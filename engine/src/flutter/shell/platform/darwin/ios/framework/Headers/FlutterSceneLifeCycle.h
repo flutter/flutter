@@ -28,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
  *    occurring in a scene: https://developer.apple.com/documentation/uikit/uiwindowscenedelegate
  */
 API_AVAILABLE(ios(13.0))
+NS_SWIFT_NONSENDABLE
 @protocol FlutterSceneLifeCycleDelegate <NSObject>
 
 @optional
@@ -44,21 +45,21 @@ API_AVAILABLE(ios(13.0))
  */
 - (BOOL)scene:(UIScene*)scene
     willConnectToSession:(UISceneSession*)session
-                 options:(nullable UISceneConnectionOptions*)connectionOptions;
+                 options:(nullable UISceneConnectionOptions*)connectionOptions NS_SWIFT_UI_ACTOR;
 
-- (void)sceneDidDisconnect:(UIScene*)scene;
+- (void)sceneDidDisconnect:(UIScene*)scene NS_SWIFT_UI_ACTOR;
 
 #pragma mark - Transitioning to the foreground
 
-- (void)sceneWillEnterForeground:(UIScene*)scene;
+- (void)sceneWillEnterForeground:(UIScene*)scene NS_SWIFT_UI_ACTOR;
 
-- (void)sceneDidBecomeActive:(UIScene*)scene;
+- (void)sceneDidBecomeActive:(UIScene*)scene NS_SWIFT_UI_ACTOR;
 
 #pragma mark - Transitioning to the background
 
-- (void)sceneWillResignActive:(UIScene*)scene;
+- (void)sceneWillResignActive:(UIScene*)scene NS_SWIFT_UI_ACTOR;
 
-- (void)sceneDidEnterBackground:(UIScene*)scene;
+- (void)sceneDidEnterBackground:(UIScene*)scene NS_SWIFT_UI_ACTOR;
 
 #pragma mark - Opening URLs
 
@@ -69,7 +70,8 @@ API_AVAILABLE(ios(13.0))
  *
  * @return `YES` if this handled one or more of the URLs.
  */
-- (BOOL)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts;
+- (BOOL)scene:(UIScene*)scene
+    openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts NS_SWIFT_UI_ACTOR;
 
 #pragma mark - Continuing user activities
 
@@ -80,7 +82,7 @@ API_AVAILABLE(ios(13.0))
  *
  * @return `YES` if this handled the activity.
  */
-- (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity;
+- (BOOL)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity NS_SWIFT_UI_ACTOR;
 
 #pragma mark - Performing tasks
 
@@ -94,13 +96,14 @@ API_AVAILABLE(ios(13.0))
  */
 - (BOOL)windowScene:(UIWindowScene*)windowScene
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
-               completionHandler:(void (^)(BOOL succeeded))completionHandler;
+               completionHandler:(void (^)(BOOL succeeded))completionHandler NS_SWIFT_UI_ACTOR;
 
 @end
 
 /**
  * A protocol for manually registering a `FlutterEngine` to receive scene life cycle events.
  */
+NS_SWIFT_UI_ACTOR
 @protocol FlutterSceneLifeCycleEngineRegistration
 /**
  * Registers a `FlutterEngine` to receive scene life cycle events.
@@ -125,7 +128,7 @@ API_AVAILABLE(ios(13.0))
  * @param engine The `FlutterEngine` to register for scene life cycle events.
  * @return `NO` if already manually registered.
  */
-- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine;
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine NS_SWIFT_UI_ACTOR;
 
 /**
  * Use this method to unregister a `FlutterEngine` from the scene's life cycle events.
@@ -134,7 +137,7 @@ API_AVAILABLE(ios(13.0))
  * @return `NO` if the engine was not found among the manually registered engines and could not be
  * unregistered.
  */
-- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine;
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine NS_SWIFT_UI_ACTOR;
 @end
 
 /**
@@ -146,6 +149,7 @@ API_AVAILABLE(ios(13.0))
  */
 FLUTTER_DARWIN_EXPORT
 API_AVAILABLE(ios(13.0))
+NS_SWIFT_UI_ACTOR
 @interface FlutterPluginSceneLifeCycleDelegate : NSObject <FlutterSceneLifeCycleEngineRegistration>
 
 #pragma mark - Connecting and disconnecting the scene
@@ -211,6 +215,7 @@ API_AVAILABLE(ios(13.0))
  * is associated with one and only one `UIScene`.
  */
 API_AVAILABLE(ios(13.0))
+NS_SWIFT_NONSENDABLE
 @protocol FlutterSceneLifeCycleProvider
 
 /**
@@ -225,7 +230,8 @@ API_AVAILABLE(ios(13.0))
  * The `FlutterPluginSceneLifeCycleDelegate` implementation is stateful. For this reason,
  * this property getter should typically always return the same object.
  */
-@property(nonatomic, readonly) FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate;
+@property(nonatomic, readonly)
+    FlutterPluginSceneLifeCycleDelegate* sceneLifeCycleDelegate NS_SWIFT_UI_ACTOR;
 @end
 
 NS_ASSUME_NONNULL_END
