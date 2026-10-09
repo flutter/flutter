@@ -58,6 +58,11 @@ class Switches {
   /// A vector containing at least one valid platform.
   std::vector<TargetPlatform> PlatformsToCompile() const;
 
+  /// The backends to emit when compiling a shader bundle. Platform flags
+  /// select a subset and may be combined; every backend is emitted when none
+  /// are given.
+  std::vector<TargetPlatform> PlatformsToBundle() const;
+
   /// Creates source options from these switches. The returned options does not
   /// have a set TargetPlatform because that cannot be determined based purely
   /// on the switches. Clients must set a valid TargetPlatform on the returned
@@ -69,6 +74,9 @@ class Switches {
  private:
   // Use |SelectDefaultTargetPlatform|.
   TargetPlatform target_platform_ = TargetPlatform::kUnknown;
+  // Every platform flag given, in contrast to |target_platform_|, which is
+  // unknown when more than one was specified. Use |PlatformsToBundle|.
+  std::vector<TargetPlatform> target_platforms_;
   // Use |PlatformsToCompile|.
   std::vector<TargetPlatform> runtime_stages_;
 };
