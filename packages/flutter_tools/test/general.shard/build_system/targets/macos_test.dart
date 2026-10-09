@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -828,8 +829,12 @@ void main() {
   testUsingContext(
     'CompileMacOSFramework creates universal binary',
     () async {
+      const sdkRoot =
+          '/Applications/Xcode.app/Contents/Developer/Platforms/'
+          'MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk';
       environment.defines[kDarwinArchs] = 'arm64 x86_64';
       environment.defines[kBuildMode] = 'release';
+      environment.defines[kSdkRoot] = sdkRoot;
 
       // Input dSYMs need to exist for `lipo` to combine them
       environment.buildDir
@@ -840,6 +845,15 @@ void main() {
           .createSync(recursive: true);
 
       processManager.addCommands(<FakeCommand>[
+        // One SDK version lookup per architecture.
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', sdkRoot, '--show-sdk-version'],
+          stdout: '12.0',
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', sdkRoot, '--show-sdk-version'],
+          stdout: '12.0',
+        ),
         FakeCommand(
           command: <String>[
             'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
@@ -848,6 +862,7 @@ void main() {
             '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
             '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
             '--macho-min-os-version=12.0',
+            '--macho-sdk-version=12.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
@@ -861,6 +876,7 @@ void main() {
             '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',
             '--macho-object=${environment.buildDir.childFile('x86_64/app.o').path}',
             '--macho-min-os-version=12.0',
+            '--macho-sdk-version=12.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
@@ -931,6 +947,30 @@ void main() {
       ]);
 
       await const CompileMacOSFramework().build(environment);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'CompileMacOSFramework throws if kSdkRoot is missing',
+    () async {
+      environment.defines[kDarwinArchs] = 'arm64';
+      environment.defines[kBuildMode] = 'release';
+
+      await expectLater(
+        const CompileMacOSFramework().build(environment),
+        throwsA(
+          isA<MissingDefineException>().having(
+            (MissingDefineException e) => e.toString(),
+            'message',
+            contains(kSdkRoot),
+          ),
+        ),
+      );
       expect(processManager, hasNoRemainingExpectations);
     },
     overrides: <Type, Generator>{
