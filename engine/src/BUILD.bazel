@@ -1,0 +1,17 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's source root (GN's `//`).
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+# Puts this directory on the include path. Engine code includes its own
+# headers and most dependencies relative to it ("flutter/fml/...",
+# "third_party/skia/..."); GN's //flutter:config does the same with
+# `include_dirs = [ ".." ]`. Reached through //engine/src/flutter:config.
+cc_library(
+    name = "include_root",
+    includes = ["."],
+    visibility = ["//engine/src/flutter:__pkg__"],
+)
