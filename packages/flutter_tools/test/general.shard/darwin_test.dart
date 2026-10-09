@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/targets/darwin.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
-import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 void main() {
   group('FlutterDarwinPlatform', () {
@@ -69,67 +67,79 @@ void main() {
   });
 
   group('print Xcode', () {
-    late FakeStdio fakeStdio;
+    late BufferLogger logger;
 
     setUp(() {
-      fakeStdio = FakeStdio();
+      logger = BufferLogger.test();
     });
 
-    testUsingContext('Warning with no filePath/lineNumber', () {
-      printXcodeWarning('warning message');
-      expect(fakeStdio.stderrBuffer.toString(), startsWith('warning: warning message\n'));
-    }, overrides: <Type, Generator>{Stdio: () => fakeStdio});
+    testWithoutContext('Warning with no filePath/lineNumber', () {
+      printXcodeWarning('warning message', logger: logger);
+      expect(logger.errorText, startsWith('warning: warning message\n'));
+      expect(logger.hadErrorOutput, isFalse);
+    });
 
-    testUsingContext('Warning with filePath/lineNumber', () {
-      printXcodeWarning('warning message', filePath: '/path/to', lineNumber: 123);
-      expect(
-        fakeStdio.stderrBuffer.toString(),
-        startsWith('/path/to:123: warning: warning message\n'),
+    testWithoutContext('Warning with filePath/lineNumber', () {
+      printXcodeWarning('warning message', logger: logger, filePath: '/path/to', lineNumber: 123);
+      expect(logger.errorText, startsWith('/path/to:123: warning: warning message\n'));
+      expect(logger.hadErrorOutput, isFalse);
+    });
+
+    testWithoutContext('Warning with lineNumber but no filePath', () {
+      printXcodeWarning('warning message', logger: logger, lineNumber: 123);
+      expect(logger.errorText, startsWith('warning: warning message\n'));
+      expect(logger.hadErrorOutput, isFalse);
+    });
+
+    testWithoutContext('Error with no filePath/lineNumber', () {
+      printXcodeError('error message', logger: logger);
+      expect(logger.errorText, startsWith('error: error message\n'));
+      expect(logger.hadErrorOutput, isTrue);
+    });
+
+    testWithoutContext('Error with filePath/lineNumber', () {
+      printXcodeError('error message', logger: logger, filePath: '/path/to', lineNumber: 123);
+      expect(logger.errorText, startsWith('/path/to:123: error: error message\n'));
+      expect(logger.hadErrorOutput, isTrue);
+    });
+
+    testWithoutContext('Error with lineNumber but no filePath', () {
+      printXcodeError('error message', logger: logger, lineNumber: 123);
+      expect(logger.errorText, startsWith('error: error message\n'));
+      expect(logger.hadErrorOutput, isTrue);
+    });
+
+    testWithoutContext('Note with no filePath/lineNumber', () {
+      printXcodeNote('note message', logger: logger);
+      expect(logger.errorText, startsWith('note: note message\n'));
+      expect(logger.hadErrorOutput, isFalse);
+    });
+
+    testWithoutContext('Note with filePath/lineNumber', () {
+      printXcodeNote('note message', logger: logger, filePath: '/path/to', lineNumber: 123);
+      expect(logger.errorText, startsWith('/path/to:123: note: note message\n'));
+      expect(logger.hadErrorOutput, isFalse);
+    });
+
+    testWithoutContext('Note with lineNumber but no filePath', () {
+      printXcodeNote('note message', logger: logger, lineNumber: 123);
+      expect(logger.errorText, startsWith('note: note message\n'));
+      expect(logger.hadErrorOutput, isFalse);
+    });
+
+    testWithoutContext('VerboseLogger output format', () {
+      final verboseLogger = VerboseLogger(logger);
+      printXcodeWarning(
+        'warning message',
+        logger: verboseLogger,
+        filePath: '/path/to',
+        lineNumber: 123,
       );
-    }, overrides: <Type, Generator>{Stdio: () => fakeStdio});
-
-    testUsingContext('Warning with lineNumber but no filePath', () {
-      printXcodeWarning('warning message', lineNumber: 123);
-      expect(fakeStdio.stderrBuffer.toString(), startsWith('warning: warning message\n'));
-    }, overrides: <Type, Generator>{Stdio: () => fakeStdio});
-
-    testUsingContext('Error with no filePath/lineNumber', () {
-      printXcodeError('error message');
-      expect(fakeStdio.stderrBuffer.toString(), startsWith('error: error message\n'));
-    }, overrides: <Type, Generator>{Stdio: () => fakeStdio});
-
-    testUsingContext('Error with filePath/lineNumber', () {
-      printXcodeError('error message', filePath: '/path/to', lineNumber: 123);
-      expect(fakeStdio.stderrBuffer.toString(), startsWith('/path/to:123: error: error message\n'));
-    }, overrides: <Type, Generator>{Stdio: () => fakeStdio});
-
-    testUsingContext('Error with lineNumber but no filePath', () {
-      printXcodeError('error message', lineNumber: 123);
-      expect(fakeStdio.stderrBuffer.toString(), startsWith('error: error message\n'));
-    }, overrides: <Type, Generator>{Stdio: () => fakeStdio});
-
-    testUsingContext('Note with no filePath/lineNumber', () {
-      printXcodeNote('note message');
-      expect(fakeStdio.stderrBuffer.toString(), startsWith('note: note message\n'));
-    }, overrides: <Type, Generator>{Stdio: () => fakeStdio});
-
-    testUsingContext('Note with filePath/lineNumber', () {
-      printXcodeNote('note message', filePath: '/path/to', lineNumber: 123);
-      expect(fakeStdio.stderrBuffer.toString(), startsWith('/path/to:123: note: note message\n'));
-    }, overrides: <Type, Generator>{Stdio: () => fakeStdio});
-
-    testUsingContext('Note with lineNumber but no filePath', () {
-      printXcodeNote('note message', lineNumber: 123);
-      expect(fakeStdio.stderrBuffer.toString(), startsWith('note: note message\n'));
-    }, overrides: <Type, Generator>{Stdio: () => fakeStdio});
+      expect(
+        logger.errorText,
+        matches(RegExp(r'^\[[^\]]*\] /path/to:123: warning: warning message\n$')),
+      );
+      expect(verboseLogger.hadErrorOutput, isFalse);
+    });
   });
-}
-
-class FakeStdio extends Fake implements Stdio {
-  final stderrBuffer = StringBuffer();
-
-  @override
-  void stderrWrite(String message, {void Function(String, dynamic, StackTrace)? fallback}) {
-    stderrBuffer.writeln(message);
-  }
 }

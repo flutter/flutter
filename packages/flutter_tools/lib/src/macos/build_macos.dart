@@ -190,6 +190,10 @@ Future<void> buildMacOS({
   await updateGeneratedXcodeProperties(
     project: flutterProject,
     buildInfo: buildInfo,
+    artifacts: globals.artifacts!,
+    config: globals.config,
+    logger: globals.logger,
+    os: globals.os,
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );
@@ -205,7 +209,17 @@ Future<void> buildMacOS({
     }
   }
 
-  await processPodsIfNeeded(flutterProject.macos, buildDirectoryPath, buildInfo.mode);
+  await processPodsIfNeeded(
+    flutterProject.macos,
+    buildDirectoryPath,
+    buildInfo.mode,
+    cocoaPods: globals.cocoaPods,
+    config: globals.config,
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    processUtils: globals.processUtils,
+    templateRenderer: globals.templateRenderer,
+  );
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {
     flutterProject.macos.inputFileList.createSync(recursive: true);

@@ -9,8 +9,10 @@ import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
@@ -2290,10 +2292,13 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
 
   @override
   Future<bool> launchAppWithXcodeDebugger({
-    required String deviceId,
+    required Artifacts artifacts,
+    required Config config,
     required DebuggingOptions debuggingOptions,
-    required IOSApp package,
+    required String deviceId,
     required List<String> launchArguments,
+    required OperatingSystemUtils os,
+    required IOSApp package,
     required TemplateRenderer templateRenderer,
     String? mainPath,
     Duration? discoveryTimeout,

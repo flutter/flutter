@@ -834,6 +834,10 @@ class IOSDevice extends Device {
         await updateGeneratedXcodeProperties(
           project: FlutterProject.current(),
           buildInfo: debuggingOptions.buildInfo,
+          artifacts: globals.artifacts!,
+          config: globals.config,
+          logger: _logger,
+          os: globals.os,
           targetOverride: mainPath,
         );
       }
@@ -1207,6 +1211,10 @@ class IOSDevice extends Device {
       await updateGeneratedXcodeProperties(
         project: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
+        artifacts: globals.artifacts!,
+        config: globals.config,
+        logger: _logger,
+        os: globals.os,
         targetOverride: mainPath,
         configurationBuildDir: bundle.parent.absolute.path,
       );

@@ -10,13 +10,11 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/windows/native_assets.dart'
@@ -112,6 +110,7 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            logger: logger,
             buildRunner: buildRunner,
             buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
             buildDataAssets: true,
@@ -129,13 +128,15 @@ void main() {
             targetPlatform: targetPlatform,
             projectUri: projectUri,
             fileSystem: fileSystem,
+            logger: logger,
+            processManager: processManager,
             nativeAssetsFileUri: nativeAssetsFileUri,
             targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/windows/'),
           );
           final expectedOS = flutterTester ? OS.current.toString() : 'windows';
           final expectedArch = flutterTester ? Architecture.current.toString() : 'x64';
           expect(
-            (globals.logger as BufferLogger).traceText,
+            logger.traceText,
             stringContainsInOrder(<String>[
               'Running build hooks for ${expectedOS}_$expectedArch.',
               'Running build hooks for ${expectedOS}_$expectedArch done.',
@@ -170,27 +171,29 @@ void main() {
   // This logic is mocked in the other tests to avoid having test order
   // randomization causing issues with what processes are invoked.
   // Exercise the parsing of the process output in this separate test.
-  testUsingContext(
-    'NativeAssetsBuildRunnerImpl.cCompilerConfig',
-    overrides: <Type, Generator>{
-      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <Pattern>[
-            RegExp(r'(.*)vswhere.exe'),
-            '-format',
-            'json',
-            '-products',
-            '*',
-            '-utf8',
-            '-latest',
-            '-version',
-            '16',
-            '-requires',
-            'Microsoft.VisualStudio.Workload.NativeDesktop',
-            'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
-            'Microsoft.VisualStudio.Component.VC.CMake.Project',
-          ],
-          stdout: r'''
+  testWithoutContext('NativeAssetsBuildRunnerImpl.cCompilerConfig', () async {
+    if (!const LocalPlatform().isWindows) {
+      return;
+    }
+
+    final testProcessManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <Pattern>[
+          RegExp(r'(.*)vswhere.exe'),
+          '-format',
+          'json',
+          '-products',
+          '*',
+          '-utf8',
+          '-latest',
+          '-version',
+          '16',
+          '-requires',
+          'Microsoft.VisualStudio.Workload.NativeDesktop',
+          'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+          'Microsoft.VisualStudio.Component.VC.CMake.Project',
+        ],
+        stdout: r'''
 [
   {
     "instanceId": "491ec752",
@@ -242,28 +245,28 @@ void main() {
   }
 ]
 ''', // Newline at the end of the string.
-        ),
-      ]),
-      FileSystem: () => fileSystem,
-    },
-    () async {
-      if (!const LocalPlatform().isWindows) {
-        return;
-      }
+      ),
+    ]);
 
-      final Directory msvcBinDir = fileSystem.directory(
-        r'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64',
-      );
-      await msvcBinDir.create(recursive: true);
+    final Directory msvcBinDir = fileSystem.directory(
+      r'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.35.32215\bin\Hostx64\x64',
+    );
+    await msvcBinDir.create(recursive: true);
 
-      final CCompilerConfig result = (await cCompilerConfigWindows(throwIfNotFound: true))!;
-      expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
-      expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
-      expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
-      expect(result.windows.developerCommandPrompt?.script, isNotNull);
-      expect(result.windows.developerCommandPrompt?.arguments, isNotNull);
-    },
-  );
+    final CCompilerConfig result = (await cCompilerConfigWindows(
+      fileSystem: fileSystem,
+      logger: logger,
+      osUtils: FakeOperatingSystemUtils(),
+      platform: const LocalPlatform(),
+      processManager: testProcessManager,
+      throwIfNotFound: true,
+    ))!;
+    expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
+    expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
+    expect(result.linker.toFilePath(), msvcBinDir.childFile('link.exe').uri.toFilePath());
+    expect(result.windows.developerCommandPrompt?.script, isNotNull);
+    expect(result.windows.developerCommandPrompt?.arguments, isNotNull);
+  });
 
   group('cCompilerConfigWindows', () {
     final Platform windowsPlatform = FakePlatform(
@@ -271,30 +274,35 @@ void main() {
       environment: <String, String>{'PROGRAMFILES(X86)': r'C:\Program Files (x86)\'},
     );
 
-    testUsingContext(
+    testWithoutContext(
       'returns null when Visual Studio is not found and throwIfNotFound is false',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Platform: () => windowsPlatform,
-        ProcessManager: () => FakeProcessManager.any(),
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-      },
       () async {
-        final CCompilerConfig? result = await cCompilerConfigWindows(throwIfNotFound: false);
+        final CCompilerConfig? result = await cCompilerConfigWindows(
+          fileSystem: fileSystem,
+          logger: logger,
+          osUtils: FakeOperatingSystemUtils(),
+          platform: windowsPlatform,
+          processManager: FakeProcessManager.any(),
+          throwIfNotFound: false,
+        );
         expect(result, isNull);
       },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'throws ToolExit when Visual Studio is not found and throwIfNotFound is true',
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        Platform: () => windowsPlatform,
-        ProcessManager: () => FakeProcessManager.any(),
-        OperatingSystemUtils: () => FakeOperatingSystemUtils(),
-      },
       () async {
-        await expectLater(cCompilerConfigWindows(throwIfNotFound: true), throwsA(isA<ToolExit>()));
+        await expectLater(
+          cCompilerConfigWindows(
+            fileSystem: fileSystem,
+            logger: logger,
+            osUtils: FakeOperatingSystemUtils(),
+            platform: windowsPlatform,
+            processManager: FakeProcessManager.any(),
+            throwIfNotFound: true,
+          ),
+          throwsA(isA<ToolExit>()),
+        );
       },
     );
   });
