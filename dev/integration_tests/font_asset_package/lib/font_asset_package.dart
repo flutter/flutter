@@ -4,6 +4,8 @@
 
 import 'package:flutter/widgets.dart';
 
+export 'src/font_data.dart' show kHookIconsFontBase64;
+
 /// Icons from the `HookIcons` font family that `hook/build.dart` provides.
 ///
 /// As with any icon font from a package, [IconData.fontPackage] namespaces

@@ -8,12 +8,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:font_asset_package/font_asset_package.dart';
 import 'package:font_assets/main.dart';
+import 'package:font_assets/src/font_data.dart';
 
 void main() {
   testWidgets('fonts from build hooks are bundled with the app', (WidgetTester tester) async {
     await tester.pumpWidget(const FontAssetsApp());
-    expect(find.text('Regular from hook'), findsOneWidget);
-    expect(find.text('Bold from hook'), findsOneWidget);
+    expect(find.text('hook'), findsNWidgets(2));
     expect(find.byIcon(HookIcons.add), findsOneWidget);
 
     final fontManifest =
@@ -36,14 +36,18 @@ void main() {
       <String, Object?>{'asset': 'packages/font_asset_package/fonts/HookIcons.otf'},
     ]);
 
-    // The font files themselves are part of the asset bundle.
-    for (final asset in <String>[
-      'packages/font_assets/fonts/Roboto-Regular.ttf',
-      'packages/font_assets/fonts/Roboto-Bold.ttf',
-      'packages/font_asset_package/fonts/HookIcons.otf',
-    ]) {
-      final ByteData font = await rootBundle.load(asset);
-      expect(font.lengthInBytes, greaterThan(0), reason: asset);
+    // The font files that the hooks generated are part of the asset bundle.
+    for (final MapEntry<String, String> entry in <String, String>{
+      'packages/font_assets/fonts/Roboto-Regular.ttf': kRobotoRegularFontBase64,
+      'packages/font_assets/fonts/Roboto-Bold.ttf': kRobotoBoldFontBase64,
+      'packages/font_asset_package/fonts/HookIcons.otf': kHookIconsFontBase64,
+    }.entries) {
+      final ByteData font = await rootBundle.load(entry.key);
+      expect(
+        font.buffer.asUint8List(font.offsetInBytes, font.lengthInBytes),
+        base64Decode(entry.value),
+        reason: entry.key,
+      );
     }
   });
 }

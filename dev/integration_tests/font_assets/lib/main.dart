@@ -24,9 +24,10 @@ class FontAssetsApp extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text('Regular from hook', style: TextStyle(fontFamily: kHookFontFamily)),
+              // The fonts from the hook only contain the glyphs of this word.
+              Text('hook', style: TextStyle(fontFamily: kHookFontFamily)),
               Text(
-                'Bold from hook',
+                'hook',
                 style: TextStyle(fontFamily: kHookFontFamily, fontWeight: FontWeight.bold),
               ),
               // An icon from the font that a dependency provides through its hook.
