@@ -10,7 +10,7 @@ Nothing in this directory is used by the GN build.
 | `extensions.bzl` | The `synced_deps` module extension: the table of repositories the root `MODULE.bazel` imports with `use_repo`, backed by the pins in `deps.lock.bzl` and `build/linux/sysroot_scripts/sysroots.json`. |
 | `third_party/<name>/BUILD.<name>.bazel` | Overlay root `BUILD` files for dependencies that ship no usable Bazel build files. Deliberately not named `BUILD.bazel`, so Bazel does not treat them as packages of this repository. |
 | `toolchains/` | The hermetic C/C++ toolchains (`cc_toolchain_config.bzl` holds the flag tables, `BUILD.bazel` the `cc_toolchain`/`toolchain` targets per platform, `tests/` a smoke test). |
-| `copts.bzl` | `FLUTTER_COPTS` / `FLUTTER_LOCAL_DEFINES`: what GN adds to first-party code only (`chromium_code`, `//flutter:config`), for `BUILD` files to spell out. |
+| `copts.bzl` | What GN adds per target rather than per toolchain, for `BUILD` files to spell out: `FLUTTER_COPTS` / `FLUTTER_LOCAL_DEFINES` for first-party code (`chromium_code`, `//flutter:config`) and `FLUTTER_THIRD_PARTY_COPTS` for overlays (`no_chromium_code`). |
 
 ## How dependencies reach Bazel during the transition
 
@@ -61,6 +61,18 @@ flags, defines). `-c dbg` corresponds to GN's unoptimized builds (`-O0 -g2
 There is no component build: `.bazelrc` sets `--force_pic` and
 `--dynamic_mode=off`, as GN links everything statically with `-fPIC`.
 
+Two details keep warnings equivalent to GN's. GN's `default_warning_flags`
+(`-Werror` included) apply to every target, third-party code included, which
+is kept building with `-Wno-*` flags. The list lives in `copts.bzl`:
+`FLUTTER_COPTS` and `FLUTTER_THIRD_PARTY_COPTS` carry it after their own
+`-Wall -Wextra` / `-Wno-*` flags, as GN orders them, and the toolchain
+applies it without `-Werror` to everything else -- dependencies built from
+upstream BUILD files enable warnings GN never does, so they cannot be made
+fatal. And the toolchain passes the `includes` of `cc_library` rules with
+`-I` instead of Bazel's default `-isystem`, since clang does not report
+warnings in headers found through `-isystem`: with the default, `-Werror`
+would silently stop covering the engine's own headers.
+
 ```
 bazelisk test //engine/src/flutter/build/bazel/toolchains/tests:cc_toolchain_smoke_test
 ```
@@ -74,5 +86,7 @@ and a threaded C++ program build and run.
 2. Add an entry to `_SOURCE_REPOSITORIES` or `_TOOL_REPOSITORIES` in
    `extensions.bzl`, pointing at the `DEPS` path (sysroots go in
    `_SYSROOT_REPOSITORIES`, keyed by their `sysroots.json` entry).
-3. If upstream has no usable Bazel files, add `third_party/<name>/BUILD.<name>.bazel`.
+3. If upstream has no usable Bazel files, add `third_party/<name>/BUILD.<name>.bazel`,
+   starting its `copts` from `FLUTTER_THIRD_PARTY_COPTS` and adding the `-Wno-*`
+   flags its `BUILD.gn` uses.
 4. Add the repository name to `use_repo(synced_deps, ...)` in the root `MODULE.bazel`.
