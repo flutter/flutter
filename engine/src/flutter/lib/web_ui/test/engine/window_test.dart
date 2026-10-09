@@ -929,6 +929,15 @@ void testMain() {
       ui_web.browser.debugOperatingSystemOverride = null;
     });
 
+    // Makes the view measure `size` as the size of the viewport (or its actual
+    // size, for null), and has the browser tell the view about the resize.
+    Future<void> resizeViewport(ui.Size? size) async {
+      myWindow.debugPhysicalSizeOverride = size;
+      final Future<void> resized = myWindow.onResize.first;
+      (domWindow.visualViewport ?? domWindow).dispatchEvent(createDomEvent('Event', 'resize'));
+      await resized;
+    }
+
     test('physicalSize remains unchanged when keyboard is up', () {
       final ui.Size initialPhysicalSize = myWindow.physicalSize;
 
@@ -938,6 +947,48 @@ void testMain() {
 
       // View's `physicalSize` should remain unchanged.
       expect(myWindow.physicalSize, initialPhysicalSize);
+    });
+
+    test('physicalSize remains unchanged when the viewport gets shorter', () async {
+      final ui.Size fullSize = myWindow.physicalSize;
+
+      // The keyboard comes up and covers half of the viewport.
+      await resizeViewport(ui.Size(fullSize.width, fullSize.height / 2));
+
+      expect(myWindow.physicalSize, fullSize);
+    });
+
+    test('physicalSize is updated when the viewport gets taller than the preserved size', () async {
+      final ui.Size fullSize = myWindow.physicalSize;
+
+      // The keyboard was already up when the text editing started, e.g. for an
+      // input inside an iframe, so the view only has the size of what the
+      // keyboard left visible.
+      final keyboardReducedSize = ui.Size(fullSize.width, fullSize.height / 2);
+      myWindow.debugPhysicalSizeOverride = keyboardReducedSize;
+      myWindow.debugForceResize();
+      expect(myWindow.physicalSize, keyboardReducedSize);
+
+      // The keyboard is dismissed, which gives the viewport its full size back.
+      await resizeViewport(null);
+
+      expect(myWindow.physicalSize, fullSize);
+      expect(myWindow.viewInsets.bottom, 0);
+    });
+
+    test('physicalSize is updated when the device is rotated', () async {
+      final double shortSide = myWindow.physicalSize.height;
+      final portraitSize = ui.Size(shortSide, shortSide * 2);
+      myWindow.debugPhysicalSizeOverride = portraitSize;
+      myWindow.debugForceResize();
+      expect(myWindow.physicalSize, portraitSize);
+
+      // The rotation makes the viewport shorter, like the keyboard does, but it
+      // changes its width too.
+      final landscapeSize = ui.Size(shortSide * 2, shortSide);
+      await resizeViewport(landscapeSize);
+
+      expect(myWindow.physicalSize, landscapeSize);
     });
   });
 
