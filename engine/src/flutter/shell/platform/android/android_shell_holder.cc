@@ -349,6 +349,71 @@ std::unique_ptr<EmbedderExternalTextureResolver> MakeExternalTextureResolver(
       });
 }
 
+struct FirstFrameCallbackEntry {
+  fml::RefPtr<fml::TaskRunner> platform_task_runner;
+  std::weak_ptr<PlatformViewAndroidJNI> jni_facade;
+};
+
+// Routes the render-thread VoidCallback from FlutterEngineSetNextFrameCallback
+// back to the originating holder's platform task runner and JNI facade by
+// holder_id, without dereferencing the holder if it is destroyed before the
+// posted platform task runs.
+class FirstFrameCallbackTable {
+ public:
+  void Register(uint64_t holder_id,
+                fml::RefPtr<fml::TaskRunner> platform_task_runner,
+                const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+    std::scoped_lock lock(mutex_);
+    entries_[holder_id] =
+        FirstFrameCallbackEntry{std::move(platform_task_runner), jni_facade};
+  }
+
+  std::optional<FirstFrameCallbackEntry> Find(uint64_t holder_id) {
+    std::scoped_lock lock(mutex_);
+    auto it = entries_.find(holder_id);
+    if (it == entries_.end()) {
+      return std::nullopt;
+    }
+    return it->second;
+  }
+
+  void RemoveForHolder(uint64_t holder_id) {
+    std::scoped_lock lock(mutex_);
+    entries_.erase(holder_id);
+  }
+
+ private:
+  std::mutex mutex_;
+  std::unordered_map<uint64_t, FirstFrameCallbackEntry> entries_;
+};
+
+FirstFrameCallbackTable& GetFirstFrameCallbackTable() {
+  static auto* table = new FirstFrameCallbackTable();
+  return *table;
+}
+
+void OnFirstFrameRendered(void* user_data) {
+  const auto holder_id =
+      static_cast<uint64_t>(reinterpret_cast<uintptr_t>(user_data));
+  std::optional<FirstFrameCallbackEntry> entry =
+      GetFirstFrameCallbackTable().Find(holder_id);
+  if (!entry.has_value() || !entry->platform_task_runner) {
+    return;
+  }
+  entry->platform_task_runner->PostTask([holder_id]() {
+    std::optional<FirstFrameCallbackEntry> platform_entry =
+        GetFirstFrameCallbackTable().Find(holder_id);
+    if (!platform_entry.has_value()) {
+      return;
+    }
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade =
+        platform_entry->jni_facade.lock();
+    if (jni_facade) {
+      jni_facade->FlutterViewOnFirstFrame();
+    }
+  });
+}
+
 void OnPlatformMessageResponse(const uint8_t* data,
                                size_t size,
                                void* user_data) {
@@ -571,6 +636,8 @@ AndroidShellHolder::AndroidShellHolder(
   FML_DCHECK(platform_view_);
   vsync_waiter_ = std::move(vsync_waiter);
   AttachVsyncWaiter(vsync_waiter_.get(), engine_.get(), &embedder_api_);
+  GetFirstFrameCallbackTable().Register(holder_id_, platform_runner,
+                                        jni_facade_);
   is_valid_ = engine_ != nullptr;
 }
 
@@ -599,12 +666,16 @@ AndroidShellHolder::AndroidShellHolder(
   FML_DCHECK(GetShell(engine_.get()).IsSetup());
   FML_DCHECK(platform_view_);
   FML_DCHECK(thread_host_);
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  GetFirstFrameCallbackTable().Register(
+      holder_id_, fml::MessageLoop::GetCurrent().GetTaskRunner(), jni_facade_);
   // The spawned engine may already wait for a vsync; see VsyncWaiterAndroid.
   AttachVsyncWaiter(vsync_waiter_.get(), engine_.get(), &embedder_api_);
   is_valid_ = engine_ != nullptr;
 }
 
 AndroidShellHolder::~AndroidShellHolder() {
+  GetFirstFrameCallbackTable().RemoveForHolder(holder_id_);
   if (vsync_waiter_) {
     vsync_waiter_->Detach();
   }
@@ -1179,6 +1250,48 @@ void AndroidShellHolder::MarkTextureFrameAvailable(int64_t texture_id) {
   if (result != kSuccess) {
     FML_LOG(ERROR) << "FlutterEngineMarkExternalTextureFrameAvailable failed: "
                    << result;
+  }
+}
+
+void AndroidShellHolder::NotifySurfaceCreated(
+    fml::RefPtr<AndroidNativeWindow> native_window) {
+  if (platform_view_ &&
+      platform_view_->SetNativeWindow(std::move(native_window))) {
+    FlutterEngineResult callback_result = embedder_api_.SetNextFrameCallback(
+        engine_.get(), &OnFirstFrameRendered,
+        reinterpret_cast<void*>(static_cast<uintptr_t>(holder_id_)));
+    if (callback_result != kSuccess) {
+      FML_LOG(ERROR) << "FlutterEngineSetNextFrameCallback failed: "
+                     << callback_result;
+    }
+  }
+  FlutterEngineResult result = embedder_api_.NotifyCreated(engine_.get());
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineNotifyCreated failed: " << result;
+  }
+}
+
+void AndroidShellHolder::NotifySurfaceWindowChanged(
+    fml::RefPtr<AndroidNativeWindow> native_window) {
+  if (platform_view_) {
+    platform_view_->SwapNativeWindow(std::move(native_window));
+  }
+  ScheduleFrame();
+}
+
+void AndroidShellHolder::NotifySurfaceChanged(int width, int height) {
+  if (platform_view_) {
+    platform_view_->ResizeSurface(DlISize(width, height));
+  }
+}
+
+void AndroidShellHolder::NotifySurfaceDestroyed() {
+  FlutterEngineResult result = embedder_api_.NotifyDestroyed(engine_.get());
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineNotifyDestroyed failed: " << result;
+  }
+  if (platform_view_) {
+    platform_view_->TeardownSurface();
   }
 }
 

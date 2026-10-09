@@ -74,6 +74,8 @@ class MockableJNIEnv : public JNIEnv {
     jni_.GetStringLength = WrapGetStringLength;
     jni_.ReleaseStringChars = WrapReleaseStringChars;
     jni_.GetDirectBufferAddress = WrapGetDirectBufferAddress;
+    jni_.PushLocalFrame = WrapPushLocalFrame;
+    jni_.PopLocalFrame = WrapPopLocalFrame;
   }
 
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
@@ -98,6 +100,8 @@ class MockableJNIEnv : public JNIEnv {
   virtual jsize GetStringLength(jstring) = 0;
   virtual void ReleaseStringChars(jstring, const jchar*) = 0;
   virtual void* GetDirectBufferAddress(jobject) = 0;
+  virtual jint PushLocalFrame(jint) = 0;
+  virtual jobject PopLocalFrame(jobject) = 0;
 
  private:
   static jobject WrapCallObjectMethod(JNIEnv* env,
@@ -207,6 +211,12 @@ class MockableJNIEnv : public JNIEnv {
   static void* WrapGetDirectBufferAddress(JNIEnv* env, jobject buf) {
     return static_cast<MockableJNIEnv*>(env)->GetDirectBufferAddress(buf);
   }
+  static jint WrapPushLocalFrame(JNIEnv* env, jint capacity) {
+    return static_cast<MockableJNIEnv*>(env)->PushLocalFrame(capacity);
+  }
+  static jobject WrapPopLocalFrame(JNIEnv* env, jobject result) {
+    return static_cast<MockableJNIEnv*>(env)->PopLocalFrame(result);
+  }
 
   JNINativeInterface jni_ = {};
 };
@@ -256,6 +266,8 @@ class MockJNIEnv : public MockableJNIEnv {
   MOCK_METHOD(jsize, GetStringLength, (jstring), (override));
   MOCK_METHOD(void, ReleaseStringChars, (jstring, const jchar*), (override));
   MOCK_METHOD(void*, GetDirectBufferAddress, (jobject), (override));
+  MOCK_METHOD(jint, PushLocalFrame, (jint), (override));
+  MOCK_METHOD(jobject, PopLocalFrame, (jobject), (override));
 };
 
 }  // namespace flutter

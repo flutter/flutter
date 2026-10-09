@@ -263,8 +263,8 @@ static void SurfaceCreated(JNIEnv* env,
   // workaround for https://code.google.com/p/android/issues/detail?id=68174
   fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
-      ANativeWindow_fromSurface(env, jsurface));
-  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyCreated(std::move(window));
+      jsurface ? ANativeWindow_fromSurface(env, jsurface) : nullptr);
+  ANDROID_SHELL_HOLDER->NotifySurfaceCreated(std::move(window));
 }
 
 static void SurfaceWindowChanged(JNIEnv* env,
@@ -276,9 +276,8 @@ static void SurfaceWindowChanged(JNIEnv* env,
   // workaround for https://code.google.com/p/android/issues/detail?id=68174
   fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
-      ANativeWindow_fromSurface(env, jsurface));
-  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifySurfaceWindowChanged(
-      std::move(window));
+      jsurface ? ANativeWindow_fromSurface(env, jsurface) : nullptr);
+  ANDROID_SHELL_HOLDER->NotifySurfaceWindowChanged(std::move(window));
 }
 
 static void SurfaceChanged(JNIEnv* env,
@@ -286,12 +285,11 @@ static void SurfaceChanged(JNIEnv* env,
                            jlong shell_holder,
                            jint width,
                            jint height) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyChanged(
-      DlISize(width, height));
+  ANDROID_SHELL_HOLDER->NotifySurfaceChanged(width, height);
 }
 
 static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder) {
-  ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyDestroyed();
+  ANDROID_SHELL_HOLDER->NotifySurfaceDestroyed();
 }
 
 static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,

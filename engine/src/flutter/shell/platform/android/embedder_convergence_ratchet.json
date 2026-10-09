@@ -22,11 +22,11 @@
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {
-      "count": 4,
-      "enforce": "ratchet"
+      "count": 0,
+      "enforce": "zero"
     },
     "platform_view_android_overrides": {
-      "count": 10,
+      "count": 9,
       "enforce": "ratchet"
     },
     "gn_internal_deps": {

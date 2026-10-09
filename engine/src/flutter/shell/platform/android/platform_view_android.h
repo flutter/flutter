@@ -68,15 +68,13 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
 
   ~PlatformViewAndroid() override;
 
-  void NotifyCreated(fml::RefPtr<AndroidNativeWindow> native_window);
+  bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> native_window);
 
-  void NotifySurfaceWindowChanged(
-      fml::RefPtr<AndroidNativeWindow> native_window);
+  void SwapNativeWindow(fml::RefPtr<AndroidNativeWindow> native_window);
 
-  void NotifyChanged(const DlISize& size);
+  void ResizeSurface(const DlISize& size);
 
-  // |PlatformView|
-  void NotifyDestroyed() override;
+  void TeardownSurface();
 
   std::unique_ptr<Texture> CreateSurfaceTexture(
       int64_t texture_id,
@@ -133,10 +131,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
 
   // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
-
-  void InstallFirstFrameCallback();
-
-  void FireFirstFrameCallback();
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

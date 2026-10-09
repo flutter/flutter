@@ -209,10 +209,36 @@ class AndroidShellHolder {
   void UnregisterTexture(int64_t texture_id);
 
   //----------------------------------------------------------------------------
-  /// @brief      Notifies the engine that a new frame is available on an
+  /// @brief      Notifies the engine that the frame is available on an
   ///             external texture through the embedder API.
   ///
   void MarkTextureFrameAvailable(int64_t texture_id);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Attaches a native window to the Android surface, installs the
+  ///             first-frame callback, and notifies the engine that its
+  ///             rendering surface was created through the embedder API.
+  ///
+  void NotifySurfaceCreated(fml::RefPtr<AndroidNativeWindow> native_window);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Replaces the native window on the Android surface and
+  ///             schedules a frame through the embedder API.
+  ///
+  void NotifySurfaceWindowChanged(
+      fml::RefPtr<AndroidNativeWindow> native_window);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Resizes the on-screen Android surface.
+  ///
+  void NotifySurfaceChanged(int width, int height);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Notifies the engine that its rendering surface is being
+  ///             destroyed through the embedder API, then tears down the
+  ///             Android surface context.
+  ///
+  void NotifySurfaceDestroyed();
 
   // Visible for testing.
   Shell* GetShellForTesting() const;

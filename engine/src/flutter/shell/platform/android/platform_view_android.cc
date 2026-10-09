@@ -182,59 +182,55 @@ PlatformViewAndroid::PlatformViewAndroid(
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
 
-void PlatformViewAndroid::NotifyCreated(
+bool PlatformViewAndroid::SetNativeWindow(
     fml::RefPtr<AndroidNativeWindow> native_window) {
-  if (android_surface_) {
-    InstallFirstFrameCallback();
-
-    fml::AutoResetWaitableEvent latch;
-    fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetRasterTaskRunner(),
-        [&latch, surface = android_surface_.get(),
-         native_window = std::move(native_window), jni_facade = jni_facade_]() {
-          surface->SetNativeWindow(native_window, jni_facade);
-          latch.Signal();
-        });
-    latch.Wait();
+  if (!android_surface_) {
+    return false;
   }
-
-  PlatformView::NotifyCreated();
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetRasterTaskRunner(),
+      [&latch, surface = android_surface_.get(),
+       native_window = std::move(native_window), jni_facade = jni_facade_]() {
+        surface->SetNativeWindow(native_window, jni_facade);
+        latch.Signal();
+      });
+  latch.Wait();
+  return true;
 }
 
-void PlatformViewAndroid::NotifySurfaceWindowChanged(
+void PlatformViewAndroid::SwapNativeWindow(
     fml::RefPtr<AndroidNativeWindow> native_window) {
-  if (android_surface_) {
-    fml::AutoResetWaitableEvent latch;
-    fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetRasterTaskRunner(),
-        [&latch, surface = android_surface_.get(),
-         native_window = std::move(native_window), jni_facade = jni_facade_]() {
-          surface->TeardownOnScreenContext();
-          surface->SetNativeWindow(native_window, jni_facade);
-          latch.Signal();
-        });
-    latch.Wait();
+  if (!android_surface_) {
+    return;
   }
-
-  PlatformView::ScheduleFrame();
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetRasterTaskRunner(),
+      [&latch, surface = android_surface_.get(),
+       native_window = std::move(native_window), jni_facade = jni_facade_]() {
+        surface->TeardownOnScreenContext();
+        surface->SetNativeWindow(native_window, jni_facade);
+        latch.Signal();
+      });
+  latch.Wait();
 }
 
-void PlatformViewAndroid::NotifyDestroyed() {
-  PlatformView::NotifyDestroyed();
-
-  if (android_surface_) {
-    fml::AutoResetWaitableEvent latch;
-    fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetRasterTaskRunner(),
-        [&latch, surface = android_surface_.get()]() {
-          surface->TeardownOnScreenContext();
-          latch.Signal();
-        });
-    latch.Wait();
+void PlatformViewAndroid::TeardownSurface() {
+  if (!android_surface_) {
+    return;
   }
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetRasterTaskRunner(),
+      [&latch, surface = android_surface_.get()]() {
+        surface->TeardownOnScreenContext();
+        latch.Signal();
+      });
+  latch.Wait();
 }
 
-void PlatformViewAndroid::NotifyChanged(const DlISize& size) {
+void PlatformViewAndroid::ResizeSurface(const DlISize& size) {
   if (!android_surface_) {
     return;
   }
@@ -397,26 +393,6 @@ std::shared_ptr<impeller::Context> PlatformViewAndroid::GetImpellerContext()
     return android_surface_->GetImpellerContext();
   }
   return android_context_->GetImpellerContext();
-}
-
-void PlatformViewAndroid::InstallFirstFrameCallback() {
-  // On Platform Task Runner.
-  SetNextFrameCallback(
-      [platform_view = GetWeakPtr(),
-       platform_task_runner = task_runners_.GetPlatformTaskRunner()]() {
-        // On GPU Task Runner.
-        platform_task_runner->PostTask([platform_view]() {
-          // Back on Platform Task Runner.
-          if (platform_view) {
-            reinterpret_cast<PlatformViewAndroid*>(platform_view.get())
-                ->FireFirstFrameCallback();
-          }
-        });
-      });
-}
-
-void PlatformViewAndroid::FireFirstFrameCallback() {
-  jni_facade_->FlutterViewOnFirstFrame();
 }
 
 bool PlatformViewAndroid::IsSurfaceControlEnabled() const {

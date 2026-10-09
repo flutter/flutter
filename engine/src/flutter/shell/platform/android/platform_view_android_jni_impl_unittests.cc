@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <android/looper.h>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -198,6 +200,10 @@ using RegisterImageTextureFn =
     void (*)(JNIEnv*, jobject, jlong, jlong, jobject, jboolean);
 using UnregisterTextureFn = void (*)(JNIEnv*, jobject, jlong, jlong);
 using MarkTextureFrameAvailableFn = void (*)(JNIEnv*, jobject, jlong, jlong);
+using SurfaceCreatedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
+using SurfaceWindowChangedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
+using SurfaceChangedFn = void (*)(JNIEnv*, jobject, jlong, jint, jint);
+using SurfaceDestroyedFn = void (*)(JNIEnv*, jobject, jlong);
 using SetViewportMetricsFn = void (*)(JNIEnv*,
                                       jobject,
                                       jlong,
@@ -243,6 +249,8 @@ void* RegisterNativesAndFind(MockJNIEnv& mock_env, const char* name) {
   EXPECT_CALL(mock_env, DeleteLocalRef(_)).WillRepeatedly(Return());
   EXPECT_CALL(mock_env, NewGlobalRef(_)).WillRepeatedly(ReturnArg<0>());
   EXPECT_CALL(mock_env, DeleteGlobalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(mock_env, PushLocalFrame(_)).WillRepeatedly(Return(0));
+  EXPECT_CALL(mock_env, PopLocalFrame(_)).WillRepeatedly(Return(nullptr));
   EXPECT_CALL(mock_env, FindClass(_)).WillRepeatedly(Return(kPlaceholderClass));
   EXPECT_CALL(mock_env, GetFieldID(_, _, _))
       .WillRepeatedly(Return(kPlaceholderFieldID));
@@ -1416,6 +1424,166 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   mark_frame_available(&mock_env, jcaller, shell_holder, kImageTextureId);
   unregister_texture(&mock_env, jcaller, shell_holder, kSurfaceTextureId);
   unregister_texture(&mock_env, jcaller, shell_holder, kImageTextureId);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       SurfaceCreatedCallsEmbedderApiAndFirstFrameCallback) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto surface_created = reinterpret_cast<SurfaceCreatedFn>(
+      RegisterNativesAndFind(mock_env, "nativeSurfaceCreated"));
+  ASSERT_NE(surface_created, nullptr);
+
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  VoidCallback captured_first_frame_callback = nullptr;
+  void* captured_first_frame_user_data = nullptr;
+  int notify_created_calls = 0;
+
+  holder->GetEmbedderApiForTesting().SetNextFrameCallback = MOCK_ENGINE_PROC(
+      SetNextFrameCallback, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                 VoidCallback callback, void* user_data) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(callback, nullptr);
+        captured_first_frame_callback = callback;
+        captured_first_frame_user_data = user_data;
+        return kSuccess;
+      }));
+  holder->GetEmbedderApiForTesting().NotifyCreated = MOCK_ENGINE_PROC(
+      NotifyCreated, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_NE(engine, nullptr);
+        notify_created_calls++;
+        return kSuccess;
+      }));
+
+  surface_created(&mock_env, reinterpret_cast<jobject>(123),
+                  reinterpret_cast<jlong>(holder.get()),
+                  /*jsurface=*/nullptr);
+
+  EXPECT_EQ(notify_created_calls, 1);
+  ASSERT_NE(captured_first_frame_callback, nullptr);
+
+  EXPECT_CALL(*jni, FlutterViewOnFirstFrame()).Times(1);
+  captured_first_frame_callback(captured_first_frame_user_data);
+  // Poll the current thread's ALooper with a zero-millisecond timeout to drain
+  // the posted platform task without blocking.
+  constexpr int kImmediatePollTimeoutMs = 0;
+  ALooper_pollOnce(kImmediatePollTimeoutMs, nullptr, nullptr, nullptr);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       FirstFrameCallbackDroppedIfHolderDestroyedBeforePlatformTaskRuns) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  VoidCallback captured_first_frame_callback = nullptr;
+  void* captured_first_frame_user_data = nullptr;
+
+  holder->GetEmbedderApiForTesting().SetNextFrameCallback = MOCK_ENGINE_PROC(
+      SetNextFrameCallback, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                 VoidCallback callback, void* user_data) {
+        captured_first_frame_callback = callback;
+        captured_first_frame_user_data = user_data;
+        return kSuccess;
+      }));
+  holder->GetEmbedderApiForTesting().NotifyCreated = MOCK_ENGINE_PROC(
+      NotifyCreated,
+      ([](FLUTTER_API_SYMBOL(FlutterEngine) engine) { return kSuccess; }));
+
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
+  holder->NotifySurfaceCreated(window);
+  ASSERT_NE(captured_first_frame_callback, nullptr);
+
+  // Fire the render-thread callback (which posts to the platform task runner),
+  // then destroy the holder before the platform task runs.
+  EXPECT_CALL(*jni, FlutterViewOnFirstFrame()).Times(0);
+  captured_first_frame_callback(captured_first_frame_user_data);
+  holder.reset();
+  // Poll the current thread's ALooper with a zero-millisecond timeout to drain
+  // the posted platform task and verify the WeakPtr guard drops it safely.
+  constexpr int kImmediatePollTimeoutMs = 0;
+  ALooper_pollOnce(kImmediatePollTimeoutMs, nullptr, nullptr, nullptr);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       SurfaceWindowChangedChangedAndDestroyedCallEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto surface_window_changed = reinterpret_cast<SurfaceWindowChangedFn>(
+      RegisterNativesAndFind(mock_env, "nativeSurfaceWindowChanged"));
+  auto surface_changed = reinterpret_cast<SurfaceChangedFn>(
+      RegisterNativesAndFind(mock_env, "nativeSurfaceChanged"));
+  auto surface_destroyed = reinterpret_cast<SurfaceDestroyedFn>(
+      RegisterNativesAndFind(mock_env, "nativeSurfaceDestroyed"));
+  ASSERT_NE(surface_window_changed, nullptr);
+  ASSERT_NE(surface_changed, nullptr);
+  ASSERT_NE(surface_destroyed, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+
+  int schedule_frame_calls = 0;
+  int notify_destroyed_calls = 0;
+  holder->GetEmbedderApiForTesting().ScheduleFrame = MOCK_ENGINE_PROC(
+      ScheduleFrame, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_NE(engine, nullptr);
+        schedule_frame_calls++;
+        return kSuccess;
+      }));
+  holder->GetEmbedderApiForTesting().NotifyDestroyed = MOCK_ENGINE_PROC(
+      NotifyDestroyed, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_NE(engine, nullptr);
+        notify_destroyed_calls++;
+        return kSuccess;
+      }));
+
+  const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
+  jobject jcaller = reinterpret_cast<jobject>(123);
+
+  surface_window_changed(&mock_env, jcaller, shell_holder,
+                         /*jsurface=*/nullptr);
+  EXPECT_EQ(schedule_frame_calls, 1);
+
+  constexpr jint kSurfaceWidth = 720;
+  constexpr jint kSurfaceHeight = 1280;
+  surface_changed(&mock_env, jcaller, shell_holder, kSurfaceWidth,
+                  kSurfaceHeight);
+
+  surface_destroyed(&mock_env, jcaller, shell_holder);
+  EXPECT_EQ(notify_destroyed_calls, 1);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       SurfaceLifecycleRealProcsForwardToEngine) {
+  // Use the software rendering backend so that the real NotifyCreated proc can
+  // construct a valid rendering surface on the raster thread without requiring
+  // a live ANativeWindow backed by an EGL surface on physical devices.
+  Settings settings;
+  settings.enable_software_rendering = true;
+  settings.enable_impeller = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kSoftware);
+  ASSERT_TRUE(holder->IsValid());
+
+  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/false);
+  holder->NotifySurfaceCreated(window);
+  constexpr int kSurfaceWidth = 480;
+  constexpr int kSurfaceHeight = 800;
+  holder->NotifySurfaceChanged(kSurfaceWidth, kSurfaceHeight);
+  holder->NotifySurfaceWindowChanged(window);
+  holder->NotifySurfaceDestroyed();
 }
 
 }  // namespace testing

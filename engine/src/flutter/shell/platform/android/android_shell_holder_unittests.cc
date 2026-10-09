@@ -304,7 +304,7 @@ TEST(AndroidShellHolder, Create) {
   EXPECT_NE(holder->GetPlatformView().get(), nullptr);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       nullptr, /*is_fake_window=*/true);
-  holder->GetPlatformView()->NotifyCreated(window);
+  holder->NotifySurfaceCreated(window);
 }
 
 TEST(AndroidShellHolder, HandlePlatformMessage) {
@@ -318,7 +318,7 @@ TEST(AndroidShellHolder, HandlePlatformMessage) {
   EXPECT_NE(holder->GetPlatformView().get(), nullptr);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       nullptr, /*is_fake_window=*/true);
-  holder->GetPlatformView()->NotifyCreated(window);
+  holder->NotifySurfaceCreated(window);
   EXPECT_TRUE(holder->GetPlatformMessageHandler());
   size_t data_size = 4;
   fml::MallocMapping bytes =
@@ -344,7 +344,7 @@ TEST(AndroidShellHolder, CreateWithMergedPlatformAndUIThread) {
       settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       nullptr, /*is_fake_window=*/true);
-  holder->GetPlatformView()->NotifyCreated(window);
+  holder->NotifySurfaceCreated(window);
 
   EXPECT_EQ(
       holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
@@ -360,7 +360,7 @@ TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
       settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       nullptr, /*is_fake_window=*/true);
-  holder->GetPlatformView()->NotifyCreated(window);
+  holder->NotifySurfaceCreated(window);
 
   EXPECT_NE(
       holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
