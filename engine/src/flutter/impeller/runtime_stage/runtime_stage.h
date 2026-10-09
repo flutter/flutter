@@ -11,10 +11,10 @@
 
 #include "flutter/fml/mapping.h"
 
+#include "absl/status/statusor.h"
 #include "flutter/impeller/core/runtime_types.h"
 #include "impeller/core/shader_types.h"
 #include "runtime_stage_types_flatbuffers.h"
-#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 

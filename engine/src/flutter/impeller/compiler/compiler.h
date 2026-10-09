@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 
+#include "absl/status/status.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/compiler/include_dir.h"
 #include "impeller/compiler/reflector.h"
@@ -17,7 +18,6 @@
 #include "impeller/compiler/types.h"
 #include "spirv_msl.hpp"
 #include "spirv_parser.hpp"
-#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 namespace compiler {

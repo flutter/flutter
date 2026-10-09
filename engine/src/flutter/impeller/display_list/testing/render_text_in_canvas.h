@@ -7,11 +7,11 @@
 
 #include <memory>
 
+#include "absl/status/statusor.h"
 #include "flutter/display_list/dl_canvas.h"
 #include "flutter/display_list/dl_color.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
 #include "impeller/typographer/backends/skia/text_frame_skia.h"
-#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace flutter {
 namespace testing {
