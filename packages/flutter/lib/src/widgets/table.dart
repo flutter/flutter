@@ -112,6 +112,40 @@ class _TableElementRow {
 /// For more details about the table layout algorithm, see [RenderTable].
 /// To control the alignment of children, see [TableCell].
 ///
+/// ## Cells that span several columns or rows
+///
+/// A [TableCell] can span several columns with [TableCell.colSpan] and several
+/// rows with [TableCell.rowSpan], like `colspan` and `rowspan` in HTML. Every
+/// [TableRow] still has exactly one child per column, so every slot that a
+/// span covers holds a [TableCell.none] placeholder:
+///
+/// ```dart
+/// Table(
+///   border: TableBorder.all(),
+///   children: const <TableRow>[
+///     TableRow(
+///       children: <Widget>[
+///         TableCell(colSpan: 2, child: Text('Spans two columns')),
+///         TableCell.none,
+///         TableCell(rowSpan: 2, child: Text('Spans two rows')),
+///       ],
+///     ),
+///     TableRow(
+///       children: <Widget>[
+///         Text('A'),
+///         Text('B'),
+///         TableCell.none,
+///       ],
+///     ),
+///   ],
+/// )
+/// ```
+///
+/// The [border] leaves out the inner borders inside a span. See
+/// [TableCell.colSpan] and [TableCell.rowSpan] for how spanning cells interact
+/// with [columnWidths] and with the row heights, and [TableCell.none] for what
+/// happens when a placeholder is missing or misplaced.
+///
 /// See also:
 ///
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
@@ -145,19 +179,44 @@ class Table extends RenderObjectWidget {
        }()),
        assert(() {
          if (children.isNotEmpty) {
-           final int cellCount = children.first.children.length;
-           if (children.any((TableRow row) => row.children.length != cellCount)) {
-             throw FlutterError(
-               'Table contains irregular row lengths.\n'
-               'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
-               'Otherwise, the table will contain holes.',
-             );
+           final int expectedColumnCount = children.first.children.length;
+
+           // Check if the first row has cells before using it as a reference
+           if (expectedColumnCount == 0) {
+             throw FlutterError.fromParts(<DiagnosticsNode>[
+               ErrorSummary('Empty first TableRow.'),
+               ErrorDescription(
+                 'The first TableRow in the table has no cells. '
+                 'It must contain at least one child widget to define the '
+                 "table's column count.",
+               ),
+             ]);
            }
-           if (children.any((TableRow row) => row.children.isEmpty)) {
-             throw FlutterError(
-               'One or more TableRow have no children.\n'
-               'Every TableRow in a Table must have at least one child, so there is no empty row. ',
-             );
+
+           for (var y = 0; y < children.length; y++) {
+             final TableRow row = children[y];
+             final List<Widget> cellList = row.children;
+             final int cellCount = cellList.length;
+
+             // Check if this row has the correct number of cells
+             if (cellCount != expectedColumnCount) {
+               throw FlutterError.fromParts(<DiagnosticsNode>[
+                 ErrorSummary('Inconsistent number of table cells.'),
+                 ErrorDescription(
+                   'Row $y contains $cellCount cells, but each row in this table '
+                   'must contain exactly $expectedColumnCount, like the first row.',
+                 ),
+                 ErrorHint(
+                   'When using colSpan or rowSpan, every TableRow must still '
+                   'define the same total number of cells (including placeholder '
+                   'cells such as TableCell.none) to ensure a consistent table grid.',
+                 ),
+                 ErrorDescription(
+                   'For example, if one cell spans 3 columns, you must still include '
+                   'two TableCell.none placeholders to fill the remaining column slots in that row.',
+                 ),
+               ]);
+             }
            }
          }
          return true;
@@ -436,12 +495,83 @@ class _TableElement extends RenderObjectElement {
 ///
 /// To create an empty [TableCell], provide a [SizedBox.shrink]
 /// as the [child].
+///
+/// A [TableCell] can also span several columns or rows, see [colSpan],
+/// [rowSpan] and [TableCell.none].
 class TableCell extends StatelessWidget {
   /// Creates a widget that controls how a child of a [Table] is aligned.
-  const TableCell({super.key, this.verticalAlignment, required this.child});
+  const TableCell({
+    super.key,
+    this.colSpan = 1,
+    this.rowSpan = 1,
+    this.verticalAlignment,
+    required this.child,
+  }) : assert(colSpan >= 1, 'The colSpan of a TableCell must be at least 1.'),
+       assert(rowSpan >= 1, 'The rowSpan of a TableCell must be at least 1.');
+
+  /// Internal constructor used for [TableCell.none].
+  const TableCell._none()
+    : colSpan = 0,
+      rowSpan = 0,
+      verticalAlignment = null,
+      child = const SizedBox.shrink();
+
+  /// {@template flutter.widgets.table.none}
+  /// A table cell that acts as a structural placeholder to preserve the
+  /// table’s grid alignment.
+  ///
+  /// This cell must be used in positions covered by another cell’s [colSpan]
+  /// or [rowSpan] to make the table’s structure explicit and maintain a
+  /// consistent layout across all rows and columns.
+  ///
+  /// Placeholders are only checked in debug builds: a slot that a span covers
+  /// but that holds any other widget, and a [TableCell.none] outside of any
+  /// span, fail an assertion that names the slot. In release builds, a widget
+  /// in a slot that a span covers is not laid out, painted or hit tested, so
+  /// it is silently dropped.
+  /// {@endtemplate}
+  static const TableCell none = TableCell._none();
 
   /// How this cell is aligned vertically.
   final TableCellVerticalAlignment? verticalAlignment;
+
+  /// The number of columns this cell should span.
+  ///
+  /// The value represents the number of columns the cell will extend to cover,
+  /// defaults to 1.
+  ///
+  /// When a cell spans multiple columns, you must follow with
+  /// the corresponding number of [TableCell.none] in the same row to fill the
+  /// remaining covered columns and maintain the table’s grid structure.
+  ///
+  /// The cell is laid out at the combined width of the columns it covers. The
+  /// column widths themselves are still computed one column at a time, and the
+  /// cell counts as part of the column it starts in. A [TableColumnWidth] that
+  /// depends on the cells of its column, such as [IntrinsicColumnWidth],
+  /// therefore sizes that column to fit the whole cell instead of sharing its
+  /// width between the columns it covers. Columns whose width does not depend
+  /// on their cells, such as [FixedColumnWidth] or [FlexColumnWidth], are not
+  /// affected.
+  final int colSpan;
+
+  /// The number of rows this cell should span.
+  ///
+  /// The value represents the number of rows the cell will extend to cover,
+  /// defaults to 1.
+  ///
+  /// When a cell spans multiple rows, you must follow with
+  /// the corresponding number of [TableCell.none] in the following [TableRow]s
+  /// to preserve consistent table alignment.
+  ///
+  /// The cell does not add its height to the row it starts in. The rows it
+  /// covers are sized by their other cells, and the last of them grows if the
+  /// cell needs more room. The cell is then aligned within the combined height
+  /// of these rows according to its [verticalAlignment]. A cell aligned with
+  /// [TableCellVerticalAlignment.fill] contributes no height, it takes the
+  /// combined height of the rows it covers. A cell aligned with
+  /// [TableCellVerticalAlignment.baseline] currently ignores [rowSpan] when the
+  /// rows are sized, and adds its whole height to the row it starts in.
+  final int rowSpan;
 
   /// The child of this cell.
   final Widget child;
@@ -449,6 +579,8 @@ class TableCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _TableCell(
+      colSpan: colSpan,
+      rowSpan: rowSpan,
       verticalAlignment: verticalAlignment,
       child: Semantics(role: SemanticsRole.cell, child: child),
     );
@@ -456,15 +588,36 @@ class TableCell extends StatelessWidget {
 }
 
 class _TableCell extends ParentDataWidget<TableCellParentData> {
-  const _TableCell({this.verticalAlignment, required super.child});
-
+  const _TableCell({
+    this.verticalAlignment,
+    required this.colSpan,
+    required this.rowSpan,
+    required super.child,
+  });
   final TableCellVerticalAlignment? verticalAlignment;
+
+  final int colSpan;
+  final int rowSpan;
 
   @override
   void applyParentData(RenderObject renderObject) {
     final parentData = renderObject.parentData! as TableCellParentData;
+    var needsLayout = false;
+
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
+      needsLayout = true;
+    }
+    if (parentData.colSpan != colSpan) {
+      parentData.colSpan = colSpan;
+      needsLayout = true;
+    }
+    if (parentData.rowSpan != rowSpan) {
+      parentData.rowSpan = rowSpan;
+      needsLayout = true;
+    }
+
+    if (needsLayout) {
       renderObject.parent?.markNeedsLayout();
     }
   }
@@ -475,9 +628,10 @@ class _TableCell extends ParentDataWidget<TableCellParentData> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(
-      EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment),
-    );
+    properties
+      ..add(EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment))
+      ..add(IntProperty('colSpan', colSpan))
+      ..add(IntProperty('rowSpan', rowSpan));
   }
 }
 
