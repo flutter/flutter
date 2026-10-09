@@ -548,28 +548,41 @@ class WebAssetServer implements AssetReader {
           'canvaskit',
         ),
       );
-      final Uri potential = canvasKitDirectory.uri.resolve(
+      final Uri? potential = resolveRequestPathUnder(
+        canvasKitDirectory.uri,
         requestPath.replaceFirst('canvaskit/', ''),
+        fileSystem: fileSystem,
+        windows: globals.platform.isWindows,
       );
-      file = fileSystem.file(potential);
+      if (potential != null) {
+        file = fileSystem.file(potential);
+      }
     }
 
     // If all of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
-      final Uri potential = fileSystem
-          .directory(getAssetBuildDirectory(null, fileSystem))
-          .uri
-          .resolve(requestPath.replaceFirst('assets/', ''));
-      file = fileSystem.file(potential);
+      final Uri? potential = resolveRequestPathUnder(
+        fileSystem.directory(getAssetBuildDirectory(null, fileSystem)).uri,
+        requestPath.replaceFirst('assets/', ''),
+        fileSystem: fileSystem,
+        windows: globals.platform.isWindows,
+      );
+      if (potential != null) {
+        file = fileSystem.file(potential);
+      }
     }
 
     if (!file.existsSync()) {
-      final Uri webPath = fileSystem.currentDirectory
-          .childDirectory('web')
-          .uri
-          .resolve(requestPath);
-      file = fileSystem.file(webPath);
+      final Uri? webPath = resolveRequestPathUnder(
+        fileSystem.currentDirectory.childDirectory('web').uri,
+        requestPath,
+        fileSystem: fileSystem,
+        windows: globals.platform.isWindows,
+      );
+      if (webPath != null) {
+        file = fileSystem.file(webPath);
+      }
     }
 
     if (!file.existsSync()) {
@@ -743,14 +756,27 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
         return entrypointCacheDirectory.childFile('web_entrypoint.dart');
     }
 
+    final File missing = fileSystem.currentDirectory.childFile('.non_existent_file');
+    if (!isRelativeRequestPath(path)) {
+      return missing;
+    }
+
     final String extension = fileSystem.path.extension(path);
     if (_sourceMapExtensions.contains(extension)) {
       // If this is a dart file, it must be on the local file system and is
       // likely coming from a source map request. The tool doesn't currently
       // consider the case of Dart files as assets.
-      final File dartFile = fileSystem.file(fileSystem.currentDirectory.uri.resolve(path));
-      if (dartFile.existsSync()) {
-        return dartFile;
+      final Uri? dartFileUri = resolveRequestPathUnder(
+        fileSystem.currentDirectory.uri,
+        path,
+        fileSystem: fileSystem,
+        windows: globals.platform.isWindows,
+      );
+      if (dartFileUri != null) {
+        final File dartFile = fileSystem.file(dartFileUri);
+        if (dartFile.existsSync()) {
+          return dartFile;
+        }
       }
 
       final List<String> segments = path.split('/');
@@ -760,7 +786,12 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
 
       // The file might have been a package file which is signaled by a
       // `/packages/<package>/<path>` request.
-      if (segments.first == 'packages') {
+      // A dot segment would resolve outside the package root, which package
+      // resolution does not guard against on its own.
+      final bool hasDotSegment = segments.any(
+        (String segment) => segment == '.' || segment == '..',
+      );
+      if (segments.first == 'packages' && !hasDotSegment) {
         final Uri? filePath = _packages.resolve(
           Uri(scheme: 'package', pathSegments: segments.skip(1)),
         );
@@ -781,21 +812,37 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
             ),
           )
           .parent;
-      final File dartSdkFile = fileSystem.file(dartSdkParent.uri.resolve(path));
-      if (dartSdkFile.existsSync()) {
-        return dartSdkFile;
+      final Uri? dartSdkFileUri = resolveRequestPathUnder(
+        dartSdkParent.uri,
+        path,
+        fileSystem: fileSystem,
+        windows: globals.platform.isWindows,
+      );
+      if (dartSdkFileUri != null) {
+        final File dartSdkFile = fileSystem.file(dartSdkFileUri);
+        if (dartSdkFile.existsSync()) {
+          return dartSdkFile;
+        }
       }
 
       final Directory flutterWebSdk = fileSystem.directory(
         globals.artifacts!.getHostArtifact(HostArtifact.flutterWebSdk),
       );
-      final File webSdkFile = fileSystem.file(flutterWebSdk.uri.resolve(path));
-      if (webSdkFile.existsSync()) {
-        return webSdkFile;
+      final Uri? webSdkFileUri = resolveRequestPathUnder(
+        flutterWebSdk.uri,
+        path,
+        fileSystem: fileSystem,
+        windows: globals.platform.isWindows,
+      );
+      if (webSdkFileUri != null) {
+        final File webSdkFile = fileSystem.file(webSdkFileUri);
+        if (webSdkFile.existsSync()) {
+          return webSdkFile;
+        }
       }
     }
 
-    return fileSystem.currentDirectory.childFile('.non_existent_file');
+    return missing;
   }
 
   File get _resolveDartSdkJsFile {
