@@ -30,7 +30,7 @@ std::string Utf8FromPath(const std::filesystem::path& path);
 ///         by a space as N backslashes followed by a space. Backslashes
 ///         elsewhere in the path are left alone so that Windows paths, which
 ///         Ninja copies through verbatim, keep working.
-std::string EscapeDepfilePath(const std::string& path);
+std::string EscapeDepfilePath(std::string_view path);
 
 std::string InferShaderNameFromPath(const std::filesystem::path& path);
 

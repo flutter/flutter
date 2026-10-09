@@ -31,7 +31,7 @@ std::string Utf8FromPath(const std::filesystem::path& path) {
   return reinterpret_cast<const char*>(path.u8string().c_str());
 }
 
-std::string EscapeDepfilePath(const std::string& path) {
+std::string EscapeDepfilePath(std::string_view path) {
   std::string result;
   result.reserve(path.size());
   size_t backslashes = 0u;
