@@ -2429,6 +2429,10 @@ void main() {
 
     // Requests focus for every node in order, then returns to node 8 so that
     // it becomes the current primary focus.
+    //
+    // Node 8 (not 9) is focused last so that node 9 — a later sibling in build
+    // order — is still focusable when node 8 is disabled, which is what hands
+    // the stale mark to node 9.
     Future<void> focusEveryNodeInOrder(WidgetTester tester, List<FocusNode> nodes) async {
       for (final node in nodes) {
         node.requestFocus();
@@ -2464,7 +2468,7 @@ void main() {
 
       // Disable every node in a single build.
       await tester.pumpWidget(buildNodeList(nodes, <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // No node can take focus, so focus falls back to the enclosing scope
       // rather than staying on a disabled node.
@@ -2480,13 +2484,51 @@ void main() {
 
       // Disable the current primary focus (node 8) and node 9 in a single build.
       await tester.pumpWidget(buildNodeList(nodes, <int>{8, 9}));
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Focus moves to node 7, the most recently focused node that can still
       // take focus, rather than to one of the disabled nodes.
       expect(nodes[7].hasPrimaryFocus, isTrue);
       expect(nodes[8].hasPrimaryFocus, isFalse);
       expect(nodes[9].hasPrimaryFocus, isFalse);
+    });
+
+    testWidgets('disabling a sibling scope in the same build does not leave '
+        'primary focus on its unfocusable child', (WidgetTester tester) async {
+      final FocusNode node = FocusNode(debugLabel: 'node');
+      final FocusNode scopedNode = FocusNode(debugLabel: 'scopedNode');
+      final FocusScopeNode scope = FocusScopeNode(debugLabel: 'scope');
+      addTearDown(() {
+        node.dispose();
+        scopedNode.dispose();
+        scope.dispose();
+      });
+
+      Widget build({required bool enabled}) => Column(
+        children: <Widget>[
+          Focus(focusNode: node, canRequestFocus: enabled, child: const SizedBox.shrink()),
+          FocusScope(
+            node: scope,
+            canRequestFocus: enabled,
+            child: Focus(focusNode: scopedNode, child: const SizedBox.shrink()),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(build(enabled: true));
+      scopedNode.requestFocus();
+      await tester.pump();
+      node.requestFocus();
+      await tester.pump();
+      final FocusScopeNode enclosingScope = node.enclosingScope!;
+
+      // `node` is disabled first and hands focus to `scope`'s child, which is
+      // still focusable at that instant; `scope` is disabled afterwards.
+      await tester.pumpWidget(build(enabled: false));
+      await tester.pump();
+
+      expect(scopedNode.hasPrimaryFocus, isFalse);
+      expect(FocusManager.instance.primaryFocus, same(enclosingScope));
     });
   });
 }
