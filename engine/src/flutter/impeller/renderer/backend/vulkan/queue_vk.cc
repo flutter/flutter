@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "flutter/fml/trace_event.h"
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 
 namespace impeller {
@@ -21,6 +22,7 @@ const QueueIndexVK& QueueVK::GetIndex() const {
 
 vk::Result QueueVK::Submit(const vk::SubmitInfo& submit_info,
                            const vk::Fence& fence) const {
+  TRACE_EVENT0("impeller", "QueueVK::Submit");
   Lock lock(queue_mutex_);
   return queue_.submit(submit_info, fence);
 }
@@ -31,6 +33,7 @@ vk::Result QueueVK::Submit(const vk::Fence& fence) const {
 }
 
 vk::Result QueueVK::Present(const vk::PresentInfoKHR& present_info) {
+  TRACE_EVENT0("impeller", "QueueVK::Present");
   Lock lock(queue_mutex_);
   return queue_.presentKHR(present_info);
 }
