@@ -97,21 +97,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
       const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
       ImageExternalTexture::ImageLifecycle lifecycle);
 
-  // |PlatformView|
-  void LoadDartDeferredLibrary(
-      intptr_t loading_unit_id,
-      std::unique_ptr<const fml::Mapping> snapshot_data,
-      std::unique_ptr<const fml::Mapping> snapshot_instructions) override;
-
-  void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
-                                    const std::string error_message,
-                                    bool transient) override;
-
-  // |PlatformView|
-  void UpdateAssetResolverByType(
-      std::unique_ptr<AssetResolver> updated_asset_resolver,
-      AssetResolver::AssetResolverType type) override;
-
   const std::shared_ptr<AndroidContext>& GetAndroidContext() {
     return android_context_;
   }
@@ -137,12 +122,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   bool android_meets_hcpp_criteria_ = false;
 
   // |PlatformView|
-  void SetApplicationLocale(std::string locale) override;
-
-  // |PlatformView|
-  void SetSemanticsTreeEnabled(bool enabled) override;
-
-  // |PlatformView|
   void HandlePlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message) override;
 
@@ -165,15 +144,9 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
 
-  // |PlatformView|
-  void RequestDartDeferredLibrary(intptr_t loading_unit_id) override;
-
   void InstallFirstFrameCallback();
 
   void FireFirstFrameCallback();
-
-  double GetScaledFontSize(double unscaled_font_size,
-                           int configuration_id) const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

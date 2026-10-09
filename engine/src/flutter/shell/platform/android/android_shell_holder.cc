@@ -127,6 +127,23 @@ PlatformViewAndroid::PlatformDispatchTable MakePlatformDispatchTable(
           },
       .on_pre_engine_restart_callback =
           [jni_facade]() { jni_facade->FlutterViewOnPreEngineRestart(); },
+      .set_application_locale_callback =
+          [jni_facade](std::string locale) {
+            jni_facade->FlutterViewSetApplicationLocale(std::move(locale));
+          },
+      .set_semantics_tree_enabled_callback =
+          [jni_facade](bool enabled) {
+            jni_facade->FlutterViewSetSemanticsTreeEnabled(enabled);
+          },
+      .request_dart_deferred_library_callback =
+          [jni_facade](intptr_t loading_unit_id) {
+            jni_facade->RequestDartDeferredLibrary(loading_unit_id);
+          },
+      .get_scaled_font_size_callback =
+          [jni_facade](double unscaled_font_size, int configuration_id) {
+            return jni_facade->FlutterViewGetScaledFontSize(unscaled_font_size,
+                                                            configuration_id);
+          },
   };
 }
 

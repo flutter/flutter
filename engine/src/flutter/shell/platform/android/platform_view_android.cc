@@ -291,16 +291,6 @@ void PlatformViewAndroid::HandlePlatformMessage(
   platform_message_handler_->HandlePlatformMessage(std::move(message));
 }
 
-// |PlatformView|
-void PlatformViewAndroid::SetApplicationLocale(std::string locale) {
-  jni_facade_->FlutterViewSetApplicationLocale(std::move(locale));
-}
-
-// |PlatformView|
-void PlatformViewAndroid::SetSemanticsTreeEnabled(bool enabled) {
-  jni_facade_->FlutterViewSetSemanticsTreeEnabled(enabled);
-}
-
 void PlatformViewAndroid::RegisterExternalTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
@@ -450,39 +440,6 @@ std::shared_ptr<impeller::Context> PlatformViewAndroid::GetImpellerContext()
   return android_context_->GetImpellerContext();
 }
 
-// |PlatformView|
-void PlatformViewAndroid::RequestDartDeferredLibrary(intptr_t loading_unit_id) {
-  if (jni_facade_->RequestDartDeferredLibrary(loading_unit_id)) {
-    return;
-  }
-  return;  // TODO(garyq): Call LoadDartDeferredLibraryFailure()
-}
-
-// |PlatformView|
-void PlatformViewAndroid::LoadDartDeferredLibrary(
-    intptr_t loading_unit_id,
-    std::unique_ptr<const fml::Mapping> snapshot_data,
-    std::unique_ptr<const fml::Mapping> snapshot_instructions) {
-  delegate_.LoadDartDeferredLibrary(loading_unit_id, std::move(snapshot_data),
-                                    std::move(snapshot_instructions));
-}
-
-// |PlatformView|
-void PlatformViewAndroid::LoadDartDeferredLibraryError(
-    intptr_t loading_unit_id,
-    const std::string error_message,
-    bool transient) {
-  delegate_.LoadDartDeferredLibraryError(loading_unit_id, error_message,
-                                         transient);
-}
-
-// |PlatformView|
-void PlatformViewAndroid::UpdateAssetResolverByType(
-    std::unique_ptr<AssetResolver> updated_asset_resolver,
-    AssetResolver::AssetResolverType type) {
-  delegate_.UpdateAssetResolverByType(std::move(updated_asset_resolver), type);
-}
-
 void PlatformViewAndroid::InstallFirstFrameCallback() {
   // On Platform Task Runner.
   SetNextFrameCallback(
@@ -501,12 +458,6 @@ void PlatformViewAndroid::InstallFirstFrameCallback() {
 
 void PlatformViewAndroid::FireFirstFrameCallback() {
   jni_facade_->FlutterViewOnFirstFrame();
-}
-
-double PlatformViewAndroid::GetScaledFontSize(double unscaled_font_size,
-                                              int configuration_id) const {
-  return jni_facade_->FlutterViewGetScaledFontSize(unscaled_font_size,
-                                                   configuration_id);
 }
 
 bool PlatformViewAndroid::IsSurfaceControlEnabled() const {

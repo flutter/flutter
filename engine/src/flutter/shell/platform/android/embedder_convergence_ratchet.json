@@ -26,7 +26,7 @@
       "enforce": "ratchet"
     },
     "platform_view_android_overrides": {
-      "count": 17,
+      "count": 10,
       "enforce": "ratchet"
     },
     "gn_internal_deps": {
