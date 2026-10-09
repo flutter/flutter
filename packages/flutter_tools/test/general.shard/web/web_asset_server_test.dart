@@ -298,6 +298,87 @@ void main() {
   );
 
   testWithoutContext(
+    'release asset server does not serve an absolute reference on Windows',
+    () async {
+      final windowsFileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+      final windowsPlatform = FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{},
+      );
+      windowsFileSystem.file(r'C:\project\build\web\index.html')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('<html></html>');
+      windowsFileSystem.file(r'C:\Windows\win.ini')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('[secret]');
+      final assetServer = ReleaseAssetServer(
+        Uri.base,
+        fileSystem: windowsFileSystem,
+        platform: windowsPlatform,
+        flutterRoot: r'C:\flutter',
+        webBuildDirectory: r'C:\project\build\web',
+        needsCoopCoep: false,
+      );
+
+      for (final path in <String>['file:///C:/Windows/win.ini', 'C:/Windows/win.ini']) {
+        final Response response = await assetServer.handle(
+          Request('GET', Uri.parse('http://localhost:8080/$path')),
+        );
+        expect(
+          await response.readAsString(),
+          '<html></html>',
+          reason: '"$path" should not be served and should return the index.html fallback',
+        );
+      }
+
+      // Behind a base path the colon is no longer in the first segment, so it
+      // reaches the handler unencoded.
+      final prefixed = ReleaseAssetServer(
+        Uri.base,
+        fileSystem: windowsFileSystem,
+        platform: windowsPlatform,
+        flutterRoot: r'C:\flutter',
+        webBuildDirectory: r'C:\project\build\web',
+        needsCoopCoep: false,
+        basePath: 'my_app',
+      );
+      for (final path in <String>['file:///C:/Windows/win.ini', 'C:/Windows/win.ini']) {
+        final Response response = await prefixed.handle(
+          Request('GET', Uri.parse('http://localhost:8080/my_app/$path')),
+        );
+        expect(
+          await response.readAsString(),
+          '<html></html>',
+          reason: '"/my_app/$path" should not be served',
+        );
+      }
+    },
+  );
+
+  testWithoutContext('release asset server serves nested build output paths', () async {
+    final assetServer = ReleaseAssetServer(
+      Uri.base,
+      fileSystem: fileSystem,
+      platform: platform,
+      flutterRoot: '/flutter',
+      webBuildDirectory: 'build/web',
+      needsCoopCoep: false,
+    );
+    // A colon is only meaningful in the first segment of a relative reference,
+    // so it stays usable in an asset name.
+    for (final path in <String>['assets/fonts/MyFont-Regular.ttf', 'assets/a:b.png']) {
+      fileSystem.file('build/web/$path')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('asset bytes');
+      final Response response = await assetServer.handle(
+        Request('GET', Uri.parse('http://localhost:8080/$path')),
+      );
+      expect(response.statusCode, HttpStatus.ok, reason: '"$path" should be served');
+      expect(await response.readAsString(), 'asset bytes', reason: '"$path" should be served');
+    }
+  });
+
+  testWithoutContext(
     'release asset server serves html content with COOP/COEP headers when specified',
     () async {
       final assetServer = ReleaseAssetServer(
