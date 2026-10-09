@@ -68,6 +68,11 @@ class DartIsolateGroupData : public PlatformMessageHandlerStorage {
   /// isolate group.
   std::vector<std::shared_ptr<const fml::Mapping>> GetKernelBuffers() const;
 
+  /// Adds a deferred library loading unit snapshot to this isolate group so its
+  /// data and executable instructions remain valid for the lifetime of the
+  /// isolate group.
+  void AddLoadingUnitSnapshot(const fml::RefPtr<const DartSnapshot>& snapshot);
+
   // |PlatformMessageHandlerStorage|
   void SetPlatformMessageHandler(
       int64_t root_isolate_token,
@@ -79,6 +84,8 @@ class DartIsolateGroupData : public PlatformMessageHandlerStorage {
 
  private:
   std::vector<std::shared_ptr<const fml::Mapping>> kernel_buffers_;
+  mutable std::mutex loading_unit_snapshots_mutex_;
+  std::vector<fml::RefPtr<const DartSnapshot>> loading_unit_snapshots_;
   const Settings settings_;
   const fml::RefPtr<const DartSnapshot> isolate_snapshot_;
   const std::string advisory_script_uri_;
