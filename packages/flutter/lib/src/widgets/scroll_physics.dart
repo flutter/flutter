@@ -94,6 +94,8 @@ class ScrollPhysics {
       AlwaysScrollableScrollPhysics;
 
   /// Creates a [BouncingScrollPhysics] instance.
+  ///
+  /// The [decelerationRate] defaults to [ScrollDecelerationRate.normal].
   const factory ScrollPhysics.bouncing({
     ScrollPhysics? parent,
     ScrollDecelerationRate decelerationRate,
@@ -633,6 +635,7 @@ class ScrollPhysics {
 /// if any, and then clamped to the new range.
 class RangeMaintainingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that maintain the scroll position in range.
+  // Any parameters that are added here should also be forwarded by `ScrollPhysics.rangeMaintaining`.
   const RangeMaintainingScrollPhysics({super.parent});
 
   @override
@@ -744,6 +747,9 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
 ///    of different types to get the desired scroll physics.
 class BouncingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that bounce back from the edge.
+  ///
+  /// The [decelerationRate] defaults to [ScrollDecelerationRate.normal].
+  // Any parameters that are added here should also be forwarded by `ScrollPhysics.bouncing`.
   const BouncingScrollPhysics({
     this.decelerationRate = ScrollDecelerationRate.normal,
     super.parent,
@@ -958,6 +964,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
   /// bounds of the content.
+  // Any parameters that are added here should also be forwarded by `ScrollPhysics.clamping`.
   const ClampingScrollPhysics({super.parent});
 
   @override
@@ -1067,6 +1074,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
 ///    found on Android.
 class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that always lets the user scroll.
+  // Any parameters that are added here should also be forwarded by `ScrollPhysics.alwaysScrollable`.
   const AlwaysScrollableScrollPhysics({super.parent});
 
   @override
@@ -1090,6 +1098,7 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
 ///    found on Android.
 class NeverScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that does not let the user scroll.
+  // Any parameters that are added here should also be forwarded by `ScrollPhysics.neverScrollable`.
   const NeverScrollableScrollPhysics({super.parent});
 
   @override
