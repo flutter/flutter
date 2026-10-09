@@ -1,0 +1,56 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of a Debian sysroot repository (@sysroot_linux_x64, ...):
+# the tarballs pinned in build/linux/sysroot_scripts/sysroots.json, either
+# unpacked by the gclient hook or downloaded by Bazel. The toolchain passes
+# the repository root as --sysroot and needs the headers and libraries as
+# action inputs.
+
+package(default_visibility = ["//visibility:public"])
+
+# The toolchain derives the --sysroot path from this file's location.
+exports_files(["BUILD.bazel"])
+
+filegroup(
+    name = "headers",
+    srcs = glob(
+        [
+            "usr/include/**",
+            # Headers that live next to their library, which pkg-config
+            # adds with -I (usr/lib/x86_64-linux-gnu/glib-2.0/include, ...).
+            "usr/lib/*/*/include/**",
+        ],
+        allow_empty = True,
+    ),
+)
+
+filegroup(
+    name = "libraries",
+    # Only what the linker resolves: shared objects (and the linker scripts
+    # named like them), archives and the crt objects, in the directories clang
+    # searches for a Debian multiarch sysroot. Subdirectories hold plugins,
+    # Python and Perl modules, systemd units with names Bazel cannot label, ...
+    srcs = glob(
+        [
+            "lib/*-linux-gnu*/*.so*",
+            "lib64/*",
+            "usr/lib/*-linux-gnu*/*.a",
+            "usr/lib/*-linux-gnu*/*.o",
+            "usr/lib/*-linux-gnu*/*.so*",
+            "usr/lib/gcc/*/*/*.a",
+            "usr/lib/gcc/*/*/*.o",
+            "usr/lib/gcc/*/*/*.so*",
+        ],
+        allow_empty = True,
+    ),
+)
+
+filegroup(
+    name = "all_files",
+    srcs = [
+        ":headers",
+        ":libraries",
+    ],
+)

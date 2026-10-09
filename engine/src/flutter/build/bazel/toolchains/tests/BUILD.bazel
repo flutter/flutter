@@ -1,0 +1,21 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Smoke tests for the hermetic toolchains: the first targets the Bazel build
+# compiles, and a quick check that a toolchain change still matches GN.
+
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+cc_test(
+    name = "cc_toolchain_smoke_test",
+    size = "small",
+    srcs = [
+        "cc_toolchain_smoke_test.cc",
+        "smoke_c_source.c",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = ["@googletest//:gtest_main"],
+)

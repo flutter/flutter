@@ -1,0 +1,121 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @libcxx: the libc++ sources pinned in DEPS, which the
+# engine builds itself instead of using the toolchain's copy. Mirrors
+# //flutter/build/secondary/flutter/third_party/libcxx/BUILD.gn.
+#
+# The public headers (include/) are not declared here: every C++ compile
+# action already gets them from the toolchain (-nostdinc++ -I.../include,
+# see //engine/src/flutter/build/bazel/toolchains), and the toolchain lists
+# them among its compiler inputs.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# The toolchain derives its include path from this file's location.
+exports_files(["include/__config"])
+
+filegroup(
+    name = "headers",
+    srcs = glob(["include/**"]),
+)
+
+# libc++'s private headers, also needed by libc++abi
+# (`#include "include/atomic_support.h" // from libc++`).
+cc_library(
+    name = "src_headers",
+    hdrs = glob([
+        "src/**/*.h",
+        "src/**/*.ipp",
+    ]),
+    includes = ["src"],
+    visibility = ["@libcxxabi//:__pkg__"],
+)
+
+# Linked as an ordinary archive: the linker pulls in only the objects a binary
+# references, exactly like a prebuilt libc++.a, so alwayslink is deliberately
+# off even though the library exports no headers of its own.
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "libcxx",
+    srcs = [
+        "src/algorithm.cpp",
+        "src/any.cpp",
+        "src/atomic.cpp",
+        "src/barrier.cpp",
+        "src/bind.cpp",
+        "src/call_once.cpp",
+        "src/charconv.cpp",
+        "src/chrono.cpp",
+        "src/condition_variable.cpp",
+        "src/condition_variable_destructor.cpp",
+        "src/error_category.cpp",
+        "src/exception.cpp",
+        "src/filesystem/directory_entry.cpp",
+        "src/filesystem/directory_iterator.cpp",
+        "src/filesystem/filesystem_clock.cpp",
+        "src/filesystem/filesystem_error.cpp",
+        "src/filesystem/int128_builtins.cpp",
+        "src/filesystem/operations.cpp",
+        "src/filesystem/path.cpp",
+        "src/fstream.cpp",
+        "src/functional.cpp",
+        "src/future.cpp",
+        "src/hash.cpp",
+        "src/ios.cpp",
+        "src/ios.instantiations.cpp",
+        "src/iostream.cpp",
+        "src/locale.cpp",
+        "src/memory.cpp",
+        "src/memory_resource.cpp",
+        "src/mutex.cpp",
+        "src/mutex_destructor.cpp",
+        "src/new.cpp",
+        "src/new_handler.cpp",
+        "src/new_helpers.cpp",
+        "src/optional.cpp",
+        "src/ostream.cpp",
+        "src/print.cpp",
+        "src/random.cpp",
+        "src/random_shuffle.cpp",
+        "src/regex.cpp",
+        "src/ryu/d2fixed.cpp",
+        "src/ryu/d2s.cpp",
+        "src/ryu/f2s.cpp",
+        "src/shared_mutex.cpp",
+        "src/stdexcept.cpp",
+        "src/string.cpp",
+        "src/strstream.cpp",
+        "src/system_error.cpp",
+        "src/thread.cpp",
+        "src/typeinfo.cpp",
+        "src/valarray.cpp",
+        "src/variant.cpp",
+        "src/vector.cpp",
+        "src/verbose_abort.cpp",
+    ],
+    copts = [
+        # No translation unit in the engine enables RTTI, but a third-party
+        # dependency may; keep it available in the runtime (as GN does).
+        "-frtti",
+        # shared_mutex.cpp is purposefully in violation.
+        "-Wno-thread-safety-analysis",
+    ],
+    # Only the pieces a static archive of libc++ needs: nothing here is
+    # propagated to the binaries that link it.
+    implementation_deps = [
+        ":src_headers",
+        "@libcxxabi",
+        "@llvm_libc",
+    ],
+    linkstatic = True,
+    local_defines = [
+        "_LIBCPP_NO_EXCEPTIONS",
+        "_LIBCPP_NO_RTTI",
+        "_LIBCPP_BUILDING_LIBRARY",
+        "LIBCXX_BUILDING_LIBCXXABI",
+    ],
+)
