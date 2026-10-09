@@ -68,6 +68,40 @@ class FlutterDriverFactory {
   }
 }
 
+/// Immutable specification consolidating test execution and browser parameters
+/// for [DriverService.startTest].
+@immutable
+class DriveTestSpecification {
+  const DriveTestSpecification({
+    required this.packageConfig,
+    this.arguments = const <String>[],
+    this.headless,
+    this.chromeBinary,
+    this.browserName,
+    this.androidEmulator,
+    this.driverPort,
+    this.webBrowserFlags = const <String>[],
+    this.browserDimension,
+    this.profileMemory,
+  });
+
+  static final _browserDimensionDelimiter = RegExp('[,x@]');
+
+  /// Splits a raw `--browser-dimension` value (`width x height[@dpr]`) into tokens.
+  static List<String>? parseBrowserDimension(String? raw) => raw?.split(_browserDimensionDelimiter);
+
+  final List<String> arguments;
+  final PackageConfig packageConfig;
+  final bool? headless;
+  final String? chromeBinary;
+  final String? browserName;
+  final bool? androidEmulator;
+  final int? driverPort;
+  final List<String> webBrowserFlags;
+  final List<String>? browserDimension;
+  final String? profileMemory;
+}
+
 /// An interface for the `flutter driver` integration test operations.
 abstract class DriverService {
   /// Install and launch the application for the provided [device].
@@ -86,24 +120,12 @@ abstract class DriverService {
   /// If --use-existing-app is provided, configured the correct VM Service URI.
   Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions);
 
-  /// Start the test file with the provided [arguments] and current environment,
+  /// Start the test file with the provided [spec] and current environment,
   /// returning the test process exit code.
   ///
-  /// If [profileMemory] is provided, it will be treated as a file path to
-  /// write a devtools memory profile.
-  Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    PackageConfig packageConfig, {
-    bool? headless,
-    String? chromeBinary,
-    String? browserName,
-    bool? androidEmulator,
-    int? driverPort,
-    List<String> webBrowserFlags,
-    List<String>? browserDimension,
-    String? profileMemory,
-  });
+  /// If [DriveTestSpecification.profileMemory] is provided, it will be treated
+  /// as a file path to write a devtools memory profile.
+  Future<int> startTest(String testFile, DriveTestSpecification spec);
 
   /// Stop the running application and uninstall it from the device.
   Future<void> stop({String? userIdentifier});
@@ -240,19 +262,8 @@ class FlutterDriverService extends DriverService {
   }
 
   @override
-  Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    PackageConfig packageConfig, {
-    bool? headless,
-    String? chromeBinary,
-    String? browserName,
-    bool? androidEmulator,
-    int? driverPort,
-    List<String> webBrowserFlags = const <String>[],
-    List<String>? browserDimension,
-    String? profileMemory,
-  }) async {
+  Future<int> startTest(String testFile, DriveTestSpecification spec) async {
+    final String? profileMemory = spec.profileMemory;
     if (profileMemory != null) {
       unawaited(
         _devtoolsLauncher.launch(
@@ -265,7 +276,7 @@ class FlutterDriverService extends DriverService {
     }
     try {
       final int result = await _processUtils.stream(
-        <String>[_dartSdkPath, ...arguments, testFile],
+        <String>[_dartSdkPath, ...spec.arguments, testFile],
         environment: <String, String>{..._platform.environment, 'VM_SERVICE_URL': _vmServiceUri},
       );
       return result;

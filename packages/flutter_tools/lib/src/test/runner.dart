@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 
@@ -34,6 +35,116 @@ import 'test_wrapper.dart';
 import 'watcher.dart';
 import 'web_test_compiler.dart';
 
+/// Immutable specification of test filtering, selection, and sharding options for `package:test`.
+@immutable
+class TestFilterSpecification {
+  const TestFilterSpecification({
+    this.names = const <String>[],
+    this.plainNames = const <String>[],
+    this.tags = const <String>[],
+    this.excludeTags = const <String>[],
+    this.presets = const <String>[],
+    this.runSkipped = false,
+    this.shardIndex,
+    this.totalShards,
+  });
+
+  final List<String> names;
+  final List<String> plainNames;
+  final List<String> tags;
+  final List<String> excludeTags;
+  final List<String> presets;
+  final bool runSkipped;
+  final int? shardIndex;
+  final int? totalShards;
+}
+
+/// Immutable specification consolidating execution, reporting, and engine parameters
+/// for [FlutterTestRunner].
+@immutable
+class TestExecutionSpecification {
+  const TestExecutionSpecification({
+    required this.debuggingOptions,
+    required this.buildInfo,
+    this.filter = const TestFilterSpecification(),
+    this.enableVmService = false,
+    this.machine = false,
+    this.precompiledDillPath,
+    this.precompiledDillFiles,
+    this.updateGoldens = false,
+    this.watcher,
+    this.concurrency,
+    this.testAssetDirectory,
+    this.flutterProject,
+    this.icudtlPath,
+    this.coverageDirectory,
+    this.web = false,
+    this.randomSeed,
+    this.reporter,
+    this.fileReporter,
+    this.timeout,
+    this.ignoreTimeouts = false,
+    this.failFast = false,
+    this.integrationTestDevice,
+    this.integrationTestUserIdentifier,
+    this.testTimeRecorder,
+    this.nativeAssetsBuilder,
+  });
+
+  final DebuggingOptions debuggingOptions;
+  final BuildInfo buildInfo;
+  final TestFilterSpecification filter;
+  final bool enableVmService;
+  final bool machine;
+  final String? precompiledDillPath;
+  final Map<String, String>? precompiledDillFiles;
+  final bool updateGoldens;
+  final TestWatcher? watcher;
+  final int? concurrency;
+  final String? testAssetDirectory;
+  final FlutterProject? flutterProject;
+  final String? icudtlPath;
+  final Directory? coverageDirectory;
+  final bool web;
+  final String? randomSeed;
+  final String? reporter;
+  final String? fileReporter;
+  final String? timeout;
+  final bool ignoreTimeouts;
+  final bool failFast;
+  final Device? integrationTestDevice;
+  final String? integrationTestUserIdentifier;
+  final TestTimeRecorder? testTimeRecorder;
+  final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+
+  /// Computes the command-line arguments passed to `package:test`.
+  List<String> toPackageTestArgs({required bool supportsColor, bool pauseAfterLoad = false}) {
+    return <String>[
+      if (!supportsColor) '--no-color',
+      if (pauseAfterLoad) '--pause-after-load',
+      if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>[
+        '-r',
+        reporter!,
+      ],
+      if (fileReporter != null) '--file-reporter=$fileReporter',
+      if (timeout != null) ...<String>['--timeout', timeout!],
+      if (ignoreTimeouts) '--ignore-timeouts',
+      if (concurrency != null) '--concurrency=$concurrency',
+      for (final String name in filter.names) ...<String>['--name', name],
+      for (final String plainName in filter.plainNames) ...<String>['--plain-name', plainName],
+      if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
+      for (final String tag in filter.tags) ...<String>['--tags', tag],
+      for (final String excludeTag in filter.excludeTags) ...<String>['--exclude-tags', excludeTag],
+      for (final String preset in filter.presets) ...<String>['--preset', preset],
+      if (failFast) '--fail-fast',
+      if (filter.runSkipped) '--run-skipped',
+      if (filter.totalShards != null) '--total-shards=${filter.totalShards}',
+      if (filter.shardIndex != null) '--shard-index=${filter.shardIndex}',
+      '--chain-stack-traces',
+    ];
+  }
+}
+
 /// Launching the `flutter_tester` process from the test runner.
 interface class FlutterTestRunner {
   const FlutterTestRunner({required this._toolContext});
@@ -43,40 +154,9 @@ interface class FlutterTestRunner {
   /// Runs tests using package:test and the Flutter engine.
   Future<int> runTests(
     TestWrapper testWrapper,
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    List<String> tags = const <String>[],
-    List<String> excludeTags = const <String>[],
-    List<String> presets = const <String>[],
-    bool enableVmService = false,
-    bool machine = false,
-    String? precompiledDillPath,
-    Map<String, String>? precompiledDillFiles,
-    bool updateGoldens = false,
-    TestWatcher? watcher,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    Directory? coverageDirectory,
-    bool web = false,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool ignoreTimeouts = false,
-    bool failFast = false,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    Device? integrationTestDevice,
-    String? integrationTestUserIdentifier,
-    TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    required BuildInfo buildInfo,
-  }) async {
+    List<Uri> testFiles,
+    TestExecutionSpecification spec,
+  ) async {
     final ToolContext(
       :Artifacts artifacts,
       :FileSystem fs,
@@ -90,29 +170,16 @@ interface class FlutterTestRunner {
     // Configure package:test to use the Flutter engine for child processes.
     final String flutterTesterBinPath = artifacts.getArtifactPath(Artifact.flutterTester);
 
-    // Compute the command-line arguments for package:test.
-    final testArgs = <String>[
-      if (!terminal.supportsColor) '--no-color',
-      if (debuggingOptions.startPaused) '--pause-after-load',
-      if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
-      if (fileReporter != null) '--file-reporter=$fileReporter',
-      if (timeout != null) ...<String>['--timeout', timeout],
-      if (ignoreTimeouts) '--ignore-timeouts',
-      if (concurrency != null) '--concurrency=$concurrency',
-      for (final String name in names) ...<String>['--name', name],
-      for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
-      if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
-      for (final String tag in tags) ...<String>['--tags', tag],
-      for (final String excludeTag in excludeTags) ...<String>['--exclude-tags', excludeTag],
-      for (final String preset in presets) ...<String>['--preset', preset],
-      if (failFast) '--fail-fast',
-      if (runSkipped) '--run-skipped',
-      if (totalShards != null) '--total-shards=$totalShards',
-      if (shardIndex != null) '--shard-index=$shardIndex',
-      '--chain-stack-traces',
-    ];
+    final DebuggingOptions debuggingOptions = spec.debuggingOptions;
+    final FlutterProject? flutterProject = spec.flutterProject;
 
-    if (web) {
+    // Compute the command-line arguments for package:test.
+    final List<String> testArgs = spec.toPackageTestArgs(
+      supportsColor: terminal.supportsColor,
+      pauseAfterLoad: debuggingOptions.startPaused,
+    );
+
+    if (spec.web) {
       // Unsupported for general Flutter developers.
       // This is only used by the Flutter Framework tests.
       // See: https://github.com/flutter/flutter/pull/65984.
@@ -154,8 +221,8 @@ interface class FlutterTestRunner {
           webMemoryFS: result,
           webRenderer: debuggingOptions.webRenderer,
           pauseAfterLoad: debuggingOptions.startPaused,
-          testTimeRecorder: testTimeRecorder,
-          updateGoldens: updateGoldens,
+          testTimeRecorder: spec.testTimeRecorder,
+          updateGoldens: spec.updateGoldens,
         );
       });
       await testWrapper.main(testArgs);
@@ -171,26 +238,26 @@ interface class FlutterTestRunner {
         : InternetAddressType.IPv4;
 
     final loader.FlutterPlatform platformInstance = loader.installHook(
-      buildInfo: buildInfo,
+      buildInfo: spec.buildInfo,
       debuggingOptions: debuggingOptions,
       flutterTesterBinPath: flutterTesterBinPath,
       toolContext: _toolContext,
-      enableVmService: enableVmService,
+      enableVmService: spec.enableVmService,
       flutterProject: flutterProject,
-      icudtlPath: icudtlPath,
-      integrationTestDevice: integrationTestDevice,
-      integrationTestUserIdentifier: integrationTestUserIdentifier,
-      machine: machine,
-      nativeAssetsBuilder: nativeAssetsBuilder,
-      precompiledDillFiles: precompiledDillFiles,
-      precompiledDillPath: precompiledDillPath,
+      icudtlPath: spec.icudtlPath,
+      integrationTestDevice: spec.integrationTestDevice,
+      integrationTestUserIdentifier: spec.integrationTestUserIdentifier,
+      machine: spec.machine,
+      nativeAssetsBuilder: spec.nativeAssetsBuilder,
+      precompiledDillFiles: spec.precompiledDillFiles,
+      precompiledDillPath: spec.precompiledDillPath,
       projectRootDirectory: fs.currentDirectory.uri,
       serverType: serverType,
-      testAssetDirectory: testAssetDirectory,
-      testTimeRecorder: testTimeRecorder,
+      testAssetDirectory: spec.testAssetDirectory,
+      testTimeRecorder: spec.testTimeRecorder,
       testWrapper: testWrapper,
-      updateGoldens: updateGoldens,
-      watcher: watcher,
+      updateGoldens: spec.updateGoldens,
+      watcher: spec.watcher,
     );
 
     try {
@@ -605,31 +672,9 @@ class SpawnPlugin extends PlatformPlugin {
   /// Runs tests using the experimental strategy of spawning each test in a
   /// separate lightweight Engine.
   Future<int> runTestsBySpawningLightweightEngines(
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    List<String> tags = const <String>[],
-    List<String> excludeTags = const <String>[],
-    List<String> presets = const <String>[],
-    bool machine = false,
-    bool updateGoldens = false,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool ignoreTimeouts = false,
-    bool failFast = false,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  }) async {
+    List<Uri> testFiles,
+    TestExecutionSpecification spec,
+  ) async {
     final ToolContext(
       :Artifacts artifacts,
       :FileSystem fs,
@@ -642,8 +687,15 @@ class SpawnPlugin extends PlatformPlugin {
 
     assert(testFiles.length > 1);
 
+    final FlutterProject flutterProject = spec.flutterProject!;
+    final DebuggingOptions debuggingOptions = spec.debuggingOptions;
+    final TestTimeRecorder? testTimeRecorder = spec.testTimeRecorder;
+    final String? testAssetDirectory = spec.testAssetDirectory;
+    final String? icudtlPath = spec.icudtlPath;
+    final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder = spec.nativeAssetsBuilder;
+
     final Directory buildDirectory = fs.directory(
-      fs.path.join(flutterProject!.directory.path, getBuildDirectory()),
+      fs.path.join(flutterProject.directory.path, getBuildDirectory()),
     );
     final Directory isolateSpawningTesterDirectory = buildDirectory.childDirectory(
       'isolate_spawning_tester',
@@ -678,29 +730,13 @@ class SpawnPlugin extends PlatformPlugin {
     );
 
     // Compute the command-line arguments for package:test.
-    final packageTestArgs = <String>[
-      if (!terminal.supportsColor) '--no-color',
-      if (machine) ...<String>['-r', 'json'] else if (reporter != null) ...<String>['-r', reporter],
-      if (fileReporter != null) '--file-reporter=$fileReporter',
-      if (timeout != null) ...<String>['--timeout', timeout],
-      if (ignoreTimeouts) '--ignore-timeouts',
-      if (concurrency != null) '--concurrency=$concurrency',
-      for (final String name in names) ...<String>['--name', name],
-      for (final String plainName in plainNames) ...<String>['--plain-name', plainName],
-      if (randomSeed != null) '--test-randomize-ordering-seed=$randomSeed',
-      for (final String tag in tags) ...<String>['--tags', tag],
-      for (final String excludeTag in excludeTags) ...<String>['--exclude-tags', excludeTag],
-      for (final String preset in presets) ...<String>['--preset', preset],
-      if (failFast) '--fail-fast',
-      if (runSkipped) '--run-skipped',
-      if (totalShards != null) '--total-shards=$totalShards',
-      if (shardIndex != null) '--shard-index=$shardIndex',
-      '--chain-stack-traces',
-    ];
+    final List<String> packageTestArgs = spec.toPackageTestArgs(
+      supportsColor: terminal.supportsColor,
+    );
 
     _generateChildTestIsolateSpawnerSourceFile(
       testFiles,
-      autoUpdateGoldenFiles: updateGoldens,
+      autoUpdateGoldenFiles: spec.updateGoldens,
       childTestIsolateSpawnerSourceFile: childTestIsolateSpawnerSourceFile,
       packageTestArgs: packageTestArgs,
       toolContext: _toolContext,
