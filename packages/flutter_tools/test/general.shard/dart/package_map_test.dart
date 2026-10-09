@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 void main() {
   group('findPackageConfigFile', () {
@@ -62,79 +61,67 @@ void main() {
 
   group('currentPackageConfig', () {
     late FileSystem fileSystem;
+    late BufferLogger logger;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
+      logger = BufferLogger.test();
     });
 
     tearDown(() {
       debugIgnorePackageConfigSync = false;
     });
 
-    testUsingContext(
-      'should load from CWD if Isolate.packageConfigSync is null',
-      () async {
-        debugIgnorePackageConfigSync = true;
+    testWithoutContext('should load from CWD if Isolate.packageConfigSync is null', () async {
+      debugIgnorePackageConfigSync = true;
 
-        // Create a valid package config in CWD
-        final File packageConfig = fileSystem.file('.dart_tool/package_config.json');
-        packageConfig.createSync(recursive: true);
-        packageConfig.writeAsStringSync('{"configVersion": 2, "packages": []}');
+      // Create a valid package config in CWD
+      final File packageConfig = fileSystem.file('.dart_tool/package_config.json');
+      packageConfig.createSync(recursive: true);
+      packageConfig.writeAsStringSync('{"configVersion": 2, "packages": []}');
 
-        final PackageConfig config = await currentPackageConfig();
-        expect(config.version, 2);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () => FakePlatform(script: Uri.parse('file:///ambient/bin/main.dart')),
-      },
-    );
+      final PackageConfig config = await currentPackageConfig(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(script: Uri.parse('file:///ambient/bin/main.dart')),
+      );
+      expect(config.version, 2);
+    });
 
-    testUsingContext(
-      'should load from script directory if CWD has no package config',
-      () async {
-        debugIgnorePackageConfigSync = true;
+    testWithoutContext('should load from script directory if CWD has no package config', () async {
+      debugIgnorePackageConfigSync = true;
 
-        // CWD = '/cwd_dir'
-        // Script = '/script_dir/bin/flutter_tools.dart'
-        // Package config = '/script_dir/.dart_tool/package_config.json'
+      // CWD = '/cwd_dir'
+      // Script = '/script_dir/bin/flutter_tools.dart'
+      // Package config = '/script_dir/.dart_tool/package_config.json'
 
-        final Directory cwd = fileSystem.directory('/cwd_dir')..createSync();
-        fileSystem.currentDirectory = cwd;
+      final Directory cwd = fileSystem.directory('/cwd_dir')..createSync();
+      fileSystem.currentDirectory = cwd;
 
-        final File packageConfig = fileSystem.file('/script_dir/.dart_tool/package_config.json');
-        packageConfig.createSync(recursive: true);
-        packageConfig.writeAsStringSync('{"configVersion": 2, "packages": []}');
+      final File packageConfig = fileSystem.file('/script_dir/.dart_tool/package_config.json');
+      packageConfig.createSync(recursive: true);
+      packageConfig.writeAsStringSync('{"configVersion": 2, "packages": []}');
 
-        final PackageConfig config = await currentPackageConfig();
-        expect(config.version, 2);
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () =>
-            FakePlatform(script: Uri.parse('file:///script_dir/bin/flutter_tools.dart')),
-      },
-    );
+      final PackageConfig config = await currentPackageConfig(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(script: Uri.parse('file:///script_dir/bin/flutter_tools.dart')),
+      );
+      expect(config.version, 2);
+    });
 
-    testUsingContext(
-      'should throw ToolExit if package config cannot be found',
-      () async {
-        debugIgnorePackageConfigSync = true;
+    testWithoutContext('should throw ToolExit if package config cannot be found', () async {
+      debugIgnorePackageConfigSync = true;
 
-        expect(
-          () => currentPackageConfig(),
-          throwsToolExit(message: 'Failed to resolve package configuration'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => FakeProcessManager.any(),
-        Platform: () =>
-            FakePlatform(script: Uri.parse('file:///script_dir/bin/flutter_tools.dart')),
-      },
-    );
+      await expectLater(
+        currentPackageConfig(
+          fileSystem: fileSystem,
+          logger: logger,
+          platform: FakePlatform(script: Uri.parse('file:///script_dir/bin/flutter_tools.dart')),
+        ),
+        throwsToolExit(message: 'Failed to resolve package configuration'),
+      );
+    });
   });
 
   group('PackageConfigWorkspaceExtension', () {
