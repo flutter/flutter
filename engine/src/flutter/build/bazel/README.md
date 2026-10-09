@@ -21,7 +21,9 @@ files are used where they are maintained and flag-compatible (`googletest`,
 `abseil-cpp`); everything else gets an overlay. An overlay replaces the
 upstream root `BUILD` file and hides upstream `BUILD` files in subdirectories
 (ICU ships some for its data-generation tools), so the overlay's globs can
-span the whole tree.
+span the whole tree. Engine code includes such dependencies by their
+canonical paths (`absl/...`, `unicode/...`), which both GN and the upstream
+or overlay `BUILD` files resolve.
 
 Prebuilt tools (clang, gn, ...) default to the synced copy as well. Set
 
