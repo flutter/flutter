@@ -38,6 +38,7 @@ synced_deps = use_extension("//engine/src/flutter/build/bazel:extensions.bzl", "
 use_repo(
     synced_deps,
     "abseil-cpp",
+    "boringssl",
     "clang_linux_x64",
     "cpython3",
     "dart",
@@ -49,6 +50,7 @@ use_repo(
     "llvm_libc",
     "ninja",
     "sysroot_linux_x64",
+    "zlib",
 )
 
 # The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler

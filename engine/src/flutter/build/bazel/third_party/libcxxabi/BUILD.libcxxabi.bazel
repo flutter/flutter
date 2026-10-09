@@ -63,3 +63,13 @@ cc_library(
     ]),
     visibility = ["@libcxx//:__pkg__"],
 )
+
+# What the GN build of this tree reads (//flutter/third_party/libcxxabi in
+# flutter/build/secondary), for rules that wrap a GN build.
+filegroup(
+    name = "build_tree",
+    srcs = glob([
+        "include/**",
+        "src/**",
+    ]),
+)

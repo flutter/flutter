@@ -1,0 +1,20 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's GN build configuration (//build in GN). Nothing here is used
+# by Bazel's own toolchains; the files are inputs of the rules that wrap a GN
+# build of part of the tree. The Debian sysroots that live under linux/ are
+# repositories of their own and are listed in .bazelignore.
+
+filegroup(
+    name = "gn_files",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "**/__pycache__/**",
+            "**/*.pyc",
+        ],
+    ),
+    visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],
+)

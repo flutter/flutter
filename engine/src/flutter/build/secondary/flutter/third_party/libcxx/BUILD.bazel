@@ -19,3 +19,14 @@ filegroup(
         "config/__config_site",
     ],
 )
+
+# What the GN build reads from this directory (the libc++ BUILD.gn and the
+# same headers), for rules that wrap a GN build. This package interrupts the
+# glob of //engine/src/flutter/build:gn_files, which lists it.
+filegroup(
+    name = "gn_files",
+    srcs = [
+        "BUILD.gn",
+        ":config_headers",
+    ],
+)

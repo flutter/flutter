@@ -1,0 +1,25 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @zlib: Chromium's zlib fork pinned in DEPS. For now it
+# only exposes what the GN build of the tree reads (its own BUILD.gn and the
+# sources of the zlib target), for rules that wrap a GN build; the engine's
+# own uses of zlib are not built by Bazel yet.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "build_tree",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "contrib/tests/**",
+            "examples/**",
+            # Chromium's compression utilities, built by other targets.
+            "google/**",
+            "patches/**",
+            "test/**",
+        ],
+    ),
+)
