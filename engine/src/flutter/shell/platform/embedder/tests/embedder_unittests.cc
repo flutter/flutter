@@ -4559,6 +4559,102 @@ TEST_F(EmbedderTest, CanSendPointerEventWithViewId) {
   message_latch.Wait();
 }
 
+TEST_F(EmbedderTest, ExtendedPointerEventFieldsReachTheFrameworkIntact) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  builder.SetDartEntrypoint("pointer_data_packet_full");
+
+  fml::AutoResetWaitableEvent ready_latch, count_latch, message_latch;
+  std::string last_message;
+  context.AddFfiNativeCallback(
+      "SignalNativeTest",
+      CREATE_FFI_LAMBDA([&ready_latch]() { ready_latch.Signal(); }));
+  context.AddFfiNativeCallback("SignalNativeCount",
+                               CREATE_FFI_LAMBDA([&count_latch](int count) {
+                                 EXPECT_EQ(count, 1);
+                                 count_latch.Signal();
+                               }));
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage", CREATE_FFI_LAMBDA([&](Dart_Handle message_handle) {
+        last_message =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
+        message_latch.Signal();
+      }));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  ready_latch.Wait();
+
+  FlutterPointerEvent pointer_event = {};
+  pointer_event.struct_size = sizeof(FlutterPointerEvent);
+  pointer_event.phase = FlutterPointerPhase::kAdd;
+  pointer_event.device_kind = kFlutterPointerDeviceKindStylus;
+  pointer_event.x = 10.0;
+  pointer_event.y = 20.0;
+  pointer_event.timestamp = 1000;
+  pointer_event.view_id = 0;
+  pointer_event.pressure = 0.5;
+  pointer_event.pressure_min = 0.1;
+  pointer_event.pressure_max = 1.0;
+  pointer_event.distance = 2.5;
+  pointer_event.distance_max = 10.0;
+  pointer_event.size = 0.25;
+  pointer_event.radius_major = 4.0;
+  pointer_event.radius_minor = 2.0;
+  pointer_event.radius_min = 1.0;
+  pointer_event.radius_max = 8.0;
+  pointer_event.orientation = 0.75;
+  pointer_event.tilt = 0.5;
+  pointer_event.platform_data = 42;
+  pointer_event.embedder_id = 99;
+
+  ASSERT_EQ(FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1),
+            kSuccess);
+  count_latch.Wait();
+  message_latch.Wait();
+
+  EXPECT_NE(last_message.find("embedderId: 99,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("distance: 2.5,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("distanceMax: 10.0,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("size: 0.25,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("radiusMajor: 4.0,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("radiusMinor: 2.0,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("radiusMin: 1.0,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("radiusMax: 8.0,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("orientation: 0.75,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("tilt: 0.5,"), std::string::npos) << last_message;
+  EXPECT_NE(last_message.find("platformData: 42,"), std::string::npos)
+      << last_message;
+
+  // Verify that an event whose struct_size predates the extended fields
+  // ignores any values past struct_size via SAFE_ACCESS.
+  pointer_event.struct_size = offsetof(FlutterPointerEvent, distance);
+  pointer_event.phase = FlutterPointerPhase::kHover;
+  pointer_event.x = 30.0;
+  pointer_event.y = 40.0;
+  ASSERT_EQ(FlutterEngineSendPointerEvent(engine.get(), &pointer_event, 1),
+            kSuccess);
+  count_latch.Wait();
+  message_latch.Wait();
+
+  EXPECT_NE(last_message.find("embedderId: 0,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("distance: 0.0,"), std::string::npos)
+      << last_message;
+  EXPECT_NE(last_message.find("platformData: 0,"), std::string::npos)
+      << last_message;
+}
+
 TEST_F(EmbedderTest, WindowMetricsEventDefaultsToImplicitView) {
   auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
   EmbedderConfigBuilder builder(context);

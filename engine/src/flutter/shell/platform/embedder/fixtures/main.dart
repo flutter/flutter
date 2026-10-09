@@ -1824,3 +1824,17 @@ void reportViewportMetricsDetails() {
   };
   signalNativeTest();
 }
+
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
+void pointer_data_packet_full() {
+  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket packet) {
+    signalNativeCount(packet.data.length);
+
+    for (final PointerData pointerData in packet.data) {
+      signalNativeMessage(pointerData.toStringFull());
+    }
+  };
+
+  signalNativeTest();
+}
