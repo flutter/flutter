@@ -90,6 +90,16 @@ mixin CompositionAwareMixin {
       return editingState;
     }
 
+    // The composing range no longer fits the text. This happens when the
+    // framework replaces the text mid-composition, for example when an input
+    // formatter rejects a dead key character. Browsers may then drop the
+    // composition without a `compositionend` event, so treat it as ended.
+    if (composingBase! + composingText!.length > editingState.text.length) {
+      composingText = null;
+      composingBase = null;
+      return editingState;
+    }
+
     return editingState.copyWith(
       composingBaseOffset: composingBase,
       composingExtentOffset: composingBase! + composingText!.length,
