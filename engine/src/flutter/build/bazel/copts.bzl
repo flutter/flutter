@@ -51,11 +51,16 @@ DEFAULT_WARNING_FLAGS = [
 # What the toolchain passes to every compile (see the module docstring).
 TOOLCHAIN_WARNING_FLAGS = [flag for flag in DEFAULT_WARNING_FLAGS if flag != "-Werror"]
 
-# //build/config/compiler:chromium_code (cflags) + //flutter:config.
-FLUTTER_COPTS = [
+# //build/config/compiler:chromium_code (cflags): first-party code and the
+# few third-party targets GN does not switch to no_chromium_code. Goes with
+# FLUTTER_LOCAL_DEFINES.
+CHROMIUM_CODE_COPTS = [
     "-Wall",
     "-Wextra",
-] + DEFAULT_WARNING_FLAGS + [
+] + DEFAULT_WARNING_FLAGS
+
+# //build/config/compiler:chromium_code (cflags) + //flutter:config.
+FLUTTER_COPTS = CHROMIUM_CODE_COPTS + [
     "-Wunreachable-code",
 ]
 
