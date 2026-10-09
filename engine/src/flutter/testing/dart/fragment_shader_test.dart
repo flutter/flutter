@@ -1628,12 +1628,136 @@ void main() async {
     expect(filterLowQuality, ImageFilter.shader(shader, filterQuality: FilterQuality.low));
     expect(identical(filter, filterLowQuality), false);
 
+    final filterUnclippedInput = ImageFilter.shader(shader, unclippedInput: true);
+    expect(filter, isNot(filterUnclippedInput));
+    expect(filterUnclippedInput, ImageFilter.shader(shader, unclippedInput: true));
+    expect(
+      filterUnclippedInput.hashCode,
+      ImageFilter.shader(shader, unclippedInput: true).hashCode,
+    );
+
     shader.setFloat(0, 1);
     final filter_3 = ImageFilter.shader(shader);
 
     expect(filter, isNot(filter_3));
     expect(identical(filter, filter_3), false);
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/185175.
+  _runImpellerTest('ImageFilter.shader with unclippedInput is given the entire layer', () async {
+    final FragmentProgram program = await FragmentProgram.fromAsset(
+      'filter_shader_input_size.frag.iplr',
+    );
+    final FragmentShader shader = program.fragmentShader();
+
+    // Returns the red and green channels of the top left pixel, which the
+    // shader sets to the input width and the x coordinate within the input.
+    Future<(int, int)> renderLayer({required bool unclippedInput}) async {
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
+      // Move 60% of the 100px wide layer outside of the 40px wide image.
+      canvas.translate(-60, 0);
+      canvas.saveLayer(
+        null,
+        Paint()..imageFilter = ImageFilter.shader(shader, unclippedInput: unclippedInput),
+      );
+      canvas.drawRect(const Rect.fromLTWH(0, 0, 100, 10), Paint()..color = const Color(0xFFFFFFFF));
+      canvas.restore();
+      final Image image = await recorder.endRecording().toImage(40, 10);
+      final ByteData data = (await image.toByteData())!;
+      image.dispose();
+      return (data.getUint8(0), data.getUint8(1));
+    }
+
+    // By default, the input is clipped to the visible 40px.
+    final (int clippedWidth, int clippedX) = await renderLayer(unclippedInput: false);
+    expect(clippedWidth, closeTo(40, 1));
+    expect(clippedX, closeTo(0, 1));
+
+    // With an unclipped input, the input is the entire layer.
+    final (int unclippedWidth, int unclippedX) = await renderLayer(unclippedInput: true);
+    expect(unclippedWidth, closeTo(100, 1));
+    expect(unclippedX, closeTo(60, 1));
+
+    shader.dispose();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/185175.
+  _runImpellerTest(
+    'ImageFilter.shader with unclippedInput renders offscreen content into the input',
+    () async {
+      final FragmentProgram program = await FragmentProgram.fromAsset(
+        'filter_shader_mirror.frag.iplr',
+      );
+      final FragmentShader shader = program.fragmentShader();
+
+      Picture record(void Function(Canvas canvas) draw) {
+        final recorder = PictureRecorder();
+        draw(Canvas(recorder));
+        return recorder.endRecording();
+      }
+
+      // Renders the 100px wide layer with its left 60px outside of a 40px wide
+      // image and returns the RGBA values of the pixel in the middle of the
+      // image. filter_shader_mirror.frag mirrors its input horizontally, so
+      // that pixel shows the input 20px from the left edge of the layer if the
+      // input is the entire layer, or the visible part of the layer otherwise.
+      Future<List<int>> render(Picture picture, {required bool unclippedInput}) async {
+        final builder = SceneBuilder();
+        builder.pushImageFilter(
+          ImageFilter.shader(shader, unclippedInput: unclippedInput),
+          offset: const Offset(-60, 0),
+        );
+        builder.addPicture(Offset.zero, picture);
+        builder.pop();
+        final Scene scene = builder.build();
+        final Image image = scene.toImageSync(40, 10);
+        final ByteData data = (await image.toByteData())!;
+        final int offset = (5 * image.width + 20) * 4;
+        final rgba = <int>[for (var i = 0; i < 4; i++) data.getUint8(offset + i)];
+        image.dispose();
+        scene.dispose();
+        return rgba;
+      }
+
+      const red = Color(0xFFFF0000);
+      const blue = Color(0xFF0000FF);
+
+      // A rectangle that is partially visible is drawn entirely either way.
+      final Picture straddling = record((Canvas canvas) {
+        canvas.drawRect(const Rect.fromLTWH(0, 0, 100, 10), Paint()..color = red);
+      });
+      expect(await render(straddling, unclippedInput: false), <int>[255, 0, 0, 255]);
+      expect(await render(straddling, unclippedInput: true), <int>[255, 0, 0, 255]);
+
+      // The red rectangle is entirely outside of the image. By default it is
+      // culled and the input only contains the blue rectangle.
+      final Picture culled = record((Canvas canvas) {
+        canvas.drawRect(const Rect.fromLTWH(0, 0, 50, 10), Paint()..color = red);
+        canvas.drawRect(const Rect.fromLTWH(50, 0, 50, 10), Paint()..color = blue);
+      });
+      expect(await render(culled, unclippedInput: false), <int>[0, 0, 255, 255]);
+      expect(await render(culled, unclippedInput: true), <int>[255, 0, 0, 255]);
+
+      // A nested save layer is limited to the image by default. The overlapping
+      // rectangles prevent the opacity from being applied without a layer.
+      final Picture nested = record((Canvas canvas) {
+        canvas.saveLayer(null, Paint()..color = const Color(0x80000000));
+        canvas.drawRect(const Rect.fromLTWH(0, 0, 100, 10), Paint()..color = red);
+        canvas.drawRect(const Rect.fromLTWH(0, 0, 100, 10), Paint()..color = red);
+        canvas.restore();
+      });
+      for (final bool unclippedInput in <bool>[false, true]) {
+        final List<int> rgba = await render(nested, unclippedInput: unclippedInput);
+        expect(rgba[0], closeTo(128, 1), reason: 'unclippedInput: $unclippedInput');
+        expect(rgba[1], 0);
+        expect(rgba[2], 0);
+        expect(rgba[3], closeTo(128, 1), reason: 'unclippedInput: $unclippedInput');
+      }
+
+      shader.dispose();
+    },
+  );
 
   test('FragmentShader The ink_sparkle shader is accepted', () async {
     final FragmentProgram program = await FragmentProgram.fromAsset('ink_sparkle.frag.iplr');

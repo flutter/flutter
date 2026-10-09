@@ -121,12 +121,14 @@ std::shared_ptr<FilterContents> FilterContents::MakeRuntimeEffect(
     FilterInput::Ref input,
     std::shared_ptr<RuntimeStage> runtime_stage,
     std::shared_ptr<std::vector<uint8_t>> uniforms,
-    std::vector<RuntimeEffectContents::TextureInput> texture_inputs) {
+    std::vector<RuntimeEffectContents::TextureInput> texture_inputs,
+    bool unclipped_input) {
   auto filter = std::make_shared<impeller::RuntimeEffectFilterContents>();
   filter->SetInputs({std::move(input)});
   filter->SetRuntimeStage(std::move(runtime_stage));
   filter->SetUniforms(std::move(uniforms));
   filter->SetTextureInputs(std::move(texture_inputs));
+  filter->SetUnclippedInput(unclipped_input);
   return filter;
 }
 
@@ -226,6 +228,13 @@ std::optional<Rect> FilterContents::GetSourceCoverage(
 
   if (!filter_input_coverage.has_value()) {
     return std::nullopt;
+  }
+
+  // If this filter needs its entire input, then so do the inputs. Mapping the
+  // maximum rect through the inputs could otherwise overflow it into a
+  // non-maximum or NaN rect.
+  if (filter_input_coverage->IsMaximum()) {
+    return filter_input_coverage;
   }
 
   std::optional<Rect> inputs_coverage;
