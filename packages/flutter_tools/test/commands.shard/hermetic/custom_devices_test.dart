@@ -1024,8 +1024,7 @@ void main() {
       );
       final customDevice = CustomDevice(
         config: customDeviceConfig,
-        logger: BufferLogger.test(),
-        processManager: processManager,
+        toolContext: FakeToolContext(logger: BufferLogger.test(), processManager: processManager),
       );
       final DeviceLogReader logReader = await customDevice.getLogReader();
       expect(logReader.logLines, emitsInOrder(expectedLogLines));

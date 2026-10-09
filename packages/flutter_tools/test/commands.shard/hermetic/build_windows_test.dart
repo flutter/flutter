@@ -4,7 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
-import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -49,6 +49,7 @@ final Platform notWindowsPlatform = FakePlatform(
 void main() {
   late MemoryFileSystem fileSystem;
   late ProcessManager processManager;
+  late BufferLogger logger;
   late FakeAnalytics fakeAnalytics;
 
   setUpAll(() {
@@ -59,6 +60,7 @@ void main() {
   setUp(() {
     fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
     Cache.flutterRoot = flutterRoot;
+    logger = BufferLogger.test();
     processManager = FakeProcessManager.empty();
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
       fs: fileSystem,
@@ -84,33 +86,27 @@ void main() {
     FeatureFlags? featureFlags,
     OperatingSystemUtils? osUtils,
     VisualStudio? visualStudio,
+    Logger? commandLogger,
     bool verboseHelp = false,
   }) {
-    final Platform effectivePlatform = platform ?? (context.get<Platform>() ?? windowsPlatform);
-    final FeatureFlags effectiveFeatureFlags =
-        featureFlags ?? (context.get<FeatureFlags>() ?? TestFeatureFlags(isWindowsEnabled: true));
-    final OperatingSystemUtils effectiveOsUtils =
-        osUtils ?? (context.get<OperatingSystemUtils>() ?? FakeOperatingSystemUtils());
-    final BufferLogger effectiveLogger =
-        (context.get<Logger>() as BufferLogger?) ?? BufferLogger.test();
-    final ProcessManager effectiveProcessManager =
-        context.get<ProcessManager>() ?? FakeProcessManager.any();
+    final Logger resolvedLogger = commandLogger ?? logger;
     final toolContext = FakeToolContext(
+      artifacts: DeferredArtifacts(FakeArtifacts(fileSystem: fileSystem)),
       cache: Cache.test(
         rootOverride: fileSystem.directory(flutterRoot),
-        logger: effectiveLogger,
-        processManager: effectiveProcessManager,
+        logger: resolvedLogger,
+        processManager: processManager,
       ),
       fs: fileSystem,
-      logger: effectiveLogger,
-      os: effectiveOsUtils,
-      platform: effectivePlatform,
-      processManager: effectiveProcessManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
+      logger: resolvedLogger,
+      os: osUtils ?? FakeOperatingSystemUtils(),
+      platform: platform ?? windowsPlatform,
+      processManager: processManager,
+      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: resolvedLogger),
     );
     return BuildWindowsCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
-      featureFlags: effectiveFeatureFlags,
+      featureFlags: featureFlags ?? TestFeatureFlags(isWindowsEnabled: true),
       toolContext: toolContext,
       verboseHelp: verboseHelp,
       visualStudio: visualStudio ?? FakeVisualStudio(),
@@ -179,10 +175,8 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Platform: () => windowsPlatform,
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+      ProcessManager: () => processManager,
     },
   );
 
@@ -204,10 +198,8 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Platform: () => windowsPlatform,
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+      ProcessManager: () => processManager,
     },
   );
 
@@ -215,7 +207,10 @@ void main() {
     'Windows build fails on non windows platform',
     () async {
       final fakeVisualStudio = FakeVisualStudio();
-      final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
+      final BuildWindowsCommand command = createCommand(
+        visualStudio: fakeVisualStudio,
+        platform: notWindowsPlatform,
+      );
       setUpMockProjectFilesForBuild();
 
       expect(
@@ -224,10 +219,8 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Platform: () => notWindowsPlatform,
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+      ProcessManager: () => processManager,
     },
   );
 
@@ -235,7 +228,10 @@ void main() {
     'Windows build fails when feature is disabled',
     () async {
       final fakeVisualStudio = FakeVisualStudio();
-      final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
+      final BuildWindowsCommand command = createCommand(
+        visualStudio: fakeVisualStudio,
+        featureFlags: TestFeatureFlags(),
+      );
       setUpMockProjectFilesForBuild();
 
       expect(
@@ -246,10 +242,8 @@ void main() {
       );
     },
     overrides: <Type, Generator>{
-      Platform: () => windowsPlatform,
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: () => TestFeatureFlags(),
+      ProcessManager: () => processManager,
     },
   );
 
@@ -266,14 +260,12 @@ void main() {
 
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
       await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
-      expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
-      expect(testLogger.traceText, contains('STDOUT STUFF'));
+      expect(logger.statusText, isNot(contains('STDOUT STUFF')));
+      expect(logger.traceText, contains('STDOUT STUFF'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -311,8 +303,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
       Analytics: () => fakeAnalytics,
     },
   );
@@ -346,8 +336,6 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -392,7 +380,7 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
       await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
       // Just the warnings and errors should be surfaced.
-      expect(testLogger.errorText, r'''
+      expect(logger.errorText, r'''
 C:\foo\windows\x64\runner\main.cpp(18): error C2220: the following warning is treated as an error [C:\foo\build\windows\x64\runner\test.vcxproj]
 C:\foo\windows\x64\runner\main.cpp(18): warning C4706: assignment within conditional expression [C:\foo\build\windows\x64\runner\test.vcxproj]
 main.obj : error LNK2019: unresolved external symbol "void __cdecl Bar(void)" (?Bar@@YAXXZ) referenced in function wWinMain [C:\foo\build\windows\x64\runner\test.vcxproj]
@@ -403,8 +391,6 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -419,16 +405,17 @@ C:\foo\windows\x64\runner\main.cpp(17,1): error C2065: 'Baz': undeclared identif
         buildCommand('Release', verbose: true, stdout: 'STDOUT STUFF'),
       ]);
 
-      final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
+      final BuildWindowsCommand command = createCommand(
+        visualStudio: fakeVisualStudio,
+        commandLogger: VerboseLogger(logger),
+      );
       await createTestCommandRunner(command).run(const <String>['windows', '--no-pub', '-v']);
-      expect(testLogger.statusText, contains('STDOUT STUFF'));
-      expect(testLogger.traceText, isNot(contains('STDOUT STUFF')));
+      expect(logger.statusText, contains('STDOUT STUFF'));
+      expect(logger.traceText, isNot(contains('STDOUT STUFF')));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -566,8 +553,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -644,8 +629,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -667,8 +650,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -686,13 +667,11 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
       await createTestCommandRunner(command)
           .run(const <String>['windows', '--release', '--no-pub']);
-      expect(testLogger.statusText, contains(r'✓ Built build\windows\x64\runner\Release'));
+      expect(logger.statusText, contains(r'✓ Built build\windows\x64\runner\Release'));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -715,8 +694,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -762,8 +739,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -806,8 +781,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -854,8 +827,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -902,8 +873,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -950,8 +919,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -992,7 +959,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       );
 
       expect(
-        testLogger.warningText,
+        logger.warningText,
         contains(
           'Warning: build identifier hello in version 1.2.3+hello is not numeric and '
           'cannot be converted into a Windows build version number. Defaulting to 0.\n'
@@ -1003,8 +970,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -1045,7 +1010,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       );
 
       expect(
-        testLogger.warningText,
+        logger.warningText,
         contains(
           'Warning: build identifier 4.5 in version 1.2.3+4.5 is not numeric and '
           'cannot be converted into a Windows build version number. Defaulting to 0.\n'
@@ -1056,41 +1021,22 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
-  testUsingContext(
-    'hidden when not enabled on Windows host',
-    () {
-      expect(
-        createCommand(featureFlags: TestFeatureFlags(), platform: windowsPlatform).hidden,
-        true,
-      );
-    },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(),
-      Platform: () => windowsPlatform,
-    },
-  );
+  testWithoutContext('hidden when not enabled on Windows host', () {
+    expect(createCommand(featureFlags: TestFeatureFlags(), platform: windowsPlatform).hidden, true);
+  });
 
-  testUsingContext(
-    'Not hidden when enabled and on Windows host',
-    () {
-      expect(
-        createCommand(
-          featureFlags: TestFeatureFlags(isWindowsEnabled: true),
-          platform: windowsPlatform,
-        ).hidden,
-        false,
-      );
-    },
-    overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-      Platform: () => windowsPlatform,
-    },
-  );
+  testWithoutContext('Not hidden when enabled and on Windows host', () {
+    expect(
+      createCommand(
+        featureFlags: TestFeatureFlags(isWindowsEnabled: true),
+        platform: windowsPlatform,
+      ).hidden,
+      false,
+    );
+  });
 
   testUsingContext(
     'Performs code size analysis and sends analytics',
@@ -1130,18 +1076,15 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
           .run(const <String>['windows', '--no-pub', '--analyze-size']);
 
       expect(
-        testLogger.statusText,
+        logger.statusText,
         contains('A summary of your Windows bundle analysis can be found at'),
       );
-      expect(testLogger.statusText, contains('dart devtools --appSizeBase='));
+      expect(logger.statusText, contains('dart devtools --appSizeBase='));
       expect(fakeAnalytics.sentEvents, contains(Event.codeSizeAnalysis(platform: 'windows')));
     },
     overrides: <Type, Generator>{
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: windowsPlatform),
       Analytics: () => fakeAnalytics,
     },
   );
@@ -1170,10 +1113,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       );
     },
     overrides: <Type, Generator>{
-      Platform: () => windowsPlatform,
       FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+      ProcessManager: () => processManager,
     },
   );
 
@@ -1198,7 +1139,7 @@ No file or variants found for asset: images/a_dot_burr.jpeg.
       final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
       await createTestCommandRunner(command).run(const <String>['windows', '--no-pub']);
       // Just the warnings and errors should be surfaced.
-      expect(testLogger.errorText, r'''
+      expect(logger.errorText, r'''
 Error detected in pubspec.yaml:
 No file or variants found for asset: images/a_dot_burr.jpeg.
 ''');
@@ -1206,8 +1147,6 @@ No file or variants found for asset: images/a_dot_burr.jpeg.
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       ProcessManager: () => processManager,
-      Platform: () => windowsPlatform,
-      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 }

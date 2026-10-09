@@ -7,16 +7,17 @@ import 'dart:async';
 import 'package:process/process.dart';
 
 import 'application_package.dart';
+import 'base/bot_detector.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'context/tool_context.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'device_port_forwarder.dart';
-import 'globals.dart' as globals;
 import 'macos/macos_device.dart';
 import 'protocol_discovery.dart';
 import 'vmservice.dart';
@@ -28,13 +29,15 @@ abstract class DesktopDevice extends Device {
     super.id, {
     required PlatformType super.platformType,
     required super.ephemeral,
-    required super.logger,
-    required this._processManager,
-    required this._fileSystem,
-    required this._operatingSystemUtils,
-  }) : _logger = logger,
-       super(category: Category.desktop);
+    required ToolContext toolContext,
+  }) : _botDetector = toolContext.botDetector,
+       _fileSystem = toolContext.fs,
+       _logger = toolContext.logger,
+       _operatingSystemUtils = toolContext.os,
+       _processManager = toolContext.processManager,
+       super(category: Category.desktop, logger: toolContext.logger);
 
+  final BotDetector _botDetector;
   final Logger _logger;
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
@@ -146,7 +149,7 @@ abstract class DesktopDevice extends Device {
     try {
       Timer? timer;
       if (this is MacOSDevice) {
-        if (await globals.isRunningOnBot) {
+        if (await _botDetector.isRunningOnBot) {
           const defaultTimeout = 5;
           timer = Timer(const Duration(minutes: defaultTimeout), () {
             // As of macOS 14, if sandboxing is enabled and the app is not codesigned,

@@ -4,12 +4,11 @@
 
 import 'package:process/process.dart';
 
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../project.dart';
@@ -19,15 +18,11 @@ import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
-  MacOSDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _operatingSystemUtils = operatingSystemUtils,
-       super('macos', platformType: PlatformType.macos, ephemeral: false);
+  MacOSDevice({required super.toolContext})
+    : _processManager = toolContext.processManager,
+      _logger = toolContext.logger,
+      _operatingSystemUtils = toolContext.os,
+      super('macos', platformType: PlatformType.macos, ephemeral: false);
 
   final ProcessManager _processManager;
   final Logger _logger;
@@ -101,24 +96,13 @@ class MacOSDevice extends DesktopDevice {
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {
-  MacOSDevices({
-    required this._platform,
-    required this._macOSWorkflow,
-    required this._processManager,
-    required this._logger,
-    required this._fileSystem,
-    required this._operatingSystemUtils,
-  }) : super('macOS devices');
+  MacOSDevices({required this._macOSWorkflow, required this._toolContext}) : super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final OperatingSystemUtils _operatingSystemUtils;
+  final ToolContext _toolContext;
 
   @override
-  bool get supportsPlatform => _platform.isMacOS;
+  bool get supportsPlatform => _toolContext.platform.isMacOS;
 
   @override
   bool get canListAnything => _macOSWorkflow.canListDevices;
@@ -131,14 +115,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[
-      MacOSDevice(
-        processManager: _processManager,
-        logger: _logger,
-        fileSystem: _fileSystem,
-        operatingSystemUtils: _operatingSystemUtils,
-      ),
-    ];
+    return <Device>[MacOSDevice(toolContext: _toolContext)];
   }
 
   @override

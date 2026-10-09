@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../features.dart';
@@ -19,17 +18,14 @@ import 'linux_workflow.dart';
 
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
-  LinuxDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       _logger = logger,
-       super('linux', platformType: PlatformType.linux, ephemeral: false);
+  LinuxDevice({required this._analytics, required super.toolContext})
+    : _operatingSystemUtils = toolContext.os,
+      _toolContext = toolContext,
+      super('linux', platformType: PlatformType.linux, ephemeral: false);
 
+  final Analytics _analytics;
   final OperatingSystemUtils _operatingSystemUtils;
-  final Logger _logger;
+  final ToolContext _toolContext;
 
   @override
   Future<bool> isSupported() async => true;
@@ -64,12 +60,14 @@ class LinuxDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
     await buildLinux(
-      FlutterProject.current().linux,
+      projectFactory.fromDirectory(fs.currentDirectory).linux,
       buildInfo,
+      analytics: _analytics,
       target: mainPath,
       targetPlatform: await targetPlatform,
-      logger: _logger,
+      toolContext: _toolContext,
     );
   }
 
@@ -81,25 +79,19 @@ class LinuxDevice extends DesktopDevice {
 
 class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
-    required Platform platform,
+    required this._analytics,
     required FeatureFlags featureFlags,
-    required this._operatingSystemUtils,
-    required this._fileSystem,
-    required this._processManager,
-    required this._logger,
-  }) : _platform = platform,
-       _linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags),
+    required ToolContext toolContext,
+  }) : _toolContext = toolContext,
+       _linuxWorkflow = LinuxWorkflow(platform: toolContext.platform, featureFlags: featureFlags),
        super('linux devices');
 
-  final Platform _platform;
+  final Analytics _analytics;
+  final ToolContext _toolContext;
   final LinuxWorkflow _linuxWorkflow;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool get supportsPlatform => _platform.isLinux;
+  bool get supportsPlatform => _toolContext.platform.isLinux;
 
   @override
   bool get canListAnything => _linuxWorkflow.canListDevices;
@@ -112,14 +104,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[
-      LinuxDevice(
-        logger: _logger,
-        processManager: _processManager,
-        fileSystem: _fileSystem,
-        operatingSystemUtils: _operatingSystemUtils,
-      ),
-    ];
+    return <Device>[LinuxDevice(analytics: _analytics, toolContext: _toolContext)];
   }
 
   @override
