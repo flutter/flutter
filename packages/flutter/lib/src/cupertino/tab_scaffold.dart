@@ -116,6 +116,51 @@ class CupertinoTabController extends ChangeNotifier {
 /// `Navigator.of(rootNavigator: true)` from inside the [BuildContext] of a
 /// [CupertinoTabView].
 ///
+/// ## Combining with a navigation bar
+///
+/// [CupertinoTabScaffold] does not itself host a navigation bar. To show a
+/// [CupertinoNavigationBar] or [CupertinoSliverNavigationBar] inside a tab,
+/// have that tab's [tabBuilder] return a [CupertinoPageScaffold] (or push
+/// routes whose pages are [CupertinoPageScaffold]s, typically through a
+/// [CupertinoTabView]). Wrapping a tab's content in [CupertinoPageScaffold]
+/// allows features such as the sliver navigation bar's translucent background
+/// to render correctly. Placing a [CupertinoSliverNavigationBar] inside a tab
+/// without a [CupertinoPageScaffold] ancestor can suppress that effect.
+///
+/// {@tool snippet}
+///
+/// This example wraps each tab's content in a [CupertinoPageScaffold] so a
+/// [CupertinoSliverNavigationBar] inside the tab can render its translucent
+/// background correctly:
+///
+/// ```dart
+/// CupertinoTabScaffold(
+///   tabBar: CupertinoTabBar(
+///     items: const <BottomNavigationBarItem>[
+///       BottomNavigationBarItem(icon: Icon(CupertinoIcons.home), label: 'Home'),
+///       BottomNavigationBarItem(icon: Icon(CupertinoIcons.search), label: 'Search'),
+///     ],
+///   ),
+///   tabBuilder: (BuildContext context, int index) {
+///     return CupertinoTabView(
+///       builder: (BuildContext context) {
+///         return CupertinoPageScaffold(
+///           child: CustomScrollView(
+///             slivers: <Widget>[
+///               CupertinoSliverNavigationBar(largeTitle: Text('Tab $index')),
+///               SliverFillRemaining(
+///                 child: Center(child: Text('Tab $index content')),
+///               ),
+///             ],
+///           ),
+///         );
+///       },
+///     );
+///   },
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [CupertinoTabBar], the bottom tab bar inserted in the scaffold.
