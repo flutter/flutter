@@ -9,6 +9,8 @@
 /// @docImport 'tab_view.dart';
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 import 'bottom_tab_bar.dart';
@@ -302,47 +304,19 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
   @override
   Widget build(BuildContext context) {
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
-    MediaQueryData newMediaQuery = MediaQuery.of(context);
 
-    Widget content = _TabSwitchingView(
-      currentTabIndex: _controller.index,
-      tabCount: widget.tabBar.items.length,
-      tabBuilder: widget.tabBuilder,
-    );
-    EdgeInsets contentPadding = EdgeInsets.zero;
-
-    if (widget.resizeToAvoidBottomInset) {
-      // Remove the view inset and add it back as a padding in the inner content.
-      newMediaQuery = newMediaQuery.removeViewInsets(removeBottom: true);
-      contentPadding = EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom);
-    }
-
-    // Only pad the content with the height of the tab bar if the tab
-    // isn't already entirely obstructed by a keyboard or other view insets.
-    // Don't double pad.
-    if (!widget.resizeToAvoidBottomInset ||
-        widget.tabBar.preferredSize.height > existingMediaQuery.viewInsets.bottom) {
-      // TODO(xster): Use real size after partial layout instead of preferred size.
-      // https://github.com/flutter/flutter/issues/12912
-      final double bottomPadding =
-          widget.tabBar.preferredSize.height + existingMediaQuery.padding.bottom;
-
-      // If tab bar opaque, directly stop the main content higher. If
-      // translucent, let main content draw behind the tab bar but hint the
-      // obstructed area.
-      if (widget.tabBar.opaque(context)) {
-        contentPadding = EdgeInsets.only(bottom: bottomPadding);
-        newMediaQuery = newMediaQuery.removePadding(removeBottom: true);
-      } else {
-        newMediaQuery = newMediaQuery.copyWith(
-          padding: newMediaQuery.padding.copyWith(bottom: bottomPadding),
-        );
-      }
-    }
-
-    content = MediaQuery(
-      data: newMediaQuery,
-      child: Padding(padding: contentPadding, child: content),
+    final Widget tabBar = SizedBox(
+      width: double.infinity,
+      child: MediaQuery.withNoTextScaling(
+        child: widget.tabBar.copyWith(
+          currentIndex: _controller.index,
+          onTap: (int newIndex) {
+            _controller.index = newIndex;
+            // Chain the user's original callback.
+            widget.tabBar.onTap?.call(newIndex);
+          },
+        ),
+      ),
     );
 
     return DecoratedBox(
@@ -351,27 +325,58 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
             CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ??
             CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
-      child: Stack(
-        children: <Widget>[
-          // The main content being at the bottom is added to the stack first.
-          content,
-          MediaQuery.withNoTextScaling(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              // Override the tab bar's currentIndex to the current tab and hook in
-              // our own listener to update the [_controller.currentIndex] on top of a possibly user
-              // provided callback.
-              child: widget.tabBar.copyWith(
-                currentIndex: _controller.index,
-                onTap: (int newIndex) {
-                  _controller.index = newIndex;
-                  // Chain the user's original callback.
-                  widget.tabBar.onTap?.call(newIndex);
-                },
-              ),
-            ),
-          ),
-        ],
+      child: EdgeInsetsOverlay(
+        bottom: tabBar,
+        builder:
+            (BuildContext context, BoxConstraints constraints, EdgeInsetsOverlayMetrics metrics) {
+              final double realTabBarHeight = metrics.padding.bottom;
+              var newMediaQuery = existingMediaQuery;
+              EdgeInsets contentPadding = EdgeInsets.zero;
+
+              if (widget.resizeToAvoidBottomInset) {
+                // Remove the view inset and add it back as a padding in the inner content.
+                newMediaQuery = newMediaQuery.removeViewInsets(removeBottom: true);
+                contentPadding = EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom);
+              }
+
+              // Only pad the content with the height of the tab bar if the tab
+              // isn't already entirely obstructed by a keyboard or other view insets.
+              // Don't double pad.
+              if (!widget.resizeToAvoidBottomInset ||
+                  realTabBarHeight > existingMediaQuery.viewInsets.bottom) {
+                final double bottomPadding =
+                    realTabBarHeight +
+                    math.max(
+                      0.0,
+                      existingMediaQuery.padding.bottom - existingMediaQuery.viewPadding.bottom,
+                    );
+
+                // If tab bar opaque, directly stop the main content higher. If
+                // translucent, let main content draw behind the tab bar but hint the
+                // obstructed area.
+                if (widget.tabBar.opaque(context)) {
+                  contentPadding = EdgeInsets.only(bottom: bottomPadding);
+                  newMediaQuery = newMediaQuery.removePadding(removeBottom: true);
+                } else {
+                  newMediaQuery = newMediaQuery.copyWith(
+                    padding: newMediaQuery.padding.copyWith(bottom: bottomPadding),
+                  );
+                }
+              }
+
+              final Widget content = _TabSwitchingView(
+                currentTabIndex: _controller.index,
+                tabCount: widget.tabBar.items.length,
+                tabBuilder: widget.tabBuilder,
+              );
+
+              return RepaintBoundary(
+                child: MediaQuery(
+                  data: newMediaQuery,
+                  child: Padding(padding: contentPadding, child: content),
+                ),
+              );
+            },
       ),
     );
   }
