@@ -18,6 +18,18 @@
 # * Fixes in this file are for MediaQuery and MediaQueryData from the widgets library. *
 version: 1
 transforms:
+  # Changes made in https://github.com/flutter/flutter/pull/68736
+  # and https://github.com/flutter/flutter/issues/183701.
+  - title: "Migrate from 'nullOk'"
+    date: 2026-10-09
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      method: 'of'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'removeParameter'
+        name: 'nullOk'
+
   # Change made in https://github.com/flutter/flutter/issues/183701
   - title: "Migrate to 'of'"
     date: 2026-10-09
@@ -347,5 +359,27 @@ transforms:
       textScaleFactor:
         kind: 'fragment'
         value: 'arguments[textScaleFactor]'
+
+  # Changes made in https://github.com/flutter/flutter/pull/119647
+  - title: "Migrate to 'fromView'"
+    date: 2022-10-28
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      constructor: 'fromWindow'
+      inClass: 'MediaQueryData'
+    changes:
+      - kind: 'rename'
+        newName: 'fromView'
+
+  # Changes made in https://github.com/flutter/flutter/pull/114459
+  - title: "Migrate to 'boldTextOf'"
+    date: 2022-10-28
+    element:
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
+      method: 'boldTextOverride'
+      inClass: 'MediaQuery'
+    changes:
+      - kind: 'rename'
+        newName: 'boldTextOf'
 
 # Before adding a new fix: read instructions at the top of this file.

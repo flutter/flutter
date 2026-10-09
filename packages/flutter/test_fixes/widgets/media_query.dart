@@ -7,6 +7,11 @@ import 'package:flutter/widgets.dart';
 void main() {
   BuildContext context;
 
+  // Changes made in https://github.com/flutter/flutter/pull/68736
+  MediaQuery.of(context, nullOk: true);
+  MediaQuery.of(context, nullOk: false);
+  MediaQuery.of(error: '');
+
   // Change made in https://github.com/flutter/flutter/issues/183701
   MediaQuery.maybeOf(context);
   MediaQuery.maybeSizeOf(context);
@@ -39,4 +44,10 @@ void main() {
   MediaQueryData(textScaleFactor: 2.0)
     ..copyWith(textScaleFactor: 2.0)
     ..copyWith();
+
+  // Changes made in https://github.com/flutter/flutter/pull/119647
+  MediaQueryData.fromWindow(View.of(context));
+
+  // Changes made in https://github.com/flutter/flutter/pull/114459
+  MediaQuery.boldTextOverride(context);
 }
