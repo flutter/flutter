@@ -113,9 +113,8 @@ class TestEnvironment {
     final io.Directory rootDir = io.Directory.systemTemp.createTempSync('et');
     final engine = TestEngine.createTemp(rootDir: rootDir);
     if (withRbe) {
-      io.Directory(
-        path.join(engine.srcDir.path, 'flutter', 'build', 'rbe'),
-      ).createSync(recursive: true);
+      io.Directory(path.join(engine.srcDir.path, 'flutter', 'build', 'rbe'))
+          .createSync(recursive: true);
     }
     // When GN runs, always try to create out/host_debug.
     final cannedGn = CannedProcess((List<String> command) {

@@ -42,8 +42,8 @@ jobs:
     steps:
       - name: Remove Label and Leave Comment
         run: |
-          gh issue edit $ISSUE_NUMBER -R flutter/flutter --remove-label "$LABEL_NAME"
-          gh issue comment $ISSUE_NUMBER -R flutter/flutter -b "Cherry-pick labels should only be applied to merged pull requests."
+          gh issue edit "$ISSUE_NUMBER" -R flutter/flutter --remove-label "$LABEL_NAME"
+          gh issue comment "$ISSUE_NUMBER" -R flutter/flutter -b "Cherry-pick labels should only be applied to merged pull requests."
         env:
           GH_TOKEN: ${{ secrets.FLUTTERACTIONSBOT_CP_TOKEN }}
           LABEL_NAME: ${{ github.event.label.name }}
@@ -61,7 +61,7 @@ jobs:
         id: get-channel
         env:
           LABEL_NAME: ${{ github.event.label.name }}
-        run: echo "channel=$(echo $LABEL_NAME | cut -d ':' -f 2 | xargs)" >> "$GITHUB_OUTPUT"
+        run: echo "channel=$(echo "$LABEL_NAME" | cut -d ':' -f 2 | xargs)" >> "$GITHUB_OUTPUT"
 
       - name: Export Release Candidate Branch
         id: get-branch

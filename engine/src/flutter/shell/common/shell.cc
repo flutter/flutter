@@ -59,7 +59,6 @@ namespace {
 
 std::unique_ptr<Engine> CreateEngine(
     Engine::Delegate& delegate,
-    const PointerDataDispatcherMaker& dispatcher_maker,
     DartVM& vm,
     const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
     const TaskRunners& task_runners,
@@ -73,7 +72,6 @@ std::unique_ptr<Engine> CreateEngine(
     const std::shared_future<impeller::RuntimeStageBackend>&
         runtime_stage_backend) {
   return std::make_unique<Engine>(delegate,             //
-                                  dispatcher_maker,     //
                                   vm,                   //
                                   isolate_snapshot,     //
                                   task_runners,         //
@@ -391,10 +389,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
         io_manager->NotifyResourceContextAvailable(resource_context);
       });
 
-  // Send dispatcher_maker to the engine constructor because shell won't have
-  // platform_view set until Shell::Setup is called later.
-  auto dispatcher_maker = platform_view->GetDispatcherMaker();
-
   // Create the engine on the UI thread.
   std::promise<std::unique_ptr<Engine>> engine_promise;
   auto engine_future = engine_promise.get_future();
@@ -402,7 +396,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
       shell->GetTaskRunners().GetUITaskRunner(),
       fml::MakeCopyable([&engine_promise,                                 //
                          shell = shell.get(),                             //
-                         &dispatcher_maker,                               //
                          &platform_data,                                  //
                          isolate_snapshot = std::move(isolate_snapshot),  //
                          vsync_waiter = std::move(vsync_waiter),          //
@@ -421,7 +414,6 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
 
         engine_promise.set_value(
             on_create_engine(*shell,                               //
-                             dispatcher_maker,                     //
                              *shell->GetDartVM(),                  //
                              std::move(isolate_snapshot),          //
                              task_runners,                         //
@@ -721,8 +713,7 @@ std::unique_ptr<Shell> Shell::Spawn(
       vm_->GetVMData()->GetIsolateSnapshot(), on_create_platform_view,
       on_create_rasterizer,
       [engine = this->engine_.get(), initial_route](
-          Engine::Delegate& delegate,
-          const PointerDataDispatcherMaker& dispatcher_maker, DartVM& vm,
+          Engine::Delegate& delegate, DartVM& vm,
           const fml::RefPtr<const DartSnapshot>& isolate_snapshot,
           const TaskRunners& task_runners, const PlatformData& platform_data,
           const Settings& settings, std::unique_ptr<Animator> animator,
@@ -734,7 +725,6 @@ std::unique_ptr<Shell> Shell::Spawn(
               runtime_stage_backend) {
         return engine->Spawn(
             /*delegate=*/delegate,
-            /*dispatcher_maker=*/dispatcher_maker,
             /*settings=*/settings,
             /*animator=*/std::move(animator),
             /*initial_route=*/initial_route,
@@ -767,6 +757,15 @@ void Shell::NotifyLowMemoryWarning() const {
       });
   // The IO Manager uses resource cache limits of 0, so it is not necessary
   // to purge them.
+}
+
+void Shell::ClearRenderTargetCache() const {
+  task_runners_.GetRasterTaskRunner()->PostTask(
+      [rasterizer = rasterizer_->GetWeakPtr()]() {
+        if (rasterizer) {
+          rasterizer->ClearRenderTargetCache();
+        }
+      });
 }
 
 void Shell::FlushMicrotaskQueue() const {
@@ -1231,13 +1230,25 @@ void Shell::OnPlatformViewDispatchPointerDataPacket(
   FML_DCHECK(is_set_up_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
-  task_runners_.GetUITaskRunner()->PostTask(
+  auto task =
       fml::MakeCopyable([engine = weak_engine_, packet = std::move(packet),
                          flow_id = next_pointer_flow_id_]() mutable {
         if (engine) {
           engine->DispatchPointerDataPacket(std::move(packet), flow_id);
         }
-      }));
+      });
+
+  // Dispatch the event synchronously if possible to reduce latency.
+  // If the event dispatch is somehow triggered from Dart code though
+  // the task will be dispatched asynchronously in order to avoid re-entrancy
+  // issues.
+  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() &&
+      Dart_CurrentIsolate() == nullptr) {
+    task();
+  } else {
+    task_runners_.GetUITaskRunner()->PostTask(task);
+  }
+
   next_pointer_flow_id_++;
 }
 
@@ -1435,7 +1446,8 @@ void Shell::OnAnimatorDraw(std::shared_ptr<FramePipeline> pipeline) {
 
   task_runners_.GetRasterTaskRunner()->PostTask(fml::MakeCopyable(
       [&waiting_for_first_frame = waiting_for_first_frame_,
-       &waiting_for_first_frame_condition = waiting_for_first_frame_condition_,
+       &waiting_for_first_frame_mutex = waiting_for_first_frame_mutex_,
+       &waiting_for_first_frame_callbacks = waiting_for_first_frame_callbacks_,
        rasterizer = rasterizer_->GetWeakPtr(),
        weak_pipeline = std::weak_ptr<FramePipeline>(pipeline)]() mutable {
         if (rasterizer) {
@@ -1444,9 +1456,23 @@ void Shell::OnAnimatorDraw(std::shared_ptr<FramePipeline> pipeline) {
             rasterizer->Draw(pipeline);
           }
 
+          // waiting_for_first_frame is set to true during shell startup, and
+          // after the first frame is drawn it is set fo false and will remain
+          // false.
+          // AddFirstFrameCallback reads waiting_for_first_frame while holding
+          // the waiting_for_first_frame_mutex, and it adds entries to
+          // waiting_for_first_frame_callbacks only if waiting_for_first_frame
+          // is true.
           if (waiting_for_first_frame.load()) {
-            waiting_for_first_frame.store(false);
-            waiting_for_first_frame_condition.notify_all();
+            std::vector<std::function<void()>> callbacks;
+            {
+              std::scoped_lock lock(waiting_for_first_frame_mutex);
+              waiting_for_first_frame.store(false);
+              std::swap(waiting_for_first_frame_callbacks, callbacks);
+            }
+            for (const auto& callback : callbacks) {
+              callback();
+            }
           }
         }
       }));
@@ -1731,6 +1757,11 @@ double Shell::GetScaledFontSize(double unscaled_font_size,
                                 int configuration_id) const {
   return platform_view_->GetScaledFontSize(unscaled_font_size,
                                            configuration_id);
+}
+
+// |Engine::Delegate|
+void Shell::OnEngineResetInternalState() {
+  ClearRenderTargetCache();
 }
 
 void Shell::RequestViewFocusChange(const ViewFocusChangeRequest& request) {
@@ -2384,44 +2415,16 @@ Rasterizer::Screenshot Shell::Screenshot(
   return screenshot;
 }
 
-fml::Status Shell::WaitForFirstFrame(fml::TimeDelta timeout) {
-  FML_DCHECK(is_set_up_);
-  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() ||
-      task_runners_.GetRasterTaskRunner()->RunsTasksOnCurrentThread()) {
-    return fml::Status(fml::StatusCode::kFailedPrecondition,
-                       "WaitForFirstFrame called from thread that can't wait "
-                       "because it is responsible for generating the frame.");
-  }
-
-  // Check for overflow.
-  auto now = std::chrono::steady_clock::now();
-  auto max_duration = std::chrono::steady_clock::time_point::max() - now;
-  auto desired_duration = std::chrono::milliseconds(timeout.ToMilliseconds());
-  auto duration =
-      now + (desired_duration > max_duration ? max_duration : desired_duration);
-
-  std::unique_lock<std::mutex> lock(waiting_for_first_frame_mutex_);
-  bool success = waiting_for_first_frame_condition_.wait_until(
-      lock, duration,
-      [&waiting_for_first_frame = waiting_for_first_frame_,
-       &cancelled = wait_for_first_frame_cancelled_] {
-        return !waiting_for_first_frame.load() || cancelled;
-      });
-  if (wait_for_first_frame_cancelled_) {
-    return fml::Status(fml::StatusCode::kAborted, "Shell is shutting down.");
-  } else if (success) {
-    return fml::Status();
-  } else {
-    return fml::Status(fml::StatusCode::kDeadlineExceeded, "timeout");
-  }
-}
-
-void Shell::CancelWaitForFirstFrame() {
+void Shell::AddFirstFrameCallback(std::function<void()> callback) {
   {
     std::scoped_lock lock(waiting_for_first_frame_mutex_);
-    wait_for_first_frame_cancelled_ = true;
+    if (waiting_for_first_frame_.load()) {
+      waiting_for_first_frame_callbacks_.push_back(std::move(callback));
+      return;
+    }
   }
-  waiting_for_first_frame_condition_.notify_all();
+  // Invoke the callback now because the first frame has already been rendered.
+  callback();
 }
 
 bool Shell::ReloadSystemFonts() {

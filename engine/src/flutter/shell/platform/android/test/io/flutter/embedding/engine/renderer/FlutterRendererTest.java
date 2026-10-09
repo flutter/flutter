@@ -23,7 +23,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -31,7 +31,6 @@ import android.graphics.SurfaceTexture;
 import android.hardware.SyncFence;
 import android.media.Image;
 import android.media.ImageReader;
-import android.os.Looper;
 import android.view.Surface;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -223,7 +222,7 @@ public class FlutterRendererTest {
     // Execute the behavior under test.
     runFinalization(entry);
 
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     flutterRenderer.stopRenderingToSurface();
 
@@ -248,7 +247,7 @@ public class FlutterRendererTest {
     // Execute the behavior under test.
     runFinalization(entry);
 
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // Verify behavior under test.
     verify(fakeFlutterJNI, times(0)).unregisterTexture(eq(id));
@@ -500,7 +499,7 @@ public class FlutterRendererTest {
     surface.unlockCanvasAndPost(canvas);
 
     // Let callbacks run.
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // Extract the image and check its size.
     Image image = texture.acquireLatestImage();
@@ -520,7 +519,7 @@ public class FlutterRendererTest {
     surface.unlockCanvasAndPost(canvas);
 
     // Let callbacks run.
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // Extract the image and check its size.
     image = texture.acquireLatestImage();
@@ -559,7 +558,7 @@ public class FlutterRendererTest {
     texture.setSize(4, 4);
 
     // Let callbacks run. The rendered frame will manifest here.
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // We acquired the frame produced above.
     assertNotNull(texture.acquireLatestImage());
@@ -587,7 +586,7 @@ public class FlutterRendererTest {
     surface.unlockCanvasAndPost(canvas);
 
     // Let callbacks run, this will produce a single frame.
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     assertEquals(1, texture.numImageReaders());
     assertEquals(1, texture.numImages());
@@ -602,7 +601,7 @@ public class FlutterRendererTest {
     surface.unlockCanvasAndPost(canvas);
 
     // Let callbacks run.
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     assertEquals(1, texture.numImageReaders());
     assertEquals(2, texture.numImages());
@@ -616,7 +615,7 @@ public class FlutterRendererTest {
     surface.unlockCanvasAndPost(canvas);
 
     // Let callbacks run.
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     assertEquals(2, texture.numImageReaders());
     assertEquals(3, texture.numImages());
@@ -673,7 +672,7 @@ public class FlutterRendererTest {
     Canvas canvas = surface.lockHardwareCanvas();
     canvas.drawARGB(255, 255, 0, 0);
     surface.unlockCanvasAndPost(canvas);
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // Acquire first frame.
     Image produced = texture.acquireLatestImage();
@@ -683,7 +682,7 @@ public class FlutterRendererTest {
     canvas = surface.lockHardwareCanvas();
     canvas.drawARGB(255, 255, 0, 0);
     surface.unlockCanvasAndPost(canvas);
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // 2
     produced = texture.acquireLatestImage();
@@ -692,7 +691,7 @@ public class FlutterRendererTest {
     canvas = surface.lockHardwareCanvas();
     canvas.drawARGB(255, 255, 0, 0);
     surface.unlockCanvasAndPost(canvas);
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // 3
     produced = texture.acquireLatestImage();
@@ -701,7 +700,7 @@ public class FlutterRendererTest {
     canvas = surface.lockHardwareCanvas();
     canvas.drawARGB(255, 255, 0, 0);
     surface.unlockCanvasAndPost(canvas);
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // 4
     produced = texture.acquireLatestImage();
@@ -731,7 +730,7 @@ public class FlutterRendererTest {
     surface.unlockCanvasAndPost(canvas);
 
     // Let callbacks run, this will produce a single frame.
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     assertEquals(1, texture.numImageReaders());
     assertEquals(1, texture.numImages());
@@ -739,7 +738,7 @@ public class FlutterRendererTest {
     // Invoke the onTrimMemory callback with level 0.
     // This should do nothing.
     texture.onTrimMemory(0);
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     assertEquals(1, texture.numImageReaders());
     assertEquals(1, texture.numImages());
@@ -748,7 +747,7 @@ public class FlutterRendererTest {
     // Invoke the onTrimMemory callback with level 40.
     // This should result in a trim.
     texture.onTrimMemory(TRIM_MEMORY_BACKGROUND);
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     assertEquals(0, texture.numImageReaders());
     assertEquals(0, texture.numImages());
@@ -766,7 +765,7 @@ public class FlutterRendererTest {
     surface.unlockCanvasAndPost(canvas);
 
     // Let callbacks run, this will produce a single frame.
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     assertEquals(1, texture.numImageReaders());
     assertEquals(1, texture.numImages());
@@ -965,7 +964,7 @@ public class FlutterRendererTest {
       Canvas canvas = surface.lockHardwareCanvas();
       canvas.drawARGB(255, 255, 0, 0);
       surface.unlockCanvasAndPost(canvas);
-      shadowOf(Looper.getMainLooper()).idle();
+      shadowMainLooper().idle();
     }
 
     // Each enqueue of an image should result in a call to scheduleEngineFrame.
@@ -973,7 +972,7 @@ public class FlutterRendererTest {
 
     // Consume the first image.
     Image image = texture.acquireLatestImage();
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // The dequeue should call scheduleEngineFrame because another image
     // remains in the queue.
@@ -981,11 +980,57 @@ public class FlutterRendererTest {
 
     // Consume the second image.
     image = texture.acquireLatestImage();
-    shadowOf(Looper.getMainLooper()).idle();
+    shadowMainLooper().idle();
 
     // The dequeue should not call scheduleEngineFrame because the queue
     // is now empty.
     verify(flutterRenderer, times(3)).scheduleEngineFrame();
+  }
+
+  @Test
+  public void itDoesNotScheduleFramesOnADetachedFlutterJNI() {
+    // Setup the test.
+    FlutterRenderer flutterRenderer = engineRule.getFlutterEngine().getRenderer();
+
+    // While attached the frame request is forwarded.
+    flutterRenderer.scheduleEngineFrame();
+    verify(fakeFlutterJNI, times(1)).scheduleFrame();
+
+    // Execute the behavior under test.
+    engineRule.setJniIsAttached(false);
+    flutterRenderer.scheduleEngineFrame();
+
+    // Verify the behavior under test: still only the call made while attached.
+    verify(fakeFlutterJNI, times(1)).scheduleFrame();
+  }
+
+  @Test
+  public void ImageReaderSurfaceProducerDoesNotScheduleFrameWhenDetached() throws Exception {
+    // Regression test for https://github.com/flutter/flutter/issues/188300.
+    FlutterRenderer flutterRenderer = spy(engineRule.getFlutterEngine().getRenderer());
+    TextureRegistry.SurfaceProducer producer = flutterRenderer.createSurfaceProducer();
+    FlutterRenderer.ImageReaderSurfaceProducer texture =
+        (FlutterRenderer.ImageReaderSurfaceProducer) producer;
+    texture.disableFenceForTest();
+    texture.setSize(1, 1);
+
+    // The engine detaches, e.g. because the Activity was destroyed, while this producer still has
+    // a frame in flight.
+    engineRule.setJniIsAttached(false);
+
+    // Render a frame. The ImageReader callback is delivered on the platform thread and reaches
+    // scheduleEngineFrame after the detach.
+    Surface surface = texture.getSurface();
+    assertNotNull(surface);
+    Canvas canvas = surface.lockHardwareCanvas();
+    canvas.drawARGB(255, 255, 0, 0);
+    surface.unlockCanvasAndPost(canvas);
+    shadowMainLooper().idle();
+
+    // The image still reaches scheduleEngineFrame, ...
+    verify(flutterRenderer, times(1)).scheduleEngineFrame();
+    // ... but it must not be forwarded to the detached FlutterJNI, which would throw.
+    verify(fakeFlutterJNI, never()).scheduleFrame();
   }
 
   @Test

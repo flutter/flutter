@@ -828,7 +828,13 @@ TEST_F(ShellTest, NeedsReportTimingsIsSetWithCallback) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("dummyReportTimingsMain");
 
+  fml::AutoResetWaitableEvent startupLatch;
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&]() { startupLatch.Signal(); }));
+
   RunEngine(shell.get(), std::move(configuration));
+  startupLatch.Wait();
+
   PumpOneFrame(shell.get());
   ASSERT_TRUE(GetNeedsReportTimings(shell.get()));
   DestroyShell(std::move(shell));
@@ -948,14 +954,21 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("onBeginFrameMain");
 
-  int64_t frame_target_time;
+  int64_t frame_target_time = 0;
+
   auto nativeOnBeginFrame = [&frame_target_time](int64_t microseconds) {
     frame_target_time = microseconds;
   };
   AddFfiNativeCallback("NativeOnBeginFrame",
                        CREATE_FFI_LAMBDA(nativeOnBeginFrame));
 
+  fml::AutoResetWaitableEvent startupLatch;
+  AddFfiNativeCallback("NotifyNative",
+                       CREATE_FFI_LAMBDA([&]() { startupLatch.Signal(); }));
+
   RunEngine(shell.get(), std::move(configuration));
+  startupLatch.Wait();
+
   PumpOneFrame(shell.get());
 
   // Check that timing is properly set. This implies that
@@ -1191,12 +1204,13 @@ TEST_F(ShellTest, OnPlatformViewDestroyDisablesThreadMerger) {
 
   PumpOneFrame(shell.get(), ViewContent::ImplicitView(100, 100, builder));
 
-  auto result = shell->WaitForFirstFrame(fml::TimeDelta::Max());
-  // Wait for the rasterizer to process the frame. WaitForFirstFrame only waits
-  // for the Animator, but end_frame_callback is called by the Rasterizer.
+  fml::AutoResetWaitableEvent first_frame_event;
+  shell->AddFirstFrameCallback(
+      [&first_frame_event] { first_frame_event.Signal(); });
+  first_frame_event.Wait();
+  // Wait for the rasterizer to process the frame. AddFirstFrameCallback only
+  // waits for the Animator, but end_frame_callback is called by the Rasterizer.
   PostSync(shell->GetTaskRunners().GetRasterTaskRunner(), [] {});
-  ASSERT_TRUE(result.ok()) << "Result: " << static_cast<int>(result.code())
-                           << ": " << result.message();
 
   ASSERT_TRUE(raster_thread_merger->IsEnabled());
 
@@ -1664,7 +1678,7 @@ TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
   ASSERT_EQ(timestamps.size(), FrameTiming::kCount);
 }
 
-TEST_F(ShellTest, WaitForFirstFrame) {
+TEST_F(ShellTest, AddFirstFrameCallbackFiresAfterFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1676,13 +1690,15 @@ TEST_F(ShellTest, WaitForFirstFrame) {
 
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
-  fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Max());
-  ASSERT_TRUE(result.ok());
+  fml::AutoResetWaitableEvent first_frame_event;
+  shell->AddFirstFrameCallback(
+      [&first_frame_event] { first_frame_event.Signal(); });
+  first_frame_event.Wait();
 
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameZeroSizeFrame) {
+TEST_F(ShellTest, AddFirstFrameCallbackDeferredIfZeroSizeFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1694,15 +1710,16 @@ TEST_F(ShellTest, WaitForFirstFrameZeroSizeFrame) {
 
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get(), ViewContent::DummyView({1.0, 0.0, 0.0, 22, 0}));
-  fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Zero());
-  EXPECT_FALSE(result.ok());
-  EXPECT_EQ(result.message(), "timeout");
-  EXPECT_EQ(result.code(), fml::StatusCode::kDeadlineExceeded);
+  fml::AutoResetWaitableEvent first_frame_event;
+  shell->AddFirstFrameCallback(
+      [&first_frame_event] { first_frame_event.Signal(); });
+  bool timeout = first_frame_event.WaitWithTimeout(fml::TimeDelta::Zero());
+  EXPECT_TRUE(timeout);
 
   DestroyShell(std::move(shell));
 }
 
-TEST_F(ShellTest, WaitForFirstFrameTimeout) {
+TEST_F(ShellTest, AddFirstFrameCallbackDeferredIfNoFrame) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1713,76 +1730,16 @@ TEST_F(ShellTest, WaitForFirstFrameTimeout) {
   configuration.SetEntrypoint("emptyMain");
 
   RunEngine(shell.get(), std::move(configuration));
-  fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Zero());
-  ASSERT_FALSE(result.ok());
-  ASSERT_EQ(result.code(), fml::StatusCode::kDeadlineExceeded);
+  fml::AutoResetWaitableEvent first_frame_event;
+  shell->AddFirstFrameCallback(
+      [&first_frame_event] { first_frame_event.Signal(); });
+  bool timeout = first_frame_event.WaitWithTimeout(fml::TimeDelta::Zero());
+  EXPECT_TRUE(timeout);
 
   DestroyShell(std::move(shell));
 }
 
-// Ensure CancelWaitForFirstFrame() correctly causes all tasks blocked on
-// WaitForFirstFrame() to return kAborted.
-//
-// See: b/521830222
-TEST_F(ShellTest, CancelWaitForFirstFrameAllowsSafeShellDestruction) {
-  auto settings = CreateSettingsForFixture();
-  std::unique_ptr<Shell> shell = CreateShell(settings);
-
-  PlatformViewNotifyCreated(shell.get());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("emptyMain");
-  RunEngine(shell.get(), std::move(configuration));
-  // No PumpOneFrame: waiting_for_first_frame_ stays true, so
-  // WaitForFirstFrame would otherwise park on the condvar for the full
-  // timeout below.
-
-  fml::AutoResetWaitableEvent bg_has_ref;
-  fml::AutoResetWaitableEvent proceed_with_wait;
-
-  // Background thread holds a raw Shell* obtained while the shell was still
-  // live -- exactly what `strongSelf.shell` (-> `*_shell`) hands the GCD
-  // block in -[FlutterEngine waitForFirstFrame:callback:].
-  Shell* raw_shell = shell.get();
-  fml::Status background_result;
-  std::thread background(
-      [raw_shell, &bg_has_ref, &proceed_with_wait, &background_result] {
-        bg_has_ref.Signal();
-        proceed_with_wait.Wait();
-        // A well-behaved caller must not still be here once the owner has
-        // finished destroying the Shell. CancelWaitForFirstFrame() below makes
-        // sure this call returns promptly instead of blocking for 30 seconds.
-        background_result =
-            raw_shell->WaitForFirstFrame(fml::TimeDelta::FromSeconds(30));
-      });
-
-  bg_has_ref.Wait();
-  proceed_with_wait.Signal();
-
-  // Give the background thread a chance to actually call WaitForFirstFrame()
-  // before it is cancelled below. If it hasn't gotten there yet, cancellation
-  // is still observed safely (and just as fast) the moment it does.
-  std::this_thread::yield();
-
-  fml::TimePoint cancel_start = fml::TimePoint::Now();
-  // Models -[FlutterEngine destroyContext]: cancel any in-flight waiter,
-  // then join it, before freeing the Shell.
-  raw_shell->CancelWaitForFirstFrame();
-  background.join();
-  fml::TimeDelta elapsed = fml::TimePoint::Now() - cancel_start;
-
-  // The whole point of CancelWaitForFirstFrame() is to avoid blocking the
-  // owner for anywhere near the caller's requested timeout.
-  EXPECT_LT(elapsed.ToSecondsF(), 5.0);
-  ASSERT_FALSE(background_result.ok());
-  ASSERT_EQ(background_result.code(), fml::StatusCode::kAborted);
-
-  // Only safe to destroy now that the background thread has been joined,
-  // i.e. is guaranteed to no longer be touching the Shell.
-  DestroyShell(std::move(shell));
-}
-
-TEST_F(ShellTest, WaitForFirstFrameMultiple) {
+TEST_F(ShellTest, AddFirstFrameCallbackMultiple) {
   auto settings = CreateSettingsForFixture();
   std::unique_ptr<Shell> shell = CreateShell(settings);
 
@@ -1794,19 +1751,23 @@ TEST_F(ShellTest, WaitForFirstFrameMultiple) {
 
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
-  fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Max());
-  ASSERT_TRUE(result.ok());
+  fml::AutoResetWaitableEvent first_frame_event;
+  shell->AddFirstFrameCallback(
+      [&first_frame_event] { first_frame_event.Signal(); });
+  first_frame_event.Wait();
   for (int i = 0; i < 100; ++i) {
-    result = shell->WaitForFirstFrame(fml::TimeDelta::Zero());
-    ASSERT_TRUE(result.ok());
+    shell->AddFirstFrameCallback(
+        [&first_frame_event] { first_frame_event.Signal(); });
+    bool timeout = first_frame_event.WaitWithTimeout(fml::TimeDelta::Zero());
+    ASSERT_FALSE(timeout);
   }
 
   DestroyShell(std::move(shell));
 }
 
-/// Makes sure that WaitForFirstFrame works if we rendered a frame with the
+/// Makes sure that AddFirstFrameCallback fires if we rendered a frame with the
 /// single-thread setup.
-TEST_F(ShellTest, WaitForFirstFrameInlined) {
+TEST_F(ShellTest, AddFirstFrameCallbackInlined) {
   Settings settings = CreateSettingsForFixture();
   auto task_runner = CreateNewThread();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
@@ -1823,14 +1784,29 @@ TEST_F(ShellTest, WaitForFirstFrameInlined) {
   PumpOneFrame(shell.get());
   fml::AutoResetWaitableEvent event;
   task_runner->PostTask([&shell, &event] {
-    fml::Status result = shell->WaitForFirstFrame(fml::TimeDelta::Max());
-    ASSERT_FALSE(result.ok());
-    ASSERT_EQ(result.code(), fml::StatusCode::kFailedPrecondition);
-    event.Signal();
+    shell->AddFirstFrameCallback([&event] { event.Signal(); });
   });
   ASSERT_FALSE(event.WaitWithTimeout(fml::TimeDelta::Max()));
 
   DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, AddFirstFrameCallbackSkippedIfNoFrame) {
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  // Check that a first frame callback is never invoked if the shell is
+  // destroyed before any frames are rendered.
+  RunEngine(shell.get(), std::move(configuration));
+  shell->AddFirstFrameCallback([] { ASSERT_TRUE(false); });
+
+  DestroyShell(std::move(shell));
 }
 
 static size_t GetRasterizerResourceCacheBytesSync(const Shell& shell) {
@@ -2263,70 +2239,6 @@ TEST_F(ShellTest, CanScheduleFrameFromPlatform) {
   DestroyShell(std::move(shell), task_runners);
 }
 
-TEST_F(ShellTest, SecondaryVsyncCallbackShouldBeCalledAfterVsyncCallback) {
-  bool is_on_begin_frame_called = false;
-  bool is_secondary_callback_called = false;
-  bool test_started = false;
-  Settings settings = CreateSettingsForFixture();
-  TaskRunners task_runners = GetTaskRunnersForFixture();
-  fml::AutoResetWaitableEvent latch;
-  AddFfiNativeCallback("NotifyNative",
-                       CREATE_FFI_LAMBDA([&]() { latch.Signal(); }));
-  fml::CountDownLatch count_down_latch(2);
-  AddFfiNativeCallback("NativeOnBeginFrame",
-                       CREATE_FFI_LAMBDA([&](int64_t microseconds) {
-                         if (!test_started) {
-                           return;
-                         }
-                         EXPECT_FALSE(is_on_begin_frame_called);
-                         EXPECT_FALSE(is_secondary_callback_called);
-                         is_on_begin_frame_called = true;
-                         count_down_latch.CountDown();
-                       }));
-  std::unique_ptr<Shell> shell = CreateShell({
-      .settings = settings,
-      .task_runners = task_runners,
-  });
-  ASSERT_TRUE(shell->IsSetup());
-
-  auto configuration = RunConfiguration::InferFromSettings(settings);
-  configuration.SetEntrypoint("onBeginFrameWithNotifyNativeMain");
-  RunEngine(shell.get(), std::move(configuration));
-
-  // Wait for the application to attach the listener.
-  latch.Wait();
-
-  auto vsync_task = [&]() {
-    shell->GetEngine()->ScheduleSecondaryVsyncCallback(0, [&]() {
-      if (!test_started) {
-        return;
-      }
-      EXPECT_TRUE(is_on_begin_frame_called);
-      EXPECT_FALSE(is_secondary_callback_called);
-      is_secondary_callback_called = true;
-      count_down_latch.CountDown();
-    });
-    shell->GetEngine()->ScheduleFrame();
-    test_started = true;
-  };
-
-  // Run the test task after a vsync occurs so that the
-  // ScheduleSecondaryVsyncCallback and ScheduleFrame calls will happen within
-  // the same vsync interval.
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetUITaskRunner(), [&]() {
-        auto vsync_waiter = shell->GetEngine()->GetVsyncWaiter().lock();
-        vsync_waiter->AsyncWaitForVsync(
-            [&](auto frame_timings_recorder) { vsync_task(); });
-      });
-
-  count_down_latch.Wait();
-  EXPECT_TRUE(is_on_begin_frame_called);
-  EXPECT_TRUE(is_secondary_callback_called);
-
-  DestroyShell(std::move(shell), task_runners);
-}
-
 static void LogSkData(const sk_sp<SkData>& data, const char* title) {
   FML_LOG(ERROR) << "---------- " << title;
   std::ostringstream ostr;
@@ -2627,6 +2539,54 @@ TEST_F(ShellTest, RasterizerMakeSkiaSnapshot) {
       });
   latch->Wait();
   DestroyShell(std::move(shell), task_runners);
+}
+
+TEST_F(ShellTest, RasterizerMakeImpellerSnapshotDoesNotGenerateMipmaps) {
+#if !SHELL_ENABLE_METAL
+  // This test uses the Metal backend.
+  GTEST_SKIP();
+#else
+  Settings settings = CreateSettingsForFixture();
+  settings.enable_impeller = true;
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  auto task_runner = CreateNewThread();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  std::unique_ptr<Shell> shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback = ShellTestPlatformViewBuilder({
+          .rendering_backend =
+              ShellTestPlatformView::BackendType::kMetalBackend,
+      }),
+  });
+
+  ASSERT_TRUE(ValidateShell(shell.get()));
+  PlatformViewNotifyCreated(shell.get());
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  auto latch = std::make_shared<fml::AutoResetWaitableEvent>();
+
+  PumpOneFrame(shell.get());
+
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetRasterTaskRunner(), [&shell, &latch]() {
+        SnapshotDelegate* delegate = shell->GetRasterizer().get();
+        std::shared_ptr<impeller::Texture> texture =
+            delegate->MakeImpellerSnapshotSync(MakeSizedDisplayList(50, 50),
+                                               DlISize(50, 50),
+                                               SnapshotPixelFormat::kDontCare);
+        EXPECT_NE(texture, nullptr);
+        if (texture != nullptr) {
+          EXPECT_EQ(texture->GetTextureDescriptor().mip_count, 1u);
+        }
+
+        latch->Signal();
+      });
+  latch->Wait();
+  DestroyShell(std::move(shell), task_runners);
+#endif  // !SHELL_ENABLE_METAL
 }
 
 TEST_F(ShellTest, OnServiceProtocolEstimateRasterCacheMemoryWorks) {
@@ -4454,8 +4414,8 @@ TEST_F(ShellTest, PointerPacketFlushMessageLoop) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
 }
 
-// Verifies a pointer event will flush the dart event loop.
-TEST_F(ShellTest, DISABLED_PointerPacketsAreDispatchedWithTask) {
+// Verifies a pointer event will flush the dart microtask queue.
+TEST_F(ShellTest, PointerPacketsFlushMicrotasks) {
   Settings settings = CreateSettingsForFixture();
   ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
                          ThreadHost::Type::kPlatform);
@@ -4467,24 +4427,74 @@ TEST_F(ShellTest, DISABLED_PointerPacketsAreDispatchedWithTask) {
             task_runners.GetUITaskRunner());
   auto shell = CreateShell(settings, task_runners);
   auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("testDispatchEventsMicrotask");
+  // The onPointerDataPacket callback is set synchronously during
+  // RunEngine so the packet can be dispatched right away.
+  RunEngine(shell.get(), std::move(configuration));
+
+  bool did_invoke_callback = false;
+  AddFfiNativeCallback(
+      // The Dart native function names aren't very consistent but this is
+      // just the native function name of the second vm entrypoint in the
+      // fixture.
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() { did_invoke_callback = true; }));
+
+  fml::AutoResetWaitableEvent latch;
+  task_runner->PostTask([&] {
+    // This dispatches the packet and flushes microtask so the callback must
+    // be invoked immediately.
+    DispatchFakePointerData(shell.get(), 23);
+    EXPECT_TRUE(did_invoke_callback);
+    latch.Signal();
+  });
+  latch.Wait();
+
+  DestroyShell(std::move(shell), task_runners);
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, PointerPacketsAreDispatchedSynchronouslyWhenOnUIThread) {
+  Settings settings = CreateSettingsForFixture();
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  auto task_runner = thread_host.platform_thread->GetTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  EXPECT_EQ(task_runners.GetPlatformTaskRunner(),
+            task_runners.GetUITaskRunner());
+  auto shell = CreateShell({
+      .settings = settings,
+      .task_runners = task_runners,
+      .platform_view_create_callback =
+          [](Shell& shell) {
+            return std::make_unique<::testing::NiceMock<TestPlatformView>>(
+                shell, shell.GetTaskRunners());
+          },
+  });
+  auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("testDispatchEvents");
 
   RunEngine(shell.get(), std::move(configuration));
   fml::CountDownLatch latch(1);
   bool did_invoke_callback = false;
   AddFfiNativeCallback(
-      // The Dart native function names aren't very consistent but this is
-      // just the native function name of the second vm entrypoint in the
-      // fixture.
-      "NotifyNative", CREATE_FFI_LAMBDA([&]() {
-        did_invoke_callback = true;
-        latch.CountDown();
-      }));
+      "NotifyNative", CREATE_FFI_LAMBDA([&]() { did_invoke_callback = true; }));
 
-  DispatchFakePointerData(shell.get(), 23);
-  EXPECT_FALSE(did_invoke_callback);
+  bool callback_was_invoked_before_dispatch_returned = false;
+  task_runners.GetPlatformTaskRunner()->PostTask([&] {
+    auto packet = std::make_unique<PointerDataPacket>(1);
+    packet->SetPointerData(0, PointerData{
+                                  .change = PointerData::Change::kHover,
+                                  .physical_x = 23,
+                              });
+    shell->GetPlatformView()->DispatchPointerDataPacket(std::move(packet));
+    callback_was_invoked_before_dispatch_returned = did_invoke_callback;
+    latch.CountDown();
+  });
+
   latch.Wait();
-  EXPECT_TRUE(did_invoke_callback);
+  EXPECT_TRUE(callback_was_invoked_before_dispatch_returned);
 
   DestroyShell(std::move(shell), task_runners);
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());

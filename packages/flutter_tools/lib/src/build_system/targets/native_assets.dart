@@ -32,10 +32,7 @@ enum HookPlatform { native, web }
 
 /// Runs the dart build of the app.
 class BuildHooks extends Target {
-  const BuildHooks({
-    this.platform = HookPlatform.native,
-    @visibleForTesting FlutterNativeAssetsBuildRunner? buildRunner,
-  }) : _buildRunner = buildRunner;
+  const BuildHooks({this.platform = HookPlatform.native, @visibleForTesting this._buildRunner});
 
   final FlutterNativeAssetsBuildRunner? _buildRunner;
 
@@ -129,8 +126,8 @@ class LinkHooks extends Target {
   const LinkHooks({
     this.platform = HookPlatform.native,
     this.extraDependencies = const <Target>[],
-    FlutterNativeAssetsBuildRunner? buildRunner,
-  }) : _buildRunner = buildRunner;
+    this._buildRunner,
+  });
 
   final HookPlatform platform;
   final List<Target> extraDependencies;
@@ -319,10 +316,9 @@ class InstallCodeAssets extends Target {
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
 
     Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    final String osName = targetPlatform.osName;
-    if (osName == 'linux' || osName == 'windows') {
+    if (targetPlatform.os case .linux || .windows) {
       // Avoid needing migration for CMake files, keep old directory structure.
-      targetUri = targetUri.resolve('$osName/');
+      targetUri = targetUri.resolve('${targetPlatform.osName}/');
     }
 
     final List<File> installedFiles = await installCodeAssets(

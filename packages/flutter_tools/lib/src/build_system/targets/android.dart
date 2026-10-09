@@ -8,7 +8,6 @@ import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -218,7 +217,6 @@ class AndroidAot extends AotElfBase {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
       processManager: environment.processManager,
       artifacts: environment.artifacts,
     );
@@ -371,9 +369,8 @@ const androidx64ReleaseBundle = AndroidAotBundle(androidx64Release);
 class AndroidAotDeferredComponentsBundle extends Target {
   /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [BuildInfo.mode].
   ///
-  /// If [components] is not provided, it will be read from the `pubspec.yaml` manifest.
-  AndroidAotDeferredComponentsBundle(this.dependency, {List<DeferredComponent>? components})
-    : _components = components;
+  /// If [_components] is not provided, it will be read from the `pubspec.yaml` manifest.
+  AndroidAotDeferredComponentsBundle(this.dependency, {this._components});
 
   /// The [AndroidAotBundle] instance this bundle rule depends on.
   final AndroidAotBundle dependency;

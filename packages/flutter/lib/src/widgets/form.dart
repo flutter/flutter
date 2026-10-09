@@ -451,9 +451,7 @@ class FormState extends State<Form> {
 }
 
 class _FormScope extends InheritedWidget {
-  const _FormScope({required super.child, required FormState formState, required int generation})
-    : _formState = formState,
-      _generation = generation;
+  const _FormScope({required super.child, required this._formState, required this._generation});
 
   final FormState _formState;
 
@@ -571,7 +569,7 @@ class FormField<T> extends StatefulWidget {
   /// value.
   ///
   /// Alternating between error and normal state can cause the height of the
-  /// [TextFormField] to change if no other subtext decoration is set on the
+  /// [TextFormField] to change if no other supporting text decoration is set on the
   /// field. To create a field whose height is fixed regardless of whether or
   /// not an error is displayed, either wrap the  [TextFormField] in a fixed
   /// height parent like [SizedBox], or set the [InputDecoration.helperText]
@@ -825,6 +823,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
     }
   }
 
+  @protected
   @override
   void dispose() {
     _errorText.dispose();

@@ -17,13 +17,11 @@ typedef ExtensionEntryPoint = void Function(SendPort sendPort);
 /// Represents an active host-side connection to a running tool extension isolate.
 class ExtensionConnection {
   ExtensionConnection._({
-    required Isolate isolate,
-    required json_rpc.Peer peer,
+    required Isolate this._isolate,
+    required this._peer,
     required this.capabilities,
-    required Logger logger,
-  }) : _isolate = isolate,
-       _peer = peer,
-       _logger = logger;
+    required this._logger,
+  });
 
   Isolate? _isolate;
   final json_rpc.Peer _peer;
@@ -36,16 +34,17 @@ class ExtensionConnection {
 
   /// Sends an RPC request to the extension isolate.
   Future<Object?> sendRequest(
-    String method, [
+    String method, {
     Object? params,
-    Duration timeout = const Duration(seconds: 5),
-  ]) async {
+    Duration? timeout = const Duration(seconds: 5),
+  }) async {
     if (_isDisposed) {
       throw StateError('ExtensionConnection has been disposed.');
     }
     _logger.printTrace('ExtensionConnection sending RPC request "$method"...');
     try {
-      final Object? result = await _peer.sendRequest(method, params).timeout(timeout);
+      final Future<Object?> request = _peer.sendRequest(method, params);
+      final Object? result = await (timeout != null ? request.timeout(timeout) : request);
       _logger.printTrace('ExtensionConnection received response for RPC request "$method".');
       return result;
     } catch (error) {
@@ -156,8 +155,8 @@ class ExtensionConnection {
 
 /// Discovers and manages active tool extension isolate connections.
 class ExtensionDiscovery {
-  /// Creates an [ExtensionDiscovery] instance with required [logger].
-  ExtensionDiscovery({required Logger logger}) : _logger = logger;
+  /// Creates an [ExtensionDiscovery] instance with required [_logger].
+  ExtensionDiscovery({required this._logger});
 
   final List<ExtensionConnection> _connections = <ExtensionConnection>[];
   final Logger _logger;

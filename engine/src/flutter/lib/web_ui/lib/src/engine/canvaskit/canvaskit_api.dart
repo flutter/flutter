@@ -2425,9 +2425,8 @@ List<String> getCanvasKitJsFileNames(CanvasKitVariant variant) {
 }
 
 Iterable<String> get _canvasKitJsUrls {
-  return getCanvasKitJsFileNames(
-    configuration.canvasKitVariant,
-  ).map((String filename) => '$_canvasKitBaseUrl$filename');
+  return getCanvasKitJsFileNames(configuration.canvasKitVariant)
+      .map((String filename) => '$_canvasKitBaseUrl$filename');
 }
 
 @visibleForTesting
@@ -2436,7 +2435,7 @@ String canvasKitWasmModuleUrl(String file, String canvasKitBase) => canvasKitBas
 /// Download and initialize the CanvasKit module.
 ///
 /// Downloads the CanvasKit JavaScript, then calls `CanvasKitInit` to download
-/// and intialize the CanvasKit wasm.
+/// and initialize the CanvasKit wasm.
 Future<CanvasKit> downloadCanvasKit() async {
   final CanvasKitModule canvasKitModule = await _downloadOneOf(_canvasKitJsUrls);
 

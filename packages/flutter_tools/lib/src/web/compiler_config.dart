@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../build_info.dart' show BuildMode;
+import '../build_info.dart' show BuildMode, deprecatedJsInteropCompilerFlags;
 import '../convert.dart';
 import 'compile.dart';
 
@@ -13,6 +13,7 @@ sealed class WebCompilerConfig {
     required this.renderer,
     this.optimizationLevel,
     required this.sourceMaps,
+    this.webContentHash = false,
   });
 
   /// Build environment flag for [optimizationLevel].
@@ -35,6 +36,9 @@ sealed class WebCompilerConfig {
   /// `true` if the compiler build should output source maps.
   final bool sourceMaps;
 
+  /// `true` if web output files should include a content hash in their filename.
+  final bool webContentHash;
+
   /// Returns which target this compiler outputs (js or wasm)
   CompileTarget get compileTarget;
   final WebRendererMode renderer;
@@ -46,9 +50,10 @@ sealed class WebCompilerConfig {
     'optimizationLevel': ?optimizationLevel,
   };
 
-  Map<String, dynamic> get _buildKeyMap => <String, dynamic>{
+  Map<String, Object?> get _buildKeyMap => <String, Object?>{
     'optimizationLevel': optimizationLevel,
     'webRenderer': renderer.name,
+    'webContentHash': webContentHash,
   };
 }
 
@@ -61,7 +66,9 @@ class JsCompilerConfig extends WebCompilerConfig {
     super.optimizationLevel,
     this.useFrequencyBasedMinification = true,
     super.sourceMaps = true,
+    super.webContentHash = false,
     this.minify,
+    this.deprecatedJsInterop,
     super.renderer = WebRendererMode.defaultForJs,
   });
 
@@ -69,7 +76,12 @@ class JsCompilerConfig extends WebCompilerConfig {
   const JsCompilerConfig.run({
     required bool nativeNullAssertions,
     required WebRendererMode renderer,
-  }) : this(nativeNullAssertions: nativeNullAssertions, renderer: renderer);
+    bool? deprecatedJsInterop,
+  }) : this(
+         nativeNullAssertions: nativeNullAssertions,
+         renderer: renderer,
+         deprecatedJsInterop: deprecatedJsInterop,
+       );
 
   /// Whether to disable dynamic generation code to satisfy CSP policies.
   final bool csp;
@@ -90,6 +102,11 @@ class JsCompilerConfig extends WebCompilerConfig {
   /// When `false`, passes `--no-frequency-based-minification` to the compiler.
   final bool useFrequencyBasedMinification;
 
+  /// Whether dart2js allows the deprecated JS interop libraries.
+  ///
+  /// If `null`, no flag is passed and the compiler's default is used.
+  final bool? deprecatedJsInterop;
+
   @override
   CompileTarget get compileTarget => CompileTarget.js;
 
@@ -104,6 +121,7 @@ class JsCompilerConfig extends WebCompilerConfig {
     if (minify ?? buildMode == BuildMode.release) '--minify' else '--no-minify',
     if (!useFrequencyBasedMinification) '--no-frequency-based-minification',
     if (csp) '--csp',
+    ...deprecatedJsInteropCompilerFlags(deprecatedJsInterop),
   ];
 
   @override
@@ -129,13 +147,14 @@ class JsCompilerConfig extends WebCompilerConfig {
 
   @override
   String get buildKey {
-    final settings = <String, dynamic>{
+    final settings = <String, Object?>{
       ...super._buildKeyMap,
       'csp': csp,
       'dumpInfo': dumpInfo,
       'nativeNullAssertions': nativeNullAssertions,
       'useFrequencyBasedMinification': useFrequencyBasedMinification,
       'minify': minify,
+      'deprecatedJsInterop': deprecatedJsInterop,
       WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
     };
     return jsonEncode(settings);
@@ -149,7 +168,9 @@ class WasmCompilerConfig extends WebCompilerConfig {
     this.stripWasm = true,
     this.minify,
     this.dryRun = false,
+    this.omitDeprecatedJsInteropFindings = false,
     super.sourceMaps = true,
+    super.webContentHash = false,
     this.enableWasmDeferredLoading = false,
     super.renderer = WebRendererMode.defaultForWasm,
   });
@@ -163,6 +184,14 @@ class WasmCompilerConfig extends WebCompilerConfig {
   final bool? minify;
 
   final bool dryRun;
+
+  /// Whether to omit deprecated JS interop import findings (e.g. imports of
+  /// `dart:html`) from the [dryRun] output shown to the user.
+  ///
+  /// Set this when the JS compile already reports these imports as errors
+  /// (i.e. it runs with `--no-deprecated-js-interop`), so that they are not
+  /// reported twice. The findings are still reported to analytics.
+  final bool omitDeprecatedJsInteropFindings;
 
   final bool enableWasmDeferredLoading;
 
@@ -198,11 +227,12 @@ class WasmCompilerConfig extends WebCompilerConfig {
 
   @override
   String get buildKey {
-    final settings = <String, dynamic>{
+    final settings = <String, Object?>{
       ...super._buildKeyMap,
       kStripWasm: stripWasm,
       'minify': minify,
       'dryRun': dryRun,
+      'omitDeprecatedJsInteropFindings': omitDeprecatedJsInteropFindings,
       WebCompilerConfig.kSourceMapsEnabled: sourceMaps,
       'enableWasmDeferredLoading': enableWasmDeferredLoading,
     };

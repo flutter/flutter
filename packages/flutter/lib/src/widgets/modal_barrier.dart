@@ -56,11 +56,7 @@ class _SemanticsClipper extends SingleChildRenderObjectWidget {
 class _RenderSemanticsClipper extends RenderProxyBox {
   /// Creates a [RenderProxyBox] that Updates the [SemanticsNode.rect] of its child
   /// based on the value inside provided [ValueNotifier].
-  _RenderSemanticsClipper({
-    required ValueNotifier<EdgeInsets> clipDetailsNotifier,
-    RenderBox? child,
-  }) : _clipDetailsNotifier = clipDetailsNotifier,
-       super(child);
+  _RenderSemanticsClipper({required this._clipDetailsNotifier, RenderBox? child}) : super(child);
 
   ValueNotifier<EdgeInsets> _clipDetailsNotifier;
 

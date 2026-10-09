@@ -128,7 +128,7 @@ class InkRipple extends InteractiveInkFeature {
     required super.referenceBox,
     required Offset position,
     required Color color,
-    required TextDirection textDirection,
+    required this._textDirection,
     bool containedInkWell = false,
     RectCallback? rectCallback,
     BorderRadius? borderRadius,
@@ -137,7 +137,6 @@ class InkRipple extends InteractiveInkFeature {
     super.onRemoved,
   }) : _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
-       _textDirection = textDirection,
        _targetRadius =
            radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),

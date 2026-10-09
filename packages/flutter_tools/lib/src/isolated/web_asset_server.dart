@@ -54,14 +54,13 @@ const _kDefaultIndex = '''
 </html>
 ''';
 
-typedef DwdsLauncher =
-    Future<Dwds> Function({
-      required AssetReader assetReader,
-      required Stream<BuildResult> buildResults,
-      required ConnectionProvider chromeConnection,
-      required ToolConfiguration toolConfiguration,
-      bool useDwdsWebSocketConnection,
-    });
+typedef DwdsLauncher = Future<Dwds> Function({
+  required AssetReader assetReader,
+  required Stream<BuildResult> buildResults,
+  required ConnectionProvider chromeConnection,
+  required ToolConfiguration toolConfiguration,
+  bool useDwdsWebSocketConnection,
+});
 
 /// A web server which handles serving JavaScript and assets.
 ///
@@ -80,11 +79,9 @@ class WebAssetServer implements AssetReader {
     required this.useLocalCanvasKit,
     required this.fileSystem,
     required this.logger,
-    String? baseHref,
-    Map<String, String> webDefines = const <String, String>{},
-  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)),
-       _baseHref = baseHref,
-       _webDefines = webDefines {
+    this._baseHref,
+    this._webDefines = const <String, String>{},
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(fileSystem, 'index.html', _kDefaultIndex)) {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (_ddcModuleSystem) {
@@ -142,8 +139,8 @@ class WebAssetServer implements AssetReader {
   /// restart or hot reload, writes a file that contains a list of objects each
   /// with three fields:
   ///
-  /// `src`: A string that corresponds to the file path relative to the app base
-  /// URL root that contains the DDC library bundle.
+  /// `src`: A root-relative URL path (including [basePath], i.e. the
+  /// `<base href>` of the app) that contains the DDC library bundle.
   /// `module`: The name of the library bundle in `src`.
   /// `libraries`: An array of strings containing the libraries that were
   /// compiled in `src`.
@@ -152,7 +149,7 @@ class WebAssetServer implements AssetReader {
   /// ```json
   /// [
   ///   {
-  ///     "src": "/<file_name>",
+  ///     "src": "/<base_path>/<file_name>",
   ///     "module": "<module_name>",
   ///     "libraries": ["<lib1>", "<lib2>"],
   ///   },
@@ -166,18 +163,24 @@ class WebAssetServer implements AssetReader {
     for (final relativeModulePath in modulePaths) {
       final metadata = ModuleMetadata.fromJson(
         json.decode(
-              utf8.decode(_webMemoryFS.metadataFiles['$relativeModulePath.metadata']!.toList()),
-            )
-            as Map<String, dynamic>,
+          utf8.decode(_webMemoryFS.metadataFiles['$relativeModulePath.metadata']!.toList()),
+        ) as Map<String, Object?>,
       );
       final List<String> libraries = metadata.libraries.keys.toList();
       moduleToLibrary.add(<String, Object>{
         // Use only the path for the module so the app can still find it even if
         // it's in a different domain than the server.
+        //
+        // The path must include `basePath` so that the browser requests the
+        // module through the same `<base href>` prefix as the initial load
+        // (e.g. behind a reverse proxy that only forwards `/<base_path>/**`),
+        // and so that DWDS can strip the same `basePath` off the resulting
+        // script URL when mapping it back to a module.
+        //
         // TODO(srujzs): We use a `/` prefix to match the path that DWDS gets
         // when parsing the parsed URL. It may be cleaner to just remove the `/`
         // in DWDS rather than add it here.
-        'src': '/$relativeModulePath',
+        'src': basePath.isEmpty ? '/$relativeModulePath' : '/$basePath/$relativeModulePath',
         'module': metadata.name,
         'libraries': libraries,
       });
@@ -329,12 +332,13 @@ class WebAssetServer implements AssetReader {
         fileSystem: fileSystem,
         platform: platform,
         flutterRoot: Cache.flutterRoot,
-        webBuildDirectory: getWebBuildDirectory(),
+        webBuildDirectory: getWebBuildDirectory(config: globals.config, fileSystem: fileSystem),
         basePath: server.basePath,
         needsCoopCoep: crossOriginIsolation,
       );
       final shelf.Handler releaseHandler = const shelf.Pipeline()
           .addMiddleware(waitMiddleware)
+          .addMiddleware(proxyMiddleware(proxy, logger))
           .addHandler(releaseAssetServer.handle);
       runZonedGuarded(
         () {
@@ -412,7 +416,7 @@ class WebAssetServer implements AssetReader {
     if (shouldEnableMiddleware) {
       pipeline = pipeline.addMiddleware(dwds.middleware);
     }
-    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, globals.logger));
+    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, logger));
     final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     final shelf.Handler serverHandler = const shelf.Pipeline()
@@ -795,16 +799,16 @@ _flutter.buildConfig = ${jsonEncode(buildConfig)};
   }
 
   File get _resolveDartSdkJsFile {
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _ddcModuleSystem
-        ? kDdcLibraryBundleDartSdkJsArtifactMap
-        : kAmdDartSdkJsArtifactMap;
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _canaryFeatures
+        ? kDDCCanarySdkArtifactMap
+        : kDDCStableSdkArtifactMap;
     return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 
   File get _resolveDartSdkJsMapFile {
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _ddcModuleSystem
-        ? kDdcLibraryBundleDartSdkJsMapArtifactMap
-        : kAmdDartSdkJsMapArtifactMap;
+    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = _canaryFeatures
+        ? kDDCCanarySdkSourcemapsArtifactMap
+        : kDDCStableSdkSourcemapsArtifactMap;
     return fileSystem.file(globals.artifacts!.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
   }
 

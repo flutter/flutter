@@ -2,35 +2,73 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+///
+/// @docImport 'accessibility_inspector.dart';
+/// @docImport 'service_extensions.dart';
+library;
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import '../foundation/_features.dart';
 import 'binding.dart';
 import 'editable_text.dart';
 import 'framework.dart';
 import 'text.dart';
 import 'title.dart';
 
-const String _kAccessibilityEvaluationsDisabledErrorMessage = '''
-Accessibility evaluations APIs are not enabled.
-
-Accessibility evaluations APIs are currently experimental. Do not use accessibility evaluations APIs in
-production applications or plugins published to pub.dev.
-
-To try experimental accessibility evaluations APIs:
-1. Switch to Flutter's main release channel.
-2. Turn on the accessibility evaluations feature flag. (See flutter config --help)
-''';
-
 /// {@template flutter.widgets.accessibility_evaluations.internal}
 /// Do not use in production.
 ///
 /// Flutter will make breaking changes to this API, even in patch versions.
 /// {@endtemplate}
+///
+/// Types of accessibility evaluations that can be performed on the semantics tree.
+///
+/// The `.name` of each enum value is used:
+/// * As the `type` parameter value in the
+///   [WidgetsServiceExtensions.accessibilityEvaluations] service extension.
+/// * As the `rule` field value in each issue map returned by the
+///   [AccessibilityServiceExtensions.getSemanticsTree] service extension.
+@internal
+enum AccessibilityEvaluationType {
+  /// Enforces that all tappable semantics nodes have a minimum size.
+  ///
+  /// Evaluated by [MinimumTapTargetEvaluation].
+  minimumTapTarget,
+
+  /// Enforces that all nodes with a tap or long press action also have a label.
+  ///
+  /// Evaluated by [LabeledTapTargetEvaluation].
+  labeledTapTarget,
+
+  /// Enforces that all text nodes meet minimum color contrast levels.
+  ///
+  /// Evaluated by [MinimumTextContrastEvaluation].
+  minimumTextContrast,
+
+  /// Enforces that all nodes representing non-text controls meet minimum
+  /// contrast levels.
+  ///
+  /// Evaluated by [MinimumNonTextContrastEvaluation].
+  minimumNonTextContrast,
+
+  /// Enforces that all leaf semantics nodes have a label, value, hint, or tooltip.
+  ///
+  /// Evaluated by [UnlabeledLeafNodeEvaluation].
+  unlabeledLeafNode,
+
+  /// Enforces that the application has at least one [Title] widget to set the
+  /// web page title.
+  ///
+  /// Evaluated by [TitleEvaluation].
+  title,
+}
+
+/// {@macro flutter.widgets.accessibility_evaluations.internal}
 ///
 /// A violation of a semantics node.
 @internal
@@ -65,15 +103,11 @@ abstract class AccessibilityEvaluation {
   /// A const constructor allows subclasses to be const.
   const AccessibilityEvaluation();
 
-  /// Evaluate whether the current state of the `binding` conforms to the rule.
-  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
-    if (!isAccessibilityEvaluationsEnabled) {
-      throw UnsupportedError(_kAccessibilityEvaluationsDisabledErrorMessage);
-    }
-    return _evaluate(binding);
-  }
+  /// The type of this accessibility evaluation.
+  AccessibilityEvaluationType get type;
 
-  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding);
+  /// Evaluate whether the current state of the `binding` conforms to the rule.
+  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding);
 }
 
 /// {@macro flutter.widgets.accessibility_evaluations.internal}
@@ -96,12 +130,16 @@ class MinimumTapTargetEvaluation extends AccessibilityEvaluation {
   static const double _kMinimumGapToBoundary = 0.001;
 
   @override
-  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
+  AccessibilityEvaluationType get type => AccessibilityEvaluationType.minimumTapTarget;
+
+  @override
+  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(
-        _traverse(view.flutterView, view.owner!.semanticsOwner!.rootSemanticsNode!),
-      );
+      final SemanticsNode? root = view.owner?.semanticsOwner?.rootSemanticsNode;
+      if (root != null) {
+        violations.addAll(_traverse(view.flutterView, root));
+      }
     }
 
     return EvaluationResult(violations);
@@ -195,11 +233,17 @@ class LabeledTapTargetEvaluation extends AccessibilityEvaluation {
   const LabeledTapTargetEvaluation();
 
   @override
-  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
+  AccessibilityEvaluationType get type => AccessibilityEvaluationType.labeledTapTarget;
+
+  @override
+  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
 
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(_traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+      final SemanticsNode? root = view.owner?.semanticsOwner?.rootSemanticsNode;
+      if (root != null) {
+        violations.addAll(_traverse(root));
+      }
     }
 
     return EvaluationResult(violations);
@@ -242,7 +286,7 @@ abstract class _ContrastEvaluation extends AccessibilityEvaluation {
   static const double _kContrastTolerance = -0.01;
 
   @override
-  Future<EvaluationResult> _evaluate(WidgetsBinding binding) async {
+  Future<EvaluationResult> evaluate(WidgetsBinding binding) async {
     final violations = <Violation>[];
     for (final RenderView renderView in binding.renderViews) {
       final layer = renderView.debugLayer! as OffsetLayer;
@@ -366,6 +410,9 @@ class MinimumTextContrastEvaluation extends _ContrastEvaluation {
   static const double kMinimumRatioLargeText = 3.0;
 
   static const double _kDefaultFontSize = 12.0;
+
+  @override
+  AccessibilityEvaluationType get type => AccessibilityEvaluationType.minimumTextContrast;
 
   @override
   bool _shouldSkipNodeEvaluation(SemanticsData data) =>
@@ -523,6 +570,9 @@ class MinimumNonTextContrastEvaluation extends _ContrastEvaluation {
   ///
   /// Defined by http://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html
   static const double _kMinimumRatioNonText = 3.0;
+
+  @override
+  AccessibilityEvaluationType get type => AccessibilityEvaluationType.minimumNonTextContrast;
 
   @override
   bool _shouldSkipNodeEvaluation(SemanticsData data) {
@@ -780,10 +830,16 @@ class UnlabeledLeafNodeEvaluation extends AccessibilityEvaluation {
   const UnlabeledLeafNodeEvaluation();
 
   @override
-  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
+  AccessibilityEvaluationType get type => AccessibilityEvaluationType.unlabeledLeafNode;
+
+  @override
+  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
     for (final RenderView view in binding.renderViews) {
-      violations.addAll(_traverse(view.owner!.semanticsOwner!.rootSemanticsNode!));
+      final SemanticsNode? root = view.owner?.semanticsOwner?.rootSemanticsNode;
+      if (root != null) {
+        violations.addAll(_traverse(root));
+      }
     }
     return EvaluationResult(violations);
   }
@@ -838,7 +894,10 @@ class TitleEvaluation extends AccessibilityEvaluation {
   const TitleEvaluation();
 
   @override
-  FutureOr<EvaluationResult> _evaluate(WidgetsBinding binding) {
+  AccessibilityEvaluationType get type => AccessibilityEvaluationType.title;
+
+  @override
+  FutureOr<EvaluationResult> evaluate(WidgetsBinding binding) {
     final violations = <Violation>[];
 
     if (binding.rootElement != null && !_hasTitleWidget(binding.rootElement!)) {

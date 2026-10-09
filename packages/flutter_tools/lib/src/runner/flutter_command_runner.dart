@@ -6,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
@@ -15,6 +16,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -24,13 +26,13 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
-import '../experimental/extension_arg_parser.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
+import 'flutter_command.dart';
 import 'local_engine.dart';
 
 /// Common flutter command line options.
@@ -63,12 +65,10 @@ abstract final class FlutterGlobalOptions {
 class FlutterCommandRunner extends CommandRunner<void> {
   FlutterCommandRunner({
     required ToolContext toolContext,
-    Analytics analytics = const NoOpAnalytics(),
+    this._analytics = const NoOpAnalytics(),
     bool verboseHelp = false,
-    FeatureFlags? featureFlags,
-  }) : _analytics = analytics,
-       _featureFlags = featureFlags,
-       _toolContext = toolContext,
+    this._featureFlags,
+  }) : _toolContext = toolContext,
        _verboseHelp = verboseHelp,
        _argParser = ArgParser(
          allowTrailingOptions: false,
@@ -252,12 +252,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       hide: !verboseHelp,
       help: 'List the special "web-server" device in device listings.',
     );
-    argParser.addFlag(
-      FlutterGlobalOptions.kContinuousIntegrationFlag,
-      negatable: false,
-      help: 'Enable a set of CI-specific test debug settings.',
-      hide: !verboseHelp,
-    );
+    argParser.addDescriptor(CommonOptions.ci, verboseHelp: verboseHelp);
     argParser.addOption(
       FlutterGlobalOptions.kDebugLogsDirectoryFlag,
       help: 'Path to a directory where logs for debugging may be added.',
@@ -331,6 +326,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// The [ToolContext] instance.
   ToolContext get toolContext => _toolContext;
 
+  /// The [FeatureFlags] instance, if provided.
+  FeatureFlags? get featureFlags => _featureFlags;
+
   // See https://github.com/flutter/flutter/issues/145158.
   late bool _machineFlagPresentInAnyCliArg;
 
@@ -362,7 +360,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   /// Traverses [args] to identify the target command being invoked and triggers
-  /// dynamic option initialization (via [ExtensionArgParserMixin.initializeDynamicOptions])
+  /// dynamic option initialization (via [FlutterCommand.initializeDynamicOptions])
   /// before argument parsing begins.
   Future<void> _initializeDynamicOptions(Iterable<String> args) async {
     if (_featureFlags?.isToolExtensionsEnabled != true) {
@@ -380,8 +378,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
       Command<void>? current = command;
       while (current != null) {
-        if (current case final ExtensionArgParserMixin dynamicCommand) {
-          await dynamicCommand.initializeDynamicOptions();
+        if (current case final FlutterCommand flutterCommand) {
+          await flutterCommand.initializeDynamicOptions();
         }
         current = current.parent;
       }
@@ -562,9 +560,26 @@ class FlutterCommandRunner extends CommandRunner<void> {
       packagePath: topLevelResults[FlutterGlobalOptions.kPackagesOption] as String?,
     );
     if (engineBuildPaths != null) {
-      contextOverrides.addAll(<Type, Object?>{
-        Artifacts: Artifacts.getLocalEngine(engineBuildPaths),
-      });
+      final ToolContext(
+        :Cache cache,
+        :FileSystem fs,
+        :OperatingSystemUtils os,
+        :Platform platform,
+        :ProcessManager processManager,
+      ) = _toolContext;
+      final Artifacts localArtifacts = Artifacts.getLocalEngine(
+        engineBuildPaths,
+        cache: cache,
+        fileSystem: fs,
+        operatingSystemUtils: os,
+        platform: platform,
+        processManager: processManager,
+      );
+      contextOverrides.addAll(<Type, Object?>{Artifacts: localArtifacts});
+      // Update the artifacts the commands were created with.
+      if (_toolContext.artifacts case final DeferredArtifacts artifacts) {
+        artifacts.resolve(localArtifacts);
+      }
     }
 
     await context.run<void>(
@@ -604,6 +619,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
               commandPath: 'version',
               result: 'success',
               commandHasTerminal: stdio.hasTerminal,
+              hostArch: _toolContext.os.hostPlatform.cliName,
             ),
           );
           final FlutterVersion version = flutterVersion.fetchTagsAndGetVersion(clock: systemClock);
@@ -656,6 +672,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
         .toList();
   }
 
+  /// Directory names to skip when scanning repository packages to avoid
+  /// traversing build caches and generated artifacts.
+  static const _ignoredDirectoryNames = <String>{'.dart_tool', 'build'};
+
   static List<String> _gatherProjectPaths(FileSystem fs, String rootPath) {
     if (fs.isFileSync(fs.path.join(rootPath, '.dartignore'))) {
       return <String>[];
@@ -668,7 +688,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     final List<String> projectPaths = directory.listSync(followLinks: false).expand((
       FileSystemEntity entity,
     ) {
-      if (entity is Directory && fs.path.basename(entity.path) != '.dart_tool') {
+      if (entity is Directory && !_ignoredDirectoryNames.contains(fs.path.basename(entity.path))) {
         return _gatherProjectPaths(fs, entity.path);
       }
       return <String>[];

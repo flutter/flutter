@@ -4,8 +4,10 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -13,24 +15,31 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_workflow.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
+import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide Category;
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_flutter_command_runner.dart';
 
 void main() {
   late BufferLogger logger;
   late FakeProcessManager fakeProcessManager;
   late MemoryFileSystem fs;
+
+  setUpAll(() {
+    Cache.disableLocking();
+  });
 
   setUp(() {
     logger = BufferLogger.test();
@@ -107,10 +116,7 @@ void main() {
           ),
         );
       },
-      overrides: <Type, Generator>{
-        AnsiTerminal: () => FakeTerminal(),
-        DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
-      },
+      overrides: <Type, Generator>{DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider()},
     );
   });
 
@@ -129,7 +135,7 @@ void main() {
           '• No issues found!\n',
         ),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate non-verbose output format for run with crash', () async {
       expect(await FakeCrashingDoctor(logger).diagnose(verbose: false), isFalse);
@@ -149,7 +155,7 @@ void main() {
           '! Doctor found issues in 1 category.\n',
         ),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate verbose output format contains trace for run with crash', () async {
       expect(await FakeCrashingDoctor(logger).diagnose(), isFalse);
@@ -168,7 +174,7 @@ void main() {
         logger.statusText,
         contains('Stuck validator that never completes exceeded maximum allowed duration of '),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate non-verbose output format for run with an async crash', () async {
       final completer = Completer<void>();
@@ -199,7 +205,7 @@ void main() {
           '! Doctor found issues in 1 category.\n',
         ),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate non-verbose output format when only one category fails', () async {
       expect(await FakeSinglePassingDoctor(logger).diagnose(verbose: false), isTrue);
@@ -213,7 +219,7 @@ void main() {
           '! Doctor found issues in 1 category.\n',
         ),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate non-verbose output format for a passing run', () async {
       expect(await FakePassingDoctor(logger).diagnose(verbose: false), isTrue);
@@ -232,7 +238,7 @@ void main() {
           '! Doctor found issues in 2 categories.\n',
         ),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate non-verbose output format', () async {
       expect(await FakeDoctor(logger).diagnose(verbose: false), isFalse);
@@ -256,7 +262,7 @@ void main() {
           '! Doctor found issues in 4 categories.\n',
         ),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate verbose output format', () async {
       expect(await FakeDoctor(logger).diagnose(), isFalse);
@@ -289,7 +295,7 @@ void main() {
           '! Doctor found issues in 4 categories.\n',
         ),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate PII can be hidden', () async {
       expect(await FakePiiDoctor(logger).diagnose(showPii: false), isTrue);
@@ -314,7 +320,7 @@ void main() {
           '• No issues found!\n',
         ),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
   });
 
   group('doctor diagnosis wrapper', () {
@@ -329,45 +335,41 @@ void main() {
       logger = BufferLogger.test(verbose: true);
     });
 
-    testUsingContext(
-      'PII separated, events only sent once',
-      () async {
-        final fakeDate = DateTime(1995, 3, 3);
-        final systemClock = SystemClock.fixed(fakeDate);
+    testUsingContext('PII separated, events only sent once', () async {
+      final fakeDate = DateTime(1995, 3, 3);
+      final systemClock = SystemClock.fixed(fakeDate);
 
-        final Doctor fakeDoctor = FakePiiDoctor(logger, clock: systemClock);
-        final doctorText = DoctorText(logger, doctor: fakeDoctor);
-        const expectedPiiText =
-            '[✓] PII Validator [0ms]\n'
-            '    • Contains PII path/to/username\n'
-            '\n'
-            '• No issues found!\n';
-        const expectedPiiStrippedText =
-            '[✓] PII Validator [0ms]\n'
-            '    • Does not contain PII\n'
-            '\n'
-            '• No issues found!\n';
+      final Doctor fakeDoctor = FakePiiDoctor(logger, clock: systemClock);
+      final doctorText = DoctorText(logger, doctor: fakeDoctor);
+      const expectedPiiText =
+          '[✓] PII Validator [0ms]\n'
+          '    • Contains PII path/to/username\n'
+          '\n'
+          '• No issues found!\n';
+      const expectedPiiStrippedText =
+          '[✓] PII Validator [0ms]\n'
+          '    • Does not contain PII\n'
+          '\n'
+          '• No issues found!\n';
 
-        // Run each multiple times to make sure the logger buffer is being cleared,
-        // and that events are only sent once.
-        expect(await doctorText.text, expectedPiiText);
-        expect(await doctorText.text, expectedPiiText);
+      // Run each multiple times to make sure the logger buffer is being cleared,
+      // and that events are only sent once.
+      expect(await doctorText.text, expectedPiiText);
+      expect(await doctorText.text, expectedPiiText);
 
-        expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
-        expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
+      expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
+      expect(await doctorText.piiStrippedText, expectedPiiStrippedText);
 
-        // Only one event sent.
-        expect(analytics.sentEvents, <Event>[
-          Event.doctorValidatorResult(
-            validatorName: 'PII Validator',
-            result: 'installed',
-            partOfGroupedValidator: false,
-            doctorInvocationId: systemClock.now().millisecondsSinceEpoch,
-          ),
-        ]);
-      },
-      overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal(), Analytics: () => analytics},
-    );
+      // Only one event sent.
+      expect(analytics.sentEvents, <Event>[
+        Event.doctorValidatorResult(
+          validatorName: 'PII Validator',
+          result: 'installed',
+          partOfGroupedValidator: false,
+          doctorInvocationId: systemClock.now().millisecondsSinceEpoch,
+        ),
+      ]);
+    }, overrides: <Type, Generator>{Analytics: () => analytics});
 
     testUsingContext('without PII has same text and PII-stripped text', () async {
       final Doctor fakeDoctor = FakePassingDoctor(logger);
@@ -412,7 +414,7 @@ void main() {
         '  categories.\n',
       ),
     );
-  }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+  });
 
   testUsingContext('validate verbose output wrapping', () async {
     final wrapLogger = BufferLogger.test(
@@ -460,7 +462,7 @@ void main() {
         '  categories.\n',
       ),
     );
-  }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+  });
 
   group('doctor with grouped validators', () {
     testUsingContext('validate diagnose combines validator output', () async {
@@ -479,7 +481,7 @@ void main() {
           '! Doctor found issues in 1 category.\n',
         ),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate merging assigns statusInfo and title', () async {
       // There are two subvalidators. Only the second contains statusInfo.
@@ -494,7 +496,7 @@ void main() {
           '• No issues found!\n',
         ),
       );
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
   });
 
   group('grouped validator merging results', () {
@@ -505,47 +507,47 @@ void main() {
     testUsingContext('validate installed + installed = installed', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[✓]'));
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate installed + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate installed + missing = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, installed, missing).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate partial + installed = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate partial + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate partial + missing = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, partial, missing).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate missing + installed = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, installed).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate missing + partial = partial', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, partial).diagnose(), isTrue);
       expect(logger.statusText, startsWith('[!]'));
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
 
     testUsingContext('validate missing + missing = missing', () async {
       expect(await FakeSmallGroupDoctor(logger, missing, missing).diagnose(), isFalse);
       expect(logger.statusText, startsWith('[✗]'));
-    }, overrides: <Type, Generator>{AnsiTerminal: () => FakeTerminal()});
+    });
   });
 
   testUsingContext(
@@ -817,6 +819,103 @@ void main() {
       await FakePassingDoctor(logger).diagnose(verbose: false, sendEvent: false);
       expect(fakeAnalytics.sentEvents, isEmpty);
     }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
+  });
+
+  group('DoctorCommand', () {
+    testWithoutContext('executes diagnose via injected Doctor', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+      expect(command.toolContext, same(fakeToolContext));
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor']);
+
+      expect(fakeDoctor.diagnoseCalled, isTrue);
+      expect(fakeDoctor.verbosePassed, isFalse);
+    });
+
+    testWithoutContext('passes verbose flag to doctor.diagnose', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(
+        toolContext: fakeToolContext,
+        doctor: fakeDoctor,
+        verbose: true,
+      );
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor']);
+
+      expect(fakeDoctor.diagnoseCalled, isTrue);
+      expect(fakeDoctor.verbosePassed, isTrue);
+    });
+
+    testWithoutContext('passes --android-licenses to doctor.diagnose', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor', '--android-licenses']);
+
+      expect(fakeDoctor.diagnoseCalled, isTrue);
+      expect(fakeDoctor.androidLicensesPassed, isTrue);
+    });
+
+    testWithoutContext('passes explicit androidLicenseValidator to doctor.diagnose', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final fakeLicenseValidator = FakeAndroidLicenseValidator();
+      final command = DoctorCommand(
+        toolContext: fakeToolContext,
+        doctor: fakeDoctor,
+        androidLicenseValidator: fakeLicenseValidator,
+      );
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor', '--android-licenses']);
+
+      expect(fakeDoctor.diagnoseCalled, isTrue);
+      expect(fakeDoctor.androidLicensesPassed, isTrue);
+      expect(fakeDoctor.androidLicenseValidatorPassed, same(fakeLicenseValidator));
+    });
+
+    testWithoutContext('lazily falls back when androidLicenseValidator is not provided', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor', '--android-licenses']);
+
+      expect(fakeDoctor.diagnoseCalled, isTrue);
+      expect(fakeDoctor.androidLicensesPassed, isTrue);
+      expect(fakeDoctor.androidLicenseValidatorPassed, isNull);
+    });
+
+    testWithoutContext('checks remote artifacts when flag provided', () async {
+      final fakeDoctor = FakeDiagnoseDoctor();
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor', '--check-for-remote-artifacts=1234567890abcdef']);
+
+      expect(fakeDoctor.checkRemoteArtifactsRevision, '1234567890abcdef');
+    });
+
+    testWithoutContext('throws ToolExit on missing remote artifacts', () async {
+      final fakeDoctor = FakeDiagnoseDoctor(checkRemoteArtifactsResult: true);
+      final fakeToolContext = FakeToolContext();
+      final command = DoctorCommand(toolContext: fakeToolContext, doctor: fakeDoctor);
+
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await expectLater(
+        runner.run(<String>['doctor', '--check-for-remote-artifacts=1234567890abcdef']),
+        throwsToolExit(message: 'Artifacts for engine 1234567890abcdef are missing'),
+      );
+    });
   });
 }
 
@@ -1242,17 +1341,46 @@ class FakeDevice extends Fake implements Device {
   Future<TargetPlatform> get targetPlatform => Future<TargetPlatform>.value(TargetPlatform.android);
 }
 
-class FakeTerminal extends Fake implements AnsiTerminal {
-  @override
-  final supportsColor = false;
-
-  @override
-  bool get isCliAnimationEnabled => supportsColor;
-}
-
 class ZeroExecutionTimeValidationResult extends ValidationResult {
   ZeroExecutionTimeValidationResult(super.type, super.messages, {super.statusInfo});
 
   @override
   Duration? get executionTime => Duration.zero;
 }
+
+class FakeDiagnoseDoctor extends Fake implements Doctor {
+  FakeDiagnoseDoctor({this.diagnoseResult = true, this.checkRemoteArtifactsResult = false});
+
+  final bool diagnoseResult;
+  final bool checkRemoteArtifactsResult;
+  bool diagnoseCalled = false;
+  bool? verbosePassed;
+  bool? androidLicensesPassed;
+  AndroidLicenseValidator? androidLicenseValidatorPassed;
+  String? checkRemoteArtifactsRevision;
+
+  @override
+  Future<bool> diagnose({
+    bool androidLicenses = false,
+    bool verbose = true,
+    AndroidLicenseValidator? androidLicenseValidator,
+    ExtensionManager? extensionManager,
+    bool showPii = true,
+    List<ValidatorTask>? startedValidatorTasks,
+    bool sendEvent = true,
+  }) async {
+    diagnoseCalled = true;
+    verbosePassed = verbose;
+    androidLicensesPassed = androidLicenses;
+    androidLicenseValidatorPassed = androidLicenseValidator;
+    return diagnoseResult;
+  }
+
+  @override
+  Future<bool> checkRemoteArtifacts(String engineRevision) async {
+    checkRemoteArtifactsRevision = engineRevision;
+    return checkRemoteArtifactsResult;
+  }
+}
+
+class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidator {}

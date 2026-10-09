@@ -47,6 +47,7 @@ library configuration;
 import 'dart:js_interop';
 
 import 'package:meta/meta.dart';
+
 import 'dom.dart';
 
 enum CanvasKitVariant {
@@ -106,11 +107,11 @@ void debugOverrideJsConfiguration(JsFlutterConfiguration? newConfig) {
 
 /// Supplies Web Engine configuration properties.
 class FlutterConfiguration {
-  /// Constructs an unitialized configuration object.
+  /// Constructs an uninitialized configuration object.
   @visibleForTesting
   FlutterConfiguration();
 
-  /// Constucts a "tainted by JS globals" configuration object.
+  /// Constructs a "tainted by JS globals" configuration object.
   ///
   /// This configuration style is deprecated. It will warn the user about the
   /// new API (if used)
@@ -140,13 +141,11 @@ class FlutterConfiguration {
   }
 
   FlutterConfiguration withOverrides(JsFlutterConfiguration? overrides) {
-    final newJsConfig =
-        objectConstructor.assign(
-              <String, Object>{}.jsify(),
-              _configuration.jsify(),
-              overrides.jsify(),
-            )
-            as JsFlutterConfiguration;
+    final newJsConfig = objectConstructor.assign(
+      <String, Object>{}.jsify(),
+      _configuration.jsify(),
+      overrides.jsify(),
+    ) as JsFlutterConfiguration;
     final newConfig = FlutterConfiguration();
     newConfig._configuration = newJsConfig;
     return newConfig;
