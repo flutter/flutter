@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
 import 'package:flutter_tools/src/test/test_golden_comparator.dart';
@@ -67,6 +68,7 @@ void main() {
         packageConfigPath: packageConfig.path,
       ),
       project,
+      templateRenderer: const MustacheTemplateRenderer(),
       toolContext: const DelegatingToolContext(),
     );
     return TestGoldenComparator(

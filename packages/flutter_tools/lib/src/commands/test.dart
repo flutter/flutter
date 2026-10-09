@@ -14,6 +14,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
@@ -69,6 +70,7 @@ const _kIntegrationTestDirectory = 'integration_test';
 /// - https://flutter.dev/to/integration-testing
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
+    required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     this.nativeAssetsBuilder,
     FlutterTestRunner? testRunner,
@@ -76,7 +78,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     this.verbose = false,
     bool verboseHelp = false,
   }) : _toolContext = toolContext,
-       _testRunner = testRunner ?? FlutterTestRunner(toolContext: toolContext),
+       _testRunner =
+           testRunner ??
+           FlutterTestRunner(templateRenderer: templateRenderer, toolContext: toolContext),
        super(toolContext: toolContext) {
     requiresPubspecYaml();
     usesPubOption();

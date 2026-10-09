@@ -6,6 +6,7 @@ import '../base/fingerprint.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../darwin/darwin.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../plugins.dart';
@@ -33,8 +34,16 @@ Future<void> processPodsIfNeeded(
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
   await refreshPluginsList(
     project,
+    cocoaPods: globals.cocoaPods,
+    featureFlags: featureFlags,
+    fileSystemUtils: globals.fsUtils,
+    flutterVersion: globals.flutterVersion,
     iosPlatform: project.ios.existsSync(),
+    logger: globals.logger,
     macOSPlatform: project.macos.existsSync(),
+    os: globals.os,
+    platform: globals.platform,
+    systemClock: globals.systemClock,
     forceCocoaPodsOnly: forceCocoaPodsOnly,
     forceSwiftPM: forceSwiftPM,
   );

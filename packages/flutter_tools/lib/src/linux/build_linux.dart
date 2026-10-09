@@ -17,6 +17,7 @@ import '../cache.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
@@ -77,7 +78,12 @@ Future<void> buildLinux(
   }
   writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, buildInfo, environmentConfig, logger);
 
-  createPluginSymlinks(linuxProject.parent);
+  createPluginSymlinks(
+    linuxProject.parent,
+    featureFlags: featureFlags,
+    os: globals.os,
+    platform: globals.platform,
+  );
 
   final Status status = logger.startProgress('Building Linux application...');
   final String buildModeName = buildInfo.mode.cliName;

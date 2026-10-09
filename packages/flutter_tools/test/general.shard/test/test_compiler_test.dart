@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
 import 'package:flutter_tools/src/test/test_time_recorder.dart';
@@ -407,6 +408,7 @@ class FakeTestCompiler extends TestCompiler {
     super.precompiledDillPath,
     ProcessManager? processManager,
     ShutdownHooks? shutdownHooks,
+    super.templateRenderer = const MustacheTemplateRenderer(),
     super.testTimeRecorder,
     ToolContext? toolContext,
   }) : super(
