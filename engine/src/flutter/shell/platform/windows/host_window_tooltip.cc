@@ -55,20 +55,7 @@ void HostWindowTooltip::ApplyContentSize(int32_t physical_width,
 }
 
 WindowRect HostWindowTooltip::GetWorkArea() const {
-  constexpr int32_t kDefaultWorkAreaSize = 10000;
-  WindowRect work_area = {0, 0, kDefaultWorkAreaSize, kDefaultWorkAreaSize};
-  HMONITOR monitor = MonitorFromWindow(parent_, MONITOR_DEFAULTTONEAREST);
-  if (monitor) {
-    MONITORINFO monitor_info = {0};
-    monitor_info.cbSize = sizeof(monitor_info);
-    if (GetMonitorInfo(monitor, &monitor_info)) {
-      work_area.left = monitor_info.rcWork.left;
-      work_area.top = monitor_info.rcWork.top;
-      work_area.width = monitor_info.rcWork.right - monitor_info.rcWork.left;
-      work_area.height = monitor_info.rcWork.bottom - monitor_info.rcWork.top;
-    }
-  }
-  return work_area;
+  return GetWorkAreaForWindow(parent_);
 }
 
 void HostWindowTooltip::UpdatePosition() {
