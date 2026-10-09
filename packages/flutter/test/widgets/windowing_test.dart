@@ -8,21 +8,20 @@ import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart'
     show
         BaseWindowController,
-        DialogWindow,
         DialogWindowController,
         DialogWindowControllerDelegate,
-        PopupWindow,
         PopupWindowController,
-        SatelliteWindow,
         SatelliteWindowController,
-        TooltipWindow,
         TooltipWindowController,
-        Window,
         WindowController,
         WindowControllerDelegate,
+        WindowEntry,
+        WindowManager,
+        WindowRegistry,
         WindowScope,
         WindowingOwner,
-        createDefaultWindowingOwner;
+        createDefaultWindowingOwner,
+        showWindow;
 import 'package:flutter/src/widgets/_window_positioner.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,8 +29,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'multi_view_testing.dart';
 
 class _StubWindowController extends WindowController {
-  _StubWindowController(WidgetTester tester) : super.empty() {
-    rootView = FakeView(tester.view);
+  _StubWindowController(WidgetTester tester, {int viewId = 100}) : super.empty() {
+    rootView = FakeView(tester.view, viewId: viewId);
   }
 
   @override
@@ -331,6 +330,36 @@ class _MutableWindowController extends WindowController {
   }
 }
 
+/// A [Text] widget that can be rendered without an enclosing [Directionality].
+Widget _text(String data) => Text(data, textDirection: TextDirection.ltr);
+
+/// Renders [child] in [controller]'s window using a [WindowManager].
+///
+/// Pump the result with `wrapWithView: false`, since the manager supplies the
+/// window's [View] itself.
+Widget _buildWindow({required BaseWindowController controller, required Widget child}) {
+  return WindowManager(
+    initialWindows: <WindowEntry>[
+      WindowEntry(controller: controller, builder: (BuildContext context) => child),
+    ],
+  );
+}
+
+/// Renders [child] below a [WindowScope] for [controller] without a
+/// [WindowManager].
+///
+/// Unlike [_buildWindow], the subtree stays mounted after the window is
+/// destroyed, since no manager is present to unregister the entry.
+Widget _buildUnmanagedWindow({required BaseWindowController controller, required Widget child}) {
+  return ListenableBuilder(
+    listenable: controller,
+    builder: (BuildContext context, Widget? _) => WindowScope(
+      controller: controller,
+      child: View(view: controller.rootView, child: child),
+    ),
+  );
+}
+
 void main() {
   group('Windowing', () {
     group('isWindowingEnabled is false', () {
@@ -362,41 +391,42 @@ void main() {
         );
       });
 
-      testWidgets('DialogWindow throws UnsupportedError', (WidgetTester tester) async {
+      testWidgets('WindowEntry throws UnsupportedError', (WidgetTester tester) async {
         expect(
-          () => DialogWindow(
+          () => WindowEntry(
             controller: _StubDialogWindowController(tester),
-            child: const Text('Test'),
+            builder: (BuildContext context) => const Text('Test'),
           ),
           throwsUnsupportedError,
         );
       });
 
-      testWidgets('TooltipWindow throws UnsupportedError', (WidgetTester tester) async {
-        expect(
-          () => TooltipWindow(
-            controller: _StubTooltipWindowController(tester: tester),
-            child: const Text('Test'),
-          ),
-          throwsUnsupportedError,
-        );
+      test('WindowRegistry throws UnsupportedError', () {
+        expect(WindowRegistry.new, throwsUnsupportedError);
       });
 
-      testWidgets('PopupWindow throws UnsupportedError', (WidgetTester tester) async {
-        expect(
-          () => PopupWindow(
-            controller: _StubPopupWindowController(tester: tester),
-            child: const Text('Test'),
-          ),
-          throwsUnsupportedError,
+      testWidgets('WindowManager throws UnsupportedError', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrapWithView: false,
+          const WindowManager(initialWindows: <WindowEntry>[]),
         );
+
+        expect(tester.takeException(), isA<UnsupportedError>());
       });
 
-      testWidgets('SatelliteWindow throws UnsupportedError', (WidgetTester tester) async {
+      testWidgets('showWindow throws UnsupportedError', (WidgetTester tester) async {
+        // The entry itself can only be created while windowing is enabled.
+        isWindowingEnabled = true;
+        isWindowingEnabled = false;
+
+        await tester.pumpWidget(Container());
+        final BuildContext context = tester.element(find.byType(Container));
+
         expect(
-          () => SatelliteWindow(
-            controller: _StubSatelliteWindowController(tester: tester),
-            child: const Text('Test'),
+          () => showWindow(
+            context: context,
+            controller: _StubWindowController(tester),
+            builder: (BuildContext context) => const Text('Test'),
           ),
           throwsUnsupportedError,
         );
@@ -415,22 +445,26 @@ void main() {
         isWindowingEnabled = true;
       });
 
-      testWidgets('Window does not throw', (WidgetTester tester) async {
+      testWidgets('WindowManager renders a regular window', (WidgetTester tester) async {
         final controller = _StubWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(controller: controller, child: Container()),
+          _buildWindow(controller: controller, child: const Placeholder()),
         );
+
+        expect(find.byType(Placeholder), findsOneWidget);
       });
 
-      testWidgets('Dialog does not throw', (WidgetTester tester) async {
+      testWidgets('WindowManager renders a dialog window', (WidgetTester tester) async {
         final controller = _StubDialogWindowController(tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(controller: controller, child: Container()),
+          _buildWindow(controller: controller, child: const Placeholder()),
         );
+
+        expect(find.byType(Placeholder), findsOneWidget);
       });
 
       testWidgets('Can access WindowScope.of for regular windows', (WidgetTester tester) async {
@@ -439,7 +473,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -459,7 +493,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -479,7 +513,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -499,7 +533,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -519,7 +553,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -541,7 +575,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -561,7 +595,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -583,7 +617,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -603,7 +637,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -625,7 +659,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -647,7 +681,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -669,7 +703,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -691,7 +725,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -713,7 +747,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -735,7 +769,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -757,7 +791,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -779,7 +813,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -801,7 +835,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -823,7 +857,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -845,7 +879,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -867,7 +901,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -887,7 +921,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -909,7 +943,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -929,7 +963,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -951,7 +985,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -973,7 +1007,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -995,7 +1029,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1017,7 +1051,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1039,7 +1073,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1061,7 +1095,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1083,7 +1117,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1105,7 +1139,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1127,7 +1161,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1149,7 +1183,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1171,7 +1205,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1193,7 +1227,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1215,7 +1249,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1237,7 +1271,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1259,7 +1293,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1281,7 +1315,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1303,7 +1337,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1325,7 +1359,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1347,7 +1381,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1369,7 +1403,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1391,7 +1425,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1413,7 +1447,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1435,7 +1469,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1457,7 +1491,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1479,7 +1513,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1501,7 +1535,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1523,7 +1557,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1545,7 +1579,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1567,7 +1601,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1589,7 +1623,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1611,7 +1645,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1633,7 +1667,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1655,7 +1689,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1677,7 +1711,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1699,7 +1733,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1721,7 +1755,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1743,7 +1777,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1765,7 +1799,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1787,7 +1821,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1809,7 +1843,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1831,7 +1865,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1853,7 +1887,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1875,7 +1909,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1897,7 +1931,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1919,7 +1953,7 @@ void main() {
         final observed = <bool>[];
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1946,7 +1980,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1968,7 +2002,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -1990,7 +2024,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2012,7 +2046,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2034,7 +2068,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2056,7 +2090,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2078,7 +2112,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          DialogWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2100,7 +2134,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          TooltipWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2122,7 +2156,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          PopupWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2144,7 +2178,7 @@ void main() {
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(
+          _buildWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2181,9 +2215,11 @@ void main() {
         final controller = _MutableWindowController(tester);
         addTearDown(controller.dispose);
         final observed = <bool>[];
+        // A WindowManager would unregister the entry as soon as the window is
+        // destroyed, so the dependent is rendered without one here.
         await tester.pumpWidget(
           wrapWithView: false,
-          Window(
+          _buildUnmanagedWindow(
             controller: controller,
             child: Builder(
               builder: (BuildContext context) {
@@ -2205,12 +2241,145 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
-      testWidgets('SatelliteWindow does not throw', (WidgetTester tester) async {
+      testWidgets('WindowManager renders a satellite window', (WidgetTester tester) async {
         final controller = _StubSatelliteWindowController(tester: tester);
         addTearDown(controller.dispose);
         await tester.pumpWidget(
           wrapWithView: false,
-          SatelliteWindow(controller: controller, child: Container()),
+          _buildWindow(controller: controller, child: const Placeholder()),
+        );
+
+        expect(find.byType(Placeholder), findsOneWidget);
+      });
+    });
+
+    group('WindowManager', () {
+      setUp(() {
+        isWindowingEnabled = true;
+      });
+
+      testWidgets('Renders every entry in initialWindows as a sibling subtree', (
+        WidgetTester tester,
+      ) async {
+        final first = _StubWindowController(tester);
+        addTearDown(first.dispose);
+        final second = _StubWindowController(tester, viewId: 101);
+        addTearDown(second.dispose);
+
+        await tester.pumpWidget(
+          wrapWithView: false,
+          WindowManager(
+            initialWindows: <WindowEntry>[
+              WindowEntry(controller: first, builder: (BuildContext context) => _text('first')),
+              WindowEntry(controller: second, builder: (BuildContext context) => _text('second')),
+            ],
+          ),
+        );
+
+        expect(find.text('first'), findsOneWidget);
+        expect(find.text('second'), findsOneWidget);
+      });
+
+      testWidgets('Provides a WindowRegistry listing its entries', (WidgetTester tester) async {
+        final controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
+        late WindowEntry entry;
+        late WindowRegistry registry;
+
+        entry = WindowEntry(
+          controller: controller,
+          builder: (BuildContext context) {
+            registry = WindowRegistry.of(context);
+            return _text('window');
+          },
+        );
+
+        await tester.pumpWidget(
+          wrapWithView: false,
+          WindowManager(initialWindows: <WindowEntry>[entry]),
+        );
+
+        expect(registry.windows, <WindowEntry>[entry]);
+      });
+
+      testWidgets('showWindow renders an entry alongside the existing windows', (
+        WidgetTester tester,
+      ) async {
+        final first = _StubWindowController(tester);
+        addTearDown(first.dispose);
+        final second = _StubWindowController(tester, viewId: 101);
+        addTearDown(second.dispose);
+        late BuildContext windowContext;
+
+        await tester.pumpWidget(
+          wrapWithView: false,
+          WindowManager(
+            initialWindows: <WindowEntry>[
+              WindowEntry(
+                controller: first,
+                builder: (BuildContext context) {
+                  windowContext = context;
+                  return _text('first');
+                },
+              ),
+            ],
+          ),
+        );
+
+        expect(find.text('second'), findsNothing);
+
+        showWindow(
+          context: windowContext,
+          controller: second,
+          builder: (BuildContext context) => _text('second'),
+        );
+        await tester.pump();
+
+        expect(find.text('first'), findsOneWidget);
+        expect(find.text('second'), findsOneWidget);
+      });
+
+      testWidgets('Removes an entry once its window is destroyed', (WidgetTester tester) async {
+        final controller = _MutableWindowController(tester);
+        addTearDown(controller.dispose);
+
+        await tester.pumpWidget(
+          wrapWithView: false,
+          _buildWindow(controller: controller, child: const Placeholder()),
+        );
+
+        expect(find.byType(Placeholder), findsOneWidget);
+
+        controller.destroy();
+        await tester.pump();
+
+        expect(find.byType(Placeholder), findsNothing);
+        expect(tester.takeException(), isNull);
+      });
+
+      testWidgets('WindowRegistry.maybeOf returns null without a WindowManager ancestor', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(Container());
+
+        expect(WindowRegistry.maybeOf(tester.element(find.byType(Container))), isNull);
+      });
+
+      testWidgets('showWindow throws a StateError without a WindowManager ancestor', (
+        WidgetTester tester,
+      ) async {
+        final controller = _StubWindowController(tester);
+        addTearDown(controller.dispose);
+        await tester.pumpWidget(Container());
+        final BuildContext context = tester.element(find.byType(Container));
+
+        expect(
+          () => showWindow(
+            context: context,
+            controller: controller,
+            builder: (BuildContext context) => const SizedBox.shrink(),
+          ),
+          throwsStateError,
         );
       });
     });

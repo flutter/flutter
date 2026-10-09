@@ -8,7 +8,6 @@
 import 'package:flutter/src/widgets/_window.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'element_position_tracker.dart';
 import 'models.dart';
 import 'popup_window_content.dart';
 
@@ -22,87 +21,38 @@ class PopupButton extends StatefulWidget {
 }
 
 class _PopupButtonState extends State<PopupButton> {
-  WindowEntry? _popupWindowEntry;
-  ElementPositionTracker? _popupTracker;
-  final GlobalKey _popupButtonKey = GlobalKey();
+  final NestedWindowController _controller = NestedWindowController();
 
   @override
   void dispose() {
-    _popupTracker?.dispose();
+    _controller.dispose();
     super.dispose();
-  }
-
-  void _onPressed(WindowSettings windowSettings) {
-    // Toggle popup visibility.
-    if (_popupWindowEntry != null) {
-      _popupWindowEntry!.controller.destroy();
-      _popupTracker?.dispose();
-      setState(() {
-        _popupWindowEntry = null;
-        _popupTracker = null;
-      });
-    } else {
-      // Popup is not shown, show it.
-      final tracker = ElementPositionTracker(element: _popupButtonKey.currentContext!);
-      late final WindowEntry entry;
-      final controller = PopupWindowController(
-        anchorRect: tracker.getGlobalRect()!,
-        positioner: windowSettings.positioner,
-        delegate: _PopupWindowControllerDelegate(
-          onDestroyed: () {
-            tracker.dispose();
-            if (mounted) {
-              setState(() {
-                _popupWindowEntry = null;
-                _popupTracker = null;
-              });
-            }
-          },
-        ),
-        parent: widget.parentController,
-      );
-      entry = WindowEntry(
-        controller: controller,
-        builder: (BuildContext context) => PopupWindowContent(controller: controller),
-      );
-      tracker.onGlobalRectChange = (rect) {
-        controller.updatePosition(anchorRect: rect);
-      };
-      setState(() {
-        _popupWindowEntry = entry;
-        _popupTracker = tracker;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     final WindowSettings windowSettings = WindowSettingsAccessor.of(context);
 
-    return OutlinedButton(
-      key: _popupButtonKey,
-      onPressed: () => _onPressed(windowSettings),
-      child: ViewAnchor(
-        view: _popupWindowEntry != null
-            ? View(
-                view: _popupWindowEntry!.controller.rootView,
-                child: Builder(builder: _popupWindowEntry!.builder),
-              )
-            : null,
-        child: Text(_popupWindowEntry != null ? 'Hide Popup' : 'Show Popup'),
+    return NestedWindow(
+      controller: _controller,
+      windowBuilder: (BuildContext context, NestedWindowLayoutInfo info) {
+        final popup = PopupWindowController(
+          anchorRect: info.anchorRect,
+          positioner: windowSettings.positioner,
+          parent: widget.parentController,
+        );
+        return (
+          controller: popup,
+          builder: (BuildContext context) => PopupWindowContent(controller: popup),
+        );
+      },
+      child: ListenableBuilder(
+        listenable: _controller,
+        builder: (BuildContext context, Widget? child) => OutlinedButton(
+          onPressed: _controller.toggle,
+          child: Text(_controller.isShowing ? 'Hide Popup' : 'Show Popup'),
+        ),
       ),
     );
   }
-}
-
-class _PopupWindowControllerDelegate extends PopupWindowControllerDelegate {
-  _PopupWindowControllerDelegate({required this.onDestroyed});
-
-  @override
-  void onWindowDestroyed() {
-    onDestroyed();
-    super.onWindowDestroyed();
-  }
-
-  final VoidCallback onDestroyed;
 }

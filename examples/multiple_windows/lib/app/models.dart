@@ -69,18 +69,6 @@ class WindowSettingsAccessor extends InheritedWidget {
   }
 }
 
-class CallbackDialogWindowControllerDelegate with DialogWindowControllerDelegate {
-  CallbackDialogWindowControllerDelegate({required this.onDestroyed});
-
-  @override
-  void onWindowDestroyed() {
-    onDestroyed();
-    super.onWindowDestroyed();
-  }
-
-  final VoidCallback onDestroyed;
-}
-
 String anchorToString(WindowPositionerAnchor anchor) {
   return switch (anchor) {
     WindowPositionerAnchor.center => 'Center',

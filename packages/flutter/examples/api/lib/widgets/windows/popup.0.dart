@@ -4,8 +4,6 @@
 
 // TODO(mattkae): remove invalid_use_of_internal_member ignore comment when this API is stable.
 // See: https://github.com/flutter/flutter/issues/177586
-// TODO(mattkae): refactor this example for better widget position tracking
-// This positioning logic is simpler than you might want in production. See https://github.com/flutter/flutter/issues/178829.
 // ignore_for_file: invalid_use_of_internal_member
 // ignore_for_file: implementation_imports
 import 'package:flutter/material.dart';
@@ -14,14 +12,19 @@ import 'package:flutter/src/widgets/_window_positioner.dart';
 
 void main() {
   try {
+    WidgetsFlutterBinding.ensureInitialized();
     runWidget(
-      Window(
-        controller: WindowController(
-          size: const Size(800, 600),
-          constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
-          title: 'Example Window',
-        ),
-        child: const MaterialApp(home: MyApp()),
+      WindowManager(
+        initialWindows: <WindowEntry>[
+          WindowEntry(
+            controller: WindowController(
+              size: const Size(800, 600),
+              constraints: const BoxConstraints(minWidth: 640, minHeight: 480),
+              title: 'Example Window',
+            ),
+            builder: (BuildContext context) => const MaterialApp(home: MyApp()),
+          ),
+        ],
       ),
     );
   } on UnsupportedError catch (e) {
@@ -44,95 +47,73 @@ class MyApp extends StatefulWidget {
   }
 }
 
-class _CallbackPopupDelegate extends PopupWindowControllerDelegate {
-  _CallbackPopupDelegate({required this.onDestroyCallback});
-
-  final VoidCallback onDestroyCallback;
-
-  @override
-  void onWindowDestroyed() {
-    onDestroyCallback();
-  }
-}
-
 class _MyAppState extends State<MyApp> {
-  final GlobalKey _key = GlobalKey();
-  PopupWindowController? _popupController;
+  final NestedWindowController _controller = NestedWindowController();
 
   @override
-  Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[
-      ElevatedButton(
-        key: _key,
-        onPressed: () {
-          setState(() {
-            _popupController ??= PopupWindowController(
-              parent: WindowScope.of(context),
-              anchorRect: _getAnchorRect()!,
-              positioner: const WindowPositioner(
-                parentAnchor: .right,
-                childAnchor: .left,
-              ),
-              delegate: _CallbackPopupDelegate(
-                onDestroyCallback: () {
-                  setState(() {
-                    _popupController = null;
-                  });
-                },
-              ),
-            );
-          });
-        },
-        child: const Text('Show Popup'),
-      ),
-    ];
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
-    if (_popupController != null) {
-      children.add(
-        PopupWindow(
-          controller: _popupController!,
-          child: Container(
-            padding: const .all(8),
-            color: Colors.black,
-            child: Column(
-              mainAxisSize: .min,
-              children: <Widget>[
-                const Text(
-                  'This is a popup',
-                  style: TextStyle(color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _popupController?.destroy();
-                    });
-                  },
-                  child: const Text('Close'),
-                ),
-              ],
-            ),
-          ),
+  // The NestedWindow owns the returned PopupWindowController and destroys it
+  // when the popup is hidden.
+  ({BaseWindowController controller, WidgetBuilder builder}) _buildPopup(
+    BuildContext context,
+    NestedWindowLayoutInfo info,
+  ) {
+    return (
+      controller: PopupWindowController(
+        parent: WindowScope.of(context),
+        anchorRect: info.anchorRect,
+        positioner: const WindowPositioner(
+          parentAnchor: .right,
+          childAnchor: .left,
         ),
-      );
-    }
+      ),
+      builder: _buildPopupContent,
+    );
+  }
 
-    return Scaffold(
-      body: Center(
-        child: Row(mainAxisSize: .min, children: children),
+  Widget _buildPopupContent(BuildContext context) {
+    return Material(
+      color: Colors.black,
+      child: Padding(
+        padding: const .all(8),
+        child: Column(
+          mainAxisSize: .min,
+          children: <Widget>[
+            const Text(
+              'This is a popup',
+              style: TextStyle(color: Colors.white),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _controller.hide,
+              child: const Text('Close'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Rect? _getAnchorRect() {
-    final RenderBox? renderBox =
-        _key.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final Offset position = renderBox.localToGlobal(Offset.zero);
-      final Size size = renderBox.size;
-      return position & size; // creates a Rect
-    }
-
-    return null;
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: NestedWindow(
+        controller: _controller,
+        windowBuilder: _buildPopup,
+        // The popup may also be destroyed by the platform, for example when
+        // it loses focus, so the label listens to the controller.
+        child: ListenableBuilder(
+          listenable: _controller,
+          builder: (BuildContext context, Widget? child) => ElevatedButton(
+            onPressed: _controller.toggle,
+            child: Text(_controller.isShowing ? 'Hide Popup' : 'Show Popup'),
+          ),
+        ),
+      ),
+    );
   }
 }
