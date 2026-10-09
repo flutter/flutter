@@ -354,12 +354,14 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
 
   /// Instructs [tryEnableSemantics] to remove the placeholders.
   ///
-  /// For Blink browser engine the placeholders are removed upon any next event.
+  /// The placeholders are removed upon the next "touchend", "pointerup", or
+  /// "click" event, once the gesture that targets them has ended. Removing them
+  /// in the middle of a gesture can take the rest of its events with them.
+  /// Safari swallows those events, and Chrome stops delivering them to the
+  /// window when the page lets the browser pan and cancels "touchmove", so the
+  /// framework never sees the pointer go up.
   ///
-  /// For Webkit browser engine the placeholders are removed upon the next
-  /// "touchend" event. This is to prevent Safari from swallowing the event
-  /// that happens on an element that's being removed. Blink doesn't have
-  /// this issue.
+  /// See https://github.com/flutter/flutter/issues/194104
   bool _schedulePlaceholderRemoval = false;
 
   /// Hosts the placeholder inside the view it belongs to.
@@ -386,10 +388,7 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     if (_schedulePlaceholderRemoval) {
       // The event type can also be click for VoiceOver.
       final bool removeNow =
-          ui_web.browser.browserEngine != ui_web.BrowserEngine.webkit ||
-          event.type == 'touchend' ||
-          event.type == 'pointerup' ||
-          event.type == 'click';
+          event.type == 'touchend' || event.type == 'pointerup' || event.type == 'click';
       if (removeNow) {
         removeAllPlaceholders();
       }
