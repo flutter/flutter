@@ -1849,6 +1849,7 @@ const config = {
         ),
         ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
+        webDevServerConfig: WebDevServerConfig(baseHref: baseHref),
       );
       webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
