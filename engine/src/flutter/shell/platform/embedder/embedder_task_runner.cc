@@ -12,12 +12,14 @@ namespace flutter {
 std::atomic_intptr_t EmbedderTaskRunner::next_unique_id_ = 0;
 
 EmbedderTaskRunner::EmbedderTaskRunner(DispatchTable table,
-                                       size_t embedder_identifier)
+                                       size_t embedder_identifier,
+                                       FlutterThreadPriority priority)
     : TaskRunner(nullptr /* loop implemenation*/),
       embedder_identifier_(embedder_identifier),
       dispatch_table_(std::move(table)),
       placeholder_id_(fml::TaskQueueId(fml::TaskQueueId::kInvalid)),
-      unique_id_(next_unique_id_++) {
+      unique_id_(next_unique_id_++),
+      priority_(priority) {
   FML_DCHECK(dispatch_table_.post_task_callback);
   FML_DCHECK(dispatch_table_.runs_task_on_current_thread_callback);
   FML_DCHECK(dispatch_table_.destruction_callback);
@@ -29,6 +31,22 @@ EmbedderTaskRunner::~EmbedderTaskRunner() {
 
 size_t EmbedderTaskRunner::GetEmbedderIdentifier() const {
   return embedder_identifier_;
+}
+
+void EmbedderTaskRunner::SetThreadPriority(FlutterThreadPriority priority) {
+  priority_.store(priority);
+  if (!dispatch_table_.thread_priority_setter) {
+    return;
+  }
+  if (RunsTasksOnCurrentThread()) {
+    dispatch_table_.thread_priority_setter(priority);
+  } else {
+    PostTask([this, priority]() {
+      if (dispatch_table_.thread_priority_setter) {
+        dispatch_table_.thread_priority_setter(priority);
+      }
+    });
+  }
 }
 
 void EmbedderTaskRunner::PostTask(const fml::closure& task) {

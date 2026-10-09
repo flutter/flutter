@@ -69,6 +69,9 @@ class EmbedderExternalViewEmbedder final : public ExternalViewEmbedder {
   // |ExternalViewEmbedder|
   void CollectView(int64_t view_id) override;
 
+  // |ExternalViewEmbedder|
+  void Teardown() override;
+
   //----------------------------------------------------------------------------
   /// @brief      Sets the surface transformation callback used by the external
   ///             view embedder to ask the platform for the per frame root
