@@ -776,6 +776,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    * buffer and the completion callback). Publishing it here would let {@link #swapTransactions()}
    * and {@link #onEndFrame()} merge and close it while those writes are in flight. The caller must
    * call {@link #publishTransaction} once it is done writing.
+   *
+   * <p>This is only called when HCPP is active, which is gated on API 34+ in the engine (both
+   * {@code kMinAPILevelHCPP} and the AHB swapchain's {@code CreateTransactionCB} require API 34+,
+   * where {@code ASurfaceTransaction_fromJava} was introduced).
    */
   // Called from the raster thread through FlutterJNI.
   @RequiresApi(API_LEVELS.API_34)
@@ -786,6 +790,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   /**
    * Publishes a transaction returned by {@link #createUnpublishedTransaction()} now that the caller
    * has finished writing into it.
+   *
+   * <p>Like {@link #createUnpublishedTransaction()}, this is only reachable on API 34+ because HCPP
+   * and the native transaction callback are gated on API 34+.
    */
   // Called from the raster thread through FlutterJNI.
   @RequiresApi(API_LEVELS.API_34)
