@@ -103,7 +103,6 @@ gn_build(
         "//engine/src/flutter/third_party/boringssl:gn_files": "flutter/third_party/boringssl",
         "@boringssl//:build_tree": "flutter/third_party/boringssl/src",
         "@dart//:build_tree": "flutter/third_party/dart",
-        "@gn//:gn": "flutter/third_party/gn",
         "@icu//:build_tree": "flutter/third_party/icu",
         "@libcxx//:build_tree": "flutter/third_party/libcxx",
         "@libcxxabi//:build_tree": "flutter/third_party/libcxxabi",
