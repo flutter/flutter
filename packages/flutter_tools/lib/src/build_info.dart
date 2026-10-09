@@ -18,7 +18,6 @@ import 'base/os.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
 import 'globals.dart' as globals;
-import 'runner/flutter_command.dart' show FlutterOptions;
 
 /// Whether icon font subsetting is enabled by default.
 const kIconTreeShakerEnabledDefault = true;
@@ -56,7 +55,6 @@ class BuildInfo {
     this.buildNativeAssets = true,
     this.useLocalCanvasKit = false,
     this.includeUnsupportedPlatformLibraryStubs = false,
-    this.webEnableHotReload = false,
     this.deprecatedJsInterop,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
@@ -105,7 +103,6 @@ class BuildInfo {
       useLocalCanvasKit: useLocalCanvasKit,
       includeUnsupportedPlatformLibraryStubs:
           includeUnsupportedPlatformLibraryStubs ?? this.includeUnsupportedPlatformLibraryStubs,
-      webEnableHotReload: webEnableHotReload,
       deprecatedJsInterop: deprecatedJsInterop,
       treeShakeIcons: treeShakeIcons,
     );
@@ -260,9 +257,6 @@ class BuildInfo {
   /// If set, web builds will use the locally built CanvasKit instead of using the CDN
   final bool useLocalCanvasKit;
 
-  /// If set, web builds with DDC will run with support for hot reload.
-  final bool webEnableHotReload;
-
   /// Whether the web compilers (dart2js and DDC) allow the deprecated JS
   /// interop libraries, such as `dart:html` and `dart:js`.
   ///
@@ -350,43 +344,6 @@ class BuildInfo {
   /// the flavor name in the output bundle files has the first character lower-cased,
   /// so the uncapitalized flavor name is used to compute the output file name
   String? get uncapitalizedFlavor => _uncapitalize(flavor);
-
-  /// The module system DDC is targeting, or null if not using DDC or the
-  /// associated flag isn't present.
-  // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-  DdcModuleFormat get ddcModuleFormat {
-    final DdcModuleFormat moduleFormat = webEnableHotReload
-        ? DdcModuleFormat.ddc
-        : DdcModuleFormat.amd;
-    final DdcModuleFormat? parsedFormat = _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(
-      extraFrontEndOptions,
-    ).ddcModuleFormat;
-    if (parsedFormat != null && moduleFormat != parsedFormat) {
-      throw Exception(
-        'Unsupported option combination:\n'
-        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
-        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-module-format=${parsedFormat.name}',
-      );
-    }
-    return moduleFormat;
-  }
-
-  /// Whether to enable canary features when using DDC, or null if not using
-  /// DDC or the associated flag isn't present.
-  bool get canaryFeatures {
-    final bool canaryEnabled = webEnableHotReload;
-    final bool? parsedCanary = _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(
-      extraFrontEndOptions,
-    ).canaryFeatures;
-    if (parsedCanary != null && canaryEnabled != parsedCanary) {
-      throw Exception(
-        'Unsupported option combination:\n'
-        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
-        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-canary=$parsedCanary',
-      );
-    }
-    return canaryEnabled;
-  }
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -1187,7 +1144,7 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
 }
 
 /// Indicates the module system DDC is targeting.
-enum DdcModuleFormat { amd, ddc }
+enum DdcModuleFormat { ddc }
 
 /// Returns the compiler flags that select whether the deprecated JS interop
 /// libraries (such as `dart:html` and `dart:js`) may be used.
@@ -1202,27 +1159,6 @@ List<String> deprecatedJsInteropCompilerFlags(bool? deprecatedJsInterop) =>
       true => const <String>['--deprecated-js-interop'],
       false => const <String>['--no-deprecated-js-interop'],
     };
-
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-({DdcModuleFormat? ddcModuleFormat, bool? canaryFeatures})
-_ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(List<String>? extraFrontEndArgs) {
-  DdcModuleFormat? ddcModuleFormat;
-  bool? canaryFeatures;
-  if (extraFrontEndArgs != null) {
-    const ddcModuleFormatArg = '--dartdevc-module-format=';
-    const canaryFeaturesArg = '--dartdevc-canary';
-    for (final String flag in extraFrontEndArgs) {
-      if (flag.startsWith(ddcModuleFormatArg)) {
-        final String moduleFormatString = flag.substring(ddcModuleFormatArg.length, flag.length);
-        assert(ddcModuleFormat == null);
-        ddcModuleFormat = DdcModuleFormat.values.byName(moduleFormatString);
-      } else if (flag == canaryFeaturesArg) {
-        canaryFeatures = true;
-      }
-    }
-  }
-  return (ddcModuleFormat: ddcModuleFormat, canaryFeatures: canaryFeatures);
-}
 
 String _getCurrentHostPlatformArchName() {
   final HostPlatform hostPlatform = getCurrentHostPlatform();

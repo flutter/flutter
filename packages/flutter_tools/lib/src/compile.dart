@@ -28,10 +28,19 @@ import 'dart/package_map.dart';
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
 
+/// Whether DDC canary features are enabled.
+///
+/// This is the single source of truth for DDC canary mode. It controls both
+/// the flags passed to the frontend server when compiling with DDC (see
+/// [kDdcLibraryBundleFlags]) and which precompiled artifacts are served at
+/// runtime. Keeping these in sync is required: code compiled with canary
+/// features must be loaded alongside an SDK compiled the same way.
+const kDdcCanaryFeatures = true;
+
 // Flags passed when compiling with DDC.
 const kDdcLibraryBundleFlags = <String>[
   '--dartdevc-module-format=ddc',
-  '--dartdevc-canary',
+  if (kDdcCanaryFeatures) '--dartdevc-canary',
   '--no-js-strongly-connected-components',
 ];
 
@@ -43,7 +52,7 @@ const kDdcLibraryBundleFlags = <String>[
 /// kernel for DDC must use them to compute the same path as the compiler.
 List<String> ddcFrontEndOptions(BuildInfo buildInfo) => <String>[
   ...buildInfo.extraFrontEndOptions,
-  if (buildInfo.webEnableHotReload) ...kDdcLibraryBundleFlags,
+  ...kDdcLibraryBundleFlags,
   ...deprecatedJsInteropCompilerFlags(buildInfo.deprecatedJsInterop),
 ];
 

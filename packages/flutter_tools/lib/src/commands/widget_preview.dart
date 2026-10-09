@@ -654,7 +654,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             trackWidgetCreation: true,
             // Don't try and download canvaskit from the CDN.
             useLocalCanvasKit: true,
-            webEnableHotReload: true,
             includeUnsupportedPlatformLibraryStubs: true,
           ),
           webEnableExposeUrl: false,
