@@ -1480,17 +1480,18 @@ void main() {
   testWidgets('MediaQueryData.fromWindow is created using window values', (
     WidgetTester tester,
   ) async {
-    final windowData = MediaQueryData.fromWindow(tester.view);
+    final windowData = MediaQueryData.fromView(tester.view);
     late MediaQueryData fromWindowData;
 
     await tester.pumpWidget(
-      MediaQuery.fromWindow(
+      MediaQuery.fromView(
         child: Builder(
           builder: (BuildContext context) {
             fromWindowData = MediaQuery.of(context);
             return const SizedBox();
           },
         ),
+        view: WidgetsBinding.instance.window,
       ),
     );
 
