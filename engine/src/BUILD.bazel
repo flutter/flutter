@@ -15,3 +15,11 @@ cc_library(
     includes = ["."],
     visibility = ["//engine/src/flutter:__pkg__"],
 )
+
+# GN's root files: the dotfile and the build_overrides it names. Inputs of
+# the rules that wrap a GN build of part of this tree.
+filegroup(
+    name = "gn_root_files",
+    srcs = [".gn"] + glob(["build_overrides/**"]),
+    visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],
+)

@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's additions to the GN build configuration: templates, and the
+# secondary source tree (//flutter/build/secondary) that supplies BUILD.gn
+# files for dependencies which ship none. Inputs of the rules that wrap a GN
+# build of part of the tree. The bazel/ subdirectory is its own package.
+
+filegroup(
+    name = "gn_files",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "**/__pycache__/**",
+            "**/*.pyc",
+        ],
+    ) + [
+        # Subpackages the glob does not enter.
+        "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:gn_files",
+    ],
+    visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],
+)
