@@ -23,7 +23,7 @@ transforms:
   - title: "Migrate from 'nullOk'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'of'
       inClass: 'MediaQuery'
     changes:
@@ -34,7 +34,7 @@ transforms:
   - title: "Migrate to 'of'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeOf'
       inClass: 'MediaQuery'
     changes:
@@ -45,7 +45,7 @@ transforms:
   - title: "Migrate to 'sizeOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeSizeOf'
       inClass: 'MediaQuery'
     changes:
@@ -56,7 +56,7 @@ transforms:
   - title: "Migrate to 'widthOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeWidthOf'
       inClass: 'MediaQuery'
     changes:
@@ -67,7 +67,7 @@ transforms:
   - title: "Migrate to 'heightOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeHeightOf'
       inClass: 'MediaQuery'
     changes:
@@ -78,7 +78,7 @@ transforms:
   - title: "Migrate to 'orientationOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeOrientationOf'
       inClass: 'MediaQuery'
     changes:
@@ -89,7 +89,7 @@ transforms:
   - title: "Migrate to 'devicePixelRatioOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeDevicePixelRatioOf'
       inClass: 'MediaQuery'
     changes:
@@ -100,7 +100,7 @@ transforms:
   - title: "Migrate to 'textScalerOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeTextScalerOf'
       inClass: 'MediaQuery'
     changes:
@@ -111,7 +111,7 @@ transforms:
   - title: "Migrate to 'platformBrightnessOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybePlatformBrightnessOf'
       inClass: 'MediaQuery'
     changes:
@@ -122,7 +122,7 @@ transforms:
   - title: "Migrate to 'paddingOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybePaddingOf'
       inClass: 'MediaQuery'
     changes:
@@ -133,7 +133,7 @@ transforms:
   - title: "Migrate to 'viewInsetsOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeViewInsetsOf'
       inClass: 'MediaQuery'
     changes:
@@ -144,7 +144,7 @@ transforms:
   - title: "Migrate to 'systemGestureInsetsOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeSystemGestureInsetsOf'
       inClass: 'MediaQuery'
     changes:
@@ -155,7 +155,7 @@ transforms:
   - title: "Migrate to 'viewPaddingOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeViewPaddingOf'
       inClass: 'MediaQuery'
     changes:
@@ -166,7 +166,7 @@ transforms:
   - title: "Migrate to 'alwaysUse24HourFormatOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeAlwaysUse24HourFormatOf'
       inClass: 'MediaQuery'
     changes:
@@ -177,7 +177,7 @@ transforms:
   - title: "Migrate to 'accessibleNavigationOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeAccessibleNavigationOf'
       inClass: 'MediaQuery'
     changes:
@@ -188,7 +188,7 @@ transforms:
   - title: "Migrate to 'invertColorsOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeInvertColorsOf'
       inClass: 'MediaQuery'
     changes:
@@ -199,7 +199,7 @@ transforms:
   - title: "Migrate to 'highContrastOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeHighContrastOf'
       inClass: 'MediaQuery'
     changes:
@@ -210,7 +210,7 @@ transforms:
   - title: "Migrate to 'onOffSwitchLabelsOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeOnOffSwitchLabelsOf'
       inClass: 'MediaQuery'
     changes:
@@ -221,7 +221,7 @@ transforms:
   - title: "Migrate to 'disableAnimationsOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeDisableAnimationsOf'
       inClass: 'MediaQuery'
     changes:
@@ -232,7 +232,7 @@ transforms:
   - title: "Migrate to 'reduceMotionOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeReduceMotionOf'
       inClass: 'MediaQuery'
     changes:
@@ -243,7 +243,7 @@ transforms:
   - title: "Migrate to 'boldTextOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeBoldTextOf'
       inClass: 'MediaQuery'
     changes:
@@ -254,7 +254,7 @@ transforms:
   - title: "Migrate to 'supportsAnnounceOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeSupportsAnnounceOf'
       inClass: 'MediaQuery'
     changes:
@@ -265,7 +265,7 @@ transforms:
   - title: "Migrate to 'navigationModeOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeNavigationModeOf'
       inClass: 'MediaQuery'
     changes:
@@ -276,7 +276,7 @@ transforms:
   - title: "Migrate to 'gestureSettingsOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeGestureSettingsOf'
       inClass: 'MediaQuery'
     changes:
@@ -287,7 +287,7 @@ transforms:
   - title: "Migrate to 'displayFeaturesOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeDisplayFeaturesOf'
       inClass: 'MediaQuery'
     changes:
@@ -298,7 +298,7 @@ transforms:
   - title: "Migrate to 'supportsShowingSystemContextMenu'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'maybeSupportsShowingSystemContextMenu'
       inClass: 'MediaQuery'
     changes:
@@ -309,7 +309,7 @@ transforms:
   - title: "Migrate to 'maybeDisplayCornerRadiiOf'"
     date: 2026-10-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'displayCornerRadiiOf'
       inClass: 'MediaQuery'
     changes:
@@ -320,7 +320,7 @@ transforms:
   - title: "Migrate to 'textScaler'"
     date: 2023-06-09
     element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart', 'material_ui.dart', 'cupertino_ui.dart' ]
+      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'copyWith'
       inClass: 'MediaQueryData'
     changes:
