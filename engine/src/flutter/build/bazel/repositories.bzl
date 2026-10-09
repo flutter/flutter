@@ -24,6 +24,12 @@ without touching the targets that use it.
 
 _BUILD_FILE_NAMES = ("BUILD", "BUILD.bazel")
 _BOUNDARY_FILE_NAMES = ("MODULE.bazel", "REPO.bazel", "WORKSPACE", "WORKSPACE.bazel")
+_BAZEL_FILE_NAMES = _BUILD_FILE_NAMES + _BOUNDARY_FILE_NAMES
+
+# Upper bound on the directories a synced tree may contain. Starlark has no
+# unbounded loops; this is only reached when a symlink cycle makes the tree
+# infinite (the largest tree today, the Dart SDK, has about 12,000).
+_MAX_DIRECTORIES = 100000
 
 def _write_build_file(rctx, build_file, build_file_content):
     if build_file != None:
@@ -37,6 +43,79 @@ def _mark_repository_boundary(rctx):
     if not rctx.path("REPO.bazel").exists:
         rctx.file("REPO.bazel", "")
 
+def _join(directory, name):
+    return directory + "/" + name if directory else name
+
+def _directories_with_bazel_files(source):
+    """Finds the directories of `source` that contain an upstream Bazel file.
+
+    Returns them together with all of their ancestors, as a set of paths
+    relative to `source` ("" for the root).
+
+    The listings are read without registering watches: the rule is `local`,
+    so it is re-run at every server start anyway, and watching every
+    directory of a large tree is not free (on the Dart SDK's 12,000
+    directories it doubled the fetch time and produced a 2 MB marker file).
+    The price is that a dependency roll which adds a Bazel file deep inside
+    an overlaid tree is only picked up at the next server start.
+    """
+    found = {}
+    pending = [(source, "")]
+    for _ in range(_MAX_DIRECTORIES):
+        if not pending:
+            return found
+        directory, relative = pending.pop()
+        for child in directory.readdir(watch = "no"):
+            if child.is_dir:
+                pending.append((child, _join(relative, child.basename)))
+            elif child.basename in _BAZEL_FILE_NAMES:
+                parts = relative.split("/") if relative else []
+                for depth in range(len(parts) + 1):
+                    found["/".join(parts[:depth])] = True
+    fail("synced_repository: %s has more than %d directories; is there a symlink cycle?" % (source, _MAX_DIRECTORIES))
+
+def _link_tree(rctx, source, overlaying):
+    """Populates the repository with symlinks to the contents of `source`.
+
+    Entries are symlinked whole, with two exceptions, both re-created as real
+    directories whose entries are symlinked one by one:
+
+    * the root of the tree, so that the overlay BUILD file and the repository
+      boundary marker can be written next to the upstream files;
+    * when an overlay replaces the upstream Bazel build, every directory that
+      contains an upstream BUILD, WORKSPACE or MODULE file (and its
+      ancestors), with those files left out. Otherwise such a directory would
+      be a package (or repository) of its own, and the overlay's globs could
+      not see the files in it -- ICU, for example, ships
+      `source/common/BUILD.bazel` for its own data-generation build.
+    """
+    expanded = _directories_with_bazel_files(source) if overlaying else {}
+    expanded[""] = True
+
+    pending = [""]
+    for _ in range(_MAX_DIRECTORIES):
+        if not pending:
+            return
+        relative = pending.pop()
+        directory = source.get_child(relative) if relative else source
+
+        # readdir() also registers a watch on the directory's entries, so adding
+        # or removing one (for example after a roll) refreshes the repository.
+        # Changes inside the entries are tracked like any source file.
+        for child in directory.readdir():
+            name = child.basename
+            if name in _BOUNDARY_FILE_NAMES:
+                continue
+            if overlaying and name in _BUILD_FILE_NAMES:
+                # The overlay replaces the upstream build files. Without an
+                # overlay, upstream BUILD files remain visible as packages.
+                continue
+            child_relative = _join(relative, name)
+            if child_relative in expanded:
+                pending.append(child_relative)
+            else:
+                rctx.symlink(child, child_relative)
+
 # ---------------------------------------------------------------------------
 # synced_repository
 # ---------------------------------------------------------------------------
@@ -44,6 +123,7 @@ def _mark_repository_boundary(rctx):
 def _synced_repository_impl(rctx):
     if rctx.attr.build_file != None and rctx.attr.build_file_content:
         fail("synced_repository(%s): specify at most one of build_file and build_file_content" % rctx.name)
+    overlaying = rctx.attr.build_file != None or bool(rctx.attr.build_file_content)
 
     source = rctx.workspace_root.get_child(rctx.attr.path)
     if not source.exists or not source.is_dir:
@@ -52,21 +132,7 @@ def _synced_repository_impl(rctx):
             "`gclient sync`; run it from the repository root (see DEPS).",
         )
 
-    overlaying = rctx.attr.build_file != None or bool(rctx.attr.build_file_content)
-
-    # readdir() also registers a watch on the directory's entries, so adding or
-    # removing a top-level entry (for example after a roll) refreshes the
-    # repository. Changes inside the entries are tracked like any source file.
-    for child in source.readdir():
-        name = child.basename
-        if name in _BOUNDARY_FILE_NAMES:
-            continue
-        if overlaying and name in _BUILD_FILE_NAMES:
-            # The upstream root BUILD file is replaced by the overlay. Upstream
-            # BUILD files in subdirectories remain visible as packages.
-            continue
-        rctx.symlink(child, name)
-
+    _link_tree(rctx, source, overlaying)
     _write_build_file(rctx, rctx.attr.build_file, rctx.attr.build_file_content)
     _mark_repository_boundary(rctx)
 
@@ -80,7 +146,8 @@ synced_repository = repository_rule(
         ),
         "build_file": attr.label(
             allow_single_file = True,
-            doc = "Overlay BUILD file for the repository root. Replaces any upstream root BUILD file.",
+            doc = "Overlay BUILD file for the repository root. Replaces the upstream root BUILD file, if " +
+                  "any, and hides upstream BUILD files in subdirectories.",
         ),
         "build_file_content": attr.string(
             doc = "Inline overlay BUILD file content; mutually exclusive with `build_file`.",

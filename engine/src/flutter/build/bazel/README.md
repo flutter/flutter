@@ -18,7 +18,10 @@ Nothing in this directory is used by the GN build.
 `synced_repository` whose contents are symlinks into the checkout, so GN and
 Bazel compile identical trees and nothing is stored twice. Upstream Bazel
 files are used where they are maintained and flag-compatible (`googletest`,
-`abseil-cpp`); everything else gets an overlay.
+`abseil-cpp`); everything else gets an overlay. An overlay replaces the
+upstream root `BUILD` file and hides upstream `BUILD` files in subdirectories
+(ICU ships some for its data-generation tools), so the overlay's globs can
+span the whole tree.
 
 Prebuilt tools (clang, gn, ...) default to the synced copy as well. Set
 
