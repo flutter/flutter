@@ -137,6 +137,8 @@ static jmethodID g_acquire_latest_image_method = nullptr;
 static jmethodID g_image_get_hardware_buffer_method = nullptr;
 
 static jmethodID g_image_close_method = nullptr;
+static jmethodID g_image_get_width_method = nullptr;
+static jmethodID g_image_get_height_method = nullptr;
 
 static jmethodID g_hardware_buffer_close_method = nullptr;
 
@@ -1229,6 +1231,14 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     fml::jni::ClearException(env, true);
   }
 
+  g_image_get_width_method =
+      env->GetMethodID(g_image_class->obj(), "getWidth", "()I");
+  g_image_get_height_method =
+      env->GetMethodID(g_image_class->obj(), "getHeight", "()I");
+  if (!g_image_get_width_method || !g_image_get_height_method) {
+    return false;
+  }
+
   g_image_close_method = env->GetMethodID(g_image_class->obj(), "close", "()V");
 
   if (g_image_close_method == nullptr) {
@@ -1722,6 +1732,23 @@ JavaLocalRef PlatformViewAndroidJNIImpl::ImageGetHardwareBuffer(
     return JavaLocalRef();
   }
   return r;
+}
+
+std::optional<SkISize> PlatformViewAndroidJNIImpl::ImageGetSize(
+    JavaLocalRef image) {
+  if (image.is_null()) {
+    return std::nullopt;
+  }
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  const int width = env->CallIntMethod(image.obj(), g_image_get_width_method);
+  if (fml::jni::ClearException(env, false)) {
+    return std::nullopt;
+  }
+  const int height = env->CallIntMethod(image.obj(), g_image_get_height_method);
+  if (fml::jni::ClearException(env, false)) {
+    return std::nullopt;
+  }
+  return SkISize::Make(width, height);
 }
 
 void PlatformViewAndroidJNIImpl::ImageClose(JavaLocalRef image) {

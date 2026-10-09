@@ -5,14 +5,19 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
+#include "flutter/shell/platform/android/image_external_texture.h"
+#include "flutter/shell/platform/android/image_size.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
+#include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
 namespace testing {
@@ -82,6 +87,89 @@ void PlatformViewAndroidJNIImplTest::SetUpJVM() {
   PlatformViewAndroid::Register(&mock_env);
 }
 
+namespace {
+
+// Isolate drawing from backend-specific image import. In particular, the GL
+// Skia wrapper uses a unit-sized image while other wrappers use pixel sizes.
+class TestImageExternalTexture final : public ImageExternalTexture {
+ public:
+  explicit TestImageExternalTexture(sk_sp<DlImage> image)
+      : ImageExternalTexture(1, {}, nullptr, ImageLifecycle::kReset) {
+    dl_image_ = std::move(image);
+  }
+
+  void SetNextBounds(SkRect bounds) { next_bounds_ = bounds; }
+
+ private:
+  void ProcessFrame(PaintContext&, const SkRect&) override {
+    normalized_image_bounds_ = next_bounds_;
+  }
+  void Attach(PaintContext&) override { state_ = AttachmentState::kAttached; }
+  void Detach() override {}
+
+  SkRect next_bounds_ = SkRect::MakeWH(1, 1);
+};
+
+void ExpectSourceRect(Texture& texture,
+                      const sk_sp<DlImage>& image,
+                      const DlRect& source,
+                      bool freeze = false) {
+  const auto destination = DlRect::MakeXYWH(10, 20, 400, 500);
+  DisplayListBuilder actual;
+  Texture::PaintContext context;
+  context.canvas = &actual;
+  texture.Paint(context, destination, freeze, DlImageSampling::kLinear);
+
+  DisplayListBuilder expected;
+  expected.DrawImageRect(image, source, destination, DlImageSampling::kLinear,
+                         nullptr, DlSrcRectConstraint::kStrict);
+  EXPECT_TRUE(actual.Build()->Equals(expected.Build()));
+}
+
+}  // namespace
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       ImageTextureDrawsLogicalImageWithoutAllocationPadding) {
+  MockJNIEnvProvider env_provider;
+  auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(336, 336));
+  ASSERT_NE(surface, nullptr);
+  auto image = DlImageSkia::Make(surface->makeImageSnapshot());
+  TestImageExternalTexture texture(image);
+  texture.SetNextBounds(
+      NormalizeImageBounds(SkISize::Make(322, 322), 336, 336));
+  ExpectSourceRect(texture, image, DlRect::MakeWH(322, 322));
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       ImageTextureConvertsImageBoundsToWrapperCoordinates) {
+  MockJNIEnvProvider env_provider;
+  auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
+  ASSERT_NE(surface, nullptr);
+  auto image = DlImageSkia::Make(surface->makeImageSnapshot());
+  TestImageExternalTexture texture(image);
+  texture.SetNextBounds(
+      NormalizeImageBounds(SkISize::Make(720, 1280), 768, 1280));
+  ExpectSourceRect(texture, image, DlRect::MakeWH(720.0f / 768, 1));
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       ImageTextureFrozenFrameKeepsItsBoundsUntilNextFrame) {
+  MockJNIEnvProvider env_provider;
+  auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(336, 336));
+  ASSERT_NE(surface, nullptr);
+  auto image = DlImageSkia::Make(surface->makeImageSnapshot());
+  TestImageExternalTexture texture(image);
+  texture.SetNextBounds(
+      NormalizeImageBounds(SkISize::Make(322, 322), 336, 336));
+  ExpectSourceRect(texture, image, DlRect::MakeWH(322, 322));
+
+  // Reusing an imported image must not freeze its bounds after playback
+  // resumes.
+  texture.SetNextBounds(SkRect::MakeWH(1, 1));
+  ExpectSourceRect(texture, image, DlRect::MakeWH(322, 322), true);
+  ExpectSourceRect(texture, image, DlRect::MakeWH(336, 336));
+}
+
 TEST_F(PlatformViewAndroidJNIImplTest, ImageGetHardwareBufferException) {
   MockJNIEnvProvider env_provider;
   MockJNIEnv& mock_env = env_provider.env();
@@ -104,6 +192,38 @@ TEST_F(PlatformViewAndroidJNIImplTest, ImageGetHardwareBufferException) {
   fml::jni::ScopedJavaLocalRef<jobject> image(&mock_env,
                                               reinterpret_cast<jobject>(123));
   android_jni.ImageGetHardwareBuffer(image);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest, ImageGetSizeUsesLogicalDimensions) {
+  MockJNIEnvProvider provider;
+  auto& env = provider.env();
+  EXPECT_CALL(env, GetObjectRefType(_)).WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(env, DeleteLocalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(env, CallIntMethodV(_, _, _))
+      .WillOnce(Return(720))
+      .WillOnce(Return(1280));
+  EXPECT_CALL(env, ExceptionCheck()).WillRepeatedly(Return(JNI_FALSE));
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_object;
+  PlatformViewAndroidJNIImpl jni(flutter_jni_object);
+  JavaLocalRef image(&env, reinterpret_cast<jobject>(123));
+  EXPECT_EQ(jni.ImageGetSize(image), SkISize::Make(720, 1280));
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest, ImageGetSizeClearsException) {
+  MockJNIEnvProvider provider;
+  auto& env = provider.env();
+  EXPECT_CALL(env, GetObjectRefType(_)).WillRepeatedly(Return(JNILocalRefType));
+  EXPECT_CALL(env, NewLocalRef(_)).WillRepeatedly(ReturnArg<0>());
+  EXPECT_CALL(env, DeleteLocalRef(_)).WillRepeatedly(Return());
+  EXPECT_CALL(env, CallIntMethodV(_, _, _)).WillOnce(Return(0));
+  EXPECT_CALL(env, ExceptionCheck()).WillOnce(Return(JNI_TRUE));
+  EXPECT_CALL(env, ExceptionDescribe()).WillOnce(Return());
+  EXPECT_CALL(env, ExceptionClear()).WillOnce(Return());
+  fml::jni::JavaObjectWeakGlobalRef flutter_jni_object;
+  PlatformViewAndroidJNIImpl jni(flutter_jni_object);
+  JavaLocalRef image(&env, reinterpret_cast<jobject>(123));
+  EXPECT_EQ(jni.ImageGetSize(image), std::nullopt);
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {

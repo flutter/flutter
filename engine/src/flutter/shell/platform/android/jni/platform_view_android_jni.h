@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 
+#include <optional>
 #include <utility>
 
 #include "flutter/fml/mapping.h"
@@ -140,6 +141,10 @@ class PlatformViewAndroidJNI {
   /// @brief      Grab the HardwareBuffer from image.
   ///
   virtual JavaLocalRef ImageGetHardwareBuffer(JavaLocalRef image) = 0;
+
+  /// Returns the logical dimensions of this acquired image, excluding
+  /// allocation padding.
+  virtual std::optional<SkISize> ImageGetSize(JavaLocalRef image) = 0;
 
   //----------------------------------------------------------------------------
   /// @brief      Call close on image.
