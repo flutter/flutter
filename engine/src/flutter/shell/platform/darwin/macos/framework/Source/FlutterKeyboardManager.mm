@@ -92,6 +92,18 @@ typedef void (^VoidBlock)();
 @property(nonatomic, nullable) NSEvent* eventBeingDispatched;
 
 /**
+ * Key codes whose key-down was consumed by an active IME composition, and
+ * whose key-up must therefore be swallowed as well.
+ */
+@property(nonatomic) NSMutableSet<NSNumber*>* keyCodesConsumedByComposition;
+
+/**
+ * The event that the text input system has already declined ahead of the
+ * responders, so |dispatchTextEvent| does not run the input context twice.
+ */
+@property(nonatomic, nullable) NSEvent* eventOfferedToTextInput;
+
+/**
  * Add a primary responder, which asynchronously decides whether to handle an
  * event.
  */
@@ -177,6 +189,7 @@ typedef void (^VoidBlock)();
                                                                                sharedInstance]]]];
 
     _pendingEvents = [[NSMutableArray alloc] init];
+    _keyCodesConsumedByComposition = [[NSMutableSet alloc] init];
     _layoutMap = [NSMutableDictionary<NSNumber*, NSNumber*> dictionary];
 
     _keyboardLayout = keyboardLayout;
@@ -245,6 +258,31 @@ typedef void (^VoidBlock)();
 - (void)performProcessEvent:(NSEvent*)event
                 withContext:(id<FlutterKeyboardManagerEventContext>)context
                    onFinish:(VoidBlock)onFinish {
+  // The key-up of a key whose key-down was consumed by the IME must be
+  // swallowed too, or the framework would receive an up event for a key it
+  // never saw go down. The composition may have already ended by now.
+  if (event.type == NSEventTypeKeyUp &&
+      [_keyCodesConsumedByComposition containsObject:@(event.keyCode)]) {
+    [_keyCodesConsumedByComposition removeObject:@(event.keyCode)];
+    onFinish();
+    return;
+  }
+
+  // While the input method is composing, offer key-downs to the text input
+  // system first: a key the IME consumes (such as the Enter that commits a
+  // conversion) is an input-method interaction and must not also trigger
+  // the framework's shortcuts and key listeners. This matches Windows,
+  // where keys claimed by the IME arrive as VK_PROCESSKEY.
+  // See https://github.com/flutter/flutter/issues/190525
+  if (event.type == NSEventTypeKeyDown && [context isComposing]) {
+    if ([context onTextInputKeyEvent:event]) {
+      [_keyCodesConsumedByComposition addObject:@(event.keyCode)];
+      onFinish();
+      return;
+    }
+    _eventOfferedToTextInput = event;
+  }
+
   // Having no primary responders require extra logic, but Flutter hard-codes
   // all primary responders, so this is a situation that Flutter will never
   // encounter.
@@ -273,7 +311,9 @@ typedef void (^VoidBlock)();
 
 - (void)dispatchTextEvent:(NSEvent*)event
               withContext:(id<FlutterKeyboardManagerEventContext>)context {
-  if ([context onTextInputKeyEvent:event]) {
+  // An event that the text input system already declined ahead of the
+  // responders must not go through the input context a second time.
+  if (_eventOfferedToTextInput != event && [context onTextInputKeyEvent:event]) {
     return;
   }
   NSResponder* nextResponder = context.nextResponder;
