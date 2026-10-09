@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_RESOLVER_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_RESOLVER_H_
 
+#include <functional>
 #include <memory>
 
 #include "flutter/common/graphics/texture.h"
@@ -24,9 +25,15 @@
 namespace flutter {
 class EmbedderExternalTextureResolver {
  public:
+  using CustomExternalTextureCallback =
+      std::function<std::unique_ptr<Texture>(int64_t texture_id)>;
+
   EmbedderExternalTextureResolver() = default;
 
   ~EmbedderExternalTextureResolver() = default;
+
+  explicit EmbedderExternalTextureResolver(
+      CustomExternalTextureCallback custom_callback);
 
 #ifdef SHELL_ENABLE_GL
   explicit EmbedderExternalTextureResolver(
@@ -48,6 +55,8 @@ class EmbedderExternalTextureResolver {
   bool SupportsExternalTextures();
 
  private:
+  CustomExternalTextureCallback custom_callback_;
+
 #ifdef SHELL_ENABLE_GL
   EmbedderExternalTextureGL::ExternalTextureCallback gl_callback_;
 #endif

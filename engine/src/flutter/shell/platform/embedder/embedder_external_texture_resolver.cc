@@ -9,6 +9,10 @@
 
 namespace flutter {
 
+EmbedderExternalTextureResolver::EmbedderExternalTextureResolver(
+    CustomExternalTextureCallback custom_callback)
+    : custom_callback_(std::move(custom_callback)) {}
+
 #ifdef SHELL_ENABLE_GL
 EmbedderExternalTextureResolver::EmbedderExternalTextureResolver(
     EmbedderExternalTextureGL::ExternalTextureCallback gl_callback)
@@ -29,6 +33,10 @@ EmbedderExternalTextureResolver::EmbedderExternalTextureResolver(
 
 std::unique_ptr<Texture>
 EmbedderExternalTextureResolver::ResolveExternalTexture(int64_t texture_id) {
+  if (custom_callback_) {
+    return custom_callback_(texture_id);
+  }
+
 #ifdef SHELL_ENABLE_GL
   if (gl_callback_) {
     return std::make_unique<EmbedderExternalTextureGL>(texture_id,
@@ -54,6 +62,10 @@ EmbedderExternalTextureResolver::ResolveExternalTexture(int64_t texture_id) {
 }
 
 bool EmbedderExternalTextureResolver::SupportsExternalTextures() {
+  if (custom_callback_) {
+    return true;
+  }
+
 #ifdef SHELL_ENABLE_GL
   if (gl_callback_) {
     return true;

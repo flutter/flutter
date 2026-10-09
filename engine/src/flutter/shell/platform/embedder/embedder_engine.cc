@@ -37,9 +37,13 @@ EmbedderEngine::EmbedderEngine(
                                               on_create_rasterizer)),
       external_texture_resolver_(std::move(external_texture_resolver)) {}
 
-EmbedderEngine::EmbedderEngine(const TaskRunners& task_runners,
-                               std::unique_ptr<Shell> spawned_shell)
-    : task_runners_(task_runners), shell_(std::move(spawned_shell)) {}
+EmbedderEngine::EmbedderEngine(
+    const TaskRunners& task_runners,
+    std::unique_ptr<Shell> spawned_shell,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
+    : task_runners_(task_runners),
+      shell_(std::move(spawned_shell)),
+      external_texture_resolver_(std::move(external_texture_resolver)) {}
 
 EmbedderEngine::~EmbedderEngine() = default;
 
@@ -72,7 +76,9 @@ std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
     RunConfiguration run_configuration,
     const std::string& initial_route,
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
-    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer) const {
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
+    const {
   if (!IsValid()) {
     return nullptr;
   }
@@ -85,7 +91,8 @@ std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
   const TaskRunners task_runners = spawned_shell->GetTaskRunners();
   // std::make_unique cannot reach the private constructor.
   return std::unique_ptr<EmbedderEngine>(
-      new EmbedderEngine(task_runners, std::move(spawned_shell)));
+      new EmbedderEngine(task_runners, std::move(spawned_shell),
+                         std::move(external_texture_resolver)));
 }
 
 bool EmbedderEngine::CollectShell() {
@@ -219,8 +226,12 @@ bool EmbedderEngine::RegisterTexture(int64_t texture) {
   if (!IsValid() || !external_texture_resolver_) {
     return false;
   }
-  shell_->GetPlatformView()->RegisterTexture(
-      external_texture_resolver_->ResolveExternalTexture(texture));
+  std::unique_ptr<Texture> resolved_texture =
+      external_texture_resolver_->ResolveExternalTexture(texture);
+  if (!resolved_texture) {
+    return false;
+  }
+  shell_->GetPlatformView()->RegisterTexture(std::move(resolved_texture));
   return true;
 }
 

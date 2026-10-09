@@ -5278,6 +5278,90 @@ TEST_F(EmbedderTest, EmbedderGetProcAddressesDeferredLibrary) {
             &FlutterEngineNotifyDartDeferredLibraryLoadError);
 }
 
+namespace {
+
+class TestCustomTexture : public flutter::Texture {
+ public:
+  explicit TestCustomTexture(int64_t id,
+                             bool* unregistered_out = nullptr,
+                             int* frames_marked_out = nullptr)
+      : Texture(id),
+        unregistered_out_(unregistered_out),
+        frames_marked_out_(frames_marked_out) {}
+
+  void Paint(PaintContext& context,
+             const DlRect& bounds,
+             bool freeze,
+             const DlImageSampling sampling) override {}
+
+  void OnGrContextCreated() override {}
+
+  void OnGrContextDestroyed() override {}
+
+  void MarkNewFrameAvailable() override {
+    if (frames_marked_out_) {
+      (*frames_marked_out_)++;
+    }
+  }
+
+  void OnTextureUnregistered() override {
+    if (unregistered_out_) {
+      *unregistered_out_ = true;
+    }
+  }
+
+ private:
+  bool* unregistered_out_;
+  int* frames_marked_out_;
+};
+
+}  // namespace
+
+TEST_F(EmbedderTest, EmbedderExternalTextureResolverCustomCallback) {
+  EmbedderExternalTextureResolver empty_resolver;
+  EXPECT_FALSE(empty_resolver.SupportsExternalTextures());
+  EXPECT_EQ(empty_resolver.ResolveExternalTexture(0), nullptr);
+
+  constexpr int64_t kZeroTextureId = 0;
+  constexpr int64_t kMissingTextureId = 99;
+  EmbedderExternalTextureResolver custom_resolver(
+      [](int64_t texture_id) -> std::unique_ptr<flutter::Texture> {
+        if (texture_id == kZeroTextureId) {
+          return std::make_unique<TestCustomTexture>(texture_id);
+        }
+        return nullptr;
+      });
+  EXPECT_TRUE(custom_resolver.SupportsExternalTextures());
+
+  std::unique_ptr<flutter::Texture> resolved =
+      custom_resolver.ResolveExternalTexture(kZeroTextureId);
+  ASSERT_NE(resolved, nullptr);
+  EXPECT_EQ(resolved->Id(), kZeroTextureId);
+  EXPECT_EQ(custom_resolver.ResolveExternalTexture(kMissingTextureId), nullptr);
+}
+
+TEST_F(EmbedderTest, EmbedderExternalTextureAllowsZeroTextureIdentifier) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Software context has no external texture resolver configured, so
+  // registering texture 0 reaches EmbedderEngine::RegisterTexture and returns
+  // kInternalInconsistency rather than kInvalidArguments.
+  constexpr int64_t kZeroTextureId = 0;
+  EXPECT_EQ(FlutterEngineRegisterExternalTexture(engine.get(), kZeroTextureId),
+            kInternalInconsistency);
+  EXPECT_EQ(FlutterEngineMarkExternalTextureFrameAvailable(engine.get(),
+                                                           kZeroTextureId),
+            kSuccess);
+  EXPECT_EQ(
+      FlutterEngineUnregisterExternalTexture(engine.get(), kZeroTextureId),
+      kSuccess);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

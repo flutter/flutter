@@ -60,11 +60,11 @@ class EmbedderEngine {
   ///
   ///             The new engine shares this engine's task runners, and its
   ///             root isolate is already running |run_configuration| when this
-  ///             returns. It owns no threads, run configuration or texture
-  ///             resolver, so RunTask(), RunRootIsolate() and
-  ///             RegisterTexture() fail on it. It does not keep this engine
-  ///             alive, and it must be destroyed before the threads behind the
-  ///             shared task runners are.
+  ///             returns. It owns no threads or run configuration, so RunTask()
+  ///             and RunRootIsolate() fail on it. RegisterTexture() succeeds
+  ///             only when |external_texture_resolver| is non-null. It does not
+  ///             keep this engine alive, and it must be destroyed before the
+  ///             threads behind the shared task runners are.
   ///
   /// @return     The new engine, or nullptr if this engine has no shell or the
   ///             spawn failed.
@@ -73,7 +73,9 @@ class EmbedderEngine {
       RunConfiguration run_configuration,
       const std::string& initial_route,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,
-      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer) const;
+      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+      std::unique_ptr<EmbedderExternalTextureResolver>
+          external_texture_resolver = nullptr) const;
 
   bool CollectShell();
 
@@ -145,7 +147,9 @@ class EmbedderEngine {
  private:
   // Adopts |spawned_shell|, a running shell returned by Shell::Spawn.
   EmbedderEngine(const TaskRunners& task_runners,
-                 std::unique_ptr<Shell> spawned_shell);
+                 std::unique_ptr<Shell> spawned_shell,
+                 std::unique_ptr<EmbedderExternalTextureResolver>
+                     external_texture_resolver);
 
   std::unique_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
