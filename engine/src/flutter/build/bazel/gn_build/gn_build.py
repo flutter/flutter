@@ -57,29 +57,43 @@ def _run(argv, cwd=None, log_path=None):
 # ---------------------------------------------------------------------------
 
 
-def _reset_dir(path, keep=()):
-    """Empties `path` except for the entries named in `keep`."""
-    os.makedirs(path, exist_ok=True)
-    for entry in os.listdir(path):
-        if entry in keep:
-            continue
-        full = os.path.join(path, entry)
-        if os.path.islink(full) or os.path.isfile(full):
-            os.unlink(full)
-        else:
-            shutil.rmtree(full)
+def _prune_tree(root, expected, keep=()):
+    """Removes links under `root` that are not in `expected`, and the directories left empty.
+
+    Entries of `root` named in `keep` (the build directory) are not entered.
+    """
+    removed = 0
+    directories = []
+    # Top-down, so that dropping names from `dirnames` prunes the walk.
+    for dirpath, dirnames, filenames in os.walk(root):
+        if dirpath == root:
+            dirnames[:] = [d for d in dirnames if d not in keep]
+        directories.append(dirpath)
+        # Symlinks to directories are listed in dirnames but not entered.
+        for name in filenames + [d for d in dirnames if os.path.islink(os.path.join(dirpath, d))]:
+            full = os.path.join(dirpath, name)
+            if full not in expected:
+                os.unlink(full)
+                removed += 1
+    for directory in reversed(directories):
+        if directory != root and not os.listdir(directory):
+            os.rmdir(directory)
+    return removed
 
 
 def _link_tree(root, tree):
-    """Creates the GN source root: a symlink per input file.
+    """Creates or refreshes the GN source root: a symlink per input file.
 
     Each entry of `tree` maps the files of one Bazel target (`files`, below
     the execution-root-relative directory `base`) to a path under the root.
     Linking file by file rather than directory by directory means that the GN
     build sees exactly the action's declared inputs, whether or not the
-    action is sandboxed.
+    action is sandboxed. Links that are already right are kept, so that a
+    persistent root (unsandboxed runs) is refreshed rather than rebuilt.
+
+    Returns the set of link paths.
     """
-    count = 0
+    links = set()
     made_dirs = set()
     for entry in tree:
         base = entry["base"]
@@ -98,12 +112,15 @@ def _link_tree(root, tree):
             target = os.path.relpath(path, link_dir)
             if os.path.lexists(link):
                 if os.path.islink(link) and os.readlink(link) == target:
-                    count += 1
+                    links.add(link)
                     continue
-                os.unlink(link)
+                if os.path.isdir(link) and not os.path.islink(link):
+                    shutil.rmtree(link)
+                else:
+                    os.unlink(link)
             os.symlink(target, link)
-            count += 1
-    return count
+            links.add(link)
+    return links
 
 
 def _root_path(root, tree, path):
@@ -241,19 +258,19 @@ def main(argv):
     os.makedirs(out_dir, exist_ok=True)
 
     started = time.monotonic()
-    _reset_dir(root, keep=("out",))
     links = _link_tree(root, params["tree"])
+    _prune_tree(root, links, keep=("out",))
     linked = time.monotonic()
 
     args = dict(params["gn_args"])
     args.setdefault("concurrent_toolchain_jobs", str(jobs))
     _write_args(out_dir, args)
 
-    # GN records paths relative to the build directory, including its own
-    # (in the regeneration rule) and the script interpreter's, as long as
-    # they are inside the root; so both are used through the symlink tree
-    # when the tree contains them.
-    gn = _root_path(root, params["tree"], params["gn"]) or params["gn"]
+    # GN records the script interpreter's path relative to the build
+    # directory when it is inside the root, so it is used through the symlink
+    # tree when the tree contains it. (GN resolves its own path for the
+    # regeneration rule, so there is no point in doing the same for gn.)
+    gn = params["gn"]
     python = _root_path(root, params["tree"], params["python"]) or params["python"]
     gn_switches = [
         "--root=" + root,
@@ -290,7 +307,7 @@ def main(argv):
     finished = time.monotonic()
 
     _log("gn_build %s: %d links %.1fs, gn gen %.1fs, ninja -j%d %.0fs, outputs %.1fs" % (
-        params["root_target"], links, linked - started, generated - linked, jobs,
+        params["root_target"], len(links), linked - started, generated - linked, jobs,
         built - generated, finished - built))
     return 0
 
