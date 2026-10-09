@@ -448,7 +448,14 @@ class FlutterPlugin : Plugin<Project> {
         getPluginHandler(projectToAddTasksTo).configurePlugins(engineVersion!!)
         FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(
             projectToAddTasksTo,
-            getPluginHandler(projectToAddTasksTo).getPluginList()
+            getPluginHandler(projectToAddTasksTo).getPluginList(),
+            // validateHostAppCompileSdk checks the host app's compileSdk instead.
+            checkCompileSdk = false
+        )
+        FlutterPluginUtils.addTaskForValidatingHostAppCompileSdk(
+            moduleProject = projectToAddTasksTo,
+            hostAppProject = appProject,
+            pluginList = getPluginHandler(projectToAddTasksTo).getPluginList()
         )
         FlutterPluginUtils.detectApplyingKotlinGradlePlugin(
             projectToAddTasksTo

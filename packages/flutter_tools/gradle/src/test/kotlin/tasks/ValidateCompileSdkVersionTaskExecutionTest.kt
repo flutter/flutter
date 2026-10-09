@@ -31,7 +31,7 @@ class ValidateCompileSdkVersionTaskExecutionTest {
 
         mockkObject(ValidateCompileSdkVersionTask.Companion)
         every {
-            ValidateCompileSdkVersionTask.performValidation(any(), any(), any(), any(), any(), any())
+            ValidateCompileSdkVersionTask.performValidation(any(), any(), any(), any(), any(), any(), any())
         } returns Unit
 
         try {
@@ -44,7 +44,48 @@ class ValidateCompileSdkVersionTaskExecutionTest {
                     pluginCompileSdks = mapOf("camera" to 35),
                     pluginNdkVersions = mapOf("camera" to "26.3.11579264"),
                     logger = any(),
-                    projectDir = projectDir
+                    projectDir = projectDir,
+                    checkCompileSdk = true
+                )
+            }
+        } finally {
+            unmockkObject(ValidateCompileSdkVersionTask.Companion)
+        }
+    }
+
+    @Test
+    fun `ValidateCompileSdkVersionTask execution forwards checkCompileSdk`(
+        @TempDir tempDir: Path
+    ) {
+        val project = ProjectBuilder.builder().build()
+        val task = project.tasks.register("testValidateTask", ValidateCompileSdkVersionTask::class.java).get()
+
+        val projectDir = tempDir.resolve("app").toFile()
+
+        task.projectCompileSdk.set(33)
+        task.projectNdkVersion.set("24.3.11579264")
+        task.pluginCompileSdks.set(mapOf("camera" to 35))
+        task.pluginNdkVersions.set(mapOf("camera" to "26.3.11579264"))
+        task.projectDir.set(projectDir)
+        task.checkCompileSdk.set(false)
+
+        mockkObject(ValidateCompileSdkVersionTask.Companion)
+        every {
+            ValidateCompileSdkVersionTask.performValidation(any(), any(), any(), any(), any(), any(), any())
+        } returns Unit
+
+        try {
+            task.run()
+
+            verify {
+                ValidateCompileSdkVersionTask.performValidation(
+                    projSdk = any(),
+                    projNdk = any(),
+                    pluginCompileSdks = any(),
+                    pluginNdkVersions = any(),
+                    logger = any(),
+                    projectDir = any(),
+                    checkCompileSdk = false
                 )
             }
         } finally {

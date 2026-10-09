@@ -9,6 +9,7 @@ import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.DynamicFeatureBuildType
 import com.android.build.api.dsl.LibraryBuildType
+import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.Variant
 import com.android.build.api.variant.VariantBuilder
@@ -866,6 +867,119 @@ class FlutterPluginUtilsTest {
                 any()
             )
         }
+    }
+
+    @Test
+    fun `detectLowCompileSdkVersionOrNdkVersion forwards checkCompileSdk to the task`() {
+        val project = mockk<Project>(relaxed = true)
+        val taskContainer = mockk<org.gradle.api.tasks.TaskContainer>(relaxed = true)
+        val taskProvider = mockk<org.gradle.api.tasks.TaskProvider<com.flutter.gradle.tasks.ValidateCompileSdkVersionTask>>()
+        every { project.tasks } returns taskContainer
+        val registerAction = slot<Action<com.flutter.gradle.tasks.ValidateCompileSdkVersionTask>>()
+        every {
+            taskContainer.register(
+                "validateCompileSdkVersion",
+                com.flutter.gradle.tasks.ValidateCompileSdkVersionTask::class.java,
+                capture(registerAction)
+            )
+        } returns taskProvider
+        val androidComponents = mockk<AndroidComponentsExtension<Any, VariantBuilder, Variant>>()
+        every {
+            project.extensions.getByType(AndroidComponentsExtension::class.java)
+        } returns androidComponents as AndroidComponentsExtension<*, *, *>
+        every { androidComponents.finalizeDsl(match<(Any) -> Unit> { true }) } returns Unit
+
+        FlutterPluginUtils.detectLowCompileSdkVersionOrNdkVersion(project, emptyList(), checkCompileSdk = false)
+
+        val task = mockk<com.flutter.gradle.tasks.ValidateCompileSdkVersionTask>(relaxed = true)
+        registerAction.captured.execute(task)
+        verify { task.checkCompileSdk.set(false) }
+    }
+
+    // getAarMinCompileSdk
+    private fun mockLibraryProject(
+        compileSdk: Int?,
+        explicitMinCompileSdk: Int?
+    ): Project {
+        val project = mockk<Project>()
+        val libraryExtension = mockk<LibraryExtension>()
+        every { project.extensions.findByName("android") } returns libraryExtension
+        every { libraryExtension.compileSdk } returns compileSdk
+        every { libraryExtension.compileSdkPreview } returns null
+        every { libraryExtension.defaultConfig.aarMetadata.minCompileSdk } returns explicitMinCompileSdk
+        return project
+    }
+
+    @Test
+    fun `getAarMinCompileSdk prefers an explicit aarMetadata minCompileSdk`() {
+        val project = mockLibraryProject(compileSdk = 37, explicitMinCompileSdk = 34)
+        assertEquals(34, FlutterPluginUtils.getAarMinCompileSdk(project, enforcedByDefault = true))
+        assertEquals(34, FlutterPluginUtils.getAarMinCompileSdk(project, enforcedByDefault = false))
+    }
+
+    @Test
+    fun `getAarMinCompileSdk uses compileSdk when AGP enforces it by default`() {
+        val project = mockLibraryProject(compileSdk = 37, explicitMinCompileSdk = null)
+        assertEquals(37, FlutterPluginUtils.getAarMinCompileSdk(project, enforcedByDefault = true))
+    }
+
+    @Test
+    fun `getAarMinCompileSdk returns null when AGP does not enforce it by default`() {
+        val project = mockLibraryProject(compileSdk = 37, explicitMinCompileSdk = null)
+        assertNull(FlutterPluginUtils.getAarMinCompileSdk(project, enforcedByDefault = false))
+    }
+
+    @Test
+    fun `getAarMinCompileSdk returns null for non-library projects`() {
+        val appProject = mockk<Project>()
+        every { appProject.extensions.findByName("android") } returns mockk<ApplicationExtension>()
+        assertNull(FlutterPluginUtils.getAarMinCompileSdk(appProject, enforcedByDefault = true))
+
+        val nonAndroidProject = mockk<Project>()
+        every { nonAndroidProject.extensions.findByName("android") } returns null
+        assertNull(FlutterPluginUtils.getAarMinCompileSdk(nonAndroidProject, enforcedByDefault = true))
+    }
+
+    // addTaskForValidatingHostAppCompileSdk
+    @Test
+    fun `addTaskForValidatingHostAppCompileSdk makes the host app preBuild depend on the validation task`() {
+        val moduleProject = mockk<Project>(relaxed = true)
+        val hostAppProject = mockk<Project>(relaxed = true)
+        val moduleTasks = mockk<org.gradle.api.tasks.TaskContainer>()
+        val hostTasks = mockk<org.gradle.api.tasks.TaskContainer>()
+        val validateTaskProvider =
+            mockk<org.gradle.api.tasks.TaskProvider<com.flutter.gradle.tasks.ValidateHostAppCompileSdkTask>>()
+        every { moduleProject.tasks } returns moduleTasks
+        every { hostAppProject.tasks } returns hostTasks
+        every {
+            moduleTasks.register(
+                com.flutter.gradle.tasks.ValidateHostAppCompileSdkTask.TASK_NAME,
+                com.flutter.gradle.tasks.ValidateHostAppCompileSdkTask::class.java,
+                any<Action<com.flutter.gradle.tasks.ValidateHostAppCompileSdkTask>>()
+            )
+        } returns validateTaskProvider
+        val configureEachAction = slot<Action<Task>>()
+        every { hostTasks.configureEach(capture(configureEachAction)) } returns Unit
+
+        FlutterPluginUtils.addTaskForValidatingHostAppCompileSdk(moduleProject, hostAppProject, emptyList())
+
+        verify {
+            moduleTasks.register(
+                com.flutter.gradle.tasks.ValidateHostAppCompileSdkTask.TASK_NAME,
+                com.flutter.gradle.tasks.ValidateHostAppCompileSdkTask::class.java,
+                any<Action<com.flutter.gradle.tasks.ValidateHostAppCompileSdkTask>>()
+            )
+        }
+
+        val preBuildTask = mockk<Task>(relaxed = true)
+        every { preBuildTask.name } returns "preBuild"
+        configureEachAction.captured.execute(preBuildTask)
+        verify { preBuildTask.dependsOn(validateTaskProvider) }
+
+        val otherTask = mockk<Task>(relaxed = true)
+        every { otherTask.name } returns "assembleDebug"
+        configureEachAction.captured.execute(otherTask)
+        verify(exactly = 0) { otherTask.dependsOn(any()) }
     }
 
     private fun writeBuildFile(
