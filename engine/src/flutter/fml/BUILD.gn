@@ -87,6 +87,7 @@ source_set("fml") {
     "task_runner_util.h",
     "task_source.cc",
     "task_source.h",
+    "task_source_grade.h",
     "thread.cc",
     "thread.h",
     "time/time_delta.h",
@@ -110,6 +111,7 @@ source_set("fml") {
   public_deps = [
     ":build_config",
     ":command_line",
+    ":macros",
     ":string_conversion",
   ]
 
@@ -267,6 +269,17 @@ source_set("command_line") {
     "command_line.cc",
     "command_line.h",
   ]
+
+  public_deps = [ ":macros" ]
+
+  public_configs = [
+    "//flutter:config",
+    "//flutter/common:flutter_config",
+  ]
+}
+
+source_set("macros") {
+  sources = [ "macros.h" ]
 
   public_configs = [
     "//flutter:config",
