@@ -5390,6 +5390,103 @@ TEST_F(EmbedderTest, EmbedderNotifyCreatedAndDestroyedValidationAndLifecycle) {
   EXPECT_EQ(FlutterEngineNotifyCreated(engine.get()), kSuccess);
 }
 
+TEST_F(EmbedderTest, EmbedderScreenshotAndFreeScreenshot) {
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  EXPECT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_EQ(procs.Screenshot, &FlutterEngineScreenshot);
+  EXPECT_EQ(procs.FreeScreenshot, &FlutterEngineFreeScreenshot);
+
+  FlutterScreenshotRequest request = {};
+  request.struct_size = sizeof(FlutterScreenshotRequest);
+  request.type = kFlutterScreenshotTypeCompressedImage;
+  request.base64_encode = false;
+
+  FlutterScreenshot screenshot = {};
+  screenshot.struct_size = sizeof(FlutterScreenshot);
+
+  // Argument validation checks.
+  EXPECT_EQ(FlutterEngineScreenshot(nullptr, &request, &screenshot),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineFreeScreenshot(nullptr), kInvalidArguments);
+
+  FlutterScreenshot invalid_screenshot = {};
+  invalid_screenshot.struct_size = 0;
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&invalid_screenshot),
+            kInvalidArguments);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Test surface dimensions for software rendering screenshot capture.
+  constexpr int32_t kSurfaceWidth = 300;
+  constexpr int32_t kSurfaceHeight = 200;
+  constexpr double kSurfacePixelRatio = 1.0;
+  builder.SetSurface(DlISize(kSurfaceWidth, kSurfaceHeight));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("render_implicit_view");
+  builder.SetRenderTargetType(
+      EmbedderTestBackingStoreProducer::RenderTargetType::kSoftwareBuffer);
+
+  fml::AutoResetWaitableEvent latch;
+  context.GetCompositor().SetNextPresentCallback(
+      [&](FlutterViewId view_id, const FlutterLayer** layers,
+          size_t layers_count) {
+        ASSERT_EQ(view_id, kFlutterImplicitViewId);
+        latch.Signal();
+      });
+
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Before FlutterEngineRunInitialized, the shell is not running yet.
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &request, &screenshot),
+            kInvalidArguments);
+
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), nullptr, &screenshot),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineScreenshot(engine.get(), &request, nullptr),
+            kInvalidArguments);
+  EXPECT_EQ(
+      FlutterEngineScreenshot(engine.get(), &request, &invalid_screenshot),
+      kInvalidArguments);
+
+  FlutterScreenshotRequest invalid_request = {};
+  invalid_request.struct_size = 0;
+  EXPECT_EQ(
+      FlutterEngineScreenshot(engine.get(), &invalid_request, &screenshot),
+      kInvalidArguments);
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = kSurfaceWidth;
+  event.height = kSurfaceHeight;
+  event.pixel_ratio = kSurfacePixelRatio;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  latch.Wait();
+
+  // Capture a compressed PNG screenshot of the last layer tree.
+  ASSERT_EQ(FlutterEngineScreenshot(engine.get(), &request, &screenshot),
+            kSuccess);
+  EXPECT_NE(screenshot.data, nullptr);
+  EXPECT_GT(screenshot.data_length, 0u);
+  EXPECT_EQ(screenshot.width, static_cast<size_t>(kSurfaceWidth));
+  EXPECT_EQ(screenshot.height, static_cast<size_t>(kSurfaceHeight));
+  ASSERT_NE(screenshot.format_description, nullptr);
+  EXPECT_NE(std::string(screenshot.format_description), "");
+  EXPECT_NE(screenshot.destruction_callback, nullptr);
+
+  EXPECT_EQ(FlutterEngineFreeScreenshot(&screenshot), kSuccess);
+  EXPECT_EQ(screenshot.data, nullptr);
+  EXPECT_EQ(screenshot.data_length, 0u);
+  EXPECT_EQ(screenshot.format, kFlutterScreenshotFormatUnknown);
+  EXPECT_EQ(screenshot.format_description, nullptr);
+  EXPECT_EQ(screenshot.user_data, nullptr);
+  EXPECT_EQ(screenshot.destruction_callback, nullptr);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

@@ -142,6 +142,9 @@ class EmbedderEngine {
                                     const std::string& error_message,
                                     bool transient);
 
+  Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
+                                    bool base64_encode) const;
+
   Shell& GetShell();
 
  private:

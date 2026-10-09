@@ -113,11 +113,15 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
-    PlatformDispatchTable platform_dispatch_table)
+    PlatformDispatchTable platform_dispatch_table,
+    std::shared_ptr<PlatformMessageHandler> platform_message_handler)
     : PlatformView(delegate, task_runners),
-      platform_message_handler_(new EmbedderPlatformMessageHandler(
-          GetWeakPtr(),
-          task_runners.GetPlatformTaskRunner())),
+      platform_message_handler_(
+          platform_message_handler
+              ? std::move(platform_message_handler)
+              : std::make_shared<EmbedderPlatformMessageHandler>(
+                    GetWeakPtr(),
+                    task_runners.GetPlatformTaskRunner())),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 
 PlatformViewEmbedder::~PlatformViewEmbedder() = default;

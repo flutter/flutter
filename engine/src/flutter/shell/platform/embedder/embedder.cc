@@ -4143,6 +4143,134 @@ FlutterEngineResult FlutterEngineNotifyDestroyed(
                    "destroyed.");
 }
 
+namespace {
+
+struct EmbedderScreenshotContext {
+  sk_sp<SkData> data;
+  std::string format;
+};
+
+}  // namespace
+
+FlutterEngineResult FlutterEngineScreenshot(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterScreenshotRequest* request,
+    FlutterScreenshot* screenshot_out) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  if (request == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Screenshot request was null.");
+  }
+
+  if (request->struct_size < sizeof(FlutterScreenshotRequest)) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "FlutterScreenshotRequest struct_size is invalid.");
+  }
+
+  if (screenshot_out == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Screenshot output pointer was null.");
+  }
+
+  if (screenshot_out->struct_size < sizeof(FlutterScreenshot)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "FlutterScreenshot struct_size is invalid.");
+  }
+
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Engine handle was not running.");
+  }
+
+  flutter::Rasterizer::ScreenshotType rasterizer_type;
+  switch (request->type) {
+    case kFlutterScreenshotTypeSkiaPicture:
+      rasterizer_type = flutter::Rasterizer::ScreenshotType::SkiaPicture;
+      break;
+    case kFlutterScreenshotTypeUncompressedImage:
+      rasterizer_type = flutter::Rasterizer::ScreenshotType::UncompressedImage;
+      break;
+    case kFlutterScreenshotTypeCompressedImage:
+      rasterizer_type = flutter::Rasterizer::ScreenshotType::CompressedImage;
+      break;
+    case kFlutterScreenshotTypeSurfaceData:
+      rasterizer_type = flutter::Rasterizer::ScreenshotType::SurfaceData;
+      break;
+    default:
+      return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                "Invalid FlutterScreenshotType specified.");
+  }
+
+  auto screenshot = embedder_engine->Screenshot(
+      rasterizer_type, SAFE_ACCESS(request, base64_encode, false));
+  if (!screenshot.data) {
+    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
+                              "Could not capture screenshot.");
+  }
+
+  FlutterScreenshotFormat pixel_format = kFlutterScreenshotFormatUnknown;
+  switch (screenshot.pixel_format) {
+    case flutter::Rasterizer::ScreenshotFormat::kUnknown:
+      pixel_format = kFlutterScreenshotFormatUnknown;
+      break;
+    case flutter::Rasterizer::ScreenshotFormat::kR8G8B8A8UNormInt:
+      pixel_format = kFlutterScreenshotFormatR8G8B8A8UNormInt;
+      break;
+    case flutter::Rasterizer::ScreenshotFormat::kB8G8R8A8UNormInt:
+      pixel_format = kFlutterScreenshotFormatB8G8R8A8UNormInt;
+      break;
+    case flutter::Rasterizer::ScreenshotFormat::kR16G16B16A16Float:
+      pixel_format = kFlutterScreenshotFormatR16G16B16A16Float;
+      break;
+  }
+
+  auto* context = new EmbedderScreenshotContext{
+      .data = std::move(screenshot.data),
+      .format = std::move(screenshot.format),
+  };
+
+  screenshot_out->data = context->data->bytes();
+  screenshot_out->data_length = context->data->size();
+  screenshot_out->width = static_cast<size_t>(screenshot.frame_size.width);
+  screenshot_out->height = static_cast<size_t>(screenshot.frame_size.height);
+  screenshot_out->format = pixel_format;
+  screenshot_out->format_description = context->format.c_str();
+  screenshot_out->user_data = context;
+  screenshot_out->destruction_callback = [](void* user_data) {
+    delete reinterpret_cast<EmbedderScreenshotContext*>(user_data);
+  };
+
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineFreeScreenshot(FlutterScreenshot* screenshot) {
+  if (screenshot == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Screenshot was null.");
+  }
+
+  if (screenshot->struct_size < sizeof(FlutterScreenshot)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "FlutterScreenshot struct_size is invalid.");
+  }
+
+  if (screenshot->destruction_callback != nullptr) {
+    screenshot->destruction_callback(screenshot->user_data);
+  }
+
+  screenshot->data = nullptr;
+  screenshot->data_length = 0;
+  screenshot->format = kFlutterScreenshotFormatUnknown;
+  screenshot->format_description = nullptr;
+  screenshot->user_data = nullptr;
+  screenshot->destruction_callback = nullptr;
+
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -4205,6 +4333,8 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
            FlutterEngineNotifyDartDeferredLibraryLoadError);
   SET_PROC(NotifyCreated, FlutterEngineNotifyCreated);
   SET_PROC(NotifyDestroyed, FlutterEngineNotifyDestroyed);
+  SET_PROC(Screenshot, FlutterEngineScreenshot);
+  SET_PROC(FreeScreenshot, FlutterEngineFreeScreenshot);
 #undef SET_PROC
 
   return kSuccess;
