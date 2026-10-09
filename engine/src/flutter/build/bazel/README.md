@@ -80,7 +80,16 @@ bazelisk test //engine/src/flutter/build/bazel/toolchains/tests:cc_toolchain_smo
 ```
 
 checks the language mode, the libc++ in use, the sysroot, and that a C file
-and a threaded C++ program build and run.
+and a threaded C++ program build and run. And
+
+```
+dart engine/src/flutter/tools/bazel_tools/bin/check_hermeticity.dart [-- <bazel options>]
+```
+
+scans the action graph of `deps(//...)` and fails if any command line,
+parameter file or environment variable mentions a path outside the execution
+root, or if a C/C++ action runs anything but a `clang_<platform>` binary (see
+`tools/bazel_tools/README.md`).
 
 ## Adding a dependency
 

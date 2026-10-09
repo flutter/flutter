@@ -37,3 +37,35 @@ computes per host (`host_os`, `host_cpu`, `checkout_*`) are preserved as
 `{host_os}`-style placeholders so the generated files are host independent;
 `condition` expressions are kept verbatim for Bazel module extensions to
 evaluate.
+
+## `bin/check_hermeticity.dart`
+
+Scans the Bazel action graph for references to the host machine, the check
+behind the migration's hermeticity metric ("no compile line references
+`/usr/include`, `/usr/bin` or a system compiler"):
+
+```sh
+dart engine/src/flutter/tools/bazel_tools/bin/check_hermeticity.dart            # deps(//...) in the default configuration
+dart engine/src/flutter/tools/bazel_tools/bin/check_hermeticity.dart -- -c opt  # options after -- go to bazel
+dart engine/src/flutter/tools/bazel_tools/bin/check_hermeticity.dart --pattern='deps(//engine/src/flutter/fml:fml_unittests)'
+```
+
+It runs `bazel aquery --output=jsonproto --include_param_files` from the
+repository root (`--bazel` picks the executable, default `bazelisk`; `--input`
+scans a saved document instead) and fails, listing every finding by target and
+mnemonic, if any action
+
+- mentions an absolute path in an argument, a parameter file or an environment
+  variable, other than `/proc/self/cwd` (what Bazel sets `PWD` to in the
+  sandbox) and `/dev/null` — `--allow` adds more;
+- has Bazel's own `PATH` or `PWD` variable set to anything but the value
+  `--incompatible_strict_action_env` gives it;
+- is a C/C++ action (`CppCompile`, `CppLink`, `CppArchive`, ...) whose
+  executable is not a binary of one of the `clang_<platform>` repositories
+  defined in `build/bazel/extensions.bzl`.
+
+The scan is textual: it proves that no command line names anything outside
+the execution root, not that the tools behave hermetically; sandboxing and the
+strict action environment cover that side. `lib/src/hermeticity_check.dart`
+holds the rules, `test/hermeticity_check_test.dart` exercises them on
+synthetic graphs without running Bazel.

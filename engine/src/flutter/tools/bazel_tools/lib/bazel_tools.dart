@@ -6,6 +6,8 @@
 /// repository (`DEPS`, GN build configurations, ...).
 library;
 
+export 'src/check_hermeticity_command.dart';
 export 'src/deps_file.dart';
 export 'src/deps_outputs.dart';
 export 'src/gen_deps_command.dart';
+export 'src/hermeticity_check.dart';
