@@ -26,11 +26,13 @@ class MacOSDevice extends DesktopDevice {
     required super.operatingSystemUtils,
   }) : _processManager = processManager,
        _logger = logger,
+       _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
        super('macos', platformType: PlatformType.macos, ephemeral: false);
 
   final ProcessManager _processManager;
   final Logger _logger;
+  final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
 
   @override
@@ -68,7 +70,7 @@ class MacOSDevice extends DesktopDevice {
     bool usingCISystem = false,
   }) async {
     await buildMacOS(
-      flutterProject: FlutterProject.current(),
+      flutterProject: FlutterProject.current(_fileSystem),
       buildInfo: buildInfo,
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,

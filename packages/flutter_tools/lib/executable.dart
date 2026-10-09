@@ -237,7 +237,11 @@ List<FlutterCommand> generateCommands({
 }) => <FlutterCommand>[
   AnalyzeCommand(
     allProjectValidators: <ProjectValidator>[
-      GeneralInfoProjectValidator(),
+      GeneralInfoProjectValidator(
+        java: toolDependencies.androidContext.java,
+        logger: toolDependencies.toolContext.logger,
+        processManager: toolDependencies.toolContext.processManager,
+      ),
       VariableDumpMachineProjectValidator(
         logger: toolDependencies.toolContext.logger,
         fileSystem: toolDependencies.toolContext.fs,
@@ -245,6 +249,11 @@ List<FlutterCommand> generateCommands({
         git: toolDependencies.toolContext.git,
       ),
     ],
+    androidBuilder: AndroidGradleBuilder.fromContexts(
+      analytics: toolDependencies.analytics,
+      androidContext: toolDependencies.androidContext,
+      toolContext: toolDependencies.toolContext,
+    ),
     suppressAnalytics: !toolDependencies.analytics.okToSend,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,

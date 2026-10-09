@@ -319,7 +319,8 @@ class ToolDependencies {
 
     // 9. Project Factory and Operating System Utilities
     final FlutterProjectFactory finalProjectFactory =
-        projectFactory ?? FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS);
+        projectFactory ??
+        FlutterProjectFactory(config: finalConfig, logger: finalLogger, fileSystem: finalFS);
 
     final finalOS = OperatingSystemUtils(
       fileSystem: finalFS,

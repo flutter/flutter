@@ -39,7 +39,7 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   if (!buildInfo.buildNativeAssets) {
     return (nativeAssetsManifest: null, flutterHookResult: null);
   }
-  final Uri projectUri = FlutterProject.current().directory.uri;
+  final Uri projectUri = FlutterProject.current(globals.fs).directory.uri;
   final String runPackageName = buildInfo.packageConfig.packages
       .firstWhere((Package p) => p.root == projectUri)
       .name;

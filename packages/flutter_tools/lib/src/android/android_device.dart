@@ -546,7 +546,7 @@ class AndroidDevice extends Device {
     if (!prebuiltApplication ||
         _androidSdk.licensesAvailable && _androidSdk.latestVersion == null) {
       _logger.printTrace('Building APK');
-      final FlutterProject project = FlutterProject.current();
+      final FlutterProject project = FlutterProject.current(_fileSystem);
 
       final releaseManifestEngineShellArgs = <String>[
         if (debuggingOptions.buildInfo.mode == BuildMode.release) ...<String>[

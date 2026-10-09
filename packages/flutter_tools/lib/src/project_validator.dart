@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
+import 'android/java.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
@@ -116,6 +119,16 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class GeneralInfoProjectValidator extends ProjectValidator {
+  const GeneralInfoProjectValidator({
+    required this.java,
+    required this.logger,
+    required this.processManager,
+  });
+
+  final Java? java;
+  final Logger logger;
+  final ProcessManager processManager;
+
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
     final FlutterManifest flutterManifest = project.manifest;
@@ -139,7 +152,13 @@ class GeneralInfoProjectValidator extends ProjectValidator {
       result.add(_materialDesignResult(flutterManifest));
       result.add(_pluginValidatorResult(flutterManifest));
     }
-    result.add(await project.android.validateJavaAndGradleAgpVersions());
+    result.add(
+      await project.android.validateJavaAndGradleAgpVersions(
+        java: java,
+        logger: logger,
+        processManager: processManager,
+      ),
+    );
     return result;
   }
 

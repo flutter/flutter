@@ -86,7 +86,7 @@ class WebEntrypointTarget extends Target {
       packageConfigFile,
       logger: environment.logger,
     );
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current(environment.fileSystem);
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
@@ -1289,8 +1289,9 @@ class WebReleaseBundle extends Target {
 
   /// Create version.json file that contains data about version for package_info
   void createVersionFile(Environment environment, Map<String, String> defines) {
-    final versionInfo =
-        jsonDecode(FlutterProject.current().getVersionInfo()) as Map<String, Object?>;
+    final versionInfo = jsonDecode(
+      FlutterProject.current(environment.fileSystem).getVersionInfo(),
+    ) as Map<String, Object?>;
 
     if (defines.containsKey(kBuildNumber)) {
       versionInfo['build_number'] = defines[kBuildNumber];

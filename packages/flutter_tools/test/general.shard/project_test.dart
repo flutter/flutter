@@ -115,7 +115,7 @@ void main() {
           directory.absolute.path,
         );
         expect(
-          FlutterProject.current().directory.absolute.path,
+          FlutterProject.current(globals.fs).directory.absolute.path,
           globals.fs.currentDirectory.absolute.path,
         );
       });
@@ -123,7 +123,10 @@ void main() {
       _testInMemory('buildDirectory uses configured build-dir', () async {
         final Directory directory = globals.fs.directory('myproject');
         globals.config.setValue('build-dir', 'custom_build');
-        final FlutterProject project = FlutterProject.fromDirectory(directory);
+        final FlutterProject project = FlutterProject.fromDirectory(
+          directory,
+          config: globals.config,
+        );
         expect(project.buildDirectory.path, globals.fs.path.join(directory.path, 'custom_build'));
         expect(
           project.ephemeralDirectories.map((Directory d) => d.path),
@@ -139,12 +142,12 @@ void main() {
           FlutterManifest.empty(logger: logger),
           FlutterManifest.empty(logger: logger),
         );
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectNotExists(project.directory);
       });
       _testInMemory('does nothing in plugin or package root project', () async {
         final FlutterProject project = await aPluginProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectNotExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
@@ -183,7 +186,7 @@ dependencies:
 ''');
         final FlutterProject project = FlutterProject.fromDirectory(directory);
 
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
 
         expectNotExists(project.flutterPluginsDependenciesFile);
       });
@@ -193,7 +196,7 @@ dependencies:
         // that a project was a plugin, but shouldn't be as this creates false
         // positives.
         project.directory.childDirectory('example').createSync();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
@@ -207,28 +210,28 @@ dependencies:
       });
       _testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
       });
       _testInMemory('generates Xcode configuration for iOS', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(
           project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'),
         );
       });
       _testInMemory('injects plugins for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(
           androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')),
         );
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
@@ -299,7 +302,7 @@ dependencies:
         final FlutterProject project = await aPluginProject();
         project.example.directory.deleteSync();
 
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expect(
           testLogger.statusText,
           isNot(
@@ -311,7 +314,7 @@ dependencies:
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
 
@@ -325,7 +328,7 @@ dependencies:
           // Don't bother with Android, we just want the manifest.
           project.directory.childDirectory('android').deleteSync(recursive: true);
 
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expect(
             project.flutterPluginsDependenciesFile.readAsStringSync(),
             contains('"dev_dependency":true'),
@@ -348,7 +351,7 @@ dependencies:
           // Create a project that depends on that plugin.
           final FlutterProject project = await projectWithPluginDependency();
 
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expect(
             project.android.generatedPluginRegistrantFile.readAsStringSync(),
             contains('MyPlugin'),
@@ -371,7 +374,7 @@ dependencies:
           // Create a project that depends on that plugin.
           final FlutterProject project = await projectWithPluginDependency();
 
-          await project.regeneratePlatformSpecificTooling(releaseMode: true);
+          await regeneratePlatformSpecificTooling(project, releaseMode: true);
           expect(
             project.android.generatedPluginRegistrantFile.readAsStringSync(),
             isNot(contains('MyPlugin')),
@@ -391,7 +394,7 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.macos.managedDirectory.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expectExists(project.macos.pluginRegistrantImplementation);
         },
         overrides: <Type, Generator>{
@@ -407,7 +410,7 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.macos.managedDirectory.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expectExists(project.macos.generatedXcodePropertiesFile);
         },
         overrides: <Type, Generator>{
@@ -423,7 +426,7 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.linux.cmakeFile.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
           expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
         },
@@ -440,7 +443,7 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.windows.cmakeFile.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await regeneratePlatformSpecificTooling(project, releaseMode: false);
           expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
           expectExists(
             project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'),
@@ -456,7 +459,7 @@ dependencies:
       );
       _testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         expectExists(project.android.hostAppGradleRoot.childFile('settings.gradle'));
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
         expectExists(
@@ -465,7 +468,7 @@ dependencies:
       });
       _testInMemory('creates iOS pod in module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await regeneratePlatformSpecificTooling(project, releaseMode: false);
         final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
         expectExists(flutter.childFile('flutter_export_environment.sh'));
@@ -582,8 +585,11 @@ dependencies {
               gradleV: '8.0',
               agpV: '7.4.2',
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isTrue);
           },
           java: java,
@@ -610,8 +616,11 @@ dependencies {
               gradleV: '6.7.1',
               agpV: '4.2.0',
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isTrue);
           },
           java: java,
@@ -639,8 +648,11 @@ dependencies {
               gradleV: '7.3.3',
               agpV: '7.2.0',
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isTrue);
           },
           java: java,
@@ -672,8 +684,11 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string
             expect(
@@ -727,8 +742,11 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -766,8 +784,11 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -807,8 +828,11 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -848,8 +872,11 @@ dependencies {
               gradleV: gradleV,
               agpV: agpV,
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -887,8 +914,11 @@ dependencies {
               gradleV: gradleV,
               agpV: '',
             );
-            final CompatibilityResult value = await project!.android
-                .hasValidJavaGradleAgpVersions();
+            final CompatibilityResult value = await project!.android.hasValidJavaGradleAgpVersions(
+              java: java,
+              logger: logger,
+              processManager: processManager,
+            );
             expect(value.success, isFalse);
             // Should not have the valid string.
             expect(
@@ -2538,6 +2568,30 @@ resolution: workspace
       );
     });
   });
+}
+
+Future<void> regeneratePlatformSpecificTooling(
+  FlutterProject project, {
+  required bool releaseMode,
+}) {
+  return project.regeneratePlatformSpecificTooling(
+    analytics: globals.analytics,
+    cache: globals.cache,
+    cocoaPods: globals.cocoaPods,
+    config: globals.config,
+    featureFlags: featureFlags,
+    fileSystem: globals.fs,
+    fileSystemUtils: globals.fsUtils,
+    flutterVersion: globals.flutterVersion,
+    gradleUtils: globals.gradleUtils,
+    logger: globals.logger,
+    os: globals.os,
+    platform: globals.platform,
+    processUtils: globals.processUtils,
+    releaseMode: releaseMode,
+    systemClock: globals.systemClock,
+    templateRenderer: globals.templateRenderer,
+  );
 }
 
 Future<FlutterProject> someProject({

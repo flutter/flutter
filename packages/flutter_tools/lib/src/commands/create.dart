@@ -16,9 +16,12 @@ import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/template.dart';
 import '../base/terminal.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../base/version_range.dart';
@@ -39,6 +42,7 @@ import '../macos/swift_packages.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+import '../version.dart';
 import 'create_base.dart';
 
 const kPlatformHelp =
@@ -811,12 +815,33 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         //
         // It won't be if they do `flutter build --no-pub`, though.
         const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
+        final ToolContext(
+          :FlutterVersion flutterVersion,
+          :OperatingSystemUtils os,
+          :ProcessUtils processUtils,
+          :SystemClock systemClock,
+        ) = toolContext;
         await project.ensureReadyForPlatformSpecificTooling(
-          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          analytics: analytics,
           androidPlatform: includeAndroid,
+          cache: cache,
+          cocoaPods: appleContext.cocoaPods,
+          config: config,
+          featureFlags: featureFlags,
+          fileSystem: fs,
+          fileSystemUtils: fsUtils,
+          flutterVersion: flutterVersion,
+          gradleUtils: androidContext.gradleUtils,
           iosPlatform: includeIos || includeDarwin,
           linuxPlatform: includeLinux,
+          logger: logger,
           macOSPlatform: includeMacos || includeDarwin,
+          os: os,
+          platform: platform,
+          processUtils: processUtils,
+          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          systemClock: systemClock,
+          templateRenderer: templateRenderer,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
         );

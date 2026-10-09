@@ -31,7 +31,13 @@ void main() {
     testUsingContext('General Info Project Validator', () async {
       final loggerTest = BufferLogger.test();
       final command = AnalyzeCommand(
-        allProjectValidators: <ProjectValidator>[GeneralInfoProjectValidator()],
+        allProjectValidators: <ProjectValidator>[
+          GeneralInfoProjectValidator(
+            java: globals.java,
+            logger: loggerTest,
+            processManager: globals.processManager,
+          ),
+        ],
         suppressAnalytics: true,
         toolContext: FakeToolContext(
           artifacts: globals.artifacts,
