@@ -53,7 +53,7 @@ class PipelineCompileQueueGLES final
     //--------------------------------------------------------------------------
     /// @brief      Finishes the job. Only called if `Start` succeeded.
     ///
-    virtual absl::Status Finish() = 0;
+    virtual void Finish() = 0;
   };
 
   /// The default maximum number of jobs that are started but not yet finished.

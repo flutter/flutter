@@ -61,7 +61,7 @@ class CapturingTaskRunner final : public fml::BasicTaskRunner {
 class MockCompileJob : public PipelineCompileQueueGLES::CompileJob {
  public:
   MOCK_METHOD(absl::Status, Start, (), (override));
-  MOCK_METHOD(absl::Status, Finish, (), (override));
+  MOCK_METHOD(void, Finish, (), (override));
 };
 
 /// Posts a job whose work is done entirely in its start step.
@@ -458,7 +458,6 @@ TEST(PipelineCompileQueueGLESTest, PerformJobEagerlyWaitsForActiveJob) {
   EXPECT_CALL(*job, Finish()).WillOnce([worker_thread_id]() {
     // The job is finished by the worker, not by the waiting thread.
     EXPECT_EQ(std::this_thread::get_id(), worker_thread_id);
-    return absl::OkStatus();
   });
   PipelineDescriptor desc;
   ASSERT_TRUE(queue->PostJobForDescriptor(desc, std::move(job)));

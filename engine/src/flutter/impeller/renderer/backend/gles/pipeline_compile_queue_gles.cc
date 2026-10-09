@@ -44,11 +44,8 @@ PipelineCompileQueueGLES::~PipelineCompileQueueGLES() {
   // Jobs that have been started must be finished on the worker, the thread
   // that started them.
   for (auto& [desc, active_job] : active_jobs) {
-    worker_task_runner_->PostTask(
-        [job = std::shared_ptr<CompileJob>(std::move(active_job.job))]() {
-          // Jobs report their own errors.
-          job->Finish().IgnoreError();
-        });
+    std::shared_ptr<CompileJob> job = std::move(active_job.job);
+    worker_task_runner_->PostTask([job]() { job->Finish(); });
   }
 }
 
@@ -191,8 +188,7 @@ void PipelineCompileQueueGLES::StartActiveJob(
 
 void PipelineCompileQueueGLES::FinishActiveJob(
     ActiveJobMap::iterator active_job) {
-  // Jobs report their own errors.
-  active_job->second.job->Finish().IgnoreError();
+  active_job->second.job->Finish();
   RemoveActiveJob(active_job);
 }
 
@@ -211,8 +207,7 @@ void PipelineCompileQueueGLES::PerformJobImmediately(CompileJob& job) {
   if (!job.Start().ok()) {
     return;
   }
-  // Jobs report their own errors.
-  job.Finish().IgnoreError();
+  job.Finish();
 }
 
 }  // namespace impeller
