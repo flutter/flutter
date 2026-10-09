@@ -275,6 +275,67 @@ void main() {
     expect(logger.errorText, isEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
+  for (final MapEntry<String, String> plist in <String, String>{
+    'XML': base64PlistXml,
+    'binary': base64PlistBinary,
+  }.entries) {
+    for (final value in <bool>[true, false]) {
+      testWithoutContext(
+        'PlistParser.replaceKeyWithBoolean writes $value as a boolean in a ${plist.key} file',
+        () {
+          file.writeAsBytesSync(base64.decode(plist.value));
+
+          expect(
+            parser.replaceKeyWithBoolean(file.path, key: 'CFBundleIdentifier', value: value),
+            isTrue,
+          );
+          expect(parser.getValueFromFile<bool>(file.path, 'CFBundleIdentifier'), value);
+          expect(parser.parseFile(file.path), <String, Object>{
+            'CFBundleExecutable': 'App',
+            'CFBundleIdentifier': value,
+          });
+          expect(logger.statusText, isEmpty);
+          expect(logger.errorText, isEmpty);
+        },
+        skip: !platform.isMacOS, // [intended] requires macos tool chain.
+      );
+    }
+  }
+
+  testWithoutContext(
+    'PlistParser.replaceKeyWithBoolean throws when /usr/bin/plutil is not found',
+    () {
+      file.writeAsBytesSync(base64.decode(base64PlistXml));
+
+      expect(
+        () => parser.replaceKeyWithBoolean(file.path, key: 'CFNewKey', value: true),
+        throwsA(isA<FileNotFoundException>()),
+      );
+      expect(logger.statusText, isEmpty);
+      expect(logger.errorText, isEmpty);
+    },
+    skip: platform.isMacOS, // [intended] requires absence of macos tool chain.
+  );
+
+  testWithoutContext(
+    'PlistParser.replaceKeyWithBoolean returns false for a malformed plist file',
+    () {
+      const contents = <int>[1, 2, 3, 4, 5, 6];
+      file.writeAsBytesSync(contents);
+
+      expect(parser.replaceKeyWithBoolean(file.path, key: 'CFNewKey', value: true), isFalse);
+      expect(file.readAsBytesSync(), contents);
+      expect(
+        logger.errorText,
+        endsWith(
+          'ProcessException: The command failed with exit code 1\n'
+          '  Command: /usr/bin/plutil -replace CFNewKey -bool true foo.plist\n',
+        ),
+      );
+    },
+    skip: !platform.isMacOS, // [intended] requires macos tool chain.
+  );
+
   testWithoutContext('PlistParser.parseFile can handle different datatypes', () async {
     file.writeAsBytesSync(base64.decode(base64PlistXmlWithComplexDatatypes));
     final Map<String, Object> values = parser.parseFile(file.path);

@@ -410,6 +410,12 @@ class FakePlistParser implements PlistParser {
   }
 
   @override
+  bool replaceKeyWithBoolean(String plistFilePath, {required String key, required bool value}) {
+    setProperty(key, value);
+    return true;
+  }
+
+  @override
   bool insertKeyWithJson(String plistFilePath, {required String key, required String json}) {
     return false;
   }

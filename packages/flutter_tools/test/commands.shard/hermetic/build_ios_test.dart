@@ -44,11 +44,13 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
     this.productBundleIdentifier,
     this.developmentTeam = 'abc',
     this.returnsEmptyBuildSettings = false,
+    this.additionalBuildSettings = const <String, String>{},
   });
 
   final String? productBundleIdentifier;
   final String? developmentTeam;
   final bool returnsEmptyBuildSettings;
+  final Map<String, String> additionalBuildSettings;
 
   @override
   Future<Map<String, String>> getBuildSettings(
@@ -65,6 +67,7 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
       'TARGET_BUILD_DIR': 'build/ios/Release-iphoneos',
       'WRAPPER_NAME': 'Runner.app',
       'DEVELOPMENT_TEAM': ?developmentTeam,
+      ...additionalBuildSettings,
     };
   }
 }
@@ -369,6 +372,68 @@ void main() {
       Platform: () => macosPlatform,
       XcodeProjectInterpreter: () =>
           FakeXcodeProjectInterpreterWithBuildSettings(returnsEmptyBuildSettings: true),
+      Artifacts: () => Artifacts.test(),
+      PlistParser: () => testPlistUtils,
+    },
+  );
+
+  testUsingContext(
+    'ios config-only build migrates the selected custom status bar plist',
+    () async {
+      createMinimalMockProjectFiles();
+      final plistParser = RecordingPlistParser();
+      testPlistUtils = plistParser;
+      const contents = '''
+<plist version="1.0">
+<dict>
+  <key>UIApplicationSceneManifest</key><dict/>
+  <key>CADisableMinimumFrameDurationOnPhone</key><true/>
+  <key>UIApplicationSupportsIndirectInputEvents</key><true/>
+  <key>UIViewControllerBasedStatusBarAppearance</key><false/>
+</dict>
+</plist>
+''';
+      final File defaultInfoPlist = fileSystem.file('ios/Runner/Info.plist')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(contents);
+      final File customInfoPlist = fileSystem.file('ios/Config/Info.plist')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(contents);
+      testPlistUtils.setProperty('CFBundleIdentifier', 'io.flutter.someProject');
+      testPlistUtils.setProperty('UIViewControllerBasedStatusBarAppearance', false);
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-platform-version'],
+          stdout: '27.0',
+        ),
+      );
+
+      await createTestCommandRunner(createBuildCommand())
+          .run(const <String>['build', 'ios', '--no-pub', '--config-only']);
+
+      expect(plistParser.replacements, <(String, String, bool)>[
+        (customInfoPlist.absolute.path, 'UIViewControllerBasedStatusBarAppearance', true),
+      ]);
+      expect(defaultInfoPlist.readAsStringSync(), contents);
+      expect(processManager.hasRemainingExpectations, isFalse);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Pub: ThrowingPub.new,
+      ProcessManager: () => processManager,
+      Platform: () => macosPlatform,
+      XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(
+        additionalBuildSettings: const <String, String>{
+          'INFOPLIST_FILE': r'$(PLIST_DIRECTORY)/Info.plist',
+          'PLIST_DIRECTORY': 'Config',
+          'SRCROOT': '/ios',
+        },
+      ),
+      Xcode: () => Xcode.test(
+        processManager: processManager,
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
+        fileSystem: fileSystem,
+      ),
       Artifacts: () => Artifacts.test(),
       PlistParser: () => testPlistUtils,
     },
@@ -1616,4 +1681,14 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
   @override
   int? getDirectorySize(Directory directory) => 1024;
+}
+
+class RecordingPlistParser extends FakePlistParser {
+  final replacements = <(String, String, bool)>[];
+
+  @override
+  bool replaceKeyWithBoolean(String plistFilePath, {required String key, required bool value}) {
+    replacements.add((plistFilePath, key, value));
+    return super.replaceKeyWithBoolean(plistFilePath, key: key, value: value);
+  }
 }
