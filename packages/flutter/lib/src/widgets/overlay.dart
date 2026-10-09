@@ -1480,6 +1480,28 @@ class _RenderTheater extends RenderBox
         layoutChild(child, nonPositionedChildConstraints);
       }
     }
+
+    // Offstage children are not laid out with the onstage children. An
+    // offstage child that was laid out with non-tight constraints while it was
+    // onstage (such as the size-determining child, or a positioned child) is
+    // not a relayout boundary, so once it is marked as needing layout it would
+    // stay dirty under a clean theater.
+    //
+    // Laying it out again with its previous constraints, without
+    // parentUsesSize, makes it a relayout boundary: the theater no longer
+    // depends on its size, so marking it as needing layout stops at the child
+    // and the PipelineOwner lays it out directly. Its size can't affect the
+    // theater while it is offstage, and it is laid out with fresh constraints
+    // and parentUsesSize again once it is back onstage.
+    //
+    // This returns early if the child is already clean.
+    RenderBox? child = firstChild;
+    for (int toSkip = skipCount; toSkip > 0; toSkip--) {
+      if (child!.hasSize) {
+        child.layout(child.constraints);
+      }
+      child = childAfter(child);
+    }
   }
 
   RenderBox _findSizeDeterminingChild() {
