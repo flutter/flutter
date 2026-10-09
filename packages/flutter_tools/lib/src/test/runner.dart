@@ -14,6 +14,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -36,8 +37,9 @@ import 'web_test_compiler.dart';
 
 /// Launching the `flutter_tester` process from the test runner.
 interface class FlutterTestRunner {
-  const FlutterTestRunner({required this._toolContext});
+  const FlutterTestRunner({required this._templateRenderer, required this._toolContext});
 
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   /// Runs tests using package:test and the Flutter engine.
@@ -149,6 +151,7 @@ interface class FlutterTestRunner {
           crossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
           flutterProject: flutterProject,
           flutterTesterBinPath: flutterTesterBinPath,
+          templateRenderer: _templateRenderer,
           toolContext: _toolContext,
           useWasm: debuggingOptions.webUseWasm,
           webMemoryFS: result,
@@ -174,6 +177,7 @@ interface class FlutterTestRunner {
       buildInfo: buildInfo,
       debuggingOptions: debuggingOptions,
       flutterTesterBinPath: flutterTesterBinPath,
+      templateRenderer: _templateRenderer,
       toolContext: _toolContext,
       enableVmService: enableVmService,
       flutterProject: flutterProject,

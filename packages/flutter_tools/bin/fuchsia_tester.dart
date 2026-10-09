@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/isolated/native_assets/test/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
@@ -168,7 +169,10 @@ Future<void> run(List<String> args) async {
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       ),
     );
-    final testRunner = FlutterTestRunner(toolContext: dependencies.toolContext);
+    final testRunner = FlutterTestRunner(
+      templateRenderer: const MustacheTemplateRenderer(),
+      toolContext: dependencies.toolContext,
+    );
     exitCode = await testRunner.runTests(
       const TestWrapper(),
       tests.keys.map(Uri.file).toList(),

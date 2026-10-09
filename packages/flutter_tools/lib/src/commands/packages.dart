@@ -435,7 +435,11 @@ class PackagesGetCommand extends FlutterCommand {
       // Build a cache of all pubspec.yaml contents once, keyed by package root
       // URI. This avoids re-reading the same files for every workspace package
       // during post-processing.
-      final PubspecCache pubspecCache = await buildPubspecCache(packageConfig, fileSystem: fs);
+      final PubspecCache pubspecCache = await buildPubspecCache(
+        packageConfig,
+        fileSystem: fs,
+        logger: logger,
+      );
       // Process workspace root packages concurrently, capped to 64 to
       // saturate I/O without exhausting file descriptors or system resources.
       await Pool(64).forEach<String, void>(graph.roots, (String workspaceRootName) async {

@@ -6,8 +6,10 @@ import 'dart:ffi' show Abi;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -16,6 +18,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -393,7 +396,19 @@ environement:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.directory('project'),
         );
-        await injectPlugins(project, iosPlatform: true, releaseMode: false);
+        await injectPlugins(
+          project,
+          analytics: fakeAnalytics,
+          cocoaPods: cocoaPodsUnderTest,
+          config: Config.test(),
+          featureFlags: TestFeatureFlags(),
+          fileSystem: fileSystem,
+          iosPlatform: true,
+          logger: logger,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          releaseMode: false,
+          templateRenderer: const MustacheTemplateRenderer(),
+        );
 
         final String debugContents = projectUnderTest.ios
             .xcodeConfigFor('Debug')

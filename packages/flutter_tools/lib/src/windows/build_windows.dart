@@ -17,6 +17,7 @@ import '../cache.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
@@ -79,7 +80,12 @@ Future<void> buildWindows(
 
   // Ensure that necessary ephemeral files are generated and up to date.
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
-  createPluginSymlinks(windowsProject.parent);
+  createPluginSymlinks(
+    windowsProject.parent,
+    featureFlags: featureFlags,
+    os: globals.os,
+    platform: globals.platform,
+  );
 
   final VisualStudio visualStudio =
       visualStudioOverride ??
