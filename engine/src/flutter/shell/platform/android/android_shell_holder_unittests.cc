@@ -17,6 +17,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/vsync_waiter.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
+#include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -186,13 +187,14 @@ constexpr fml::TimeDelta kDefaultFrameInterval =
 // Creates a holder without calling NotifyCreated: a fake window makes the
 // Impeller GLES reactor abort on devices.
 std::unique_ptr<AndroidShellHolder> CreateHolderWithoutSurface(
-    Settings::MergedPlatformUIThread merged_platform_ui_thread) {
+    Settings::MergedPlatformUIThread merged_platform_ui_thread,
+    std::shared_ptr<MockPlatformViewAndroidJNI> jni =
+        std::make_shared<MockPlatformViewAndroidJNI>()) {
   Settings settings;
   settings.enable_software_rendering = false;
   settings.merged_platform_ui_thread = merged_platform_ui_thread;
   return std::make_unique<AndroidShellHolder>(
-      settings, std::make_shared<MockPlatformViewAndroidJNI>(),
-      AndroidRenderingAPI::kImpellerOpenGLES);
+      settings, std::move(jni), AndroidRenderingAPI::kImpellerOpenGLES);
 }
 
 // Dispatches the ALooper of the current thread, which runs both fml tasks and
@@ -477,6 +479,76 @@ TEST(AndroidShellHolder, VsyncBatonsReturnThroughFlutterEngineOnVsync) {
   ASSERT_EQ(frames.size(), 1u);
   EXPECT_EQ(frames[0].start.ToEpochDelta().ToNanoseconds(),
             static_cast<int64_t>(calls[0].frame_start_time_nanos));
+}
+
+TEST(AndroidShellHolder, UpdateSemanticsForwardsToJni) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+  // Semantic node ID, custom action IDs, and the implicit view ID (0) used to
+  // verify binary encoding.
+  constexpr int64_t kImplicitViewId = 0;
+  constexpr int32_t kTestNodeId = 42;
+  constexpr int32_t kTestActionId = 7;
+  constexpr int32_t kTestActionOverrideId = 8;
+
+  SemanticsNode node;
+  node.id = kTestNodeId;
+  node.label = "Submit";
+  SemanticsNodeUpdates updates;
+  updates.emplace(kTestNodeId, node);
+
+  CustomAccessibilityAction action;
+  action.id = kTestActionId;
+  action.overrideId = kTestActionOverrideId;
+  action.label = "Activate";
+  action.hint = "Double tap";
+  CustomAccessibilityActionUpdates actions;
+  actions.emplace(kTestActionId, action);
+
+  EXPECT_CALL(
+      *jni, FlutterViewUpdateCustomAccessibilityActions(
+                ::testing::SizeIs(PlatformViewAndroidDelegate::kBytesPerAction),
+                ::testing::ElementsAre("Activate", "Double tap")));
+  EXPECT_CALL(*jni,
+              FlutterViewUpdateSemantics(
+                  ::testing::SizeIs(PlatformViewAndroidDelegate::kBytesPerNode),
+                  ::testing::ElementsAre("Submit"), ::testing::IsEmpty()));
+
+  PlatformView& platform_view = *holder->GetPlatformView();
+  platform_view.UpdateSemantics(kImplicitViewId, std::move(updates),
+                                std::move(actions));
+}
+
+TEST(AndroidShellHolder, ComputePlatformResolvedLocalesForwardsToJni) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+  const std::vector<std::string> supported = {"en", "US", "", "fr", "FR", ""};
+  EXPECT_CALL(*jni, FlutterViewComputePlatformResolvedLocale(supported))
+      .WillOnce([](std::vector<std::string>) {
+        return std::make_unique<std::vector<std::string>>(
+            std::initializer_list<std::string>{"fr", "FR", ""});
+      });
+
+  PlatformView& platform_view = *holder->GetPlatformView();
+  std::unique_ptr<std::vector<std::string>> resolved =
+      platform_view.ComputePlatformResolvedLocales(supported);
+  ASSERT_NE(resolved, nullptr);
+  EXPECT_THAT(*resolved, ::testing::ElementsAre("fr", "FR", ""));
+}
+
+TEST(AndroidShellHolder, OnPreEngineRestartForwardsToJni) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+  EXPECT_CALL(*jni, FlutterViewOnPreEngineRestart());
+
+  PlatformView& platform_view = *holder->GetPlatformView();
+  platform_view.OnPreEngineRestart();
 }
 
 }  // namespace testing
