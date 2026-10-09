@@ -354,12 +354,13 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
 
   /// Instructs [tryEnableSemantics] to remove the placeholders.
   ///
-  /// The placeholders are removed upon the next "touchend", "pointerup", or
-  /// "click" event, once the gesture that targets them has ended. Removing them
-  /// in the middle of a gesture can take the rest of its events with them.
-  /// Safari swallows those events, and Chrome stops delivering them to the
-  /// window when the page lets the browser pan and cancels "touchmove", so the
-  /// framework never sees the pointer go up.
+  /// The placeholders are removed upon the next "touchend", "pointerup",
+  /// "touchcancel", "pointercancel", or "click" event, once the gesture that
+  /// targets them has ended or was canceled. Removing them in the middle of a
+  /// gesture can take the rest of its events with them. Safari swallows those
+  /// events, and Chrome stops delivering them to the window when the page lets
+  /// the browser pan and cancels "touchmove", so the framework never sees the
+  /// pointer go up.
   ///
   /// See https://github.com/flutter/flutter/issues/194104
   bool _schedulePlaceholderRemoval = false;
@@ -388,7 +389,11 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     if (_schedulePlaceholderRemoval) {
       // The event type can also be click for VoiceOver.
       final bool removeNow =
-          event.type == 'touchend' || event.type == 'pointerup' || event.type == 'click';
+          event.type == 'touchend' ||
+          event.type == 'pointerup' ||
+          event.type == 'touchcancel' ||
+          event.type == 'pointercancel' ||
+          event.type == 'click';
       if (removeNow) {
         removeAllPlaceholders();
       }

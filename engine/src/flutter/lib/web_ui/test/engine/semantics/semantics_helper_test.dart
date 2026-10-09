@@ -319,6 +319,23 @@ void testMain() {
         expect(mobileSemanticsEnabler.placeholders, isEmpty);
       });
 
+      for (final cancelType in <String>['pointercancel', 'touchcancel']) {
+        test('removes the placeholder when the gesture ends with $cancelType', () {
+          // A gesture the browser takes over, such as a page pan, ends with a
+          // cancel instead of a pointerup or touchend.
+          mobileSemanticsEnabler.semanticsActivationAttempts = kMaxSemanticsActivationAttempts - 1;
+          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointermove'));
+          expect(placeholder!.isConnected, isTrue);
+
+          expect(
+            mobileSemanticsEnabler.tryEnableSemantics(createDomEvent('Event', cancelType)),
+            isTrue,
+          );
+          expect(placeholder!.isConnected, isFalse);
+          expect(mobileSemanticsEnabler.placeholders, isEmpty);
+        });
+      }
+
       test('Can update placeholder label', () {
         const testLabel = 'Test label for placeholder';
         mobileSemanticsEnabler.updatePlaceholderLabel(testLabel);
