@@ -90,4 +90,9 @@ config("relative_paths") {
     # superfluous for purposes of the debugging information.
     "-no-canonical-prefixes",
   ]
+
+  # Assembly sources (built with -g by the symbols configs) record
+  # DW_AT_comp_dir too, so they need the same mapping to stay independent of
+  # the build location.
+  asmflags = cflags
 }
