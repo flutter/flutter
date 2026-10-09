@@ -2,18 +2,189 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Root BUILD file of @zlib: Chromium's zlib fork pinned in DEPS. For now it
-# only exposes what the GN build of the tree reads (its own BUILD.gn and the
-# sources of the zlib target), for rules that wrap a GN build; the engine's
-# own uses of zlib are not built by Bazel yet.
+# Root BUILD file of @zlib: Chromium's zlib fork pinned in DEPS. Mirrors the
+# targets of its BUILD.gn that the engine uses (`zlib` and the SIMD source
+# sets it is assembled from) as the engine's GN build configures them.
+#
+# Only x86-64 is covered so far: the select()s below have no default, so a
+# build for another CPU fails at analysis rather than silently producing a
+# zlib without the NEON paths (use_arm_neon_optimizations in BUILD.gn).
+
+# This file is loaded as the root of @zlib, so the main module is named.
+load("@flutter//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_THIRD_PARTY_COPTS")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
+_X86_64 = "@platforms//cpu:x86_64"
+
+# config("zlib_internal_config"): ZLIB_DEBUG in unoptimized builds.
+_INTERNAL_DEFINES = ["ZLIB_IMPLEMENTATION"] + select({
+    "@flutter//engine/src/flutter/build/bazel:optimized": [],
+    "//conditions:default": ["ZLIB_DEBUG"],
+})
+
+# config("zlib_warnings")
+_ZLIB_WARNINGS = [
+    "-Wno-incompatible-pointer-types",
+    "-Wunused-variable",
+]
+
+# The public_configs of the SIMD source sets, which apply to them and to
+# the zlib target that depends on them.
+_ADLER32_SIMD_DEFINES = select({_X86_64: [
+    "ADLER32_SIMD_SSSE3",
+    "X86_NOT_WINDOWS",
+]})
+
+_CRC32_SIMD_DEFINES = select({_X86_64: ["CRC32_SIMD_SSE42_PCLMUL"]})
+
+_DATA_CHUNK_SIMD_DEFINES = select({_X86_64: [
+    "INFLATE_CHUNK_SIMD_SSE2",
+    "INFLATE_CHUNK_READ_64LE",
+    "DEFLATE_CHUNK_WRITE_64LE",
+]})
+
+_SLIDE_HASH_SIMD_DEFINES = select({_X86_64: ["DEFLATE_SLIDE_HASH_SSE2"]})
+
+# source_set("zlib_common_headers")
+cc_library(
+    name = "zlib_common_headers",
+    hdrs = [
+        "chromeconf.h",
+        "deflate.h",
+        "inffast.h",
+        "inffixed.h",
+        "inflate.h",
+        "inftrees.h",
+        "zconf.h",
+        "zlib.h",
+        "zutil.h",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+# source_set("zlib_adler32_simd") -- chromium_code, unlike zlib itself.
+cc_library(
+    name = "zlib_adler32_simd",
+    srcs = ["adler32_simd.c"],
+    hdrs = ["adler32_simd.h"],
+    copts = CHROMIUM_CODE_COPTS + select({_X86_64: ["-mssse3"]}),
+    linkstatic = True,
+    local_defines = FLUTTER_LOCAL_DEFINES + _INTERNAL_DEFINES + _ADLER32_SIMD_DEFINES,
+    visibility = ["//visibility:private"],
+    deps = [":zlib_common_headers"],
+)
+
+# source_set("zlib_crc32_simd") -- chromium_code.
+cc_library(
+    name = "zlib_crc32_simd",
+    srcs = [
+        "crc32_simd.c",
+        "crc_folding.c",
+    ],
+    hdrs = ["crc32_simd.h"],
+    copts = CHROMIUM_CODE_COPTS + select({_X86_64: [
+        "-msse4.2",
+        "-mpclmul",
+    ]}),
+    linkstatic = True,
+    local_defines = FLUTTER_LOCAL_DEFINES + _INTERNAL_DEFINES + _CRC32_SIMD_DEFINES,
+    visibility = ["//visibility:private"],
+    deps = [":zlib_common_headers"],
+)
+
+# source_set("zlib_data_chunk_simd"): the chunk-copying inflate that
+# replaces inflate.c; no_chromium_code with zlib_warnings.
+cc_library(
+    name = "zlib_data_chunk_simd",
+    srcs = [
+        "contrib/optimizations/inffast_chunk.c",
+        "contrib/optimizations/inflate.c",
+    ],
+    hdrs = [
+        "contrib/optimizations/chunkcopy.h",
+        "contrib/optimizations/inffast_chunk.h",
+    ],
+    copts = FLUTTER_THIRD_PARTY_COPTS + _ZLIB_WARNINGS,
+    includes = ["."],
+    linkstatic = True,
+    local_defines = _INTERNAL_DEFINES + _DATA_CHUNK_SIMD_DEFINES,
+    visibility = ["//visibility:private"],
+    deps = [":zlib_common_headers"],
+)
+
+# source_set("zlib_slide_hash_simd") -- header only.
+cc_library(
+    name = "zlib_slide_hash_simd",
+    hdrs = ["slide_hash_simd.h"],
+    visibility = ["//visibility:private"],
+    deps = [":zlib_common_headers"],
+)
+
+# component("zlib"), as a static library (there is no component build).
+# config("zlib_config") is `includes`; the engine also includes the headers
+# as "third_party/zlib/zlib.h", which include_prefix provides.
+cc_library(
+    name = "zlib",
+    srcs = [
+        "adler32.c",
+        "compress.c",
+        "contrib/optimizations/insert_string.h",
+        "cpu_features.c",
+        "cpu_features.h",
+        "crc32.c",
+        "crc32.h",
+        "deflate.c",
+        "deflate.h",
+        "gzclose.c",
+        "gzguts.h",
+        "gzlib.c",
+        "gzread.c",
+        "gzwrite.c",
+        "infback.c",
+        "inffast.c",
+        "inffast.h",
+        "inffixed.h",
+        "inflate.h",
+        "inftrees.c",
+        "inftrees.h",
+        "trees.c",
+        "trees.h",
+        "uncompr.c",
+        "zutil.c",
+        "zutil.h",
+    ],
+    hdrs = [
+        "chromeconf.h",
+        "zconf.h",
+        "zlib.h",
+    ],
+    copts = FLUTTER_THIRD_PARTY_COPTS + _ZLIB_WARNINGS,
+    include_prefix = "third_party/zlib",
+    includes = ["."],
+    linkstatic = True,
+    local_defines = _INTERNAL_DEFINES + _ADLER32_SIMD_DEFINES + _CRC32_SIMD_DEFINES +
+                    _DATA_CHUNK_SIMD_DEFINES + _SLIDE_HASH_SIMD_DEFINES,
+    deps = [
+        ":zlib_adler32_simd",
+        ":zlib_common_headers",
+        ":zlib_crc32_simd",
+        ":zlib_data_chunk_simd",
+        ":zlib_slide_hash_simd",
+    ],
+)
+
+# What the GN build of this tree reads, for rules that wrap a GN build.
 filegroup(
     name = "build_tree",
     srcs = glob(
         ["**"],
         exclude = [
+            # This repository's Bazel files are not GN inputs.
+            "BUILD.bazel",
+            "REPO.bazel",
+            "*.bzl",
             "contrib/tests/**",
             "examples/**",
             # Chromium's compression utilities, built by other targets.
