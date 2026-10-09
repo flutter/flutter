@@ -61,6 +61,15 @@ class MockVulkanContextBuilder {
   MockVulkanContextBuilder();
 
   //------------------------------------------------------------------------------
+  /// @brief      Initialize a mocked Vulkan instance and select a physical
+  ///             device without creating the logical device or full context.
+  ///
+  /// @return     A `ContextVK::DeviceSelection` if a physical device can be
+  ///             selected.
+  ///
+  absl::StatusOr<ContextVK::DeviceSelection> SelectDevice();
+
+  //------------------------------------------------------------------------------
   /// @brief      Create a Vulkan context with Vulkan functions mocked. The
   ///             caller is given a chance to tinker on the settings right
   ///             before a context is created.
@@ -146,6 +155,8 @@ class MockVulkanContextBuilder {
   }
 
  private:
+  ContextVK::Settings PrepareSettings();
+
   std::function<void(ContextVK::Settings&)> settings_callback_;
   std::vector<std::string> instance_extensions_;
   std::vector<std::string> instance_layers_;

@@ -53,7 +53,7 @@ const templateKotlinGradlePluginVersion = '2.4.20';
 // so new versions are picked up after a Flutter upgrade.
 //
 // Please see the README before changing any of these values.
-const compileSdkVersionInt = 37;
+const compileSdkVersionInt = 36;
 const compileSdkVersion = '$compileSdkVersionInt';
 const minSdkVersionInt = 24;
 const minSdkVersion = '$minSdkVersionInt';

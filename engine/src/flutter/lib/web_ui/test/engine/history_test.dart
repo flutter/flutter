@@ -717,7 +717,7 @@ void testMain() {
   });
 
   group('$BrowserPlatformLocation', () {
-    test('getOrCreateDomEventListener caches funcions', () {
+    test('getOrCreateDomEventListener caches functions', () {
       const location = BrowserPlatformLocation();
       void myListener(Object event) {}
 
