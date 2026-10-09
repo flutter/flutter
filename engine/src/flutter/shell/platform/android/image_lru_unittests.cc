@@ -54,5 +54,23 @@ TEST(ImageLRU, CanClear) {
   }
 }
 
+TEST(ImageLRU, RetainsAndroidBufferQueueWorkingSet) {
+  auto image = DlImageSkia::Make(nullptr);
+  ImageLRU image_lru;
+  constexpr HardwareBufferKey kAndroidBufferQueueMaxSlots = 64u;
+
+  for (HardwareBufferKey key = 1u; key <= kAndroidBufferQueueMaxSlots; key++) {
+    EXPECT_EQ(image_lru.AddImage(image, key), 0u);
+  }
+  for (HardwareBufferKey key = 1u; key <= kAndroidBufferQueueMaxSlots; key++) {
+    EXPECT_EQ(image_lru.FindImage(key), image);
+  }
+
+  const HardwareBufferKey next_key = kAndroidBufferQueueMaxSlots + 1u;
+  EXPECT_EQ(image_lru.AddImage(image, next_key), 1u);
+  EXPECT_EQ(image_lru.FindImage(1u), nullptr);
+  EXPECT_EQ(image_lru.FindImage(next_key), image);
+}
+
 }  // namespace testing
 }  // namespace flutter
