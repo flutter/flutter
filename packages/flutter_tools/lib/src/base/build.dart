@@ -7,6 +7,7 @@ import 'package:process/process.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
 import '../darwin/darwin.dart';
+import '../ios/xcodeproj.dart';
 import '../macos/xcode.dart';
 
 import 'file_system.dart';
@@ -178,11 +179,19 @@ class AOTSnapshotter {
       final minOSVersion = platform == TargetPlatform.ios
           ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
           : FlutterDarwinPlatform.macos.deploymentTarget().toString();
+
+      // sdkRoot is the SDK being built against (Xcode's SDKROOT for app
+      // builds), so xcrun reports that exact SDK's version. It is null only for
+      // macOS builds that run without Xcode (`flutter build macos-framework`
+      // and `flutter build swift-package`), which use the default macOS SDK.
+      final String sdkVersion = await _xcode.sdkVersion(sdkRoot ?? XcodeSdk.MacOSX.platformName);
+
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-macho-dylib',
         '--macho=$aotSharedLibrary',
         '--macho-object=$relocatableObject',
         '--macho-min-os-version=$minOSVersion',
+        '--macho-sdk-version=$sdkVersion',
         '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
         '--macho-install-name=@rpath/$frameworkName/$frameworkSnapshotName',
       ]);
