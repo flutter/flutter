@@ -489,6 +489,30 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
 }
 
+- (void)testFlutterTextInputViewDidRestoreFirstResponderWillCallTextInputClientOnFocusReceived {
+  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine setBinaryMessenger:mockBinaryMessenger];
+  [engine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInputClient.onFocusReceived"
+                                        arguments:@[ @(123) ]];
+  NSData* encodedMethodCall = [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:methodCall];
+  NSData* encodedReply = [[FlutterJSONMethodCodec sharedInstance] encodeSuccessEnvelope:@NO];
+  id mockBinaryReply = [OCMArg invokeBlockWithArgs:encodedReply, nil];
+  OCMStub([mockBinaryMessenger sendOnChannel:@"flutter/textinput"
+                                     message:encodedMethodCall
+                                 binaryReply:mockBinaryReply]);
+
+  __block id focusReceivedResult;
+  [engine flutterTextInputView:nil
+      didRestoreFirstResponderWithTextInputClient:123
+                                           result:^(id result) {
+                                             focusReceivedResult = result;
+                                           }];
+  XCTAssertEqualObjects(focusReceivedResult, @NO);
+}
+
 - (void)testFlutterEngineUpdatesDisplays {
   FlutterEngine* engine = [[FlutterEngine alloc] init];
   id mockEngine = OCMPartialMock(engine);

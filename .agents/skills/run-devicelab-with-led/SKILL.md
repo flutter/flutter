@@ -17,7 +17,7 @@ Host assumptions:
 
 # Running DeviceLab Tests with `led`
 
-This skill guides running post-submit and DeviceLab tests for pull requests (PRs) using LUCI's `led` CLI tool. For additional context, see [docs/infra/Running-Devicelab-Tests-For-PR.md](../../../docs/infra/Running-Devicelab-Tests-For-PR.md).
+This skill guides running post-submit and DeviceLab tests for pull requests (PRs) using LUCI's `led` CLI tool. For additional context, see [docs/infra/Running-Devicelab-Tests-For-PR.md](../../../docs/infra/Running-Devicelab-Tests-For-PR.md). If no recipe or bot changes are needed, `bb add` may fit better; see [docs/infra/Using-bb-and-led.md](../../../docs/infra/Using-bb-and-led.md). Never run `led auth-login` yourself (interactive); if `led auth-info` reports `Not logged in.`, ask the user to run it.
 
 ## Prerequisites
 

@@ -38,7 +38,7 @@ class EngineFlutterDisplay extends ui.Display {
 
   /// The real device pixel ratio of the browser.
   ///
-  /// This value cannot be overriden by tests, for example.
+  /// This value cannot be overridden by tests, for example.
   double get browserDevicePixelRatio {
     double ratio = domWindow.devicePixelRatio;
     // Guard against WebOS returning 0.
