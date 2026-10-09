@@ -180,10 +180,22 @@ struct SampledImageSlot {
 ///         bit width, and component count.
 ///
 ///         Each backend maps these values to its own native vertex format, so
-///         this is the shared vocabulary for vertex inputs. The values are
-///         currently derived from a reflected `ShaderStageIOSlot` (see
-///         `ShaderStageIOSlot::GetVertexAttributeFormat`), so only the kinds
-///         that reflection produces are reachable.
+///         this is the shared vocabulary for vertex inputs. Formats whose
+///         scalar kind matches a shader input type are derived from a
+///         reflected `ShaderStageIOSlot` (see
+///         `ShaderStageIOSlot::GetVertexAttributeFormat`). The normalized and
+///         packed formats have no shader-side spelling, since the shader
+///         always sees floats, so they are requested through
+///         `ShaderStageIOSlot::vertex_format`.
+///
+///         D3D11 has no 3-component 8 or 16-bit vertex format, so ANGLE
+///         widens the `x3` formats to 4 components with a CPU copy per buffer.
+///         They work, but prefer an `x4` format for a hot attribute.
+///
+/// TODO(https://github.com/flutter/flutter/issues/186309): Add the 64-bit
+/// float formats. They are Vulkan-only among the backends here (Metal has no
+/// double vertex format) and need a shader toolchain that can carry doubles
+/// through to the target language.
 enum class VertexAttributeFormat {
   /// Not a valid vertex attribute (a matrix input, an unsupported scalar kind,
   /// or a component count outside 1 to 4).
@@ -209,6 +221,20 @@ enum class VertexAttributeFormat {
   kUInt8x3,
   kUInt8x4,
 
+  kSNorm8,
+  kSNorm8x2,
+  kSNorm8x3,
+  kSNorm8x4,
+
+  kUNorm8,
+  kUNorm8x2,
+  kUNorm8x3,
+  kUNorm8x4,
+
+  /// Four unsigned normalized bytes stored in blue, green, red, alpha order.
+  /// This is the packed byte layout of a `Color` on the host.
+  kUNorm8x4BGRA,
+
   kSInt16,
   kSInt16x2,
   kSInt16x3,
@@ -219,6 +245,16 @@ enum class VertexAttributeFormat {
   kUInt16x3,
   kUInt16x4,
 
+  kSNorm16,
+  kSNorm16x2,
+  kSNorm16x3,
+  kSNorm16x4,
+
+  kUNorm16,
+  kUNorm16x2,
+  kUNorm16x3,
+  kUNorm16x4,
+
   kSInt32,
   kSInt32x2,
   kSInt32x3,
@@ -228,7 +264,114 @@ enum class VertexAttributeFormat {
   kUInt32x2,
   kUInt32x3,
   kUInt32x4,
+
+  /// Four unsigned normalized components packed into 32 bits, with 10 bits
+  /// each for red, green, and blue and 2 bits for alpha. Alpha occupies the
+  /// most significant bits.
+  kUNormR10G10B10A2,
 };
+
+/// @brief  Whether a shader input declared as `type` can read an attribute
+///         stored as `format`.
+///
+///         Float, normalized, and packed formats feed float inputs. Integer
+///         formats feed integer inputs of the same signedness at any width,
+///         since the vertex fetch widens them.
+constexpr bool IsVertexFormatReadableAs(VertexAttributeFormat format,
+                                        ShaderType type) {
+  enum class ScalarClass { kNone, kFloat, kSigned, kUnsigned };
+  ScalarClass format_class = ScalarClass::kNone;
+  switch (format) {
+    case VertexAttributeFormat::kInvalid:
+      return false;
+    case VertexAttributeFormat::kFloat32:
+    case VertexAttributeFormat::kFloat32x2:
+    case VertexAttributeFormat::kFloat32x3:
+    case VertexAttributeFormat::kFloat32x4:
+    case VertexAttributeFormat::kFloat16:
+    case VertexAttributeFormat::kFloat16x2:
+    case VertexAttributeFormat::kFloat16x3:
+    case VertexAttributeFormat::kFloat16x4:
+    case VertexAttributeFormat::kSNorm8:
+    case VertexAttributeFormat::kSNorm8x2:
+    case VertexAttributeFormat::kSNorm8x3:
+    case VertexAttributeFormat::kSNorm8x4:
+    case VertexAttributeFormat::kUNorm8:
+    case VertexAttributeFormat::kUNorm8x2:
+    case VertexAttributeFormat::kUNorm8x3:
+    case VertexAttributeFormat::kUNorm8x4:
+    case VertexAttributeFormat::kUNorm8x4BGRA:
+    case VertexAttributeFormat::kSNorm16:
+    case VertexAttributeFormat::kSNorm16x2:
+    case VertexAttributeFormat::kSNorm16x3:
+    case VertexAttributeFormat::kSNorm16x4:
+    case VertexAttributeFormat::kUNorm16:
+    case VertexAttributeFormat::kUNorm16x2:
+    case VertexAttributeFormat::kUNorm16x3:
+    case VertexAttributeFormat::kUNorm16x4:
+    case VertexAttributeFormat::kUNormR10G10B10A2:
+      format_class = ScalarClass::kFloat;
+      break;
+    case VertexAttributeFormat::kSInt8:
+    case VertexAttributeFormat::kSInt8x2:
+    case VertexAttributeFormat::kSInt8x3:
+    case VertexAttributeFormat::kSInt8x4:
+    case VertexAttributeFormat::kSInt16:
+    case VertexAttributeFormat::kSInt16x2:
+    case VertexAttributeFormat::kSInt16x3:
+    case VertexAttributeFormat::kSInt16x4:
+    case VertexAttributeFormat::kSInt32:
+    case VertexAttributeFormat::kSInt32x2:
+    case VertexAttributeFormat::kSInt32x3:
+    case VertexAttributeFormat::kSInt32x4:
+      format_class = ScalarClass::kSigned;
+      break;
+    case VertexAttributeFormat::kUInt8:
+    case VertexAttributeFormat::kUInt8x2:
+    case VertexAttributeFormat::kUInt8x3:
+    case VertexAttributeFormat::kUInt8x4:
+    case VertexAttributeFormat::kUInt16:
+    case VertexAttributeFormat::kUInt16x2:
+    case VertexAttributeFormat::kUInt16x3:
+    case VertexAttributeFormat::kUInt16x4:
+    case VertexAttributeFormat::kUInt32:
+    case VertexAttributeFormat::kUInt32x2:
+    case VertexAttributeFormat::kUInt32x3:
+    case VertexAttributeFormat::kUInt32x4:
+      format_class = ScalarClass::kUnsigned;
+      break;
+  }
+  ScalarClass type_class = ScalarClass::kNone;
+  switch (type) {
+    case ShaderType::kFloat:
+    case ShaderType::kHalfFloat:
+      type_class = ScalarClass::kFloat;
+      break;
+    case ShaderType::kSignedByte:
+    case ShaderType::kSignedShort:
+    case ShaderType::kSignedInt:
+      type_class = ScalarClass::kSigned;
+      break;
+    case ShaderType::kUnsignedByte:
+    case ShaderType::kUnsignedShort:
+    case ShaderType::kUnsignedInt:
+      type_class = ScalarClass::kUnsigned;
+      break;
+    case ShaderType::kUnknown:
+    case ShaderType::kVoid:
+    case ShaderType::kBoolean:
+    case ShaderType::kSignedInt64:
+    case ShaderType::kUnsignedInt64:
+    case ShaderType::kAtomicCounter:
+    case ShaderType::kDouble:
+    case ShaderType::kStruct:
+    case ShaderType::kImage:
+    case ShaderType::kSampledImage:
+    case ShaderType::kSampler:
+      return false;
+  }
+  return format_class == type_class;
+}
 
 struct ShaderStageIOSlot {
   const char* name;
@@ -242,32 +385,55 @@ struct ShaderStageIOSlot {
   size_t offset;
   bool relaxed_precision;
 
+  /// @brief  The format of the attribute as it is stored in the vertex buffer,
+  ///         when that differs from the format implied by the shader's
+  ///         declared input type.
+  ///
+  ///         Normalized and packed formats are only reachable this way. The
+  ///         shader declares a float input and the hardware converts on read,
+  ///         so reflection alone cannot tell the two apart. Unset means the
+  ///         format is derived from `type`, `bit_width`, and `vec_size`. A
+  ///         format that `type` cannot read (see `IsVertexFormatReadableAs`)
+  ///         makes the slot invalid.
+  std::optional<VertexAttributeFormat> vertex_format = std::nullopt;
+
   constexpr size_t GetHash() const {
-    return fml::HashCombine(name, location, set, binding, type, bit_width,
-                            vec_size, columns, offset, relaxed_precision);
+    return fml::HashCombine(
+        name, location, set, binding, type, bit_width, vec_size, columns,
+        offset, relaxed_precision, vertex_format.has_value(),
+        vertex_format.value_or(VertexAttributeFormat::kInvalid));
   }
 
   constexpr bool operator==(const ShaderStageIOSlot& other) const {
-    return name == other.name &&                         //
-           location == other.location &&                 //
-           set == other.set &&                           //
-           binding == other.binding &&                   //
-           type == other.type &&                         //
-           bit_width == other.bit_width &&               //
-           vec_size == other.vec_size &&                 //
-           columns == other.columns &&                   //
-           offset == other.offset &&                     //
-           relaxed_precision == other.relaxed_precision  //
+    return name == other.name &&                            //
+           location == other.location &&                    //
+           set == other.set &&                              //
+           binding == other.binding &&                      //
+           type == other.type &&                            //
+           bit_width == other.bit_width &&                  //
+           vec_size == other.vec_size &&                    //
+           columns == other.columns &&                      //
+           offset == other.offset &&                        //
+           relaxed_precision == other.relaxed_precision &&  //
+           vertex_format == other.vertex_format             //
         ;
   }
 
-  /// @brief  Derives the flat vertex attribute format from this slot's scalar
+  /// @brief  The flat vertex attribute format for this slot, either the
+  ///         explicit `vertex_format` or one derived from the slot's scalar
   ///         type, bit width, and component count.
   ///
   ///         Returns `kInvalid` for matrices, component counts outside 1 to 4,
-  ///         mismatched bit widths, and scalar kinds that are not valid vertex
-  ///         inputs (boolean, 64-bit integers, and doubles).
+  ///         mismatched bit widths, scalar kinds that are not valid vertex
+  ///         inputs (boolean, 64-bit integers, and doubles), and an explicit
+  ///         format the declared input cannot read.
   constexpr VertexAttributeFormat GetVertexAttributeFormat() const {
+    if (vertex_format.has_value()) {
+      return columns == 1u &&
+                     IsVertexFormatReadableAs(vertex_format.value(), type)
+                 ? vertex_format.value()
+                 : VertexAttributeFormat::kInvalid;
+    }
     if (columns != 1u || vec_size < 1u || vec_size > 4u) {
       return VertexAttributeFormat::kInvalid;
     }

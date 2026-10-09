@@ -397,10 +397,18 @@ fml::StatusOr<vk::UniquePipeline> MakePipeline(
   const auto& stage_buffer_layouts =
       desc.GetVertexDescriptor()->GetStageLayouts();
   for (const ShaderStageIOSlot& stage_in : stage_inputs) {
+    const vk::Format format = ToVertexDescriptorFormat(stage_in);
+    if (format == vk::Format::eUndefined) {
+      VALIDATION_LOG << "Vertex attribute '" << stage_in.name
+                     << "' has no valid format in pipeline: "
+                     << desc.GetLabel();
+      return {fml::Status(fml::StatusCode::kUnknown,
+                          "Invalid vertex attribute format.")};
+    }
     vk::VertexInputAttributeDescription attr_desc;
     attr_desc.setBinding(stage_in.binding);
     attr_desc.setLocation(stage_in.location);
-    attr_desc.setFormat(ToVertexDescriptorFormat(stage_in));
+    attr_desc.setFormat(format);
     attr_desc.setOffset(stage_in.offset);
     attr_descs.push_back(attr_desc);
   }
