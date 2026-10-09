@@ -112,8 +112,9 @@ PlatformViewAndroid::PlatformDispatchTable MakePlatformDispatchTable(
     const std::shared_ptr<VsyncWaiterAndroid>& vsync_waiter) {
   return {
       .update_semantics_callback =
-          [jni_facade](int64_t view_id, flutter::SemanticsNodeUpdates update,
-                       flutter::CustomAccessibilityActionUpdates actions) {
+          [jni_facade](
+              int64_t view_id, const flutter::SemanticsNodeUpdates& update,
+              const flutter::CustomAccessibilityActionUpdates& actions) {
             PlatformViewAndroidDelegate(jni_facade)
                 .UpdateSemantics(update, actions);
           },
