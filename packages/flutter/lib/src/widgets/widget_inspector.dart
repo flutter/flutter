@@ -1538,11 +1538,11 @@ mixin WidgetInspectorService {
   /// or other packages.
   @protected
   void addPubRootDirectories(List<String> pubRootDirectories) {
-    pubRootDirectories = pubRootDirectories
+    final List<String> newPubRootDirectories = pubRootDirectories
         .map<String>((String directory) => Uri.parse(directory).path)
         .toList();
 
-    final directorySet = Set<String>.of(pubRootDirectories);
+    final directorySet = Set<String>.of(newPubRootDirectories);
     if (_pubRootDirectories != null) {
       directorySet.addAll(_pubRootDirectories!);
     }
@@ -1562,12 +1562,12 @@ mixin WidgetInspectorService {
     if (_pubRootDirectories == null) {
       return;
     }
-    pubRootDirectories = pubRootDirectories
+    final List<String> newPubRootDirectories = pubRootDirectories
         .map<String>((String directory) => Uri.parse(directory).path)
         .toList();
 
     final directorySet = Set<String>.of(_pubRootDirectories!);
-    directorySet.removeAll(pubRootDirectories);
+    directorySet.removeAll(newPubRootDirectories);
 
     _pubRootDirectories = directorySet.toList();
     _isLocalCreationCache.clear();
@@ -4517,12 +4517,13 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
 
   @override
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode? owner) {
+    var newNodes = nodes;
     if (maxDescendantsTruncatableNode >= 0 &&
         owner!.allowTruncate &&
         nodes.length > maxDescendantsTruncatableNode) {
-      nodes = service._truncateNodes(nodes, maxDescendantsTruncatableNode);
+      newNodes = service._truncateNodes(nodes, maxDescendantsTruncatableNode);
     }
-    return nodes;
+    return newNodes;
   }
 
   @override

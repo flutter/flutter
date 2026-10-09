@@ -1023,12 +1023,10 @@ class SliverReorderableListState extends State<SliverReorderableList>
     }
 
     // Removing an item at the old index shortens the list by one.
-    if (newIndex > oldIndex) {
-      newIndex -= 1;
-    }
+    final int updatedNewIndex = newIndex > oldIndex ? newIndex - 1 : newIndex;
 
-    if (oldIndex != newIndex) {
-      widget.onReorderItem?.call(oldIndex, newIndex);
+    if (oldIndex != updatedNewIndex) {
+      widget.onReorderItem?.call(oldIndex, updatedNewIndex);
     }
   }
 

@@ -10683,7 +10683,7 @@ void main() {
       TextEditingValue newValue,
     ) {
       if (newValue.text == 'I will be modified by the formatter.') {
-        newValue = collapsedAtEnd('Flutter is the best!');
+        return collapsedAtEnd('Flutter is the best!');
       }
       return newValue;
     });
