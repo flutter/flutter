@@ -7,9 +7,10 @@
 
 #include <deque>
 #include <memory>
+#include <optional>
+#include <shared_mutex>
 #include <string>
 
-#include <optional>
 #include "flutter/assets/asset_resolver.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
@@ -95,6 +96,7 @@ class AssetManager final : public AssetResolver {
   const AssetManager* as_asset_manager() const override { return this; }
 
  private:
+  mutable std::shared_mutex resolvers_mutex_;
   std::deque<std::unique_ptr<AssetResolver>> resolvers_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AssetManager);
