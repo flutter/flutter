@@ -65,9 +65,19 @@ static std::shared_ptr<impeller::Context> CreateImpellerContext(
 
   auto context = selection->CreateContext();
 
+  if (!context) {
+    return nullptr;
+  }
+
+  if (context->GetDriverInfo()->IsKnownBadDriver()) {
+    FML_LOG(INFO)
+        << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
+    return nullptr;
+  }
+
   if (!p_settings.quiet) {
-    if (context && impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
-                       .AreValidationsEnabled()) {
+    if (impeller::CapabilitiesVK::Cast(*context->GetCapabilities())
+            .AreValidationsEnabled()) {
       FML_LOG(IMPORTANT) << "Using the Impeller rendering backend (Vulkan with "
                             "Validation Layers).";
     } else if (context) {
