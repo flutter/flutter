@@ -6,8 +6,11 @@
 
 #include <dxgi.h>
 #include <wrl/client.h>
+#include <chrono>
+#include <optional>
 #include <thread>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/common/app_lifecycle_state.h"
@@ -59,6 +62,93 @@ void PumpMessage() {
     ::TranslateMessage(&msg);
     ::DispatchMessage(&msg);
   }
+}
+
+// Processes pending win32 messages without blocking, then yields briefly.
+void PumpPendingMessages() {
+  ::MSG msg;
+  while (::PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+    ::TranslateMessage(&msg);
+    ::DispatchMessage(&msg);
+  }
+  std::this_thread::sleep_for(std::chrono::milliseconds(16));
+}
+
+// Blocks until no other test in this or any other process holds this lock,
+// and returns a closure that releases it. Tests hold it while they have a
+// window on screen, since CI runs test processes in parallel and one test's
+// window could otherwise cover another's.
+fml::ScopedCleanupClosure AcquireCrossProcessLock() {
+  HANDLE mutex =
+      ::CreateMutex(nullptr, FALSE, L"Local\\flutter_windows_unittests_screen");
+  EXPECT_NE(mutex, nullptr) << "Failed to create the lock.";
+  ::WaitForSingleObject(mutex, INFINITE);
+  return fml::ScopedCleanupClosure([mutex] {
+    ::ReleaseMutex(mutex);
+    ::CloseHandle(mutex);
+  });
+}
+
+// Creates a visible top-level window to host a Flutter view. Flutter views are
+// created as children of HWND_MESSAGE, so they are not visible until they are
+// reparented into a real window.
+WindowPtr CreateHostWindow() {
+  // Topmost so screen reads are not obscured; WS_CLIPCHILDREN so the host's
+  // own background paint never overdraws the view.
+  return WindowPtr{
+      ::CreateWindowEx(WS_EX_TOPMOST, L"STATIC", L"",
+                       WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_CLIPCHILDREN, 0, 0,
+                       320, 240, nullptr, nullptr, nullptr, nullptr)};
+}
+
+// Reparents |controller|'s view into |host|, filling its client area, and
+// returns the view's window.
+HWND EmbedView(FlutterDesktopViewControllerRef controller, HWND host) {
+  HWND view = FlutterDesktopViewGetHWND(
+      FlutterDesktopViewControllerGetView(controller));
+  RECT client;
+  ::GetClientRect(host, &client);
+  ::SetParent(view, host);
+  ::MoveWindow(view, 0, 0, client.right, client.bottom, TRUE);
+  return view;
+}
+
+// The color drawn by the `drawSolidRed` fixture.
+constexpr COLORREF kSolidRed = RGB(0xFF, 0x00, 0x00);
+
+// Verifies that |expected| reaches the screen at the center of |view|.
+void ExpectCenterPixel(HWND view, COLORREF expected) {
+  RECT client;
+  ::GetClientRect(view, &client);
+  POINT center = {client.right / 2, client.bottom / 2};
+  ::ClientToScreen(view, &center);
+
+  // The frame reaches the screen asynchronously: the engine renders on its own
+  // thread, and the desktop compositor presents on its own schedule. Poll
+  // until the color shows up or the deadline passes.
+  const auto deadline =
+      std::chrono::steady_clock::now() + std::chrono::seconds(15);
+  std::optional<COLORREF> pixel;
+  do {
+    PumpPendingMessages();
+    // Skip reads while the view is not the window on screen at the point.
+    HWND window_at_point = ::WindowFromPoint(center);
+    if (window_at_point != view && !::IsChild(view, window_at_point)) {
+      pixel = std::nullopt;
+      continue;
+    }
+    // Read the pixel from the screen DC (GetDC(nullptr)) rather than asking the
+    // window to paint itself (e.g. with PrintWindow), because the latter forces
+    // a redraw and can capture a half-finished frame.
+    HDC screen_dc = ::GetDC(nullptr);
+    pixel = ::GetPixel(screen_dc, center.x, center.y);
+    ::ReleaseDC(nullptr, screen_dc);
+  } while (pixel != expected && std::chrono::steady_clock::now() < deadline);
+
+  ASSERT_TRUE(pixel.has_value());
+  EXPECT_EQ(*pixel, expected)
+      << "Expected 0x" << std::hex << expected
+      << " at the center of the view but got 0x" << *pixel << ".";
 }
 
 }  // namespace
@@ -363,6 +453,133 @@ TEST_F(WindowsTest, NextFrameCallback) {
 
   // Wait for the platform thread to exit.
   platform_thread->Join();
+}
+
+// The RendersSolidColor* tests verify that a frame rendered by Dart reaches
+// the screen.
+// Regression test for https://github.com/flutter/flutter/issues/191978, where
+// the window stayed black on GPUs limited to D3D11 feature level 10_0.
+//
+// A regression that breaks these tests will show up differently per build mode.
+// In debug builds GL errors are fatal, so the test binary aborts with a
+// backtrace; the abort cannot be caught in-process, so there is no simple way
+// to report it as an ordinary test failure. In release builds the window stays
+// black and the pixel check fails.
+
+// Impeller renders with the default ANGLE configuration.
+TEST_F(WindowsTest, RendersSolidColorImpeller) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("drawSolidRed");
+  builder.SetImpellerSwitch(EnabledImpeller);
+
+  EnginePtr engine{builder.InitializeEngine()};
+  ASSERT_NE(engine, nullptr);
+
+  // Create a host window for the Flutter view. Only one test may be on screen
+  // at a time.
+  fml::ScopedCleanupClosure lock = AcquireCrossProcessLock();
+  WindowPtr host = CreateHostWindow();
+  ASSERT_NE(host, nullptr);
+
+  // Run the engine, show its view, and check what reaches the screen.
+  ViewControllerPtr controller{
+      FlutterDesktopViewControllerCreate(320, 240, engine.release())};
+  ASSERT_NE(controller, nullptr);
+  HWND view = EmbedView(controller.get(), host.get());
+  ExpectCenterPixel(view, kSolidRed);
+}
+
+// Skia renders with the default ANGLE configuration.
+TEST_F(WindowsTest, RendersSolidColorSkia) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("drawSolidRed");
+  builder.SetImpellerSwitch(DisabledImpeller);
+
+  EnginePtr engine{builder.InitializeEngine()};
+  ASSERT_NE(engine, nullptr);
+
+  // Create a host window for the Flutter view. Only one test may be on screen
+  // at a time.
+  fml::ScopedCleanupClosure lock = AcquireCrossProcessLock();
+  WindowPtr host = CreateHostWindow();
+  ASSERT_NE(host, nullptr);
+
+  // Run the engine, show its view, and check what reaches the screen.
+  ViewControllerPtr controller{
+      FlutterDesktopViewControllerCreate(320, 240, engine.release())};
+  ASSERT_NE(controller, nullptr);
+  HWND view = EmbedView(controller.get(), host.get());
+  ExpectCenterPixel(view, kSolidRed);
+}
+
+// Impeller renders when ANGLE is capped to D3D11 feature level 10_0.
+TEST_F(WindowsTest, RendersSolidColorCappedToFeatureLevel10Impeller) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("drawSolidRed");
+  builder.SetImpellerSwitch(EnabledImpeller);
+
+  EnginePtr engine{builder.InitializeEngine()};
+  ASSERT_NE(engine, nullptr);
+
+  // Replace the engine's EGL manager with one capped to feature level 10_0.
+  // |allow_inverted_surface| must match what the engine uses for this renderer.
+  EngineModifier modifier{
+      reinterpret_cast<FlutterWindowsEngine*>(engine.get())};
+  auto egl_manager = egl::Manager::Create(egl::GpuPreference::NoPreference,
+                                          /*allow_inverted_surface=*/true,
+                                          egl::D3DFeatureLevel{10, 0});
+  ASSERT_NE(egl_manager, nullptr);
+  modifier.SetEGLManager(std::move(egl_manager));
+
+  // Create a host window for the Flutter view. Only one test may be on screen
+  // at a time.
+  fml::ScopedCleanupClosure lock = AcquireCrossProcessLock();
+  WindowPtr host = CreateHostWindow();
+  ASSERT_NE(host, nullptr);
+
+  // Run the engine, show its view, and check what reaches the screen.
+  ViewControllerPtr controller{
+      FlutterDesktopViewControllerCreate(320, 240, engine.release())};
+  ASSERT_NE(controller, nullptr);
+  HWND view = EmbedView(controller.get(), host.get());
+  ExpectCenterPixel(view, kSolidRed);
+}
+
+// Skia renders when ANGLE is capped to D3D11 feature level 10_0.
+TEST_F(WindowsTest, RendersSolidColorCappedToFeatureLevel10Skia) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  builder.SetDartEntrypoint("drawSolidRed");
+  builder.SetImpellerSwitch(DisabledImpeller);
+
+  EnginePtr engine{builder.InitializeEngine()};
+  ASSERT_NE(engine, nullptr);
+
+  // Replace the engine's EGL manager with one capped to feature level 10_0.
+  // |allow_inverted_surface| must match what the engine uses for this renderer.
+  EngineModifier modifier{
+      reinterpret_cast<FlutterWindowsEngine*>(engine.get())};
+  auto egl_manager = egl::Manager::Create(egl::GpuPreference::NoPreference,
+                                          /*allow_inverted_surface=*/false,
+                                          egl::D3DFeatureLevel{10, 0});
+  ASSERT_NE(egl_manager, nullptr);
+  modifier.SetEGLManager(std::move(egl_manager));
+
+  // Create a host window for the Flutter view. Only one test may be on screen
+  // at a time.
+  fml::ScopedCleanupClosure lock = AcquireCrossProcessLock();
+  WindowPtr host = CreateHostWindow();
+  ASSERT_NE(host, nullptr);
+
+  // Run the engine, show its view, and check what reaches the screen.
+  ViewControllerPtr controller{
+      FlutterDesktopViewControllerCreate(320, 240, engine.release())};
+  ASSERT_NE(controller, nullptr);
+  HWND view = EmbedView(controller.get(), host.get());
+  ExpectCenterPixel(view, kSolidRed);
 }
 
 // Verify the embedder ignores presents to the implicit view when there is no

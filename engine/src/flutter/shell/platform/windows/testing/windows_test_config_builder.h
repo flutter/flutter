@@ -5,8 +5,10 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_WINDOWS_TEST_CONFIG_BUILDER_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_TESTING_WINDOWS_TEST_CONFIG_BUILDER_H_
 
+#include <memory>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <vector>
 
 #include "flutter/fml/macros.h"
@@ -40,6 +42,14 @@ struct ViewControllerDeleter {
 using ViewControllerPtr =
     std::unique_ptr<FlutterDesktopViewController, ViewControllerDeleter>;
 
+// Deleter for HWND objects.
+struct WindowDeleter {
+  void operator()(HWND window) { ::DestroyWindow(window); }
+};
+
+// Unique pointer wrapper for HWND.
+using WindowPtr = std::unique_ptr<std::remove_pointer_t<HWND>, WindowDeleter>;
+
 // Test configuration builder for WindowsTests.
 //
 // Utility class for configuring engine and view controller launch arguments,
@@ -68,6 +78,8 @@ class WindowsConfigBuilder {
   void SetGpuPreference(FlutterDesktopGpuPreference gpu_preference);
 
   void SetAccessibilityMode(FlutterDesktopAccessibilityMode accessibility_mode);
+
+  void SetImpellerSwitch(FlutterDesktopImpellerSwitch impeller_switch);
 
   // Returns a configured and initialized engine.
   EnginePtr InitializeEngine() const;
@@ -100,6 +112,9 @@ class WindowsConfigBuilder {
 
   FlutterDesktopAccessibilityMode accessibility_mode_ =
       FlutterDesktopAccessibilityMode::DefaultAccessibilityMode;
+
+  FlutterDesktopImpellerSwitch impeller_switch_ =
+      FlutterDesktopImpellerSwitch::DefaultImpeller;
 
   FML_DISALLOW_COPY_AND_ASSIGN(WindowsConfigBuilder);
 };

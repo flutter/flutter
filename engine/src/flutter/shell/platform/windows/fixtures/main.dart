@@ -358,6 +358,20 @@ ui.Picture _createColoredBox(ui.Color color, ui.Size size) {
 }
 
 @pragma('vm:entry-point')
+void drawSolidRed() {
+  ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
+    final builder = ui.SceneBuilder()
+      ..addPicture(
+        ui.Offset.zero,
+        _createColoredBox(const ui.Color(0xFFFF0000), const ui.Size(800.0, 600.0)),
+      )
+      ..pop();
+    ui.PlatformDispatcher.instance.implicitView?.render(builder.build());
+  };
+  ui.PlatformDispatcher.instance.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
 void renderImplicitView() {
   ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) {
     const size = ui.Size(800.0, 600.0);

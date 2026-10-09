@@ -53,6 +53,11 @@ void WindowsConfigBuilder::SetAccessibilityMode(
   accessibility_mode_ = accessibility_mode;
 }
 
+void WindowsConfigBuilder::SetImpellerSwitch(
+    FlutterDesktopImpellerSwitch impeller_switch) {
+  impeller_switch_ = impeller_switch;
+}
+
 FlutterDesktopEngineProperties WindowsConfigBuilder::GetEngineProperties()
     const {
   FlutterDesktopEngineProperties engine_properties = {};
@@ -81,6 +86,7 @@ FlutterDesktopEngineProperties WindowsConfigBuilder::GetEngineProperties()
   engine_properties.gpu_preference = gpu_preference_;
   engine_properties.ui_thread_policy = ui_thread_policy_;
   engine_properties.accessibility_mode = accessibility_mode_;
+  engine_properties.impeller_switch = impeller_switch_;
 
   return engine_properties;
 }

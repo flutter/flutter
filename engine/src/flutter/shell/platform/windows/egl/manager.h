@@ -35,6 +35,12 @@ enum class GpuPreference {
   HighPerformancePreference,
 };
 
+// A Direct3D feature level, such as 10_0 or 11_1.
+struct D3DFeatureLevel {
+  int major;
+  int minor;
+};
+
 // A manager for initializing ANGLE correctly and using it to create and
 // destroy surfaces
 class Manager {
@@ -45,8 +51,15 @@ class Manager {
   // EGL_ANGLE_surface_orientation, window surfaces are created with an
   // inverted Y axis so that the default framebuffer shares Impeller's
   // top-left origin. See |surface_origin_is_top_left|.
-  static std::unique_ptr<Manager> Create(GpuPreference gpu_preference,
-                                         bool allow_inverted_surface);
+  //
+  // If |max_feature_level| is set, ANGLE's D3D11 renderer is limited to at
+  // most that feature level, even if the hardware supports a higher one. This
+  // is intended for testing: capping to 10_0 makes ANGLE expose only an
+  // OpenGL ES 2.0 context, emulating older GPUs on any machine.
+  static std::unique_ptr<Manager> Create(
+      GpuPreference gpu_preference,
+      bool allow_inverted_surface,
+      std::optional<D3DFeatureLevel> max_feature_level = std::nullopt);
 
   virtual ~Manager();
 
@@ -105,7 +118,9 @@ class Manager {
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
-  Manager(GpuPreference gpu_preference, bool allow_inverted_surface);
+  Manager(GpuPreference gpu_preference,
+          bool allow_inverted_surface,
+          std::optional<D3DFeatureLevel> max_feature_level = std::nullopt);
 
  private:
   // Number of active instances of Manager
@@ -117,7 +132,8 @@ class Manager {
 
   // Initialize the EGL display.
   bool InitializeDisplay(GpuPreference gpu_preference,
-                         bool allow_inverted_surface);
+                         bool allow_inverted_surface,
+                         std::optional<D3DFeatureLevel> max_feature_level);
 
   // Initialize the EGL configs.
   bool InitializeConfig();
