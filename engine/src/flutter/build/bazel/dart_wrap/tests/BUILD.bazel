@@ -15,6 +15,7 @@ cc_test(
     copts = FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
+        "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
         "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
         "@googletest//:gtest_main",
     ],
