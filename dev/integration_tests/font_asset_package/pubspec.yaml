@@ -1,0 +1,18 @@
+name: font_asset_package
+description: A package that provides an icon font through its build hook.
+version: 0.0.1
+
+publish_to: none
+
+environment:
+  sdk: ^3.13.0-0
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  hooks: ^2.2.0
+  font_asset: ^0.1.0
+
+# PUBSPEC CHECKSUM: b0amvj

@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:font_asset_package/font_asset_package.dart';
 
-/// The font family that `hook/build.dart` provides.
+/// The font family that this app's own `hook/build.dart` provides.
 const String kHookFontFamily = 'RobotoFromHook';
 
 void main() {
@@ -28,6 +29,8 @@ class FontAssetsApp extends StatelessWidget {
                 'Bold from hook',
                 style: TextStyle(fontFamily: kHookFontFamily, fontWeight: FontWeight.bold),
               ),
+              // An icon from the font that a dependency provides through its hook.
+              Icon(HookIcons.add),
             ],
           ),
         ),
