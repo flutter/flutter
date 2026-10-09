@@ -40,7 +40,13 @@ final class PredictiveBackEvent {
           ? null
           : Offset((touchOffset[0]! as num).toDouble(), (touchOffset[1]! as num).toDouble()),
       progress: (map['progress']! as num).toDouble(),
-      swipeEdge: SwipeEdge.values[map['swipeEdge']! as int],
+      swipeEdge: switch (map['swipeEdge']! as int) {
+        0 => SwipeEdge.left,
+        1 => SwipeEdge.right,
+        // Android BackEvent.EDGE_NONE is 2. Unknown values (including
+        // EDGE_NONE) fall back to left so fromMap never throws a RangeError.
+        _ => SwipeEdge.left,
+      },
     );
   }
 
@@ -50,6 +56,15 @@ final class PredictiveBackEvent {
   /// This represents the touch location that initiates or interacts with the
   /// back gesture. When `null`, it indicates the gesture was not started by a
   /// touch event, such as a back button press in devices with hardware buttons.
+  ///
+  /// The Android `BackEvent` API (`BackEvent.getTouchX()` and
+  /// `BackEvent.getTouchY()`) specifies that these values return `NaN` for
+  /// button-triggered events. The engine maps those `NaN` values to `null`
+  /// here.
+  ///
+  /// See also:
+  ///
+  ///  * https://developer.android.com/reference/android/window/BackEvent#getTouchX()
   final Offset? touchOffset;
 
   /// Returns a value between 0.0 and 1.0 representing how far along the back
@@ -74,6 +89,10 @@ final class PredictiveBackEvent {
   final double progress;
 
   /// The screen edge from which the swipe gesture starts.
+  ///
+  /// Android's `BackEvent.EDGE_NONE` (value 2) and any unknown platform value
+  /// are mapped to [SwipeEdge.left] so that [PredictiveBackEvent.fromMap] does
+  /// not throw. Button-triggered events are identified by [isButtonEvent].
   final SwipeEdge swipeEdge;
 
   /// Indicates if the event was triggered by a system back button press.
