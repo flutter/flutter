@@ -91,7 +91,6 @@ template("display_list_unittests_component") {
     "dl_playground.h",
     "dl_unittests.cc",
     "paint_unittests.cc",
-    "testing/default_anti_aliased_dl_paint.h",
     "testing/render_text_in_canvas.cc",
     "testing/render_text_in_canvas.h",
     "testing/rmse.cc",
@@ -176,7 +175,6 @@ template("aiks_unittests_component") {
   predefined_sources = [
     "aiks_unittests.cc",
     "aiks_unittests.h",
-    "testing/default_anti_aliased_dl_paint.h",
   ]
   additional_sources = []
   if (defined(invoker.sources)) {

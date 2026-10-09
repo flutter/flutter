@@ -13,7 +13,6 @@
 #include "display_list/geometry/dl_path_builder.h"
 #include "display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
-#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -38,7 +37,6 @@ namespace impeller {
 namespace testing {
 
 using namespace flutter;
-using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 TEST_P(AiksTest, CollapsedDrawPaintInSubpass) {
   DisplayListBuilder builder;

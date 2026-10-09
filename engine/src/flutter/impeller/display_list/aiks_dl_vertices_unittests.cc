@@ -7,7 +7,6 @@
 #include "display_list/dl_vertices.h"
 #include "display_list/effects/dl_mask_filter.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
-#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -24,7 +23,6 @@ namespace impeller {
 namespace testing {
 
 using namespace flutter;
-using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 namespace {
 std::shared_ptr<DlVertices> MakeVertices(
@@ -181,7 +179,7 @@ TEST_P(AiksTest, CanConvertTriangleFanToTriangles) {
     DlPoint(hex_start.x - center_to_flat, hex_start.y + 0.5 * hexagon_radius)
   };
   // clang-format on
-  auto paint = DlPaint(flutter::DlColor::kDarkGrey());
+  auto paint = flutter::DlPaint(flutter::DlColor::kDarkGrey());
   auto dl_vertices = flutter::DlVertices::Make(
       flutter::DlVertexMode::kTriangleFan, vertices.size(), vertices.data(),
       nullptr, nullptr);
@@ -207,7 +205,7 @@ TEST_P(AiksTest, DrawVerticesSolidColorTrianglesWithoutIndices) {
       /*texture_coordinates=*/nullptr, colors.data());
 
   flutter::DisplayListBuilder builder;
-  DlPaint paint;
+  flutter::DlPaint paint;
 
   paint.setColor(flutter::DlColor::kRed().modulateOpacity(0.5));
   builder.Scale(-1, -1);
@@ -236,7 +234,7 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithoutIndices) {
       flutter::DlTileMode::kRepeat);
 
   flutter::DisplayListBuilder builder;
-  DlPaint paint;
+  flutter::DlPaint paint;
 
   paint.setColorSource(linear);
   builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
@@ -269,7 +267,7 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithTextureCoordinates) {
       flutter::DlTileMode::kRepeat);
 
   flutter::DisplayListBuilder builder;
-  DlPaint paint;
+  flutter::DlPaint paint;
 
   paint.setColorSource(linear);
   builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
@@ -296,7 +294,7 @@ TEST_P(AiksTest, DrawVerticesImageSourceWithTextureCoordinates) {
       texture_coordinates.data(), /*colors=*/nullptr);
 
   flutter::DisplayListBuilder builder;
-  DlPaint paint;
+  flutter::DlPaint paint;
 
   auto image_source = flutter::DlColorSource::MakeImage(
       dl_image, flutter::DlTileMode::kRepeat, flutter::DlTileMode::kRepeat);
@@ -330,7 +328,7 @@ TEST_P(AiksTest,
       texture_coordinates.data(), colors.data());
 
   flutter::DisplayListBuilder builder;
-  DlPaint paint;
+  flutter::DlPaint paint;
 
   auto image_source = flutter::DlColorSource::MakeImage(
       dl_image, flutter::DlTileMode::kRepeat, flutter::DlTileMode::kRepeat);
@@ -356,7 +354,7 @@ TEST_P(AiksTest, DrawVerticesSolidColorTrianglesWithIndices) {
       indices.data());
 
   flutter::DisplayListBuilder builder;
-  DlPaint paint;
+  flutter::DlPaint paint;
 
   paint.setColor(flutter::DlColor::kRed());
   builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
@@ -381,7 +379,7 @@ TEST_P(AiksTest, DrawVerticesPremultipliesColors) {
       indices.data());
 
   flutter::DisplayListBuilder builder;
-  DlPaint paint;
+  flutter::DlPaint paint;
   paint.setBlendMode(flutter::DlBlendMode::kSrcOver);
   paint.setColor(flutter::DlColor::kRed());
 
@@ -408,7 +406,7 @@ TEST_P(AiksTest, DrawVerticesWithInvalidIndices) {
   EXPECT_EQ(vertices->GetBounds(), DlRect::MakeLTRB(100, 100, 300, 500));
 
   flutter::DisplayListBuilder builder;
-  DlPaint paint;
+  flutter::DlPaint paint;
   paint.setBlendMode(flutter::DlBlendMode::kSrcOver);
   paint.setColor(flutter::DlColor::kRed());
 
@@ -481,8 +479,8 @@ TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
       /*indices=*/nullptr);
 
   flutter::DisplayListBuilder builder;
-  DlPaint paint;
-  DlPaint rect_paint;
+  flutter::DlPaint paint;
+  flutter::DlPaint rect_paint;
   rect_paint.setColor(DlColor::kBlue());
 
   auto runtime_stages_result =
@@ -530,8 +528,8 @@ TEST_P(AiksTest,
       /*indices=*/nullptr);
 
   flutter::DisplayListBuilder builder;
-  DlPaint paint;
-  DlPaint rect_paint;
+  flutter::DlPaint paint;
+  flutter::DlPaint rect_paint;
   rect_paint.setColor(DlColor::kBlue());
 
   auto runtime_stages_result =

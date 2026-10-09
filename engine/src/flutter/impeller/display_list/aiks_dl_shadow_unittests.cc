@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/impeller/display_list/aiks_unittests.h"
-#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
@@ -16,7 +15,6 @@ namespace impeller {
 namespace testing {
 
 using namespace flutter;
-using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 namespace {
 /// @brief  Reflect the segments of a path around a coordinate using the

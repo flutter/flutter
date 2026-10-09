@@ -18,7 +18,6 @@
 #include "impeller/display_list/aiks_context.h"
 #include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_text_impeller.h"
-#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/contents/text_contents.h"
@@ -34,8 +33,6 @@ using namespace flutter;
 
 namespace impeller {
 namespace testing {
-
-using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 struct TextRenderOptions {
   bool stroke = false;

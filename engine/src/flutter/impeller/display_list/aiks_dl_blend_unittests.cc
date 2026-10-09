@@ -11,7 +11,6 @@
 #include "display_list/effects/dl_color_source.h"
 #include "display_list/effects/dl_mask_filter.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
-#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -34,7 +33,6 @@ namespace impeller {
 namespace testing {
 
 using namespace flutter;
-using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 #define BLEND_MODE_TUPLE(blend_mode) {#blend_mode, BlendMode::k##blend_mode},
 

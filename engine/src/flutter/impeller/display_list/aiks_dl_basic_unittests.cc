@@ -11,7 +11,6 @@
 #include "display_list/effects/dl_mask_filter.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
 #include "flutter/impeller/geometry/constants.h"
-#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -29,7 +28,6 @@ namespace impeller {
 namespace testing {
 
 using namespace flutter;
-using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 TEST_P(AiksTest, CanRenderColoredRect) {
   DisplayListBuilder builder;
@@ -757,7 +755,7 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
     background_paint.setColor(DlColor(1, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
     builder.DrawPaint(background_paint);
 
-    DlPaint paint;
+    flutter::DlPaint paint;
 
     paint.setColor(flutter::DlColor::kRed().withAlpha(stroked_alpha));
     paint.setDrawStyle(flutter::DlDrawStyle::kStroke);

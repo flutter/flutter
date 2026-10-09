@@ -10,7 +10,6 @@
 #include "display_list/effects/dl_mask_filter.h"
 #include "display_list/geometry/dl_path_builder.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
-#include "impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/display_list/dl_color.h"
@@ -27,8 +26,6 @@ using namespace flutter;
 
 namespace impeller {
 namespace testing {
-
-using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 namespace {
 

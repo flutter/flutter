@@ -13,7 +13,6 @@
 #include "display_list/geometry/dl_path_builder.h"
 #include "flutter/display_list/dl_builder.h"
 #include "flutter/fml/closure.h"
-#include "flutter/impeller/display_list/testing/default_anti_aliased_dl_paint.h"
 #include "flutter/impeller/display_list/testing/render_text_in_canvas.h"
 #include "flutter/impeller/display_list/testing/rmse.h"
 #include "flutter/testing/testing.h"
@@ -29,7 +28,6 @@ using impeller::PlaygroundTest;
 using impeller::Point;
 using impeller::Radians;
 using impeller::Scalar;
-using DlPaint = impeller::testing::DefaultAntiAliasedDlPaint;
 
 INSTANTIATE_PLAYGROUND_SUITE(DlGoldenTest);
 
