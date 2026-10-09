@@ -4,7 +4,7 @@
 
 # Build-wide engine configuration: the Bazel side of config.gni.
 
-load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -36,6 +36,17 @@ string_flag(
     ]
 ]
 
+# GN's `slimpeller` argument: build without the Skia-backed rendering paths.
+bool_flag(
+    name = "slimpeller",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "slimpeller_enabled",
+    flag_values = {":slimpeller": "True"},
+)
+
 # config("flutter_config"): `feature_defines_list` from config.gni, which
 # every engine library propagates to its dependents through fml.
 cc_library(
@@ -61,5 +72,8 @@ cc_library(
             "FLUTTER_RELEASE=1",
             "FLUTTER_JIT_RUNTIME=1",
         ],
+    }) + select({
+        ":slimpeller_enabled": ["SLIMPELLER=1"],
+        "//conditions:default": [],
     }),
 )
