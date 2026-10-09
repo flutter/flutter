@@ -11,6 +11,7 @@ import static org.mockito.AdditionalMatchers.gt;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isNotNull;
 import static org.mockito.Mockito.isNull;
@@ -1569,6 +1570,199 @@ public class TextInputPluginTest {
 
     textInputPlugin.showTextInput(testView);
     assertFalse(testImm.isSoftInputVisible());
+    // The input connection must still be (re)started for TextInputType.none so that
+    // hardware key events (e.g. Ctrl+V paste from a physical keyboard) are dispatched
+    // to an active IME editor. Without it, Android's ViewRootImpl routes hardware key
+    // events to the IME first, which consumes editor shortcuts and the framework never
+    // receives them. See https://github.com/flutter/flutter/issues/182941.
+    assertEquals(1, testImm.getRestartCount(testView));
+  }
+
+  @Test
+  public void showTextInput_textInputTypeNone_focusesViewAndRestartsInputWithoutShowingKeyboard() {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = spy(new View(ctx));
+    // Start with the soft keyboard visible to verify that showTextInput hides it.
+    ctx.getSystemService(InputMethodManager.class).showSoftInput(testView, 0);
+    TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    textInputPlugin.setTextInputClient(0, createConfiguration(TextInputChannel.TextInputType.NONE));
+    int restartCountBeforeShow = testImm.getRestartCount(testView);
+
+    textInputPlugin.showTextInput(testView);
+
+    verify(testView, times(1)).requestFocus();
+    assertEquals(restartCountBeforeShow + 1, testImm.getRestartCount(testView));
+    assertFalse(testImm.isSoftInputVisible());
+  }
+
+  @Test
+  public void showTextInput_textInputTypeText_focusesViewAndShowsKeyboard() {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = spy(new View(ctx));
+    ctx.getSystemService(InputMethodManager.class)
+        .hideSoftInputFromWindow(testView.getWindowToken(), 0);
+    TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    textInputPlugin.setTextInputClient(0, createConfiguration(TextInputChannel.TextInputType.TEXT));
+    int restartCountBeforeShow = testImm.getRestartCount(testView);
+
+    textInputPlugin.showTextInput(testView);
+
+    verify(testView, times(1)).requestFocus();
+    // The input connection is only restarted for TextInputType.none.
+    assertEquals(restartCountBeforeShow, testImm.getRestartCount(testView));
+    assertTrue(testImm.isSoftInputVisible());
+  }
+
+  @Test
+  public void showTextInput_nullConfiguration_focusesViewAndShowsKeyboard() {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = spy(new View(ctx));
+    ctx.getSystemService(InputMethodManager.class)
+        .hideSoftInputFromWindow(testView.getWindowToken(), 0);
+    TextInputChannel textInputChannel = new TextInputChannel(mock(DartExecutor.class));
+    ScribeChannel scribeChannel = new ScribeChannel(mock(DartExecutor.class));
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            textInputChannel,
+            scribeChannel,
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+
+    // No text input client has been set, so there is no configuration.
+    textInputPlugin.showTextInput(testView);
+
+    verify(testView, times(1)).requestFocus();
+    assertEquals(0, testImm.getRestartCount(testView));
+    assertTrue(testImm.isSoftInputVisible());
+  }
+
+  @Test
+  public void onWindowFocusChanged_focusesViewAndRequestsExistingInputStateWhenConnectionWasLost() {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setAcceptingText(false);
+    View testView = spy(new View(ctx));
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin = createTextInputPlugin(testView, textInputChannel);
+    textInputPlugin.setTextInputClient(0, createConfiguration(TextInputChannel.TextInputType.NONE));
+    // The constructor requests the existing input state once; ignore that call.
+    clearInvocations(textInputChannel, testView);
+
+    textInputPlugin.onWindowFocusChanged(true);
+
+    // The view may have lost focus along with the window (e.g. when the screen is turned off and
+    // on again), and restarting the input connection has no effect on an unfocused view.
+    verify(testView, times(1)).requestFocus();
+    verify(textInputChannel, times(1)).requestExistingInputState();
+  }
+
+  @Test
+  public void onWindowFocusChanged_doesNothingWhenFocusIsLost() {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setAcceptingText(false);
+    View testView = spy(new View(ctx));
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin = createTextInputPlugin(testView, textInputChannel);
+    textInputPlugin.setTextInputClient(0, createConfiguration(TextInputChannel.TextInputType.NONE));
+    clearInvocations(textInputChannel, testView);
+
+    textInputPlugin.onWindowFocusChanged(false);
+
+    verify(testView, never()).requestFocus();
+    verify(textInputChannel, never()).requestExistingInputState();
+  }
+
+  @Test
+  public void onWindowFocusChanged_doesNothingWhenAcceptingText() {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setAcceptingText(true);
+    View testView = spy(new View(ctx));
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin = createTextInputPlugin(testView, textInputChannel);
+    textInputPlugin.setTextInputClient(0, createConfiguration(TextInputChannel.TextInputType.NONE));
+    clearInvocations(textInputChannel, testView);
+
+    textInputPlugin.onWindowFocusChanged(true);
+
+    verify(testView, never()).requestFocus();
+    verify(textInputChannel, never()).requestExistingInputState();
+  }
+
+  @Test
+  public void onWindowFocusChanged_doesNothingForOtherInputTypes() {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setAcceptingText(false);
+    View testView = spy(new View(ctx));
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin = createTextInputPlugin(testView, textInputChannel);
+    textInputPlugin.setTextInputClient(0, createConfiguration(TextInputChannel.TextInputType.TEXT));
+    clearInvocations(textInputChannel, testView);
+
+    textInputPlugin.onWindowFocusChanged(true);
+
+    verify(testView, never()).requestFocus();
+    verify(textInputChannel, never()).requestExistingInputState();
+  }
+
+  @Test
+  public void onWindowFocusChanged_doesNothingWithoutFrameworkClient() {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    testImm.setAcceptingText(false);
+    View testView = spy(new View(ctx));
+    TextInputChannel textInputChannel = spy(new TextInputChannel(mock(DartExecutor.class)));
+    TextInputPlugin textInputPlugin = createTextInputPlugin(testView, textInputChannel);
+    textInputPlugin.setTextInputClient(0, createConfiguration(TextInputChannel.TextInputType.NONE));
+    textInputPlugin.clearTextInputClient();
+    clearInvocations(textInputChannel, testView);
+
+    textInputPlugin.onWindowFocusChanged(true);
+
+    verify(testView, never()).requestFocus();
+    verify(textInputChannel, never()).requestExistingInputState();
+  }
+
+  private static TextInputPlugin createTextInputPlugin(
+      View view, TextInputChannel textInputChannel) {
+    return new TextInputPlugin(
+        view,
+        textInputChannel,
+        new ScribeChannel(mock(DartExecutor.class)),
+        mock(PlatformViewsController.class),
+        mock(PlatformViewsController2.class));
+  }
+
+  private static TextInputChannel.Configuration createConfiguration(
+      TextInputChannel.TextInputType inputType) {
+    return new TextInputChannel.Configuration(
+        false,
+        false,
+        true,
+        true,
+        false,
+        TextInputChannel.TextCapitalization.NONE,
+        new TextInputChannel.InputType(inputType, false, false, false),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
   }
 
   @Test
@@ -3213,6 +3407,7 @@ public class TextInputPluginTest {
     private CursorAnchorInfo cursorAnchorInfo;
     private ArrayList<Integer> selectionUpdateValues;
     private boolean trackSelection = false;
+    private boolean acceptingText = false;
     private EventHandler handler;
 
     public TestImm() {
@@ -3236,6 +3431,15 @@ public class TextInputPluginTest {
 
     public int getRestartCount(View view) {
       return restartCounter.get(view.hashCode(), /*defaultValue=*/ 0);
+    }
+
+    @Implementation
+    public boolean isAcceptingText() {
+      return acceptingText;
+    }
+
+    public void setAcceptingText(boolean acceptingText) {
+      this.acceptingText = acceptingText;
     }
 
     public void setEventHandler(EventHandler eventHandler) {
