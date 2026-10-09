@@ -1,0 +1,257 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Mirrors BUILD.gn. Only the host Linux build is covered so far: the other
+# platforms' sources follow with their toolchains, and the configurable
+# arguments GN consults here (enable_backtrace, is_wasm) are taken at their
+# defaults until a target needs them.
+
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "fml",
+    srcs = [
+        "ascii_trie.cc",
+        "backtrace.cc",  # enable_backtrace && !is_wasm
+        "base32.cc",
+        "concurrent_message_loop.cc",
+        "cpu_affinity.cc",
+        "delayed_task.cc",
+        "endianness.cc",
+        "file.cc",
+        "hex_codec.cc",
+        "icu_util.cc",  # !is_wasm
+        "log_settings.cc",
+        "log_settings_state.cc",
+        "logging.cc",
+        "mapping.cc",
+        "memory/task_runner_checker.cc",
+        "memory/thread_checker.cc",
+        "memory/weak_ptr_internal.cc",
+        "message_loop.cc",
+        "message_loop_impl.cc",
+        "message_loop_task_queues.cc",
+        "paths.cc",
+        "raster_thread_merger.cc",
+        "safe_math.cc",
+        "shared_thread_merger.cc",
+        "synchronization/count_down_latch.cc",
+        "synchronization/semaphore.cc",
+        "synchronization/sync_switch.cc",
+        "synchronization/waitable_event.cc",
+        "task_runner.cc",
+        "task_runner_util.cc",
+        "task_source.cc",
+        "thread.cc",
+        "time/time_point.cc",
+        "trace_event.cc",
+        "unique_fd.cc",
+    ] + select({
+        "@platforms//os:linux": [
+            # !(is_ios || is_mac)
+            "concurrent_message_loop_factory.cc",
+            # is_linux
+            "platform/linux/message_loop_linux.cc",
+            "platform/linux/message_loop_linux.h",
+            "platform/linux/paths_linux.cc",
+            "platform/linux/timerfd.cc",
+            "platform/linux/timerfd.h",
+            # !is_win
+            "platform/posix/command_line_posix.cc",
+            "platform/posix/file_posix.cc",
+            "platform/posix/mapping_posix.cc",
+            "platform/posix/native_library_posix.cc",
+            "platform/posix/paths_posix.cc",
+            "platform/posix/posix_wrappers_posix.cc",
+            "platform/posix/process_posix.cc",
+        ],
+    }),
+    hdrs = [
+        "ascii_trie.h",
+        "backtrace.h",
+        "base32.h",
+        "closure.h",
+        "concurrent_message_loop.h",
+        "container.h",
+        "cpu_affinity.h",
+        "delayed_task.h",
+        "eintr_wrapper.h",
+        "endianness.h",
+        "file.h",
+        "hash_combine.h",
+        "hex_codec.h",
+        "icu_util.h",  # !is_wasm
+        "log_level.h",
+        "log_settings.h",
+        "logging.h",
+        "make_copyable.h",
+        "mapping.h",
+        "math.h",
+        "memory/ref_counted.h",
+        "memory/ref_counted_internal.h",
+        "memory/ref_ptr.h",
+        "memory/ref_ptr_internal.h",
+        "memory/task_runner_checker.h",
+        "memory/thread_checker.h",
+        "memory/weak_ptr.h",
+        "memory/weak_ptr_internal.h",
+        "message_loop.h",
+        "message_loop_impl.h",
+        "message_loop_task_queues.h",
+        "native_library.h",
+        "paths.h",
+        "posix_wrappers.h",
+        "process.h",
+        "raster_thread_merger.h",
+        "safe_math.h",
+        "shared_thread_merger.h",
+        "status.h",
+        "status_or.h",
+        "synchronization/atomic_object.h",
+        "synchronization/count_down_latch.h",
+        "synchronization/semaphore.h",
+        "synchronization/sync_switch.h",
+        "synchronization/waitable_event.h",
+        "task_queue_id.h",
+        "task_runner.h",
+        "task_runner_util.h",
+        "task_source.h",
+        "task_source_grade.h",
+        "thread.h",
+        "time/time_delta.h",
+        "time/time_point.h",
+        "time/timestamp_provider.h",
+        "trace_event.h",
+        "unique_fd.h",
+        "unique_object.h",
+        "wakeable.h",
+    ],
+    copts = FLUTTER_COPTS,
+    # GN lists these under `deps`, so their public configs (ICU's defines and
+    # include directories in particular) stop at fml.
+    implementation_deps = [
+        "@abseil-cpp//absl/debugging:symbolize",  # enable_backtrace
+        "@abseil-cpp//absl/numeric:int128",
+        "@icu",  # !is_wasm
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":build_config",
+        ":command_line",
+        ":macros",
+        ":string_conversion",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+        # trace_event.h uses the Dart timeline types.
+        "@dart//:dart_api_headers",
+    ],
+)
+
+cc_library(
+    name = "build_config",
+    hdrs = ["build_config.h"],
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+    ],
+)
+
+cc_library(
+    name = "command_line",
+    srcs = ["command_line.cc"],
+    hdrs = ["command_line.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":macros",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+    ],
+)
+
+cc_library(
+    name = "macros",
+    hdrs = ["macros.h"],
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+    ],
+)
+
+cc_library(
+    name = "string_conversion",
+    srcs = ["string_conversion.cc"],
+    hdrs = ["string_conversion.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        # Current versions of libcxx have deprecated some of the UTF-16 string
+        # conversion APIs.
+        "_LIBCPP_DISABLE_DEPRECATION_WARNINGS",
+    ],
+    deps = [
+        ":build_config",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+    ],
+)
+
+flutter_test_fixtures(
+    name = "fml_fixtures",
+    fixtures = [],
+)
+
+cc_test(
+    name = "fml_unittests",
+    size = "small",
+    srcs = [
+        "ascii_trie_unittests.cc",
+        "backtrace_unittests.cc",
+        "base32_unittest.cc",
+        "closure_unittests.cc",
+        "command_line_unittest.cc",
+        "container_unittests.cc",
+        "cpu_affinity_unittests.cc",
+        "endianness_unittests.cc",
+        "file_unittest.cc",
+        "hash_combine_unittests.cc",
+        "hex_codec_unittest.cc",
+        "logging_unittests.cc",
+        "mapping_unittests.cc",
+        "math_unittests.cc",
+        "memory/ref_counted_unittest.cc",
+        "memory/task_runner_checker_unittest.cc",
+        "memory/weak_ptr_unittest.cc",
+        "message_loop_task_queues_merge_unmerge_unittests.cc",
+        "message_loop_task_queues_unittests.cc",
+        "message_loop_unittests.cc",
+        "paths_unittests.cc",
+        "raster_thread_merger_unittests.cc",
+        "safe_math_unittests.cc",
+        "string_conversion_unittests.cc",
+        "synchronization/count_down_latch_unittests.cc",
+        "synchronization/semaphore_unittest.cc",
+        "synchronization/sync_switch_unittest.cc",
+        "synchronization/waitable_event_unittest.cc",
+        "task_runner_util_unittests.cc",
+        "task_source_unittests.cc",
+        "thread_unittests.cc",
+        "time/chrono_timestamp_provider.cc",
+        "time/chrono_timestamp_provider.h",
+        "time/time_delta_unittest.cc",
+        "time/time_point_unittest.cc",
+        "time/time_unittest.cc",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":fml",
+        ":fml_fixtures",
+        "//engine/src/flutter/testing:run_all_unittests",
+        "//engine/src/flutter/testing:testing_core",
+    ],
+)
