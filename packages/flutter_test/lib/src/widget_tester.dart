@@ -191,9 +191,12 @@ void testWidgets(
               maybeSetupLeakTrackingForTest(experimentalLeakTesting, combinedDescription);
               await callback(tester);
             } finally {
-              await variant.tearDown(value, memento);
-              maybeTearDownLeakTrackingForTest();
-              semanticsHandle?.dispose();
+              try {
+                await variant.tearDown(value, memento);
+                maybeTearDownLeakTrackingForTest();
+              } finally {
+                semanticsHandle?.dispose();
+              }
             }
           },
           tester._endOfTestVerifications,
