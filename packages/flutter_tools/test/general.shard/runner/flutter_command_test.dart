@@ -214,20 +214,50 @@ void main() {
     );
 
     testUsingContext(
-      'prints Intel Mac warning on macOS X64 once',
+      'prints Intel Mac warning on macOS X64 on every command',
       () async {
         final flutterCommand = DummyFlutterCommand();
 
         await flutterCommand.run();
 
-        final String warningText = testLogger.warningText;
-        expect(warningText, contains('Flutter is deprecating support for Intel-based Macs.'));
+        expect(
+          testLogger.warningText,
+          contains('Flutter is deprecating support for Intel-based Macs.'),
+        );
 
-        // Run the command again, the message shouldn't be printed again.
+        // Run the command again, the warning is printed every time.
         await flutterCommand.run();
 
-        // BufferLogger.clear() does not clear warnings.
-        expect(testLogger.warningText, equals(warningText));
+        // BufferLogger.clear() does not clear warnings, so the second run appends
+        // another copy of the warning.
+        expect(
+          'Flutter is deprecating support for Intel-based Macs.'
+              .allMatches(testLogger.warningText)
+              .length,
+          2,
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        OperatingSystemUtils: () => FakeOperatingSystemUtils(hostPlatform: .darwin_x64),
+      },
+    );
+
+    testUsingContext(
+      'Intel Mac warning on macOS X64 is not fatal',
+      () async {
+        final flutterCommand = DummyFlutterCommand();
+        testLogger.fatalWarnings = true;
+
+        await flutterCommand.run();
+
+        expect(
+          testLogger.warningText,
+          contains('Flutter is deprecating support for Intel-based Macs.'),
+        );
+        expect(testLogger.hadWarningOutput, isFalse);
+        expect(testLogger.checkForFatalLogs, returnsNormally);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
