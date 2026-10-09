@@ -91,7 +91,7 @@ mergeInto(LibraryManager.library, {
             );
             return;
           case 'onInitialized':
-            _surface_onInitialized(data.surface, data.callbackId);
+            _surface_onInitialized(data.surface, data.callbackId, data.success);
             return;
           case 'resizeSurface':
             _surface_resizeOnWorker(data.surface, data.width, data.height, data.callbackId);
@@ -218,11 +218,12 @@ mergeInto(LibraryManager.library, {
         callbackId,
       }, [canvas], threadId);
     };
-    _skwasm_reportInitialized = function (surfaceHandle, callbackId) {
+    _skwasm_reportInitialized = function (surfaceHandle, callbackId, success) {
       skwasm_postMessage({
         skwasmMessage: 'onInitialized',
         surface: surfaceHandle,
         callbackId,
+        success,
       }, []);
     };
 
