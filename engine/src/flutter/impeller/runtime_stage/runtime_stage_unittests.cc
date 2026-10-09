@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <future>
 
+#include "absl/status/status_matchers.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
@@ -23,7 +24,6 @@
 #include "impeller/runtime_stage/runtime_stage_flatbuffers.h"
 #include "impeller/runtime_stage/runtime_stage_playground.h"
 #include "runtime_stage_types_flatbuffers.h"
-#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {

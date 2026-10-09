@@ -5,13 +5,13 @@
 #include <filesystem>
 #include <fstream>
 
+#include "absl/flags/flag.h"
+#include "absl/flags/parse.h"
+#include "absl/flags/usage.h"
+#include "absl/log/globals.h"
+#include "absl/log/initialize.h"
+#include "absl/strings/str_cat.h"
 #include "flutter/tools/licenses_cpp/src/license_checker.h"
-#include "third_party/abseil-cpp/absl/flags/flag.h"
-#include "third_party/abseil-cpp/absl/flags/parse.h"
-#include "third_party/abseil-cpp/absl/flags/usage.h"
-#include "third_party/abseil-cpp/absl/log/globals.h"
-#include "third_party/abseil-cpp/absl/log/initialize.h"
-#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace fs = std::filesystem;
 

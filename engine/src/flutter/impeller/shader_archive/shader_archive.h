@@ -9,10 +9,10 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include "absl/status/statusor.h"
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/mapping.h"
 #include "impeller/shader_archive/shader_archive_types.h"
-#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
