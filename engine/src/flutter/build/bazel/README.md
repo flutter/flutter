@@ -25,7 +25,7 @@ span the whole tree. Engine code includes such dependencies by their
 canonical paths (`absl/...`, `unicode/...`), which both GN and the upstream
 or overlay `BUILD` files resolve.
 
-Prebuilt tools (clang, gn, ...) default to the synced copy as well. Set
+Prebuilt tools (clang, gn, ninja, ...) default to the synced copy as well. Set
 
 ```
 FLUTTER_BAZEL_FETCH_TOOLCHAINS=1   # e.g. bazelisk build --repo_env=FLUTTER_BAZEL_FETCH_TOOLCHAINS=1 ...
@@ -34,15 +34,22 @@ FLUTTER_BAZEL_FETCH_TOOLCHAINS=1   # e.g. bazelisk build --repo_env=FLUTTER_BAZE
 to have Bazel download them from CIPD at the `DEPS` pins instead; the
 repository layout is the same either way. This is the path a checkout without
 `gclient` will use once the switch is complete. The download is the exact
-package file `gclient` installs (verified byte-for-byte for clang and gn on
-linux-x64), served as a zip by
+package file `gclient` installs (verified byte-for-byte for clang, gn and
+ninja on linux-x64), served as a zip by
 `https://chrome-infra-packages.appspot.com/dl/<package>/+/<version>`.
 
 A CIPD instance id is `base64url(sha256(zip) + 0x02)`, so the sha256 Bazel
 needs to verify (and cache) a download can be read off the instance id that
-`gclient sync` writes to `<path>/.versions/<name>.cipd_version`, without
+`gclient sync` writes to `<path>/.versions/<name>.cipd_version` (or, for
+packages without one, to `.cipd/pkgs/<n>/_current` next to `DEPS`), without
 downloading anything. Known hashes live in `_CIPD_SHA256` in `extensions.bzl`;
 for an unknown pin Bazel still fetches and prints the hash to add.
+
+A few tools are not in `DEPS` at all and are therefore always downloaded
+(`_DOWNLOADED_TOOL_REPOSITORIES` in `extensions.bzl`, pins included). The one
+so far is `@cpython3`, the interpreter for the Python scripts that wrapped GN
+builds run: `.gn` names depot_tools' `vpython3` for those, which a Bazel
+action must not reach for. Its pin is the one Skia's Bazel build uses.
 
 ## C/C++ toolchains
 
@@ -96,7 +103,9 @@ root, or if a C/C++ action runs anything but a `clang_<platform>` binary (see
 1. Make sure `deps.lock.bzl` is current (`gen_deps.dart --check`).
 2. Add an entry to `_SOURCE_REPOSITORIES` or `_TOOL_REPOSITORIES` in
    `extensions.bzl`, pointing at the `DEPS` path (sysroots go in
-   `_SYSROOT_REPOSITORIES`, keyed by their `sysroots.json` entry).
+   `_SYSROOT_REPOSITORIES`, keyed by their `sysroots.json` entry; tools that
+   `DEPS` does not provide go in `_DOWNLOADED_TOOL_REPOSITORIES` with an
+   explicit CIPD pin and a hash in `_CIPD_SHA256`).
 3. If upstream has no usable Bazel files, add `third_party/<name>/BUILD.<name>.bazel`,
    starting its `copts` from `FLUTTER_THIRD_PARTY_COPTS` and adding the `-Wno-*`
    flags its `BUILD.gn` uses.

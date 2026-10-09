@@ -1,0 +1,43 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @cpython3: the CIPD `infra/3pp/tools/cpython3` package
+# (see _DOWNLOADED_TOOL_REPOSITORIES in ../../extensions.bzl). It is the
+# interpreter for the Python scripts that wrapped GN builds run, in place of
+# the `vpython3` that `.gn` names, so that no action depends on depot_tools.
+#
+# Layout of the POSIX packages: `bin/python3 -> python3.X` (a statically
+# linked interpreter, no lib-dynload), the standard library in
+# `lib/python3.X/`, and pip/setuptools/wheel in `site-packages`. The Windows
+# package is laid out differently (`python3.exe`, `Lib/`, `DLLs/`) and is not
+# covered yet.
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["bin/python3"])
+
+# The interpreter and the standard library it loads at run time. Actions that
+# run `bin/python3` must depend on this, not just on the binary. Omitted:
+# bytecode caches (actions run with PYTHONDONTWRITEBYTECODE), packaging tools
+# and GUI/demo modules that build scripts have no use for.
+filegroup(
+    name = "runtime",
+    srcs = glob(
+        [
+            "bin/python3*",
+            "lib/python3.*/**",
+        ],
+        exclude = [
+            "bin/*-config",
+            "**/__pycache__/**",
+            "lib/python3.*/ensurepip/**",
+            "lib/python3.*/idlelib/**",
+            "lib/python3.*/lib2to3/**",
+            "lib/python3.*/site-packages/**",
+            "lib/python3.*/test/**",
+            "lib/python3.*/tkinter/**",
+            "lib/python3.*/turtledemo/**",
+        ],
+    ),
+)
