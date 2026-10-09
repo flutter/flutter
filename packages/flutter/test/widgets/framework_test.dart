@@ -1253,6 +1253,30 @@ void main() {
     );
   });
 
+  testWidgets('dispose() error explains that super.dispose() must be called synchronously', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const _AsyncDisposeWidget());
+
+    // Removing the widget calls dispose(), which returns before it reaches
+    // super.dispose() because of the await.
+    await tester.pumpWidget(Container());
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        '_AsyncDisposeWidgetState.dispose failed to call super.dispose.\n'
+        'dispose() implementations must always call their superclass dispose() method, to '
+        'ensure that all the resources used by the widget are fully released.\n'
+        'The framework does not await dispose(), so super.dispose() must be called '
+        'synchronously, not after an await. Consider making dispose() synchronous and '
+        'starting any asynchronous cleanup without awaiting it.',
+      ),
+    );
+  });
+
   testWidgets('State toString', (WidgetTester tester) async {
     final state = TestState();
     expect(state.toString(), contains('no widget'));
@@ -2709,4 +2733,22 @@ class _NullElement extends Element {
 
   @override
   bool get debugDoingBuild => throw UnimplementedError();
+}
+
+class _AsyncDisposeWidget extends StatefulWidget {
+  const _AsyncDisposeWidget();
+
+  @override
+  State<_AsyncDisposeWidget> createState() => _AsyncDisposeWidgetState();
+}
+
+class _AsyncDisposeWidgetState extends State<_AsyncDisposeWidget> {
+  @override
+  Future<void> dispose() async {
+    await Future<void>.value();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }
