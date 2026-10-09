@@ -3192,13 +3192,15 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
   }
 
   std::unique_ptr<flutter::PlatformMessage> message;
-  if (message_size == 0) {
+  if (message_size == 0 && message_data == nullptr) {
     message = std::make_unique<flutter::PlatformMessage>(
         flutter_message->channel, response);
   } else {
+    static const uint8_t kEmptyByte = 0;
+    const uint8_t* copy_source = message_size == 0 ? &kEmptyByte : message_data;
     message = std::make_unique<flutter::PlatformMessage>(
         flutter_message->channel,
-        fml::MallocMapping::Copy(message_data, message_size), response);
+        fml::MallocMapping::Copy(copy_source, message_size), response);
   }
 
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)
@@ -3273,7 +3275,7 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
   auto response = handle->message->response();
 
   if (response) {
-    if (data_length == 0) {
+    if (data_length == 0 && data == nullptr) {
       response->CompleteEmpty();
     } else {
       response->Complete(std::make_unique<fml::DataMapping>(

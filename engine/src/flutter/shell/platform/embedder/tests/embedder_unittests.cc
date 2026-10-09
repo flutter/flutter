@@ -746,6 +746,87 @@ TEST_F(EmbedderTest, NullPlatformMessagesCanBeSent) {
   message.Wait();
 }
 
+TEST_F(EmbedderTest,
+       ZeroLengthNonNullPlatformMessagesAndResponsesAreDistinguishedFromNull) {
+  struct ResponseCapture {
+    fml::AutoResetWaitableEvent latch;
+    bool data_was_non_null = false;
+    size_t size = 0;
+  };
+  ResponseCapture null_capture;
+  ResponseCapture zero_byte_capture;
+
+  CreateNewThread()->PostTask([&]() {
+    auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+    EmbedderConfigBuilder builder(context);
+    builder.SetSurface(DlISize(1, 1));
+    builder.SetDartEntrypoint("platform_messages_response");
+
+    fml::AutoResetWaitableEvent ready;
+    context.AddFfiNativeCallback(
+        "SignalNativeTest", CREATE_FFI_LAMBDA([&ready]() { ready.Signal(); }));
+
+    auto engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+    ready.Wait();
+
+    auto callback = [](const uint8_t* data, size_t size, void* user_data) {
+      auto* capture = reinterpret_cast<ResponseCapture*>(user_data);
+      capture->data_was_non_null = (data != nullptr);
+      capture->size = size;
+      capture->latch.Signal();
+    };
+
+    // 1. Null message (message == nullptr, message_size == 0) reaches Dart as
+    // null and echoes back as a null response (data == nullptr, size == 0).
+    FlutterPlatformMessageResponseHandle* null_response = nullptr;
+    ASSERT_EQ(FlutterPlatformMessageCreateResponseHandle(
+                  engine.get(), callback, &null_capture, &null_response),
+              kSuccess);
+    FlutterPlatformMessage null_message = {};
+    null_message.struct_size = sizeof(FlutterPlatformMessage);
+    null_message.channel = "test_channel";
+    null_message.message = nullptr;
+    null_message.message_size = 0;
+    null_message.response_handle = null_response;
+    ASSERT_EQ(FlutterEngineSendPlatformMessage(engine.get(), &null_message),
+              kSuccess);
+    ASSERT_EQ(FlutterPlatformMessageReleaseResponseHandle(engine.get(),
+                                                          null_response),
+              kSuccess);
+
+    // 2. Zero-byte non-null message (message != nullptr, message_size == 0)
+    // reaches Dart as ByteData(0) and echoes back as a zero-byte non-null
+    // response (data != nullptr, size == 0).
+    static const uint8_t kEmptyByte = 0;
+    FlutterPlatformMessageResponseHandle* zero_byte_response = nullptr;
+    ASSERT_EQ(
+        FlutterPlatformMessageCreateResponseHandle(
+            engine.get(), callback, &zero_byte_capture, &zero_byte_response),
+        kSuccess);
+    FlutterPlatformMessage zero_byte_message = {};
+    zero_byte_message.struct_size = sizeof(FlutterPlatformMessage);
+    zero_byte_message.channel = "test_channel";
+    zero_byte_message.message = &kEmptyByte;
+    zero_byte_message.message_size = 0;
+    zero_byte_message.response_handle = zero_byte_response;
+    ASSERT_EQ(
+        FlutterEngineSendPlatformMessage(engine.get(), &zero_byte_message),
+        kSuccess);
+    ASSERT_EQ(FlutterPlatformMessageReleaseResponseHandle(engine.get(),
+                                                          zero_byte_response),
+              kSuccess);
+  });
+
+  null_capture.latch.Wait();
+  EXPECT_FALSE(null_capture.data_was_non_null);
+  EXPECT_EQ(null_capture.size, 0u);
+
+  zero_byte_capture.latch.Wait();
+  EXPECT_TRUE(zero_byte_capture.data_was_non_null);
+  EXPECT_EQ(zero_byte_capture.size, 0u);
+}
+
 //------------------------------------------------------------------------------
 /// Tests that a null platform message cannot be send if the message_size
 /// isn't equals to 0.
