@@ -147,18 +147,49 @@ PlatformViewAndroid::PlatformViewAndroid(
               delegate.OnPlatformViewGetShutdownSafeIOTaskRunner()),
           std::move(platform_dispatch_table)) {}
 
+static PlatformViewEmbedder::PlatformDispatchTable WithPlatformMessageCallback(
+    PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table,
+    const std::shared_ptr<PlatformMessageHandlerAndroid>&
+        platform_message_handler) {
+  if (!platform_dispatch_table.platform_message_response_callback) {
+    platform_dispatch_table.platform_message_response_callback =
+        [platform_message_handler](
+            std::unique_ptr<flutter::PlatformMessage> message) {
+          platform_message_handler->HandlePlatformMessage(std::move(message));
+        };
+  }
+  return platform_dispatch_table;
+}
+
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::shared_ptr<flutter::AndroidContext>& android_context,
     PlatformDispatchTable platform_dispatch_table)
-    : PlatformViewEmbedder(delegate,
-                           task_runners,
-                           std::move(platform_dispatch_table)),
+    : PlatformViewAndroid(
+          delegate,
+          task_runners,
+          jni_facade,
+          android_context,
+          std::make_shared<PlatformMessageHandlerAndroid>(jni_facade),
+          std::move(platform_dispatch_table)) {}
+
+PlatformViewAndroid::PlatformViewAndroid(
+    PlatformView::Delegate& delegate,
+    const flutter::TaskRunners& task_runners,
+    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+    const std::shared_ptr<flutter::AndroidContext>& android_context,
+    std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler,
+    PlatformDispatchTable platform_dispatch_table)
+    : PlatformViewEmbedder(
+          delegate,
+          task_runners,
+          WithPlatformMessageCallback(std::move(platform_dispatch_table),
+                                      platform_message_handler)),
       jni_facade_(jni_facade),
       android_context_(android_context),
-      platform_message_handler_(new PlatformMessageHandlerAndroid(jni_facade)) {
+      platform_message_handler_(std::move(platform_message_handler)) {
   if (android_context_) {
     FML_CHECK(android_context_->IsValid())
         << "Could not create surface from invalid Android context.";
@@ -242,13 +273,6 @@ void PlatformViewAndroid::ResizeSurface(const DlISize& size) {
         latch.Signal();
       });
   latch.Wait();
-}
-
-// |PlatformView|
-void PlatformViewAndroid::HandlePlatformMessage(
-    std::unique_ptr<flutter::PlatformMessage> message) {
-  // Called from the ui thread.
-  platform_message_handler_->HandlePlatformMessage(std::move(message));
 }
 
 std::unique_ptr<Texture> PlatformViewAndroid::CreateSurfaceTexture(

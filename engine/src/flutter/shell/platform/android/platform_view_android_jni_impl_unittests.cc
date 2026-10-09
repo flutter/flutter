@@ -204,6 +204,7 @@ using SurfaceCreatedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
 using SurfaceWindowChangedFn = void (*)(JNIEnv*, jobject, jlong, jobject);
 using SurfaceChangedFn = void (*)(JNIEnv*, jobject, jlong, jint, jint);
 using SurfaceDestroyedFn = void (*)(JNIEnv*, jobject, jlong);
+using UpdateDisplayMetricsFn = void (*)(JNIEnv*, jobject, jlong);
 using SetViewportMetricsFn = void (*)(JNIEnv*,
                                       jobject,
                                       jlong,
@@ -1584,6 +1585,132 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   holder->NotifySurfaceChanged(kSurfaceWidth, kSurfaceHeight);
   holder->NotifySurfaceWindowChanged(window);
   holder->NotifySurfaceDestroyed();
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       UpdateDisplayMetricsCallsEmbedderNotifyDisplayUpdate) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto update_display_metrics = reinterpret_cast<UpdateDisplayMetricsFn>(
+      RegisterNativesAndFind(mock_env, "nativeUpdateDisplayMetrics"));
+  ASSERT_NE(update_display_metrics, nullptr);
+
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  constexpr double kRefreshRateHz = 120.0;
+  constexpr double kDisplayWidthPx = 1080.0;
+  constexpr double kDisplayHeightPx = 2400.0;
+  constexpr double kDisplayDensity = 2.75;
+  EXPECT_CALL(*jni, GetDisplayRefreshRate()).WillOnce(Return(kRefreshRateHz));
+  EXPECT_CALL(*jni, GetDisplayWidth()).WillOnce(Return(kDisplayWidthPx));
+  EXPECT_CALL(*jni, GetDisplayHeight()).WillOnce(Return(kDisplayHeightPx));
+  EXPECT_CALL(*jni, GetDisplayDensity()).WillOnce(Return(kDisplayDensity));
+
+  FlutterEngineDisplaysUpdateType captured_update_type =
+      static_cast<FlutterEngineDisplaysUpdateType>(-1);
+  std::vector<FlutterEngineDisplay> captured_displays;
+
+  holder->GetEmbedderApiForTesting().NotifyDisplayUpdate = MOCK_ENGINE_PROC(
+      NotifyDisplayUpdate,
+      ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+           FlutterEngineDisplaysUpdateType update_type,
+           const FlutterEngineDisplay* displays, size_t display_count) {
+        EXPECT_NE(engine, nullptr);
+        captured_update_type = update_type;
+        if (displays != nullptr) {
+          captured_displays.assign(displays, displays + display_count);
+        }
+        return kSuccess;
+      }));
+
+  update_display_metrics(&mock_env, reinterpret_cast<jobject>(123),
+                         reinterpret_cast<jlong>(holder.get()));
+
+  EXPECT_EQ(captured_update_type, kFlutterEngineDisplaysUpdateTypeStartup);
+  ASSERT_EQ(captured_displays.size(), 1u);
+  EXPECT_EQ(captured_displays[0].struct_size, sizeof(FlutterEngineDisplay));
+  EXPECT_EQ(captured_displays[0].display_id, 0u);
+  EXPECT_TRUE(captured_displays[0].single_display);
+  EXPECT_DOUBLE_EQ(captured_displays[0].refresh_rate, kRefreshRateHz);
+  EXPECT_EQ(captured_displays[0].width, static_cast<size_t>(kDisplayWidthPx));
+  EXPECT_EQ(captured_displays[0].height, static_cast<size_t>(kDisplayHeightPx));
+  EXPECT_DOUBLE_EQ(captured_displays[0].device_pixel_ratio, kDisplayDensity);
+
+  // Verify negative sentinel values (-1.0 when Java object is absent) are
+  // clamped to 0.0 before conversion.
+  constexpr double kMissingJavaObjectSentinel = -1.0;
+  EXPECT_CALL(*jni, GetDisplayRefreshRate())
+      .WillOnce(Return(kUnknownDisplayRefreshRate));
+  EXPECT_CALL(*jni, GetDisplayWidth())
+      .WillOnce(Return(kMissingJavaObjectSentinel));
+  EXPECT_CALL(*jni, GetDisplayHeight())
+      .WillOnce(Return(kMissingJavaObjectSentinel));
+  EXPECT_CALL(*jni, GetDisplayDensity())
+      .WillOnce(Return(kMissingJavaObjectSentinel));
+
+  captured_displays.clear();
+  holder->UpdateDisplayMetrics();
+  ASSERT_EQ(captured_displays.size(), 1u);
+  EXPECT_EQ(captured_displays[0].width, 0u);
+  EXPECT_EQ(captured_displays[0].height, 0u);
+  EXPECT_DOUBLE_EQ(captured_displays[0].device_pixel_ratio, 0.0);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       UpdateDisplayMetricsRealProcForwardsToEngine) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  constexpr double kRefreshRateHz = 90.0;
+  constexpr double kDisplayWidthPx = 1440.0;
+  constexpr double kDisplayHeightPx = 3120.0;
+  constexpr double kDisplayDensity = 3.5;
+  EXPECT_CALL(*jni, GetDisplayRefreshRate()).WillOnce(Return(kRefreshRateHz));
+  EXPECT_CALL(*jni, GetDisplayWidth()).WillOnce(Return(kDisplayWidthPx));
+  EXPECT_CALL(*jni, GetDisplayHeight()).WillOnce(Return(kDisplayHeightPx));
+  EXPECT_CALL(*jni, GetDisplayDensity()).WillOnce(Return(kDisplayDensity));
+
+  holder->UpdateDisplayMetrics();
+  EXPECT_DOUBLE_EQ(holder->GetShellForTesting()->GetDisplayRefreshRate(),
+                   kRefreshRateHz);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       PlatformViewEmbedderHandlePlatformMessageForwardsToAndroidHandler) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+  ASSERT_NE(holder->GetPlatformMessageHandler(), nullptr);
+  EXPECT_EQ(holder->GetPlatformMessageHandler(),
+            holder->GetPlatformView()->GetPlatformMessageHandler());
+
+  std::string captured_channel;
+  EXPECT_CALL(*jni, FlutterViewHandlePlatformMessage(_, _))
+      .WillOnce([&](std::unique_ptr<flutter::PlatformMessage> message,
+                    int response_id) {
+        ASSERT_NE(message, nullptr);
+        captured_channel = message->channel();
+        EXPECT_GT(response_id, 0);
+      });
+
+  PlatformView* platform_view = holder->GetPlatformView().get();
+  ASSERT_NE(platform_view, nullptr);
+  platform_view->HandlePlatformMessage(
+      std::make_unique<flutter::PlatformMessage>(
+          "flutter/test_embedder_forward", nullptr));
+  EXPECT_EQ(captured_channel, "flutter/test_embedder_forward");
 }
 
 }  // namespace testing

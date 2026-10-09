@@ -6,7 +6,7 @@
       "enforce": "ratchet"
     },
     "get_shell_calls": {
-      "count": 14,
+      "count": 10,
       "enforce": "ratchet"
     },
     "embedder_engine_refs": {
@@ -18,7 +18,7 @@
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
-      "count": 151,
+      "count": 150,
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {
@@ -26,7 +26,7 @@
       "enforce": "zero"
     },
     "platform_view_android_overrides": {
-      "count": 9,
+      "count": 8,
       "enforce": "ratchet"
     },
     "gn_internal_deps": {

@@ -11,7 +11,6 @@
 
 #include <android/hardware_buffer_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
-#include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/snapshot_surface_producer.h"
 #include "flutter/shell/platform/android/context/android_context.h"
@@ -101,6 +100,14 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   void SetupImpellerContext() override;
 
  private:
+  PlatformViewAndroid(
+      PlatformView::Delegate& delegate,
+      const flutter::TaskRunners& task_runners,
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+      const std::shared_ptr<flutter::AndroidContext>& android_context,
+      std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler,
+      PlatformDispatchTable platform_dispatch_table);
+
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidContext> android_context_;
   std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
@@ -108,10 +115,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   std::unique_ptr<AndroidSurface> android_surface_;
   std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler_;
   bool android_meets_hcpp_criteria_ = false;
-
-  // |PlatformView|
-  void HandlePlatformMessage(
-      std::unique_ptr<flutter::PlatformMessage> message) override;
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;

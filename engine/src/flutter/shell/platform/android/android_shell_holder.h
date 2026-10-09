@@ -105,6 +105,10 @@ class AndroidShellHolder {
   const std::shared_ptr<PlatformMessageHandler>& GetPlatformMessageHandler()
       const;
 
+  //----------------------------------------------------------------------------
+  /// @brief      Reads display metrics from the JNI facade and sends them to
+  ///             the engine through the embedder API.
+  ///
   void UpdateDisplayMetrics();
 
   //----------------------------------------------------------------------------
@@ -259,6 +263,7 @@ class AndroidShellHolder {
   const flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   fml::WeakPtr<PlatformViewAndroid> platform_view_;
+  std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
   std::shared_ptr<ThreadHost> thread_host_;
   UniqueEngine engine_;
   // The embedder API functions that the holder calls engine_ through.
