@@ -9,6 +9,7 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace {
@@ -46,6 +47,16 @@ TEST(DartWrap, InitializeAndCleanup) {
 
   char* cleanup_error = Dart_Cleanup();
   EXPECT_EQ(cleanup_error, nullptr) << cleanup_error;
+}
+
+// Links the dart:io embedder library the way the engine's DartVM does, which
+// reaches BoringSSL (entropy, TLS) and zlib through the Bazel-built
+// libraries rather than through the archive.
+TEST(DartWrap, DartIoBootstrapsAndCleansUp) {
+  dart::bin::BootstrapDartIo();
+  uint8_t entropy[16] = {};
+  EXPECT_TRUE(dart::bin::GetEntropy(entropy, sizeof(entropy)));
+  dart::bin::CleanupDartIo();
 }
 
 }  // namespace
