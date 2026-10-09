@@ -15,6 +15,7 @@ import '../../../../src/common.dart';
 typedef WidgetPreviewSourceFile = ({String path, String source});
 
 const _kPubspec = 'pubspec.yaml';
+const _kPubspecTouchComment = '\n# touched\n';
 
 /// A utility class for working with Pub workspaces in Widget Preview tests.
 class WidgetPreviewWorkspace {
@@ -42,9 +43,12 @@ class WidgetPreviewWorkspace {
   /// The absolute path to the workspace's pubspec.yaml.
   String get pubspecAbsolutePath => _pubspecYaml.absolute.path;
 
-  /// "Modifies" the workspace's pubspec.yaml.
+  /// Modifies the workspace's pubspec.yaml by appending a YAML comment.
+  ///
+  /// The contents must change: on macOS, `dart:io` file watchers do not report
+  /// mtime-only updates such as `setLastModifiedSync`.
   void touchPubspec() {
-    _pubspecYaml.setLastModifiedSync(DateTime.now());
+    _pubspecYaml.writeAsStringSync(_kPubspecTouchComment, mode: FileMode.append);
   }
 
   Future<WidgetPreviewProject> createWorkspaceProject({
@@ -213,9 +217,12 @@ dependencies:
     );
   }
 
-  /// "Modifies" the project's pubspec.yaml.
+  /// Modifies the project's pubspec.yaml by appending a YAML comment.
+  ///
+  /// The contents must change: on macOS, `dart:io` file watchers do not report
+  /// mtime-only updates such as `setLastModifiedSync`.
   void touchPubspec() {
-    _pubspecYaml.setLastModifiedSync(DateTime.now());
+    _pubspecYaml.writeAsStringSync(_kPubspecTouchComment, mode: FileMode.append);
   }
 
   /// Updates the content of the project's pubspec.yaml.
