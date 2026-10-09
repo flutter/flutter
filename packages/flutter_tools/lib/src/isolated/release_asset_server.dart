@@ -60,7 +60,9 @@ class ReleaseAssetServer {
 
   // Locations where source files, assets, or source maps may be located, paired
   // with the set of file extensions allowed to be served from each location. An
-  // empty set means no extension restriction is applied.
+  // empty set means no extension restriction is applied, and relies on the
+  // request path staying below its root, which `resolveRequestPathUnder`
+  // enforces for every root listed below.
   List<(Uri, Set<String>)> _searchPaths() => <(Uri, Set<String>)>[
     (_fileSystem.directory(_webBuildDirectory).uri, const <String>{}),
     (_fileSystem.directory(_flutterRoot).uri, _sourceMapExtensions),
@@ -84,7 +86,16 @@ class ReleaseAssetServer {
       fileUri = entrypoint;
     } else {
       for (final (Uri uri, Set<String> allowedExtensions) in _searchPaths()) {
-        final Uri potential = uri.resolve(requestPath);
+        final Uri? potential = resolveRequestPathUnder(
+          uri,
+          requestPath,
+          fileSystem: _fileSystem,
+          windows: _platform.isWindows,
+        );
+        if (potential == null) {
+          // The request path does not name a location below this root.
+          continue;
+        }
         final String potentialPath = potential.toFilePath(windows: _platform.isWindows);
         if (allowedExtensions.isNotEmpty &&
             !allowedExtensions.contains(_fileSystem.path.extension(potentialPath))) {
