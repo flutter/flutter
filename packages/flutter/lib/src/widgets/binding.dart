@@ -4,6 +4,7 @@
 
 /// @docImport 'dart:ui';
 /// @docImport 'package:flutter/animation.dart';
+/// @docImport 'package:flutter/cupertino.dart';
 /// @docImport 'package:flutter/material.dart';
 /// @docImport 'package:flutter_test/flutter_test.dart';
 ///
@@ -763,8 +764,12 @@ mixin WidgetsBinding
             throw Exception('type parameter is required');
           }
 
-          switch (type) {
-            case 'MinimumTextContrastEvaluation':
+          final AccessibilityEvaluationType? evaluationType = AccessibilityEvaluationType.values
+              .where((AccessibilityEvaluationType e) => e.name == type)
+              .firstOrNull;
+
+          switch (evaluationType) {
+            case AccessibilityEvaluationType.minimumTextContrast:
               if (parameters case {
                 'minNormalTextContrastRatio': final String minNormalTextContrastRatio,
                 'minLargeTextContrastRatio': final String minLargeTextContrastRatio,
@@ -776,7 +781,7 @@ mixin WidgetsBinding
                 return _formatEvaluationResult(result.violations);
               }
               throw Exception('Invalid arguments');
-            case 'MinimumTapTargetEvaluation':
+            case AccessibilityEvaluationType.minimumTapTarget:
               if (parameters case {'targetSize': final String targetSize}) {
                 final EvaluationResult result = await MinimumTapTargetEvaluation(
                   size: Size.square(double.parse(targetSize)),
@@ -784,12 +789,15 @@ mixin WidgetsBinding
                 return _formatEvaluationResult(result.violations);
               }
               throw Exception('Invalid arguments');
-            case 'LabeledTapTargetEvaluation':
+            case AccessibilityEvaluationType.labeledTapTarget:
               final EvaluationResult result = await const LabeledTapTargetEvaluation().evaluate(
                 this,
               );
               return _formatEvaluationResult(result.violations);
-            default:
+            case AccessibilityEvaluationType.minimumNonTextContrast:
+            case AccessibilityEvaluationType.unlabeledLeafNode:
+            case AccessibilityEvaluationType.title:
+            case null:
               throw Exception('unknown type: $type');
           }
         },

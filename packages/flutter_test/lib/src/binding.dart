@@ -1783,6 +1783,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           );
     }
 
+    _currentTestDescription = description;
     _oldExceptionHandler = FlutterError.onError;
     _oldStackTraceDemangler = FlutterError.demangleStackTrace;
     var exceptionCount = 0; // number of un-taken exceptions
@@ -1989,6 +1990,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
   }
 
+  // The description of the currently running test, saved in [_runTest] so that
+  // [postTest] can include it when reporting invariant failures.
+  String _currentTestDescription = '';
   bool _beforeTestAutoUpdateGoldens = false;
   late TestExceptionReporter _beforeTestReportTestException;
   late ErrorWidgetBuilder _beforeTestErrorWidgetBuilder;
@@ -2087,7 +2091,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void _verifyAutoUpdateGoldensUnset(bool valueBeforeTest) {
     assert(() {
       if (autoUpdateGoldenFiles != valueBeforeTest) {
-        throw FlutterError('The value of autoUpdateGoldenFiles was changed by the test.');
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: FlutterError('The value of autoUpdateGoldenFiles was changed by the test.'),
+            stack: StackTrace.current,
+            library: 'Flutter test framework',
+          ),
+        );
       }
       return true;
     }());
@@ -2101,7 +2111,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // So we reset the error reporter to its initial value and then report
         // this error.
         reportTestException = valueBeforeTest;
-        throw FlutterError('The value of reportTestException was changed by the test.');
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: FlutterError('The value of reportTestException was changed by the test.'),
+            stack: StackTrace.current,
+            library: 'Flutter test framework',
+          ),
+        );
       }
       return true;
     }());
@@ -2110,7 +2126,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void _verifyErrorWidgetBuilderUnset(ErrorWidgetBuilder valueBeforeTest) {
     assert(() {
       if (ErrorWidget.builder != valueBeforeTest) {
-        throw FlutterError('The value of ErrorWidget.builder was changed by the test.');
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: FlutterError('The value of ErrorWidget.builder was changed by the test.'),
+            stack: StackTrace.current,
+            library: 'Flutter test framework',
+          ),
+        );
       }
       return true;
     }());
@@ -2119,8 +2141,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   void _verifyShouldPropagateDevicePointerEventsUnset(bool valueBeforeTest) {
     assert(() {
       if (shouldPropagateDevicePointerEvents != valueBeforeTest) {
-        throw FlutterError(
-          'The value of shouldPropagateDevicePointerEvents was changed by the test.',
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: FlutterError(
+              'The value of shouldPropagateDevicePointerEvents was changed by the test.',
+            ),
+            stack: StackTrace.current,
+            library: 'Flutter test framework',
+          ),
         );
       }
       return true;
@@ -2185,7 +2213,25 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           library: 'Flutter test framework',
         );
       }
+      // Some invariant checks (such as debugAssertNoTransientCallbacks and the
+      // _verify*Unset helpers above) report failures through
+      // FlutterError.reportError instead of throwing. During the test,
+      // FlutterError.onError stores them in _pendingExceptionDetails, which is
+      // normally reported by the test completion handler. That handler has
+      // already run by the time postTest is called, so these errors must be
+      // picked up here or they would be silently dropped.
+      final FlutterErrorDetails? reportedError = _pendingExceptionDetails;
+      if (reportedError != null) {
+        if (invariantError == null) {
+          invariantError = reportedError;
+        } else {
+          debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+          FlutterError.dumpErrorToConsole(reportedError, forceReport: true);
+        }
+      }
     }
+    final String testDescription = _currentTestDescription;
+    _currentTestDescription = '';
     FlutterError.onError = _oldExceptionHandler;
     FlutterError.demangleStackTrace = _oldStackTraceDemangler;
     _pendingExceptionDetails = null;
@@ -2222,8 +2268,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // ignore: invalid_use_of_visible_for_testing_member
     ServicesBinding.instance.resetInternalState();
 
+    platformDispatcher.resetInternalState();
+
     if (invariantError != null) {
-      reportTestException(invariantError, '');
+      debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+      reportTestException(invariantError, testDescription);
     }
   }
 }
