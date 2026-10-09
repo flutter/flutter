@@ -1,0 +1,21 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Smoke test for the wrapped Dart SDK build: an embedder-style link of the
+# VM archive, and VM start-up.
+
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+cc_test(
+    name = "dart_vm_smoke_test",
+    size = "small",
+    srcs = ["dart_vm_smoke_test.cc"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "@googletest//:gtest_main",
+    ],
+)
