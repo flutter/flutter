@@ -325,8 +325,7 @@ static gboolean get_touchpad_pinch_position(FlView* self,
     return FALSE;
   }
 
-  GdkEventTouchpadPinch* pinch =
-      reinterpret_cast<GdkEventTouchpadPinch*>(event);
+  GdkEventTouchpadPinch* pinch = &event->touchpad_pinch;
   gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
   *x = pinch->x * scale_factor;
   *y = pinch->y * scale_factor;
