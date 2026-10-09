@@ -14,6 +14,7 @@ import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../android/java.dart';
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -278,8 +279,11 @@ class Daemon {
   }) : _logger = notifyingLogger ?? toolContext.logger,
        _fs = toolContext.fs,
        _stdio = toolContext.stdio {
-    final ToolContext(:ProcessManager processManager, :FlutterProjectFactory projectFactory) =
-        toolContext;
+    final ToolContext(
+      :Artifacts artifacts,
+      :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
+    ) = toolContext;
     final AndroidWorkflow workflow =
         androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: featureFlags);
 
@@ -307,6 +311,7 @@ class Daemon {
     registerDomain(
       deviceDomain = DeviceDomain(
         this,
+        artifacts: artifacts,
         fileSystem: _fs,
         logger: _logger,
         projectFactory: projectFactory,
@@ -1240,6 +1245,7 @@ typedef _DeviceEventHandler = void Function(Device device);
 class DeviceDomain extends Domain {
   DeviceDomain(
     Daemon daemon, {
+    required this._artifacts,
     required FileSystem fileSystem,
     required this._logger,
     required this._projectFactory,
@@ -1270,6 +1276,7 @@ class DeviceDomain extends Domain {
     _deviceManager?.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
+  final Artifacts _artifacts;
   final DeviceManager? _deviceManager;
   final FileSystem _fs;
   final Logger _logger;
@@ -1533,6 +1540,7 @@ class DeviceDomain extends Domain {
     }
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
+      artifacts: _artifacts,
       appName:
           'Kind: Flutter - Device: ${device.displayName} - '
           'Package: ${project?.manifest.appName ?? 'Unknown'}',

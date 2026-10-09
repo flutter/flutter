@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 
+import '../artifacts.dart';
 import '../base/dds.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -20,6 +21,7 @@ import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../resident_runner.dart';
+import '../version.dart';
 import '../vmservice.dart';
 import 'font_config_manager.dart';
 import 'test_device.dart';
@@ -27,6 +29,7 @@ import 'test_device.dart';
 /// Implementation of [TestDevice] with the Flutter Tester over a [Process].
 class FlutterTesterTestDevice extends TestDevice {
   FlutterTesterTestDevice({
+    required this.artifacts,
     required this.id,
     required this.platform,
     required this.fileSystem,
@@ -39,6 +42,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.host,
     required this.testAssetDirectory,
     required this.flutterProject,
+    required this.flutterVersion,
     required this.icudtlPath,
     required this.compileExpression,
     required this.fontConfigManager,
@@ -47,6 +51,8 @@ class FlutterTesterTestDevice extends TestDevice {
        _gotProcessVmServiceUri = enableVmService
            ? Completer<Uri?>()
            : (Completer<Uri?>()..complete());
+
+  final Artifacts artifacts;
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
@@ -61,6 +67,7 @@ class FlutterTesterTestDevice extends TestDevice {
   final InternetAddress? host;
   final String? testAssetDirectory;
   final FlutterProject? flutterProject;
+  final FlutterVersion flutterVersion;
   final String? icudtlPath;
   final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
@@ -180,6 +187,7 @@ class FlutterTesterTestDevice extends TestDevice {
           logger.printTrace('test $id: Starting Dart Development Service');
           await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
             detectedUri,
+            artifacts: artifacts,
             appName:
                 'Kind: Flutter - Device: flutter tester - '
                 'Package: ${flutterProject?.manifest.appName ?? 'unknown'}',
@@ -263,7 +271,12 @@ class FlutterTesterTestDevice extends TestDevice {
     CompileExpression? compileExpression,
     required Logger logger,
   }) {
-    return connectToVmService(httpUri, compileExpression: compileExpression, logger: logger);
+    return connectToVmService(
+      httpUri,
+      compileExpression: compileExpression,
+      flutterVersion: flutterVersion,
+      logger: logger,
+    );
   }
 
   /// Binds an [HttpServer] serving from `host` on `port`.

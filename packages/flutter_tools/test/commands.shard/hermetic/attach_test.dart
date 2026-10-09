@@ -188,6 +188,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -260,6 +261,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
           Signals: () => FakeSignals(),
         },
@@ -345,6 +347,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
           ProcessManager: () => FakeProcessManager.empty(),
         },
@@ -428,6 +431,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -509,6 +513,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -603,6 +608,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -697,6 +703,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -941,6 +948,7 @@ void main() {
             ),
             logger: logger,
             analytics: const NoOpAnalytics(),
+            platform: FakePlatform(),
           ),
         },
       );
@@ -1769,6 +1777,7 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    Artifacts? artifacts,
     String? appName = 'Fake App',
     int? ddsPort,
     FlutterDevice? device,

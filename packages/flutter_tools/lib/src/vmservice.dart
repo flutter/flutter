@@ -15,10 +15,8 @@ import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart' as globals;
 import 'project.dart';
 import 'version.dart';
 
@@ -166,6 +164,7 @@ typedef VMServiceConnector = Future<FlutterVmService> Function(
   Restart? restart,
   CompileExpression? compileExpression,
   FlutterProject? flutterProject,
+  FlutterVersion? flutterVersion,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression,
   Device? device,
@@ -182,6 +181,7 @@ Future<vm_service.VmService> setUpVmService({
   CompileExpression? compileExpression,
   Device? device,
   FlutterProject? flutterProject,
+  FlutterVersion? flutterVersion,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   required vm_service.VmService vmService,
 }) async {
@@ -219,22 +219,21 @@ Future<vm_service.VmService> setUpVmService({
     registrationRequests.add(vmService.registerService(kHotRestartServiceName, kFlutterToolAlias));
   }
 
-  vmService.registerServiceCallback(kFlutterVersionServiceName, (
-    Map<String, Object?> params,
-  ) async {
-    final FlutterVersion version =
-        context.get<FlutterVersion>() ??
-        FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git);
-    final Map<String, Object> versionJson = version.toJson();
-    versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
-    versionJson['engineRevisionShort'] = version.engineRevisionShort;
-    return <String, Object>{
-      'result': <String, Object>{kResultType: kResultTypeSuccess, ...versionJson},
-    };
-  });
-  registrationRequests.add(
-    vmService.registerService(kFlutterVersionServiceName, kFlutterToolAlias),
-  );
+  if (flutterVersion != null) {
+    vmService.registerServiceCallback(kFlutterVersionServiceName, (
+      Map<String, Object?> params,
+    ) async {
+      final Map<String, Object> versionJson = flutterVersion.toJson();
+      versionJson['frameworkRevisionShort'] = flutterVersion.frameworkRevisionShort;
+      versionJson['engineRevisionShort'] = flutterVersion.engineRevisionShort;
+      return <String, Object>{
+        'result': <String, Object>{kResultType: kResultTypeSuccess, ...versionJson},
+      };
+    });
+    registrationRequests.add(
+      vmService.registerService(kFlutterVersionServiceName, kFlutterToolAlias),
+    );
+  }
 
   if (compileExpression != null) {
     vmService.registerServiceCallback(kCompileExpressionServiceName, (
@@ -348,6 +347,7 @@ Future<FlutterVmService> connectToVmService(
   Restart? restart,
   CompileExpression? compileExpression,
   FlutterProject? flutterProject,
+  FlutterVersion? flutterVersion,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device? device,
@@ -362,6 +362,7 @@ Future<FlutterVmService> connectToVmService(
     compression: compression,
     device: device,
     flutterProject: flutterProject,
+    flutterVersion: flutterVersion,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
     logger: logger,
   );
@@ -435,6 +436,7 @@ Future<FlutterVmService> _connect(
   Restart? restart,
   CompileExpression? compileExpression,
   FlutterProject? flutterProject,
+  FlutterVersion? flutterVersion,
   PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
   io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   Device? device,
@@ -453,6 +455,7 @@ Future<FlutterVmService> _connect(
     compileExpression: compileExpression,
     device: device,
     flutterProject: flutterProject,
+    flutterVersion: flutterVersion,
     printStructuredErrorLogMethod: printStructuredErrorLogMethod,
     vmService: delegateService,
   );
@@ -525,12 +528,12 @@ class FlutterVmService {
   /// Calls [vm_service.VmService.getVM]. However, in the case that an [vm_service.RPCError]
   /// is thrown due to the service being disconnected, the error is discarded
   /// and null is returned.
-  Future<vm_service.VM?> getVmGuarded() async {
+  Future<vm_service.VM?> getVmGuarded({required Logger logger}) async {
     try {
       return await service.getVM();
     } on vm_service.RPCError catch (err) {
       if (err.isConnectionDisposedException) {
-        globals.printTrace('VmService.getVm call failed: $err');
+        logger.printTrace('VmService.getVm call failed: $err');
         return null;
       }
       rethrow;

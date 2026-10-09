@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
@@ -412,6 +414,8 @@ void main() {
       final logReader = FakeDeviceLogReader();
       final DriverService driverService = FlutterDriverService(
         applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
+        artifacts: Artifacts.test(),
+        flutterVersion: FakeFlutterVersion(),
         logger: BufferLogger.test(),
         platform: FakePlatform(),
         processUtils: ProcessUtils(logger: BufferLogger.test(), processManager: processManager),
@@ -425,6 +429,7 @@ void main() {
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
               Device? device,
@@ -460,6 +465,8 @@ FlutterDriverService setUpDriverService({
   logger ??= BufferLogger.test();
   return FlutterDriverService(
     applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
+    artifacts: Artifacts.test(),
+    flutterVersion: FakeFlutterVersion(),
     logger: logger,
     platform: platform ?? FakePlatform(),
     processUtils: ProcessUtils(
@@ -475,6 +482,7 @@ FlutterDriverService setUpDriverService({
           Restart? restart,
           CompileExpression? compileExpression,
           FlutterProject? flutterProject,
+          FlutterVersion? flutterVersion,
           PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
           io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
           Device? device,
@@ -591,6 +599,7 @@ class FakeDartDevelopmentService extends Fake
   @override
   Future<void> startDartDevelopmentService(
     Uri vmServiceUri, {
+    Artifacts? artifacts,
     String? appName = 'Fake App',
     FlutterDevice? device,
     int? ddsPort,

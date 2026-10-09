@@ -260,7 +260,7 @@ TemplateRenderer get templateRenderer => context.get<TemplateRenderer>()!;
 ///
 /// This is depended on by [localFileSystem] which is called before any
 /// [AppContext] is set up, and thus this cannot be a Context getter.
-final shutdownHooks = ShutdownHooks();
+ShutdownHooks get shutdownHooks => LocalSignals.instance.shutdownHooks;
 
 // Unless we're in a test of this class's signal handling features, we must
 // have only one instance created with the singleton LocalSignals instance

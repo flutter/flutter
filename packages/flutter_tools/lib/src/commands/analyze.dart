@@ -365,6 +365,7 @@ class AnalyzeCommand extends FlutterCommand {
       await AnalyzeContinuously(
         argResults!,
         runner!.getRepoPackages(),
+        analytics: analytics,
         artifacts: artifacts,
         fileSystem: fileSystem,
         logger: logger,

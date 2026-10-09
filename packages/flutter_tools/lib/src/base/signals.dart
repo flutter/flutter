@@ -5,10 +5,12 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
-import '../globals.dart' as globals;
 import 'async_guard.dart';
+import 'exit.dart';
 import 'io.dart';
+import 'logger.dart';
 import 'process.dart';
 
 typedef SignalHandler = FutureOr<void> Function(ProcessSignal signal);
@@ -19,9 +21,18 @@ typedef SignalHandler = FutureOr<void> Function(ProcessSignal signal);
 abstract class Signals {
   @visibleForTesting
   factory Signals.test({
+    Analytics? analytics,
     List<ProcessSignal> exitSignals = defaultExitSignals,
+    Logger? logger,
     ShutdownHooks? shutdownHooks,
-  }) => LocalSignals._(exitSignals, shutdownHooks: shutdownHooks);
+  }) {
+    assert((analytics == null) == (logger == null), 'Pass both analytics and logger, or neither.');
+    final signals = LocalSignals._(exitSignals, shutdownHooks: shutdownHooks);
+    if ((analytics, logger) case (final Analytics analytics, final Logger logger)) {
+      signals.configureExit(analytics: analytics, logger: logger);
+    }
+    return signals;
+  }
 
   // The default list of signals that should cause the process to exit.
   static const defaultExitSignals = <ProcessSignal>[ProcessSignal.sigterm, ProcessSignal.sigint];
@@ -51,12 +62,23 @@ abstract class Signals {
 /// fatal signals run before this class calls exit().
 class LocalSignals implements Signals {
   LocalSignals._(this.exitSignals, {ShutdownHooks? shutdownHooks})
-    : _shutdownHooks = shutdownHooks ?? globals.shutdownHooks;
+    : shutdownHooks = shutdownHooks ?? ShutdownHooks();
 
   static LocalSignals instance = LocalSignals._(Signals.defaultExitSignals);
 
   final List<ProcessSignal> exitSignals;
-  final ShutdownHooks _shutdownHooks;
+  final ShutdownHooks shutdownHooks;
+
+  // Plain exit until configured. Honors setExitFunctionForTests.
+  Future<void> Function(int code) _exit = (int code) async {
+    exit(code);
+  };
+
+  /// Routes exits caused by fatal signals through [exitWithHooks].
+  void configureExit({required Analytics analytics, required Logger logger}) {
+    _exit = (int code) =>
+        exitWithHooks(code, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
+  }
 
   // A table mapping (signal, token) -> signal handler.
   final _handlersTable = <ProcessSignal, Map<Object, SignalHandler>>{};
@@ -141,7 +163,7 @@ class LocalSignals implements Signals {
     // If this was a signal that should cause the process to go down, then
     // call exit();
     if (_shouldExitFor(s)) {
-      await exitWithHooks(0, shutdownHooks: _shutdownHooks);
+      await _exit(0);
     }
   }
 
