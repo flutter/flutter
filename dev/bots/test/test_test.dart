@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
-import 'dart:io' hide Platform;
+import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:file/file.dart' as fs;
@@ -132,11 +132,19 @@ void main() {
       final String dart = path.absolute(
         path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
       );
-      final ProcessResult scriptProcess = processManager.runSync(<String>[
-        dart,
-        'test.dart',
-        ...otherArgs,
-      ], environment: environment);
+      // Do not let the spawned test.dart inherit SHARD/SUBSHARD from this
+      // process. When this test runs under test.dart itself (as it does on CI,
+      // with SHARD=framework_tests SUBSHARD=misc), inheriting them would
+      // silently change which shards the script under test selects.
+      final scriptEnvironment = Map<String, String>.of(Platform.environment)
+        ..remove(kShardKey)
+        ..remove(kSubshardKey)
+        ..addAll(environment ?? const <String, String>{});
+      final ProcessResult scriptProcess = processManager.runSync(
+        <String>[dart, 'test.dart', ...otherArgs],
+        environment: scriptEnvironment,
+        includeParentEnvironment: false,
+      );
       return scriptProcess;
     }
 
@@ -177,6 +185,12 @@ void main() {
       final ProcessResult result = await runScript(<String, String>{}, <String>['--dry-run']);
       expectExitCode(result, 0);
       expect(result.stdout, contains('|> bin/flutter'));
+      // Every shard must be enumerated, even if an earlier one throws on this
+      // host (add_to_app_life_cycle_tests throws on non-macOS). The test
+      // harness shard is registered last in test.dart, so reaching it proves
+      // the enumeration did not stop early.
+      expect(result.stdout, contains('SHARD=add_to_app_life_cycle_tests'));
+      expect(result.stdout, contains('SHARD=$kTestHarnessShardName'));
     }, testOn: 'posix');
   });
 

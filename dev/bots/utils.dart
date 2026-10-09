@@ -770,28 +770,43 @@ Future<void> _runFromList(
   String name,
   int positionInTaskName,
 ) async {
-  try {
-    final String? item = Platform.environment[key];
-    if (item == null) {
-      for (final String currentItem in items.keys) {
-        printProgress('$bold$key=$currentItem$reset');
-        await items[currentItem]!();
-      }
-    } else {
-      printProgress('$bold$key=$item$reset');
-      if (!items.containsKey(item)) {
-        foundError(<String>[
-          '${red}Invalid $name: $item$reset',
-          'The available ${name}s are: ${items.keys.join(", ")}',
-        ]);
-        return;
-      }
-      await items[item]!();
+  final String? item = Platform.environment[key];
+  if (item == null) {
+    for (final String currentItem in items.keys) {
+      printProgress('$bold$key=$currentItem$reset');
+      await _runShardRunner(items[currentItem]!, key: key, item: currentItem);
     }
-  } catch (_) {
+  } else {
+    printProgress('$bold$key=$item$reset');
+    if (!items.containsKey(item)) {
+      foundError(<String>[
+        '${red}Invalid $name: $item$reset',
+        'The available ${name}s are: ${items.keys.join(", ")}',
+      ]);
+      return;
+    }
+    await _runShardRunner(items[item]!, key: key, item: item);
+  }
+}
+
+/// Runs a single shard or subshard [runner].
+///
+/// Outside of [dryRun], any error thrown by [runner] propagates to the caller
+/// unchanged. In [dryRun], the error is printed and swallowed so that one shard
+/// that cannot run on this host (for example an iOS-only shard on Linux) does
+/// not prevent the remaining shards from being enumerated.
+Future<void> _runShardRunner(
+  ShardRunner runner, {
+  required String key,
+  required String item,
+}) async {
+  try {
+    await runner();
+  } catch (error) {
     if (!dryRun) {
       rethrow;
     }
+    printProgress('${yellow}Skipping $key=$item in --dry-run because it threw: $error$reset');
   }
 }
 
