@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context_runner.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../devfs.dart';
@@ -564,11 +565,17 @@ class IOSSimulator extends Device {
     assert(buildInfo.isDebug);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
+      analytics: globals.analytics,
       app: app,
       buildInfo: buildInfo,
+      plistParser: globals.plistParser,
+      toolContext: const GlobalToolContext(),
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
+      cocoaPods: globals.cocoaPods,
+      xcode: globals.xcode,
     );
     if (!buildResult.success) {
       await diagnoseXcodeBuildFailure(
@@ -577,7 +584,9 @@ class IOSSimulator extends Device {
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: FlutterDarwinPlatform.ios,
+        processUtils: globals.processUtils,
         project: app.project.parent,
+        xcode: globals.xcode,
         device: this,
       );
       throwToolExit('Could not build the application for the simulator.');
