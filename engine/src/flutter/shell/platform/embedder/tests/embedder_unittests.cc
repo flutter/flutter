@@ -5362,6 +5362,34 @@ TEST_F(EmbedderTest, EmbedderExternalTextureAllowsZeroTextureIdentifier) {
       kSuccess);
 }
 
+TEST_F(EmbedderTest, EmbedderNotifyCreatedAndDestroyedValidationAndLifecycle) {
+  EXPECT_EQ(FlutterEngineNotifyCreated(nullptr), kInvalidArguments);
+  EXPECT_EQ(FlutterEngineNotifyDestroyed(nullptr), kInvalidArguments);
+
+  FlutterEngineProcTable procs = {};
+  procs.struct_size = sizeof(FlutterEngineProcTable);
+  EXPECT_EQ(FlutterEngineGetProcAddresses(&procs), kSuccess);
+  EXPECT_EQ(procs.NotifyCreated, &FlutterEngineNotifyCreated);
+  EXPECT_EQ(procs.NotifyDestroyed, &FlutterEngineNotifyDestroyed);
+
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Before FlutterEngineRunInitialized, the shell is not running yet.
+  EXPECT_EQ(FlutterEngineNotifyCreated(engine.get()), kInvalidArguments);
+  EXPECT_EQ(FlutterEngineNotifyDestroyed(engine.get()), kInvalidArguments);
+
+  ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+
+  // Tearing down and recreating the surface on a running engine succeeds.
+  EXPECT_EQ(FlutterEngineNotifyDestroyed(engine.get()), kSuccess);
+  EXPECT_EQ(FlutterEngineNotifyCreated(engine.get()), kSuccess);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

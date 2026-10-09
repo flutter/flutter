@@ -3927,6 +3927,10 @@ FlutterEngineResult FlutterEngineSetNextFrameCallback(
 
   flutter::EmbedderEngine* embedder_engine =
       reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Engine handle was not running.");
+  }
 
   fml::WeakPtr<flutter::PlatformView> weak_platform_view =
       embedder_engine->GetShell().GetPlatformView();
@@ -4100,6 +4104,45 @@ FlutterEngineResult FlutterEngineNotifyDartDeferredLibraryLoadError(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineNotifyCreated(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                   engine) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Engine handle was not running.");
+  }
+
+  return embedder_engine->NotifyCreated()
+             ? kSuccess
+             : LOG_EMBEDDER_ERROR(
+                   kInternalInconsistency,
+                   "Could not notify the engine that the surface was created.");
+}
+
+FlutterEngineResult FlutterEngineNotifyDestroyed(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Engine handle was not running.");
+  }
+
+  return embedder_engine->NotifyDestroyed()
+             ? kSuccess
+             : LOG_EMBEDDER_ERROR(
+                   kInternalInconsistency,
+                   "Could not notify the engine that the surface was "
+                   "destroyed.");
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -4160,6 +4203,8 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(LoadDartDeferredLibrary, FlutterEngineLoadDartDeferredLibrary);
   SET_PROC(NotifyDartDeferredLibraryLoadError,
            FlutterEngineNotifyDartDeferredLibraryLoadError);
+  SET_PROC(NotifyCreated, FlutterEngineNotifyCreated);
+  SET_PROC(NotifyDestroyed, FlutterEngineNotifyDestroyed);
 #undef SET_PROC
 
   return kSuccess;
