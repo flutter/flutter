@@ -1446,6 +1446,64 @@ void main() {
     },
   );
 
+  testWidgets('preserves the selected character when dragging the start handle on iOS', (
+    WidgetTester tester,
+  ) async {
+    final controller = TextEditingController(text: 'abcdefgh');
+    final focusNode = FocusNode();
+    final selectionControls = _MockTextSelectionHandleControls();
+    addTearDown(controller.dispose);
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SizedBox(
+          width: 300,
+          child: TestTextField(
+            controller: controller,
+            focusNode: focusNode,
+            selectionControls: selectionControls,
+            showSelectionHandles: true,
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pump();
+
+    // Select exactly one character: "e".
+    controller.selection = const TextSelection(baseOffset: 4, extentOffset: 5);
+    await tester.pumpAndSettle();
+
+    final RenderEditable renderEditable = tester.allRenderObjects.whereType<RenderEditable>().first;
+
+    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
+      controller.selection,
+    );
+    expect(endpoints, hasLength(2));
+
+    // The start handle is positioned at the first selection endpoint.
+    final Offset startHandlePosition = renderEditable.localToGlobal(endpoints.first.point);
+
+    // Drag the start handle left, past "d" and "c".
+    final Offset newPosition = textOffsetToPosition(tester, 2);
+
+    final TestGesture gesture = await tester.startGesture(startHandlePosition);
+    await tester.pump();
+
+    await gesture.moveTo(newPosition);
+    await tester.pump();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // The originally selected "e" must remain selected.
+    // The selection direction is reversed after the start handle crosses
+    // the original selection.
+    expect(controller.selection, const TextSelection(baseOffset: 5, extentOffset: 2));
+  }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
   group('SelectionOverlay', () {
     Future<SelectionOverlay> pumpApp(
       WidgetTester tester, {

@@ -871,12 +871,25 @@ class TextSelectionOverlay {
         // always returns true for a TextSelection.
         final bool dragStartSelectionNormalized =
             _dragStartSelection!.extentOffset >= _dragStartSelection!.baseOffset;
-        newSelection = TextSelection(
-          baseOffset: dragStartSelectionNormalized
-              ? _dragStartSelection!.baseOffset
-              : _dragStartSelection!.extentOffset,
-          extentOffset: position.offset,
+        final int selectionStart = math.min(
+          _dragStartSelection!.baseOffset,
+          _dragStartSelection!.extentOffset,
         );
+        final int selectionEnd = math.max(
+          _dragStartSelection!.baseOffset,
+          _dragStartSelection!.extentOffset,
+        );
+
+        if (selectionEnd - selectionStart == 1 && position.offset < selectionStart) {
+          newSelection = TextSelection(baseOffset: selectionEnd, extentOffset: position.offset);
+        } else {
+          newSelection = TextSelection(
+            baseOffset: dragStartSelectionNormalized
+                ? _dragStartSelection!.baseOffset
+                : _dragStartSelection!.extentOffset,
+            extentOffset: position.offset,
+          );
+        }
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
