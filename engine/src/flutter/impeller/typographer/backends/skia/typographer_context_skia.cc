@@ -33,7 +33,7 @@
 #include "impeller/typographer/rectangle_packer.h"
 #include "impeller/typographer/typographer_context.h"
 
-#include "third_party/abseil-cpp/absl/status/statusor.h"
+#include "absl/status/statusor.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkCanvas.h"

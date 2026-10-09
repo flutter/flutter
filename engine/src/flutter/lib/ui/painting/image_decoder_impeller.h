@@ -7,12 +7,12 @@
 
 #include <future>
 
+#include "absl/status/statusor.h"
 #include "flutter/fml/macros.h"
 #include "flutter/lib/ui/painting/image_decoder.h"
 #include "impeller/core/formats.h"
 #include "impeller/geometry/size.h"
 #include "impeller/renderer/capabilities.h"
-#include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkImageInfo.h"
 

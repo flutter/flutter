@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "absl/status/statusor.h"
 #include "flutter/display_list/display_list.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "flutter/impeller/display_list/aiks_context.h"
@@ -15,7 +16,6 @@
 #include "flutter/testing/testing.h"
 #include "impeller/playground/playground.h"
 #include "impeller/typographer/typographer_context.h"
-#include "third_party/abseil-cpp/absl/status/statusor.h"
 #include "third_party/imgui/imgui.h"
 
 #if FML_OS_MACOSX

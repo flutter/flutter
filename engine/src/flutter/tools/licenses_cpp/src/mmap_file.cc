@@ -8,7 +8,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-#include "third_party/abseil-cpp/absl/strings/str_cat.h"
+#include "absl/strings/str_cat.h"
 
 absl::StatusOr<MMapFile> MMapFile::Make(std::string_view path) {
   int fd = open(path.data(), O_RDONLY);
