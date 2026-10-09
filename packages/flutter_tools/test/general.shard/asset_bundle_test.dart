@@ -823,6 +823,7 @@ flutter:
       logger: testLogger,
       projectDir: globals.fs.currentDirectory,
       buildMode: BuildMode.debug,
+      platform: globals.platform,
     );
 
     expect(testLogger.warningText, contains('Expected Error Text'));
@@ -988,6 +989,7 @@ flutter:
           logger: testLogger,
           projectDir: globals.fs.currentDirectory,
           buildMode: BuildMode.debug,
+          platform: globals.platform,
         );
       },
       overrides: <Type, Generator>{
@@ -1051,6 +1053,7 @@ flutter:
           logger: testLogger,
           projectDir: globals.fs.currentDirectory,
           buildMode: BuildMode.debug,
+          platform: globals.platform,
         );
       },
       overrides: <Type, Generator>{
@@ -1213,6 +1216,7 @@ flutter:
           logger: testLogger,
           projectDir: globals.fs.currentDirectory,
           buildMode: BuildMode.debug,
+          platform: globals.platform,
         );
         expect((globals.processManager as FakeProcessManager).hasRemainingExpectations, false);
       },
