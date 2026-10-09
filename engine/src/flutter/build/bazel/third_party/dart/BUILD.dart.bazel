@@ -4,11 +4,11 @@
 
 # Root BUILD file of @dart: the Dart SDK sources pinned in DEPS.
 #
-# For now this exposes only the embedding API headers. The engine includes
-# them as "third_party/dart/runtime/include/<name>.h", which GN resolves
-# through the engine root include directory; include_prefix reproduces that
-# path here so no source has to change. Building the VM, gen_snapshot and the
-# dart binary from these sources comes later in the migration.
+# The VM, gen_snapshot and the other Dart targets the engine depends on are
+# not built from these sources by Bazel rules; the engine's GN build of them
+# is wrapped as one action instead (see ../../dart_wrap). This file therefore
+# exposes two things: the embedding API headers, which the engine compiles
+# against directly, and `build_tree`, the inputs of that wrapped build.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
@@ -16,10 +16,90 @@ package(default_visibility = ["//visibility:public"])
 
 # The C API an embedder compiles against: the headers of
 # //third_party/dart/runtime:dart_api (runtime/BUILD.gn) plus the bin/ ones
-# the engine's dart:io glue includes. Header-only: dart_api_dl.c belongs to
-# the embedder that uses the dynamic linking API, not here.
+# the engine's dart:io glue includes. The engine includes them as
+# "third_party/dart/runtime/include/<name>.h", which GN resolves through the
+# engine root include directory; include_prefix reproduces that path here so
+# no source has to change. Header-only: dart_api_dl.c belongs to the embedder
+# that uses the dynamic linking API, not here.
 cc_library(
     name = "dart_api_headers",
     hdrs = glob(["runtime/include/**/*.h"]),
     include_prefix = "third_party/dart",
+)
+
+# Everything the engine's GN build of the Dart SDK targets reads, as measured
+# on the build graph of those targets (GN's own inputs, the compiler's
+# dependency output and the Dart compilers' depfiles): about 12k of the
+# tree's 82k files. The patterns are deliberately a little wider than the
+# measurement so that a Dart roll which adds a source does not usually need a
+# change here; one that reads from a new area fails the (sandboxed) wrapped
+# build with a missing-file error, and the fix is a pattern below.
+filegroup(
+    name = "build_tree",
+    srcs = [
+        "BUILD.gn",
+        "tools/VERSION",
+        # Resolves the Dart packages compile_platform, gen_kernel and the
+        # frontend server are compiled from (globbed below).
+        ".dart_tool/package_config.json",
+        # The prebuilt SDK that bootstraps the build (`dart compile exe` of
+        # compile_platform and gen_kernel), from DEPS: the launcher, the
+        # runtimes, and the gen_snapshot it drives. Its snapshots and
+        # libraries are globbed below.
+        "tools/sdks/dart-sdk/bin/dart",
+        "tools/sdks/dart-sdk/bin/dartaotruntime",
+        "tools/sdks/dart-sdk/bin/dartvm",
+        "tools/sdks/dart-sdk/bin/utils/gen_snapshot",
+        "tools/sdks/dart-sdk/version",
+        "third_party/perfetto/BUILD.gn",
+        "third_party/perfetto/src/BUILD.gn",
+    ] + glob(
+        [
+            # Build definitions and the scripts they run.
+            "*.gni",
+            "build/**",
+            "utils/**",
+            "tools/*.py",
+            # The runtime (VM, embedder library, gen_snapshot) and the core
+            # library sources it is built with.
+            "runtime/**",
+            "sdk/**",
+            # The Dart packages the compilers are built from. Only a
+            # package's lib/, bin/ and tool/ are reachable from those entry
+            # points, except that front_end's compile_platform imports
+            # helpers from its test/ directory.
+            "pkg/*",
+            "pkg/*/*",
+            "pkg/*/bin/**",
+            "pkg/*/lib/**",
+            "pkg/*/test/*.dart",
+            "pkg/*/tool/**",
+            "third_party/pkg/**/lib/**",
+            "third_party/pkg/**/pubspec.yaml",
+            # Bundled C++ dependencies of the runtime (the engine provides
+            # boringssl, zlib and icu itself).
+            "third_party/double-conversion/**",
+            "third_party/perfetto/mock_protobuf/**",
+            "third_party/perfetto/protos/**",
+            "third_party/perfetto/src/gn/**",
+            "third_party/perfetto/src/include/**",
+            "third_party/perfetto/src/src/base/**",
+            "third_party/perfetto/src/src/protozero/**",
+            # What the bootstrap SDK loads.
+            "tools/sdks/dart-sdk/bin/snapshots/**",
+            "tools/sdks/dart-sdk/lib/**",
+        ],
+        exclude = [
+            "**/__pycache__/**",
+            "**/testcases/**",
+            "**/testdata/**",
+            "pkg/*/lib/**/test/**",
+            "runtime/docs/**",
+            "runtime/tests/**",
+            "runtime/tools/dartfuzz/**",
+            "runtime/tools/graphexplorer/**",
+            "runtime/tools/wiki/**",
+            "third_party/pkg/**/test/**",
+        ],
+    ),
 )
