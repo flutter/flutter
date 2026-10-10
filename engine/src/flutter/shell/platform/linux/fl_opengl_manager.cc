@@ -109,6 +109,14 @@ gboolean fl_opengl_manager_make_resource_current(FlOpenGLManager* self) {
 }
 
 gboolean fl_opengl_manager_make_platform_current(FlOpenGLManager* self) {
+  // Under libglvnd, calling eglMakeCurrent on the GTK main thread while a GLX
+  // context (GdkGLContext) is active causes eglMakeCurrent to fail with
+  // EGL_BAD_ACCESS ("Another window API already has a current context").
+  // Because EGL does not unbind foreign APIs, the GLX context must be
+  // explicitly unbound first via gdk_gl_context_clear_current() so that an
+  // X_GLXMakeContextCurrent(None) request is dispatched to the X server,
+  // preventing client-server state desynchronization.
+  gdk_gl_context_clear_current();
   return eglMakeCurrent(self->display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                         self->platform_context) == EGL_TRUE;
 }
