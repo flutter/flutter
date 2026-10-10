@@ -70,6 +70,41 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
 exports_files(["fixtures_location.cc"])
 ''',
   ),
+  ConvertedFile(
+    '//flutter/impeller',
+    skip: <String, String>{
+      'impeller': 'needs //flutter/impeller/{entity,renderer,display_list}',
+      'impeller_unittesting': 'needs //flutter/impeller/testing',
+      'impeller_unittests': 'needs the Impeller test suites',
+      'impeller_dart_unittests': 'needs //flutter/impeller/renderer',
+    },
+  ),
+  ConvertedFile(
+    '//flutter/impeller/base',
+    skip: <String, String>{'base_unittests': 'needs //flutter/testing:testing_lib'},
+  ),
+  ConvertedFile(
+    '//flutter/impeller/geometry',
+    skip: <String, String>{
+      'geometry_asserts': 'needs //flutter/testing:testing_lib',
+      'geometry_unittests': 'needs //flutter/display_list/testing',
+      'geometry_benchmarks': 'needs //flutter/impeller/entity',
+    },
+  ),
+  ConvertedFile(
+    '//flutter/display_list',
+    skip: <String, String>{
+      'display_list_fixtures': 'fixture in //flutter/txt/third_party/fonts, which has no package',
+      'display_list_unittests': 'needs //flutter/display_list/testing',
+      'display_list_rendertests': 'needs //flutter/display_list/testing',
+      'display_list_builder_benchmarks': 'needs //flutter/benchmarking',
+      'display_list_region_benchmarks': 'needs //flutter/benchmarking',
+      'display_list_transform_benchmarks': 'needs //flutter/benchmarking',
+      'display_list_benchmarks_source': 'needs //flutter/benchmarking',
+      'display_list_benchmarks': 'needs display_list_benchmarks_source',
+      'primitive_rendering_benchmarks': 'needs display_list_benchmarks_source',
+    },
+  ),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia
@@ -88,20 +123,38 @@ const List<ConvertedFile> fetchTimeFiles = <ConvertedFile>[
     // textually (.inc, the generated SkSL modules) are textual headers.
     // A glob stops at a package boundary, so the packages below export
     // their own headers.
+    //
+    // Engine code also includes Skia as `flutter/third_party/skia/...`,
+    // its path under the engine's source root, which GN's `-I//` resolves
+    // on disk. That root is @flutter//engine/src:include_root, which
+    // carries the same headers under the second prefix; this way Skia's
+    // own compiles do not stage the symlinks only the engine uses.
     appendix: '''
-cc_library(
-    name = "skia_headers",
-    hdrs = glob([
+filegroup(
+    name = "headers",
+    srcs = glob([
         "include/**/*.h",
         "modules/**/*.h",
         "src/**/*.h",
     ]),
+)
+
+cc_library(
+    name = "skia_headers",
+    hdrs = [":headers"],
     include_prefix = "third_party/skia",
     textual_hdrs = glob([
         "src/**/*.inc",
         "src/sksl/generated/*.sksl",
     ]),
     deps = ["//modules/skcms:skcms_headers"],
+)
+
+cc_library(
+    name = "engine_root_headers",
+    hdrs = [":headers"],
+    include_prefix = "flutter/third_party/skia",
+    visibility = ["@flutter//engine/src:__pkg__"],
 )
 ''',
   ),
