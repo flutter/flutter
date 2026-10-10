@@ -12,11 +12,14 @@ import 'package:path/path.dart' as p;
 ///
 ///     dart bin/gn_to_bazel.dart [options] [<BUILD.gn>...]
 ///
-/// Without inputs, every file in the manifest (lib/src/manifest.dart) is
-/// converted. Each file is written next to its input as `BUILD.bazel` unless
-/// `--out-dir` names a directory, in which case the output is laid out there
-/// by GN package (`<out-dir>/flutter/fml/BUILD.bazel`). With `--check` the
-/// existing files are compared instead and a difference is a failure.
+/// Without inputs, every checked-in file of the manifest
+/// (lib/src/manifest.dart) is converted. Each file is written next to its
+/// input as `BUILD.bazel` unless `--out-dir` names a directory, in which case
+/// the output is laid out there by GN package
+/// (`<out-dir>/flutter/fml/BUILD.bazel`). With `--check` the existing files
+/// are compared instead and a difference is a failure. With `--repository`
+/// the inputs are laid out as the packages of an external repository (the
+/// fetch-time conversion of build/bazel/repositories.bzl).
 Future<void> main(List<String> arguments) async {
   exitCode = await run(arguments);
 }
@@ -49,8 +52,18 @@ Future<int> run(List<String> arguments) async {
     )
     ..addOption(
       'buildifier',
-      help: 'Format the output with this buildifier (default: the one on PATH, if any).',
+      help:
+          'Format the output with this buildifier (default: the one on PATH, if any; '
+          '`none` for no formatting).',
     )
+    ..addOption(
+      'repository',
+      help:
+          'Generate into an external repository made from a synced tree, as '
+          '@repo=//gn/dir/of/its/root (e.g. @skia=//flutter/third_party/skia); the inputs '
+          'become the packages of the repository, written under --out-dir.',
+    )
+    ..addOption('depfile', help: 'Write the GN files read, one per line, to this file.')
     ..addFlag(
       'check',
       help: 'Compare with the existing BUILD.bazel files instead of writing.',
@@ -77,19 +90,29 @@ Future<int> run(List<String> arguments) async {
       : p.join(root, 'flutter/third_party/gn/gn');
   final Assumptions assumptions = _assumptions(options.multiOption('assume'));
   final Set<String> extraSkips = options.multiOption('skip').toSet();
-  final String? buildifier = options.option('buildifier') ?? await _findOnPath('buildifier');
+  final String? buildifierOption = options.option('buildifier');
+  final String? buildifier = buildifierOption == 'none'
+      ? null
+      : buildifierOption ?? await _findOnPath('buildifier');
   final String? outDir = options.option('out-dir');
   final bool check = options.flag('check');
+  final String? repository = options.option('repository');
+  if (repository != null && outDir == null) {
+    stderr.writeln('--repository needs --out-dir');
+    return 64;
+  }
+  final tree = GnSourceTree(root, gnBinary: gn);
 
-  // The inputs: the manifest's files, or the ones named (which pick up the
-  // manifest's skip list and appendix when they are in it).
+  // The inputs: the manifest's checked-in files, or the ones named (which
+  // pick up the manifest's skip list, appendix and implicit deps when they
+  // are in it).
   final List<String> inputs = options.rest.isEmpty
       ? <String>[
           for (final ConvertedFile file in convertedFiles)
             p.join(root, file.gnPackage.substring(2), 'BUILD.gn'),
         ]
       : options.rest;
-
+  final files = <String>[];
   var failures = 0;
   for (final input in inputs) {
     final String file = p.canonicalize(input);
@@ -98,32 +121,49 @@ Future<int> run(List<String> arguments) async {
       failures++;
       continue;
     }
-    final gnPackage = '//${p.posix.joinAll(p.split(p.dirname(p.relative(file, from: root))))}';
-    final ConvertedFile? manifest = convertedFiles
-        .where((ConvertedFile f) => f.gnPackage == gnPackage)
-        .firstOrNull;
+    files.add(file);
+  }
+  final OutputLayout layout;
+  try {
+    layout = _layout(repository, files.map(tree.gnDirectory));
+  } on FormatException catch (e) {
+    stderr.writeln(e.message);
+    return 64;
+  }
+
+  for (final file in files) {
+    final String gnPackage = tree.gnDirectory(file);
+    final ConvertedFile? manifest = manifestEntry(gnPackage);
     final skip = <String>{...?manifest?.skip.keys, ...extraSkips};
     try {
-      final GnBlock tree = await loadGnFile(file, gnBinary: gn);
       final GnFileEvaluation evaluation = evaluateGnFile(
-        tree,
+        tree.load(file),
         assumptions: assumptions,
         templates: templateMappings.keys.toSet(),
         externalVariables: knownExternalVariables,
         skipTargets: skip,
+        tree: tree,
+        importPolicy: engineImportPolicy,
       );
       String output = emitBuildFile(
         evaluation,
         gnPackage: gnPackage,
         skipTargets: skip,
         appendix: manifest?.appendix,
+        layout: layout,
+        implicitDeps: manifest?.implicitDeps ?? const <String>[],
       );
       if (buildifier != null) {
         output = await _format(buildifier, output);
       }
-      final String outputPath = outDir == null
-          ? p.join(p.dirname(file), 'BUILD.bazel')
-          : p.join(outDir, gnPackage.substring(2), 'BUILD.bazel');
+      final String outputPath;
+      if (outDir == null) {
+        outputPath = p.join(p.dirname(file), 'BUILD.bazel');
+      } else if (layout.isMain) {
+        outputPath = p.join(outDir, gnPackage.substring(2), 'BUILD.bazel');
+      } else {
+        outputPath = p.join(outDir, _repositoryPackage(gnPackage, layout), 'BUILD.bazel');
+      }
       if (check) {
         final existing = File(outputPath);
         if (!existing.existsSync() || existing.readAsStringSync() != output) {
@@ -148,10 +188,53 @@ Future<int> run(List<String> arguments) async {
       failures++;
     }
   }
+  final String? depfile = options.option('depfile');
+  if (depfile != null) {
+    File(depfile)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('${tree.loadedFiles.join('\n')}\n');
+  }
   if (check && failures == 0) {
     stdout.writeln('${inputs.length} generated BUILD.bazel file(s) up to date');
   }
   return failures == 0 ? 0 : 1;
+}
+
+/// `--repository=@skia=//flutter/third_party/skia`, with the packages of
+/// the GN directories being converted.
+OutputLayout _layout(String? repository, Iterable<String> gnPackages) {
+  if (repository == null) {
+    return const OutputLayout.main();
+  }
+  final int equals = repository.indexOf('=');
+  if (!repository.startsWith('@') ||
+      equals < 0 ||
+      !repository.substring(equals + 1).startsWith('//')) {
+    throw FormatException('--repository takes @repo=//gn/dir, not $repository');
+  }
+  final bare = OutputLayout.repository(
+    repository.substring(0, equals),
+    repositoryGnRoot: repository.substring(equals + 1),
+  );
+  return OutputLayout.repository(
+    bare.repository,
+    repositoryGnRoot: bare.repositoryGnRoot,
+    packages: <String>{
+      for (final String gnPackage in gnPackages) _repositoryPackage(gnPackage, bare),
+    },
+  );
+}
+
+/// The package path of [gnPackage] within the repository of [layout].
+String _repositoryPackage(String gnPackage, OutputLayout layout) {
+  final package = BazelLabel.parse(bazelLabel(gnPackage, package: gnPackage));
+  if (package.repository != layout.repository) {
+    throw FormatException(
+      '$gnPackage maps to ${package.repository}//${package.package}, '
+      'not into ${layout.repository}',
+    );
+  }
+  return package.package;
 }
 
 String _defaultRoot() {

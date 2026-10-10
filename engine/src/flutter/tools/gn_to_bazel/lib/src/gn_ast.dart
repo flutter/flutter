@@ -14,6 +14,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 
 /// A position in a GN file.
 @immutable
@@ -190,6 +191,60 @@ Future<GnBlock> loadGnFile(String path, {required String gnBinary}) async {
     throw GnError(GnLocation(path, 0, 0), 'gn format failed: ${result.stderr}');
   }
   return parseGnTree(jsonDecode(result.stdout as String), file: path);
+}
+
+/// A GN source tree: resolves `//` paths against the root and loads files
+/// (synchronously, as the evaluator needs them for imports), remembering
+/// every file read so that a depfile can name them.
+final class GnSourceTree {
+  GnSourceTree(String root, {required this.gnBinary}) : root = p.canonicalize(root);
+
+  /// The directory holding `.gn`.
+  final String root;
+  final String gnBinary;
+
+  final Map<String, GnBlock> _cache = <String, GnBlock>{};
+  final Set<String> _loaded = <String>{};
+
+  /// Every file loaded so far, in load order.
+  List<String> get loadedFiles => List<String>.unmodifiable(_loaded);
+
+  /// The file for a GN path (`//flutter/fml/BUILD.gn`).
+  String resolve(String gnPath) {
+    if (!gnPath.startsWith('//')) {
+      throw ArgumentError.value(gnPath, 'gnPath', 'not a GN path');
+    }
+    return p.join(root, gnPath.substring(2));
+  }
+
+  /// The GN path of a file under the root.
+  String gnPath(String file) {
+    final String absolute = p.canonicalize(file);
+    if (!p.isWithin(root, absolute)) {
+      throw GnError(GnLocation(file, 0, 0), 'not under the GN root $root');
+    }
+    return '//${p.posix.joinAll(p.split(p.relative(absolute, from: root)))}';
+  }
+
+  /// The GN directory (`//flutter/fml`) of a file under the root.
+  String gnDirectory(String file) => p.posix.dirname(gnPath(file));
+
+  /// Loads and parses [file].
+  GnBlock load(String file) {
+    final String absolute = p.canonicalize(file);
+    return _cache.putIfAbsent(absolute, () {
+      _loaded.add(absolute);
+      final ProcessResult result = Process.runSync(gnBinary, <String>[
+        'format',
+        '--dump-tree=json',
+        absolute,
+      ]);
+      if (result.exitCode != 0) {
+        throw GnError(GnLocation(absolute, 0, 0), 'gn format failed: ${result.stderr}');
+      }
+      return parseGnTree(jsonDecode(result.stdout as String), file: absolute);
+    });
+  }
 }
 
 final class _GnTreeReader {
