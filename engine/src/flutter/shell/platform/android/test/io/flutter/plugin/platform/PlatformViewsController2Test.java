@@ -11,6 +11,8 @@ import static org.mockito.Mockito.*;
 import android.app.Presentation;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.media.Image;
 import android.util.SparseArray;
@@ -32,6 +34,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorView;
+import io.flutter.embedding.engine.mutatorsstack.FlutterMutatorsStack;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.MouseCursorChannel;
@@ -61,6 +64,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
@@ -302,6 +306,56 @@ public class PlatformViewsController2Test {
     View resultAndroidView = PlatformViewsController2.getPlatformViewById(platformViewId);
     assertNotNull(resultAndroidView);
     assertEquals(resultAndroidView, androidView);
+  }
+
+  @Test
+  @Config(
+      qualifiers = "420dpi",
+      shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void onDisplayPlatformView_handsTheFramesRatioToTheMutatorView() {
+    PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();
+    PlatformViewsController2 platformViewsController2 = new PlatformViewsController2();
+    platformViewsController2.setRegistry(registryImpl);
+
+    int platformViewId = 0;
+    PlatformViewFactory viewFactory = mock(PlatformViewFactory.class);
+    PlatformView platformView = mock(PlatformView.class);
+    View androidView = mock(View.class);
+    when(platformView.getView()).thenReturn(androidView);
+    when(viewFactory.create(any(), eq(platformViewId), any())).thenReturn(platformView);
+    platformViewsController2.getRegistry().registerViewFactory("testType", viewFactory);
+
+    FlutterJNI jni = new FlutterJNI();
+    attach(jni, platformViewsController2);
+    createPlatformView(jni, platformViewsController2, platformViewId, "testType");
+
+    // 420dpi seeds the mutator view with a density of 2.625, so a matrix scaled by 1/2.5 can
+    // only have come from the ratio this call passes.
+    platformViewsController2.onDisplayPlatformView(
+        platformViewId,
+        /*x=*/ 0,
+        /*y=*/ 0,
+        /*width=*/ 100,
+        /*height=*/ 100,
+        /*viewWidth=*/ 100,
+        /*viewHeight=*/ 100,
+        /*devicePixelRatio=*/ 2.5f,
+        /*mutatorsStack=*/ new FlutterMutatorsStack());
+
+    final FlutterMutatorView parent =
+        platformViewsController2.getPlatformViewParent(platformViewId);
+    // The embedded view is a mock and is not what is under test; drawing it would exercise
+    // Mockito rather than the matrix.
+    parent.removeAllViews();
+
+    final Canvas canvas = mock(Canvas.class);
+    parent.dispatchDraw(canvas);
+    final ArgumentCaptor<Matrix> matrixCaptor = ArgumentCaptor.forClass(Matrix.class);
+    verify(canvas).concat(matrixCaptor.capture());
+
+    final Matrix expected = new Matrix();
+    expected.preScale(1 / 2.5f, 1 / 2.5f);
+    assertEquals(expected, matrixCaptor.getValue());
   }
 
   @Test

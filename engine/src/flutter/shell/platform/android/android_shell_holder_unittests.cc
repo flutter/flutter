@@ -86,6 +86,7 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
                int height,
                int viewWidth,
                int viewHeight,
+               double device_pixel_ratio,
                MutatorsStack mutators_stack),
               (override));
   MOCK_METHOD(void,
@@ -115,6 +116,7 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
                int32_t height,
                int32_t viewWidth,
                int32_t viewHeight,
+               double device_pixel_ratio,
                MutatorsStack mutators_stack),
               (override));
   MOCK_METHOD(void, hidePlatformView2, (int32_t view_id), (override));

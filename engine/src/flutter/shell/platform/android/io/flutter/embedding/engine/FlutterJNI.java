@@ -1444,6 +1444,7 @@ public class FlutterJNI {
       int height,
       int viewWidth,
       int viewHeight,
+      float devicePixelRatio,
       FlutterMutatorsStack mutatorsStack) {
     ensureRunningOnMainThread();
     if (platformViewsController2 == null) {
@@ -1451,7 +1452,7 @@ public class FlutterJNI {
           "platformViewsController must be set before attempting to position a platform view");
     }
     platformViewsController2.onDisplayPlatformView(
-        viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+        viewId, x, y, width, height, viewWidth, viewHeight, devicePixelRatio, mutatorsStack);
   }
 
   @UiThread
@@ -1662,6 +1663,7 @@ public class FlutterJNI {
       int height,
       int viewWidth,
       int viewHeight,
+      float devicePixelRatio,
       FlutterMutatorsStack mutatorsStack) {
     ensureRunningOnMainThread();
     if (platformViewsController == null) {
@@ -1669,7 +1671,7 @@ public class FlutterJNI {
           "platformViewsController must be set before attempting to position a platform view");
     }
     platformViewsController.onDisplayPlatformView(
-        viewId, x, y, width, height, viewWidth, viewHeight, mutatorsStack);
+        viewId, x, y, width, height, viewWidth, viewHeight, devicePixelRatio, mutatorsStack);
   }
 
   @UiThread

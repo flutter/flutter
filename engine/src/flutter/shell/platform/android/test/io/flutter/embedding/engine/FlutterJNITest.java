@@ -31,6 +31,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiResizeListener;
 import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.plugin.localization.LocalizationPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
+import io.flutter.plugin.platform.PlatformViewsController2;
 import java.nio.ByteBuffer;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -191,6 +192,7 @@ public class FlutterJNITest {
     assertFalse(flutterJNI.semanticsEnabled);
   }
 
+  @Test
   public void onDisplayPlatformView_callsPlatformViewsController() {
     PlatformViewsController platformViewsController = mock(PlatformViewsController.class);
 
@@ -206,6 +208,7 @@ public class FlutterJNITest {
         /*height=*/ 200,
         /*viewWidth=*/ 100,
         /*viewHeight=*/ 200,
+        /*devicePixelRatio=*/ 2.625f,
         /*mutatorsStack=*/ stack);
 
     // --- Verify Results ---
@@ -218,6 +221,40 @@ public class FlutterJNITest {
             /*height=*/ 200,
             /*viewWidth=*/ 100,
             /*viewHeight=*/ 200,
+            /*devicePixelRatio=*/ 2.625f,
+            /*mutatorsStack=*/ stack);
+  }
+
+  @Test
+  public void onDisplayPlatformView2_callsPlatformViewsController2() {
+    PlatformViewsController2 platformViewsController2 = mock(PlatformViewsController2.class);
+
+    FlutterJNI flutterJNI = new FlutterJNI();
+    flutterJNI.setPlatformViewsController2(platformViewsController2);
+    FlutterMutatorsStack stack = new FlutterMutatorsStack();
+    // --- Execute Test ---
+    flutterJNI.onDisplayPlatformView2(
+        /*viewId=*/ 1,
+        /*x=*/ 10,
+        /*y=*/ 20,
+        /*width=*/ 100,
+        /*height=*/ 200,
+        /*viewWidth=*/ 100,
+        /*viewHeight=*/ 200,
+        /*devicePixelRatio=*/ 3.25f,
+        /*mutatorsStack=*/ stack);
+
+    // --- Verify Results ---
+    verify(platformViewsController2, times(1))
+        .onDisplayPlatformView(
+            /*viewId=*/ 1,
+            /*x=*/ 10,
+            /*y=*/ 20,
+            /*width=*/ 100,
+            /*height=*/ 200,
+            /*viewWidth=*/ 100,
+            /*viewHeight=*/ 200,
+            /*devicePixelRatio=*/ 3.25f,
             /*mutatorsStack=*/ stack);
   }
 
