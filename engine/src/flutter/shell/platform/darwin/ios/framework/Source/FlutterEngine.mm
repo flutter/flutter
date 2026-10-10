@@ -428,7 +428,15 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   if (!self.platformView) {
     return;
   }
+  auto vsync_waiter = _shell->GetVsyncWaiter().lock();
+  auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
+  if (vsync_waiter_ios) {
+    vsync_waiter_ios->SetDispatchingEvent(true);
+  }
   self.platformView->DispatchPointerDataPacket(std::move(packet));
+  if (vsync_waiter_ios) {
+    vsync_waiter_ios->SetDispatchingEvent(false);
+  }
 }
 
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
@@ -1329,6 +1337,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
     [self.platformViewsChannel invokeMethod:@"viewFocused" arguments:@(platform_view_id)];
   });
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    didRestoreFirstResponderWithTextInputClient:(int)client
+                                         result:(FlutterResult)callback {
+  [self.textInputChannel invokeMethod:@"TextInputClient.onFocusReceived"
+                            arguments:@[ @(client) ]
+                               result:callback];
 }
 
 #pragma mark - Undo Manager Delegate
