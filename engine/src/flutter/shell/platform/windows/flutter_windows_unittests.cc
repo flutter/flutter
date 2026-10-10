@@ -430,6 +430,39 @@ TEST_F(WindowsTest, IsNotPlatformThread) {
   EXPECT_FALSE(result);
 }
 
+// Verify the plugin registrar reports the platform thread correctly.
+TEST_F(WindowsTest, PluginRegistrarIsPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  FlutterDesktopPluginRegistrarRef registrar =
+      FlutterDesktopEngineGetPluginRegistrar(engine.get(), "foo_bar");
+
+  EXPECT_TRUE(FlutterDesktopPluginRegistrarIsPlatformThread(registrar));
+}
+
+// Verify the plugin registrar reports a background thread as not the platform
+// thread.
+TEST_F(WindowsTest, PluginRegistrarIsNotPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  FlutterDesktopPluginRegistrarRef registrar =
+      FlutterDesktopEngineGetPluginRegistrar(engine.get(), "foo_bar");
+
+  bool result = true;
+  std::thread background([&]() {
+    result = FlutterDesktopPluginRegistrarIsPlatformThread(registrar);
+  });
+  background.join();
+
+  EXPECT_FALSE(result);
+}
+
 // Verify a task can be posted to the platform thread while on the platform
 // thread.
 TEST_F(WindowsTest, PostPlatformThreadTaskFromPlatformThread) {
