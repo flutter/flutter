@@ -52,6 +52,8 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
+#include "flutter/lib/ui/plugins/callback_cache.h"
+#include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
@@ -70,6 +72,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/writer.h"
+#include "txt/platform.h"
 
 // Note: the IMPELLER_SUPPORTS_RENDERING may be defined even when the
 // embedder/BUILD.gn variable impeller_supports_rendering is disabled.
@@ -4345,6 +4348,125 @@ FlutterEngineResult FlutterEngineRegisterImageGenerator(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineGetCallbackInformation(
+    int64_t handle,
+    FlutterCallbackInformation* callback_info_out) {
+  if (!callback_info_out) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "FlutterCallbackInformation output pointer is null");
+  }
+
+  if (SAFE_ACCESS(callback_info_out, struct_size, 0) !=
+      sizeof(FlutterCallbackInformation)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Invalid FlutterCallbackInformation.struct_size");
+  }
+
+  const char* name = nullptr;
+  const char* class_name = nullptr;
+  const char* library_path = nullptr;
+  if (!flutter::DartCallbackCache::GetCallbackStrings(
+          handle, &name, &class_name, &library_path)) {
+    return kInternalInconsistency;
+  }
+
+  callback_info_out->name = name;
+  callback_info_out->class_name = class_name;
+  callback_info_out->library_path = library_path;
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineSetCallbackCachePath(const char* path) {
+  if (!path) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Callback cache path is null");
+  }
+  flutter::DartCallbackCache::SetCachePath(std::string(path));
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineLoadCallbackCache(void) {
+  flutter::DartCallbackCache::LoadCacheFromDisk();
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineGetCallbackHandle(
+    const FlutterCallbackInformation* callback_info,
+    int64_t* handle_out) {
+  if (!callback_info || !handle_out) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Null callback_info or handle_out specified.");
+  }
+
+  if (SAFE_ACCESS(callback_info, struct_size, 0) !=
+      sizeof(FlutterCallbackInformation)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Invalid FlutterCallbackInformation.struct_size");
+  }
+
+  if (!callback_info->name || !callback_info->library_path) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments, "Callback name and library_path must be non-null.");
+  }
+
+  std::string class_name_str =
+      callback_info->class_name ? callback_info->class_name : "";
+  *handle_out = flutter::DartCallbackCache::GetCallbackHandle(
+      std::string(callback_info->name), class_name_str,
+      std::string(callback_info->library_path));
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEnginePrefetchDefaultFontManager(void) {
+  (void)txt::GetDefaultFontManager();
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineRegisterVMServiceUriCallback(
+    const FlutterVMServiceUriCallbackConfig* config,
+    intptr_t* handle_out) {
+  if (!config) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "FlutterVMServiceUriCallbackConfig pointer is null.");
+  }
+
+  if (SAFE_ACCESS(config, struct_size, 0) !=
+      sizeof(FlutterVMServiceUriCallbackConfig)) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "Invalid FlutterVMServiceUriCallbackConfig.struct_size.");
+  }
+
+  FlutterEngineVMServiceUriCallback cb = SAFE_ACCESS(config, callback, nullptr);
+  if (!cb) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "VM Service URI callback pointer is null.");
+  }
+
+  void* user_data = SAFE_ACCESS(config, user_data, nullptr);
+  flutter::DartServiceIsolate::CallbackHandle handle =
+      flutter::DartServiceIsolate::AddServerStatusCallback(
+          [cb, user_data](const std::string& vm_service_uri) {
+            cb(vm_service_uri.c_str(), user_data);
+          });
+
+  if (handle_out) {
+    *handle_out = static_cast<intptr_t>(handle);
+  }
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterEngineDeregisterVMServiceUriCallback(
+    intptr_t handle) {
+  if (!flutter::DartServiceIsolate::RemoveServerStatusCallback(
+          static_cast<flutter::DartServiceIsolate::CallbackHandle>(handle))) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "VM Service URI callback handle was not found or already removed.");
+  }
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -4410,6 +4532,15 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(Screenshot, FlutterEngineScreenshot);
   SET_PROC(FreeScreenshot, FlutterEngineFreeScreenshot);
   SET_PROC(RegisterImageGenerator, FlutterEngineRegisterImageGenerator);
+  SET_PROC(GetCallbackInformation, FlutterEngineGetCallbackInformation);
+  SET_PROC(SetCallbackCachePath, FlutterEngineSetCallbackCachePath);
+  SET_PROC(LoadCallbackCache, FlutterEngineLoadCallbackCache);
+  SET_PROC(GetCallbackHandle, FlutterEngineGetCallbackHandle);
+  SET_PROC(PrefetchDefaultFontManager, FlutterEnginePrefetchDefaultFontManager);
+  SET_PROC(RegisterVMServiceUriCallback,
+           FlutterEngineRegisterVMServiceUriCallback);
+  SET_PROC(DeregisterVMServiceUriCallback,
+           FlutterEngineDeregisterVMServiceUriCallback);
 #undef SET_PROC
 
   return kSuccess;

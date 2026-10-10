@@ -5963,6 +5963,120 @@ TEST_F(EmbedderTest, EmbedderGetProcAddressesImageGenerator) {
   EXPECT_EQ(table.RegisterImageGenerator, &FlutterEngineRegisterImageGenerator);
 }
 
+TEST_F(EmbedderTest, EmbedderCallbackCacheRoundTrip) {
+  fml::ScopedTemporaryDirectory temp_dir;
+  ASSERT_TRUE(temp_dir.fd().is_valid());
+
+  EXPECT_EQ(FlutterEngineSetCallbackCachePath(nullptr), kInvalidArguments);
+  EXPECT_EQ(FlutterEngineSetCallbackCachePath(temp_dir.path().c_str()),
+            kSuccess);
+  EXPECT_EQ(FlutterEngineLoadCallbackCache(), kSuccess);
+
+  FlutterCallbackInformation top_level_in = {};
+  top_level_in.struct_size = sizeof(FlutterCallbackInformation);
+  top_level_in.name = "topLevelCallback";
+  top_level_in.class_name = nullptr;
+  top_level_in.library_path = "package:app/main.dart";
+
+  int64_t top_level_handle = 0;
+  EXPECT_EQ(FlutterEngineGetCallbackHandle(nullptr, &top_level_handle),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineGetCallbackHandle(&top_level_in, nullptr),
+            kInvalidArguments);
+  ASSERT_EQ(FlutterEngineGetCallbackHandle(&top_level_in, &top_level_handle),
+            kSuccess);
+  EXPECT_NE(top_level_handle, 0);
+
+  FlutterCallbackInformation static_in = {};
+  static_in.struct_size = sizeof(FlutterCallbackInformation);
+  static_in.name = "staticCallback";
+  static_in.class_name = "MyWorker";
+  static_in.library_path = "package:app/worker.dart";
+
+  int64_t static_handle = 0;
+  ASSERT_EQ(FlutterEngineGetCallbackHandle(&static_in, &static_handle),
+            kSuccess);
+  EXPECT_NE(static_handle, 0);
+  EXPECT_NE(static_handle, top_level_handle);
+
+  FlutterCallbackInformation top_level_out = {};
+  top_level_out.struct_size = sizeof(FlutterCallbackInformation);
+  ASSERT_EQ(
+      FlutterEngineGetCallbackInformation(top_level_handle, &top_level_out),
+      kSuccess);
+  EXPECT_STREQ(top_level_out.name, "topLevelCallback");
+  EXPECT_EQ(top_level_out.class_name, nullptr);
+  EXPECT_STREQ(top_level_out.library_path, "package:app/main.dart");
+
+  FlutterCallbackInformation static_out = {};
+  static_out.struct_size = sizeof(FlutterCallbackInformation);
+  ASSERT_EQ(FlutterEngineGetCallbackInformation(static_handle, &static_out),
+            kSuccess);
+  EXPECT_STREQ(static_out.name, "staticCallback");
+  EXPECT_STREQ(static_out.class_name, "MyWorker");
+  EXPECT_STREQ(static_out.library_path, "package:app/worker.dart");
+
+  // Unregistered handle should return kInternalInconsistency.
+  constexpr int64_t kUnknownHandle = -999999;
+  FlutterCallbackInformation missing_out = {};
+  missing_out.struct_size = sizeof(FlutterCallbackInformation);
+  EXPECT_EQ(FlutterEngineGetCallbackInformation(kUnknownHandle, &missing_out),
+            kInternalInconsistency);
+}
+
+TEST_F(EmbedderTest, EmbedderPrefetchDefaultFontManager) {
+  EXPECT_EQ(FlutterEnginePrefetchDefaultFontManager(), kSuccess);
+}
+
+TEST_F(EmbedderTest, EmbedderVMServiceUriCallback) {
+  EXPECT_EQ(FlutterEngineRegisterVMServiceUriCallback(nullptr, nullptr),
+            kInvalidArguments);
+
+  FlutterVMServiceUriCallbackConfig bad_config = {};
+  // Intentionally leave struct_size as 0 to test validation.
+  bad_config.callback = [](const char*, void*) {};
+  EXPECT_EQ(FlutterEngineRegisterVMServiceUriCallback(&bad_config, nullptr),
+            kInvalidArguments);
+
+  FlutterVMServiceUriCallbackConfig null_cb_config = {};
+  null_cb_config.struct_size = sizeof(FlutterVMServiceUriCallbackConfig);
+  null_cb_config.callback = nullptr;
+  EXPECT_EQ(FlutterEngineRegisterVMServiceUriCallback(&null_cb_config, nullptr),
+            kInvalidArguments);
+
+  FlutterVMServiceUriCallbackConfig valid_config = {};
+  valid_config.struct_size = sizeof(FlutterVMServiceUriCallbackConfig);
+  valid_config.callback = [](const char*, void*) {};
+  valid_config.user_data = nullptr;
+
+  intptr_t handle = 0;
+  ASSERT_EQ(FlutterEngineRegisterVMServiceUriCallback(&valid_config, &handle),
+            kSuccess);
+  EXPECT_NE(handle, 0);
+
+  EXPECT_EQ(FlutterEngineDeregisterVMServiceUriCallback(handle), kSuccess);
+  // Deregistering the same handle a second time should fail.
+  EXPECT_EQ(FlutterEngineDeregisterVMServiceUriCallback(handle),
+            kInvalidArguments);
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesCallbackCacheFontAndVMService) {
+  FlutterEngineProcTable table = {};
+  table.struct_size = sizeof(FlutterEngineProcTable);
+
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&table), kSuccess);
+  EXPECT_EQ(table.GetCallbackInformation, &FlutterEngineGetCallbackInformation);
+  EXPECT_EQ(table.SetCallbackCachePath, &FlutterEngineSetCallbackCachePath);
+  EXPECT_EQ(table.LoadCallbackCache, &FlutterEngineLoadCallbackCache);
+  EXPECT_EQ(table.GetCallbackHandle, &FlutterEngineGetCallbackHandle);
+  EXPECT_EQ(table.PrefetchDefaultFontManager,
+            &FlutterEnginePrefetchDefaultFontManager);
+  EXPECT_EQ(table.RegisterVMServiceUriCallback,
+            &FlutterEngineRegisterVMServiceUriCallback);
+  EXPECT_EQ(table.DeregisterVMServiceUriCallback,
+            &FlutterEngineDeregisterVMServiceUriCallback);
+}
+
 }  // namespace testing
 }  // namespace flutter
 
