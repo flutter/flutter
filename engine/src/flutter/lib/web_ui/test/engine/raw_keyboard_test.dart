@@ -497,7 +497,7 @@ void testMain() {
       ]);
       messages.clear();
 
-      // Still too eary to synthesize a keyup event.
+      // Still too early to synthesize a keyup event.
       async.elapse(const Duration(milliseconds: 50));
       expect(messages, isEmpty);
 

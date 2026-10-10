@@ -171,8 +171,8 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryVK::GetPipeline(
 
   auto promise = std::make_shared<
       NoExceptionPromise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
-  auto pipeline_future =
-      PipelineFuture<PipelineDescriptor>{descriptor, promise->get_future()};
+  auto pipeline_future = PipelineFuture<PipelineDescriptor>{
+      descriptor, promise->get_future(), weak_from_this()};
   pipelines_[descriptor] = pipeline_future;
 
   auto weak_this = weak_from_this();
@@ -306,8 +306,9 @@ PipelineLibraryVK::GetWorkerTaskRunner() const {
   return worker_task_runner_;
 }
 
-PipelineCompileQueue* PipelineLibraryVK::GetPipelineCompileQueue() const {
-  return compile_queue_.get();
+// |PipelineLibrary|
+void PipelineLibraryVK::PerformEagerly(const PipelineDescriptor& descriptor) {
+  compile_queue_->PerformJobEagerly(descriptor);
 }
 
 }  // namespace impeller
