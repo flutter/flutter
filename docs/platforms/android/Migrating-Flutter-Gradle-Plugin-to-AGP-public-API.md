@@ -99,9 +99,10 @@ projects. That opt-out dies with AGP 10.
 5. **`buildModeFor` semantics.** Every variant-scope call uses the
    `(name, debuggable)` overload with the public `Component.debuggable`.
    Name-based inference is confined to the one DSL-scope case with no public
-   signal (the library-plugin build-type copy in `PluginHandler`). This
-   preserves add-to-app custom-debuggable matching (a host `staging`
-   debuggable build type maps to debug engine artifacts).
+   signal (the library-plugin build-type copy in `PluginHandler`). In an
+   add-to-app module the call reads the module's own variant, so the build mode
+   follows the module variant that the host's `matchingFallbacks` select (see
+   "Features that must break" item 6).
 6. **P3 pre-spike / PR 4 (afterEvaluate DSL mutation under newDsl).** The planned scratch-app
    spike (AGP 9.1 + `newDsl=true` + custom build type, verifying that build-type
    creation from `pluginProject.afterEvaluate` still works) could not run in the
@@ -237,12 +238,23 @@ else serializes through `FlutterPlugin.kt` / `FlutterPluginUtils.kt`.
    but C++ debugging will be broken for those custom build types.
 5. **Asset merge**: flutter assets become a merged source dir instead of a
    post-merge overwrite; collisions resolve by AGP source-set priority.
-6. **Add-to-app**: the explicit `:app:merge<V>Assets.dependsOn` edge and
-   host-project lookup are removed; `flutter.hostAppProjectName` becomes a
-   no-op with a deprecation warning naming a removal milestone. Build scripts that
-   reference Flutter's `copyFlutterAssets<V>` tasks by name (e.g. `tasks.getByPath(...)`)
-   will crash with a `Task with path ... not found` error because the tasks are now
-   registered lazily.
+6. **Add-to-app**: the module registers its Flutter tasks in its own `onVariants` and
+   adds the staged assets and native libraries as generated source directories of each
+   library variant. The host consumes them like any Android library's, so the
+   host-project lookup, the `libraryVariants` × host `applicationVariants` loop and the
+   `:app:merge<V>Assets.dependsOn` edge are removed.
+   - `flutter.hostAppProjectName` has no effect; setting it logs a warning that names no
+     removal milestone.
+   - Every module variant is configured whatever the command line names, because the
+     host's `matchingFallbacks`, not the task name, decide which module variant a host
+     task consumes. Registration is lazy, so only that variant runs. Cost: a host build
+     of only `assemble<Variant>AndroidTest` runs the module's `flutter assemble`.
+   - The build mode comes from the consumed module variant, not the host build type. A
+     debuggable host build type that falls back to the module's `release` gets release
+     artifacts. Built as the only task, the deleted code ran the module's debug Flutter
+     build for it, and the APK had no `flutter_assets` and no `libapp.so`.
+   - Module assets are a generated source directory (item 5), and `copyFlutterAssets<V>`
+     is a `CopyFlutterAssetsTask` (item 7).
 7. **Task realization/type**: flutter tasks become lazy `TaskProvider`s, and
    `copyFlutterAssets<V>` changes type from `org.gradle.api.tasks.Copy` to a
    custom task class — `tasks.named(..., Copy::class)` casts fail.
