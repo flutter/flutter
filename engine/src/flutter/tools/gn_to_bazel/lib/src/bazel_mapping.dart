@@ -66,9 +66,17 @@ const Map<String, String> labelOverrides = <String, String>{
       '//engine/src/flutter/build/bazel/dart_wrap:libprotozero',
   '//third_party/perfetto:libprotozero': '//engine/src/flutter/build/bazel/dart_wrap:libprotozero',
   // Skia, generated into @skia at fetch time from the engine's GN over the
-  // synced tree (research/07).
+  // synced tree (research/07), and Skia's codec and font dependencies, each
+  // generated the same way from its own small GN file.
   '//flutter/skia': '@skia',
   '//flutter/skia:skia': '@skia',
+  '//flutter/third_party/expat': '@expat',
+  '//flutter/third_party/freetype2': '@freetype2',
+  '//flutter/third_party/libjpeg-turbo': '@libjpeg-turbo',
+  '//flutter/third_party/libpng': '@libpng',
+  '//flutter/third_party/libwebp': '@libwebp',
+  '//flutter/third_party/wuffs': '@wuffs',
+  '//third_party/libpng': '@libpng',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -79,6 +87,27 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   // (`//flutter/third_party/skia/...`) both land in @skia.
   '//flutter/skia/': '@skia//',
   '//flutter/third_party/skia/': '@skia//',
+  '//flutter/third_party/expat/': '@expat//',
+  '//flutter/third_party/freetype2/': '@freetype2//',
+  '//flutter/third_party/libjpeg-turbo/': '@libjpeg-turbo//',
+  '//flutter/third_party/libpng/': '@libpng//',
+  '//flutter/third_party/libwebp/': '@libwebp//',
+  '//flutter/third_party/wuffs/': '@wuffs//',
+};
+
+/// Compiler flags that GN hands to the dependents of a target through one
+/// of its public configs (`wuffs_public` turns warnings off for whoever
+/// includes wuffs), which Bazel has no way to carry along a dependency.
+/// The converter adds them to the `copts` of every target that lists the
+/// dependency, and when it converts the dependency's own file it requires
+/// the public config to carry exactly these, so that the two sides cannot
+/// drift apart. Keys are GN labels as `//dir:name`.
+const Map<String, List<String>> propagatedCopts = <String, List<String>>{
+  '//flutter/third_party/freetype2:freetype2': <String>[
+    '-Wno-unused-function',
+    '-Wno-unused-variable',
+  ],
+  '//flutter/third_party/wuffs:wuffs': <String>['-Wno-unused-function', '-Wno-c++11-narrowing'],
 };
 
 /// A Bazel label taken apart: `@repo//package:name`.
@@ -162,12 +191,14 @@ final class OutputLayout {
     : repository = '',
       repositoryGnRoot = '//',
       pathPrefix = 'engine/src/',
-      packages = const <String>{};
+      packages = const <String>{},
+      secondarySource = null;
 
   const OutputLayout.repository(
     this.repository, {
     required this.repositoryGnRoot,
     this.packages = const <String>{''},
+    this.secondarySource,
   }) : pathPrefix = '';
 
   /// `@skia`, or the empty string for the main repository.
@@ -186,11 +217,21 @@ final class OutputLayout {
   /// labelled through its own package.
   final Set<String> packages;
 
+  /// GN's secondary source root (`//flutter/build/secondary`), when the
+  /// repository's build files live there: files beside them (`expat`'s
+  /// `expat_config` directory) are mirrored into the repository by the
+  /// repository rule, so their GN paths map into it too.
+  final String? secondarySource;
+
   bool get isMain => repository.isEmpty;
 
   /// The repository-relative path of a GN directory or file under the root,
   /// or null when it is outside.
   String? relativePath(String gnPath) {
+    final String? secondary = secondarySource;
+    if (secondary != null && gnPath.startsWith(secondary + repositoryGnRoot.substring(1))) {
+      return relativePath('/${gnPath.substring(secondary.length)}');
+    }
     final root = repositoryGnRoot == '//' ? '//' : '$repositoryGnRoot/';
     if (gnPath == repositoryGnRoot) {
       return pathPrefix.isEmpty ? '' : pathPrefix.substring(0, pathPrefix.length - 1);
@@ -229,6 +270,14 @@ String bazelLabel(String gnLabel, {required String package, GnLocation? location
   final String? override = labelOverrides[absolute];
   if (override != null) {
     return override;
+  }
+  // `//dir:name` where `//dir` is the root of an external repository.
+  final int colon = absolute.indexOf(':');
+  if (colon > 0) {
+    final String? directory = labelOverrides[absolute.substring(0, colon)];
+    if (directory != null && directory.startsWith('@') && !directory.contains('//')) {
+      return '$directory//${absolute.substring(colon)}';
+    }
   }
   for (final MapEntry<String, String> entry in labelRepositoryPrefixes.entries) {
     if (absolute.startsWith(entry.key)) {
@@ -306,6 +355,7 @@ const Set<String> knownExternalVariables = <String>{
   'current_cpu',
   'current_os',
   'current_toolchain',
+  'default_library_type',
   'host_cpu',
   'host_os',
   'host_toolchain',
@@ -396,6 +446,7 @@ Assumptions linuxHostAssumptions() {
     'current_cpu': GnStringValue('x64'),
     'current_os': GnStringValue('linux'),
     'current_toolchain': GnStringValue('//build/toolchain/linux:clang_x64'),
+    'default_library_type': GnStringValue('static_library'),
     'host_cpu': GnStringValue('x64'),
     'host_os': GnStringValue('linux'),
     'host_toolchain': GnStringValue('//build/toolchain/linux:clang_x64'),
