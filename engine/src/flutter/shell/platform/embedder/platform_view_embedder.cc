@@ -155,6 +155,9 @@ void PlatformViewEmbedder::HandlePlatformMessage(
 
 // |PlatformView|
 std::unique_ptr<Surface> PlatformViewEmbedder::CreateRenderingSurface() {
+  if (platform_dispatch_table_.create_rendering_surface_callback != nullptr) {
+    return platform_dispatch_table_.create_rendering_surface_callback();
+  }
   if (embedder_surface_ == nullptr) {
     FML_LOG(ERROR) << "Embedder surface was null.";
     return nullptr;
@@ -165,11 +168,28 @@ std::unique_ptr<Surface> PlatformViewEmbedder::CreateRenderingSurface() {
 // |PlatformView|
 std::shared_ptr<ExternalViewEmbedder>
 PlatformViewEmbedder::CreateExternalViewEmbedder() {
+  if (platform_dispatch_table_.create_external_view_embedder_callback !=
+      nullptr) {
+    return platform_dispatch_table_.create_external_view_embedder_callback();
+  }
   return external_view_embedder_;
+}
+
+// |PlatformView|
+std::unique_ptr<SnapshotSurfaceProducer>
+PlatformViewEmbedder::CreateSnapshotSurfaceProducer() {
+  if (platform_dispatch_table_.create_snapshot_surface_producer_callback !=
+      nullptr) {
+    return platform_dispatch_table_.create_snapshot_surface_producer_callback();
+  }
+  return PlatformView::CreateSnapshotSurfaceProducer();
 }
 
 std::shared_ptr<impeller::Context> PlatformViewEmbedder::GetImpellerContext()
     const {
+  if (platform_dispatch_table_.get_impeller_context_callback != nullptr) {
+    return platform_dispatch_table_.get_impeller_context_callback();
+  }
   if (embedder_surface_ == nullptr) {
     FML_LOG(ERROR) << "Embedder surface was null.";
     return nullptr;
@@ -178,7 +198,17 @@ std::shared_ptr<impeller::Context> PlatformViewEmbedder::GetImpellerContext()
 }
 
 // |PlatformView|
+void PlatformViewEmbedder::SetupImpellerContext() {
+  if (platform_dispatch_table_.setup_impeller_context_callback != nullptr) {
+    platform_dispatch_table_.setup_impeller_context_callback();
+  }
+}
+
+// |PlatformView|
 sk_sp<GrDirectContext> PlatformViewEmbedder::CreateResourceContext() const {
+  if (platform_dispatch_table_.create_resource_context_callback != nullptr) {
+    return platform_dispatch_table_.create_resource_context_callback();
+  }
   if (embedder_surface_ == nullptr) {
     FML_LOG(ERROR) << "Embedder surface was null.";
     return nullptr;
@@ -188,6 +218,10 @@ sk_sp<GrDirectContext> PlatformViewEmbedder::CreateResourceContext() const {
 
 // |PlatformView|
 void PlatformViewEmbedder::ReleaseResourceContext() const {
+  if (platform_dispatch_table_.release_resource_context_callback != nullptr) {
+    platform_dispatch_table_.release_resource_context_callback();
+    return;
+  }
   if (embedder_surface_ == nullptr) {
     FML_LOG(ERROR) << "Embedder surface was null.";
     return;

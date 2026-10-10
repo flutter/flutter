@@ -262,9 +262,11 @@ TEST(PlatformViewEmbedderTest, SubclassWithoutSurfaceHasNoRenderingResources) {
     PlatformView& platform_view = embedder;
 
     EXPECT_FALSE(platform_view.GetImpellerContext());
+    platform_view.SetupImpellerContext();
     EXPECT_FALSE(platform_view.CreateResourceContext());
     platform_view.ReleaseResourceContext();
     EXPECT_FALSE(platform_view.CreateExternalViewEmbedder());
+    EXPECT_FALSE(platform_view.CreateSnapshotSurfaceProducer());
     EXPECT_TRUE(platform_view.GetPlatformMessageHandler());
     latch.Signal();
   });
@@ -414,6 +416,87 @@ TEST(PlatformViewEmbedderTest,
                                                true);
     platform_view.UpdateAssetResolverByType(
         nullptr, AssetResolver::AssetResolverType::kApkAssetProvider);
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
+TEST(PlatformViewEmbedderTest,
+     SubclassWithoutSurfaceForwardsRenderingAndContextCallbacks) {
+  ThreadHost thread_host(
+      "io.flutter.test." + GetCurrentTestName() + ".",
+      ThreadHost::Type::kPlatform | ThreadHost::Type::kRaster);
+  flutter::TaskRunners task_runners = flutter::TaskRunners(
+      GetCurrentTestName(), thread_host.platform_thread->GetTaskRunner(),
+      thread_host.raster_thread->GetTaskRunner(), nullptr, nullptr);
+  fml::AutoResetWaitableEvent latch;
+  task_runners.GetPlatformTaskRunner()->PostTask([&latch, task_runners] {
+    MockDelegate delegate;
+    bool create_rendering_surface_called = false;
+    bool create_external_view_embedder_called = false;
+    bool create_snapshot_surface_producer_called = false;
+    bool create_resource_context_called = false;
+    bool release_resource_context_called = false;
+    bool get_impeller_context_called = false;
+    bool setup_impeller_context_called = false;
+
+    PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table;
+    platform_dispatch_table.create_rendering_surface_callback =
+        [&create_rendering_surface_called]() -> std::unique_ptr<Surface> {
+      create_rendering_surface_called = true;
+      return nullptr;
+    };
+    platform_dispatch_table.create_external_view_embedder_callback =
+        [&create_external_view_embedder_called]()
+        -> std::shared_ptr<ExternalViewEmbedder> {
+      create_external_view_embedder_called = true;
+      return nullptr;
+    };
+    platform_dispatch_table.create_snapshot_surface_producer_callback =
+        [&create_snapshot_surface_producer_called]()
+        -> std::unique_ptr<SnapshotSurfaceProducer> {
+      create_snapshot_surface_producer_called = true;
+      return nullptr;
+    };
+    platform_dispatch_table.create_resource_context_callback =
+        [&create_resource_context_called]() -> sk_sp<GrDirectContext> {
+      create_resource_context_called = true;
+      return nullptr;
+    };
+    platform_dispatch_table.release_resource_context_callback =
+        [&release_resource_context_called]() {
+          release_resource_context_called = true;
+        };
+    platform_dispatch_table.get_impeller_context_callback =
+        [&get_impeller_context_called]() -> std::shared_ptr<impeller::Context> {
+      get_impeller_context_called = true;
+      return nullptr;
+    };
+    platform_dispatch_table.setup_impeller_context_callback =
+        [&setup_impeller_context_called]() {
+          setup_impeller_context_called = true;
+        };
+
+    SurfacelessPlatformViewEmbedder embedder(
+        delegate, task_runners, std::move(platform_dispatch_table));
+    PlatformView& platform_view = embedder;
+    const PlatformView& const_platform_view = embedder;
+
+    platform_view.NotifyCreated();
+    EXPECT_FALSE(platform_view.CreateExternalViewEmbedder());
+    EXPECT_FALSE(platform_view.CreateSnapshotSurfaceProducer());
+    EXPECT_FALSE(const_platform_view.CreateResourceContext());
+    const_platform_view.ReleaseResourceContext();
+    EXPECT_FALSE(const_platform_view.GetImpellerContext());
+    platform_view.SetupImpellerContext();
+
+    EXPECT_TRUE(create_rendering_surface_called);
+    EXPECT_TRUE(create_external_view_embedder_called);
+    EXPECT_TRUE(create_snapshot_surface_producer_called);
+    EXPECT_TRUE(create_resource_context_called);
+    EXPECT_TRUE(release_resource_context_called);
+    EXPECT_TRUE(get_impeller_context_called);
+    EXPECT_TRUE(setup_impeller_context_called);
     latch.Signal();
   });
   latch.Wait();

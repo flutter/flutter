@@ -54,6 +54,17 @@ class PlatformViewEmbedder : public PlatformView {
       std::function<void(intptr_t loading_unit_id)>;
   using GetScaledFontSizeCallback =
       std::function<double(double unscaled_font_size, int configuration_id)>;
+  using CreateRenderingSurfaceCallback =
+      std::function<std::unique_ptr<Surface>()>;
+  using CreateExternalViewEmbedderCallback =
+      std::function<std::shared_ptr<ExternalViewEmbedder>()>;
+  using CreateSnapshotSurfaceProducerCallback =
+      std::function<std::unique_ptr<SnapshotSurfaceProducer>()>;
+  using CreateResourceContextCallback = std::function<sk_sp<GrDirectContext>()>;
+  using ReleaseResourceContextCallback = std::function<void()>;
+  using GetImpellerContextCallback =
+      std::function<std::shared_ptr<impeller::Context>()>;
+  using SetupImpellerContextCallback = std::function<void()>;
 
   struct PlatformDispatchTable {
     UpdateSemanticsCallback update_semantics_callback;  // optional
@@ -72,6 +83,17 @@ class PlatformViewEmbedder : public PlatformView {
     RequestDartDeferredLibraryCallback
         request_dart_deferred_library_callback;               // optional
     GetScaledFontSizeCallback get_scaled_font_size_callback;  // optional
+    CreateRenderingSurfaceCallback
+        create_rendering_surface_callback;  // optional
+    CreateExternalViewEmbedderCallback
+        create_external_view_embedder_callback;  // optional
+    CreateSnapshotSurfaceProducerCallback
+        create_snapshot_surface_producer_callback;                   // optional
+    CreateResourceContextCallback create_resource_context_callback;  // optional
+    ReleaseResourceContextCallback
+        release_resource_context_callback;                         // optional
+    GetImpellerContextCallback get_impeller_context_callback;      // optional
+    SetupImpellerContextCallback setup_impeller_context_callback;  // optional
   };
 
   // Create a platform view that sets up a software rasterizer.
@@ -143,11 +165,9 @@ class PlatformViewEmbedder : public PlatformView {
   //----------------------------------------------------------------------------
   /// @brief      Creates a platform view for an embedding that renders on its
   ///             own. There is no embedder surface and no external view
-  ///             embedder, so a subclass that renders overrides
-  ///             `CreateRenderingSurface`, `CreateExternalViewEmbedder` and
-  ///             the resource context methods. Everything else comes from
-  ///             `platform_dispatch_table`, the same as for the other
-  ///             constructors.
+  ///             embedder; everything comes from `platform_dispatch_table`,
+  ///             including any surface, external view embedder, and rendering
+  ///             context callbacks.
   ///
   PlatformViewEmbedder(PlatformView::Delegate& delegate,
                        const flutter::TaskRunners& task_runners,
@@ -169,7 +189,14 @@ class PlatformViewEmbedder : public PlatformView {
   std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override;
 
   // |PlatformView|
+  std::unique_ptr<SnapshotSurfaceProducer> CreateSnapshotSurfaceProducer()
+      override;
+
+  // |PlatformView|
   std::shared_ptr<impeller::Context> GetImpellerContext() const override;
+
+  // |PlatformView|
+  void SetupImpellerContext() override;
 
   // |PlatformView|
   sk_sp<GrDirectContext> CreateResourceContext() const override;
