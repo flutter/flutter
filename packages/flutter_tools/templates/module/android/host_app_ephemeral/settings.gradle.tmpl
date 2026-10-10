@@ -9,7 +9,7 @@ pluginManagement {
         return flutterSdkPath
     }()
 
-    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
+    includeBuild(file("$flutterSdkPath/packages/flutter_tools/gradle").canonicalPath)
 
     repositories {
         google()
