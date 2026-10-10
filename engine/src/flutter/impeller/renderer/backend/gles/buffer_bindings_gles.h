@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_BUFFER_BINDINGS_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_BUFFER_BINDINGS_GLES_H_
 
+#include <array>
 #include <vector>
 
 #include "impeller/core/shader_types.h"
@@ -25,7 +26,66 @@ FML_TEST_CLASS(BufferBindingsGLESTest,
                BindsTexturesAcrossThePerStageUnitBoundary);
 FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit);
 FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit);
+FML_TEST_CLASS(BufferBindingsGLESTest,
+               SkipsRedundantSamplerConfigurationOnSameTexture);
 }  // namespace testing
+
+struct VertexAttribStateCache {
+  static constexpr size_t kMaxVertexAttribs = 16;
+  static constexpr size_t kMaxTextureUnits = 32;
+
+  struct AttribSlotState {
+    GLuint vbo = 0;
+    GLint size = 0;
+    GLenum type = 0;
+    GLboolean normalized = GL_FALSE;
+    GLsizei stride = 0;
+    uintptr_t offset = 0;
+    GLuint divisor = 0;
+    bool valid = false;
+  };
+
+  GLuint bound_array_buffer = 0;
+  GLuint bound_element_array_buffer = 0;
+  uint32_t enabled_attribs_mask = 0;
+  uint32_t current_draw_attribs_mask = 0;
+  uint32_t non_zero_divisor_mask = 0;
+  std::array<AttribSlotState, kMaxVertexAttribs> slots = {};
+  GLenum active_texture_unit = 0;
+  std::array<GLuint, kMaxTextureUnits> bound_textures = {};
+
+  void DisableUnusedAttribsBeforeDraw(const ProcTableGLES& gl) {
+    uint32_t to_disable = enabled_attribs_mask & ~current_draw_attribs_mask;
+    while (to_disable != 0) {
+      uint32_t idx = __builtin_ctz(to_disable);
+      gl.DisableVertexAttribArray(idx);
+      enabled_attribs_mask &= ~(1u << idx);
+      to_disable &= (to_disable - 1);
+    }
+  }
+
+  void ResetAtPassEnd(const ProcTableGLES& gl) {
+    uint32_t div_mask = non_zero_divisor_mask;
+    while (div_mask != 0) {
+      uint32_t idx = __builtin_ctz(div_mask);
+      if (gl.VertexAttribDivisor.IsAvailable()) {
+        gl.VertexAttribDivisor(idx, 0u);
+      } else if (gl.VertexAttribDivisorEXT.IsAvailable()) {
+        gl.VertexAttribDivisorEXT(idx, 0u);
+      }
+      div_mask &= (div_mask - 1);
+    }
+    non_zero_divisor_mask = 0;
+
+    uint32_t en_mask = enabled_attribs_mask;
+    while (en_mask != 0) {
+      uint32_t idx = __builtin_ctz(en_mask);
+      gl.DisableVertexAttribArray(idx);
+      en_mask &= (en_mask - 1);
+    }
+    enabled_attribs_mask = 0;
+  }
+};
 
 //------------------------------------------------------------------------------
 /// @brief      Sets up stage bindings for single draw call in the OpenGLES
@@ -53,13 +113,15 @@ class BufferBindingsGLES {
   bool BindVertexAttributes(const ProcTableGLES& gl,
                             size_t binding,
                             size_t vertex_offset,
-                            size_t instance = 0);
+                            size_t instance = 0,
+                            VertexAttribStateCache* state_cache = nullptr);
 
   bool BindUniformData(const ProcTableGLES& gl,
                        const std::vector<TextureAndSampler>& bound_textures,
                        const std::vector<BufferResource>& bound_buffers,
                        Range texture_range,
-                       Range buffer_range);
+                       Range buffer_range,
+                       VertexAttribStateCache* state_cache = nullptr);
 
   bool UnbindVertexAttributes(const ProcTableGLES& gl);
 
@@ -76,6 +138,8 @@ class BufferBindingsGLES {
                   RejectsTexturesBeyondThePerStageLimit);
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
                   RejectsTexturesBeyondTheCombinedLimit);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  SkipsRedundantSamplerConfigurationOnSameTexture);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///
@@ -101,6 +165,7 @@ class BufferBindingsGLES {
 
   using BindingMap = absl::flat_hash_map<std::string, std::vector<GLint>>;
   BindingMap binding_map_ = {};
+  absl::flat_hash_map<GLint, GLint> configured_sampler_uniforms_ = {};
   GLuint vertex_array_object_ = 0;
   GLuint program_handle_ = GL_NONE;
   bool use_ubo_ = false;
@@ -131,7 +196,8 @@ class BufferBindingsGLES {
       const std::vector<TextureAndSampler>& bound_textures,
       Range texture_range,
       ShaderStage stage,
-      size_t unit_start_index = 0);
+      size_t unit_start_index = 0,
+      VertexAttribStateCache* state_cache = nullptr);
 
   BufferBindingsGLES(const BufferBindingsGLES&) = delete;
 

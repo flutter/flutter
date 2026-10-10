@@ -43,6 +43,14 @@ class PipelineGLES final
   // cached at link time. -1 if the shader doesn't declare it.
   GLint GetYFlipUniformLocation() const { return y_flip_uniform_location_; }
 
+  bool NeedsYFlipUpdate(GLfloat y_flip) const {
+    if (y_flip_uniform_location_ < 0 || configured_y_flip_ == y_flip) {
+      return false;
+    }
+    configured_y_flip_ = y_flip;
+    return true;
+  }
+
  private:
   friend PipelineLibraryGLES;
   friend class testing::RenderPassGLESCommandTest;
@@ -51,6 +59,7 @@ class PipelineGLES final
   std::shared_ptr<UniqueHandleGLES> handle_;
   std::unique_ptr<BufferBindingsGLES> buffer_bindings_;
   GLint y_flip_uniform_location_ = -1;
+  mutable std::optional<GLfloat> configured_y_flip_;
   bool is_valid_ = false;
 
   // |Pipeline|
