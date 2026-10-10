@@ -55,6 +55,17 @@ class PointerDelegateTest : public ::testing::Test {
         mouse_source_bindings_.AddBinding(mouse_source_.get()));
   }
 
+  void ResetPointerDelegate(bool intercept_all_input) {
+    touch_source_bindings_.CloseAll(ZX_OK);
+    mouse_source_bindings_.CloseAll(ZX_OK);
+    touch_source_ = std::make_unique<FakeTouchSource>();
+    mouse_source_ = std::make_unique<FakeMouseSource>();
+    pointer_delegate_ = std::make_unique<flutter_runner::PointerDelegate>(
+        touch_source_bindings_.AddBinding(touch_source_.get()),
+        mouse_source_bindings_.AddBinding(mouse_source_.get()),
+        intercept_all_input);
+  }
+
   void RunLoopUntilIdle() { loop_.RunUntilIdle(); }
 
   std::unique_ptr<FakeTouchSource> touch_source_;
@@ -69,7 +80,24 @@ class PointerDelegateTest : public ::testing::Test {
   FML_DISALLOW_COPY_AND_ASSIGN(PointerDelegateTest);
 };
 
-TEST_F(PointerDelegateTest, Data_FuchsiaTimeVersusFlutterTime) {
+class PointerDelegateTouchTest : public PointerDelegateTest,
+                                 public ::testing::WithParamInterface<bool> {
+ protected:
+  void SetUp() override {
+    const bool intercept_all_input = GetParam();
+    ResetPointerDelegate(intercept_all_input);
+    if (!intercept_all_input) {
+      pointer_delegate_->SetGestureResponsePolicy(
+          {.default_response = fup_TouchResponseType::YES});
+    }
+  }
+};
+
+INSTANTIATE_TEST_SUITE_P(InterceptAllInput,
+                         PointerDelegateTouchTest,
+                         ::testing::Bool());
+
+TEST_P(PointerDelegateTouchTest, Data_FuchsiaTimeVersusFlutterTime) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -95,7 +123,7 @@ TEST_F(PointerDelegateTest, Data_FuchsiaTimeVersusFlutterTime) {
   EXPECT_EQ((*pointers)[1].time_stamp, /* in microseconds */ 1111u);
 }
 
-TEST_F(PointerDelegateTest, Phase_FlutterPhasesAreSynthesized) {
+TEST_P(PointerDelegateTouchTest, Phase_FlutterPhasesAreSynthesized) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -146,7 +174,7 @@ TEST_F(PointerDelegateTest, Phase_FlutterPhasesAreSynthesized) {
   EXPECT_EQ((*pointers)[1].change, flutter::PointerData::Change::kRemove);
 }
 
-TEST_F(PointerDelegateTest, Phase_FuchsiaCancelBecomesFlutterCancel) {
+TEST_P(PointerDelegateTouchTest, Phase_FuchsiaCancelBecomesFlutterCancel) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -184,7 +212,7 @@ TEST_F(PointerDelegateTest, Phase_FuchsiaCancelBecomesFlutterCancel) {
   EXPECT_EQ((*pointers)[0].change, flutter::PointerData::Change::kCancel);
 }
 
-TEST_F(PointerDelegateTest, Coordinates_CorrectMapping) {
+TEST_P(PointerDelegateTouchTest, Coordinates_CorrectMapping) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -251,7 +279,7 @@ TEST_F(PointerDelegateTest, Coordinates_CorrectMapping) {
   EXPECT_FLOAT_EQ((*pointers)[0].physical_y, 10.f);
 }
 
-TEST_F(PointerDelegateTest, Coordinates_DownEventClampedToView) {
+TEST_P(PointerDelegateTouchTest, Coordinates_DownEventClampedToView) {
   const float kSmallDiscrepancy = -0.00003f;
 
   std::optional<std::vector<flutter::PointerData>> pointers;
@@ -284,7 +312,7 @@ TEST_F(PointerDelegateTest, Coordinates_DownEventClampedToView) {
   EXPECT_EQ(down_event.physical_y, 0.f);
 }
 
-TEST_F(PointerDelegateTest, Protocol_FirstResponseIsEmpty) {
+TEST_P(PointerDelegateTouchTest, Protocol_FirstResponseIsEmpty) {
   bool called = false;
   pointer_delegate_->WatchLoop(
       [&called](std::vector<flutter::PointerData> events) { called = true; });
@@ -297,7 +325,7 @@ TEST_F(PointerDelegateTest, Protocol_FirstResponseIsEmpty) {
   ASSERT_EQ(responses->size(), 0u);
 }
 
-TEST_F(PointerDelegateTest, Protocol_ResponseMatchesEarlierEvents) {
+TEST_P(PointerDelegateTouchTest, Protocol_ResponseMatchesEarlierEvents) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -356,7 +384,7 @@ TEST_F(PointerDelegateTest, Protocol_ResponseMatchesEarlierEvents) {
   EXPECT_EQ(responses.value()[3].response_type(), fup_TouchResponseType::YES);
 }
 
-TEST_F(PointerDelegateTest, Protocol_LateGrant) {
+TEST_P(PointerDelegateTouchTest, Protocol_LateGrant) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -420,7 +448,7 @@ TEST_F(PointerDelegateTest, Protocol_LateGrant) {
   pointers = {};
 }
 
-TEST_F(PointerDelegateTest, Protocol_LateGrantCombo) {
+TEST_P(PointerDelegateTouchTest, Protocol_LateGrantCombo) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -476,7 +504,7 @@ TEST_F(PointerDelegateTest, Protocol_LateGrantCombo) {
   pointers = {};
 }
 
-TEST_F(PointerDelegateTest, Protocol_EarlyGrant) {
+TEST_P(PointerDelegateTouchTest, Protocol_EarlyGrant) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -515,7 +543,7 @@ TEST_F(PointerDelegateTest, Protocol_EarlyGrant) {
   pointers = {};
 }
 
-TEST_F(PointerDelegateTest, Protocol_LateDeny) {
+TEST_P(PointerDelegateTouchTest, Protocol_LateDeny) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -562,7 +590,7 @@ TEST_F(PointerDelegateTest, Protocol_LateDeny) {
   pointers = {};
 }
 
-TEST_F(PointerDelegateTest, Protocol_LateDenyCombo) {
+TEST_P(PointerDelegateTouchTest, Protocol_LateDenyCombo) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -610,7 +638,7 @@ TEST_F(PointerDelegateTest, Protocol_LateDenyCombo) {
   pointers = {};
 }
 
-TEST_F(PointerDelegateTest, Protocol_PointersAreIndependent) {
+TEST_P(PointerDelegateTouchTest, Protocol_PointersAreIndependent) {
   std::optional<std::vector<flutter::PointerData>> pointers;
   pointer_delegate_->WatchLoop(
       [&pointers](std::vector<flutter::PointerData> events) {
@@ -839,6 +867,414 @@ TEST_F(PointerDelegateTest, MouseWheel_TouchpadPixelBased) {
   EXPECT_EQ(pointers.value()[0].scroll_delta_x, 120);
   EXPECT_EQ(pointers.value()[0].scroll_delta_y, 0);
   pointers = {};
+}
+
+TEST_F(PointerDelegateTest, GesturePolicy_FlagTrueNoPolicyAnswersYes) {
+  ResetPointerDelegate(/*intercept_all_input=*/true);
+  std::vector<flutter::PointerData> pointers;
+  pointer_delegate_->WatchLoop(
+      [&pointers](std::vector<flutter::PointerData> e) {
+        pointers.insert(pointers.end(), e.begin(), e.end());
+      });
+  RunLoopUntilIdle();
+
+  auto initial = touch_source_->UploadedResponses();
+  ASSERT_TRUE(initial.has_value());
+  EXPECT_TRUE(initial->empty());
+
+  std::vector<fup_TouchEvent> events;
+  events.emplace_back(TouchEventBuilder::New()
+                          .AddTime(1000u)
+                          .AddViewParameters(kRect, kRect, kIdentity)
+                          .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
+                          .Build());
+  events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(2000u)
+          .AddSample(kIxnOne, fup_EventPhase::CHANGE, {15.f, 15.f})
+          .Build());
+  events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(3000u)
+          .AddSample(kIxnOne, fup_EventPhase::REMOVE, {15.f, 15.f})
+          .Build());
+  touch_source_->ScheduleCallback(std::move(events));
+  RunLoopUntilIdle();
+
+  auto responses = touch_source_->UploadedResponses();
+  ASSERT_TRUE(responses.has_value());
+  ASSERT_EQ(responses->size(), 3u);
+  for (const auto& r : *responses) {
+    ASSERT_TRUE(r.has_response_type());
+    EXPECT_EQ(r.response_type(), fup_TouchResponseType::YES);
+  }
+  pointer_delegate_.reset();
+}
+
+TEST_F(PointerDelegateTest, GesturePolicy_FlagFalseRegionsAndDefaultResponses) {
+  ResetPointerDelegate(/*intercept_all_input=*/false);
+  GestureResponsePolicy policy;
+  policy.default_response = fup_TouchResponseType::NO;
+  policy.regions.push_back({
+      .left = 0.f,
+      .top = 0.f,
+      .right = 10.f,
+      .bottom = 10.f,
+      .response = fup_TouchResponseType::YES_PRIORITIZE,
+  });
+  policy.regions.push_back({
+      .left = 10.f,
+      .top = 10.f,
+      .right = 15.f,
+      .bottom = 15.f,
+      .response = fup_TouchResponseType::YES,
+  });
+  pointer_delegate_->SetGestureResponsePolicy(std::move(policy));
+
+  pointer_delegate_->WatchLoop([](std::vector<flutter::PointerData>) {});
+  RunLoopUntilIdle();
+  (void)touch_source_->UploadedResponses();
+
+  constexpr fup_TouchIxnId kIxn1 = {1u, 1u, 1u};
+  constexpr fup_TouchIxnId kIxn2 = {1u, 1u, 2u};
+  constexpr fup_TouchIxnId kIxn3 = {1u, 1u, 3u};
+
+  std::vector<fup_TouchEvent> events;
+  events.emplace_back(TouchEventBuilder::New()
+                          .AddTime(1000u)
+                          .AddViewParameters(kRect, kRect, kIdentity)
+                          .AddSample(kIxn1, fup_EventPhase::ADD, {5.f, 5.f})
+                          .Build());
+  events.emplace_back(TouchEventBuilder::New()
+                          .AddTime(2000u)
+                          .AddSample(kIxn2, fup_EventPhase::ADD, {12.f, 12.f})
+                          .Build());
+  events.emplace_back(TouchEventBuilder::New()
+                          .AddTime(3000u)
+                          .AddSample(kIxn3, fup_EventPhase::ADD, {18.f, 18.f})
+                          .Build());
+  touch_source_->ScheduleCallback(std::move(events));
+  RunLoopUntilIdle();
+
+  auto responses = touch_source_->UploadedResponses();
+  ASSERT_TRUE(responses.has_value());
+  ASSERT_EQ(responses->size(), 3u);
+  // Baseline (before policy evaluation): unconditionally answers YES.
+  EXPECT_EQ((*responses)[0].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*responses)[1].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*responses)[2].response_type(), fup_TouchResponseType::YES);
+}
+
+TEST_F(PointerDelegateTest, GesturePolicy_FlagFalseNoPolicyFailsLoudly) {
+  ResetPointerDelegate(/*intercept_all_input=*/false);
+  pointer_delegate_->WatchLoop([](std::vector<flutter::PointerData>) {});
+  RunLoopUntilIdle();
+
+  // Baseline (before policy enforcement): answers YES even without a policy.
+  (void)touch_source_->UploadedResponses();
+  std::vector<fup_TouchEvent> events =
+      TouchEventBuilder::New()
+          .AddTime(1000u)
+          .AddViewParameters(kRect, kRect, kIdentity)
+          .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
+          .BuildAsVector();
+  touch_source_->ScheduleCallback(std::move(events));
+  RunLoopUntilIdle();
+  auto responses = touch_source_->UploadedResponses();
+  ASSERT_TRUE(responses.has_value());
+  ASSERT_EQ(responses->size(), 1u);
+  EXPECT_EQ((*responses)[0].response_type(), fup_TouchResponseType::YES);
+}
+
+TEST_F(PointerDelegateTest,
+       GesturePolicy_ProtocolPairingAcrossMultipleBatches) {
+  ResetPointerDelegate(/*intercept_all_input=*/false);
+  GestureResponsePolicy policy;
+  policy.default_response = fup_TouchResponseType::NO;
+  policy.regions.push_back({
+      .left = 0.f,
+      .top = 0.f,
+      .right = 10.f,
+      .bottom = 10.f,
+      .response = fup_TouchResponseType::YES_PRIORITIZE,
+  });
+  pointer_delegate_->SetGestureResponsePolicy(std::move(policy));
+
+  pointer_delegate_->WatchLoop([](std::vector<flutter::PointerData>) {});
+  RunLoopUntilIdle();
+
+  // 1st Watch: empty vector.
+  auto r0 = touch_source_->UploadedResponses();
+  ASSERT_TRUE(r0.has_value());
+  EXPECT_EQ(r0->size(), 0u);
+
+  constexpr fup_TouchIxnId kIxnA = {1u, 1u, 10u};
+  constexpr fup_TouchIxnId kIxnB = {1u, 1u, 11u};
+
+  // Batch 1: 2 events (both with samples).
+  std::vector<fup_TouchEvent> batch1;
+  batch1.emplace_back(TouchEventBuilder::New()
+                          .AddTime(1000u)
+                          .AddViewParameters(kRect, kRect, kIdentity)
+                          .AddSample(kIxnA, fup_EventPhase::ADD, {4.f, 4.f})
+                          .Build());
+  batch1.emplace_back(TouchEventBuilder::New()
+                          .AddTime(2000u)
+                          .AddSample(kIxnB, fup_EventPhase::ADD, {16.f, 16.f})
+                          .Build());
+  touch_source_->ScheduleCallback(std::move(batch1));
+  RunLoopUntilIdle();
+
+  // 2nd Watch: paired 1-to-1 with batch1 (size 2).
+  auto r1 = touch_source_->UploadedResponses();
+  ASSERT_TRUE(r1.has_value());
+  ASSERT_EQ(r1->size(), 2u);
+  EXPECT_EQ((*r1)[0].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*r1)[1].response_type(), fup_TouchResponseType::YES);
+
+  // Batch 2: 3 events (sample, interaction_result only, sample).
+  std::vector<fup_TouchEvent> batch2;
+  batch2.emplace_back(TouchEventBuilder::New()
+                          .AddTime(3000u)
+                          .AddSample(kIxnA, fup_EventPhase::CHANGE, {5.f, 5.f})
+                          .Build());
+  batch2.emplace_back(TouchEventBuilder::New()
+                          .AddTime(3500u)
+                          .AddResult({.interaction = kIxnA,
+                                      .status = fup_TouchIxnStatus::GRANTED})
+                          .Build());
+  batch2.emplace_back(TouchEventBuilder::New()
+                          .AddTime(4000u)
+                          .AddSample(kIxnA, fup_EventPhase::REMOVE, {5.f, 5.f})
+                          .Build());
+  touch_source_->ScheduleCallback(std::move(batch2));
+  RunLoopUntilIdle();
+
+  // 3rd Watch: paired 1-to-1 with batch2 (size 3; middle entry is empty table).
+  auto r2 = touch_source_->UploadedResponses();
+  ASSERT_TRUE(r2.has_value());
+  ASSERT_EQ(r2->size(), 3u);
+  EXPECT_EQ((*r2)[0].response_type(), fup_TouchResponseType::YES);
+  EXPECT_FALSE((*r2)[1].has_response_type());
+  EXPECT_EQ((*r2)[2].response_type(), fup_TouchResponseType::YES);
+}
+
+TEST_F(PointerDelegateTest,
+       GesturePolicy_TableDrivenBufferingInvariantsBothPaths) {
+  enum class Form {
+    kLateGrant,
+    kComboGrant,
+    kEarlyGrant,
+    kLateDeny,
+    kComboDeny,
+  };
+  const std::array<Form, 5> kForms = {
+      Form::kLateGrant, Form::kComboGrant, Form::kEarlyGrant,
+      Form::kLateDeny,  Form::kComboDeny,
+  };
+
+  for (bool intercept_all_input : {true, false}) {
+    for (Form form : kForms) {
+      ResetPointerDelegate(intercept_all_input);
+      if (!intercept_all_input) {
+        GestureResponsePolicy policy;
+        policy.default_response = fup_TouchResponseType::YES_PRIORITIZE;
+        pointer_delegate_->SetGestureResponsePolicy(std::move(policy));
+      }
+
+      std::vector<std::vector<flutter::PointerData>> batches_received;
+      pointer_delegate_->WatchLoop(
+          [&batches_received](std::vector<flutter::PointerData> events) {
+            batches_received.push_back(std::move(events));
+          });
+      RunLoopUntilIdle();
+
+      auto send_event = [this](fup_TouchEvent e) {
+        std::vector<fup_TouchEvent> v;
+        v.push_back(std::move(e));
+        touch_source_->ScheduleCallback(std::move(v));
+        RunLoopUntilIdle();
+      };
+
+      switch (form) {
+        case Form::kLateGrant: {
+          // S(ADD) S(CHANGE) S(REMOVE) R(g)
+          send_event(TouchEventBuilder::New()
+                         .AddTime(1000u)
+                         .AddViewParameters(kRect, kRect, kIdentity)
+                         .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(2000u)
+                         .AddSample(kIxnOne, fup_EventPhase::CHANGE, {6.f, 6.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(3000u)
+                         .AddSample(kIxnOne, fup_EventPhase::REMOVE, {6.f, 6.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(4000u)
+                         .AddResult({.interaction = kIxnOne,
+                                     .status = fup_TouchIxnStatus::GRANTED})
+                         .Build());
+          // ADD(2) + CHANGE(1) + REMOVE(2) = 5 flutter::PointerData items
+          EXPECT_EQ(batches_received.back().size(), 5u);
+          break;
+        }
+        case Form::kComboGrant: {
+          // S(ADD) S(CHANGE) S(REMOVE)+R(g)
+          send_event(TouchEventBuilder::New()
+                         .AddTime(1000u)
+                         .AddViewParameters(kRect, kRect, kIdentity)
+                         .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(2000u)
+                         .AddSample(kIxnOne, fup_EventPhase::CHANGE, {6.f, 6.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(3000u)
+                         .AddSample(kIxnOne, fup_EventPhase::REMOVE, {6.f, 6.f})
+                         .AddResult({.interaction = kIxnOne,
+                                     .status = fup_TouchIxnStatus::GRANTED})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 5u);
+          break;
+        }
+        case Form::kEarlyGrant: {
+          // S(ADD)+R(g) S(CHANGE) S(REMOVE)
+          send_event(TouchEventBuilder::New()
+                         .AddTime(1000u)
+                         .AddViewParameters(kRect, kRect, kIdentity)
+                         .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
+                         .AddResult({.interaction = kIxnOne,
+                                     .status = fup_TouchIxnStatus::GRANTED})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 2u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(2000u)
+                         .AddSample(kIxnOne, fup_EventPhase::CHANGE, {6.f, 6.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 1u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(3000u)
+                         .AddSample(kIxnOne, fup_EventPhase::REMOVE, {6.f, 6.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 2u);
+          break;
+        }
+        case Form::kLateDeny: {
+          // S(ADD) S(CHANGE) S(REMOVE) R(d)
+          send_event(TouchEventBuilder::New()
+                         .AddTime(1000u)
+                         .AddViewParameters(kRect, kRect, kIdentity)
+                         .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(2000u)
+                         .AddSample(kIxnOne, fup_EventPhase::CHANGE, {6.f, 6.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(3000u)
+                         .AddSample(kIxnOne, fup_EventPhase::REMOVE, {6.f, 6.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(4000u)
+                         .AddResult({.interaction = kIxnOne,
+                                     .status = fup_TouchIxnStatus::DENIED})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          break;
+        }
+        case Form::kComboDeny: {
+          // S(ADD) S(CHANGE) S(REMOVE)+R(d)
+          send_event(TouchEventBuilder::New()
+                         .AddTime(1000u)
+                         .AddViewParameters(kRect, kRect, kIdentity)
+                         .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(2000u)
+                         .AddSample(kIxnOne, fup_EventPhase::CHANGE, {6.f, 6.f})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          send_event(TouchEventBuilder::New()
+                         .AddTime(3000u)
+                         .AddSample(kIxnOne, fup_EventPhase::REMOVE, {6.f, 6.f})
+                         .AddResult({.interaction = kIxnOne,
+                                     .status = fup_TouchIxnStatus::DENIED})
+                         .Build());
+          EXPECT_EQ(batches_received.back().size(), 0u);
+          break;
+        }
+      }
+      pointer_delegate_.reset();
+    }
+  }
+}
+
+TEST_F(PointerDelegateTest, GesturePolicy_DeferralAndMidInteractionCommit) {
+  ResetPointerDelegate(/*intercept_all_input=*/false);
+  // Start with a policy that answers MAYBE_SUPPRESS (4) on the first 2 samples
+  // and commits to YES_PRIORITIZE (9) from the 3rd sample onward.
+  GestureResponsePolicy policy;
+  policy.default_response = fup_TouchResponseType::NO;
+  policy.regions.push_back({
+      .left = 0.f,
+      .top = 0.f,
+      .right = 10.f,
+      .bottom = 10.f,
+      .response = fup_TouchResponseType::YES_PRIORITIZE,
+      .defer_samples = 2u,
+      .defer_response = fup_TouchResponseType::MAYBE_SUPPRESS,
+  });
+  pointer_delegate_->SetGestureResponsePolicy(std::move(policy));
+
+  pointer_delegate_->WatchLoop([](std::vector<flutter::PointerData>) {});
+  RunLoopUntilIdle();
+  (void)touch_source_->UploadedResponses();
+
+  std::vector<fup_TouchEvent> events;
+  events.emplace_back(TouchEventBuilder::New()
+                          .AddTime(1000u)
+                          .AddViewParameters(kRect, kRect, kIdentity)
+                          .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
+                          .Build());
+  events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(2000u)
+          .AddSample(kIxnOne, fup_EventPhase::CHANGE, {6.f, 6.f})
+          .Build());
+  events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(3000u)
+          .AddSample(kIxnOne, fup_EventPhase::CHANGE, {7.f, 7.f})
+          .Build());
+  events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(4000u)
+          .AddSample(kIxnOne, fup_EventPhase::REMOVE, {7.f, 7.f})
+          .Build());
+  touch_source_->ScheduleCallback(std::move(events));
+  RunLoopUntilIdle();
+
+  auto responses = touch_source_->UploadedResponses();
+  ASSERT_TRUE(responses.has_value());
+  ASSERT_EQ(responses->size(), 4u);
+  // Baseline (before deferral policy evaluation): answers YES on all samples.
+  EXPECT_EQ((*responses)[0].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*responses)[1].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*responses)[2].response_type(), fup_TouchResponseType::YES);
+  EXPECT_EQ((*responses)[3].response_type(), fup_TouchResponseType::YES);
 }
 
 }  // namespace flutter_runner::testing

@@ -78,7 +78,8 @@ PlatformView::PlatformView(
     OnRequestAnnounceCallback on_request_announce_callback,
     OnShaderWarmupCallback on_shader_warmup_callback,
     AwaitVsyncCallback await_vsync_callback,
-    std::shared_ptr<sys::ServiceDirectory> dart_application_svc)
+    std::shared_ptr<sys::ServiceDirectory> dart_application_svc,
+    bool intercept_all_input)
     : flutter::PlatformView(delegate, std::move(task_runners)),
       external_view_embedder_(external_view_embedder),
       focus_delegate_(
@@ -86,7 +87,8 @@ PlatformView::PlatformView(
                                           std::move(focuser))),
       pointer_delegate_(
           std::make_shared<PointerDelegate>(std::move(touch_source),
-                                            std::move(mouse_source))),
+                                            std::move(mouse_source),
+                                            intercept_all_input)),
       wireframe_enabled_callback_(std::move(wireframe_enabled_callback)),
       on_update_view_callback_(std::move(on_update_view_callback)),
       on_create_surface_callback_(std::move(on_create_surface_callback)),

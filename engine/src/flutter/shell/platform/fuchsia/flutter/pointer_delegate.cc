@@ -340,8 +340,11 @@ void InsertIntoBuffer(
 
 PointerDelegate::PointerDelegate(
     fuchsia::ui::pointer::TouchSourceHandle touch_source,
-    fuchsia::ui::pointer::MouseSourceHandle mouse_source)
-    : touch_source_(touch_source.Bind()), mouse_source_(mouse_source.Bind()) {
+    fuchsia::ui::pointer::MouseSourceHandle mouse_source,
+    bool intercept_all_input)
+    : touch_source_(touch_source.Bind()),
+      intercept_all_input_(intercept_all_input),
+      mouse_source_(mouse_source.Bind()) {
   if (touch_source_) {
     touch_source_.set_error_handler([](zx_status_t status) {
       FML_LOG(ERROR) << "TouchSource channel error: << "
@@ -450,6 +453,10 @@ void PointerDelegate::WatchLoop(
   if (mouse_source_) {
     mouse_source_->Watch(/*copy*/ mouse_responder_);
   }
+}
+
+void PointerDelegate::SetGestureResponsePolicy(GestureResponsePolicy policy) {
+  policy_ = std::move(policy);
 }
 
 }  // namespace flutter_runner
