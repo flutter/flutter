@@ -15,7 +15,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
@@ -246,8 +245,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
 
   ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
 
-  OperatingSystemUtils get os => toolContext.os;
-
   ProcessManager get processManager => toolContext.processManager;
 
   Artifacts get artifacts => toolContext.artifacts;
@@ -381,7 +378,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
           organization: 'flutter',
           projectName: kWidgetPreviewScaffoldName,
           titleCaseProjectName: 'Widget Preview Scaffold',
-          flutterRoot: Cache.flutterRoot!,
+          flutterRoot: cache.flutterRoot,
           dartSdkVersionBounds: '^${cache.dartSdkBuild}',
           web: true,
         ),

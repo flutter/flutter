@@ -22,10 +22,10 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
+import '../base/user_messages.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../dart/package_map.dart';
 import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/chrome.dart';
@@ -230,6 +230,8 @@ class WebAssetServer implements AssetReader {
     required Platform platform,
     bool shouldEnableMiddleware = true,
     Map<String, String> webDefines = const <String, String>{},
+    Cache? cache,
+    String? flutterRoot,
   }) async {
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
@@ -331,7 +333,14 @@ class WebAssetServer implements AssetReader {
         entrypoint,
         fileSystem: fileSystem,
         platform: platform,
-        flutterRoot: Cache.flutterRoot,
+        flutterRoot:
+            flutterRoot ??
+            cache?.flutterRoot ??
+            Cache.defaultFlutterRoot(
+              fileSystem: fileSystem,
+              platform: platform,
+              userMessages: UserMessages(),
+            ),
         webBuildDirectory: getWebBuildDirectory(config: globals.config, fileSystem: fileSystem),
         basePath: server.basePath,
         needsCoopCoep: crossOriginIsolation,
@@ -377,7 +386,7 @@ class WebAssetServer implements AssetReader {
                 PackageUriMapper(packageConfig),
                 digestProvider,
                 BuildSettings(
-                  appEntrypoint: packageConfig.toPackageUriForWorkspace(
+                  appEntrypoint: packageConfig.toPackageUri(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
                   canaryFeatures: canaryFeatures,
@@ -391,7 +400,7 @@ class WebAssetServer implements AssetReader {
                 PackageUriMapper(packageConfig),
                 digestProvider,
                 BuildSettings(
-                  appEntrypoint: packageConfig.toPackageUriForWorkspace(
+                  appEntrypoint: packageConfig.toPackageUri(
                     fileSystem.file(entrypoint).absolute.uri,
                   ),
                   canaryFeatures: canaryFeatures,

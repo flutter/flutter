@@ -13,13 +13,10 @@ import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/platform.dart';
 import 'src/base/template.dart';
 import 'src/base/terminal.dart';
-import 'src/base/user_messages.dart';
 import 'src/build_system/build_targets.dart';
 import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
-import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -103,15 +100,6 @@ Future<void> main(List<String> args) async {
   final widgetPreviews = commandName == WidgetPreviewCommand.kWidgetPreview;
   final bool runMachine = args.contains('--machine');
 
-  // Cache.flutterRoot must be set early because other features use it (e.g.
-  // enginePath's initializer uses it). This can only work with the real
-  // instances of the platform or filesystem, so just use those.
-  Cache.flutterRoot = Cache.defaultFlutterRoot(
-    platform: const LocalPlatform(),
-    fileSystem: globals.localFileSystem,
-    userMessages: UserMessages(),
-  );
-
   await runner.run(
     args,
     (ToolDependencies toolDependencies) {
@@ -126,6 +114,7 @@ Future<void> main(List<String> args) async {
         featureFlags: featureFlags,
         fileSystem: fs,
         logger: logger,
+        cache: toolDependencies.toolContext.cache,
       );
       return generateCommands(
         toolDependencies: toolDependencies,
@@ -181,7 +170,7 @@ Future<void> main(List<String> args) async {
         );
         // runner.run calls "terminal.applyFeatureFlags()"
       },
-      PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
+      PreRunValidator: () => PreRunValidator(fileSystem: globals.fs, cache: globals.cache),
       TestCompilerNativeAssetsBuilder: () => const TestCompilerNativeAssetsBuilderImpl(),
     },
     shutdownHooks: globals.shutdownHooks,
@@ -243,6 +232,7 @@ List<FlutterCommand> generateCommands({
         fileSystem: toolDependencies.toolContext.fs,
         platform: toolDependencies.toolContext.platform,
         git: toolDependencies.toolContext.git,
+        cache: toolDependencies.toolContext.cache,
       ),
     ],
     suppressAnalytics: !toolDependencies.analytics.okToSend,
@@ -257,16 +247,23 @@ List<FlutterCommand> generateCommands({
   ),
   AttachCommand(
     buildSystem: toolDependencies.buildSystem,
-    buildTargets: const BuildTargetsImpl(),
+    buildTargets: toolDependencies.buildTargets,
     toolContext: toolDependencies.toolContext,
     xcode: toolDependencies.appleContext.xcode,
     verboseHelp: verboseHelp,
   ),
   BuildCommand(
-    androidBuilder: AndroidGradleBuilder.fromContexts(
+    androidBuilder: AndroidGradleBuilder(
       analytics: toolDependencies.analytics,
-      androidContext: toolDependencies.androidContext,
-      toolContext: toolDependencies.toolContext,
+      androidStudio: toolDependencies.androidContext.androidStudio,
+      artifacts: toolDependencies.toolContext.artifacts,
+      fileSystem: toolDependencies.toolContext.fs,
+      gradleUtils: toolDependencies.androidContext.gradleUtils,
+      java: toolDependencies.androidContext.java,
+      logger: toolDependencies.toolContext.logger,
+      platform: toolDependencies.toolContext.platform,
+      processManager: toolDependencies.toolContext.processManager,
+      androidSdk: toolDependencies.androidContext.androidSdk,
     ),
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
@@ -304,7 +301,7 @@ List<FlutterCommand> generateCommands({
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
     buildSystem: toolDependencies.buildSystem,
-    buildTargets: const BuildTargetsImpl(),
+    buildTargets: toolDependencies.buildTargets,
     deviceManager: toolDependencies.deviceManager,
     hidden: !verboseHelp,
     toolContext: toolDependencies.toolContext,
@@ -326,7 +323,7 @@ List<FlutterCommand> generateCommands({
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(
     buildSystem: toolDependencies.buildSystem,
-    buildTargets: const BuildTargetsImpl(),
+    buildTargets: toolDependencies.buildTargets,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
@@ -352,7 +349,16 @@ List<FlutterCommand> generateCommands({
     platform: toolDependencies.toolContext.platform,
     featureFlags: featureFlags,
   ),
-  RunCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
+  RunCommand(
+    appleContext: toolDependencies.appleContext,
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: toolDependencies.buildTargets,
+    toolContext: toolDependencies.toolContext,
+    androidContext: toolDependencies.androidContext,
+    androidWorkflow: android_workflow.androidWorkflow,
+    deviceManager: toolDependencies.deviceManager,
+    verboseHelp: verboseHelp,
+  ),
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
@@ -363,7 +369,7 @@ List<FlutterCommand> generateCommands({
   ),
   WidgetPreviewCommand(
     buildSystem: toolDependencies.buildSystem,
-    buildTargets: const BuildTargetsImpl(),
+    buildTargets: toolDependencies.buildTargets,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),

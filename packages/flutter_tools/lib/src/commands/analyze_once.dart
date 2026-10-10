@@ -15,6 +15,7 @@ class AnalyzeOnce extends AnalyzeBase {
     super.argResults,
     List<Directory> repoPackages, {
     required super.artifacts,
+    required super.cache,
     required super.fileSystem,
     required super.logger,
     required super.platform,
@@ -35,7 +36,11 @@ class AnalyzeOnce extends AnalyzeBase {
     if (isFlutterRepo) {
       // check for conflicting dependencies
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fileSystem);
+      dependencies.checkForConflictingDependencies(
+        repoPackages,
+        fileSystem: fileSystem,
+        flutterRoot: flutterRoot,
+      );
       items.add(flutterRoot);
       if (argResults.wasParsed('current-package') && (argResults['current-package'] as bool)) {
         items.add(currentDirectory);

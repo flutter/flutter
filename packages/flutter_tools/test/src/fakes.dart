@@ -64,6 +64,7 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import 'common.dart';
 import 'context.dart';
 
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
@@ -1092,9 +1093,17 @@ class FakeArtifacts extends Fake implements Artifacts {
 }
 
 class FakeCache extends Fake implements Cache {
-  FakeCache({FileSystem? fileSystem}) : _fileSystem = fileSystem ?? MemoryFileSystem.test();
+  FakeCache({FileSystem? fileSystem, this._flutterRoot})
+    : _fileSystem = fileSystem ?? MemoryFileSystem.test();
 
   final FileSystem _fileSystem;
+  String? _flutterRoot;
+
+  @override
+  String get flutterRoot => _flutterRoot ?? getFlutterRoot();
+
+  @override
+  set flutterRoot(String? value) => _flutterRoot = value;
 
   @override
   Future<void> lock() async {}
@@ -1363,11 +1372,11 @@ class FakeToolContext extends Fake implements ToolContext {
   late final LocalEngineLocator localEngineLocator =
       _localEngineLocator ??
       LocalEngineLocator(
-        userMessages: userMessages,
+        fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
         logger: logger,
         platform: platform,
-        fileSystem: fs,
-        flutterRoot: Cache.flutterRoot ?? '',
+        userMessages: userMessages,
       );
 
   @override
@@ -1518,11 +1527,11 @@ class DelegatingToolContext with Fake implements ToolContext {
       _localEngineLocator ??
       globals.localEngineLocator ??
       LocalEngineLocator(
-        userMessages: userMessages,
+        fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
         logger: logger,
         platform: platform,
-        fileSystem: fs,
-        flutterRoot: Cache.flutterRoot ?? '',
+        userMessages: userMessages,
       );
 
   @override

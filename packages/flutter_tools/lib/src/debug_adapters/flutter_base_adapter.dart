@@ -24,12 +24,14 @@ abstract class FlutterBaseDebugAdapter
     super.channel, {
     required this.fileSystem,
     required this.platform,
+    Cache? cache,
+    String? flutterSdkRoot,
     super.ipv6,
     this.enableFlutterDds = true,
     super.enableAuthCodes,
     super.logger,
     super.onError,
-  }) : flutterSdkRoot = Cache.flutterRoot! {
+  }) : flutterSdkRoot = flutterSdkRoot ?? cache?.flutterRoot ?? '' {
     configureOrgDartlangSdkMappings();
   }
 

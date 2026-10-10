@@ -1126,7 +1126,7 @@ See the link below for more information:
     if (!hostAppGradleRoot.existsSync()) {
       return;
     }
-    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
+    gradle.updateLocalProperties(project: parent, requireAndroidSdk: false, cache: globals.cache);
   }
 
   bool _shouldRegenerateFromTemplate() {

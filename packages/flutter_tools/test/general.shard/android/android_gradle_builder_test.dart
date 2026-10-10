@@ -60,7 +60,6 @@ void main() {
       processManager = FakeProcessManager.empty();
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
-      Cache.flutterRoot = '';
 
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
@@ -96,29 +95,18 @@ void main() {
       AndroidStudio? androidStudio,
       AndroidSdk? androidSdk,
     }) {
-      return AndroidGradleBuilder.fromContexts(
-        toolContext:
-            toolContext ??
-            FakeToolContext(
-              logger: logger,
-              processManager: processManager,
-              fs: fileSystem ?? globals.fs,
-              artifacts: artifacts,
-              platform: platform,
-            ),
-        androidContext:
-            androidContext ??
-            FakeAndroidContext(
-              java: java,
-              gradleUtils: gradleUtils,
-              androidStudio: androidStudio,
-              androidSdk:
-                  androidSdk ??
-                  AndroidSdk(
-                    (fileSystem ?? globals.fs).directory(missingSdkPath()),
-                    java: FakeJava(),
-                  ),
-            ),
+      return AndroidGradleBuilder(
+        logger: logger!,
+        processManager: processManager!,
+        fileSystem: fileSystem ?? globals.fs,
+        artifacts: artifacts ?? FakeArtifacts(),
+        gradleUtils: gradleUtils ?? FakeGradleUtils(),
+        platform: platform ?? FakePlatform(),
+        androidStudio: androidStudio ?? FakeAndroidStudio(),
+        androidSdk:
+            androidSdk ??
+            AndroidSdk((fileSystem ?? globals.fs).directory(missingSdkPath()), java: FakeJava()),
+        java: java ?? FakeJava(),
         analytics: analytics ?? fakeAnalytics,
       );
     }
@@ -132,6 +120,7 @@ void main() {
         description,
         body,
         overrides: <Type, Generator>{
+          Cache: () => Cache.test(processManager: processManager, flutterRoot: ''),
           AndroidSdk: () => AndroidSdk(fileSystem.directory(missingSdkPath()), java: FakeJava()),
           ProcessManager: () => processManager,
           ...overrides,

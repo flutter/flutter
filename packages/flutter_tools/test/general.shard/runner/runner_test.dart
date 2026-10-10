@@ -423,9 +423,9 @@ void main() {
       () async {
         // Since crash reporting calls the doctor, which checks for the devtools
         // version file in the cache, write a version file to the memory fs.
-        Cache.flutterRoot = '/path/to/flutter';
+        globals.cache.flutterRoot = '/path/to/flutter';
         final Directory devtoolsDir = globals.fs.directory(
-          '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+          '${globals.cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
         )..createSync(recursive: true);
         devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
@@ -532,9 +532,9 @@ void main() {
         () async {
           // Since crash reporting calls the doctor, which checks for the devtools
           // version file in the cache, write a version file to the memory fs.
-          Cache.flutterRoot = '/path/to/flutter';
+          globals.cache.flutterRoot = '/path/to/flutter';
           final Directory devtoolsDir = globals.fs.directory(
-            '${Cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+            '${globals.cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
           )..createSync(recursive: true);
           devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
@@ -1112,6 +1112,12 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
 }
 
 class FakeCache extends Fake implements Cache {
+  @override
+  String get flutterRoot => '/path/to/sdk/flutter';
+
+  @override
+  set flutterRoot(String? value) {}
+
   @override
   Future<void> lock() async {}
 

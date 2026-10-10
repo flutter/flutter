@@ -91,13 +91,13 @@ class ToolDependencies {
     required this.androidContext,
     required this.appleContext,
     required this.buildSystem,
+    required this.buildTargets,
     required this.crashReporter,
     required this.deviceManager,
     required this.doctor,
     required this.emulatorManager,
     required this.featureFlags,
     required this.toolContext,
-    this.buildTargets,
     this.extensionBuildManager,
     this.extensionManager,
   });
@@ -115,7 +115,7 @@ class ToolDependencies {
   final BuildSystem buildSystem;
 
   /// Factory interface for constructing compile and bundle build targets.
-  final BuildTargets? buildTargets;
+  final BuildTargets buildTargets;
 
   /// Captures and submits unhandled tool crash reports and stack traces.
   final CrashReporter crashReporter;
@@ -292,15 +292,30 @@ class ToolDependencies {
     final Git finalGit =
         git ?? Git(currentPlatform: finalPlatform, runProcessWith: finalProcessUtils);
 
-    // 7. Flutter Version and Cache
-    final String flutterRoot =
-        Cache.flutterRoot ??
-        Cache.defaultFlutterRoot(
-          platform: finalPlatform,
+    // 7. Project Factory, OS Utilities, and Cache
+    final FlutterProjectFactory finalProjectFactory =
+        projectFactory ?? FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS);
+
+    final finalOS = OperatingSystemUtils(
+      fileSystem: finalFS,
+      logger: finalLogger,
+      platform: finalPlatform,
+      processManager: finalProcessManager,
+    );
+
+    final Cache finalCache =
+        cache ??
+        FlutterCache(
           fileSystem: finalFS,
-          userMessages: finalUserMessages,
+          flutterRoot: cache?.flutterRoot,
+          logger: finalLogger,
+          platform: finalPlatform,
+          osUtils: finalOS,
+          projectFactory: finalProjectFactory,
+          stdio: finalStdio,
         );
-    Cache.flutterRoot ??= flutterRoot;
+
+    final String flutterRoot = finalCache.flutterRoot;
 
     final FlutterVersion finalFlutterVersion =
         flutterVersion ?? FlutterVersion(fs: finalFS, flutterRoot: flutterRoot, git: finalGit);
@@ -317,34 +332,12 @@ class ToolDependencies {
         );
     finalAnalyticsInitialized = true;
 
-    // 9. Project Factory and Operating System Utilities
-    final FlutterProjectFactory finalProjectFactory =
-        projectFactory ?? FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS);
-
-    final finalOS = OperatingSystemUtils(
-      fileSystem: finalFS,
-      logger: finalLogger,
-      platform: finalPlatform,
-      processManager: finalProcessManager,
-    );
-
-    final Cache finalCache =
-        cache ??
-        FlutterCache(
-          fileSystem: finalFS,
-          logger: finalLogger,
-          platform: finalPlatform,
-          osUtils: finalOS,
-          projectFactory: finalProjectFactory,
-          stdio: finalStdio,
-        );
-
-    // 10. Remaining ToolContext Dependencies
+    // 9. Remaining ToolContext Dependencies
     final BuildSystem finalBuildSystem =
         buildSystem ??
         FlutterBuildSystem(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
-    final finalBuildTargets = buildTargets;
+    final BuildTargets finalBuildTargets = buildTargets ?? const NoOpBuildTargets();
 
     final CrashReporter finalCrashReporter =
         crashReporter ??
@@ -356,10 +349,15 @@ class ToolDependencies {
 
     final CustomDevicesConfig finalCustomDevicesConfig =
         customDevicesConfig ??
-        CustomDevicesConfig(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
+        CustomDevicesConfig(
+          cache: finalCache,
+          fileSystem: finalFS,
+          logger: finalLogger,
+          platform: finalPlatform,
+        );
 
     final PreRunValidator finalPreRunValidator =
-        preRunValidator ?? PreRunValidator(fileSystem: finalFS);
+        preRunValidator ?? PreRunValidator(cache: finalCache, fileSystem: finalFS);
 
     final ProcessInfo finalProcessInfo = processInfo ?? ProcessInfo(finalFS);
 
@@ -406,6 +404,7 @@ class ToolDependencies {
           platform: finalPlatform,
           xcodeProjectInterpreter: finalXcodeProjectInterpreter,
           analytics: finalAnalytics,
+          cache: finalCache,
         );
 
     final CocoaPodsValidator finalCocoapodsValidator =
@@ -588,6 +587,7 @@ class ToolDependencies {
         xcodeProjectInterpreter: finalXcodeProjectInterpreter,
       ),
       buildSystem: finalBuildSystem,
+      buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
       deviceManager: finalDeviceManager,
       doctor: finalDoctor,
@@ -623,7 +623,6 @@ class ToolDependencies {
         terminal: finalTerminal,
         userMessages: finalUserMessages,
       ),
-      buildTargets: finalBuildTargets,
     );
   }
 }

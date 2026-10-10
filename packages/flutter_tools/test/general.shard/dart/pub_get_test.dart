@@ -21,10 +21,6 @@ import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 
 void main() {
-  setUpAll(() {
-    Cache.flutterRoot = '';
-  });
-
   testWithoutContext('Throws a tool exit if pub cannot be run', () async {
     final processManager = FakeProcessManager.empty();
     final logger = BufferLogger.test();
@@ -795,6 +791,7 @@ exit code: 66
     // Intentionally not using pub.test to simulate a real environment, but
     // we are using non-inherited I/O to avoid printing to the console.
     final pub = Pub(
+      cache: Cache.test(flutterRoot: '', processManager: processManager),
       platform: FakePlatform(),
       fileSystem: fileSystem,
       logger: logger,

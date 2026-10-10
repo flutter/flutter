@@ -2691,14 +2691,14 @@ void _testInMemory(
   ProcessManager? processManager,
   AndroidSdk? androidSdk,
 }) {
-  Cache.flutterRoot = getFlutterRoot();
+  final String flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = fileSystem ?? getFileSystemForPlatform();
 
-  final Directory fakeFlutterRoot = testFileSystem.directory(Cache.flutterRoot);
+  final Directory fakeFlutterRoot = testFileSystem.directory(flutterRoot);
   _insertFakeGradleArtifactDir(flutterRoot: fakeFlutterRoot);
   transfer(
     globals.fs
-        .directory(Cache.flutterRoot)
+        .directory(flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools')
         .childDirectory('templates'),
@@ -2709,7 +2709,7 @@ void _testInMemory(
   dummyTemplateImagesDirectory.createSync(recursive: true);
   writePackageConfigFiles(
     directory: testFileSystem
-        .directory(Cache.flutterRoot)
+        .directory(flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools'),
     mainLibName: 'app_name',
@@ -2729,6 +2729,7 @@ void _testInMemory(
       // Intentionally null if not set. Some ios tests fail if this is a fake.
       AndroidSdk: () => androidSdk,
       Cache: () => Cache(
+        flutterRoot: flutterRoot,
         logger: globals.logger,
         fileSystem: testFileSystem,
         osUtils: globals.os,

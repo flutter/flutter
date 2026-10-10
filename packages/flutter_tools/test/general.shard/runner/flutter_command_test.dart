@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -56,10 +57,6 @@ void main() {
     late PreRunValidator preRunValidator;
     late FakeLockTrackingCache lockTrackingCache;
     late FakeLockCheckingPub lockCheckingPub;
-
-    setUpAll(() {
-      Cache.flutterRoot = '/path/to/sdk/flutter';
-    });
 
     setUp(() {
       Cache.disableLocking();
@@ -2246,6 +2243,10 @@ class FakeIoProcessSignal extends Fake implements io.ProcessSignal {
 }
 
 class FakeCache extends Fake implements Cache {
+  @override
+  String get flutterRoot => '/path/to/sdk/flutter';
+  @override
+  set flutterRoot(String? value) {}
   List<Set<DevelopmentArtifact>> artifacts = <Set<DevelopmentArtifact>>[];
 
   @override
@@ -2290,6 +2291,23 @@ class FakeClock extends Fake implements SystemClock {
 }
 
 class _TestRunCommandThatOnlyValidates extends RunCommand {
+  _TestRunCommandThatOnlyValidates({ToolContext? toolContext})
+    : super(
+        appleContext: FakeAppleContext(),
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext:
+            toolContext ??
+            FakeToolContext(
+              fs: globals.fs,
+              logger: globals.logger,
+              platform: globals.platform,
+              processManager: globals.processManager,
+              artifacts: globals.artifacts,
+              cache: globals.cache,
+            ),
+      );
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
@@ -2326,6 +2344,10 @@ class DummyFlutterCommandWithPub extends FlutterCommand {
 }
 
 class FakeLockTrackingCache extends Fake implements Cache {
+  @override
+  String get flutterRoot => '/path/to/sdk/flutter';
+  @override
+  set flutterRoot(String? value) {}
   bool isLockHeld = false;
 
   @override
