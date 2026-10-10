@@ -1876,48 +1876,46 @@ Please ensure that the SDK and/or project is installed in a location that has re
       overrideWindowsRetryBackoffs = originalBackoffs;
     });
 
-    testWithoutContext('recovers from transient lock during retry loop (sync)', () {
-      attemptsLeft = 3; // Fails 3 times, succeeds on 4th (attempt index 3)
+    ErrorHandlingFileSystem createFileSystemWithTransientErrors({
+      required int errorCode,
+      required int failures,
+      required FileSystemOp targetOp,
+      required String targetPath,
+    }) {
+      attemptsLeft = failures;
       final memoryFileSystem = MemoryFileSystem.test(
         opHandle: (String path, FileSystemOp op) {
-          if (path == '/file' && op == FileSystemOp.write) {
-            if (attemptsLeft > 0) {
-              attemptsLeft--;
-              throw const FileSystemException(
-                '',
-                '/file',
-                OSError('', 32),
-              ); // ERROR_SHARING_VIOLATION
-            }
+          if (path == targetPath && op == targetOp && attemptsLeft > 0) {
+            attemptsLeft--;
+            throw FileSystemException('', targetPath, OSError('', errorCode));
           }
         },
       );
-      fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+      return ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
+    }
+
+    testWithoutContext('recovers from transient lock during retry loop (sync)', () {
+      fileSystem = createFileSystemWithTransientErrors(
+        errorCode: kSystemCodeSharingViolation,
+        failures: 3,
+        targetOp: .write,
+        targetPath: '/file',
+      );
       final File file = fileSystem.file('/file');
 
       // This should succeed because we succeed after 3 attempts (within the 5 attempts max)
       file.writeAsStringSync('content');
       expect(attemptsLeft, 0);
-      expect(memoryFileSystem.file('/file').readAsStringSync(), 'content');
+      expect(file.readAsStringSync(), 'content');
     });
 
     testWithoutContext('fails after 5 transient locks and throws ToolExit (sync)', () {
-      attemptsLeft = 6; // Fails 6 times
-      final memoryFileSystem = MemoryFileSystem.test(
-        opHandle: (String path, FileSystemOp op) {
-          if (path == '/file' && op == FileSystemOp.write) {
-            if (attemptsLeft > 0) {
-              attemptsLeft--;
-              throw const FileSystemException(
-                '',
-                '/file',
-                OSError('', 32),
-              ); // ERROR_SHARING_VIOLATION
-            }
-          }
-        },
+      fileSystem = createFileSystemWithTransientErrors(
+        errorCode: kSystemCodeSharingViolation,
+        failures: 6,
+        targetOp: .write,
+        targetPath: '/file',
       );
-      fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
       final File file = fileSystem.file('/file');
 
       expect(
@@ -1927,28 +1925,90 @@ Please ensure that the SDK and/or project is installed in a location that has re
     });
 
     testWithoutContext('recovers from transient lock during retry loop (async)', () async {
-      attemptsLeft = 3; // Fails 3 times, succeeds on 4th (attempt index 3)
-      final memoryFileSystem = MemoryFileSystem.test(
-        opHandle: (String path, FileSystemOp op) {
-          if (path == '/file' && op == FileSystemOp.write) {
-            if (attemptsLeft > 0) {
-              attemptsLeft--;
-              throw const FileSystemException(
-                '',
-                '/file',
-                OSError('', 32),
-              ); // ERROR_SHARING_VIOLATION
-            }
-          }
-        },
+      fileSystem = createFileSystemWithTransientErrors(
+        errorCode: kSystemCodeSharingViolation,
+        failures: 3,
+        targetOp: .write,
+        targetPath: '/file',
       );
-      fileSystem = ErrorHandlingFileSystem(delegate: memoryFileSystem, platform: windowsPlatform);
       final File file = fileSystem.file('/file');
 
       // This should succeed because we succeed after 3 attempts (within the 5 attempts max)
       await file.writeAsString('content');
       expect(attemptsLeft, 0);
-      expect(memoryFileSystem.file('/file').readAsStringSync(), 'content');
+      expect(file.readAsStringSync(), 'content');
+    });
+
+    testWithoutContext(
+      'recovers from ERROR_DIR_NOT_EMPTY on directory deletion during retry loop (sync)',
+      () {
+        fileSystem = createFileSystemWithTransientErrors(
+          errorCode: kSystemCodeDirNotEmpty,
+          failures: 3,
+          targetOp: .delete,
+          targetPath: '/dir',
+        );
+        final Directory directory = fileSystem.directory('/dir')..createSync();
+
+        directory.deleteSync(recursive: true);
+        expect(attemptsLeft, 0);
+        expect(directory, isNot(exists));
+      },
+    );
+
+    testWithoutContext('fails after 5 ERROR_DIR_NOT_EMPTY attempts and throws ToolExit (sync)', () {
+      fileSystem = createFileSystemWithTransientErrors(
+        errorCode: kSystemCodeDirNotEmpty,
+        failures: 6,
+        targetOp: .delete,
+        targetPath: '/dir',
+      );
+      final Directory directory = fileSystem.directory('/dir')..createSync();
+
+      expect(
+        () => directory.deleteSync(recursive: true),
+        throwsToolExit(message: 'The file is being used by another program'),
+      );
+      expect(attemptsLeft, 0);
+    });
+
+    testWithoutContext(
+      'recovers from ERROR_DIR_NOT_EMPTY on directory deletion during retry loop (async)',
+      () async {
+        fileSystem = createFileSystemWithTransientErrors(
+          errorCode: kSystemCodeDirNotEmpty,
+          failures: 3,
+          targetOp: .delete,
+          targetPath: '/dir',
+        );
+        final Directory directory = fileSystem.directory('/dir')..createSync();
+
+        await directory.delete(recursive: true);
+        expect(attemptsLeft, 0);
+        expect(directory, isNot(exists));
+      },
+    );
+
+    testWithoutContext('does not retry ERROR_DIR_NOT_EMPTY on non-recursive deletion', () {
+      fileSystem = createFileSystemWithTransientErrors(
+        errorCode: kSystemCodeDirNotEmpty,
+        failures: 6,
+        targetOp: .delete,
+        targetPath: '/dir',
+      );
+      final Directory directory = fileSystem.directory('/dir')..createSync();
+
+      expect(
+        () => directory.deleteSync(),
+        throwsA(
+          isA<FileSystemException>().having(
+            (FileSystemException e) => e.osError?.errorCode,
+            'errorCode',
+            kSystemCodeDirNotEmpty,
+          ),
+        ),
+      );
+      expect(attemptsLeft, 5); // Only executed once, no retries performed
     });
   });
 
