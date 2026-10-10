@@ -560,6 +560,76 @@ TEST_F(EmbedderTest, CreateInvalidBackingstoreMetalTexture) {
   latch.Wait();
 }
 
+// Regression test for https://github.com/flutter/flutter/issues/185394.
+//
+// An embedder that hands back a Metal texture whose size does not match the
+// requested backing store size must not crash the raster thread. Before the
+// fix, the wrapped TextureMTL silently invalidated itself because its size
+// disagreed with the descriptor, RenderTarget::SetColorAttachment dropped the
+// invalid attachment, and impeller::Canvas::SetupRenderPass dereferenced the
+// missing color texture.
+TEST_F(EmbedderTest, WrongSizeMetalBackingStoreDoesNotCrashImpeller) {
+  auto& context = GetEmbedderContext<EmbedderTestContextMetal>();
+  EmbedderConfigBuilder builder(context);
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetSurface(DlISize(800, 600));
+  builder.SetCompositor();
+  builder.SetRenderTargetType(EmbedderTestBackingStoreProducer::RenderTargetType::kMetalTexture);
+  builder.SetDartEntrypoint("invalid_backingstore");
+
+  builder.GetCompositor().create_backing_store_callback =
+      [](const FlutterBackingStoreConfig* config,  //
+         FlutterBackingStore* backing_store_out,   //
+         void* user_data                           //
+      ) {
+        // Deliberately hand back a texture that is half the requested size.
+        id<MTLDevice> device = MTLCreateSystemDefaultDevice();
+        MTLTextureDescriptor* descriptor = [MTLTextureDescriptor
+            texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+                                         width:static_cast<NSUInteger>(config->size.width / 2)
+                                        height:static_cast<NSUInteger>(config->size.height / 2)
+                                     mipmapped:NO];
+        descriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
+        id<MTLTexture> texture = [device newTextureWithDescriptor:descriptor];
+
+        backing_store_out->type = kFlutterBackingStoreTypeMetal;
+        backing_store_out->user_data = nullptr;
+        backing_store_out->metal.struct_size = sizeof(FlutterMetalBackingStore);
+        backing_store_out->metal.texture.struct_size = sizeof(FlutterMetalTexture);
+        backing_store_out->metal.texture.texture = (__bridge void*)texture;
+        // The retain taken here is balanced in the destruction callback.
+        backing_store_out->metal.texture.user_data = (__bridge_retained void*)texture;
+        backing_store_out->metal.texture.destruction_callback = [](void* user_data) {
+          id<MTLTexture> released = (__bridge_transfer id<MTLTexture>)user_data;
+          released = nil;
+        };
+        return true;
+      };
+
+  // The fixture signals after every frame; the assertion here is on the
+  // compositor side, so the signal is only consumed.
+  context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([]() {}));
+
+  // The layer is dropped, but the frame is still presented (with no layers)
+  // and the engine must survive it.
+  fml::AutoResetWaitableEvent latch;
+  context.GetCompositor().AddOnPresentCallback([&latch]() { latch.Signal(); });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  // Send a window metrics events so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 800;
+  event.height = 600;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event), kSuccess);
+
+  latch.Wait();
+  engine.reset();
+}
+
 TEST_F(EmbedderTest, ExternalTextureMetalRefreshedTooOften) {
   auto& context = GetEmbedderContext<EmbedderTestContextMetal>();
 
