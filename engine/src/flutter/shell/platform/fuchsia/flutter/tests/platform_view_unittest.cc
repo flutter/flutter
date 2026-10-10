@@ -466,6 +466,11 @@ class PlatformViewBuilder {
     return *this;
   }
 
+  PlatformViewBuilder& SetInterceptAllInput(bool intercept_all_input) {
+    intercept_all_input_ = intercept_all_input;
+    return *this;
+  }
+
   // Once Build is called, the instance is no longer usable.
   PlatformView Build() {
     EXPECT_FALSE(std::exchange(built_, true))
@@ -484,7 +489,8 @@ class PlatformViewBuilder {
         std::move(on_create_surface_callback_),
         std::move(on_semantics_node_update_callback_),
         std::move(on_request_announce_callback_),
-        std::move(on_shader_warmup_callback_), [](auto...) {}, nullptr);
+        std::move(on_shader_warmup_callback_), [](auto...) {}, nullptr,
+        intercept_all_input_);
   }
 
  private:
@@ -515,6 +521,7 @@ class PlatformViewBuilder {
   OnSemanticsNodeUpdateCallback on_semantics_node_update_callback_;
   OnRequestAnnounceCallback on_request_announce_callback_;
   OnShaderWarmupCallback on_shader_warmup_callback_;
+  bool intercept_all_input_{false};
 
   bool built_{false};
 };
@@ -1483,7 +1490,14 @@ TEST_F(PlatformViewTests, OnShaderWarmup) {
   EXPECT_EQ(expected_result_string, response->result_string);
 }
 
-TEST_F(PlatformViewTests, TouchSourceLogicalToPhysicalConversion) {
+class PlatformViewTouchTests : public PlatformViewTests,
+                               public ::testing::WithParamInterface<bool> {};
+
+INSTANTIATE_TEST_SUITE_P(InterceptAllInput,
+                         PlatformViewTouchTests,
+                         ::testing::Bool());
+
+TEST_P(PlatformViewTouchTests, TouchSourceLogicalToPhysicalConversion) {
   constexpr uint32_t width = 640;
   constexpr uint32_t height = 480;
   constexpr std::array<std::array<float, 2>, 2> kRect = {
@@ -1492,6 +1506,7 @@ TEST_F(PlatformViewTests, TouchSourceLogicalToPhysicalConversion) {
   constexpr fuchsia::ui::pointer::TouchInteractionId kIxnOne = {
       .device_id = 0u, .pointer_id = 1u, .interaction_id = 2u};
 
+  const bool intercept_all_input = GetParam();
   MockPlatformViewDelegate delegate;
   flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
                                     nullptr);
@@ -1504,7 +1519,14 @@ TEST_F(PlatformViewTests, TouchSourceLogicalToPhysicalConversion) {
       PlatformViewBuilder(delegate, std::move(task_runners))
           .SetParentViewportWatcher(viewport_watcher.GetHandle())
           .SetTouchSource(std::move(touch_handle))
+          .SetInterceptAllInput(intercept_all_input)
           .Build();
+  if (!intercept_all_input) {
+    auto msg_response = FakePlatformMessageResponse::Create();
+    platform_view.HandlePlatformMessage(msg_response->WithMessage(
+        "flutter/platform_views",
+        R"({"method":"View.setGestureResponsePolicy","args":{"defaultResponse":"YES"}})"));
+  }
   RunLoopUntilIdle();
   EXPECT_EQ(delegate.pointer_packets().size(), 0u);
 
@@ -1544,6 +1566,259 @@ TEST_F(PlatformViewTests, TouchSourceLogicalToPhysicalConversion) {
   EXPECT_EQ(flutter_events[0].physical_y, height / 2);
   EXPECT_EQ(flutter_events[1].physical_x, width / 2);
   EXPECT_EQ(flutter_events[1].physical_y, height / 2);
+}
+
+TEST_F(PlatformViewTests, TouchGestureResponsePolicy_InterceptAllInputTrue) {
+  constexpr std::array<std::array<float, 2>, 2> kRect = {{{0, 0}, {100, 100}}};
+  constexpr std::array<float, 9> kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  constexpr fuchsia::ui::pointer::TouchInteractionId kIxn = {
+      .device_id = 0u, .pointer_id = 1u, .interaction_id = 1u};
+
+  MockPlatformViewDelegate delegate;
+  flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
+                                    nullptr);
+  FakeTouchSource touch_server;
+  fidl::BindingSet<fuchsia::ui::pointer::TouchSource> touch_bindings;
+  auto platform_view =
+      PlatformViewBuilder(delegate, std::move(task_runners))
+          .SetTouchSource(touch_bindings.AddBinding(&touch_server))
+          .SetInterceptAllInput(true)
+          .Build();
+  RunLoopUntilIdle();
+
+  // First Watch() sends empty responses.
+  auto initial = touch_server.UploadedResponses();
+  ASSERT_TRUE(initial.has_value());
+  EXPECT_TRUE(initial->empty());
+
+  // Even without a policy (and even if a policy with NO is set), flag TRUE
+  // answers YES (8) to every sample.
+  auto msg_response = FakePlatformMessageResponse::Create();
+  platform_view.HandlePlatformMessage(msg_response->WithMessage(
+      "flutter/platform_views",
+      R"({"method":"View.setGestureResponsePolicy","args":{"defaultResponse":"NO"}})"));
+  msg_response->ExpectCompleted("[0]");
+
+  std::vector<fuchsia::ui::pointer::TouchEvent> events;
+  events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(1000u)
+          .AddViewParameters(kRect, kRect, kIdentity)
+          .AddSample(kIxn, fuchsia::ui::pointer::EventPhase::ADD, {10.f, 10.f})
+          .Build());
+  events.emplace_back(TouchEventBuilder::New()
+                          .AddTime(2000u)
+                          .AddSample(kIxn,
+                                     fuchsia::ui::pointer::EventPhase::CHANGE,
+                                     {80.f, 80.f})
+                          .Build());
+  events.emplace_back(TouchEventBuilder::New()
+                          .AddTime(3000u)
+                          .AddSample(kIxn,
+                                     fuchsia::ui::pointer::EventPhase::REMOVE,
+                                     {80.f, 80.f})
+                          .Build());
+  touch_server.ScheduleCallback(std::move(events));
+  RunLoopUntilIdle();
+
+  auto responses = touch_server.UploadedResponses();
+  ASSERT_TRUE(responses.has_value());
+  ASSERT_EQ(responses->size(), 3u);
+  for (const auto& resp : *responses) {
+    ASSERT_TRUE(resp.has_response_type());
+    EXPECT_EQ(resp.response_type(),
+              fuchsia::ui::pointer::TouchResponseType::YES);
+  }
+}
+
+TEST_F(PlatformViewTests,
+       TouchGestureResponsePolicy_InterceptAllInputFalse_RegionsAndDefault) {
+  constexpr std::array<std::array<float, 2>, 2> kRect = {{{0, 0}, {100, 100}}};
+  constexpr std::array<float, 9> kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  constexpr fuchsia::ui::pointer::TouchInteractionId kIxn1 = {
+      .device_id = 0u, .pointer_id = 1u, .interaction_id = 1u};
+  constexpr fuchsia::ui::pointer::TouchInteractionId kIxn2 = {
+      .device_id = 0u, .pointer_id = 1u, .interaction_id = 2u};
+  constexpr fuchsia::ui::pointer::TouchInteractionId kIxn3 = {
+      .device_id = 0u, .pointer_id = 1u, .interaction_id = 3u};
+
+  MockPlatformViewDelegate delegate;
+  flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
+                                    nullptr);
+  FakeTouchSource touch_server;
+  fidl::BindingSet<fuchsia::ui::pointer::TouchSource> touch_bindings;
+  auto platform_view =
+      PlatformViewBuilder(delegate, std::move(task_runners))
+          .SetTouchSource(touch_bindings.AddBinding(&touch_server))
+          .SetInterceptAllInput(false)
+          .Build();
+  RunLoopUntilIdle();
+  (void)touch_server.UploadedResponses();
+
+  auto msg_response = FakePlatformMessageResponse::Create();
+  platform_view.HandlePlatformMessage(
+      msg_response->WithMessage("flutter/platform_views",
+                                R"({
+            "method": "View.setGestureResponsePolicy",
+            "args": {
+              "defaultResponse": "NO",
+              "regions": [
+                {"rectLTRB": [0.0, 0.0, 40.0, 40.0], "response": "YES_PRIORITIZE"},
+                {"rectLTRB": [40.0, 40.0, 70.0, 70.0], "response": "YES"}
+              ]
+            }
+          })"));
+  msg_response->ExpectCompleted("[0]");
+
+  std::vector<fuchsia::ui::pointer::TouchEvent> events;
+  // Inside first region -> YES_PRIORITIZE (9)
+  events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(1000u)
+          .AddViewParameters(kRect, kRect, kIdentity)
+          .AddSample(kIxn1, fuchsia::ui::pointer::EventPhase::ADD, {20.f, 20.f})
+          .Build());
+  // Inside second region -> YES (8)
+  events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(2000u)
+          .AddSample(kIxn2, fuchsia::ui::pointer::EventPhase::ADD, {55.f, 55.f})
+          .Build());
+  // Outside all regions -> defaultResponse NO (1)
+  events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(3000u)
+          .AddSample(kIxn3, fuchsia::ui::pointer::EventPhase::ADD, {90.f, 90.f})
+          .Build());
+
+  touch_server.ScheduleCallback(std::move(events));
+  RunLoopUntilIdle();
+
+  auto responses = touch_server.UploadedResponses();
+  ASSERT_TRUE(responses.has_value());
+  ASSERT_EQ(responses->size(), 3u);
+  EXPECT_EQ((*responses)[0].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::YES_PRIORITIZE);
+  EXPECT_EQ((*responses)[1].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::YES);
+  EXPECT_EQ((*responses)[2].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::NO);
+}
+
+TEST_F(PlatformViewTests,
+       TouchGestureResponsePolicy_InterceptAllInputFalse_NoPolicyFailsLoudly) {
+  constexpr std::array<std::array<float, 2>, 2> kRect = {{{0, 0}, {100, 100}}};
+  constexpr std::array<float, 9> kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  constexpr fuchsia::ui::pointer::TouchInteractionId kIxn = {
+      .device_id = 0u, .pointer_id = 1u, .interaction_id = 1u};
+
+  MockPlatformViewDelegate delegate;
+  flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
+                                    nullptr);
+  FakeTouchSource touch_server;
+  fidl::BindingSet<fuchsia::ui::pointer::TouchSource> touch_bindings;
+  auto platform_view =
+      PlatformViewBuilder(delegate, std::move(task_runners))
+          .SetTouchSource(touch_bindings.AddBinding(&touch_server))
+          .SetInterceptAllInput(false)
+          .Build();
+  RunLoopUntilIdle();
+
+  // On Fuchsia, FML_CHECK logs to the Fuchsia syslog rather than stderr, so
+  // the stderr matcher for EXPECT_DEATH_IF_SUPPORTED must be empty.
+  EXPECT_DEATH_IF_SUPPORTED(
+      {
+        std::vector<fuchsia::ui::pointer::TouchEvent> events =
+            TouchEventBuilder::New()
+                .AddTime(1000u)
+                .AddViewParameters(kRect, kRect, kIdentity)
+                .AddSample(kIxn, fuchsia::ui::pointer::EventPhase::ADD,
+                           {10.f, 10.f})
+                .BuildAsVector();
+        touch_server.ScheduleCallback(std::move(events));
+        RunLoopUntilIdle();
+      },
+      "");
+}
+
+TEST_F(PlatformViewTests,
+       TouchGestureResponsePolicy_DeferralCommitsMidInteraction) {
+  constexpr std::array<std::array<float, 2>, 2> kRect = {{{0, 0}, {100, 100}}};
+  constexpr std::array<float, 9> kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  constexpr fuchsia::ui::pointer::TouchInteractionId kIxn = {
+      .device_id = 0u, .pointer_id = 1u, .interaction_id = 1u};
+
+  MockPlatformViewDelegate delegate;
+  flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
+                                    nullptr);
+  FakeTouchSource touch_server;
+  fidl::BindingSet<fuchsia::ui::pointer::TouchSource> touch_bindings;
+  auto platform_view =
+      PlatformViewBuilder(delegate, std::move(task_runners))
+          .SetTouchSource(touch_bindings.AddBinding(&touch_server))
+          .SetInterceptAllInput(false)
+          .Build();
+  RunLoopUntilIdle();
+  (void)touch_server.UploadedResponses();
+
+  auto msg_response = FakePlatformMessageResponse::Create();
+  platform_view.HandlePlatformMessage(
+      msg_response->WithMessage("flutter/platform_views",
+                                R"({
+            "method": "View.setGestureResponsePolicy",
+            "args": {
+              "defaultResponse": "NO",
+              "regions": [
+                {
+                  "rectLTRB": [0.0, 0.0, 50.0, 50.0],
+                  "deferSamples": 2,
+                  "deferResponse": "MAYBE_SUPPRESS",
+                  "response": "YES_PRIORITIZE"
+                }
+              ]
+            }
+          })"));
+  msg_response->ExpectCompleted("[0]");
+
+  std::vector<fuchsia::ui::pointer::TouchEvent> events;
+  events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(1000u)
+          .AddViewParameters(kRect, kRect, kIdentity)
+          .AddSample(kIxn, fuchsia::ui::pointer::EventPhase::ADD, {25.f, 25.f})
+          .Build());
+  events.emplace_back(TouchEventBuilder::New()
+                          .AddTime(2000u)
+                          .AddSample(kIxn,
+                                     fuchsia::ui::pointer::EventPhase::CHANGE,
+                                     {26.f, 26.f})
+                          .Build());
+  events.emplace_back(TouchEventBuilder::New()
+                          .AddTime(3000u)
+                          .AddSample(kIxn,
+                                     fuchsia::ui::pointer::EventPhase::CHANGE,
+                                     {27.f, 27.f})
+                          .Build());
+  events.emplace_back(TouchEventBuilder::New()
+                          .AddTime(4000u)
+                          .AddSample(kIxn,
+                                     fuchsia::ui::pointer::EventPhase::REMOVE,
+                                     {27.f, 27.f})
+                          .Build());
+  touch_server.ScheduleCallback(std::move(events));
+  RunLoopUntilIdle();
+
+  auto responses = touch_server.UploadedResponses();
+  ASSERT_TRUE(responses.has_value());
+  ASSERT_EQ(responses->size(), 4u);
+  EXPECT_EQ((*responses)[0].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*responses)[1].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*responses)[2].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::YES_PRIORITIZE);
+  EXPECT_EQ((*responses)[3].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::YES_PRIORITIZE);
 }
 
 }  // namespace flutter_runner::testing

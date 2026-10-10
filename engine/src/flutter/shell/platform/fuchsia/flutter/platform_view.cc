@@ -78,7 +78,8 @@ PlatformView::PlatformView(
     OnRequestAnnounceCallback on_request_announce_callback,
     OnShaderWarmupCallback on_shader_warmup_callback,
     AwaitVsyncCallback await_vsync_callback,
-    std::shared_ptr<sys::ServiceDirectory> dart_application_svc)
+    std::shared_ptr<sys::ServiceDirectory> dart_application_svc,
+    bool intercept_all_input)
     : flutter::PlatformView(delegate, std::move(task_runners)),
       external_view_embedder_(external_view_embedder),
       focus_delegate_(
@@ -86,7 +87,8 @@ PlatformView::PlatformView(
                                           std::move(focuser))),
       pointer_delegate_(
           std::make_shared<PointerDelegate>(std::move(touch_source),
-                                            std::move(mouse_source))),
+                                            std::move(mouse_source),
+                                            intercept_all_input)),
       wireframe_enabled_callback_(std::move(wireframe_enabled_callback)),
       on_update_view_callback_(std::move(on_update_view_callback)),
       on_create_surface_callback_(std::move(on_create_surface_callback)),
@@ -893,6 +895,136 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
           std::vector<uint8_t>({'[', '0', ']'})));
       return true;
     }
+  } else if (method == "View.setGestureResponsePolicy" ||
+             method == "View.setTouchResponsePolicy") {
+    auto args_it = root.FindMember("args");
+    if (args_it == root.MemberEnd() || !args_it->value.IsObject()) {
+      FML_LOG(ERROR) << "No arguments found for " << method;
+      return false;
+    }
+    const auto& args = args_it->value;
+
+    auto parse_response_type =
+        [](const rapidjson::Value& val,
+           fuchsia::ui::pointer::TouchResponseType* out) -> bool {
+      if (val.IsInt() || val.IsUint()) {
+        *out =
+            static_cast<fuchsia::ui::pointer::TouchResponseType>(val.GetInt());
+        return true;
+      }
+      if (val.IsString()) {
+        std::string s(val.GetString());
+        if (s == "NO") {
+          *out = fuchsia::ui::pointer::TouchResponseType::NO;
+          return true;
+        } else if (s == "MAYBE") {
+          *out = fuchsia::ui::pointer::TouchResponseType::MAYBE;
+          return true;
+        } else if (s == "MAYBE_PRIORITIZE") {
+          *out = fuchsia::ui::pointer::TouchResponseType::MAYBE_PRIORITIZE;
+          return true;
+        } else if (s == "MAYBE_SUPPRESS") {
+          *out = fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS;
+          return true;
+        } else if (s == "MAYBE_PRIORITIZE_SUPPRESS") {
+          *out = fuchsia::ui::pointer::TouchResponseType::
+              MAYBE_PRIORITIZE_SUPPRESS;
+          return true;
+        } else if (s == "HOLD") {
+          *out = fuchsia::ui::pointer::TouchResponseType::HOLD;
+          return true;
+        } else if (s == "YES") {
+          *out = fuchsia::ui::pointer::TouchResponseType::YES;
+          return true;
+        } else if (s == "YES_PRIORITIZE") {
+          *out = fuchsia::ui::pointer::TouchResponseType::YES_PRIORITIZE;
+          return true;
+        }
+      }
+      return false;
+    };
+
+    GestureResponsePolicy policy;
+    auto default_resp_it = args.FindMember("defaultResponse");
+    if (default_resp_it != args.MemberEnd()) {
+      if (!parse_response_type(default_resp_it->value,
+                               &policy.default_response)) {
+        FML_LOG(ERROR) << "Invalid 'defaultResponse' in " << method;
+        return false;
+      }
+    }
+    auto default_defer_it = args.FindMember("defaultDeferSamples");
+    if (default_defer_it == args.MemberEnd()) {
+      default_defer_it = args.FindMember("deferSamples");
+    }
+    if (default_defer_it != args.MemberEnd() &&
+        default_defer_it->value.IsUint()) {
+      policy.default_defer_samples = default_defer_it->value.GetUint();
+    }
+    auto default_defer_resp_it = args.FindMember("defaultDeferResponse");
+    if (default_defer_resp_it == args.MemberEnd()) {
+      default_defer_resp_it = args.FindMember("deferResponse");
+    }
+    if (default_defer_resp_it != args.MemberEnd()) {
+      parse_response_type(default_defer_resp_it->value,
+                          &policy.default_defer_response);
+    }
+
+    auto regions_it = args.FindMember("regions");
+    if (regions_it != args.MemberEnd() && regions_it->value.IsArray()) {
+      for (const auto& reg_val : regions_it->value.GetArray()) {
+        if (!reg_val.IsObject()) {
+          continue;
+        }
+        GestureResponseRegion region;
+        auto rect_it = reg_val.FindMember("rectLTRB");
+        if (rect_it != reg_val.MemberEnd() && rect_it->value.IsArray() &&
+            rect_it->value.GetArray().Size() == 4) {
+          const auto& arr = rect_it->value.GetArray();
+          if (arr[0].IsNumber() && arr[1].IsNumber() && arr[2].IsNumber() &&
+              arr[3].IsNumber()) {
+            region.left = static_cast<float>(arr[0].GetDouble());
+            region.top = static_cast<float>(arr[1].GetDouble());
+            region.right = static_cast<float>(arr[2].GetDouble());
+            region.bottom = static_cast<float>(arr[3].GetDouble());
+          }
+        } else {
+          auto l_it = reg_val.FindMember("left");
+          auto t_it = reg_val.FindMember("top");
+          auto r_it = reg_val.FindMember("right");
+          auto b_it = reg_val.FindMember("bottom");
+          if (l_it != reg_val.MemberEnd() && l_it->value.IsNumber() &&
+              t_it != reg_val.MemberEnd() && t_it->value.IsNumber() &&
+              r_it != reg_val.MemberEnd() && r_it->value.IsNumber() &&
+              b_it != reg_val.MemberEnd() && b_it->value.IsNumber()) {
+            region.left = static_cast<float>(l_it->value.GetDouble());
+            region.top = static_cast<float>(t_it->value.GetDouble());
+            region.right = static_cast<float>(r_it->value.GetDouble());
+            region.bottom = static_cast<float>(b_it->value.GetDouble());
+          }
+        }
+        auto resp_it = reg_val.FindMember("response");
+        if (resp_it != reg_val.MemberEnd()) {
+          parse_response_type(resp_it->value, &region.response);
+        }
+        auto defer_it = reg_val.FindMember("deferSamples");
+        if (defer_it != reg_val.MemberEnd() && defer_it->value.IsUint()) {
+          region.defer_samples = defer_it->value.GetUint();
+        }
+        auto defer_resp_it = reg_val.FindMember("deferResponse");
+        if (defer_resp_it != reg_val.MemberEnd()) {
+          parse_response_type(defer_resp_it->value, &region.defer_response);
+        }
+        policy.regions.push_back(region);
+      }
+    }
+
+    pointer_delegate_->SetGestureResponsePolicy(std::move(policy));
+    if (message->response()) {
+      message->response()->Complete(std::make_unique<fml::DataMapping>(
+          std::vector<uint8_t>({'[', '0', ']'})));
+    }
+    return true;
   } else if (method.rfind("View.focus", 0) == 0) {
     return focus_delegate_->HandlePlatformMessage(document,
                                                   message->response());
@@ -905,6 +1037,10 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
   }
   // Complete with an empty response by default.
   return false;
+}
+
+void PlatformView::SetGestureResponsePolicy(GestureResponsePolicy policy) {
+  pointer_delegate_->SetGestureResponsePolicy(std::move(policy));
 }
 
 bool PlatformView::HandleFuchsiaShaderWarmupChannelPlatformMessage(

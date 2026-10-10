@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui';
 
 void main(List<String> args) {
@@ -18,6 +20,16 @@ class TestApp {
   Color _backgroundColor = _pink;
 
   void run() {
+    final policyMessage = ByteData.sublistView(
+      utf8.encode(
+        json.encode(<String, Object>{
+          'method': 'View.setGestureResponsePolicy',
+          'args': <String, Object>{'defaultResponse': 'YES'},
+        }),
+      ),
+    );
+    PlatformDispatcher.instance.sendPlatformMessage('flutter/platform_views', policyMessage, null);
+
     window.onPointerDataPacket = (PointerDataPacket packet) {
       this.pointerDataPacket(packet);
     };

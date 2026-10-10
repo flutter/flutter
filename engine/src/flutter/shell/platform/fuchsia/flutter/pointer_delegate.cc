@@ -340,8 +340,11 @@ void InsertIntoBuffer(
 
 PointerDelegate::PointerDelegate(
     fuchsia::ui::pointer::TouchSourceHandle touch_source,
-    fuchsia::ui::pointer::MouseSourceHandle mouse_source)
-    : touch_source_(touch_source.Bind()), mouse_source_(mouse_source.Bind()) {
+    fuchsia::ui::pointer::MouseSourceHandle mouse_source,
+    bool intercept_all_input)
+    : touch_source_(touch_source.Bind()),
+      intercept_all_input_(intercept_all_input),
+      mouse_source_(mouse_source.Bind()) {
   if (touch_source_) {
     touch_source_.set_error_handler([](zx_status_t status) {
       FML_LOG(ERROR) << "TouchSource channel error: << "
@@ -355,6 +358,78 @@ PointerDelegate::PointerDelegate(
     });
   }
 }
+
+void PointerDelegate::SetGestureResponsePolicy(GestureResponsePolicy policy) {
+  policy_ = std::move(policy);
+}
+
+void PointerDelegate::RemoveActiveInteraction(
+    const fuchsia::ui::pointer::TouchInteractionId& ixn) {
+  for (size_t i = 0; i < active_interactions_count_; ++i) {
+    if (fidl::Equals(active_interactions_[i].id, ixn)) {
+      active_interactions_[i] =
+          active_interactions_[active_interactions_count_ - 1];
+      --active_interactions_count_;
+      return;
+    }
+  }
+}
+
+fup_TouchResponseType PointerDelegate::EvaluatePolicy(
+    const fuchsia::ui::pointer::TouchInteractionId& ixn,
+    fuchsia::ui::pointer::EventPhase phase,
+    float logical_x,
+    float logical_y) {
+  FML_DCHECK(policy_.has_value());
+  ActiveInteraction* active = nullptr;
+  for (size_t i = 0; i < active_interactions_count_; ++i) {
+    if (fidl::Equals(active_interactions_[i].id, ixn)) {
+      active = &active_interactions_[i];
+      break;
+    }
+  }
+
+  if (phase == fup_EventPhase::ADD || active == nullptr) {
+    if (active == nullptr) {
+      if (active_interactions_count_ < kMaxActiveInteractions) {
+        active = &active_interactions_[active_interactions_count_++];
+      } else {
+        active = &active_interactions_[0];
+      }
+    }
+    active->id = ixn;
+    active->start_x = logical_x;
+    active->start_y = logical_y;
+    active->sample_count = 0;
+  }
+
+  const float match_x = active->start_x;
+  const float match_y = active->start_y;
+  const uint32_t sample_index = active->sample_count++;
+
+  fup_TouchResponseType result = policy_->default_response;
+  if (sample_index < policy_->default_defer_samples) {
+    result = policy_->default_defer_response;
+  }
+
+  for (const auto& region : policy_->regions) {
+    if (region.Contains(match_x, match_y)) {
+      if (sample_index < region.defer_samples) {
+        result = region.defer_response;
+      } else {
+        result = region.response;
+      }
+      break;
+    }
+  }
+
+  if (phase == fup_EventPhase::REMOVE || phase == fup_EventPhase::CANCEL) {
+    RemoveActiveInteraction(ixn);
+  }
+
+  return result;
+}
+
 // Core logic of this class.
 // Aim to keep state management in this function.
 void PointerDelegate::WatchLoop(
@@ -386,13 +461,23 @@ void PointerDelegate::WatchLoop(
 
         FML_DCHECK(touch_view_parameters_.has_value()) << "API guarantee";
         auto events = CreateTouchDraft(event, touch_view_parameters_.value());
+        const float logical_x = static_cast<float>(events.first.physical_x);
+        const float logical_y = static_cast<float>(events.first.physical_y);
         if (touch_buffer_.count(ixn) > 0) {
           InsertIntoBuffer(std::move(events), &touch_buffer_[ixn]);
         } else {
           InsertIntoBuffer(std::move(events), &to_client);
         }
-        // For this simple client, always claim we want the gesture.
-        response.set_response_type(fup_TouchResponseType::YES);
+        if (intercept_all_input_) {
+          // For this simple client, always claim we want the gesture.
+          response.set_response_type(fup_TouchResponseType::YES);
+        } else {
+          FML_CHECK(policy_.has_value())
+              << "intercept_all_input is false, but no gesture-response policy "
+                 "has been set.";
+          response.set_response_type(
+              EvaluatePolicy(ixn, sample.phase(), logical_x, logical_y));
+        }
       }
       if (event.has_interaction_result()) {
         const auto& result = event.interaction_result();
