@@ -14,7 +14,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/net.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
@@ -121,7 +120,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       throwToolExit('Failed to fetch coverage data from $coverageUri');
     }
     final String coverageDir = globals.fs.path.join(
-      Cache.flutterRoot!,
+      globals.cache.flutterRoot,
       'packages/flutter/coverage',
     );
     globals.fs.file(globals.fs.path.join(coverageDir, 'lcov.base.info'))
@@ -137,7 +136,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     // Add the root directory to the list of packages, to capture the workspace
     // `pubspec.yaml`.
     final Directory rootDirectory = globals.fs.directory(
-      globals.fs.path.absolute(Cache.flutterRoot!),
+      globals.fs.path.absolute(globals.cache.flutterRoot),
     );
 
     final bool forceUpgrade = boolArg(_keyForceUpgrade);
@@ -288,7 +287,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final deps = <_ProjectDeps>[];
     for (final project in projects) {
       final Directory projectTempDir = tempDir.childDirectory(
-        globals.fs.path.relative(project.directory.path, from: Cache.flutterRoot),
+        globals.fs.path.relative(project.directory.path, from: globals.cache.flutterRoot),
       );
       final File tempPubspec = projectTempDir.childFile(project.pubspecFile.basename)
         ..createSync(recursive: true);

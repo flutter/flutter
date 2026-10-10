@@ -1430,11 +1430,11 @@ flutter:
       await residentRunner.run();
 
       final String expectedPath = getDefaultCachedKernelPath(
-        fileSystem: globals.fs,
         trackWidgetCreation: residentRunner.trackWidgetCreation,
         dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
         config: globals.config,
+        fileSystem: globals.fs,
         targetModel: TargetModel.fromTargetPlatform(flutterDevice.targetPlatform),
       );
       expect(await globals.fs.file(expectedPath).readAsString(), 'ABC');
@@ -1469,11 +1469,11 @@ flutter:
       await residentRunner.run();
 
       final String expectedPath = getDefaultCachedKernelPath(
-        fileSystem: globals.fs,
         trackWidgetCreation: residentRunner.trackWidgetCreation,
         dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
         config: globals.config,
+        fileSystem: globals.fs,
         targetModel: TargetModel.fromTargetPlatform(flutterDevice.targetPlatform),
       );
       expect(await globals.fs.file(expectedPath).readAsString(), 'ABC');
@@ -1508,11 +1508,11 @@ flutter:
       await residentRunner.run();
 
       final String expectedPath = getDefaultCachedKernelPath(
-        fileSystem: globals.fs,
         trackWidgetCreation: residentRunner.trackWidgetCreation,
         dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
         config: globals.config,
+        fileSystem: globals.fs,
         targetModel: TargetModel.fromTargetPlatform(flutterDevice.targetPlatform),
       );
       expect(await globals.fs.file(expectedPath).readAsString(), 'ABC');
@@ -1539,11 +1539,11 @@ flutter:
       await residentRunner.run();
 
       final String expectedPath = getDefaultCachedKernelPath(
-        fileSystem: globals.fs,
         trackWidgetCreation: residentRunner.trackWidgetCreation,
         dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
         config: globals.config,
+        fileSystem: globals.fs,
         targetModel: TargetModel.fromTargetPlatform(flutterDevice.targetPlatform),
       );
       expect(await globals.fs.file(expectedPath).readAsString(), 'ABC');
@@ -1602,11 +1602,11 @@ flutter:
       await residentRunner.run();
 
       final String expectedPath = getDefaultCachedKernelPath(
-        fileSystem: globals.fs,
         trackWidgetCreation: residentRunner.trackWidgetCreation,
         dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
         extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
         config: globals.config,
+        fileSystem: globals.fs,
         targetModel: TargetModel.fromTargetPlatform(flutterDevice.targetPlatform),
       );
       expect(await globals.fs.file(expectedPath).readAsString(), 'ABC');
@@ -1703,10 +1703,10 @@ flutter:
               as DefaultResidentCompiler?;
 
       final String expectedPath = getDefaultCachedKernelPath(
-        fileSystem: globals.fs,
         trackWidgetCreation: false,
         dartDefines: const <String>[],
         config: globals.config,
+        fileSystem: globals.fs,
         targetModel: TargetModel.dartdevc,
       );
       expect(residentCompiler!.initializeFromDill, expectedPath);
@@ -1756,10 +1756,10 @@ flutter:
               as DefaultResidentCompiler?;
 
       final String expectedPath = getDefaultCachedKernelPath(
-        fileSystem: globals.fs,
         trackWidgetCreation: false,
         dartDefines: const <String>[],
         config: globals.config,
+        fileSystem: globals.fs,
         targetModel: TargetModel.dartdevc,
       );
       expect(residentCompiler!.initializeFromDill, expectedPath);
@@ -2343,11 +2343,11 @@ flutter:
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
-          fileSystem: globals.fs,
           trackWidgetCreation: residentRunner.trackWidgetCreation,
           dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
           extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
           config: globals.config,
+          fileSystem: globals.fs,
           targetModel: TargetModel.dartdevc,
         );
 
@@ -2363,11 +2363,11 @@ flutter:
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
-          fileSystem: globals.fs,
           trackWidgetCreation: residentRunner.trackWidgetCreation,
           dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
           extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
           config: globals.config,
+          fileSystem: globals.fs,
           targetModel: TargetModel.flutterRunner,
         );
 
@@ -2383,11 +2383,11 @@ flutter:
         residentRunner.testCacheInitialDillCompilation();
 
         final String expectedPath = getDefaultCachedKernelPath(
-          fileSystem: globals.fs,
           trackWidgetCreation: residentRunner.trackWidgetCreation,
           dartDefines: residentRunner.debuggingOptions.buildInfo.dartDefines,
           extraFrontEndOptions: residentRunner.debuggingOptions.buildInfo.extraFrontEndOptions,
           config: globals.config,
+          fileSystem: globals.fs,
           targetModel: TargetModel.flutter,
         );
 

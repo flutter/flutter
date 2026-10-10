@@ -78,7 +78,7 @@ void main() {
       expect(dependencies.analytics, isNotNull);
       expect(dependencies.toolContext.botDetector, isNotNull);
       expect(dependencies.buildSystem, isNotNull);
-      expect(dependencies.buildTargets, isNull);
+      expect(dependencies.buildTargets, isA<NoOpBuildTargets>());
       expect(dependencies.crashReporter, isNotNull);
       expect(dependencies.deviceManager, isA<FlutterDeviceManager>());
       expect(dependencies.doctor, isNotNull);

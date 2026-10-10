@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -78,8 +77,6 @@ Future<void> run(List<String> args) async {
     'flutter_fuchsia_tester.',
   );
   try {
-    Cache.flutterRoot = tempDir.path;
-
     final String flutterTesterBinPath = globals.fs
         .file(argResults[_kOptionShell])
         .resolveSymbolicLinksSync();

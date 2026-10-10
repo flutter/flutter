@@ -53,8 +53,9 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     globals.logger,
     globals.platform,
     runPackageName,
-    includeDevDependencies: true,
     pubspecPath,
+    includeDevDependencies: true,
+    cache: globals.cache,
   );
 
   if (!globals.platform.isMacOS && !globals.platform.isLinux && !globals.platform.isWindows) {
