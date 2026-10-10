@@ -219,10 +219,29 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   button.label = "Flutter AT-SPI activation fixture";
   button.actions = kFlutterSemanticsActionTap;
   button.flags2 = &flags;
-  FlutterSemanticsNode2* nodes[] = {&button};
+  const bool check_text =
+      g_strcmp0(g_getenv("FLUTTER_TEST_ATSPI_TEXT"), "1") == 0;
+  if (check_text) {
+    ASSERT_TRUE(fl_gtk_runtime_supports_native_accessibility_text());
+  }
+  FlutterSemanticsFlags text_flags = {};
+  text_flags.is_text_field = true;
+  FlutterSemanticsNode2 text = {};
+  text.id = 1;
+  text.flags2 = &text_flags;
+  text.label = "Flutter AT-SPI text fixture";
+  text.value = "A\xF0\x9F\x98\x80 caf\xC3\xA9. Next sentence!";
+  text.text_selection_base = 1;
+  text.text_selection_extent = 3;
+  int32_t children[] = {1};
+  if (check_text) {
+    button.child_count = 1;
+    button.children_in_traversal_order = children;
+  }
+  FlutterSemanticsNode2* nodes[] = {&button, &text};
   FlutterSemanticsUpdate2 update = {};
   update.view_id = view_id;
-  update.node_count = 1;
+  update.node_count = check_text ? 2 : 1;
   update.nodes = nodes;
   fl_engine_get_embedder_api(view_engine)->SendSemanticsAction =
       MOCK_ENGINE_PROC(SendSemanticsAction,

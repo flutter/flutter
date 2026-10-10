@@ -58,7 +58,7 @@ def wait_until(predicate, description, seconds=10):
   raise RuntimeError(f'Timed out waiting for {description}')
 
 
-def run_fixture(binary, output, check_focus=False):
+def run_fixture(binary, output, check_focus=False, check_text=False):
   import gi
   gi.require_version('Atspi', '2.0')
   from gi.repository import Atspi, Gio, GLib
@@ -90,7 +90,7 @@ def run_fixture(binary, output, check_focus=False):
       command = [binary, '--gtest_filter=FlViewGtk4AccessibilityTest.ExternalAtspiActivation']
       with process(command, output) as fixture:
 
-        def find_fixture():
+        def find_fixture(name='Flutter AT-SPI activation fixture'):
           if fixture.poll() is not None:
             raise RuntimeError('Engine fixture exited before activation')
           desktop = Atspi.get_desktop(0)
@@ -103,7 +103,7 @@ def run_fixture(binary, output, check_focus=False):
                 if not pending:
                   break
                 node = pending.pop()
-                if node.get_name() == 'Flutter AT-SPI activation fixture':
+                if node.get_name() == name:
                   return node
                 pending.extend(
                     filter(
@@ -119,6 +119,33 @@ def run_fixture(binary, output, check_focus=False):
         names = [action.get_action_name(i) for i in range(action.get_n_actions())]
         if names != ['flutter.tap']:
           raise RuntimeError(f'Unexpected native actions: {names}')
+        if check_text:
+          text_node = wait_until(
+              lambda: find_fixture('Flutter AT-SPI text fixture'), 'native text node'
+          )
+          text = text_node.get_text_iface()
+          if text is None:
+            raise RuntimeError('Native text node does not export AT-SPI Text')
+          expected = 'A\U0001f600 caf\u00e9. Next sentence!'
+          if Atspi.Text.get_text(text, 0,
+                                 -1) != expected or text.get_character_count() != len(expected):
+            raise RuntimeError('AT-SPI text contents or character count disagrees with semantics')
+          if text.get_caret_offset() != 2 or text.get_n_selections() != 1:
+            raise RuntimeError('AT-SPI caret or selection count is incorrect')
+          selection = Atspi.Text.get_selection(text, 0)
+          if (selection.start_offset, selection.end_offset) != (1, 2):
+            raise RuntimeError('AT-SPI selection did not convert UTF-16 offsets')
+          cases = [
+              (1, Atspi.TextGranularity.CHAR, 1, 2, '\U0001f600'),
+              (4, Atspi.TextGranularity.WORD, 3, 7, 'caf\u00e9'),
+              (12, Atspi.TextGranularity.SENTENCE, 9, len(expected), 'Next sentence!'),
+              (len(expected), Atspi.TextGranularity.CHAR, len(expected), len(expected), ''),
+          ]
+          for offset, granularity, start, end, contents in cases:
+            result = text.get_string_at_offset(offset, granularity)
+            actual = (result.start_offset, result.end_offset, result.content)
+            if actual != (start, end, contents):
+              raise RuntimeError(f'Unexpected AT-SPI text range at {offset}: {actual!r}')
         if check_focus:
           focus_events = []
 
@@ -155,12 +182,15 @@ def run_fixture(binary, output, check_focus=False):
         print('PASS: AT-SPI flutter.tap reached the Flutter embedder')
         if check_focus:
           print('PASS: AT-SPI observed focus gain and loss without duplicate events')
+        if check_text:
+          print('PASS: AT-SPI text, Unicode selection, word and sentence queries')
 
 
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument('binary', type=lambda value: str(Path(value).resolve()))
   parser.add_argument('--check-focus', action='store_true', help='Verify focus events (GTK 4.18+)')
+  parser.add_argument('--check-text', action='store_true', help='Verify text queries (GTK 4.14+)')
   parser.add_argument('--isolated-session', action='store_true', help=argparse.SUPPRESS)
   args = parser.parse_args()
   if not Path(args.binary).is_file():
@@ -176,19 +206,21 @@ def main():
         GSK_RENDERER='cairo',
         GIO_USE_VFS='local',
         FLUTTER_TEST_ATSPI_ACTION='1',
-        FLUTTER_TEST_ATSPI_FOCUS='1' if args.check_focus else '0'
+        FLUTTER_TEST_ATSPI_FOCUS='1' if args.check_focus else '0',
+        FLUTTER_TEST_ATSPI_TEXT='1' if args.check_text else '0'
     )
     return subprocess.run([
         'xvfb-run', '-a', 'dbus-run-session', '--', sys.executable,
-        str(Path(__file__).resolve()), '--isolated-session', args.binary,
-        *(['--check-focus'] if args.check_focus else [])
+        str(Path(__file__).resolve()
+           ), '--isolated-session', args.binary, *(['--check-focus'] if args.check_focus else []),
+        *(['--check-text'] if args.check_text else [])
     ],
                           env=environment,
                           timeout=45,
                           check=False).returncode
   with tempfile.TemporaryFile(mode='w+') as output:
     try:
-      run_fixture(args.binary, output, args.check_focus)
+      run_fixture(args.binary, output, args.check_focus, args.check_text)
     finally:
       output.seek(0)
       print(output.read(), end='')
