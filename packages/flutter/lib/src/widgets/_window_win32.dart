@@ -58,6 +58,14 @@ To try experimental windowing APIs:
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
 
+FlutterView _flutterViewForId(int viewId) {
+  final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
+  if (view == null) {
+    throw StateError('No FlutterView with viewId $viewId was found on the platform dispatcher.');
+  }
+  return view;
+}
+
 /// Abstract handler class for Windows messages.
 ///
 /// Implementations of this class should register with
@@ -266,9 +274,12 @@ class WindowingOwnerWin32 extends WindowingOwner {
   }
 
   void _onMessage(ffi.Pointer<_WindowsMessage> message) {
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == message.ref.viewId,
+    final FlutterView? flutterView = WidgetsBinding.instance.platformDispatcher.view(
+      id: message.ref.viewId,
     );
+    if (flutterView == null) {
+      return;
+    }
 
     final int handlesLength = _messageHandlers.length;
     for (final _WindowsMessageHandler handler in _messageHandlers) {
@@ -373,10 +384,7 @@ class WindowControllerWin32 extends WindowController with BaseWindowControllerWi
       throw Exception('Windows failed to create a regular window with a valid view id.');
     }
 
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
   }
 
   final WindowingOwnerWin32 _owner;
@@ -626,10 +634,7 @@ class DialogWindowControllerWin32 extends DialogWindowController with BaseWindow
       throw Exception('Windows failed to create a dialog window with a valid view id.');
     }
 
-    final FlutterView flutterView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
   }
 
   final WindowingOwnerWin32 _owner;
@@ -878,10 +883,10 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
     _owner._addMessageHandler(this);
     final int viewId = _Win32PlatformInterface.createTooltipWindow(
       _owner.allocator,
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       contentSizeConstraints,
       _Win32PlatformInterface.getWindowHandle(
-        PlatformDispatcher.instance.engineId!,
+        WidgetsBinding.instance.platformDispatcher.engineId!,
         parent.rootView.viewId,
       ),
       _onGetWindowPosition.nativeFunction,
@@ -890,10 +895,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
       throw Exception('Windows failed to create a tooltip window with a valid view id.');
     }
 
-    final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
   }
 
   final WindowingOwnerWin32 _owner;
@@ -918,7 +920,7 @@ class TooltipWindowControllerWin32 extends TooltipWindowController
   HWND get windowHandle {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       rootView.viewId,
     );
   }
@@ -1042,10 +1044,10 @@ class PopupWindowControllerWin32 extends PopupWindowController
     _owner._addMessageHandler(this);
     final int viewId = _Win32PlatformInterface.createPopupWindow(
       _owner.allocator,
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       contentSizeConstraints,
       _Win32PlatformInterface.getWindowHandle(
-        PlatformDispatcher.instance.engineId!,
+        WidgetsBinding.instance.platformDispatcher.engineId!,
         parent.rootView.viewId,
       ),
       _onGetWindowPosition.nativeFunction,
@@ -1054,10 +1056,7 @@ class PopupWindowControllerWin32 extends PopupWindowController
       throw Exception('Windows failed to create a popup window with a valid view id.');
     }
 
-    final FlutterView flutterView = PlatformDispatcher.instance.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
-    rootView = flutterView;
+    rootView = _flutterViewForId(viewId);
   }
 
   final WindowingOwnerWin32 _owner;
@@ -1082,7 +1081,7 @@ class PopupWindowControllerWin32 extends PopupWindowController
   HWND getWindowHandle() {
     _ensureNotDestroyed();
     return _Win32PlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       rootView.viewId,
     );
   }
@@ -1129,7 +1128,7 @@ class PopupWindowControllerWin32 extends PopupWindowController
     _ensureNotDestroyed();
     final HWND popupHandle = getWindowHandle();
     final HWND parentHandle = _Win32PlatformInterface.getWindowHandle(
-      PlatformDispatcher.instance.engineId!,
+      WidgetsBinding.instance.platformDispatcher.engineId!,
       parent.rootView.viewId,
     );
 
@@ -1140,9 +1139,7 @@ class PopupWindowControllerWin32 extends PopupWindowController
     );
 
     // Convert from physical pixels to logical pixels.
-    final double scale = PlatformDispatcher.instance.views
-        .firstWhere((FlutterView view) => view.viewId == rootView.viewId)
-        .devicePixelRatio;
+    final double scale = rootView.devicePixelRatio;
 
     return physicalOffset / scale;
   }
@@ -1160,7 +1157,7 @@ class PopupWindowControllerWin32 extends PopupWindowController
       // AND the new focus is neither the parent window nor a descendant of the
       // popup, close the popup.
       final HWND parentHwnd = _Win32PlatformInterface.getWindowHandle(
-        PlatformDispatcher.instance.engineId!,
+        WidgetsBinding.instance.platformDispatcher.engineId!,
         parent.rootView.viewId,
       );
       final HWND hFocused = _Win32PlatformInterface.getForegroundWindow();
@@ -1294,9 +1291,7 @@ class SatelliteWindowControllerWin32 extends SatelliteWindowController
       throw Exception('Windows failed to create a satellite window with a valid view id.');
     }
 
-    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    rootView = _flutterViewForId(viewId);
   }
 
   final WindowingOwnerWin32 _owner;
