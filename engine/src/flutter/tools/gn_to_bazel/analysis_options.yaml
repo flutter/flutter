@@ -1,0 +1,10 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+include: ../../analysis_options.yaml
+
+linter:
+  rules:
+    # A tool, not public API (as for tools/pkg/engine_build_configs).
+    public_member_api_docs: false

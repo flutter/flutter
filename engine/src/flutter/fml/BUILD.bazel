@@ -2,10 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Mirrors BUILD.gn. Only the host Linux build is covered so far: the other
-# platforms' sources follow with their toolchains, and the configurable
-# arguments GN consults here (enable_backtrace, is_wasm) are taken at their
-# defaults until a target needs them.
+# Generated from //flutter/fml/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: fml_benchmarks.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
@@ -20,12 +18,13 @@ cc_library(
         "backtrace.cc",  # enable_backtrace && !is_wasm
         "base32.cc",
         "concurrent_message_loop.cc",
+        "concurrent_message_loop_factory.cc",  # !(is_ios || is_mac)
         "cpu_affinity.cc",
         "delayed_task.cc",
         "endianness.cc",
         "file.cc",
         "hex_codec.cc",
-        "icu_util.cc",  # !is_wasm
+        "icu_util.cc",  # target_os != "wasm"
         "log_settings.cc",
         "log_settings_state.cc",
         "logging.cc",
@@ -37,6 +36,16 @@ cc_library(
         "message_loop_impl.cc",
         "message_loop_task_queues.cc",
         "paths.cc",
+        "platform/linux/message_loop_linux.cc",  # is_linux
+        "platform/linux/paths_linux.cc",  # is_linux
+        "platform/linux/timerfd.cc",  # is_linux
+        "platform/posix/command_line_posix.cc",  # !(is_win)
+        "platform/posix/file_posix.cc",  # !(is_win)
+        "platform/posix/mapping_posix.cc",  # !(is_win)
+        "platform/posix/native_library_posix.cc",  # !(is_win)
+        "platform/posix/paths_posix.cc",  # !(is_win)
+        "platform/posix/posix_wrappers_posix.cc",  # !(is_win)
+        "platform/posix/process_posix.cc",  # !(is_win)
         "raster_thread_merger.cc",
         "safe_math.cc",
         "shared_thread_merger.cc",
@@ -51,30 +60,12 @@ cc_library(
         "time/time_point.cc",
         "trace_event.cc",
         "unique_fd.cc",
-    ] + select({
-        "@platforms//os:linux": [
-            # !(is_ios || is_mac)
-            "concurrent_message_loop_factory.cc",
-            # is_linux
-            "platform/linux/message_loop_linux.cc",
-            "platform/linux/message_loop_linux.h",
-            "platform/linux/paths_linux.cc",
-            "platform/linux/timerfd.cc",
-            "platform/linux/timerfd.h",
-            # !is_win
-            "platform/posix/command_line_posix.cc",
-            "platform/posix/file_posix.cc",
-            "platform/posix/mapping_posix.cc",
-            "platform/posix/native_library_posix.cc",
-            "platform/posix/paths_posix.cc",
-            "platform/posix/posix_wrappers_posix.cc",
-            "platform/posix/process_posix.cc",
-        ],
-    }),
+    ],
     hdrs = [
         "ascii_trie.h",
         "backtrace.h",
         "base32.h",
+        "build_config.h",
         "closure.h",
         "concurrent_message_loop.h",
         "container.h",
@@ -85,7 +76,7 @@ cc_library(
         "file.h",
         "hash_combine.h",
         "hex_codec.h",
-        "icu_util.h",  # !is_wasm
+        "icu_util.h",  # target_os != "wasm"
         "log_level.h",
         "log_settings.h",
         "logging.h",
@@ -105,6 +96,8 @@ cc_library(
         "message_loop_task_queues.h",
         "native_library.h",
         "paths.h",
+        "platform/linux/message_loop_linux.h",  # is_linux
+        "platform/linux/timerfd.h",  # is_linux
         "posix_wrappers.h",
         "process.h",
         "raster_thread_merger.h",
@@ -132,12 +125,11 @@ cc_library(
         "wakeable.h",
     ],
     copts = FLUTTER_COPTS,
-    # GN lists these under `deps`, so their public configs (ICU's defines and
-    # include directories in particular) stop at fml.
     implementation_deps = [
+        # This abseil dependency is only used by backtrace.cc.
         "@abseil-cpp//absl/debugging:symbolize",  # enable_backtrace
         "@abseil-cpp//absl/numeric:int128",
-        "@icu",  # !is_wasm
+        "@icu",  # target_os != "wasm"
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
@@ -147,8 +139,10 @@ cc_library(
         ":string_conversion",
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
-        # trace_event.h uses the Dart timeline types.
-        "@dart//:dart_api_headers",
+        # trace_event.h uses the Dart timeline API. The Dart runtime's build
+        # files cannot be loaded for target_os == "wasm", where the header is
+        # found through the source root alone.
+        "@dart//:dart_api_headers",  # target_os != "wasm"
     ],
 )
 
@@ -184,17 +178,20 @@ cc_library(
 )
 
 cc_library(
+    name = "string_conversion_config",
+)
+
+cc_library(
     name = "string_conversion",
     srcs = ["string_conversion.cc"],
     hdrs = ["string_conversion.h"],
     copts = FLUTTER_COPTS,
-    local_defines = FLUTTER_LOCAL_DEFINES + [
-        # Current versions of libcxx have deprecated some of the UTF-16 string
-        # conversion APIs.
-        "_LIBCPP_DISABLE_DEPRECATION_WARNINGS",
-    ],
+    implementation_deps = [":build_config"],
+    # Current versions of libcxx have deprecated some of the UTF-16 string
+    # conversion APIs.
+    local_defines = FLUTTER_LOCAL_DEFINES + ["_LIBCPP_DISABLE_DEPRECATION_WARNINGS"],
     deps = [
-        ":build_config",
+        ":string_conversion_config",
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
     ],
@@ -202,7 +199,6 @@ cc_library(
 
 flutter_test_fixtures(
     name = "fml_fixtures",
-    fixtures = [],
 )
 
 cc_test(
