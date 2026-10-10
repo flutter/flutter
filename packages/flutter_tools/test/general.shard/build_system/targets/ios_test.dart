@@ -308,6 +308,9 @@ void main() {
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
+          .createSync();
       // Project info
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
@@ -369,6 +372,7 @@ void main() {
       expect(assetDirectory.childFile('kernel_blob.bin'), exists);
       expect(assetDirectory.childFile('vm_snapshot_data'), exists);
       expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
+      expect(assetDirectory.childFile('vmservice_snapshot.dill'), exists);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -674,6 +678,7 @@ void main() {
       expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));
       expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
       expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
+      expect(assetDirectory.childFile('vmservice_snapshot.dill'), isNot(exists));
       expect(fakeAnalytics.sentEvents, isEmpty);
     },
     overrides: <Type, Generator>{
