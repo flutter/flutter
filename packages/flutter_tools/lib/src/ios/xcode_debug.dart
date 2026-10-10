@@ -9,11 +9,14 @@ import 'package:process/process.dart';
 import 'package:xml/xml.dart';
 import 'package:xml/xpath.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
@@ -441,12 +444,19 @@ and ensure "Debug executable" is checked in the "Info" tab.
     required BuildInfo buildInfo,
     String? mainPath,
     required String configurationBuildDir,
+    required Artifacts artifacts,
+    required Config config,
+    required OperatingSystemUtils os,
   }) async {
     await updateGeneratedXcodeProperties(
       project: project,
       buildInfo: buildInfo,
       targetOverride: mainPath,
       configurationBuildDir: configurationBuildDir,
+      artifacts: artifacts,
+      config: config,
+      logger: _logger,
+      os: os,
     );
   }
 }

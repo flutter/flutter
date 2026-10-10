@@ -8,12 +8,14 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/template.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -65,6 +67,8 @@ class BuildSwiftPackage extends BuildSubCommand {
     required this._artifacts,
     required this._buildSystem,
     required this._cache,
+    required this._cocoaPods,
+    required this._config,
     required this._featureFlags,
     required this._fileSystem,
     required this._flutterVersion,
@@ -134,6 +138,8 @@ class BuildSwiftPackage extends BuildSubCommand {
   final FlutterVersion _flutterVersion;
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
+  final CocoaPods _cocoaPods;
+  final Config _config;
 
   @override
   bool get supported => _platform.isMacOS;
@@ -222,6 +228,8 @@ class BuildSwiftPackage extends BuildSubCommand {
     artifacts: _artifacts,
     buildSystem: _buildSystem,
     cache: _cache,
+    cocoaPods: _cocoaPods,
+    config: _config,
     fileSystem: _fileSystem,
     flutterRoot: Cache.flutterRoot!,
     flutterVersion: _flutterVersion,
@@ -1579,8 +1587,14 @@ class CocoaPodPluginDependencies {
   Future<void> processPods(XcodeBasedProject xcodeProject, BuildInfo buildInfo) async {
     await processPodsIfNeeded(
       xcodeProject,
-      _targetPlatform.buildDirectory(),
+      _targetPlatform.buildDirectory(config: _utils.config, fileSystem: _utils.fileSystem),
       buildInfo.mode,
+      cocoaPods: _utils.cocoaPods,
+      config: _utils.config,
+      fileSystem: _utils.fileSystem,
+      logger: _utils.logger,
+      processUtils: ProcessUtils(processManager: _utils.processManager, logger: _utils.logger),
+      templateRenderer: _utils.templateRenderer,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
       // SwiftPM. Since "flutter build swift-package" builds Swift packages and CocoaPods
       // separately, we need to force SwiftPM to be enabled so that CocoaPods will skip processing
@@ -2156,6 +2170,8 @@ class BuildSwiftPackageUtils {
     required this.artifacts,
     required this.buildSystem,
     required this.cache,
+    required this.cocoaPods,
+    required this.config,
     required this.fileSystem,
     required this.flutterRoot,
     required this.flutterVersion,
@@ -2171,6 +2187,8 @@ class BuildSwiftPackageUtils {
   final Artifacts artifacts;
   final BuildSystem buildSystem;
   final Cache cache;
+  final CocoaPods cocoaPods;
+  final Config config;
   final FileSystem fileSystem;
   final String flutterRoot;
   final FlutterVersion flutterVersion;

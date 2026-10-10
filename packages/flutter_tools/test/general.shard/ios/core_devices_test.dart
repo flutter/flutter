@@ -7,10 +7,13 @@ import 'dart:io' as io;
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
@@ -29,6 +32,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' hide FakeProcess;
 
 class LocalFileSystemFake extends Fake implements LocalFileSystem {
   MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
@@ -764,6 +768,9 @@ void main() {
           package: package,
           launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
           templateRenderer: FakeTemplateRenderer(),
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          os: FakeOperatingSystemUtils(),
         );
 
         expect(result, isTrue);
@@ -799,6 +806,9 @@ void main() {
           package: package,
           launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
           templateRenderer: FakeTemplateRenderer(),
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          os: FakeOperatingSystemUtils(),
         );
 
         expect(result, isTrue);
@@ -834,6 +844,9 @@ void main() {
           package: package,
           launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
           templateRenderer: FakeTemplateRenderer(),
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          os: FakeOperatingSystemUtils(),
         );
 
         expect(result, isFalse);
@@ -869,6 +882,9 @@ void main() {
           package: package,
           launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
           templateRenderer: FakeTemplateRenderer(),
+          artifacts: Artifacts.test(),
+          config: Config.test(),
+          os: FakeOperatingSystemUtils(),
         );
 
         expect(result, isFalse);
@@ -4310,6 +4326,9 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     required BuildInfo buildInfo,
     String? mainPath,
     required String configurationBuildDir,
+    required Artifacts artifacts,
+    required Config config,
+    required OperatingSystemUtils os,
   }) async {}
 }
 

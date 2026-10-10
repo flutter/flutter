@@ -8,12 +8,16 @@ import 'dart:math' as math;
 import 'package:args/args.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/context/tool_dependencies.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -23,6 +27,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
 import 'package:flutter_tools/src/test/test_wrapper.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 const _kOptionPackages = 'packages';
@@ -168,6 +173,14 @@ Future<void> run(List<String> args) async {
         globals.fs.path.absolute(argResults[_kOptionPackages] as String),
       ),
     );
+    final ToolContext(
+      :Config config,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
+    ) = dependencies.toolContext;
     final testRunner = FlutterTestRunner(toolContext: dependencies.toolContext);
     exitCode = await testRunner.runTests(
       const TestWrapper(),
@@ -180,7 +193,14 @@ Future<void> run(List<String> args) async {
       concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
       icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
       coverageDirectory: coverageDirectory,
-      nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
+      nativeAssetsBuilder: TestCompilerNativeAssetsBuilderImpl(
+        config: config,
+        fileSystem: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+        projectFactory: projectFactory,
+      ),
     );
 
     if (collector != null) {

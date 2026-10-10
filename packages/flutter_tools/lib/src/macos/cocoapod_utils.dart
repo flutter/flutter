@@ -2,14 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../base/config.dart';
+import '../base/file_system.dart';
 import '../base/fingerprint.dart';
+import '../base/logger.dart';
+import '../base/process.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../plugins.dart';
 import '../project.dart';
+import 'cocoapods.dart';
 import 'swift_package_manager.dart';
 
 /// For a given build, determines whether dependencies have changed since the
@@ -18,6 +23,12 @@ Future<void> processPodsIfNeeded(
   XcodeBasedProject xcodeProject,
   String buildDirectory,
   BuildMode buildMode, {
+  required CocoaPods? cocoaPods,
+  required Config config,
+  required FileSystem fileSystem,
+  required Logger logger,
+  required ProcessUtils processUtils,
+  required TemplateRenderer templateRenderer,
   bool forceCocoaPodsOnly = false,
   bool forceSwiftPM = false,
 }) async {
@@ -48,23 +59,23 @@ Future<void> processPodsIfNeeded(
   // If forcing the use of only CocoaPods, but the project is using Swift
   // Package Manager, print a warning that CocoaPods will be used.
   if (forceCocoaPodsOnly && xcodeProject.usesSwiftPackageManager) {
-    globals.logger.printWarning(
+    logger.printWarning(
       'Swift Package Manager does not yet support this command. '
       'CocoaPods will be used instead.',
     );
 
     // If CocoaPods has been deintegrated, add it back.
     if (!xcodeProject.podfile.existsSync()) {
-      await globals.cocoaPods?.setupPodfile(xcodeProject);
+      await cocoaPods?.setupPodfile(xcodeProject);
     }
 
     // Generate an empty Swift Package Manager manifest to invalidate fingerprinter
     final swiftPackageManager = SwiftPackageManager(
-      fileSystem: globals.localFileSystem,
-      templateRenderer: globals.templateRenderer,
-      processUtils: globals.processUtils,
-      config: globals.config,
-      logger: globals.logger,
+      fileSystem: fileSystem,
+      templateRenderer: templateRenderer,
+      processUtils: processUtils,
+      config: config,
+      logger: logger,
     );
     final FlutterDarwinPlatform platform = xcodeProject is IosProject
         ? FlutterDarwinPlatform.ios
@@ -81,20 +92,20 @@ Future<void> processPodsIfNeeded(
   // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper
   // have changed since last run, pods should be updated.
   final fingerprinter = Fingerprinter(
-    fingerprintPath: globals.fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
+    fingerprintPath: fileSystem.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
       if (xcodeProject.flutterPluginSwiftPackageManifest.existsSync())
         xcodeProject.flutterPluginSwiftPackageManifest.path,
-      globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'),
+      fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'),
     ],
-    fileSystem: globals.fs,
-    logger: globals.logger,
+    fileSystem: fileSystem,
+    logger: logger,
   );
 
   final bool didPodInstall =
-      await globals.cocoaPods?.processPods(
+      await cocoaPods?.processPods(
         xcodeProject: xcodeProject,
         buildMode: buildMode,
         dependenciesChanged: !fingerprinter.doesFingerprintMatch(),

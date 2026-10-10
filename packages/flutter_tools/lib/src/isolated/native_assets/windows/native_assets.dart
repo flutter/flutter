@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
+import 'package:process/process.dart';
 
 import '../../../base/common.dart';
-import '../../../globals.dart' as globals;
+import '../../../base/file_system.dart';
+import '../../../base/logger.dart';
+import '../../../base/os.dart';
+import '../../../base/platform.dart';
 import '../../../windows/visual_studio.dart';
 
 /// Returns the [CCompilerConfig] for Windows by locating the active Visual Studio toolchain.
@@ -13,13 +17,20 @@ import '../../../windows/visual_studio.dart';
 /// If a suitable Visual Studio installation is not found:
 /// * Throws a [ToolExit] if [throwIfNotFound] is true.
 /// * Returns null if [throwIfNotFound] is false.
-Future<CCompilerConfig?> cCompilerConfigWindows({required bool throwIfNotFound}) async {
+Future<CCompilerConfig?> cCompilerConfigWindows({
+  required FileSystem fileSystem,
+  required Logger logger,
+  required OperatingSystemUtils osUtils,
+  required Platform platform,
+  required ProcessManager processManager,
+  required bool throwIfNotFound,
+}) async {
   final visualStudio = VisualStudio(
-    fileSystem: globals.fs,
-    platform: globals.platform,
-    logger: globals.logger,
-    processManager: globals.processManager,
-    osUtils: globals.os,
+    fileSystem: fileSystem,
+    platform: platform,
+    logger: logger,
+    processManager: processManager,
+    osUtils: osUtils,
   );
 
   final Uri? compiler = _toOptionalFileUri(visualStudio.clPath);

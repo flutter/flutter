@@ -13,6 +13,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
@@ -37,6 +38,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this._appleContext,
     required this._buildSystem,
     required this.codesign,
+    required this.templateRenderer,
     required ToolContext super.toolContext,
     required super.verboseHelp,
   }) : _toolContext = toolContext,
@@ -111,6 +113,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   );
 
   final DarwinAddToAppCodesigning codesign;
+  final TemplateRenderer templateRenderer;
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
@@ -470,6 +473,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required super.appleContext,
     required super.buildSystem,
     required super.codesign,
+    required super.templateRenderer,
     required super.toolContext,
     required super.verboseHelp,
   }) {
@@ -527,6 +531,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       :FileSystem fs,
       :Logger logger,
       :ProcessManager processManager,
+      :ProcessUtils processUtils,
     ) = toolContext;
 
     final String outputArgument =
@@ -606,6 +611,12 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           project.ios,
           getIosBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
+          cocoaPods: appleContext.cocoaPods,
+          config: config,
+          fileSystem: fs,
+          logger: logger,
+          processUtils: processUtils,
+          templateRenderer: templateRenderer,
           forceCocoaPodsOnly: true,
         );
         if (hasPlugins(project)) {

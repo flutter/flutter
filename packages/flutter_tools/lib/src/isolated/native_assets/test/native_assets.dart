@@ -6,17 +6,34 @@
 
 import 'package:code_assets/code_assets.dart' show OS;
 import 'package:package_config/package_config_types.dart';
+import 'package:process/process.dart';
 
+import '../../../base/config.dart';
+import '../../../base/file_system.dart';
+import '../../../base/logger.dart';
 import '../../../base/platform.dart';
 import '../../../build_info.dart';
-import '../../../globals.dart' as globals;
 import '../../../native_assets.dart';
 import '../../../project.dart';
 import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
 class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBuilder {
-  const TestCompilerNativeAssetsBuilderImpl();
+  const TestCompilerNativeAssetsBuilderImpl({
+    required this._config,
+    required this._fileSystem,
+    required this._logger,
+    required this._platform,
+    required this._processManager,
+    required this._projectFactory,
+  });
+
+  final Config _config;
+  final FileSystem _fileSystem;
+  final Logger _logger;
+  final Platform _platform;
+  final ProcessManager _processManager;
+  final FlutterProjectFactory _projectFactory;
 
   @override
   Future<Uri?> build(BuildInfo buildInfo) async =>
@@ -24,22 +41,36 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 
   @override
   Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) =>
-      testCompilerBuildNativeAssets(buildInfo);
+      testCompilerBuildNativeAssets(
+        buildInfo,
+        config: _config,
+        fileSystem: _fileSystem,
+        logger: _logger,
+        platform: _platform,
+        processManager: _processManager,
+        projectFactory: _projectFactory,
+      );
 
   @override
   String windowsBuildDirectory(FlutterProject project) {
-    final String buildDir = getBuildDirectory();
+    final String buildDir = getBuildDirectory(_config, _fileSystem);
     return project.directory.uri.resolve('$buildDir/native_assets/windows/').toFilePath();
   }
 }
 
 Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
-  BuildInfo buildInfo,
-) async {
+  BuildInfo buildInfo, {
+  required Config config,
+  required FileSystem fileSystem,
+  required Logger logger,
+  required Platform platform,
+  required ProcessManager processManager,
+  required FlutterProjectFactory projectFactory,
+}) async {
   if (!buildInfo.buildNativeAssets) {
     return (nativeAssetsManifest: null, flutterHookResult: null);
   }
-  final Uri projectUri = FlutterProject.current().directory.uri;
+  final Uri projectUri = projectFactory.fromDirectory(fileSystem.currentDirectory).directory.uri;
   final String runPackageName = buildInfo.packageConfig.packages
       .firstWhere((Package p) => p.root == projectUri)
       .name;
@@ -49,20 +80,22 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
     buildInfo.packageConfigPath,
     buildInfo.packageConfig,
-    globals.fs,
-    globals.logger,
-    globals.platform,
+    fileSystem,
+    logger,
+    platform,
+    processManager,
     runPackageName,
     includeDevDependencies: true,
     pubspecPath,
   );
 
-  if (!globals.platform.isMacOS && !globals.platform.isLinux && !globals.platform.isWindows) {
+  if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {
     await ensureNoNativeAssetsOrOsIsSupported(
       projectUri,
-      const LocalPlatform().operatingSystem,
-      globals.fs,
+      platform.operatingSystem,
+      fileSystem,
       buildRunner,
+      logger: logger,
     );
     return (nativeAssetsManifest: null, flutterHookResult: null);
   }
@@ -71,7 +104,7 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   // `build/native_assets/<os>/native_assets.json` file which uses absolute
   // paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
-  final String buildDir = getBuildDirectory();
+  final String buildDir = getBuildDirectory(config, fileSystem);
   final String osName = targetOS.name;
   final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$osName/');
   final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
@@ -84,7 +117,8 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     buildRunner: buildRunner,
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
-    fileSystem: globals.fs,
+    fileSystem: fileSystem,
+    logger: logger,
     buildCodeAssets: const BuildCodeAssetsOptions(
       // We're in tests, so there is no app build directory
       appBuildDirectory: null,
@@ -99,11 +133,13 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     environmentDefines: environmentDefines,
     targetPlatform: TargetPlatform.tester,
     projectUri: projectUri,
-    fileSystem: globals.fs,
+    fileSystem: fileSystem,
+    logger: logger,
+    processManager: processManager,
     nativeAssetsFileUri: nativeAssetsFileUri,
-    targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/$osName/'),
+    targetUri: buildUri,
   );
-  assert(globals.fs.file(nativeAssetsFileUri).existsSync());
+  assert(fileSystem.file(nativeAssetsFileUri).existsSync());
 
   return (
     nativeAssetsManifest: nativeAssetsFileUri,

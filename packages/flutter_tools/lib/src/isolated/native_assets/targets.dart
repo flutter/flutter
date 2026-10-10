@@ -6,8 +6,13 @@ import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart' show Directory, FileSystem;
 import 'package:hooks/hooks.dart';
+import 'package:process/process.dart' show ProcessManager;
 
 import '../../base/common.dart' show throwToolExit;
+import '../../base/logger.dart' show Logger;
+import '../../base/os.dart' show OperatingSystemUtils;
+import '../../base/platform.dart' show Platform;
+import '../../base/process.dart' show ProcessUtils;
 import '../../build_info.dart'
     show
         BuildMode,
@@ -227,7 +232,13 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
   /// could not be found. For `flutter test` setups where no app is compiled, we _prefer_ to use the
   /// same toolchain but would allow not passing a [CCompilerConfig] if that fails. This allows
   /// hooks that only download code assets instead of compiling them to still function.
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true});
+  Future<void> setCCompilerConfig({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
+    bool mustMatchAppBuild = true,
+  });
 
   List<CodeAssetExtension> get codeAssetExtensions {
     return <CodeAssetExtension>[
@@ -256,8 +267,25 @@ class WindowsAssetTarget extends CodeAssetTarget {
   ];
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigWindows(throwIfNotFound: mustMatchAppBuild);
+  Future<void> setCCompilerConfig({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
+    bool mustMatchAppBuild = true,
+  }) async => cCompilerConfigSync = await cCompilerConfigWindows(
+    fileSystem: fileSystem,
+    logger: logger,
+    osUtils: OperatingSystemUtils(
+      fileSystem: fileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+    ),
+    platform: platform,
+    processManager: processManager,
+    throwIfNotFound: mustMatchAppBuild,
+  );
 }
 
 final class LinuxAssetTarget extends CodeAssetTarget {
@@ -272,7 +300,13 @@ final class LinuxAssetTarget extends CodeAssetTarget {
   final Directory? cmakeBuildDirectory;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async {
+  Future<void> setCCompilerConfig({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
+    bool mustMatchAppBuild = true,
+  }) async {
     final bool isNativeAppBuild = cmakeBuildDirectory != null && cmakeBuildDirectory!.existsSync();
 
     cCompilerConfigSync = await cCompilerConfigLinux(
@@ -300,8 +334,16 @@ final class IOSAssetTarget extends CodeAssetTarget {
   final FileSystem fileSystem;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
+  Future<void> setCCompilerConfig({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
+    bool mustMatchAppBuild = true,
+  }) async => cCompilerConfigSync = await cCompilerConfigMacOS(
+    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+    throwIfNotFound: mustMatchAppBuild,
+  );
 
   IOSCodeConfig _getIOSConfig(Map<String, String> environmentDefines, FileSystem fileSystem) {
     final String? sdkRoot = environmentDefines[kSdkRoot];
@@ -348,8 +390,16 @@ final class MacOSAssetTarget extends CodeAssetTarget {
   }
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigMacOS(throwIfNotFound: mustMatchAppBuild);
+  Future<void> setCCompilerConfig({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
+    bool mustMatchAppBuild = true,
+  }) async => cCompilerConfigSync = await cCompilerConfigMacOS(
+    processUtils: ProcessUtils(processManager: processManager, logger: logger),
+    throwIfNotFound: mustMatchAppBuild,
+  );
 }
 
 final class AndroidAssetTarget extends CodeAssetTarget {
@@ -365,8 +415,13 @@ final class AndroidAssetTarget extends CodeAssetTarget {
   final AndroidCodeConfig? _androidCodeConfig;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) async =>
-      cCompilerConfigSync = await cCompilerConfigAndroid();
+  Future<void> setCCompilerConfig({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
+    bool mustMatchAppBuild = true,
+  }) async => cCompilerConfigSync = await cCompilerConfigAndroid();
 
   @override
   List<ProtocolExtension> get extensions => <ProtocolExtension>[
@@ -414,8 +469,19 @@ final class FlutterTesterAssetTarget extends CodeAssetTarget {
   CCompilerConfig? get cCompilerConfigSync => subtarget.cCompilerConfigSync;
 
   @override
-  Future<void> setCCompilerConfig({bool mustMatchAppBuild = true}) =>
-      subtarget.setCCompilerConfig(mustMatchAppBuild: false);
+  Future<void> setCCompilerConfig({
+    required FileSystem fileSystem,
+    required Logger logger,
+    required Platform platform,
+    required ProcessManager processManager,
+    bool mustMatchAppBuild = true,
+  }) => subtarget.setCCompilerConfig(
+    fileSystem: fileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+    mustMatchAppBuild: false,
+  );
 }
 
 List<CpuArch> _androidArchs(TargetPlatform targetPlatform, String? androidArchsEnvironment) {
