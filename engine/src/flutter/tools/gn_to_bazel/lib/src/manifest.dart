@@ -260,6 +260,29 @@ cc_library(
 )
 ''',
   ),
+  // The shader compiler's dependencies (research/08, step 1): the engine's
+  // GN in the secondary source tree over synced trees it names by absolute
+  // path (`$source_root/...`), and SPIRV-Headers' own GN.
+  ConvertedFile('//third_party/inja'),
+  ConvertedFile('//flutter/third_party/json'),
+  ConvertedFile('//third_party/spirv_cross_flutter'),
+  ConvertedFile(
+    '//flutter/third_party/flatbuffers',
+    implicitDeps: <String>['@flatbuffers//:flatbuffers_headers'],
+    // The GN lists leave out headers the sources include (src/idl_gen_text.h
+    // and friends).
+    appendix: '''
+cc_library(
+    name = "flatbuffers_headers",
+    hdrs = glob([
+        "grpc/src/compiler/*.h",
+        "include/**/*.h",
+        "src/*.h",
+    ]),
+)
+''',
+  ),
+  ConvertedFile('//flutter/third_party/vulkan-deps/spirv-headers/src'),
 ];
 
 /// The manifest entry for a GN directory, from either list.

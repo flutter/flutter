@@ -455,6 +455,17 @@ final class _Emitter {
         rule.list('deps').addUnique(Condition.always, _Item(_localLabel(defaultIncludeDirsLabel)));
       }
     }
+    // cc_binary and cc_test have no `includes`; a target's own include_dirs
+    // ride a header-only library it depends on, which puts the same -I on
+    // the same compiles.
+    final _ListAttribute? includes = rule.lists['includes'];
+    if (kind != 'cc_library' && includes != null && !includes.isEmpty) {
+      rule.lists.remove('includes');
+      final helper = _Rule('cc_library', '${target.name}_include_dirs', const <String>[]);
+      helper.lists['includes'] = includes;
+      rules.add(helper);
+      rule.list('deps').addUnique(Condition.always, _Item(':${helper.name}'));
+    }
     rules.add(rule);
   }
 
