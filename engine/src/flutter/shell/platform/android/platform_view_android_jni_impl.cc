@@ -446,8 +446,8 @@ static bool IsSurfaceControlEnabled(JNIEnv* env,
 
 static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   auto screenshot = ANDROID_SHELL_HOLDER->Screenshot(
-      Rasterizer::ScreenshotType::UncompressedImage, false);
-  if (screenshot.data == nullptr) {
+      kFlutterScreenshotTypeUncompressedImage, false);
+  if (screenshot.data.GetMapping() == nullptr) {
     return nullptr;
   }
 
@@ -463,13 +463,13 @@ static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   }
 
   auto bitmap = env->CallStaticObjectMethod(
-      g_bitmap_class->obj(), g_bitmap_create_bitmap_method,
-      screenshot.frame_size.width, screenshot.frame_size.height, bitmap_config);
+      g_bitmap_class->obj(), g_bitmap_create_bitmap_method, screenshot.width,
+      screenshot.height, bitmap_config);
 
   fml::jni::ScopedJavaLocalRef<jobject> buffer(
-      env,
-      env->NewDirectByteBuffer(const_cast<uint8_t*>(screenshot.data->bytes()),
-                               screenshot.data->size()));
+      env, env->NewDirectByteBuffer(
+               const_cast<uint8_t*>(screenshot.data.GetMapping()),
+               screenshot.data.GetSize()));
 
   env->CallVoidMethod(bitmap, g_bitmap_copy_pixels_from_buffer_method,
                       buffer.obj());

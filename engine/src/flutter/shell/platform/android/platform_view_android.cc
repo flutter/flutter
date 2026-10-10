@@ -10,7 +10,6 @@
 #include <utility>
 
 #include "common/settings.h"
-#include "flutter/common/graphics/texture.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/gpu/gpu_surface_gl_delegate.h"

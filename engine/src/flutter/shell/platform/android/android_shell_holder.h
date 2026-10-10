@@ -9,7 +9,6 @@
 #include <type_traits>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
@@ -39,6 +38,14 @@ namespace flutter {
 ///
 class AndroidShellHolder {
  public:
+  struct ScreenshotData {
+    fml::MallocMapping data;
+    int32_t width = 0;
+    int32_t height = 0;
+    std::string format;
+    FlutterScreenshotFormat pixel_format = kFlutterScreenshotFormatUnknown;
+  };
+
   AndroidShellHolder(const flutter::Settings& settings,
                      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
                      AndroidRenderingAPI android_rendering_api);
@@ -96,8 +103,7 @@ class AndroidShellHolder {
 
   bool IsSurfaceControlEnabled();
 
-  Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
-                                    bool base64_encode);
+  ScreenshotData Screenshot(FlutterScreenshotType type, bool base64_encode);
 
   void NotifyLowMemoryWarning();
 

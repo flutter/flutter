@@ -1810,25 +1810,22 @@ TEST_F(PlatformViewAndroidJNIImplTest,
                          return kSuccess;
                        }));
 
-  Rasterizer::Screenshot result = holder->Screenshot(
-      Rasterizer::ScreenshotType::UncompressedImage, /*base64_encode=*/true);
+  AndroidShellHolder::ScreenshotData result = holder->Screenshot(
+      kFlutterScreenshotTypeUncompressedImage, /*base64_encode=*/true);
 
   EXPECT_TRUE(screenshot_called);
   EXPECT_TRUE(free_screenshot_called);
   EXPECT_EQ(captured_type, kFlutterScreenshotTypeUncompressedImage);
   EXPECT_TRUE(captured_base64_encode);
-  ASSERT_NE(result.data, nullptr);
-  ASSERT_EQ(result.data->size(), sizeof(kFakePixelBytes));
-  EXPECT_EQ(std::memcmp(result.data->bytes(), kFakePixelBytes,
+  ASSERT_NE(result.data.GetMapping(), nullptr);
+  ASSERT_EQ(result.data.GetSize(), sizeof(kFakePixelBytes));
+  EXPECT_EQ(std::memcmp(result.data.GetMapping(), kFakePixelBytes,
                         sizeof(kFakePixelBytes)),
             0);
-  EXPECT_EQ(result.frame_size.width,
-            static_cast<int32_t>(kFakeScreenshotWidth));
-  EXPECT_EQ(result.frame_size.height,
-            static_cast<int32_t>(kFakeScreenshotHeight));
+  EXPECT_EQ(result.width, static_cast<int32_t>(kFakeScreenshotWidth));
+  EXPECT_EQ(result.height, static_cast<int32_t>(kFakeScreenshotHeight));
   EXPECT_EQ(result.format, "ScreenshotType::UncompressedImage");
-  EXPECT_EQ(result.pixel_format,
-            Rasterizer::ScreenshotFormat::kR8G8B8A8UNormInt);
+  EXPECT_EQ(result.pixel_format, kFlutterScreenshotFormatR8G8B8A8UNormInt);
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest,

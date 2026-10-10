@@ -7,17 +7,7 @@
 #include <android/hardware_buffer_jni.h>
 #include <android/sensor.h>
 
-#include "flutter/common/graphics/texture.h"
-#include "flutter/impeller/core/formats.h"
-#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/toolkit/android/hardware_buffer.h"
-#include "flutter/impeller/toolkit/egl/image.h"
-#include "flutter/impeller/toolkit/gles/texture.h"
-#include "third_party/skia/include/core/SkAlphaType.h"
-#include "third_party/skia/include/core/SkColorType.h"
-#include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
-#include "third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
-#include "third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
 
 namespace flutter {
 

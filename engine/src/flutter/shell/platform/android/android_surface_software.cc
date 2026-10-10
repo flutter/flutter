@@ -15,7 +15,6 @@
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 
 #include "third_party/skia/include/core/SkImage.h"
-#include "third_party/skia/include/core/SkSurface.h"
 
 namespace flutter {
 

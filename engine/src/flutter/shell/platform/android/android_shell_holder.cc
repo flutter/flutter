@@ -23,7 +23,6 @@
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
@@ -865,30 +864,15 @@ void AndroidShellHolder::Launch(
   }
 }
 
-Rasterizer::Screenshot AndroidShellHolder::Screenshot(
-    Rasterizer::ScreenshotType type,
+AndroidShellHolder::ScreenshotData AndroidShellHolder::Screenshot(
+    FlutterScreenshotType type,
     bool base64_encode) {
   if (!IsValid()) {
-    return {nullptr, DlISize(), "", Rasterizer::ScreenshotFormat::kUnknown};
-  }
-  FlutterScreenshotType screenshot_type;
-  switch (type) {
-    case Rasterizer::ScreenshotType::SkiaPicture:
-      screenshot_type = kFlutterScreenshotTypeSkiaPicture;
-      break;
-    case Rasterizer::ScreenshotType::UncompressedImage:
-      screenshot_type = kFlutterScreenshotTypeUncompressedImage;
-      break;
-    case Rasterizer::ScreenshotType::CompressedImage:
-      screenshot_type = kFlutterScreenshotTypeCompressedImage;
-      break;
-    case Rasterizer::ScreenshotType::SurfaceData:
-      screenshot_type = kFlutterScreenshotTypeSurfaceData;
-      break;
+    return {};
   }
   FlutterScreenshotRequest request = {
       .struct_size = sizeof(FlutterScreenshotRequest),
-      .type = screenshot_type,
+      .type = type,
       .base64_encode = base64_encode,
   };
   FlutterScreenshot c_screenshot = {
@@ -897,35 +881,24 @@ Rasterizer::Screenshot AndroidShellHolder::Screenshot(
   FlutterEngineResult result =
       embedder_api_.Screenshot(engine_.get(), &request, &c_screenshot);
   if (result != kSuccess) {
-    return {nullptr, DlISize(), "", Rasterizer::ScreenshotFormat::kUnknown};
+    return {};
   }
-  sk_sp<SkData> data =
+  fml::MallocMapping data =
       c_screenshot.data != nullptr
-          ? SkData::MakeWithCopy(c_screenshot.data, c_screenshot.data_length)
-          : nullptr;
-  DlISize frame_size(static_cast<int32_t>(c_screenshot.width),
-                     static_cast<int32_t>(c_screenshot.height));
-  std::string format = c_screenshot.format_description != nullptr
-                           ? c_screenshot.format_description
-                           : "";
-  Rasterizer::ScreenshotFormat pixel_format =
-      Rasterizer::ScreenshotFormat::kUnknown;
-  switch (c_screenshot.format) {
-    case kFlutterScreenshotFormatUnknown:
-      pixel_format = Rasterizer::ScreenshotFormat::kUnknown;
-      break;
-    case kFlutterScreenshotFormatR8G8B8A8UNormInt:
-      pixel_format = Rasterizer::ScreenshotFormat::kR8G8B8A8UNormInt;
-      break;
-    case kFlutterScreenshotFormatB8G8R8A8UNormInt:
-      pixel_format = Rasterizer::ScreenshotFormat::kB8G8R8A8UNormInt;
-      break;
-    case kFlutterScreenshotFormatR16G16B16A16Float:
-      pixel_format = Rasterizer::ScreenshotFormat::kR16G16B16A16Float;
-      break;
-  }
+          ? fml::MallocMapping::Copy(c_screenshot.data,
+                                     c_screenshot.data_length)
+          : fml::MallocMapping();
+  ScreenshotData screenshot = {
+      .data = std::move(data),
+      .width = static_cast<int32_t>(c_screenshot.width),
+      .height = static_cast<int32_t>(c_screenshot.height),
+      .format = c_screenshot.format_description != nullptr
+                    ? c_screenshot.format_description
+                    : "",
+      .pixel_format = c_screenshot.format,
+  };
   embedder_api_.FreeScreenshot(&c_screenshot);
-  return {std::move(data), frame_size, std::move(format), pixel_format};
+  return screenshot;
 }
 
 fml::WeakPtr<PlatformViewAndroid> AndroidShellHolder::GetPlatformView() {

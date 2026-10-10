@@ -9,12 +9,10 @@
 #include <GLES2/gl2ext.h>
 
 #include "flutter/display_list/image/dl_image_skia.h"
-#include "flutter/third_party/skia/include/core/SkColorSpace.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
-#include "flutter/third_party/skia/include/gpu/ganesh/gl/GrGLTypes.h"
 
 namespace flutter {
 

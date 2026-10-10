@@ -5,7 +5,6 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_SNAPSHOT_SURFACE_PRODUCER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_SNAPSHOT_SURFACE_PRODUCER_H_
 
-#include "flutter/flow/surface.h"
 #include "flutter/shell/common/snapshot_surface_producer.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 
