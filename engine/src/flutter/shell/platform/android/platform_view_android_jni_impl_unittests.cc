@@ -15,6 +15,7 @@
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/shell.h"
+#include "flutter/shell/platform/android/android_image_generator.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
@@ -1819,6 +1820,69 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   EXPECT_EQ(result.format, "ScreenshotType::UncompressedImage");
   EXPECT_EQ(result.pixel_format,
             Rasterizer::ScreenshotFormat::kR8G8B8A8UNormInt);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       AndroidImageGeneratorRegistrationInfoValidatesCallbacksAndDestruction) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+  EXPECT_NE(holder->GetEmbedderApiForTesting().RegisterImageGenerator, nullptr);
+
+  // Priority -1 matches AndroidShellHolder SDK image decoder registration.
+  constexpr int32_t kAndroidSdkDecoderPriority = -1;
+  FlutterImageGeneratorRegistrationInfo info =
+      AndroidImageGenerator::MakeFlutterImageGeneratorRegistrationInfo(
+          holder->GetShellForTesting()->GetTaskRunners().GetIOTaskRunner(),
+          kAndroidSdkDecoderPriority);
+
+  EXPECT_EQ(info.struct_size, sizeof(FlutterImageGeneratorRegistrationInfo));
+  EXPECT_EQ(info.priority, kAndroidSdkDecoderPriority);
+  ASSERT_NE(info.create_generator, nullptr);
+  ASSERT_NE(info.user_data, nullptr);
+  ASSERT_NE(info.destruction_callback, nullptr);
+
+  // Null/empty arguments to create_generator must return false without leaking.
+  FlutterImageGenerator out_gen = {};
+  constexpr uint8_t kDummyEncodedBytes[] = {0x89, 0x50, 0x4E, 0x47};
+  EXPECT_FALSE(info.create_generator(nullptr, sizeof(kDummyEncodedBytes),
+                                     info.user_data, &out_gen));
+  EXPECT_FALSE(
+      info.create_generator(kDummyEncodedBytes, 0, info.user_data, &out_gen));
+  EXPECT_FALSE(info.create_generator(
+      kDummyEncodedBytes, sizeof(kDummyEncodedBytes), nullptr, &out_gen));
+  EXPECT_FALSE(info.create_generator(
+      kDummyEncodedBytes, sizeof(kDummyEncodedBytes), info.user_data, nullptr));
+
+  // Release the heap-allocated task runner ref in user_data.
+  info.destruction_callback(info.user_data);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       LaunchQueriesRunsAOTCompiledDartCodeViaEmbedderApi) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  bool runs_aot_queried = false;
+  holder->GetEmbedderApiForTesting().RunsAOTCompiledDartCode =
+      MOCK_ENGINE_PROC(RunsAOTCompiledDartCode, ([&]() {
+                         runs_aot_queried = true;
+                         return false;
+                       }));
+
+  // With RunsAOTCompiledDartCode returning false and no kernel asset configured
+  // on settings, Launch queries RunsAOTCompiledDartCode and returns early when
+  // BuildRunConfiguration returns std::nullopt.
+  constexpr int64_t kTestEngineId = 1;
+  holder->Launch(/*apk_asset_provider=*/nullptr, "main", "", {}, kTestEngineId);
+  EXPECT_TRUE(runs_aot_queried);
 }
 
 }  // namespace testing

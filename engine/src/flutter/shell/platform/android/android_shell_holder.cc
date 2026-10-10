@@ -23,7 +23,6 @@
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/lib/ui/painting/image_generator_registry.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/thread_host.h"
@@ -636,14 +635,23 @@ AndroidShellHolder::AndroidShellHolder(
                      << priority_result;
     }
 
-    GetShell(engine_.get())
-        .RegisterImageDecoder(
-            [runner = task_runners.GetIOTaskRunner()](sk_sp<SkData> buffer) {
-              return AndroidImageGenerator::MakeFromData(std::move(buffer),
-                                                         runner);
-            },
-            -1);
-    FML_DLOG(INFO) << "Registered Android SDK image decoder (API level 28+)";
+    // Priority -1 runs after built-in Skia image decoders (which use priority
+    // 0).
+    constexpr int32_t kAndroidSdkImageDecoderPriority = -1;
+    FlutterImageGeneratorRegistrationInfo generator_info =
+        AndroidImageGenerator::MakeFlutterImageGeneratorRegistrationInfo(
+            task_runners.GetIOTaskRunner(), kAndroidSdkImageDecoderPriority);
+    FlutterEngineResult decoder_result =
+        embedder_api_.RegisterImageGenerator(engine_.get(), &generator_info);
+    if (decoder_result != kSuccess) {
+      if (generator_info.destruction_callback != nullptr) {
+        generator_info.destruction_callback(generator_info.user_data);
+      }
+      FML_LOG(ERROR) << "FlutterEngineRegisterImageGenerator failed: "
+                     << decoder_result;
+    } else {
+      FML_DLOG(INFO) << "Registered Android SDK image decoder (API level 28+)";
+    }
   }
 
   platform_view_ = weak_platform_view;
@@ -1378,7 +1386,7 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
     const std::string& libraryUrl,
     const std::vector<std::string>& entrypoint_args) const {
   std::unique_ptr<IsolateConfiguration> isolate_configuration;
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
+  if (embedder_api_.RunsAOTCompiledDartCode()) {
     isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
   } else {
     std::unique_ptr<fml::Mapping> kernel_blob =

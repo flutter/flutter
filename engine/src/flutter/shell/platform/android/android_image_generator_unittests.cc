@@ -9,27 +9,33 @@ namespace flutter {
 namespace testing {
 
 TEST(AndroidImageGenerator, HeaderDecodeDimensionMismatch) {
-  constexpr int kHeaderW = 2;
-  constexpr int kHeaderH = 2;
-  SkImageInfo header_info = SkImageInfo::Make(
-      kHeaderW, kHeaderH, kRGBA_8888_SkColorType, kPremul_SkAlphaType);
+  constexpr uint32_t kHeaderW = 2;
+  constexpr uint32_t kHeaderH = 2;
+  FlutterImageGeneratorInfo header_info = {
+      .width = kHeaderW,
+      .height = kHeaderH,
+      .color_type = kFlutterImageGeneratorColorTypeRGBA8888,
+      .alpha_type = kFlutterImageGeneratorAlphaTypePremul,
+  };
 
-  constexpr int kDecodedW = 64;
-  constexpr int kDecodedH = 64;
-  sk_sp<SkData> decoded =
-      SkData::MakeZeroInitialized(kDecodedW * kDecodedH * sizeof(uint32_t));
+  constexpr size_t kDecodedW = 64;
+  constexpr size_t kDecodedH = 64;
+  std::vector<uint8_t> decoded(kDecodedW * kDecodedH * sizeof(uint32_t), 0);
 
   // Create an AndroidImageGenerator where the dimensions in the header
   // ImageInfo do not match the dimensions of the decoded data.
   auto gen =
       AndroidImageGenerator::MakeForTesting(header_info, std::move(decoded));
 
-  ASSERT_EQ(gen->GetInfo().dimensions(), SkISize(kHeaderW, kHeaderH));
+  ASSERT_EQ(gen->GetInfo().width, kHeaderW);
+  ASSERT_EQ(gen->GetInfo().height, kHeaderH);
 
   // AndroidImageGenerator should detect that the buffer size derived from the
-  // SkImageInfo is insufficent for the decoded data.
-  sk_sp<SkImage> image = gen->GetImage();
-  EXPECT_EQ(image, nullptr);
+  // header FlutterImageGeneratorInfo is insufficient for the decoded data.
+  constexpr size_t kHeaderRowBytes = kHeaderW * sizeof(uint32_t);
+  std::vector<uint8_t> output_pixels(kHeaderRowBytes * kHeaderH, 0);
+  EXPECT_FALSE(
+      gen->GetPixels(gen->GetInfo(), output_pixels.data(), kHeaderRowBytes));
 }
 
 }  // namespace testing
