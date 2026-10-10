@@ -1187,6 +1187,63 @@ abstract class WidgetController {
     });
   }
 
+  /// Dispatch a hover sequence at the center of the given widget, assuming it is
+  /// exposed.
+  ///
+  /// The return value is a [TestGesture] object that can be used to continue the
+  /// hover (e.g. moving the pointer or dispatching a down event).
+  ///
+  /// By default, the gesture kind is [PointerDeviceKind.mouse].
+  ///
+  ///
+  /// See also:
+  ///
+  ///  * [press], which dispatches a pointer down sequence.
+  ///  * [startHoverAt], which starts a hover gesture at a specific location.
+  /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
+  Future<TestGesture> startHover(
+    finders.FinderBase<Element> finder, {
+    int? pointer,
+    bool warnIfMissed = true,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+  }) {
+    final FlutterView? view = _maybeViewOf(finder);
+    return startHoverAt(
+      getCenter(finder, warnIfMissed: warnIfMissed, callee: 'startHover'),
+      pointer: pointer,
+      kind: kind,
+      view: view,
+    );
+  }
+
+  /// Dispatch a hover sequence at the given location.
+  ///
+  /// The return value is a [TestGesture] object that can be used to continue the
+  /// hover (e.g. moving the pointer or dispatching a down event).
+  ///
+  /// By default, the gesture kind is [PointerDeviceKind.mouse].
+  ///
+  /// See also:
+  ///
+  ///  * [startHover], which starts a hover gesture at the center of a widget.
+  Future<TestGesture> startHoverAt(
+    Offset location, {
+    int? pointer,
+    PointerDeviceKind kind = PointerDeviceKind.mouse,
+    FlutterView? view,
+  }) {
+    assert(kind != PointerDeviceKind.trackpad);
+    return TestAsyncUtils.guard<TestGesture>(() async {
+      final TestGesture gesture = await createGesture(
+        pointer: pointer,
+        kind: kind,
+      );
+      await gesture.addPointer(location: location, view: view);
+      await gesture.moveTo(location, view: view);
+      return gesture;
+    });
+  }
+
   /// Dispatch a pointer down / pointer up sequence (with a delay of
   /// [kLongPressTimeout] + [kPressTimeout] between the two events) at the
   /// center of the given widget, assuming it is exposed.
@@ -1846,10 +1903,12 @@ abstract class WidgetController {
     required PointerDeviceKind kind,
     required int buttons,
   }) {
+    final int p = pointer ?? _getNextPointer();
     return TestGesture(
       dispatcher: sendEventToBinding,
       kind: kind,
-      pointer: pointer ?? _getNextPointer(),
+      pointer: p,
+      device: kind == PointerDeviceKind.mouse ? p : null,
       buttons: buttons,
     );
   }
