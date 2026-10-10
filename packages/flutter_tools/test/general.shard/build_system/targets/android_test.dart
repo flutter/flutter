@@ -158,7 +158,7 @@ void main() {
     expect(fileSystem.file(fileSystem.path.join('out', 'app.so')).existsSync(), true);
   });
 
-  testUsingContext('AndroidAot can build provided target platform', () async {
+  testWithoutContext('AndroidAot can build provided target platform', () async {
     processManager = FakeProcessManager.empty();
     final environment = Environment.test(
       fileSystem.currentDirectory,
@@ -194,7 +194,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('AndroidAot provide code size information.', () async {
+  testWithoutContext('AndroidAot provide code size information.', () async {
     processManager = FakeProcessManager.empty();
     final environment = Environment.test(
       fileSystem.currentDirectory,
@@ -232,7 +232,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
+  testWithoutContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
     processManager = FakeProcessManager.empty();
     final environment = Environment.test(
       fileSystem.currentDirectory,
