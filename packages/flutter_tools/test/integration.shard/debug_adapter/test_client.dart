@@ -381,6 +381,8 @@ extension DapTestClientExtension on DapTestClient {
         : output;
   }
 
+  static const _collectTestOutputTimeout = Duration(minutes: 2);
+
   /// Collects all output and test events until the program terminates.
   ///
   /// These results include all events in the order they are received, including
@@ -397,20 +399,55 @@ extension DapTestClientExtension on DapTestClient {
   }) async {
     assert(start == null || launch == null, 'Only one of "start" or "launch" may be provided');
 
+    final collectedOutputs = <OutputEventBody>[];
+    final collectedNotifications = <Map<String, Object?>>[];
+    final StreamSubscription<OutputEventBody> outputSub = outputEvents.listen(collectedOutputs.add);
+    final StreamSubscription<Map<String, Object?>> notificationSub = testNotificationEvents.listen(
+      collectedNotifications.add,
+    );
+
     final Future<List<OutputEventBody>> outputEventsFuture = outputEvents.toList();
     final Future<List<Map<String, Object?>>> testNotificationEventsFuture = testNotificationEvents
         .toList();
 
-    if (start != null) {
-      await start();
-    } else {
-      await this.start(program: program, cwd: cwd, launch: launch);
+    Future<Never> throwDiagnosticTimeout() {
+      final String outputsDump = collectedOutputs
+          .map((OutputEventBody e) => '[${e.category ?? 'console'}] ${e.output.trimRight()}')
+          .join('\n');
+      final String notificationsDump = collectedNotifications
+          .map((Map<String, Object?> e) => e.toString())
+          .join('\n');
+      throw TimeoutException('''
+Timed out waiting for DAP test session to complete.
+Collected output (${collectedOutputs.length} events):
+$outputsDump
+Collected test notifications (${collectedNotifications.length} events):
+$notificationsDump''', _collectTestOutputTimeout);
     }
 
-    return TestEvents(
-      output: await outputEventsFuture,
-      testNotifications: await testNotificationEventsFuture,
-    );
+    try {
+      if (start != null) {
+        await start().timeout(_collectTestOutputTimeout, onTimeout: throwDiagnosticTimeout);
+      } else {
+        await this
+            .start(program: program, cwd: cwd, launch: launch)
+            .timeout(_collectTestOutputTimeout, onTimeout: throwDiagnosticTimeout);
+      }
+
+      return TestEvents(
+        output: await outputEventsFuture.timeout(
+          _collectTestOutputTimeout,
+          onTimeout: throwDiagnosticTimeout,
+        ),
+        testNotifications: await testNotificationEventsFuture.timeout(
+          _collectTestOutputTimeout,
+          onTimeout: throwDiagnosticTimeout,
+        ),
+      );
+    } finally {
+      await outputSub.cancel();
+      await notificationSub.cancel();
+    }
   }
 
   /// Sets a breakpoint at [line] in the file at [filePath].

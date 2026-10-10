@@ -10,7 +10,9 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter_args.dart';
 import 'package:flutter_tools/src/globals.dart' as globals show platform;
+import 'package:test/fake.dart';
 import 'package:test/test.dart';
+import 'package:vm_service/vm_service.dart' as vm;
 
 import 'mocks.dart';
 
@@ -158,5 +160,168 @@ void main() {
         ),
       );
     });
+
+    test('times out with diagnostic error when debugger initialization hangs', () async {
+      final debuggerCompleter = Completer<void>();
+      final adapter = FakeFlutterTestDebugAdapter(
+        fileSystem: MemoryFileSystem.test(style: fsStyle),
+        platform: platform,
+        customDebuggerInitialized: debuggerCompleter.future,
+        debuggerInitializationTimeout: const Duration(milliseconds: 10),
+      );
+      final responseCompleter = Completer<void>();
+      final request = FakeRequest();
+      final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart', noDebug: false);
+
+      await adapter.configurationDoneRequest(request, null, () {});
+      await expectLater(
+        adapter.launchRequest(request, args, responseCompleter.complete),
+        throwsA(
+          isA<DebugAdapterException>().having(
+            (DebugAdapterException e) => e.message,
+            'message',
+            contains(
+              'Timed out after 0s waiting for debugger to initialize '
+              '(waiting for test.startedProcess event from flutter test).',
+            ),
+          ),
+        ),
+      );
+      expect(adapter.waitingForDebugger, isFalse);
+    });
+
+    test('debuggerConnected waits for isolates to become runnable and reach PauseStart', () async {
+      var getIsolateCount = 0;
+      final fakeVmService = _FakeVmService(
+        onGetVM: () async => vm.VM(
+          isolates: <vm.IsolateRef>[
+            vm.IsolateRef(id: 'isolates/1', name: 'main', number: '1', isSystemIsolate: false),
+          ],
+        ),
+        onGetIsolate: (String isolateId) async {
+          getIsolateCount++;
+          if (getIsolateCount == 1) {
+            return vm.Isolate(
+              id: isolateId,
+              name: 'main',
+              number: '1',
+              runnable: false,
+              pauseEvent: vm.Event(kind: vm.EventKind.kNone, timestamp: 0),
+            );
+          }
+          if (getIsolateCount == 2) {
+            return vm.Isolate(
+              id: isolateId,
+              name: 'main',
+              number: '1',
+              runnable: true,
+              pauseEvent: vm.Event(kind: vm.EventKind.kNone, timestamp: 1),
+            );
+          }
+          return vm.Isolate(
+            id: isolateId,
+            name: 'main',
+            number: '1',
+            runnable: true,
+            pauseEvent: vm.Event(kind: vm.EventKind.kPauseStart, timestamp: 2),
+          );
+        },
+      );
+
+      final adapter = FakeFlutterTestDebugAdapter(
+        fileSystem: MemoryFileSystem.test(style: fsStyle),
+        platform: platform,
+      );
+      adapter.vmService = fakeVmService;
+
+      final responseCompleter = Completer<void>();
+      final request = FakeRequest();
+      final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart', noDebug: false);
+      await adapter.configurationDoneRequest(request, null, () {});
+      await adapter.launchRequest(request, args, responseCompleter.complete);
+      await responseCompleter.future;
+
+      final vmInfo = vm.VM(isolates: <vm.IsolateRef>[]);
+      await adapter.debuggerConnected(vmInfo);
+
+      expect(getIsolateCount, 3);
+      expect(vmInfo.isolates?.single.id, 'isolates/1');
+    });
+
+    test('ensureIsolatesResumedFromPauseStart sends explicit resume when isolate remains at PauseStart', () async {
+      final resumedIsolates = <String>[];
+      final isolate = vm.Isolate(
+        id: 'isolates/1',
+        name: 'main',
+        number: '1',
+        runnable: true,
+        pauseEvent: vm.Event(kind: vm.EventKind.kPauseStart, timestamp: 2),
+        libraries: <vm.LibraryRef>[],
+      );
+      final fakeVmService = _FakeVmService(
+        onGetVM: () async => vm.VM(
+          isolates: <vm.IsolateRef>[
+            vm.IsolateRef(id: 'isolates/1', name: 'main', number: '1', isSystemIsolate: false),
+          ],
+        ),
+        onGetIsolate: (String isolateId) async => isolate,
+        onResume: (String isolateId) async {
+          resumedIsolates.add(isolateId);
+          return vm.Success();
+        },
+      );
+
+      final adapter = FakeFlutterTestDebugAdapter(
+        fileSystem: MemoryFileSystem.test(style: fsStyle),
+        platform: platform,
+      );
+      adapter.vmService = fakeVmService;
+
+      final responseCompleter = Completer<void>();
+      final request = FakeRequest();
+      final args = FlutterLaunchRequestArguments(cwd: '.', program: 'foo.dart', noDebug: false);
+      await adapter.configurationDoneRequest(request, null, () {});
+
+      (await adapter.isolateManager.registerIsolate(
+        isolate,
+        vm.EventKind.kIsolateRunnable,
+      )).startupHandled = true;
+
+      await adapter.launchRequest(request, args, responseCompleter.complete);
+      await responseCompleter.future;
+
+      expect(resumedIsolates, <String>['isolates/1']);
+    });
   });
+}
+
+class _FakeVmService extends Fake implements vm.VmService {
+  _FakeVmService({required this.onGetVM, required this.onGetIsolate, this.onResume});
+
+  final Future<vm.VM> Function() onGetVM;
+  final Future<vm.Isolate> Function(String isolateId) onGetIsolate;
+  final Future<vm.Success> Function(String isolateId)? onResume;
+
+  @override
+  Future<vm.VM> getVM() => onGetVM();
+
+  @override
+  Future<vm.Isolate> getIsolate(String isolateId) => onGetIsolate(isolateId);
+
+  @override
+  Future<vm.Success> setLibraryDebuggable(
+    String isolateId,
+    String libraryId,
+    bool isDebuggable,
+  ) async => vm.Success();
+
+  @override
+  Future<vm.Success> setExceptionPauseMode(
+    String isolateId,
+    /*ExceptionPauseMode*/ String mode,
+  ) async => vm.Success();
+
+  @override
+  Future<vm.Success> resume(String isolateId, {String? step, int? frameIndex}) =>
+      onResume!(isolateId);
 }
