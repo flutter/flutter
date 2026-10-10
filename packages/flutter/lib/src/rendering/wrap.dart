@@ -527,6 +527,10 @@ class RenderWrap extends RenderBox
           width += child.getMaxIntrinsicWidth(double.infinity);
           child = childAfter(child);
         }
+        // Include inter-child spacing so IntrinsicWidth/PopupMenu sizing matches layout.
+        if (childCount > 1) {
+          width += spacing * (childCount - 1);
+        }
         return width;
       case Axis.vertical:
         return getDryLayout(BoxConstraints(maxHeight: height)).width;
@@ -560,6 +564,9 @@ class RenderWrap extends RenderBox
         while (child != null) {
           height += child.getMaxIntrinsicHeight(double.infinity);
           child = childAfter(child);
+        }
+        if (childCount > 1) {
+          height += spacing * (childCount - 1);
         }
         return height;
     }
