@@ -353,64 +353,119 @@ void main() {
     );
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/192030.
-  testWidgets('Obstructed overlay child does not assert when the overlay is resized', (
-    WidgetTester tester,
-  ) async {
-    addTearDown(tester.view.reset);
-    tester.view.physicalSize = const Size(1200, 800);
+  // Regression tests for https://github.com/flutter/flutter/issues/192030.
+  group('obstructed overlay entries', () {
+    late GlobalKey<OverlayState> overlayKey;
+    late OverlayEntry bottomEntry;
+    late OverlayEntry topEntry;
+    var topEntryInserted = false;
+    var layoutCallbackCount = 0;
+    late OverlayChildLayoutInfo lastLayoutInfo;
 
-    final overlayKey = GlobalKey<OverlayState>();
-    late final OverlayEntry bottomEntry;
-    final topEntry = OverlayEntry(
-      opaque: true,
-      builder: (BuildContext context) => const SizedBox(),
-    );
-    addTearDown(() {
-      bottomEntry
-        ..remove()
-        ..dispose();
-      topEntry
-        ..remove()
-        ..dispose();
+    Future<void> pumpOverlay(WidgetTester tester) async {
+      addTearDown(tester.view.reset);
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(1200, 800);
+
+      layoutCallbackCount = 0;
+      topEntryInserted = false;
+      overlayKey = GlobalKey<OverlayState>();
+      topEntry = OverlayEntry(opaque: true, builder: (BuildContext context) => const SizedBox());
+      addTearDown(() {
+        bottomEntry
+          ..remove()
+          ..dispose();
+        if (topEntryInserted) {
+          topEntry.remove();
+        }
+        topEntry.dispose();
+      });
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            key: overlayKey,
+            initialEntries: <OverlayEntry>[
+              bottomEntry = OverlayEntry(
+                maintainState: true,
+                builder: (BuildContext context) {
+                  return OverlayPortal.overlayChildLayoutBuilder(
+                    controller: controller1,
+                    overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+                      layoutCallbackCount += 1;
+                      lastLayoutInfo = layoutInfo;
+                      return const SizedBox();
+                    },
+                    child: const SizedBox(),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(layoutCallbackCount, greaterThan(0));
+      expect(lastLayoutInfo.overlaySize, const Size(1200, 800));
+    }
+
+    void obstructBottomEntry() {
+      overlayKey.currentState!.insert(topEntry);
+      topEntryInserted = true;
+    }
+
+    testWidgets('do not assert when the overlay is resized', (WidgetTester tester) async {
+      await pumpOverlay(tester);
+
+      // Obstruct the bottom entry, which makes the theater skip laying it out.
+      obstructBottomEntry();
+      await tester.pump();
+
+      // The layout callback keeps running (so the widget tree stays up to date)
+      // but must not assert, even though the obstructed entry is not resized.
+      final countBeforeResize = layoutCallbackCount;
+      tester.view.physicalSize = const Size(1100, 720);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(layoutCallbackCount, greaterThan(countBeforeResize));
     });
 
-    var layoutCallbackCount = 0;
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: Overlay(
-          key: overlayKey,
-          initialEntries: <OverlayEntry>[
-            bottomEntry = OverlayEntry(
-              maintainState: true,
-              builder: (BuildContext context) {
-                return OverlayPortal.overlayChildLayoutBuilder(
-                  controller: controller1,
-                  overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo layoutInfo) {
-                    layoutCallbackCount += 1;
-                    return const SizedBox();
-                  },
-                  child: const SizedBox(),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-    expect(layoutCallbackCount, greaterThan(0));
+    testWidgets('do not compute the layout info from stale layout', (WidgetTester tester) async {
+      await pumpOverlay(tester);
+      final Matrix4 transformBeforeObstruction = lastLayoutInfo.childPaintTransform.clone();
 
-    // Obstruct the bottom entry with an opaque entry, which makes the theater
-    // skip laying it out.
-    overlayKey.currentState!.insert(topEntry);
-    await tester.pump();
+      obstructBottomEntry();
+      await tester.pump();
+      tester.view.physicalSize = const Size(1100, 720);
+      await tester.pump();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
 
-    // Resizing the theater must not trip any assertion, even though the
-    // obstructed entry's layout builder still has a pending frame callback.
-    tester.view.physicalSize = const Size(1100, 720);
-    await tester.pump();
-    expect(tester.takeException(), isNull);
+      // The obstructed entry was not laid out, so the layout info is the last
+      // one that was computed from up-to-date layout.
+      expect(lastLayoutInfo.overlaySize, const Size(1200, 800));
+      expect(lastLayoutInfo.childPaintTransform, transformBeforeObstruction);
+    });
+
+    testWidgets('refresh the layout info once they are no longer obstructed', (
+      WidgetTester tester,
+    ) async {
+      await pumpOverlay(tester);
+
+      obstructBottomEntry();
+      await tester.pump();
+      tester.view.physicalSize = const Size(1100, 720);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(lastLayoutInfo.overlaySize, const Size(1200, 800));
+
+      topEntry.remove();
+      topEntryInserted = false;
+      await tester.pump();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(lastLayoutInfo.overlaySize, const Size(1100, 720));
+    });
   });
 }
 
