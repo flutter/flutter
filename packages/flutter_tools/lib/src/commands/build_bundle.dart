@@ -2,18 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../bundle_builder.dart';
+import '../cache.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
+import '../isolated/build_targets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
@@ -22,9 +29,8 @@ class BuildBundleCommand extends BuildSubCommand {
     required this.featureFlags,
     required ToolContext toolContext,
     required super.verboseHelp,
-    BundleBuilder? bundleBuilder,
-  }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(),
-       super(
+    this._bundleBuilder,
+  }) : super(
          logger: toolContext.logger,
          outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
@@ -80,11 +86,8 @@ class BuildBundleCommand extends BuildSubCommand {
   }
 
   final BuildSystem buildSystem;
-  final BundleBuilder _bundleBuilder;
+  final BundleBuilder? _bundleBuilder;
   final FeatureFlags featureFlags;
-
-  @visibleForTesting
-  BundleBuilder get bundleBuilder => _bundleBuilder;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -149,8 +152,33 @@ class BuildBundleCommand extends BuildSubCommand {
     }
 
     final BuildInfo buildInfo = await getBuildInfo();
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
+      :FileSystem fs,
+      :FlutterVersion flutterVersion,
+      :Logger logger,
+      platform: Platform hostPlatform,
+      :ProcessManager processManager,
+    ) = toolContext;
+    final BundleBuilder bundleBuilder =
+        _bundleBuilder ??
+        BundleBuilder(
+          analytics: analytics,
+          artifacts: artifacts,
+          buildSystem: buildSystem,
+          buildTargets: const BuildTargetsImpl(),
+          cache: cache,
+          config: config,
+          fileSystem: fs,
+          flutterVersion: flutterVersion,
+          logger: logger,
+          platform: hostPlatform,
+          processManager: processManager,
+        );
 
-    await _bundleBuilder.build(
+    await bundleBuilder.build(
       buildInfo: buildInfo,
       platform: platform,
       assetDirPath: stringArg('asset-dir'),

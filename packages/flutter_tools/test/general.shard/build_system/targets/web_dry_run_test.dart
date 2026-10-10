@@ -47,6 +47,7 @@ void main() {
       omitDeprecatedJsInteropFindings: omitDeprecatedJsInteropFindings,
     ),
     fakeAnalytics,
+    engineRevision: 'abcdefghijklmnopqrstuvwxyz',
   )..dryRunRandom = Random(0);
 
   setUp(() {

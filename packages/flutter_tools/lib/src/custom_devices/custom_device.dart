@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart';
 import '../bundle_builder.dart';
 import '../convert.dart';
 import '../device.dart';
@@ -729,14 +728,25 @@ class CustomDevice extends Device {
     if (!prebuiltApplication) {
       final String assetBundleDir = getAssetBuildDirectory();
 
-      bundleBuilder ??= BundleBuilder();
+      bundleBuilder ??= BundleBuilder(
+        analytics: globals.analytics,
+        artifacts: artifacts,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        cache: globals.cache,
+        config: globals.config,
+        fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
+        logger: _logger,
+        platform: globals.platform,
+        processManager: _processManager,
+      );
 
       // this just builds the asset bundle, it's the same as `flutter build bundle`
       await bundleBuilder.build(
         platform: platform,
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
-        depfilePath: defaultDepfilePath,
         assetDirPath: assetBundleDir,
       );
 

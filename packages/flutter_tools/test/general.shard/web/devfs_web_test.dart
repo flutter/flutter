@@ -80,9 +80,12 @@ void main() {
           <String, String>{},
           usesDdcModuleSystem,
           canaryFeatures,
+          artifacts: globals.artifacts!,
+          config: globals.config,
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
+          flutterVersion: globals.flutterVersion,
           logger: logger,
         );
         releaseAssetServer = ReleaseAssetServer(
@@ -343,9 +346,12 @@ void main() {
       <String, String>{},
       usesDdcModuleSystem,
       canaryFeatures,
+      artifacts: globals.artifacts!,
+      config: globals.config,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
+      flutterVersion: globals.flutterVersion,
       logger: logger,
     );
 
@@ -365,9 +371,12 @@ void main() {
       <String, String>{},
       usesDdcModuleSystem,
       canaryFeatures,
+      artifacts: globals.artifacts!,
+      config: globals.config,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
+      flutterVersion: globals.flutterVersion,
       logger: logger,
     );
 
@@ -389,9 +398,12 @@ void main() {
         <String, String>{},
         usesDdcModuleSystem,
         canaryFeatures,
+        artifacts: globals.artifacts!,
+        config: globals.config,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
         logger: logger,
       ),
       throwsToolExit(),
@@ -412,9 +424,12 @@ void main() {
         <String, String>{},
         usesDdcModuleSystem,
         canaryFeatures,
+        artifacts: globals.artifacts!,
+        config: globals.config,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
         logger: logger,
       ),
       throwsToolExit(),
@@ -475,9 +490,12 @@ void main() {
       <String, String>{},
       usesDdcModuleSystem,
       canaryFeatures,
+      artifacts: globals.artifacts!,
+      config: globals.config,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: true,
       fileSystem: globals.fs,
+      flutterVersion: globals.flutterVersion,
       logger: logger,
     );
 
@@ -1502,12 +1520,15 @@ void main() {
       const DartDevelopmentServiceConfiguration(enable: false),
       Uri.base,
       null,
+      artifacts: Artifacts.test(),
+      config: globals.config,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
       webDevServerConfig: webDevServerConfig,
       fileSystem: globals.fs,
+      flutterVersion: globals.flutterVersion,
       logger: globals.logger,
       platform: globals.platform,
       crossOriginIsolation: false,
@@ -1517,7 +1538,7 @@ void main() {
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
     await webAssetServer.dispose();
-  }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
+  });
 
   runInTestbed('passes on extra headers', () async {
     const extraHeaderKey = 'hurray';
@@ -1541,12 +1562,15 @@ void main() {
       const DartDevelopmentServiceConfiguration(enable: false),
       Uri.base,
       null,
+      artifacts: Artifacts.test(),
+      config: globals.config,
       webRenderer: WebRendererMode.canvaskit,
       isWasm: false,
       useLocalCanvasKit: false,
       testMode: true,
       webDevServerConfig: webDevServerConfig,
       fileSystem: globals.fs,
+      flutterVersion: globals.flutterVersion,
       logger: globals.logger,
       platform: globals.platform,
       crossOriginIsolation: false,
@@ -1557,7 +1581,7 @@ void main() {
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
 
     await webAssetServer.dispose();
-  }, overrides: <Type, Generator>{Artifacts: () => Artifacts.test()});
+  });
 
   runInTestbed('WebAssetServer responds to POST requests with 404 not found', () async {
     final Response response = await webAssetServer.handleRequest(
@@ -1641,9 +1665,12 @@ void main() {
       <String, String>{},
       usesDdcModuleSystem,
       canaryFeatures,
+      artifacts: globals.artifacts!,
+      config: globals.config,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
+      flutterVersion: globals.flutterVersion,
       logger: logger,
     );
 
@@ -1707,9 +1734,12 @@ void main() {
         <String, String>{},
         usesDdcModuleSystem,
         canaryFeatures,
+        artifacts: globals.artifacts!,
+        config: globals.config,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
         logger: logger,
       );
 
@@ -1756,9 +1786,12 @@ void main() {
         <String, String>{},
         usesDdcModuleSystem,
         canaryFeatures,
+        artifacts: globals.artifacts!,
+        config: globals.config,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
         webDefines: <String, String>{}, // Empty webDefines
         logger: logger,
       );
@@ -1812,9 +1845,12 @@ void main() {
         <String, String>{},
         usesDdcModuleSystem,
         canaryFeatures,
+        artifacts: globals.artifacts!,
+        config: globals.config,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
+        flutterVersion: globals.flutterVersion,
         webDefines: <String, String>{}, // Empty webDefines
         logger: logger,
       );
@@ -1864,9 +1900,12 @@ const config = {
       <String, String>{},
       usesDdcModuleSystem,
       canaryFeatures,
+      artifacts: globals.artifacts!,
+      config: globals.config,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
+      flutterVersion: globals.flutterVersion,
       webDefines: <String, String>{'API_URL': 'https://test.api.com', 'DEBUG_MODE': 'true'},
       logger: logger,
     );
