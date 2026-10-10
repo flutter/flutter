@@ -572,7 +572,7 @@ void main() {
     final align = RenderPositionedBox(alignment: Alignment.topLeft, child: box);
     layout(align);
 
-    expect(builderCallCount, greaterThan(0));
+    expect(builderCallCount, greaterThan(1));
     expect(lastDimensions!.viewportMainAxisExtent, 600.0);
     expect(lastDimensions!.crossAxisExtent, 800.0);
     builderCallCount = 0;
@@ -580,7 +580,7 @@ void main() {
     // Resize viewport main axis.
     box.additionalConstraints = const BoxConstraints.tightFor(width: 800.0, height: 400.0);
     pumpFrame();
-    expect(builderCallCount, greaterThan(0));
+    expect(builderCallCount, greaterThan(1));
     expect(lastDimensions!.viewportMainAxisExtent, 400.0);
     expect(lastDimensions!.crossAxisExtent, 800.0);
 
@@ -588,7 +588,7 @@ void main() {
     // Resize viewport cross axis.
     box.additionalConstraints = const BoxConstraints.tightFor(width: 400.0, height: 400.0);
     pumpFrame();
-    expect(builderCallCount, greaterThan(0));
+    expect(builderCallCount, greaterThan(1));
     expect(lastDimensions!.viewportMainAxisExtent, 400.0);
     expect(lastDimensions!.crossAxisExtent, 400.0);
   });

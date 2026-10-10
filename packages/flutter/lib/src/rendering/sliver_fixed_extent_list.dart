@@ -594,11 +594,9 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   ItemExtentBuilder get itemExtentBuilder => _itemExtentBuilder;
   ItemExtentBuilder _itemExtentBuilder;
   set itemExtentBuilder(ItemExtentBuilder value) {
-    if (_itemExtentBuilder != value) {
-      _itemExtentBuilder = value;
-      _clearItemExtentCache();
-      markNeedsLayout();
-    }
+    _itemExtentBuilder = value;
+    _clearItemExtentCache();
+    markNeedsLayout();
   }
 
   @override
