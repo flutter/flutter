@@ -113,8 +113,9 @@ skia_library_configs = [
   ":skia_library",
 ]
 
+# Skia's bundled Vulkan headers, which it includes through the Skia root
+# (include/third_party/vulkan/vulkan/vulkan_core.h) when this is defined.
 config("our_vulkan_headers") {
-  include_dirs = [ "include/third_party/vulkan" ]
   defines = [ "SK_USE_INTERNAL_VULKAN_HEADERS" ]
 }
 
