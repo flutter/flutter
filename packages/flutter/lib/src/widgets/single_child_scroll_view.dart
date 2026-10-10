@@ -381,6 +381,8 @@ class _RenderSingleChildViewport extends RenderBox
     if (attached) {
       _offset.addListener(_hasScrolled);
     }
+    // The new offset has not been reconciled against the extents yet.
+    _reconciledMaxScrollExtent = null;
     markNeedsLayout();
   }
 
@@ -450,6 +452,9 @@ class _RenderSingleChildViewport extends RenderBox
     });
   }
 
+  // The max scroll extent the offset was last reconciled against.
+  double? _reconciledMaxScrollExtent;
+
   BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
     return switch (axis) {
       Axis.horizontal => constraints.heightConstraints(),
@@ -501,16 +506,31 @@ class _RenderSingleChildViewport extends RenderBox
       size = constraints.constrain(child!.size);
     }
 
+    final double minScrollExtent = _minScrollExtent;
+    final double maxScrollExtent = _maxScrollExtent;
+
     if (offset.hasPixels) {
-      if (offset.pixels > _maxScrollExtent) {
-        offset.correctBy(_maxScrollExtent - offset.pixels);
-      } else if (offset.pixels < _minScrollExtent) {
-        offset.correctBy(_minScrollExtent - offset.pixels);
+      final double pixels = offset.pixels;
+      final double? previousMaxScrollExtent = _reconciledMaxScrollExtent;
+      // Preserve an existing overscroll unless the edge it is past moved inward. A new offset
+      // still needs its initial correction, as does an offset left out of range by a shrink.
+      if (pixels > maxScrollExtent &&
+          (previousMaxScrollExtent == null ||
+              pixels <= previousMaxScrollExtent ||
+              maxScrollExtent < previousMaxScrollExtent)) {
+        offset.correctBy(maxScrollExtent - pixels);
+      } else if (pixels < minScrollExtent && previousMaxScrollExtent == null) {
+        offset.correctBy(minScrollExtent - pixels);
       }
+      _reconciledMaxScrollExtent = maxScrollExtent;
     }
 
     offset.applyViewportDimension(_viewportExtent);
-    offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
+    if (!offset.applyContentDimensions(minScrollExtent, maxScrollExtent)) {
+      // The physics corrected the offset for the new extents. The child's layout does not depend
+      // on the offset, so the corrected offset only has to be accepted.
+      offset.applyContentDimensions(minScrollExtent, maxScrollExtent);
+    }
   }
 
   Offset get _paintOffset => _paintOffsetForPosition(offset.pixels);
