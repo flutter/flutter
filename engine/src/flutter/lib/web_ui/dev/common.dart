@@ -239,7 +239,7 @@ final LuciConfig? luciConfig = () {
 bool get isLuci => io.Platform.environment['LUCI_CONTEXT'] != null;
 
 /// Whether the felt command is running on one of the Continuous Integration
-/// environements.
+/// environments.
 bool get isCi => isLuci;
 
 final String gitRevision = () {

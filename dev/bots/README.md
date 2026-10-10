@@ -35,6 +35,8 @@ to Chromium's infra and the foundation to Flutter's infrastructure.
 To work on this infrastructure you will need:
 
 - [depot_tools](https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up)
+- To use the `bb` or `led` command line tools: run `bb auth-login` / `led auth-login`.
+  See [Using `bb` and `led` with LUCI](../../docs/infra/Using-bb-and-led.md).
 - Python package installer: `sudo apt-get install python-pip`
 - Python coverage package (only needed for `training_simulation`): `sudo pip install coverage`
 

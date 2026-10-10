@@ -346,11 +346,11 @@ class KeyboardConverter {
   // to positioned keys (left/right/numpad) or multiple keyboards.
   final Map<int, int> _pressingRecords = <int, int>{};
 
-  // Schedule the dispatching of an event in the future. The `callback` will
-  // invoked before that.
-  //
-  // Returns a callback that cancels the schedule. Disposal of
-  // `KeyBoardConverter` also cancels the shedule automatically.
+  /// Schedule the dispatching of an event in the future. The [callback] will
+  /// be invoked before that.
+  ///
+  /// Returns a callback that cancels the schedule. Disposal of
+  /// [KeyboardConverter] also cancels the schedule automatically.
   _VoidCallback _scheduleAsyncEvent(
     Duration duration,
     ValueGetter<ui.KeyData> getData,
