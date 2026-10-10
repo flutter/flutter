@@ -160,29 +160,11 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
   // by the backend at pipeline creation (for example, to the device maximum).
   // Only meaningful for compute shaders.
   {
-    uint32_t workgroup_size_x = 0u;
-    uint32_t workgroup_size_y = 0u;
-    uint32_t workgroup_size_z = 0u;
-    if (execution_model == spv::ExecutionModel::ExecutionModelGLCompute) {
-      spirv_cross::SpecializationConstant spec_x, spec_y, spec_z;
-      compiler_->get_work_group_size_specialization_constants(spec_x, spec_y,
-                                                              spec_z);
-      const auto local_size = [&](spirv_cross::SpecializationConstant& spec,
-                                  uint32_t index) -> uint32_t {
-        // A non-zero id means this dimension is driven by a specialization
-        // constant; leave it as the runtime-resolved sentinel of 0.
-        return spec.id != 0
-                   ? 0u
-                   : compiler_->get_execution_mode_argument(
-                         spv::ExecutionMode::ExecutionModeLocalSize, index);
-      };
-      workgroup_size_x = local_size(spec_x, 0u);
-      workgroup_size_y = local_size(spec_y, 1u);
-      workgroup_size_z = local_size(spec_z, 2u);
-    }
-    root["workgroup_size_x"] = workgroup_size_x;
-    root["workgroup_size_y"] = workgroup_size_y;
-    root["workgroup_size_z"] = workgroup_size_z;
+    const std::array<uint32_t, 3> workgroup_size =
+        ReflectWorkgroupSize().value_or(std::array<uint32_t, 3>{0u, 0u, 0u});
+    root["workgroup_size_x"] = workgroup_size[0];
+    root["workgroup_size_y"] = workgroup_size[1];
+    root["workgroup_size_z"] = workgroup_size[2];
   }
 
   const auto shader_resources = compiler_->get_shader_resources();
@@ -608,6 +590,48 @@ std::shared_ptr<ShaderBundleData> Reflector::GenerateShaderBundleData() const {
     data->AddUniformTexture(uniform_texture);
   }
 
+  const auto storage_buffers =
+      compiler_->get_shader_resources().storage_buffers;
+  for (const auto& buffer : storage_buffers) {
+    ShaderBundleData::ShaderStorageBuffer storage_buffer;
+    storage_buffer.name = buffer.name;
+    storage_buffer.ext_res_0 = compiler_.GetExtendedMSLResourceBinding(
+        CompilerBackend::ExtendedResourceIndex::kPrimary, buffer.id);
+    storage_buffer.set = compiler_->get_decoration(
+        buffer.id, spv::Decoration::DecorationDescriptorSet);
+    storage_buffer.binding = compiler_->get_decoration(
+        buffer.id, spv::Decoration::DecorationBinding);
+
+    // `readonly` and `writeonly` may decorate the block variable or every
+    // member of the block. `get_buffer_block_flags` folds both cases together.
+    const auto flags = compiler_->get_buffer_block_flags(buffer.id);
+    const bool non_writable = flags.get(spv::Decoration::DecorationNonWritable);
+    const bool non_readable = flags.get(spv::Decoration::DecorationNonReadable);
+    if (non_writable && !non_readable) {
+      storage_buffer.access = fb::shaderbundle::ShaderResourceAccess::kReadOnly;
+    } else if (non_readable && !non_writable) {
+      storage_buffer.access =
+          fb::shaderbundle::ShaderResourceAccess::kWriteOnly;
+    } else {
+      storage_buffer.access =
+          fb::shaderbundle::ShaderResourceAccess::kReadWrite;
+    }
+
+    const auto& type = compiler_->get_type(buffer.base_type_id);
+    const size_t empty_size =
+        compiler_->get_declared_struct_size_runtime_array(type, 0);
+    storage_buffer.size_in_bytes = empty_size;
+    storage_buffer.runtime_array_stride =
+        compiler_->get_declared_struct_size_runtime_array(type, 1) - empty_size;
+
+    data->AddStorageBuffer(std::move(storage_buffer));
+  }
+
+  if (auto workgroup_size = ReflectWorkgroupSize();
+      workgroup_size.has_value()) {
+    data->SetWorkgroupSize(workgroup_size.value());
+  }
+
   // We only need to worry about storing vertex attributes.
   if (entrypoints.front().execution_model == spv::ExecutionModelVertex) {
     const auto inputs = compiler_->get_shader_resources().stage_inputs;
@@ -635,6 +659,29 @@ std::shared_ptr<ShaderBundleData> Reflector::GenerateShaderBundleData() const {
   }
 
   return data;
+}
+
+std::optional<std::array<uint32_t, 3>> Reflector::ReflectWorkgroupSize() const {
+  const auto& entrypoints = compiler_->get_entry_points_and_stages();
+  if (entrypoints.size() != 1u ||
+      entrypoints.front().execution_model !=
+          spv::ExecutionModel::ExecutionModelGLCompute) {
+    return std::nullopt;
+  }
+  spirv_cross::SpecializationConstant spec_x, spec_y, spec_z;
+  compiler_->get_work_group_size_specialization_constants(spec_x, spec_y,
+                                                          spec_z);
+  const auto local_size = [&](const spirv_cross::SpecializationConstant& spec,
+                              uint32_t index) -> uint32_t {
+    // A non-zero id means this dimension is driven by a specialization
+    // constant; leave it as the runtime-resolved sentinel of 0.
+    return spec.id != 0
+               ? 0u
+               : compiler_->get_execution_mode_argument(
+                     spv::ExecutionMode::ExecutionModeLocalSize, index);
+  };
+  return std::array<uint32_t, 3>{local_size(spec_x, 0u), local_size(spec_y, 1u),
+                                 local_size(spec_z, 2u)};
 }
 
 std::optional<uint32_t> Reflector::GetArrayElements(

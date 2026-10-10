@@ -47,7 +47,9 @@ fml::RefPtr<Shader> Shader::Make(
     std::vector<impeller::ShaderStageBufferLayout> layouts,
     std::unordered_map<std::string, UniformBinding> uniform_structs,
     std::unordered_map<std::string, TextureBinding> uniform_textures,
-    std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts) {
+    std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts,
+    std::unordered_map<std::string, StorageBufferBinding> storage_buffers,
+    std::optional<std::array<uint32_t, 3>> workgroup_size) {
   auto shader = fml::MakeRefCounted<Shader>();
   shader->library_id_ = std::move(library_id);
   shader->entrypoint_ = std::move(entrypoint);
@@ -58,6 +60,8 @@ fml::RefPtr<Shader> Shader::Make(
   shader->uniform_structs_ = std::move(uniform_structs);
   shader->uniform_textures_ = std::move(uniform_textures);
   shader->descriptor_set_layouts_ = std::move(descriptor_set_layouts);
+  shader->storage_buffers_ = std::move(storage_buffers);
+  shader->workgroup_size_ = workgroup_size;
   shader->RebuildBindingOrder();
   return shader;
 }
@@ -111,6 +115,8 @@ void Shader::ResetFrom(Shader& other) {
   uniform_structs_ = std::move(other.uniform_structs_);
   uniform_textures_ = std::move(other.uniform_textures_);
   descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
+  storage_buffers_ = std::move(other.storage_buffers_);
+  workgroup_size_ = other.workgroup_size_;
   RebuildBindingOrder();
   if (code_changed) {
     is_dirty_ = true;
@@ -195,6 +201,19 @@ const Shader::TextureBinding* Shader::GetUniformTexture(
     return nullptr;
   }
   return &uniform->second;
+}
+
+const Shader::StorageBufferBinding* Shader::GetStorageBuffer(
+    const std::string& name) const {
+  auto storage_buffer = storage_buffers_.find(name);
+  if (storage_buffer == storage_buffers_.end()) {
+    return nullptr;
+  }
+  return &storage_buffer->second;
+}
+
+const std::optional<std::array<uint32_t, 3>>& Shader::GetWorkgroupSize() const {
+  return workgroup_size_;
 }
 
 int Shader::GetUniformStructIndex(const std::string& name) const {

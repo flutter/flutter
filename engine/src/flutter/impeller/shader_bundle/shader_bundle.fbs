@@ -8,7 +8,7 @@ namespace impeller.fb.shaderbundle;
 // incremented any time there is a change to this file which changes the
 // resulting flat buffer format.
 enum ShaderBundleFormatVersion:uint32 {
-  kVersion = 2
+  kVersion = 3
 }
 
 enum ShaderStage:byte {
@@ -96,6 +96,34 @@ table ShaderUniformTexture {
   binding: uint64;
 }
 
+// How a shader accesses a storage resource, as declared by the `readonly` or
+// `writeonly` qualifier on it.
+enum ShaderResourceAccess:byte {
+  kReadWrite,
+  kReadOnly,
+  kWriteOnly,
+}
+
+table ShaderStorageBuffer {
+  name: string;
+  ext_res_0: uint64;
+  set: uint64;
+  binding: uint64;
+  access: ShaderResourceAccess;
+  // The size of the block, counting a trailing runtime-sized array as empty.
+  size_in_bytes: uint64;
+  // The stride of the block's trailing runtime-sized array, or zero if the
+  // block does not end in one.
+  runtime_array_stride: uint64;
+}
+
+// The workgroup size a compute shader declares with `local_size`.
+struct WorkgroupSize {
+  x: uint32;
+  y: uint32;
+  z: uint32;
+}
+
 table BackendShader {
   stage: ShaderStage;
   entrypoint: string;
@@ -103,6 +131,9 @@ table BackendShader {
   uniform_structs: [ShaderUniformStruct];
   uniform_textures: [ShaderUniformTexture];
   shader: [ubyte];
+  storage_buffers: [ShaderStorageBuffer];
+  // Present for compute shaders only.
+  workgroup_size: WorkgroupSize;
 }
 
 table Shader {

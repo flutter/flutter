@@ -4,6 +4,7 @@
 
 #include "flutter/lib/gpu/shader_library.h"
 
+#include <array>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -64,6 +65,19 @@ static impeller::ShaderStage ToShaderStage(
       return impeller::ShaderStage::kFragment;
     case impeller::fb::shaderbundle::ShaderStage::kCompute:
       return impeller::ShaderStage::kCompute;
+  }
+  FML_UNREACHABLE();
+}
+
+static Shader::StorageBufferBinding::Access ToStorageBufferAccess(
+    impeller::fb::shaderbundle::ShaderResourceAccess access) {
+  switch (access) {
+    case impeller::fb::shaderbundle::ShaderResourceAccess::kReadWrite:
+      return Shader::StorageBufferBinding::Access::kReadWrite;
+    case impeller::fb::shaderbundle::ShaderResourceAccess::kReadOnly:
+      return Shader::StorageBufferBinding::Access::kReadOnly;
+    case impeller::fb::shaderbundle::ShaderResourceAccess::kWriteOnly:
+      return Shader::StorageBufferBinding::Access::kWriteOnly;
   }
   FML_UNREACHABLE();
 }
@@ -326,6 +340,58 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
       }
     }
 
+    std::unordered_map<std::string, Shader::StorageBufferBinding>
+        storage_buffers;
+    if (backend_shader->storage_buffers() != nullptr) {
+      for (const auto& storage_buffer : *backend_shader->storage_buffers()) {
+        if (storage_buffer->name() == nullptr) {
+          // A malformed bundle from `ShaderLibrary.fromBytes`; the verifier
+          // does not require optional fields to be present.
+          continue;
+        }
+        if (storage_buffer->ext_res_0() == impeller::kOptimizedOutBinding) {
+          // Dropped for the same reason as the optimized-out uniforms above.
+          continue;
+        }
+        storage_buffers[storage_buffer->name()->str()] =
+            Shader::StorageBufferBinding{
+                .slot =
+                    impeller::ShaderUniformSlot{
+                        .name = storage_buffer->name()->c_str(),
+                        .ext_res_0 =
+                            static_cast<size_t>(storage_buffer->ext_res_0()),
+                        .set = static_cast<size_t>(storage_buffer->set()),
+                        .binding =
+                            static_cast<size_t>(storage_buffer->binding()),
+                    },
+                .access = ToStorageBufferAccess(storage_buffer->access()),
+                .size_in_bytes =
+                    static_cast<size_t>(storage_buffer->size_in_bytes()),
+                .runtime_array_stride =
+                    static_cast<size_t>(storage_buffer->runtime_array_stride()),
+        };
+
+        descriptor_set_layouts.push_back(impeller::DescriptorSetLayout{
+            static_cast<uint32_t>(storage_buffer->binding()),
+            impeller::DescriptorType::kStorageBuffer,
+            ToShaderStage(backend_shader->stage()),
+        });
+      }
+    }
+
+    std::optional<std::array<uint32_t, 3>> workgroup_size;
+    if (backend_shader->stage() ==
+        impeller::fb::shaderbundle::ShaderStage::kCompute) {
+      const auto* size = backend_shader->workgroup_size();
+      if (size == nullptr || size->x() == 0u || size->y() == 0u ||
+          size->z() == 0u) {
+        VALIDATION_LOG << "Compute shader \"" << bundled_shader->name()->c_str()
+                       << "\" in the bundle has no workgroup size.";
+        continue;
+      }
+      workgroup_size = {size->x(), size->y(), size->z()};
+    }
+
     std::vector<impeller::ShaderStageIOSlot> inputs;
     std::vector<impeller::ShaderStageBufferLayout> layouts;
     if (backend_shader->stage() ==
@@ -360,7 +426,8 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
         library_id, backend_shader->entrypoint()->str(),
         ToShaderStage(backend_shader->stage()), std::move(code_mapping),
         std::move(inputs), std::move(layouts), std::move(uniform_structs),
-        std::move(uniform_textures), std::move(descriptor_set_layouts));
+        std::move(uniform_textures), std::move(descriptor_set_layouts),
+        std::move(storage_buffers), workgroup_size);
     shader_map[bundled_shader->name()->str()] = std::move(shader);
   }
 
