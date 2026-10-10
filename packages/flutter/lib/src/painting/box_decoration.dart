@@ -37,7 +37,9 @@ import 'image_provider.dart';
 /// the box. Finally there is the [image], the precise alignment of which is
 /// controlled by the [DecorationImage] class.
 ///
-/// The [border] paints over the body; the [boxShadow], naturally, paints below it.
+/// The [border] paints over the body. A [boxShadow] paints below the body,
+/// unless [BoxShadow.inset] is set, in which case that shadow paints above
+/// the body and below the [border].
 ///
 /// {@tool snippet}
 ///
@@ -175,9 +177,12 @@ class BoxDecoration extends Decoration {
   /// {@macro flutter.painting.BoxDecoration.clip}
   final BorderRadiusGeometry? borderRadius;
 
-  /// A list of shadows cast by this box behind the box.
+  /// A list of shadows cast by this box.
   ///
-  /// The shadow follows the [shape] of the box.
+  /// The shadow follows the [shape] of the box. Shadows paint below the
+  /// background. A shadow with [BoxShadow.inset] set paints above the
+  /// background and [image] and below the [border]. The child of the decorated
+  /// box paints above every shadow.
   ///
   /// See also:
   ///
@@ -451,6 +456,9 @@ class _BoxDecorationPainter extends BoxPainter {
       return;
     }
     for (final BoxShadow boxShadow in _decoration.boxShadow!) {
+      if (boxShadow.inset) {
+        continue;
+      }
       final Paint paint = boxShadow.toPaint();
       final Rect bounds = rect.shift(boxShadow.offset).inflate(boxShadow.spreadRadius);
       assert(() {
@@ -467,6 +475,82 @@ class _BoxDecorationPainter extends BoxPainter {
         }
         return true;
       }());
+    }
+  }
+
+  // Three sigma of Gaussian support, as used for display-list blur bounds,
+  // plus one logical pixel so antialiasing is not clipped.
+  static const double _kInsetBlurSigmaExtent = 3.0;
+  static const double _kInsetAntiAliasOutset = 1.0;
+
+  void _paintInsetShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
+    final List<BoxShadow>? shadows = _decoration.boxShadow;
+    if (shadows == null) {
+      return;
+    }
+    RRect? outline;
+    for (final BoxShadow shadow in shadows) {
+      if (!shadow.inset || shadow.color.alpha == 0) {
+        continue;
+      }
+      outline ??= _boxRRect(rect, textDirection);
+      if (!outline.isFinite) {
+        continue;
+      }
+      _paintInsetShadow(canvas, rect, outline, shadow, textDirection);
+    }
+  }
+
+  void _paintInsetShadow(
+    Canvas canvas,
+    Rect rect,
+    RRect outline,
+    BoxShadow shadow,
+    TextDirection? textDirection,
+  ) {
+    final Paint paint = shadow.copyWith(blurStyle: BlurStyle.normal).toPaint();
+    final Rect holeRect = rect.shift(shadow.offset).inflate(-shadow.spreadRadius);
+    final RRect hole = holeRect.isEmpty ? RRect.zero : _boxRRect(holeRect, textDirection);
+    final Rect core = hole.isEmpty ? Rect.zero : hole.scaleRadii().safeInnerRect;
+    canvas.save();
+    canvas.clipRRect(outline);
+    if (shadow.blurRadius > 0 &&
+        paint.maskFilter != null &&
+        !core.isEmpty &&
+        shadow.blurSigma * _kInsetBlurSigmaExtent <= core.shortestSide / 2) {
+      final Paint erasePaint = Paint()
+        ..color = const Color(0xFFFFFFFF)
+        ..maskFilter = paint.maskFilter
+        ..blendMode = BlendMode.dstOut;
+      paint.maskFilter = null;
+      canvas.saveLayer(outline.outerRect, Paint());
+      canvas.drawPaint(paint);
+      canvas.drawRRect(hole, erasePaint);
+      canvas.restore();
+    } else {
+      final double padding = shadow.blurSigma * _kInsetBlurSigmaExtent + _kInsetAntiAliasOutset;
+      final Rect cover = (hole.isEmpty ? rect : rect.expandToInclude(hole.outerRect)).inflate(
+        padding,
+      );
+      final Path path = Path()
+        ..fillType = PathFillType.evenOdd
+        ..addRect(cover);
+      if (!hole.isEmpty) {
+        path.addRRect(hole);
+      }
+      canvas.drawPath(path, paint);
+    }
+    canvas.restore();
+  }
+
+  RRect _boxRRect(Rect rect, TextDirection? textDirection) {
+    switch (_decoration.shape) {
+      case BoxShape.circle:
+        final double radius = rect.shortestSide / 2.0;
+        final Rect square = Rect.fromCircle(center: rect.center, radius: radius);
+        return RRect.fromRectAndRadius(square, Radius.circular(radius));
+      case BoxShape.rectangle:
+        return (_decoration.borderRadius ?? BorderRadius.zero).resolve(textDirection).toRRect(rect);
     }
   }
 
@@ -576,6 +660,7 @@ class _BoxDecorationPainter extends BoxPainter {
     _paintShadows(canvas, rect, textDirection);
     _paintBackgroundColor(canvas, rect, textDirection);
     _paintBackgroundImage(canvas, rect, configuration);
+    _paintInsetShadows(canvas, rect, textDirection);
     _decoration.border?.paint(
       canvas,
       rect,

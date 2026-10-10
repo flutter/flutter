@@ -141,6 +141,10 @@ class ShapeDecoration extends Decoration {
 
   /// A list of shadows cast by the [shape].
   ///
+  /// Shadows paint below the background. A shadow with [BoxShadow.inset] set
+  /// paints above the background and [image] and below the [shape] border.
+  /// The child of the decorated box paints above every shadow.
+  ///
   /// See also:
   ///
   ///  * [kElevationToShadow], for some predefined shadows used in Material
@@ -316,6 +320,7 @@ class _ShapeDecorationPainter extends BoxPainter {
   Path? _innerPath;
   Paint? _interiorPaint;
   int? _shadowCount;
+  late List<BoxShadow> _outerShadows;
   late List<Rect> _shadowBounds;
   late List<Path> _shadowPaths;
   late List<Paint> _shadowPaints;
@@ -346,26 +351,28 @@ class _ShapeDecorationPainter extends BoxPainter {
     }
     if (_decoration.shadows != null) {
       if (_shadowCount == null) {
-        _shadowCount = _decoration.shadows!.length;
-        _shadowPaints = <Paint>[
-          ..._decoration.shadows!.map((BoxShadow shadow) => shadow.toPaint()),
+        _outerShadows = <BoxShadow>[
+          for (final BoxShadow shadow in _decoration.shadows!)
+            if (!shadow.inset) shadow,
         ];
+        _shadowCount = _outerShadows.length;
+        _shadowPaints = <Paint>[for (final BoxShadow shadow in _outerShadows) shadow.toPaint()];
       }
-      if (_decoration.shape.preferPaintInterior) {
-        _shadowBounds = <Rect>[
-          ..._decoration.shadows!.map((BoxShadow shadow) {
-            return rect.shift(shadow.offset).inflate(shadow.spreadRadius);
-          }),
-        ];
-      } else {
-        _shadowPaths = <Path>[
-          ..._decoration.shadows!.map((BoxShadow shadow) {
-            return _decoration.shape.getOuterPath(
+      if (_shadowCount! > 0) {
+        if (_decoration.shape.preferPaintInterior) {
+          _shadowBounds = <Rect>[
+            for (final BoxShadow shadow in _outerShadows)
               rect.shift(shadow.offset).inflate(shadow.spreadRadius),
-              textDirection: textDirection,
-            );
-          }),
-        ];
+          ];
+        } else {
+          _shadowPaths = <Path>[
+            for (final BoxShadow shadow in _outerShadows)
+              _decoration.shape.getOuterPath(
+                rect.shift(shadow.offset).inflate(shadow.spreadRadius),
+                textDirection: textDirection,
+              ),
+          ];
+        }
       }
     }
     if (!_decoration.shape.preferPaintInterior &&
@@ -414,7 +421,7 @@ class _ShapeDecorationPainter extends BoxPainter {
           assert(
             debugHandleDisabledShadowStart(
               canvas,
-              _decoration.shadows![index],
+              _outerShadows[index],
               _decoration.shape.getOuterPath(_shadowBounds[index], textDirection: textDirection),
             ),
           );
@@ -424,21 +431,53 @@ class _ShapeDecorationPainter extends BoxPainter {
             _shadowPaints[index],
             textDirection: textDirection,
           );
-          assert(debugHandleDisabledShadowEnd(canvas, _decoration.shadows![index]));
+          assert(debugHandleDisabledShadowEnd(canvas, _outerShadows[index]));
         }
       } else {
         for (var index = 0; index < _shadowCount!; index += 1) {
-          assert(
-            debugHandleDisabledShadowStart(
-              canvas,
-              _decoration.shadows![index],
-              _shadowPaths[index],
-            ),
-          );
+          assert(debugHandleDisabledShadowStart(canvas, _outerShadows[index], _shadowPaths[index]));
           canvas.drawPath(_shadowPaths[index], _shadowPaints[index]);
-          assert(debugHandleDisabledShadowEnd(canvas, _decoration.shadows![index]));
+          assert(debugHandleDisabledShadowEnd(canvas, _outerShadows[index]));
         }
       }
+    }
+  }
+
+  // Three sigma of Gaussian support, as used for display-list blur bounds,
+  // plus one logical pixel so antialiasing is not clipped.
+  static const double _kInsetBlurSigmaExtent = 3.0;
+  static const double _kInsetAntiAliasOutset = 1.0;
+
+  void _paintInsetShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
+    final List<BoxShadow>? shadows = _decoration.shadows;
+    if (shadows == null) {
+      return;
+    }
+    Path? clip;
+    for (final BoxShadow shadow in shadows) {
+      if (!shadow.inset || shadow.color.alpha == 0) {
+        continue;
+      }
+      clip ??= _decoration.shape.getOuterPath(rect, textDirection: textDirection);
+      final Paint paint = shadow.copyWith(blurStyle: BlurStyle.normal).toPaint();
+      final Rect holeRect = rect.shift(shadow.offset).inflate(-shadow.spreadRadius);
+      final double padding = shadow.blurSigma * _kInsetBlurSigmaExtent + _kInsetAntiAliasOutset;
+      final Rect cover = (holeRect.isEmpty ? rect : rect.expandToInclude(holeRect)).inflate(
+        padding,
+      );
+      final Path path = Path()
+        ..fillType = PathFillType.evenOdd
+        ..addRect(cover);
+      if (!holeRect.isEmpty) {
+        path.addPath(
+          _decoration.shape.getOuterPath(holeRect, textDirection: textDirection),
+          Offset.zero,
+        );
+      }
+      canvas.save();
+      canvas.clipPath(clip);
+      canvas.drawPath(path, paint);
+      canvas.restore();
     }
   }
 
@@ -494,6 +533,7 @@ class _ShapeDecorationPainter extends BoxPainter {
     _paintShadows(canvas, rect, textDirection);
     _paintInterior(canvas, rect, textDirection);
     _paintImage(canvas, configuration);
+    _paintInsetShadows(canvas, rect, textDirection);
     _decoration.shape.paint(canvas, rect, textDirection: textDirection);
   }
 }
