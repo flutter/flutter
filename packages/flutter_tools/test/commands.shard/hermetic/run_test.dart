@@ -2001,6 +2001,46 @@ server:
   );
 
   testUsingContext(
+    'web browser default flags stay enabled unless opted out',
+    () async {
+      final command = RunCommand();
+      await expectLater(
+        () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
+        throwsToolExit(),
+      );
+
+      final DebuggingOptions options = await command.createDebuggingOptions();
+      expect(options.webBrowserDefaultFlags, true);
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    '--no-web-browser-default-flags disables Flutter browser defaults',
+    () async {
+      final command = RunCommand();
+      await expectLater(
+        () => createTestCommandRunner(
+          command,
+        ).run(<String>['run', '--no-pub', '--no-web-browser-default-flags']),
+        throwsToolExit(),
+      );
+
+      final DebuggingOptions options = await command.createDebuggingOptions();
+      expect(options.webBrowserDefaultFlags, false);
+    },
+    overrides: <Type, Generator>{
+      Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
     'fails when "--web-launch-url" is not supported',
     () async {
       final command = RunCommand();
