@@ -6228,6 +6228,34 @@ TEST_F(EmbedderTest, EmbedderGetProcAddressesLaunchEngine) {
   EXPECT_EQ(table.LaunchEngine, &FlutterEngineLaunchEngine);
 }
 
+TEST_F(EmbedderTest,
+       EmbedderDeinitializeOnlyNotifiesDestroyedWhenSurfaceIsCreated) {
+  constexpr int32_t kTestSurfaceDim = 1;
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(kTestSurfaceDim, kTestSurfaceDim));
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  auto* embedder_engine = reinterpret_cast<EmbedderEngine*>(engine.get());
+  ASSERT_TRUE(embedder_engine->LaunchShell());
+  EXPECT_FALSE(embedder_engine->IsSurfaceCreated());
+
+  ASSERT_EQ(FlutterEngineNotifyCreated(engine.get()), kSuccess);
+  EXPECT_TRUE(embedder_engine->IsSurfaceCreated());
+
+  ASSERT_EQ(FlutterEngineNotifyDestroyed(engine.get()), kSuccess);
+  EXPECT_FALSE(embedder_engine->IsSurfaceCreated());
+
+  // Re-create the surface and verify that FlutterEngineDeinitialize clears
+  // IsSurfaceCreated() by notifying destruction before collecting the shell.
+  ASSERT_EQ(FlutterEngineNotifyCreated(engine.get()), kSuccess);
+  EXPECT_TRUE(embedder_engine->IsSurfaceCreated());
+
+  ASSERT_EQ(FlutterEngineDeinitialize(engine.get()), kSuccess);
+  EXPECT_FALSE(embedder_engine->IsSurfaceCreated());
+}
+
 }  // namespace testing
 }  // namespace flutter
 

@@ -40,6 +40,26 @@ EmbedderEngine::EmbedderEngine(
       image_generators_(std::move(image_generators)) {}
 
 EmbedderEngine::EmbedderEngine(
+    std::unique_ptr<EmbedderThreadHost> thread_host,
+    const flutter::TaskRunners& task_runners,
+    const flutter::Settings& settings,
+    std::optional<RunConfiguration> run_configuration,
+    const PlatformViewFactory& on_create_platform_view,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
+    std::vector<ImageGeneratorFactoryRegistration> image_generators)
+    : EmbedderEngine(
+          std::move(thread_host),
+          task_runners,
+          settings,
+          std::move(run_configuration),
+          [on_create_platform_view](Shell& shell) {
+            return on_create_platform_view(shell, shell.GetTaskRunners());
+          },
+          [](Shell& shell) { return std::make_unique<Rasterizer>(shell); },
+          std::move(external_texture_resolver),
+          std::move(image_generators)) {}
+
+EmbedderEngine::EmbedderEngine(
     const TaskRunners& task_runners,
     std::unique_ptr<Shell> spawned_shell,
     std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
@@ -101,6 +121,21 @@ std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
   return std::unique_ptr<EmbedderEngine>(
       new EmbedderEngine(task_runners, std::move(spawned_shell),
                          std::move(external_texture_resolver)));
+}
+
+std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
+    RunConfiguration run_configuration,
+    const std::string& initial_route,
+    const PlatformViewFactory& on_create_platform_view,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
+    const {
+  return Spawn(
+      std::move(run_configuration), initial_route,
+      [on_create_platform_view](Shell& shell) {
+        return on_create_platform_view(shell, shell.GetTaskRunners());
+      },
+      [](Shell& shell) { return std::make_unique<Rasterizer>(shell); },
+      std::move(external_texture_resolver));
 }
 
 bool EmbedderEngine::CollectShell() {
@@ -179,6 +214,7 @@ bool EmbedderEngine::NotifyCreated() {
     return false;
   }
 
+  is_surface_created_ = true;
   shell_->GetPlatformView()->NotifyCreated();
   return true;
 }
@@ -188,9 +224,14 @@ bool EmbedderEngine::NotifyDestroyed() {
     return false;
   }
 
+  is_surface_created_ = false;
   shell_->GetPlatformView()->NotifyDestroyed();
 
   return true;
+}
+
+bool EmbedderEngine::IsSurfaceCreated() const {
+  return is_surface_created_;
 }
 
 bool EmbedderEngine::SetViewportMetrics(

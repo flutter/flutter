@@ -2915,7 +2915,9 @@ FlutterEngineResult FlutterEngineDeinitialize(FLUTTER_API_SYMBOL(FlutterEngine)
   }
 
   auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
-  embedder_engine->NotifyDestroyed();
+  if (embedder_engine->IsSurfaceCreated()) {
+    embedder_engine->NotifyDestroyed();
+  }
   embedder_engine->CollectShell();
   embedder_engine->CollectThreadHost();
   return kSuccess;

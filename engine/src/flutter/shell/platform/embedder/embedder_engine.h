@@ -31,6 +31,10 @@ struct ImageGeneratorFactoryRegistration {
 // instance of the Flutter engine.
 class EmbedderEngine {
  public:
+  using PlatformViewFactory =
+      std::function<std::unique_ptr<PlatformView>(PlatformView::Delegate&,
+                                                  const TaskRunners&)>;
+
   //----------------------------------------------------------------------------
   /// @param[in]  thread_host  The threads and custom task runners of the
   ///             engine. May be null when the embedder owns the threads behind
@@ -48,6 +52,16 @@ class EmbedderEngine {
       std::optional<RunConfiguration> run_configuration,
       const Shell::CreateCallback<PlatformView>& on_create_platform_view,
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+      std::unique_ptr<EmbedderExternalTextureResolver>
+          external_texture_resolver,
+      std::vector<ImageGeneratorFactoryRegistration> image_generators = {});
+
+  EmbedderEngine(
+      std::unique_ptr<EmbedderThreadHost> thread_host,
+      const TaskRunners& task_runners,
+      const Settings& settings,
+      std::optional<RunConfiguration> run_configuration,
+      const PlatformViewFactory& on_create_platform_view,
       std::unique_ptr<EmbedderExternalTextureResolver>
           external_texture_resolver,
       std::vector<ImageGeneratorFactoryRegistration> image_generators = {});
@@ -85,6 +99,13 @@ class EmbedderEngine {
       std::unique_ptr<EmbedderExternalTextureResolver>
           external_texture_resolver = nullptr) const;
 
+  std::unique_ptr<EmbedderEngine> Spawn(
+      RunConfiguration run_configuration,
+      const std::string& initial_route,
+      const PlatformViewFactory& on_create_platform_view,
+      std::unique_ptr<EmbedderExternalTextureResolver>
+          external_texture_resolver = nullptr) const;
+
   bool CollectShell();
 
   void CollectThreadHost();
@@ -94,6 +115,8 @@ class EmbedderEngine {
   bool NotifyCreated();
 
   bool NotifyDestroyed();
+
+  bool IsSurfaceCreated() const;
 
   bool RunRootIsolate();
 
@@ -173,6 +196,7 @@ class EmbedderEngine {
   std::unique_ptr<Shell> shell_;
   std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver_;
   std::vector<ImageGeneratorFactoryRegistration> image_generators_;
+  bool is_surface_created_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderEngine);
 };
