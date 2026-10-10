@@ -22,6 +22,7 @@
 #     * Element: fix_element.yaml
 #     * Expansible: (in this file)
 #     * ListWheelScrollView: fix_list_wheel_scroll_view.yaml
+#     * MediaQuery: fix_media_query.yaml
 version: 1
 transforms:
   # Change made in https://github.com/flutter/flutter/pull/135218
@@ -816,17 +817,6 @@ transforms:
         oldName: 'clipBehavior'
         newName: 'decorationClipBehavior'
 
-  # Changes made in https://github.com/flutter/flutter/pull/119647
-  - title: "Migrate to 'fromView'"
-    date: 2022-10-28
-    element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
-      constructor: 'fromWindow'
-      inClass: 'MediaQueryData'
-    changes:
-      - kind: 'rename'
-        newName: 'fromView'
-
   # Changes made in https://github.com/flutter/flutter/pull/119186 and https://github.com/flutter/flutter/pull/81067
   - title: "Remove 'vsync'"
     date: 2023-01-30
@@ -837,17 +827,6 @@ transforms:
     changes:
       - kind: 'removeParameter'
         name: 'vsync'
-
-  # Changes made in https://github.com/flutter/flutter/pull/114459
-  - title: "Migrate to 'boldTextOf'"
-    date: 2022-10-28
-    element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
-      method: 'boldTextOverride'
-      inClass: 'MediaQuery'
-    changes:
-      - kind: 'rename'
-        newName: 'boldTextOf'
 
   # Changes made in https://github.com/flutter/flutter/pull/87839
   - title: "Migrate to 'disallowIndicator'"
@@ -1038,29 +1017,6 @@ transforms:
       uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
       method: 'of'
       inClass: 'Navigator'
-    oneOf:
-      - if: "nullOk == 'true'"
-        changes:
-          - kind: 'rename'
-            newName: 'maybeOf'
-          - kind: 'removeParameter'
-            name: 'nullOk'
-      - if: "nullOk == 'false'"
-        changes:
-          - kind: 'removeParameter'
-            name: 'nullOk'
-    variables:
-      nullOk:
-        kind: 'fragment'
-        value: 'arguments[nullOk]'
-
-  # Changes made in https://github.com/flutter/flutter/pull/68736.
-  - title: "Migrate from 'nullOk'"
-    date: 2021-01-27
-    element:
-      uris: [ 'widgets.dart', 'material.dart', 'cupertino.dart' ]
-      method: 'of'
-      inClass: 'MediaQuery'
     oneOf:
       - if: "nullOk == 'true'"
         changes:

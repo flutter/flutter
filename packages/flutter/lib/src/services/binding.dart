@@ -690,7 +690,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 ///  * [ServicesBinding.systemContextMenuClient], which can be set to a
 ///    [SystemContextMenuClient] to register it to receive events, or null to
 ///    unregister.
-///  * [MediaQuery.maybeSupportsShowingSystemContextMenu], which indicates
+///  * [MediaQuery.supportsShowingSystemContextMenu], which indicates
 ///    whether the system context menu is supported.
 ///  * [SystemContextMenu], which provides a widget interface for displaying the
 ///    system context menu.
