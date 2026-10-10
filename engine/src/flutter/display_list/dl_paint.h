@@ -48,6 +48,9 @@ class DlPaint {
   static constexpr DlColor kDefaultColor = DlColor::kBlack();
   static constexpr float kDefaultWidth = 0.0;
   static constexpr float kDefaultMiter = 4.0;
+  // Note that this differs from the default of dart:ui Paint (true). The
+  // dart:ui Paint always sets this attribute explicitly.
+  static constexpr bool kDefaultAntiAlias = false;
 
   static const DlPaint kDefault;
 

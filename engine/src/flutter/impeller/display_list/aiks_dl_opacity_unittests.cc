@@ -19,9 +19,11 @@ TEST_P(AiksTest, DrawOpacityPeephole) {
   DisplayListBuilder builder;
 
   DlPaint green;
+  green.setAntiAlias(true);
   green.setColor(DlColor::kGreen().modulateOpacity(0.5));
 
   DlPaint alpha;
+  alpha.setAntiAlias(true);
   alpha.setColor(DlColor::kRed().modulateOpacity(0.5));
 
   builder.SaveLayer(std::nullopt, &alpha);
@@ -35,13 +37,17 @@ TEST_P(AiksTest, CanRenderGroupOpacity) {
   DisplayListBuilder builder;
 
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
   DlPaint green;
+  green.setAntiAlias(true);
   green.setColor(DlColor::kGreen().modulateOpacity(0.5));
   DlPaint blue;
+  blue.setAntiAlias(true);
   blue.setColor(DlColor::kBlue());
 
   DlPaint alpha;
+  alpha.setAntiAlias(true);
   alpha.setColor(DlColor::kRed().modulateOpacity(0.5));
 
   builder.SaveLayer(std::nullopt, &alpha);
@@ -57,9 +63,11 @@ TEST_P(AiksTest, CanRenderGroupOpacityToSavelayer) {
   DisplayListBuilder builder;
 
   DlPaint red;
+  red.setAntiAlias(true);
   red.setColor(DlColor::kRed());
 
   DlPaint alpha;
+  alpha.setAntiAlias(true);
   alpha.setColor(DlColor::kRed().modulateOpacity(0.7));
 
   // Create a saveLayer that will forward its opacity to another

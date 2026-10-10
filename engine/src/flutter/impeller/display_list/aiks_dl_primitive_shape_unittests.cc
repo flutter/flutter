@@ -75,6 +75,7 @@ void RenderPrimitiveWithStroke(DisplayListBuilder& builder,
   auto draw_shape = [&](DlScalar radius, DlColor color,
                         DlScalar stroke_width = -1) -> void {
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(color);
     if (stroke_width < 0) {
       paint.setDrawStyle(DlDrawStyle::kFill);

@@ -120,6 +120,7 @@ void DrawShadowMesh(DisplayListBuilder& builder,
   Point shadow_translate = Point(0, occluder_z) * matrix.Invert().GetScale().y;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setDrawStyle(DlDrawStyle::kStroke);
   paint.setColor(DlColor::kDarkGrey());
 
@@ -961,9 +962,11 @@ TEST_P(AiksTest, CanDrawPerspectiveConvexShadow) {
     builder.Save();
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(color.withAlphaF(0.25f));
 
     DlPaint shadow_paint;
+    shadow_paint.setAntiAlias(true);
     shadow_paint.setMaskFilter(
         DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10.0f));
 
@@ -994,7 +997,7 @@ TEST_P(AiksTest, CanDrawPerspectiveConvexShadow) {
     builder.Save();
 
     builder.Translate(0, 75);
-    builder.DrawPath(path, DlPaint(DlColor::kPurple()));
+    builder.DrawPath(path, DlPaint(DlColor::kPurple()).setAntiAlias(true));
 
     builder.Translate(150, -75);
     draw_paths_and_shadows(path, DlColor::kGreen(), simple_y_rotate_matrix);
@@ -1029,9 +1032,11 @@ TEST_P(AiksTest, CanDrawRotatedConvexShadow) {
   DlPath pentagon_path = path_builder.TakePath();
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kGreen().withAlphaF(0.25f));
 
   DlPaint shadow_paint;
+  shadow_paint.setAntiAlias(true);
   shadow_paint.setMaskFilter(
       DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10.0f));
 
@@ -1065,9 +1070,11 @@ TEST_P(AiksTest, CanDrawNonuniformScaleConvexShadow) {
   DlPath pentagon_path = path_builder.TakePath();
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kGreen().withAlphaF(0.25f));
 
   DlPaint shadow_paint;
+  shadow_paint.setAntiAlias(true);
   shadow_paint.setMaskFilter(
       DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10.0f));
 

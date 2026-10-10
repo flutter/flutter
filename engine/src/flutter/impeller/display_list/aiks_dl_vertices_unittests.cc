@@ -52,6 +52,7 @@ std::shared_ptr<DlVertices> MakeVertices(
 TEST_P(AiksTest, VerticesGeometryUVPositionData) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
   ContentContext content_context(GetContext(), nullptr);
@@ -76,6 +77,7 @@ TEST_P(AiksTest, VerticesGeometryUVPositionData) {
 TEST_P(AiksTest, VerticesGeometryUVPositionDataWithTranslate) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
   ContentContext content_context(GetContext(), nullptr);
@@ -102,6 +104,7 @@ TEST_P(AiksTest, VerticesGeometryUVPositionDataWithTranslate) {
 TEST_P(AiksTest, VerticesGeometryColorUVPositionData) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
   ContentContext content_context(GetContext(), nullptr);
@@ -131,6 +134,7 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionData) {
 TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
   ContentContext content_context(GetContext(), nullptr);
@@ -179,7 +183,8 @@ TEST_P(AiksTest, CanConvertTriangleFanToTriangles) {
     DlPoint(hex_start.x - center_to_flat, hex_start.y + 0.5 * hexagon_radius)
   };
   // clang-format on
-  auto paint = flutter::DlPaint(flutter::DlColor::kDarkGrey());
+  auto paint =
+      flutter::DlPaint(flutter::DlColor::kDarkGrey()).setAntiAlias(true);
   auto dl_vertices = flutter::DlVertices::Make(
       flutter::DlVertexMode::kTriangleFan, vertices.size(), vertices.data(),
       nullptr, nullptr);
@@ -206,6 +211,7 @@ TEST_P(AiksTest, DrawVerticesSolidColorTrianglesWithoutIndices) {
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setColor(flutter::DlColor::kRed().modulateOpacity(0.5));
   builder.Scale(-1, -1);
@@ -235,6 +241,7 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithoutIndices) {
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setColorSource(linear);
   builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
@@ -268,6 +275,7 @@ TEST_P(AiksTest, DrawVerticesLinearGradientWithTextureCoordinates) {
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setColorSource(linear);
   builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
@@ -295,6 +303,7 @@ TEST_P(AiksTest, DrawVerticesImageSourceWithTextureCoordinates) {
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   auto image_source = flutter::DlColorSource::MakeImage(
       dl_image, flutter::DlTileMode::kRepeat, flutter::DlTileMode::kRepeat);
@@ -329,6 +338,7 @@ TEST_P(AiksTest,
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   auto image_source = flutter::DlColorSource::MakeImage(
       dl_image, flutter::DlTileMode::kRepeat, flutter::DlTileMode::kRepeat);
@@ -355,6 +365,7 @@ TEST_P(AiksTest, DrawVerticesSolidColorTrianglesWithIndices) {
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setColor(flutter::DlColor::kRed());
   builder.DrawVertices(vertices, flutter::DlBlendMode::kSrcOver, paint);
@@ -380,6 +391,7 @@ TEST_P(AiksTest, DrawVerticesPremultipliesColors) {
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setBlendMode(flutter::DlBlendMode::kSrcOver);
   paint.setColor(flutter::DlColor::kRed());
 
@@ -407,6 +419,7 @@ TEST_P(AiksTest, DrawVerticesWithInvalidIndices) {
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setBlendMode(flutter::DlBlendMode::kSrcOver);
   paint.setColor(flutter::DlColor::kRed());
 
@@ -480,7 +493,9 @@ TEST_P(AiksTest, DrawVerticesTextureCoordinatesWithFragmentShader) {
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   flutter::DlPaint rect_paint;
+  rect_paint.setAntiAlias(true);
   rect_paint.setColor(DlColor::kBlue());
 
   auto runtime_stages_result =
@@ -529,7 +544,9 @@ TEST_P(AiksTest,
 
   flutter::DisplayListBuilder builder;
   flutter::DlPaint paint;
+  paint.setAntiAlias(true);
   flutter::DlPaint rect_paint;
+  rect_paint.setAntiAlias(true);
   rect_paint.setColor(DlColor::kBlue());
 
   auto runtime_stages_result =
@@ -562,6 +579,7 @@ TEST_P(AiksTest,
 TEST_P(AiksTest, VerticesGeometryWithMaskFilter) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 10));
 
   std::vector<DlPoint> vertex_coordinates = {

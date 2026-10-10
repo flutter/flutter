@@ -67,6 +67,7 @@ TEST_P(AiksTest, CanRenderClippedRuntimeEffects) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   auto effect =
       MakeRuntimeEffect(this, "runtime_stage_example.frag.iplr", uniform_data);
   ABSL_ASSERT_OK(effect);
@@ -92,6 +93,7 @@ TEST_P(AiksTest, DrawPaintTransformsBounds) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   auto effect = MakeRuntimeEffect(this, "gradient.frag.iplr", uniform_data);
   ABSL_ASSERT_OK(effect);
   paint.setColorSource(effect.value());
@@ -121,6 +123,7 @@ TEST_P(AiksTest, CanRenderRuntimeEffectFilter) {
   uniform_data->resize(sizeof(Vector2));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kAqua());
   paint.setImageFilter(DlImageFilter::MakeRuntimeEffect(
       DlRuntimeEffectImpeller::Make(runtime_stage), sampler_inputs,
@@ -150,6 +153,7 @@ TEST_P(AiksTest, RuntimeEffectWithInvalidSamplerDoesNotCrash) {
   uniform_data->resize(sizeof(Vector2));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   auto effect =
       MakeRuntimeEffect(this, "runtime_stage_filter_example.frag.iplr",
                         uniform_data, sampler_inputs);
@@ -165,10 +169,12 @@ TEST_P(AiksTest, RuntimeEffectWithInvalidSamplerDoesNotCrash) {
 TEST_P(AiksTest, ComposePaintRuntimeOuter) {
   DisplayListBuilder builder;
   DlPaint background;
+  background.setAntiAlias(true);
   background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
   builder.DrawPaint(background);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kGreen());
   float matrix[] = {
       0, 1, 0, 0, 0,  //
@@ -207,6 +213,7 @@ TEST_P(AiksTest, ComposePaintRuntimeOuter) {
                     DlImageSampling::kNearestNeighbor, &paint);
 
   DlPaint green;
+  green.setAntiAlias(true);
   green.setColor(DlColor::kGreen());
   builder.DrawLine({100, 100}, {200, 100}, green);
   builder.DrawLine({100, 100}, {100, 200}, green);
@@ -240,10 +247,12 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
     }
     DisplayListBuilder builder;
     DlPaint background;
+    background.setAntiAlias(true);
     background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
     builder.DrawPaint(background);
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kGreen());
     float matrix[] = {
         0, 1, 0, 0, 0,  //
@@ -285,6 +294,7 @@ TEST_P(AiksTest, ComposePaintRuntimeInner) {
     }
 
     DlPaint green;
+    green.setAntiAlias(true);
     green.setColor(DlColor::kGreen());
     builder.DrawLine({100, 100}, {200, 100}, green);
     builder.DrawLine({100, 100}, {100, 200}, green);
@@ -319,6 +329,7 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
     }
     DisplayListBuilder builder;
     DlPaint background;
+    background.setAntiAlias(true);
     background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
     builder.DrawPaint(background);
 
@@ -345,16 +356,19 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInner) {
                                                       /*inner=*/blur_filter);
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
     builder.DrawImage(image, DlPoint(100.0, 100.0),
                       DlImageSampling::kNearestNeighbor, &paint);
 
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     save_paint.setBlendMode(DlBlendMode::kSrc);
     builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
     builder.Restore();
 
     DlPaint green;
+    green.setAntiAlias(true);
     green.setColor(DlColor::kGreen());
     builder.DrawLine({100, 100}, {200, 100}, green);
     builder.DrawLine({100, 100}, {100, 200}, green);
@@ -383,6 +397,7 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
     }
     DisplayListBuilder builder;
     DlPaint background;
+    background.setAntiAlias(true);
     background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
     builder.DrawPaint(background);
 
@@ -408,16 +423,19 @@ TEST_P(AiksTest, ComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
                                                       /*inner=*/blur_filter);
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
     builder.DrawImage(image, DlPoint(100.0, 100.0),
                       DlImageSampling::kNearestNeighbor, &paint);
 
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     save_paint.setBlendMode(DlBlendMode::kSrc);
     builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
     builder.Restore();
 
     DlPaint green;
+    green.setAntiAlias(true);
     green.setColor(DlColor::kGreen());
     builder.DrawLine({100, 100}, {200, 100}, green);
     builder.DrawLine({100, 100}, {100, 200}, green);
@@ -455,6 +473,7 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
     }
     DisplayListBuilder builder;
     DlPaint background;
+    background.setAntiAlias(true);
     background.setColor(DlColor(1.0, 0.1, 0.1, 0.1, DlColorSpace::kSRGB));
     builder.DrawPaint(background);
 
@@ -483,16 +502,19 @@ TEST_P(AiksTest, ClippedComposeBackdropRuntimeOuterBlurInnerSmallSigma) {
                                       clip_size.y));
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     auto image = DlImageImpeller::Make(CreateTextureForFixture("kalimba.jpg"));
     builder.DrawImage(image, DlPoint(100.0, 100.0),
                       DlImageSampling::kNearestNeighbor, &paint);
 
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     save_paint.setBlendMode(DlBlendMode::kSrc);
     builder.SaveLayer(std::nullopt, &save_paint, backdrop_filter.get());
     builder.Restore();
 
     DlPaint green;
+    green.setAntiAlias(true);
     green.setColor(DlColor::kGreen());
     builder.DrawLine({100, 100}, {200, 100}, green);
     builder.DrawLine({100, 100}, {100, 200}, green);
@@ -531,11 +553,13 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
 
   // Draw a background so the backdrop filter has something to affect
   DlPaint background_paint;
+  background_paint.setAntiAlias(true);
   background_paint.setColor(DlColor::kWhite());
   builder.DrawPaint(background_paint);
 
   // Draw some pattern to verify the filter effect
   DlPaint pattern_paint;
+  pattern_paint.setAntiAlias(true);
   pattern_paint.setColor(DlColor::kRed());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 200, 200), pattern_paint);
   pattern_paint.setColor(DlColor::kBlue());
@@ -548,6 +572,7 @@ TEST_P(AiksTest, ClippedBackdropFilterWithShader) {
   builder.ClipRect(DlRect::MakeXYWH(66, 66, 268, 268));
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   // The Flutter code uses a backdrop filter layer.
   // In DisplayList, this corresponds to SaveLayer with a backdrop filter.
   builder.SaveLayer(std::nullopt, &save_paint, runtime_filter.get());
@@ -601,6 +626,7 @@ TEST_P(AiksTest, RuntimeEffectImageFilterRotated) {
     builder.Translate(-size.width * 0.5, -size.height * 0.5);
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setImageFilter(runtime_filter);
     builder.DrawImage(image, DlPoint(0.0, 0.0),
                       DlImageSampling::kNearestNeighbor, &paint);
@@ -623,6 +649,7 @@ TEST_P(AiksTest, RuntimeEffectVectorArray) {
   memcpy(uniform_data->data(), &frag_uniforms, sizeof(FragUniforms));
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   auto effect = MakeRuntimeEffect(this, "runtime_stage_vector_array.frag.iplr",
                                   uniform_data);
   ABSL_ASSERT_OK(effect);

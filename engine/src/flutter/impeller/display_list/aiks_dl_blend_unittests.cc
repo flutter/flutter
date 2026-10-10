@@ -65,11 +65,13 @@ TEST_P(AiksTest, CanRenderAdvancedBlendColorFilterWithSaveLayer) {
   builder.ClipRect(layer_rect);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setColorFilter(DlColorFilter::MakeBlend(
       DlColor::RGBA(0, 1, 0, 0.5), DlBlendMode::kDifference));
   builder.SaveLayer(layer_rect, &save_paint);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlack());
   builder.DrawPaint(paint);
   paint.setColor(DlColor::kWhite());
@@ -82,6 +84,7 @@ TEST_P(AiksTest, CanRenderAdvancedBlendColorFilterWithSaveLayer) {
 TEST_P(AiksTest, BlendModeShouldCoverWholeScreen) {
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
 
   paint.setColor(DlColor::kRed());
   builder.DrawPaint(paint);
@@ -109,6 +112,7 @@ TEST_P(AiksTest, CanDrawPaintWithAdvancedBlend) {
 
   builder.Scale(0.2, 0.2);
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::RGBA(
       Color::MediumTurquoise().red, Color::MediumTurquoise().green,
       Color::MediumTurquoise().blue, Color::MediumTurquoise().alpha));
@@ -124,6 +128,7 @@ TEST_P(AiksTest, CanDrawPaintWithAdvancedBlend) {
 
 TEST_P(AiksTest, DrawPaintWithAdvancedBlendOverFilter) {
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlack());
   paint.setMaskFilter(DlBlurMaskFilter::Make(DlBlurStyle::kNormal, 60));
 
@@ -143,6 +148,7 @@ TEST_P(AiksTest, DrawAdvancedBlendPartlyOffscreen) {
   DisplayListBuilder builder;
 
   DlPaint draw_paint;
+  draw_paint.setAntiAlias(true);
   draw_paint.setColor(DlColor::kBlue());
   builder.DrawPaint(draw_paint);
   builder.Scale(2, 2);
@@ -153,6 +159,7 @@ TEST_P(AiksTest, DrawAdvancedBlendPartlyOffscreen) {
   std::vector<Scalar> stops = {0.0, 1.0};
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   DlMatrix matrix = DlMatrix::MakeScale({0.3, 0.3, 1.0});
   paint.setColorSource(DlColorSource::MakeLinear(
       /*start_point=*/{0, 0},             //
@@ -171,6 +178,7 @@ TEST_P(AiksTest, DrawAdvancedBlendPartlyOffscreen) {
 
 TEST_P(AiksTest, PaintBlendModeIsRespected) {
   DlPaint paint;
+  paint.setAntiAlias(true);
   DisplayListBuilder builder;
   // Default is kSourceOver.
 
@@ -224,11 +232,13 @@ TEST_P(AiksTest, ColorFilterBlend) {
       builder.Scale(0.4, 0.4);
       {
         DlPaint dstPaint;
+        dstPaint.setAntiAlias(true);
         builder.DrawImage(dst_image, DlPoint(0, 0),
                           DlImageSampling::kMipmapLinear, &dstPaint);
       }
       {
         DlPaint srcPaint;
+        srcPaint.setAntiAlias(true);
         srcPaint.setBlendMode(blend_modes[i]);
         if (has_color_filter) {
           std::shared_ptr<const DlColorFilter> color_filter =
@@ -281,11 +291,13 @@ TEST_P(AiksTest, ColorFilterAdvancedBlend) {
       builder.Scale(0.4, 0.4);
       {
         DlPaint dstPaint;
+        dstPaint.setAntiAlias(true);
         builder.DrawImage(dst_image, DlPoint(0, 0),
                           DlImageSampling::kMipmapLinear, &dstPaint);
       }
       {
         DlPaint srcPaint;
+        srcPaint.setAntiAlias(true);
         srcPaint.setBlendMode(blend_modes[i]);
         if (has_color_filter) {
           std::shared_ptr<const DlColorFilter> color_filter =
@@ -371,11 +383,13 @@ TEST_P(AiksTest, ColorFilterAdvancedBlendNoFbFetch) {
       builder.Scale(0.4, 0.4);
       {
         DlPaint dstPaint;
+        dstPaint.setAntiAlias(true);
         builder.DrawImage(dst_image, DlPoint(0, 0),
                           DlImageSampling::kMipmapLinear, &dstPaint);
       }
       {
         DlPaint srcPaint;
+        srcPaint.setAntiAlias(true);
         srcPaint.setBlendMode(blend_modes[i]);
         if (has_color_filter) {
           std::shared_ptr<const DlColorFilter> color_filter =
@@ -408,6 +422,7 @@ TEST_P(AiksTest, BlendModePlusAlphaWideGamut) {
 
   DisplayListBuilder builder;
   DlPaint paint;
+  paint.setAntiAlias(true);
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   paint.setColor(DlColor::RGBA(0.9, 1, 0.9, 1.0));
@@ -448,10 +463,12 @@ TEST_P(AiksTest, BlendModePlusAlphaColorFilterWideGamut) {
   builder.Scale(GetContentScale().x, GetContentScale().y);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::RGBA(0.1, 0.2, 0.1, 1.0));
   builder.DrawPaint(paint);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::RGBA(1, 0, 0, 1), DlBlendMode::kPlus));
   builder.SaveLayer(std::nullopt, &save_paint);
@@ -477,6 +494,7 @@ TEST_P(AiksTest, ForegroundBlendSubpassCollapseOptimization) {
   DisplayListBuilder builder;
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kColorDodge));
   builder.SaveLayer(std::nullopt, &save_paint);
@@ -485,6 +503,7 @@ TEST_P(AiksTest, ForegroundBlendSubpassCollapseOptimization) {
   builder.Rotate(120);
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
   builder.DrawRect(DlRect::MakeXYWH(100, 100, 200, 200), paint);
 
@@ -495,10 +514,12 @@ TEST_P(AiksTest, ClearBlend) {
   DisplayListBuilder builder;
 
   DlPaint blue;
+  blue.setAntiAlias(true);
   blue.setColor(DlColor::kBlue());
   builder.DrawRect(DlRect::MakeXYWH(0, 0, 600.0, 600.0), blue);
 
   DlPaint clear;
+  clear.setAntiAlias(true);
   clear.setBlendMode(DlBlendMode::kClear);
 
   builder.DrawCircle(DlPoint(300.0, 300.0), 200.0, clear);
@@ -526,6 +547,7 @@ static sk_sp<DisplayList> BlendModeTest(AiksTest* test,
   DisplayListBuilder builder;
   {
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kBlack());
     builder.DrawPaint(paint);
   }
@@ -548,6 +570,7 @@ static sk_sp<DisplayList> BlendModeTest(AiksTest* test,
       builder.SaveLayer(std::nullopt);
       {
         DlPaint draw_paint;
+        draw_paint.setAntiAlias(true);
         draw_paint.setColor(
             DlColor::RGBA(destination_color.red, destination_color.green,
                           destination_color.blue, destination_color.alpha));
@@ -556,10 +579,12 @@ static sk_sp<DisplayList> BlendModeTest(AiksTest* test,
         // Draw the source color in an offscreen pass and blend it to the parent
         // pass.
         DlPaint save_paint;
+        save_paint.setAntiAlias(true);
         save_paint.setBlendMode(static_cast<DlBlendMode>(blend_mode));
         builder.SaveLayer(std::nullopt, &save_paint);
         {  //
           DlPaint paint;
+          paint.setAntiAlias(true);
           paint.setColor(
               DlColor::RGBA(color.red, color.green, color.blue, color.alpha));
           builder.DrawRect(DlRect::MakeXYWH(25, 25, 100, 100), paint);
@@ -585,6 +610,7 @@ static sk_sp<DisplayList> BlendModeTest(AiksTest* test,
   for (const auto& color : source_colors) {
     // Simply write the CPU blended color to the pass.
     DlPaint paint;
+    paint.setAntiAlias(true);
     auto dest = destination_color.Blend(color, blend_mode);
     paint.setColor(DlColor::RGBA(dest.red, dest.green, dest.blue, dest.alpha));
     paint.setBlendMode(DlBlendMode::kSrcOver);
@@ -606,11 +632,13 @@ static sk_sp<DisplayList> BlendModeTest(AiksTest* test,
   // Draw grid behind the images.
   {
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::RGBA(41 / 255.0, 41 / 255.0, 41 / 255.0, 1));
     builder.DrawRect(DlRect::MakeLTRB(0, 0, 800, 400), paint);
   }
 
   DlPaint square_paint;
+  square_paint.setAntiAlias(true);
   square_paint.setColor(DlColor::RGBA(15 / 255.0, 15 / 255.0, 15 / 255.0, 1));
   for (int y = 0; y < 400 / 8; y++) {
     for (int x = 0; x < 800 / 16; x++) {
@@ -621,6 +649,7 @@ static sk_sp<DisplayList> BlendModeTest(AiksTest* test,
 
   // Uploaded image source (left image).
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setBlendMode(DlBlendMode::kSrcOver);
   builder.Save();
   builder.SaveLayer(std::nullopt, &paint);
@@ -640,12 +669,14 @@ static sk_sp<DisplayList> BlendModeTest(AiksTest* test,
   builder.Save();
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   builder.SaveLayer(std::nullopt, &save_paint);
   {
     builder.DrawImage(dst_image, DlPoint(400, 0),
                       DlImageSampling::kMipmapLinear, nullptr);
 
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     save_paint.setColor(DlColor::kWhite().withAlpha(src_alpha * 255));
     save_paint.setBlendMode(static_cast<DlBlendMode>(blend_mode));
     builder.SaveLayer(std::nullopt, &save_paint);
@@ -710,6 +741,7 @@ TEST_P(AiksTest, CanDrawPaintMultipleTimesInteractive) {
     DisplayListBuilder builder;
     builder.Scale(0.2, 0.2);
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor(background.ToARGB()));
     builder.DrawPaint(paint);
 
@@ -729,6 +761,7 @@ TEST_P(AiksTest, ForegroundPipelineBlendAppliesTransformCorrectly) {
   builder.Rotate(30);
 
   DlPaint image_paint;
+  image_paint.setAntiAlias(true);
   image_paint.setColorFilter(DlColorFilter::MakeBlend(
       DlColor::RGBA(255.0f / 255.0f, 165.0f / 255.0f, 0.0f / 255.0f, 1.0f),
       DlBlendMode::kSrcIn));
@@ -747,6 +780,7 @@ TEST_P(AiksTest, ForegroundAdvancedBlendAppliesTransformCorrectly) {
   builder.Rotate(30);
 
   DlPaint image_paint;
+  image_paint.setAntiAlias(true);
   image_paint.setColorFilter(DlColorFilter::MakeBlend(
       DlColor::RGBA(255.0f / 255.0f, 165.0f / 255.0f, 0.0f / 255.0f, 1.0f),
       DlBlendMode::kColorDodge));
@@ -766,12 +800,14 @@ TEST_P(AiksTest, FramebufferAdvancedBlendCoverage) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(
       DlColor::RGBA(169.0f / 255.0f, 169.0f / 255.0f, 169.0f / 255.0f, 1.0f));
   builder.DrawPaint(paint);
   builder.Scale(0.4, 0.4);
 
   DlPaint image_paint;
+  image_paint.setAntiAlias(true);
   image_paint.setBlendMode(DlBlendMode::kMultiply);
 
   builder.DrawImage(DlImageImpeller::Make(texture), DlPoint(20, 20),
@@ -803,6 +839,7 @@ TEST_P(AiksTest, ColorWheel) {
     };
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setBlendMode(DlBlendMode::kSrcOver);
 
     // Draw a fancy color wheel for the backdrop.
@@ -850,11 +887,13 @@ TEST_P(AiksTest, ColorWheel) {
     DisplayListBuilder builder;
 
     DlPaint paint;
+    paint.setAntiAlias(true);
     paint.setColor(DlColor::kWhite().withAlpha(dst_alpha * 255));
     paint.setBlendMode(DlBlendMode::kSrc);
     builder.SaveLayer(std::nullopt, &paint);
     {
       DlPaint paint;
+      paint.setAntiAlias(true);
       paint.setColor(DlColor::kWhite());
       builder.DrawPaint(paint);
 
@@ -873,12 +912,14 @@ TEST_P(AiksTest, ColorWheel) {
 
     // Draw 3 circles to a subpass and blend it in.
     DlPaint save_paint;
+    save_paint.setAntiAlias(true);
     save_paint.setColor(DlColor::kWhite().withAlpha(src_alpha * 255));
     save_paint.setBlendMode(static_cast<DlBlendMode>(
         blend_modes.blend_mode_values[current_blend_index]));
     builder.SaveLayer(std::nullopt, &save_paint);
     {
       DlPaint paint;
+      paint.setAntiAlias(true);
       paint.setBlendMode(DlBlendMode::kPlus);
       const Scalar x = std::sin(k2Pi / 3);
       const Scalar y = -std::cos(k2Pi / 3);
@@ -901,10 +942,12 @@ TEST_P(AiksTest, DestructiveBlendColorFilterFloodsClip) {
   DisplayListBuilder builder;
 
   DlPaint paint;
+  paint.setAntiAlias(true);
   paint.setColor(DlColor::kBlue());
   builder.DrawPaint(paint);
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setColorFilter(
       DlColorFilter::MakeBlend(DlColor::kRed(), DlBlendMode::kSrc));
   builder.SaveLayer(std::nullopt, &save_paint);
@@ -917,17 +960,18 @@ TEST_P(AiksTest, DestructiveBlendColorFilterFloodsClip) {
 TEST_P(AiksTest, AdvancedBlendColorFilterWithDestinationOpacity) {
   DisplayListBuilder builder;
 
-  builder.DrawPaint(DlPaint(DlColor::kWhite()));
+  builder.DrawPaint(DlPaint(DlColor::kWhite()).setAntiAlias(true));
 
   DlPaint save_paint;
+  save_paint.setAntiAlias(true);
   save_paint.setOpacity(0.3);
   save_paint.setColorFilter(DlColorFilter::MakeBlend(DlColor::kTransparent(),
                                                      DlBlendMode::kSaturation));
   builder.SaveLayer(std::nullopt, &save_paint);
   builder.DrawRect(DlRect::MakeXYWH(100, 100, 300, 300),
-                   DlPaint(DlColor::kMaroon()));
+                   DlPaint(DlColor::kMaroon()).setAntiAlias(true));
   builder.DrawRect(DlRect::MakeXYWH(200, 200, 300, 300),
-                   DlPaint(DlColor::kBlue()));
+                   DlPaint(DlColor::kBlue()).setAntiAlias(true));
   builder.Restore();
 
   // Should be solid red as the destructive color filter floods the clip.
@@ -937,18 +981,19 @@ TEST_P(AiksTest, AdvancedBlendColorFilterWithDestinationOpacity) {
 TEST_P(AiksTest, EmulatedAdvancedBlendRestore) {
   DisplayListBuilder builder;
 
-  builder.DrawPaint(DlPaint(DlColor::kWhite()));
+  builder.DrawPaint(DlPaint(DlColor::kWhite()).setAntiAlias(true));
   builder.Save();
   builder.ClipRect(DlRect::MakeLTRB(100, 100, 400, 300));
 
   // Draw should apply the clip, even though it is an advanced blend.
   builder.DrawRect(DlRect::MakeLTRB(0, 0, 400, 300),
                    DlPaint()
+                       .setAntiAlias(true)
                        .setColor(DlColor::kRed())
                        .setBlendMode(DlBlendMode::kDifference));
   // This color should not show if clip is still functional.
   builder.DrawRect(DlRect::MakeLTRB(0, 0, 100, 100),
-                   DlPaint().setColor(DlColor::kBlue()));
+                   DlPaint().setAntiAlias(true).setColor(DlColor::kBlue()));
   builder.Restore();
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
