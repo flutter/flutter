@@ -143,7 +143,7 @@ class FlutterTesterDevice extends Device {
     );
 
     // Build assets and perform initial compilation.
-    final FlutterProject project = FlutterProject.current();
+    final FlutterProject project = FlutterProject.current(_fileSystem);
     await BundleBuilder().build(
       project: project,
       buildInfo: buildInfo,

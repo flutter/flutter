@@ -49,7 +49,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .android:
         if (applicationBinary == null) {
           return AndroidApk.fromAndroidProject(
-            FlutterProject.current().android,
+            FlutterProject.current(_fileSystem).android,
             processManager: _processManager,
             processUtils: _processUtils,
             logger: _logger,
@@ -69,26 +69,26 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         );
       case .ios:
         return applicationBinary == null
-            ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
+            ? await IOSApp.fromIosProject(FlutterProject.current(_fileSystem).ios, buildInfo)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case .tester:
         return FlutterTesterApp.fromCurrentDirectory(_fileSystem);
       case .macos:
         return applicationBinary == null
-            ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
+            ? MacOSApp.fromMacOSProject(FlutterProject.current(_fileSystem).macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
       case .web:
-        if (!FlutterProject.current().web.existsSync()) {
+        if (!FlutterProject.current(_fileSystem).web.existsSync()) {
           return null;
         }
-        return WebApplicationPackage(FlutterProject.current());
+        return WebApplicationPackage(FlutterProject.current(_fileSystem));
       case .linux:
         return applicationBinary == null
-            ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
+            ? LinuxApp.fromLinuxProject(FlutterProject.current(_fileSystem).linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
       case .windows:
         return applicationBinary == null
-            ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
+            ? WindowsApp.fromWindowsProject(FlutterProject.current(_fileSystem).windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();

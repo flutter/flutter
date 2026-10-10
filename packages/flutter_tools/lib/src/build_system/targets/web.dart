@@ -14,6 +14,7 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/logger.dart';
 import '../../base/process.dart';
+import '../../base/template.dart';
 import '../../build_info.dart';
 import '../../cache.dart';
 import '../../convert.dart';
@@ -22,6 +23,7 @@ import '../../dart/package_map.dart';
 import '../../features.dart';
 import '../../flutter_plugins.dart';
 import '../../globals.dart' as globals;
+import '../../isolated/mustache_template.dart';
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../../web/bootstrap.dart';
@@ -50,7 +52,9 @@ const String _kLegacyWebDeprecationWarning =
 /// Generates an entry point for a web target.
 // Keep this in sync with build_runner/resident_web_runner.dart
 class WebEntrypointTarget extends Target {
-  const WebEntrypointTarget();
+  const WebEntrypointTarget({this.templateRenderer = const MustacheTemplateRenderer()});
+
+  final TemplateRenderer templateRenderer;
 
   @override
   String get name => 'web_entrypoint';
@@ -82,7 +86,7 @@ class WebEntrypointTarget extends Target {
       packageConfigFile,
       logger: environment.logger,
     );
-    final FlutterProject flutterProject = FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current(environment.fileSystem);
     final LanguageVersion languageVersion = determineLanguageVersion(
       environment.fileSystem.file(targetFile),
       packageConfig[flutterProject.manifest.appName],
@@ -105,6 +109,8 @@ class WebEntrypointTarget extends Target {
     await injectBuildTimePluginFilesForWebPlatform(
       flutterProject,
       destination: environment.buildDir,
+      logger: environment.logger,
+      templateRenderer: templateRenderer,
     );
     // The below works because `injectBuildTimePluginFiles` is configured to write
     // the web_plugin_registrant.dart file alongside the generated main.dart
@@ -1283,8 +1289,9 @@ class WebReleaseBundle extends Target {
 
   /// Create version.json file that contains data about version for package_info
   void createVersionFile(Environment environment, Map<String, String> defines) {
-    final versionInfo =
-        jsonDecode(FlutterProject.current().getVersionInfo()) as Map<String, Object?>;
+    final versionInfo = jsonDecode(
+      FlutterProject.current(environment.fileSystem).getVersionInfo(),
+    ) as Map<String, Object?>;
 
     if (defines.containsKey(kBuildNumber)) {
       versionInfo['build_number'] = defines[kBuildNumber];

@@ -10,6 +10,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
@@ -17,6 +18,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
@@ -31,7 +33,9 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../package_graph.dart';
 import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
@@ -207,8 +211,10 @@ abstract class FlutterCommand extends Command<void> {
       toolContext?.projectFactory ?? globals.projectFactory;
   Analytics get _analytics => runner?.analytics ?? globals.analytics;
   Cache get _cache => toolContext?.cache ?? globals.cache;
+  Config get _config => toolContext?.config ?? globals.config;
   FlutterVersion get _flutterVersion => toolContext?.flutterVersion ?? globals.flutterVersion;
   FileSystemUtils get _fsUtils => toolContext?.fileSystemUtils ?? globals.fsUtils;
+  ProcessUtils get _processUtils => toolContext?.processUtils ?? globals.processUtils;
 
   /// The currently executing command (or sub-command).
 
@@ -1674,6 +1680,40 @@ abstract class FlutterCommand extends Command<void> {
   /// - <https://github.com/flutter/flutter/issues/162649>.
   @protected
   @nonVirtual
+  Future<void> regeneratePlatformSpecificTooling(
+    FlutterProject project, {
+    required bool releaseMode,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    PackageConfig? packageConfig,
+    PackageGraph? packageGraph,
+    PubspecCache? pubspecCache,
+  }) async {
+    await project.regeneratePlatformSpecificTooling(
+      analytics: _analytics,
+      cache: _cache,
+      cocoaPods: globals.cocoaPods,
+      config: _config,
+      deprecationBehavior: deprecationBehavior,
+      featureFlags: featureFlags,
+      fileSystem: _fs,
+      fileSystemUtils: _fsUtils,
+      flutterVersion: _flutterVersion,
+      gradleUtils: globals.gradleUtils,
+      logger: _logger,
+      os: _os,
+      packageConfig: packageConfig,
+      packageGraph: packageGraph,
+      platform: _platform,
+      processUtils: _processUtils,
+      pubspecCache: pubspecCache,
+      releaseMode: releaseMode,
+      systemClock: _clock,
+      templateRenderer: globals.templateRenderer,
+    );
+  }
+
+  @protected
+  @nonVirtual
   Future<void> regeneratePlatformSpecificToolingIfApplicable(
     FlutterProject project, {
     required bool releaseMode,
@@ -1681,7 +1721,7 @@ abstract class FlutterCommand extends Command<void> {
     if (!shouldRunPub) {
       return;
     }
-    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
+    await regeneratePlatformSpecificTooling(project, releaseMode: releaseMode);
   }
 
   /// The set of development artifacts required for this command.

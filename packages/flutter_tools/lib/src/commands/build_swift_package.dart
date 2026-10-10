@@ -291,7 +291,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     )..createSync(recursive: true);
     final Directory pluginsDirectory = flutterIntegrationPackage.childDirectory(_kFlutterPlugins);
 
-    await project.regeneratePlatformSpecificTooling(releaseMode: false);
+    await regeneratePlatformSpecificTooling(project, releaseMode: false);
 
     final List<BuildInfo> buildInfos = await _getBuildInfos();
     if (buildInfos.isEmpty) {
@@ -565,6 +565,7 @@ class FlutterPluginRegistrantSwiftPackage {
         await writeIOSPluginRegistrant(
           _utils.project,
           plugins,
+          logger: _utils.logger,
           swiftPluginRegistrant: swiftFile,
           templateRenderer: _utils.templateRenderer,
         );
@@ -572,6 +573,7 @@ class FlutterPluginRegistrantSwiftPackage {
         await writeMacOSPluginRegistrant(
           _utils.project,
           plugins,
+          logger: _utils.logger,
           pluginRegistrantImplementation: swiftFile,
           templateRenderer: _utils.templateRenderer,
           // The registrant needs to be public to be accessible in the app, since it's within a
@@ -1518,6 +1520,7 @@ class CocoaPodPluginDependencies {
         await writeIOSPluginRegistrant(
           _utils.project,
           [],
+          logger: _utils.logger,
           templateRenderer: _utils.templateRenderer,
         );
       }

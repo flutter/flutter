@@ -129,7 +129,10 @@ abstract class BundleLinuxAssets extends Target {
           .childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
     }
-    final String versionInfo = getVersionInfo(environment.defines);
+    final String versionInfo = getVersionInfo(
+      environment.defines,
+      fileSystem: environment.fileSystem,
+    );
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
       environment,
@@ -152,9 +155,9 @@ abstract class BundleLinuxAssets extends Target {
   }
 
   /// Return json encoded string that contains data about version for package_info
-  String getVersionInfo(Map<String, String> defines) {
+  String getVersionInfo(Map<String, String> defines, {required FileSystem fileSystem}) {
     final versionInfo =
-        jsonDecode(FlutterProject.current().getVersionInfo()) as Map<String, dynamic>;
+        jsonDecode(FlutterProject.current(fileSystem).getVersionInfo()) as Map<String, dynamic>;
 
     if (defines.containsKey(kBuildNumber)) {
       versionInfo['build_number'] = defines[kBuildNumber];

@@ -23,6 +23,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/template.dart';
 import '../base/time.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -88,6 +89,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required this.webRenderer,
     required this.useWasm,
     required this.crossOriginIsolation,
+    required TemplateRenderer templateRenderer,
     required this._toolContext,
     TestTimeRecorder? testTimeRecorder,
   }) {
@@ -118,6 +120,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       compilerFactory: () => TestCompiler(
         buildInfo,
         flutterProject,
+        templateRenderer: templateRenderer,
         toolContext: _toolContext,
         testTimeRecorder: testTimeRecorder,
       ),
@@ -171,6 +174,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     required bool crossOriginIsolation,
     required FlutterProject flutterProject,
     required String flutterTesterBinPath,
+    required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     required bool useWasm,
     required WebMemoryFS webMemoryFS,
@@ -211,6 +215,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       testHostDartJs: testHostDartJs,
       buildDirectory: buildDirectory,
       chromiumLauncher: chromiumLauncher,
+      templateRenderer: templateRenderer,
       toolContext: toolContext,
       webRenderer: webRenderer,
       useWasm: useWasm,

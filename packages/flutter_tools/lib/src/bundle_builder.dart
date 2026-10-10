@@ -40,7 +40,7 @@ class BundleBuilder {
     String? assetDirPath,
     BuildSystem? buildSystem,
   }) async {
-    project ??= FlutterProject.current();
+    project ??= FlutterProject.current(globals.fs);
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();

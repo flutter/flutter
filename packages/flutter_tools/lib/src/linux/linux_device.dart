@@ -26,10 +26,12 @@ class LinuxDevice extends DesktopDevice {
     required super.operatingSystemUtils,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _logger = logger,
+       _fileSystem = fileSystem,
        super('linux', platformType: PlatformType.linux, ephemeral: false);
 
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
+  final FileSystem _fileSystem;
 
   @override
   Future<bool> isSupported() async => true;
@@ -65,7 +67,7 @@ class LinuxDevice extends DesktopDevice {
     bool usingCISystem = false,
   }) async {
     await buildLinux(
-      FlutterProject.current().linux,
+      FlutterProject.current(_fileSystem).linux,
       buildInfo,
       target: mainPath,
       targetPlatform: await targetPlatform,

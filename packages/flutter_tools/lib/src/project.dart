@@ -7,33 +7,44 @@ import 'dart:collection';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
+import 'android/java.dart';
 import 'base/common.dart';
+import 'base/config.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
+import 'base/platform.dart';
+import 'base/process.dart';
 import 'base/project_migrator.dart';
+import 'base/template.dart';
+import 'base/time.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
+import 'cache.dart';
 import 'cmake_project.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
-import 'globals.dart' as globals;
+import 'macos/cocoapods.dart';
 import 'migrations/analysis_options_migration.dart';
 import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
+import 'version.dart';
 import 'xcode_project.dart';
 
 export 'cmake_project.dart';
@@ -52,10 +63,11 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({required this._logger, required this._fileSystem});
+  FlutterProjectFactory({required this._fileSystem, required this._logger, this._config});
 
   final Logger _logger;
   final FileSystem _fileSystem;
+  final Config? _config;
 
   @visibleForTesting
   final projects = <String, FlutterProject>{};
@@ -63,6 +75,9 @@ class FlutterProjectFactory {
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
+    final Directory? buildDirectory = _config == null
+        ? null
+        : directory.childDirectory(getBuildDirectory(_config, directory.fileSystem));
     final File pubspec = directory.childFile(bundle.defaultManifestPath);
     if (!pubspec.existsSync()) {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -75,7 +90,13 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest);
+      return FlutterProject(
+        directory,
+        manifest,
+        exampleManifest,
+        buildDirectory: buildDirectory,
+        projectFactory: this,
+      );
     }
     return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -88,7 +109,13 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest, projectFactory: this);
+      return FlutterProject(
+        directory,
+        manifest,
+        exampleManifest,
+        buildDirectory: buildDirectory,
+        projectFactory: this,
+      );
     });
   }
 
@@ -154,7 +181,7 @@ class FlutterProject {
       try {
         final FlutterManifest manifest = FlutterProject._readManifest(
           pubspec.path,
-          logger: globals.logger,
+          logger: _manifest.logger,
           fileSystem: fileSystem,
         );
         if (manifest.workspace.isNotEmpty) {
@@ -168,10 +195,10 @@ class FlutterProject {
           });
           if (isMember) {
             return _projectFactory?.fromDirectory(candidate) ??
-                FlutterProject.fromDirectory(candidate);
+                FlutterProject.fromDirectory(candidate, logger: _manifest.logger);
           }
         }
-      } on Exception catch (_) {
+      } on Exception {
         // Ignore manifest reading errors.
       }
     }
@@ -180,13 +207,17 @@ class FlutterProject {
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject fromDirectory(Directory directory) =>
-      globals.projectFactory.fromDirectory(directory);
+  static FlutterProject fromDirectory(Directory directory, {Config? config, Logger? logger}) =>
+      FlutterProjectFactory(
+        config: config,
+        fileSystem: directory.fileSystem,
+        logger: logger ?? BufferLogger.test(),
+      ).fromDirectory(directory);
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject current() =>
-      globals.projectFactory.fromDirectory(globals.fs.currentDirectory);
+  static FlutterProject current(FileSystem fileSystem) =>
+      FlutterProject.fromDirectory(fileSystem.currentDirectory);
 
   /// Create a [FlutterProject] and bypass the project caching.
   @visibleForTesting
@@ -250,9 +281,10 @@ class FlutterProject {
         if (entity.childFile('pubspec.yaml').existsSync()) {
           try {
             _workspaceProjects.add(
-              _projectFactory?.fromDirectory(entity) ?? FlutterProject.fromDirectory(entity),
+              _projectFactory?.fromDirectory(entity) ??
+                  FlutterProject.fromDirectory(entity, logger: _manifest.logger),
             );
-          } on Exception catch (_) {
+          } on Exception {
             // Ignore child projects with invalid manifests.
           }
         }
@@ -471,9 +503,9 @@ class FlutterProject {
 
   /// The generated scaffolding project for hosting widget previews from this
   /// project.
-  late final FlutterProject widgetPreviewScaffoldProject = FlutterProject.fromDirectory(
-    widgetPreviewScaffold,
-  );
+  late final FlutterProject widgetPreviewScaffoldProject =
+      _projectFactory?.fromDirectory(widgetPreviewScaffold) ??
+      FlutterProject.fromDirectory(widgetPreviewScaffold, logger: _manifest.logger);
 
   /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
@@ -562,19 +594,49 @@ class FlutterProject {
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
   Future<void> regeneratePlatformSpecificTooling({
-    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    required Analytics analytics,
+    required Cache cache,
+    required CocoaPods? cocoaPods,
+    required Config config,
+    required FeatureFlags featureFlags,
+    required FileSystem fileSystem,
+    required FileSystemUtils fileSystemUtils,
+    required FlutterVersion flutterVersion,
+    required gradle.GradleUtils? gradleUtils,
+    required Logger logger,
+    required OperatingSystemUtils os,
+    required Platform platform,
+    required ProcessUtils processUtils,
     required bool releaseMode,
-    PubspecCache? pubspecCache,
-    PackageGraph? packageGraph,
+    required SystemClock systemClock,
+    required TemplateRenderer templateRenderer,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     PackageConfig? packageConfig,
+    PackageGraph? packageGraph,
+    PubspecCache? pubspecCache,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
+      analytics: analytics,
       androidPlatform: android.existsSync(),
+      cache: cache,
+      cocoaPods: cocoaPods,
+      config: config,
+      featureFlags: featureFlags,
+      fileSystem: fileSystem,
+      fileSystemUtils: fileSystemUtils,
+      flutterVersion: flutterVersion,
+      gradleUtils: gradleUtils,
       iosPlatform: ios.existsSync(),
       // TODO(stuartmorgan): Revisit the conditions here once the plans for handling
       // desktop in existing projects are in place.
       linuxPlatform: featureFlags.isLinuxEnabled && linux.existsSync(),
+      logger: logger,
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
+      os: os,
+      platform: platform,
+      processUtils: processUtils,
+      systemClock: systemClock,
+      templateRenderer: templateRenderer,
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
@@ -592,24 +654,39 @@ class FlutterProject {
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required Analytics analytics,
+    required Cache cache,
+    required CocoaPods? cocoaPods,
+    required Config config,
+    required FeatureFlags featureFlags,
+    required FileSystem fileSystem,
+    required FileSystemUtils fileSystemUtils,
+    required FlutterVersion flutterVersion,
+    required gradle.GradleUtils? gradleUtils,
+    required Logger logger,
+    required OperatingSystemUtils os,
+    required Platform platform,
+    required ProcessUtils processUtils,
     required bool releaseMode,
+    required SystemClock systemClock,
+    required TemplateRenderer templateRenderer,
     bool androidPlatform = false,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     bool iosPlatform = false,
     bool linuxPlatform = false,
     bool macOSPlatform = false,
-    bool windowsPlatform = false,
-    bool webPlatform = false,
-    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
-    PubspecCache? pubspecCache,
-    PackageGraph? packageGraph,
     PackageConfig? packageConfig,
+    PackageGraph? packageGraph,
+    PubspecCache? pubspecCache,
+    bool webPlatform = false,
+    bool windowsPlatform = false,
   }) async {
     if (!directory.existsSync()) {
       return;
     }
 
     final migration = ProjectMigration(<ProjectMigrator>[
-      AnalysisOptionsMigration(this, globals.logger, packageConfig: packageConfig),
+      AnalysisOptionsMigration(this, logger, packageConfig: packageConfig),
     ]);
     await migration.run();
 
@@ -627,14 +704,30 @@ class FlutterProject {
     }
     await refreshPluginsList(
       this,
+      cocoaPods: cocoaPods,
+      featureFlags: featureFlags,
+      fileSystemUtils: fileSystemUtils,
+      flutterVersion: flutterVersion,
       iosPlatform: iosPlatform,
+      logger: logger,
       macOSPlatform: macOSPlatform,
+      os: os,
+      platform: platform,
+      systemClock: systemClock,
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
     );
     if (androidPlatform) {
-      await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
+      await android.ensureReadyForPlatformSpecificTooling(
+        cache: cache,
+        deprecationBehavior: deprecationBehavior,
+        fileSystem: fileSystem,
+        fileSystemUtils: fileSystemUtils,
+        gradleUtils: gradleUtils,
+        logger: logger,
+        templateRenderer: templateRenderer,
+      );
     }
     if (iosPlatform) {
       await ios.ensureReadyForPlatformSpecificTooling();
@@ -649,14 +742,25 @@ class FlutterProject {
       await windows.ensureReadyForPlatformSpecificTooling();
     }
     if (webPlatform) {
-      await web.ensureReadyForPlatformSpecificTooling();
+      await web.ensureReadyForPlatformSpecificTooling(
+        logger: logger,
+        templateRenderer: templateRenderer,
+      );
     }
     await injectPlugins(
       this,
+      analytics: analytics,
       androidPlatform: androidPlatform,
+      cocoaPods: cocoaPods,
+      config: config,
+      featureFlags: featureFlags,
+      fileSystem: fileSystem,
       iosPlatform: iosPlatform,
       linuxPlatform: linuxPlatform,
+      logger: logger,
       macOSPlatform: macOSPlatform,
+      processUtils: processUtils,
+      templateRenderer: templateRenderer,
       windowsPlatform: windowsPlatform,
       releaseMode: releaseMode,
       pubspecCache: pubspecCache,
@@ -792,11 +896,11 @@ class AndroidProject extends FlutterProjectPlatform {
   late final bool isSupportedVersion = _computeSupportedVersion();
 
   /// Gets all build variants of this project.
-  Future<List<String>> getBuildVariants() async {
+  Future<List<String>> getBuildVariants({required AndroidBuilder? androidBuilder}) async {
     if (!existsSync() || androidBuilder == null) {
       return const <String>[];
     }
-    return androidBuilder!.getBuildVariants(project: parent);
+    return androidBuilder.getBuildVariants(project: parent);
   }
 
   /// Outputs app link related settings into a json file.
@@ -804,11 +908,14 @@ class AndroidProject extends FlutterProjectPlatform {
   /// The return future resolves to the path of the json file.
   ///
   /// The future resolves to null if it fails to retrieve app link settings.
-  Future<String> outputsAppLinkSettings({required String variant}) async {
+  Future<String> outputsAppLinkSettings({
+    required AndroidBuilder? androidBuilder,
+    required String variant,
+  }) async {
     if (!existsSync() || androidBuilder == null) {
       throwToolExit('Target directory $hostAppGradleRoot is not an Android project');
     }
-    return androidBuilder!.outputsAppLinkSettings(variant, project: parent);
+    return androidBuilder.outputsAppLinkSettings(variant, project: parent);
   }
 
   bool _computeSupportedVersion() {
@@ -967,12 +1074,20 @@ class AndroidProject extends FlutterProjectPlatform {
   ///
   /// This is expected to be called from
   /// flutter_tools/lib/src/project_validator.dart.
-  Future<ProjectValidatorResult> validateJavaAndGradleAgpVersions() async {
+  Future<ProjectValidatorResult> validateJavaAndGradleAgpVersions({
+    required Java? java,
+    required Logger logger,
+    required ProcessManager processManager,
+  }) async {
     // Constructing ProjectValidatorResult happens here and not in
     // flutter_tools/lib/src/project_validator.dart because of the additional
     // Complexity of variable status values and error string formatting.
     const visibleName = 'Java/Gradle/KGP/Android Gradle Plugin';
-    final CompatibilityResult validJavaGradleAgpVersions = await hasValidJavaGradleAgpVersions();
+    final CompatibilityResult validJavaGradleAgpVersions = await hasValidJavaGradleAgpVersions(
+      java: java,
+      logger: logger,
+      processManager: processManager,
+    );
 
     return ProjectValidatorResult(
       name: visibleName,
@@ -986,43 +1101,47 @@ class AndroidProject extends FlutterProjectPlatform {
   /// Ensures Java SDK is compatible with the project's Gradle version and
   /// the project's Gradle version is compatible with the AGP version and
   /// kotlin version used in build.gradle.
-  Future<CompatibilityResult> hasValidJavaGradleAgpVersions() async {
+  Future<CompatibilityResult> hasValidJavaGradleAgpVersions({
+    required Java? java,
+    required Logger logger,
+    required ProcessManager processManager,
+  }) async {
     final String? gradleVersion = await gradle.getGradleVersion(
       hostAppGradleRoot,
-      globals.logger,
-      globals.processManager,
+      logger,
+      processManager,
     );
-    final String? agpVersion = gradle.getAgpVersion(hostAppGradleRoot, globals.logger);
-    final String? javaVersion = versionToParsableString(globals.java?.version);
+    final String? agpVersion = gradle.getAgpVersion(hostAppGradleRoot, logger);
+    final String? javaVersion = versionToParsableString(java?.version);
     final String? kgpVersion = await gradle.getKgpVersion(
       hostAppGradleRoot,
-      globals.logger,
-      globals.processManager,
+      logger,
+      processManager,
     );
 
     // Assume valid configuration.
     String description = validJavaGradleAgpKgpString;
 
     final bool compatibleGradleAgp = gradle.validateGradleAndAgp(
-      globals.logger,
+      logger,
       gradleV: gradleVersion,
       agpV: agpVersion,
     );
 
     final bool compatibleJavaGradle = gradle.validateJavaAndGradle(
-      globals.logger,
+      logger,
       javaVersion: javaVersion,
       gradleVersion: gradleVersion,
     );
 
     final bool compatibleKgpGradle = gradle.validateGradleAndKGP(
-      globals.logger,
+      logger,
       gradleV: gradleVersion,
       kgpV: kgpVersion,
     );
 
     final bool compatibleAgpKgp = gradle.validateAgpAndKgp(
-      globals.logger,
+      logger,
       agpV: agpVersion,
       kgpV: kgpVersion,
     );
@@ -1107,19 +1226,36 @@ See the link below for more information:
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required Cache cache,
+    required FileSystem fileSystem,
+    required FileSystemUtils fileSystemUtils,
+    required gradle.GradleUtils? gradleUtils,
+    required Logger logger,
+    required TemplateRenderer templateRenderer,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
-    if (isModule && _shouldRegenerateFromTemplate()) {
-      await _regenerateLibrary();
+    if (isModule && _shouldRegenerateFromTemplate(cache: cache, fileSystemUtils: fileSystemUtils)) {
+      await _regenerateLibrary(
+        fileSystem: fileSystem,
+        gradleUtils: gradleUtils,
+        logger: logger,
+        templateRenderer: templateRenderer,
+      );
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
         await _overwriteFromTemplate(
-          globals.fs.path.join('module', 'android', 'host_app_common'),
+          fileSystem.path.join('module', 'android', 'host_app_common'),
           ephemeralDirectory,
+          fileSystem: fileSystem,
+          logger: logger,
+          templateRenderer: templateRenderer,
         );
         await _overwriteFromTemplate(
-          globals.fs.path.join('module', 'android', 'host_app_ephemeral'),
+          fileSystem.path.join('module', 'android', 'host_app_ephemeral'),
           ephemeralDirectory,
+          fileSystem: fileSystem,
+          logger: logger,
+          templateRenderer: templateRenderer,
         );
       }
     }
@@ -1129,12 +1265,15 @@ See the link below for more information:
     gradle.updateLocalProperties(project: parent, requireAndroidSdk: false);
   }
 
-  bool _shouldRegenerateFromTemplate() {
-    return globals.fsUtils.isOlderThanReference(
+  bool _shouldRegenerateFromTemplate({
+    required Cache cache,
+    required FileSystemUtils fileSystemUtils,
+  }) {
+    return fileSystemUtils.isOlderThanReference(
           entity: ephemeralDirectory,
           referenceFile: parent.pubspecFile,
         ) ||
-        globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
+        cache.isOlderThanToolsStamp(ephemeralDirectory);
   }
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
@@ -1142,26 +1281,43 @@ See the link below for more information:
   Directory get pluginRegistrantHost =>
       _flutterLibGradleRoot.childDirectory(isModule ? 'Flutter' : 'app');
 
-  Future<void> _regenerateLibrary() async {
+  Future<void> _regenerateLibrary({
+    required FileSystem fileSystem,
+    required gradle.GradleUtils? gradleUtils,
+    required Logger logger,
+    required TemplateRenderer templateRenderer,
+  }) async {
     ErrorHandlingFileSystem.deleteIfExists(ephemeralDirectory, recursive: true);
     await _overwriteFromTemplate(
-      globals.fs.path.join('module', 'android', 'library_new_embedding'),
+      fileSystem.path.join('module', 'android', 'library_new_embedding'),
       ephemeralDirectory,
+      fileSystem: fileSystem,
+      logger: logger,
+      templateRenderer: templateRenderer,
     );
     await _overwriteFromTemplate(
-      globals.fs.path.join('module', 'android', 'gradle'),
+      fileSystem.path.join('module', 'android', 'gradle'),
       ephemeralDirectory,
+      fileSystem: fileSystem,
+      logger: logger,
+      templateRenderer: templateRenderer,
     );
-    globals.gradleUtils?.injectGradleWrapperIfNeeded(ephemeralDirectory);
+    gradleUtils?.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
-  Future<void> _overwriteFromTemplate(String path, Directory target) async {
+  Future<void> _overwriteFromTemplate(
+    String path,
+    Directory target, {
+    required FileSystem fileSystem,
+    required Logger logger,
+    required TemplateRenderer templateRenderer,
+  }) async {
     final Template template = await Template.fromName(
       path,
-      fileSystem: globals.fs,
+      fileSystem: fileSystem,
       templateManifest: null,
-      logger: globals.logger,
-      templateRenderer: globals.templateRenderer,
+      logger: logger,
+      templateRenderer: templateRenderer,
     );
     final String androidIdentifier =
         parent.manifest.androidPackage ?? 'com.example.${parent.manifest.appName}';
@@ -1399,10 +1555,18 @@ class WebProject extends FlutterProjectPlatform {
   Directory get dartpadToolDirectory =>
       parent.directory.childDirectory('.dart_tool').childDirectory('dartpad');
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
+  Future<void> ensureReadyForPlatformSpecificTooling({
+    required Logger logger,
+    required TemplateRenderer templateRenderer,
+  }) async {
     /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
     /// See: https://github.com/dart-lang/dart-services/pull/874
-    await injectBuildTimePluginFilesForWebPlatform(parent, destination: dartpadToolDirectory);
+    await injectBuildTimePluginFilesForWebPlatform(
+      parent,
+      destination: dartpadToolDirectory,
+      logger: logger,
+      templateRenderer: templateRenderer,
+    );
   }
 }
 

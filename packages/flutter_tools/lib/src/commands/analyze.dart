@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
+import '../android/android_builder.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -27,6 +28,7 @@ class AnalyzeCommand extends FlutterCommand {
     required this._allProjectValidators,
     required this._suppressAnalytics,
     required super.toolContext,
+    this._androidBuilder,
     bool verboseHelp = false,
     this.workingDirectory,
   }) {
@@ -195,6 +197,7 @@ class AnalyzeCommand extends FlutterCommand {
   final Directory? workingDirectory;
 
   final List<ProjectValidator> _allProjectValidators;
+  final AndroidBuilder? _androidBuilder;
   final bool _suppressAnalytics;
 
   @override
@@ -281,6 +284,7 @@ class AnalyzeCommand extends FlutterCommand {
         directoryPath = items.first;
       }
       await AndroidAnalyze(
+        androidBuilder: _androidBuilder,
         fileSystem: fileSystem,
         option: option,
         userPath: directoryPath,

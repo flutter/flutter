@@ -14,6 +14,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/template.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
@@ -113,6 +114,7 @@ class TestCompiler {
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
+    required this._templateRenderer,
     required ToolContext toolContext,
     String? precompiledDillPath,
     this.testTimeRecorder,
@@ -172,6 +174,7 @@ class TestCompiler {
   final TestTimeRecorder? testTimeRecorder;
   final ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory();
 
+  final TemplateRenderer _templateRenderer;
   final ToolContext _toolContext;
 
   ResidentCompiler? compiler;
@@ -274,6 +277,8 @@ class TestCompiler {
             flutterProject!,
             buildInfo.packageConfig,
             mainFile,
+            logger: logger,
+            templateRenderer: _templateRenderer,
           );
           invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
           _registrantLanguageVersion = languageVersion;
