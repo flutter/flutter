@@ -25,11 +25,13 @@ import Foundation
 ///
 /// 2.  Commit (Raster Thread): As the engine renders frames, the raster thread, upon presenting a
 ///     new frame, calls `performCommit(forSize:afterDelay:notify:)`, providing the size of the
-///     frame just rendered.
+///     frame just rendered. A frame with no layers displays nothing and has no size, and is
+///     committed with `performCommitForEmptyFrame(afterDelay:notify:)` instead.
 ///
 /// 3.  Unblocking: If the size of the committed frame matches the target size that `beginResize()`
 ///     is waiting for, `beginResize()` unblocks. This allows the native resize operation to
-///     complete, now that Flutter's content is synchronized with the new window dimensions.
+///     complete, now that Flutter's content is synchronized with the new window dimensions. A
+///     frame with no layers unblocks `beginResize()` whatever target size it waits for.
 ///
 /// Safeguards:
 ///   - Timeout: `beginResize()` includes a timeout mechanism to prevent indefinite blocking if a
@@ -42,7 +44,24 @@ import Foundation
 ///     actions between the platform thread and the raster thread.
 @objc(FlutterResizeSynchronizer)
 final class ResizeSynchronizer: NSObject {
-  private static let invalidSize = CGSize(width: -1, height: -1)
+  /// A frame committed by the raster thread.
+  private enum CommittedFrame {
+    /// A frame with no layers. Such a frame has no size, and displays nothing that could be out
+    /// of sync with the window.
+    case empty
+    /// A frame with contents of the given size, in physical pixels.
+    case contents(CGSize)
+
+    /// Whether a resize to `size` may complete with this frame on screen.
+    func satisfiesResize(toSize size: CGSize) -> Bool {
+      switch self {
+      case .empty:
+        return true
+      case .contents(let contentsSize):
+        return contentsSize == size
+      }
+    }
+  }
 
   // Synchronizes access to _isInResize_unsafe: isInResize is accessed from multiple threads and
   // thus requires synchronized access to the underlying storage.
@@ -67,8 +86,9 @@ final class ResizeSynchronizer: NSObject {
   // True if at least one frame has been presented. Must be set on platform thread.
   private var didReceiveFrame: Bool = false
 
-  // The updated view surface size. Must be set on platform thread.
-  private var contentSize: CGSize = ResizeSynchronizer.invalidSize
+  // The frame most recently committed during the current resize, if any. Must be set on platform
+  // thread.
+  private var committedFrame: CommittedFrame?
 
   /// Begins window resize operation to the specified size.
   ///
@@ -86,9 +106,9 @@ final class ResizeSynchronizer: NSObject {
       return
     }
 
-    // Mark that we're in a resize and set the content size to a sentinel value.
+    // Mark that we're in a resize and forget any previously committed frame.
     isInResize = true
-    contentSize = ResizeSynchronizer.invalidSize
+    committedFrame = nil
 
     // Call the notify callback.
     notify()
@@ -97,8 +117,8 @@ final class ResizeSynchronizer: NSObject {
     let startTime = CFAbsoluteTimeGetCurrent()
     let timeoutDuration: TimeInterval = 1.0
     while true {
-      // If no change to size, or we got a shutdown notice, bail out.
-      if contentSize == size || isShuttingDown {
+      // If a committed frame satisfies the requested size, or we got a shutdown notice, bail out.
+      if (committedFrame?.satisfiesResize(toSize: size) ?? false) || isShuttingDown {
         break
       }
 
@@ -108,7 +128,7 @@ final class ResizeSynchronizer: NSObject {
         break
       }
 
-      // Process platform thread messages to pick up any updates to contentSize, didReceiveFrame,
+      // Process platform thread messages to pick up any updates to committedFrame, didReceiveFrame,
       // isShuttingDown made in performCommit and shutdown methods.
       FlutterRunLoop.mainRunLoop.pollFlutterMessagesOnce()
     }
@@ -126,6 +146,26 @@ final class ResizeSynchronizer: NSObject {
     afterDelay delay: TimeInterval,
     notify: @escaping () -> Void
   ) {
+    commit(.contents(size), afterDelay: delay, notify: notify)
+  }
+
+  /// Commit a frame with no layers.
+  ///
+  /// Such a frame has no size, and unblocks `beginResize` whatever size it waits for.
+  ///
+  /// Called from the raster thread on frame present.
+  @objc func performCommitForEmptyFrame(
+    afterDelay delay: TimeInterval,
+    notify: @escaping () -> Void
+  ) {
+    commit(.empty, afterDelay: delay, notify: notify)
+  }
+
+  private func commit(
+    _ frame: CommittedFrame,
+    afterDelay delay: TimeInterval,
+    notify: @escaping () -> Void
+  ) {
     var effectiveDelay = delay
 
     // If we're currently resizing, process immediately.
@@ -135,7 +175,7 @@ final class ResizeSynchronizer: NSObject {
 
     FlutterRunLoop.mainRunLoop.perform(afterDelay: effectiveDelay) {
       self.didReceiveFrame = true
-      self.contentSize = size
+      self.committedFrame = frame
       notify()
     }
   }
