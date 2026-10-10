@@ -216,6 +216,26 @@ Future<void> testMain() async {
           editingState.copyWith(composingBaseOffset: 0, composingExtentOffset: 8),
         );
       });
+
+      test('should end composition if composing range exceeds text length', () {
+        final mockWithCompositionAwareMixin = _MockWithCompositionAwareMixin();
+        mockWithCompositionAwareMixin.composingText = '^';
+
+        final composingState = EditingState(text: 'AAA^', baseOffset: 4, extentOffset: 4);
+        expect(
+          mockWithCompositionAwareMixin.determineCompositionState(composingState),
+          composingState.copyWith(composingBaseOffset: 3, composingExtentOffset: 4),
+        );
+
+        // The text was replaced without a compositionend event.
+        final replacedState = EditingState(text: 'AAA', baseOffset: 3, extentOffset: 3);
+        expect(
+          mockWithCompositionAwareMixin.determineCompositionState(replacedState),
+          replacedState,
+        );
+        expect(mockWithCompositionAwareMixin.composingText, isNull);
+        expect(mockWithCompositionAwareMixin.composingBase, isNull);
+      });
     });
   });
 
@@ -292,6 +312,46 @@ Future<void> testMain() async {
               'composingExtentOffset',
               beforeComposingText.length,
             ),
+      );
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/189056.
+    test('should be cleared when the framework removes the composing text', () {
+      _inputElement.value = 'AAA';
+      _inputElement.setSelectionRange(3, 3);
+
+      // Dead key `^` starts a composition.
+      _inputElement.dispatchEvent(
+        createDomCompositionEvent(
+          _MockWithCompositionAwareMixin._kCompositionUpdate,
+          <Object?, Object?>{'data': '^'},
+        ),
+      );
+      _inputElement.value = 'AAA^';
+      _inputElement.setSelectionRange(4, 4);
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(editingStrategy.lastEditingState?.composingBaseOffset, 3);
+      expect(editingStrategy.lastEditingState?.composingExtentOffset, 4);
+
+      // An input formatter rejects `^`. Chrome drops the composition without
+      // firing compositionend.
+      editingStrategy.setEditingState(EditingState(text: 'AAA', baseOffset: 3, extentOffset: 3));
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(
+        editingStrategy.lastEditingState,
+        EditingState(text: 'AAA', baseOffset: 3, extentOffset: 3),
+      );
+
+      // Typing afterwards must not mark the new character as composing.
+      _inputElement.value = 'AAAB';
+      _inputElement.setSelectionRange(4, 4);
+      _inputElement.dispatchEvent(createDomEvent('Event', 'input'));
+
+      expect(
+        editingStrategy.lastEditingState,
+        EditingState(text: 'AAAB', baseOffset: 4, extentOffset: 4),
       );
     });
   });
