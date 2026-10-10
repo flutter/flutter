@@ -525,7 +525,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   String get deprecationWarning {
-    return '${globals.logger.terminal.warningMark} The "flutter build ios-framework" command is '
+    return '${toolContext.logger.terminal.warningMark} The "flutter build ios-framework" command is '
         'deprecated and has been replaced by "flutter build swift-package --platform ios". '
         'For more information, see: https://docs.flutter.dev/add-to-app/ios/project-setup\n';
   }

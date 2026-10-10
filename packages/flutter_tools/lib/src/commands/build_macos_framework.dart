@@ -64,7 +64,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
 
   @override
   String get deprecationWarning {
-    return '${globals.logger.terminal.warningMark} The "flutter build macos-framework" command is '
+    return '${toolContext.logger.terminal.warningMark} The "flutter build macos-framework" command is '
         'deprecated and has been replaced by "flutter build swift-package --platform macos". '
         'For more information, see: https://docs.flutter.dev/add-to-app/macos/project-setup\n';
   }
