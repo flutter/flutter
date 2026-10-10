@@ -86,6 +86,15 @@ Future<int> run(List<String> arguments) async {
     // `dir:*` describes the targets; configs are described one by one.
     final Map<String, Object?> described = await _gnDesc(gn, outDir, '$gnPackage:*');
     final seen = <String>{...skip.map((String name) => '$gnPackage:$name')};
+    // The all_dependent_configs the file itself names (as opposed to those
+    // GN propagates in from dependencies in other files).
+    final named = <String>{
+      for (final GnTarget t in evaluation.targets)
+        for (final GnAssignment a
+            in t.variables['all_dependent_configs']?.assignments ?? const <GnAssignment>[])
+          for (final GnValue v in a.items)
+            if (v is GnStringValue) _absoluteLabel(v.value, gnPackage),
+    };
     for (final GnTarget target in evaluation.targets) {
       final label = '$gnPackage:${target.name}';
       seen.add(label);
@@ -105,7 +114,14 @@ Future<int> run(List<String> arguments) async {
         continue;
       }
       compared++;
-      differences += _compare(label, target, gnTarget, gnPackage, evaluation.allDependentConfigs);
+      differences += _compare(
+        label,
+        target,
+        gnTarget,
+        gnPackage,
+        evaluation.allDependentConfigs,
+        namedAllDependentConfigs: named,
+      );
     }
     for (final String label in described.keys) {
       // GN's `_`-prefixed targets are the internals of template expansions.
@@ -128,11 +144,27 @@ int _compare(
   GnTarget target,
   Map<String, Object?> gnTarget,
   String gnPackage,
-  Map<String, Set<String>> inherited,
-) {
+  Map<String, Set<String>> inherited, {
+  required Set<String> namedAllDependentConfigs,
+}) {
   var differences = 0;
-  void check(String what, Set<String> ours, Set<String> theirs, {bool subset = false}) {
-    final Set<String> missing = subset ? const <String>{} : theirs.difference(ours);
+  // Items under conditions the assumptions did not decide cannot be
+  // compared with one out directory; they are reported, not counted, and
+  // GN having one of them is not the converter lacking it (it is in the
+  // generated select()).
+  final undecided = <String>[];
+  final undecidedValues = <String>{};
+  final notes = <String>[];
+  void check(
+    String what,
+    Set<String> ours,
+    Set<String> theirs, {
+    bool subset = false,
+    Set<String> notOurs = const <String>{},
+  }) {
+    final Set<String> missing = subset
+        ? const <String>{}
+        : theirs.difference(ours).difference(undecidedValues).difference(notOurs);
     final Set<String> extra = ours.difference(theirs);
     if (missing.isEmpty && extra.isEmpty) {
       return;
@@ -153,9 +185,6 @@ int _compare(
     _report(label, 'is a ${target.rule} to the converter, a $type to GN');
     differences++;
   }
-  // Items under conditions the assumptions did not decide cannot be
-  // compared with one out directory; they are reported, not counted.
-  final undecided = <String>[];
   Set<String> items(String variable, String Function(String) normalize) {
     final GnVariable? v = target.variables[variable];
     if (v == null) {
@@ -165,6 +194,11 @@ int _compare(
     for (final GnAssignment a in v.assignments) {
       if (!a.isUnconditional) {
         undecided.add('$variable under ${a.condition}');
+        for (final GnValue item in a.items) {
+          if (item is GnStringValue) {
+            undecidedValues.add(normalize(item.value));
+          }
+        }
         continue;
       }
       for (final GnValue item in a.items) {
@@ -205,18 +239,34 @@ int _compare(
   );
   // gn desc lists public_configs after propagation from public_deps, so the
   // target's own are a subset; all_dependent_configs are compared after
-  // propagation on both sides (the converter follows deps within the file).
+  // propagation on both sides. The converter follows deps within the file;
+  // what GN propagates in from dependencies in other files reaches the
+  // Bazel target through those dependencies' own public deps (the other
+  // file's conversion), so it is reported, not counted, unless this file
+  // names the config itself.
   check(
     'public_configs',
     items('public_configs', labelOf),
     _strings(gnTarget['public_configs']).map(labelOf).toSet(),
     subset: true,
   );
+  final Set<String> gnAllDependent = _strings(gnTarget['all_dependent_configs'])
+      .map(labelOf)
+      .toSet();
+  final Set<String> fromElsewhere = gnAllDependent
+      .where((String c) => !c.startsWith('$gnPackage:') && !namedAllDependentConfigs.contains(c))
+      .toSet();
   check(
     'all_dependent_configs',
     (inherited[target.name] ?? const <String>{}).map(labelOf).toSet(),
-    _strings(gnTarget['all_dependent_configs']).map(labelOf).toSet(),
+    gnAllDependent,
+    notOurs: fromElsewhere,
   );
+  if (fromElsewhere.isNotEmpty) {
+    notes.add(
+      'all_dependent_configs from other files, which reach the Bazel target through its deps (not compared): ${(fromElsewhere.toList()..sort()).join(', ')}',
+    );
+  }
   if (type == 'config') {
     check('defines', items('defines', (String s) => s), _strings(gnTarget['defines']).toSet());
     check(
@@ -227,6 +277,9 @@ int _compare(
   }
   for (final u in undecided) {
     stdout.writeln('  $label: $u (undecided; not compared)');
+  }
+  for (final n in notes) {
+    stdout.writeln('  $label: $n');
   }
   return differences;
 }
@@ -272,7 +325,7 @@ String _absoluteLabel(String value, String gnPackage) {
       ? '$gnPackage$value'
       : value.startsWith('//')
       ? value
-      : '$gnPackage/$value';
+      : '//${p.posix.normalize('${gnPackage.substring(2)}/$value')}';
   if (!label.contains(':')) {
     label = '$label:${label.substring(label.lastIndexOf('/') + 1)}';
   }

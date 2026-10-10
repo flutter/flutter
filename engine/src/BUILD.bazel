@@ -8,12 +8,15 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 
 # Puts this directory on the include path. Engine code includes its own
 # headers and most dependencies relative to it ("flutter/fml/...",
-# "third_party/skia/..."); GN's //flutter:config does the same with
-# `include_dirs = [ ".." ]`. Reached through //engine/src/flutter:config.
+# "third_party/skia/..."). This is GN's
+# //build/config/compiler:default_include_dirs (`-I//`), which
+# BUILDCONFIG.gn applies to every target; the generated BUILD files depend
+# on it from every target that compiles, and //engine/src/flutter:config
+# (GN's //flutter:config, `include_dirs = [ "..", "." ]`) reaches it too.
 cc_library(
     name = "include_root",
     includes = ["."],
-    visibility = ["//engine/src/flutter:__pkg__"],
+    visibility = ["//engine/src/flutter:__subpackages__"],
 )
 
 # GN's root files: the dotfile and the build_overrides it names. Inputs of
