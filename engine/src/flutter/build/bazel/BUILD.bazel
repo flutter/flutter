@@ -6,13 +6,35 @@
 # `deps.lock.bzl` belongs to a Bazel package and can be loaded by module
 # extensions and tooling, and holds the build-wide config_settings.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
 package(default_visibility = ["//visibility:public"])
 
 exports_files(["deps.lock.bzl"])
 
 # GN's `is_debug` is "unoptimized", which Bazel spells -c dbg or -c fastbuild;
-# this is the complement (tools/gn without --unoptimized).
+# `optimized` is the complement (tools/gn without --unoptimized) and
+# `unoptimized` is `is_debug` itself, for the generated files that select()
+# on it.
 config_setting(
     name = "optimized",
     values = {"compilation_mode": "opt"},
+)
+
+config_setting(
+    name = "dbg",
+    values = {"compilation_mode": "dbg"},
+)
+
+config_setting(
+    name = "fastbuild",
+    values = {"compilation_mode": "fastbuild"},
+)
+
+selects.config_setting_group(
+    name = "unoptimized",
+    match_any = [
+        ":dbg",
+        ":fastbuild",
+    ],
 )
