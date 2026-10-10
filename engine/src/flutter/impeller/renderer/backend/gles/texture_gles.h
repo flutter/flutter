@@ -171,6 +171,9 @@ class TextureGLES final : public Texture,
   /// false, the FBO must be re-attached before use.
   bool CachedFBOMatchesSubresource(uint32_t mip_level, uint32_t slice) const;
 
+  // |Texture|
+  bool ResizeStorage(ISize new_size) override;
+
   // Visible for testing.
   std::optional<HandleGLES> GetSyncFence() const;
 

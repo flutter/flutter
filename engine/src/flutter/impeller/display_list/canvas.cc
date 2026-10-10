@@ -1903,6 +1903,19 @@ void Canvas::SaveLayer(const Paint& paint,
     return SkipUntilMatchingRestore(total_content_depth);
   }
 
+  // Quantize non-filtered, non-destructive subpass dimensions to 32-pixel
+  // multiples so that subpixel translation jitter (+1px from RoundOut) and
+  // small layout oscillations hit the exact RenderTargetCache entry instead of
+  // reallocating WebGL2 textures/renderbuffers every frame.
+  if (!paint.image_filter && !backdrop_filter &&
+      (!paint.color_filter ||
+       !paint.color_filter->modifies_transparent_black()) &&
+      !Entity::IsBlendModeDestructive(paint.blend_mode)) {
+    constexpr int64_t kBucket = 32;
+    subpass_size = ISize((subpass_size.width + kBucket - 1) & ~(kBucket - 1),
+                         (subpass_size.height + kBucket - 1) & ~(kBucket - 1));
+  }
+
   // When there are scaling filters present, these contents may exceed the
   // maximum texture size. Perform a clamp here, which may cause rendering
   // artifacts.

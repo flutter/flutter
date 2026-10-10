@@ -892,4 +892,26 @@ bool TextureGLES::CachedFBOMatchesSubresource(uint32_t mip_level,
   return cached_fbo_mip_level_ == mip_level && cached_fbo_slice_ == slice;
 }
 
+bool TextureGLES::ResizeStorage(ISize new_size) {
+  if (!IsValid() || is_wrapped_ || new_size.IsEmpty()) {
+    return false;
+  }
+  const auto max_size =
+      reactor_->GetProcTable().GetCapabilities()->max_texture_size;
+  if (new_size.Max(max_size) != max_size) {
+    return false;
+  }
+  if (GetSize() == new_size) {
+    return true;
+  }
+  const bool was_initialized = IsSliceMipLevelInitialized(0, 0);
+  SetTextureSize(new_size);
+  slice_mip_initialized_ = {};
+  mipmap_generated_ = false;
+  if (was_initialized || !cached_fbo_.IsDead()) {
+    InitializeContentsIfNecessary();
+  }
+  return true;
+}
+
 }  // namespace impeller
