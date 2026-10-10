@@ -125,7 +125,11 @@ Future<int> run(List<String> arguments) async {
   }
   final OutputLayout layout;
   try {
-    layout = _layout(repository, files.map(tree.gnDirectory));
+    layout = _layout(
+      repository,
+      files.map(tree.gnDirectory),
+      secondarySource: tree.secondarySource,
+    );
   } on FormatException catch (e) {
     stderr.writeln(e.message);
     return 64;
@@ -202,7 +206,7 @@ Future<int> run(List<String> arguments) async {
 
 /// `--repository=@skia=//flutter/third_party/skia`, with the packages of
 /// the GN directories being converted.
-OutputLayout _layout(String? repository, Iterable<String> gnPackages) {
+OutputLayout _layout(String? repository, Iterable<String> gnPackages, {String? secondarySource}) {
   if (repository == null) {
     return const OutputLayout.main();
   }
@@ -222,6 +226,7 @@ OutputLayout _layout(String? repository, Iterable<String> gnPackages) {
     packages: <String>{
       for (final String gnPackage in gnPackages) _repositoryPackage(gnPackage, bare),
     },
+    secondarySource: secondarySource,
   );
 }
 

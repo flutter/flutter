@@ -196,12 +196,24 @@ Future<GnBlock> loadGnFile(String path, {required String gnBinary}) async {
 /// A GN source tree: resolves `//` paths against the root and loads files
 /// (synchronously, as the evaluator needs them for imports), remembering
 /// every file read so that a depfile can name them.
+///
+/// GN's secondary source root (`secondary_source` in `.gn`, the engine's
+/// `//flutter/build/secondary/`) is a parallel tree of build files for
+/// directories that cannot hold their own; a `BUILD.gn` there stands in for
+/// the directory at the same path under the primary root, and `.gni` files
+/// there are found when the primary tree lacks them.
 final class GnSourceTree {
-  GnSourceTree(String root, {required this.gnBinary}) : root = p.canonicalize(root);
+  GnSourceTree(String root, {required this.gnBinary})
+    : root = p.canonicalize(root),
+      secondarySource = _secondarySource(p.canonicalize(root));
 
   /// The directory holding `.gn`.
   final String root;
   final String gnBinary;
+
+  /// The secondary source root as a GN directory (`//flutter/build/secondary`),
+  /// or null when `.gn` declares none.
+  final String? secondarySource;
 
   final Map<String, GnBlock> _cache = <String, GnBlock>{};
   final Set<String> _loaded = <String>{};
@@ -209,21 +221,46 @@ final class GnSourceTree {
   /// Every file loaded so far, in load order.
   List<String> get loadedFiles => List<String>.unmodifiable(_loaded);
 
-  /// The file for a GN path (`//flutter/fml/BUILD.gn`).
+  static String? _secondarySource(String root) {
+    final dotGn = File(p.join(root, '.gn'));
+    if (!dotGn.existsSync()) {
+      return null;
+    }
+    final Match? match = RegExp(
+      r'^\s*secondary_source\s*=\s*"(//[^"]*?)/?"',
+      multiLine: true,
+    ).firstMatch(dotGn.readAsStringSync());
+    return match?.group(1);
+  }
+
+  /// The file for a GN path (`//flutter/fml/BUILD.gn`): under the root, or
+  /// under the secondary source root when the root has no such file.
   String resolve(String gnPath) {
     if (!gnPath.startsWith('//')) {
       throw ArgumentError.value(gnPath, 'gnPath', 'not a GN path');
     }
-    return p.join(root, gnPath.substring(2));
+    final String primary = p.join(root, gnPath.substring(2));
+    final String? secondary = secondarySource;
+    if (secondary == null || File(primary).existsSync()) {
+      return primary;
+    }
+    final String fallback = p.join(root, secondary.substring(2), gnPath.substring(2));
+    return File(fallback).existsSync() ? fallback : primary;
   }
 
-  /// The GN path of a file under the root.
+  /// The GN path of a file under the root; a file under the secondary
+  /// source root is at the path it stands in for.
   String gnPath(String file) {
     final String absolute = p.canonicalize(file);
     if (!p.isWithin(root, absolute)) {
       throw GnError(GnLocation(file, 0, 0), 'not under the GN root $root');
     }
-    return '//${p.posix.joinAll(p.split(p.relative(absolute, from: root)))}';
+    String relative = p.posix.joinAll(p.split(p.relative(absolute, from: root)));
+    final String? secondary = secondarySource;
+    if (secondary != null && relative.startsWith('${secondary.substring(2)}/')) {
+      relative = relative.substring(secondary.length - 2 + 1);
+    }
+    return '//$relative';
   }
 
   /// The GN directory (`//flutter/fml`) of a file under the root.
