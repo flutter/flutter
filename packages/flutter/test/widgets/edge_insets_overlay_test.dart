@@ -150,6 +150,88 @@ void main() {
       expect(observedInsets, const EdgeInsets.fromLTRB(0.0, 90.0, 0.0, 0.0));
     });
 
+    testWidgets(
+      'updates builder metrics dynamically when overlay size changes under tight constraints',
+      (WidgetTester tester) async {
+        late StateSetter setOverlayState;
+        var topHeight = 50.0;
+        EdgeInsets? observedPadding;
+
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: .ltr,
+            child: Center(
+              child: SizedBox(
+                width: 800.0,
+                height: 600.0,
+                child: EdgeInsetsOverlay(
+                  top: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                      setOverlayState = setState;
+                      return SizedBox(height: topHeight);
+                    },
+                  ),
+                  builder:
+                      (
+                        BuildContext context,
+                        BoxConstraints constraints,
+                        EdgeInsetsOverlayMetrics metrics,
+                      ) {
+                        observedPadding = metrics.padding;
+                        return const SizedBox.expand();
+                      },
+                ),
+              ),
+            ),
+          ),
+        );
+
+        expect(observedPadding, const EdgeInsets.only(top: 50.0));
+
+        setOverlayState(() {
+          topHeight = 100.0;
+        });
+        await tester.pump();
+
+        expect(observedPadding, const EdgeInsets.only(top: 100.0));
+      },
+    );
+
+    testWidgets('does not rebuild builder callback when metrics and constraints remain identical', (
+      WidgetTester tester,
+    ) async {
+      var buildCount = 0;
+      late StateSetter setOtherState;
+
+      final Widget overlay = EdgeInsetsOverlay(
+        top: const SizedBox(height: 50.0),
+        builder:
+            (BuildContext context, BoxConstraints constraints, EdgeInsetsOverlayMetrics metrics) {
+              buildCount++;
+              return const SizedBox(width: 100.0, height: 100.0);
+            },
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: .ltr,
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              setOtherState = setState;
+              return Column(children: <Widget>[overlay]);
+            },
+          ),
+        ),
+      );
+
+      expect(buildCount, 1);
+
+      setOtherState(() {});
+      await tester.pump();
+
+      expect(buildCount, 1);
+    });
+
     testWidgets('updates insets dynamically when side widgets are added or removed', (
       WidgetTester tester,
     ) async {
