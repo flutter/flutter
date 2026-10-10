@@ -1435,9 +1435,9 @@ class _FocusUpAction extends ContextAction<DirectionalFocusIntent> {
     }
 
     final FocusNode? firstFocus = policy.findFirstFocus(primaryFocus!, ignoreCurrentFocus: true);
-    final FocusNode lastFocus = policy.findLastFocus(primaryFocus!, ignoreCurrentFocus: true);
-    if (lastFocus.context != null) {
-      if (primaryFocus == lastFocus.enclosingScope || primaryFocus == firstFocus) {
+    final FocusNode? lastFocus = policy.findLastFocus(primaryFocus!, ignoreCurrentFocus: true);
+    if (lastFocus?.context != null) {
+      if (primaryFocus == lastFocus!.enclosingScope || primaryFocus == firstFocus) {
         policy.requestFocusCallback(lastFocus);
         return;
       }
@@ -1461,7 +1461,7 @@ class _FocusDownAction extends ContextAction<DirectionalFocusIntent> {
     }
 
     final FocusNode? firstFocus = policy.findFirstFocus(primaryFocus!, ignoreCurrentFocus: true);
-    final FocusNode lastFocus = policy.findLastFocus(primaryFocus!, ignoreCurrentFocus: true);
+    final FocusNode? lastFocus = policy.findLastFocus(primaryFocus!, ignoreCurrentFocus: true);
     if (firstFocus?.context != null) {
       if (primaryFocus == firstFocus!.enclosingScope || primaryFocus == lastFocus) {
         policy.requestFocusCallback(firstFocus);
@@ -1503,11 +1503,11 @@ class _FocusLastAction extends ContextAction<_FocusLastIntent> {
   void invoke(_FocusLastIntent intent, [BuildContext? context]) {
     final FocusTraversalPolicy policy =
         FocusTraversalGroup.maybeOf(context!) ?? ReadingOrderTraversalPolicy();
-    final FocusNode lastFocus = policy.findLastFocus(primaryFocus!, ignoreCurrentFocus: true);
-    if (lastFocus.context == null) {
+    final FocusNode? lastFocus = policy.findLastFocus(primaryFocus!, ignoreCurrentFocus: true);
+    if (lastFocus?.context == null) {
       return;
     }
-    policy.requestFocusCallback(lastFocus);
+    policy.requestFocusCallback(lastFocus!);
   }
 }
 
