@@ -8,13 +8,16 @@ import 'package:process/process.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/process.dart';
+import 'base/signals.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'cache.dart';
-import 'globals.dart' as globals;
+import 'context/tool_context.dart';
 
 //////////////////////////////////////////////////////////////////////
 //                                                                  //
@@ -247,7 +250,11 @@ class LocalEngineInfo {
   /// The [targetOutPath] and [hostOutPath] are assumed to be resolvable
   /// paths to the built engine artifacts for the target (device) and host
   /// (build) platforms, respectively.
-  const LocalEngineInfo({required this.targetOutPath, required this.hostOutPath});
+  const LocalEngineInfo({
+    required this.fileSystem,
+    required this.hostOutPath,
+    required this.targetOutPath,
+  });
 
   /// The path to the engine artifacts for the target (device) platform.
   ///
@@ -263,11 +270,14 @@ class LocalEngineInfo {
   /// (platform), see [localHostName].
   final String hostOutPath;
 
+  /// The [FileSystem] used to resolve paths.
+  final FileSystem fileSystem;
+
   /// The name of the target (device) platform, i.e. `android_debug_unopt`.
-  String get localTargetName => globals.fs.path.basename(targetOutPath);
+  String get localTargetName => fileSystem.path.basename(targetOutPath);
 
   /// The name of the host (build) platform, e.g. `host_debug_unopt`.
-  String get localHostName => globals.fs.path.basename(hostOutPath);
+  String get localHostName => fileSystem.path.basename(hostOutPath);
 }
 
 // Manages the engine artifacts of Flutter.
@@ -296,27 +306,30 @@ abstract class Artifacts {
 
   static Artifacts getLocalEngine(
     EngineBuildPaths engineBuildPaths, {
-    required Cache cache,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessManager processManager,
+    required ToolContext toolContext,
   }) {
+    final ToolContext(
+      :Cache cache,
+      :FileSystem fs,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
     Artifacts artifacts = CachedArtifacts(
-      fileSystem: fileSystem,
+      fileSystem: fs,
       platform: platform,
       cache: cache,
-      operatingSystemUtils: operatingSystemUtils,
+      operatingSystemUtils: os,
     );
     if (engineBuildPaths.hostEngine != null && engineBuildPaths.targetEngine != null) {
       artifacts = CachedLocalEngineArtifacts(
         engineBuildPaths.hostEngine!,
         engineOutPath: engineBuildPaths.targetEngine!,
         cache: cache,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         processManager: processManager,
         platform: platform,
-        operatingSystemUtils: operatingSystemUtils,
+        operatingSystemUtils: os,
         parent: artifacts,
       );
     }
@@ -324,9 +337,9 @@ abstract class Artifacts {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: artifacts,
         webSdkPath: engineBuildPaths.webSdk!,
-        fileSystem: fileSystem,
+        fileSystem: fs,
         platform: platform,
-        operatingSystemUtils: operatingSystemUtils,
+        operatingSystemUtils: os,
       );
     }
     return artifacts;
@@ -1026,6 +1039,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
        localEngineInfo = LocalEngineInfo(
          targetOutPath: engineOutPath,
          hostOutPath: _hostEngineOutPath,
+         fileSystem: fileSystem,
        ),
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils,
@@ -1453,6 +1467,7 @@ class _TestLocalEngine extends _TestArtifacts {
     : localEngineInfo = LocalEngineInfo(
         targetOutPath: engineOutPath,
         hostOutPath: engineHostOutPath,
+        fileSystem: fileSystem,
       );
 
   @override
@@ -1463,12 +1478,17 @@ class _TestLocalEngine extends _TestArtifacts {
 }
 
 String _getFileGeneratorsPath() {
+  final localFileSystem = LocalFileSystem(
+    LocalSignals.instance,
+    const <ProcessSignal>[],
+    ShutdownHooks(),
+  );
   final String flutterRoot = Cache.defaultFlutterRoot(
-    fileSystem: globals.localFileSystem,
+    fileSystem: localFileSystem,
     platform: const LocalPlatform(),
     userMessages: UserMessages(),
   );
-  return globals.localFileSystem.path.join(
+  return localFileSystem.path.join(
     flutterRoot,
     'packages',
     'flutter_tools',
