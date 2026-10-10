@@ -253,7 +253,10 @@ struct RenderPassStateCache {
   BlendStateCache blend;
   StencilStateCache stencil;
   DepthStateCache depth;
+  VertexAttribStateCache attrib;
   std::optional<HandleGLES> program;
+  absl::flat_hash_map<HandleGLES, float, HandleGLES::Hash, HandleGLES::Equal>
+      configured_program_y_flip;
   CullMode cull_mode = CullMode::kNone;
   WindingOrder winding_order = WindingOrder::kClockwise;
 
@@ -388,9 +391,13 @@ struct RenderPassStateCache {
     }
 
     // Bind the y-flip uniform if the vertex shader declares it.
-    const GLint y_flip_loc = pipeline.GetYFlipUniformLocation();
-    if (y_flip_loc >= 0) {
-      gl.Uniform1fv(y_flip_loc, 1, &y_flip_value);
+    const GLint y_flip_location = pipeline.GetYFlipUniformLocation();
+    if (y_flip_location >= 0) {
+      auto it = configured_program_y_flip.find(program_handle);
+      if (it == configured_program_y_flip.end() || it->second != y_flip_value) {
+        gl.Uniform1fv(y_flip_location, 1, &y_flip_value);
+        configured_program_y_flip[program_handle] = y_flip_value;
+      }
     }
 
     program = program_handle;
@@ -404,7 +411,8 @@ static bool BindVertexBuffer(const ProcTableGLES& gl,
                              BufferBindingsGLES* vertex_desc_gles,
                              const BufferView& vertex_buffer_view,
                              size_t buffer_index,
-                             size_t instance = 0) {
+                             size_t instance = 0,
+                             VertexAttribStateCache* attrib_cache = nullptr) {
   if (!vertex_buffer_view) {
     return false;
   }
@@ -416,16 +424,31 @@ static bool BindVertexBuffer(const ProcTableGLES& gl,
   }
 
   const auto& vertex_buffer_gles = DeviceBufferGLES::Cast(*vertex_buffer);
+  const bool use_es_cache =
+      attrib_cache != nullptr && gl.GetCapabilities()->IsES();
+  bool already_bound = false;
+  if (use_es_cache) {
+    if (auto handle = vertex_buffer_gles.GetHandle();
+        handle.has_value() && attrib_cache->bound_array_buffer == *handle) {
+      already_bound = true;
+    }
+  }
   if (!vertex_buffer_gles.BindAndUploadDataIfNecessary(
-          DeviceBufferGLES::BindingType::kArrayBuffer)) {
+          DeviceBufferGLES::BindingType::kArrayBuffer, already_bound)) {
     return false;
+  }
+  if (use_es_cache) {
+    if (auto handle = vertex_buffer_gles.GetHandle(); handle.has_value()) {
+      attrib_cache->bound_array_buffer = *handle;
+    }
   }
 
   //--------------------------------------------------------------------------
   /// Bind the vertex attributes associated with vertex buffer.
   ///
   if (!vertex_desc_gles->BindVertexAttributes(
-          gl, buffer_index, vertex_buffer_view.GetRange().offset, instance)) {
+          gl, buffer_index, vertex_buffer_view.GetRange().offset, instance,
+          attrib_cache)) {
     return false;
   }
 
@@ -585,6 +608,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   const float y_flip_value = flip_y ? -1.0f : 1.0f;
 
   RenderPassStateCache state_cache;
+  const bool is_es = gl.GetCapabilities()->IsES();
   // Inverted to keep front-facing consistent under the vertex y-flip.
   gl.FrontFace(flip_y ? GL_CCW : GL_CW);
 
@@ -658,12 +682,16 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     ///       `RenderPass::ValidateIndexBuffer` here, as validation already runs
     ///       when the vertex/index buffers are set on the command.
     ///
+    state_cache.attrib.current_draw_attribs_mask = 0;
     for (size_t i = 0; i < command.vertex_buffers.length; i++) {
       if (!BindVertexBuffer(gl, vertex_desc_gles,
                             vertex_buffers[i + command.vertex_buffers.offset],
-                            i)) {
+                            i, /*instance=*/0, &state_cache.attrib)) {
         return false;
       }
+    }
+    if (is_es) {
+      state_cache.attrib.DisableUnusedAttribsBeforeDraw(gl);
     }
 
     //--------------------------------------------------------------------------
@@ -677,11 +705,12 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     /// Bind uniform data.
     ///
     if (!vertex_desc_gles->BindUniformData(
-            gl,                                        //
-            bound_textures,                            //
-            bound_buffers,                             //
-            /*texture_range=*/command.bound_textures,  //
-            /*buffer_range=*/command.bound_buffers     //
+            gl,                                                    //
+            bound_textures,                                        //
+            bound_buffers,                                         //
+            /*texture_range=*/command.bound_textures,              //
+            /*buffer_range=*/command.bound_buffers,                //
+            /*state_cache=*/is_es ? &state_cache.attrib : nullptr  //
             )) {
       return false;
     }
@@ -733,9 +762,24 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       auto index_buffer_view = command.index_buffer;
       const DeviceBuffer* index_buffer = index_buffer_view.GetBuffer();
       const auto& index_buffer_gles = DeviceBufferGLES::Cast(*index_buffer);
+      bool idx_already_bound = false;
+      if (is_es) {
+        if (auto idx_handle = index_buffer_gles.GetHandle();
+            idx_handle.has_value() &&
+            state_cache.attrib.bound_element_array_buffer == *idx_handle) {
+          idx_already_bound = true;
+        }
+      }
       if (!index_buffer_gles.BindAndUploadDataIfNecessary(
-              DeviceBufferGLES::BindingType::kElementArrayBuffer)) {
+              DeviceBufferGLES::BindingType::kElementArrayBuffer,
+              idx_already_bound)) {
         return false;
+      }
+      if (is_es) {
+        if (auto idx_handle = index_buffer_gles.GetHandle();
+            idx_handle.has_value()) {
+          state_cache.attrib.bound_element_array_buffer = *idx_handle;
+        }
       }
       index_offset = reinterpret_cast<const GLvoid*>(
           static_cast<uintptr_t>(index_buffer_view.GetRange().offset));
@@ -761,11 +805,12 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       // were already bound above for instance 0.
       for (size_t instance = 0; instance < command.instance_count; instance++) {
         if (instance > 0u) {
+          state_cache.attrib.current_draw_attribs_mask = 0;
           for (size_t i = 0; i < command.vertex_buffers.length; i++) {
             if (!BindVertexBuffer(
                     gl, vertex_desc_gles,
                     vertex_buffers[i + command.vertex_buffers.offset], i,
-                    instance)) {
+                    instance, &state_cache.attrib)) {
               return false;
             }
           }
@@ -794,13 +839,21 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     }
 
     //--------------------------------------------------------------------------
-    /// Unbind vertex attribs.
+    /// Unbind vertex attribs (desktop GL VAO path only; ES defers cleanup to
+    /// pass end via state_cache.attrib).
     ///
-    if (!vertex_desc_gles->UnbindVertexAttributes(gl)) {
-      return false;
+    if (!is_es) {
+      if (!vertex_desc_gles->UnbindVertexAttributes(gl)) {
+        return false;
+      }
     }
   }
 
+  if (is_es) {
+    state_cache.attrib.ResetAtPassEnd(gl);
+  }
+
+  GLenum discard_target = GL_FRAMEBUFFER;
   if (pass_data.resolve_attachment &&
       !gl.GetCapabilities()->SupportsImplicitResolvingMSAA() &&
       !is_wrapped_fbo) {
@@ -818,27 +871,25 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
           reactor.CreateUntrackedHandle(HandleType::kFrameBuffer);
       resolve_gles.SetCachedFBO(cached_fbo);
       resolve_fbo_opt = reactor.GetGLHandle(cached_fbo);
-      gl.BindFramebuffer(GL_FRAMEBUFFER, resolve_fbo_opt.value());
+      gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo_opt.value());
 
       if (!resolve_gles.SetAsFramebufferAttachment(
-              GL_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
+              GL_DRAW_FRAMEBUFFER, TextureGLES::AttachmentType::kColor0)) {
         return false;
       }
 
-      auto status = gl.CheckFramebufferStatusDebug(GL_FRAMEBUFFER);
+      auto status = gl.CheckFramebufferStatusDebug(GL_DRAW_FRAMEBUFFER);
       if (status != GL_FRAMEBUFFER_COMPLETE) {
         VALIDATION_LOG << "Could not create a complete frambuffer: "
                        << DebugToFramebufferError(status);
         return false;
       }
     } else {
-      gl.BindFramebuffer(GL_FRAMEBUFFER, resolve_fbo_opt.value());
+      gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo_opt.value());
     }
 
-    // Bind MSAA renderbuffer to read framebuffer.
-    gl.BindFramebuffer(GL_READ_FRAMEBUFFER, fbo.value());
-    gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo_opt.value());
-
+    // Bind MSAA renderbuffer FBO to read framebuffer (already bound to
+    // GL_READ_FRAMEBUFFER via the initial GL_FRAMEBUFFER bind at pass start).
     RenderPassGLES::ResetGLState(gl);
     auto size = pass_data.color_attachment->GetSize();
 
@@ -853,15 +904,12 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
                        /*mask=*/GL_COLOR_BUFFER_BIT,
                        /*filter=*/GL_NEAREST);
 
-    gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, GL_NONE);
-    gl.BindFramebuffer(GL_READ_FRAMEBUFFER, GL_NONE);
-    // Rebind the original FBO so that we can discard it below.
-    gl.BindFramebuffer(GL_FRAMEBUFFER, fbo.value());
+    discard_target = GL_READ_FRAMEBUFFER;
   }
 
-  GLint framebuffer_id = 0;
-  gl.GetIntegerv(GL_FRAMEBUFFER_BINDING, &framebuffer_id);
-  const bool is_default_fbo = framebuffer_id == 0;
+  const bool is_default_fbo =
+      is_wrapped_fbo &&
+      (!color_gles.GetFBO().has_value() || *color_gles.GetFBO() == 0);
 
   if (gl.InvalidateFramebuffer.IsAvailable()) {
     std::array<GLenum, 3> attachments;
@@ -883,7 +931,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       attachments[attachment_count++] =
           (is_default_fbo ? GL_STENCIL_EXT : GL_STENCIL_ATTACHMENT);
     }
-    gl.InvalidateFramebuffer(GL_FRAMEBUFFER,     // target
+    gl.InvalidateFramebuffer(discard_target,     // target
                              attachment_count,   // attachments to discard
                              attachments.data()  // size
     );
@@ -910,7 +958,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       attachments[attachment_count++] =
           (is_default_fbo ? GL_STENCIL_EXT : GL_STENCIL_ATTACHMENT);
     }
-    gl.DiscardFramebufferEXT(GL_FRAMEBUFFER,     // target
+    gl.DiscardFramebufferEXT(discard_target,     // target
                              attachment_count,   // attachments to discard
                              attachments.data()  // size
     );
