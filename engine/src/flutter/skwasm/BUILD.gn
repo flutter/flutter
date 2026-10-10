@@ -37,6 +37,7 @@ template("skwasm_variant") {
       "text/text_style.cc",
       "text/text_types.h",
       "vertices.cc",
+      "wasm_worker_semaphore.cc",
       "wrappers.h",
     ]
 
@@ -57,6 +58,11 @@ template("skwasm_variant") {
       "-sUSE_ES6_IMPORT_META=0",
       "--js-library",
       rebase_path("library_skwasm_support.js"),
+      "-Wl,--wrap=sem_init",
+      "-Wl,--wrap=sem_destroy",
+      "-Wl,--wrap=sem_post",
+      "-Wl,--wrap=sem_wait",
+      "-Wl,--wrap=sem_trywait",
     ]
 
     inputs = [ rebase_path("library_skwasm_support.js") ]

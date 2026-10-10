@@ -13,7 +13,6 @@
 #include "impeller/typographer/font.h"
 #include "impeller/typographer/glyph.h"
 #include "third_party/skia/include/core/SkFont.h"
-#include "third_party/skia/include/core/SkFontMetrics.h"
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/modules/skparagraph/include/Paragraph.h"  // nogncheck
@@ -25,9 +24,6 @@ namespace impeller {
 static Font ToFont(const SkTextBlobRunIterator& run, AxisAlignment alignment) {
   auto& font = run.font();
   auto typeface = std::make_shared<TypefaceSkia>(font.refTypeface());
-
-  SkFontMetrics sk_metrics;
-  font.getMetrics(&sk_metrics);
 
   Font::Metrics metrics;
   metrics.point_size = font.getSize();
@@ -48,9 +44,9 @@ std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
   std::vector<TextRun> runs;
   for (SkTextBlobRunIterator run(blob.get()); !run.done(); run.next()) {
     SkStrikeSpec strikeSpec = SkStrikeSpec::MakeWithNoDevice(run.font());
-    SkBulkGlyphMetricsAndPaths paths{strikeSpec};
+    SkBulkGlyphMetrics metrics{strikeSpec};
     SkSpan<const SkGlyph*> glyphs =
-        paths.glyphs(SkSpan(run.glyphs(), run.glyphCount()));
+        metrics.glyphs(SkSpan(run.glyphs(), run.glyphCount()));
 
     for (const auto& glyph : glyphs) {
       has_color |= glyph->isColor();
@@ -77,8 +73,7 @@ std::shared_ptr<TextFrame> MakeTextFrameFromTextBlobSkia(
                                                         point->y(),
                                                     }});
         }
-        TextRun text_run(ToFont(run, alignment), positions);
-        runs.emplace_back(text_run);
+        runs.emplace_back(ToFont(run, alignment), positions);
         break;
       }
       default:
