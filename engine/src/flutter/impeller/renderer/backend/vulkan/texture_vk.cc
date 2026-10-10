@@ -217,6 +217,15 @@ FramebufferAndRenderPass TextureVK::GetCachedFrameData(
                                      attachments);
 }
 
+SharedHandleVK<vk::RenderPass> TextureVK::GetCachedRenderPass(
+    SampleCount sample_count,
+    uint32_t mip_level,
+    uint32_t slice,
+    size_t attachment_count) const {
+  return source_->GetCachedRenderPass(sample_count, mip_level, slice,
+                                      attachment_count);
+}
+
 void TextureVK::SetMipMapGenerated() {
   mipmap_generated_ = true;
 }

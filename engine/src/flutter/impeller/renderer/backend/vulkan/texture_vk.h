@@ -50,25 +50,35 @@ class TextureVK final : public Texture, public BackendCast<TextureVK, Texture> {
   std::shared_ptr<SamplerVK> GetImmutableSamplerVariant(
       const SamplerVK& sampler) const;
 
-  /// Store the framebuffer and render pass last used to render into the
-  /// `(sample_count, mip_level, slice)` subresource of this texture.
+  /// Store the framebuffer and render pass used to render into the
+  /// `(sample_count, mip_level, slice)` subresource of this texture with the
+  /// given attachments.
   ///
   /// Only called when this texture is being used as the resolve (or
   /// non-MSAA color) target of a render pass.
   void SetCachedFrameData(const FramebufferAndRenderPass& data,
                           SampleCount sample_count,
-                          uint32_t mip_level = 0u,
-                          uint32_t slice = 0u,
-                          const FramebufferAttachmentsVK& attachments = {});
+                          uint32_t mip_level,
+                          uint32_t slice,
+                          const FramebufferAttachmentsVK& attachments);
 
   /// Retrieve the cached framebuffer and render pass for the given
   /// `(sample_count, mip_level, slice)` subresource and attachment set.
   /// Returns an empty `FramebufferAndRenderPass` if no entry exists.
   FramebufferAndRenderPass GetCachedFrameData(
       SampleCount sample_count,
-      uint32_t mip_level = 0u,
-      uint32_t slice = 0u,
-      const FramebufferAttachmentsVK& attachments = {}) const;
+      uint32_t mip_level,
+      uint32_t slice,
+      const FramebufferAttachmentsVK& attachments) const;
+
+  /// Retrieve a render pass cached for the `(sample_count, mip_level, slice)`
+  /// subresource with any attachments of the same count. See
+  /// `TextureSourceVK::GetCachedRenderPass`.
+  SharedHandleVK<vk::RenderPass> GetCachedRenderPass(
+      SampleCount sample_count,
+      uint32_t mip_level,
+      uint32_t slice,
+      size_t attachment_count) const;
 
  private:
   std::weak_ptr<Context> context_;

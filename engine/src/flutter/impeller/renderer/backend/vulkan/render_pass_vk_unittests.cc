@@ -19,6 +19,16 @@
 namespace impeller {
 namespace testing {
 
+namespace {
+
+int CountCalls(const ContextVK& context, const std::string& name) {
+  auto called_functions = GetMockVulkanFunctions(context.GetDevice());
+  return static_cast<int>(
+      std::count(called_functions->begin(), called_functions->end(), name));
+}
+
+}  // namespace
+
 TEST(RenderPassVK, DoesNotRedundantlySetStencil) {
   std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
   std::shared_ptr<Context> copy = context;
@@ -127,17 +137,101 @@ TEST(RenderPassVK, DoesNotReuseAFramebufferWithADifferentDepthAttachment) {
   ASSERT_NE(first.GetDepthAttachment()->texture,
             second.GetDepthAttachment()->texture);
 
+  const int render_passes_before = CountCalls(*context, "vkCreateRenderPass");
   ASSERT_TRUE(cmd_buffer->CreateRenderPass(first));
   ASSERT_TRUE(cmd_buffer->CreateRenderPass(second));
 
-  // One framebuffer per attachment set. The render pass itself is compatible
-  // between the two and is cached separately, so the framebuffer is what says
-  // whether the entry was reused: before the key included the depth
+  // One framebuffer per attachment set: before the key included the depth
   // attachment, the second pass was handed the first's and only one was made.
-  auto called_functions = GetMockVulkanFunctions(context->GetDevice());
-  EXPECT_EQ(std::count(called_functions->begin(), called_functions->end(),
-                       "vkCreateFramebuffer"),
-            2);
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 2);
+  // The render pass does not depend on which depth texture is attached, only
+  // on its format, so the second pass shares the first's.
+  EXPECT_EQ(CountCalls(*context, "vkCreateRenderPass") - render_passes_before,
+            1);
+}
+
+// A render pass on the same target as an earlier one is handed the cached
+// framebuffer and render pass rather than new ones.
+TEST(RenderPassVK, ReusesTheFramebufferForTheSameTarget) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<Context> copy = context;
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget target = allocator.CreateOffscreen(*copy.get(), {4, 4}, 1);
+
+  const int render_passes_before = CountCalls(*context, "vkCreateRenderPass");
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 1);
+  EXPECT_EQ(CountCalls(*context, "vkCreateRenderPass") - render_passes_before,
+            1);
+}
+
+// The same for a multisample target, whose cache lives on the resolve
+// texture.
+TEST(RenderPassVK, ReusesTheFramebufferForTheSameMultisampleTarget) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<Context> copy = context;
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget target = allocator.CreateOffscreenMSAA(*copy.get(), {4, 4}, 1);
+
+  const int render_passes_before = CountCalls(*context, "vkCreateRenderPass");
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 1);
+  EXPECT_EQ(CountCalls(*context, "vkCreateRenderPass") - render_passes_before,
+            1);
+}
+
+// Without a depth attachment the framebuffer holds the stencil texture, so
+// that is what the key names: the same stencil texture hits, another one
+// misses.
+TEST(RenderPassVK, KeysAStencilOnlyTargetOnTheStencilTexture) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<Context> copy = context;
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget target = allocator.CreateOffscreen(*copy.get(), {4, 4}, 1);
+  auto make_stencil = [&context]() {
+    TextureDescriptor desc;
+    desc.storage_mode = StorageMode::kDevicePrivate;
+    desc.format = context->GetCapabilities()->GetDefaultStencilFormat();
+    desc.size = {4, 4};
+    desc.usage = TextureUsage::kRenderTarget;
+    StencilAttachment stencil;
+    stencil.texture = context->GetResourceAllocator()->CreateTexture(desc);
+    stencil.load_action = LoadAction::kClear;
+    stencil.store_action = StoreAction::kDontCare;
+    FML_CHECK(stencil.texture);
+    return stencil;
+  };
+  target.SetDepthAttachment(std::nullopt);
+  target.SetStencilAttachment(make_stencil());
+  RenderTarget other_stencil = target;
+  other_stencil.SetStencilAttachment(make_stencil());
+
+  FramebufferAttachmentsVK attachments =
+      RenderPassVK::GetFramebufferAttachments(target);
+  ASSERT_EQ(attachments.count, 2u);
+  EXPECT_EQ(attachments.attachments[1].source.lock(),
+            TextureVK::Cast(*target.GetStencilAttachment()->texture)
+                .GetTextureSource());
+
+  const int render_passes_before = CountCalls(*context, "vkCreateRenderPass");
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 1);
+
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(other_stencil));
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 2);
+  EXPECT_EQ(CountCalls(*context, "vkCreateRenderPass") - render_passes_before,
+            1);
 }
 
 // The same, for the multisample texture behind a resolve texture. The cache
@@ -170,13 +264,13 @@ TEST(RenderPassVK, DoesNotReuseAFramebufferWithADifferentMultisampleTexture) {
   ASSERT_NE(first.GetColorAttachment(0).texture,
             second.GetColorAttachment(0).texture);
 
+  const int render_passes_before = CountCalls(*context, "vkCreateRenderPass");
   ASSERT_TRUE(cmd_buffer->CreateRenderPass(first));
   ASSERT_TRUE(cmd_buffer->CreateRenderPass(second));
 
-  auto called_functions = GetMockVulkanFunctions(context->GetDevice());
-  EXPECT_EQ(std::count(called_functions->begin(), called_functions->end(),
-                       "vkCreateFramebuffer"),
-            2);
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 2);
+  EXPECT_EQ(CountCalls(*context, "vkCreateRenderPass") - render_passes_before,
+            1);
 }
 
 namespace {
@@ -209,10 +303,13 @@ ColorAndDepth MakeColorAndDepth(
 
 FramebufferAttachmentsVK AttachmentsOf(const ColorAndDepth& textures,
                                        uint32_t depth_slice = 0u) {
-  return {
-      {TextureVK::Cast(*textures.color).GetTextureSource(), 0u, 0u},
-      {TextureVK::Cast(*textures.depth).GetTextureSource(), 0u, depth_slice},
-  };
+  FramebufferAttachmentsVK attachments;
+  attachments.attachments[0] = {
+      TextureVK::Cast(*textures.color).GetTextureSource(), 0u, 0u};
+  attachments.attachments[1] = {
+      TextureVK::Cast(*textures.depth).GetTextureSource(), 0u, depth_slice};
+  attachments.count = 2u;
+  return attachments;
 }
 
 // A cache entry a hit can be told apart by: a miss has no render pass.

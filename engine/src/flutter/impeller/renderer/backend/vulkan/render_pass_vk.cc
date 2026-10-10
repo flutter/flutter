@@ -65,16 +65,14 @@ static vk::Viewport ToVkViewport(const Viewport& viewport) {
       .setMaxDepth(viewport.depth_range.z_far);
 }
 
-/// The image views `CreateVKFramebuffer` puts in a framebuffer for `target`,
-/// as the textures and subresources they come from. The order and the choice
-/// of depth over stencil follow `CreateVKFramebuffer`.
-static FramebufferAttachmentsVK GetFramebufferAttachments(
+// The order and the choice of depth over stencil follow `CreateVKFramebuffer`.
+FramebufferAttachmentsVK RenderPassVK::GetFramebufferAttachments(
     const RenderTarget& target) {
   FramebufferAttachmentsVK attachments;
   auto add = [&attachments](const std::shared_ptr<Texture>& texture,
                             uint32_t mip_level, uint32_t slice) {
-    attachments.push_back(
-        {TextureVK::Cast(*texture).GetTextureSource(), mip_level, slice});
+    attachments.attachments.at(attachments.count++) = {
+        TextureVK::Cast(*texture).GetTextureSource(), mip_level, slice};
   };
   target.IterateAllColorAttachments(
       [&add](size_t index, const ColorAttachment& attachment) -> bool {
@@ -215,6 +213,14 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
   is_swapchain = frame_data_texture.IsSwapchainImage();
   frame_data = frame_data_texture.GetCachedFrameData(
       sample_count, cache_mip_level, cache_slice, attachments);
+  const bool is_cached = frame_data.framebuffer != nullptr;
+  if (!is_cached) {
+    // A render pass depends on the formats of the attachments, not on which
+    // textures they are, so a miss caused by another depth or multisample
+    // texture still shares the one already made for this subresource.
+    frame_data.render_pass = frame_data_texture.GetCachedRenderPass(
+        sample_count, cache_mip_level, cache_slice, attachments.count);
+  }
 
   const auto& target_size = render_target_.GetRenderTargetSize();
 
@@ -226,9 +232,8 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
     return;
   }
 
-  auto framebuffer = (frame_data.framebuffer == nullptr)
-                         ? CreateVKFramebuffer(vk_context, *render_pass_)
-                         : frame_data.framebuffer;
+  auto framebuffer = is_cached ? frame_data.framebuffer
+                               : CreateVKFramebuffer(vk_context, *render_pass_);
   if (!framebuffer) {
     VALIDATION_LOG << "Could not create framebuffer.";
     is_valid_ = false;
@@ -241,11 +246,12 @@ RenderPassVK::RenderPassVK(const std::shared_ptr<const Context>& context,
     return;
   }
 
-  frame_data.framebuffer = framebuffer;
-  frame_data.render_pass = render_pass_;
-
-  frame_data_texture.SetCachedFrameData(
-      frame_data, sample_count, cache_mip_level, cache_slice, attachments);
+  if (!is_cached) {
+    frame_data.framebuffer = framebuffer;
+    frame_data.render_pass = render_pass_;
+    frame_data_texture.SetCachedFrameData(
+        frame_data, sample_count, cache_mip_level, cache_slice, attachments);
+  }
 
   // If the resolve image exists and has mipmaps, transition mip levels besides
   // the base to shader read only in preparation for mipmap generation.

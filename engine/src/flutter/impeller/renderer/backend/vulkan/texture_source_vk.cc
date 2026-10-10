@@ -10,33 +10,38 @@ namespace impeller {
 
 namespace {
 
-// Whether a cached attachment set is the one a render pass asks for. A
-// released attachment never matches: its weak pointer is expired, so a new
-// texture at the same address compares unequal.
-bool SameAttachments(const FramebufferAttachmentsVK& cached,
-                     const FramebufferAttachmentsVK& wanted) {
-  if (cached.size() != wanted.size()) {
+// Whether two weak pointers share a control block, that is, refer to the same
+// texture source. Neither is locked, and a source released and replaced by
+// another at the same address compares unequal.
+bool SameOwner(const std::weak_ptr<const TextureSourceVK>& a,
+               const std::weak_ptr<const TextureSourceVK>& b) {
+  return !a.owner_before(b) && !b.owner_before(a);
+}
+
+}  // namespace
+
+bool FramebufferAttachmentsVK::IsSameAs(
+    const FramebufferAttachmentsVK& other) const {
+  if (count != other.count) {
     return false;
   }
-  for (size_t i = 0; i < cached.size(); i++) {
-    std::shared_ptr<const TextureSourceVK> source = cached[i].source.lock();
-    if (!source || source != wanted[i].source.lock() ||
-        cached[i].mip_level != wanted[i].mip_level ||
-        cached[i].slice != wanted[i].slice) {
+  for (size_t i = 0; i < count; i++) {
+    const FramebufferAttachmentVK& a = attachments[i];
+    const FramebufferAttachmentVK& b = other.attachments[i];
+    if (a.mip_level != b.mip_level || a.slice != b.slice ||
+        !SameOwner(a.source, b.source)) {
       return false;
     }
   }
   return true;
 }
 
-bool AnyReleased(const FramebufferAttachmentsVK& attachments) {
-  return std::any_of(attachments.begin(), attachments.end(),
+bool FramebufferAttachmentsVK::AnyReleased() const {
+  return std::any_of(attachments.begin(), attachments.begin() + count,
                      [](const FramebufferAttachmentVK& attachment) {
                        return attachment.source.expired();
                      });
 }
-
-}  // namespace
 
 TextureSourceVK::TextureSourceVK(TextureDescriptor desc) : desc_(desc) {}
 
@@ -96,21 +101,20 @@ void TextureSourceVK::SetCachedFrameData(
     uint32_t mip_level,
     uint32_t slice,
     const FramebufferAttachmentsVK& attachments) {
-  // A framebuffer whose attachment has been released can never be handed out
-  // again. The command buffers that used it hold their own references.
-  frame_data_.erase(std::remove_if(frame_data_.begin(), frame_data_.end(),
-                                   [](const CachedFrameDataEntry& entry) {
-                                     return AnyReleased(entry.attachments);
-                                   }),
-                    frame_data_.end());
   for (auto& entry : frame_data_) {
     if (entry.sample_count == sample_count && entry.mip_level == mip_level &&
-        entry.slice == slice &&
-        SameAttachments(entry.attachments, attachments)) {
+        entry.slice == slice && entry.attachments.IsSameAs(attachments)) {
       entry.data = data;
       return;
     }
   }
+  // A framebuffer whose attachment has been released can never be handed out
+  // again. The command buffers that used it hold their own references.
+  frame_data_.erase(std::remove_if(frame_data_.begin(), frame_data_.end(),
+                                   [](const CachedFrameDataEntry& entry) {
+                                     return entry.attachments.AnyReleased();
+                                   }),
+                    frame_data_.end());
   frame_data_.push_back({sample_count, mip_level, slice, attachments, data});
 }
 
@@ -121,12 +125,25 @@ FramebufferAndRenderPass TextureSourceVK::GetCachedFrameData(
     const FramebufferAttachmentsVK& attachments) const {
   for (const auto& entry : frame_data_) {
     if (entry.sample_count == sample_count && entry.mip_level == mip_level &&
-        entry.slice == slice &&
-        SameAttachments(entry.attachments, attachments)) {
+        entry.slice == slice && entry.attachments.IsSameAs(attachments)) {
       return entry.data;
     }
   }
   return {};
+}
+
+SharedHandleVK<vk::RenderPass> TextureSourceVK::GetCachedRenderPass(
+    SampleCount sample_count,
+    uint32_t mip_level,
+    uint32_t slice,
+    size_t attachment_count) const {
+  for (const auto& entry : frame_data_) {
+    if (entry.sample_count == sample_count && entry.mip_level == mip_level &&
+        entry.slice == slice && entry.attachments.count == attachment_count) {
+      return entry.data.render_pass;
+    }
+  }
+  return nullptr;
 }
 
 size_t TextureSourceVK::GetCachedFrameDataCountForTesting() const {
