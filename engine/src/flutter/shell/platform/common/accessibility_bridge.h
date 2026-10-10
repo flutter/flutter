@@ -231,6 +231,8 @@ class AccessibilityBridge
                                       const SemanticsNode& node);
   void SetNameFromFlutterUpdate(ui::AXNodeData& node_data,
                                 const SemanticsNode& node);
+  void SetDescriptionFromFlutterUpdate(ui::AXNodeData& node_data,
+                                       const SemanticsNode& node);
   void SetValueFromFlutterUpdate(ui::AXNodeData& node_data,
                                  const SemanticsNode& node);
   void SetTooltipFromFlutterUpdate(ui::AXNodeData& node_data,
