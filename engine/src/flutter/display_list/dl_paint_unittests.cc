@@ -14,7 +14,7 @@ namespace testing {
 
 TEST(DisplayListPaint, ConstructorDefaults) {
   DlPaint paint;
-  EXPECT_FALSE(paint.isAntiAlias());
+  EXPECT_TRUE(paint.isAntiAlias());
   EXPECT_FALSE(paint.isInvertColors());
   EXPECT_EQ(paint.getColor(), DlPaint::kDefaultColor);
   EXPECT_EQ(paint.getAlpha(), 0xFF);
@@ -39,12 +39,13 @@ TEST(DisplayListPaint, ConstructorDefaults) {
   EXPECT_EQ(DlPaint::kDefaultColor, DlColor::kBlack());
   EXPECT_EQ(DlPaint::kDefaultWidth, 0.0);
   EXPECT_EQ(DlPaint::kDefaultMiter, 4.0);
+  EXPECT_TRUE(DlPaint::kDefaultAntiAlias);
 
   EXPECT_EQ(paint, DlPaint());
   EXPECT_EQ(paint, DlPaint(DlColor::kBlack()));
   EXPECT_EQ(paint, DlPaint(DlColor(0xFF000000)));
 
-  EXPECT_NE(paint, DlPaint().setAntiAlias(true));
+  EXPECT_NE(paint, DlPaint().setAntiAlias(false));
   EXPECT_NE(paint, DlPaint().setInvertColors(true));
   EXPECT_NE(paint, DlPaint().setColor(DlColor::kGreen()));
   EXPECT_NE(paint, DlPaint(DlColor::kGreen()));
@@ -115,7 +116,7 @@ TEST(DisplayListPaint, ChainingConstructor) {
   };
   DlPaint paint =
       DlPaint()                                                         //
-          .setAntiAlias(true)                                           //
+          .setAntiAlias(false)                                          //
           .setInvertColors(true)                                        //
           .setColor(DlColor::kGreen())                                  //
           .setAlpha(0x7F)                                               //
@@ -131,7 +132,7 @@ TEST(DisplayListPaint, ChainingConstructor) {
               DlColorFilter::MakeBlend(DlColor::kYellow(), DlBlendMode::kDstIn))
           .setImageFilter(DlImageFilter::MakeBlur(1.3, 4.7, DlTileMode::kClamp))
           .setMaskFilter(DlBlurMaskFilter(DlBlurStyle::kInner, 3.14).shared());
-  EXPECT_TRUE(paint.isAntiAlias());
+  EXPECT_FALSE(paint.isAntiAlias());
   EXPECT_TRUE(paint.isInvertColors());
   EXPECT_EQ(paint.getColor(), DlColor::kGreen().withAlpha(0x7F));
   EXPECT_EQ(paint.getAlpha(), 0x7F);

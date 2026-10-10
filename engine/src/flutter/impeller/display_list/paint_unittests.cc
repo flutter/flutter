@@ -14,6 +14,27 @@
 namespace impeller {
 namespace testing {
 
+// Initial paint must match DlPaint::kDefault (see DlOpReceiver).
+// https://github.com/flutter/flutter/issues/193388.
+TEST(PaintTest, DefaultsMatchDlPaintDefaults) {
+  Paint paint;
+  const flutter::DlPaint& defaults = flutter::DlPaint::kDefault;
+
+  EXPECT_EQ(paint.anti_alias, defaults.isAntiAlias());
+  EXPECT_EQ(paint.invert_colors, defaults.isInvertColors());
+  EXPECT_EQ(paint.color, Color::Black());
+  EXPECT_EQ(paint.color_source, nullptr);
+  EXPECT_EQ(paint.color_filter, nullptr);
+  EXPECT_EQ(paint.image_filter, nullptr);
+  EXPECT_FALSE(paint.mask_blur_descriptor.has_value());
+  EXPECT_EQ(paint.style, Paint::Style::kFill);
+  EXPECT_EQ(paint.blend_mode, BlendMode::kSrcOver);
+  EXPECT_EQ(paint.stroke.width, defaults.getStrokeWidth());
+  EXPECT_EQ(paint.stroke.miter_limit, defaults.getStrokeMiter());
+  EXPECT_EQ(paint.stroke.cap, Cap::kButt);
+  EXPECT_EQ(paint.stroke.join, Join::kMiter);
+}
+
 TEST(PaintTest, OptionalStrokeWithFill) {
   Paint paint;
   paint.style = Paint::Style::kFill;
