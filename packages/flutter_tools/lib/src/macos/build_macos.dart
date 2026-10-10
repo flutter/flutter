@@ -353,8 +353,13 @@ Future<void> buildMacOS({
     }
     throwToolExit('Build process failed');
   }
-  final String? applicationBundle = MacOSApp.fromMacOSProject(flutterProject.macos)
-      .applicationBundle(buildInfo);
+  final String? applicationBundle = MacOSApp.fromMacOSProject(
+    flutterProject.macos,
+    fileSystem: globals.fs,
+    logger: globals.logger,
+    operatingSystemUtils: globals.os,
+    plistParser: globals.plistParser,
+  ).applicationBundle(buildInfo);
   if (applicationBundle != null) {
     final Directory outputDirectory = globals.fs.directory(applicationBundle);
     // This output directory is the .app folder itself.

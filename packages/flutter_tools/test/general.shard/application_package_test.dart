@@ -11,13 +11,13 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/application_package.dart';
-import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -640,165 +640,233 @@ void main() {
   });
 
   group('PrebuiltIOSApp', () {
+    late MemoryFileSystem fileSystem;
+    late BufferLogger logger;
     late FakeOperatingSystemUtils os;
     late FakePlistParser testPlistParser;
 
     final overrides = <Type, Generator>{
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
-      PlistParser: () => testPlistParser,
-      OperatingSystemUtils: () => os,
     };
 
     setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      logger = BufferLogger.test();
       os = FakeOperatingSystemUtils();
       testPlistParser = FakePlistParser();
     });
 
-    testUsingContext('Error on non-existing file', () {
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('not_existing.ipa')) as PrebuiltIOSApp?;
+    testWithoutContext('Error on non-existing file', () {
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('not_existing.ipa'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+        plistParser: testPlistParser,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         'File "not_existing.ipa" does not exist. Use an app bundle or an ipa.\n',
       );
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Error on non-app-bundle folder', () {
-      globals.fs.directory('regular_folder').createSync();
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('regular_folder')) as PrebuiltIOSApp?;
+    testWithoutContext('Error on non-app-bundle folder', () {
+      fileSystem.directory('regular_folder').createSync();
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('regular_folder'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+        plistParser: testPlistParser,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
-      expect(testLogger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
-    }, overrides: overrides);
+      expect(logger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
+    });
 
-    testUsingContext('Error on no info.plist', () {
-      globals.fs.directory('bundle.app').createSync();
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app')) as PrebuiltIOSApp?;
+    testWithoutContext('Error on no info.plist', () {
+      fileSystem.directory('bundle.app').createSync();
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('bundle.app'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+        plistParser: testPlistParser,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
-      expect(testLogger.errorText, 'Invalid prebuilt iOS app. Does not contain Info.plist.\n');
-    }, overrides: overrides);
+      expect(logger.errorText, 'Invalid prebuilt iOS app. Does not contain Info.plist.\n');
+    });
 
-    testUsingContext('Error on bad info.plist', () {
-      globals.fs.directory('bundle.app').createSync();
-      globals.fs.file('bundle.app/Info.plist').createSync();
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app')) as PrebuiltIOSApp?;
+    testWithoutContext('Error on bad info.plist', () {
+      fileSystem.directory('bundle.app').createSync();
+      fileSystem.file('bundle.app/Info.plist').createSync();
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('bundle.app'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+        plistParser: testPlistParser,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         contains('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n'),
       );
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Success with app bundle', () {
-      globals.fs.directory('bundle.app').createSync();
-      globals.fs.file('bundle.app/Info.plist').createSync();
+    testWithoutContext('Success with app bundle', () {
+      fileSystem.directory('bundle.app').createSync();
+      fileSystem.file('bundle.app/Info.plist').createSync();
       testPlistParser.setProperty('CFBundleIdentifier', 'fooBundleId');
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('bundle.app'))! as PrebuiltIOSApp;
-      expect(testLogger.errorText, isEmpty);
+      final iosApp =
+          IOSApp.fromPrebuiltApp(
+                fileSystem.file('bundle.app'),
+                fileSystem: fileSystem,
+                logger: logger,
+                operatingSystemUtils: os,
+                plistParser: testPlistParser,
+              )!
+              as PrebuiltIOSApp;
+      expect(logger.errorText, isEmpty);
       expect(iosApp.uncompressedBundle.path, 'bundle.app');
       expect(iosApp.id, 'fooBundleId');
       expect(iosApp.bundleName, 'bundle.app');
-      expect(iosApp.applicationPackage.path, globals.fs.directory('bundle.app').path);
-    }, overrides: overrides);
+      expect(iosApp.applicationPackage.path, fileSystem.directory('bundle.app').path);
+    });
 
-    testUsingContext('Bad ipa zip-file, no payload dir', () {
-      globals.fs.file('app.ipa').createSync();
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp?;
+    testWithoutContext('Bad ipa zip-file, no payload dir', () {
+      fileSystem.file('app.ipa').createSync();
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('app.ipa'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+        plistParser: testPlistParser,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(
-        testLogger.errorText,
+        logger.errorText,
         'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.\n',
       );
-    }, overrides: overrides);
+    });
 
-    testUsingContext('Bad ipa zip-file, two app bundles', () {
-      globals.fs.file('app.ipa').createSync();
+    testWithoutContext('Bad ipa zip-file, two app bundles', () {
+      fileSystem.file('app.ipa').createSync();
       os.onUnzip = (File zipFile, Directory targetDirectory) {
         if (zipFile.path != 'app.ipa') {
           return;
         }
-        final String bundlePath1 = globals.fs.path.join(
+        final String bundlePath1 = fileSystem.path.join(
           targetDirectory.path,
           'Payload',
           'bundle1.app',
         );
-        final String bundlePath2 = globals.fs.path.join(
+        final String bundlePath2 = fileSystem.path.join(
           targetDirectory.path,
           'Payload',
           'bundle2.app',
         );
-        globals.fs.directory(bundlePath1).createSync(recursive: true);
-        globals.fs.directory(bundlePath2).createSync(recursive: true);
+        fileSystem.directory(bundlePath1).createSync(recursive: true);
+        fileSystem.directory(bundlePath2).createSync(recursive: true);
       };
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa')) as PrebuiltIOSApp?;
+      final iosApp = IOSApp.fromPrebuiltApp(
+        fileSystem.file('app.ipa'),
+        fileSystem: fileSystem,
+        logger: logger,
+        operatingSystemUtils: os,
+        plistParser: testPlistParser,
+      ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
-      expect(
-        testLogger.errorText,
-        'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n',
-      );
-    }, overrides: overrides);
+      expect(logger.errorText, 'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n');
+    });
 
-    testUsingContext('Success with ipa', () {
-      globals.fs.file('app.ipa').createSync();
+    testWithoutContext('Success with ipa', () {
+      fileSystem.file('app.ipa').createSync();
       os.onUnzip = (File zipFile, Directory targetDirectory) {
         if (zipFile.path != 'app.ipa') {
           return;
         }
-        final Directory bundleAppDir = globals.fs.directory(
-          globals.fs.path.join(targetDirectory.path, 'Payload', 'bundle.app'),
+        final Directory bundleAppDir = fileSystem.directory(
+          fileSystem.path.join(targetDirectory.path, 'Payload', 'bundle.app'),
         );
         bundleAppDir.createSync(recursive: true);
         testPlistParser.setProperty('CFBundleIdentifier', 'fooBundleId');
-        globals.fs.file(globals.fs.path.join(bundleAppDir.path, 'Info.plist')).createSync();
+        fileSystem.file(fileSystem.path.join(bundleAppDir.path, 'Info.plist')).createSync();
       };
-      final iosApp = IOSApp.fromPrebuiltApp(globals.fs.file('app.ipa'))! as PrebuiltIOSApp;
-      expect(testLogger.errorText, isEmpty);
+      final iosApp =
+          IOSApp.fromPrebuiltApp(
+                fileSystem.file('app.ipa'),
+                fileSystem: fileSystem,
+                logger: logger,
+                operatingSystemUtils: os,
+                plistParser: testPlistParser,
+              )!
+              as PrebuiltIOSApp;
+      expect(logger.errorText, isEmpty);
       expect(iosApp.uncompressedBundle.path, endsWith('bundle.app'));
       expect(iosApp.id, 'fooBundleId');
       expect(iosApp.bundleName, 'bundle.app');
-      expect(iosApp.applicationPackage.path, globals.fs.file('app.ipa').path);
-    }, overrides: overrides);
+      expect(iosApp.applicationPackage.path, fileSystem.file('app.ipa').path);
+    });
 
     testUsingContext('returns null when there is no ios or .ios directory', () async {
-      globals.fs.file('pubspec.yaml').createSync();
+      fileSystem.file('pubspec.yaml').createSync();
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'macos'),
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
     }, overrides: overrides);
 
     testUsingContext('returns null when there is no Runner.xcodeproj', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.file('ios/FooBar.xcodeproj').createSync(recursive: true);
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'macos'),
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
+      expect(logger.errorText, contains('Expected ios/Runner.xcodeproj but this file is missing.'));
     }, overrides: overrides);
 
     testUsingContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
+      fileSystem.file('pubspec.yaml').createSync();
+      fileSystem.directory('ios/Runner.xcodeproj').createSync(recursive: true);
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'macos'),
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
+      expect(
+        logger.errorText,
+        contains('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.'),
+      );
     }, overrides: overrides);
 
     testUsingContext('returns null when there with no product identifier', () async {
-      globals.fs.file('pubspec.yaml').createSync();
-      final Directory project = globals.fs.directory('ios/Runner.xcodeproj')
+      fileSystem.file('pubspec.yaml').createSync();
+      final Directory project = fileSystem.directory('ios/Runner.xcodeproj')
         ..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: FakePlatform(operatingSystem: 'macos'),
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
@@ -806,9 +874,11 @@ void main() {
 
     testUsingContext('handles project paths with periods in app name', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Name.With.Dots',
+        fileSystem: fileSystem,
+        logger: logger,
       );
       expect(iosApp.name, 'Name.With.Dots');
       expect(iosApp.archiveBundleOutputPath, 'build/ios/archive/Name.With.Dots.xcarchive');
@@ -822,32 +892,36 @@ void main() {
 
     testUsingContext('returns project app icon dirname', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        fileSystem: fileSystem,
+        logger: logger,
       );
-      final String iconDirSuffix = globals.fs.path.join(
+      final String iconDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'AppIcon.appiconset',
       );
-      expect(iosApp.projectAppIconDirName, globals.fs.path.join('ios', iconDirSuffix));
+      expect(iosApp.projectAppIconDirName, fileSystem.path.join('ios', iconDirSuffix));
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        fileSystem: fileSystem,
+        logger: logger,
       );
-      final String iconDirSuffix = globals.fs.path.join(
+      final String iconDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'AppIcon.appiconset',
       );
       expect(
         iosApp.templateAppIconDirNameForContentsJson,
-        globals.fs.path.join(
+        fileSystem.path.join(
           Cache.flutterRoot!,
           'packages',
           'flutter_tools',
@@ -860,13 +934,13 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template app icon dirname for images', () async {
-      final String toolsDir = globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
-      final String packageConfigPath = globals.fs.path.join(
+      final String toolsDir = fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
+      final String packageConfigPath = fileSystem.path.join(
         toolsDir,
         '.dart_tool',
         'package_config.json',
       );
-      globals.fs.file(packageConfigPath)
+      fileSystem.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 {
@@ -882,18 +956,20 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        fileSystem: fileSystem,
+        logger: logger,
       );
-      final String iconDirSuffix = globals.fs.path.join(
+      final String iconDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'AppIcon.appiconset',
       );
       expect(
         await iosApp.templateAppIconDirNameForImages,
-        globals.fs.path.absolute(
+        fileSystem.path.absolute(
           'flutter_template_images',
           'templates',
           'app',
@@ -905,32 +981,36 @@ void main() {
 
     testUsingContext('returns project launch image dirname', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        fileSystem: fileSystem,
+        logger: logger,
       );
-      final String launchImageDirSuffix = globals.fs.path.join(
+      final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'LaunchImage.imageset',
       );
-      expect(iosApp.projectLaunchImageDirName, globals.fs.path.join('ios', launchImageDirSuffix));
+      expect(iosApp.projectLaunchImageDirName, fileSystem.path.join('ios', launchImageDirSuffix));
     }, overrides: overrides);
 
     testUsingContext('returns template launch image dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        fileSystem: fileSystem,
+        logger: logger,
       );
-      final String launchImageDirSuffix = globals.fs.path.join(
+      final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'LaunchImage.imageset',
       );
       expect(
         iosApp.templateLaunchImageDirNameForContentsJson,
-        globals.fs.path.join(
+        fileSystem.path.join(
           Cache.flutterRoot!,
           'packages',
           'flutter_tools',
@@ -943,13 +1023,13 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('returns template launch image dirname for images', () async {
-      final String toolsDir = globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
-      final String packageConfigPath = globals.fs.path.join(
+      final String toolsDir = fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools');
+      final String packageConfigPath = fileSystem.path.join(
         toolsDir,
         '.dart_tool',
         'package_config.json',
       );
-      globals.fs.file(packageConfigPath)
+      fileSystem.file(packageConfigPath)
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 {
@@ -965,18 +1045,20 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
+        fileSystem: fileSystem,
+        logger: logger,
       );
-      final String launchImageDirSuffix = globals.fs.path.join(
+      final String launchImageDirSuffix = fileSystem.path.join(
         'Runner',
         'Assets.xcassets',
         'LaunchImage.imageset',
       );
       expect(
         await iosApp.templateLaunchImageDirNameForImages,
-        globals.fs.path.absolute(
+        fileSystem.path.absolute(
           'flutter_template_images',
           'templates',
           'app',

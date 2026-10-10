@@ -123,11 +123,14 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       AndroidWorkflow: () =>
           AndroidWorkflow(androidSdk: globals.androidSdk, featureFlags: featureFlags),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
-        userMessages: globals.userMessages,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        fileSystem: globals.fs,
         androidSdk: globals.androidSdk,
+        fileSystem: globals.fs,
+        logger: globals.logger,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
+        plistParser: globals.plistParser,
+        processManager: globals.processManager,
+        userMessages: globals.userMessages,
       ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,

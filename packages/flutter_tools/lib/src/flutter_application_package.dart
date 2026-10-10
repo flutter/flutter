@@ -9,10 +9,13 @@ import 'android/application_package.dart';
 import 'application_package.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'ios/application_package.dart';
+import 'ios/plist_parser.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
@@ -24,20 +27,24 @@ import 'windows/application_package.dart';
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
     required this._androidSdk,
-    required ProcessManager processManager,
-    required Logger logger,
-    required this._userMessages,
     required this._fileSystem,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+    required this._logger,
+    required this._operatingSystemUtils,
+    required this._platform,
+    required this._plistParser,
+    required this._processManager,
+    required this._userMessages,
+  }) : _processUtils = ProcessUtils(processManager: _processManager, logger: _logger);
 
   final AndroidSdk? _androidSdk;
-  final ProcessManager _processManager;
+  final FileSystem _fileSystem;
   final Logger _logger;
+  final OperatingSystemUtils _operatingSystemUtils;
+  final Platform _platform;
+  final PlistParser _plistParser;
+  final ProcessManager _processManager;
   final ProcessUtils _processUtils;
   final UserMessages _userMessages;
-  final FileSystem _fileSystem;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -69,14 +76,38 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         );
       case .ios:
         return applicationBinary == null
-            ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
-            : IOSApp.fromPrebuiltApp(applicationBinary);
+            ? await IOSApp.fromIosProject(
+                FlutterProject.current().ios,
+                buildInfo,
+                fileSystem: _fileSystem,
+                logger: _logger,
+                platform: _platform,
+              )
+            : IOSApp.fromPrebuiltApp(
+                applicationBinary,
+                fileSystem: _fileSystem,
+                logger: _logger,
+                operatingSystemUtils: _operatingSystemUtils,
+                plistParser: _plistParser,
+              );
       case .tester:
         return FlutterTesterApp.fromCurrentDirectory(_fileSystem);
       case .macos:
         return applicationBinary == null
-            ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
-            : MacOSApp.fromPrebuiltApp(applicationBinary);
+            ? MacOSApp.fromMacOSProject(
+                FlutterProject.current().macos,
+                fileSystem: _fileSystem,
+                logger: _logger,
+                operatingSystemUtils: _operatingSystemUtils,
+                plistParser: _plistParser,
+              )
+            : MacOSApp.fromPrebuiltApp(
+                applicationBinary,
+                fileSystem: _fileSystem,
+                logger: _logger,
+                operatingSystemUtils: _operatingSystemUtils,
+                plistParser: _plistParser,
+              );
       case .web:
         if (!FlutterProject.current().web.existsSync()) {
           return null;
@@ -89,7 +120,12 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .windows:
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
-            : WindowsApp.fromPrebuiltApp(applicationBinary);
+            : WindowsApp.fromPrebuiltApp(
+                applicationBinary,
+                fileSystem: _fileSystem,
+                logger: _logger,
+                operatingSystemUtils: _operatingSystemUtils,
+              );
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
