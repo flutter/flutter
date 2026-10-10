@@ -72,6 +72,7 @@ class FlutterTesterTestDevice extends TestDevice {
   Process? _process;
   HttpServer? _server;
   DevtoolsLauncher? _devToolsLauncher;
+  bool _killed = false;
 
   /// Starts the device.
   ///
@@ -226,6 +227,9 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   Future<void> kill() async {
+    if (!_exitCode.isCompleted) {
+      _killed = true;
+    }
     logger.printTrace('test $id: Terminating flutter_tester process');
     _process?.kill(io.ProcessSignal.sigkill);
 
@@ -241,8 +245,7 @@ class FlutterTesterTestDevice extends TestDevice {
   Future<void> get finished async {
     final int exitCode = await _exitCode.future;
 
-    // On Windows, the [exitCode] and the terminating signal have no correlation.
-    if (platform.isWindows) {
+    if (_killed) {
       return;
     }
 
