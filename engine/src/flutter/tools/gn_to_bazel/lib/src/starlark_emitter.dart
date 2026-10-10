@@ -129,6 +129,16 @@ String emitBuildFile(
   for (final GnTarget target in evaluation.targets) {
     if (target.rule == 'config') {
       emitter.localConfigs[target.name] = target;
+      continue;
+    }
+    for (final name in <String>['configs', 'public_configs', 'all_dependent_configs']) {
+      for (final GnAssignment a in target.variables[name]?.assignments ?? const <GnAssignment>[]) {
+        for (final GnValue v in a.items) {
+          if (v is GnStringValue && v.value.startsWith(':')) {
+            emitter.locallyUsedConfigs.add(v.value.substring(1));
+          }
+        }
+      }
     }
   }
   final skipped = <String>[...evaluation.skipped];
@@ -162,6 +172,10 @@ final class _Emitter {
 
   /// The `config()` targets of the file, by name, for inlining.
   final Map<String, GnTarget> localConfigs = <String, GnTarget>{};
+
+  /// The local configs some target of the file lists (whose compiler flags
+  /// are therefore inlined there).
+  final Set<String> locallyUsedConfigs = <String>{};
 
   /// `load()` statements: file label to the symbols used from it.
   final Map<String, Set<String>> loads = <String, Set<String>>{};
@@ -245,8 +259,6 @@ final class _Emitter {
       rule.scalars['size'] = '"${testSizes[target.name] ?? defaultTestSize}"';
     }
     var chromiumCode = true;
-    final extraCopts = <_Item>[];
-    final conditionalCopts = <Condition, List<_Item>>{};
     // With an explicit `public` list the headers in `sources` are private.
     final bool explicitPublic = target.variables.containsKey('public');
     // Configs that reach dependents anyway are not inlined privately as well.
@@ -257,6 +269,9 @@ final class _Emitter {
             if (v is GnStringValue) v.value,
     };
 
+    // Two passes: the target's own variables, then its configs, so that a
+    // config's flags follow the target's own as they do in GN.
+    final configVariables = <GnVariable>[];
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'sources':
@@ -265,8 +280,10 @@ final class _Emitter {
           _filesInto(rule.list('hdrs'), variable);
         case 'deps':
           _labelsInto(rule.list(library ? 'implementation_deps' : 'deps'), variable, target);
+          _propagatedFlagsInto(rule, variable);
         case 'public_deps':
           _labelsInto(rule.list('deps'), variable, target);
+          _propagatedFlagsInto(rule, variable);
         case 'defines':
           _stringsInto(rule.list('local_defines'), variable);
         case 'include_dirs':
@@ -274,13 +291,7 @@ final class _Emitter {
         case 'configs':
         case 'public_configs':
         case 'all_dependent_configs':
-          chromiumCode = _configsInto(
-            rule,
-            variable,
-            target,
-            chromiumCode: chromiumCode,
-            publicConfigs: publicConfigs,
-          );
+          configVariables.add(variable);
         case 'libs':
         case 'frameworks':
         case 'ldflags':
@@ -290,28 +301,7 @@ final class _Emitter {
         case 'cflags_cc':
         case 'cflags_objc':
         case 'cflags_objcc':
-          final String attribute = switch (variable.name) {
-            'cflags_c' => 'conlyopts',
-            'cflags_cc' => 'cxxopts',
-            _ => 'copts',
-          };
-          _forEachItem(variable, into: rule.list(attribute), (_Element e) {
-            final _Item item = _flagItem(e);
-            // GN's compiler config fixes the language standard in its own
-            // cflags_c/cflags_cc, which follow every target's flags, so a
-            // target's -std= never takes effect there (skcms asks for C11
-            // and compiles C++20). Bazel's copts come last and would win.
-            if (item.quoted && item.text.startsWith('-std=')) {
-              return;
-            }
-            if (attribute != 'copts') {
-              rule.list(attribute).add(e.condition, item);
-            } else if (e.condition == Condition.always) {
-              extraCopts.add(item);
-            } else {
-              conditionalCopts.putIfAbsent(e.condition, () => <_Item>[]).add(item);
-            }
-          });
+          _compilerFlagsInto(rule, variable, Condition.always);
         case 'testonly':
           // cc_test is testonly by definition.
           if (kind != 'cc_test') {
@@ -331,13 +321,24 @@ final class _Emitter {
           );
       }
     }
+    final propagated = <String>[];
+    for (final variable in configVariables) {
+      chromiumCode = _configsInto(
+        rule,
+        variable,
+        target,
+        chromiumCode: chromiumCode,
+        publicConfigs: publicConfigs,
+        propagatedFlags: propagated,
+      );
+    }
+    _checkPropagatedFlags(target, propagated);
 
     // A header-only library compiles nothing, so its flags would only be
     // noise (GN ignores them just the same).
     final bool compiles = !(rule.lists['srcs']?.isEmpty ?? true);
     final bool hasFlags =
-        extraCopts.isNotEmpty ||
-        conditionalCopts.isNotEmpty ||
+        !(rule.lists['copts']?.isEmpty ?? true) ||
         !(rule.lists['conlyopts']?.isEmpty ?? true) ||
         !(rule.lists['cxxopts']?.isEmpty ?? true) ||
         target.variables.containsKey('defines') &&
@@ -355,19 +356,17 @@ final class _Emitter {
     if (compiles) {
       // GN applies chromium_code (or no_chromium_code) to every target; the
       // Bazel toolchain carries the rest.
-      final _ListAttribute copts = rule.list('copts');
       _use(
         '//engine/src/flutter/build/bazel:copts.bzl',
         chromiumCode ? 'FLUTTER_COPTS' : 'FLUTTER_THIRD_PARTY_COPTS',
       );
-      copts.always.insert(
-        0,
-        _Item(chromiumCode ? 'FLUTTER_COPTS' : 'FLUTTER_THIRD_PARTY_COPTS', quoted: false),
-      );
-      copts.always.addAll(extraCopts);
-      for (final MapEntry<Condition, List<_Item>> entry in conditionalCopts.entries) {
-        copts.conditional.putIfAbsent(entry.key, () => <_Item>[]).addAll(entry.value);
-      }
+      rule
+          .list('copts')
+          .always
+          .insert(
+            0,
+            _Item(chromiumCode ? 'FLUTTER_COPTS' : 'FLUTTER_THIRD_PARTY_COPTS', quoted: false),
+          );
       if (chromiumCode) {
         _use('//engine/src/flutter/build/bazel:copts.bzl', 'FLUTTER_LOCAL_DEFINES');
         rule
@@ -391,10 +390,80 @@ final class _Emitter {
     rules.add(rule);
   }
 
+  /// `cflags*` of a target or a config into the rule's flag attributes,
+  /// under [condition] on top of each item's own.
+  void _compilerFlagsInto(_Rule rule, GnVariable variable, Condition condition) {
+    final String attribute = switch (variable.name) {
+      'cflags_c' => 'conlyopts',
+      'cflags_cc' => 'cxxopts',
+      _ => 'copts',
+    };
+    _forEachItem(variable, into: rule.list(attribute), (_Element e) {
+      final _Item item = _flagItem(e);
+      // GN's compiler config fixes the language standard in its own
+      // cflags_c/cflags_cc, which follow every target's flags, so a
+      // target's -std= never takes effect there (skcms asks for C11 and
+      // compiles C++20). Bazel's copts come last and would win.
+      if (item.quoted && item.text.startsWith('-std=')) {
+        return;
+      }
+      rule.list(attribute).add(condition.and(e.condition), item);
+    });
+  }
+
+  /// The flags a dependency hands its dependents through a public config
+  /// ([propagatedCopts]), added to the rule that lists the dependency.
+  void _propagatedFlagsInto(_Rule rule, GnVariable variable) {
+    _forEachItem(variable, into: _ListAttribute(), (_Element e) {
+      final List<String>? flags = propagatedCopts[_gnLabel(_string(e))];
+      if (flags == null) {
+        return;
+      }
+      for (final String flag in flags) {
+        rule.list('copts').addUnique(e.condition, _Item(flag, comment: 'from ${_string(e)}'));
+      }
+    });
+  }
+
+  /// A target whose public configs carry compiler flags must be listed in
+  /// [propagatedCopts] with exactly those flags, since that table is how
+  /// its dependents get them.
+  void _checkPropagatedFlags(GnTarget target, List<String> propagated) {
+    final label = '$gnPackage:${target.name}';
+    final Set<String> expected = propagatedCopts[label]?.toSet() ?? const <String>{};
+    final Set<String> actual = propagated.toSet();
+    if (expected.length != actual.length || !expected.containsAll(actual)) {
+      throw GnError(
+        target.location,
+        actual.isEmpty
+            ? '$label is in propagatedCopts but its public configs carry no compiler flags'
+            : 'the public configs of $label carry compiler flags ${actual.toList()}, which Bazel '
+                  'cannot hand to its dependents; list them under $label in propagatedCopts '
+                  '(bazel_mapping.dart)${expected.isEmpty ? '' : ', which has ${expected.toList()}'}',
+      );
+    }
+  }
+
+  /// A GN label as written in this file, as `//dir:name`.
+  String _gnLabel(String value) {
+    var label = value.startsWith(':')
+        ? '$gnPackage$value'
+        : value.startsWith('//')
+        ? value
+        : '$gnPackage/$value';
+    if (!label.contains(':')) {
+      label = '$label:${label.substring(label.lastIndexOf('/') + 1)}';
+    }
+    return label;
+  }
+
   /// config("x") becomes a header-only library carrying the defines, include
   /// directories and link flags, which dependents list in deps; Bazel
   /// propagates those the way GN propagates a config. Compiler flags cannot
-  /// travel that way.
+  /// travel that way: a target of this file that lists the config gets them
+  /// inlined (and, for a public config, must be in [propagatedCopts] for
+  /// its dependents); a config with flags that no target here lists is
+  /// refused.
   void _convertConfig(GnTarget target) {
     _use('@rules_cc//cc:defs.bzl', 'cc_library');
     final rule = _Rule('cc_library', target.name, target.comments);
@@ -411,6 +480,10 @@ final class _Emitter {
         case 'visibility':
           // Local configs are only ever used by their own package.
           break;
+        case 'cflags' || 'cflags_c' || 'cflags_cc' || 'cflags_objc' || 'cflags_objcc'
+            when locallyUsedConfigs.contains(target.name):
+          // Carried by the targets of this file that list the config.
+          break;
         default:
           if (variable.forwarded) {
             break;
@@ -426,11 +499,27 @@ final class _Emitter {
     rules.add(rule);
   }
 
+  static const Set<String> _flagVariables = <String>{
+    'cflags',
+    'cflags_c',
+    'cflags_cc',
+    'cflags_objc',
+    'cflags_objcc',
+  };
+
   /// Copies a private config of this file into [rule] (see [_configsInto]).
   /// [use] is the assignment that listed the config; its condition applies
-  /// on top of the config's own.
-  void _inlineConfig(_Rule rule, GnTarget config, GnAssignment use) {
+  /// on top of the config's own. With [flagsOnly], only the compiler flags
+  /// (what a public config cannot carry as a dependency).
+  void _inlineConfig(_Rule rule, GnTarget config, GnAssignment use, {bool flagsOnly = false}) {
     for (final GnVariable variable in config.variables.values) {
+      if (_flagVariables.contains(variable.name)) {
+        _compilerFlagsInto(rule, variable, use.condition);
+        continue;
+      }
+      if (flagsOnly) {
+        continue;
+      }
       final String attribute;
       switch (variable.name) {
         case 'defines':
@@ -689,16 +778,21 @@ final class _Emitter {
   ///
   /// A public config becomes a dependency on the header-only library that
   /// stands for it, so that its defines and include directories reach
-  /// dependents as GN propagates them. A private config of the same file is
-  /// inlined instead: its defines become `local_defines` (a dependency's
-  /// `defines` would leak to dependents, which GN's private configs never
-  /// do), its include directories `includes` and its link flags `linkopts`.
+  /// dependents as GN propagates them; its compiler flags, which cannot,
+  /// are inlined into the target itself (GN applies a target's public
+  /// configs to it) and noted in [propagatedFlags] for the dependents'
+  /// side. A private config of the same file is inlined instead: its
+  /// defines become `local_defines` (a dependency's `defines` would leak to
+  /// dependents, which GN's private configs never do), its include
+  /// directories `includes`, its link flags `linkopts`, its compiler flags
+  /// `copts`.
   bool _configsInto(
     _Rule rule,
     GnVariable variable,
     GnTarget target, {
     required bool chromiumCode,
     required Set<String> publicConfigs,
+    required List<String> propagatedFlags,
   }) {
     var result = chromiumCode;
     final private = variable.name == 'configs';
@@ -706,12 +800,28 @@ final class _Emitter {
       for (final _Element element in _elements(assignment, withComments: true)) {
         final String config = _string(element);
         final GnTarget? local = config.startsWith(':') ? localConfigs[config.substring(1)] : null;
-        if (local != null && private && !publicConfigs.contains(config)) {
+        if (local != null && private) {
+          if (publicConfigs.contains(config)) {
+            // The public listing of the same config does everything.
+            continue;
+          }
           if (assignment.op == '-=') {
             throw GnError(assignment.location, 'removing config $config is not supported');
           }
           _inlineConfig(rule, local, assignment);
           continue;
+        }
+        if (local != null) {
+          _inlineConfig(rule, local, assignment, flagsOnly: true);
+          for (final GnVariable v in local.variables.values) {
+            if (_flagVariables.contains(v.name)) {
+              for (final GnValue flag in v.unconditionalItems ?? const <GnValue>[]) {
+                if (flag is GnStringValue && !flag.value.startsWith('-std=')) {
+                  propagatedFlags.add(flag.value);
+                }
+              }
+            }
+          }
         }
         final ConfigEffect? effect = config.startsWith(':')
             ? ConfigDependency(config)
