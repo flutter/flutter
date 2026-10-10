@@ -91,6 +91,14 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/libwebp': '@libwebp',
   '//flutter/third_party/wuffs': '@wuffs',
   '//third_party/libpng': '@libpng',
+  // The shader compiler's dependencies (research/08): engine GN in the
+  // secondary tree over synced trees (inja, json, SPIRV-Cross, flatbuffers)
+  // and SPIRV-Headers' own GN, each a fetch-time repository.
+  '//third_party/inja': '@inja',
+  '//flutter/third_party/json': '@json',
+  '//third_party/spirv_cross_flutter': '@spirv-cross',
+  '//flutter/third_party/flatbuffers': '@flatbuffers',
+  '//flutter/third_party/vulkan-deps/spirv-headers/src': '@spirv-headers',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -107,6 +115,11 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/libpng/': '@libpng//',
   '//flutter/third_party/libwebp/': '@libwebp//',
   '//flutter/third_party/wuffs/': '@wuffs//',
+  '//flutter/third_party/inja/': '@inja//',
+  '//flutter/third_party/json/': '@json//',
+  '//flutter/third_party/vulkan-deps/spirv-cross/src/': '@spirv-cross//',
+  '//flutter/third_party/flatbuffers/': '@flatbuffers//',
+  '//flutter/third_party/vulkan-deps/spirv-headers/src/': '@spirv-headers//',
 };
 
 /// Compiler flags that GN hands to the dependents of a target through one
@@ -122,6 +135,8 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
     '-Wno-unused-variable',
   ],
   '//flutter/third_party/wuffs:wuffs': <String>['-Wno-unused-function', '-Wno-c++11-narrowing'],
+  '//third_party/inja:inja': <String>['-Wno-unused-variable', '-Wno-newline-eof'],
+  '//flutter/third_party/flatbuffers:flatbuffers': <String>['-Wno-newline-eof'],
 };
 
 /// A Bazel label taken apart: `@repo//package:name`.

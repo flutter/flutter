@@ -64,6 +64,15 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/third_party/freetype2/BUILD.gn"],
         gn_repository = "@freetype2=//flutter/third_party/freetype2",
     ),
+    # The shader compiler's dependencies (research/08): engine GN in the
+    # secondary tree describing a synced tree by absolute path, converted at
+    # fetch time like the codecs above.
+    "flatbuffers": struct(
+        path = "engine/src/flutter/third_party/flatbuffers",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/flatbuffers/BUILD.gn"],
+        gn_repository = "@flatbuffers=//flutter/third_party/flatbuffers",
+    ),
     "googletest": struct(
         path = "engine/src/flutter/third_party/googletest",
         build_file = None,
@@ -71,6 +80,18 @@ _SOURCE_REPOSITORIES = {
     "icu": struct(
         path = "engine/src/flutter/third_party/icu",
         build_file = _OVERLAYS + ":icu/BUILD.icu.bazel",
+    ),
+    "inja": struct(
+        path = "engine/src/flutter/third_party/inja",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/third_party/inja/BUILD.gn"],
+        gn_repository = "@inja=//flutter/third_party/inja",
+    ),
+    "json": struct(
+        path = "engine/src/flutter/third_party/json",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/json/BUILD.gn"],
+        gn_repository = "@json=//flutter/third_party/json",
     ),
     # The engine's own C++ runtime, built from source by the toolchain's
     # `cxx_runtime` library (see toolchains/BUILD.bazel).
@@ -119,6 +140,19 @@ _SOURCE_REPOSITORIES = {
             "engine/src/flutter/third_party/skia/src/partition_alloc/BUILD.gn",
         ],
         gn_repository = "@skia=//flutter/third_party/skia",
+    ),
+    "spirv-cross": struct(
+        path = "engine/src/flutter/third_party/vulkan-deps/spirv-cross/src",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/third_party/spirv_cross_flutter/BUILD.gn"],
+        gn_repository = "@spirv-cross=//flutter/third_party/vulkan-deps/spirv-cross/src",
+    ),
+    # SPIRV-Headers' own GN, in the synced tree.
+    "spirv-headers": struct(
+        path = "engine/src/flutter/third_party/vulkan-deps/spirv-headers/src",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/spirv-headers/src/BUILD.gn"],
+        gn_repository = "@spirv-headers=//flutter/third_party/vulkan-deps/spirv-headers/src",
     ),
     "wuffs": struct(
         path = "engine/src/flutter/third_party/wuffs",
