@@ -1975,6 +1975,17 @@ class FocusManager with DiagnosticableTreeMixin, ChangeNotifier {
     }
     _pendingAutofocuses.clear();
 
+    final FocusNode? marked = _markedForFocus;
+    if (marked != null && !marked.canRequestFocus) {
+      // The node was marked for focus but became unfocusable before this update.
+      marked.unfocus(disposition: UnfocusDisposition.previouslyFocusedChild);
+      assert(_focusDebug(() => 'Marked node $marked can no longer request focus, unfocusing it.'));
+      // A node with no enclosing scope has nowhere to move focus to, so
+      // unfocus() leaves the marker alone.
+      if (_markedForFocus == marked) {
+        _markedForFocus = null;
+      }
+    }
     if (_primaryFocus == null && _markedForFocus == null) {
       // If we don't have any current focus, and nobody has asked to focus yet,
       // then revert to the root scope.
