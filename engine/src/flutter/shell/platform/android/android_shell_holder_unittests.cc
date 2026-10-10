@@ -689,5 +689,21 @@ TEST(AndroidShellHolder,
   const_platform_view.ReleaseResourceContext();
 }
 
+TEST(AndroidShellHolder, SpawnReturnsNullWhenKernelBlobUnreadable) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+
+  if (!holder->GetEmbedderApiForTesting().RunsAOTCompiledDartCode()) {
+    // Sample engine ID (1) passed to Spawn when kernel_blob_path is unset.
+    constexpr int64_t kSpawnedEngineId = 1;
+    std::unique_ptr<AndroidShellHolder> spawned = holder->Spawn(
+        jni, /*entrypoint=*/"main", /*libraryUrl=*/"",
+        /*initial_route=*/"/", /*entrypoint_args=*/{}, kSpawnedEngineId);
+    EXPECT_EQ(spawned, nullptr);
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter

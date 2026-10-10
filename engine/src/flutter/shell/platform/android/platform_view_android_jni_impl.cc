@@ -14,7 +14,6 @@
 #include "unicode/uchar.h"
 
 #include "flutter/common/constants.h"
-#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/platform/android/jni_util.h"

@@ -23,7 +23,6 @@
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
@@ -507,42 +506,44 @@ void AttachVsyncWaiter(VsyncWaiterAndroid* vsync_waiter,
   }
 }
 
-std::optional<RunConfiguration> BuildRunConfiguration(
-    const FlutterEngineProcTable& embedder_api,
-    const Settings& settings,
-    const APKAssetProvider* apk_asset_provider,
-    const std::string& entrypoint,
-    const std::string& libraryUrl,
-    const std::vector<std::string>& entrypoint_args) {
-  std::unique_ptr<IsolateConfiguration> isolate_configuration;
-  if (embedder_api.RunsAOTCompiledDartCode()) {
-    isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
-  } else {
-    std::unique_ptr<fml::Mapping> kernel_blob =
-        fml::FileMapping::CreateReadOnly(settings.application_kernel_asset);
-    if (!kernel_blob) {
-      FML_DLOG(ERROR) << "Unable to load the kernel blob asset.";
-      return std::nullopt;
+struct ScopedRunConfiguration {
+  std::vector<const char*> c_entrypoint_args;
+  FlutterAssetResolver asset_resolver = {};
+  FlutterEngineRunConfiguration config = {};
+
+  ScopedRunConfiguration(const Settings& settings,
+                         const APKAssetProvider* apk_asset_provider,
+                         const std::string& entrypoint,
+                         const std::string& library_url,
+                         const std::vector<std::string>& entrypoint_args,
+                         int64_t engine_id) {
+    c_entrypoint_args.reserve(entrypoint_args.size());
+    for (const std::string& arg : entrypoint_args) {
+      c_entrypoint_args.push_back(arg.c_str());
     }
-    isolate_configuration =
-        IsolateConfiguration::CreateForKernel(std::move(kernel_blob));
-  }
 
-  RunConfiguration config(std::move(isolate_configuration));
-  if (apk_asset_provider != nullptr) {
-    config.AddAssetResolver(apk_asset_provider->Clone());
-  }
+    const FlutterAssetResolver* asset_resolver_ptr = nullptr;
+    if (apk_asset_provider != nullptr) {
+      asset_resolver = apk_asset_provider->Clone()->ToFlutterAssetResolver();
+      asset_resolver_ptr = &asset_resolver;
+    }
 
-  if (!entrypoint.empty() && !libraryUrl.empty()) {
-    config.SetEntrypointAndLibrary(entrypoint, libraryUrl);
-  } else if (!entrypoint.empty()) {
-    config.SetEntrypoint(entrypoint);
+    config.struct_size = sizeof(FlutterEngineRunConfiguration);
+    config.kernel_blob_path = settings.application_kernel_asset.empty()
+                                  ? nullptr
+                                  : settings.application_kernel_asset.c_str();
+    config.custom_dart_entrypoint =
+        entrypoint.empty() ? nullptr : entrypoint.c_str();
+    config.custom_dart_entrypoint_library =
+        (!entrypoint.empty() && !library_url.empty()) ? library_url.c_str()
+                                                      : nullptr;
+    config.dart_entrypoint_argc = static_cast<int>(c_entrypoint_args.size());
+    config.dart_entrypoint_argv =
+        c_entrypoint_args.empty() ? nullptr : c_entrypoint_args.data();
+    config.asset_resolver = asset_resolver_ptr;
+    config.engine_id = engine_id;
   }
-  if (!entrypoint_args.empty()) {
-    config.SetEntrypointArgs(entrypoint_args);
-  }
-  return config;
-}
+};
 
 }  // namespace
 
@@ -803,30 +804,30 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
         return platform_view_android;
       };
 
-  auto config = BuildRunConfiguration(embedder_api_, GetSettings(),
-                                      apk_asset_provider_.get(), entrypoint,
-                                      libraryUrl, entrypoint_args);
-  if (!config) {
-    // If the RunConfiguration was null, the kernel blob wasn't readable.
-    // Fail the whole thing.
-    return nullptr;
-  }
-  config->SetEngineId(engine_id);
+  ScopedRunConfiguration run_config(GetSettings(), apk_asset_provider_.get(),
+                                    entrypoint, libraryUrl, entrypoint_args,
+                                    engine_id);
 
   const uint64_t spawned_holder_id = NextHolderId();
   // embedder.h has no spawn API yet.
   std::unique_ptr<EmbedderEngine> spawned =
       reinterpret_cast<EmbedderEngine*>(engine_.get())
-          ->Spawn(std::move(config.value()), initial_route,
-                  on_create_platform_view,
+          ->Spawn(&run_config.config, initial_route, on_create_platform_view,
                   MakeExternalTextureResolver(spawned_holder_id));
+  if (!spawned) {
+    // If Spawn failed, the kernel blob wasn't readable or the shell failed to
+    // spawn.
+    return nullptr;
+  }
   UniqueEngine engine(
       reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(spawned.release()));
 
   return std::unique_ptr<AndroidShellHolder>(new AndroidShellHolder(
       GetSettings(), jni_facade, thread_host_, std::move(engine),
-      spawned_holder_id, apk_asset_provider_->Clone(), weak_platform_view,
-      std::move(vsync_waiter), android_context->RenderingApi()));
+      spawned_holder_id,
+      apk_asset_provider_ ? apk_asset_provider_->Clone() : nullptr,
+      weak_platform_view, std::move(vsync_waiter),
+      android_context->RenderingApi()));
 }
 
 void AndroidShellHolder::Launch(
@@ -849,41 +850,16 @@ void AndroidShellHolder::Launch(
 
   UpdateDisplayMetrics();
 
-  std::vector<const char*> c_entrypoint_args;
-  c_entrypoint_args.reserve(entrypoint_args.size());
-  for (const std::string& arg : entrypoint_args) {
-    c_entrypoint_args.push_back(arg.c_str());
-  }
-
-  FlutterAssetResolver asset_resolver = {};
-  const FlutterAssetResolver* asset_resolver_ptr = nullptr;
-  if (apk_asset_provider_) {
-    asset_resolver = apk_asset_provider_->Clone()->ToFlutterAssetResolver();
-    asset_resolver_ptr = &asset_resolver;
-  }
-
-  FlutterEngineRunConfiguration run_config = {};
-  run_config.struct_size = sizeof(FlutterEngineRunConfiguration);
-  run_config.kernel_blob_path =
-      GetSettings().application_kernel_asset.empty()
-          ? nullptr
-          : GetSettings().application_kernel_asset.c_str();
-  run_config.custom_dart_entrypoint =
-      entrypoint.empty() ? nullptr : entrypoint.c_str();
-  run_config.custom_dart_entrypoint_library =
-      (!entrypoint.empty() && !libraryUrl.empty()) ? libraryUrl.c_str()
-                                                   : nullptr;
-  run_config.dart_entrypoint_argc = static_cast<int>(c_entrypoint_args.size());
-  run_config.dart_entrypoint_argv =
-      c_entrypoint_args.empty() ? nullptr : c_entrypoint_args.data();
-  run_config.asset_resolver = asset_resolver_ptr;
-  run_config.engine_id = engine_id;
+  ScopedRunConfiguration run_config(GetSettings(), apk_asset_provider_.get(),
+                                    entrypoint, libraryUrl, entrypoint_args,
+                                    engine_id);
 
   FlutterEngineResult result =
-      embedder_api_.LaunchEngine(engine_.get(), &run_config);
+      embedder_api_.LaunchEngine(engine_.get(), &run_config.config);
   if (result != kSuccess) {
-    if (asset_resolver.destruction_callback) {
-      asset_resolver.destruction_callback(asset_resolver.user_data);
+    if (run_config.asset_resolver.destruction_callback) {
+      run_config.asset_resolver.destruction_callback(
+          run_config.asset_resolver.user_data);
     }
     FML_LOG(ERROR) << "FlutterEngineLaunchEngine failed: " << result;
   }
