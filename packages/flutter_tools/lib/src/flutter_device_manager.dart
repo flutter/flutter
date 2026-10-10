@@ -12,6 +12,8 @@ import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
+import 'context/apple_context.dart';
+import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
@@ -41,6 +43,7 @@ class FlutterDeviceManager extends DeviceManager {
     required ProcessManager processManager,
     required FileSystem fileSystem,
     required AndroidSdk? androidSdk,
+    required AppleContext appleContext,
     required FeatureFlags featureFlags,
     required IOSSimulatorUtils iosSimulatorUtils,
     required XCDevice xcDevice,
@@ -54,6 +57,7 @@ class FlutterDeviceManager extends DeviceManager {
     required WindowsWorkflow windowsWorkflow,
     required CustomDevicesConfig customDevicesConfig,
     required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    required ToolContext toolContext,
     ExtensionManager? extensionManager,
   }) : deviceDiscoverers = <DeviceDiscovery>[
          AndroidDevices(
@@ -82,12 +86,10 @@ class FlutterDeviceManager extends DeviceManager {
            nativeAssetsBuilder: nativeAssetsBuilder,
          ),
          MacOSDevices(
-           processManager: processManager,
+           appleContext: appleContext,
+           featureFlags: featureFlags,
            macOSWorkflow: macOSWorkflow,
-           logger: logger,
-           platform: platform,
-           fileSystem: fileSystem,
-           operatingSystemUtils: operatingSystemUtils,
+           toolContext: toolContext,
          ),
          MacOSDesignedForIPadDevices(
            processManager: processManager,

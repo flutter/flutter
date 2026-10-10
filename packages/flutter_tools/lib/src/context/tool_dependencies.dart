@@ -532,11 +532,51 @@ class ToolDependencies {
         windowsWorkflow ??
         WindowsWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
 
+    final toolContext = ToolContext(
+      artifacts: finalArtifacts,
+      botDetector: finalBotDetector,
+      cache: finalCache,
+      config: finalConfig,
+      customDevicesConfig: finalCustomDevicesConfig,
+      flutterVersion: finalFlutterVersion,
+      fs: finalFS,
+      git: finalGit,
+      localEngineLocator: finalLocalEngineLocator,
+      logger: finalLogger,
+      nativeAssetsBuilder: finalNativeAssetsBuilder,
+      os: finalOS,
+      outputPreferences: finalOutputPreferences,
+      persistentToolState: finalPersistentToolState,
+      platform: finalPlatform,
+      preRunValidator: finalPreRunValidator,
+      processInfo: finalProcessInfo,
+      processManager: finalProcessManager,
+      processUtils: finalProcessUtils,
+      projectFactory: finalProjectFactory,
+      shutdownHooks: finalShutdownHooks,
+      signals: LocalSignals.instance,
+      stdio: finalStdio,
+      systemClock: finalSystemClock,
+      terminal: finalTerminal,
+      userMessages: finalUserMessages,
+    );
+
     final extensionManager = ExtensionManager(
       entryPoints: extensionEntryPoints,
       featureFlags: finalFeatureFlags,
       hostPlatform: finalOS.hostPlatform,
       logger: finalLogger,
+    );
+
+    final appleContext = AppleContext(
+      cocoaPods: finalCocoaPods,
+      cocoapodsValidator: finalCocoapodsValidator,
+      iosSimulatorUtils: finalIOSSimulatorUtils,
+      iosWorkflow: finalIOSWorkflow,
+      plistParser: finalPlistParser,
+      xcdevice: finalXCDevice,
+      xcode: finalXcode,
+      xcodeProjectInterpreter: finalXcodeProjectInterpreter,
     );
 
     final extensionBuildManager = ExtensionBuildManager(
@@ -553,6 +593,7 @@ class ToolDependencies {
           processManager: finalProcessManager,
           fileSystem: finalFS,
           androidSdk: finalAndroidSdk,
+          appleContext: appleContext,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,
           xcDevice: finalXCDevice,
@@ -566,6 +607,7 @@ class ToolDependencies {
           windowsWorkflow: finalWindowsWorkflow,
           customDevicesConfig: finalCustomDevicesConfig,
           nativeAssetsBuilder: finalNativeAssetsBuilder,
+          toolContext: toolContext,
           extensionManager: extensionManager,
         );
 
@@ -577,16 +619,7 @@ class ToolDependencies {
         gradleUtils: finalGradleUtils,
         java: finalJava,
       ),
-      appleContext: AppleContext(
-        cocoaPods: finalCocoaPods,
-        cocoapodsValidator: finalCocoapodsValidator,
-        iosSimulatorUtils: finalIOSSimulatorUtils,
-        iosWorkflow: finalIOSWorkflow,
-        plistParser: finalPlistParser,
-        xcdevice: finalXCDevice,
-        xcode: finalXcode,
-        xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-      ),
+      appleContext: appleContext,
       buildSystem: finalBuildSystem,
       crashReporter: finalCrashReporter,
       deviceManager: finalDeviceManager,
@@ -595,34 +628,7 @@ class ToolDependencies {
       extensionBuildManager: extensionBuildManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
-      toolContext: ToolContext(
-        artifacts: finalArtifacts,
-        botDetector: finalBotDetector,
-        cache: finalCache,
-        config: finalConfig,
-        customDevicesConfig: finalCustomDevicesConfig,
-        flutterVersion: finalFlutterVersion,
-        fs: finalFS,
-        git: finalGit,
-        localEngineLocator: finalLocalEngineLocator,
-        logger: finalLogger,
-        nativeAssetsBuilder: finalNativeAssetsBuilder,
-        os: finalOS,
-        outputPreferences: finalOutputPreferences,
-        persistentToolState: finalPersistentToolState,
-        platform: finalPlatform,
-        preRunValidator: finalPreRunValidator,
-        processInfo: finalProcessInfo,
-        processManager: finalProcessManager,
-        processUtils: finalProcessUtils,
-        projectFactory: finalProjectFactory,
-        shutdownHooks: finalShutdownHooks,
-        signals: LocalSignals.instance,
-        stdio: finalStdio,
-        systemClock: finalSystemClock,
-        terminal: finalTerminal,
-        userMessages: finalUserMessages,
-      ),
+      toolContext: toolContext,
       buildTargets: finalBuildTargets,
     );
   }

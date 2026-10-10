@@ -656,11 +656,20 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
 class FakeMacOSDevice extends MacOSDevice {
   FakeMacOSDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  });
+    required FileSystem fileSystem,
+    required Logger logger,
+    required OperatingSystemUtils operatingSystemUtils,
+    required ProcessManager processManager,
+  }) : super(
+         appleContext: FakeAppleContext(),
+         featureFlags: TestFeatureFlags(),
+         toolContext: FakeToolContext(
+           fs: fileSystem,
+           logger: logger,
+           os: operatingSystemUtils,
+           processManager: processManager,
+         ),
+       );
 
   @override
   String get name => 'dummy';
