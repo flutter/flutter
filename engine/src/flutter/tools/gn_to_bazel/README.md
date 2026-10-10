@@ -106,17 +106,28 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    opaque values that are an error only if they reach the output.
 3. `starlark_emitter.dart` -- the mapping from GN targets to Bazel rules:
    `source_set`/`static_library` to `cc_library` (with headers in `hdrs`, or
-   the `public` list when there is one; `deps` as `implementation_deps`,
-   `public_deps` as `deps`; a `source_set` is `alwayslink`, since GN links all
-   of its objects), test executables to `cc_test`, `config` to a header-only
+   the `public` list when there is one; a `source_set` is `alwayslink`,
+   since GN links all of its objects), `group` to a `cc_library` of only
+   `deps`, test executables to `cc_test`, `config` to a header-only
    `cc_library` carrying the defines, include directories and link flags that
    dependents list in `deps`, known `.gni` templates to the matching Bazel
-   macros. A private config of the same file is inlined instead (its defines
-   as `local_defines`, its flags as `copts`), since a dependency's `defines`
-   would leak to dependents where GN's private configs never do. The configs
-   a target inherits through its dependencies' `all_dependent_configs` --
-   which GN applies across private dependencies, where Bazel's
-   `implementation_deps` would stop them -- become public `deps` of the
+   macros. GN's `deps` and `public_deps` both become `deps`: GN's include
+   paths make every header of every transitive dependency visible, private
+   or not, and `gn check` follows only the first edge, so a header that
+   includes a private dependency's header is normal in the engine
+   (`impeller/geometry/point.h` includes `fml/logging.h`); a sandboxed
+   compile sees declared inputs alone, and `implementation_deps` would
+   withhold exactly those. What a private GN dependency withholds from
+   dependents is its public configs' defines; what dependents gain from the
+   mapping shows up as extra defines when Bazel's compile commands
+   (`bazel aquery`) are set against GN's `compile_commands.json`. Every
+   compiled target also depends on `//engine/src:include_root`, GN's
+   `default_include_dirs` (`-I//`). A private config of the same file is
+   inlined instead (its defines as `local_defines`, its flags as `copts`),
+   since a dependency's `defines` would leak to dependents where GN's
+   private configs never do; a header-only target drops them, as GN applies
+   them to no compile. The configs a target inherits through its
+   dependencies' `all_dependent_configs` become public `deps` of the
    target, so that Skia's `SK_VULKAN` and friends reach the engine as they
    do under GN. A public config's compiler flags cannot ride a dependency:
    they are inlined into the owner, and dependents get them from the
