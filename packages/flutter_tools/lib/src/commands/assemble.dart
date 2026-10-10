@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionBuildTarget;
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -17,6 +18,7 @@ import '../build_system/targets/android.dart';
 import '../build_system/targets/assets.dart';
 import '../build_system/targets/common.dart';
 import '../build_system/targets/deferred_components.dart';
+import '../build_system/targets/extension.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
@@ -24,6 +26,7 @@ import '../build_system/targets/windows.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
+import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -46,6 +49,13 @@ var _kDefaultTargets = <Target>[
   const ProfileUnpackMacOS(),
   const ReleaseUnpackMacOS(),
   // Linux targets
+  const UnpackLinux(TargetPlatform.linux_x64),
+  const UnpackLinux(TargetPlatform.linux_arm64),
+  const UnpackLinux(TargetPlatform.linux_riscv64),
+  const AotElfProfile(TargetPlatform.linux_x64),
+  const AotElfProfile(TargetPlatform.linux_arm64),
+  const AotElfRelease(TargetPlatform.linux_x64),
+  const AotElfRelease(TargetPlatform.linux_arm64),
   const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
   const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
   const DebugBundleLinuxAssets(TargetPlatform.linux_riscv64),
@@ -100,6 +110,7 @@ class AssembleCommand extends FlutterCommand {
     required this._buildSystem,
     required this._featureFlags,
     required ToolContext super.toolContext,
+    this._extensionBuildManager,
     bool verboseHelp = false,
   }) : _toolContext = toolContext,
        _verboseHelp = verboseHelp {
@@ -169,6 +180,7 @@ class AssembleCommand extends FlutterCommand {
 
   final bool _verboseHelp;
   final BuildSystem _buildSystem;
+  final ExtensionBuildManager? _extensionBuildManager;
   final FeatureFlags _featureFlags;
   final ToolContext _toolContext;
 
@@ -217,9 +229,33 @@ class AssembleCommand extends FlutterCommand {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argumentResults.rest.first;
-    final targetMap = <String, Target>{
-      for (final Target target in _kDefaultTargets) target.name: target,
-    };
+    final targetMap = <String, Target>{};
+    Target resolveDependency(String dependencyName) {
+      final Target? target = targetMap[dependencyName];
+      if (target == null) {
+        throwToolExit('Target "$dependencyName" not found. It might not be registered.');
+      }
+      return target;
+    }
+
+    for (final Target target in _kDefaultTargets) {
+      targetMap[target.name] = target;
+    }
+    if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?) {
+      for (final ExtensionBuildTarget target in extensionBuildManager.cachedTargets) {
+        if (!targetMap.containsKey(target.name)) {
+          targetMap[target.name] = ExtensionAssembleTarget(
+            buildManager: extensionBuildManager,
+            buildTarget: target,
+            dependencyResolver: resolveDependency,
+          );
+        } else {
+          _toolContext.logger.printWarning(
+            'Skipping custom assemble target "${target.name}" because a target with that name already exists.',
+          );
+        }
+      }
+    }
     final results = <Target>[
       for (final String targetName in argumentResults.rest)
         if (targetMap.containsKey(targetName)) targetMap[targetName]!,
@@ -339,8 +375,10 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = _toolContext.fs;
-    final Logger logger = _toolContext.logger;
+    if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?) {
+      await extensionBuildManager.getBuildTargets();
+    }
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final List<Target> targets = createTargets();
     final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];

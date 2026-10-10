@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart'
+    hide Artifact, BuildMode, HostArtifact, Source, Target;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -17,6 +18,7 @@ import '../base/platform.dart';
 import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/targets/extension.dart';
 import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
@@ -213,6 +215,9 @@ class BuildCommand extends FlutterCommand {
     if (_extensionBuildManager case final extensionBuildManager?) {
       final List<ExtensionBuildTarget> targets = await extensionBuildManager.getBuildTargets();
       for (final target in targets) {
+        if (!target.isTopLevel) {
+          continue;
+        }
         if (!subcommands.containsKey(target.name)) {
           _addSubcommand(
             ExtensionBuildSubCommand(
@@ -310,12 +315,33 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final ToolContext(:Artifacts artifacts, :FileSystem fs) = toolContext;
+    final String projectRoot = fs.currentDirectory.path;
     final BuildInfo buildInfo = await getBuildInfo();
+    final String buildModeName = buildInfo.mode.cliName;
+
+    final String buildDir = fs.path.join(projectRoot, '.dart_tool', 'flutter_build');
+    final String outputDir = fs.path.normalize(
+      target.outputDir
+          .replaceAll(kProjectDirPlaceholder, projectRoot)
+          .replaceAll(kBuildDirPlaceholder, buildDir)
+          .replaceAll(kBuildModePlaceholder, buildModeName)
+          .replaceAll(kTargetPlatformPlaceholder, target.targetPlatform),
+    );
+
+    final Map<String, String> resolvedArtifacts = ArtifactResolver.resolveInputs(
+      artifacts: artifacts,
+      buildMode: buildInfo.mode,
+      target: target,
+    );
 
     final ExtensionBuildResult result = await _buildManager.build(
+      buildDir: fs.directory(buildDir).uri,
       buildMode: buildInfo.mode,
       mainPath: targetFile,
-      projectRoot: toolContext.fs.currentDirectory.uri,
+      outputDir: fs.directory(outputDir).uri,
+      projectRoot: fs.currentDirectory.uri,
+      resolvedArtifacts: resolvedArtifacts,
       targetName: target.name,
     );
 

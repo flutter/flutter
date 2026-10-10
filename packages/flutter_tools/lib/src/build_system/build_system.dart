@@ -5,6 +5,7 @@
 import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' as core;
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
@@ -144,6 +145,11 @@ abstract class Target {
   /// The output [Source]s which we attempt to verify are correctly produced.
   List<Source> get outputs;
 
+  /// The output directory pattern for this target.
+  ///
+  /// Defaults to `{BUILD_DIR}`.
+  String get outputDir => core.kBuildDirPlaceholder;
+
   /// A list of zero or more depfiles, located directly under {BUILD_DIR}.
   List<String> get depfiles => const <String>[];
 
@@ -203,7 +209,7 @@ abstract class Target {
   /// Resolve the set of input patterns and functions into a concrete list of
   /// files.
   ResolvedFiles resolveInputs(Environment environment) {
-    return _resolveConfiguration(inputs, depfiles, environment);
+    return _resolveConfiguration(inputs, depfiles, getResolvedEnvironment(environment));
   }
 
   /// Find the current set of declared outputs, including wildcard directories.
@@ -211,7 +217,33 @@ abstract class Target {
   /// The [Source.implicit] flag controls whether it is safe to evaluate [Source]s
   /// which uses functions, behaviors, or patterns.
   ResolvedFiles resolveOutputs(Environment environment) {
-    return _resolveConfiguration(outputs, depfiles, environment, inputs: false);
+    return _resolveConfiguration(
+      outputs,
+      depfiles,
+      getResolvedEnvironment(environment),
+      inputs: false,
+    );
+  }
+
+  /// Returns a copy of [environment] with [outputDir] resolved if this target
+  /// overrides it.
+  Environment getResolvedEnvironment(Environment environment) {
+    if (outputDir == core.kBuildDirPlaceholder) {
+      return environment;
+    }
+    final String buildMode = environment.defines[kBuildMode] ?? 'debug';
+    final String targetPlatform = environment.defines[kTargetPlatform] ?? '';
+    final String resolvedPath = outputDir
+        .replaceAll(core.kProjectDirPlaceholder, environment.projectDir.path)
+        .replaceAll(core.kBuildDirPlaceholder, environment.buildDir.path)
+        .replaceAll(core.kBuildModePlaceholder, buildMode)
+        .replaceAll(core.kTargetPlatformPlaceholder, targetPlatform);
+
+    return environment.copyWith(
+      outputDir: environment.fileSystem.directory(
+        environment.fileSystem.path.normalize(resolvedPath),
+      ),
+    );
   }
 
   /// Performs a fold across this target and its dependencies.
@@ -478,24 +510,24 @@ class Environment {
   }
 
   /// The [Source] value which is substituted with the path to [projectDir].
-  static const kProjectDirectory = '{PROJECT_DIR}';
+  static const String kProjectDirectory = core.kProjectDirPlaceholder;
 
   /// The [Source] value which is substituted with the path to the directory
   /// that contains `.dart_tool/package_config.json`.
   /// That is the grand-parent of [BuildInfo.packageConfigPath].
-  static const kWorkspaceDirectory = '{WORKSPACE_DIR}';
+  static const String kWorkspaceDirectory = core.kWorkspaceDirPlaceholder;
 
   /// The [Source] value which is substituted with the path to [buildDir].
-  static const kBuildDirectory = '{BUILD_DIR}';
+  static const String kBuildDirectory = core.kBuildDirPlaceholder;
 
   /// The [Source] value which is substituted with the path to [cacheDir].
-  static const kCacheDirectory = '{CACHE_DIR}';
+  static const String kCacheDirectory = core.kCacheDirPlaceholder;
 
   /// The [Source] value which is substituted with a path to the flutter root.
-  static const kFlutterRootDirectory = '{FLUTTER_ROOT}';
+  static const String kFlutterRootDirectory = core.kFlutterRootDirPlaceholder;
 
   /// The [Source] value which is substituted with a path to [outputDir].
-  static const kOutputDirectory = '{OUTPUT_DIR}';
+  static const String kOutputDirectory = core.kOutputDirPlaceholder;
 
   /// The `PROJECT_DIR` environment variable.
   ///
