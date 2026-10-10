@@ -901,6 +901,65 @@ TEST_F(FlViewGtk4AccessibilityTest, TextSelectionUsesCharacterOffsets) {
   }
 }
 
+TEST_F(FlViewGtk4AccessibilityTest, CharacterQueriesRespectTextEnd) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing() ||
+      !fl_gtk_runtime_supports_native_accessibility_text()) {
+    GTEST_SKIP() << "Native accessible text requires GTK 4.14+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  flags.is_text_field = true;
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+
+  const gchar* texts[] = {"",
+                          "A\xF0\x9F\x98\x80"
+                          "e\xCC\x81"};
+  for (const gchar* text : texts) {
+    root.value = text;
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    g_autoptr(GtkAccessible) native =
+        fl_view_gtk4_accessibility_ref_native_root_for_testing(
+            view->accessibility_backend);
+    ASSERT_NE(native, nullptr);
+    auto* iface = static_cast<FlGtkAccessibleTextInterface4_14*>(
+        g_type_interface_peek(G_OBJECT_GET_CLASS(native),
+                              fl_gtk_runtime_accessible_text_get_type()));
+    ASSERT_NE(iface, nullptr);
+    const guint length = g_utf8_strlen(text, -1);
+    for (guint offset = 0; offset <= length + 1; offset++) {
+      SCOPED_TRACE(testing::Message() << text << ":" << offset);
+      guint start = G_MAXUINT;
+      guint end = G_MAXUINT;
+      g_autoptr(GBytes) contents = iface->get_contents_at(
+          native, offset, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_CHARACTER, &start,
+          &end);
+      ASSERT_NE(contents, nullptr);
+      EXPECT_EQ(start, MIN(offset, length));
+      EXPECT_EQ(end, MIN(offset + 1, length));
+      g_autofree gchar* actual = g_strndup(
+          static_cast<const gchar*>(g_bytes_get_data(contents, nullptr)),
+          g_bytes_get_size(contents));
+      g_autofree gchar* expected =
+          g_utf8_substring(text, MIN(offset, length), MIN(offset + 1, length));
+      EXPECT_STREQ(actual, expected);
+    }
+    g_autoptr(GBytes) terminal = iface->get_contents_at(
+        native, G_MAXUINT, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_CHARACTER,
+        nullptr, nullptr);
+    ASSERT_NE(terminal, nullptr);
+    EXPECT_EQ(*static_cast<const gchar*>(g_bytes_get_data(terminal, nullptr)),
+              '\0');
+  }
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";

@@ -650,16 +650,15 @@ static GBytes* fl_gtk4_text_accessible_node_get_contents_at(
 
   // Flutter's semantics payload has text but no layout runs. Character ranges
   // are exact; broader queries safely return the complete text range.
-  if (granularity == FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_CHARACTER &&
-      offset < length) {
+  if (granularity == FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_CHARACTER) {
+    const guint next = offset < length ? offset + 1 : length;
     if (start != nullptr) {
       *start = offset;
     }
     if (end != nullptr) {
-      *end = offset + 1;
+      *end = next;
     }
-    return fl_gtk4_text_accessible_node_get_contents(accessible, offset,
-                                                     offset + 1);
+    return fl_gtk4_text_accessible_node_get_contents(accessible, offset, next);
   }
 
   if (start != nullptr) {
