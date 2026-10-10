@@ -4,14 +4,11 @@
 
 import 'dart:async';
 
-import 'package:process/process.dart';
-
 import '../application_package.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../device_vm_service_discovery_for_attach.dart';
@@ -22,13 +19,9 @@ import '../project.dart';
 ///
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
-  MacOSDesignedForIPadDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
+  MacOSDesignedForIPadDevice({required super.toolContext})
+    : _operatingSystemUtils = toolContext.os,
+      super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
 
   final OperatingSystemUtils _operatingSystemUtils;
 
@@ -121,31 +114,21 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 }
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
-  MacOSDesignedForIPadDevices({
-    required this._platform,
-    required this._iosWorkflow,
-    required this._processManager,
-    required this._logger,
-    required this._fileSystem,
-    required this._operatingSystemUtils,
-  }) : super('Mac designed for iPad devices');
+  MacOSDesignedForIPadDevices({required this._iosWorkflow, required this._toolContext})
+    : super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final OperatingSystemUtils _operatingSystemUtils;
+  final ToolContext _toolContext;
 
   @override
-  bool get supportsPlatform => _platform.isMacOS;
+  bool get supportsPlatform => _toolContext.platform.isMacOS;
 
   /// iOS (not desktop macOS) development is enabled, the host is an ARM Mac,
   /// and discovery is allowed for this command.
   @override
   bool get canListAnything =>
       _iosWorkflow.canListDevices &&
-      _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64 &&
+      _toolContext.os.hostPlatform == HostPlatform.darwin_arm64 &&
       allowDiscovery;
 
   /// Set to show ARM macOS as an iOS device target.
@@ -159,14 +142,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[
-      MacOSDesignedForIPadDevice(
-        processManager: _processManager,
-        logger: _logger,
-        fileSystem: _fileSystem,
-        operatingSystemUtils: _operatingSystemUtils,
-      ),
-    ];
+    return <Device>[MacOSDesignedForIPadDevice(toolContext: _toolContext)];
   }
 
   @override

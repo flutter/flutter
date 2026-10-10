@@ -10,21 +10,22 @@ import 'package:process/process.dart';
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart';
 import '../bundle_builder.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
+import '../version.dart';
 import '../vmservice.dart';
 import 'custom_device_config.dart';
 import 'custom_device_workflow.dart';
@@ -423,35 +424,35 @@ class CustomDeviceAppSession {
 /// The exact actions are defined by the contents of the [CustomDeviceConfig]
 /// used to construct it.
 class CustomDevice extends Device {
-  CustomDevice({
-    required CustomDeviceConfig config,
-    required super.logger,
-    required ProcessManager processManager,
-  }) : _config = config,
-       _logger = logger,
-       _processManager = processManager,
-       _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _globalLogReader = CustomDeviceLogReader(config.label),
-       portForwarder = config.usesPortForwarding
-           ? CustomDevicePortForwarder(
-               deviceName: config.label,
-               forwardPortCommand: config.forwardPortCommand!,
-               forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
-               processManager: processManager,
-               logger: logger,
-             )
-           : const NoOpDevicePortForwarder(),
-       super(
-         config.id,
-         category: Category.mobile,
-         ephemeral: true,
-         platformType: PlatformType.custom,
-       );
+  CustomDevice({required CustomDeviceConfig config, required ToolContext toolContext})
+    : _config = config,
+      _logger = toolContext.logger,
+      _processManager = toolContext.processManager,
+      _processUtils = toolContext.processUtils,
+      _toolContext = toolContext,
+      _globalLogReader = CustomDeviceLogReader(config.label),
+      portForwarder = config.usesPortForwarding
+          ? CustomDevicePortForwarder(
+              deviceName: config.label,
+              forwardPortCommand: config.forwardPortCommand!,
+              forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
+              processManager: toolContext.processManager,
+              logger: toolContext.logger,
+            )
+          : const NoOpDevicePortForwarder(),
+      super(
+        config.id,
+        category: Category.mobile,
+        ephemeral: true,
+        logger: toolContext.logger,
+        platformType: PlatformType.custom,
+      );
 
   final CustomDeviceConfig _config;
   final Logger _logger;
   final ProcessManager _processManager;
   final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
   final _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
   Process? _globalLogReaderProcess;
@@ -646,7 +647,11 @@ class CustomDevice extends Device {
       return false;
     }
 
-    final bool result = await tryInstall(localPath: getAssetBuildDirectory(), appName: appName);
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    final bool result = await tryInstall(
+      localPath: getAssetBuildDirectory(config, fs),
+      appName: appName,
+    );
 
     return result;
   }
@@ -716,18 +721,21 @@ class CustomDevice extends Device {
     BundleBuilder? bundleBuilder,
   }) async {
     final TargetPlatform platform = await targetPlatform;
-    final Artifacts artifacts = globals.artifacts!;
+    final ToolContext(
+      :Artifacts artifacts,
+      :Config config,
+      :FlutterVersion flutterVersion,
+      :FileSystem fs,
+    ) = _toolContext;
 
     final additionalReplacementValues = <String, String>{
       'buildMode': debuggingOptions.buildInfo.modeName,
       'icuDataPath': artifacts.getArtifactPath(Artifact.icuData, platform: platform),
-      'engineRevision': artifacts.usesLocalArtifacts
-          ? 'local'
-          : globals.flutterVersion.engineRevision,
+      'engineRevision': artifacts.usesLocalArtifacts ? 'local' : flutterVersion.engineRevision,
     };
 
     if (!prebuiltApplication) {
-      final String assetBundleDir = getAssetBuildDirectory();
+      final String assetBundleDir = getAssetBuildDirectory(config, fs);
 
       bundleBuilder ??= BundleBuilder();
 
@@ -736,7 +744,7 @@ class CustomDevice extends Device {
         platform: platform,
         buildInfo: debuggingOptions.buildInfo,
         mainPath: mainPath,
-        depfilePath: defaultDepfilePath,
+        depfilePath: fs.path.join(getBuildDirectory(config, fs), 'snapshot_blob.bin.d'),
         assetDirPath: assetBundleDir,
       );
 
@@ -806,18 +814,15 @@ class CustomDevice extends Device {
 class CustomDevices extends PollingDeviceDiscovery {
   /// Create a custom device discovery that pings all enabled devices in the
   /// given [CustomDevicesConfig].
-  CustomDevices({
-    required FeatureFlags featureFlags,
-    required this._processManager,
-    required this._logger,
-    required this._config,
-  }) : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
-       super('custom devices');
+  CustomDevices({required FeatureFlags featureFlags, required ToolContext toolContext})
+    : _config = toolContext.customDevicesConfig,
+      _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
+      _toolContext = toolContext,
+      super('custom devices');
 
   final CustomDeviceWorkflow _customDeviceWorkflow;
-  final ProcessManager _processManager;
-  final Logger _logger;
   final CustomDevicesConfig _config;
+  final ToolContext _toolContext;
 
   @override
   bool get supportsPlatform => true;
@@ -831,10 +836,7 @@ class CustomDevices extends PollingDeviceDiscovery {
     return _customDevicesConfig
         .tryGetDevices()
         .where((CustomDeviceConfig element) => element.enabled)
-        .map(
-          (CustomDeviceConfig config) =>
-              CustomDevice(config: config, logger: _logger, processManager: _processManager),
-        )
+        .map((CustomDeviceConfig config) => CustomDevice(config: config, toolContext: _toolContext))
         .toList();
   }
 

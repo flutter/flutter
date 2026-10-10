@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
@@ -9,16 +10,18 @@ import '../base/analyze_size.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
+import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../flutter_plugins.dart';
-import '../globals.dart' as globals;
 import '../migrations/cmake_custom_command_migration.dart';
 import '../migrations/cmake_native_assets_migration.dart';
 
@@ -36,14 +39,22 @@ final errorMatcher = RegExp(
 Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
+  required Analytics analytics,
+  required TargetPlatform targetPlatform,
+  required ToolContext toolContext,
   String? target,
   SizeAnalyzer? sizeAnalyzer,
   bool needCrossBuild = false,
-  required TargetPlatform targetPlatform,
   String targetSysroot = '/',
-  required Logger logger,
   bool configOnly = false,
 }) async {
+  final ToolContext(
+    :Artifacts artifacts,
+    :FileSystem fs,
+    :FileSystemUtils fileSystemUtils,
+    :Logger logger,
+    :AnsiTerminal terminal,
+  ) = toolContext;
   target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit(
@@ -65,13 +76,11 @@ Future<void> buildLinux(
   // step.
   final Map<String, String> environmentConfig = buildInfo.toEnvironmentConfig();
   environmentConfig['FLUTTER_TARGET'] = target;
-  final LocalEngineInfo? localEngineInfo = globals.artifacts?.localEngineInfo;
+  final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
     final String targetOutPath = localEngineInfo.targetOutPath;
     // $ENGINE/src/out/foo_bar_baz -> $ENGINE/src
-    environmentConfig['FLUTTER_ENGINE'] = globals.fs.path.dirname(
-      globals.fs.path.dirname(targetOutPath),
-    );
+    environmentConfig['FLUTTER_ENGINE'] = fs.path.dirname(fs.path.dirname(targetOutPath));
     environmentConfig['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
     environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
@@ -81,7 +90,7 @@ Future<void> buildLinux(
 
   final Status status = logger.startProgress('Building Linux application...');
   final String buildModeName = buildInfo.mode.cliName;
-  final Directory platformBuildDirectory = globals.fs
+  final Directory platformBuildDirectory = fs
       .directory(linuxProject.parent.directory.path)
       .childDirectory(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor));
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
@@ -93,11 +102,13 @@ Future<void> buildLinux(
       needCrossBuild,
       targetPlatform,
       targetSysroot,
+      analytics: analytics,
+      toolContext: toolContext,
     );
     if (configOnly) {
       return;
     }
-    await _runBuild(buildDirectory);
+    await _runBuild(buildDirectory, analytics: analytics, toolContext: toolContext);
   } finally {
     status.cancel();
   }
@@ -111,35 +122,31 @@ Future<void> buildLinux(
   // We don't print a size because the output directory can contain
   // optional files not needed by the user and because the binary is not
   // self-contained.
-  globals.printStatus(
-    '${globals.terminal.successMark} '
-    'Built ${globals.fs.path.relative(buildOutput.path)}',
+  logger.printStatus(
+    '${terminal.successMark} '
+    'Built ${fs.path.relative(buildOutput.path)}',
     color: TerminalColor.green,
   );
 
   if (buildInfo.codeSizeDirectory != null && sizeAnalyzer != null) {
     final String arch = targetPlatform.getName();
-    final File codeSizeFile = globals.fs
+    final File codeSizeFile = fs
         .directory(buildInfo.codeSizeDirectory)
         .childFile('snapshot.$arch.json');
-    final File precompilerTrace = globals.fs
+    final File precompilerTrace = fs
         .directory(buildInfo.codeSizeDirectory)
         .childFile('trace.$arch.json');
     final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(
       aotSnapshot: codeSizeFile,
       // This analysis is only supported for release builds.
-      outputDirectory: globals.fs.directory(
-        globals.fs.path.join(
-          getLinuxBuildDirectory(targetPlatform, buildInfo.flavor),
-          'release',
-          'bundle',
-        ),
+      outputDirectory: fs.directory(
+        fs.path.join(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor), 'release', 'bundle'),
       ),
       precompilerTrace: precompilerTrace,
       type: 'linux',
     );
-    final File outputFile = globals.fsUtils.getUniqueFile(
-      globals.fs.directory(globals.fsUtils.homeDirPath).childDirectory('.flutter-devtools'),
+    final File outputFile = fileSystemUtils.getUniqueFile(
+      fs.directory(fileSystemUtils.homeDirPath).childDirectory('.flutter-devtools'),
       'linux-code-size-analysis',
       'json',
     )..writeAsStringSync(jsonEncode(output));
@@ -161,8 +168,15 @@ Future<void> _runCmake(
   Directory buildDir,
   bool needCrossBuild,
   TargetPlatform targetPlatform,
-  String targetSysroot,
-) async {
+  String targetSysroot, {
+  required Analytics analytics,
+  required ToolContext toolContext,
+}) async {
+  final ToolContext(
+    :ProcessManager processManager,
+    :ProcessUtils processUtils,
+    :UserMessages userMessages,
+  ) = toolContext;
   final sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
@@ -173,10 +187,10 @@ Future<void> _runCmake(
   final bool needCrossBuildOptionsForRiscv64 =
       needCrossBuild && targetPlatform == TargetPlatform.linux_riscv64;
   int result;
-  if (!globals.processManager.canRun('cmake')) {
-    throwToolExit(globals.userMessages.cmakeMissing);
+  if (!processManager.canRun('cmake')) {
+    throwToolExit(userMessages.cmakeMissing);
   }
-  result = await globals.processUtils.stream(
+  result = await processUtils.stream(
     <String>[
       'cmake',
       '-G',
@@ -201,7 +215,7 @@ Future<void> _runCmake(
     throwToolExit('Unable to generate build files');
   }
   final Duration elapsedDuration = sw.elapsed;
-  globals.analytics.send(
+  analytics.send(
     Event.timing(
       workflow: 'build',
       variableName: 'cmake-linux',
@@ -210,16 +224,21 @@ Future<void> _runCmake(
   );
 }
 
-Future<void> _runBuild(Directory buildDir) async {
+Future<void> _runBuild(
+  Directory buildDir, {
+  required Analytics analytics,
+  required ToolContext toolContext,
+}) async {
+  final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
   final sw = Stopwatch()..start();
 
   int result;
   try {
-    result = await globals.processUtils.stream(
+    result = await processUtils.stream(
       <String>['ninja', '-C', buildDir.path, 'install'],
       environment: <String, String>{
-        if (globals.logger.isVerbose) 'VERBOSE_SCRIPT_LOGGING': 'true',
-        if (!globals.logger.isVerbose) 'PREFIXED_ERROR_LOGGING': 'true',
+        if (logger.isVerbose) 'VERBOSE_SCRIPT_LOGGING': 'true',
+        if (!logger.isVerbose) 'PREFIXED_ERROR_LOGGING': 'true',
       },
       trace: true,
       stdoutErrorMatcher: errorMatcher,
@@ -231,7 +250,7 @@ Future<void> _runBuild(Directory buildDir) async {
     throwToolExit('Build process failed');
   }
   final Duration elapsedDuration = sw.elapsed;
-  globals.analytics.send(
+  analytics.send(
     Event.timing(
       workflow: 'build',
       variableName: 'linux-ninja',

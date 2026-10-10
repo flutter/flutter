@@ -7,16 +7,20 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/windows/application_package.dart';
 import 'package:flutter_tools/src/windows/windows_device.dart';
 import 'package:flutter_tools/src/windows/windows_workflow.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/fake_process_manager.dart';
+import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/package_config.dart';
 
 void main() {
   testWithoutContext('WindowsDevice defaults', () async {
@@ -43,14 +47,17 @@ void main() {
     () async {
       expect(
         await WindowsDevices(
+          analytics: const NoOpAnalytics(),
           windowsWorkflow: WindowsWorkflow(
             featureFlags: TestFeatureFlags(),
             platform: FakePlatform(operatingSystem: 'windows'),
           ),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
-          fileSystem: MemoryFileSystem.test(),
+          toolContext: FakeToolContext(
+            fs: MemoryFileSystem.test(),
+            logger: BufferLogger.test(),
+            os: FakeOperatingSystemUtils(),
+            processManager: FakeProcessManager.any(),
+          ),
         ).devices(),
         <Device>[],
       );
@@ -60,14 +67,17 @@ void main() {
   testWithoutContext('WindowsDevices lists a devices if the workflow is supported', () async {
     expect(
       await WindowsDevices(
+        analytics: const NoOpAnalytics(),
         windowsWorkflow: WindowsWorkflow(
           featureFlags: TestFeatureFlags(isWindowsEnabled: true),
           platform: FakePlatform(operatingSystem: 'windows'),
         ),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: MemoryFileSystem.test(),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
       ).devices(),
       hasLength(1),
     );
@@ -111,6 +121,121 @@ void main() {
     expect(windowsDevice.executablePathForDevice(fakeApp, BuildInfo.profile), 'profile/executable');
     expect(windowsDevice.executablePathForDevice(fakeApp, BuildInfo.release), 'release/executable');
   });
+
+  group('WindowsDevice.buildForDevice', () {
+    late MemoryFileSystem fileSystem;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test(style: FileSystemStyle.windows);
+    });
+
+    testUsingContext(
+      'sends timing events to analytics',
+      () async {
+        Cache.flutterRoot = r'C:\flutter';
+        fileSystem.file('pubspec.yaml').createSync();
+        writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+        fileSystem
+            .file(fileSystem.path.join('windows', 'CMakeLists.txt'))
+            .createSync(recursive: true);
+        const vsPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community';
+        const cmakePath =
+            '$vsPath'
+            r'\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe';
+        const vswherePath = r'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe';
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
+          fs: fileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: const <String>[
+              vswherePath,
+              '-format',
+              'json',
+              '-products',
+              '*',
+              '-utf8',
+              '-latest',
+              '-version',
+              '16',
+              '-requires',
+              'Microsoft.VisualStudio.Workload.NativeDesktop',
+              'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
+              'Microsoft.VisualStudio.Component.VC.CMake.Project',
+            ],
+            stdout:
+                '[{"installationPath": ${jsonEncode(vsPath)}, "installationVersion": "16.11.0.0", "displayName": "Visual Studio Community 2019", "catalog": {"productDisplayVersion": "16.11.0"}}]',
+          ),
+          const FakeCommand(
+            command: <String>[
+              cmakePath,
+              '-S',
+              r'C:\windows',
+              '-B',
+              r'C:\build\windows\x64',
+              '-G',
+              'Visual Studio 16 2019',
+              '-A',
+              'x64',
+              '-DFLUTTER_TARGET_PLATFORM=windows-x64',
+            ],
+          ),
+          const FakeCommand(
+            command: <String>[
+              cmakePath,
+              '--build',
+              r'C:\build\windows\x64',
+              '--config',
+              'Debug',
+              '--target',
+              'INSTALL',
+            ],
+          ),
+        ]);
+        final device = WindowsDevice(
+          analytics: fakeAnalytics,
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            os: FakeOperatingSystemUtils(),
+            platform: FakePlatform(
+              operatingSystem: 'windows',
+              environment: <String, String>{
+                'PROGRAMFILES(X86)': r'C:\Program Files (x86)\',
+                'FLUTTER_ROOT': r'C:\flutter',
+              },
+            ),
+            processManager: processManager,
+          ),
+        );
+
+        await device.buildForDevice(buildInfo: BuildInfo.debug);
+
+        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(
+          analyticsTimingEventExists(
+            sentEvents: fakeAnalytics.sentEvents,
+            workflow: 'build',
+            variableName: 'windows-cmake-generation',
+          ),
+          true,
+        );
+        expect(
+          analyticsTimingEventExists(
+            sentEvents: fakeAnalytics.sentEvents,
+            workflow: 'build',
+            variableName: 'windows-cmake-build',
+          ),
+          true,
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.empty(),
+      },
+    );
+  });
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {
@@ -127,10 +252,13 @@ WindowsDevice setUpWindowsDevice({
   ProcessManager? processManager,
 }) {
   return WindowsDevice(
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
-    logger: logger ?? BufferLogger.test(),
-    processManager: processManager ?? FakeProcessManager.any(),
-    operatingSystemUtils: FakeOperatingSystemUtils(),
+    analytics: const NoOpAnalytics(),
+    toolContext: FakeToolContext(
+      fs: fileSystem ?? MemoryFileSystem.test(),
+      logger: logger ?? BufferLogger.test(),
+      os: FakeOperatingSystemUtils(),
+      processManager: processManager ?? FakeProcessManager.any(),
+    ),
   );
 }
 

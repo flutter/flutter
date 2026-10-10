@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
-import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../project.dart';
@@ -19,15 +19,14 @@ import 'windows_workflow.dart';
 
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
-  WindowsDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       super('windows', platformType: PlatformType.windows, ephemeral: false);
+  WindowsDevice({required this._analytics, required super.toolContext})
+    : _operatingSystemUtils = toolContext.os,
+      _toolContext = toolContext,
+      super('windows', platformType: PlatformType.windows, ephemeral: false);
 
+  final Analytics _analytics;
   final OperatingSystemUtils _operatingSystemUtils;
+  final ToolContext _toolContext;
 
   @override
   Future<bool> isSupported() async => true;
@@ -60,11 +59,14 @@ class WindowsDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
     await buildWindows(
-      FlutterProject.current().windows,
+      projectFactory.fromDirectory(fs.currentDirectory).windows,
       buildInfo,
       _targetPlatform,
+      analytics: _analytics,
       target: mainPath,
+      toolContext: _toolContext,
     );
   }
 
@@ -76,17 +78,13 @@ class WindowsDevice extends DesktopDevice {
 
 class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices({
-    required this._processManager,
-    required this._logger,
-    required this._fileSystem,
-    required this._operatingSystemUtils,
+    required this._analytics,
+    required this._toolContext,
     required this._windowsWorkflow,
   }) : super('windows devices');
 
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final ProcessManager _processManager;
-  final OperatingSystemUtils _operatingSystemUtils;
+  final Analytics _analytics;
+  final ToolContext _toolContext;
   final WindowsWorkflow _windowsWorkflow;
 
   @override
@@ -103,14 +101,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[
-      WindowsDevice(
-        fileSystem: _fileSystem,
-        logger: _logger,
-        processManager: _processManager,
-        operatingSystemUtils: _operatingSystemUtils,
-      ),
-    ];
+    return <Device>[WindowsDevice(analytics: _analytics, toolContext: _toolContext)];
   }
 
   @override
