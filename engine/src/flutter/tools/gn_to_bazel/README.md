@@ -8,17 +8,23 @@ builds coexist; the Bazel files are generated from them and checked in.
 
 ```sh
 cd engine/src/flutter/tools/gn_to_bazel
-dart bin/gn_to_bazel.dart --skip=fml_benchmarks ../../fml/BUILD.gn
-dart bin/gn_to_bazel.dart --check --skip=fml_benchmarks ../../fml/BUILD.gn
+dart bin/gn_to_bazel.dart            # regenerate every file in the manifest
+dart bin/gn_to_bazel.dart --check    # verify them (the presubmit)
+dart bin/gn_to_bazel.dart ../../fml/BUILD.gn   # one file
 dart test
 ```
 
+The manifest (`lib/src/manifest.dart`) lists the GN files whose
+`BUILD.bazel` is generated, each with the targets to skip (those whose
+dependencies have no Bazel build yet, with the reason) and, where the GN file
+has no way to say something Bazel needs, Starlark to append. Adding a file to
+the migration means adding it there; the skip lists shrink as it proceeds.
+
 Each input is written next to it as `BUILD.bazel` (or under `--out-dir`, laid
 out by GN package). `--check` compares with the existing file instead and
-fails on a difference, which is what a presubmit runs. The output is piped
-through `buildifier` when one is on `PATH` (or named by `--buildifier`); the
-emitter already writes buildifier's format, so the result is the same either
-way.
+fails on a difference. The output is piped through `buildifier` when one is
+on `PATH` (or named by `--buildifier`); the emitter already writes
+buildifier's format, so the result is the same either way.
 
 By default the converter assumes the Linux x64 host build: GN conditions on
 `is_linux`, `is_win`, `enable_backtrace` and so on are decided the way GN
@@ -39,10 +45,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    variables and prune dead branches.
 3. `starlark_emitter.dart` -- the mapping from GN targets to Bazel rules:
    `source_set`/`static_library` to `cc_library` (with headers in `hdrs`,
-   `deps` as `implementation_deps`, `public_deps` as `deps`), test
-   executables to `cc_test`, `config` to a header-only `cc_library` that
-   dependents list in `deps`, known `.gni` templates to the matching Bazel
-   macros.
+   `deps` as `implementation_deps`, `public_deps` as `deps`; a `source_set`
+   is `alwayslink`, since GN links all of its objects), test executables to
+   `cc_test`, `config` to a header-only `cc_library` carrying the defines,
+   include directories and link flags that dependents list in `deps`, known
+   `.gni` templates to the matching Bazel macros.
 
 `bazel_mapping.dart` holds the converter's knowledge of the engine: label
 translations for synced dependencies (`//flutter/third_party/icu` is `@icu`),

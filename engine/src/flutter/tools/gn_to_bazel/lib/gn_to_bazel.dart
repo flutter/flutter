@@ -13,4 +13,5 @@ library;
 export 'src/bazel_mapping.dart';
 export 'src/gn_ast.dart';
 export 'src/gn_eval.dart';
+export 'src/manifest.dart';
 export 'src/starlark_emitter.dart';

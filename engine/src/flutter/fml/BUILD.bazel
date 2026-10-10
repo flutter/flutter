@@ -144,6 +144,7 @@ cc_library(
         # found through the source root alone.
         "@dart//:dart_api_headers",  # target_os != "wasm"
     ],
+    alwayslink = True,
 )
 
 cc_library(
@@ -166,6 +167,7 @@ cc_library(
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
     ],
+    alwayslink = True,
 )
 
 cc_library(
@@ -195,6 +197,7 @@ cc_library(
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
     ],
+    alwayslink = True,
 )
 
 flutter_test_fixtures(

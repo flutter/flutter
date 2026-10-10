@@ -124,7 +124,7 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   '//build/config/compiler:no_chromium_code': ConfigWarningSet(chromiumCode: false),
 };
 
-/// The Bazel config_setting (or constraint) for a GN platform predicate.
+/// The Bazel config_setting (or constraint) for a GN boolean predicate.
 const Map<String, String> conditionSettings = <String, String>{
   'is_android': '@platforms//os:android',
   'is_fuchsia': '@platforms//os:fuchsia',
@@ -133,6 +133,17 @@ const Map<String, String> conditionSettings = <String, String>{
   'is_mac': '@platforms//os:macos',
   'is_qnx': '@platforms//os:qnx',
   'is_win': '@platforms//os:windows',
+  'slimpeller': '//engine/src/flutter/common:slimpeller_enabled',
+};
+
+/// The Bazel config_setting for `variable == "value"`, by variable and value.
+const Map<String, Map<String, String>> comparisonSettings = <String, Map<String, String>>{
+  'flutter_runtime_mode': <String, String>{
+    'debug': '//engine/src/flutter/common:runtime_mode_debug',
+    'profile': '//engine/src/flutter/common:runtime_mode_profile',
+    'release': '//engine/src/flutter/common:runtime_mode_release',
+    'jit_release': '//engine/src/flutter/common:runtime_mode_jit_release',
+  },
 };
 
 /// GN variables an imported `.gni` defines and that build files may read or
@@ -141,9 +152,13 @@ const Set<String> knownExternalVariables = <String>{
   // //build/config/BUILDCONFIG.gn
   'current_cpu',
   'current_os',
+  'current_toolchain',
+  'host_cpu',
   'host_os',
+  'host_toolchain',
   'is_android',
   'is_apple',
+  'is_clang',
   'is_debug',
   'is_fuchsia',
   'is_ios',
@@ -154,6 +169,8 @@ const Set<String> knownExternalVariables = <String>{
   'is_win',
   'target_cpu',
   'target_os',
+  // //flutter/build/dart/dart.gni
+  'dart_src',
   // //flutter/common/config.gni
   'enable_backtrace',
   'enable_unittests',
@@ -161,6 +178,15 @@ const Set<String> knownExternalVariables = <String>{
   'flutter_cflags_objcc',
   'flutter_runtime_mode',
   'slimpeller',
+  // //flutter/shell/config.gni
+  'shell_enable_gl',
+  'shell_enable_metal',
+  'shell_enable_software',
+  'shell_enable_vulkan',
+  'test_enable_gl',
+  'test_enable_metal',
+  'test_enable_software',
+  'test_enable_vulkan',
   // //flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni
   'fuchsia_arch_root',
   'fuchsia_sdk',
@@ -188,17 +214,23 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   ),
 };
 
-/// Which assumptions describe the Linux x64 host build. Everything not fixed
-/// here stays a select().
+/// Which assumptions describe the Linux x64 host build (the values
+/// `tools/gn` gives these arguments for it). Everything not fixed here stays
+/// a select(): the runtime mode and slimpeller in particular, which are Bazel
+/// flags.
 Assumptions linuxHostAssumptions() {
   return Assumptions(const <String, GnValue>{
     'current_cpu': GnStringValue('x64'),
     'current_os': GnStringValue('linux'),
+    'current_toolchain': GnStringValue('//build/toolchain/linux:clang_x64'),
+    'host_cpu': GnStringValue('x64'),
     'host_os': GnStringValue('linux'),
+    'host_toolchain': GnStringValue('//build/toolchain/linux:clang_x64'),
     'target_cpu': GnStringValue('x64'),
     'target_os': GnStringValue('linux'),
     'is_android': GnBoolValue(false),
     'is_apple': GnBoolValue(false),
+    'is_clang': GnBoolValue(true),
     'is_fuchsia': GnBoolValue(false),
     'is_ios': GnBoolValue(false),
     'is_linux': GnBoolValue(true),
@@ -206,7 +238,16 @@ Assumptions linuxHostAssumptions() {
     'is_qnx': GnBoolValue(false),
     'is_wasm': GnBoolValue(false),
     'is_win': GnBoolValue(false),
+    'dart_src': GnStringValue('//flutter/third_party/dart'),
     'enable_backtrace': GnBoolValue(true),
     'enable_unittests': GnBoolValue(true),
+    'shell_enable_gl': GnBoolValue(true),
+    'shell_enable_metal': GnBoolValue(false),
+    'shell_enable_software': GnBoolValue(true),
+    'shell_enable_vulkan': GnBoolValue(true),
+    'test_enable_gl': GnBoolValue(true),
+    'test_enable_metal': GnBoolValue(false),
+    'test_enable_software': GnBoolValue(true),
+    'test_enable_vulkan': GnBoolValue(true),
   });
 }

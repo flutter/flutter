@@ -68,6 +68,8 @@ sealed class Condition {
   Condition get negated => switch (this) {
     ConditionConstant(:final bool value) => ConditionConstant(!value),
     ConditionNot(:final Condition operand) => operand,
+    ConditionComparison(:final String name, :final bool equals, :final String value) =>
+      ConditionComparison(name, !equals, value),
     ConditionAnd(:final List<Condition> terms) => ConditionOr(<Condition>[
       for (final Condition t in terms) t.negated,
     ]),
@@ -269,6 +271,24 @@ final class GnReference extends GnValue {
   String toString() => name;
 }
 
+/// A boolean whose value the assumptions did not decide: the result of
+/// `use_x = enable_unittests && shell_enable_gl`, kept as a formula so that
+/// `if (use_x)` can be followed.
+final class GnConditionValue extends GnValue {
+  const GnConditionValue(this.condition);
+
+  final Condition condition;
+
+  @override
+  bool operator ==(Object other) => other is GnConditionValue && other.condition == condition;
+
+  @override
+  int get hashCode => condition.hashCode;
+
+  @override
+  String toString() => '($condition)';
+}
+
 /// The comments around one list item in the GN source.
 @immutable
 final class GnItemComments {
@@ -391,6 +411,9 @@ final class GnFileEvaluation {
   final String file;
   final List<String> imports = <String>[];
   final List<GnTarget> targets = <GnTarget>[];
+
+  /// Targets that were asked to be skipped and were found, in file order.
+  final List<String> skipped = <String>[];
 }
 
 // ---------------------------------------------------------------------------
@@ -449,13 +472,22 @@ const Set<String> gnTargetRules = <String>{
 /// [templates] are the names of the `.gni` templates that may be invoked like
 /// rules; [externalVariables] the names that imported files define and that
 /// may be read (they become [GnReference]s) or tested (they stay symbolic).
+/// Targets named in [skipTargets] are not evaluated at all (so that what is
+/// inside them need not be understood); they are listed in the result.
 GnFileEvaluation evaluateGnFile(
   GnBlock file, {
   required Assumptions assumptions,
   Set<String> templates = const <String>{},
   Set<String> externalVariables = const <String>{},
+  Set<String> skipTargets = const <String>{},
 }) {
-  final evaluator = _Evaluator(assumptions, templates, externalVariables, file.location.file);
+  final evaluator = _Evaluator(
+    assumptions,
+    templates,
+    externalVariables,
+    skipTargets,
+    file.location.file,
+  );
   evaluator.evaluateFile(file);
   return evaluator.result;
 }
@@ -492,12 +524,18 @@ final class _Expression {
 }
 
 final class _Evaluator {
-  _Evaluator(this.assumptions, this.templates, this.externalVariables, String file)
-    : result = GnFileEvaluation(file);
+  _Evaluator(
+    this.assumptions,
+    this.templates,
+    this.externalVariables,
+    this.skipTargets,
+    String file,
+  ) : result = GnFileEvaluation(file);
 
   final Assumptions assumptions;
   final Set<String> templates;
   final Set<String> externalVariables;
+  final Set<String> skipTargets;
   final GnFileEvaluation result;
 
   void evaluateFile(GnBlock file) {
@@ -603,11 +641,20 @@ final class _Evaluator {
       case 'forward_variables_from':
         throw GnError(call.location, '${call.name}() is not supported by the converter');
     }
-    if (!gnTargetRules.contains(call.name) && !templates.contains(call.name)) {
-      throw GnError(call.location, 'unknown function or template ${call.name}()');
-    }
     if (target != null) {
       throw GnError(call.location, 'target ${call.name}() nested inside target ${target.name}');
+    }
+    // A skipped target is left alone before anything about it is checked,
+    // so that a template the converter does not know can be skipped.
+    if (call.args.length == 1) {
+      final GnNode arg = call.args.single;
+      if (arg is GnLiteral && arg.isString && skipTargets.contains(arg.stringValue)) {
+        result.skipped.add(arg.stringValue);
+        return;
+      }
+    }
+    if (!gnTargetRules.contains(call.name) && !templates.contains(call.name)) {
+      throw GnError(call.location, 'unknown function or template ${call.name}()');
     }
     final GnBlock? block = call.block;
     if (block == null) {
@@ -645,7 +692,9 @@ final class _Evaluator {
     }
     final String name = left.name;
     final GnVariable? existing = scope.lookup(name);
-    final _Expression value = _expression(node.right, scope);
+    final _Expression value = _isBooleanExpression(node.right)
+        ? _booleanExpression(node.right, scope)
+        : _expression(node.right, scope);
     final GnVariable variable;
     if (node.op == '=') {
       // `=` defines a variable in the current scope (GN forbids shadowing an
@@ -745,13 +794,34 @@ final class _Evaluator {
         throw GnError(node.location, 'unknown variable $name');
       case GnLiteral():
         return _Expression(<(GnValue, GnItemComments)>[
-          (_literal(node), _comments(node)),
+          (_literal(node, scope: scope), _comments(node)),
         ], isList: false);
       case GnFunctionCall(:final String name):
         throw GnError(node.location, '$name() in an expression is not supported by the converter');
       default:
         throw GnError(node.location, 'unsupported expression (${node.runtimeType})');
     }
+  }
+
+  /// Whether [node] is a formula (`a && b`, `!a`, `x == "y"`) rather than a
+  /// value.
+  static bool _isBooleanExpression(GnNode node) {
+    return switch (node) {
+      GnBinary(:final String op) => op == '&&' || op == '||' || op == '==' || op == '!=',
+      GnUnary(op: '!') => true,
+      _ => false,
+    };
+  }
+
+  /// The value of a formula: a boolean when the assumptions decide it, else
+  /// the formula itself.
+  _Expression _booleanExpression(GnNode node, _Scope scope) {
+    final Condition condition = _condition(node, scope);
+    final GnValue value = switch (condition) {
+      ConditionConstant(:final bool value) => GnBoolValue(value),
+      _ => GnConditionValue(condition),
+    };
+    return _Expression(<(GnValue, GnItemComments)>[(value, GnItemComments.none)], isList: false);
   }
 
   static GnItemComments _comments(GnNode node) {
@@ -761,7 +831,7 @@ final class _Evaluator {
     return GnItemComments(before: node.beforeComments, suffix: node.suffixComments);
   }
 
-  GnValue _literal(GnLiteral node) {
+  GnValue _literal(GnLiteral node, {_Scope? scope}) {
     if (node.isBool) {
       return GnBoolValue(node.boolValue);
     }
@@ -769,9 +839,55 @@ final class _Evaluator {
       return GnIntValue(node.intValue);
     }
     if (node.hasExpansion) {
-      throw GnError(node.location, 'string expansion is not supported: ${node.raw}');
+      return GnStringValue(_expand(node, scope));
     }
     return GnStringValue(node.stringValue);
+  }
+
+  static final RegExp _expansion = RegExp(
+    r'\$(?:\{([A-Za-z_][A-Za-z0-9_]*)\}|([A-Za-z_][A-Za-z0-9_]*))',
+  );
+
+  /// Resolves `$name` and `${name}` in a string from the known strings
+  /// (assumptions and local scalar variables); anything else is an error.
+  String _expand(GnLiteral node, _Scope? scope) {
+    final String text = node.stringValue;
+    var last = 0;
+    final out = StringBuffer();
+    for (final Match match in _expansion.allMatches(text)) {
+      final String name = match.group(1) ?? match.group(2)!;
+      final String? value = _knownString(name, scope);
+      if (value == null) {
+        throw GnError(node.location, 'string expansion of \$$name is not supported: ${node.raw}');
+      }
+      out
+        ..write(text.substring(last, match.start))
+        ..write(value);
+      last = match.end;
+    }
+    if (last < text.length) {
+      final String rest = text.substring(last);
+      if (rest.contains(r'$')) {
+        throw GnError(node.location, 'string expansion is not supported: ${node.raw}');
+      }
+      out.write(rest);
+    }
+    return out.toString();
+  }
+
+  /// The value of [name] when it is a string the converter knows: an
+  /// assumption, or a local variable holding one unconditional string.
+  String? _knownString(String name, _Scope? scope) {
+    final GnVariable? variable = scope?.lookup(name);
+    if (variable != null) {
+      final List<GnValue>? items = variable.unconditionalItems;
+      if (!variable.isList && items != null && items.length == 1 && items.single is GnStringValue) {
+        return (items.single as GnStringValue).value;
+      }
+      return null;
+    }
+    final GnValue? assumed = assumptions[name];
+    return assumed is GnStringValue ? assumed.value : null;
   }
 
   Condition _condition(GnNode node, _Scope scope) {
@@ -798,10 +914,14 @@ final class _Evaluator {
     final GnVariable? variable = scope.lookup(name);
     if (variable != null) {
       final List<GnValue>? items = variable.unconditionalItems;
-      if (items == null || items.length != 1 || items.single is! GnBoolValue) {
+      if (items == null || items.length != 1) {
         throw GnError(location, 'condition on $name, which is not a plain boolean');
       }
-      return ConditionConstant((items.single as GnBoolValue).value);
+      return switch (items.single) {
+        GnBoolValue(:final bool value) => ConditionConstant(value),
+        GnConditionValue(:final Condition condition) => condition,
+        _ => throw GnError(location, 'condition on $name, which is not a plain boolean'),
+      };
     }
     final GnValue? assumed = assumptions[name];
     if (assumed != null) {
@@ -817,22 +937,30 @@ final class _Evaluator {
   }
 
   Condition _comparison(GnNode node, bool equals, GnNode left, GnNode right, _Scope scope) {
-    if (left is! GnIdentifier || right is! GnLiteral || !right.isString) {
+    if (left is! GnIdentifier) {
+      throw GnError(node.location, 'only `variable == "string"` comparisons are supported');
+    }
+    final String? leftValue = _knownString(left.name, scope);
+    if (right is GnIdentifier) {
+      // `current_toolchain == host_toolchain`: both sides must be known.
+      final String? rightValue = _knownString(right.name, scope);
+      if (leftValue == null || rightValue == null) {
+        throw GnError(
+          node.location,
+          'comparison of ${left.name} with ${right.name} needs both values to be known',
+        );
+      }
+      return ConditionConstant((leftValue == rightValue) == equals);
+    }
+    if (right is! GnLiteral || !right.isString) {
       throw GnError(node.location, 'only `variable == "string"` comparisons are supported');
     }
     final String value = right.stringValue;
-    final GnValue? assumed = assumptions[left.name];
-    if (assumed != null) {
-      if (assumed is! GnStringValue) {
-        throw GnError(node.location, '${left.name} is assumed to be $assumed, not a string');
-      }
-      return ConditionConstant((assumed.value == value) == equals);
+    if (leftValue != null) {
+      return ConditionConstant((leftValue == value) == equals);
     }
-    if (scope.lookup(left.name) != null) {
-      throw GnError(
-        node.location,
-        'comparison with the local variable ${left.name} is not supported',
-      );
+    if (assumptions[left.name] != null || scope.lookup(left.name) != null) {
+      throw GnError(node.location, 'comparison with ${left.name}, which is not a known string');
     }
     if (!externalVariables.contains(left.name)) {
       throw GnError(node.location, 'unknown variable ${left.name} in condition');
