@@ -285,6 +285,14 @@ shaderc::CompileOptions SPIRVCompilerOptions::BuildShadercOptions() const {
   options.SetAutoMapLocations(true);
   options.SetPreserveBindings(true);
 
+  // HLSL declares textures and samplers separately. Every backend here binds
+  // combined image samplers, so fold them together in the front end.
+  if (source_langauge.has_value() &&
+      source_langauge.value() ==
+          shaderc_source_language::shaderc_source_language_hlsl) {
+    options.SetAutoSampledTextures(true);
+  }
+
   options.SetOptimizationLevel(optimization_level);
 
   if (generate_debug_info) {
