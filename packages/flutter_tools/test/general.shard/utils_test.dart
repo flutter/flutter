@@ -107,6 +107,21 @@ baz=qux
   });
 
   group('Misc', () {
+    for (final MapEntry<String, String> name in <String, String>{
+      '': '',
+      'foo': 'foo',
+      'foo_bar': 'fooBar',
+      'foo_b': 'fooB',
+      'a_b': 'aB',
+      'foo_bar_b': 'fooBarB',
+      'foo_': 'foo_',
+      'foo_b_': 'fooB_',
+    }.entries) {
+      testWithoutContext('camelCase: ${name.key}', () {
+        expect(camelCase(name.key), name.value);
+      });
+    }
+
     testWithoutContext('snakeCase', () async {
       expect(snakeCase('abc'), equals('abc'));
       expect(snakeCase('abC'), equals('ab_c'));
