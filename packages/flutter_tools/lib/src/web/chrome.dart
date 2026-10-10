@@ -270,10 +270,8 @@ class ChromiumLauncher {
     }
 
     // Mutable copy so --user-data-dir can be removed after extraction.
-    final List<String> mutableWebBrowserFlags = List<String>.from(webBrowserFlags);
-    final (:Directory directory, :bool isCustom) = _createUserDataDirectory(
-      mutableWebBrowserFlags,
-    );
+    final mutableWebBrowserFlags = List<String>.from(webBrowserFlags);
+    final (:Directory directory, :bool isCustom) = _createUserDataDirectory(mutableWebBrowserFlags);
 
     // Only seed session cache for temporary profiles managed by the tool.
     if (cacheDir != null && !isCustom) {

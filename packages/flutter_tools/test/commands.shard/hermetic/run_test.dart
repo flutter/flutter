@@ -2024,9 +2024,9 @@ server:
     () async {
       final command = RunCommand();
       await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['run', '--no-pub', '--no-web-browser-default-flags']),
+        () =>
+            createTestCommandRunner(command)
+                .run(<String>['run', '--no-pub', '--no-web-browser-default-flags']),
         throwsToolExit(),
       );
 

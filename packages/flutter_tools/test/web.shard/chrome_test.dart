@@ -1286,7 +1286,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     exceptionHandler.addError(
       userDataDir,
       FileSystemOp.create,
-      FileSystemException('creation failed', customUserDataDir),
+      const FileSystemException('creation failed', customUserDataDir),
     );
 
     await expectLater(
