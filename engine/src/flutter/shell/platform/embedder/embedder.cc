@@ -4476,100 +4476,20 @@ FlutterEngineResult FlutterEngineLaunchEngine(
     return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
   }
 
-  if (!config) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Run configuration was null.");
-  }
-
-  if (SAFE_ACCESS(config, struct_size, 0) <
-      sizeof(FlutterEngineRunConfiguration)) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "FlutterEngineRunConfiguration struct_size is invalid.");
-  }
-
   auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
   if (!embedder_engine->IsValid()) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments,
                               "Engine is not in a valid running state.");
   }
 
-  int argc = SAFE_ACCESS(config, dart_entrypoint_argc, 0);
-  const char* const* argv = SAFE_ACCESS(config, dart_entrypoint_argv, nullptr);
-  if (argc < 0 || (argc > 0 && argv == nullptr)) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "Invalid Dart entrypoint arguments in FlutterEngineRunConfiguration.");
+  std::string error;
+  std::optional<flutter::RunConfiguration> run_configuration =
+      flutter::EmbedderEngine::BuildRunConfiguration(config, &error);
+  if (!run_configuration.has_value()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, error.c_str());
   }
 
-  const FlutterAssetResolver* c_resolver =
-      SAFE_ACCESS(config, asset_resolver, nullptr);
-  if (c_resolver != nullptr) {
-    if (c_resolver->struct_size < sizeof(FlutterAssetResolver)) {
-      return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                                "FlutterAssetResolver struct_size is invalid.");
-    }
-    if (c_resolver->find_asset_callback == nullptr) {
-      return LOG_EMBEDDER_ERROR(
-          kInvalidArguments,
-          "FlutterAssetResolver find_asset_callback is required.");
-    }
-  }
-
-  std::unique_ptr<flutter::IsolateConfiguration> isolate_configuration;
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
-    isolate_configuration =
-        flutter::IsolateConfiguration::CreateForAppSnapshot();
-  } else {
-    const char* kernel_path = SAFE_ACCESS(config, kernel_blob_path, nullptr);
-    if (!kernel_path || kernel_path[0] == '\0') {
-      return LOG_EMBEDDER_ERROR(
-          kInvalidArguments,
-          "Kernel blob path is required when not running in AOT mode.");
-    }
-    std::unique_ptr<fml::Mapping> kernel_blob =
-        fml::FileMapping::CreateReadOnly(kernel_path);
-    if (!kernel_blob) {
-      return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                                "Unable to load the kernel blob asset.");
-    }
-    isolate_configuration =
-        flutter::IsolateConfiguration::CreateForKernel(std::move(kernel_blob));
-  }
-
-  if (!isolate_configuration) {
-    return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                              "Could not create isolate configuration.");
-  }
-
-  flutter::RunConfiguration run_configuration(std::move(isolate_configuration));
-
-  if (c_resolver != nullptr) {
-    run_configuration.AddAssetResolver(
-        std::make_unique<flutter::EmbedderAssetResolver>(*c_resolver));
-  }
-
-  const char* entrypoint = SAFE_ACCESS(config, custom_dart_entrypoint, nullptr);
-  const char* library =
-      SAFE_ACCESS(config, custom_dart_entrypoint_library, nullptr);
-  if (entrypoint != nullptr && entrypoint[0] != '\0') {
-    if (library != nullptr && library[0] != '\0') {
-      run_configuration.SetEntrypointAndLibrary(entrypoint, library);
-    } else {
-      run_configuration.SetEntrypoint(entrypoint);
-    }
-  }
-
-  if (argc > 0) {
-    std::vector<std::string> arguments(argc);
-    for (int i = 0; i < argc; ++i) {
-      arguments[i] = argv[i] ? std::string{argv[i]} : std::string{};
-    }
-    run_configuration.SetEntrypointArgs(std::move(arguments));
-  }
-
-  run_configuration.SetEngineId(SAFE_ACCESS(config, engine_id, 0));
-
-  if (!embedder_engine->LaunchEngine(std::move(run_configuration))) {
+  if (!embedder_engine->LaunchEngine(std::move(run_configuration.value()))) {
     return LOG_EMBEDDER_ERROR(kInternalInconsistency,
                               "Could not launch engine with configuration.");
   }

@@ -5,9 +5,33 @@
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
 #include "flutter/fml/make_copyable.h"
+#include "flutter/fml/mapping.h"
+#include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/platform/embedder/embedder_asset_resolver.h"
+#include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
 
 namespace flutter {
+
+namespace {
+
+void DestroyAssetResolverIfNeeded(
+    const FlutterEngineRunConfiguration* run_configuration) {
+  if (run_configuration == nullptr ||
+      SAFE_ACCESS(run_configuration, struct_size, 0) <
+          sizeof(FlutterEngineRunConfiguration)) {
+    return;
+  }
+  const FlutterAssetResolver* c_resolver =
+      SAFE_ACCESS(run_configuration, asset_resolver, nullptr);
+  if (c_resolver != nullptr &&
+      c_resolver->struct_size >= sizeof(FlutterAssetResolver) &&
+      c_resolver->destruction_callback != nullptr) {
+    c_resolver->destruction_callback(c_resolver->user_data);
+  }
+}
+
+}  // namespace
 
 struct ShellArgs {
   Settings settings;
@@ -136,6 +160,115 @@ std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
       },
       [](Shell& shell) { return std::make_unique<Rasterizer>(shell); },
       std::move(external_texture_resolver));
+}
+
+std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
+    const FlutterEngineRunConfiguration* run_configuration,
+    const std::string& initial_route,
+    const PlatformViewFactory& on_create_platform_view,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
+    const {
+  if (!IsValid()) {
+    DestroyAssetResolverIfNeeded(run_configuration);
+    return nullptr;
+  }
+  std::optional<RunConfiguration> config =
+      BuildRunConfiguration(run_configuration);
+  if (!config.has_value()) {
+    DestroyAssetResolverIfNeeded(run_configuration);
+    return nullptr;
+  }
+  return Spawn(std::move(config.value()), initial_route,
+               on_create_platform_view, std::move(external_texture_resolver));
+}
+
+std::optional<RunConfiguration> EmbedderEngine::BuildRunConfiguration(
+    const FlutterEngineRunConfiguration* config,
+    std::string* error_out) {
+  auto set_error = [error_out](const char* message) -> std::nullopt_t {
+    if (error_out != nullptr) {
+      *error_out = message;
+    }
+    return std::nullopt;
+  };
+
+  if (!config) {
+    return set_error("Run configuration was null.");
+  }
+
+  if (SAFE_ACCESS(config, struct_size, 0) <
+      sizeof(FlutterEngineRunConfiguration)) {
+    return set_error("FlutterEngineRunConfiguration struct_size is invalid.");
+  }
+
+  int argc = SAFE_ACCESS(config, dart_entrypoint_argc, 0);
+  const char* const* argv = SAFE_ACCESS(config, dart_entrypoint_argv, nullptr);
+  if (argc < 0 || (argc > 0 && argv == nullptr)) {
+    return set_error(
+        "Invalid Dart entrypoint arguments in FlutterEngineRunConfiguration.");
+  }
+
+  const FlutterAssetResolver* c_resolver =
+      SAFE_ACCESS(config, asset_resolver, nullptr);
+  if (c_resolver != nullptr) {
+    if (c_resolver->struct_size < sizeof(FlutterAssetResolver)) {
+      return set_error("FlutterAssetResolver struct_size is invalid.");
+    }
+    if (c_resolver->find_asset_callback == nullptr) {
+      return set_error("FlutterAssetResolver find_asset_callback is required.");
+    }
+  }
+
+  std::unique_ptr<IsolateConfiguration> isolate_configuration;
+  if (DartVM::IsRunningPrecompiledCode()) {
+    isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
+  } else {
+    const char* kernel_path = SAFE_ACCESS(config, kernel_blob_path, nullptr);
+    if (!kernel_path || kernel_path[0] == '\0') {
+      return set_error(
+          "Kernel blob path is required when not running in AOT mode.");
+    }
+    std::unique_ptr<fml::Mapping> kernel_blob =
+        fml::FileMapping::CreateReadOnly(kernel_path);
+    if (!kernel_blob) {
+      return set_error("Unable to load the kernel blob asset.");
+    }
+    isolate_configuration =
+        IsolateConfiguration::CreateForKernel(std::move(kernel_blob));
+  }
+
+  if (!isolate_configuration) {
+    return set_error("Could not create isolate configuration.");
+  }
+
+  RunConfiguration run_configuration(std::move(isolate_configuration));
+
+  if (c_resolver != nullptr) {
+    run_configuration.AddAssetResolver(
+        std::make_unique<EmbedderAssetResolver>(*c_resolver));
+  }
+
+  const char* entrypoint = SAFE_ACCESS(config, custom_dart_entrypoint, nullptr);
+  const char* library =
+      SAFE_ACCESS(config, custom_dart_entrypoint_library, nullptr);
+  if (entrypoint != nullptr && entrypoint[0] != '\0') {
+    if (library != nullptr && library[0] != '\0') {
+      run_configuration.SetEntrypointAndLibrary(entrypoint, library);
+    } else {
+      run_configuration.SetEntrypoint(entrypoint);
+    }
+  }
+
+  if (argc > 0) {
+    std::vector<std::string> arguments(argc);
+    for (int i = 0; i < argc; ++i) {
+      arguments[i] = argv[i] ? std::string{argv[i]} : std::string{};
+    }
+    run_configuration.SetEntrypointArgs(std::move(arguments));
+  }
+
+  run_configuration.SetEngineId(SAFE_ACCESS(config, engine_id, 0));
+  return run_configuration;
 }
 
 bool EmbedderEngine::CollectShell() {

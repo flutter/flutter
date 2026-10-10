@@ -6256,6 +6256,102 @@ TEST_F(EmbedderTest,
   EXPECT_FALSE(embedder_engine->IsSurfaceCreated());
 }
 
+TEST_F(EmbedderTest, SpawnedEngineWithFlutterEngineRunConfiguration) {
+  constexpr int32_t kTestSurfaceDim = 1;
+  constexpr int64_t kSpawnedEngineId = 77;
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent spawned_entrypoint_ran;
+  context.AddFfiNativeCallback("SignalNativeTest", CREATE_FFI_LAMBDA([&]() {
+                                 spawned_entrypoint_ran.Signal();
+                               }));
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(kTestSurfaceDim, kTestSurfaceDim));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  EmbedderEngine* parent = ToEmbedderEngine(engine.get());
+
+  // Verify that a failed Spawn cleans up the caller-supplied asset resolver.
+  bool failed_resolver_destroyed = false;
+  FlutterAssetResolver failed_resolver = {};
+  failed_resolver.struct_size = sizeof(FlutterAssetResolver);
+  failed_resolver.user_data = &failed_resolver_destroyed;
+  failed_resolver.find_asset_callback =
+      [](void* /*user_data*/, const char* /*name*/,
+         FlutterAsset* /*asset_out*/) -> bool { return false; };
+  failed_resolver.destruction_callback = [](void* user_data) {
+    *static_cast<bool*>(user_data) = true;
+  };
+
+  FlutterEngineRunConfiguration invalid_config = {};
+  invalid_config.struct_size = sizeof(FlutterEngineRunConfiguration);
+  invalid_config.kernel_blob_path = "/nonexistent/kernel_blob.bin";
+  invalid_config.asset_resolver = &failed_resolver;
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    std::unique_ptr<EmbedderEngine> failed_spawn = parent->Spawn(
+        &invalid_config, /*initial_route=*/"",
+        [](PlatformView::Delegate& delegate, const TaskRunners& runners) {
+          return std::make_unique<PlatformView>(delegate, runners);
+        });
+    EXPECT_EQ(failed_spawn, nullptr);
+    EXPECT_TRUE(failed_resolver_destroyed);
+  }
+
+  // Verify a valid Spawn with FlutterEngineRunConfiguration and custom asset
+  // resolver.
+  fml::AutoResetWaitableEvent resolver_destroyed_latch;
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &resolver_destroyed_latch;
+  resolver.find_asset_callback = [](void* /*user_data*/, const char* /*name*/,
+                                    FlutterAsset* /*asset_out*/) -> bool {
+    return false;
+  };
+  resolver.destruction_callback = [](void* user_data) {
+    static_cast<fml::AutoResetWaitableEvent*>(user_data)->Signal();
+  };
+
+  std::string kernel_path =
+      fml::paths::JoinPaths({context.GetAssetsPath(), "kernel_blob.bin"});
+  FlutterEngineRunConfiguration run_config = {};
+  run_config.struct_size = sizeof(FlutterEngineRunConfiguration);
+  run_config.kernel_blob_path = kernel_path.c_str();
+  run_config.custom_dart_entrypoint = "spawnedEngineMain";
+  run_config.asset_resolver = &resolver;
+  run_config.engine_id = kSpawnedEngineId;
+
+  std::unique_ptr<EmbedderEngine> spawned = parent->Spawn(
+      &run_config, /*initial_route=*/"",
+      [](PlatformView::Delegate& delegate, const TaskRunners& runners) {
+        return std::make_unique<PlatformView>(delegate, runners);
+      });
+  ASSERT_NE(spawned, nullptr);
+  ASSERT_TRUE(spawned->IsValid());
+  spawned_entrypoint_ran.Wait();
+
+  FLUTTER_API_SYMBOL(FlutterEngine)
+  raw_spawned =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(spawned.release());
+
+  // Replace the custom asset resolver on the spawned engine via the C-API,
+  // which destroys the initial resolver registered through
+  // FlutterEngineRunConfiguration.
+  FlutterAssetResolver replacement_resolver = {};
+  replacement_resolver.struct_size = sizeof(FlutterAssetResolver);
+  replacement_resolver.find_asset_callback =
+      [](void* /*user_data*/, const char* /*name*/,
+         FlutterAsset* /*asset_out*/) -> bool { return false; };
+  FlutterAssetResolverRegistrationInfo update_info = {};
+  update_info.struct_size = sizeof(FlutterAssetResolverRegistrationInfo);
+  update_info.resolver = &replacement_resolver;
+  ASSERT_EQ(FlutterEngineUpdateAssetResolver(raw_spawned, &update_info),
+            kSuccess);
+  resolver_destroyed_latch.Wait();
+
+  ASSERT_EQ(FlutterEngineShutdown(raw_spawned), kSuccess);
+  engine.reset();
+}
+
 }  // namespace testing
 }  // namespace flutter
 

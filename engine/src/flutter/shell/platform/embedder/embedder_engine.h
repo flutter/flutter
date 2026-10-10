@@ -106,6 +106,17 @@ class EmbedderEngine {
       std::unique_ptr<EmbedderExternalTextureResolver>
           external_texture_resolver = nullptr) const;
 
+  std::unique_ptr<EmbedderEngine> Spawn(
+      const FlutterEngineRunConfiguration* run_configuration,
+      const std::string& initial_route,
+      const PlatformViewFactory& on_create_platform_view,
+      std::unique_ptr<EmbedderExternalTextureResolver>
+          external_texture_resolver = nullptr) const;
+
+  static std::optional<RunConfiguration> BuildRunConfiguration(
+      const FlutterEngineRunConfiguration* config,
+      std::string* error_out = nullptr);
+
   bool CollectShell();
 
   void CollectThreadHost();
