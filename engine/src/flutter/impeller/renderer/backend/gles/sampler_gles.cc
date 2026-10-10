@@ -77,11 +77,6 @@ bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
     return false;
   }
   const SamplerDescriptor& desc = GetDescriptor();
-  const uint64_t sampler_key = SamplerDescriptor::ToKey(desc);
-  if (!texture.IsWrapped() &&
-      texture.GetConfiguredSamplerKey() == sampler_key) {
-    return true;
-  }
 
   GLint mag_filter = ToParam(desc.mag_filter);
 
@@ -139,10 +134,6 @@ bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
     const GLfloat anisotropy[1] = {static_cast<GLfloat>(
         std::clamp<uint32_t>(desc.max_anisotropy, 1u, max_anisotropy))};
     gl.TexParameterfv(*target, IMPELLER_GL_TEXTURE_MAX_ANISOTROPY, anisotropy);
-  }
-
-  if (!texture.IsWrapped()) {
-    texture.SetConfiguredSamplerKey(sampler_key);
   }
 
   return true;

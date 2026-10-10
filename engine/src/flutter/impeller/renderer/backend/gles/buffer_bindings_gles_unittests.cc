@@ -510,8 +510,11 @@ TEST(BufferBindingsGLESTest, SkipsRedundantSamplerConfigurationOnSameTexture) {
   ASSERT_TRUE(fixture.reactor->React());
 
   BufferBindingsGLES bindings;
-  bindings.SetUniformBindings(std::move(fixture.uniform_bindings));
+  bindings.SetUniformBindings(fixture.uniform_bindings);
+  BufferBindingsGLES other_bindings;
+  other_bindings.SetUniformBindings(std::move(fixture.uniform_bindings));
   std::vector<BufferResource> bound_buffers;
+  SamplerStateCache sampler_cache;
 
   auto expect_sampler_params = [&](int count) {
     EXPECT_CALL(*raw_impl,
@@ -529,16 +532,21 @@ TEST(BufferBindingsGLESTest, SkipsRedundantSamplerConfigurationOnSameTexture) {
         .Times(count);
   };
 
-  // First bind on ES 3.0 configures all 5 sampler parameters; second bind with
-  // the same sampler descriptor skips all TexParameteri calls.
+  // First bind on ES 3.0 configures all 5 sampler parameters; subsequent binds
+  // with the same sampler descriptor (including across different
+  // BufferBindingsGLES instances sharing the pass cache) skip all
+  // TexParameteri calls.
   expect_sampler_params(1);
 
   EXPECT_TRUE(bindings.BindUniformData(
       fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
-      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
   EXPECT_TRUE(bindings.BindUniformData(
       fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
-      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
+  EXPECT_TRUE(other_bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
 
   // Changing the sampler descriptor must re-configure the texture once.
   SamplerDescriptor linear_desc;
@@ -547,9 +555,9 @@ TEST(BufferBindingsGLESTest, SkipsRedundantSamplerConfigurationOnSameTexture) {
   fixture.bound_textures[0].sampler =
       fixture.sampler_library->GetSampler(linear_desc);
   expect_sampler_params(1);
-  EXPECT_TRUE(bindings.BindUniformData(
+  EXPECT_TRUE(other_bindings.BindUniformData(
       fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
-      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
 
   // Wrapped external textures must bypass the sampler parameter cache and
   // re-emit TexParameteri on every bind (2 consecutive binds with the same
@@ -569,10 +577,10 @@ TEST(BufferBindingsGLESTest, SkipsRedundantSamplerConfigurationOnSameTexture) {
   expect_sampler_params(2);
   EXPECT_TRUE(bindings.BindUniformData(
       fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
-      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
   EXPECT_TRUE(bindings.BindUniformData(
       fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
-      Range{0, fixture.bound_textures.size()}, Range{0, 0}));
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
 }
 
 }  // namespace testing
