@@ -6218,5 +6218,65 @@ TEST_F(DisplayListTest, SaveLayerWithLinearSkewDoesNotCrash) {
             nullptr);
 }
 
+#if IMPELLER_SUPPORTS_RENDERING
+TEST_F(DisplayListTest, DlTextImpellerMakeFromBlobCachesAndEvictsLRU) {
+  EXPECT_EQ(DlTextImpeller::MakeFromBlob(nullptr), nullptr);
+
+  SkFont font = CreateTestFontOfSize(20.0f);
+  auto blob_a = SkTextBlob::MakeFromString("Hello", font);
+  auto blob_b = SkTextBlob::MakeFromString("World", font);
+  ASSERT_NE(blob_a, nullptr);
+  ASSERT_NE(blob_b, nullptr);
+
+  auto text_a1 = DlTextImpeller::MakeFromBlob(blob_a);
+  auto text_a2 = DlTextImpeller::MakeFromBlob(blob_a);
+  auto text_b = DlTextImpeller::MakeFromBlob(blob_b);
+  ASSERT_NE(text_a1, nullptr);
+  EXPECT_EQ(text_a1, text_a2);
+  EXPECT_EQ(text_a1->GetTextFrame(), text_a2->GetTextFrame());
+  EXPECT_NE(text_a1, text_b);
+
+  // Collect 5 blobs that map to the same set in the 1024-set, 4-way cache.
+  constexpr size_t kNumSets = 1024;
+  std::array<std::vector<sk_sp<SkTextBlob>>, kNumSets> buckets;
+  std::vector<sk_sp<SkTextBlob>> colliding_blobs;
+  for (size_t i = 0; i <= kNumSets * 4; ++i) {
+    auto blob = SkTextBlob::MakeFromString("x", font);
+    ASSERT_NE(blob, nullptr);
+    const uint32_t id = blob->uniqueID();
+    const size_t set_idx = (id ^ (id >> 10)) & (kNumSets - 1);
+    auto& bucket = buckets[set_idx];
+    bucket.push_back(blob);
+    if (bucket.size() == 5) {
+      colliding_blobs = bucket;
+      break;
+    }
+  }
+  ASSERT_EQ(colliding_blobs.size(), 5u);
+
+  // Fill all 4 ways of the target cache set.
+  auto way0 = DlTextImpeller::MakeFromBlob(colliding_blobs[0]);
+  auto way1 = DlTextImpeller::MakeFromBlob(colliding_blobs[1]);
+  auto way2 = DlTextImpeller::MakeFromBlob(colliding_blobs[2]);
+  auto way3 = DlTextImpeller::MakeFromBlob(colliding_blobs[3]);
+
+  // Touch way0, way2, way3 so that way1 becomes the least-recently-used entry.
+  EXPECT_EQ(DlTextImpeller::MakeFromBlob(colliding_blobs[0]), way0);
+  EXPECT_EQ(DlTextImpeller::MakeFromBlob(colliding_blobs[2]), way2);
+  EXPECT_EQ(DlTextImpeller::MakeFromBlob(colliding_blobs[3]), way3);
+
+  // Inserting a 5th colliding blob must evict way1 (LRU) while preserving
+  // way0, way2, and way3.
+  auto way4 = DlTextImpeller::MakeFromBlob(colliding_blobs[4]);
+  EXPECT_EQ(DlTextImpeller::MakeFromBlob(colliding_blobs[0]), way0);
+  EXPECT_EQ(DlTextImpeller::MakeFromBlob(colliding_blobs[2]), way2);
+  EXPECT_EQ(DlTextImpeller::MakeFromBlob(colliding_blobs[3]), way3);
+  EXPECT_EQ(DlTextImpeller::MakeFromBlob(colliding_blobs[4]), way4);
+
+  auto way1_recreated = DlTextImpeller::MakeFromBlob(colliding_blobs[1]);
+  EXPECT_NE(way1_recreated, way1);
+}
+#endif
+
 }  // namespace testing
 }  // namespace flutter
