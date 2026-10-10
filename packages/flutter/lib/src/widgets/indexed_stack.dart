@@ -227,6 +227,13 @@ class _IndexedStackElement extends MultiChildRenderObjectElement {
 /// because the parent is a [StatelessWidget]) then to use [SizedBox.shrink]
 /// instead of the child that would otherwise be included.
 ///
+/// When [visible] is false, the [replacement] is still a child of the parent
+/// widget. For example, in a [Row], [Column], [Flex] or [Wrap] with a non-zero
+/// `spacing`, the parent still places spacing next to the zero-sized
+/// [replacement], leaving a visible gap. To remove both the child and its
+/// spacing, leave the child out of the list of children instead, for example
+/// by using a collection `if` in the list literal.
+///
 /// See also:
 ///
 ///  * [AnimatedSwitcher], which can fade from one child to the next as the
