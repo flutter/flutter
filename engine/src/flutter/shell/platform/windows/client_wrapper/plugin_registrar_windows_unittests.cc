@@ -302,6 +302,7 @@ TEST(PluginRegistrarWindowsTest, PostPlatformThreadTask) {
   // The stub should have received the task.
   EXPECT_NE(test_api->post_task_callback(), nullptr);
   EXPECT_NE(test_api->post_task_user_data(), nullptr);
+  EXPECT_FALSE(called);
 
   // Simulate executing the callback.
   test_api->post_task_callback()(test_api->post_task_user_data());
@@ -331,11 +332,14 @@ TEST(PluginRegistrarWindowsTest, PostPlatformThreadTaskOnCancel) {
   PluginRegistrarWindows registrar(
       reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
 
-  registrar.PostPlatformThreadTask([]() {});
+  bool called = false;
+  registrar.PostPlatformThreadTask([&called]() { called = true; });
 
-  // Verify the on_cancel callback is set and can clean up without crashing.
+  // Simulate the engine discarding the task: on_cancel must free the
+  // callback without running it.
   EXPECT_NE(test_api->post_task_on_cancel(), nullptr);
   test_api->post_task_on_cancel()(test_api->post_task_user_data());
+  EXPECT_FALSE(called);
 }
 
 }  // namespace flutter
