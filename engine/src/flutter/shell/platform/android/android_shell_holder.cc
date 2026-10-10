@@ -23,7 +23,6 @@
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
-#include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
@@ -508,6 +507,43 @@ void AttachVsyncWaiter(VsyncWaiterAndroid* vsync_waiter,
   }
 }
 
+std::optional<RunConfiguration> BuildRunConfiguration(
+    const FlutterEngineProcTable& embedder_api,
+    const Settings& settings,
+    const APKAssetProvider* apk_asset_provider,
+    const std::string& entrypoint,
+    const std::string& libraryUrl,
+    const std::vector<std::string>& entrypoint_args) {
+  std::unique_ptr<IsolateConfiguration> isolate_configuration;
+  if (embedder_api.RunsAOTCompiledDartCode()) {
+    isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
+  } else {
+    std::unique_ptr<fml::Mapping> kernel_blob =
+        fml::FileMapping::CreateReadOnly(settings.application_kernel_asset);
+    if (!kernel_blob) {
+      FML_DLOG(ERROR) << "Unable to load the kernel blob asset.";
+      return std::nullopt;
+    }
+    isolate_configuration =
+        IsolateConfiguration::CreateForKernel(std::move(kernel_blob));
+  }
+
+  RunConfiguration config(std::move(isolate_configuration));
+  if (apk_asset_provider != nullptr) {
+    config.AddAssetResolver(apk_asset_provider->Clone());
+  }
+
+  if (!entrypoint.empty() && !libraryUrl.empty()) {
+    config.SetEntrypointAndLibrary(entrypoint, libraryUrl);
+  } else if (!entrypoint.empty()) {
+    config.SetEntrypoint(entrypoint);
+  }
+  if (!entrypoint_args.empty()) {
+    config.SetEntrypointArgs(entrypoint_args);
+  }
+  return config;
+}
+
 }  // namespace
 
 AndroidShellHolder::AndroidShellHolder(
@@ -548,27 +584,21 @@ AndroidShellHolder::AndroidShellHolder(
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
   std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
   AndroidRenderingAPI rendering_api = android_rendering_api_;
-  Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [&jni_facade, &weak_platform_view, &vsync_waiter,
-       rendering_api](Shell& shell) {
-        vsync_waiter =
-            std::make_shared<VsyncWaiterAndroid>(shell.GetTaskRunners());
-        std::unique_ptr<PlatformViewAndroid> platform_view_android;
-        platform_view_android = std::make_unique<PlatformViewAndroid>(
-            shell,                   // delegate
-            shell.GetTaskRunners(),  // task runners
-            jni_facade,              // JNI interop
-            rendering_api,           // rendering API
+  auto on_create_platform_view =
+      [&jni_facade, &weak_platform_view, &vsync_waiter, rendering_api](
+          PlatformView::Delegate& delegate, const TaskRunners& runners) {
+        vsync_waiter = std::make_shared<VsyncWaiterAndroid>(runners);
+        auto platform_view_android = std::make_unique<PlatformViewAndroid>(
+            delegate,       // delegate
+            runners,        // task runners
+            jni_facade,     // JNI interop
+            rendering_api,  // rendering API
             MakePlatformDispatchTable(jni_facade,
                                       vsync_waiter)  // embedder callbacks
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
       };
-
-  Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {
-    return std::make_unique<Rasterizer>(shell);
-  };
 
   // The current thread will be used as the platform thread. Ensure that the
   // message loop is initialized.
@@ -600,7 +630,7 @@ AndroidShellHolder::AndroidShellHolder(
   auto engine = std::make_unique<EmbedderEngine>(
       /*thread_host=*/nullptr, task_runners, settings_,
       /*run_configuration=*/std::nullopt, on_create_platform_view,
-      on_create_rasterizer, MakeExternalTextureResolver(holder_id_));
+      MakeExternalTextureResolver(holder_id_));
   if (engine->LaunchShell(GetDefaultPlatformData())) {
     engine_.reset(
         reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(engine.release()));
@@ -700,7 +730,12 @@ AndroidShellHolder::~AndroidShellHolder() {
     vsync_waiter_->Detach();
   }
   platform_message_handler_.reset();
-  engine_.reset();
+  if (engine_) {
+    FlutterEngineResult result = embedder_api_.Shutdown(engine_.release());
+    if (result != kSuccess) {
+      FML_LOG(ERROR) << "FlutterEngineShutdown failed: " << result;
+    }
+  }
   thread_host_.reset();
   GetPendingResponseTable().RemoveForHolder(holder_id_);
   GetPendingTextureTable().RemoveForHolder(holder_id_);
@@ -708,10 +743,10 @@ AndroidShellHolder::~AndroidShellHolder() {
 
 void AndroidShellHolder::EngineDeleter::operator()(
     FLUTTER_API_SYMBOL(FlutterEngine) engine) const {
-  // Deletes the engine the way the Shell was deleted before it moved behind
-  // a handle. FlutterEngineShutdown would also call NotifyDestroyed() on the
-  // platform view first.
-  delete reinterpret_cast<EmbedderEngine*>(engine);
+  FlutterEngineResult result = FlutterEngineShutdown(engine);
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineShutdown failed: " << result;
+  }
 }
 
 bool AndroidShellHolder::IsValid() const {
@@ -752,17 +787,15 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
 
   // This is a synchronous call, so the captures don't have race checks.
   std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
-  Shell::CreateCallback<PlatformView> on_create_platform_view =
-      [&jni_facade, android_context, &weak_platform_view,
-       &vsync_waiter](Shell& shell) {
-        vsync_waiter =
-            std::make_shared<VsyncWaiterAndroid>(shell.GetTaskRunners());
-        std::unique_ptr<PlatformViewAndroid> platform_view_android;
-        platform_view_android = std::make_unique<PlatformViewAndroid>(
-            shell,                   // delegate
-            shell.GetTaskRunners(),  // task runners
-            jni_facade,              // JNI interop
-            android_context,         // Android context
+  auto on_create_platform_view =
+      [&jni_facade, android_context, &weak_platform_view, &vsync_waiter](
+          PlatformView::Delegate& delegate, const TaskRunners& runners) {
+        vsync_waiter = std::make_shared<VsyncWaiterAndroid>(runners);
+        auto platform_view_android = std::make_unique<PlatformViewAndroid>(
+            delegate,         // delegate
+            runners,          // task runners
+            jni_facade,       // JNI interop
+            android_context,  // Android context
             MakePlatformDispatchTable(jni_facade,
                                       vsync_waiter)  // embedder callbacks
         );
@@ -770,11 +803,9 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
         return platform_view_android;
       };
 
-  Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {
-    return std::make_unique<Rasterizer>(shell);
-  };
-
-  auto config = BuildRunConfiguration(entrypoint, libraryUrl, entrypoint_args);
+  auto config = BuildRunConfiguration(embedder_api_, GetSettings(),
+                                      apk_asset_provider_.get(), entrypoint,
+                                      libraryUrl, entrypoint_args);
   if (!config) {
     // If the RunConfiguration was null, the kernel blob wasn't readable.
     // Fail the whole thing.
@@ -787,7 +818,7 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
   std::unique_ptr<EmbedderEngine> spawned =
       reinterpret_cast<EmbedderEngine*>(engine_.get())
           ->Spawn(std::move(config.value()), initial_route,
-                  on_create_platform_view, on_create_rasterizer,
+                  on_create_platform_view,
                   MakeExternalTextureResolver(spawned_holder_id));
   UniqueEngine engine(
       reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(spawned.release()));
@@ -1411,41 +1442,6 @@ void AndroidShellHolder::NotifySurfaceDestroyed() {
 
 FlutterEngineProcTable& AndroidShellHolder::GetEmbedderApiForTesting() {
   return embedder_api_;
-}
-
-std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
-    const std::string& entrypoint,
-    const std::string& libraryUrl,
-    const std::vector<std::string>& entrypoint_args) const {
-  std::unique_ptr<IsolateConfiguration> isolate_configuration;
-  if (embedder_api_.RunsAOTCompiledDartCode()) {
-    isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
-  } else {
-    std::unique_ptr<fml::Mapping> kernel_blob =
-        fml::FileMapping::CreateReadOnly(
-            GetSettings().application_kernel_asset);
-    if (!kernel_blob) {
-      FML_DLOG(ERROR) << "Unable to load the kernel blob asset.";
-      return std::nullopt;
-    }
-    isolate_configuration =
-        IsolateConfiguration::CreateForKernel(std::move(kernel_blob));
-  }
-
-  RunConfiguration config(std::move(isolate_configuration));
-  config.AddAssetResolver(apk_asset_provider_->Clone());
-
-  {
-    if (!entrypoint.empty() && !libraryUrl.empty()) {
-      config.SetEntrypointAndLibrary(entrypoint, libraryUrl);
-    } else if (!entrypoint.empty()) {
-      config.SetEntrypoint(entrypoint);
-    }
-    if (!entrypoint_args.empty()) {
-      config.SetEntrypointArgs(entrypoint_args);
-    }
-  }
-  return config;
 }
 
 void AndroidShellHolder::UpdateDisplayMetrics() {

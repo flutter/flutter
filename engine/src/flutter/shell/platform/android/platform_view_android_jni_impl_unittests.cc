@@ -2037,5 +2037,33 @@ TEST_F(PlatformViewAndroidJNIImplTest, LaunchCallsLaunchEngineEmbedderApi) {
   EXPECT_EQ(captured_engine_id, kTestEngineId);
 }
 
+TEST_F(PlatformViewAndroidJNIImplTest, DestroyCallsShutdownEmbedderApi) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  FLUTTER_API_SYMBOL(FlutterEngine)
+  expected_engine = holder->GetEngineForTesting();
+  ASSERT_NE(expected_engine, nullptr);
+
+  bool shutdown_called = false;
+  FlutterEngineShutdownFnPtr real_shutdown =
+      holder->GetEmbedderApiForTesting().Shutdown;
+  ASSERT_NE(real_shutdown, nullptr);
+
+  holder->GetEmbedderApiForTesting().Shutdown = MOCK_ENGINE_PROC(
+      Shutdown, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_EQ(engine, expected_engine);
+        shutdown_called = true;
+        return real_shutdown(engine);
+      }));
+
+  holder.reset();
+  EXPECT_TRUE(shutdown_called);
+}
+
 }  // namespace testing
 }  // namespace flutter

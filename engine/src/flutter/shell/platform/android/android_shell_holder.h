@@ -9,8 +9,7 @@
 #include <type_traits>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/common/run_configuration.h"
-#include "flutter/shell/common/shell.h"
+#include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
@@ -305,10 +304,6 @@ class AndroidShellHolder {
                      std::shared_ptr<VsyncWaiterAndroid> vsync_waiter,
                      AndroidRenderingAPI rendering_api);
   static void ThreadDestructCallback(void* value);
-  std::optional<RunConfiguration> BuildRunConfiguration(
-      const std::string& entrypoint,
-      const std::string& libraryUrl,
-      const std::vector<std::string>& entrypoint_args) const;
 
   bool IsNDKImageDecoderAvailable();
 
