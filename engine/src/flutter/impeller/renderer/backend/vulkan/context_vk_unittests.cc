@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <optional>
+#include <string_view>
+
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "impeller/base/validation.h"
@@ -424,6 +427,69 @@ TEST(ContextVKTest, HashIsUniqueAcrossThreads) {
   thread2.join();
 
   EXPECT_NE(hash1, hash2);
+}
+
+namespace {
+
+constexpr std::string_view kAdreno630Name = "Adreno (TM) 630";
+constexpr uint32_t kQualcommVendorID = 0x5143;
+
+void SetAdreno630Properties(VkPhysicalDevice device,
+                            VkPhysicalDeviceProperties* prop) {
+  prop->vendorID = kQualcommVendorID;
+  kAdreno630Name.copy(prop->deviceName, kAdreno630Name.size());
+  prop->deviceName[kAdreno630Name.size()] = '\0';
+  prop->deviceType = VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+}
+
+}  // namespace
+
+TEST(ContextVKTest, SelectDeviceExposesDriverInfoBeforeContextCreation) {
+  absl::StatusOr<ContextVK::DeviceSelection> selection =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(SetAdreno630Properties)
+          .SelectDevice();
+
+  ASSERT_TRUE(selection.ok());
+  EXPECT_EQ(selection->driver_info->GetVendor(), VendorVK::kQualcomm);
+  EXPECT_EQ(selection->driver_info->GetAdrenoGPUInfo(), AdrenoGPU::kAdreno630);
+  EXPECT_TRUE(selection->driver_info->IsKnownBadDriver());
+  // Dropping `selection` without calling CreateContext() tears down the Vulkan
+  // instance cleanly (verified by MockVulkanStatePtr's thread-exit leak check).
+}
+
+TEST(ContextVKTest, SelectDeviceCanFinishCreatingContext) {
+  absl::StatusOr<ContextVK::DeviceSelection> selection =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(SetAdreno630Properties)
+          .SelectDevice();
+
+  ASSERT_TRUE(selection.ok());
+  std::shared_ptr<ContextVK> context = selection->CreateContext();
+
+  ASSERT_NE(context, nullptr);
+  EXPECT_TRUE(context->IsValid());
+  // The same DriverInfoVK inspected on the selection is retained by the
+  // context.
+  EXPECT_EQ(context->GetDriverInfo()->GetAdrenoGPUInfo(),
+            AdrenoGPU::kAdreno630);
+  EXPECT_EQ(context->DescribeGpuModel(), std::string(kAdreno630Name));
+
+  // CreateContext() consumes the selection; calling it again returns nullptr.
+  EXPECT_EQ(selection->CreateContext(), nullptr);
+}
+
+TEST(ContextVKTest, CreateAcceptsKnownBadDriversByDefault) {
+  // ContextVK::Create does not reject known-bad drivers on its own; callers
+  // without a fallback rely on this.
+  std::shared_ptr<ContextVK> context =
+      MockVulkanContextBuilder()
+          .SetPhysicalPropertiesCallback(SetAdreno630Properties)
+          .Build();
+
+  ASSERT_NE(context, nullptr);
+  EXPECT_TRUE(context->IsValid());
+  EXPECT_TRUE(context->GetDriverInfo()->IsKnownBadDriver());
 }
 
 }  // namespace testing

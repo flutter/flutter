@@ -25,12 +25,11 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=x86"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -83,12 +82,11 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=x86"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -143,12 +141,11 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=x86"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -203,12 +200,11 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=x86"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -261,12 +257,11 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=x86"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
@@ -321,12 +316,11 @@
             ],
             "drone_dimensions": [
                 "device_type=none",
-                "os=Mac-15.7",
+                "os=Mac-15.7|Mac-26.6",
                 "cpu=x86"
             ],
             "gclient_variables": {
                 "download_android_deps": false,
-                "download_jdk": false,
                 "use_rbe": true
             },
             "gn": [
