@@ -14,8 +14,8 @@ TEST(AndroidImageGenerator, HeaderDecodeDimensionMismatch) {
   FlutterImageGeneratorInfo header_info = {
       .width = kHeaderW,
       .height = kHeaderH,
-      .color_type = kFlutterImageGeneratorColorTypeRGBA8888,
       .alpha_type = kFlutterImageGeneratorAlphaTypePremul,
+      .color_type = kFlutterImageGeneratorColorTypeRGBA8888,
   };
 
   constexpr size_t kDecodedW = 64;

@@ -30,8 +30,8 @@ AndroidImageGenerator::AndroidImageGenerator(std::vector<uint8_t> data)
       image_info_({
           .width = 0,
           .height = 0,
-          .color_type = kFlutterImageGeneratorColorTypeUnknown,
           .alpha_type = kFlutterImageGeneratorAlphaTypeUnknown,
+          .color_type = kFlutterImageGeneratorColorTypeUnknown,
       }) {}
 
 const FlutterImageGeneratorInfo& AndroidImageGenerator::GetInfo() {
@@ -53,8 +53,8 @@ FlutterImageGeneratorFrameInfo AndroidImageGenerator::GetFrameInfo(
       .required_frame = -1,
       .duration_ms = 0,
       .disposal_method = kFlutterImageGeneratorDisposalMethodKeep,
-      .has_disposal_rect = false,
       .disposal_rect = {},
+      .has_disposal_rect = false,
       .blend_mode = kFlutterImageGeneratorBlendModeSrcOver,
   };
 }
@@ -360,8 +360,8 @@ void AndroidImageGenerator::NativeImageHeaderCallback(JNIEnv* env,
     generator->image_info_ = {
         .width = static_cast<uint32_t>(width),
         .height = static_cast<uint32_t>(height),
-        .color_type = kFlutterImageGeneratorColorTypeRGBA8888,
         .alpha_type = kFlutterImageGeneratorAlphaTypePremul,
+        .color_type = kFlutterImageGeneratorColorTypeRGBA8888,
     };
     generator->header_valid_ = true;
   }
