@@ -5,6 +5,10 @@
 #include <Foundation/Foundation.h>
 #include <QuartzCore/QuartzCore.h>
 
+#include "flutter/display_list/dl_builder.h"
+#include "flutter/display_list/dl_color.h"
+#include "flutter/display_list/dl_paint.h"
+#include "flutter/shell/common/snapshot_controller_impeller.h"
 #include "flutter/shell/gpu/gpu_surface_metal_impeller.h"
 #include "gtest/gtest.h"
 #include "impeller/display_list/aiks_context.h"
@@ -158,6 +162,53 @@ TEST(GPUSurfaceMetalImpeller, CreatesImpellerCaptureScope) {
   EXPECT_FALSE(context->GetCaptureManager()->CaptureScopeActive());
 }
 #endif  // IMPELLER_DEBUG
+
+class TestSnapshotDelegate : public SnapshotController::Delegate {
+ public:
+  explicit TestSnapshotDelegate(std::shared_ptr<impeller::AiksContext> aiks_context)
+      : aiks_context_(std::move(aiks_context)) {}
+
+  const std::unique_ptr<Surface>& GetSurface() const override { return null_surface_; }
+  bool IsAiksContextInitialized() const override { return aiks_context_ != nullptr; }
+  std::shared_ptr<impeller::AiksContext> GetAiksContext() const override { return aiks_context_; }
+  const std::unique_ptr<SnapshotSurfaceProducer>& GetSnapshotSurfaceProducer() const override {
+    return null_producer_;
+  }
+  std::shared_ptr<const fml::SyncSwitch> GetIsGpuDisabledSyncSwitch() const override {
+    return sync_switch_;
+  }
+
+ private:
+  std::shared_ptr<impeller::AiksContext> aiks_context_;
+  std::unique_ptr<Surface> null_surface_;
+  std::unique_ptr<SnapshotSurfaceProducer> null_producer_;
+  std::shared_ptr<fml::SyncSwitch> sync_switch_ = std::make_shared<fml::SyncSwitch>(false);
+};
+
+TEST(SnapshotControllerImpeller, MakeImpellerSnapshotSyncRecyclesHostBuffer) {
+  auto context = CreateImpellerContext();
+  auto aiks_context = std::make_shared<impeller::AiksContext>(context, nullptr);
+  TestSnapshotDelegate delegate(aiks_context);
+  auto controller = std::make_unique<SnapshotControllerImpeller>(delegate);
+
+  DisplayListBuilder builder;
+  DlPaint paint;
+  paint.setColor(DlColor::kRed());
+  for (int i = 0; i < 100; ++i) {
+    builder.DrawRect(DlRect::MakeLTRB(i, i, i + 50, i + 50), paint);
+  }
+  auto display_list = builder.Build();
+
+  for (int i = 0; i < 100; ++i) {
+    auto texture = controller->MakeImpellerSnapshotSync(display_list, DlISize(100, 100),
+                                                        SnapshotPixelFormat::kDontCare);
+    ASSERT_NE(texture, nullptr);
+  }
+
+  impeller::HostBuffer::TestStateQuery state =
+      aiks_context->GetContentContext().GetTransientsDataBuffer().GetStateForTest();
+  EXPECT_EQ(state.total_buffer_count, 1u);
+}
 
 }  // namespace testing
 }  // namespace flutter
