@@ -18,6 +18,7 @@
 library;
 
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 
 import 'gn_ast.dart';
 
@@ -271,6 +272,30 @@ final class GnReference extends GnValue {
   String toString() => name;
 }
 
+/// A GN scope held in a variable: `x = { a = [...] }`, or a template's
+/// `invoker`. Members are read as `x.a`.
+final class GnScopeValue extends GnValue {
+  const GnScopeValue(this.variables);
+
+  final Map<String, GnVariable> variables;
+
+  @override
+  String toString() => '{${variables.keys.join(', ')}}';
+}
+
+/// A value the converter cannot know: the result of `rebase_path()` or
+/// `exec_script()`. It may be stored (a `.gni` may compute arguments the
+/// engine never uses) but is an error wherever it would reach the output.
+final class GnOpaqueValue extends GnValue {
+  const GnOpaqueValue(this.description);
+
+  /// What produced it, for the error message.
+  final String description;
+
+  @override
+  String toString() => '<$description>';
+}
+
 /// A boolean whose value the assumptions did not decide: the result of
 /// `use_x = enable_unittests && shell_enable_gl`, kept as a formula so that
 /// `if (use_x)` can be followed.
@@ -351,13 +376,18 @@ final class GnAssignment {
 
 /// Everything that was assigned to one variable, in program order.
 final class GnVariable {
-  GnVariable(this.name, {required this.isList});
+  GnVariable(this.name, {required this.isList, this.forwarded = false});
 
   final String name;
 
   /// Whether the variable holds a list (as opposed to a string, boolean or
   /// integer), decided by its first assignment.
   final bool isList;
+
+  /// Whether the variable arrived through `forward_variables_from()` rather
+  /// than being written where it is: a template forwards its invoker's
+  /// bookkeeping (`enabled`, ...) along with the real target variables.
+  final bool forwarded;
   final List<GnAssignment> assignments = <GnAssignment>[];
 
   /// The items of a list variable when every assignment is unconditional
@@ -430,6 +460,10 @@ final class Assumptions {
 
   GnValue? operator [](String name) => _values[name];
 
+  /// These assumptions with [overrides] added or replaced.
+  Assumptions withValues(Map<String, GnValue> overrides) =>
+      Assumptions(<String, GnValue>{..._values, ...overrides});
+
   /// Parses `name=value` where value is `true`, `false`, an integer or a
   /// string (quoted or not).
   static GnValue parseValue(String text) {
@@ -467,6 +501,29 @@ const Set<String> gnTargetRules = <String>{
   'static_library',
 };
 
+/// Target types that BUILDCONFIG.gn defines as templates over the built-in
+/// ones, with what they amount to in the engine's build: `component` is a
+/// source_set, since `is_component_build` is false (every object of Skia is
+/// linked into whatever depends on it, which Bazel's alwayslink keeps).
+const Map<String, String> gnRuleAliases = <String, String>{'component': 'source_set'};
+
+/// Which imported files the evaluator runs, and which it takes as known.
+///
+/// A `.gni` under one of [evaluatedPrefixes] (GN paths) is loaded and
+/// evaluated like GN would, so that its lists, arguments and templates are
+/// available. Files in [known] are not evaluated: the mapping tables describe
+/// what they define (variables through the known external variables and the
+/// assumptions, templates through the template mappings). Importing any
+/// other file is an error.
+final class ImportPolicy {
+  const ImportPolicy({this.evaluatedPrefixes = const <String>{}, this.known = const <String>{}});
+
+  final Set<String> evaluatedPrefixes;
+  final Set<String> known;
+
+  bool evaluates(String gnPath) => evaluatedPrefixes.any(gnPath.startsWith);
+}
+
 /// Evaluates [file] (the tree of one `BUILD.gn`).
 ///
 /// [templates] are the names of the `.gni` templates that may be invoked like
@@ -474,20 +531,27 @@ const Set<String> gnTargetRules = <String>{
 /// may be read (they become [GnReference]s) or tested (they stay symbolic).
 /// Targets named in [skipTargets] are not evaluated at all (so that what is
 /// inside them need not be understood); they are listed in the result.
+/// Imports are resolved and loaded through [tree] according to
+/// [importPolicy]; without a tree, imports are only recorded.
 GnFileEvaluation evaluateGnFile(
   GnBlock file, {
   required Assumptions assumptions,
   Set<String> templates = const <String>{},
   Set<String> externalVariables = const <String>{},
   Set<String> skipTargets = const <String>{},
+  GnSourceTree? tree,
+  ImportPolicy importPolicy = const ImportPolicy(),
 }) {
-  final evaluator = _Evaluator(
-    assumptions,
-    templates,
-    externalVariables,
-    skipTargets,
-    file.location.file,
+  final settings = _Settings(
+    assumptions: assumptions,
+    templates: templates,
+    externalVariables: externalVariables,
+    skipTargets: skipTargets,
+    tree: tree,
+    importPolicy: importPolicy,
+    importCache: <String, _ImportedFile>{},
   );
+  final evaluator = _Evaluator(settings, file.location.file);
   evaluator.evaluateFile(file);
   return evaluator.result;
 }
@@ -495,6 +559,9 @@ GnFileEvaluation evaluateGnFile(
 /// Target variables that BUILDCONFIG.gn's set_defaults() initializes, so
 /// that a target may `+=` to them without assigning them first.
 const Set<String> _predefinedTargetVariables = <String>{'configs'};
+
+/// Functions whose calls have no effect on the data the converter extracts.
+const Set<String> _ignoredFunctions = <String>{'assert', 'not_needed', 'print', 'set_defaults'};
 
 final class _Scope {
   _Scope(this.parent, {this.isTarget = false});
@@ -504,43 +571,122 @@ final class _Scope {
   /// Whether this is the scope of a target's block.
   final bool isTarget;
   final Map<String, GnVariable> variables = <String, GnVariable>{};
+  final Map<String, _Template> templates = <String, _Template>{};
 
   GnVariable? lookup(String name) => variables[name] ?? parent?.lookup(name);
+
+  _Template? lookupTemplate(String name) => templates[name] ?? parent?.lookupTemplate(name);
+}
+
+/// A `template("name") { body }`: a closure over the scope it was defined in.
+final class _Template {
+  const _Template(this.name, this.body, this.scope, this.location);
+
+  final String name;
+  final GnBlock body;
+  final _Scope scope;
+  final GnLocation location;
+}
+
+/// What an evaluated `.gni` contributes to its importers.
+final class _ImportedFile {
+  const _ImportedFile(this.variables, this.templates);
+
+  final Map<String, GnVariable> variables;
+  final Map<String, _Template> templates;
+}
+
+/// One element of an expression's value: the GN value, the comments around
+/// it, and the condition it holds under (always, unless it came from a
+/// variable with conditional appends).
+final class _Value {
+  const _Value(
+    this.value,
+    this.comments, {
+    this.condition = Condition.always,
+    this.sourceConditions = const <String>[],
+  });
+
+  final GnValue value;
+  final GnItemComments comments;
+  final Condition condition;
+  final List<String> sourceConditions;
 }
 
 /// The value of an expression while it is evaluated.
 final class _Expression {
   const _Expression(this.items, {required this.isList});
 
-  final List<(GnValue, GnItemComments)> items;
+  _Expression.scalar(GnValue value)
+    : this(<_Value>[_Value(value, GnItemComments.none)], isList: false);
+
+  final List<_Value> items;
   final bool isList;
 
-  /// The value of a scalar expression.
-  GnValue? get scalar => isList ? null : items.single.$1;
+  /// The value of a scalar expression that holds unconditionally.
+  GnValue? get scalar =>
+      isList || items.single.condition != Condition.always ? null : items.single.value;
 
   @override
   String toString() =>
-      isList ? '[${items.map(((GnValue, GnItemComments) i) => i.$1).join(', ')}]' : '$scalar';
+      isList ? '[${items.map((_Value i) => i.value).join(', ')}]' : '${items.single.value}';
 }
 
-final class _Evaluator {
-  _Evaluator(
-    this.assumptions,
-    this.templates,
-    this.externalVariables,
-    this.skipTargets,
-    String file,
-  ) : result = GnFileEvaluation(file);
+/// What every evaluator of one conversion shares.
+final class _Settings {
+  const _Settings({
+    required this.assumptions,
+    required this.templates,
+    required this.externalVariables,
+    required this.skipTargets,
+    required this.tree,
+    required this.importPolicy,
+    required this.importCache,
+  });
 
   final Assumptions assumptions;
   final Set<String> templates;
   final Set<String> externalVariables;
   final Set<String> skipTargets;
+  final GnSourceTree? tree;
+  final ImportPolicy importPolicy;
+  final Map<String, _ImportedFile> importCache;
+}
+
+/// A template invocation in progress: the primary target it defines (the one
+/// named `target_name`) takes the invocation's comments.
+final class _Invocation {
+  const _Invocation(this.targetName, this.comments);
+
+  final String targetName;
+  final List<String> comments;
+}
+
+final class _Evaluator {
+  _Evaluator(this.settings, String file) : result = GnFileEvaluation(file);
+
+  final _Settings settings;
   final GnFileEvaluation result;
 
+  /// The root scope of the file, where imports merge.
+  late final _Scope fileScope;
+
+  final List<_Invocation> _invocations = <_Invocation>[];
+
+  /// Whether a `declare_args()` block is being evaluated, in which the
+  /// assumptions override the defaults.
+  bool _declaringArgs = false;
+
+  Assumptions get assumptions => settings.assumptions;
+
   void evaluateFile(GnBlock file) {
-    _evaluateBlock(file, _Scope(null), Condition.always, const <String>[], target: null);
+    fileScope = _Scope(null);
+    _evaluateBlock(file, fileScope, Condition.always, const <String>[], target: null);
   }
+
+  // -------------------------------------------------------------------------
+  // Statements
+  // -------------------------------------------------------------------------
 
   /// [path] is the condition of the enclosing `if`s with the assumptions
   /// applied; [source] their text as written.
@@ -563,7 +709,14 @@ final class _Evaluator {
         case GnCondition():
           _evaluateCondition(statement, scope, path, source, target: target);
         case GnFunctionCall():
-          _evaluateCall(statement, scope, path, target: target, comments: statement.beforeComments);
+          _evaluateCall(
+            statement,
+            scope,
+            path,
+            source,
+            target: target,
+            comments: statement.beforeComments,
+          );
         default:
           throw GnError(statement.location, 'unsupported statement (${statement.runtimeType})');
       }
@@ -613,6 +766,8 @@ final class _Evaluator {
         '${_gnText(left)} $op ${right is GnBinary && right.op != op ? '(${_gnText(right)})' : _gnText(right)}',
       GnAccessor(:final String base, :final GnNode index) =>
         index is GnIdentifier ? '$base.${index.name}' : '$base[${_gnText(index)}]',
+      GnFunctionCall(:final String name, :final List<GnNode> args) =>
+        '$name(${args.map(_gnText).join(', ')})',
       _ => '<${node.runtimeType}>',
     };
   }
@@ -620,25 +775,32 @@ final class _Evaluator {
   void _evaluateCall(
     GnFunctionCall call,
     _Scope scope,
-    Condition condition, {
+    Condition condition,
+    List<String> source, {
     required GnTarget? target,
     required List<String> comments,
   }) {
+    if (_ignoredFunctions.contains(call.name)) {
+      return;
+    }
     switch (call.name) {
       case 'import':
         if (target != null) {
           throw GnError(call.location, 'import inside a target');
         }
-        result.imports.add(_stringArgument(call));
+        _import(call, scope);
         return;
-      case 'assert':
+      case 'declare_args':
+        _declareArgs(call, scope, condition, source);
+        return;
+      case 'template':
+        _defineTemplate(call, scope);
+        return;
+      case 'forward_variables_from':
+        _forwardVariablesFrom(call, scope);
         return;
       case 'foreach':
-      case 'template':
-      case 'declare_args':
-      case 'set_defaults':
       case 'exec_script':
-      case 'forward_variables_from':
         throw GnError(call.location, '${call.name}() is not supported by the converter');
     }
     if (target != null) {
@@ -648,36 +810,283 @@ final class _Evaluator {
     // so that a template the converter does not know can be skipped.
     if (call.args.length == 1) {
       final GnNode arg = call.args.single;
-      if (arg is GnLiteral && arg.isString && skipTargets.contains(arg.stringValue)) {
+      if (arg is GnLiteral && arg.isString && settings.skipTargets.contains(arg.stringValue)) {
         result.skipped.add(arg.stringValue);
         return;
       }
     }
-    if (!gnTargetRules.contains(call.name) && !templates.contains(call.name)) {
-      throw GnError(call.location, 'unknown function or template ${call.name}()');
+    final _Template? template = scope.lookupTemplate(call.name);
+    if (template != null) {
+      _invokeTemplate(template, call, scope, condition, source, comments: comments);
+      return;
+    }
+    final String rule;
+    final String name;
+    if (call.name == 'target') {
+      // target(type, name): the type is an expression.
+      if (call.args.length != 2) {
+        throw GnError(call.location, 'target() takes a type and a name');
+      }
+      rule = _stringExpression(call.args[0], scope);
+      name = _stringExpression(call.args[1], scope);
+    } else {
+      rule = call.name;
+      name = _stringArgument(call, scope);
+    }
+    final String resolvedRule = gnRuleAliases[rule] ?? rule;
+    if (!gnTargetRules.contains(resolvedRule) && !settings.templates.contains(resolvedRule)) {
+      throw GnError(call.location, 'unknown function or template $rule()');
     }
     final GnBlock? block = call.block;
     if (block == null) {
       throw GnError(call.location, '${call.name}() without a block');
     }
-    final newTarget = GnTarget(call.location, call.name, _stringArgument(call), condition)
-      ..comments = comments;
+    final _Invocation? invocation = _invocations.isEmpty ? null : _invocations.last;
+    final newTarget = GnTarget(call.location, resolvedRule, name, condition)
+      ..comments = invocation != null && invocation.targetName == name
+          ? invocation.comments
+          : comments;
     final targetScope = _Scope(scope, isTarget: true);
     _evaluateBlock(block, targetScope, Condition.always, const <String>[], target: newTarget);
     newTarget.variables.addAll(targetScope.variables);
     result.targets.add(newTarget);
   }
 
-  String _stringArgument(GnFunctionCall call) {
+  String _stringArgument(GnFunctionCall call, _Scope scope) {
     if (call.args.length != 1) {
       throw GnError(call.location, '${call.name}() takes one argument');
     }
-    final GnNode arg = call.args.single;
-    if (arg is! GnLiteral || !arg.isString || arg.hasExpansion) {
-      throw GnError(arg.location, '${call.name}() argument must be a plain string');
-    }
-    return arg.stringValue;
+    return _stringExpression(call.args.single, scope);
   }
+
+  /// The value of an expression that must be a string.
+  String _stringExpression(GnNode node, _Scope scope) {
+    final GnValue? value = _expression(node, scope).scalar;
+    if (value is! GnStringValue) {
+      throw GnError(node.location, 'expected a string, got ${value ?? 'a list'}');
+    }
+    return value.value;
+  }
+
+  // -------------------------------------------------------------------------
+  // Imports, arguments, templates
+  // -------------------------------------------------------------------------
+
+  void _import(GnFunctionCall call, _Scope scope) {
+    final String gnPath = _importPath(call, scope);
+    result.imports.add(gnPath);
+    final GnSourceTree? tree = settings.tree;
+    if (tree == null) {
+      // Imports are only recorded; what they define must be known.
+      return;
+    }
+    if (settings.importPolicy.known.contains(gnPath)) {
+      return;
+    }
+    if (!settings.importPolicy.evaluates(gnPath)) {
+      throw GnError(
+        call.location,
+        'import of $gnPath is neither evaluated nor known to the converter',
+      );
+    }
+    final _ImportedFile imported = settings.importCache.putIfAbsent(gnPath, () {
+      final String file = tree.resolve(gnPath);
+      final evaluator = _Evaluator(settings, file)..evaluateFile(tree.load(file));
+      if (evaluator.result.targets.isNotEmpty) {
+        throw GnError(
+          evaluator.result.targets.first.location,
+          'target defined in an imported file',
+        );
+      }
+      // Underscore names are private to the file.
+      return _ImportedFile(
+        <String, GnVariable>{
+          for (final MapEntry<String, GnVariable> e in evaluator.fileScope.variables.entries)
+            if (!e.key.startsWith('_')) e.key: e.value,
+        },
+        <String, _Template>{
+          for (final MapEntry<String, _Template> e in evaluator.fileScope.templates.entries)
+            if (!e.key.startsWith('_')) e.key: e.value,
+        },
+      );
+    });
+    // Merge; a conflict with a different value is GN's "import clobbers" error.
+    for (final MapEntry<String, GnVariable> e in imported.variables.entries) {
+      final GnVariable? existing = scope.variables[e.key];
+      if (existing != null && existing != e.value && !_sameValue(existing, e.value)) {
+        throw GnError(call.location, 'import of $gnPath would clobber ${e.key}');
+      }
+      scope.variables[e.key] = e.value;
+    }
+    for (final MapEntry<String, _Template> e in imported.templates.entries) {
+      final _Template? existing = scope.templates[e.key];
+      if (existing != null && existing != e.value) {
+        throw GnError(call.location, 'import of $gnPath would clobber template ${e.key}()');
+      }
+      scope.templates[e.key] = e.value;
+    }
+  }
+
+  static bool _sameValue(GnVariable a, GnVariable b) {
+    final List<GnValue>? x = a.unconditionalItems;
+    final List<GnValue>? y = b.unconditionalItems;
+    if (x == null || y == null || x.length != y.length) {
+      return false;
+    }
+    for (var i = 0; i < x.length; i++) {
+      if (x[i] != y[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// The GN path (`//a/b.gni`) of an import, resolved against the importing
+  /// file's directory when relative.
+  String _importPath(GnFunctionCall call, _Scope scope) {
+    final String path = _stringArgument(call, scope);
+    if (path.startsWith('//')) {
+      return path;
+    }
+    final GnSourceTree? tree = settings.tree;
+    if (tree == null) {
+      return path;
+    }
+    return tree.gnPath(p.join(p.dirname(call.location.file), path));
+  }
+
+  /// `declare_args() { x = default }`: the assumptions play the role of
+  /// args.gn and override the defaults.
+  void _declareArgs(GnFunctionCall call, _Scope scope, Condition condition, List<String> source) {
+    final GnBlock? block = call.block;
+    if (block == null) {
+      throw GnError(call.location, 'declare_args() without a block');
+    }
+    final bool outer = _declaringArgs;
+    _declaringArgs = true;
+    try {
+      _evaluateBlock(block, scope, condition, source, target: null);
+    } finally {
+      _declaringArgs = outer;
+    }
+  }
+
+  void _defineTemplate(GnFunctionCall call, _Scope scope) {
+    final String name = _stringArgument(call, scope);
+    final GnBlock? body = call.block;
+    if (body == null) {
+      throw GnError(call.location, 'template() without a block');
+    }
+    scope.templates[name] = _Template(name, body, scope, call.location);
+  }
+
+  /// Runs a template: the invoking block becomes the `invoker` scope, the
+  /// body runs as a closure over the defining scope with `target_name` set.
+  void _invokeTemplate(
+    _Template template,
+    GnFunctionCall call,
+    _Scope scope,
+    Condition condition,
+    List<String> source, {
+    required List<String> comments,
+  }) {
+    final String name = _stringArgument(call, scope);
+    final GnBlock? block = call.block;
+    if (block == null) {
+      throw GnError(call.location, '${call.name}() without a block');
+    }
+    final invokerScope = _Scope(scope);
+    _evaluateBlock(block, invokerScope, Condition.always, const <String>[], target: null);
+    final bodyScope = _Scope(template.scope);
+    bodyScope.variables['invoker'] = GnVariable('invoker', isList: false)
+      ..assignments.add(
+        GnAssignment(call.location, Condition.always, '=', <GnValue>[
+          GnScopeValue(invokerScope.variables),
+        ]),
+      );
+    bodyScope.variables['target_name'] = GnVariable('target_name', isList: false)
+      ..assignments.add(
+        GnAssignment(call.location, Condition.always, '=', <GnValue>[GnStringValue(name)]),
+      );
+    _invocations.add(_Invocation(name, comments));
+    try {
+      _evaluateBlock(template.body, bodyScope, condition, source, target: null);
+    } finally {
+      _invocations.removeLast();
+    }
+  }
+
+  /// `forward_variables_from(scope, "*" | [names], [excluded])`.
+  void _forwardVariablesFrom(GnFunctionCall call, _Scope scope) {
+    if (call.args.length < 2 || call.args.length > 3) {
+      throw GnError(call.location, 'forward_variables_from() takes two or three arguments');
+    }
+    final GnNode fromNode = call.args[0];
+    if (fromNode is! GnIdentifier) {
+      throw GnError(fromNode.location, 'forward_variables_from() needs a scope variable');
+    }
+    final Map<String, GnVariable> from = _scopeVariables(fromNode.name, fromNode.location, scope);
+    final Set<String> excluded = call.args.length == 3
+        ? _stringList(call.args[2], scope).toSet()
+        : const <String>{};
+    final GnNode what = call.args[1];
+    if (what is GnLiteral && what.isString && what.stringValue == '*') {
+      // "*": everything set directly on the scope, clobbering.
+      for (final MapEntry<String, GnVariable> e in from.entries) {
+        if (!excluded.contains(e.key)) {
+          scope.variables[e.key] = _copy(e.value, forwarded: true);
+        }
+      }
+      return;
+    }
+    for (final String name in _stringList(what, scope)) {
+      if (excluded.contains(name)) {
+        continue;
+      }
+      final GnVariable? variable = from[name];
+      if (variable == null) {
+        continue;
+      }
+      if (scope.variables.containsKey(name)) {
+        throw GnError(call.location, 'forward_variables_from() would clobber $name');
+      }
+      scope.variables[name] = _copy(variable, forwarded: true);
+    }
+  }
+
+  static GnVariable _copy(GnVariable variable, {required bool forwarded}) {
+    return GnVariable(variable.name, isList: variable.isList, forwarded: forwarded)
+      ..assignments.addAll(variable.assignments);
+  }
+
+  List<String> _stringList(GnNode node, _Scope scope) {
+    final _Expression value = _expression(node, scope);
+    if (!value.isList) {
+      throw GnError(node.location, 'expected a list of strings');
+    }
+    return <String>[
+      for (final _Value item in value.items)
+        if (item.value is GnStringValue && item.condition == Condition.always)
+          (item.value as GnStringValue).value
+        else
+          throw GnError(node.location, 'expected a list of plain strings, got ${item.value}'),
+    ];
+  }
+
+  /// The variables of the scope held by [name] (`invoker`, or a variable
+  /// assigned a `{ ... }` block).
+  Map<String, GnVariable> _scopeVariables(String name, GnLocation location, _Scope scope) {
+    final GnVariable? variable = scope.lookup(name);
+    final List<GnValue>? items = variable?.unconditionalItems;
+    if (items == null || items.length != 1 || items.single is! GnScopeValue) {
+      throw GnError(location, '$name is not a scope');
+    }
+    return (items.single as GnScopeValue).variables;
+  }
+
+  // -------------------------------------------------------------------------
+  // Assignments and expressions
+  // -------------------------------------------------------------------------
 
   void _evaluateAssignment(
     GnBinary node,
@@ -692,7 +1101,10 @@ final class _Evaluator {
     }
     final String name = left.name;
     final GnVariable? existing = scope.lookup(name);
-    final _Expression value = _isBooleanExpression(node.right)
+    final GnValue? assumed = _declaringArgs && node.op == '=' ? assumptions[name] : null;
+    final _Expression value = assumed != null
+        ? _Expression.scalar(assumed)
+        : _isBooleanExpression(node.right)
         ? _booleanExpression(node.right, scope)
         : _expression(node.right, scope);
     final GnVariable variable;
@@ -725,21 +1137,46 @@ final class _Evaluator {
         '${variable.isList ? 'list' : 'scalar'} $name',
       );
     }
-    final List<(GnValue, GnItemComments)> items = value.items;
-    final bool anyItemComments = items.any(((GnValue, GnItemComments) i) => !i.$2.isEmpty);
-    variable.assignments.add(
-      GnAssignment(
-        node.location,
-        condition,
-        node.op,
-        <GnValue>[for (final (GnValue value, _) in items) value],
-        sourceConditions: source,
-        comments: comments,
-        itemComments: anyItemComments
-            ? <GnItemComments>[for (final (_, GnItemComments c) in items) c]
-            : const <GnItemComments>[],
-      ),
-    );
+    // Elements that hold under a condition of their own (read from a
+    // variable with conditional appends) become appends under that
+    // condition, in order of first appearance.
+    final groups = <Condition, List<_Value>>{};
+    for (final _Value item in value.items) {
+      groups.putIfAbsent(item.condition, () => <_Value>[]).add(item);
+    }
+    if (groups.isEmpty) {
+      groups[Condition.always] = <_Value>[];
+    }
+    String op = node.op;
+    var first = true;
+    for (final MapEntry<Condition, List<_Value>> group in groups.entries) {
+      final Condition when = condition.and(group.key);
+      if (when == Condition.never) {
+        continue;
+      }
+      if (op == '-=' && group.key != Condition.always) {
+        throw GnError(node.location, '-= of conditional elements is not supported');
+      }
+      final List<_Value> items = group.value;
+      final bool anyItemComments = items.any((_Value i) => !i.comments.isEmpty);
+      variable.assignments.add(
+        GnAssignment(
+          node.location,
+          when,
+          op,
+          <GnValue>[for (final _Value item in items) item.value],
+          sourceConditions: <String>[...source, ...?items.firstOrNull?.sourceConditions],
+          comments: first ? comments : const <String>[],
+          itemComments: anyItemComments
+              ? <GnItemComments>[for (final _Value item in items) item.comments]
+              : const <GnItemComments>[],
+        ),
+      );
+      first = false;
+      if (op == '=') {
+        op = '+=';
+      }
+    }
   }
 
   /// The value of an expression: the items of a list, or the single value
@@ -747,60 +1184,126 @@ final class _Evaluator {
   _Expression _expression(GnNode node, _Scope scope) {
     switch (node) {
       case GnList(:final List<GnNode> items):
-        return _Expression(<(GnValue, GnItemComments)>[
+        return _Expression(<_Value>[
           for (final GnNode item in items) ..._expression(item, scope).items,
         ], isList: true);
       case GnBinary(op: '+', :final GnNode left, :final GnNode right):
         final _Expression l = _expression(left, scope);
         final _Expression r = _expression(right, scope);
         if (l.isList && r.isList) {
-          return _Expression(<(GnValue, GnItemComments)>[...l.items, ...r.items], isList: true);
+          return _Expression(<_Value>[...l.items, ...r.items], isList: true);
         }
         final GnValue? a = l.scalar;
         final GnValue? b = r.scalar;
         if (a is GnStringValue && b is GnStringValue) {
-          return _Expression(<(GnValue, GnItemComments)>[
-            (GnStringValue(a.value + b.value), GnItemComments.none),
-          ], isList: false);
+          return _Expression.scalar(GnStringValue(a.value + b.value));
         }
         throw GnError(node.location, 'unsupported operands of +: $l and $r');
       case GnIdentifier(:final String name):
-        final GnVariable? variable = scope.lookup(name);
-        if (variable != null) {
-          final List<GnValue>? items = variable.unconditionalItems;
-          if (items == null) {
-            throw GnError(
-              node.location,
-              'use of $name, whose value depends on a condition, is not supported',
-            );
-          }
-          return _Expression(<(GnValue, GnItemComments)>[
-            for (final GnValue item in items) (item, GnItemComments.none),
-          ], isList: variable.isList);
+        return _variableValue(name, node, scope);
+      case GnAccessor(:final String base, :final GnNode index):
+        if (index is! GnIdentifier) {
+          throw GnError(node.location, 'only scope.member access is supported');
         }
-        final GnValue? assumed = assumptions[name];
-        if (assumed != null) {
-          return _Expression(<(GnValue, GnItemComments)>[
-            (assumed, GnItemComments.none),
-          ], isList: false);
+        final GnVariable? member = _scopeVariables(base, node.location, scope)[index.name];
+        if (member == null) {
+          throw GnError(node.location, '$base has no member ${index.name}');
         }
-        if (externalVariables.contains(name)) {
-          // The engine's `.gni` variables that build files read are all
-          // lists of flags.
-          return _Expression(<(GnValue, GnItemComments)>[
-            (GnReference(name), _comments(node)),
-          ], isList: true);
-        }
-        throw GnError(node.location, 'unknown variable $name');
+        return _variableItems(member, node);
+      case GnBlock():
+        // `x = { ... }`: a scope value.
+        final blockScope = _Scope(scope);
+        _evaluateBlock(node, blockScope, Condition.always, const <String>[], target: null);
+        return _Expression.scalar(GnScopeValue(blockScope.variables));
       case GnLiteral():
-        return _Expression(<(GnValue, GnItemComments)>[
-          (_literal(node, scope: scope), _comments(node)),
+        return _Expression(<_Value>[
+          _Value(_literal(node, scope: scope), _comments(node)),
         ], isList: false);
+      case GnFunctionCall(name: 'get_path_info', :final List<GnNode> args):
+        if (args.length != 2 || _stringExpression(args[1], scope) != 'abspath') {
+          throw GnError(node.location, 'only get_path_info(path, "abspath") is supported');
+        }
+        return _Expression.scalar(
+          GnStringValue(_absolutePath(_stringExpression(args[0], scope), node)),
+        );
+      case GnFunctionCall(name: 'rebase_path' || 'exec_script'):
+        // Unknowable here; an error if it ever reaches the output.
+        return _Expression.scalar(GnOpaqueValue(_gnText(node)));
       case GnFunctionCall(:final String name):
         throw GnError(node.location, '$name() in an expression is not supported by the converter');
       default:
         throw GnError(node.location, 'unsupported expression (${node.runtimeType})');
     }
+  }
+
+  /// The GN path of [path] as seen from the file containing [node].
+  String _absolutePath(String path, GnNode node) {
+    if (path.startsWith('//')) {
+      return path;
+    }
+    final GnSourceTree? tree = settings.tree;
+    if (tree == null) {
+      throw GnError(node.location, 'get_path_info() needs the source tree');
+    }
+    return tree.gnPath(p.normalize(p.join(p.dirname(node.location.file), path)));
+  }
+
+  _Expression _variableValue(String name, GnNode node, _Scope scope) {
+    final GnVariable? variable = scope.lookup(name);
+    if (variable != null) {
+      return _variableItems(variable, node);
+    }
+    final GnValue? assumed = assumptions[name];
+    if (assumed != null) {
+      return _Expression.scalar(assumed);
+    }
+    if (settings.externalVariables.contains(name)) {
+      // The engine's `.gni` variables that build files read are all lists of
+      // flags.
+      return _Expression(<_Value>[_Value(GnReference(name), _comments(node))], isList: true);
+    }
+    throw GnError(node.location, 'unknown variable $name');
+  }
+
+  /// The elements of a variable, each under the condition of the append
+  /// that produced it. A scalar must be unconditional.
+  static _Expression _variableItems(GnVariable variable, GnNode node) {
+    final items = <_Value>[];
+    for (final GnAssignment a in variable.assignments) {
+      if (a.op == '-=') {
+        if (!a.isUnconditional) {
+          throw GnError(node.location, 'use of ${variable.name}, which has a conditional -=');
+        }
+        items.removeWhere((_Value item) => a.items.contains(item.value));
+        continue;
+      }
+      if (a.op == '=') {
+        if (!a.isUnconditional && items.isNotEmpty) {
+          throw GnError(
+            node.location,
+            'use of ${variable.name}, which is reassigned conditionally',
+          );
+        }
+        items.clear();
+      }
+      for (var i = 0; i < a.items.length; i++) {
+        items.add(
+          _Value(
+            a.items[i],
+            a.commentsOf(i),
+            condition: a.condition,
+            sourceConditions: a.sourceConditions,
+          ),
+        );
+      }
+    }
+    if (!variable.isList && (items.length != 1 || items.single.condition != Condition.always)) {
+      throw GnError(
+        node.location,
+        'use of ${variable.name}, whose value depends on a condition, is not supported',
+      );
+    }
+    return _Expression(items, isList: variable.isList);
   }
 
   /// Whether [node] is a formula (`a && b`, `!a`, `x == "y"`) rather than a
@@ -821,7 +1324,7 @@ final class _Evaluator {
       ConditionConstant(:final bool value) => GnBoolValue(value),
       _ => GnConditionValue(condition),
     };
-    return _Expression(<(GnValue, GnItemComments)>[(value, GnItemComments.none)], isList: false);
+    return _Expression.scalar(value);
   }
 
   static GnItemComments _comments(GnNode node) {
@@ -890,33 +1393,67 @@ final class _Evaluator {
     return assumed is GnStringValue ? assumed.value : null;
   }
 
+  // -------------------------------------------------------------------------
+  // Conditions
+  // -------------------------------------------------------------------------
+
   Condition _condition(GnNode node, _Scope scope) {
     switch (node) {
       case GnLiteral() when node.isBool:
         return ConditionConstant(node.boolValue);
       case GnIdentifier(:final String name):
         return _variableCondition(name, node.location, scope);
+      case GnAccessor():
+        return _valueCondition(_expression(node, scope).scalar, node.location, _gnText(node));
       case GnUnary(op: '!', :final GnNode operand):
         return _condition(operand, scope).negated;
       case GnBinary(op: '&&', :final GnNode left, :final GnNode right):
-        return _condition(left, scope).and(_condition(right, scope));
+        // GN short-circuits: the right side may be meaningless when the left
+        // is false (`is_android && ndk_api >= 30`).
+        final Condition l = _condition(left, scope);
+        return l == Condition.never ? l : l.and(_condition(right, scope));
       case GnBinary(op: '||', :final GnNode left, :final GnNode right):
-        return _condition(left, scope).or(_condition(right, scope));
+        final Condition l = _condition(left, scope);
+        return l == Condition.always ? l : l.or(_condition(right, scope));
       case GnBinary(:final String op, :final GnNode left, :final GnNode right)
           when op == '==' || op == '!=':
         return _comparison(node, op == '==', left, right, scope);
-      case GnFunctionCall(name: 'defined', :final List<GnNode> args):
-        if (args.length != 1 || args.single is! GnIdentifier) {
-          throw GnError(node.location, 'only defined(variable) is supported');
+      case GnBinary(:final String op, :final GnNode left, :final GnNode right)
+          when op == '<' || op == '<=' || op == '>' || op == '>=':
+        final GnValue? a = _expression(left, scope).scalar;
+        final GnValue? b = _expression(right, scope).scalar;
+        if (a is! GnIntValue || b is! GnIntValue) {
+          throw GnError(node.location, '$op needs two known integers');
         }
-        final String name = (args.single as GnIdentifier).name;
-        return ConditionConstant(
-          scope.lookup(name) != null ||
-              assumptions[name] != null ||
-              externalVariables.contains(name),
-        );
+        return ConditionConstant(switch (op) {
+          '<' => a.value < b.value,
+          '<=' => a.value <= b.value,
+          '>' => a.value > b.value,
+          _ => a.value >= b.value,
+        });
+      case GnFunctionCall(name: 'defined', :final List<GnNode> args):
+        if (args.length != 1) {
+          throw GnError(node.location, 'defined() takes one argument');
+        }
+        return ConditionConstant(_isDefined(args.single, scope));
       default:
         throw GnError(node.location, 'unsupported condition (${node.runtimeType})');
+    }
+  }
+
+  bool _isDefined(GnNode what, _Scope scope) {
+    switch (what) {
+      case GnIdentifier(:final String name):
+        return scope.lookup(name) != null ||
+            assumptions[name] != null ||
+            settings.externalVariables.contains(name);
+      case GnAccessor(:final String base, :final GnNode index):
+        if (index is! GnIdentifier) {
+          throw GnError(what.location, 'only defined(scope.member) is supported');
+        }
+        return _scopeVariables(base, what.location, scope).containsKey(index.name);
+      default:
+        throw GnError(what.location, 'only defined(variable) is supported');
     }
   }
 
@@ -927,23 +1464,24 @@ final class _Evaluator {
       if (items == null || items.length != 1) {
         throw GnError(location, 'condition on $name, which is not a plain boolean');
       }
-      return switch (items.single) {
-        GnBoolValue(:final bool value) => ConditionConstant(value),
-        GnConditionValue(:final Condition condition) => condition,
-        _ => throw GnError(location, 'condition on $name, which is not a plain boolean'),
-      };
+      return _valueCondition(items.single, location, name);
     }
     final GnValue? assumed = assumptions[name];
     if (assumed != null) {
-      if (assumed is! GnBoolValue) {
-        throw GnError(location, '$name is assumed to be $assumed, not a boolean');
-      }
-      return ConditionConstant(assumed.value);
+      return _valueCondition(assumed, location, name);
     }
-    if (externalVariables.contains(name)) {
+    if (settings.externalVariables.contains(name)) {
       return ConditionVariable(name);
     }
     throw GnError(location, 'unknown variable $name in condition');
+  }
+
+  static Condition _valueCondition(GnValue? value, GnLocation location, String what) {
+    return switch (value) {
+      GnBoolValue(:final bool value) => ConditionConstant(value),
+      GnConditionValue(:final Condition condition) => condition,
+      _ => throw GnError(location, 'condition on $what, which is not a plain boolean'),
+    };
   }
 
   Condition _comparison(GnNode node, bool equals, GnNode left, GnNode right, _Scope scope) {
@@ -972,7 +1510,7 @@ final class _Evaluator {
     if (assumptions[left.name] != null || scope.lookup(left.name) != null) {
       throw GnError(node.location, 'comparison with ${left.name}, which is not a known string');
     }
-    if (!externalVariables.contains(left.name)) {
+    if (!settings.externalVariables.contains(left.name)) {
       throw GnError(node.location, 'unknown variable ${left.name} in condition');
     }
     return ConditionComparison(left.name, equals, value);

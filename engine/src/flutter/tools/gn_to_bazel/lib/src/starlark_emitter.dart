@@ -45,11 +45,15 @@ final class _Element {
   final GnItemComments comments;
 
   /// A comment for the item's line: GN's suffix comment, and the condition
-  /// the assumptions resolved.
+  /// the assumptions resolved (`defined()` tests, which templates use to
+  /// forward optional variables, say nothing and are left out).
   String? get note {
+    final List<String> conditions = assignment.sourceConditions
+        .where((String c) => !c.startsWith('defined(') && !c.startsWith('!(defined('))
+        .toList();
     final parts = <String>[
       for (final String suffix in comments.suffix) _uncomment(suffix),
-      if (assignment.sourceConditions.isNotEmpty) assignment.sourceConditions.join(' && '),
+      if (conditions.isNotEmpty) conditions.join(' && '),
     ];
     return parts.isEmpty ? null : parts.join('; ');
   }
@@ -109,14 +113,24 @@ final class _Rule {
 /// [gnPackage] is the GN directory of the file (`//flutter/fml`). Targets
 /// named in [skipTargets] are left out (with a note), as are the ones the
 /// evaluation already skipped. [appendix] is Starlark to append verbatim:
-/// what the GN file has no way to say (an `exports_files`, say).
+/// what the GN file has no way to say (an `exports_files`, say). [layout]
+/// says where the file lives, which decides how file paths are written.
+/// [implicitDeps] are labels every target that compiles depends on (see
+/// the manifest).
 String emitBuildFile(
   GnFileEvaluation evaluation, {
   required String gnPackage,
   Set<String> skipTargets = const <String>{},
   String? appendix,
+  OutputLayout layout = const OutputLayout.main(),
+  List<String> implicitDeps = const <String>[],
 }) {
-  final emitter = _Emitter(gnPackage);
+  final emitter = _Emitter(gnPackage, layout, implicitDeps);
+  for (final GnTarget target in evaluation.targets) {
+    if (target.rule == 'config') {
+      emitter.localConfigs[target.name] = target;
+    }
+  }
   final skipped = <String>[...evaluation.skipped];
   for (final GnTarget target in evaluation.targets) {
     if (skipTargets.contains(target.name)) {
@@ -128,20 +142,42 @@ String emitBuildFile(
   return emitter.render(evaluation.file, skipped, appendix: appendix);
 }
 
+/// Target variables that say nothing Bazel needs.
+const Set<String> _ignoredVariables = <String>{'check_includes', 'visibility'};
+
 final class _Emitter {
-  _Emitter(this.gnPackage) : bazelPackage = bazelLabel(gnPackage, package: gnPackage);
+  _Emitter(this.gnPackage, this.layout, this.implicitDeps)
+    : package = BazelLabel.parse(bazelLabel(gnPackage, package: gnPackage));
 
   final String gnPackage;
+  final OutputLayout layout;
 
-  /// The Bazel package of the generated file (`//engine/src/flutter/fml`).
-  final String bazelPackage;
+  /// Labels every compiled target depends on (the manifest's implicitDeps).
+  final List<String> implicitDeps;
+
+  /// The Bazel package of the generated file (`//engine/src/flutter/fml`,
+  /// or `@skia//` for a repository root).
+  final BazelLabel package;
   final List<_Rule> rules = <_Rule>[];
+
+  /// The `config()` targets of the file, by name, for inlining.
+  final Map<String, GnTarget> localConfigs = <String, GnTarget>{};
 
   /// `load()` statements: file label to the symbols used from it.
   final Map<String, Set<String>> loads = <String, Set<String>>{};
 
   void _use(String bzl, String symbol) {
-    loads.putIfAbsent(bzl, () => <String>{}).add(symbol);
+    loads.putIfAbsent(_absoluteLabel(bzl), () => <String>{}).add(symbol);
+  }
+
+  /// [label] as written from the generated file without shortening: a
+  /// main-repository label (`//engine/src/...`) is qualified with the main
+  /// repository's name when the file lives in an external repository.
+  String _absoluteLabel(String label) {
+    if (layout.isMain || !label.startsWith('//')) {
+      return label;
+    }
+    return '$mainRepositoryName$label';
   }
 
   // -------------------------------------------------------------------------
@@ -211,16 +247,22 @@ final class _Emitter {
     var chromiumCode = true;
     final extraCopts = <_Item>[];
     final conditionalCopts = <Condition, List<_Item>>{};
+    // With an explicit `public` list the headers in `sources` are private.
+    final bool explicitPublic = target.variables.containsKey('public');
+    // Configs that reach dependents anyway are not inlined privately as well.
+    final publicConfigs = <String>{
+      for (final String name in <String>['public_configs', 'all_dependent_configs'])
+        for (final GnAssignment a in target.variables[name]?.assignments ?? const <GnAssignment>[])
+          for (final GnValue v in a.items)
+            if (v is GnStringValue) v.value,
+    };
 
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'sources':
-          _sourcesInto(rule, variable, target, library: library);
+          _sourcesInto(rule, variable, target, splitHeaders: library && !explicitPublic);
         case 'public':
-          throw GnError(
-            variable.assignments.first.location,
-            '`public` header lists are not supported yet',
-          );
+          _filesInto(rule.list('hdrs'), variable);
         case 'deps':
           _labelsInto(rule.list(library ? 'implementation_deps' : 'deps'), variable, target);
         case 'public_deps':
@@ -228,10 +270,17 @@ final class _Emitter {
         case 'defines':
           _stringsInto(rule.list('local_defines'), variable);
         case 'include_dirs':
-          _stringsInto(rule.list('includes'), variable);
+          _filesInto(rule.list('includes'), variable);
         case 'configs':
         case 'public_configs':
-          chromiumCode = _configsInto(rule, variable, target, chromiumCode: chromiumCode);
+        case 'all_dependent_configs':
+          chromiumCode = _configsInto(
+            rule,
+            variable,
+            target,
+            chromiumCode: chromiumCode,
+            publicConfigs: publicConfigs,
+          );
         case 'libs':
         case 'frameworks':
         case 'ldflags':
@@ -241,9 +290,23 @@ final class _Emitter {
         case 'cflags_cc':
         case 'cflags_objc':
         case 'cflags_objcc':
-          _forEachItem(variable, into: rule.list('copts'), (_Element e) {
+          final String attribute = switch (variable.name) {
+            'cflags_c' => 'conlyopts',
+            'cflags_cc' => 'cxxopts',
+            _ => 'copts',
+          };
+          _forEachItem(variable, into: rule.list(attribute), (_Element e) {
             final _Item item = _flagItem(e);
-            if (e.condition == Condition.always) {
+            // GN's compiler config fixes the language standard in its own
+            // cflags_c/cflags_cc, which follow every target's flags, so a
+            // target's -std= never takes effect there (skcms asks for C11
+            // and compiles C++20). Bazel's copts come last and would win.
+            if (item.quoted && item.text.startsWith('-std=')) {
+              return;
+            }
+            if (attribute != 'copts') {
+              rule.list(attribute).add(e.condition, item);
+            } else if (e.condition == Condition.always) {
               extraCopts.add(item);
             } else {
               conditionalCopts.putIfAbsent(e.condition, () => <_Item>[]).add(item);
@@ -254,7 +317,14 @@ final class _Emitter {
           if (kind != 'cc_test') {
             _scalar(rule, 'testonly', variable);
           }
+        case 'lib_dirs':
+          _requireEmpty(variable);
         default:
+          if (_ignoredVariables.contains(variable.name) || variable.forwarded) {
+            // A template forwards its invoker's bookkeeping (`enabled`, ...)
+            // along with the real variables; GN ignores it just the same.
+            break;
+          }
           throw GnError(
             variable.assignments.first.location,
             'variable ${variable.name} is not converted yet',
@@ -268,12 +338,19 @@ final class _Emitter {
     final bool hasFlags =
         extraCopts.isNotEmpty ||
         conditionalCopts.isNotEmpty ||
-        !(rule.lists['local_defines']?.isEmpty ?? true);
+        !(rule.lists['conlyopts']?.isEmpty ?? true) ||
+        !(rule.lists['cxxopts']?.isEmpty ?? true) ||
+        target.variables.containsKey('defines') &&
+            !(target.variables['defines']!.unconditionalItems?.isEmpty ?? false);
     if (!compiles && hasFlags) {
       throw GnError(
         target.location,
         '${target.name} has flags or defines but no sources to apply them to',
       );
+    }
+    if (!compiles) {
+      // What private configs brought has nothing to apply to.
+      rule.lists.remove('local_defines');
     }
     if (compiles) {
       // GN applies chromium_code (or no_chromium_code) to every target; the
@@ -305,6 +382,11 @@ final class _Emitter {
       if (target.rule == 'source_set') {
         rule.scalars['alwayslink'] = 'True';
       }
+      // What GN leaves implicit (the headers of the tree, say) is a public
+      // dependency, so that dependents outside the file see it too.
+      for (final String dep in implicitDeps) {
+        rule.list('deps').addUnique(Condition.always, _Item(_localLabel(dep)));
+      }
     }
     rules.add(rule);
   }
@@ -321,7 +403,7 @@ final class _Emitter {
         case 'defines':
           _stringsInto(rule.list('defines'), variable);
         case 'include_dirs':
-          _stringsInto(rule.list('includes'), variable);
+          _filesInto(rule.list('includes'), variable);
         case 'libs':
         case 'frameworks':
         case 'ldflags':
@@ -330,13 +412,66 @@ final class _Emitter {
           // Local configs are only ever used by their own package.
           break;
         default:
-          throw GnError(
-            variable.assignments.first.location,
-            'config variable ${variable.name} cannot be propagated by Bazel; convert it by hand',
+          if (variable.forwarded) {
+            break;
+          }
+          // `cflags_objcc = []`, `lib_dirs = []`: nothing to propagate.
+          _requireEmpty(
+            variable,
+            why:
+                'config variable ${variable.name} cannot be propagated by Bazel; convert it by hand',
           );
       }
     }
     rules.add(rule);
+  }
+
+  /// Copies a private config of this file into [rule] (see [_configsInto]).
+  /// [use] is the assignment that listed the config; its condition applies
+  /// on top of the config's own.
+  void _inlineConfig(_Rule rule, GnTarget config, GnAssignment use) {
+    for (final GnVariable variable in config.variables.values) {
+      final String attribute;
+      switch (variable.name) {
+        case 'defines':
+          attribute = 'local_defines';
+        case 'include_dirs':
+          attribute = 'includes';
+        case 'ldflags':
+          attribute = 'linkopts';
+        case 'visibility':
+          continue;
+        default:
+          if (variable.forwarded) {
+            continue;
+          }
+          _requireEmpty(
+            variable,
+            why:
+                'config variable ${variable.name} of ${config.name} cannot be applied to '
+                '${rule.name} by Bazel; convert it by hand',
+          );
+          continue;
+      }
+      _forEachItem(variable, into: rule.list(attribute), (_Element e) {
+        final String text = attribute == 'includes'
+            ? _filePath(_string(e), e.assignment.location)
+            : _string(e);
+        final item = _Item(text, comment: e.note, before: <String>[...e.comments.before]);
+        rule.list(attribute).addUnique(use.condition.and(e.condition), item);
+      });
+    }
+  }
+
+  /// Accepts a variable only while it holds nothing.
+  void _requireEmpty(GnVariable variable, {String? why}) {
+    final List<GnValue>? items = variable.unconditionalItems;
+    if (items == null || items.isNotEmpty) {
+      throw GnError(
+        variable.assignments.first.location,
+        why ?? 'variable ${variable.name} is not converted yet',
+      );
+    }
   }
 
   /// `libs`, `frameworks` and `ldflags` all become `linkopts`.
@@ -476,43 +611,108 @@ final class _Emitter {
     });
   }
 
-  /// `//engine/src/flutter/fml:x` is `:x` from within its own package.
+  /// The shortest way to write [label] from the generated file: `:x` within
+  /// its package, `//pkg:x` within its repository. An absolute label's `//`
+  /// is the main repository, as everywhere in the mapping tables.
   String _localLabel(String label) {
-    if (label == bazelPackage) {
-      return ':${bazelPackage.substring(bazelPackage.lastIndexOf('/') + 1)}';
+    final parsed = label.startsWith(':')
+        ? BazelLabel(package.repository, package.package, label.substring(1))
+        : BazelLabel.parse(label);
+    return parsed.relativeTo(repository: package.repository, package: package.package);
+  }
+
+  /// How a GN file path (a source, header or include directory) is written
+  /// in the generated file: relative to the package when the package owns
+  /// it, as a `//pkg:file` label when another package of the repository
+  /// does. A path outside the output repository is an error: the GN file
+  /// then names something Bazel cannot see from here.
+  String _filePath(String gnFilePath, GnLocation location) {
+    final String absolute = gnFilePath.startsWith('//')
+        ? gnFilePath
+        : gnFilePath == '.'
+        ? gnPackage
+        : '$gnPackage/$gnFilePath';
+    final String? relative = layout.relativePath(absolute);
+    if (relative == null) {
+      throw GnError(
+        location,
+        '$gnFilePath is outside the output repository '
+        '${layout.repository.isEmpty ? '' : layout.repository} (root ${layout.repositoryGnRoot})',
+      );
     }
-    if (label.startsWith('$bazelPackage:')) {
-      return label.substring(bazelPackage.length);
+    final String owner = layout.isMain ? package.package : layout.owningPackage(relative);
+    final ownerPrefix = owner.isEmpty ? '' : '$owner/';
+    if (owner == package.package) {
+      if (relative == owner) {
+        return '.';
+      }
+      if (!relative.startsWith(ownerPrefix)) {
+        throw GnError(location, '$gnFilePath is outside the package of the generated file');
+      }
+      return relative.substring(ownerPrefix.length);
     }
-    return label;
+    final String rest = relative == owner ? '' : relative.substring(ownerPrefix.length);
+    return '//$owner:$rest';
+  }
+
+  void _filesInto(_ListAttribute attribute, GnVariable variable) {
+    _forEachItem(variable, into: attribute, (_Element e) {
+      attribute.addUnique(e.condition, _item(_filePath(_string(e), e.assignment.location), e));
+    });
   }
 
   static const Set<String> _headerExtensions = <String>{'.h', '.hh', '.hpp', '.inc'};
 
-  /// Libraries get their headers in `hdrs` (GN's default `public` is all
-  /// of them); binaries and tests have no such attribute.
-  void _sourcesInto(_Rule rule, GnVariable variable, GnTarget target, {required bool library}) {
+  /// Libraries without an explicit `public` list get their headers in
+  /// `hdrs` (GN's default `public` is all of them); otherwise, and for
+  /// binaries and tests, everything is a source. A file listed twice (Skia's
+  /// generated lists repeat shared headers) is kept once, as Bazel insists.
+  void _sourcesInto(
+    _Rule rule,
+    GnVariable variable,
+    GnTarget target, {
+    required bool splitHeaders,
+  }) {
     _forEachItem(variable, into: rule.list('srcs'), (_Element e) {
       final String path = _string(e);
       final int dot = path.lastIndexOf('.');
       final String extension = dot < 0 ? '' : path.substring(dot);
-      final bool header = library && _headerExtensions.contains(extension);
-      rule.list(header ? 'hdrs' : 'srcs').add(e.condition, _item(path, e));
+      final bool header = splitHeaders && _headerExtensions.contains(extension);
+      rule
+          .list(header ? 'hdrs' : 'srcs')
+          .addUnique(e.condition, _item(_filePath(path, e.assignment.location), e));
     });
   }
 
-  /// Applies `configs`/`public_configs`; returns whether the target is still
-  /// chromium_code.
+  /// Applies `configs`, `public_configs` or `all_dependent_configs`;
+  /// returns whether the target is still chromium_code.
+  ///
+  /// A public config becomes a dependency on the header-only library that
+  /// stands for it, so that its defines and include directories reach
+  /// dependents as GN propagates them. A private config of the same file is
+  /// inlined instead: its defines become `local_defines` (a dependency's
+  /// `defines` would leak to dependents, which GN's private configs never
+  /// do), its include directories `includes` and its link flags `linkopts`.
   bool _configsInto(
     _Rule rule,
     GnVariable variable,
     GnTarget target, {
     required bool chromiumCode,
+    required Set<String> publicConfigs,
   }) {
     var result = chromiumCode;
+    final private = variable.name == 'configs';
     for (final GnAssignment assignment in variable.assignments) {
       for (final _Element element in _elements(assignment, withComments: true)) {
         final String config = _string(element);
+        final GnTarget? local = config.startsWith(':') ? localConfigs[config.substring(1)] : null;
+        if (local != null && private && !publicConfigs.contains(config)) {
+          if (assignment.op == '-=') {
+            throw GnError(assignment.location, 'removing config $config is not supported');
+          }
+          _inlineConfig(rule, local, assignment);
+          continue;
+        }
         final ConfigEffect? effect = config.startsWith(':')
             ? ConfigDependency(config)
             : configEffects[config] ?? configEffects['$gnPackage$config'];
@@ -796,6 +996,6 @@ final class _Emitter {
         'no config_setting for `$condition` (used by ${rule.kind} ${rule.name})',
       );
     }
-    return setting;
+    return _absoluteLabel(setting);
   }
 }
