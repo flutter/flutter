@@ -109,7 +109,22 @@ bool InternalFlutterGpu_DeviceBuffer_Flush(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int size_in_bytes) {
-  device_buffer->GetBuffer()->Flush(
-      impeller::Range(offset_in_bytes, size_in_bytes));
+  const size_t buffer_size =
+      device_buffer->GetBuffer()->GetDeviceBufferDescriptor().size;
+  // Same bounds as DeviceBuffer.flush in Dart: the offset must be inside the
+  // buffer.
+  if (offset_in_bytes < 0 ||
+      static_cast<size_t>(offset_in_bytes) >= buffer_size) {
+    return false;
+  }
+  const size_t offset = static_cast<size_t>(offset_in_bytes);
+  // A negative length (the Dart default is -1) flushes to the end of the
+  // buffer. Passing it through would make a range of SIZE_MAX bytes.
+  const size_t length = size_in_bytes < 0 ? buffer_size - offset
+                                          : static_cast<size_t>(size_in_bytes);
+  if (length > buffer_size - offset) {
+    return false;
+  }
+  device_buffer->GetBuffer()->Flush(impeller::Range(offset, length));
   return true;
 }
