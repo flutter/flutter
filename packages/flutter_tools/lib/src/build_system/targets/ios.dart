@@ -46,7 +46,7 @@ abstract class AotAssemblyBase extends Target {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
+      xcode: globals.xcode,
       artifacts: environment.artifacts,
       processManager: environment.processManager,
     );

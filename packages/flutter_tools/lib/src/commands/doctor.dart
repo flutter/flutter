@@ -4,9 +4,9 @@
 
 import '../android/android_workflow.dart' as android_workflow;
 import '../base/common.dart';
+import '../context/tool_context.dart';
 import '../doctor.dart';
 import '../experimental/extension_manager.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// The `flutter doctor` command, which displays diagnostic information about the
@@ -14,16 +14,15 @@ import '../runner/flutter_command.dart';
 class DoctorCommand extends FlutterCommand {
   /// Creates a new [DoctorCommand].
   ///
-  /// If [doctor] is omitted, it defaults to [globals.doctor]. If
-  /// [_androidLicenseValidator] is omitted, it is lazily resolved from the
+  /// If [_androidLicenseValidator] is omitted, it is lazily resolved from the
   /// active context when `--android-licenses` is supplied.
   DoctorCommand({
+    required this._doctor,
+    required ToolContext super.toolContext,
     this._androidLicenseValidator,
-    Doctor? doctor,
     this.extensionManager,
-    required super.toolContext,
     this.verbose = false,
-  }) : _explicitDoctor = doctor {
+  }) {
     argParser.addFlag(
       'android-licenses',
       negatable: false,
@@ -39,12 +38,13 @@ class DoctorCommand extends FlutterCommand {
     );
   }
 
-  final Doctor? _explicitDoctor;
+  final Doctor _doctor;
   final android_workflow.AndroidLicenseValidator? _androidLicenseValidator;
   final bool verbose;
   final ExtensionManager? extensionManager;
 
-  Doctor get _doctor => _explicitDoctor ?? globals.doctor!;
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   final name = 'doctor';
