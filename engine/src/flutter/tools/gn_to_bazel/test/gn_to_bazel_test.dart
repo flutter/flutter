@@ -322,6 +322,25 @@ source_set("x") {
       expect(evaluation.targets.map((GnTarget t) => t.name), <String>['x']);
     });
 
+    test('answers defined() from the scope', () async {
+      final GnFileEvaluation evaluation = await evaluate('''
+source_set("x") {
+  sources = [ "x.cc" ]
+  if (!defined(defines)) {
+    defines = []
+  }
+  defines += [ "X=1" ]
+  if (defined(enable_unittests) && !defined(never_declared)) {
+    defines += [ "Y=1" ]
+  }
+}
+''');
+      expect(evaluation.targets.single.variables['defines']!.unconditionalItems, <GnValue>[
+        const GnStringValue('X=1'),
+        const GnStringValue('Y=1'),
+      ]);
+    });
+
     test('records imports and comments', () async {
       final GnFileEvaluation evaluation = await evaluate('''
 import("//flutter/common/config.gni")
@@ -604,6 +623,22 @@ cc_test(
 )
 '''),
       );
+      final String kinds = await convert('''
+executable("x_rendertests") {
+  testonly = true
+  sources = [ "a.cc" ]
+}
+executable("x_benchmarks") {
+  testonly = true
+  sources = [ "b.cc" ]
+}
+executable("x_tool") {
+  sources = [ "c.cc" ]
+}
+''');
+      expect(kinds, contains('cc_test(\n    name = "x_rendertests",'));
+      expect(kinds, contains('cc_binary(\n    name = "x_benchmarks",\n    testonly = True,'));
+      expect(kinds, contains('cc_binary(\n    name = "x_tool",\n    srcs'));
     });
 
     test('renders the runtime mode and slimpeller as select()', () async {
