@@ -92,6 +92,13 @@ mixin AnimationEagerListenerMixin {
 mixin AnimationLocalListenersMixin {
   final HashedObserverList<VoidCallback> _listeners = HashedObserverList<VoidCallback>();
 
+  /// Whether any value listeners are registered with [addListener].
+  ///
+  /// This does not include listeners registered with
+  /// [AnimationLocalStatusListenersMixin.addStatusListener].
+  @protected
+  bool get hasListeners => _listeners.isNotEmpty;
+
   /// Called immediately before a listener is added via [addListener].
   ///
   /// At the time this method is called the registered listener is not yet
