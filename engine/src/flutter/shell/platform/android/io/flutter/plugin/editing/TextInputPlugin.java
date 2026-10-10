@@ -8,7 +8,9 @@ import static io.flutter.Build.API_LEVELS;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -58,6 +60,13 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
   @NonNull private PlatformViewsController platformViewsController;
   @NonNull private PlatformViewsController2 platformViewsController2;
   @Nullable private Rect lastClientRect;
+  // The transform from the local coordinate system of the current client to the coordinate system
+  // of mView, in logical pixels.
+  @Nullable private Matrix lastClientTransform;
+  // The bounds of the current client in its local coordinate system.
+  @Nullable private RectF lastClientBounds;
+  // The caret rect in the local coordinate system of the current client.
+  @Nullable private RectF lastCaretRect;
   private ImeSyncDeferringInsetsCallback imeSyncCallback;
 
   // Initialize the "last seen" text editing values to a non-null value.
@@ -159,6 +168,11 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
           @Override
           public void setEditableSizeAndTransform(double width, double height, double[] transform) {
             saveEditableSizeAndTransform(width, height, transform);
+          }
+
+          @Override
+          public void setCaretRect(double x, double y, double width, double height) {
+            saveCaretRect(x, y, width, height);
           }
 
           @Override
@@ -393,6 +407,7 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
             keyboardManager,
             mEditable,
             outAttrs);
+    connection.setEditableGeometry(lastClientTransform, lastClientBounds, lastCaretRect);
     outAttrs.initialSelStart = mEditable.getSelectionStart();
     outAttrs.initialSelEnd = mEditable.getSelectionEnd();
 
@@ -468,6 +483,9 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     mRestartInputPending = true;
     unlockPlatformViewInputConnection();
     lastClientRect = null;
+    lastClientTransform = null;
+    lastClientBounds = null;
+    lastCaretRect = null;
     mEditable.addEditingStateListener(this);
   }
 
@@ -572,6 +590,38 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
             (int) (minMax[2] * density),
             (int) Math.ceil(minMax[1] * density),
             (int) Math.ceil(minMax[3] * density));
+
+    // Convert the column-major 4x4 matrix to a row-major 3x3 matrix by dropping the z row and
+    // column, since the client lies in the z = 0 plane and the depth of the result isn't used.
+    lastClientTransform = new Matrix();
+    lastClientTransform.setValues(
+        new float[] {
+          (float) matrix[0], (float) matrix[4], (float) matrix[12],
+          (float) matrix[1], (float) matrix[5], (float) matrix[13],
+          (float) matrix[3], (float) matrix[7], (float) matrix[15]
+        });
+    lastClientBounds = new RectF(0, 0, (float) width, (float) height);
+    updateEditableGeometry();
+  }
+
+  private void saveCaretRect(double x, double y, double width, double height) {
+    // The framework sends a rect with a negative size when the caret rect is unknown.
+    lastCaretRect =
+        width < 0 || height < 0
+            ? null
+            : new RectF((float) x, (float) y, (float) (x + width), (float) (y + height));
+    updateEditableGeometry();
+  }
+
+  // Sends the latest geometry of the current client to its input connection.
+  private void updateEditableGeometry() {
+    // Until the input method is restarted, lastInputConnection belongs to the previous client. The
+    // input connection of the current client gets the geometry when it's created.
+    if (mRestartInputPending || !(lastInputConnection instanceof InputConnectionAdaptor)) {
+      return;
+    }
+    ((InputConnectionAdaptor) lastInputConnection)
+        .setEditableGeometry(lastClientTransform, lastClientBounds, lastCaretRect);
   }
 
   @VisibleForTesting
@@ -600,6 +650,9 @@ public class TextInputPlugin implements ListenableEditingState.EditingStateWatch
     inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
     unlockPlatformViewInputConnection();
     lastClientRect = null;
+    lastClientTransform = null;
+    lastClientBounds = null;
+    lastCaretRect = null;
     // When the IME is hidden, we need to restart the input method manager to accomodate
     // some keyboards like the Samsung keyboard that may be caching old state.
     WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(mView);
