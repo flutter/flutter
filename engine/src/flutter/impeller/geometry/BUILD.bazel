@@ -1,0 +1,84 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/geometry/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: geometry_asserts, geometry_unittests, geometry_benchmarks.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "geometry",
+    srcs = [
+        "arc.cc",
+        "color.cc",
+        "constants.cc",
+        "dashed_line_path_source.cc",
+        "gradient.cc",
+        "matrix.cc",
+        "matrix_decomposition.cc",
+        "path_source.cc",
+        "point.cc",
+        "quaternion.cc",
+        "rational.cc",
+        "rect.cc",
+        "round_rect.cc",
+        "round_superellipse.cc",
+        "round_superellipse_param.cc",
+        "rounding_radii.cc",
+        "rstransform.cc",
+        "separated_vector.cc",
+        "shear.cc",
+        "sigma.cc",
+        "size.cc",
+        "trig.cc",
+        "type_traits.cc",
+        "vector.cc",
+        "wangs_formula.cc",
+    ],
+    hdrs = [
+        "arc.h",
+        "color.h",
+        "constants.h",
+        "dashed_line_path_source.h",
+        "gradient.h",
+        "half.h",
+        "matrix.h",
+        "matrix_decomposition.h",
+        "path_source.h",
+        "point.h",
+        "quaternion.h",
+        "rational.h",
+        "rect.h",
+        "round_rect.h",
+        "round_superellipse.h",
+        "round_superellipse_param.h",
+        "rounding_radii.h",
+        "rstransform.h",
+        "saturated_math.h",
+        "scalar.h",
+        "separated_vector.h",
+        "shear.h",
+        "sigma.h",
+        "size.h",
+        "stroke_parameters.h",
+        "trig.h",
+        "type_traits.h",
+        "vector.h",
+        "wangs_formula.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+    ],
+    alwayslink = True,
+)
