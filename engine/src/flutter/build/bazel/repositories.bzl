@@ -208,10 +208,31 @@ def _synced_repository_impl(rctx):
 
     _link_tree(rctx, source, overlaying)
     if converting:
+        _link_secondary(rctx)
         _convert_gn(rctx)
     else:
         _write_build_file(rctx, rctx.attr.build_file, rctx.attr.build_file_content)
     _mark_repository_boundary(rctx)
+
+def _link_secondary(rctx):
+    """Mirrors what sits beside a secondary-tree BUILD.gn into the repository.
+
+    GN's secondary source tree (`//flutter/build/secondary/`) holds build
+    files for directories that cannot carry their own; files beside such a
+    BUILD.gn (expat's `expat_config/`) belong to the directory it stands in
+    for, which is this repository. The converter maps their GN paths the
+    same way.
+    """
+    if not rctx.attr.gn_secondary_dir:
+        return
+    secondary = rctx.workspace_root.get_child(rctx.attr.gn_secondary_dir)
+    for child in secondary.readdir():
+        name = child.basename
+        if name in _BUILD_FILE_NAMES or name == "BUILD.gn" or name.endswith(".gni"):
+            continue
+        if rctx.path(name).exists:
+            fail("synced_repository(%s): %s exists both in the synced tree and beside its secondary BUILD.gn" % (rctx.name, name))
+        rctx.symlink(child, name)
 
 synced_repository = repository_rule(
     implementation = _synced_repository_impl,
@@ -237,6 +258,11 @@ synced_repository = repository_rule(
             doc = "With gn_build_files: `@name=//gn/dir` naming this repository and the GN directory " +
                   "that is its root (the converter's --repository). The converted files become the " +
                   "repository's packages.",
+        ),
+        "gn_secondary_dir": attr.string(
+            doc = "With gn_build_files: the directory of GN's secondary source tree that stands in for " +
+                  "the repository's root, whose files other than build files are mirrored into the " +
+                  "repository.",
         ),
     },
     # The repository only symlinks into the checkout, so it must be re-created

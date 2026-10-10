@@ -28,7 +28,9 @@ _OVERLAYS = "//engine/src/flutter/build/bazel/third_party"
 #   build_file:     overlay BUILD file, or None to use the upstream Bazel files.
 #   gn_build_files: instead of an overlay, GN build files that tools/gn_to_bazel
 #                   converts into the repository at fetch time (with
-#                   gn_repository, see repositories.bzl).
+#                   gn_repository and gn_secondary_dir, see repositories.bzl).
+#   synced:         the DEPS entry inside `path`, when `path` is an engine
+#                   directory holding the GN file over a synced subdirectory.
 _SOURCE_REPOSITORIES = {
     "abseil-cpp": struct(
         path = "engine/src/third_party/abseil-cpp",
@@ -44,6 +46,23 @@ _SOURCE_REPOSITORIES = {
     "dart": struct(
         path = "engine/src/flutter/third_party/dart",
         build_file = _OVERLAYS + ":dart/BUILD.dart.bazel",
+    ),
+    # Skia's codec and font dependencies, each converted at fetch time from
+    # its GN file: in the synced tree (libpng, freetype2), in the engine's
+    # secondary source tree (expat, libwebp, wuffs; files beside the BUILD.gn
+    # are mirrored in), or in the engine over a synced `src/` (libjpeg-turbo).
+    "expat": struct(
+        path = "engine/src/flutter/third_party/expat",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/expat/BUILD.gn"],
+        gn_repository = "@expat=//flutter/third_party/expat",
+        gn_secondary_dir = "engine/src/flutter/build/secondary/flutter/third_party/expat",
+    ),
+    "freetype2": struct(
+        path = "engine/src/flutter/third_party/freetype2",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/third_party/freetype2/BUILD.gn"],
+        gn_repository = "@freetype2=//flutter/third_party/freetype2",
     ),
     "googletest": struct(
         path = "engine/src/flutter/third_party/googletest",
@@ -63,6 +82,26 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/libcxxabi",
         build_file = _OVERLAYS + ":libcxxabi/BUILD.libcxxabi.bazel",
     ),
+    "libjpeg-turbo": struct(
+        path = "engine/src/flutter/third_party/libjpeg-turbo",
+        synced = "engine/src/flutter/third_party/libjpeg-turbo/src",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/third_party/libjpeg-turbo/BUILD.gn"],
+        gn_repository = "@libjpeg-turbo=//flutter/third_party/libjpeg-turbo",
+    ),
+    "libpng": struct(
+        path = "engine/src/flutter/third_party/libpng",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/third_party/libpng/BUILD.gn"],
+        gn_repository = "@libpng=//flutter/third_party/libpng",
+    ),
+    "libwebp": struct(
+        path = "engine/src/flutter/third_party/libwebp",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/libwebp/BUILD.gn"],
+        gn_repository = "@libwebp=//flutter/third_party/libwebp",
+        gn_secondary_dir = "engine/src/flutter/build/secondary/flutter/third_party/libwebp",
+    ),
     "llvm_libc": struct(
         path = "engine/src/flutter/third_party/llvm_libc",
         build_file = _OVERLAYS + ":llvm_libc/BUILD.llvm_libc.bazel",
@@ -80,6 +119,13 @@ _SOURCE_REPOSITORIES = {
             "engine/src/flutter/third_party/skia/src/partition_alloc/BUILD.gn",
         ],
         gn_repository = "@skia=//flutter/third_party/skia",
+    ),
+    "wuffs": struct(
+        path = "engine/src/flutter/third_party/wuffs",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/wuffs/BUILD.gn"],
+        gn_repository = "@wuffs=//flutter/third_party/wuffs",
+        gn_secondary_dir = "engine/src/flutter/build/secondary/flutter/third_party/wuffs",
     ),
     "zlib": struct(
         path = "engine/src/flutter/third_party/zlib",
@@ -225,14 +271,16 @@ def _sysroot_repositories(mctx, fetch):
 
 def _synced_deps_impl(mctx):
     for name, spec in _SOURCE_REPOSITORIES.items():
-        if spec.path not in GIT_DEPS:
-            fail("synced_deps: %s is not a git dependency in DEPS (deps.lock.bzl is stale?)" % spec.path)
+        synced = getattr(spec, "synced", spec.path)
+        if synced not in GIT_DEPS:
+            fail("synced_deps: %s is not a git dependency in DEPS (deps.lock.bzl is stale?)" % synced)
         synced_repository(
             name = name,
             path = spec.path,
             build_file = spec.build_file,
             gn_build_files = getattr(spec, "gn_build_files", []),
             gn_repository = getattr(spec, "gn_repository", ""),
+            gn_secondary_dir = getattr(spec, "gn_secondary_dir", ""),
         )
 
     fetch = _fetch_toolchains(mctx)
