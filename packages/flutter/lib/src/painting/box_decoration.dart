@@ -410,6 +410,7 @@ class _BoxDecorationPainter extends BoxPainter {
 
   Paint? _cachedBackgroundPaint;
   Rect? _rectForCachedBackgroundPaint;
+  final Paint _layerPaint = Paint();
   Paint _getBackgroundPaint(Rect rect, TextDirection? textDirection) {
     assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
@@ -493,11 +494,19 @@ class _BoxDecorationPainter extends BoxPainter {
       if (!shadow.inset || shadow.color.alpha == 0) {
         continue;
       }
-      outline ??= _boxRRect(rect, textDirection);
-      if (!outline.isFinite) {
-        continue;
+      if (outline == null) {
+        final RRect next = _boxRRect(rect, textDirection);
+        if (!next.isFinite) {
+          return;
+        }
+        outline = next;
+        canvas.save();
+        canvas.clipRRect(outline);
       }
       _paintInsetShadow(canvas, rect, outline, shadow, textDirection);
+    }
+    if (outline != null) {
+      canvas.restore();
     }
   }
 
@@ -508,12 +517,10 @@ class _BoxDecorationPainter extends BoxPainter {
     BoxShadow shadow,
     TextDirection? textDirection,
   ) {
-    final Paint paint = shadow.copyWith(blurStyle: BlurStyle.normal).toPaint();
+    final Paint paint = _insetPaint(shadow);
     final Rect holeRect = rect.shift(shadow.offset).inflate(-shadow.spreadRadius);
     final RRect hole = holeRect.isEmpty ? RRect.zero : _boxRRect(holeRect, textDirection);
     final Rect core = hole.isEmpty ? Rect.zero : hole.scaleRadii().safeInnerRect;
-    canvas.save();
-    canvas.clipRRect(outline);
     if (shadow.blurRadius > 0 &&
         paint.maskFilter != null &&
         !core.isEmpty &&
@@ -523,7 +530,7 @@ class _BoxDecorationPainter extends BoxPainter {
         ..maskFilter = paint.maskFilter
         ..blendMode = BlendMode.dstOut;
       paint.maskFilter = null;
-      canvas.saveLayer(outline.outerRect, Paint());
+      canvas.saveLayer(outline.outerRect, _layerPaint);
       canvas.drawPaint(paint);
       canvas.drawRRect(hole, erasePaint);
       canvas.restore();
@@ -540,7 +547,14 @@ class _BoxDecorationPainter extends BoxPainter {
       }
       canvas.drawPath(path, paint);
     }
-    canvas.restore();
+  }
+
+  Paint _insetPaint(BoxShadow shadow) {
+    final Paint paint = shadow.toPaint();
+    if (shadow.blurStyle != BlurStyle.normal && paint.maskFilter != null) {
+      paint.maskFilter = MaskFilter.blur(BlurStyle.normal, shadow.blurSigma);
+    }
+    return paint;
   }
 
   RRect _boxRRect(Rect rect, TextDirection? textDirection) {

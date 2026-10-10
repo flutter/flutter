@@ -458,8 +458,12 @@ class _ShapeDecorationPainter extends BoxPainter {
       if (!shadow.inset || shadow.color.alpha == 0) {
         continue;
       }
-      clip ??= _decoration.shape.getOuterPath(rect, textDirection: textDirection);
-      final Paint paint = shadow.copyWith(blurStyle: BlurStyle.normal).toPaint();
+      if (clip == null) {
+        clip = _decoration.shape.getOuterPath(rect, textDirection: textDirection);
+        canvas.save();
+        canvas.clipPath(clip);
+      }
+      final Paint paint = _insetPaint(shadow);
       final Rect holeRect = rect.shift(shadow.offset).inflate(-shadow.spreadRadius);
       final double padding = shadow.blurSigma * _kInsetBlurSigmaExtent + _kInsetAntiAliasOutset;
       final Rect cover = (holeRect.isEmpty ? rect : rect.expandToInclude(holeRect)).inflate(
@@ -474,11 +478,19 @@ class _ShapeDecorationPainter extends BoxPainter {
           Offset.zero,
         );
       }
-      canvas.save();
-      canvas.clipPath(clip);
       canvas.drawPath(path, paint);
+    }
+    if (clip != null) {
       canvas.restore();
     }
+  }
+
+  Paint _insetPaint(BoxShadow shadow) {
+    final Paint paint = shadow.toPaint();
+    if (shadow.blurStyle != BlurStyle.normal && paint.maskFilter != null) {
+      paint.maskFilter = MaskFilter.blur(BlurStyle.normal, shadow.blurSigma);
+    }
+    return paint;
   }
 
   void _paintInterior(Canvas canvas, Rect rect, TextDirection? textDirection) {

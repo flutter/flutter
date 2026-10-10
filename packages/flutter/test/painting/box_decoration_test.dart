@@ -282,6 +282,19 @@ void main() {
     expect(outer, lessThan(background));
     expect(background, lessThan(clip));
   });
+
+  test('BoxDecoration clips stacked inset shadows once', () {
+    const decoration = BoxDecoration(
+      boxShadow: <BoxShadow>[
+        BoxShadow(blurRadius: 0, inset: true),
+        BoxShadow(color: Color(0xFF00FF00), blurRadius: 0, inset: true),
+      ],
+    );
+    final List<Symbol> calls = _paintCalls(decoration, const Size(40, 40));
+    expect(calls.where((Symbol call) => call == #clipRRect).length, 1);
+    expect(calls.where((Symbol call) => call == #drawPath).length, 2);
+    expect(calls.where((Symbol call) => call == #restore).length, 1);
+  });
 }
 
 List<Symbol> _paintCalls(BoxDecoration decoration, Size size) {
