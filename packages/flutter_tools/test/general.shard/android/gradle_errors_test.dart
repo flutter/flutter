@@ -6,8 +6,6 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/android/gradle_errors.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
-import 'package:flutter_tools/src/android/java.dart';
-import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -16,17 +14,25 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
   late FakeProcessManager processManager;
+  late BufferLogger testLogger;
+  late FakeToolContext toolContext;
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
     processManager = FakeProcessManager.empty();
+    testLogger = BufferLogger.test();
+    toolContext = FakeToolContext(
+      fs: fileSystem,
+      logger: testLogger,
+      platform: FakePlatform(),
+      processManager: processManager,
+    );
   });
 
   group('gradleErrors', () {
@@ -65,10 +71,8 @@ void main() {
   });
 
   group('network errors', () {
-    testUsingContext(
-      'retries if gradle fails while downloading',
-      () async {
-        const errorMessage = r'''
+    testWithoutContext('retries if gradle fails while downloading', () async {
+      const errorMessage = r'''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
 at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1872)
 at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
@@ -82,28 +86,25 @@ at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-        expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-        expect(
-          await networkErrorHandler.handler(
-            line: '',
-            project: FakeFlutterProject(),
-            usesAndroidX: true,
-          ),
-          equals(GradleBuildStatus.retry),
-        );
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(
+        await networkErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: '',
+          project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
+        ),
+        equals(GradleBuildStatus.retry),
+      );
 
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
 
-    testUsingContext('retries if remote host terminated ssl handshake', () async {
+    testWithoutContext('retries if remote host terminated ssl handshake', () async {
       const errorMessage = r'''
 Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host terminated the handshake
 	at java.base/sun.security.ssl.SSLSocketImpl.handleEOF(SSLSocketImpl.java:1696)
@@ -136,8 +137,10 @@ Caused by: java.io.EOFException: SSL peer shut down incorrectly
       expect(formatTestErrorMessage(errorMessage, remoteTerminatedHandshakeHandler), isTrue);
       expect(
         await remoteTerminatedHandshakeHandler.handler(
+          gradleUtils: FakeGradleUtils(),
           line: '',
           project: FakeFlutterProject(),
+          toolContext: toolContext,
           usesAndroidX: true,
         ),
         equals(GradleBuildStatus.retry),
@@ -149,10 +152,8 @@ Caused by: java.io.EOFException: SSL peer shut down incorrectly
       );
     });
 
-    testUsingContext(
-      'retries if gradle fails downloading with proxy error',
-      () async {
-        const errorMessage = r'''
+    testWithoutContext('retries if gradle fails downloading with proxy error', () async {
+      const errorMessage = r'''
 Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
 at sun.net.www.protocol.http.HttpURLConnection.doTunneling(HttpURLConnection.java:2124)
 at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:183)
@@ -168,31 +169,26 @@ at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-        expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-        expect(
-          await networkErrorHandler.handler(
-            line: '',
-            project: FakeFlutterProject(),
-            usesAndroidX: true,
-          ),
-          equals(GradleBuildStatus.retry),
-        );
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(
+        await networkErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: '',
+          project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
+        ),
+        equals(GradleBuildStatus.retry),
+      );
 
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
 
-    testUsingContext(
-      'retries if gradle fails downloading with bad gateway error',
-      () async {
-        const errorMessage = r'''
+    testWithoutContext('retries if gradle fails downloading with bad gateway error', () async {
+      const errorMessage = r'''
 Exception in thread "main" java.io.IOException: Server returned HTTP response code: 502 for URL: https://objects.githubusercontent.com/github-production-release-asset-2e65be/696192900/1e77bbfb-4cde-4376-92ea-fc4ff57b8362?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=FFFF%2F20231220%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20231220T160553Z&X-Amz-Expires=300&X-Amz-Signature=ffff&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=696192900&response-content-disposition=attachment%3B%20filename%3Dgradle-8.2.1-all.zip&response-content-type=application%2Foctet-stream
 at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1997)
 at java.base/sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1589)
@@ -206,62 +202,52 @@ at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-        expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-        expect(
-          await networkErrorHandler.handler(
-            line: '',
-            project: FakeFlutterProject(),
-            usesAndroidX: true,
-          ),
-          equals(GradleBuildStatus.retry),
-        );
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(
+        await networkErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: '',
+          project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
+        ),
+        equals(GradleBuildStatus.retry),
+      );
 
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
 
-    testUsingContext(
-      'retries if gradle times out waiting for exclusive access to zip',
-      () async {
-        const errorMessage = '''
+    testWithoutContext('retries if gradle times out waiting for exclusive access to zip', () async {
+      const errorMessage = '''
 Exception in thread "main" java.lang.RuntimeException: Timeout of 120000 reached waiting for exclusive access to file: /User/documents/gradle-5.6.2-all.zip
 	at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManager.java:61)
 	at org.gradle.wrapper.Install.createDist(Install.java:48)
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-        expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-        expect(
-          await networkErrorHandler.handler(
-            line: '',
-            project: FakeFlutterProject(),
-            usesAndroidX: true,
-          ),
-          equals(GradleBuildStatus.retry),
-        );
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(
+        await networkErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: '',
+          project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
+        ),
+        equals(GradleBuildStatus.retry),
+      );
 
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
 
-    testUsingContext(
-      'retries if remote host closes connection',
-      () async {
-        const errorMessage = r'''
+    testWithoutContext('retries if remote host closes connection', () async {
+      const errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-5.6.2-all.zip
 Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake
 	at sun.security.ssl.SSLSocketImpl.readRecord(SSLSocketImpl.java:994)
@@ -284,31 +270,26 @@ Exception in thread "main" javax.net.ssl.SSLHandshakeException: Remote host clos
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-        expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-        expect(
-          await networkErrorHandler.handler(
-            line: '',
-            project: FakeFlutterProject(),
-            usesAndroidX: true,
-          ),
-          equals(GradleBuildStatus.retry),
-        );
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(
+        await networkErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: '',
+          project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
+        ),
+        equals(GradleBuildStatus.retry),
+      );
 
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
 
-    testUsingContext(
-      'retries if file opening fails',
-      () async {
-        const errorMessage = r'''
+    testWithoutContext('retries if file opening fails', () async {
+      const errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-3.5.0-all.zip
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle-dn.com/distributions/gradle-3.5.0-all.zip
 	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1890)
@@ -323,31 +304,26 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-        expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-        expect(
-          await networkErrorHandler.handler(
-            line: '',
-            project: FakeFlutterProject(),
-            usesAndroidX: true,
-          ),
-          equals(GradleBuildStatus.retry),
-        );
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(
+        await networkErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: '',
+          project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
+        ),
+        equals(GradleBuildStatus.retry),
+      );
 
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
 
-    testUsingContext(
-      'retries if the connection is reset',
-      () async {
-        const errorMessage = r'''
+    testWithoutContext('retries if the connection is reset', () async {
+      const errorMessage = r'''
 Downloading https://services.gradle.org/distributions/gradle-5.6.2-all.zip
 Exception in thread "main" java.net.SocketException: Connection reset
 	at java.net.SocketInputStream.read(SocketInputStream.java:210)
@@ -373,31 +349,26 @@ Exception in thread "main" java.net.SocketException: Connection reset
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)''';
 
-        expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-        expect(
-          await networkErrorHandler.handler(
-            line: '',
-            project: FakeFlutterProject(),
-            usesAndroidX: true,
-          ),
-          equals(GradleBuildStatus.retry),
-        );
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(
+        await networkErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: '',
+          project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
+        ),
+        equals(GradleBuildStatus.retry),
+      );
 
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
 
-    testUsingContext(
-      'retries if Gradle could not get a resource',
-      () async {
-        const errorMessage = '''
+    testWithoutContext('retries if Gradle could not get a resource', () async {
+      const errorMessage = '''
 A problem occurred configuring root project 'android'.
 > Could not resolve all artifacts for configuration ':classpath'.
    > Could not resolve net.sf.proguard:proguard-gradle:6.0.3.
@@ -410,31 +381,26 @@ A problem occurred configuring root project 'android'.
                   > Could not get resource 'https://jcenter.bintray.com/net/sf/proguard/proguard-parent/6.0.3/proguard-parent-6.0.3.pom'.
                      > Could not GET 'https://jcenter.bintray.com/net/sf/proguard/proguard-parent/6.0.3/proguard-parent-6.0.3.pom'. Received status code 504 from server: Gateway Time-out''';
 
-        expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-        expect(
-          await networkErrorHandler.handler(
-            line: '',
-            project: FakeFlutterProject(),
-            usesAndroidX: true,
-          ),
-          equals(GradleBuildStatus.retry),
-        );
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(
+        await networkErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: '',
+          project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
+        ),
+        equals(GradleBuildStatus.retry),
+      );
 
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
 
-    testUsingContext(
-      'retries if Gradle could not get a resource (non-Gateway)',
-      () async {
-        const errorMessage = '''
+    testWithoutContext('retries if Gradle could not get a resource (non-Gateway)', () async {
+      const errorMessage = '''
 * Error running Gradle:
 Exit code 1 from: /home/travis/build/flutter/flutter sdk/examples/flutter_gallery/android/gradlew app:properties:
 Starting a Gradle Daemon (subsequent builds will be faster)
@@ -451,31 +417,26 @@ A problem occurred configuring root project 'android'.
             > Could not GET 'https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/3.1.2/gradle-3.1.2.pom'.
                > Remote host closed connection during handshake''';
 
-        expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-        expect(
-          await networkErrorHandler.handler(
-            line: '',
-            project: FakeFlutterProject(),
-            usesAndroidX: true,
-          ),
-          equals(GradleBuildStatus.retry),
-        );
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(
+        await networkErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: '',
+          project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
+        ),
+        equals(GradleBuildStatus.retry),
+      );
 
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
 
-    testUsingContext(
-      'retries if connection times out',
-      () async {
-        const errorMessage = r'''
+    testWithoutContext('retries if connection times out', () async {
+      const errorMessage = r'''
 Exception in thread "main" java.net.ConnectException: Connection timed out
 java.base/sun.nio.ch.Net.connect0(Native Method)
   at java.base/sun.nio.ch.Net.connect(Net.java:579)
@@ -491,30 +452,27 @@ java.base/sun.nio.ch.Net.connect0(Native Method)
   at java.base/sun.net.www.protocol.https.HttpsClient.<init>(HttpsClient.java:266)
   at java.base/sun.net.www.protocol.https.HttpsClient.New(HttpsClient.java:380)''';
 
-        expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
-        expect(
-          await networkErrorHandler.handler(
-            line: '',
-            project: FakeFlutterProject(),
-            usesAndroidX: true,
-          ),
-          equals(GradleBuildStatus.retry),
-        );
+      expect(formatTestErrorMessage(errorMessage, networkErrorHandler), isTrue);
+      expect(
+        await networkErrorHandler.handler(
+          gradleUtils: FakeGradleUtils(),
+          line: '',
+          project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
+        ),
+        equals(GradleBuildStatus.retry),
+      );
 
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
   });
 
   group('permission errors', () {
-    testUsingContext('throws toolExit if gradle is missing execute permissions', () async {
+    testWithoutContext('throws toolExit if gradle is missing execute permissions', () async {
       const errorMessage = '''
 Permission denied
 Command: /home/android/gradlew assembleRelease
@@ -522,9 +480,11 @@ Command: /home/android/gradlew assembleRelease
       expect(formatTestErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
       expect(
         await permissionDeniedErrorHandler.handler(
-          usesAndroidX: true,
+          gradleUtils: FakeGradleUtils(),
           line: '',
           project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
         ),
         equals(GradleBuildStatus.exit),
       );
@@ -543,7 +503,7 @@ Command: /home/android/gradlew assembleRelease
       );
     });
 
-    testUsingContext('pattern', () async {
+    testWithoutContext('pattern', () async {
       const errorMessage = '''
 Permission denied
 Command: /home/android/gradlew assembleRelease
@@ -551,12 +511,14 @@ Command: /home/android/gradlew assembleRelease
       expect(formatTestErrorMessage(errorMessage, permissionDeniedErrorHandler), isTrue);
     });
 
-    testUsingContext('handler', () async {
+    testWithoutContext('handler', () async {
       expect(
         await permissionDeniedErrorHandler.handler(
-          usesAndroidX: true,
+          gradleUtils: FakeGradleUtils(),
           line: '',
           project: FakeFlutterProject(),
+          toolContext: toolContext,
+          usesAndroidX: true,
         ),
         equals(GradleBuildStatus.exit),
       );
@@ -586,10 +548,12 @@ Command: /home/android/gradlew assembleRelease
       );
     });
 
-    testUsingContext('handler', () async {
+    testWithoutContext('handler', () async {
       await licenseNotAcceptedHandler.handler(
+        gradleUtils: FakeGradleUtils(),
         line: 'You have not accepted the license agreements of the following SDK components: [foo, bar]',
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
         usesAndroidX: true,
       );
 
@@ -626,13 +590,11 @@ Command: /home/android/gradlew assembleRelease
       );
     });
 
-    testUsingContext(
-      'handler - with flavor',
-      () async {
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['gradlew', 'app:tasks', '--all', '--console=auto'],
-            stdout: '''
+    testWithoutContext('handler - with flavor', () async {
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['gradlew', 'app:tasks', '--all', '--console=auto'],
+          stdout: '''
 assembleRelease
 assembleFlavor1
 assembleFlavor1Release
@@ -643,87 +605,75 @@ assembleProfile
 assembles
 assembleFooTest
           ''',
-          ),
-        );
+        ),
+      );
 
-        await flavorUndefinedHandler.handler(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-          line: '',
-        );
+      await flavorUndefinedHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        java: FakeJava(),
+        line: '',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        expect(
-          testLogger.statusText,
-          contains(
-            'Gradle project does not define a task suitable '
-            'for the requested build.',
-          ),
-        );
-        expect(
-          testLogger.statusText,
-          contains(
-            '\n'
-            '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
-            '│ [!]  Gradle project does not define a task suitable for the requested build.                    │\n'
-            '│                                                                                                 │\n'
-            '│ The /android/app/build.gradle file defines product flavors: flavor1, flavor_2. You must specify │\n'
-            '│ a --flavor option to select one of them.                                                        │\n'
-            '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n',
-          ),
-        );
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        Java: () => FakeJava(),
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.statusText,
+        contains(
+          'Gradle project does not define a task suitable '
+          'for the requested build.',
+        ),
+      );
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!]  Gradle project does not define a task suitable for the requested build.                    │\n'
+          '│                                                                                                 │\n'
+          '│ The /android/app/build.gradle file defines product flavors: flavor1, flavor_2. You must specify │\n'
+          '│ a --flavor option to select one of them.                                                        │\n'
+          '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
 
-    testUsingContext(
-      'handler - without flavor',
-      () async {
-        processManager.addCommand(
-          const FakeCommand(
-            command: <String>['gradlew', 'app:tasks', '--all', '--console=auto'],
-            stdout: '''
+    testWithoutContext('handler - without flavor', () async {
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['gradlew', 'app:tasks', '--all', '--console=auto'],
+          stdout: '''
 assembleRelease
 assembleDebug
 assembleProfile
           ''',
-          ),
-        );
+        ),
+      );
 
-        await flavorUndefinedHandler.handler(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-          line: '',
-        );
+      await flavorUndefinedHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        java: FakeJava(),
+        line: '',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        expect(
-          testLogger.statusText,
-          contains(
-            '\n'
-            '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
-            '│ [!]  Gradle project does not define a task suitable for the requested build.                  │\n'
-            '│                                                                                               │\n'
-            '│ The /android/app/build.gradle file does not define any custom product flavors. You cannot use │\n'
-            '│ the --flavor option.                                                                          │\n'
-            '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n',
-          ),
-        );
-        expect(processManager, hasNoRemainingExpectations);
-      },
-      overrides: <Type, Generator>{
-        Java: () => FakeJava(),
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!]  Gradle project does not define a task suitable for the requested build.                  │\n'
+          '│                                                                                               │\n'
+          '│ The /android/app/build.gradle file does not define any custom product flavors. You cannot use │\n'
+          '│ the --flavor option.                                                                          │\n'
+          '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 
   group('higher minSdkVersion', () {
@@ -734,43 +684,36 @@ assembleProfile
       expect(minSdkVersionHandler.test(stdoutLine), isTrue);
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        await minSdkVersionHandler.handler(
-          line: stdoutLine,
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-        );
+    testWithoutContext('suggestion', () async {
+      await minSdkVersionHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: stdoutLine,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        expect(
-          testLogger.statusText,
-          contains(
-            '\n'
-            '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
-            '│ The plugin webview_flutter requires a higher Android SDK version.                             │\n'
-            '│ Fix this issue by adding the following to the file /android/app/build.gradle:                 │\n'
-            '│ android {                                                                                     │\n'
-            '│   defaultConfig {                                                                             │\n'
-            '│     minSdkVersion 21                                                                          │\n'
-            '│   }                                                                                           │\n'
-            '│ }                                                                                             │\n'
-            '│                                                                                               │\n'
-            '│ Following this change, your app will not be available to users running Android SDKs below 21. │\n'
-            '│ Consider searching for a version of this plugin that supports these lower versions of the     │\n'
-            '│ Android SDK instead.                                                                          │\n'
-            '│ For more information, see: https://flutter.dev/to/review-gradle-config                        │\n'
-            '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ The plugin webview_flutter requires a higher Android SDK version.                             │\n'
+          '│ Fix this issue by adding the following to the file /android/app/build.gradle:                 │\n'
+          '│ android {                                                                                     │\n'
+          '│   defaultConfig {                                                                             │\n'
+          '│     minSdkVersion 21                                                                          │\n'
+          '│   }                                                                                           │\n'
+          '│ }                                                                                             │\n'
+          '│                                                                                               │\n'
+          '│ Following this change, your app will not be available to users running Android SDKs below 21. │\n'
+          '│ Consider searching for a version of this plugin that supports these lower versions of the     │\n'
+          '│ Android SDK instead.                                                                          │\n'
+          '│ For more information, see: https://flutter.dev/to/review-gradle-config                        │\n'
+          '└───────────────────────────────────────────────────────────────────────────────────────────────┘\n',
+        ),
+      );
+    });
   });
 
   // https://issuetracker.google.com/issues/141126614
@@ -782,38 +725,31 @@ assembleProfile
       );
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        await transformInputIssueHandler.handler(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-          line: '',
-        );
+    testWithoutContext('suggestion', () async {
+      await transformInputIssueHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: '',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        expect(
-          testLogger.statusText,
-          contains(
-            '\n'
-            '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
-            '│ This issue appears to be https://github.com/flutter/flutter/issues/58247.     │\n'
-            '│ Fix this issue by adding the following to the file /android/app/build.gradle: │\n'
-            '│ android {                                                                     │\n'
-            '│   lintOptions {                                                               │\n'
-            '│     checkReleaseBuilds false                                                  │\n'
-            '│   }                                                                           │\n'
-            '│ }                                                                             │\n'
-            '└───────────────────────────────────────────────────────────────────────────────┘\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ─────────────────────────────────────────────────────────────────┐\n'
+          '│ This issue appears to be https://github.com/flutter/flutter/issues/58247.     │\n'
+          '│ Fix this issue by adding the following to the file /android/app/build.gradle: │\n'
+          '│ android {                                                                     │\n'
+          '│   lintOptions {                                                               │\n'
+          '│     checkReleaseBuilds false                                                  │\n'
+          '│   }                                                                           │\n'
+          '│ }                                                                             │\n'
+          '└───────────────────────────────────────────────────────────────────────────────┘\n',
+        ),
+      );
+    });
   });
 
   group('java heap space', () {
@@ -822,31 +758,24 @@ assembleProfile
       expect(javaHeapSpaceHandler.test('java.lang.OutOfMemoryError: Java heap space'), isTrue);
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        final GradleBuildStatus status = await javaHeapSpaceHandler.handler(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-          line: '> Java heap space',
-        );
+    testWithoutContext('suggestion', () async {
+      final GradleBuildStatus status = await javaHeapSpaceHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: '> Java heap space',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        expect(status, GradleBuildStatus.exit);
-        expect(testLogger.statusText, contains('Java heap space'));
-        expect(
-          testLogger.statusText,
-          contains(
-            'https://docs.gradle.org/current/userguide/config_gradle.html#sec:configuring_jvm_memory',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(status, GradleBuildStatus.exit);
+      expect(testLogger.statusText, contains('Java heap space'));
+      expect(
+        testLogger.statusText,
+        contains(
+          'https://docs.gradle.org/current/userguide/config_gradle.html#sec:configuring_jvm_memory',
+        ),
+      );
+    });
   });
 
   group('Dependency mismatch', () {
@@ -864,43 +793,18 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       );
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        await lockFileDepMissingHandler.handler(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-          line: '',
-        );
-
-        expect(
-          testLogger.statusText,
-          contains(
-            '\n'
-            '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
-            '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
-            '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
-            '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
-            '└──────────────────────────────────────────────────────────────────────────────────────────┘\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
-  });
-
-  testUsingContext(
-    'generates correct gradle command for Unix-like environment',
-    () async {
+    testWithoutContext('suggestion', () async {
       await lockFileDepMissingHandler.handler(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        usesAndroidX: true,
+        gradleUtils: FakeGradleUtils(),
         line: '',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: testLogger,
+          platform: fakePlatform('android'),
+          processManager: processManager,
+        ),
+        usesAndroidX: true,
       );
 
       expect(
@@ -911,47 +815,66 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
           '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
           '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
           '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
-          '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
-          '',
+          '└──────────────────────────────────────────────────────────────────────────────────────────┘\n',
         ),
       );
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('linux'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    });
+  });
 
-  testUsingContext(
-    'generates correct gradle command for windows environment',
-    () async {
-      await lockFileDepMissingHandler.handler(
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        usesAndroidX: true,
-        line: '',
-      );
-      expect(
-        testLogger.statusText,
-        contains(
-          '\n'
-          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│ You need to update the lockfile, or disable Gradle dependency locking.                       │\n'
-          '│ To regenerate the lockfiles run: `.\\gradlew.bat :generateLockfiles` in /android/build.gradle │\n'
-          '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle      │\n'
-          '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
-          '',
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('windows'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+  testWithoutContext('generates correct gradle command for Unix-like environment', () async {
+    await lockFileDepMissingHandler.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: '',
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: testLogger,
+        platform: fakePlatform('linux'),
+        processManager: processManager,
+      ),
+      usesAndroidX: true,
+    );
+
+    expect(
+      testLogger.statusText,
+      contains(
+        '\n'
+        '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────┐\n'
+        '│ You need to update the lockfile, or disable Gradle dependency locking.                   │\n'
+        '│ To regenerate the lockfiles run: `./gradlew :generateLockfiles` in /android/build.gradle │\n'
+        '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle  │\n'
+        '└──────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        '',
+      ),
+    );
+  });
+
+  testWithoutContext('generates correct gradle command for windows environment', () async {
+    await lockFileDepMissingHandler.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: '',
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: testLogger,
+        platform: fakePlatform('windows'),
+        processManager: processManager,
+      ),
+      usesAndroidX: true,
+    );
+    expect(
+      testLogger.statusText,
+      contains(
+        '\n'
+        '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
+        '│ You need to update the lockfile, or disable Gradle dependency locking.                       │\n'
+        '│ To regenerate the lockfiles run: `.\\gradlew.bat :generateLockfiles` in /android/build.gradle │\n'
+        '│ To remove dependency locking, remove the `dependencyLocking` from /android/build.gradle      │\n'
+        '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        '',
+      ),
+    );
+  });
 
   group('Incompatible Kotlin version', () {
     testWithoutContext('pattern', () {
@@ -969,40 +892,33 @@ Execution failed for task ':app:generateDebugFeatureTransitiveDeps'.
       );
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        await incompatibleKotlinVersionHandler.handler(
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-          line: '',
-        );
+    testWithoutContext('suggestion', () async {
+      await incompatibleKotlinVersionHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: '',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        expect(
-          testLogger.statusText,
-          contains(
-            '\n'
-            '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
-            '│ [!] Your project requires a newer version of the Kotlin Gradle plugin.                       │\n'
-            '│ Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then   │\n'
-            '│ update the                                                                                   │\n'
-            '│ version number of the plugin with id "org.jetbrains.kotlin.android" in the plugins block of  │\n'
-            '│ /android/settings.gradle.                                                                    │\n'
-            '│                                                                                              │\n'
-            '│ Alternatively (if your project was created before Flutter 3.19), update                      │\n'
-            '│ /android/build.gradle                                                                        │\n'
-            "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
-            '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a newer version of the Kotlin Gradle plugin.                       │\n'
+          '│ Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then   │\n'
+          '│ update the                                                                                   │\n'
+          '│ version number of the plugin with id "org.jetbrains.kotlin.android" in the plugins block of  │\n'
+          '│ /android/settings.gradle.                                                                    │\n'
+          '│                                                                                              │\n'
+          '│ Alternatively (if your project was created before Flutter 3.19), update                      │\n'
+          '│ /android/build.gradle                                                                        │\n'
+          "│ ext.kotlin_version = '<latest-version>'                                                      │\n"
+          '└──────────────────────────────────────────────────────────────────────────────────────────────┘\n',
+        ),
+      );
+    });
   });
 
   group('Bump Gradle', () {
@@ -1016,40 +932,33 @@ A problem occurred evaluating project ':app'.
       expect(outdatedGradleHandler.test(errorMessage), isTrue);
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        await outdatedGradleHandler.handler(
-          line: errorMessage,
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-        );
+    testWithoutContext('suggestion', () async {
+      await outdatedGradleHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        expect(
-          testLogger.statusText,
-          contains(
-            '\n'
-            '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────┐\n'
-            '│ [!] Your project needs to upgrade Gradle and the Android Gradle plugin.          │\n'
-            '│                                                                                  │\n'
-            '│ To fix this issue, replace the following content:                                │\n'
-            '│ /android/build.gradle:                                                           │\n'
-            "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
-            "│     + classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'                           │\n"
-            '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
-            '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
-            '│     + https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip             │\n'
-            '└──────────────────────────────────────────────────────────────────────────────────┘\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project needs to upgrade Gradle and the Android Gradle plugin.          │\n'
+          '│                                                                                  │\n'
+          '│ To fix this issue, replace the following content:                                │\n'
+          '│ /android/build.gradle:                                                           │\n'
+          "│     - classpath 'com.android.tools.build:gradle:<current-version>'               │\n"
+          "│     + classpath 'com.android.tools.build:gradle:$templateAndroidGradlePluginVersion'                           │\n"
+          '│ /android/gradle/wrapper/gradle-wrapper.properties:                               │\n'
+          '│     - https://services.gradle.org/distributions/gradle-<current-version>-all.zip │\n'
+          '│     + https://services.gradle.org/distributions/gradle-$templateDefaultGradleVersion-all.zip             │\n'
+          '└──────────────────────────────────────────────────────────────────────────────────┘\n',
+        ),
+      );
+    });
   });
 
   group('Required compileSdkVersion', () {
@@ -1075,36 +984,29 @@ Execution failed for task ':app:checkDebugAarMetadata'.
       expect(minCompileSdkVersionHandler.test(errorMessage), isTrue);
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        await minCompileSdkVersionHandler.handler(
-          line: errorMessage,
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-        );
+    testWithoutContext('suggestion', () async {
+      await minCompileSdkVersionHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        expect(
-          testLogger.statusText,
-          contains(
-            '\n'
-            '┌─ Flutter Fix ──────────────────────────────────────────────────────────────────┐\n'
-            '│ [!] Your project requires a higher compileSdk version.                         │\n'
-            '│ Fix this issue by bumping the compileSdk version in /android/app/build.gradle: │\n'
-            '│ android {                                                                      │\n'
-            '│   compileSdk 31                                                                │\n'
-            '│ }                                                                              │\n'
-            '└────────────────────────────────────────────────────────────────────────────────┘\n',
-          ),
-        );
-      },
-      overrides: <Type, Generator>{
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ──────────────────────────────────────────────────────────────────┐\n'
+          '│ [!] Your project requires a higher compileSdk version.                         │\n'
+          '│ Fix this issue by bumping the compileSdk version in /android/app/build.gradle: │\n'
+          '│ android {                                                                      │\n'
+          '│   compileSdk 31                                                                │\n'
+          '│ }                                                                              │\n'
+          '└────────────────────────────────────────────────────────────────────────────────┘\n',
+        ),
+      );
+    });
   });
 
   group('incompatible java and android gradle plugin versions error', () {
@@ -1123,35 +1025,26 @@ An exception occurred applying plugin request [id: 'com.android.application']
       expect(incompatibleJavaAndAgpVersionsHandler.test(errorMessage), isTrue);
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        await incompatibleJavaAndAgpVersionsHandler.handler(
-          line: errorMessage,
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-        );
+    testWithoutContext('suggestion', () async {
+      await incompatibleJavaAndAgpVersionsHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        // Ensure the error notes the required Java version, the Java version currently used,
-        // the android studio and android sdk installation link, the flutter command to set
-        // the Java version Flutter uses, and the flutter doctor command.
-        expect(
-          testLogger.statusText,
-          contains(
-            'Android Gradle plugin requires Java 17 to run. You are currently using Java 11.',
-          ),
-        );
-        expect(testLogger.statusText, contains('https://developer.android.com/studio/install'));
-        expect(testLogger.statusText, contains('`flutter config --jdk-dir=“</path/to/jdk>“`'));
-        expect(testLogger.statusText, contains('`flutter doctor --verbose`'));
-      },
-      overrides: <Type, Generator>{
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      // Ensure the error notes the required Java version, the Java version currently used,
+      // the android studio and android sdk installation link, the flutter command to set
+      // the Java version Flutter uses, and the flutter doctor command.
+      expect(
+        testLogger.statusText,
+        contains('Android Gradle plugin requires Java 17 to run. You are currently using Java 11.'),
+      );
+      expect(testLogger.statusText, contains('https://developer.android.com/studio/install'));
+      expect(testLogger.statusText, contains('`flutter config --jdk-dir=“</path/to/jdk>“`'));
+      expect(testLogger.statusText, contains('`flutter doctor --verbose`'));
+    });
   });
 
   group('SSLException', () {
@@ -1202,28 +1095,21 @@ at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:108)'''),
       );
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        final GradleBuildStatus status = await sslExceptionHandler.handler(
-          project: FakeFlutterProject(),
-          usesAndroidX: true,
-          line: '',
-        );
+    testWithoutContext('suggestion', () async {
+      final GradleBuildStatus status = await sslExceptionHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: '',
+        project: FakeFlutterProject(),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        expect(status, GradleBuildStatus.retry);
-        expect(
-          testLogger.errorText,
-          contains('Gradle threw an error while downloading artifacts from the network.'),
-        );
-      },
-      overrides: <Type, Generator>{
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      expect(status, GradleBuildStatus.retry);
+      expect(
+        testLogger.errorText,
+        contains('Gradle threw an error while downloading artifacts from the network.'),
+      );
+    });
   });
 
   group('Zip exception', () {
@@ -1247,116 +1133,112 @@ at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)'''),
       );
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+    testWithoutContext('suggestion', () async {
+      fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
 
-        final GradleBuildStatus result = await zipExceptionHandler.handler(
-          project: FakeFlutterProject(),
-          usesAndroidX: true,
-          line: '',
-        );
+      final GradleBuildStatus result = await zipExceptionHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: '',
+        project: FakeFlutterProject(),
+        toolContext: FakeToolContext(
+          botDetector: const FakeBotDetector(false),
+          fs: fileSystem,
+          logger: testLogger,
+          platform: FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+          processManager: processManager,
+        ),
+        usesAndroidX: true,
+      );
 
-        expect(result, equals(GradleBuildStatus.retry));
-        expect(fileSystem.file('foo/.gradle/fizz.zip'), exists);
-        expect(
-          testLogger.errorText,
-          contains('[!] Your .gradle directory under the home directory might be corrupted.\n'),
-        );
-        expect(testLogger.statusText, '');
-      },
-      overrides: <Type, Generator>{
-        Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        BotDetector: () => const FakeBotDetector(false),
-      },
-    );
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(fileSystem.file('foo/.gradle/fizz.zip'), exists);
+      expect(
+        testLogger.errorText,
+        contains('[!] Your .gradle directory under the home directory might be corrupted.\n'),
+      );
+      expect(testLogger.statusText, '');
+    });
 
-    testUsingContext(
-      'suggestion if running as bot',
-      () async {
-        fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+    testWithoutContext('suggestion if running as bot', () async {
+      fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
 
-        final GradleBuildStatus result = await zipExceptionHandler.handler(
-          project: FakeFlutterProject(),
-          usesAndroidX: true,
-          line: '',
-        );
+      final GradleBuildStatus result = await zipExceptionHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: '',
+        project: FakeFlutterProject(),
+        toolContext: FakeToolContext(
+          botDetector: const FakeBotDetector(true),
+          fs: fileSystem,
+          logger: testLogger,
+          platform: FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+          processManager: processManager,
+        ),
+        usesAndroidX: true,
+      );
 
-        expect(result, equals(GradleBuildStatus.retry));
-        expect(fileSystem.file('foo/.gradle/fizz.zip'), isNot(exists));
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(fileSystem.file('foo/.gradle/fizz.zip'), isNot(exists));
 
-        expect(
-          testLogger.errorText,
-          contains('[!] Your .gradle directory under the home directory might be corrupted.\n'),
-        );
-        expect(testLogger.statusText, contains('Deleting foo/.gradle\n'));
-      },
-      overrides: <Type, Generator>{
-        Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        BotDetector: () => const FakeBotDetector(true),
-      },
-    );
+      expect(
+        testLogger.errorText,
+        contains('[!] Your .gradle directory under the home directory might be corrupted.\n'),
+      );
+      expect(testLogger.statusText, contains('Deleting foo/.gradle\n'));
+    });
 
-    testUsingContext(
-      'suggestion if stdin has terminal and user entered y',
-      () async {
-        fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+    testWithoutContext('suggestion if stdin has terminal and user entered y', () async {
+      fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+      final promptLogger = BufferLogger.test(terminal: _TestPromptTerminal('y'));
 
-        final GradleBuildStatus result = await zipExceptionHandler.handler(
-          line: '',
-          usesAndroidX: true,
-          project: FakeFlutterProject(),
-        );
+      final GradleBuildStatus result = await zipExceptionHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: '',
+        project: FakeFlutterProject(),
+        toolContext: FakeToolContext(
+          botDetector: const FakeBotDetector(false),
+          fs: fileSystem,
+          logger: promptLogger,
+          platform: FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+          processManager: processManager,
+        ),
+        usesAndroidX: true,
+      );
 
-        expect(result, equals(GradleBuildStatus.retry));
-        expect(fileSystem.file('foo/.gradle/fizz.zip'), isNot(exists));
-        expect(
-          testLogger.errorText,
-          contains('[!] Your .gradle directory under the home directory might be corrupted.\n'),
-        );
-        expect(testLogger.statusText, contains('Deleting foo/.gradle\n'));
-      },
-      overrides: <Type, Generator>{
-        Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        AnsiTerminal: () => _TestPromptTerminal('y'),
-        BotDetector: () => const FakeBotDetector(false),
-      },
-    );
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(fileSystem.file('foo/.gradle/fizz.zip'), isNot(exists));
+      expect(
+        promptLogger.errorText,
+        contains('[!] Your .gradle directory under the home directory might be corrupted.\n'),
+      );
+      expect(promptLogger.statusText, contains('Deleting foo/.gradle\n'));
+    });
 
-    testUsingContext(
-      'suggestion if stdin has terminal and user entered n',
-      () async {
-        fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+    testWithoutContext('suggestion if stdin has terminal and user entered n', () async {
+      fileSystem.file('foo/.gradle/fizz.zip').createSync(recursive: true);
+      final promptLogger = BufferLogger.test(terminal: _TestPromptTerminal('n'));
 
-        final GradleBuildStatus result = await zipExceptionHandler.handler(
-          line: '',
-          usesAndroidX: true,
-          project: FakeFlutterProject(),
-        );
+      final GradleBuildStatus result = await zipExceptionHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: '',
+        project: FakeFlutterProject(),
+        toolContext: FakeToolContext(
+          botDetector: const FakeBotDetector(false),
+          fs: fileSystem,
+          logger: promptLogger,
+          platform: FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
+          processManager: processManager,
+        ),
+        usesAndroidX: true,
+      );
 
-        expect(result, equals(GradleBuildStatus.retry));
-        expect(fileSystem.file('foo/.gradle/fizz.zip'), exists);
-        expect(
-          testLogger.errorText,
-          contains('[!] Your .gradle directory under the home directory might be corrupted.\n'),
-        );
-        expect(testLogger.statusText, '');
-      },
-      overrides: <Type, Generator>{
-        Platform: () => FakePlatform(environment: <String, String>{'HOME': 'foo/'}),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-        AnsiTerminal: () => _TestPromptTerminal('n'),
-        BotDetector: () => const FakeBotDetector(false),
-      },
-    );
+      expect(result, equals(GradleBuildStatus.retry));
+      expect(fileSystem.file('foo/.gradle/fizz.zip'), exists);
+      expect(
+        promptLogger.errorText,
+        contains('[!] Your .gradle directory under the home directory might be corrupted.\n'),
+      );
+      expect(promptLogger.statusText, '');
+    });
   });
 
   group('incompatible java and gradle versions error', () {
@@ -1371,41 +1253,33 @@ Could not compile build file '…/example/android/build.gradle'.
       expect(incompatibleJavaAndGradleVersionsHandler.test(errorMessage), isTrue);
     });
 
-    testUsingContext(
-      'suggestion',
-      () async {
-        await incompatibleJavaAndGradleVersionsHandler.handler(
-          line: errorMessage,
-          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          usesAndroidX: true,
-        );
+    testWithoutContext('suggestion', () async {
+      await incompatibleJavaAndGradleVersionsHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        line: errorMessage,
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
 
-        // Ensure the error notes the incompatible Gradle/AGP/Java versions, links to related resources,
-        // and a portion of the path to where to change their gradle version.
-        expect(
-          testLogger.statusText,
-          contains('Gradle version is incompatible with the Java version'),
-        );
-        expect(testLogger.statusText, contains('gradle-wrapper.properties'));
-        expect(
-          testLogger.statusText,
-          contains('https://docs.gradle.org/current/userguide/compatibility.html#java'),
-        );
-      },
-      overrides: <Type, Generator>{
-        GradleUtils: () => FakeGradleUtils(),
-        Platform: () => fakePlatform('android'),
-        FileSystem: () => fileSystem,
-        ProcessManager: () => processManager,
-      },
-    );
+      // Ensure the error notes the incompatible Gradle/AGP/Java versions, links to related resources,
+      // and a portion of the path to where to change their gradle version.
+      expect(
+        testLogger.statusText,
+        contains('Gradle version is incompatible with the Java version'),
+      );
+      expect(testLogger.statusText, contains('gradle-wrapper.properties'));
+      expect(
+        testLogger.statusText,
+        contains('https://docs.gradle.org/current/userguide/compatibility.html#java'),
+      );
+    });
   });
 
-  testUsingContext(
-    'couldNotOpenCacheDirectoryHandler',
-    () async {
-      final GradleBuildStatus status = await couldNotOpenCacheDirectoryHandler.handler(
-        line: '''
+  testWithoutContext('couldNotOpenCacheDirectoryHandler', () async {
+    final GradleBuildStatus status = await couldNotOpenCacheDirectoryHandler.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: '''
 FAILURE: Build failed with an exception.
 
 * Where:
@@ -1416,24 +1290,16 @@ A problem occurred evaluating script.
 > Failed to apply plugin class 'FlutterPlugin'.
    > Could not open cache directory 41rl0ui7kgmsyfwn97o2jypl6 (/Volumes/Work/s/w/ir/cache/gradle/caches/6.7/gradle-kotlin-dsl/41rl0ui7kgmsyfwn97o2jypl6).
       > Failed to create Jar file /Volumes/Work/s/w/ir/cache/gradle/caches/6.7/generated-gradle-jars/gradle-api-6.7.jar.''',
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        usesAndroidX: true,
-      );
-      expect(testLogger.errorText, contains('Gradle threw an error while resolving dependencies'));
-      expect(status, GradleBuildStatus.retry);
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('android'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      toolContext: toolContext,
+      usesAndroidX: true,
+    );
+    expect(testLogger.errorText, contains('Gradle threw an error while resolving dependencies'));
+    expect(status, GradleBuildStatus.retry);
+  });
 
-  testUsingContext(
-    'compileSdk 35 and AGP < 8.1',
-    () async {
-      const errorExample = r'''
+  testWithoutContext('compileSdk 35 and AGP < 8.1', () async {
+    const errorExample = r'''
 Execution failed for task ':app:bundleReleaseResources'.
 > A failure occurred while executing com.android.build.gradle.internal.res.Aapt2ProcessResourcesRunnable
    > Android resource linking failed
@@ -1442,89 +1308,75 @@ Execution failed for task ':app:bundleReleaseResources'.
      error: failed to load include path /Users/mackall/Library/Android/sdk/platforms/android-35/android.jar.
     ''';
 
-      await incompatibleCompileSdk35AndAgpVersionHandler.handler(
-        line: errorExample,
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        usesAndroidX: true,
-      );
+    await incompatibleCompileSdk35AndAgpVersionHandler.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: errorExample,
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      toolContext: toolContext,
+      usesAndroidX: true,
+    );
 
-      expect(
-        testLogger.statusText,
-        contains(
-          '\n'
-          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│ [!] Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.                    │\n'
-          '│  Please upgrade to a newer AGP version. The version of AGP that your project uses is likely      │\n'
-          '│  defined in:                                                                                     │\n'
-          '│ /android/settings.gradle,                                                                        │\n'
-          '│ in the \'plugins\' closure (by the number following "com.android.application").                    │\n'
-          '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
-          '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
-          '│ /android/build.gradle,                                                                           │\n'
-          '│ as the number following "com.android.tools.build:gradle:".                                       │\n'
-          '│                                                                                                  │\n'
-          '│  Finally, if you have a strong reason to avoid upgrading AGP, you can temporarily lower the      │\n'
-          '│  compileSdk version in the following file:                                                       │\n'
-          '│ /android/app/build.gradle                                                                        │\n'
-          '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
-          '',
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('android'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(
+      testLogger.statusText,
+      contains(
+        '\n'
+        '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
+        '│ [!] Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.                    │\n'
+        '│  Please upgrade to a newer AGP version. The version of AGP that your project uses is likely      │\n'
+        '│  defined in:                                                                                     │\n'
+        '│ /android/settings.gradle,                                                                        │\n'
+        '│ in the \'plugins\' closure (by the number following "com.android.application").                    │\n'
+        '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
+        '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
+        '│ /android/build.gradle,                                                                           │\n'
+        '│ as the number following "com.android.tools.build:gradle:".                                       │\n'
+        '│                                                                                                  │\n'
+        '│  Finally, if you have a strong reason to avoid upgrading AGP, you can temporarily lower the      │\n'
+        '│  compileSdk version in the following file:                                                       │\n'
+        '│ /android/app/build.gradle                                                                        │\n'
+        '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        '',
+      ),
+    );
+  });
 
-  testUsingContext(
-    'AGP 7.3.0 R8 bug',
-    () async {
-      const errorExample = r'''
+  testWithoutContext('AGP 7.3.0 R8 bug', () async {
+    const errorExample = r'''
 ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862e/transformed/jetified-media3-exoplayer-dash-1.4.0-runtime.jar: R8: com.android.tools.r8.internal.Y10: Unused argument with users in androidx
     ''';
 
-      await r8DexingBugInAgp73Handler.handler(
-        line: errorExample,
-        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-        usesAndroidX: true,
-      );
+    await r8DexingBugInAgp73Handler.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: errorExample,
+      project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      toolContext: toolContext,
+      usesAndroidX: true,
+    );
 
-      expect(
-        testLogger.statusText,
-        contains(
-          '\n'
-          '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
-          '│ [!] Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug      │\n'
-          '│ which causes this error (see more info at https://issuetracker.google.com/issues/242308990).     │\n'
-          '│ To fix this error, update to a newer version of AGP (at least 7.4.0).                            │\n'
-          '│                                                                                                  │\n'
-          '│  The version of AGP that your project uses is likely defined in:                                 │\n'
-          '│ /android/settings.gradle,                                                                        │\n'
-          '│ in the \'plugins\' closure (by the number following "com.android.application").                    │\n'
-          '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
-          '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
-          '│ /android/build.gradle,                                                                           │\n'
-          '│ as the number following "com.android.tools.build:gradle:".                                       │\n'
-          '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
-          '',
-        ),
-      );
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('android'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(
+      testLogger.statusText,
+      contains(
+        '\n'
+        '┌─ Flutter Fix ────────────────────────────────────────────────────────────────────────────────────┐\n'
+        '│ [!] Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug      │\n'
+        '│ which causes this error (see more info at https://issuetracker.google.com/issues/242308990).     │\n'
+        '│ To fix this error, update to a newer version of AGP (at least 7.4.0).                            │\n'
+        '│                                                                                                  │\n'
+        '│  The version of AGP that your project uses is likely defined in:                                 │\n'
+        '│ /android/settings.gradle,                                                                        │\n'
+        '│ in the \'plugins\' closure (by the number following "com.android.application").                    │\n'
+        '│  Alternatively, if your project was created with an older version of the templates, it is likely │\n'
+        '│ in the buildscript.dependencies closure of the top-level build.gradle:                           │\n'
+        '│ /android/build.gradle,                                                                           │\n'
+        '│ as the number following "com.android.tools.build:gradle:".                                       │\n'
+        '└──────────────────────────────────────────────────────────────────────────────────────────────────┘\n'
+        '',
+      ),
+    );
+  });
 
-  testUsingContext(
-    'Usage of removed v1 embedding references',
-    () async {
-      const errorExample = r'''
+  testWithoutContext('Usage of removed v1 embedding references', () async {
+    const errorExample = r'''
 /Users/jesswon/.pub-cache/hosted/pub.dev/video_player_android-2.5.0/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java:42: error: cannot find symbol
   private VideoPlayerPlugin(io.flutter.plugin.common.PluginRegistry.Registrar registrar) {
                                                                    ^
@@ -1535,40 +1387,33 @@ ERROR:/Users/mackall/.gradle/caches/transforms-3/bd2c84591857c6d4c308221ffece862
 FAILURE: Build failed with an exception.
     ''';
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      await usageOfV1EmbeddingReferencesHandler.handler(
-        line: errorExample,
-        project: project,
-        usesAndroidX: true,
-      );
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    await usageOfV1EmbeddingReferencesHandler.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: errorExample,
+      project: project,
+      toolContext: toolContext,
+      usesAndroidX: true,
+    );
 
-      // Main fix text.
-      expect(
-        testLogger.statusText,
-        contains(
-          "To fix this error, please upgrade your current package's dependencies to latest versions by",
-        ),
-      );
-      expect(testLogger.statusText, contains('running `flutter pub upgrade`.'));
-      // Text and link to file an issue.
-      expect(
-        testLogger.statusText,
-        contains('If that does not work, please file an issue for the problematic plugin(s) here:'),
-      );
-      expect(testLogger.statusText, contains('https://github.com/flutter/flutter/issues'));
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('android'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    // Main fix text.
+    expect(
+      testLogger.statusText,
+      contains(
+        "To fix this error, please upgrade your current package's dependencies to latest versions by",
+      ),
+    );
+    expect(testLogger.statusText, contains('running `flutter pub upgrade`.'));
+    // Text and link to file an issue.
+    expect(
+      testLogger.statusText,
+      contains('If that does not work, please file an issue for the problematic plugin(s) here:'),
+    );
+    expect(testLogger.statusText, contains('https://github.com/flutter/flutter/issues'));
+  });
 
-  testUsingContext(
-    'Java 21 and jlink bug',
-    () async {
-      const errorExample = r'''
+  testWithoutContext('Java 21 and jlink bug', () async {
+    const errorExample = r'''
 * What went wrong:
 Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJavac'.
 > Could not resolve all files for configuration ':shared_preferences_android:androidJdkImage'.
@@ -1577,90 +1422,69 @@ Execution failed for task ':shared_preferences_android:compileReleaseJavaWithJav
          > Error while executing process /Users/mackall/Desktop/JDKs/21/jdk-21.0.2.jdk/Contents/Home/bin/jlink with arguments {--module-path /Users/mackall/.gradle/caches/8.9/transforms/2890fec03da42154757073d3208548e5-79660961-f91d-4df2-90bc-b9a3f2a270bd/transformed/output/temp/jmod --add-modules java.base --output /Users/mackall/.gradle/caches/8.9/transforms/2890fec03da42154757073d3208548e5-79660961-f91d-4df2-90bc-b9a3f2a270bd/transformed/output/jdkImage --disable-plugin system-modules}
     ''';
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      await jlinkErrorWithJava21AndSourceCompatibility.handler(
-        line: errorExample,
-        project: project,
-        usesAndroidX: true,
-      );
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    await jlinkErrorWithJava21AndSourceCompatibility.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: errorExample,
+      project: project,
+      toolContext: toolContext,
+      usesAndroidX: true,
+    );
 
-      // Main fix text.
-      expect(
-        testLogger.statusText,
-        contains('To fix this error, please upgrade your AGP version to at least 8.2.1.'),
-      );
-      // Paths to AGP location.
-      expect(testLogger.statusText, contains('/android/settings.gradle'));
-      expect(testLogger.statusText, contains('/android/build.gradle'));
-      // Links to info.
-      expect(testLogger.statusText, contains('https://issuetracker.google.com/issues/294137077'));
-      expect(testLogger.statusText, contains('https://github.com/flutter/flutter/issues/156304'));
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('android'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    // Main fix text.
+    expect(
+      testLogger.statusText,
+      contains('To fix this error, please upgrade your AGP version to at least 8.2.1.'),
+    );
+    // Paths to AGP location.
+    expect(testLogger.statusText, contains('/android/settings.gradle'));
+    expect(testLogger.statusText, contains('/android/build.gradle'));
+    // Links to info.
+    expect(testLogger.statusText, contains('https://issuetracker.google.com/issues/294137077'));
+    expect(testLogger.statusText, contains('https://github.com/flutter/flutter/issues/156304'));
+  });
 
-  testUsingContext(
-    'Missing NDK source.properties file',
-    () async {
-      const unixErrorExample = r'''
+  testWithoutContext('Missing NDK source.properties file', () async {
+    const unixErrorExample = r'''
 * What went wrong:
 A problem occurred configuring project ':app'.
 > [CXX1101] NDK at /Users/mackall/Library/Android/sdk/ndk/26.3.11579264 did not have a source.properties file
     ''';
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      await missingNdkSourcePropertiesFile.handler(
-        line: unixErrorExample,
-        project: project,
-        usesAndroidX: true,
-      );
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    await missingNdkSourcePropertiesFile.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: unixErrorExample,
+      project: project,
+      toolContext: toolContext,
+      usesAndroidX: true,
+    );
 
-      expect(
-        testLogger.statusText,
-        contains('This can be fixed by deleting the local NDK copy at'),
-      );
-      expect(
-        testLogger.statusText,
-        contains('/Users/mackall/Library/Android/sdk/ndk/26.3.11579264'),
-      );
+    expect(testLogger.statusText, contains('This can be fixed by deleting the local NDK copy at'));
+    expect(testLogger.statusText, contains('/Users/mackall/Library/Android/sdk/ndk/26.3.11579264'));
 
-      const windowsErrorExample = r'''
+    const windowsErrorExample = r'''
 * What went wrong:
 A problem occurred configuring project ':app'.
 > [CXX1101] NDK at C:\Users\mackall\Library\Android\sdk\ndk\26.3.11579264 did not have a source.properties file
     ''';
-      await missingNdkSourcePropertiesFile.handler(
-        line: windowsErrorExample,
-        project: project,
-        usesAndroidX: true,
-      );
+    await missingNdkSourcePropertiesFile.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: windowsErrorExample,
+      project: project,
+      toolContext: toolContext,
+      usesAndroidX: true,
+    );
 
-      expect(
-        testLogger.statusText,
-        contains('This can be fixed by deleting the local NDK copy at'),
-      );
-      expect(
-        testLogger.statusText,
-        contains(r'C:\Users\mackall\Library\Android\sdk\ndk\26.3.11579264'),
-      );
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('android'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(testLogger.statusText, contains('This can be fixed by deleting the local NDK copy at'));
+    expect(
+      testLogger.statusText,
+      contains(r'C:\Users\mackall\Library\Android\sdk\ndk\26.3.11579264'),
+    );
+  });
 
-  testUsingContext(
-    'Failure to apply kotlin-android plugin',
-    () async {
-      const applyingKotlinAndroidPluginErrorExample = r'''
+  testWithoutContext('Failure to apply kotlin-android plugin', () async {
+    const applyingKotlinAndroidPluginErrorExample = r'''
 FAILURE: Build failed with an exception.
 
 * Where:
@@ -1676,32 +1500,27 @@ An exception occurred applying plugin request [id: 'kotlin-android']
       > java.lang.Throwable (no error message)
     ''';
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      await applyingKotlinAndroidPluginErrorHandler.handler(
-        line: applyingKotlinAndroidPluginErrorExample,
-        project: project,
-        usesAndroidX: true,
-      );
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    await applyingKotlinAndroidPluginErrorHandler.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: applyingKotlinAndroidPluginErrorExample,
+      project: project,
+      toolContext: toolContext,
+      usesAndroidX: true,
+    );
 
-      expect(
-        testLogger.statusText,
-        contains('Starting AGP 9+, the default has become built-in Kotlin.'),
-      );
-      expect(
-        testLogger.statusText,
-        contains(' This results in a build failure when applying the kotlin-android plugin'),
-      );
-      expect(testLogger.statusText, contains('applying the kotlin-android plugin'));
-      expect(testLogger.statusText, contains('For instructions on how to migrate, see:'));
-      expect(testLogger.statusText, contains(kMigrateToBuiltInKotlinDocsUrl));
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('android'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(
+      testLogger.statusText,
+      contains('Starting AGP 9+, the default has become built-in Kotlin.'),
+    );
+    expect(
+      testLogger.statusText,
+      contains(' This results in a build failure when applying the kotlin-android plugin'),
+    );
+    expect(testLogger.statusText, contains('applying the kotlin-android plugin'));
+    expect(testLogger.statusText, contains('For instructions on how to migrate, see:'));
+    expect(testLogger.statusText, contains(kMigrateToBuiltInKotlinDocsUrl));
+  });
 
   group('new AGP DSL error', () {
     const useNewAgpDslErrorExample = r'''
@@ -1755,10 +1574,8 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
     });
   });
 
-  testUsingContext(
-    'Failure to apply Flutter Gradle plugin with the new AGP DSL',
-    () async {
-      const useNewAgpDslErrorHandlerExample = r'''
+  testWithoutContext('Failure to apply Flutter Gradle plugin with the new AGP DSL', () async {
+    const useNewAgpDslErrorHandlerExample = r'''
 FAILURE: Build failed with an exception.
 
 * Where:
@@ -1770,35 +1587,30 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
    > java.lang.NullPointerException (no error message)
     ''';
 
-      final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
-      await useNewAgpDslErrorHandler.handler(
-        line: useNewAgpDslErrorHandlerExample,
-        project: project,
-        usesAndroidX: true,
-      );
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    await useNewAgpDslErrorHandler.handler(
+      gradleUtils: FakeGradleUtils(),
+      line: useNewAgpDslErrorHandlerExample,
+      project: project,
+      toolContext: toolContext,
+      usesAndroidX: true,
+    );
 
-      expect(
-        testLogger.statusText,
-        contains('Starting AGP 9+, only the new DSL interface will be read.'),
-      );
-      expect(
-        testLogger.statusText,
-        contains('This results in a build failure when applying the Flutter Gradle plugin'),
-      );
-      expect(testLogger.statusText, contains('For instructions on how to opt out, see:'));
-      expect(testLogger.statusText, contains(kOptOutOfNewDslDocsUrl));
-      expect(
-        testLogger.statusText,
-        contains('If you are not upgrading to AGP 9+, run `flutter analyze --suggestions`'),
-      );
-    },
-    overrides: <Type, Generator>{
-      GradleUtils: () => FakeGradleUtils(),
-      Platform: () => fakePlatform('android'),
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    expect(
+      testLogger.statusText,
+      contains('Starting AGP 9+, only the new DSL interface will be read.'),
+    );
+    expect(
+      testLogger.statusText,
+      contains('This results in a build failure when applying the Flutter Gradle plugin'),
+    );
+    expect(testLogger.statusText, contains('For instructions on how to opt out, see:'));
+    expect(testLogger.statusText, contains(kOptOutOfNewDslDocsUrl));
+    expect(
+      testLogger.statusText,
+      contains('If you are not upgrading to AGP 9+, run `flutter analyze --suggestions`'),
+    );
+  });
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
@@ -1822,6 +1634,12 @@ class _TestPromptTerminal extends Fake implements AnsiTerminal {
   _TestPromptTerminal(this.promptResult);
 
   final String promptResult;
+
+  @override
+  String color(String message, TerminalColor color) => message;
+
+  @override
+  String get warningMark => '[!]';
 
   @override
   bool get stdinHasTerminal => true;

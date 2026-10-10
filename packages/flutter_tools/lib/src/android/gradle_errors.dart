@@ -4,15 +4,28 @@
 
 import 'package:meta/meta.dart';
 
+import '../base/bot_detector.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
-import '../globals.dart' as globals;
+import '../context/tool_context.dart';
 import '../project.dart';
 import 'gradle_utils.dart' as utils;
+import 'java.dart';
 
 typedef GradleErrorTest = bool Function(String);
+
+typedef GradleErrorHandler = Future<GradleBuildStatus> Function({
+  required utils.GradleUtils gradleUtils,
+  required String line,
+  required FlutterProject project,
+  required ToolContext toolContext,
+  required bool usesAndroidX,
+  Java? java,
+});
 
 /// A Gradle error handled by the tool.
 class GradleHandledError {
@@ -24,12 +37,7 @@ class GradleHandledError {
   final GradleErrorTest test;
 
   /// The handler function.
-  final Future<GradleBuildStatus> Function({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-  })
-  handler;
+  final GradleErrorHandler handler;
 
   /// The build event label is named gradle-[eventLabel].
   /// If not empty, the build event is logged along with
@@ -96,9 +104,17 @@ const _boxTitle = 'Flutter Fix';
 final permissionDeniedErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>['Permission denied']),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        globals.printBox(
-          '${globals.logger.terminal.warningMark} Gradle does not have execution permission.\n'
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printBox(
+          '${logger.terminal.warningMark} Gradle does not have execution permission.\n'
           'You should change the ownership of the project directory to your user, '
           'or move the project to a directory with execute permissions.',
           title: _boxTitle,
@@ -125,9 +141,17 @@ final networkErrorHandler = GradleHandledError(
     'javax.net.ssl.SSLHandshakeException: Remote host closed connection during handshake',
   ]),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        globals.printError(
-          '${globals.logger.terminal.warningMark} '
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printError(
+          '${logger.terminal.warningMark} '
           'Gradle threw an error while downloading artifacts from the network.',
         );
         return GradleBuildStatus.retry;
@@ -150,41 +174,52 @@ final networkErrorHandler = GradleHandledError(
 final zipExceptionHandler = GradleHandledError(
   test: _lineMatcher(const <String>['java.util.zip.ZipException: error in opening zip file']),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        globals.printError(
-          '${globals.logger.terminal.warningMark} '
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final ToolContext(
+          :BotDetector botDetector,
+          :FileSystem fs,
+          :Logger logger,
+          :Platform platform,
+        ) = toolContext;
+        logger.printError(
+          '${logger.terminal.warningMark} '
           'Your .gradle directory under the home directory might be corrupted.',
         );
-        bool shouldDeleteUserGradle = await globals.botDetector.isRunningOnBot;
-        if (!shouldDeleteUserGradle && globals.terminal.stdinHasTerminal) {
+        bool shouldDeleteUserGradle = await botDetector.isRunningOnBot;
+        if (!shouldDeleteUserGradle && logger.terminal.stdinHasTerminal) {
           try {
-            final String selection = await globals.terminal.promptForCharInput(
+            final String selection = await logger.terminal.promptForCharInput(
               <String>['y', 'n'],
-              logger: globals.logger,
+              logger: logger,
               prompt: 'Do you want to delete the .gradle directory under the home directory?',
               defaultChoiceIndex: 0,
             );
             shouldDeleteUserGradle = selection == 'y';
           } on StateError catch (e) {
-            globals.printError(e.message, indent: 0);
+            logger.printError(e.message, indent: 0);
           }
         }
         if (shouldDeleteUserGradle) {
-          final String? homeDir = globals.platform.environment['HOME'];
+          final String? homeDir = platform.environment['HOME'];
           if (homeDir == null) {
-            globals.logger.printStatus(
+            logger.printStatus(
               "Could not delete .gradle directory because there isn't a HOME env variable",
             );
             return GradleBuildStatus.retry;
           }
-          final Directory userGradle = globals.fs.directory(
-            globals.fs.path.join(homeDir, '.gradle'),
-          );
-          globals.logger.printStatus('Deleting ${userGradle.path}');
+          final Directory userGradle = fs.directory(fs.path.join(homeDir, '.gradle'));
+          logger.printStatus('Deleting ${userGradle.path}');
           try {
             ErrorHandlingFileSystem.deleteIfExists(userGradle, recursive: true);
           } on FileSystemException catch (err) {
-            globals.printTrace('Failed to delete Gradle cache: $err');
+            logger.printTrace('Failed to delete Gradle cache: $err');
           }
         }
         return GradleBuildStatus.retry;
@@ -200,22 +235,31 @@ final licenseNotAcceptedHandler = GradleHandledError(
   test: _lineMatcher(const <String>[
     'You have not accepted the license agreements of the following SDK components',
   ]),
-  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    const licenseNotAcceptedMatcher =
-        r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        const licenseNotAcceptedMatcher =
+            r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
 
-    final licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
-    final Match? licenseMatch = licenseFailure.firstMatch(line);
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
-      'following licenses have not been accepted: '
-      '${licenseMatch?.group(1)}\n\n'
-      'To resolve this, please run the following command in a Terminal:\n'
-      'flutter doctor --android-licenses',
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
+        final licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
+        final Match? licenseMatch = licenseFailure.firstMatch(line);
+        logger.printBox(
+          '${logger.terminal.warningMark} Unable to download needed Android SDK components, as the '
+          'following licenses have not been accepted: '
+          '${licenseMatch?.group(1)}\n\n'
+          'To resolve this, please run the following command in a Terminal:\n'
+          'flutter doctor --android-licenses',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
   eventLabel: 'license-not-accepted',
 );
 
@@ -229,57 +273,66 @@ final flavorUndefinedHandler = GradleHandledError(
   test: (String line) {
     return _undefinedTaskPattern.hasMatch(line);
   },
-  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    final RunResult tasksRunResult = await globals.processUtils.run(
-      <String>[globals.gradleUtils!.getExecutable(project), 'app:tasks', '--all', '--console=auto'],
-      throwOnError: true,
-      workingDirectory: project.android.hostAppGradleRoot.path,
-      environment: globals.java?.gradleEnvironment,
-    );
-    // Extract build types and product flavors.
-    final variants = <String>{};
-    for (final String task in tasksRunResult.stdout.split('\n')) {
-      final Match? match = _assembleTaskPattern.matchAsPrefix(task);
-      if (match != null) {
-        final String variant = match.group(1)!.toLowerCase();
-        if (!variant.endsWith('test')) {
-          variants.add(variant);
-        }
-      }
-    }
-    final productFlavors = <String>{};
-    for (final variant1 in variants) {
-      for (final variant2 in variants) {
-        if (variant2.startsWith(variant1) && variant2 != variant1) {
-          final String buildType = variant2.substring(variant1.length);
-          if (variants.contains(buildType)) {
-            productFlavors.add(variant1);
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
+        final productFlavors = <String>{};
+        final RunResult tasksRunResult = await processUtils.run(
+          <String>[gradleUtils.getExecutable(project), 'app:tasks', '--all', '--console=auto'],
+          throwOnError: true,
+          workingDirectory: project.android.hostAppGradleRoot.path,
+          environment: java?.gradleEnvironment,
+        );
+        // Extract build types and product flavors.
+        final variants = <String>{};
+        for (final String task in tasksRunResult.stdout.split('\n')) {
+          final Match? match = _assembleTaskPattern.matchAsPrefix(task);
+          if (match != null) {
+            final String variant = match.group(1)!.toLowerCase();
+            if (!variant.endsWith('test')) {
+              variants.add(variant);
+            }
           }
         }
-      }
-    }
-    final errorMessage =
-        '${globals.logger.terminal.warningMark}  Gradle project does not define a task suitable for the requested build.';
-    final File buildGradle = project.android.appGradleFile;
-    if (productFlavors.isEmpty) {
-      globals.printBox(
-        '$errorMessage\n\n'
-        'The ${buildGradle.absolute.path} file does not define '
-        'any custom product flavors. '
-        'You cannot use the --flavor option.',
-        title: _boxTitle,
-      );
-    } else {
-      globals.printBox(
-        '$errorMessage\n\n'
-        'The ${buildGradle.absolute.path} file defines product '
-        'flavors: ${productFlavors.join(', ')}. '
-        'You must specify a --flavor option to select one of them.',
-        title: _boxTitle,
-      );
-    }
-    return GradleBuildStatus.exit;
-  },
+        for (final variant1 in variants) {
+          for (final variant2 in variants) {
+            if (variant2.startsWith(variant1) && variant2 != variant1) {
+              final String buildType = variant2.substring(variant1.length);
+              if (variants.contains(buildType)) {
+                productFlavors.add(variant1);
+              }
+            }
+          }
+        }
+        final errorMessage =
+            '${logger.terminal.warningMark}  Gradle project does not define a task suitable for the requested build.';
+        final File buildGradle = project.android.appGradleFile;
+        if (productFlavors.isEmpty) {
+          logger.printBox(
+            '$errorMessage\n\n'
+            'The ${buildGradle.absolute.path} file does not define '
+            'any custom product flavors. '
+            'You cannot use the --flavor option.',
+            title: _boxTitle,
+          );
+        } else {
+          logger.printBox(
+            '$errorMessage\n\n'
+            'The ${buildGradle.absolute.path} file defines product '
+            'flavors: ${productFlavors.join(', ')}. '
+            'You must specify a --flavor option to select one of them.',
+            title: _boxTitle,
+          );
+        }
+        return GradleBuildStatus.exit;
+      },
   eventLabel: 'flavor-undefined',
 );
 
@@ -293,29 +346,38 @@ final minSdkVersionHandler = GradleHandledError(
   test: (String line) {
     return _minSdkVersionPattern.hasMatch(line);
   },
-  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    final File gradleFile = project.android.appGradleFile;
-    final Match? minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
-    assert(minSdkVersionMatch?.groupCount == 3);
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        final File gradleFile = project.android.appGradleFile;
+        final Match? minSdkVersionMatch = _minSdkVersionPattern.firstMatch(line);
+        assert(minSdkVersionMatch?.groupCount == 3);
 
-    final String textInBold = globals.logger.terminal.bolden(
-      'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
-      'android {\n'
-      '  defaultConfig {\n'
-      '    minSdkVersion ${minSdkVersionMatch?.group(2)}\n'
-      '  }\n'
-      '}\n',
-    );
-    globals.printBox(
-      'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
-      '$textInBold\n'
-      'Following this change, your app will not be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n'
-      'Consider searching for a version of this plugin that supports these lower versions of the Android SDK instead.\n'
-      'For more information, see: https://flutter.dev/to/review-gradle-config',
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
+        final String textInBold = logger.terminal.bolden(
+          'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
+          'android {\n'
+          '  defaultConfig {\n'
+          '    minSdkVersion ${minSdkVersionMatch?.group(2)}\n'
+          '  }\n'
+          '}\n',
+        );
+        logger.printBox(
+          'The plugin ${minSdkVersionMatch?.group(3)} requires a higher Android SDK version.\n'
+          '$textInBold\n'
+          'Following this change, your app will not be available to users running Android SDKs below ${minSdkVersionMatch?.group(2)}.\n'
+          'Consider searching for a version of this plugin that supports these lower versions of the Android SDK instead.\n'
+          'For more information, see: https://flutter.dev/to/review-gradle-config',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
   eventLabel: 'plugin-min-sdk',
 );
 
@@ -327,9 +389,17 @@ final transformInputIssueHandler = GradleHandledError(
     return line.contains('https://issuetracker.google.com/issues/158753935');
   },
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
         final File gradleFile = project.android.appGradleFile;
-        final String textInBold = globals.logger.terminal.bolden(
+        final String textInBold = logger.terminal.bolden(
           'Fix this issue by adding the following to the file ${gradleFile.path}:\n'
           'android {\n'
           '  lintOptions {\n'
@@ -337,7 +407,7 @@ final transformInputIssueHandler = GradleHandledError(
           '  }\n'
           '}',
         );
-        globals.printBox(
+        logger.printBox(
           'This issue appears to be https://github.com/flutter/flutter/issues/58247.\n'
           '$textInBold',
           title: _boxTitle,
@@ -352,13 +422,21 @@ final transformInputIssueHandler = GradleHandledError(
 final javaHeapSpaceHandler = GradleHandledError(
   test: _lineMatcher(const <String>['Java heap space']),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        final String textInBold = globals.logger.terminal.bolden(
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        final String textInBold = logger.terminal.bolden(
           'Adjust the maximum Java heap allocation according to the documentation:\n'
           'https://docs.gradle.org/current/userguide/config_gradle.html#sec:configuring_jvm_memory',
         );
-        globals.printBox(
-          '${globals.logger.terminal.warningMark} The Gradle build ran out of Java heap space.\n'
+        logger.printBox(
+          '${logger.terminal.warningMark} The Gradle build ran out of Java heap space.\n'
           '$textInBold',
           title: _boxTitle,
         );
@@ -373,20 +451,29 @@ final lockFileDepMissingHandler = GradleHandledError(
   test: (String line) {
     return line.contains('which is not part of the dependency lock state');
   },
-  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    final File gradleFile = project.android.hostAppGradleFile;
-    final generatedGradleCommand = globals.platform.isWindows ? r'.\gradlew.bat' : './gradlew';
-    final String textInBold = globals.logger.terminal.bolden(
-      'To regenerate the lockfiles run: `$generatedGradleCommand :generateLockfiles` in ${gradleFile.path}\n'
-      'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}',
-    );
-    globals.printBox(
-      'You need to update the lockfile, or disable Gradle dependency locking.\n'
-      '$textInBold',
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final ToolContext(:Logger logger, :Platform platform) = toolContext;
+        final File gradleFile = project.android.hostAppGradleFile;
+        final generatedGradleCommand = platform.isWindows ? r'.\gradlew.bat' : './gradlew';
+        final String textInBold = logger.terminal.bolden(
+          'To regenerate the lockfiles run: `$generatedGradleCommand :generateLockfiles` in ${gradleFile.path}\n'
+          'To remove dependency locking, remove the `dependencyLocking` from ${gradleFile.path}',
+        );
+        logger.printBox(
+          'You need to update the lockfile, or disable Gradle dependency locking.\n'
+          '$textInBold',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
   eventLabel: 'lock-dep-issue',
 );
 
@@ -394,23 +481,32 @@ final lockFileDepMissingHandler = GradleHandledError(
 // to be the lowest priority error.
 final incompatibleKotlinVersionHandler = GradleHandledError(
   test: _lineMatcher(const <String>['was compiled with an incompatible version of Kotlin']),
-  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    final File gradleFile = project.android.hostAppGradleFile;
-    final File settingsFile = project.directory
-        .childDirectory('android')
-        .childFile('settings.gradle');
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.\n'
-      'Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then update the \n'
-      'version number of the plugin with id "org.jetbrains.kotlin.android" in the plugins block of \n'
-      '${settingsFile.path}.\n\n'
-      'Alternatively (if your project was created before Flutter 3.19), update \n'
-      '${gradleFile.path}\n'
-      "ext.kotlin_version = '<latest-version>'",
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        final File gradleFile = project.android.hostAppGradleFile;
+        final File settingsFile = project.directory
+            .childDirectory('android')
+            .childFile('settings.gradle');
+        logger.printBox(
+          '${logger.terminal.warningMark} Your project requires a newer version of the Kotlin Gradle plugin.\n'
+          'Find the latest version on https://kotlinlang.org/docs/releases.html#release-details, then update the \n'
+          'version number of the plugin with id "org.jetbrains.kotlin.android" in the plugins block of \n'
+          '${settingsFile.path}.\n\n'
+          'Alternatively (if your project was created before Flutter 3.19), update \n'
+          '${gradleFile.path}\n'
+          "ext.kotlin_version = '<latest-version>'",
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
   eventLabel: 'incompatible-kotlin-version',
 );
 
@@ -421,22 +517,31 @@ final _outdatedGradlePattern = RegExp(
 @visibleForTesting
 final outdatedGradleHandler = GradleHandledError(
   test: _outdatedGradlePattern.hasMatch,
-  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    final File gradleFile = project.android.hostAppGradleFile;
-    final File gradlePropertiesFile = project.android.gradleWrapperPropertiesFile;
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} Your project needs to upgrade Gradle and the Android Gradle plugin.\n\n'
-      'To fix this issue, replace the following content:\n'
-      '${gradleFile.path}:\n'
-      '    ${globals.terminal.color("- classpath 'com.android.tools.build:gradle:<current-version>'", TerminalColor.red)}\n'
-      '    ${globals.terminal.color("+ classpath 'com.android.tools.build:gradle:${utils.templateAndroidGradlePluginVersion}'", TerminalColor.green)}\n'
-      '${gradlePropertiesFile.path}:\n'
-      '    ${globals.terminal.color('- https://services.gradle.org/distributions/gradle-<current-version>-all.zip', TerminalColor.red)}\n'
-      '    ${globals.terminal.color('+ https://services.gradle.org/distributions/gradle-${utils.templateDefaultGradleVersion}-all.zip', TerminalColor.green)}',
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        final File gradleFile = project.android.hostAppGradleFile;
+        final File gradlePropertiesFile = project.android.gradleWrapperPropertiesFile;
+        logger.printBox(
+          '${logger.terminal.warningMark} Your project needs to upgrade Gradle and the Android Gradle plugin.\n\n'
+          'To fix this issue, replace the following content:\n'
+          '${gradleFile.path}:\n'
+          '    ${logger.terminal.color("- classpath 'com.android.tools.build:gradle:<current-version>'", TerminalColor.red)}\n'
+          '    ${logger.terminal.color("+ classpath 'com.android.tools.build:gradle:${utils.templateAndroidGradlePluginVersion}'", TerminalColor.green)}\n'
+          '${gradlePropertiesFile.path}:\n'
+          '    ${logger.terminal.color('- https://services.gradle.org/distributions/gradle-<current-version>-all.zip', TerminalColor.red)}\n'
+          '    ${logger.terminal.color('+ https://services.gradle.org/distributions/gradle-${utils.templateDefaultGradleVersion}-all.zip', TerminalColor.green)}',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
   eventLabel: 'outdated-gradle-version',
 );
 
@@ -445,21 +550,30 @@ final _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+)\) spe
 @visibleForTesting
 final minCompileSdkVersionHandler = GradleHandledError(
   test: _minCompileSdkVersionPattern.hasMatch,
-  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
-    assert(minCompileSdkVersionMatch?.groupCount == 1);
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
+        assert(minCompileSdkVersionMatch?.groupCount == 1);
 
-    final File gradleFile = project.android.appGradleFile;
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
-      'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
-      'android {\n'
-      '  compileSdk ${minCompileSdkVersionMatch?.group(1)}\n'
-      '}',
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
+        final File gradleFile = project.android.appGradleFile;
+        logger.printBox(
+          '${logger.terminal.warningMark} Your project requires a higher compileSdk version.\n'
+          'Fix this issue by bumping the compileSdk version in ${gradleFile.path}:\n'
+          'android {\n'
+          '  compileSdk ${minCompileSdkVersionMatch?.group(1)}\n'
+          '}',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
   eventLabel: 'min-compile-sdk-version',
 );
 
@@ -477,19 +591,28 @@ final incompatibleJavaAndAgpVersionsHandler = GradleHandledError(
   test: (String line) {
     return _agpJavaError.hasMatch(line);
   },
-  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    final String helpfulGradleError = line.trim().substring(2);
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        final String helpfulGradleError = line.trim().substring(2);
 
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} $helpfulGradleError\n\n'
-      'To fix this issue, try updating to the latest Android SDK and Android Studio on: ${AndroidProject.installAndroidStudioUrl}\n'
-      'If that does not work, you can set the Java version used by Flutter by \n'
-      'running `flutter config --jdk-dir=“</path/to/jdk>“`\n\n'
-      'To check the Java version used by Flutter, run `flutter doctor --verbose`',
-      title: _boxTitle,
-    );
-    return GradleBuildStatus.exit;
-  },
+        logger.printBox(
+          '${logger.terminal.warningMark} $helpfulGradleError\n\n'
+          'To fix this issue, try updating to the latest Android SDK and Android Studio on: ${AndroidProject.installAndroidStudioUrl}\n'
+          'If that does not work, you can set the Java version used by Flutter by \n'
+          'running `flutter config --jdk-dir=“</path/to/jdk>“`\n\n'
+          'To check the Java version used by Flutter, run `flutter doctor --verbose`',
+          title: _boxTitle,
+        );
+        return GradleBuildStatus.exit;
+      },
   eventLabel: 'incompatible-java-agp-version',
 );
 
@@ -501,9 +624,17 @@ final sslExceptionHandler = GradleHandledError(
     'javax.crypto.AEADBadTagException: Tag mismatch!',
   ]),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        globals.printError(
-          '${globals.logger.terminal.warningMark} '
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printError(
+          '${logger.terminal.warningMark} '
           'Gradle threw an error while downloading artifacts from the network.',
         );
         return GradleBuildStatus.retry;
@@ -524,10 +655,18 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
     return _unsupportedClassFileMajorVersionPattern.hasMatch(line);
   },
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
         final File gradlePropertiesFile = project.android.gradleWrapperPropertiesFile;
-        globals.printBox(
-          "${globals.logger.terminal.warningMark} Your project's Gradle version "
+        logger.printBox(
+          "${logger.terminal.warningMark} Your project's Gradle version "
           'is incompatible with the Java version that Flutter is using for Gradle.\n\n'
           'To fix this issue, first, check the Java version used by Flutter by '
           'running `flutter doctor --verbose`.\n\n'
@@ -546,9 +685,17 @@ final incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
 final remoteTerminatedHandshakeHandler = GradleHandledError(
   test: (String line) => line.contains('Remote host terminated the handshake'),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        globals.printError(
-          '${globals.logger.terminal.warningMark} '
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printError(
+          '${logger.terminal.warningMark} '
           'Gradle threw an error while downloading artifacts from the network.',
         );
 
@@ -561,9 +708,17 @@ final remoteTerminatedHandshakeHandler = GradleHandledError(
 final couldNotOpenCacheDirectoryHandler = GradleHandledError(
   test: (String line) => line.contains('> Could not open cache directory '),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        globals.printError(
-          '${globals.logger.terminal.warningMark} '
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printError(
+          '${logger.terminal.warningMark} '
           'Gradle threw an error while resolving dependencies.',
         );
 
@@ -587,16 +742,25 @@ as the number following "com.android.tools.build:gradle:".''';
 final incompatibleCompileSdk35AndAgpVersionHandler = GradleHandledError(
   test: (String line) =>
       line.contains('RES_TABLE_TYPE_TYPE entry offsets overlap actual entry data'),
-  handler: ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-    globals.printBox(
-      '${globals.logger.terminal.warningMark} Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.'
-      ' \n Please upgrade to a newer AGP version.${_getAgpLocation(project)}\n\n Finally, if you have a'
-      ' strong reason to avoid upgrading AGP, you can temporarily lower the compileSdk version in the following file:\n${project.android.appGradleFile.path}',
-      title: _boxTitle,
-    );
+  handler:
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printBox(
+          '${logger.terminal.warningMark} Using compileSdk 35 requires Android Gradle Plugin (AGP) 8.1.0 or higher.'
+          ' \n Please upgrade to a newer AGP version.${_getAgpLocation(project)}\n\n Finally, if you have a'
+          ' strong reason to avoid upgrading AGP, you can temporarily lower the compileSdk version in the following file:\n${project.android.appGradleFile.path}',
+          title: _boxTitle,
+        );
 
-    return GradleBuildStatus.exit;
-  },
+        return GradleBuildStatus.exit;
+      },
   eventLabel: 'incompatible-compile-sdk-and-agp',
 );
 
@@ -606,9 +770,17 @@ final r8DexingBugInAgp73Handler = GradleHandledError(
       line.contains('com.android.tools.r8.internal') &&
       line.contains(': Unused argument with users'),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        globals.printBox('''
-${globals.logger.terminal.warningMark} Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error (see more info at https://issuetracker.google.com/issues/242308990).
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printBox('''
+${logger.terminal.warningMark} Version 7.3 of the Android Gradle Plugin (AGP) uses a version of R8 that contains a bug which causes this error (see more info at https://issuetracker.google.com/issues/242308990).
 To fix this error, update to a newer version of AGP (at least 7.4.0).
 
 ${_getAgpLocation(project)}''', title: _boxTitle);
@@ -625,10 +797,18 @@ final usageOfV1EmbeddingReferencesHandler = GradleHandledError(
   test: (String line) =>
       line.contains('io.flutter.plugin.common.PluginRegistry.Registrar registrar'),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        globals.printBox(
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printBox(
           '''
-${globals.logger.terminal.warningMark} Consult the error logs above to identify any broken plugins, specifically those containing "error: cannot find symbol..."
+${logger.terminal.warningMark} Consult the error logs above to identify any broken plugins, specifically those containing "error: cannot find symbol..."
 This issue is likely caused by v1 embedding removal and the plugin's continued usage of removed references to the v1 embedding.
 To fix this error, please upgrade your current package's dependencies to latest versions by running `flutter pub upgrade`.
 If that does not work, please file an issue for the problematic plugin(s) here: https://github.com/flutter/flutter/issues''',
@@ -644,9 +824,17 @@ If that does not work, please file an issue for the problematic plugin(s) here: 
 final jlinkErrorWithJava21AndSourceCompatibility = GradleHandledError(
   test: (String line) => line.contains('> Error while executing process') && line.contains('jlink'),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        globals.printBox('''
-${globals.logger.terminal.warningMark} This is likely due to a known bug in Android Gradle Plugin (AGP) versions less than 8.2.1, when
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printBox('''
+${logger.terminal.warningMark} This is likely due to a known bug in Android Gradle Plugin (AGP) versions less than 8.2.1, when
   1. setting a value for SourceCompatibility and
   2. using Java 21 or above.
 To fix this error, please upgrade your AGP version to at least 8.2.1.${_getAgpLocation(project)}
@@ -669,10 +857,18 @@ final _missingNdkSourcePropertiesRegexp = RegExp(
 final missingNdkSourcePropertiesFile = GradleHandledError(
   test: (String line) => _missingNdkSourcePropertiesRegexp.hasMatch(line),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
         final String path = _missingNdkSourcePropertiesRegexp.firstMatch(line)!.group(1)!;
-        globals.printBox('''
-    ${globals.logger.terminal.warningMark} This is likely due to a malformed download of the NDK.
+        logger.printBox('''
+    ${logger.terminal.warningMark} This is likely due to a malformed download of the NDK.
     This can be fixed by deleting the local NDK copy at: $path
     and allowing the Android Gradle Plugin to automatically re-download it.
 
@@ -702,9 +898,17 @@ final applyingKotlinAndroidPluginErrorHandler = GradleHandledError(
     );
   },
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
-        globals.printBox('''
-${globals.logger.terminal.warningMark} Starting AGP 9+, the default has become built-in Kotlin.
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
+        logger.printBox('''
+${logger.terminal.warningMark} Starting AGP 9+, the default has become built-in Kotlin.
 This results in a build failure when applying the kotlin-android plugin.
 To resolve this, migrate to built-in Kotlin.
 \nFor instructions on how to migrate, see: $kMigrateToBuiltInKotlinDocsUrl''', title: _boxTitle);
@@ -727,11 +931,19 @@ To resolve this, migrate to built-in Kotlin.
 final useNewAgpDslErrorHandler = GradleHandledError(
   test: _lineMatcher(const <String>['> java.lang.NullPointerException (no error message)']),
   handler:
-      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+      ({
+        required utils.GradleUtils gradleUtils,
+        required String line,
+        required FlutterProject project,
+        required ToolContext toolContext,
+        required bool usesAndroidX,
+        Java? java,
+      }) async {
+        final Logger logger = toolContext.logger;
         final File appGradleFile = project.android.appGradleFile;
-        globals.printBox(
+        logger.printBox(
           '''
-${globals.logger.terminal.warningMark} Starting AGP 9+, only the new DSL interface will be read.
+${logger.terminal.warningMark} Starting AGP 9+, only the new DSL interface will be read.
 This results in a build failure when applying the Flutter Gradle plugin at ${appGradleFile.path}.
 \nTo resolve this update flutter or opt out of `android.newDsl`.
 For instructions on how to opt out, see: $kOptOutOfNewDslDocsUrl
