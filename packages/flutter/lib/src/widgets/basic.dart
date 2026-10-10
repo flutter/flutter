@@ -4872,20 +4872,18 @@ class Stack extends MultiChildRenderObjectWidget {
 
 /// A widget that positions its child within a [Stack] or an [Overlay].
 ///
-/// A [Positioned] widget only takes effect inside a subtree that is laid out
-/// with the stack layout algorithm, and the path from the root of that subtree
-/// down to the [Positioned] widget must contain only [StatelessWidget]s or
-/// [StatefulWidget]s (not other kinds of widgets, like [RenderObjectWidget]s).
+/// A [Positioned] widget must be inside a [Stack], or inside the widget
+/// subtree that an [Overlay] lays out: the widget returned by
+/// [OverlayEntry.builder] or [OverlayPortal.overlayChildBuilder]. Both are
+/// laid out with the stack layout algorithm (see [RenderStack]). In either
+/// case, the path from the [Positioned] up to that boundary must contain only
+/// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
+/// [RenderObjectWidget]s).
 ///
-/// In a [Stack], each of its children is such a subtree, so the restriction
-/// covers the path from the [Stack] itself down to the [Positioned] widget.
-///
-/// An [Overlay] lays its entries out with the same stack layout algorithm. The
-/// subtree there is the one an [OverlayEntry] builds, or the one
-/// [OverlayPortal.overlayChildBuilder] builds, and the widgets between it and
-/// the [Overlay] are internal to the overlay and do include
-/// [RenderObjectWidget]s. The restriction is therefore measured from the root
-/// of that subtree, not from the [Overlay].
+/// For a [Stack], the boundary is the [Stack] itself. For an [Overlay], it is
+/// the widget the builder returns, which must therefore be the [Positioned]
+/// itself, or a [StatelessWidget] or [StatefulWidget] that eventually builds
+/// it.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EgtPleVwxBQ}
 ///
@@ -4903,12 +4901,11 @@ class Stack extends MultiChildRenderObjectWidget {
 /// corresponding position property (e.g. [top] and [height]).
 ///
 /// If all three values on a particular axis are null, then the
-/// [Stack.alignment] property is used to position the child. An [Overlay]
-/// always aligns such children to [AlignmentDirectional.topStart].
+/// [Stack.alignment] property is used to position the child.
 ///
-/// If all six values are null, the child is a non-positioned child. A [Stack]
-/// uses only the non-positioned children to size itself, while an [Overlay]
-/// gives its non-positioned children the same size as the overlay.
+/// If all six values are null, the child is a non-positioned child, and a
+/// [Stack] uses only its non-positioned children to size itself. See [Overlay]
+/// for how an overlay aligns and sizes such children.
 ///
 /// See also:
 ///
@@ -5150,22 +5147,18 @@ class Positioned extends ParentDataWidget<StackParentData> {
 /// The ambient [Directionality] is used to determine whether [start] is to the
 /// left or to the right.
 ///
-/// A [PositionedDirectional] widget only takes effect inside a subtree that is
-/// laid out with the stack layout algorithm, and the path from the root of that
-/// subtree down to the [PositionedDirectional] widget must contain only
-/// [StatelessWidget]s or [StatefulWidget]s (not other kinds of widgets, like
-/// [RenderObjectWidget]s).
+/// A [PositionedDirectional] widget must be inside a [Stack], or inside the
+/// widget subtree that an [Overlay] lays out: the widget returned by
+/// [OverlayEntry.builder] or [OverlayPortal.overlayChildBuilder]. Both are
+/// laid out with the stack layout algorithm (see [RenderStack]). In either
+/// case, the path from the [PositionedDirectional] up to that boundary must
+/// contain only [StatelessWidget]s or [StatefulWidget]s (not other kinds of
+/// widgets, like [RenderObjectWidget]s).
 ///
-/// In a [Stack], each of its children is such a subtree, so the restriction
-/// covers the path from the [Stack] itself down to the [PositionedDirectional]
-/// widget.
-///
-/// An [Overlay] lays its entries out with the same stack layout algorithm. The
-/// subtree there is the one an [OverlayEntry] builds, or the one
-/// [OverlayPortal.overlayChildBuilder] builds, and the widgets between it and
-/// the [Overlay] are internal to the overlay and do include
-/// [RenderObjectWidget]s. The restriction is therefore measured from the root
-/// of that subtree, not from the [Overlay].
+/// For a [Stack], the boundary is the [Stack] itself. For an [Overlay], it is
+/// the widget the builder returns, which must therefore be the
+/// [PositionedDirectional] itself, or a [StatelessWidget] or [StatefulWidget]
+/// that eventually builds it.
 ///
 /// If a widget is wrapped in a [PositionedDirectional], then it is a
 /// _positioned_ widget in its [Stack] or [Overlay]. If the [top] property is
