@@ -2890,6 +2890,230 @@ typedef struct {
   VoidCallback destruction_callback;
 } FlutterScreenshot;
 
+/// Alpha format of an image.
+typedef enum {
+  /// Alpha format is unknown.
+  kFlutterImageGeneratorAlphaTypeUnknown = 0,
+  /// Image is completely opaque (no alpha channel or alpha is ignored).
+  kFlutterImageGeneratorAlphaTypeOpaque = 1,
+  /// Pixels are stored with premultiplied alpha.
+  kFlutterImageGeneratorAlphaTypePremul = 2,
+  /// Pixels are stored with un-premultiplied alpha.
+  kFlutterImageGeneratorAlphaTypeUnpremul = 3,
+} FlutterImageGeneratorAlphaType;
+
+/// Color format / pixel type of an image.
+typedef enum {
+  /// Color format is unknown.
+  kFlutterImageGeneratorColorTypeUnknown = 0,
+  /// 32-bit RGBA (8 bits per channel: Red, Green, Blue, Alpha).
+  kFlutterImageGeneratorColorTypeRGBA8888 = 1,
+  /// 32-bit BGRA (8 bits per channel: Blue, Green, Red, Alpha).
+  kFlutterImageGeneratorColorTypeBGRA8888 = 2,
+} FlutterImageGeneratorColorType;
+
+/// Disposal method for an animation frame before drawing subsequent frames.
+typedef enum {
+  /// Leave the frame in place and draw the next frame on top of it.
+  kFlutterImageGeneratorDisposalMethodKeep = 1,
+  /// Clear the frame's canvas or disposal rectangle to the background color.
+  kFlutterImageGeneratorDisposalMethodRestoreBackground = 2,
+  /// Restore the previous frame's content before drawing the next frame.
+  kFlutterImageGeneratorDisposalMethodRestorePrevious = 3,
+} FlutterImageGeneratorDisposalMethod;
+
+/// Blend mode for an animation frame with the previous frame.
+typedef enum {
+  /// Blend the current frame over the previous frame (source over).
+  kFlutterImageGeneratorBlendModeSrcOver = 0,
+  /// Overwrite the previous frame with the current frame (source copy).
+  kFlutterImageGeneratorBlendModeSrc = 1,
+} FlutterImageGeneratorBlendMode;
+
+/// Information describing the dimensions, alpha format, and color format of an
+/// image.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterImageGeneratorInfo).
+  size_t struct_size;
+
+  /// The width of the image in pixels.
+  uint32_t width;
+
+  /// The height of the image in pixels.
+  uint32_t height;
+
+  /// The alpha type of the image.
+  FlutterImageGeneratorAlphaType alpha_type;
+
+  /// The color type (pixel format) of the image.
+  FlutterImageGeneratorColorType color_type;
+} FlutterImageGeneratorInfo;
+
+/// Information describing a single frame of an animated/multi-frame image.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterImageGeneratorFrameInfo).
+  size_t struct_size;
+
+  /// The frame index of the required frame that this frame blends with, or -1
+  /// if this frame does not depend on a prior frame.
+  int64_t required_frame;
+
+  /// Duration to display this frame in milliseconds (0 means display for one
+  /// frame).
+  uint32_t duration_ms;
+
+  /// The disposal method for this frame before drawing subsequent frames.
+  FlutterImageGeneratorDisposalMethod disposal_method;
+
+  /// The region affected by the disposal method. Only valid if
+  /// `has_disposal_rect` is true.
+  FlutterRect disposal_rect;
+
+  /// How this frame blends with the previous frame.
+  FlutterImageGeneratorBlendMode blend_mode;
+
+  /// Whether `disposal_rect` is specified for this frame.
+  bool has_disposal_rect;
+} FlutterImageGeneratorFrameInfo;
+
+/// Callback to get basic image dimensions and format info.
+///
+/// Implementations must populate `info_out` and return true if information was
+/// successfully determined.
+///
+/// This callback is executed on the UI thread and should be lightweight.
+typedef bool (*FlutterImageGeneratorGetInfoCallback)(
+    void* /* user_data */,
+    FlutterImageGeneratorInfo* /* info_out */);
+
+/// Callback to get the total number of frames in the image.
+///
+/// Single still images should return 1.
+///
+/// Optional: if NULL, the engine assumes 1 frame.
+typedef uint32_t (*FlutterImageGeneratorGetFrameCountCallback)(
+    void* /* user_data */);
+
+/// Callback to get the repetition count for animated images.
+///
+/// Return 1 for single static playback, 0 for infinite loop, or N for N loops.
+///
+/// Optional: if NULL, the engine assumes 1 repetition.
+typedef uint32_t (*FlutterImageGeneratorGetPlayCountCallback)(
+    void* /* user_data */);
+
+/// Callback to get animation and blending details for a specific frame.
+///
+/// `frame_index` is 0-indexed and less than the frame count.
+/// Implementations must populate `frame_info_out` and return true on success.
+///
+/// Optional: if NULL, the engine provides standard defaults.
+typedef bool (*FlutterImageGeneratorGetFrameInfoCallback)(
+    void* /* user_data */,
+    uint32_t /* frame_index */,
+    FlutterImageGeneratorFrameInfo* /* frame_info_out */);
+
+/// Callback to determine the closest efficient decoding dimensions for a given
+/// scale.
+///
+/// `desired_scale` is the float scale factor. Implementations should populate
+/// `scaled_width_out` and `scaled_height_out` and return true.
+///
+/// Optional: if NULL, the engine uses the original image dimensions.
+typedef bool (*FlutterImageGeneratorGetScaledDimensionsCallback)(
+    void* /* user_data */,
+    float /* desired_scale */,
+    uint32_t* /* scaled_width_out */,
+    uint32_t* /* scaled_height_out */);
+
+/// Callback to decode image pixels into the supplied buffer.
+///
+/// `info` specifies the desired destination format and dimensions.
+/// `pixels` is the pointer to the destination buffer.
+/// `row_bytes` is the total byte length of one row of pixels.
+/// `frame_index` is the 0-based frame index to decode.
+/// `prior_frame` is the frame index of the prior cached blended frame, or -1 if
+/// none.
+///
+/// This callback is executed on IO or worker threads and may perform
+/// synchronous decoding.
+///
+/// Returns true if decoding succeeded, false otherwise.
+typedef bool (*FlutterImageGeneratorGetPixelsCallback)(
+    void* /* user_data */,
+    const FlutterImageGeneratorInfo* /* info */,
+    void* /* pixels */,
+    size_t /* row_bytes */,
+    uint32_t /* frame_index */,
+    int64_t /* prior_frame */);
+
+/// A custom image generator (decoder) instance.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterImageGenerator).
+  size_t struct_size;
+
+  /// User data baton associated with this generator instance.
+  void* user_data;
+
+  /// Optional callback invoked when the engine destroys this generator
+  /// instance.
+  VoidCallback destruction_callback;
+
+  /// Callback to get basic image dimensions and format info. Required.
+  FlutterImageGeneratorGetInfoCallback get_info;
+
+  /// Callback to decode pixels into a destination buffer. Required.
+  FlutterImageGeneratorGetPixelsCallback get_pixels;
+
+  /// Callback to get frame count. Optional (defaults to 1 if NULL).
+  FlutterImageGeneratorGetFrameCountCallback get_frame_count;
+
+  /// Callback to get animation loop play count. Optional (defaults to 1 if
+  /// NULL).
+  FlutterImageGeneratorGetPlayCountCallback get_play_count;
+
+  /// Callback to get frame info. Optional.
+  FlutterImageGeneratorGetFrameInfoCallback get_frame_info;
+
+  /// Callback to get closest scaled dimensions. Optional.
+  FlutterImageGeneratorGetScaledDimensionsCallback get_scaled_dimensions;
+} FlutterImageGenerator;
+
+/// Callback invoked by the engine to create an image generator for raw encoded
+/// image data.
+///
+/// If the factory recognizes the image format, it populates `generator_out`
+/// (setting `generator_out->struct_size` to `sizeof(FlutterImageGenerator)`)
+/// and returns true. Otherwise, it returns false.
+typedef bool (*FlutterImageGeneratorFactoryCallback)(
+    const uint8_t* /* buffer */,
+    size_t /* buffer_size */,
+    void* /* user_data */,
+    FlutterImageGenerator* /* generator_out */);
+
+/// This struct specifies registration details for a custom image generator
+/// factory.
+typedef struct {
+  /// The size of this struct. Must be
+  /// sizeof(FlutterImageGeneratorRegistrationInfo).
+  size_t struct_size;
+
+  /// Factory callback to instantiate image generators for compatible data.
+  /// Required.
+  FlutterImageGeneratorFactoryCallback create_generator;
+
+  /// Priority of this image generator. Higher values take precedence over lower
+  /// values. Built-in Skia decoders operate at priority 0. Negative values run
+  /// after Skia decoders.
+  int32_t priority;
+
+  /// User data baton passed to `create_generator`.
+  void* user_data;
+
+  /// Optional callback invoked when the factory is destroyed or unregistered.
+  VoidCallback destruction_callback;
+} FlutterImageGeneratorRegistrationInfo;
+
 /// An opaque object that describes the AOT data that can be used to launch a
 /// FlutterEngine instance in AOT mode.
 typedef struct _FlutterEngineAOTData* FlutterEngineAOTData;
@@ -3226,6 +3450,16 @@ typedef struct {
   /// call is made (the platform thread).
   FlutterDartDeferredLibraryLoadingUnitCallback
       dart_deferred_library_loader_callback;
+
+  /// An optional list of custom image generator factories.
+  ///
+  /// Embedders can supply custom image generators (decoders) to decode image
+  /// formats (such as Android platform ImageDecoder, NDK decoders, or custom
+  /// formats).
+  const FlutterImageGeneratorRegistrationInfo** image_generators;
+
+  /// The number of image generators in the `image_generators` array.
+  size_t image_generators_count;
 } FlutterProjectArgs;
 
 typedef struct {
@@ -4151,6 +4385,28 @@ FlutterEngineResult FlutterEngineScreenshot(
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineFreeScreenshot(FlutterScreenshot* screenshot);
 
+//------------------------------------------------------------------------------
+/// @brief      Registers a custom image generator (decoder) factory with the
+///             engine.
+///
+///             Custom image generators allow embedders to supply
+///             platform-native decoders (e.g. Android Bitmap / ImageDecoder,
+///             Apple ImageIO / CoreGraphics, or custom decoders) to decode
+///             images within Flutter.
+///
+/// @param[in]  engine  A running engine instance.
+/// @param[in]  info    The image generator registration information. Must not
+///                     be null and its struct_size must be initialized to
+///                     sizeof(FlutterImageGeneratorRegistrationInfo).
+///
+/// @return     `kSuccess` on success, or `kInvalidArguments` if arguments are
+///             invalid.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineRegisterImageGenerator(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterImageGeneratorRegistrationInfo* info);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -4305,6 +4561,9 @@ typedef FlutterEngineResult (*FlutterEngineScreenshotFnPtr)(
     FlutterScreenshot* screenshot_out);
 typedef FlutterEngineResult (*FlutterEngineFreeScreenshotFnPtr)(
     FlutterScreenshot* screenshot);
+typedef FlutterEngineResult (*FlutterEngineRegisterImageGeneratorFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterImageGeneratorRegistrationInfo* info);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -4363,6 +4622,7 @@ typedef struct {
   FlutterEngineNotifyDestroyedFnPtr NotifyDestroyed;
   FlutterEngineScreenshotFnPtr Screenshot;
   FlutterEngineFreeScreenshotFnPtr FreeScreenshot;
+  FlutterEngineRegisterImageGeneratorFnPtr RegisterImageGenerator;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

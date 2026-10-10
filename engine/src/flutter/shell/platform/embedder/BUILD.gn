@@ -68,6 +68,8 @@ template("embedder_source_set") {
       "embedder_external_view.h",
       "embedder_external_view_embedder.cc",
       "embedder_external_view_embedder.h",
+      "embedder_image_generator.cc",
+      "embedder_image_generator.h",
       "embedder_include.c",
       "embedder_include2.c",
       "embedder_layers.cc",
