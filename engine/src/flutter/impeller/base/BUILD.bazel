@@ -1,0 +1,53 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/base/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: base_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "base",
+    srcs = [
+        "allocation.cc",
+        "allocation_size.cc",
+        "comparable.cc",
+        "promise.cc",
+        "strings.cc",
+        "thread.cc",
+        "thread_safety.cc",
+        "validation.cc",
+        "version.cc",
+    ],
+    hdrs = [
+        "allocation.h",
+        "allocation_size.h",
+        "backend_cast.h",
+        "comparable.h",
+        "config.h",
+        "flags.h",
+        "mask.h",
+        "promise.h",
+        "strings.h",
+        "thread.h",
+        "thread_safety.h",
+        "timing.h",
+        "validation.h",
+        "version.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "@abseil-cpp//absl/status:statusor",
+    ],
+    alwayslink = True,
+)

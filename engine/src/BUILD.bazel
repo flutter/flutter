@@ -13,10 +13,16 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 # BUILDCONFIG.gn applies to every target; the generated BUILD files depend
 # on it from every target that compiles, and //engine/src/flutter:config
 # (GN's //flutter:config, `include_dirs = [ "..", "." ]`) reaches it too.
+#
+# The trees gclient syncs are external repositories here, not directories
+# under this root, so the one that engine code includes by its path under
+# the root ("flutter/third_party/skia/...") is carried along under that
+# path.
 cc_library(
     name = "include_root",
     includes = ["."],
     visibility = ["//engine/src/flutter:__subpackages__"],
+    deps = ["@skia//:engine_root_headers"],
 )
 
 # GN's root files: the dotfile and the build_overrides it names. Inputs of
