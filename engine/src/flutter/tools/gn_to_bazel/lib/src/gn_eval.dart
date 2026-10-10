@@ -905,6 +905,16 @@ final class _Evaluator {
       case GnBinary(:final String op, :final GnNode left, :final GnNode right)
           when op == '==' || op == '!=':
         return _comparison(node, op == '==', left, right, scope);
+      case GnFunctionCall(name: 'defined', :final List<GnNode> args):
+        if (args.length != 1 || args.single is! GnIdentifier) {
+          throw GnError(node.location, 'only defined(variable) is supported');
+        }
+        final String name = (args.single as GnIdentifier).name;
+        return ConditionConstant(
+          scope.lookup(name) != null ||
+              assumptions[name] != null ||
+              externalVariables.contains(name),
+        );
       default:
         throw GnError(node.location, 'unsupported condition (${node.runtimeType})');
     }

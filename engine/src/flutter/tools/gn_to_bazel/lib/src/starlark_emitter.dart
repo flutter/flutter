@@ -173,11 +173,14 @@ final class _Emitter {
     }
   }
 
+  /// The engine's test executables are testonly and named `*tests`
+  /// (`fml_unittests`, `display_list_rendertests`); testonly benchmarks and
+  /// tools stay binaries.
   static bool _isTest(GnTarget target) {
     final List<GnValue>? testonly = target.variables['testonly']?.unconditionalItems;
     final bool isTestonly =
         testonly != null && testonly.length == 1 && testonly.single == const GnBoolValue(true);
-    return isTestonly && (target.name.endsWith('_unittests') || target.name.endsWith('_tests'));
+    return isTestonly && target.name.endsWith('tests');
   }
 
   void _convertTemplate(GnTarget target, TemplateMapping template) {
