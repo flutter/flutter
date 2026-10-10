@@ -54,8 +54,8 @@ FlutterImageGeneratorFrameInfo AndroidImageGenerator::GetFrameInfo(
       .duration_ms = 0,
       .disposal_method = kFlutterImageGeneratorDisposalMethodKeep,
       .disposal_rect = {},
-      .has_disposal_rect = false,
       .blend_mode = kFlutterImageGeneratorBlendModeSrcOver,
+      .has_disposal_rect = false,
   };
 }
 
