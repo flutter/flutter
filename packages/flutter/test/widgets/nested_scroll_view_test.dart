@@ -3605,7 +3605,9 @@ void main() {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
-        child: nestedScrollView(nestedScrollView(const SizedBox.expand())),
+        child: nestedScrollView(
+          nestedScrollView(ListView(children: const <Widget>[SizedBox(height: 1000)])),
+        ),
       ),
     );
     expect(tester.takeException(), isNull);
