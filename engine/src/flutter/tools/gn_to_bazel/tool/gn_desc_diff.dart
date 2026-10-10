@@ -105,7 +105,7 @@ Future<int> run(List<String> arguments) async {
         continue;
       }
       compared++;
-      differences += _compare(label, target, gnTarget, gnPackage);
+      differences += _compare(label, target, gnTarget, gnPackage, evaluation.allDependentConfigs);
     }
     for (final String label in described.keys) {
       // GN's `_`-prefixed targets are the internals of template expansions.
@@ -123,7 +123,13 @@ Future<int> run(List<String> arguments) async {
 }
 
 /// Compares one target; returns the number of differences.
-int _compare(String label, GnTarget target, Map<String, Object?> gnTarget, String gnPackage) {
+int _compare(
+  String label,
+  GnTarget target,
+  Map<String, Object?> gnTarget,
+  String gnPackage,
+  Map<String, Set<String>> inherited,
+) {
   var differences = 0;
   void check(String what, Set<String> ours, Set<String> theirs, {bool subset = false}) {
     final Set<String> missing = subset ? const <String>{} : theirs.difference(ours);
@@ -197,17 +203,20 @@ int _compare(String label, GnTarget target, Map<String, Object?> gnTarget, Strin
     items('deps', labelOf).union(items('public_deps', labelOf)),
     _strings(gnTarget['deps']).map(_stripToolchain).map(labelOf).toSet()..removeAll(_toolchainDeps),
   );
-  // gn desc lists public_configs and all_dependent_configs after propagation
-  // from the dependencies, so the target's own are a subset (Bazel's deps
-  // propagate the same way).
-  for (final configs in <String>['public_configs', 'all_dependent_configs']) {
-    check(
-      configs,
-      items(configs, labelOf),
-      _strings(gnTarget[configs]).map(labelOf).toSet(),
-      subset: true,
-    );
-  }
+  // gn desc lists public_configs after propagation from public_deps, so the
+  // target's own are a subset; all_dependent_configs are compared after
+  // propagation on both sides (the converter follows deps within the file).
+  check(
+    'public_configs',
+    items('public_configs', labelOf),
+    _strings(gnTarget['public_configs']).map(labelOf).toSet(),
+    subset: true,
+  );
+  check(
+    'all_dependent_configs',
+    (inherited[target.name] ?? const <String>{}).map(labelOf).toSet(),
+    _strings(gnTarget['all_dependent_configs']).map(labelOf).toSet(),
+  );
   if (type == 'config') {
     check('defines', items('defines', (String s) => s), _strings(gnTarget['defines']).toSet());
     check(

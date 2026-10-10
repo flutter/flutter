@@ -24,6 +24,12 @@ const String bazelRootPackage = '//engine/src';
 /// module's repository mapping, in which the module's own name is itself.
 const String mainRepositoryName = '@flutter';
 
+/// The GN config engine code is compiled with (`-Wunreachable-code`, the
+/// engine include roots); what tells engine code from the third-party trees
+/// the engine describes with GN (Skia, the codecs), which get
+/// `chromium_code` alone.
+const String flutterConfigLabel = '//flutter:config';
+
 /// The `size` of a generated `cc_test`. GN has no notion of it; the engine's
 /// suites are small unless listed in [testSizes].
 const String defaultTestSize = 'small';

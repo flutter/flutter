@@ -81,7 +81,12 @@ GN build files are programs; Bazel wants data. The converter has three layers:
 
 1. `gn_ast.dart` -- the syntax tree, read from `gn format --dump-tree=json`.
    GN's own parser is the only parser. `GnSourceTree` resolves `//` paths and
-   loads files on demand (for imports), remembering them for the depfile.
+   loads files on demand (for imports), remembering them for the depfile. It
+   reads `secondary_source` from `.gn`: a `BUILD.gn` under
+   `//flutter/build/secondary/X` stands in for `//X` (its GN directory,
+   relative paths and imports resolve as if it were there), and a `.gni` is
+   found there when the primary tree lacks it -- the engine describes
+   libwebp, wuffs and expat that way.
 2. `gn_eval.dart` -- a symbolic evaluator. Each assignment is recorded with
    the condition under which it happens, so `if (is_linux) { sources += [...] }`
    becomes "under `is_linux`, append these to `sources`". Assumptions fix
@@ -107,11 +112,23 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `cc_library` carrying the defines, include directories and link flags that
    dependents list in `deps`, known `.gni` templates to the matching Bazel
    macros. A private config of the same file is inlined instead (its defines
-   as `local_defines`), since a dependency's `defines` would leak to
-   dependents where GN's private configs never do. `cflags_c` and `cflags_cc`
-   go to `conlyopts` and `cxxopts`; a `-std=` in a target's flags is dropped,
-   because GN's compiler config sets the standard after every target's flags
-   and the target's never takes effect. A file listed twice is emitted once.
+   as `local_defines`, its flags as `copts`), since a dependency's `defines`
+   would leak to dependents where GN's private configs never do. The configs
+   a target inherits through its dependencies' `all_dependent_configs` --
+   which GN applies across private dependencies, where Bazel's
+   `implementation_deps` would stop them -- become public `deps` of the
+   target, so that Skia's `SK_VULKAN` and friends reach the engine as they
+   do under GN. A public config's compiler flags cannot ride a dependency:
+   they are inlined into the owner, and dependents get them from the
+   `propagatedCopts` table, against which the owner's file is checked.
+   `cflags_c` and `cflags_cc` go to `conlyopts` and `cxxopts`; a `-std=` in a
+   target's flags is dropped, because GN's compiler config sets the standard
+   after every target's flags and the target's never takes effect. A file
+   listed twice is emitted once. Every compiled target gets `FLUTTER_COPTS`
+   (engine code: it lists `//flutter:config` or depends on engine code),
+   `CHROMIUM_CODE_COPTS` (the third-party trees the engine describes with
+   GN, such as Skia) or `FLUTTER_THIRD_PARTY_COPTS` (`no_chromium_code`),
+   from `build/bazel/copts.bzl`.
 
 `bazel_mapping.dart` holds the converter's knowledge of the engine: label
 translations for synced dependencies (`//flutter/third_party/icu` is `@icu`,
