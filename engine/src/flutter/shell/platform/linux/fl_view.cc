@@ -562,8 +562,19 @@ static void fl_view_notify(GObject* object, GParamSpec* pspec) {
   }
 }
 
+void fl_view_begin_destroy(FlView* self) {
+  g_return_if_fail(FL_IS_VIEW(self));
+
+  if (FL_IS_VIEW_RENDERER_OPENGL(self->renderer)) {
+    fl_view_renderer_opengl_cancel_wait(
+        FL_VIEW_RENDERER_OPENGL(self->renderer));
+  }
+}
+
 static void fl_view_dispose(GObject* object) {
   FlView* self = FL_VIEW(object);
+
+  fl_view_begin_destroy(self);
 
   if (self->cancellable != nullptr) {
     g_cancellable_cancel(self->cancellable);

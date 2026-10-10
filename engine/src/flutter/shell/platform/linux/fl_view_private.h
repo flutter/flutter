@@ -20,6 +20,15 @@ G_BEGIN_DECLS
  */
 FlViewAccessible* fl_view_get_accessible(FlView* view);
 
+/**
+ * fl_view_begin_destroy:
+ * @view: an #FlView.
+ *
+ * Cancels any pending frame wait and removes the view from the engine before
+ * its toplevel window is destroyed.
+ */
+void fl_view_begin_destroy(FlView* view);
+
 G_END_DECLS
 
 #endif  // FLUTTER_SHELL_PLATFORM_LINUX_FL_VIEW_PRIVATE_H_

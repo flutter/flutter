@@ -36,6 +36,9 @@ struct _FlViewRendererOpenGL {
 
   // Ensure Flutter and GTK can access the frame stored in the compositor.
   GMutex frame_mutex;
+
+  // TRUE once teardown has started and wait_for_frame should abort immediately.
+  gboolean destroyed;
 };
 
 G_DEFINE_TYPE(FlViewRendererOpenGL,
@@ -59,7 +62,8 @@ static void get_frame_size(FlViewRendererOpenGL* self,
 static gboolean redraw_cb(gpointer user_data) {
   g_autoptr(FlViewRendererOpenGL) self = FL_VIEW_RENDERER_OPENGL(user_data);
 
-  if (self->compositor == nullptr || self->engine == nullptr) {
+  if (self->destroyed || self->compositor == nullptr ||
+      self->engine == nullptr) {
     return G_SOURCE_REMOVE;
   }
 
@@ -91,7 +95,7 @@ static void wait_for_frame(FlViewRendererOpenGL* self,
                            gint scale_factor) {
   gint64 expiry_time = g_get_monotonic_time() + kRenderTimeoutMicroseconds;
   while (true) {
-    if (self->compositor == nullptr) {
+    if (self->destroyed || self->compositor == nullptr) {
       break;
     }
     size_t width = gdk_window_get_width(window) * scale_factor;
@@ -156,7 +160,7 @@ static gboolean fl_view_renderer_opengl_draw(GtkWidget* widget, cairo_t* cr) {
 
   // The compositor is created when the widget is realized; if it is not yet
   // available there is nothing to render beyond the background.
-  if (self->compositor == nullptr) {
+  if (self->destroyed || self->compositor == nullptr) {
     return TRUE;
   }
 
@@ -168,6 +172,11 @@ static gboolean fl_view_renderer_opengl_draw(GtkWidget* widget, cairo_t* cr) {
   // If frame not ready, then wait for it.
   if (!self->sized_to_content) {
     wait_for_frame(self, window, scale_factor);
+  }
+
+  if (self->destroyed || self->compositor == nullptr) {
+    g_mutex_unlock(&self->frame_mutex);
+    return FALSE;
   }
 
   // The frame is drawn from an OpenGL texture, so make a context current that
@@ -314,4 +323,16 @@ FlViewRendererOpenGL* fl_view_renderer_opengl_new(FlEngine* engine,
   self->engine = FL_ENGINE(g_object_ref(engine));
   self->sized_to_content = sized_to_content;
   return self;
+}
+
+void fl_view_renderer_opengl_cancel_wait(FlViewRendererOpenGL* self) {
+  g_return_if_fail(FL_IS_VIEW_RENDERER_OPENGL(self));
+
+  g_mutex_lock(&self->frame_mutex);
+  self->destroyed = TRUE;
+  g_mutex_unlock(&self->frame_mutex);
+
+  if (self->task_runner != nullptr) {
+    fl_task_runner_stop_wait(self->task_runner);
+  }
 }
