@@ -12,7 +12,10 @@ to Bazel:
   `DEPS`). The directory is consumed in place -- it is symlinked, never
   copied -- so GN and Bazel always build the exact same sources, and nothing
   is downloaded twice. An overlay `BUILD` file can be supplied for trees that
-  ship no Bazel build files or whose upstream ones should not be used.
+  ship no Bazel build files or whose upstream ones should not be used; or
+  the engine's GN build files for the tree can be converted into `BUILD`
+  files at fetch time (`gn_build_files`), so that a dependency roll that
+  changes the GN side (Skia's source lists, say) needs no regeneration.
 
 * `cipd_package`: a repository populated by downloading a CIPD package over
   HTTPS (the same mechanism Skia uses). It needs no `cipd` client and no
@@ -120,10 +123,81 @@ def _link_tree(rctx, source, overlaying):
 # synced_repository
 # ---------------------------------------------------------------------------
 
+_CONVERTER = "engine/src/flutter/tools/gn_to_bazel"
+_GN_ROOT = "engine/src"
+
+def _host_dart(rctx):
+    """The checkout's prebuilt Dart SDK for this host (a DEPS CIPD package)."""
+    os_name = rctx.os.name.lower()
+    if os_name.startswith("linux"):
+        os_part, exe = "linux", "dart"
+    elif os_name.startswith("mac"):
+        os_part, exe = "macos", "dart"
+    elif os_name.startswith("windows"):
+        os_part, exe = "windows", "dart.exe"
+    else:
+        fail("synced_repository: unsupported host OS %r" % rctx.os.name)
+    arch = rctx.os.arch.lower()
+    if arch in ("amd64", "x86_64", "x64"):
+        arch_part = "x64"
+    elif arch in ("aarch64", "arm64"):
+        arch_part = "arm64"
+    else:
+        fail("synced_repository: unsupported host architecture %r" % rctx.os.arch)
+    dart = rctx.workspace_root.get_child("engine/src/flutter/prebuilts/%s-%s/dart-sdk/bin/%s" % (os_part, arch_part, exe))
+    if not dart.exists:
+        fail("synced_repository: %s does not exist; it is populated by `gclient sync`" % dart)
+    return dart
+
+def _convert_gn(rctx):
+    """Runs tools/gn_to_bazel over `gn_build_files`, writing into the repository.
+
+    The converter is the checkout's own: the prebuilt Dart SDK and `gn` from
+    DEPS. Every GN file it read (the depfile) and the converter's sources are
+    watched, so a roll that changes a `.gni` or an edit to the converter
+    re-runs the conversion on the next build.
+    """
+    root = rctx.workspace_root.get_child(_GN_ROOT)
+    converter = rctx.workspace_root.get_child(_CONVERTER)
+    depfile = rctx.path("gn_to_bazel.d")
+    arguments = [
+        _host_dart(rctx),
+        converter.get_child("bin/gn_to_bazel.dart"),
+        "--root",
+        root,
+        "--gn",
+        root.get_child("flutter/third_party/gn/gn"),
+        "--out-dir",
+        rctx.path(""),
+        "--repository",
+        rctx.attr.gn_repository,
+        "--depfile",
+        depfile,
+        "--buildifier",
+        "none",
+    ] + [
+        rctx.workspace_root.get_child(file)
+        for file in rctx.attr.gn_build_files
+    ]
+    result = rctx.execute(arguments, timeout = 600)
+    if result.return_code != 0:
+        fail("synced_repository(%s): gn_to_bazel failed:\n%s%s" % (rctx.name, result.stdout, result.stderr))
+    for line in rctx.read(depfile).splitlines():
+        if line:
+            rctx.watch(line)
+    rctx.delete(depfile)
+    rctx.watch_tree(converter.get_child("lib"))
+    rctx.watch_tree(converter.get_child("bin"))
+
 def _synced_repository_impl(rctx):
     if rctx.attr.build_file != None and rctx.attr.build_file_content:
         fail("synced_repository(%s): specify at most one of build_file and build_file_content" % rctx.name)
-    overlaying = rctx.attr.build_file != None or bool(rctx.attr.build_file_content)
+    converting = bool(rctx.attr.gn_build_files)
+    if converting and (rctx.attr.build_file != None or rctx.attr.build_file_content):
+        fail("synced_repository(%s): gn_build_files and an overlay BUILD file are mutually exclusive" % rctx.name)
+    if converting != bool(rctx.attr.gn_repository):
+        fail("synced_repository(%s): gn_build_files and gn_repository go together" % rctx.name)
+    overlaying = converting or rctx.attr.build_file != None or bool(rctx.attr.build_file_content)
 
     source = rctx.workspace_root.get_child(rctx.attr.path)
     if not source.exists or not source.is_dir:
@@ -133,7 +207,10 @@ def _synced_repository_impl(rctx):
         )
 
     _link_tree(rctx, source, overlaying)
-    _write_build_file(rctx, rctx.attr.build_file, rctx.attr.build_file_content)
+    if converting:
+        _convert_gn(rctx)
+    else:
+        _write_build_file(rctx, rctx.attr.build_file, rctx.attr.build_file_content)
     _mark_repository_boundary(rctx)
 
 synced_repository = repository_rule(
@@ -151,6 +228,15 @@ synced_repository = repository_rule(
         ),
         "build_file_content": attr.string(
             doc = "Inline overlay BUILD file content; mutually exclusive with `build_file`.",
+        ),
+        "gn_build_files": attr.string_list(
+            doc = "GN build files (relative to the repository root) that tools/gn_to_bazel converts into " +
+                  "this repository's BUILD files at fetch time; hides upstream BUILD files like an overlay.",
+        ),
+        "gn_repository": attr.string(
+            doc = "With gn_build_files: `@name=//gn/dir` naming this repository and the GN directory " +
+                  "that is its root (the converter's --repository). The converted files become the " +
+                  "repository's packages.",
         ),
     },
     # The repository only symlinks into the checkout, so it must be re-created
