@@ -10,11 +10,15 @@
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/backend/gles/device_buffer_gles.h"
 #include "impeller/renderer/backend/gles/gles.h"
+#include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/command.h"
 #include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
+
+class SamplerGLES;
+class TextureGLES;
 
 namespace testing {
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformData);
@@ -25,7 +29,22 @@ FML_TEST_CLASS(BufferBindingsGLESTest,
                BindsTexturesAcrossThePerStageUnitBoundary);
 FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit);
 FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit);
+FML_TEST_CLASS(BufferBindingsGLESTest,
+               SkipsRedundantSamplerConfigurationOnSameTexture);
 }  // namespace testing
+
+//------------------------------------------------------------------------------
+/// @brief      Caches the sampler configuration state applied to GL texture
+///             objects during a render pass.
+///
+struct SamplerStateCache {
+  absl::flat_hash_map<HandleGLES, uint64_t, HandleGLES::Hash, HandleGLES::Equal>
+      configured_samplers;
+
+  bool ConfigureBoundTexture(const SamplerGLES& sampler,
+                             const TextureGLES& texture,
+                             const ProcTableGLES& gl);
+};
 
 //------------------------------------------------------------------------------
 /// @brief      Sets up stage bindings for single draw call in the OpenGLES
@@ -59,7 +78,8 @@ class BufferBindingsGLES {
                        const std::vector<TextureAndSampler>& bound_textures,
                        const std::vector<BufferResource>& bound_buffers,
                        Range texture_range,
-                       Range buffer_range);
+                       Range buffer_range,
+                       SamplerStateCache* sampler_cache = nullptr);
 
   bool UnbindVertexAttributes(const ProcTableGLES& gl);
 
@@ -76,6 +96,8 @@ class BufferBindingsGLES {
                   RejectsTexturesBeyondThePerStageLimit);
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
                   RejectsTexturesBeyondTheCombinedLimit);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  SkipsRedundantSamplerConfigurationOnSameTexture);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///
@@ -131,7 +153,8 @@ class BufferBindingsGLES {
       const std::vector<TextureAndSampler>& bound_textures,
       Range texture_range,
       ShaderStage stage,
-      size_t unit_start_index = 0);
+      size_t unit_start_index = 0,
+      SamplerStateCache* sampler_cache = nullptr);
 
   BufferBindingsGLES(const BufferBindingsGLES&) = delete;
 

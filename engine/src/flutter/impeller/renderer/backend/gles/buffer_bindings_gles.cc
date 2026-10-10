@@ -262,24 +262,46 @@ bool BufferBindingsGLES::BindVertexAttributes(const ProcTableGLES& gl,
   return true;
 }
 
+bool SamplerStateCache::ConfigureBoundTexture(const SamplerGLES& sampler,
+                                              const TextureGLES& texture,
+                                              const ProcTableGLES& gl) {
+  if (texture.IsWrapped()) {
+    return sampler.ConfigureBoundTexture(texture, gl);
+  }
+  const uint64_t sampler_key =
+      SamplerDescriptor::ToKey(sampler.GetDescriptor());
+  const HandleGLES& handle = texture.GetHandle();
+  auto it = configured_samplers.find(handle);
+  if (it != configured_samplers.end() && it->second == sampler_key) {
+    return true;
+  }
+  if (!sampler.ConfigureBoundTexture(texture, gl)) {
+    return false;
+  }
+  configured_samplers[handle] = sampler_key;
+  return true;
+}
+
 bool BufferBindingsGLES::BindUniformData(
     const ProcTableGLES& gl,
     const std::vector<TextureAndSampler>& bound_textures,
     const std::vector<BufferResource>& bound_buffers,
     Range texture_range,
-    Range buffer_range) {
+    Range buffer_range,
+    SamplerStateCache* sampler_cache) {
   for (auto i = 0u; i < buffer_range.length; i++) {
     if (!BindUniformBuffer(gl, bound_buffers[buffer_range.offset + i])) {
       return false;
     }
   }
   std::optional<size_t> next_unit_index =
-      BindTextures(gl, bound_textures, texture_range, ShaderStage::kVertex);
+      BindTextures(gl, bound_textures, texture_range, ShaderStage::kVertex,
+                   /*unit_start_index=*/0, sampler_cache);
   if (!next_unit_index.has_value()) {
     return false;
   }
   if (!BindTextures(gl, bound_textures, texture_range, ShaderStage::kFragment,
-                    *next_unit_index)
+                    *next_unit_index, sampler_cache)
            .has_value()) {
     return false;
   }
@@ -491,7 +513,8 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     const std::vector<TextureAndSampler>& bound_textures,
     Range texture_range,
     ShaderStage stage,
-    size_t unit_start_index) {
+    size_t unit_start_index,
+    SamplerStateCache* sampler_cache) {
   size_t active_index = unit_start_index;
   size_t stage_texture_count = 0;
   for (auto i = 0u; i < texture_range.length; i++) {
@@ -549,7 +572,12 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     /// bound texture using that sampler.
     ///
     const auto& sampler_gles = SamplerGLES::Cast(*data.sampler);
-    if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
+    const bool configured =
+        sampler_cache != nullptr
+            ? sampler_cache->ConfigureBoundTexture(sampler_gles, texture_gles,
+                                                   gl)
+            : sampler_gles.ConfigureBoundTexture(texture_gles, gl);
+    if (!configured) {
       return std::nullopt;
     }
 
