@@ -1354,6 +1354,19 @@ class _RenderTheater extends RenderBox
 
   RenderBox? get _lastOnstageChild => skipCount == super.childCount ? null : lastChild;
 
+  // Whether the given render child of this theater is obstructed (offstage),
+  // in which case it is not laid out, painted or hit tested by this theater.
+  bool _isObstructedChild(RenderObject child) {
+    RenderBox? candidate = super.firstChild;
+    for (var i = 0; i < skipCount && candidate != null; i++) {
+      if (candidate == child) {
+        return true;
+      }
+      candidate = (candidate.parentData! as StackParentData).nextSibling;
+    }
+    return false;
+  }
+
   @override
   double computeMinIntrinsicWidth(double height) {
     return RenderStack.getIntrinsicDimension(
@@ -2918,8 +2931,40 @@ class _RenderLayoutBuilder extends RenderProxyBox
   @override
   @visibleForOverriding
   void layoutCallback() {
-    _layoutInfo = _computeNewLayoutInfo();
+    // A _RenderTheater does not lay out the OverlayEntries that are obstructed
+    // by an opaque entry. The overlay child of an OverlayPortal in such an
+    // entry is neither painted nor hit-tested, but the layout callback is still
+    // run to keep the widget tree up-to-date, and the layout of the anchor
+    // (the layout surrogate) is stale, so the paint transform computed from it
+    // may be wrong. Reuse the last layout info, which was computed from valid
+    // layout, until the anchor is laid out again.
+    if (_layoutInfo == null || !_isAnchorObstructed) {
+      _layoutInfo = _computeNewLayoutInfo();
+    }
     super.layoutCallback();
+  }
+
+  // Whether the layout surrogate, the anchor the layout info is computed
+  // against, is in a render subtree that some _RenderTheater between the
+  // surrogate and this box's theater does not lay out because its OverlayEntry
+  // is obstructed.
+  bool get _isAnchorObstructed {
+    final _RenderTheater theater = this.theater;
+    RenderObject? node = (parent! as _RenderDeferredLayoutBox)._layoutSurrogate;
+    while (node != null && node != theater) {
+      if (node is _RenderDeferredLayoutBox) {
+        // The overlay child of another OverlayPortal. It's a child of a theater
+        // but is positioned (and laid out) relative to its own surrogate.
+        node = node._layoutSurrogate;
+        continue;
+      }
+      final RenderObject? nodeParent = node.parent;
+      if (nodeParent is _RenderTheater && nodeParent._isObstructedChild(node)) {
+        return true;
+      }
+      node = nodeParent;
+    }
+    return false;
   }
 
   int? _callbackId;
