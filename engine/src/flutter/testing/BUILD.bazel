@@ -49,6 +49,7 @@ cc_library(
     copts = FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
+        "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/fml",
         "@googletest//:gtest",
@@ -66,6 +67,7 @@ cc_library(
     deps = [
         ":dynamic_symbols",
         ":testing_core",
+        "//engine/src:include_root",
     ],
     alwayslink = True,
 )

@@ -855,14 +855,15 @@ cc_library(
     ],
     hdrs = ["example.h"],
     copts = FLUTTER_COPTS,
-    implementation_deps = ["//engine/src/flutter/fml"],
     linkopts = [
         "-lpthread",  # is_linux
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":example_config",
+        "//engine/src:include_root",
         "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
         "@icu",
     ],
     alwayslink = True,
@@ -884,6 +885,7 @@ cc_test(
     deps = [
         ":dynamic_symbols",
         ":example",
+        "//engine/src:include_root",
         "//engine/src/flutter/testing",
     ],
 )
@@ -1091,13 +1093,15 @@ source_set("x") {
         output,
         contains('''
     copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
     # Why these.
-    implementation_deps = [
+    deps = [
         # The library itself.
         ":example",
         # Linux needs this one.
         ":linux",  # is_linux
         ":y",
+        "//engine/src:include_root",
         "//engine/src/flutter/fml",
     ],
 '''),
@@ -1203,7 +1207,10 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    deps = [":public_config"],
+    deps = [
+        ":public_config",
+        "//engine/src:include_root",
+    ],
 )
 '''),
       );
@@ -1284,12 +1291,6 @@ cc_library(
     ],
     hdrs = ["include/a.h"],
     copts = FLUTTER_COPTS,
-    implementation_deps = [
-        "//modules/skcms",
-        "//modules/skcms:other",
-        "@flutter//engine/src/flutter/fml",
-        "@icu",
-    ],
     includes = ["."],
     local_defines = FLUTTER_LOCAL_DEFINES + select({
         "@flutter//engine/src/flutter/build/bazel:unoptimized": [
@@ -1297,6 +1298,12 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
+    deps = [
+        "//modules/skcms",
+        "//modules/skcms:other",
+        "@flutter//engine/src/flutter/fml",
+        "@icu",
+    ],
 '''),
       );
       await expectLater(
@@ -1384,7 +1391,7 @@ source_set("engine_too") {
 }
 ''');
       // GN applies vulkan_public to gpu and skia although they reach vulkan
-      // through private deps; Bazel's implementation_deps would stop there.
+      // through private deps.
       expect(
         output,
         contains('''
@@ -1392,9 +1399,12 @@ cc_library(
     name = "gpu",
     srcs = ["gpu.cc"],
     copts = CHROMIUM_CODE_COPTS,
-    implementation_deps = [":vulkan"],
     local_defines = FLUTTER_LOCAL_DEFINES,
-    deps = [":vulkan_public"],
+    deps = [
+        ":vulkan",
+        ":vulkan_public",
+        "//engine/src:include_root",
+    ],
     alwayslink = True,
 )
 '''),
@@ -1406,9 +1416,12 @@ cc_library(
     name = "skia",
     srcs = ["skia.cc"],
     copts = CHROMIUM_CODE_COPTS,
-    implementation_deps = [":gpu"],
     local_defines = FLUTTER_LOCAL_DEFINES,
-    deps = [":vulkan_public"],
+    deps = [
+        ":gpu",
+        ":vulkan_public",
+        "//engine/src:include_root",
+    ],
     alwayslink = True,
 )
 '''),
@@ -1577,14 +1590,17 @@ source_set("wuffs") {
     });
 
     test('rejects what it cannot express', () async {
-      await expectLater(
-        convert('''
+      // Flags and defines on a header-only target apply to nothing, in GN as
+      // here.
+      expect(
+        await convert('''
 source_set("headers") {
   sources = [ "a.h" ]
   defines = [ "UNUSED" ]
+  cflags = [ "-Wall" ]
 }
 '''),
-        throwsGnError(line: 1, message: 'has flags or defines but no sources'),
+        contains('cc_library(\n    name = "headers",\n    hdrs = ["a.h"],\n)\n'),
       );
       await expectLater(
         convert('''
@@ -1629,13 +1645,18 @@ shared_library("x") {
           '..',
           file.gnPackage.substring(2),
         );
-        final GnBlock tree = await loadGnFile(p.join(directory, 'BUILD.gn'), gnBinary: gnBinary);
+        final tree = GnSourceTree(
+          p.join(Directory.current.path, '..', '..', '..'),
+          gnBinary: gnBinary,
+        );
         final GnFileEvaluation evaluation = evaluateGnFile(
-          tree,
+          tree.load(p.join(directory, 'BUILD.gn')),
           assumptions: linuxHostAssumptions(),
           templates: templateMappings.keys.toSet(),
           externalVariables: knownExternalVariables,
           skipTargets: file.skip.keys.toSet(),
+          tree: tree,
+          importPolicy: engineImportPolicy,
         );
         final String output = emitBuildFile(
           evaluation,

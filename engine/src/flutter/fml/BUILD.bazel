@@ -125,24 +125,23 @@ cc_library(
         "wakeable.h",
     ],
     copts = FLUTTER_COPTS,
-    implementation_deps = [
-        # This abseil dependency is only used by backtrace.cc.
-        "@abseil-cpp//absl/debugging:symbolize",  # enable_backtrace
-        "@abseil-cpp//absl/numeric:int128",
-        "@icu",  # target_os != "wasm"
-    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":build_config",
         ":command_line",
         ":macros",
         ":string_conversion",
+        "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
+        # This abseil dependency is only used by backtrace.cc.
+        "@abseil-cpp//absl/debugging:symbolize",  # enable_backtrace
+        "@abseil-cpp//absl/numeric:int128",
         # trace_event.h uses the Dart timeline API. The Dart runtime's build
         # files cannot be loaded for target_os == "wasm", where the header is
         # found through the source root alone.
         "@dart//:dart_api_headers",  # target_os != "wasm"
+        "@icu",  # target_os != "wasm"
     ],
     alwayslink = True,
 )
@@ -164,6 +163,7 @@ cc_library(
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":macros",
+        "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
     ],
@@ -188,12 +188,13 @@ cc_library(
     srcs = ["string_conversion.cc"],
     hdrs = ["string_conversion.h"],
     copts = FLUTTER_COPTS,
-    implementation_deps = [":build_config"],
     # Current versions of libcxx have deprecated some of the UTF-16 string
     # conversion APIs.
     local_defines = FLUTTER_LOCAL_DEFINES + ["_LIBCPP_DISABLE_DEPRECATION_WARNINGS"],
     deps = [
+        ":build_config",
         ":string_conversion_config",
+        "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/common:flutter_config",
     ],
@@ -250,6 +251,7 @@ cc_test(
     deps = [
         ":fml",
         ":fml_fixtures",
+        "//engine/src:include_root",
         "//engine/src/flutter/testing:run_all_unittests",
         "//engine/src/flutter/testing:testing_core",
     ],

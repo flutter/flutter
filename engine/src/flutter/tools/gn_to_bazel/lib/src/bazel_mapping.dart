@@ -11,6 +11,7 @@
 library;
 
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 
 import 'gn_ast.dart';
 import 'gn_eval.dart';
@@ -29,6 +30,13 @@ const String mainRepositoryName = '@flutter';
 /// the engine describes with GN (Skia, the codecs), which get
 /// `chromium_code` alone.
 const String flutterConfigLabel = '//flutter:config';
+
+/// What stands for GN's `//build/config/compiler:default_include_dirs`
+/// (`-I//`, the source root), which BUILDCONFIG.gn applies to every target
+/// and engine code relies on for its `flutter/...` includes. Every compiled
+/// target of the main repository depends on it privately; the third-party
+/// trees the engine describes with GN never use it.
+const String defaultIncludeDirsLabel = '//engine/src:include_root';
 
 /// The `size` of a generated `cc_test`. GN has no notion of it; the engine's
 /// suites are small unless listed in [testSizes].
@@ -271,8 +279,11 @@ String bazelLabel(String gnLabel, {required String package, GnLocation? location
   if (gnLabel.startsWith(':')) {
     return gnLabel;
   }
-  // `modules/skcms` is relative to the directory of the GN file.
-  final absolute = gnLabel.startsWith('//') ? gnLabel : '$package/$gnLabel';
+  // `modules/skcms` and `../base` are relative to the directory of the GN
+  // file.
+  final absolute = gnLabel.startsWith('//')
+      ? gnLabel
+      : '//${p.posix.normalize('${package.substring(2)}/$gnLabel')}';
   final String? override = labelOverrides[absolute];
   if (override != null) {
     return override;
@@ -326,6 +337,9 @@ final class ConfigWarningSet extends ConfigEffect {
 const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   '//flutter:config': ConfigDependency('//engine/src/flutter:config'),
   '//flutter/common:flutter_config': ConfigDependency('//engine/src/flutter/common:flutter_config'),
+  '//flutter/impeller:impeller_public_config': ConfigDependency(
+    '//engine/src/flutter/impeller:impeller_public_config',
+  ),
   '//flutter/third_party/icu:icu_config': ConfigImplied(),
   '//build/config/compiler:chromium_code': ConfigWarningSet(chromiumCode: true),
   '//build/config/compiler:no_chromium_code': ConfigWarningSet(chromiumCode: false),
@@ -426,16 +440,25 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
 };
 
 /// Which imported `.gni` files the converter evaluates (Skia's lists,
-/// arguments and templates; the engine's Skia wrapper files) and which it
-/// takes as known through the tables above (the engine's own configuration
-/// files, whose variables are [knownExternalVariables] and whose templates
-/// are [templateMappings]).
+/// arguments and templates; the engine's Skia wrapper files; Impeller's
+/// arguments and its `impeller_component` template) and which it takes as
+/// known through the tables above (the engine's own configuration files,
+/// whose variables are [knownExternalVariables] and whose templates are
+/// [templateMappings]; Impeller's shader templates, until something
+/// converted invokes them).
 const ImportPolicy engineImportPolicy = ImportPolicy(
-  evaluatedPrefixes: <String>{'//flutter/third_party/skia/', '//flutter/skia/'},
+  evaluatedPrefixes: <String>{
+    '//flutter/third_party/skia/',
+    '//flutter/skia/',
+    '//flutter/impeller/tools/impeller.gni',
+    '//flutter/impeller/tools/args.gni',
+    '//flutter/impeller/tools/component.gni',
+    '//flutter/third_party/glfw/glfw_args.gni',
+  },
   known: <String>{
     '//flutter/build/dart/dart.gni',
     '//flutter/common/config.gni',
-    '//flutter/impeller/tools/impeller.gni',
+    '//flutter/impeller/tools/shaders.gni',
     '//flutter/shell/config.gni',
     '//flutter/testing/testing.gni',
     '//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni',

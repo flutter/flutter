@@ -5,6 +5,8 @@
 /// Starlark generation: from the evaluated GN targets to a `BUILD.bazel`.
 library;
 
+import 'package:path/path.dart' as p;
+
 import 'bazel_mapping.dart';
 import 'gn_ast.dart';
 import 'gn_eval.dart';
@@ -231,9 +233,51 @@ final class _Emitter {
         _convertCcTarget(target, _isTest(target) ? 'cc_test' : 'cc_binary', library: false);
       case 'config':
         _convertConfig(target);
+      case 'group':
+        _convertGroup(target);
       default:
         throw GnError(target.location, '${target.rule}() is not converted yet');
     }
+  }
+
+  /// group("x") forwards its dependencies: a `cc_library` with only `deps`.
+  /// With nothing to compile it cannot keep a private dependency private
+  /// (Bazel's implementation_deps need sources), so `deps` and
+  /// `public_deps` both become `deps`, which is what GN does for linking.
+  void _convertGroup(GnTarget target) {
+    _use('@rules_cc//cc:defs.bzl', 'cc_library');
+    final rule = _Rule('cc_library', target.name, target.comments);
+    for (final GnVariable variable in target.variables.values) {
+      switch (variable.name) {
+        case 'deps':
+        case 'public_deps':
+          _labelsInto(rule.list('deps'), variable, target);
+        case 'testonly':
+          _scalar(rule, 'testonly', variable);
+        case 'public_configs':
+        case 'all_dependent_configs':
+          _configsInto(
+            rule,
+            variable,
+            target,
+            chromiumCode: true,
+            publicConfigs: const <String>{},
+            propagatedFlags: <String>[],
+          );
+        default:
+          if (_ignoredVariables.contains(variable.name) || variable.forwarded) {
+            break;
+          }
+          throw GnError(
+            variable.assignments.first.location,
+            'variable ${variable.name} of group ${target.name} is not converted yet',
+          );
+      }
+    }
+    for (final String config in inheritedConfigs[target.name] ?? const <String>{}) {
+      rule.list('deps').addUnique(Condition.always, _Item(_localLabel(config)));
+    }
+    rules.add(rule);
   }
 
   /// The engine's test executables are testonly and named `*tests`
@@ -292,9 +336,16 @@ final class _Emitter {
         case 'public':
           _filesInto(rule.list('hdrs'), variable);
         case 'deps':
-          _labelsInto(rule.list(library ? 'implementation_deps' : 'deps'), variable, target);
-          _propagatedFlagsInto(rule, variable);
         case 'public_deps':
+          // Both are Bazel deps: GN's include paths make every header of
+          // every transitive dependency visible, private or not, and its
+          // check follows only the first edge; a sandboxed compile sees
+          // declared inputs alone. What a private GN dep keeps from
+          // dependents is the propagation of its public configs, which
+          // Bazel's implementation_deps would model at the price of
+          // compiles that cannot find the headers their dependencies'
+          // headers include. The defines dependents gain this way are what
+          // the parity check against GN measures.
           _labelsInto(rule.list('deps'), variable, target);
           _propagatedFlagsInto(rule, variable);
         case 'defines':
@@ -361,24 +412,12 @@ final class _Emitter {
       rule.list('deps').addUnique(Condition.always, _Item(_localLabel(config)));
     }
 
-    // A header-only library compiles nothing, so its flags would only be
-    // noise (GN ignores them just the same).
+    // A header-only library compiles nothing: GN ignores its flags and
+    // defines (they apply to no compile and propagate to no one), and so
+    // does the generated rule.
     final bool compiles = !(rule.lists['srcs']?.isEmpty ?? true);
-    final bool hasFlags =
-        !(rule.lists['copts']?.isEmpty ?? true) ||
-        !(rule.lists['conlyopts']?.isEmpty ?? true) ||
-        !(rule.lists['cxxopts']?.isEmpty ?? true) ||
-        target.variables.containsKey('defines') &&
-            !(target.variables['defines']!.unconditionalItems?.isEmpty ?? false);
-    if (!compiles && hasFlags) {
-      throw GnError(
-        target.location,
-        '${target.name} has flags or defines but no sources to apply them to',
-      );
-    }
     if (!compiles) {
-      // What private configs brought has nothing to apply to.
-      rule.lists.remove('local_defines');
+      const <String>['copts', 'conlyopts', 'cxxopts', 'local_defines'].forEach(rule.lists.remove);
     }
     if (compiles) {
       // GN applies chromium_code (or no_chromium_code) to every target, and
@@ -410,6 +449,10 @@ final class _Emitter {
       // dependency, so that dependents outside the file see it too.
       for (final String dep in implicitDeps) {
         rule.list('deps').addUnique(Condition.always, _Item(_localLabel(dep)));
+      }
+      // GN's default include dirs, applied to every target by BUILDCONFIG.gn.
+      if (layout.isMain) {
+        rule.list('deps').addUnique(Condition.always, _Item(_localLabel(defaultIncludeDirsLabel)));
       }
     }
     rules.add(rule);
@@ -530,7 +573,7 @@ final class _Emitter {
         ? '$gnPackage$value'
         : value.startsWith('//')
         ? value
-        : '$gnPackage/$value';
+        : '//${p.posix.normalize('${gnPackage.substring(2)}/$value')}';
     if (!label.contains(':')) {
       label = '$label:${label.substring(label.lastIndexOf('/') + 1)}';
     }
