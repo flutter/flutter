@@ -125,8 +125,11 @@ String emitBuildFile(
   OutputLayout layout = const OutputLayout.main(),
   List<String> implicitDeps = const <String>[],
 }) {
-  final emitter = _Emitter(gnPackage, layout, implicitDeps);
+  final emitter = _Emitter(gnPackage, layout, implicitDeps)
+    ..inheritedConfigs.addAll(evaluation.allDependentConfigs)
+    ..conditionalInheritance.addAll(evaluation.conditionalAllDependentConfigs);
   for (final GnTarget target in evaluation.targets) {
+    emitter.localTargets[target.name] = target;
     if (target.rule == 'config') {
       emitter.localConfigs[target.name] = target;
       continue;
@@ -173,9 +176,19 @@ final class _Emitter {
   /// The `config()` targets of the file, by name, for inlining.
   final Map<String, GnTarget> localConfigs = <String, GnTarget>{};
 
+  /// Every target of the file, by name.
+  final Map<String, GnTarget> localTargets = <String, GnTarget>{};
+
   /// The local configs some target of the file lists (whose compiler flags
   /// are therefore inlined there).
   final Set<String> locallyUsedConfigs = <String>{};
+
+  /// Per target, the configs it inherits through `all_dependent_configs`
+  /// (its own and its dependencies', see
+  /// [GnFileEvaluation.allDependentConfigs]), and the targets whose
+  /// inheritance is conditional, which the emitter refuses.
+  final Map<String, Set<String>> inheritedConfigs = <String, Set<String>>{};
+  final Set<String> conditionalInheritance = <String>{};
 
   /// `load()` statements: file label to the symbols used from it.
   final Map<String, Set<String>> loads = <String, Set<String>>{};
@@ -334,6 +347,20 @@ final class _Emitter {
     }
     _checkPropagatedFlags(target, propagated);
 
+    // GN applies a dependency's all_dependent_configs to this target and to
+    // everything that depends on it, through private dependencies too;
+    // Bazel's implementation_deps would stop them, so the configs become
+    // public deps of their own.
+    if (conditionalInheritance.contains(target.name)) {
+      throw GnError(
+        target.location,
+        '${target.name} inherits all_dependent_configs under a condition, which is not supported',
+      );
+    }
+    for (final String config in inheritedConfigs[target.name] ?? const <String>{}) {
+      rule.list('deps').addUnique(Condition.always, _Item(_localLabel(config)));
+    }
+
     // A header-only library compiles nothing, so its flags would only be
     // noise (GN ignores them just the same).
     final bool compiles = !(rule.lists['srcs']?.isEmpty ?? true);
@@ -354,19 +381,17 @@ final class _Emitter {
       rule.lists.remove('local_defines');
     }
     if (compiles) {
-      // GN applies chromium_code (or no_chromium_code) to every target; the
-      // Bazel toolchain carries the rest.
-      _use(
-        '//engine/src/flutter/build/bazel:copts.bzl',
-        chromiumCode ? 'FLUTTER_COPTS' : 'FLUTTER_THIRD_PARTY_COPTS',
-      );
-      rule
-          .list('copts')
-          .always
-          .insert(
-            0,
-            _Item(chromiumCode ? 'FLUTTER_COPTS' : 'FLUTTER_THIRD_PARTY_COPTS', quoted: false),
-          );
+      // GN applies chromium_code (or no_chromium_code) to every target, and
+      // //flutter:config (-Wunreachable-code) to engine code: targets that
+      // list it, their direct dependents, and dependents through public_deps.
+      // The Bazel toolchain carries the rest.
+      final constant = !chromiumCode
+          ? 'FLUTTER_THIRD_PARTY_COPTS'
+          : _isEngineCode(target)
+          ? 'FLUTTER_COPTS'
+          : 'CHROMIUM_CODE_COPTS';
+      _use('//engine/src/flutter/build/bazel:copts.bzl', constant);
+      rule.list('copts').always.insert(0, _Item(constant, quoted: false));
       if (chromiumCode) {
         _use('//engine/src/flutter/build/bazel:copts.bzl', 'FLUTTER_LOCAL_DEFINES');
         rule
@@ -388,6 +413,61 @@ final class _Emitter {
       }
     }
     rules.add(rule);
+  }
+
+  /// Whether GN compiles [target] with //flutter:config: it lists the
+  /// config itself, or depends (directly, or through public_deps) on a
+  /// target of this file that exports it, or depends on another engine
+  /// package — engine libraries all export //flutter:config, which is the
+  /// convention the Bazel copts constants rest on.
+  bool _isEngineCode(GnTarget target, [Set<String>? visiting]) {
+    bool lists(GnTarget t, List<String> variables) {
+      for (final name in variables) {
+        for (final GnAssignment a in t.variables[name]?.assignments ?? const <GnAssignment>[]) {
+          for (final GnValue v in a.items) {
+            if (v is GnStringValue && v.value == flutterConfigLabel && a.op != '-=') {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    if (lists(target, const <String>['configs', 'public_configs', 'all_dependent_configs'])) {
+      return true;
+    }
+    final Set<String> seen = visiting ?? <String>{};
+    if (!seen.add(target.name)) {
+      return false;
+    }
+    for (final name in const <String>['deps', 'public_deps']) {
+      for (final GnAssignment a in target.variables[name]?.assignments ?? const <GnAssignment>[]) {
+        for (final GnValue v in a.items) {
+          if (v is! GnStringValue || a.op == '-=') {
+            continue;
+          }
+          final GnTarget? local = v.value.startsWith(':')
+              ? localTargets[v.value.substring(1)]
+              : null;
+          if (local != null) {
+            if (lists(local, const <String>['public_configs', 'all_dependent_configs'])) {
+              return true;
+            }
+            // Public configs travel further only through public_deps.
+            if (name == 'public_deps' && _isEngineCode(local, seen)) {
+              return true;
+            }
+            continue;
+          }
+          final String label = bazelLabel(v.value, package: gnPackage, location: a.location);
+          if (label.startsWith('$bazelRootPackage/flutter')) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   }
 
   /// `cflags*` of a target or a config into the rule's flag attributes,

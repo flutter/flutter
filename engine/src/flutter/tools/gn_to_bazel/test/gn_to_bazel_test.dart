@@ -1147,7 +1147,7 @@ cc_library(
     ],
     hdrs = ["shared.h"],
     conlyopts = ["-Wno-c-only"],
-    copts = FLUTTER_COPTS + ["-Wno-something"],
+    copts = CHROMIUM_CODE_COPTS + ["-Wno-something"],
     cxxopts = ["-fno-rtti"],
 '''),
       );
@@ -1194,7 +1194,7 @@ cc_library(
         "src/lib_priv.h",
     ],
     hdrs = ["include/lib.h"],
-    copts = FLUTTER_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     includes = ["src"],
     linkopts = ["-Wl,--private"],
     local_defines = FLUTTER_LOCAL_DEFINES + ["IMPLEMENTATION=1"] + select({
@@ -1339,7 +1339,7 @@ source_set("compiled") {
 cc_library(
     name = "compiled",
     srcs = ["a.cc"],
-    copts = FLUTTER_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = ["//:skia_headers"],
     alwayslink = True,
@@ -1349,6 +1349,78 @@ cc_library(
       expect(
         output,
         contains('cc_library(\n    name = "headers_only",\n    defines = ["X"],\n)\n'),
+      );
+    });
+
+    test('all_dependent_configs cross private deps; engine code gets FLUTTER_COPTS', () async {
+      final String output = await convert('''
+config("vulkan_public") {
+  defines = [ "SK_VULKAN" ]
+}
+
+source_set("vulkan") {
+  sources = [ "vk.cc" ]
+  all_dependent_configs = [ ":vulkan_public" ]
+}
+
+source_set("gpu") {
+  sources = [ "gpu.cc" ]
+  deps = [ ":vulkan" ]
+}
+
+source_set("skia") {
+  sources = [ "skia.cc" ]
+  deps = [ ":gpu" ]
+}
+
+source_set("engine") {
+  sources = [ "engine.cc" ]
+  deps = [ "//flutter/fml" ]
+}
+
+source_set("engine_too") {
+  sources = [ "engine_too.cc" ]
+  public_configs = [ "//flutter:config" ]
+}
+''');
+      // GN applies vulkan_public to gpu and skia although they reach vulkan
+      // through private deps; Bazel's implementation_deps would stop there.
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "gpu",
+    srcs = ["gpu.cc"],
+    copts = CHROMIUM_CODE_COPTS,
+    implementation_deps = [":vulkan"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [":vulkan_public"],
+    alwayslink = True,
+)
+'''),
+      );
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "skia",
+    srcs = ["skia.cc"],
+    copts = CHROMIUM_CODE_COPTS,
+    implementation_deps = [":gpu"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [":vulkan_public"],
+    alwayslink = True,
+)
+'''),
+      );
+      // //flutter:config, listed or implied by a dependency on engine code.
+      expect(
+        output,
+        contains('name = "engine",\n    srcs = ["engine.cc"],\n    copts = FLUTTER_COPTS,'),
+      );
+      expect(
+        output,
+        contains('name = "engine_too",\n    srcs = ["engine_too.cc"],\n    copts = FLUTTER_COPTS,'),
       );
     });
 
@@ -1393,7 +1465,7 @@ source_set("wuffs") {
 cc_library(
     name = "wuffs",
     srcs = ["release/c/wuffs-v0.3.c"],
-    copts = FLUTTER_COPTS + [
+    copts = CHROMIUM_CODE_COPTS + [
         "-Wno-unused-function",  # is_clang
         "-Wno-c++11-narrowing",  # is_clang
         "-w",
@@ -1420,7 +1492,7 @@ source_set("gif_codec") {
       expect(
         user,
         contains('''
-    copts = FLUTTER_COPTS + [
+    copts = CHROMIUM_CODE_COPTS + [
         "-Wno-unused-function",  # from //flutter/third_party/wuffs
         "-Wno-c++11-narrowing",  # from //flutter/third_party/wuffs
     ],

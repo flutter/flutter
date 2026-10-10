@@ -444,6 +444,77 @@ final class GnFileEvaluation {
 
   /// Targets that were asked to be skipped and were found, in file order.
   final List<String> skipped = <String>[];
+
+  /// The configs GN applies to each target of this file through
+  /// `all_dependent_configs`: a target's own, and those of every target it
+  /// depends on, directly or indirectly, through `deps` or `public_deps` —
+  /// private dependencies do not stop them, unlike `public_configs`. Only
+  /// dependencies within this file are followed (`:name`), and only
+  /// unconditional ones (see [conditionalAllDependentConfigs]); the result
+  /// maps target names to config labels as written (`:name_public`).
+  Map<String, Set<String>> get allDependentConfigs => _propagation().$1;
+
+  /// The targets whose propagated configs depend on a condition the
+  /// assumptions did not decide (a conditional dep or a conditional
+  /// `all_dependent_configs`), which [allDependentConfigs] leaves out.
+  Set<String> get conditionalAllDependentConfigs => _propagation().$2;
+
+  (Map<String, Set<String>>, Set<String>) _propagation() {
+    final byName = <String, GnTarget>{for (final GnTarget t in targets) t.name: t};
+    final result = <String, Set<String>>{};
+    final conditional = <String>{};
+    Set<String> visit(GnTarget target, Set<String> visiting) {
+      final Set<String>? done = result[target.name];
+      if (done != null) {
+        return done;
+      }
+      final configs = <String>{};
+      if (visiting.add(target.name)) {
+        for (final GnAssignment a
+            in target.variables['all_dependent_configs']?.assignments ?? const <GnAssignment>[]) {
+          if (!a.isUnconditional) {
+            conditional.add(target.name);
+            continue;
+          }
+          for (final GnValue v in a.items) {
+            if (v is GnStringValue && a.op != '-=') {
+              configs.add(v.value);
+            }
+          }
+        }
+        for (final name in <String>['deps', 'public_deps']) {
+          for (final GnAssignment a
+              in target.variables[name]?.assignments ?? const <GnAssignment>[]) {
+            for (final GnValue v in a.items) {
+              final GnTarget? dep = v is GnStringValue && v.value.startsWith(':')
+                  ? byName[v.value.substring(1)]
+                  : null;
+              if (dep == null || a.op == '-=') {
+                continue;
+              }
+              final Set<String> theirs = visit(dep, visiting);
+              if (a.isUnconditional) {
+                configs.addAll(theirs);
+                if (conditional.contains(dep.name)) {
+                  conditional.add(target.name);
+                }
+              } else if (theirs.isNotEmpty || conditional.contains(dep.name)) {
+                conditional.add(target.name);
+              }
+            }
+          }
+        }
+        visiting.remove(target.name);
+      }
+      result[target.name] = configs;
+      return configs;
+    }
+
+    for (final GnTarget target in targets) {
+      visit(target, <String>{});
+    }
+    return (result, conditional);
+  }
 }
 
 // ---------------------------------------------------------------------------
