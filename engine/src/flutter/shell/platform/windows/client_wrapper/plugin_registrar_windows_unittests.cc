@@ -333,13 +333,19 @@ TEST(PluginRegistrarWindowsTest, PostPlatformThreadTaskOnCancel) {
       reinterpret_cast<FlutterDesktopPluginRegistrarRef>(1));
 
   bool called = false;
-  registrar.PostPlatformThreadTask([&called]() { called = true; });
+  // Captured by the callback to detect whether the callback is freed.
+  auto captured = std::make_shared<int>(0);
+  std::weak_ptr<int> weak_token = captured;
+  registrar.PostPlatformThreadTask(
+      [&called, token = std::move(captured)]() { called = true; });
+  EXPECT_FALSE(weak_token.expired());
 
   // Simulate the engine discarding the task: on_cancel must free the
   // callback without running it.
   EXPECT_NE(test_api->post_task_on_cancel(), nullptr);
   test_api->post_task_on_cancel()(test_api->post_task_user_data());
   EXPECT_FALSE(called);
+  EXPECT_TRUE(weak_token.expired());
 }
 
 }  // namespace flutter
