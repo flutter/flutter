@@ -920,13 +920,21 @@ TEST(ImageDecoderTest, VerifySimpleDecoding) {
   EXPECT_EQ(result_2->image_info.size.height, 2);
 
   // If the destination size is larger than the max texture size the image
-  // is scaled down.
+  // is scaled down, keeping its aspect ratio.
   auto result_3 = ImageDecoderImpeller::DecompressTexture(
       descriptor.get(), {.target_width = 60, .target_height = 20}, {10, 10},
       /*supports_wide_gamut=*/false, capabilities, allocator);
   ASSERT_TRUE(result_3.ok());
   EXPECT_EQ(result_3->image_info.size.width, 10);
-  EXPECT_EQ(result_3->image_info.size.height, 10);
+  EXPECT_EQ(result_3->image_info.size.height, 3);
+
+  // Same for a tall destination size.
+  auto result_tall = ImageDecoderImpeller::DecompressTexture(
+      descriptor.get(), {.target_width = 20, .target_height = 60}, {10, 10},
+      /*supports_wide_gamut=*/false, capabilities, allocator);
+  ASSERT_TRUE(result_tall.ok());
+  EXPECT_EQ(result_tall->image_info.size.width, 3);
+  EXPECT_EQ(result_tall->image_info.size.height, 10);
 
   // CPU resize is forced.
   auto result_4 = ImageDecoderImpeller::DecompressTexture(
