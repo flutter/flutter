@@ -289,6 +289,36 @@ void main() {
     );
     expect(clipPath, isLookLikeExpectedPath);
   });
+
+  test('ShapeDecoration inset shadow is clipped inside the shape', () {
+    const decoration = ShapeDecoration(
+      color: Color(0xFF00FF00),
+      shadows: <BoxShadow>[BoxShadow(blurRadius: 0, spreadRadius: 10, inset: true)],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+    );
+    final TestRecordingCanvas canvas = TestRecordingCanvas();
+    decoration
+        .createBoxPainter(() {})
+        .paint(
+          canvas,
+          Offset.zero,
+          const ImageConfiguration(size: Size(100, 100), textDirection: TextDirection.ltr),
+        );
+    final List<Symbol> calls = canvas.invocations
+        .map((RecordedInvocation call) => call.invocation.memberName)
+        .toList();
+    expect(calls.indexOf(#drawRRect), lessThan(calls.indexOf(#clipPath)));
+    expect(calls.indexOf(#clipPath), lessThan(calls.lastIndexOf(#drawPath)));
+    final Path shadow =
+        canvas.invocations
+                .lastWhere((RecordedInvocation call) => call.invocation.memberName == #drawPath)
+                .invocation
+                .positionalArguments
+                .first
+            as Path;
+    expect(shadow.contains(const Offset(50, 50)), isFalse);
+    expect(shadow.contains(const Offset(2, 50)), isTrue);
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
