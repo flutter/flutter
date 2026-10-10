@@ -6,7 +6,10 @@
 #define FML_USED_ON_EMBEDDER
 
 #include <atomic>
+#include <mutex>
 #include <string>
+#include <thread>
+#include <utility>
 #include <vector>
 
 #include "GLES3/gl3.h"
@@ -50,6 +53,64 @@ TEST_F(EmbedderTest, CanCreateOpenGLRenderingEngine) {
   builder.SetSurface(DlISize(1, 1));
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
+}
+
+namespace {
+
+class ResourceReleaseTestContext final : public EmbedderTestContextGL {
+ public:
+  explicit ResourceReleaseTestContext(std::string assets_path)
+      : EmbedderTestContextGL(std::move(assets_path)) {
+    auto& config = GetRendererConfig().open_gl;
+    make_resource_ = config.make_resource_current;
+    clear_current_ = config.clear_current;
+    config.make_resource_current = [](void* data) {
+      auto* self = static_cast<ResourceReleaseTestContext*>(
+          static_cast<EmbedderTestContext*>(data));
+      const bool current = self->make_resource_(data);
+      if (current) {
+        std::scoped_lock lock(self->mutex_);
+        self->resource_thread_ = std::this_thread::get_id();
+        self->resource_current = true;
+      }
+      return current;
+    };
+    config.clear_current = [](void* data) {
+      auto* self = static_cast<ResourceReleaseTestContext*>(
+          static_cast<EmbedderTestContext*>(data));
+      const bool cleared = self->clear_current_(data);
+      std::scoped_lock lock(self->mutex_);
+      if (cleared && self->resource_thread_ == std::this_thread::get_id()) {
+        self->resource_current = false;
+        self->resource_released = true;
+      }
+      return cleared;
+    };
+  }
+  std::atomic<bool> resource_current = false;
+  std::atomic<bool> resource_released = false;
+
+ private:
+  BoolCallback make_resource_;
+  BoolCallback clear_current_;
+  std::mutex mutex_;
+  std::thread::id resource_thread_;
+};
+
+}  // namespace
+
+TEST_F(EmbedderTest, ShutdownReleasesOpenGLResourceContextOnItsThread) {
+  ResourceReleaseTestContext context(GetFixturesDirectory());
+  EmbedderConfigBuilder builder(context);
+  builder.AddCommandLineArgument("--enable-impeller=false");
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  ASSERT_TRUE(context.resource_current);
+  ASSERT_FALSE(context.resource_released);
+  engine.reset();
+  EXPECT_TRUE(context.resource_released);
+  EXPECT_FALSE(context.resource_current);
 }
 
 //------------------------------------------------------------------------------
