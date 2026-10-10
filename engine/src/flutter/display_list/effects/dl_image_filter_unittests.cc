@@ -751,6 +751,18 @@ TEST(DisplayListImageFilter, ColorFilterModifiesTransparencyBounds) {
   TestInvalidBounds(filter, DlMatrix(), input_bounds);
 }
 
+TEST(DisplayListImageFilter, LocalMatrixBounds) {
+  DlMatrix scale = DlMatrix::MakeTranslation({100, 50}) *
+                   DlMatrix::MakeScale({1.25, 1.25, 1.0}) *
+                   DlMatrix::MakeTranslation({-100, -50});
+  DlMatrixImageFilter inner(scale, DlImageSampling::kLinear);
+  DlLocalMatrixImageFilter filter(DlMatrix::MakeTranslation({800, 1200}),
+                                  inner.shared());
+  DlRect input_bounds = DlRect::MakeLTRB(800, 1200, 1000, 1300);
+  DlRect expected_output_bounds = DlRect::MakeLTRB(775, 1187.5, 1025, 1312.5);
+  TestBounds(filter, input_bounds, expected_output_bounds);
+}
+
 TEST(DisplayListImageFilter, LocalImageFilterBounds) {
   auto filter_matrix = DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
                                          0.5, 3.0, 0.0, 15,   //
@@ -860,6 +872,19 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
           if (dl_local_filter->map_device_bounds(
                   ToDlIRect(input_bounds), dl_bounds_matrices[k], dl_rect)) {
             ASSERT_EQ(sk_rect, ToSkIRect(dl_rect)) << desc;
+          } else {
+            ASSERT_TRUE(dl_local_filter->modifies_transparent_black()) << desc;
+            ASSERT_FALSE(sk_local_filter->canComputeFastBounds()) << desc;
+          }
+        }
+        {
+          SkRect input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
+          DlRect dl_rect;
+          if (dl_local_filter->map_local_bounds(ToDlRect(input_bounds),
+                                                dl_rect)) {
+            SkRect sk_rect = sk_local_filter->computeFastBounds(input_bounds);
+            ASSERT_EQ(sk_rect.roundOut(), ToSkIRect(DlIRect::RoundOut(dl_rect)))
+                << desc;
           } else {
             ASSERT_TRUE(dl_local_filter->modifies_transparent_black()) << desc;
             ASSERT_FALSE(sk_local_filter->canComputeFastBounds()) << desc;
