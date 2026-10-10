@@ -121,6 +121,7 @@ Future<void> main(List<String> args) async {
                 templatesDir: templatesDir,
                 xcodeProjectDir: xcodeProjectDir,
                 xcodeProjectName: xcodeProjectName,
+                appDir: appDir,
               );
               testCount++;
               if (result != 0) {
@@ -302,12 +303,13 @@ Future<int> _testNativeApp({
   required Directory xcodeProjectDir,
   required String deviceId,
   required String xcodeProjectName,
+  required Directory appDir,
 }) async {
   final String resultBundleTemp = Directory.systemTemp
       .createTempSync('flutter_module_test_ios_xcresult.')
       .path;
   final String resultBundlePath = path.join(resultBundleTemp, 'result');
-  final String derivedDataPath = path.join(xcodeProjectDir.path, 'DerivedData');
+  final String derivedDataPath = path.join(appDir.path, 'build', 'DerivedData');
   final int testResultExit = await exec(
     'xcodebuild',
     <String>[
@@ -511,8 +513,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
   };
 
@@ -586,8 +587,25 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
       r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
           r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEvents-NoApplicationEvents.swift':
-          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents-NoApplicationEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+    },
+
+    // Multi scene app where FlutterViewController is never added to the scene hierarchy,
+    // but the engine is manually registered via the legacy registerSceneLifeCycle(with:).
+    'MultiSceneEnabled-LegacyManualRegistration-FlutterViewControllerNotAddedToScene': <String, String>{
+      ...sharedAppLifecycleFiles,
+      ...sharedPluginLifecycleFiles,
+      r'$TEMPLATE_DIR/native/Info-MultiSceneEnabled-NoStoryboard.plist':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/Info.plist',
+      r'$TEMPLATE_DIR/native/AppDelegate-FlutterAppDelegate.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/AppDelegate.swift',
+      r'$TEMPLATE_DIR/native/SceneDelegate-FlutterSceneDelegate-MultiScene-LegacyRegistration-FlutterViewControllerNotAdded.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/SceneDelegate.swift',
+      r'$TEMPLATE_DIR/native/ViewController-FlutterEngineFromSceneDelegate-FlutterViewControllerNotAdded.swift':
+          r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
+      r'$TEMPLATE_DIR/flutterplugin/ios/LifecyclePlugin-migrated.swift':
+          r'$PLUGIN_DIR/ios/my_plugin/Sources/my_plugin/MyPlugin.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents-NoApplicationEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
   };
 
@@ -672,7 +690,7 @@ class Scenarios {
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/AppDelegate.swift',
       r'$TEMPLATE_DIR/native/ViewController-ImplicitFlutterEngine.swift':
           r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperiment/ViewController.swift',
-      r'$TEMPLATE_DIR/native/UITests-SceneEventsNoConnect-NoApplicationEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
+      r'$TEMPLATE_DIR/native/UITests-SceneEvents-NoApplicationEvents.swift': r'$XCODE_PROJ_DIR/NativeUIKitSwiftExperimentUITests/NativeUIKitSwiftExperimentUITests.swift',
     },
   };
 

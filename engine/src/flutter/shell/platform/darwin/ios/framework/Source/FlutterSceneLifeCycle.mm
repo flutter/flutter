@@ -12,16 +12,8 @@
 
 FLUTTER_ASSERT_ARC
 
-// Tracks all engines for single-scene applications.
-// We have to use a global variable because the FlutterEngine could be created before
-// UISceneDelegate object is created.
-static NSPointerArray* gEnginesForSingleScene;
-
-// Tracks whether the application-level sceneWillConnect fallback (which forwards to
-// application:didFinishLaunchingWithOptions:) has already been invoked. This must only be
-// called once per application lifetime.
-static BOOL gSceneWillConnectFallbackCalled = NO;
-
+// Used to determine whether to compact a pointer array.
+// Compacting only when `count` is a power of two amortizes the O(n) compaction cost to O(1).
 static BOOL IsPowerOfTwo(NSUInteger x) {
   return x != 0 && (x & (x - 1)) == 0;
 }
@@ -40,6 +32,10 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 // Developer managed engines registered and unregstered via FlutterSceneLifeCycleEngineRegistry API.
 @property(nonatomic, strong) NSMapTable<UIScene*, NSPointerArray*>* developerManagedEngines;
 
+// Developer managed engines registered and unregistered via deprecated
+// FlutterSceneLifeCycleEngineRegistration API.
+@property(nonatomic, strong) NSPointerArray* legacyDeveloperManagedEngines;
+
 // Tracks the connecting scenes and their connectionOptions within the initial connection runloop.
 // Once the connection window ends on the next runloop, entries are removed.
 // This is to ensure engines attached after sceneWillConnect (but still in the same runloop)
@@ -55,13 +51,23 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 
 @implementation FlutterPluginSceneLifeCycleDelegate
 
+// Tracks all engines for single-scene applications.
+// Uses a static variable because the FlutterEngine could be created before
+// UISceneDelegate object is created.
+static NSPointerArray* _enginesForSingleScene = nil;
+
+// Tracks whether the application-level sceneWillConnect fallback (which forwards to
+// application:didFinishLaunchingWithOptions:) has already been invoked. This must only be
+// called once per application lifetime.
+static BOOL _sceneWillConnectFallbackCalled = NO;
+
 + (void)registerEngineForSingleScene:(FlutterEngine*)engine {
-  if (!gEnginesForSingleScene) {
-    gEnginesForSingleScene = [NSPointerArray weakObjectsPointerArray];
+  if (!_enginesForSingleScene) {
+    _enginesForSingleScene = [NSPointerArray weakObjectsPointerArray];
   }
-  [gEnginesForSingleScene addPointer:(__bridge void*)engine];
-  if (IsPowerOfTwo(gEnginesForSingleScene.count)) {
-    CompactNSPointerArray(gEnginesForSingleScene);
+  [_enginesForSingleScene addPointer:(__bridge void*)engine];
+  if (IsPowerOfTwo(_enginesForSingleScene.count)) {
+    CompactNSPointerArray(_enginesForSingleScene);
   }
 }
 
@@ -93,7 +99,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
   }
 }
 
-- (NSArray<FlutterViewController*>*)searchFlutterViewControllersWithScene:(UIScene*)scene {
+- (NSArray<FlutterViewController*>*)searchFlutterViewControllersWithinScene:(UIScene*)scene {
   NSMutableArray<FlutterViewController*>* result = [NSMutableArray array];
   NSMutableSet<UIViewController*>* visited = [NSMutableSet set];
   if ([scene isKindOfClass:[UIWindowScene class]]) {
@@ -107,14 +113,14 @@ static void CompactNSPointerArray(NSPointerArray* array) {
   return [result copy];
 }
 
-- (NSArray<FlutterEngine*>*)searchFlutterEnginesWithScene:(UIScene*)scene {
+- (NSArray<FlutterEngine*>*)searchFlutterEnginesWithinScene:(UIScene*)scene {
   if (!FlutterSharedApplication.application.supportsMultipleScenes) {
-    return gEnginesForSingleScene.allObjects ?: @[];
+    return _enginesForSingleScene.allObjects ?: @[];
   }
 
   NSMutableSet<FlutterEngine*>* result = [NSMutableSet set];
   NSArray<FlutterViewController*>* flutterViewControllers =
-      [self searchFlutterViewControllersWithScene:scene];
+      [self searchFlutterViewControllersWithinScene:scene];
   for (FlutterViewController* flutterViewController in flutterViewControllers) {
     FlutterEngine* engine = flutterViewController.engine;
     if (engine) {
@@ -127,12 +133,16 @@ static void CompactNSPointerArray(NSPointerArray* array) {
   for (FlutterEngine* engine in developerEngines.allObjects) {
     [result addObject:engine];
   }
+  for (FlutterEngine* engine in self.legacyDeveloperManagedEngines.allObjects) {
+    [result addObject:engine];
+  }
   return result.allObjects;
 }
 
 - (instancetype)init {
   if (self = [super init]) {
     _developerManagedEngines = [NSMapTable weakToStrongObjectsMapTable];
+    _legacyDeveloperManagedEngines = [NSPointerArray weakObjectsPointerArray];
     _enginesSentConnectionEvent = [NSMapTable weakToStrongObjectsMapTable];
     _connectingScenes = [NSMapTable weakToStrongObjectsMapTable];
     _sceneWillConnectEventHandledByPlugin = [NSMapTable weakToStrongObjectsMapTable];
@@ -142,21 +152,9 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 
 #pragma mark - Manual Engine Registration
 
-/**
- * Adds `engine` to the weak array `mapTable` keeps for `scene`, creating the array if needed.
- *
- * Returns NO if the engine was already tracked for that scene.
- */
-- (BOOL)addEngine:(FlutterEngine*)engine
-       toMapTable:(NSMapTable<UIScene*, NSPointerArray*>*)mapTable
-         forScene:(UIScene*)scene {
-  NSPointerArray* engines = [mapTable objectForKey:scene];
+- (BOOL)addEngine:(FlutterEngine*)engine toPointerArray:(NSPointerArray*)engines {
   if ([engines.allObjects containsObject:engine]) {
     return NO;
-  }
-  if (!engines) {
-    engines = [NSPointerArray weakObjectsPointerArray];
-    [mapTable setObject:engines forKey:scene];
   }
   [engines addPointer:(__bridge void*)engine];
   if (IsPowerOfTwo(engines.count)) {
@@ -165,12 +163,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
   return YES;
 }
 
-- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
-  return [self addEngine:engine toMapTable:self.developerManagedEngines forScene:scene];
-}
-
-- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
-  NSPointerArray* engines = [self.developerManagedEngines objectForKey:scene];
+- (BOOL)removeEngine:(FlutterEngine*)engine fromPointerArray:(NSPointerArray*)engines {
   for (NSUInteger i = 0; i < engines.count; i++) {
     if ([engines pointerAtIndex:i] == (__bridge void*)engine) {
       [engines removePointerAtIndex:i];
@@ -181,6 +174,39 @@ static void CompactNSPointerArray(NSPointerArray* array) {
     }
   }
   return NO;
+}
+
+/**
+ * Adds `engine` to the weak array `mapTable` keeps for `scene`, creating the array if needed.
+ *
+ * Returns NO if the engine was already tracked for that scene.
+ */
+- (BOOL)addEngine:(FlutterEngine*)engine
+       toMapTable:(NSMapTable<UIScene*, NSPointerArray*>*)mapTable
+         forScene:(UIScene*)scene {
+  NSPointerArray* engines = [mapTable objectForKey:scene];
+  if (!engines) {
+    engines = [NSPointerArray weakObjectsPointerArray];
+    [mapTable setObject:engines forKey:scene];
+  }
+  return [self addEngine:engine toPointerArray:engines];
+}
+
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
+  return [self addEngine:engine toMapTable:self.developerManagedEngines forScene:scene];
+}
+
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
+  NSPointerArray* engines = [self.developerManagedEngines objectForKey:scene];
+  return [self removeEngine:engine fromPointerArray:engines];
+}
+
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
+  return [self addEngine:engine toPointerArray:self.legacyDeveloperManagedEngines];
+}
+
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
+  return [self removeEngine:engine fromPointerArray:self.legacyDeveloperManagedEngines];
 }
 
 - (void)markConnectionEventSentForEngine:(FlutterEngine*)engine scene:(UIScene*)scene {
@@ -209,11 +235,11 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 }
 
 + (void)resetSceneWillConnectFallbackCalledForTesting {
-  gSceneWillConnectFallbackCalled = NO;
+  _sceneWillConnectFallbackCalled = NO;
 }
 
 + (void)resetEnginesForSingleSceneForTesting {
-  gEnginesForSingleScene = nil;
+  _enginesForSingleScene = nil;
 }
 
 - (BOOL)sceneWillConnectEventHandledByPluginForScene:(UIScene*)scene {
@@ -235,8 +261,8 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 
   // If no plugins handled this, give the application fallback a chance to handle it.
   // Only call the fallback once since it's per application.
-  if (!handledByPlugin && !gSceneWillConnectFallbackCalled) {
-    gSceneWillConnectFallbackCalled = YES;
+  if (!handledByPlugin && !_sceneWillConnectFallbackCalled) {
+    _sceneWillConnectFallbackCalled = YES;
     if ([[self applicationLifeCycleDelegate] sceneWillConnectFallback:connectionOptions]) {
       handledByPlugin = YES;
     }
@@ -276,12 +302,16 @@ static void CompactNSPointerArray(NSPointerArray* array) {
     [self.connectingScenes setObject:connectionOptions forKey:scene];
   }
 
-  NSArray<FlutterEngine*>* engines = [self searchFlutterEnginesWithScene:scene];
+  NSArray<FlutterEngine*>* engines = [self searchFlutterEnginesWithinScene:scene];
   for (FlutterEngine* engine in engines) {
     [self connectEngineIfNeeded:engine scene:scene];
   }
 
-  // Close the connection window on the next run loop turn.
+  // Keep `connectionOptions` in `connectingScenes` for the remainder of the current run loop so
+  // that engines attached after `sceneWillConnect` (e.g. in the root view controller's
+  // `viewDidLoad`, before `sceneWillEnterForeground` or `sceneDidEnterBackground`) still receive
+  // the initial connection event. Remove it on the next run loop turn so that engines attached or
+  // foregrounded later do not receive a stale connection event.
   __weak __typeof(self) weakSelf = self;
   __weak __typeof(scene) weakScene = scene;
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -294,7 +324,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 }
 
 - (void)sceneDidDisconnect:(UIScene*)scene {
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     [engine.sceneLifeCycleDelegate sceneDidDisconnect:scene];
   }
   // There is no application equivalent for this event and therefore no fallback.
@@ -303,7 +333,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 #pragma mark - Transitioning to the foreground
 
 - (void)sceneWillEnterForeground:(UIScene*)scene {
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     // If the engine is added after sceneWillConnect but before sceneWillEnterForeground
     // (e.g. viewDidLoad of the root view controller), we still want to send connection event.
     // Before UIScene, storyboard's rootVC is loaded before didFinishLaunching is called.
@@ -318,7 +348,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 }
 
 - (void)sceneDidBecomeActive:(UIScene*)scene {
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     [engine.sceneLifeCycleDelegate sceneDidBecomeActive:scene];
   }
 
@@ -328,14 +358,14 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 #pragma mark - Transitioning to the background
 
 - (void)sceneWillResignActive:(UIScene*)scene {
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     [engine.sceneLifeCycleDelegate sceneWillResignActive:scene];
   }
   [[self applicationLifeCycleDelegate] sceneWillResignActiveFallback];
 }
 
 - (void)sceneDidEnterBackground:(UIScene*)scene {
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     // A scene could start in background mode.
     // See sceneWillEnterForeground for rational behind sending connection event.
     [self connectEngineIfNeeded:engine scene:scene];
@@ -349,7 +379,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 - (void)scene:(UIScene*)scene openURLContexts:(NSSet<UIOpenURLContext*>*)URLContexts {
   // Track engines that had this event handled by a plugin.
   NSMutableSet<FlutterEngine*>* enginesHandledByPlugin = [NSMutableSet set];
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     if ([engine.sceneLifeCycleDelegate scene:scene openURLContexts:URLContexts]) {
       [enginesHandledByPlugin addObject:engine];
     }
@@ -364,7 +394,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
   }
 
   // For any engine that was not handled by a plugin, do deeplinking.
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     if ([enginesHandledByPlugin containsObject:engine]) {
       continue;
     }
@@ -381,7 +411,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
 - (void)scene:(UIScene*)scene continueUserActivity:(NSUserActivity*)userActivity {
   // Track engines that had this event handled by a plugin.
   NSMutableSet<FlutterEngine*>* enginesHandledByPlugin = [NSMutableSet set];
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     if ([engine.sceneLifeCycleDelegate scene:scene continueUserActivity:userActivity]) {
       [enginesHandledByPlugin addObject:engine];
     }
@@ -396,7 +426,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
   }
 
   // For any engine that was not handled by a plugin, do deeplinking.
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     if ([enginesHandledByPlugin containsObject:engine]) {
       continue;
     }
@@ -414,7 +444,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
   }
 
   int64_t appBundleModifiedTime = FlutterSharedApplication.lastAppModificationTime;
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     FlutterViewController* vc = (FlutterViewController*)engine.viewController;
     NSString* restorationId = vc.restorationIdentifier;
     if (restorationId) {
@@ -446,7 +476,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
     return;
   }
 
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:scene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:scene]) {
     UIViewController* vc = (UIViewController*)engine.viewController;
     NSString* restorationId = vc.restorationIdentifier;
     if (restorationId) {
@@ -464,7 +494,7 @@ static void CompactNSPointerArray(NSPointerArray* array) {
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler {
   BOOL handledByPlugin = NO;
-  for (FlutterEngine* engine in [self searchFlutterEnginesWithScene:windowScene]) {
+  for (FlutterEngine* engine in [self searchFlutterEnginesWithinScene:windowScene]) {
     BOOL result = [engine.sceneLifeCycleDelegate windowScene:windowScene
                                 performActionForShortcutItem:shortcutItem
                                            completionHandler:completionHandler];

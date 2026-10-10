@@ -16,9 +16,13 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * This class is typically specified as the UISceneDelegate in the Info.plist.
  */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 FLUTTER_DARWIN_EXPORT
-@interface FlutterSceneDelegate
-    : NSObject <UIWindowSceneDelegate, FlutterSceneLifeCycleEngineRegistry>
+@interface FlutterSceneDelegate : NSObject <UIWindowSceneDelegate,
+                                            FlutterSceneLifeCycleEngineRegistry,
+                                            FlutterSceneLifeCycleEngineRegistration>
+#pragma GCC diagnostic pop
 @property(nonatomic, strong, nullable) UIWindow* window;
 
 @end

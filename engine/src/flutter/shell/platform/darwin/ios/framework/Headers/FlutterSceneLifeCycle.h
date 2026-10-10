@@ -120,10 +120,11 @@ API_AVAILABLE(ios(13.0))
  * Registers a `FlutterEngine` to receive a scene's life-cycle events without requiring its
  * `FlutterViewController` to be in the scene's view hierarchy.
  *
- * This method is **only** necessary in multi-scene applications when an engine needs to receive
- * a scene's life-cycle events before its `FlutterViewController` is added to that scene (for
- * example, pre-warmed engines in add-to-app workflows), or when the engine has no view controller
- * at all (headless engines).
+ * This method is **only** necessary when the following conditions are true:
+ * 1. Multiple scenes (`UIApplicationSupportsMultipleScenes`) is enabled.
+ * 2. The engine needs to receive a scene's life-cycle events before its `FlutterViewController` is
+ *    added to that scene (for example, pre-warmed engines in add-to-app workflows), or when the
+ *    engine has no view controller at all (headless engines).
  *
  * In all other cases, Flutter automatically discovers any `FlutterViewController` present in the
  * scene's view controller hierarchy (including child and presented view controllers) and routes
@@ -157,15 +158,55 @@ API_AVAILABLE(ios(13.0))
 @end
 
 /**
+ * A protocol for manually registering a `FlutterEngine` to receive scene life cycle events.
+ *
+ * Deprecated: Use `FlutterSceneLifeCycleEngineRegistry` instead.
+ */
+FLUTTER_DEPRECATED("Use FlutterSceneLifeCycleEngineRegistry instead.")
+@protocol FlutterSceneLifeCycleEngineRegistration
+/**
+ * Registers a `FlutterEngine` to receive scene life cycle events.
+ *
+ * Deprecated: Use
+ * `-[FlutterSceneLifeCycleEngineRegistry registerSceneLifeCycleWithFlutterEngine:scene:]` instead.
+ *
+ * @param engine The `FlutterEngine` to register for scene life cycle events.
+ * @return `NO` if already manually registered.
+ */
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine
+    FLUTTER_DEPRECATED("Use -[FlutterSceneLifeCycleEngineRegistry "
+                       "registerSceneLifeCycleWithFlutterEngine:scene:] instead.");
+
+/**
+ * Use this method to unregister a `FlutterEngine` from the scene's life cycle events.
+ *
+ * Deprecated: Use
+ * `-[FlutterSceneLifeCycleEngineRegistry unregisterSceneLifeCycleWithFlutterEngine:scene:]`
+ * instead.
+ *
+ * @param engine The `FlutterEngine` to unregister for scene life cycle events.
+ * @return `NO` if the engine was not found among the manually registered engines and could not be
+ *         unregistered.
+ */
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine
+    FLUTTER_DEPRECATED("Use -[FlutterSceneLifeCycleEngineRegistry "
+                       "unregisterSceneLifeCycleWithFlutterEngine:scene:] instead.");
+@end
+
+/**
  * Forwards `UISceneDelegate` and `UIWindowSceneDelegate` callbacks to plugins that register for
  * them.
  *
  * This class is responsible for receiving `UISceneDelegate` and `UIWindowSceneDelegate` callbacks
  * and forwarding them to any plugins.
  */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 FLUTTER_DARWIN_EXPORT
 API_AVAILABLE(ios(13.0))
-@interface FlutterPluginSceneLifeCycleDelegate : NSObject <FlutterSceneLifeCycleEngineRegistry>
+@interface FlutterPluginSceneLifeCycleDelegate
+    : NSObject <FlutterSceneLifeCycleEngineRegistry, FlutterSceneLifeCycleEngineRegistration>
+#pragma GCC diagnostic pop
 
 #pragma mark - Connecting and disconnecting the scene
 

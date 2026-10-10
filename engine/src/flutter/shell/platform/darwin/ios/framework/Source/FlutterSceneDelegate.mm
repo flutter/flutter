@@ -112,6 +112,17 @@ FLUTTER_ASSERT_ARC
   return [self.sceneLifeCycleDelegate unregisterSceneLifeCycleWithFlutterEngine:engine scene:scene];
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+- (BOOL)registerSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
+  return [self.sceneLifeCycleDelegate registerSceneLifeCycleWithFlutterEngine:engine];
+}
+
+- (BOOL)unregisterSceneLifeCycleWithFlutterEngine:(FlutterEngine*)engine {
+  return [self.sceneLifeCycleDelegate unregisterSceneLifeCycleWithFlutterEngine:engine];
+}
+#pragma GCC diagnostic pop
+
 - (void)moveRootViewControllerFrom:(NSObject<UIApplicationDelegate>*)appDelegate
                                 to:(UIWindowScene*)windowScene {
   self.window = [[UIWindow alloc] initWithWindowScene:windowScene];
