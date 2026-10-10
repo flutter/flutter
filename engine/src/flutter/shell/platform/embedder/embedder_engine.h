@@ -97,6 +97,8 @@ class EmbedderEngine {
 
   bool RunRootIsolate();
 
+  bool LaunchEngine(RunConfiguration run_configuration);
+
   bool IsValid() const;
 
   bool SetViewportMetrics(int64_t view_id,

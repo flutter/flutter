@@ -6077,6 +6077,157 @@ TEST_F(EmbedderTest, EmbedderGetProcAddressesCallbackCacheFontAndVMService) {
             &FlutterEngineDeregisterVMServiceUriCallback);
 }
 
+TEST_F(EmbedderTest, EmbedderLaunchEngineInvalidArguments) {
+  constexpr int32_t kTestSurfaceDim = 1;
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(kTestSurfaceDim, kTestSurfaceDim));
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterEngineRunConfiguration valid_config = {};
+  valid_config.struct_size = sizeof(FlutterEngineRunConfiguration);
+  std::string kernel_path =
+      fml::paths::JoinPaths({context.GetAssetsPath(), "kernel_blob.bin"});
+  valid_config.kernel_blob_path = kernel_path.c_str();
+
+  // Null engine or null config.
+  EXPECT_EQ(FlutterEngineLaunchEngine(nullptr, &valid_config),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineLaunchEngine(engine.get(), nullptr),
+            kInvalidArguments);
+
+  // Invalid struct_size.
+  FlutterEngineRunConfiguration bad_size = valid_config;
+  bad_size.struct_size = sizeof(FlutterEngineRunConfiguration) - 1;
+  EXPECT_EQ(FlutterEngineLaunchEngine(engine.get(), &bad_size),
+            kInvalidArguments);
+
+  // Engine shell not yet launched (only initialized).
+  EXPECT_EQ(FlutterEngineLaunchEngine(engine.get(), &valid_config),
+            kInvalidArguments);
+
+  // Launch the shell without running the root isolate so engine->IsValid() is
+  // true.
+  auto* embedder_engine = reinterpret_cast<EmbedderEngine*>(engine.get());
+  ASSERT_TRUE(embedder_engine->LaunchShell());
+
+  // Negative argc or positive argc with null argv.
+  constexpr int kNegativeArgc = -1;
+  constexpr int kPositiveArgc = 2;
+  FlutterEngineRunConfiguration bad_argc = valid_config;
+  bad_argc.dart_entrypoint_argc = kNegativeArgc;
+  EXPECT_EQ(FlutterEngineLaunchEngine(engine.get(), &bad_argc),
+            kInvalidArguments);
+
+  FlutterEngineRunConfiguration null_argv = valid_config;
+  null_argv.dart_entrypoint_argc = kPositiveArgc;
+  null_argv.dart_entrypoint_argv = nullptr;
+  EXPECT_EQ(FlutterEngineLaunchEngine(engine.get(), &null_argv),
+            kInvalidArguments);
+
+  // Invalid asset_resolver struct_size or null find_asset_callback.
+  FlutterAssetResolver bad_resolver = {};
+  bad_resolver.struct_size = sizeof(FlutterAssetResolver) - 1;
+  FlutterEngineRunConfiguration bad_resolver_config = valid_config;
+  bad_resolver_config.asset_resolver = &bad_resolver;
+  EXPECT_EQ(FlutterEngineLaunchEngine(engine.get(), &bad_resolver_config),
+            kInvalidArguments);
+
+  FlutterAssetResolver null_cb_resolver = {};
+  null_cb_resolver.struct_size = sizeof(FlutterAssetResolver);
+  null_cb_resolver.find_asset_callback = nullptr;
+  bad_resolver_config.asset_resolver = &null_cb_resolver;
+  EXPECT_EQ(FlutterEngineLaunchEngine(engine.get(), &bad_resolver_config),
+            kInvalidArguments);
+
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    // Missing or unreadable kernel_blob_path in JIT mode.
+    FlutterEngineRunConfiguration no_kernel = valid_config;
+    no_kernel.kernel_blob_path = nullptr;
+    EXPECT_EQ(FlutterEngineLaunchEngine(engine.get(), &no_kernel),
+              kInvalidArguments);
+
+    no_kernel.kernel_blob_path = "/nonexistent/path/to/kernel_blob.bin";
+    EXPECT_EQ(FlutterEngineLaunchEngine(engine.get(), &no_kernel),
+              kInvalidArguments);
+  }
+}
+
+TEST_F(EmbedderTest, EmbedderLaunchEngineCustomEntrypointAndAssetResolver) {
+  constexpr int32_t kTestSurfaceDim = 1;
+  constexpr int64_t kTestEngineId = 42;
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  static fml::AutoResetWaitableEvent latch;
+  auto entrypoint = []() { latch.Signal(); };
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint",
+                               reinterpret_cast<void*>(+entrypoint));
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(kTestSurfaceDim, kTestSurfaceDim));
+  auto engine = builder.InitializeEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  auto* embedder_engine = reinterpret_cast<EmbedderEngine*>(engine.get());
+  ASSERT_TRUE(embedder_engine->LaunchShell());
+  ASSERT_TRUE(embedder_engine->NotifyCreated());
+
+  fml::AutoResetWaitableEvent resolver_destroyed_latch;
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &resolver_destroyed_latch;
+  resolver.find_asset_callback = [](void* /*user_data*/, const char* /*name*/,
+                                    FlutterAsset* /*asset_out*/) -> bool {
+    return false;
+  };
+  resolver.destruction_callback = [](void* user_data) {
+    static_cast<fml::AutoResetWaitableEvent*>(user_data)->Signal();
+  };
+
+  std::string kernel_path =
+      fml::paths::JoinPaths({context.GetAssetsPath(), "kernel_blob.bin"});
+  const char* entrypoint_args[] = {"--arg1", "--arg2"};
+  constexpr int kEntrypointArgc = 2;
+
+  FlutterEngineRunConfiguration run_config = {};
+  run_config.struct_size = sizeof(FlutterEngineRunConfiguration);
+  run_config.kernel_blob_path = kernel_path.c_str();
+  run_config.custom_dart_entrypoint = "customEntrypoint";
+  run_config.custom_dart_entrypoint_library = nullptr;
+  run_config.dart_entrypoint_argc = kEntrypointArgc;
+  run_config.dart_entrypoint_argv = entrypoint_args;
+  run_config.asset_resolver = &resolver;
+  run_config.engine_id = kTestEngineId;
+
+  ASSERT_EQ(FlutterEngineLaunchEngine(engine.get(), &run_config), kSuccess);
+  latch.Wait();
+
+  // Updating the custom asset resolver replaces the resolver registered during
+  // FlutterEngineLaunchEngine on the UI thread and triggers its
+  // destruction_callback.
+  FlutterAssetResolver replacement_resolver = {};
+  replacement_resolver.struct_size = sizeof(FlutterAssetResolver);
+  replacement_resolver.find_asset_callback =
+      [](void* /*user_data*/, const char* /*name*/,
+         FlutterAsset* /*asset_out*/) -> bool { return false; };
+  FlutterAssetResolverRegistrationInfo update_info = {};
+  update_info.struct_size = sizeof(FlutterAssetResolverRegistrationInfo);
+  update_info.resolver = &replacement_resolver;
+  ASSERT_EQ(FlutterEngineUpdateAssetResolver(engine.get(), &update_info),
+            kSuccess);
+  resolver_destroyed_latch.Wait();
+
+  engine.reset();
+}
+
+TEST_F(EmbedderTest, EmbedderGetProcAddressesLaunchEngine) {
+  FlutterEngineProcTable table = {};
+  table.struct_size = sizeof(FlutterEngineProcTable);
+
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&table), kSuccess);
+  EXPECT_EQ(table.LaunchEngine, &FlutterEngineLaunchEngine);
+}
+
 }  // namespace testing
 }  // namespace flutter
 

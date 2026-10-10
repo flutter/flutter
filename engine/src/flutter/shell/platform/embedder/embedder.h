@@ -3532,6 +3532,36 @@ typedef struct {
   void* user_data;
 } FlutterVMServiceUriCallbackConfig;
 
+//------------------------------------------------------------------------------
+/// @brief      Configuration for launching a Dart isolate on a running
+///             `FlutterEngine` instance via `FlutterEngineLaunchEngine`.
+///
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterEngineRunConfiguration).
+  size_t struct_size;
+  /// Optional path to the Dart kernel snapshot file in JIT/debug mode.
+  const char* kernel_blob_path;
+  /// Optional custom Dart entrypoint function name. If null or empty,
+  /// defaults to "main".
+  const char* custom_dart_entrypoint;
+  /// Optional library URI containing `custom_dart_entrypoint`. Only used when
+  /// both `custom_dart_entrypoint` and `custom_dart_entrypoint_library` are
+  /// non-null and non-empty.
+  const char* custom_dart_entrypoint_library;
+  /// Number of command-line arguments passed to the Dart entrypoint.
+  int dart_entrypoint_argc;
+  /// Command-line arguments passed to the Dart entrypoint.
+  const char* const* dart_entrypoint_argv;
+  /// Optional custom asset resolver to register with the run configuration.
+  /// If `FlutterEngineLaunchEngine` returns `kSuccess`, the engine takes
+  /// ownership of `asset_resolver->user_data` and will invoke
+  /// `asset_resolver->destruction_callback` when destroyed.
+  const FlutterAssetResolver* asset_resolver;
+  /// Identifier of the engine instance passed to
+  /// `PlatformDispatcher.instance.engineId`.
+  int64_t engine_id;
+} FlutterEngineRunConfiguration;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -4561,6 +4591,23 @@ FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineDeregisterVMServiceUriCallback(
     intptr_t handle);
 
+//------------------------------------------------------------------------------
+/// @brief      Launches a Dart isolate on a running `FlutterEngine` instance
+///             using the specified `FlutterEngineRunConfiguration`.
+///
+/// @param[in]  engine  A running engine instance.
+/// @param[in]  config  The run configuration describing the Dart entrypoint,
+///                     kernel snapshot (in JIT mode), arguments, asset
+///                     resolver, and engine ID.
+///
+/// @return     `kSuccess` on success, or `kInvalidArguments` if arguments are
+///             invalid.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineLaunchEngine(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterEngineRunConfiguration* config);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -4734,6 +4781,9 @@ typedef FlutterEngineResult (*FlutterEngineRegisterVMServiceUriCallbackFnPtr)(
     intptr_t* handle_out);
 typedef FlutterEngineResult (*FlutterEngineDeregisterVMServiceUriCallbackFnPtr)(
     intptr_t handle);
+typedef FlutterEngineResult (*FlutterEngineLaunchEngineFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterEngineRunConfiguration* config);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -4801,6 +4851,7 @@ typedef struct {
   FlutterEngineRegisterVMServiceUriCallbackFnPtr RegisterVMServiceUriCallback;
   FlutterEngineDeregisterVMServiceUriCallbackFnPtr
       DeregisterVMServiceUriCallback;
+  FlutterEngineLaunchEngineFnPtr LaunchEngine;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

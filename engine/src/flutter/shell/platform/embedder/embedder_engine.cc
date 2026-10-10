@@ -158,6 +158,14 @@ bool EmbedderEngine::RunRootIsolate() {
   return true;
 }
 
+bool EmbedderEngine::LaunchEngine(RunConfiguration run_configuration) {
+  if (!IsValid() || !run_configuration.IsValid()) {
+    return false;
+  }
+  shell_->RunEngine(std::move(run_configuration));
+  return true;
+}
+
 bool EmbedderEngine::IsValid() const {
   return static_cast<bool>(shell_);
 }
