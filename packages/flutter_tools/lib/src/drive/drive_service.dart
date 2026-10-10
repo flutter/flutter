@@ -11,6 +11,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/dds.dart';
 import '../base/logger.dart';
@@ -22,6 +23,7 @@ import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
 import '../resident_runner.dart';
+import '../version.dart';
 import '../vmservice.dart';
 import 'web_driver_service.dart';
 
@@ -55,12 +57,19 @@ class FlutterDriverFactory {
         toolContext: _toolContext,
       );
     }
-    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
-        _toolContext;
+    final ToolContext(
+      :Artifacts artifacts,
+      :FlutterVersion flutterVersion,
+      :Logger logger,
+      :Platform platform,
+      :ProcessUtils processUtils,
+    ) = _toolContext;
     return FlutterDriverService(
       applicationPackageFactory: _applicationPackageFactory,
+      artifacts: artifacts,
       dartSdkPath: _dartSdkPath,
       devtoolsLauncher: _devtoolsLauncher,
+      flutterVersion: flutterVersion,
       logger: logger,
       platform: platform,
       processUtils: processUtils,
@@ -114,8 +123,10 @@ abstract class DriverService {
 class FlutterDriverService extends DriverService {
   FlutterDriverService({
     required this._applicationPackageFactory,
+    required this._artifacts,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
+    required this._flutterVersion,
     required this._logger,
     required this._platform,
     required this._processUtils,
@@ -126,6 +137,8 @@ class FlutterDriverService extends DriverService {
   static const _kLaunchAttempts = 3;
 
   final ApplicationPackageFactory _applicationPackageFactory;
+  final Artifacts _artifacts;
+  final FlutterVersion _flutterVersion;
   final Logger _logger;
   final Platform _platform;
   final ProcessUtils _processUtils;
@@ -218,6 +231,7 @@ class FlutterDriverService extends DriverService {
         try {
           await device.dds.startDartDevelopmentServiceFromDebuggingOptions(
             uri,
+            artifacts: _artifacts,
             appName:
                 'Kind: Flutter - Device: ${device.displayName} - '
                 'Package: ${_applicationPackage?.name}',
@@ -230,7 +244,12 @@ class FlutterDriverService extends DriverService {
           // This can be ignored to continue to use the existing remote DDS instance.
         }
       }
-      _vmService = await _vmServiceConnector(uri, device: _device, logger: _logger);
+      _vmService = await _vmServiceConnector(
+        uri,
+        device: _device,
+        flutterVersion: _flutterVersion,
+        logger: _logger,
+      );
       await logReader.provideVmService(_vmService);
     } catch (error) {
       // Allow time for buffered/async log messages (e.g. engine crash logs) to arrive and flush.

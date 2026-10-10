@@ -1116,6 +1116,9 @@ class FakeCache extends Fake implements Cache {
       _fileSystem.directory('/bin/cache/$name');
 
   @override
+  Directory getCacheArtifacts() => getCacheDir('artifacts');
+
+  @override
   Directory getArtifactDirectory(String name) =>
       _fileSystem.directory('/bin/cache/artifacts/$name');
 

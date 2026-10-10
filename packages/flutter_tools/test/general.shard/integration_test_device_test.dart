@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:dds/dds_launcher.dart';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/integration_test_device.dart';
 import 'package:flutter_tools/src/test/test_device.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
@@ -61,6 +63,8 @@ void main() {
 
   setUp(() {
     testDevice = IntegrationTestTestDevice(
+      artifacts: Artifacts.test(),
+      flutterVersion: FakeFlutterVersion(),
       id: 1,
       device: FakeDevice(
         'ephemeral',
@@ -69,6 +73,7 @@ void main() {
         launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
       ),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      logger: BufferLogger.test(),
       userIdentifier: '',
       compileExpression: null,
     );
@@ -147,6 +152,7 @@ void main() {
             Restart? restart,
             CompileExpression? compileExpression,
             FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
             PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
             io.CompressionOptions? compression,
             Device? device,
@@ -172,6 +178,7 @@ void main() {
             Restart? restart,
             CompileExpression? compileExpression,
             FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
             PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
             io.CompressionOptions? compression,
             Device? device,
@@ -184,6 +191,8 @@ void main() {
     'kill() completes and logs warning when DDS shutdown times out',
     () async {
       final TestDevice localTestDevice = IntegrationTestTestDevice(
+        artifacts: Artifacts.test(),
+        flutterVersion: FakeFlutterVersion(),
         id: 1,
         device: FakeDevice(
           'ephemeral',
@@ -192,6 +201,7 @@ void main() {
           launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
         ),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        logger: BufferLogger.test(),
         userIdentifier: '',
         compileExpression: null,
         ddsShutdownTimeout: const Duration(milliseconds: 10),
@@ -229,6 +239,7 @@ void main() {
             Restart? restart,
             CompileExpression? compileExpression,
             FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
             PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
             io.CompressionOptions? compression,
             Device? device,
@@ -241,6 +252,8 @@ void main() {
     'when the device starts without providing an vmService URI',
     () async {
       final TestDevice testDevice = IntegrationTestTestDevice(
+        artifacts: Artifacts.test(),
+        flutterVersion: FakeFlutterVersion(),
         id: 1,
         device: FakeDevice(
           'ephemeral',
@@ -249,6 +262,7 @@ void main() {
           launchResult: LaunchResult.succeeded(),
         ),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        logger: BufferLogger.test(),
         userIdentifier: '',
         compileExpression: null,
       );
@@ -263,6 +277,7 @@ void main() {
             Restart? restart,
             CompileExpression? compileExpression,
             FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
             PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
             io.CompressionOptions? compression,
             Device? device,
@@ -274,6 +289,8 @@ void main() {
     'when the device fails to start',
     () async {
       final TestDevice testDevice = IntegrationTestTestDevice(
+        artifacts: Artifacts.test(),
+        flutterVersion: FakeFlutterVersion(),
         id: 1,
         device: FakeDevice(
           'ephemeral',
@@ -282,6 +299,7 @@ void main() {
           launchResult: LaunchResult.failed(),
         ),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        logger: BufferLogger.test(),
         userIdentifier: '',
         compileExpression: null,
       );
@@ -296,6 +314,7 @@ void main() {
             Restart? restart,
             CompileExpression? compileExpression,
             FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
             PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
             io.CompressionOptions? compression,
             Device? device,
@@ -308,9 +327,12 @@ void main() {
     () async {
       final trackingDevice = FakeDeviceTrackingUninstall();
       final testDeviceWithUninstall = IntegrationTestTestDevice(
+        artifacts: Artifacts.test(),
+        flutterVersion: FakeFlutterVersion(),
         id: 1,
         device: trackingDevice,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+        logger: BufferLogger.test(),
         userIdentifier: '',
         compileExpression: null,
       );
@@ -330,6 +352,7 @@ void main() {
             Restart? restart,
             CompileExpression? compileExpression,
             FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
             PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
             io.CompressionOptions? compression,
             Device? device,
@@ -343,9 +366,12 @@ void main() {
     () async {
       final trackingDevice = FakeDeviceTrackingUninstall();
       final testDeviceWithoutUninstall = IntegrationTestTestDevice(
+        artifacts: Artifacts.test(),
+        flutterVersion: FakeFlutterVersion(),
         id: 1,
         device: trackingDevice,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, uninstallApp: false),
+        logger: BufferLogger.test(),
         userIdentifier: '',
         compileExpression: null,
       );
@@ -365,6 +391,7 @@ void main() {
             Restart? restart,
             CompileExpression? compileExpression,
             FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
             PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
             io.CompressionOptions? compression,
             Device? device,
@@ -389,6 +416,7 @@ void main() {
             Restart? restart,
             CompileExpression? compileExpression,
             FlutterProject? flutterProject,
+            FlutterVersion? flutterVersion,
             PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
             io.CompressionOptions? compression,
             Device? device,

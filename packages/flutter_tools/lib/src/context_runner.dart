@@ -261,8 +261,11 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
               outputPreferences: globals.outputPreferences,
             ),
       MacOSWorkflow: () => MacOSWorkflow(featureFlags: featureFlags, platform: globals.platform),
-      MDnsVmServiceDiscovery: () =>
-          MDnsVmServiceDiscovery(logger: globals.logger, analytics: globals.analytics),
+      MDnsVmServiceDiscovery: () => MDnsVmServiceDiscovery(
+        logger: globals.logger,
+        analytics: globals.analytics,
+        platform: globals.platform,
+      ),
       OperatingSystemUtils: () => OperatingSystemUtils(
         fileSystem: globals.fs,
         logger: globals.logger,

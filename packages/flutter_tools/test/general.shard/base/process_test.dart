@@ -16,7 +16,6 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart' hide FakeProcess;
 
@@ -475,46 +474,52 @@ void main() {
       );
     });
 
-    testUsingContext('prints analytics welcome message', () async {
+    testWithoutContext('prints analytics welcome message', () async {
       setExitFunctionForTests((int exitCode) {});
       final shutdownHooks = ShutdownHooks();
-      await exitWithHooks(0, shutdownHooks: shutdownHooks);
+      await exitWithHooks(0, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
       expect(logger.statusText, contains(analytics.getConsentMessage));
-    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+    });
 
-    testUsingContext('does not print analytics welcome message if Analytics instance indicates it should not be printed', () async {
+    testWithoutContext('does not print analytics welcome message if Analytics instance indicates it should not be printed', () async {
       setExitFunctionForTests((int exitCode) {});
 
       analytics.clientShowedMessage();
 
       final shutdownHooks = ShutdownHooks();
-      await exitWithHooks(0, shutdownHooks: shutdownHooks);
+      await exitWithHooks(0, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks);
       expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
-    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+    });
 
-    testUsingContext('[sync] exceptions thrown from a hook do not crash the tool', () async {
+    testWithoutContext('[sync] exceptions thrown from a hook do not crash the tool', () async {
       setExitFunctionForTests((int exitCode) {});
 
       final shutdownHooks = ShutdownHooks();
       shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
-      await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+      await expectLater(
+        exitWithHooks(0, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks),
+        completes,
+      );
       expect(
         logger.warningText,
         stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
       );
-    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+    });
 
-    testUsingContext('[async] exceptions thrown from a hook do not crash the tool', () async {
+    testWithoutContext('[async] exceptions thrown from a hook do not crash the tool', () async {
       setExitFunctionForTests((int exitCode) {});
 
       final shutdownHooks = ShutdownHooks();
       shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
-      await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+      await expectLater(
+        exitWithHooks(0, analytics: analytics, logger: logger, shutdownHooks: shutdownHooks),
+        completes,
+      );
       expect(
         logger.warningText,
         stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
       );
-    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+    });
   });
 
   group('Environment variable propagation', () {
@@ -556,7 +561,7 @@ void main() {
       );
     });
 
-    testUsingContext(
+    testWithoutContext(
       'propagates DASH__SUPPRESS_ANALYTICS and DASH__TOOL when running a command',
       () async {
         fakeProcessManager.addCommand(
@@ -568,10 +573,9 @@ void main() {
         expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
         expect(fakeProcessManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{Analytics: () => analytics},
     );
 
-    testUsingContext(
+    testWithoutContext(
       'preserves parent DASH__TOOL if already specified in the environment',
       () async {
         final fakePlatform = FakePlatform(
@@ -595,7 +599,6 @@ void main() {
 
         expect((await localProcessUtils.run(<String>['whoohoo'])).exitCode, 0);
       },
-      overrides: <Type, Generator>{Analytics: () => analytics},
     );
   });
 }

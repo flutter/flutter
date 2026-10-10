@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:unified_analytics/unified_analytics.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -13,6 +15,7 @@ class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(
     super.argResults,
     List<Directory> repoPackages, {
+    required this._analytics,
     required super.artifacts,
     required super.fileSystem,
     required super.logger,
@@ -23,6 +26,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     required super.terminal,
   }) : super(repoPackages: repoPackages);
 
+  final Analytics _analytics;
   final ShutdownHooks shutdownHooks;
 
   String? analysisTarget;
@@ -132,7 +136,12 @@ class AnalyzeContinuously extends AnalyzeBase {
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount);
         server.dispose().whenComplete(() {
-          exitWithHooks(issueCount > 0 ? 1 : 0, shutdownHooks: shutdownHooks);
+          exitWithHooks(
+            issueCount > 0 ? 1 : 0,
+            analytics: _analytics,
+            logger: logger,
+            shutdownHooks: shutdownHooks,
+          );
         });
       }
 
