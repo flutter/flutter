@@ -24,8 +24,11 @@ load(":repositories.bzl", "cipd_package", "synced_repository")
 _OVERLAYS = "//engine/src/flutter/build/bazel/third_party"
 
 # Source trees from DEPS, keyed by repository name.
-#   path:       directory relative to the repository root, as listed in DEPS.
-#   build_file: overlay BUILD file, or None to use the upstream Bazel files.
+#   path:           directory relative to the repository root, as listed in DEPS.
+#   build_file:     overlay BUILD file, or None to use the upstream Bazel files.
+#   gn_build_files: instead of an overlay, GN build files that tools/gn_to_bazel
+#                   converts into the repository at fetch time (with
+#                   gn_repository, see repositories.bzl).
 _SOURCE_REPOSITORIES = {
     "abseil-cpp": struct(
         path = "engine/src/third_party/abseil-cpp",
@@ -63,6 +66,20 @@ _SOURCE_REPOSITORIES = {
     "llvm_libc": struct(
         path = "engine/src/flutter/third_party/llvm_libc",
         build_file = _OVERLAYS + ":llvm_libc/BUILD.llvm_libc.bazel",
+    ),
+    # Skia as the engine builds it: //flutter/skia/BUILD.gn (the engine's
+    # wrapper over Skia's gn/*.gni source lists), converted at fetch time so
+    # that Skia rolls need no regeneration (research/07). Skia's own Bazel
+    # files are not used: the engine builds Skia with its own flags.
+    "skia": struct(
+        path = "engine/src/flutter/third_party/skia",
+        build_file = None,
+        gn_build_files = [
+            "engine/src/flutter/skia/BUILD.gn",
+            "engine/src/flutter/skia/modules/skcms/BUILD.gn",
+            "engine/src/flutter/third_party/skia/src/partition_alloc/BUILD.gn",
+        ],
+        gn_repository = "@skia=//flutter/third_party/skia",
     ),
     "zlib": struct(
         path = "engine/src/flutter/third_party/zlib",
@@ -210,7 +227,13 @@ def _synced_deps_impl(mctx):
     for name, spec in _SOURCE_REPOSITORIES.items():
         if spec.path not in GIT_DEPS:
             fail("synced_deps: %s is not a git dependency in DEPS (deps.lock.bzl is stale?)" % spec.path)
-        synced_repository(name = name, path = spec.path, build_file = spec.build_file)
+        synced_repository(
+            name = name,
+            path = spec.path,
+            build_file = spec.build_file,
+            gn_build_files = getattr(spec, "gn_build_files", []),
+            gn_repository = getattr(spec, "gn_repository", ""),
+        )
 
     fetch = _fetch_toolchains(mctx)
     platform = _cipd_platform(mctx)
