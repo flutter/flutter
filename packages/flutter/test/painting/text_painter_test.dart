@@ -1295,7 +1295,7 @@ void main() {
     expect(hidden.width, 30);
     manual.dispose();
     hidden.dispose();
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/193506
+  }, skip: kIsWeb && !kIsWasm); // CanvasKit: https://github.com/flutter/flutter/issues/193506
 
   test('Changing TextPainter.hyphens after layout changes the width', () {
     final TextPainter painter = softHyphenPainter(Hyphens.hidden)..layout(maxWidth: 49);
@@ -1305,7 +1305,7 @@ void main() {
     painter.layout(maxWidth: 49);
     expect(painter.width, 40);
     painter.dispose();
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/193506
+  }, skip: kIsWeb && !kIsWasm); // CanvasKit: https://github.com/flutter/flutter/issues/193506
 
   test('TextPainter line metrics', () {
     final painter = TextPainter()..textDirection = TextDirection.ltr;

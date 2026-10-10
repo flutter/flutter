@@ -842,6 +842,8 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
     }
     paragraphStyleSetTextStyle(handle, textStyleHandle);
     paragraphStyleSetApplyRoundingHack(handle, false);
+    // Like the native engine, render soft hyphens unless they are hidden.
+    paragraphStyleSetRenderSoftHyphens(handle, _hyphens != ui.Hyphens.hidden);
     return (handle, textStyle);
   }
 
@@ -857,13 +859,6 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
   final ui.StrutStyle? _strutStyle;
   final String? _ellipsis;
   final ui.Locale? _locale;
-  // TODO(dbebawy): hyphens is accepted and stored but not honored here yet.
-  // Neither Hyphens.manual nor Hyphens.hidden takes effect on Skwasm until a
-  // renderSoftHyphens setter is exposed on the Skwasm ParagraphStyle binding
-  // (the native engine wires this via SkParagraph::setRenderSoftHyphens).
-  // https://github.com/flutter/flutter/issues/193506
-  // Customizing the hyphen string is separate future work:
-  // https://github.com/flutter/flutter/issues/189617
   final ui.Hyphens? _hyphens;
 
   @override
