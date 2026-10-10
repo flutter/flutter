@@ -1486,6 +1486,269 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('RenderTarget throws for a texture without render target usage', () async {
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      16,
+      16,
+      enableRenderTargetUsage: false,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    expect(
+      () => commandBuffer.createRenderPass(
+        gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: texture)),
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('render target usage'),
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderTarget throws when attachment sample counts differ', () async {
+    final gpu.Texture color = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 16, 16);
+    final gpu.Texture depthStencil = gpu.gpuContext.createTexture(
+      gpu.StorageMode.deviceTransient,
+      16,
+      16,
+      format: gpu.gpuContext.defaultDepthStencilFormat,
+      sampleCount: 4,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    expect(
+      () => commandBuffer.createRenderPass(
+        gpu.RenderTarget.singleColor(
+          gpu.ColorAttachment(texture: color),
+          depthStencilAttachment: gpu.DepthStencilAttachment(texture: depthStencil),
+        ),
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('same sample count'),
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('DepthStencilAttachment throws for a color format', () async {
+    final gpu.Texture color = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 16, 16);
+    final gpu.Texture notDepth = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      16,
+      16,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    expect(
+      () => commandBuffer.createRenderPass(
+        gpu.RenderTarget.singleColor(
+          gpu.ColorAttachment(texture: color),
+          depthStencilAttachment: gpu.DepthStencilAttachment(texture: notDepth),
+        ),
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('depth or stencil format'),
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('ColorAttachment throws for a depth/stencil format', () async {
+    final gpu.Texture depthStencil = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      16,
+      16,
+      format: gpu.gpuContext.defaultDepthStencilFormat,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    expect(
+      () => commandBuffer.createRenderPass(
+        gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: depthStencil)),
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('Use it as a DepthStencilAttachment instead'),
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderTarget throws when it has no attachments', () async {
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    expect(
+      () => commandBuffer.createRenderPass(const gpu.RenderTarget()),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('at least one color or depth-stencil attachment'),
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('ColorAttachment throws for a non-zero mip level the backend cannot render', () async {
+    if (gpu.gpuContext.doesSupportFramebufferRenderMipmap) {
+      markTestSkipped('Backend supports rendering into non-zero mip levels.');
+      return;
+    }
+    final gpu.Texture texture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      8,
+      8,
+      mipLevelCount: 3,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    expect(
+      () => commandBuffer.createRenderPass(
+        gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: texture, mipLevel: 1)),
+      ),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('doesSupportFramebufferRenderMipmap'),
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test(
+    'RenderPass vertex and index buffer binds throw for a BufferView outside its buffer',
+    () async {
+      final RenderPassState state = createSimpleRenderPass();
+      final gpu.DeviceBuffer buffer = gpu.gpuContext.createDeviceBuffer(
+        gpu.StorageMode.hostVisible,
+        64,
+      );
+      final gpu.BufferView tooLong = gpu.BufferView(buffer, offsetInBytes: 32, lengthInBytes: 64);
+      final gpu.BufferView negative = gpu.BufferView(buffer, offsetInBytes: -4, lengthInBytes: 8);
+
+      expect(() => state.renderPass.bindVertexBuffer(tooLong), throwsRangeError);
+      expect(() => state.renderPass.bindVertexBuffer(negative), throwsRangeError);
+      expect(
+        () => state.renderPass.bindIndexBuffer(tooLong, gpu.IndexType.int16),
+        throwsRangeError,
+      );
+    },
+    skip: !(impellerEnabled && flutterGpuEnabled),
+  );
+
+  test('RenderPass.drawIndexed throws when indexCount exceeds the index buffer', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    state.renderPass.bindVertexBuffer(
+      transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
+    );
+    state.renderPass.bindIndexBuffer(
+      transients.emplace(Uint16List.fromList(<int>[0, 1, 2]).buffer.asByteData()),
+      gpu.IndexType.int16,
+    );
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+
+    expect(() => state.renderPass.drawIndexed(4), throwsRangeError);
+    state.renderPass.drawIndexed(3);
+    await submitAndWait(state.commandBuffer);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass color blend setters throw for a missing color attachment', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    expect(
+      () => state.renderPass.setColorBlendEnable(true, colorAttachmentIndex: 1),
+      throwsRangeError,
+    );
+    expect(
+      () => state.renderPass.setColorBlendEnable(true, colorAttachmentIndex: -1),
+      throwsRangeError,
+    );
+    expect(
+      () =>
+          state.renderPass.setColorBlendEquation(gpu.ColorBlendEquation(), colorAttachmentIndex: 1),
+      throwsRangeError,
+    );
+    state.renderPass.setColorBlendEnable(true);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('RenderPass.setScissor throws outside the render target', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    expect(
+      () => state.renderPass.setScissor(gpu.Scissor(x: 50, y: 0, width: 1000, height: 1000)),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('must lie within the 100x100 render target'),
+        ),
+      ),
+    );
+    expect(
+      () => state.renderPass.setScissor(gpu.Scissor(x: -1, y: 0, width: 10, height: 10)),
+      throwsException,
+    );
+
+    // A scissor inside the target still limits the draw.
+    state.renderPass.setScissor(gpu.Scissor(x: 50, y: 0, width: 50, height: 100));
+    await drawTriangle(state, Colors.lime);
+    await submitAndWait(state.commandBuffer);
+
+    final ByteData bytes = await readTextureBytes(state.renderTexture);
+    const int insideScissor = (50 * 100 + 60) * 4;
+    const int outsideScissor = (50 * 100 + 40) * 4;
+    expect(bytes.getUint8(insideScissor + 1), greaterThan(0xC0));
+    expect(bytes.getUint8(outsideScissor + 1), lessThan(0x40));
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('ColorAttachment throws for an invalid resolve texture', () async {
+    final gpu.Texture msaa = gpu.gpuContext.createTexture(
+      gpu.StorageMode.deviceTransient,
+      16,
+      16,
+      sampleCount: 4,
+    );
+    final gpu.Texture wrongFormat = gpu.gpuContext.createTexture(
+      gpu.StorageMode.devicePrivate,
+      16,
+      16,
+      format: gpu.PixelFormat.r32Float,
+    );
+    final gpu.Texture wrongSize = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 8, 8);
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    void expectResolveError(gpu.Texture resolve, String message) {
+      expect(
+        () => commandBuffer.createRenderPass(
+          gpu.RenderTarget.singleColor(
+            gpu.ColorAttachment(
+              texture: msaa,
+              resolveTexture: resolve,
+              storeAction: gpu.StoreAction.multisampleResolve,
+            ),
+          ),
+        ),
+        throwsA(
+          isA<Exception>().having((Exception e) => e.toString(), 'message', contains(message)),
+        ),
+      );
+    }
+
+    expectResolveError(wrongFormat, 'same format');
+    expectResolveError(wrongSize, 'same dimensions');
+    expectResolveError(msaa, 'sample count of 1');
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   // Renders a green triangle pointing downwards.
   test('Can render triangle', () async {
     final RenderPassState state = createSimpleRenderPass();
