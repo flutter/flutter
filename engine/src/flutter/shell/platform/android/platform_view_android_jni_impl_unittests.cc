@@ -1969,5 +1969,66 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   prefetch_fn(&mock_env, kPlaceholderClass);
 }
 
+TEST_F(PlatformViewAndroidJNIImplTest, LaunchCallsLaunchEngineEmbedderApi) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  // Simulate AOT mode so Launch proceeds without needing a kernel file on disk.
+  holder->GetEmbedderApiForTesting().RunsAOTCompiledDartCode =
+      MOCK_ENGINE_PROC(RunsAOTCompiledDartCode, ([]() { return true; }));
+
+  // Expect display metrics query during Launch.
+  constexpr double kRefreshRateHz = 60.0;
+  constexpr double kDisplayWidthPx = 1080.0;
+  constexpr double kDisplayHeightPx = 1920.0;
+  constexpr double kDisplayDensity = 2.0;
+  EXPECT_CALL(*jni, GetDisplayRefreshRate()).WillOnce(Return(kRefreshRateHz));
+  EXPECT_CALL(*jni, GetDisplayWidth()).WillOnce(Return(kDisplayWidthPx));
+  EXPECT_CALL(*jni, GetDisplayHeight()).WillOnce(Return(kDisplayHeightPx));
+  EXPECT_CALL(*jni, GetDisplayDensity()).WillOnce(Return(kDisplayDensity));
+
+  bool launch_engine_called = false;
+  std::string captured_entrypoint;
+  std::string captured_library;
+  std::vector<std::string> captured_args;
+  int64_t captured_engine_id = 0;
+
+  holder->GetEmbedderApiForTesting().LaunchEngine = MOCK_ENGINE_PROC(
+      LaunchEngine, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                         const FlutterEngineRunConfiguration* config) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(config, nullptr);
+        if (config != nullptr) {
+          EXPECT_EQ(config->struct_size, sizeof(FlutterEngineRunConfiguration));
+          if (config->custom_dart_entrypoint != nullptr) {
+            captured_entrypoint = config->custom_dart_entrypoint;
+          }
+          if (config->custom_dart_entrypoint_library != nullptr) {
+            captured_library = config->custom_dart_entrypoint_library;
+          }
+          for (int i = 0; i < config->dart_entrypoint_argc; ++i) {
+            captured_args.emplace_back(config->dart_entrypoint_argv[i]);
+          }
+          captured_engine_id = config->engine_id;
+        }
+        launch_engine_called = true;
+        return kSuccess;
+      }));
+
+  constexpr int64_t kTestEngineId = 77;
+  holder->Launch(/*apk_asset_provider=*/nullptr, "customMain",
+                 "package:my_app/main.dart", {"--foo", "--bar"}, kTestEngineId);
+
+  EXPECT_TRUE(launch_engine_called);
+  EXPECT_EQ(captured_entrypoint, "customMain");
+  EXPECT_EQ(captured_library, "package:my_app/main.dart");
+  EXPECT_THAT(captured_args, ElementsAre("--foo", "--bar"));
+  EXPECT_EQ(captured_engine_id, kTestEngineId);
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -6,7 +6,7 @@
       "enforce": "ratchet"
     },
     "get_shell_calls": {
-      "count": 6,
+      "count": 5,
       "enforce": "ratchet"
     },
     "embedder_engine_refs": {

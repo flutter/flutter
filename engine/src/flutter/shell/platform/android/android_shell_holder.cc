@@ -813,13 +813,53 @@ void AndroidShellHolder::Launch(
   }
 
   apk_asset_provider_ = std::move(apk_asset_provider);
-  auto config = BuildRunConfiguration(entrypoint, libraryUrl, entrypoint_args);
-  if (!config) {
+  if (!embedder_api_.RunsAOTCompiledDartCode() &&
+      !fml::FileMapping::CreateReadOnly(
+          GetSettings().application_kernel_asset)) {
+    FML_DLOG(ERROR) << "Unable to load the kernel blob asset.";
     return;
   }
-  config->SetEngineId(engine_id);
+
   UpdateDisplayMetrics();
-  GetShell(engine_.get()).RunEngine(std::move(config.value()));
+
+  std::vector<const char*> c_entrypoint_args;
+  c_entrypoint_args.reserve(entrypoint_args.size());
+  for (const std::string& arg : entrypoint_args) {
+    c_entrypoint_args.push_back(arg.c_str());
+  }
+
+  FlutterAssetResolver asset_resolver = {};
+  const FlutterAssetResolver* asset_resolver_ptr = nullptr;
+  if (apk_asset_provider_) {
+    asset_resolver = apk_asset_provider_->Clone()->ToFlutterAssetResolver();
+    asset_resolver_ptr = &asset_resolver;
+  }
+
+  FlutterEngineRunConfiguration run_config = {};
+  run_config.struct_size = sizeof(FlutterEngineRunConfiguration);
+  run_config.kernel_blob_path =
+      GetSettings().application_kernel_asset.empty()
+          ? nullptr
+          : GetSettings().application_kernel_asset.c_str();
+  run_config.custom_dart_entrypoint =
+      entrypoint.empty() ? nullptr : entrypoint.c_str();
+  run_config.custom_dart_entrypoint_library =
+      (!entrypoint.empty() && !libraryUrl.empty()) ? libraryUrl.c_str()
+                                                   : nullptr;
+  run_config.dart_entrypoint_argc = static_cast<int>(c_entrypoint_args.size());
+  run_config.dart_entrypoint_argv =
+      c_entrypoint_args.empty() ? nullptr : c_entrypoint_args.data();
+  run_config.asset_resolver = asset_resolver_ptr;
+  run_config.engine_id = engine_id;
+
+  FlutterEngineResult result =
+      embedder_api_.LaunchEngine(engine_.get(), &run_config);
+  if (result != kSuccess) {
+    if (asset_resolver.destruction_callback) {
+      asset_resolver.destruction_callback(asset_resolver.user_data);
+    }
+    FML_LOG(ERROR) << "FlutterEngineLaunchEngine failed: " << result;
+  }
 }
 
 Rasterizer::Screenshot AndroidShellHolder::Screenshot(
