@@ -1589,6 +1589,35 @@ source_set("wuffs") {
       expect(output, contains('includes = [\n        "release/c",\n        "config",\n    ],'));
     });
 
+    test("an executable's include_dirs ride a helper library", () async {
+      final String output = await convert('''
+executable("tool") {
+  sources = [ "tool.cc" ]
+  include_dirs = [ "grpc" ]
+}
+''');
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "tool_include_dirs",
+    includes = ["grpc"],
+)
+
+cc_binary(
+    name = "tool",
+    srcs = ["tool.cc"],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":tool_include_dirs",
+        "//engine/src:include_root",
+    ],
+)
+'''),
+      );
+    });
+
     test('rejects what it cannot express', () async {
       // Flags and defines on a header-only target apply to nothing, in GN as
       // here.
