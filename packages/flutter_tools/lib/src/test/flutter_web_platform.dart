@@ -559,9 +559,16 @@ window.\$dartLoader.loader.nextAttempt();
 
   // A handler that serves wrapper files used to bootstrap tests.
   shelf.Response _wrapperHandler(shelf.Request request) {
-    final String path = _fileSystem.path.fromUri(request.url);
+    final List<String> pathSegments = request.url.pathSegments;
+    if (pathSegments.any((String segment) => segment.contains('/') || segment.contains(r'\'))) {
+      return shelf.Response.notFound('Not found.');
+    }
+    // Test selectors follow URI paths on every host, not native file paths.
+    final String path = pathSegments.join('/');
     if (path.endsWith('.html')) {
-      final test = '${_fileSystem.path.withoutExtension(path)}.dart';
+      final test = '${path.substring(0, path.length - '.html'.length)}.dart';
+      // JSON handles quotes and escapes; HTML script parsing also needs '<' escaped.
+      final String testSelector = jsonEncode(test).replaceAll('<', r'\u003c');
       // TODO(vegorov): this should probably be part of Wasm bootstrapping
       // script when compiling for testing (just like it is part of DDC runtime)
       final bumpStackTraceLimit = useWasm ? 'Error.stackTraceLimit = Infinity;' : '';
@@ -580,7 +587,7 @@ window.\$dartLoader.loader.nextAttempt();
         ${_makeBuildConfigString()}
       ]
     }
-    window.testSelector = "$test";
+    window.testSelector = $testSelector;
     _flutter.loader.load({
       config: {
         canvasKitBaseUrl: "/canvaskit/",

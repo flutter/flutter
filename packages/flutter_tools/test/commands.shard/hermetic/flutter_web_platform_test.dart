@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -310,4 +311,124 @@ void main() {
       Logger: () => logger,
     },
   );
+
+  for (final style in <FileSystemStyle>[FileSystemStyle.posix, FileSystemStyle.windows]) {
+    final styleName = style == FileSystemStyle.windows ? 'Windows' : 'POSIX';
+    group('FlutterWebPlatform test selectors with $styleName paths', () {
+      late FileSystem testFileSystem;
+      late BufferLogger testLogger;
+      late Platform testPlatform;
+      late Artifacts testArtifacts;
+      late ProcessManager testProcessManager;
+      late Directory testProject;
+
+      setUp(() {
+        testFileSystem = MemoryFileSystem.test(style: style);
+        testLogger = BufferLogger.test();
+        testPlatform = FakePlatform(
+          operatingSystem: style == FileSystemStyle.windows ? 'windows' : 'linux',
+        );
+        testArtifacts = Artifacts.test(fileSystem: testFileSystem);
+        testProcessManager = FakeProcessManager.empty();
+        testProject = testFileSystem.systemTempDirectory.createTempSync(
+          'flutter_web_platform_selector_test.',
+        );
+        final artifact =
+            testArtifacts.getHostArtifact(HostArtifact.webPrecompiledDDCCanarySdk) as File;
+        artifact.createSync();
+        artifact.writeAsStringSync('webPrecompiledDDCCanarySdk');
+      });
+
+      testUsingContext(
+        'emits slash-normalized and safely encoded selectors',
+        () async {
+          final chromiumLauncher = ChromiumLauncher(
+            fileSystem: testFileSystem,
+            platform: testPlatform,
+            processManager: testProcessManager,
+            operatingSystemUtils: FakeOperatingSystemUtils(),
+            browserFinder: (Platform _, FileSystem _) => 'chrome',
+            logger: testLogger,
+          );
+          final server = FakeServer();
+          final FlutterWebPlatform webPlatform = await FlutterWebPlatform.start(
+            testProject.path,
+            buildDirectory: testProject.childDirectory('build'),
+            buildInfo: const BuildInfo(
+              BuildMode.debug,
+              '',
+              packageConfigPath: '.dart_tool/package_config.json',
+              treeShakeIcons: false,
+            ),
+            chromiumLauncher: chromiumLauncher,
+            crossOriginIsolation: false,
+            flutterProject: FlutterProject.fromDirectoryTest(testProject),
+            flutterTesterBinPath: testArtifacts.getArtifactPath(Artifact.flutterTester),
+            toolContext: FakeToolContext(
+              artifacts: testArtifacts,
+              fs: testFileSystem,
+              logger: testLogger,
+              processManager: testProcessManager,
+            ),
+            useWasm: false,
+            webMemoryFS: WebMemoryFS(),
+            webRenderer: WebRendererMode.canvaskit,
+            serverFactory: () async => server,
+            testPackageUri: Uri.parse('test'),
+          );
+
+          try {
+            final shelf.Handler? handler = server.mountedHandler;
+            expect(handler, isNotNull);
+
+            final cases = <String, String>{
+              'online/room_invitation_test.html': 'online/room_invitation_test.dart',
+              'online/my%20%22quoted%22%20%3Cscript%3E_test.html':
+                  'online/my "quoted" <script>_test.dart',
+              'online/%3C/script%3E_test.html': 'online/</script>_test.dart',
+            };
+            for (final MapEntry<String, String> testCase in cases.entries) {
+              final shelf.Response response = await handler!(
+                shelf.Request('GET', Uri.parse('http://localhost/${testCase.key}')),
+              );
+              expect(response.statusCode, HttpStatus.ok);
+              final String body = await response.readAsString();
+              final Match? selectorMatch = RegExp(r'window\.testSelector = (.+);').firstMatch(body);
+              expect(selectorMatch, isNotNull);
+              final String selectorExpression = selectorMatch!.group(1)!;
+              expect(selectorExpression, isNot(contains('<')));
+              expect(jsonDecode(selectorExpression), testCase.value);
+            }
+
+            final shelf.Response encodedSeparatorResponse = await handler!(
+              shelf.Request(
+                'GET',
+                Uri.parse('http://localhost/online%2Froom_invitation_test.html'),
+              ),
+            );
+            expect(encodedSeparatorResponse.statusCode, HttpStatus.notFound);
+
+            final shelf.Response encodedBackslashResponse = await handler(
+              shelf.Request(
+                'GET',
+                Uri.parse('http://localhost/online%5Croom_invitation_test.html'),
+              ),
+            );
+            expect(encodedBackslashResponse.statusCode, HttpStatus.notFound);
+          } finally {
+            await webPlatform.close();
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => testFileSystem,
+          ProcessManager: () => testProcessManager,
+          Logger: () => testLogger,
+        },
+      );
+
+      tearDown(() {
+        tryToDelete(testProject);
+      });
+    });
+  }
 }
