@@ -1047,6 +1047,7 @@ VkResult vkCreateFramebuffer(VkDevice device,
                              const VkFramebufferCreateInfo* pCreateInfo,
                              const VkAllocationCallbacks* pAllocator,
                              VkFramebuffer* pFramebuffer) {
+  MockDevice::Unwrap(device)->AddCalledFunction("vkCreateFramebuffer");
   *pFramebuffer = reinterpret_cast<VkFramebuffer>(new MockFramebuffer());
   return VK_SUCCESS;
 }

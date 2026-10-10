@@ -5,15 +5,29 @@
 #include "flutter/testing/testing.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_builder_vk.h"
 #include "impeller/renderer/backend/vulkan/render_pass_vk.h"
+#include "impeller/renderer/backend/vulkan/shared_object_vk.h"
 #include "impeller/renderer/backend/vulkan/test/mock_vulkan.h"
+#include "impeller/renderer/backend/vulkan/texture_source_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/render_target.h"
 #include "vulkan/vulkan_enums.hpp"
 
 namespace impeller {
 namespace testing {
+
+namespace {
+
+int CountCalls(const ContextVK& context, const std::string& name) {
+  auto called_functions = GetMockVulkanFunctions(context.GetDevice());
+  return static_cast<int>(
+      std::count(called_functions->begin(), called_functions->end(), name));
+}
+
+}  // namespace
 
 TEST(RenderPassVK, DoesNotRedundantlySetStencil) {
   std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
@@ -88,6 +102,278 @@ TEST(RenderPassVK, SetViewportPropagatesAllUserSuppliedFields) {
   EXPECT_FLOAT_EQ(vp.height, -80.0f);
   EXPECT_FLOAT_EQ(vp.minDepth, 0.25f);
   EXPECT_FLOAT_EQ(vp.maxDepth, 0.75f);
+}
+
+// Regression guard: the framebuffer cache lives on color attachment zero's
+// texture, and a framebuffer holds image views of *every* attachment. Two
+// passes that share a color texture but bring different depth textures (a
+// shadow atlas drawn with a depth buffer from a pool is the ordinary case)
+// used to be handed the same framebuffer, which still referred to the first
+// pass's depth. Vulkan reports the stale view as
+// VUID-VkRenderPassBeginInfo-framebuffer-parameter, and the driver
+// dereferences it once that texture has been released.
+TEST(RenderPassVK, DoesNotReuseAFramebufferWithADifferentDepthAttachment) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<Context> copy = context;
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget first = allocator.CreateOffscreen(*copy.get(), {4, 4}, 1);
+
+  // The same color texture, and whatever depth the allocator makes next.
+  RenderTarget second = allocator.CreateOffscreen(
+      *copy.get(),                                    //
+      {4, 4},                                         //
+      1,                                              //
+      "Offscreen",                                    //
+      RenderTarget::kDefaultColorAttachmentConfig,    //
+      RenderTarget::kDefaultStencilAttachmentConfig,  //
+      first.GetRenderTargetTexture()                  //
+  );
+
+  ASSERT_TRUE(first.GetDepthAttachment().has_value());
+  ASSERT_TRUE(second.GetDepthAttachment().has_value());
+  ASSERT_EQ(first.GetRenderTargetTexture(), second.GetRenderTargetTexture());
+  ASSERT_NE(first.GetDepthAttachment()->texture,
+            second.GetDepthAttachment()->texture);
+
+  const int render_passes_before = CountCalls(*context, "vkCreateRenderPass");
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(first));
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(second));
+
+  // One framebuffer per attachment set: before the key included the depth
+  // attachment, the second pass was handed the first's and only one was made.
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 2);
+  // The render pass does not depend on which depth texture is attached, only
+  // on its format, so the second pass shares the first's.
+  EXPECT_EQ(CountCalls(*context, "vkCreateRenderPass") - render_passes_before,
+            1);
+}
+
+// A render pass on the same target as an earlier one is handed the cached
+// framebuffer and render pass rather than new ones.
+TEST(RenderPassVK, ReusesTheFramebufferForTheSameTarget) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<Context> copy = context;
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget target = allocator.CreateOffscreen(*copy.get(), {4, 4}, 1);
+
+  const int render_passes_before = CountCalls(*context, "vkCreateRenderPass");
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 1);
+  EXPECT_EQ(CountCalls(*context, "vkCreateRenderPass") - render_passes_before,
+            1);
+}
+
+// The same for a multisample target, whose cache lives on the resolve
+// texture.
+TEST(RenderPassVK, ReusesTheFramebufferForTheSameMultisampleTarget) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<Context> copy = context;
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget target = allocator.CreateOffscreenMSAA(*copy.get(), {4, 4}, 1);
+
+  const int render_passes_before = CountCalls(*context, "vkCreateRenderPass");
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 1);
+  EXPECT_EQ(CountCalls(*context, "vkCreateRenderPass") - render_passes_before,
+            1);
+}
+
+// Without a depth attachment the framebuffer holds the stencil texture, so
+// that is what the key names: the same stencil texture hits, another one
+// misses.
+TEST(RenderPassVK, KeysAStencilOnlyTargetOnTheStencilTexture) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<Context> copy = context;
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget target = allocator.CreateOffscreen(*copy.get(), {4, 4}, 1);
+  auto make_stencil = [&context]() {
+    TextureDescriptor desc;
+    desc.storage_mode = StorageMode::kDevicePrivate;
+    desc.format = context->GetCapabilities()->GetDefaultStencilFormat();
+    desc.size = {4, 4};
+    desc.usage = TextureUsage::kRenderTarget;
+    StencilAttachment stencil;
+    stencil.texture = context->GetResourceAllocator()->CreateTexture(desc);
+    stencil.load_action = LoadAction::kClear;
+    stencil.store_action = StoreAction::kDontCare;
+    FML_CHECK(stencil.texture);
+    return stencil;
+  };
+  target.SetDepthAttachment(std::nullopt);
+  target.SetStencilAttachment(make_stencil());
+  RenderTarget other_stencil = target;
+  other_stencil.SetStencilAttachment(make_stencil());
+
+  FramebufferAttachmentsVK attachments =
+      RenderPassVK::GetFramebufferAttachments(target);
+  ASSERT_EQ(attachments.count, 2u);
+  EXPECT_EQ(attachments.attachments[1].source.lock(),
+            TextureVK::Cast(*target.GetStencilAttachment()->texture)
+                .GetTextureSource());
+
+  const int render_passes_before = CountCalls(*context, "vkCreateRenderPass");
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(target));
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 1);
+
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(other_stencil));
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 2);
+  EXPECT_EQ(CountCalls(*context, "vkCreateRenderPass") - render_passes_before,
+            1);
+}
+
+// The same, for the multisample texture behind a resolve texture. The cache
+// lives on the resolve texture then, and the multisample texture is one of
+// the attachments it has to key on.
+TEST(RenderPassVK, DoesNotReuseAFramebufferWithADifferentMultisampleTexture) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  std::shared_ptr<Context> copy = context;
+  std::shared_ptr<CommandBuffer> cmd_buffer = context->CreateCommandBuffer();
+
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget first = allocator.CreateOffscreenMSAA(*copy.get(), {4, 4}, 1);
+
+  // The same resolve texture, and whatever multisample texture the allocator
+  // makes next.
+  RenderTarget second = allocator.CreateOffscreenMSAA(
+      *copy.get(),                                      //
+      {4, 4},                                           //
+      1,                                                //
+      "Offscreen MSAA",                                 //
+      RenderTarget::kDefaultColorAttachmentConfigMSAA,  //
+      RenderTarget::kDefaultStencilAttachmentConfig,    //
+      nullptr,                                          //
+      first.GetColorAttachment(0).resolve_texture       //
+  );
+
+  ASSERT_TRUE(first.GetColorAttachment(0).resolve_texture);
+  ASSERT_EQ(first.GetColorAttachment(0).resolve_texture,
+            second.GetColorAttachment(0).resolve_texture);
+  ASSERT_NE(first.GetColorAttachment(0).texture,
+            second.GetColorAttachment(0).texture);
+
+  const int render_passes_before = CountCalls(*context, "vkCreateRenderPass");
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(first));
+  ASSERT_TRUE(cmd_buffer->CreateRenderPass(second));
+
+  EXPECT_EQ(CountCalls(*context, "vkCreateFramebuffer"), 2);
+  EXPECT_EQ(CountCalls(*context, "vkCreateRenderPass") - render_passes_before,
+            1);
+}
+
+namespace {
+
+struct ColorAndDepth {
+  std::shared_ptr<Texture> color;
+  std::shared_ptr<Texture> depth;
+};
+
+// An offscreen target's color and depth textures. Passing `color` reuses it
+// with a new depth texture.
+ColorAndDepth MakeColorAndDepth(
+    const std::shared_ptr<ContextVK>& context,
+    const std::shared_ptr<Texture>& color = nullptr) {
+  std::shared_ptr<Context> copy = context;
+  RenderTargetAllocator allocator(context->GetResourceAllocator());
+  RenderTarget target = allocator.CreateOffscreen(
+      *copy.get(),                                    //
+      {4, 4},                                         //
+      1,                                              //
+      "Offscreen",                                    //
+      RenderTarget::kDefaultColorAttachmentConfig,    //
+      RenderTarget::kDefaultStencilAttachmentConfig,  //
+      color                                           //
+  );
+  FML_CHECK(target.GetDepthAttachment().has_value());
+  return {target.GetRenderTargetTexture(),
+          target.GetDepthAttachment()->texture};
+}
+
+FramebufferAttachmentsVK AttachmentsOf(const ColorAndDepth& textures,
+                                       uint32_t depth_slice = 0u) {
+  FramebufferAttachmentsVK attachments;
+  attachments.attachments[0] = {
+      TextureVK::Cast(*textures.color).GetTextureSource(), 0u, 0u};
+  attachments.attachments[1] = {
+      TextureVK::Cast(*textures.depth).GetTextureSource(), 0u, depth_slice};
+  attachments.count = 2u;
+  return attachments;
+}
+
+// A cache entry a hit can be told apart by: a miss has no render pass.
+FramebufferAndRenderPass MakeFrameData(const ContextVK& context) {
+  auto [result, pass] = context.GetDevice().createRenderPassUnique({});
+  FML_CHECK(result == vk::Result::eSuccess);
+  FramebufferAndRenderPass data;
+  data.render_pass = MakeSharedVK(std::move(pass));
+  return data;
+}
+
+}  // namespace
+
+// A cached framebuffer refers to its attachments weakly. Once one of them is
+// released, the entry never matches again, even if a new texture is allocated
+// at the same address, and the next store drops it. Otherwise a color texture
+// drawn with a stream of transient depth textures keeps one framebuffer for
+// each of them.
+TEST(RenderPassVK, FramebufferCacheForgetsReleasedAttachments) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  ColorAndDepth first = MakeColorAndDepth(context);
+  TextureVK& color = TextureVK::Cast(*first.color);
+
+  color.SetCachedFrameData(MakeFrameData(*context), SampleCount::kCount1, 0u,
+                           0u, AttachmentsOf(first));
+  ASSERT_TRUE(color
+                  .GetCachedFrameData(SampleCount::kCount1, 0u, 0u,
+                                      AttachmentsOf(first))
+                  .render_pass);
+
+  std::weak_ptr<const TextureSourceVK> released =
+      TextureVK::Cast(*first.depth).GetTextureSource();
+  first.depth.reset();
+  ASSERT_TRUE(released.expired());
+
+  ColorAndDepth second = MakeColorAndDepth(context, first.color);
+  EXPECT_FALSE(color
+                   .GetCachedFrameData(SampleCount::kCount1, 0u, 0u,
+                                       AttachmentsOf(second))
+                   .render_pass);
+
+  color.SetCachedFrameData(MakeFrameData(*context), SampleCount::kCount1, 0u,
+                           0u, AttachmentsOf(second));
+  EXPECT_EQ(color.GetTextureSource()->GetCachedFrameDataCountForTesting(), 1u);
+}
+
+// A framebuffer views one subresource of each attachment, so another layer of
+// the same depth texture needs another framebuffer.
+TEST(RenderPassVK, FramebufferCacheKeysOnTheDepthSubresource) {
+  std::shared_ptr<ContextVK> context = MockVulkanContextBuilder().Build();
+  ColorAndDepth textures = MakeColorAndDepth(context);
+  TextureVK& color = TextureVK::Cast(*textures.color);
+
+  color.SetCachedFrameData(MakeFrameData(*context), SampleCount::kCount1, 0u,
+                           0u, AttachmentsOf(textures, /*depth_slice=*/0u));
+
+  EXPECT_TRUE(color
+                  .GetCachedFrameData(SampleCount::kCount1, 0u, 0u,
+                                      AttachmentsOf(textures, 0u))
+                  .render_pass);
+  EXPECT_FALSE(color
+                   .GetCachedFrameData(SampleCount::kCount1, 0u, 0u,
+                                       AttachmentsOf(textures, 1u))
+                   .render_pass);
 }
 
 }  // namespace testing

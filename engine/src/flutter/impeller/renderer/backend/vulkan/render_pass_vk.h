@@ -9,6 +9,7 @@
 #include "impeller/renderer/backend/vulkan/context_vk.h"
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/shared_object_vk.h"
+#include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
@@ -22,6 +23,12 @@ class RenderPassVK final : public RenderPass {
  public:
   // |RenderPass|
   ~RenderPassVK() override;
+
+  /// The image views a framebuffer for `target` holds, as the textures and
+  /// subresources they come from, in the order `CreateVKFramebuffer` attaches
+  /// them. This is the key a render pass looks up a cached framebuffer with.
+  static FramebufferAttachmentsVK GetFramebufferAttachments(
+      const RenderTarget& target);
 
  private:
   friend class CommandBufferVK;

@@ -18,6 +18,10 @@
 
 namespace impeller {
 
+static constexpr size_t kMaxColorAttachments = 16;
+static constexpr size_t kMaxAttachments =
+    (kMaxColorAttachments * 2) + 1;  // MSAA + resolve plus depth/stencil
+
 constexpr std::optional<PixelFormat> VkFormatToImpellerFormat(
     vk::Format format) {
   switch (format) {
