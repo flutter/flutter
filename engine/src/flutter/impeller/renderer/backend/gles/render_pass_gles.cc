@@ -543,17 +543,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       }
       color_gles.SetCachedFBOSubresource(pass_data.color_mip_level,
                                          pass_data.color_slice);
-    } else {
-      // If the attachment textures were resized in-place by RenderTargetCache,
-      // re-initialize their GL storage on the existing handles attached to fbo.
-      color_gles.InitializeContentsIfNecessary();
-      if (auto depth = TextureGLES::Cast(pass_data.depth_attachment.get())) {
-        depth->InitializeContentsIfNecessary();
-      }
-      if (auto stencil =
-              TextureGLES::Cast(pass_data.stencil_attachment.get())) {
-        stencil->InitializeContentsIfNecessary();
-      }
     }
   }
 
@@ -889,7 +878,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
         return false;
       }
     } else {
-      resolve_gles.InitializeContentsIfNecessary();
       gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo_opt.value());
     }
 
