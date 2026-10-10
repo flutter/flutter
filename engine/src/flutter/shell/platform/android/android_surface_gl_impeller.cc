@@ -254,7 +254,9 @@ bool AndroidSurfaceGLImpeller::
   }
   onscreen_surface_.reset();
   auto onscreen_surface =
-      android_context_->CreateOnscreenSurface(native_window_->handle());
+      native_window_->IsFakeWindow()
+          ? android_context_->CreateOffscreenSurface()
+          : android_context_->CreateOnscreenSurface(native_window_->handle());
   if (!onscreen_surface) {
     FML_DLOG(ERROR) << "Could not create onscreen surface.";
     return false;
