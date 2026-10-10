@@ -496,6 +496,7 @@ class DataTable extends StatelessWidget {
     this.checkboxHorizontalMargin,
     this.border,
     this.clipBehavior = Clip.none,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(columns.isNotEmpty),
        assert(
          sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length),
@@ -776,6 +777,9 @@ class DataTable extends StatelessWidget {
   /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
   final int? _onlyTextColumn;
@@ -905,6 +909,7 @@ class DataTable extends StatelessWidget {
               visible: sorted,
               up: sorted ? ascending : null,
               duration: _sortArrowAnimationDuration,
+              animationBehavior: animationBehavior,
             ),
             const SizedBox(width: _sortArrowPadding),
           ],
@@ -1327,13 +1332,20 @@ class TableRowInkWell extends InkResponse {
 }
 
 class _SortArrow extends StatefulWidget {
-  const _SortArrow({required this.visible, required this.up, required this.duration});
+  const _SortArrow({
+    required this.visible,
+    required this.up,
+    required this.duration,
+    this.animationBehavior = AnimationBehavior.normal,
+  });
 
   final bool visible;
 
   final bool? up;
 
   final Duration duration;
+
+  final AnimationBehavior animationBehavior;
 
   @override
   _SortArrowState createState() => _SortArrowState();
@@ -1359,11 +1371,19 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     super.initState();
     _up = widget.up;
     _opacityAnimation = CurvedAnimation(
-      parent: _opacityController = AnimationController(duration: widget.duration, vsync: this),
+      parent: _opacityController = AnimationController(
+        duration: widget.duration,
+        vsync: this,
+        animationBehavior: widget.animationBehavior,
+      ),
       curve: Curves.fastOutSlowIn,
     )..addListener(_rebuild);
     _opacityController.value = widget.visible ? 1.0 : 0.0;
-    _orientationController = AnimationController(duration: widget.duration, vsync: this);
+    _orientationController = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     _orientationAnimation = _orientationController.drive(_turnTween)
       ..addListener(_rebuild)
       ..addStatusListener(_resetOrientationAnimation);

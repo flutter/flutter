@@ -67,7 +67,13 @@ class NavigationDrawer extends StatelessWidget {
     this.onDestinationSelected,
     this.selectedIndex = 0,
     this.tilePadding = const EdgeInsets.symmetric(horizontal: 12.0),
+    this.animationBehavior = AnimationBehavior.normal,
   });
+
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   /// The background color of the [Material] that holds the [NavigationDrawer]'s
   /// contents.
@@ -161,6 +167,7 @@ class NavigationDrawer extends StatelessWidget {
     Widget wrapChild(Widget child, int index) => _SelectableAnimatedBuilder(
       duration: const Duration(milliseconds: 500),
       isSelected: index == selectedIndex,
+      animationBehavior: animationBehavior,
       builder: (BuildContext context, Animation<double> animation) {
         return _NavigationDrawerDestinationInfo(
           index: index,
@@ -647,6 +654,7 @@ class _SelectableAnimatedBuilder extends StatefulWidget {
     required this.isSelected,
     this.duration = const Duration(milliseconds: 200),
     required this.builder,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// When true, the widget will animate an animation controller from 0 to 1.
@@ -667,6 +675,7 @@ class _SelectableAnimatedBuilder extends StatefulWidget {
   /// animation will animate up to 1. When [isSelected] is updated to
   /// `false`, this will be called and the animation will animate down to 0.
   final Widget Function(BuildContext, Animation<double>) builder;
+  final AnimationBehavior animationBehavior;
 
   ///
   @override
@@ -682,7 +691,7 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
+    _controller = AnimationController(vsync: this, animationBehavior: widget.animationBehavior);
     _controller.duration = widget.duration;
     _controller.value = widget.isSelected ? 1.0 : 0.0;
   }

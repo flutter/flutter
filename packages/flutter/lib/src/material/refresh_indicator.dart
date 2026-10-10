@@ -159,6 +159,7 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    this.animationBehavior = AnimationBehavior.normal,
     required this.child,
   }) : _indicatorType = _IndicatorType.material,
        onStatusChange = null,
@@ -193,6 +194,7 @@ class RefreshIndicator extends StatefulWidget {
     this.strokeWidth = RefreshProgressIndicator.defaultStrokeWidth,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    this.animationBehavior = AnimationBehavior.normal,
     required this.child,
   }) : _indicatorType = _IndicatorType.adaptive,
        onStatusChange = null,
@@ -211,6 +213,7 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsValue,
     this.triggerMode = RefreshIndicatorTriggerMode.onEdge,
     this.elevation = 2.0,
+    this.animationBehavior = AnimationBehavior.normal,
     required this.child,
   }) : _indicatorType = _IndicatorType.noSpinner,
        // The following parameters aren't used because [_IndicatorType.noSpinner] is being used,
@@ -316,6 +319,9 @@ class RefreshIndicator extends StatefulWidget {
   /// Defaults to 2.0.
   final double elevation;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   @override
   RefreshIndicatorState createState() => RefreshIndicatorState();
 }
@@ -350,13 +356,19 @@ class RefreshIndicatorState extends State<RefreshIndicator>
   @override
   void initState() {
     super.initState();
-    _positionController = AnimationController(vsync: this);
+    _positionController = AnimationController(
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     _positionFactor = _positionController.drive(_kDragSizeFactorLimitTween);
 
     // The "value" of the circular progress indicator during a drag.
     _value = _positionController.drive(_threeQuarterTween);
 
-    _scaleController = AnimationController(vsync: this);
+    _scaleController = AnimationController(
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     _scaleFactor = _scaleController.drive(_oneToZeroTween);
   }
 
@@ -670,10 +682,12 @@ class RefreshIndicatorState extends State<RefreshIndicator>
                           backgroundColor: widget.backgroundColor,
                           strokeWidth: widget.strokeWidth,
                           elevation: widget.elevation,
+                          animationBehavior: widget.animationBehavior,
                         );
 
                         final Widget cupertinoIndicator = CupertinoActivityIndicator(
                           color: widget.color,
+                          animationBehavior: widget.animationBehavior,
                         );
 
                         switch (widget._indicatorType) {

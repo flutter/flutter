@@ -86,6 +86,7 @@ class InteractiveViewer extends StatefulWidget {
     this.transformationController,
     this.alignment,
     this.trackpadScrollCausesScale = false,
+    this.animationBehavior = AnimationBehavior.normal,
     required Widget this.child,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
@@ -130,6 +131,7 @@ class InteractiveViewer extends StatefulWidget {
     this.transformationController,
     this.alignment,
     this.trackpadScrollCausesScale = false,
+    this.animationBehavior = AnimationBehavior.normal,
     required InteractiveViewerWidgetBuilder this.builder,
   }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
@@ -151,6 +153,9 @@ class InteractiveViewer extends StatefulWidget {
 
   /// The alignment of the child's origin, relative to the size of the box.
   final Alignment? alignment;
+
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
 
   /// If set to [Clip.none], the child may extend beyond the size of the InteractiveViewer,
   /// but it will not receive gestures in these areas.
@@ -1016,8 +1021,11 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
-    _scaleController = AnimationController(vsync: this);
+    _controller = AnimationController(vsync: this, animationBehavior: widget.animationBehavior);
+    _scaleController = AnimationController(
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
 
     _transformer.addListener(_handleTransformation);
   }
