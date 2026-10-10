@@ -434,8 +434,6 @@ static void fl_view_renderer_subsurface_dispose(GObject* object) {
   FlViewRendererSubsurface* self = FL_VIEW_RENDERER_SUBSURFACE(object);
 
   g_clear_object(&self->engine);
-  g_clear_object(&self->task_runner);
-  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->dispose(object);
 }
@@ -450,6 +448,8 @@ static void fl_view_renderer_subsurface_finalize(GObject* object) {
   // presenting.
   g_clear_object(&self->compositor);
   g_clear_object(&self->framebuffer);
+  g_clear_object(&self->task_runner);
+  g_mutex_clear(&self->frame_mutex);
 
   G_OBJECT_CLASS(fl_view_renderer_subsurface_parent_class)->finalize(object);
 }
