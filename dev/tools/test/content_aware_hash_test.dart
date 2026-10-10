@@ -32,8 +32,6 @@ void main() {
   // Then, set this variable to true:
   final usePowershellOnPosix = io.Platform.environment['FORCE_POWERSHELL'] == 'true';
 
-  print('env: ${io.Platform.environment}');
-
   const FileSystem localFs = LocalFileSystem();
   final flutterRoot = _FlutterRootUnderTest.findWithin();
 
@@ -85,7 +83,15 @@ void main() {
 
     if (const LocalPlatform().isWindows || usePowershellOnPosix) {
       // Copy a minimal set of environment variables needed to run the update_engine_version script in PowerShell.
-      const powerShellVariables = <String>['SystemRoot', 'PATH', 'PATHEXT'];
+      const powerShellVariables = <String>[
+        'SystemRoot',
+        'PATH',
+        'Path',
+        'PATHEXT',
+        'TEMP',
+        'TMP',
+        'USERPROFILE',
+      ];
       for (final key in powerShellVariables) {
         final String? value = io.Platform.environment[key];
         if (value != null) {
@@ -120,20 +126,26 @@ void main() {
   /// If the exit code is 0, it is considered a success, and files should exist as a side-effect.
   ///   - On Windows, `powershell` is used (to run `update_engine_version.ps1`);
   ///   - Otherwise, `update_engine_version.sh` is used.
-  io.ProcessResult runContentAwareHash() {
+  io.ProcessResult runContentAwareHash([List<String> extraArgs = const <String>[]]) {
     final String executable;
     final List<String> args;
     if (const LocalPlatform().isWindows) {
       executable = 'powershell';
       // "ExecutionPolicy Bypass" is required to execute scripts from temp
       // folders on Windows 11 machines.
-      args = <String>['-ExecutionPolicy', 'Bypass', '-File', testRoot.contentAwareHashPs1.path];
+      args = <String>[
+        '-ExecutionPolicy',
+        'Bypass',
+        '-File',
+        testRoot.contentAwareHashPs1.path,
+        ...extraArgs,
+      ];
     } else if (usePowershellOnPosix) {
       executable = 'pwsh';
-      args = <String>[testRoot.contentAwareHashPs1.path];
+      args = <String>[testRoot.contentAwareHashPs1.path, ...extraArgs];
     } else {
       executable = testRoot.contentAwareHashSh.path;
-      args = <String>[];
+      args = <String>[...extraArgs];
     }
     return run(executable, args);
   }
@@ -196,7 +208,7 @@ void main() {
   // Downstream flutter user tests: (origin|upstream)/(main|master), stable, and
   // beta should work.
 
-  test('generates a hash or upstream/master', () async {
+  test('generates a hash for upstream/master', () async {
     initGitRepoWithBlankInitialCommit();
     expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
   });
@@ -235,9 +247,10 @@ void main() {
     expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
   });
 
-  test('generates a hash based on merge-base in local detached HEAD', () {
-    // This test validates the workflow with a detached HEAD, which is common
-    // when working with jj.
+  test('generates a hash from HEAD in detached HEAD without LUCI_CONTEXT', () {
+    // This test validates that detached HEAD (such as in GitHub Actions merge
+    // queue or local jj workflows) hashes HEAD rather than silently hashing
+    // merge-base.
     initGitRepoWithBlankInitialCommit(branch: 'main');
     writeFileAndCommit(testRoot.deps, 'deps changed');
 
@@ -249,7 +262,7 @@ void main() {
       equals('HEAD'),
     );
 
-    expect(runContentAwareHash(), processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'));
+    expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
   });
 
   group('stable branches calculate hash locally', () {
@@ -320,40 +333,52 @@ void main() {
     expect(runContentAwareHash(), processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'));
   });
 
-  group('ignores local engine for', () {
-    test('upstream', () {
+  group('feature branches and explicit git refs', () {
+    test('hashes HEAD for committed changes and ignores uncommitted changes (upstream)', () {
       initGitRepoWithBlankInitialCommit();
+      final String baseSha = gitShaFor('HEAD');
       gitSwitchBranch('engineTest');
       testRoot.deps.writeAsStringSync('deps changed');
       expect(
         runContentAwareHash(),
         processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'),
-        reason: 'content hash from master for non-committed file',
+        reason: 'content hash from HEAD for non-committed file',
       );
 
       writeFileAndCommit(testRoot.deps, 'deps changed');
       expect(
         runContentAwareHash(),
+        processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'),
+        reason: 'content hash from HEAD for committed file',
+      );
+      expect(
+        runContentAwareHash(<String>[baseSha]),
         processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'),
-        reason: 'content hash from master for committed file',
+        reason: 'content hash from explicit merge-base ref argument',
       );
     });
 
-    test('origin', () {
+    test('hashes HEAD for committed changes and ignores uncommitted changes (origin)', () {
       initGitRepoWithBlankInitialCommit(remote: 'origin');
+      final String baseSha = gitShaFor('HEAD');
       gitSwitchBranch('engineTest');
       testRoot.deps.writeAsStringSync('deps changed');
       expect(
         runContentAwareHash(),
         processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'),
-        reason: 'content hash from master for non-committed file',
+        reason: 'content hash from HEAD for non-committed file',
       );
 
       writeFileAndCommit(testRoot.deps, 'deps changed');
       expect(
         runContentAwareHash(),
+        processStdout('63a6c6dc494d9a2fc3e78e8505e878d129429246'),
+        reason: 'content hash from HEAD for committed file',
+      );
+      expect(
+        runContentAwareHash(<String>[baseSha]),
         processStdout('fa69812cddffc076be3aa477a93942cb8d233ccc'),
-        reason: 'content hash from master for committed file',
+        reason: 'content hash from explicit merge-base ref argument',
       );
     });
   });
