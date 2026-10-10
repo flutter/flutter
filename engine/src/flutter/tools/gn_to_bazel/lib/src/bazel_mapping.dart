@@ -10,11 +10,19 @@
 /// converter's coverage grows.
 library;
 
+import 'package:meta/meta.dart';
+
 import 'gn_ast.dart';
 import 'gn_eval.dart';
 
 /// Where the engine's GN root (`//`) lives in the Bazel workspace.
 const String bazelRootPackage = '//engine/src';
+
+/// The main repository's apparent name (`module(name = "flutter")` in
+/// MODULE.bazel), as it must be written from an external repository that
+/// the engine's module extension generates: such repositories see the root
+/// module's repository mapping, in which the module's own name is itself.
+const String mainRepositoryName = '@flutter';
 
 /// The `size` of a generated `cc_test`. GN has no notion of it; the engine's
 /// suites are small unless listed in [testSizes].
@@ -57,13 +65,155 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/dart/third_party/perfetto:libprotozero':
       '//engine/src/flutter/build/bazel/dart_wrap:libprotozero',
   '//third_party/perfetto:libprotozero': '//engine/src/flutter/build/bazel/dart_wrap:libprotozero',
+  // Skia, generated into @skia at fetch time from the engine's GN over the
+  // synced tree (research/07).
+  '//flutter/skia': '@skia',
+  '//flutter/skia:skia': '@skia',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
 /// becomes `@abseil-cpp//absl/x:y`.
 const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//third_party/abseil-cpp/': '@abseil-cpp//',
+  // The engine's GN for Skia (`//flutter/skia/...`) and Skia's own tree
+  // (`//flutter/third_party/skia/...`) both land in @skia.
+  '//flutter/skia/': '@skia//',
+  '//flutter/third_party/skia/': '@skia//',
 };
+
+/// A Bazel label taken apart: `@repo//package:name`.
+@immutable
+final class BazelLabel {
+  const BazelLabel(this.repository, this.package, this.name);
+
+  /// Parses `@repo//pkg:name`, `//pkg:name`, `//pkg` (name = last segment),
+  /// `@repo` (`@repo//:repo`) and `:name` (in [package] of [repository]).
+  factory BazelLabel.parse(String label, {String repository = '', String package = ''}) {
+    var rest = label;
+    var repo = repository;
+    if (rest.startsWith('@')) {
+      final int slashes = rest.indexOf('//');
+      if (slashes < 0) {
+        return BazelLabel(rest, '', rest.substring(1));
+      }
+      repo = rest.substring(0, slashes);
+      rest = rest.substring(slashes);
+    }
+    if (rest.startsWith('//')) {
+      rest = rest.substring(2);
+      final int colon = rest.indexOf(':');
+      if (colon < 0) {
+        return BazelLabel(repo, rest, rest.substring(rest.lastIndexOf('/') + 1));
+      }
+      return BazelLabel(repo, rest.substring(0, colon), rest.substring(colon + 1));
+    }
+    if (rest.startsWith(':')) {
+      return BazelLabel(repo, package, rest.substring(1));
+    }
+    throw ArgumentError.value(label, 'label', 'not a label');
+  }
+
+  /// `@skia` or the empty string for the main repository.
+  final String repository;
+  final String package;
+  final String name;
+
+  /// How to write this label from [package] of [repository]: `:name` within
+  /// the package, `//pkg:name` within the repository, the full form
+  /// elsewhere; the name is dropped when it repeats the package's last
+  /// segment (`@icu` for `@icu//:icu`). From an external repository, the
+  /// main repository is [mainRepositoryName].
+  String relativeTo({required String repository, required String package}) {
+    if (this.repository == repository && this.package == package) {
+      return ':$name';
+    }
+    final String last = this.package.substring(this.package.lastIndexOf('/') + 1);
+    if (this.repository == repository) {
+      return '//${this.package}${name == last && this.package.isNotEmpty ? '' : ':$name'}';
+    }
+    final String repo = this.repository.isEmpty ? mainRepositoryName : this.repository;
+    if (this.package.isEmpty) {
+      return name == repo.substring(1) ? repo : '$repo//:$name';
+    }
+    return '$repo//${this.package}${name == last ? '' : ':$name'}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is BazelLabel &&
+      other.repository == repository &&
+      other.package == package &&
+      other.name == name;
+
+  @override
+  int get hashCode => Object.hash(repository, package, name);
+
+  @override
+  String toString() => '$repository//$package:$name';
+}
+
+/// Where a generated file lives: in the main repository (an engine package
+/// such as `//engine/src/flutter/fml`), or in an external repository made
+/// from a synced tree at fetch time (`@skia`, whose root is the GN directory
+/// `//flutter/third_party/skia`).
+@immutable
+final class OutputLayout {
+  const OutputLayout.main()
+    : repository = '',
+      repositoryGnRoot = '//',
+      pathPrefix = 'engine/src/',
+      packages = const <String>{};
+
+  const OutputLayout.repository(
+    this.repository, {
+    required this.repositoryGnRoot,
+    this.packages = const <String>{''},
+  }) : pathPrefix = '';
+
+  /// `@skia`, or the empty string for the main repository.
+  final String repository;
+
+  /// The GN directory that is the repository's root: files under it are
+  /// repository-relative.
+  final String repositoryGnRoot;
+
+  /// What precedes a GN-root-relative path in the repository: the GN root
+  /// is `engine/src` of the main repository.
+  final String pathPrefix;
+
+  /// The Bazel packages that exist in the repository (repository-relative
+  /// directories; `''` is the root), so that a file in a subpackage is
+  /// labelled through its own package.
+  final Set<String> packages;
+
+  bool get isMain => repository.isEmpty;
+
+  /// The repository-relative path of a GN directory or file under the root,
+  /// or null when it is outside.
+  String? relativePath(String gnPath) {
+    final root = repositoryGnRoot == '//' ? '//' : '$repositoryGnRoot/';
+    if (gnPath == repositoryGnRoot) {
+      return pathPrefix.isEmpty ? '' : pathPrefix.substring(0, pathPrefix.length - 1);
+    }
+    if (!gnPath.startsWith(root)) {
+      return null;
+    }
+    return '$pathPrefix${gnPath.substring(root.length)}';
+  }
+
+  /// The package (from [packages]) that owns a repository-relative path.
+  String owningPackage(String relativePath) {
+    String? best;
+    for (final String package in packages) {
+      if (package.isEmpty || relativePath == package || relativePath.startsWith('$package/')) {
+        if (best == null || package.length > best.length) {
+          best = package;
+        }
+      }
+    }
+    return best ?? '';
+  }
+}
 
 /// Translates a GN label to a Bazel label.
 ///
@@ -74,17 +224,19 @@ String bazelLabel(String gnLabel, {required String package, GnLocation? location
   if (gnLabel.startsWith(':')) {
     return gnLabel;
   }
-  final String? override = labelOverrides[gnLabel];
+  // `modules/skcms` is relative to the directory of the GN file.
+  final absolute = gnLabel.startsWith('//') ? gnLabel : '$package/$gnLabel';
+  final String? override = labelOverrides[absolute];
   if (override != null) {
     return override;
   }
   for (final MapEntry<String, String> entry in labelRepositoryPrefixes.entries) {
-    if (gnLabel.startsWith(entry.key)) {
-      return entry.value + gnLabel.substring(entry.key.length);
+    if (absolute.startsWith(entry.key)) {
+      return entry.value + absolute.substring(entry.key.length);
     }
   }
-  if (gnLabel.startsWith('//flutter/') || gnLabel == '//flutter') {
-    return '$bazelRootPackage${gnLabel.substring(1)}';
+  if (absolute.startsWith('//flutter/') || absolute == '//flutter') {
+    return '$bazelRootPackage${absolute.substring(1)}';
   }
   throw GnError(location ?? GnLocation(package, 0, 0), 'no Bazel home for label $gnLabel');
 }
@@ -133,6 +285,7 @@ const Map<String, String> conditionSettings = <String, String>{
   'is_mac': '@platforms//os:macos',
   'is_qnx': '@platforms//os:qnx',
   'is_win': '@platforms//os:windows',
+  'is_debug': '//engine/src/flutter/build/bazel:unoptimized',
   'slimpeller': '//engine/src/flutter/common:slimpeller_enabled',
 };
 
@@ -159,11 +312,13 @@ const Set<String> knownExternalVariables = <String>{
   'is_android',
   'is_apple',
   'is_clang',
+  'is_component_build',
   'is_debug',
   'is_fuchsia',
   'is_ios',
   'is_linux',
   'is_mac',
+  'is_official_build',
   'is_qnx',
   'is_wasm',
   'is_win',
@@ -214,12 +369,30 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   ),
 };
 
+/// Which imported `.gni` files the converter evaluates (Skia's lists,
+/// arguments and templates; the engine's Skia wrapper files) and which it
+/// takes as known through the tables above (the engine's own configuration
+/// files, whose variables are [knownExternalVariables] and whose templates
+/// are [templateMappings]).
+const ImportPolicy engineImportPolicy = ImportPolicy(
+  evaluatedPrefixes: <String>{'//flutter/third_party/skia/', '//flutter/skia/'},
+  known: <String>{
+    '//flutter/build/dart/dart.gni',
+    '//flutter/common/config.gni',
+    '//flutter/impeller/tools/impeller.gni',
+    '//flutter/shell/config.gni',
+    '//flutter/testing/testing.gni',
+    '//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni',
+  },
+);
+
 /// Which assumptions describe the Linux x64 host build (the values
-/// `tools/gn` gives these arguments for it). Everything not fixed here stays
-/// a select(): the runtime mode and slimpeller in particular, which are Bazel
-/// flags.
+/// `tools/gn` gives these arguments for it, as in `out/host_debug*/args.gn`).
+/// Everything not fixed here stays a select(): `is_debug`, the runtime mode
+/// and slimpeller in particular, which are Bazel flags.
 Assumptions linuxHostAssumptions() {
   return Assumptions(const <String, GnValue>{
+    // //build/config/BUILDCONFIG.gn
     'current_cpu': GnStringValue('x64'),
     'current_os': GnStringValue('linux'),
     'current_toolchain': GnStringValue('//build/toolchain/linux:clang_x64'),
@@ -231,16 +404,21 @@ Assumptions linuxHostAssumptions() {
     'is_android': GnBoolValue(false),
     'is_apple': GnBoolValue(false),
     'is_clang': GnBoolValue(true),
+    'is_component_build': GnBoolValue(false),
     'is_fuchsia': GnBoolValue(false),
     'is_ios': GnBoolValue(false),
     'is_linux': GnBoolValue(true),
     'is_mac': GnBoolValue(false),
+    'is_official_build': GnBoolValue(true),
     'is_qnx': GnBoolValue(false),
     'is_wasm': GnBoolValue(false),
     'is_win': GnBoolValue(false),
+    // //flutter/build/dart/dart.gni
     'dart_src': GnStringValue('//flutter/third_party/dart'),
+    // //flutter/common/config.gni
     'enable_backtrace': GnBoolValue(true),
     'enable_unittests': GnBoolValue(true),
+    // //flutter/shell/config.gni
     'shell_enable_gl': GnBoolValue(true),
     'shell_enable_metal': GnBoolValue(false),
     'shell_enable_software': GnBoolValue(true),
@@ -249,5 +427,23 @@ Assumptions linuxHostAssumptions() {
     'test_enable_metal': GnBoolValue(false),
     'test_enable_software': GnBoolValue(true),
     'test_enable_vulkan': GnBoolValue(true),
+    // Skia's arguments as tools/gn sets them for a Linux host; the rest take
+    // the defaults of //flutter/third_party/skia/gn/skia.gni.
+    'skia_enable_pdf': GnBoolValue(false),
+    'skia_gl_standard': GnStringValue(''),
+    'skia_use_dng_sdk': GnBoolValue(false),
+    'skia_use_expat': GnBoolValue(true),
+    'skia_use_fontconfig': GnBoolValue(false),
+    'skia_use_gl': GnBoolValue(true),
+    'skia_use_icu': GnBoolValue(true),
+    'skia_use_libpng_decode': GnBoolValue(true),
+    'skia_use_libpng_encode': GnBoolValue(true),
+    'skia_use_rust_png_decode': GnBoolValue(false),
+    'skia_use_rust_png_encode': GnBoolValue(false),
+    'skia_use_vma': GnBoolValue(false),
+    'skia_use_vulkan': GnBoolValue(true),
+    'skia_use_wuffs': GnBoolValue(true),
+    'skia_use_x11': GnBoolValue(false),
+    'skia_use_xps': GnBoolValue(false),
   });
 }
