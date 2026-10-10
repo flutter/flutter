@@ -444,6 +444,45 @@ void main() {
     });
   });
 
+  group('option', () {
+    testWidgets('failure case, no listBox as its ancestor', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.option,
+            selected: true,
+            onTap: () {},
+            child: const ExcludeSemantics(child: Text('apple')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(error.message, 'An option must be a descendant of a listBox');
+    });
+
+    testWidgets('Success case with listBox as an ancestor', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.listBox,
+            explicitChildNodes: true,
+            child: Semantics(
+              role: SemanticsRole.option,
+              selected: true,
+              onTap: () {},
+              child: const Text('apple'),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('menuItemCheckbox', () {
     testWidgets('failure case, no checked flag', (WidgetTester tester) async {
       await tester.pumpWidget(
