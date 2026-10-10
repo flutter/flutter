@@ -960,6 +960,74 @@ TEST_F(FlViewGtk4AccessibilityTest, CharacterQueriesRespectTextEnd) {
   }
 }
 
+TEST_F(FlViewGtk4AccessibilityTest, WordAndSentenceQueriesUseTextBoundaries) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing() ||
+      !fl_gtk_runtime_supports_native_accessibility_text()) {
+    GTEST_SKIP() << "Native accessible text requires GTK 4.14+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  flags.is_text_field = true;
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+
+  struct BoundaryCase {
+    const gchar* text;
+    guint offset;
+    FlGtkAccessibleTextGranularity4_14 granularity;
+    guint start;
+    guint end;
+    const gchar* expected;
+  };
+  const BoundaryCase cases[] = {
+      {"Hello world. Next sentence!", 7,
+       FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_WORD, 6, 11, "world"},
+      {"Hello world. Next sentence!", 5,
+       FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_WORD, 0, 5, "Hello"},
+      {"Hello world. Next sentence!", 15,
+       FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_SENTENCE, 13, 27, "Next sentence!"},
+      {"Hello world. Next sentence!", 2,
+       FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_SENTENCE, 0, 12, "Hello world."},
+      {"caf\xC3\xA9 noir", 6, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_WORD, 5, 9,
+       "noir"},
+      {"e\xCC\x81lan noir", 1, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_WORD, 0, 5,
+       "e\xCC\x81lan"},
+      {"", 0, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_WORD, 0, 0, ""},
+      {"", G_MAXUINT, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_SENTENCE, 0, 0, ""},
+  };
+  for (const BoundaryCase& test : cases) {
+    SCOPED_TRACE(testing::Message() << test.text << ":" << test.offset);
+    root.value = test.text;
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    g_autoptr(GtkAccessible) native =
+        fl_view_gtk4_accessibility_ref_native_root_for_testing(
+            view->accessibility_backend);
+    ASSERT_NE(native, nullptr);
+    auto* iface = static_cast<FlGtkAccessibleTextInterface4_14*>(
+        g_type_interface_peek(G_OBJECT_GET_CLASS(native),
+                              fl_gtk_runtime_accessible_text_get_type()));
+    ASSERT_NE(iface, nullptr);
+    guint start = G_MAXUINT;
+    guint end = G_MAXUINT;
+    g_autoptr(GBytes) contents = iface->get_contents_at(
+        native, test.offset, test.granularity, &start, &end);
+    ASSERT_NE(contents, nullptr);
+    EXPECT_EQ(start, test.start);
+    EXPECT_EQ(end, test.end);
+    g_autofree gchar* actual = g_strndup(
+        static_cast<const gchar*>(g_bytes_get_data(contents, nullptr)),
+        g_bytes_get_size(contents));
+    EXPECT_STREQ(actual, test.expected);
+  }
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
