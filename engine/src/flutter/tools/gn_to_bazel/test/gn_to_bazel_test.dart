@@ -49,13 +49,57 @@ Future<String> convert(
   Set<String> externalVariables = knownExternalVariables,
   Set<String> skip = const <String>{},
   String? appendix,
+  OutputLayout layout = const OutputLayout.main(),
 }) async {
   return emitBuildFile(
     await evaluate(gn, assumptions: assumptions, externalVariables: externalVariables, skip: skip),
     gnPackage: gnPackage,
     skipTargets: skip,
     appendix: appendix,
+    layout: layout,
   );
+}
+
+/// A GN source tree in a temporary directory holding [files] (paths relative
+/// to the root, contents), for tests of imports and templates.
+GnSourceTree sourceTree(Map<String, String> files) {
+  final Directory root = Directory.systemTemp.createTempSync('gn_to_bazel_tree');
+  addTearDown(() => root.deleteSync(recursive: true));
+  File(p.join(root.path, '.gn')).writeAsStringSync('buildconfig = "//BUILDCONFIG.gn"\n');
+  for (final MapEntry<String, String> file in files.entries) {
+    File(p.join(root.path, file.key))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(file.value);
+  }
+  return GnSourceTree(root.path, gnBinary: gnBinary);
+}
+
+/// Evaluates [file] of [tree] with imports under `//lib/` evaluated and
+/// `//known/config.gni` taken as known, like the engine's policy.
+GnFileEvaluation evaluateIn(
+  GnSourceTree tree,
+  String file, {
+  Assumptions? assumptions,
+  ImportPolicy importPolicy = const ImportPolicy(
+    evaluatedPrefixes: <String>{'//lib/'},
+    known: <String>{'//known/config.gni'},
+  ),
+}) {
+  return evaluateGnFile(
+    tree.load(tree.resolve(file)),
+    assumptions: assumptions ?? linuxHostAssumptions(),
+    externalVariables: knownExternalVariables,
+    tree: tree,
+    importPolicy: importPolicy,
+  );
+}
+
+/// The unconditional string items of [variable] of [target].
+List<String> strings(GnTarget target, String variable) {
+  return <String>[
+    for (final GnValue value in target.variables[variable]!.unconditionalItems!)
+      (value as GnStringValue).value,
+  ];
 }
 
 /// Matches a [GnError] whose message mentions [line] of the input and
@@ -379,33 +423,32 @@ source_set("x") {
         );
       });
 
-      test('exec_script', () async {
+      test('exec_script and other calls in expressions', () async {
+        // exec_script() as a statement does nothing the converter can use.
         await expectLater(
           evaluate('''
-files = exec_script("list.py", [], "list lines")
+exec_script("check.py", [])
 '''),
-          throwsGnError(line: 1, message: 'exec_script() in an expression is not supported'),
+          throwsGnError(line: 1, message: 'exec_script() is not supported'),
+        );
+        await expectLater(
+          evaluate('''
+source_set("x") {
+  sources = read_file("list.txt", "list lines")
+}
+'''),
+          throwsGnError(line: 2, message: 'read_file() in an expression is not supported'),
         );
       });
 
-      test('templates and forward_variables_from', () async {
-        await expectLater(
-          evaluate('''
-template("my_lib") {
-  source_set(target_name) {
-    forward_variables_from(invoker, "*")
-  }
-}
-'''),
-          throwsGnError(line: 1, message: 'template() is not supported'),
-        );
+      test('forward_variables_from outside a template', () async {
         await expectLater(
           evaluate('''
 source_set("x") {
   forward_variables_from(invoker, [ "sources" ])
 }
 '''),
-          throwsGnError(line: 2, message: 'forward_variables_from() is not supported'),
+          throwsGnError(line: 2, message: 'invoker is not a scope'),
         );
       });
 
@@ -481,6 +524,263 @@ if (slimpeller) {
         expect(
           () => emitBuildFile(evaluation, gnPackage: '//flutter/example'),
           throwsGnError(line: 7, message: 'defined under `slimpeller`'),
+        );
+      });
+    });
+
+    group('imports, arguments and templates', () {
+      test('evaluates imports the policy names and records the known ones', () {
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'lib/lists.gni': '''
+_private = [ "hidden.cc" ]
+example_sources = [
+  "a.cc",
+  "b.cc",
+]
+example_sources += _private
+''',
+          'flutter/example/BUILD.gn': '''
+import("//known/config.gni")
+import("../../lib/lists.gni")
+
+source_set("x") {
+  sources = example_sources
+}
+''',
+        });
+        final GnFileEvaluation evaluation = evaluateIn(tree, '//flutter/example/BUILD.gn');
+        expect(evaluation.imports, <String>['//known/config.gni', '//lib/lists.gni']);
+        expect(strings(evaluation.targets.single, 'sources'), <String>[
+          'a.cc',
+          'b.cc',
+          'hidden.cc',
+        ]);
+        // The depfile names what was read.
+        expect(tree.loadedFiles.map((String f) => tree.gnPath(f)), <String>[
+          '//flutter/example/BUILD.gn',
+          '//lib/lists.gni',
+        ]);
+      });
+
+      test('keeps underscore names private and rejects unknown imports', () {
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'lib/lists.gni': '_private = [ "hidden.cc" ]\n',
+          'a/BUILD.gn': '''
+import("//lib/lists.gni")
+source_set("x") {
+  sources = _private
+}
+''',
+          'b/BUILD.gn': '''
+import("//elsewhere/other.gni")
+''',
+        });
+        expect(
+          () => evaluateIn(tree, '//a/BUILD.gn'),
+          throwsGnError(line: 3, message: 'unknown variable _private'),
+        );
+        expect(
+          () => evaluateIn(tree, '//b/BUILD.gn'),
+          throwsGnError(
+            line: 1,
+            message: 'import of //elsewhere/other.gni is neither evaluated nor known',
+          ),
+        );
+      });
+
+      test('declare_args() defaults yield to the assumptions', () {
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'lib/args.gni': '''
+declare_args() {
+  enable_x = true
+  x_level = 2
+  x_name = "default"
+}
+''',
+          'a/BUILD.gn': '''
+import("//lib/args.gni")
+source_set("x") {
+  sources = [ "a.cc" ]
+  defines = [ "NAME=" + x_name ]
+  if (enable_x) {
+    sources += [ "x.cc" ]
+  }
+  if (x_level >= 2) {
+    defines += [ "LEVEL2" ]
+  }
+}
+''',
+        });
+        final GnTarget defaults = evaluateIn(tree, '//a/BUILD.gn').targets.single;
+        expect(strings(defaults, 'sources'), <String>['a.cc', 'x.cc']);
+        expect(strings(defaults, 'defines'), <String>['NAME=default', 'LEVEL2']);
+
+        final GnTarget overridden = evaluateIn(
+          tree,
+          '//a/BUILD.gn',
+          assumptions: Assumptions(const <String, GnValue>{
+            'enable_x': GnBoolValue(false),
+            'x_level': GnIntValue(1),
+            'x_name': GnStringValue('custom'),
+          }),
+        ).targets.single;
+        expect(strings(overridden, 'sources'), <String>['a.cc']);
+        expect(strings(overridden, 'defines'), <String>['NAME=custom']);
+      });
+
+      test('runs templates as closures with invoker and target_name', () {
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'lib/templates.gni': '''
+_extra_deps = [ "//lib:extra" ]
+
+template("my_lib") {
+  source_set(target_name) {
+    forward_variables_from(invoker, "*", [ "deps" ])
+    deps = _extra_deps
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+    if (defined(invoker.flavour)) {
+      defines = [ "FLAVOUR_" + invoker.flavour ]
+    }
+  }
+  group(target_name + "_group") {
+    deps = [ ":" + target_name ]
+  }
+}
+
+template("my_other_lib") {
+  static_library(target_name) {
+    forward_variables_from(invoker, [ "sources", "missing" ])
+  }
+}
+''',
+          'a/BUILD.gn': '''
+import("//lib/templates.gni")
+
+# About x.
+my_lib("x") {
+  sources = [ "a.cc" ]
+  deps = [ "//lib:dep" ]
+  flavour = "vanilla"
+}
+
+my_other_lib("y") {
+  sources = [ "b.cc" ]
+}
+''',
+        });
+        final GnFileEvaluation evaluation = evaluateIn(tree, '//a/BUILD.gn');
+        expect(evaluation.targets.map((GnTarget t) => t.name), <String>['x', 'x_group', 'y']);
+        final GnTarget x = evaluation.targets[0];
+        expect(x.rule, 'source_set');
+        expect(x.comments, <String>['# About x.']);
+        expect(strings(x, 'sources'), <String>['a.cc']);
+        expect(strings(x, 'deps'), <String>['//lib:extra', '//lib:dep']);
+        expect(strings(x, 'defines'), <String>['FLAVOUR_vanilla']);
+        // Forwarded variables are marked, so that bookkeeping like `flavour`
+        // can be told from what the template wrote.
+        expect(x.variables['flavour']!.forwarded, isTrue);
+        expect(x.variables['deps']!.forwarded, isFalse);
+        final GnTarget group = evaluation.targets[1];
+        expect(group.rule, 'group');
+        expect(group.comments, isEmpty);
+        expect(strings(group, 'deps'), <String>[':x']);
+        final GnTarget y = evaluation.targets[2];
+        expect(y.rule, 'static_library');
+        expect(strings(y, 'sources'), <String>['b.cc']);
+        expect(y.variables.containsKey('missing'), isFalse);
+      });
+
+      test('is strict about templates too', () {
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'lib/templates.gni': '''
+template("clobbering") {
+  source_set(target_name) {
+    sources = [ "own.cc" ]
+    forward_variables_from(invoker, [ "sources" ])
+  }
+}
+''',
+          'a/BUILD.gn': '''
+import("//lib/templates.gni")
+clobbering("x") {
+  sources = [ "a.cc" ]
+}
+''',
+          'lib/targets.gni': '''
+source_set("in_gni") {
+  sources = [ "a.cc" ]
+}
+''',
+          'b/BUILD.gn': 'import("//lib/targets.gni")\n',
+        });
+        expect(
+          () => evaluateIn(tree, '//a/BUILD.gn'),
+          throwsGnError(line: 4, message: 'forward_variables_from() would clobber sources'),
+        );
+        expect(
+          () => evaluateIn(tree, '//b/BUILD.gn'),
+          throwsGnError(line: 1, message: 'target defined in an imported file'),
+        );
+      });
+
+      test('short-circuits && and || and compares integers', () async {
+        final GnFileEvaluation evaluation = await evaluate('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  if (is_android && defined(ndk_api) && ndk_api >= 30) {
+    sources += [ "android.cc" ]
+  }
+  if (is_linux || never_declared) {
+    sources += [ "linux.cc" ]
+  }
+}
+''');
+        expect(strings(evaluation.targets.single, 'sources'), <String>['a.cc', 'linux.cc']);
+      });
+
+      test('reads a variable with conditional appends as conditional items', () async {
+        final GnFileEvaluation evaluation = await evaluate('''
+source_set("x") {
+  _sources = [ "a.cc" ]
+  if (is_win) {
+    _sources += [ "win.cc" ]
+  }
+  if (slimpeller) {
+    _sources += [ "slim.cc" ]
+  }
+  sources = _sources
+}
+''');
+        final List<GnAssignment> sources =
+            evaluation.targets.single.variables['sources']!.assignments;
+        expect(sources, hasLength(2));
+        expect(sources[0].op, '=');
+        expect(sources[0].condition, Condition.always);
+        expect(sources[0].items, <GnValue>[const GnStringValue('a.cc')]);
+        expect(sources[1].op, '+=');
+        expect(sources[1].condition, const ConditionVariable('slimpeller'));
+        expect(sources[1].items, <GnValue>[const GnStringValue('slim.cc')]);
+      });
+
+      test('keeps rebase_path() and exec_script() opaque until they are used', () async {
+        final GnFileEvaluation evaluation = await evaluate('''
+_unused = rebase_path("//somewhere")
+_also_unused = exec_script("list.py", [], "list lines")
+source_set("x") {
+  sources = [ "a.cc" ]
+}
+''');
+        expect(strings(evaluation.targets.single, 'sources'), <String>['a.cc']);
+        await expectLater(
+          convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  include_dirs = [ rebase_path("//somewhere") ]
+}
+'''),
+          throwsGnError(line: 3, message: 'expected a string, got <rebase_path("//somewhere")>'),
         );
       });
     });
@@ -814,6 +1114,242 @@ source_set("x") {
 ''');
       expect(output, contains('copts = FLUTTER_THIRD_PARTY_COPTS,'));
       expect(output, isNot(contains('FLUTTER_LOCAL_DEFINES')));
+    });
+
+    test('keeps language-specific flags apart, drops -std= and repeated files', () async {
+      final String output = await convert('''
+source_set("x") {
+  sources = [
+    "a.c",
+    "b.cc",
+    "shared.h",
+    "shared.h",
+  ]
+  cflags = [
+    "-std=c11",
+    "-Wno-something",
+  ]
+  cflags_c = [ "-Wno-c-only" ]
+  cflags_cc = [
+    "-std=c++17",
+    "-fno-rtti",
+  ]
+}
+''');
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "x",
+    srcs = [
+        "a.c",
+        "b.cc",
+    ],
+    hdrs = ["shared.h"],
+    conlyopts = ["-Wno-c-only"],
+    copts = FLUTTER_COPTS + ["-Wno-something"],
+    cxxopts = ["-fno-rtti"],
+'''),
+      );
+      expect(output, isNot(contains('-std=')));
+    });
+
+    test('an explicit public list becomes hdrs; private configs are inlined', () async {
+      final String output = await convert('''
+config("private_config") {
+  defines = [ "IMPLEMENTATION=1" ]
+  include_dirs = [ "src" ]
+  ldflags = [ "-Wl,--private" ]
+}
+
+config("public_config") {
+  defines = [ "PUBLIC=1" ]
+}
+
+static_library("lib") {
+  public = [ "include/lib.h" ]
+  sources = [
+    "src/lib.cc",
+    "src/lib_priv.h",
+  ]
+  configs += [ ":private_config" ]
+  public_configs = [ ":public_config" ]
+  if (is_debug) {
+    defines = [ "DEBUG_ONLY" ]
+  }
+}
+
+static_library("headers_only_private_config") {
+  sources = [ "src/other.h" ]
+  configs += [ ":private_config" ]
+}
+''');
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "lib",
+    srcs = [
+        "src/lib.cc",
+        "src/lib_priv.h",
+    ],
+    hdrs = ["include/lib.h"],
+    copts = FLUTTER_COPTS,
+    includes = ["src"],
+    linkopts = ["-Wl,--private"],
+    local_defines = FLUTTER_LOCAL_DEFINES + ["IMPLEMENTATION=1"] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": [
+            "DEBUG_ONLY",  # is_debug
+        ],
+        "//conditions:default": [],
+    }),
+    deps = [":public_config"],
+)
+'''),
+      );
+      // A headers-only target has nothing to compile the private defines
+      // into; what remains of the config still applies.
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "headers_only_private_config",
+    hdrs = ["src/other.h"],
+    includes = ["src"],
+    linkopts = ["-Wl,--private"],
+)
+'''),
+      );
+      // The private config is still a target of its own, for anyone who
+      // lists it publicly.
+      expect(
+        output,
+        contains('cc_library(\n    name = "private_config",\n    defines = ["IMPLEMENTATION=1"],'),
+      );
+    });
+
+    test('lays files out by package in an external repository', () async {
+      // The Skia layout: the engine's //flutter/skia/BUILD.gn generates the
+      // root of @skia, whose files are Skia's synced tree.
+      const layout = OutputLayout.repository(
+        '@skia',
+        repositoryGnRoot: '//flutter/third_party/skia',
+        packages: <String>{'', 'modules/skcms'},
+      );
+      final String output = await convert(
+        r'''
+_skia_root = "//flutter/third_party/skia"
+
+source_set("example") {
+  include_dirs = [ _skia_root ]
+  sources = [
+    "$_skia_root/src/a.cc",
+    "//flutter/third_party/skia/src/b.cc",
+    "//flutter/third_party/skia/modules/skcms/c.cc",
+  ]
+  public = [ "$_skia_root/include/a.h" ]
+  deps = [
+    "modules/skcms",
+    "//flutter/third_party/skia/modules/skcms:other",
+    "//flutter/fml",
+    "//flutter/third_party/icu",
+  ]
+  if (is_debug) {
+    defines = [ "DEBUG_ONLY" ]
+  }
+}
+''',
+        gnPackage: '//flutter/skia',
+        layout: layout,
+      );
+      expect(output, contains('# Generated from //flutter/skia/BUILD.gn by gn_to_bazel'));
+      // The engine's own files and settings are reached through the main
+      // repository's name.
+      expect(
+        output,
+        contains(
+          'load("@flutter//engine/src/flutter/build/bazel:copts.bzl", '
+          '"FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")',
+        ),
+      );
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "example",
+    srcs = [
+        "src/a.cc",
+        "src/b.cc",
+        "//modules/skcms:c.cc",
+    ],
+    hdrs = ["include/a.h"],
+    copts = FLUTTER_COPTS,
+    implementation_deps = [
+        "//modules/skcms",
+        "//modules/skcms:other",
+        "@flutter//engine/src/flutter/fml",
+        "@icu",
+    ],
+    includes = ["."],
+    local_defines = FLUTTER_LOCAL_DEFINES + select({
+        "@flutter//engine/src/flutter/build/bazel:unoptimized": [
+            "DEBUG_ONLY",  # is_debug
+        ],
+        "//conditions:default": [],
+    }),
+'''),
+      );
+      await expectLater(
+        convert(
+          '''
+source_set("x") {
+  sources = [ "//flutter/elsewhere/a.cc" ]
+}
+''',
+          gnPackage: '//flutter/skia',
+          layout: layout,
+        ),
+        throwsGnError(line: 2, message: 'is outside the output repository @skia'),
+      );
+    });
+
+    test('implicit deps reach every target that compiles', () async {
+      const layout = OutputLayout.repository(
+        '@skia',
+        repositoryGnRoot: '//flutter/third_party/skia',
+        packages: <String>{'', 'modules/skcms'},
+      );
+      final GnFileEvaluation evaluation = await evaluate('''
+config("headers_only") {
+  defines = [ "X" ]
+}
+source_set("compiled") {
+  sources = [ "//flutter/third_party/skia/modules/skcms/a.cc" ]
+}
+''');
+      final String output = emitBuildFile(
+        evaluation,
+        gnPackage: '//flutter/skia/modules/skcms',
+        layout: layout,
+        implicitDeps: const <String>['@skia//:skia_headers'],
+      );
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "compiled",
+    srcs = ["a.cc"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = ["//:skia_headers"],
+    alwayslink = True,
+)
+'''),
+      );
+      expect(
+        output,
+        contains('cc_library(\n    name = "headers_only",\n    defines = ["X"],\n)\n'),
+      );
     });
 
     test('rejects what it cannot express', () async {
