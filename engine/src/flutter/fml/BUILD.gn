@@ -119,6 +119,11 @@ source_set("fml") {
   if (target_os != "wasm") {
     deps += [ "//flutter/third_party/icu" ]
 
+    # trace_event.h uses the Dart timeline API. The Dart runtime's build
+    # files cannot be loaded for target_os == "wasm", where the header is
+    # found through the source root alone.
+    public_deps += [ "//flutter/third_party/dart/runtime:dart_api" ]
+
     sources += [
       "icu_util.cc",
       "icu_util.h",
