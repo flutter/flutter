@@ -18,16 +18,14 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
-#include "flutter/lib/ui/plugins/callback_cache.h"
-#include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 #include "impeller/base/validation.h"
 #include "impeller/toolkit/android/proc_table.h"
-#include "txt/platform.h"
 
 namespace flutter {
 
@@ -68,7 +66,14 @@ FlutterMain::FlutterMain(const flutter::Settings& settings,
                          flutter::AndroidRenderingAPI android_rendering_api)
     : settings_(settings), android_rendering_api_(android_rendering_api) {}
 
-FlutterMain::~FlutterMain() = default;
+FlutterMain::~FlutterMain() {
+  if (vm_service_uri_callback_ != 0) {
+    FlutterEngineProcTable embedder_api = {};
+    embedder_api.struct_size = sizeof(FlutterEngineProcTable);
+    FlutterEngineGetProcAddresses(&embedder_api);
+    embedder_api.DeregisterVMServiceUriCallback(vm_service_uri_callback_);
+  }
+}
 
 static std::unique_ptr<FlutterMain> g_flutter_main;
 
@@ -145,18 +150,23 @@ void FlutterMain::Init(JNIEnv* env,
   settings.enable_timeline_event_handler = settings.trace_systrace;
 #endif  // FLUTTER_RELEASE
 
+  FlutterEngineProcTable embedder_api = {};
+  embedder_api.struct_size = sizeof(FlutterEngineProcTable);
+  FlutterEngineGetProcAddresses(&embedder_api);
+
   // Restore the callback cache.
   // TODO(chinmaygarde): Route all cache file access through FML and remove this
   // setter.
-  flutter::DartCallbackCache::SetCachePath(
-      fml::jni::JavaStringToString(env, appStoragePath));
+  std::string app_storage_path =
+      fml::jni::JavaStringToString(env, appStoragePath);
+  embedder_api.SetCallbackCachePath(app_storage_path.c_str());
 
   fml::paths::InitializeAndroidCachesPath(
       fml::jni::JavaStringToString(env, engineCachesPath));
 
-  flutter::DartCallbackCache::LoadCacheFromDisk();
+  embedder_api.LoadCallbackCache();
 
-  if (!flutter::DartVM::IsRunningPrecompiledCode() && kernelPath) {
+  if (!embedder_api.RunsAOTCompiledDartCode() && kernelPath) {
     // Check to see if the appropriate kernel files are present and configure
     // settings accordingly.
     auto application_kernel_path =
@@ -229,15 +239,35 @@ void FlutterMain::SetupDartVMServiceUriCallback(JNIEnv* env) {
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
 
-  vm_service_uri_callback_ = DartServiceIsolate::AddServerStatusCallback(
-      [platform_runner, set_uri](const std::string& uri) {
-        platform_runner->PostTask([uri, set_uri] { set_uri(uri); });
-      });
+  vm_service_uri_handler_ = [platform_runner, set_uri](const std::string& uri) {
+    platform_runner->PostTask([uri, set_uri] { set_uri(uri); });
+  };
+
+  FlutterEngineProcTable embedder_api = {};
+  embedder_api.struct_size = sizeof(FlutterEngineProcTable);
+  FlutterEngineGetProcAddresses(&embedder_api);
+
+  FlutterVMServiceUriCallbackConfig config = {};
+  config.struct_size = sizeof(FlutterVMServiceUriCallbackConfig);
+  config.user_data = this;
+  config.callback = [](const char* uri, void* user_data) {
+    if (uri == nullptr || user_data == nullptr) {
+      return;
+    }
+    auto* self = reinterpret_cast<FlutterMain*>(user_data);
+    if (self->vm_service_uri_handler_) {
+      self->vm_service_uri_handler_(std::string(uri));
+    }
+  };
+  embedder_api.RegisterVMServiceUriCallback(&config, &vm_service_uri_callback_);
 }
 
 static void PrefetchDefaultFontManager(JNIEnv* env, jclass jcaller) {
   // Initialize a singleton owned by Skia.
-  txt::GetDefaultFontManager();
+  FlutterEngineProcTable embedder_api = {};
+  embedder_api.struct_size = sizeof(FlutterEngineProcTable);
+  FlutterEngineGetProcAddresses(&embedder_api);
+  embedder_api.PrefetchDefaultFontManager();
 }
 
 bool FlutterMain::Register(JNIEnv* env) {

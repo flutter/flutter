@@ -21,12 +21,12 @@
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/impeller/toolkit/android/proc_table.h"
-#include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 #define ANDROID_SHELL_HOLDER \
   (reinterpret_cast<AndroidShellHolder*>(shell_holder))
@@ -317,15 +317,20 @@ static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
 static jobject LookupCallbackInformation(JNIEnv* env,
                                          /* unused */ jobject,
                                          jlong handle) {
-  auto cbInfo = flutter::DartCallbackCache::GetCallbackInformation(handle);
-  if (cbInfo == nullptr) {
+  FlutterEngineProcTable embedder_api = {};
+  embedder_api.struct_size = sizeof(FlutterEngineProcTable);
+  FlutterEngineGetProcAddresses(&embedder_api);
+
+  FlutterCallbackInformation cb_info = {};
+  cb_info.struct_size = sizeof(FlutterCallbackInformation);
+  if (embedder_api.GetCallbackInformation(handle, &cb_info) != kSuccess) {
     return nullptr;
   }
-  return env->NewObject(g_flutter_callback_info_class->obj(),
-                        g_flutter_callback_info_constructor,
-                        env->NewStringUTF(cbInfo->name.c_str()),
-                        env->NewStringUTF(cbInfo->class_name.c_str()),
-                        env->NewStringUTF(cbInfo->library_path.c_str()));
+  return env->NewObject(
+      g_flutter_callback_info_class->obj(), g_flutter_callback_info_constructor,
+      env->NewStringUTF(cb_info.name ? cb_info.name : ""),
+      env->NewStringUTF(cb_info.class_name ? cb_info.class_name : ""),
+      env->NewStringUTF(cb_info.library_path ? cb_info.library_path : ""));
 }
 
 static void SetViewportMetrics(JNIEnv* env,

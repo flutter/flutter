@@ -7,6 +7,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "flutter/fml/file.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
@@ -17,6 +18,7 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
+#include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
@@ -1883,6 +1885,88 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   constexpr int64_t kTestEngineId = 1;
   holder->Launch(/*apk_asset_provider=*/nullptr, "main", "", {}, kTestEngineId);
   EXPECT_TRUE(runs_aot_queried);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       LookupCallbackInformationRoutesThroughEmbedderApi) {
+  fml::ScopedTemporaryDirectory temp_dir;
+  ASSERT_TRUE(temp_dir.fd().is_valid());
+
+  FlutterEngineProcTable embedder_api = {};
+  embedder_api.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&embedder_api), kSuccess);
+
+  ASSERT_EQ(embedder_api.SetCallbackCachePath(temp_dir.path().c_str()),
+            kSuccess);
+  ASSERT_EQ(embedder_api.LoadCallbackCache(), kSuccess);
+
+  FlutterCallbackInformation cb_in = {};
+  cb_in.struct_size = sizeof(FlutterCallbackInformation);
+  cb_in.name = "myTopLevelCallback";
+  cb_in.class_name = nullptr;
+  cb_in.library_path = "package:my_app/callbacks.dart";
+
+  int64_t handle = 0;
+  ASSERT_EQ(embedder_api.GetCallbackHandle(&cb_in, &handle), kSuccess);
+  EXPECT_NE(handle, 0);
+
+  using LookupCallbackInformationFn =
+      jobject (*)(JNIEnv*, jobject, jlong handle);
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto lookup_fn = reinterpret_cast<LookupCallbackInformationFn>(
+      RegisterNativesAndFind(mock_env, "nativeLookupCallbackInformation"));
+  ASSERT_NE(lookup_fn, nullptr);
+
+  std::vector<std::string> utf_strings;
+  EXPECT_CALL(mock_env, NewStringUTF(_))
+      .WillRepeatedly([&utf_strings](const char* str) {
+        EXPECT_NE(str, nullptr);
+        utf_strings.emplace_back(str);
+        return reinterpret_cast<jstring>(utf_strings.size());
+      });
+  const jobject kFakeCallbackInfoObj = reinterpret_cast<jobject>(777);
+  EXPECT_CALL(mock_env, NewObjectV(_, _, _))
+      .WillOnce(Return(kFakeCallbackInfoObj));
+
+  jobject jcaller = reinterpret_cast<jobject>(123);
+  jobject result = lookup_fn(&mock_env, jcaller, handle);
+  EXPECT_EQ(result, kFakeCallbackInfoObj);
+  EXPECT_THAT(utf_strings, ElementsAre("myTopLevelCallback", "",
+                                       "package:my_app/callbacks.dart"));
+
+  // Unknown handle returns nullptr without constructing a Java object.
+  constexpr jlong kUnknownHandle = -999999;
+  EXPECT_EQ(lookup_fn(&mock_env, jcaller, kUnknownHandle), nullptr);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       FlutterMainPrefetchDefaultFontManagerCallsEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+
+  const jclass kPlaceholderClass = reinterpret_cast<jclass>(100);
+  EXPECT_CALL(mock_env, FindClass(_)).WillRepeatedly(Return(kPlaceholderClass));
+
+  using PrefetchDefaultFontManagerFn = void (*)(JNIEnv*, jclass);
+  PrefetchDefaultFontManagerFn prefetch_fn = nullptr;
+  EXPECT_CALL(mock_env, RegisterNatives(_, _, _))
+      .WillOnce(
+          [&](jclass clazz, const JNINativeMethod* methods, jint nMethods) {
+            for (jint i = 0; i < nMethods; ++i) {
+              if (std::strcmp(methods[i].name,
+                              "nativePrefetchDefaultFontManager") == 0) {
+                prefetch_fn = reinterpret_cast<PrefetchDefaultFontManagerFn>(
+                    methods[i].fnPtr);
+              }
+            }
+            return 0;
+          });
+
+  ASSERT_TRUE(FlutterMain::Register(&mock_env));
+  ASSERT_NE(prefetch_fn, nullptr);
+
+  prefetch_fn(&mock_env, kPlaceholderClass);
 }
 
 }  // namespace testing

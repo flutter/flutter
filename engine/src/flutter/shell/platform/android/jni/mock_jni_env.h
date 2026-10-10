@@ -76,6 +76,9 @@ class MockableJNIEnv : public JNIEnv {
     jni_.GetDirectBufferAddress = WrapGetDirectBufferAddress;
     jni_.PushLocalFrame = WrapPushLocalFrame;
     jni_.PopLocalFrame = WrapPopLocalFrame;
+    jni_.NewObject = WrapNewObject;
+    jni_.NewObjectV = WrapNewObjectV;
+    jni_.NewStringUTF = WrapNewStringUTF;
   }
 
   virtual jobject CallObjectMethodV(jobject, jmethodID, va_list) = 0;
@@ -102,6 +105,8 @@ class MockableJNIEnv : public JNIEnv {
   virtual void* GetDirectBufferAddress(jobject) = 0;
   virtual jint PushLocalFrame(jint) = 0;
   virtual jobject PopLocalFrame(jobject) = 0;
+  virtual jobject NewObjectV(jclass, jmethodID, va_list) = 0;
+  virtual jstring NewStringUTF(const char*) = 0;
 
  private:
   static jobject WrapCallObjectMethod(JNIEnv* env,
@@ -217,6 +222,25 @@ class MockableJNIEnv : public JNIEnv {
   static jobject WrapPopLocalFrame(JNIEnv* env, jobject result) {
     return static_cast<MockableJNIEnv*>(env)->PopLocalFrame(result);
   }
+  static jobject WrapNewObject(JNIEnv* env,
+                               jclass clazz,
+                               jmethodID methodID,
+                               ...) {
+    va_list args;
+    va_start(args, methodID);
+    jobject result = WrapNewObjectV(env, clazz, methodID, args);
+    va_end(args);
+    return result;
+  }
+  static jobject WrapNewObjectV(JNIEnv* env,
+                                jclass clazz,
+                                jmethodID methodID,
+                                va_list args) {
+    return static_cast<MockableJNIEnv*>(env)->NewObjectV(clazz, methodID, args);
+  }
+  static jstring WrapNewStringUTF(JNIEnv* env, const char* utf) {
+    return static_cast<MockableJNIEnv*>(env)->NewStringUTF(utf);
+  }
 
   JNINativeInterface jni_ = {};
 };
@@ -268,6 +292,8 @@ class MockJNIEnv : public MockableJNIEnv {
   MOCK_METHOD(void*, GetDirectBufferAddress, (jobject), (override));
   MOCK_METHOD(jint, PushLocalFrame, (jint), (override));
   MOCK_METHOD(jobject, PopLocalFrame, (jobject), (override));
+  MOCK_METHOD(jobject, NewObjectV, (jclass, jmethodID, va_list), (override));
+  MOCK_METHOD(jstring, NewStringUTF, (const char*), (override));
 };
 
 }  // namespace flutter
