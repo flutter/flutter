@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
+import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
@@ -837,7 +838,12 @@ class BrowserManager {
 
     unawaited(
       _browser.onExit.then((int exitCode) {
-        if (!_closed) {
+        if (_unexpectedDisconnect) {
+          _logger.printError(
+            'Chrome browser process (PID: ${_browser.pid}) '
+            'exited with code $exitCode after disconnecting from the test host.',
+          );
+        } else if (!_closed) {
           _logger.printError(
             'Chrome browser process (PID: ${_browser.pid}) '
             'exited unexpectedly with code $exitCode during test execution.',
@@ -885,8 +891,19 @@ class BrowserManager {
     );
 
     _environment = _loadBrowserEnvironment();
-    _channel.stream.listen(_onMessage, onDone: close);
+    _channel.stream.listen(_onMessage, onDone: _onDisconnect);
   }
+
+  /// Creates a manager for an already-running [browser] connected over
+  /// [webSocket].
+  @visibleForTesting
+  factory BrowserManager.test(
+    Chromium browser,
+    Runtime runtime,
+    WebSocketChannel webSocket,
+    Logger logger,
+    SystemClock systemClock,
+  ) = BrowserManager._;
 
   /// The browser instance that this is connected to via [_channel].
   final Chromium _browser;
@@ -910,6 +927,9 @@ class BrowserManager {
 
   /// Whether the channel to the browser has closed.
   var _closed = false;
+
+  /// Whether the browser disconnected before this manager started closing it.
+  var _unexpectedDisconnect = false;
 
   /// The completer for [_BrowserEnvironment.displayPause].
   ///
@@ -1226,6 +1246,25 @@ class BrowserManager {
     report.write('[flutter_tools] ---------------------------------------------');
 
     return report.toString();
+  }
+
+  /// Handles the browser closing its end of the channel.
+  ///
+  /// Report an unexpected disconnect before cleanup starts. Keep reporting the
+  /// process exit code after cleanup starts, because the exit notification can
+  /// arrive after the connection closes. This does not imply that the process
+  /// crashed: cleanup may have closed a browser whose page or renderer died.
+  Future<void> _onDisconnect() {
+    if (!_closed) {
+      _unexpectedDisconnect = true;
+      _logger.printError(
+        'The ${_runtime.name} browser closed its connection to the test host '
+        'unexpectedly, so any unfinished test suites are reported as '
+        '"did not complete". The browser process, page, or renderer may have '
+        'crashed or been terminated, for example after running out of memory.',
+      );
+    }
+    return close();
   }
 
   /// Closes the manager and releases any resources it owns, including closing
