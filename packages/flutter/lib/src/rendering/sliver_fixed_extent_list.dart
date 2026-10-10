@@ -594,6 +594,9 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   ItemExtentBuilder get itemExtentBuilder => _itemExtentBuilder;
   ItemExtentBuilder _itemExtentBuilder;
   set itemExtentBuilder(ItemExtentBuilder value) {
+    if (_itemExtentBuilder == value) {
+      return;
+    }
     _itemExtentBuilder = value;
     _clearItemExtentCache();
     markNeedsLayout();
@@ -630,20 +633,6 @@ class RenderSliverVariedExtentList extends RenderSliverFixedExtentBoxAdaptor {
     }
 
     super.performLayout();
-
-    // Invoke the builder at least once per layout for the first visible index
-    // so that it receives the latest SliverLayoutDimensions (including scrollOffset).
-    // We do this after super.performLayout() so that _currentLayoutDimensions is updated.
-    final int? childCount = childManager.estimatedChildCount;
-    if (childCount == null || childCount > 0) {
-      final int firstIndex = math.max(
-        0,
-        _findChildIndexForScrollOffset(constraints.scrollOffset, findMax: false),
-      );
-      if (childCount == null || firstIndex < childCount) {
-        itemExtentBuilder(firstIndex, layoutDimensions);
-      }
-    }
   }
 
   @override
