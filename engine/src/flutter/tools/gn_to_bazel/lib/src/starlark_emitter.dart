@@ -76,6 +76,19 @@ final class _ListAttribute {
       conditional.putIfAbsent(condition, () => <_Item>[]).add(item);
     }
   }
+
+  /// Adds [item] unless the same text is already there under [condition]
+  /// (two GN labels can translate to one Bazel label, which Bazel rejects as
+  /// a duplicate).
+  void addUnique(Condition condition, _Item item) {
+    final List<_Item> bucket = condition == Condition.always
+        ? always
+        : conditional.putIfAbsent(condition, () => <_Item>[]);
+    if (bucket.any((_Item existing) => existing.text == item.text)) {
+      return;
+    }
+    bucket.add(item);
+  }
 }
 
 /// A generated rule.
@@ -94,14 +107,17 @@ final class _Rule {
 /// Converts the targets of one GN file into the text of a `BUILD.bazel`.
 ///
 /// [gnPackage] is the GN directory of the file (`//flutter/fml`). Targets
-/// named in [skipTargets] are left out (with a note).
+/// named in [skipTargets] are left out (with a note), as are the ones the
+/// evaluation already skipped. [appendix] is Starlark to append verbatim:
+/// what the GN file has no way to say (an `exports_files`, say).
 String emitBuildFile(
   GnFileEvaluation evaluation, {
   required String gnPackage,
   Set<String> skipTargets = const <String>{},
+  String? appendix,
 }) {
   final emitter = _Emitter(gnPackage);
-  final skipped = <String>[];
+  final skipped = <String>[...evaluation.skipped];
   for (final GnTarget target in evaluation.targets) {
     if (skipTargets.contains(target.name)) {
       skipped.add(target.name);
@@ -109,7 +125,7 @@ String emitBuildFile(
     }
     emitter.convert(target);
   }
-  return emitter.render(evaluation.file, skipped);
+  return emitter.render(evaluation.file, skipped, appendix: appendix);
 }
 
 final class _Emitter {
@@ -214,20 +230,9 @@ final class _Emitter {
         case 'public_configs':
           chromiumCode = _configsInto(rule, variable, target, chromiumCode: chromiumCode);
         case 'libs':
-          _forEachItem(variable, into: rule.list('linkopts'), (_Element e) {
-            final String lib = _string(e);
-            if (lib.contains('/')) {
-              throw GnError(e.assignment.location, 'library path $lib in libs is not supported');
-            }
-            rule.list('linkopts').add(e.condition, _item('-l$lib', e));
-          });
         case 'frameworks':
-          _forEachItem(variable, into: rule.list('linkopts'), (_Element e) {
-            final String framework = _string(e).replaceFirst(RegExp(r'\.framework$'), '');
-            rule.list('linkopts')
-              ..add(e.condition, _item('-framework', e, note: false))
-              ..add(e.condition, _Item(framework, comment: e.note));
-          });
+        case 'ldflags':
+          _linkFlagsInto(rule, variable);
         case 'cflags':
         case 'cflags_c':
         case 'cflags_cc':
@@ -241,8 +246,6 @@ final class _Emitter {
               conditionalCopts.putIfAbsent(e.condition, () => <_Item>[]).add(item);
             }
           });
-        case 'ldflags':
-          _stringsInto(rule.list('linkopts'), variable);
         case 'testonly':
           // cc_test is testonly by definition.
           if (kind != 'cc_test') {
@@ -292,14 +295,21 @@ final class _Emitter {
             .always
             .insert(0, const _Item('FLUTTER_LOCAL_DEFINES', quoted: false));
       }
-    } else if (!library) {
-      throw GnError(target.location, '${target.name} has no sources');
+      // GN links every object of a source_set into the dependent binary,
+      // whereas a static_library is an archive the linker picks from. Code
+      // that registers itself from static initializers (gtest suites in a
+      // helper source_set, for one) relies on the former.
+      if (target.rule == 'source_set') {
+        rule.scalars['alwayslink'] = 'True';
+      }
     }
     rules.add(rule);
   }
 
-  /// config("x") becomes a header-only library carrying the defines and
-  /// include directories, which dependents list in deps.
+  /// config("x") becomes a header-only library carrying the defines, include
+  /// directories and link flags, which dependents list in deps; Bazel
+  /// propagates those the way GN propagates a config. Compiler flags cannot
+  /// travel that way.
   void _convertConfig(GnTarget target) {
     _use('@rules_cc//cc:defs.bzl', 'cc_library');
     final rule = _Rule('cc_library', target.name, target.comments);
@@ -309,6 +319,10 @@ final class _Emitter {
           _stringsInto(rule.list('defines'), variable);
         case 'include_dirs':
           _stringsInto(rule.list('includes'), variable);
+        case 'libs':
+        case 'frameworks':
+        case 'ldflags':
+          _linkFlagsInto(rule, variable);
         case 'visibility':
           // Local configs are only ever used by their own package.
           break;
@@ -320,6 +334,30 @@ final class _Emitter {
       }
     }
     rules.add(rule);
+  }
+
+  /// `libs`, `frameworks` and `ldflags` all become `linkopts`.
+  void _linkFlagsInto(_Rule rule, GnVariable variable) {
+    final _ListAttribute linkopts = rule.list('linkopts');
+    switch (variable.name) {
+      case 'libs':
+        _forEachItem(variable, into: linkopts, (_Element e) {
+          final String lib = _string(e);
+          if (lib.contains('/')) {
+            throw GnError(e.assignment.location, 'library path $lib in libs is not supported');
+          }
+          linkopts.add(e.condition, _item('-l$lib', e));
+        });
+      case 'frameworks':
+        _forEachItem(variable, into: linkopts, (_Element e) {
+          final String framework = _string(e).replaceFirst(RegExp(r'\.framework$'), '');
+          linkopts
+            ..add(e.condition, _item('-framework', e, note: false))
+            ..add(e.condition, _Item(framework, comment: e.note));
+        });
+      case 'ldflags':
+        _stringsInto(linkopts, variable);
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -431,7 +469,7 @@ final class _Emitter {
         package: gnPackage,
         location: e.assignment.location,
       );
-      attribute.add(e.condition, _item(_localLabel(label), e));
+      attribute.addUnique(e.condition, _item(_localLabel(label), e));
     });
   }
 
@@ -490,7 +528,7 @@ final class _Emitter {
             if (assignment.op == '-=') {
               throw GnError(assignment.location, 'removing config $config is not supported');
             }
-            rule.list('deps').add(assignment.condition, _item(label, element));
+            rule.list('deps').addUnique(assignment.condition, _item(label, element));
           case ConfigImplied():
             break;
         }
@@ -522,7 +560,7 @@ final class _Emitter {
   // Rendering
   // -------------------------------------------------------------------------
 
-  String render(String gnFile, List<String> skipped) {
+  String render(String gnFile, List<String> skipped, {String? appendix}) {
     final out = StringBuffer()
       ..write(_licenseHeader)
       ..writeln()
@@ -543,6 +581,15 @@ final class _Emitter {
       out.writeln();
       _renderRule(out, rule);
     }
+    if (appendix != null) {
+      out
+        ..writeln()
+        ..writeln("# What GN has no words for; maintained in the converter's manifest")
+        ..writeln('# (tools/gn_to_bazel/lib/src/manifest.dart).')
+        ..writeln()
+        ..write(appendix.trim())
+        ..writeln();
+    }
     return out.toString();
   }
 
@@ -556,7 +603,26 @@ final class _Emitter {
     return a.compareTo(b);
   }
 
-  static const List<String> _leadingAttributes = <String>['name', 'size', 'srcs', 'hdrs'];
+  static const List<String> _leadingAttributes = <String>[
+    'name',
+    'size',
+    'testonly',
+    'srcs',
+    'hdrs',
+  ];
+  static const List<String> _trailingAttributes = <String>['deps', 'alwayslink'];
+
+  static int _attributeRank(String attribute) {
+    final int leading = _leadingAttributes.indexOf(attribute);
+    if (leading >= 0) {
+      return leading;
+    }
+    final int trailing = _trailingAttributes.indexOf(attribute);
+    if (trailing >= 0) {
+      return _leadingAttributes.length + 1 + trailing;
+    }
+    return _leadingAttributes.length;
+  }
 
   void _renderRule(StringBuffer out, _Rule rule) {
     rule.comments.forEach(out.writeln);
@@ -564,17 +630,8 @@ final class _Emitter {
     out.writeln('    name = "${rule.name}",');
     final List<String> attributes = <String>{...rule.lists.keys, ...rule.scalars.keys}.toList()
       ..sort((String a, String b) {
-        final int ia = _leadingAttributes.indexOf(a);
-        final int ib = _leadingAttributes.indexOf(b);
-        if (ia >= 0 || ib >= 0) {
-          return (ia < 0 ? _leadingAttributes.length : ia).compareTo(
-            ib < 0 ? _leadingAttributes.length : ib,
-          );
-        }
-        if ((a == 'deps') != (b == 'deps')) {
-          return a == 'deps' ? 1 : -1;
-        }
-        return a.compareTo(b);
+        final int byRank = _attributeRank(a).compareTo(_attributeRank(b));
+        return byRank != 0 ? byRank : a.compareTo(b);
       });
     for (final attribute in attributes) {
       final String? scalar = rule.scalars[attribute];
@@ -695,13 +752,16 @@ final class _Emitter {
     var negated = false;
     switch (condition) {
       case ConditionVariable():
+      case ConditionComparison(equals: true):
         settings.add(_setting(condition, rule));
-      case ConditionNot(operand: final ConditionVariable operand):
+      case ConditionComparison(equals: false):
+        settings.add(_setting(condition.negated, rule));
+        negated = true;
+      case ConditionNot(:final Condition operand):
         settings.add(_setting(operand, rule));
         negated = true;
-      case ConditionOr(:final List<Condition> terms)
-          when terms.every((Condition t) => t is ConditionVariable):
-        settings.addAll(terms.map((Condition t) => _setting(t as ConditionVariable, rule)));
+      case ConditionOr(:final List<Condition> terms):
+        settings.addAll(terms.map((Condition t) => _setting(t, rule)));
       default:
         throw GnError(
           GnLocation('$gnPackage/BUILD.gn', 0, 0),
@@ -718,12 +778,19 @@ final class _Emitter {
     return out.toString();
   }
 
-  String _setting(ConditionVariable variable, _Rule rule) {
-    final String? setting = conditionSettings[variable.name];
+  /// The config_setting that is true exactly when [condition] (a variable or
+  /// an equality) holds.
+  String _setting(Condition condition, _Rule rule) {
+    final String? setting = switch (condition) {
+      ConditionVariable(:final String name) => conditionSettings[name],
+      ConditionComparison(:final String name, equals: true, :final String value) =>
+        comparisonSettings[name]?[value],
+      _ => null,
+    };
     if (setting == null) {
       throw GnError(
         GnLocation('$gnPackage/BUILD.gn', 0, 0),
-        'no config_setting for `${variable.name}` (used by ${rule.kind} ${rule.name})',
+        'no config_setting for `$condition` (used by ${rule.kind} ${rule.name})',
       );
     }
     return setting;
