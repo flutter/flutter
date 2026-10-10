@@ -21,7 +21,6 @@ import com.flutter.gradle.tasks.ValidateCompileSdkVersionTask
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 import org.gradle.api.logging.Logger
 import org.gradle.kotlin.dsl.register
@@ -32,7 +31,6 @@ import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Properties
 import com.android.build.api.dsl.BuildType as DslBuildType
-import com.android.builder.model.BuildType as ModelBuildType
 
 /**
  * A collection of static utility functions used by the Flutter Gradle Plugin.
@@ -329,14 +327,6 @@ object FlutterPluginUtils {
         project.findProperty(PROP_FORCE_VERSION_CODE_IGNORING_ABI)?.toString()?.toBoolean() ?: false
 
     /**
-     * Delegates to [shouldConfigureFlutterTask(Project, String)] using [assembleTask]'s name.
-     */
-    internal fun shouldConfigureFlutterTask(
-        project: Project,
-        assembleTask: Task
-    ): Boolean = shouldConfigureFlutterTask(project, assembleTask.name)
-
-    /**
      * Whether Flutter's tasks should be configured for the variant that [assembleTaskName]
      * assembles.
      *
@@ -350,7 +340,7 @@ object FlutterPluginUtils {
      * tried on AGP/Gradle 7.2.0/7.5 and still caused build failures.
      *
      * Callers in [FlutterPlugin][com.flutter.gradle.FlutterPlugin] gate the compile task and
-     * everything that depends on it.
+     * everything that depends on it, for application variants only.
      *
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
      *  That issue records the original rationale verbatim, the Gradle invocations that were
@@ -467,15 +457,6 @@ object FlutterPluginUtils {
             project.dependencies.add(configuration, dependency, config)
         }
     }
-
-    /**
-     * Returns a Flutter build mode suitable for the specified Android buildType.
-     *
-     * @return "debug", "profile", or "release" (fall-back).
-     */
-    @JvmStatic
-    @JvmName("buildModeFor")
-    internal fun buildModeFor(buildType: ModelBuildType): String = buildModeFor(buildType.name, buildType.isDebuggable)
 
     /**
      * Returns a Flutter build mode for a build type identified by [buildTypeName] and its

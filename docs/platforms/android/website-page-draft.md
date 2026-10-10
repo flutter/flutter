@@ -194,28 +194,27 @@ aliases:
 
 ### Add-to-app (Flutter module in a host app)
 
-- Flutter no longer looks up or configures the host `:app` project from the
-  module. The dependency between your host's asset merging and Flutter's asset
-  copy is expressed through the Variant API instead of an explicit
-  `merge<Variant>Assets.dependsOn(...)` edge. Build scripts that reference
-  Flutter's `copyFlutterAssets<Variant>` tasks by name or type will break.
-  For example, `tasks.getByPath(":flutter:copyFlutterAssetsDebug")` will crash
-  your build with a `Task with path ... not found` error because the
-  tasks are now registered lazily and are no longer of type
-  `org.gradle.api.tasks.Copy`.
-- `flutter.hostAppProjectName` in `gradle.properties` is now a no-op. Flutter
-  prints a deprecation warning naming the removal milestone. It was only used
-  for the host-project lookup, which no longer exists.
-- Flutter maps host build types to Flutter build modes using the public
-  "debuggable" flag: `profile` stays `profile`, debuggable build types map to
-  `debug`, everything else maps to `release`. If your host has no `profile`
-  build type, add `matchingFallbacks`:
+- The Flutter module adds its assets and native libraries to its own variants
+  through the Variant API. Your host app consumes them like the assets of any
+  Android library. Flutter does not look up or configure the host `:app`
+  project, and adds no `merge<Variant>Assets.dependsOn(...)` edge to it.
+- `flutter.hostAppProjectName` in `gradle.properties` has no effect. If it is
+  set, Flutter prints a warning that says so. You can remove it.
+- The Flutter module's `copyFlutterAssets<Variant>` tasks are of type
+  `CopyFlutterAssetsTask`, not `org.gradle.api.tasks.Copy`. Build scripts that
+  look them up with the `Copy` type fail.
+- The Flutter build mode comes from the module variant your host build
+  consumes: the module's `debug` variant builds debug Flutter artifacts,
+  `profile` builds profile, and `release` builds release. Host `debug`,
+  `profile` and `release` build types consume the module variant of the same
+  name. For a custom host build type, AGP picks the module variant through the
+  build type's `matchingFallbacks`, so list the module build type you want
+  first:
 
   ```kotlin
   create("staging") {
       initWith(getByName("debug"))
-      isDebuggable = true            // staging gets debug Flutter artifacts
-      matchingFallbacks += listOf("debug", "release")
+      matchingFallbacks += listOf("debug", "release") // staging gets debug Flutter artifacts
   }
   ```
 
@@ -232,10 +231,14 @@ aliases:
 
 ### `flutter build aar`
 
-Variant enumeration for AAR builds now uses the public `components` API. If
-your module's build script declares `singleVariant(...)` publishing itself,
-Flutter detects the overlap and reports it with an actionable error instead of
-failing inside AGP.
+- If your module's or a plugin's build file declares
+  `android.publishing.singleVariant(...)` for a variant, Flutter uses that
+  declaration for that variant and declares publishing (with sources and javadoc
+  jars) for the other variants.
+- The variant you build must exist in the module and in each Android plugin
+  that it uses. If it doesn't, the build fails. Build a variant that all of them
+  declare: pass `--flavor` for a module with product flavors, and use plugins
+  that declare the same product flavors as the module.
 
 ## Escape hatch (temporary)
 
