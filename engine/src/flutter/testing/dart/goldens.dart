@@ -63,21 +63,96 @@ class ImageComparer {
     });
   }
 
-  Future<bool> fuzzyCompareImages(Image golden, Image testImage) async {
+  /// Compares two images pixel by pixel.
+  ///
+  /// If [maxColorDelta] is greater than 0, per-channel differences less than or
+  /// equal to [maxColorDelta] are considered identical.
+  ///
+  /// If [maxDifferentPixelsRate] is greater than 0.0, the comparison passes if
+  /// the ratio of different pixels to total pixels does not exceed this value.
+  Future<bool> fuzzyCompareImages(
+    Image golden,
+    Image testImage, {
+    int maxColorDelta = 0,
+    double maxDifferentPixelsRate = 0.0,
+  }) async {
     if (golden.width != testImage.width || golden.height != testImage.height) {
       return false;
     }
-    int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * golden.width) * 4);
-    final ByteData goldenData = (await golden.toByteData())!;
-    final ByteData testImageData = (await testImage.toByteData())!;
-    for (var y = 0; y < golden.height; y++) {
-      for (var x = 0; x < golden.width; x++) {
-        if (getPixel(goldenData, x, y) != getPixel(testImageData, x, y)) {
+    final ByteData? goldenData = await golden.toByteData();
+    final ByteData? testImageData = await testImage.toByteData();
+    if (goldenData == null || testImageData == null) {
+      return false;
+    }
+
+    final int totalPixels = golden.width * golden.height;
+
+    // When no tolerance thresholds are specified, compare full 32-bit RGBA pixel
+    // values directly in a single pass with early exit on first mismatch.
+    if (maxColorDelta == 0 && maxDifferentPixelsRate == 0.0) {
+      final Uint32List goldenUint32 = goldenData.buffer.asUint32List(
+        goldenData.offsetInBytes,
+        totalPixels,
+      );
+      final Uint32List testUint32 = testImageData.buffer.asUint32List(
+        testImageData.offsetInBytes,
+        totalPixels,
+      );
+      for (var i = 0; i < totalPixels; i++) {
+        if (goldenUint32[i] != testUint32[i]) {
           return false;
         }
       }
+      return true;
+    }
+
+    // When tolerance thresholds are configured, inspect each pixel's color
+    // channels and count those exceeding [maxColorDelta] to determine whether
+    // the proportion of different pixels is within [maxDifferentPixelsRate].
+    var differentPixels = 0;
+    var maxObservedDelta = 0;
+
+    final Uint8List goldenBytes = goldenData.buffer.asUint8List(
+      goldenData.offsetInBytes,
+      totalPixels * 4,
+    );
+    final Uint8List testBytes = testImageData.buffer.asUint8List(
+      testImageData.offsetInBytes,
+      totalPixels * 4,
+    );
+
+    for (var i = 0; i < totalPixels; i++) {
+      final int pixelDelta = _maxChannelDelta(goldenBytes, testBytes, i * 4);
+      if (pixelDelta > maxObservedDelta) {
+        maxObservedDelta = pixelDelta;
+      }
+      if (pixelDelta > maxColorDelta) {
+        differentPixels++;
+      }
+    }
+
+    final double diffRate = differentPixels / totalPixels;
+    if (diffRate > maxDifferentPixelsRate) {
+      print(
+        'fuzzyCompareImages failed: '
+        'maxObservedDelta=$maxObservedDelta (threshold=$maxColorDelta), '
+        'differentPixels=$differentPixels/$totalPixels '
+        '(${(diffRate * 100).toStringAsFixed(3)}%, maxAllowed=${(maxDifferentPixelsRate * 100).toStringAsFixed(3)}%)',
+      );
+      return false;
     }
     return true;
+  }
+
+  static int _maxChannelDelta(Uint8List a, Uint8List b, int offset) {
+    int maxDelta = (a[offset] - b[offset]).abs();
+    for (var c = 1; c < 4; c++) {
+      final int diff = (a[offset + c] - b[offset + c]).abs();
+      if (diff > maxDelta) {
+        maxDelta = diff;
+      }
+    }
+    return maxDelta;
   }
 }
 
