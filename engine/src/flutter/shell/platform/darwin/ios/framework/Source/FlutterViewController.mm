@@ -661,19 +661,37 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 - (BOOL)stateIsActive {
   // [UIApplication sharedApplication API is not available for app extension.
   UIApplication* flutterApplication = FlutterSharedApplication.application;
-  BOOL isActive = flutterApplication
-                      ? [self isApplicationStateMatching:UIApplicationStateActive
-                                         withApplication:flutterApplication]
-                      : [self isSceneStateMatching:UISceneActivationStateForegroundActive];
-  return isActive;
+
+  if (flutterApplication) {
+    return [self isApplicationStateMatching:UIApplicationStateActive
+                            withApplication:flutterApplication];
+  }
+  return [self isSceneStateMatching:UISceneActivationStateForegroundActive];
+}
+
+- (BOOL)stateIsForeground {
+  // [UIApplication sharedApplication API is not available for app extension.
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+
+  if (flutterApplication) {
+    return [self isApplicationStateMatching:UIApplicationStateActive
+                            withApplication:flutterApplication] ||
+           [self isApplicationStateMatching:UIApplicationStateInactive
+                            withApplication:flutterApplication];
+  }
+  return [self isSceneStateMatching:UISceneActivationStateForegroundActive] ||
+         [self isSceneStateMatching:UISceneActivationStateForegroundInactive];
 }
 
 - (BOOL)stateIsBackground {
   // [UIApplication sharedApplication API is not available for app extension.
   UIApplication* flutterApplication = FlutterSharedApplication.application;
-  return flutterApplication ? [self isApplicationStateMatching:UIApplicationStateBackground
-                                               withApplication:flutterApplication]
-                            : [self isSceneStateMatching:UISceneActivationStateBackground];
+
+  if (flutterApplication) {
+    return [self isApplicationStateMatching:UIApplicationStateBackground
+                            withApplication:flutterApplication];
+  }
+  return [self isSceneStateMatching:UISceneActivationStateBackground];
 }
 
 - (BOOL)shouldHandleSceneNotification:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
@@ -727,6 +745,18 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
     self.platformViewsController.flutterView = nil;
     self.platformViewsController.flutterViewController = nil;
   }
+}
+
+// Creates the surface if the viewport is sized.
+//
+// Callers must guarantee GPU access is permitted since UIApplication reports
+// UIApplicationStateBackground while willEnterForeground is delivered, so the application state
+// can't be enforced here.
+- (void)createSurfaceIfReady {
+  if (!self.engine || !_viewportMetrics.physical_width) {
+    return;
+  }
+  [self surfaceUpdated:YES];
 }
 
 #pragma mark - UIViewController lifecycle notifications
@@ -815,9 +845,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
     // Only recreate surface on subsequent appearances when viewport metrics are known.
     // First time surface creation is done on viewDidLayoutSubviews.
-    if (_viewportMetrics.physical_width) {
-      [self surfaceUpdated:YES];
-    }
+    [self createSurfaceIfReady];
     [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.inactive"];
     [self.engine.restorationPlugin markRestorationComplete];
   }
@@ -1021,9 +1049,6 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
 - (void)appOrSceneBecameActive {
   self.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground = NO;
-  if (_viewportMetrics.physical_width) {
-    [self surfaceUpdated:YES];
-  }
   [self performSelector:@selector(goToApplicationLifecycle:)
              withObject:@"AppLifecycleState.resumed"
              afterDelay:0.0f];
@@ -1048,6 +1073,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (void)appOrSceneWillEnterForeground {
+  [self createSurfaceIfReady];
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
 }
 
@@ -1319,13 +1345,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self setViewportMetricsPaddings];
   [self updateViewportMetricsIfNeeded];
 
-  // There is no guarantee that UIKit will layout subviews when the application/scene is active.
-  // Creating the surface when inactive will cause GPU accesses from the background, so only
-  // create the surface when the application/scene is actually active.
+  // There is no guarantee that UIKit will layout subviews when the application/scene is in the
+  // foreground. Creating the surface when backgrounded will cause app termination, so in that
+  // scenario, skip it here, and leave surface creation to appOrSceneWillEnterForeground.
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
-  if (firstViewBoundsUpdate && self.stateIsActive && self.engine) {
-    [self surfaceUpdated:YES];
+  if (firstViewBoundsUpdate && self.stateIsForeground) {
+    [self createSurfaceIfReady];
   }
 }
 
