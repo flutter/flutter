@@ -122,6 +122,91 @@ cc_library(
     '//flutter/third_party/skia/src/partition_alloc',
     implicitDeps: <String>['@skia//:skia_headers'],
   ),
+  // Skia's codec and font dependencies: small GN files (in the synced tree,
+  // in the engine's secondary source tree, or in the engine itself over a
+  // synced `src/`), each over a tree whose headers GN never declares.
+  ConvertedFile(
+    '//flutter/third_party/libpng',
+    implicitDeps: <String>['@libpng//:libpng_headers'],
+    appendix: '''
+cc_library(
+    name = "libpng_headers",
+    hdrs = glob(["**/*.h"]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/libwebp',
+    implicitDeps: <String>['@libwebp//:libwebp_headers'],
+    appendix: '''
+cc_library(
+    name = "libwebp_headers",
+    hdrs = glob(["**/*.h"]),
+    # sharpyuv_cpu.c includes the CPU detection source.
+    textual_hdrs = ["src/dsp/cpu.c"],
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/wuffs',
+    implicitDeps: <String>['@wuffs//:wuffs_headers'],
+    // Wuffs is a single-file library: its .c is the header its users
+    // include, and what the `wuffs` target compiles with WUFFS_IMPLEMENTATION.
+    appendix: '''
+cc_library(
+    name = "wuffs_headers",
+    textual_hdrs = ["release/c/wuffs-v0.3.c"],
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/expat',
+    implicitDeps: <String>['@expat//:expat_headers'],
+    // expat_config comes from the secondary source tree, mirrored into the
+    // repository beside the GN file; xmltok.c includes two .c files.
+    appendix: '''
+cc_library(
+    name = "expat_headers",
+    hdrs = glob([
+        "expat/lib/*.h",
+        "expat_config/*.h",
+    ]),
+    textual_hdrs = [
+        "expat/lib/xmltok_impl.c",
+        "expat/lib/xmltok_ns.c",
+    ],
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/freetype2',
+    implicitDeps: <String>['@freetype2//:freetype2_headers'],
+    // FreeType's amalgamated sources (ftbase.c, sfnt.c, ...) include the
+    // other .c files of their directories.
+    appendix: '''
+cc_library(
+    name = "freetype2_headers",
+    hdrs = glob(["include/**/*.h"]),
+    textual_hdrs = glob([
+        "src/**/*.c",
+        "src/**/*.h",
+    ]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/libjpeg-turbo',
+    implicitDeps: <String>['@libjpeg-turbo//:libjpeg_headers'],
+    // jdcolor.c, jdhuff.c and friends include the .c files that hold their
+    // colour-space and Huffman table variants.
+    appendix: '''
+cc_library(
+    name = "libjpeg_headers",
+    hdrs = glob(["src/**/*.h"]),
+    textual_hdrs = glob(["src/*.c"]),
+)
+''',
+  ),
 ];
 
 /// The manifest entry for a GN directory, from either list.

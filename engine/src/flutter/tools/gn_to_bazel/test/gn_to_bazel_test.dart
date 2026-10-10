@@ -1352,6 +1352,158 @@ cc_library(
       );
     });
 
+    test('hands the flags of a public config to the owner and its dependents', () async {
+      // wuffs: the engine's GN turns warnings off for whoever includes it.
+      const layout = OutputLayout.repository(
+        '@wuffs',
+        repositoryGnRoot: '//flutter/third_party/wuffs',
+      );
+      final String wuffs = await convert(
+        '''
+config("wuffs_public") {
+  include_dirs = [ "release/c" ]
+  cflags = []
+  if (is_clang) {
+    cflags += [
+      "-Wno-unused-function",
+      "-Wno-c++11-narrowing",
+    ]
+  }
+}
+
+config("quiet") {
+  cflags = [ "-w" ]
+  cflags_c = [ "-std=c99" ]
+}
+
+source_set("wuffs") {
+  public_configs = [ ":wuffs_public" ]
+  configs += [ ":quiet" ]
+  sources = [ "release/c/wuffs-v0.3.c" ]
+}
+''',
+        gnPackage: '//flutter/third_party/wuffs',
+        layout: layout,
+      );
+      // The owner compiles with the flags of both configs (-std= aside); the
+      // public config is still a dependency for its include directory.
+      expect(
+        wuffs,
+        contains('''
+cc_library(
+    name = "wuffs",
+    srcs = ["release/c/wuffs-v0.3.c"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-unused-function",  # is_clang
+        "-Wno-c++11-narrowing",  # is_clang
+        "-w",
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [":wuffs_public"],
+    alwayslink = True,
+)
+'''),
+      );
+      expect(
+        wuffs,
+        contains('cc_library(\n    name = "wuffs_public",\n    includes = ["release/c"],\n)'),
+      );
+      expect(wuffs, contains('cc_library(\n    name = "quiet",\n)'));
+
+      // A dependent gets them from the table.
+      final String user = await convert('''
+source_set("gif_codec") {
+  sources = [ "gif.cc" ]
+  deps = [ "//flutter/third_party/wuffs" ]
+}
+''');
+      expect(
+        user,
+        contains('''
+    copts = FLUTTER_COPTS + [
+        "-Wno-unused-function",  # from //flutter/third_party/wuffs
+        "-Wno-c++11-narrowing",  # from //flutter/third_party/wuffs
+    ],
+'''),
+      );
+
+      // A public config with flags that the table does not know is an error,
+      // as is a config with flags that nothing in the file lists.
+      await expectLater(
+        convert('''
+config("loud_public") {
+  cflags = [ "-Wall" ]
+}
+source_set("x") {
+  sources = [ "x.cc" ]
+  public_configs = [ ":loud_public" ]
+}
+'''),
+        throwsGnError(line: 4, message: 'list them under //flutter/example:x in propagatedCopts'),
+      );
+      await expectLater(
+        convert('''
+config("unused") {
+  cflags = [ "-Wall" ]
+}
+'''),
+        throwsGnError(line: 2, message: 'cannot be propagated by Bazel'),
+      );
+    });
+
+    test('secondary source root: a BUILD.gn stands in for another directory', () {
+      // wuffs: its BUILD.gn lives in //flutter/build/secondary.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        '.gn':
+            'buildconfig = "//BUILDCONFIG.gn"\nsecondary_source = "//flutter/build/secondary/"\n',
+        'lib/lists.gni': 'lib_sources = [ "a.c" ]\n',
+        'flutter/build/secondary/flutter/third_party/wuffs/BUILD.gn': '''
+import("//lib/lists.gni")
+import("//flutter/build/secondary/flutter/third_party/wuffs/more.gni")
+
+config("wuffs_config") {
+  include_dirs = [
+    "release/c",
+    "//flutter/build/secondary/flutter/third_party/wuffs/config",
+  ]
+  cflags = [
+    "-Wno-unused-function",
+    "-Wno-c++11-narrowing",
+  ]
+}
+
+source_set("wuffs") {
+  sources = lib_sources + more_sources
+  public_configs = [ ":wuffs_config" ]
+}
+''',
+        'flutter/build/secondary/flutter/third_party/wuffs/more.gni': 'more_sources = [ "b.c" ]\n',
+      });
+      expect(tree.secondarySource, '//flutter/build/secondary');
+      final String file = tree.resolve('//flutter/third_party/wuffs/BUILD.gn');
+      expect(file, endsWith('flutter/build/secondary/flutter/third_party/wuffs/BUILD.gn'));
+      expect(tree.gnDirectory(file), '//flutter/third_party/wuffs');
+      final GnFileEvaluation evaluation = evaluateIn(
+        tree,
+        '//flutter/third_party/wuffs/BUILD.gn',
+        importPolicy: const ImportPolicy(
+          evaluatedPrefixes: <String>{'//lib/', '//flutter/build/secondary/'},
+        ),
+      );
+      expect(strings(evaluation.targets[1], 'sources'), <String>['a.c', 'b.c']);
+      // Files beside the secondary BUILD.gn are mirrored into the repository.
+      final String output = emitBuildFile(
+        evaluation,
+        gnPackage: '//flutter/third_party/wuffs',
+        layout: OutputLayout.repository(
+          '@wuffs',
+          repositoryGnRoot: '//flutter/third_party/wuffs',
+          secondarySource: tree.secondarySource,
+        ),
+      );
+      expect(output, contains('includes = [\n        "release/c",\n        "config",\n    ],'));
+    });
+
     test('rejects what it cannot express', () async {
       await expectLater(
         convert('''
