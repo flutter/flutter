@@ -70,7 +70,8 @@ class CompositorOpenGLANGLETest
     // The compositor leaves the render context current on this thread.
     // Release it before the engine destroys it, or ANGLE crashes the next test
     // that reuses the display.
-    if (engine_) {
+    if (engine_ && engine_->egl_manager() &&
+        engine_->egl_manager()->render_context()) {
       engine_->egl_manager()->render_context()->ClearCurrent();
     }
     WindowsTest::TearDown();
@@ -83,6 +84,7 @@ class CompositorOpenGLANGLETest
     auto egl_manager = egl::Manager::Create(egl::GpuPreference::NoPreference,
                                             /*allow_inverted_surface=*/false,
                                             GetParam().max_feature_level);
+    EXPECT_NE(egl_manager, nullptr);
 
     FlutterWindowsEngineBuilder builder{GetContext()};
 
