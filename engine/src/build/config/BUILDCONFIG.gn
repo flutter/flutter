@@ -401,6 +401,12 @@ if (is_win) {
     "//build/config/win:unicode",
     "//build/config/win:winver",
   ]
+  if (is_clang) {
+    _native_compiler_configs += [
+      "//build/config/win:relative_paths",
+      "//build/config/win:deterministic_builds",
+    ]
+  }
 }
 if (is_posix) {
   _native_compiler_configs += [
