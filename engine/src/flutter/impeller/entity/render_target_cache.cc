@@ -4,6 +4,7 @@
 
 #include "impeller/entity/render_target_cache.h"
 #include "impeller/core/formats.h"
+#include "impeller/renderer/context.h"
 #include "impeller/renderer/render_target.h"
 
 namespace impeller {
@@ -71,11 +72,16 @@ RenderTarget RenderTargetCache::CreateOffscreen(
 
   FML_DCHECK(existing_color_texture == nullptr &&
              existing_depth_stencil_texture == nullptr);
+  const PixelFormat resolved_format =
+      target_pixel_format.has_value()
+          ? target_pixel_format.value()
+          : context.GetCapabilities()->GetDefaultColorFormat();
   auto config = RenderTargetConfig{
       .size = size,
       .mip_count = static_cast<size_t>(mip_count),
       .has_msaa = false,
       .has_depth_stencil = stencil_attachment_config.has_value(),
+      .color_format = resolved_format,
   };
 
   if (CacheEnabled()) {
@@ -93,6 +99,34 @@ RenderTarget RenderTargetCache::CreateOffscreen(
             context, size, mip_count, label, color_attachment_config,
             stencil_attachment_config, color0.texture, depth_tex,
             target_pixel_format);
+      }
+    }
+    if (context.GetBackendType() == Context::BackendType::kOpenGLES) {
+      for (RenderTargetData& render_target_data : render_target_data_) {
+        const RenderTargetConfig& other_config = render_target_data.config;
+        if (!render_target_data.used_this_frame &&
+            other_config.mip_count == config.mip_count &&
+            other_config.has_msaa == config.has_msaa &&
+            other_config.has_depth_stencil == config.has_depth_stencil &&
+            other_config.color_format == config.color_format) {
+          ColorAttachment color0 =
+              render_target_data.render_target.GetColorAttachment(0);
+          std::optional<DepthAttachment> depth =
+              render_target_data.render_target.GetDepthAttachment();
+          std::shared_ptr<Texture> depth_tex = depth ? depth->texture : nullptr;
+          if (color0.texture && color0.texture->ResizeStorage(size) &&
+              (!depth_tex || depth_tex->ResizeStorage(size))) {
+            render_target_data.used_this_frame = true;
+            render_target_data.keep_alive_frame_count = keep_alive_frame_count_;
+            render_target_data.config = config;
+            render_target_data.render_target =
+                RenderTargetAllocator::CreateOffscreen(
+                    context, size, mip_count, label, color_attachment_config,
+                    stencil_attachment_config, color0.texture, depth_tex,
+                    target_pixel_format);
+            return render_target_data.render_target;
+          }
+        }
       }
     }
   }
@@ -131,11 +165,16 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
   FML_DCHECK(existing_color_msaa_texture == nullptr &&
              existing_color_resolve_texture == nullptr &&
              existing_depth_stencil_texture == nullptr);
+  const PixelFormat resolved_format =
+      target_pixel_format.has_value()
+          ? target_pixel_format.value()
+          : context.GetCapabilities()->GetDefaultColorFormat();
   auto config = RenderTargetConfig{
       .size = size,
       .mip_count = static_cast<size_t>(mip_count),
       .has_msaa = true,
       .has_depth_stencil = stencil_attachment_config.has_value(),
+      .color_format = resolved_format,
   };
   if (CacheEnabled()) {
     for (RenderTargetData& render_target_data : render_target_data_) {
@@ -152,6 +191,36 @@ RenderTarget RenderTargetCache::CreateOffscreenMSAA(
             context, size, mip_count, label, color_attachment_config,
             stencil_attachment_config, color0.texture, color0.resolve_texture,
             depth_tex, target_pixel_format);
+      }
+    }
+    if (context.GetBackendType() == Context::BackendType::kOpenGLES) {
+      for (RenderTargetData& render_target_data : render_target_data_) {
+        const RenderTargetConfig& other_config = render_target_data.config;
+        if (!render_target_data.used_this_frame &&
+            other_config.mip_count == config.mip_count &&
+            other_config.has_msaa == config.has_msaa &&
+            other_config.has_depth_stencil == config.has_depth_stencil &&
+            other_config.color_format == config.color_format) {
+          ColorAttachment color0 =
+              render_target_data.render_target.GetColorAttachment(0);
+          std::optional<DepthAttachment> depth =
+              render_target_data.render_target.GetDepthAttachment();
+          std::shared_ptr<Texture> depth_tex = depth ? depth->texture : nullptr;
+          if (color0.texture && color0.texture->ResizeStorage(size) &&
+              (!color0.resolve_texture ||
+               color0.resolve_texture->ResizeStorage(size)) &&
+              (!depth_tex || depth_tex->ResizeStorage(size))) {
+            render_target_data.used_this_frame = true;
+            render_target_data.keep_alive_frame_count = keep_alive_frame_count_;
+            render_target_data.config = config;
+            render_target_data.render_target =
+                RenderTargetAllocator::CreateOffscreenMSAA(
+                    context, size, mip_count, label, color_attachment_config,
+                    stencil_attachment_config, color0.texture,
+                    color0.resolve_texture, depth_tex, target_pixel_format);
+            return render_target_data.render_target;
+          }
+        }
       }
     }
   }

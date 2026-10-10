@@ -60,6 +60,10 @@ class Texture {
   /// `array_layer_count` for 2D array textures).
   bool IsSliceValid(size_t slice) const;
 
+  /// Re-specify the storage dimensions of this texture in-place if the backend
+  /// supports mutable texture/renderbuffer storage (e.g. OpenGL ES).
+  virtual bool ResizeStorage(ISize new_size) { return false; }
+
  protected:
   explicit Texture(TextureDescriptor desc);
 
@@ -73,8 +77,10 @@ class Texture {
 
   bool mipmap_generated_ = false;
 
+  void SetTextureSize(ISize size) { desc_.size = size; }
+
  private:
-  const TextureDescriptor desc_;
+  TextureDescriptor desc_;
   bool is_opaque_ = false;
 
   Texture(const Texture&) = delete;

@@ -183,5 +183,57 @@ TEST_P(RenderTargetCacheTest, ClearDropsAllCachedTextures) {
   EXPECT_EQ(render_target_cache.CachedTextureCount(), 0u);
 }
 
+TEST_P(RenderTargetCacheTest, RecyclesAndResizesCachedTexturesInPlaceOnGLES) {
+  if (GetBackend() != PlaygroundBackend::kOpenGLES &&
+      GetBackend() != PlaygroundBackend::kOpenGLESSDF) {
+    GTEST_SKIP() << "In-place GL handle resize recycling is OpenGLES-specific.";
+  }
+
+  auto render_target_cache = RenderTargetCache(
+      GetContext()->GetResourceAllocator(), /*keep_alive_frame_count=*/4);
+
+  render_target_cache.Start();
+  RenderTarget target1 =
+      render_target_cache.CreateOffscreen(*GetContext(), {100, 100}, 1);
+  render_target_cache.End();
+
+  // Wait until the entry becomes unused in a subsequent frame and request a
+  // different size; on OpenGLES it should resize in-place and preserve the
+  // cached FBO ID rather than allocating a second RenderTarget entry.
+  render_target_cache.Start();
+  RenderTarget target2 =
+      render_target_cache.CreateOffscreen(*GetContext(), {128, 96}, 1);
+  EXPECT_EQ(render_target_cache.CachedTextureCount(), 1u);
+  EXPECT_EQ(target2.GetRenderTargetSize(), ISize(128, 96));
+  EXPECT_EQ(target2.GetColorAttachment(0).texture,
+            target1.GetColorAttachment(0).texture);
+  render_target_cache.End();
+}
+
+TEST_P(RenderTargetCacheTest, SeparatesCachedTargetsByColorFormat) {
+  auto render_target_cache = RenderTargetCache(
+      GetContext()->GetResourceAllocator(), /*keep_alive_frame_count=*/4);
+
+  render_target_cache.Start();
+  RenderTarget rgba_target = render_target_cache.CreateOffscreen(
+      *GetContext(), {100, 100}, 1, "OffscreenRGBA",
+      RenderTarget::kDefaultColorAttachmentConfig,
+      RenderTarget::kDefaultStencilAttachmentConfig, nullptr, nullptr,
+      PixelFormat::kR8G8B8A8UNormInt);
+  render_target_cache.End();
+
+  render_target_cache.Start();
+  RenderTarget r8_target = render_target_cache.CreateOffscreen(
+      *GetContext(), {100, 100}, 1, "OffscreenR8",
+      RenderTarget::kDefaultColorAttachmentConfig,
+      RenderTarget::kDefaultStencilAttachmentConfig, nullptr, nullptr,
+      PixelFormat::kR8UNormInt);
+  render_target_cache.End();
+
+  EXPECT_NE(rgba_target.GetColorAttachment(0).texture,
+            r8_target.GetColorAttachment(0).texture);
+  EXPECT_EQ(r8_target.GetRenderTargetPixelFormat(), PixelFormat::kR8UNormInt);
+}
+
 }  // namespace testing
 }  // namespace impeller

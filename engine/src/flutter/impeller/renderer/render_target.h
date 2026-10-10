@@ -23,15 +23,17 @@ struct RenderTargetConfig {
   size_t mip_count = 0;
   bool has_msaa = false;
   bool has_depth_stencil = false;
+  PixelFormat color_format = PixelFormat::kUnknown;
 
   constexpr bool operator==(const RenderTargetConfig& o) const {
     return size == o.size && mip_count == o.mip_count &&
-           has_msaa == o.has_msaa && has_depth_stencil == o.has_depth_stencil;
+           has_msaa == o.has_msaa && has_depth_stencil == o.has_depth_stencil &&
+           color_format == o.color_format;
   }
 
   constexpr size_t Hash() const {
     return fml::HashCombine(size.width, size.height, mip_count, has_msaa,
-                            has_depth_stencil);
+                            has_depth_stencil, color_format);
   }
 };
 
