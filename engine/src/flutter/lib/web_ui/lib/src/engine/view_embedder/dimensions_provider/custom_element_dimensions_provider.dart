@@ -99,4 +99,19 @@ class CustomElementDimensionsProvider extends DimensionsProvider {
   ViewPadding computeKeyboardInsets(double physicalHeight, bool isEditingOnMobile) {
     return const ViewPadding(top: 0, right: 0, bottom: 0, left: 0);
   }
+
+  @override
+  ViewPadding computeSafeAreaInsets() {
+    // A view embedded in a custom element occupies a region of a page that is
+    // laid out by the host application, so the engine doesn't presume to know
+    // how (or even whether) that region overlaps the obstructions of the device
+    // screen. Keeping the element clear of them, or padding it with the CSS
+    // `env(safe-area-inset-*)` values, is up to the host application for now.
+    //
+    // TODO(diegolopezrm): Derive these from the intersection of the host
+    // element with the `env(safe-area-inset-*)` values of the page, so that
+    // `SafeArea` works the same way in an embedded view as it does in a
+    // full-page one. https://github.com/flutter/flutter/issues/84833
+    return const ViewPadding(top: 0, right: 0, bottom: 0, left: 0);
+  }
 }

@@ -91,7 +91,7 @@ class BrowserPlatform extends PlatformPlugin {
         .add(_createAbsolutePackageUrlHandler())
         .add(_screenshotHandler)
         // Generates and serves a test payload of given length, split into chunks
-        // of given size. Reponds to requests to /long_test_payload.
+        // of given size. Responds to requests to /long_test_payload.
         .add(_testPayloadGenerator)
         // If none of the handlers above handled the request, return 404.
         .add(_fileNotFoundCatcher);
@@ -562,6 +562,12 @@ class BrowserPlatform extends PlatformPlugin {
 </script>
 <script src="/flutter_js/flutter.js"></script>
 <script>
+  const _loaderWarnings = [];
+  const _origWarn = console.warn;
+  console.warn = function(...args) {
+    _loaderWarnings.push(args.map(String).join(' '));
+    return _origWarn.apply(console, args);
+  };
   _flutter.loader.load({
     config: {
       canvasKitVariant: "${getCanvasKitVariant()}",
@@ -570,7 +576,18 @@ class BrowserPlatform extends PlatformPlugin {
       wasmAllowList: ${jsonEncode(suite.runConfig.wasmAllowList)},
       preferWebParagraph: ${suite.runConfig.enableWebParagraph},
       enableWimp: ${suite.runConfig.enableWimp},
+      verboseBuildSelection: true,
     },
+  }).catch((error) => {
+    console.error(error);
+    const errorMessage = (error && error.stack) ? error.stack.toString() : String(error);
+    const details = _loaderWarnings.length > 0
+      ? errorMessage + '\\nLoader warnings:\\n  ' + _loaderWarnings.join('\\n  ')
+      : errorMessage;
+    window.parent.postMessage({
+      exception: true,
+      data: [0, { type: 'loadException', message: details }],
+    }, window.location.origin);
   });
 </script>
 ''';

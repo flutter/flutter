@@ -636,7 +636,7 @@ void main() {
 
         final CommandRunner<void> runner = createTestCommandRunner(
           UpgradeCommand(
-            toolContext: DelegatingToolContext(),
+            toolContext: const DelegatingToolContext(),
             verboseHelp: false,
             commandRunner: fakeCommandRunner,
           ),

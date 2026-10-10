@@ -61,10 +61,9 @@ class FlatlandConnection final {
   void Present();
 
   // Used to implement VsyncWaiter functionality.
-  // Note that these two methods are called from the UI thread while the
+  // Note that this method is called from the UI thread while the
   // rest of the methods on this class are called from the raster thread.
   void AwaitVsync(FireCallbackCallback callback);
-  void AwaitVsyncForSecondaryCallback(FireCallbackCallback callback);
 
   fuchsia::ui::composition::Flatland* flatland() { return flatland_.get(); }
 

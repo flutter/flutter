@@ -28,6 +28,25 @@ import 'dart/package_map.dart';
 /// Opt-in changes to the dart compilers.
 const kDartCompilerExperiments = <String>[];
 
+// Flags passed when compiling with DDC.
+const kDdcLibraryBundleFlags = <String>[
+  '--dartdevc-module-format=ddc',
+  '--dartdevc-canary',
+  '--no-js-strongly-connected-components',
+];
+
+/// Returns the frontend server options used when compiling [buildInfo] with
+/// DDC.
+///
+/// These options are part of the default cached kernel path (see
+/// [getDefaultCachedKernelPath]), so any code that reads or writes the cached
+/// kernel for DDC must use them to compute the same path as the compiler.
+List<String> ddcFrontEndOptions(BuildInfo buildInfo) => <String>[
+  ...buildInfo.extraFrontEndOptions,
+  if (buildInfo.webEnableHotReload) ...kDdcLibraryBundleFlags,
+  ...deprecatedJsInteropCompilerFlags(buildInfo.deprecatedJsInterop),
+];
+
 /// The target model describes the set of core libraries that are available within
 /// the SDK.
 class TargetModel {
@@ -66,9 +85,9 @@ class TargetModel {
 
   /// Infers the appropriate [TargetModel] from a given [TargetPlatform].
   static TargetModel fromTargetPlatform(TargetPlatform? platform) {
-    return switch (platform) {
-      TargetPlatform.web_javascript => TargetModel.dartdevc,
-      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => TargetModel.flutterRunner,
+    return switch (platform?.os) {
+      .web => TargetModel.dartdevc,
+      .fuchsia => TargetModel.flutterRunner,
       _ => TargetModel.flutter,
     };
   }
@@ -565,12 +584,7 @@ class ResidentCompilerFactory {
         // Override the filesystem scheme so that the frontend_server can find
         // the generated entrypoint code.
         fileSystemScheme: 'org-dartlang-app',
-        extraFrontEndOptions: [
-          ...buildInfo.extraFrontEndOptions,
-          if (buildInfo.webEnableHotReload)
-          // These flags are only valid to be passed when compiling with DDC.
-          ...<String>['--dartdevc-canary', '--dartdevc-module-format=ddc'],
-        ],
+        extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
       );
     } else {
       if (targetPlatform case .fuchsia_arm64 || .fuchsia_x64) {
