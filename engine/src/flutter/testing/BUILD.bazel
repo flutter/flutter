@@ -2,17 +2,21 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Test support for the engine's gtest binaries. Mirrors BUILD.gn; targets that
-# need display_list, the Dart VM or Skia (testing_lib, testing, dart, skia,
-# ...) follow once those libraries build with Bazel.
+# Generated from //flutter/testing/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: testing_lib, testing, dart, skia, vmservice_kernel, vmservice_snapshot, fixture_test, vulkan, test_swiftshader_utils, test_swangle_utils, opengl.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
-# Compiled by flutter_test_fixtures (testing.bzl) once per fixtures target.
-exports_files(["fixtures_location.cc"])
+cc_library(
+    name = "dynamic_symbols",
+    linkopts = [
+        "-rdynamic",  # is_clang && is_linux
+    ],
+)
 
 # Test helpers that depend only on fml and googletest. Tests of code below
 # display_list (fml, tooling, ...) should depend on this target and
@@ -49,26 +53,38 @@ cc_library(
         "//engine/src/flutter/fml",
         "@googletest//:gtest",
     ],
+    alwayslink = True,
 )
 
 # The gtest main() used by the engine's unit test binaries.
-#
-# GN additionally links the GTK libraries into every Linux test binary through
-# //flutter/shell/platform/linux/config:gtk, a leftover from when main()
-# called gtk_init; nothing here uses them, so they are not reproduced.
 cc_library(
     name = "run_all_unittests",
     testonly = True,
     srcs = ["run_all_unittests.cc"],
     copts = FLUTTER_COPTS,
-    # config("dynamic_symbols"): export symbols so that backtraces can be
-    # symbolized.
-    linkopts = select({
-        "@platforms//os:linux": ["-rdynamic"],
-        "//conditions:default": [],
-    }),
     local_defines = FLUTTER_LOCAL_DEFINES,
-    deps = [":testing_core"],
-    # main() must end up in every binary that lists this library.
+    deps = [
+        ":dynamic_symbols",
+        ":testing_core",
+    ],
     alwayslink = True,
 )
+
+flutter_test_fixtures(
+    name = "testing_fixtures",
+)
+
+cc_test(
+    name = "testing_unittests",
+    size = "small",
+    deps = [
+        ":testing_fixtures",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+exports_files(["fixtures_location.cc"])

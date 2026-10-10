@@ -31,12 +31,14 @@ Future<GnFileEvaluation> evaluate(
   Assumptions? assumptions,
   Set<String> externalVariables = knownExternalVariables,
   Set<String> templates = const <String>{'test_fixtures'},
+  Set<String> skip = const <String>{},
 }) async {
   return evaluateGnFile(
     await parse(gn),
     assumptions: assumptions ?? linuxHostAssumptions(),
     templates: templates,
     externalVariables: externalVariables,
+    skipTargets: skip,
   );
 }
 
@@ -45,10 +47,14 @@ Future<String> convert(
   Assumptions? assumptions,
   String gnPackage = '//flutter/example',
   Set<String> externalVariables = knownExternalVariables,
+  Set<String> skip = const <String>{},
+  String? appendix,
 }) async {
   return emitBuildFile(
-    await evaluate(gn, assumptions: assumptions, externalVariables: externalVariables),
+    await evaluate(gn, assumptions: assumptions, externalVariables: externalVariables, skip: skip),
     gnPackage: gnPackage,
+    skipTargets: skip,
+    appendix: appendix,
   );
 }
 
@@ -225,6 +231,95 @@ source_set("x") {
       expect(target.variables['defines']!.unconditionalItems, <GnValue>[
         const GnStringValue('PREFIX_SUFFIX'),
       ]);
+      await expectLater(
+        evaluate('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  sources += "b.cc"
+}
+'''),
+        throwsGnError(line: 3, message: '+= of a scalar to the list sources'),
+      );
+    });
+
+    test('expands known strings and leaves the rest alone', () async {
+      final GnFileEvaluation evaluation = await evaluate(r'''
+source_set("x") {
+  sources = [ "a.cc" ]
+  deps = [ "$dart_src/runtime/bin:elf_loader" ]
+}
+''');
+      expect(evaluation.targets.single.variables['deps']!.unconditionalItems, <GnValue>[
+        const GnStringValue('//flutter/third_party/dart/runtime/bin:elf_loader'),
+      ]);
+      await expectLater(
+        evaluate(r'''
+source_set("x") {
+  sources = [ "$root_gen_dir/a.cc" ]
+}
+'''),
+        throwsGnError(line: 2, message: r'string expansion of $root_gen_dir is not supported'),
+      );
+    });
+
+    test('follows boolean variables, decided or not', () async {
+      final GnFileEvaluation evaluation = await evaluate('''
+use_swiftshader = enable_unittests && shell_enable_gl
+use_slim = slimpeller && !is_fuchsia
+if (use_swiftshader) {
+  source_set("gl") {
+    sources = [ "gl.cc" ]
+  }
+}
+source_set("x") {
+  sources = [ "x.cc" ]
+  if (use_slim) {
+    sources += [ "slim.cc" ]
+  }
+}
+''');
+      expect(evaluation.targets.map((GnTarget t) => t.name), <String>['gl', 'x']);
+      expect(evaluation.targets[0].condition, Condition.always);
+      final GnAssignment slim = evaluation.targets[1].variables['sources']!.assignments[1];
+      expect(slim.condition, const ConditionVariable('slimpeller'));
+    });
+
+    test('compares two known strings', () async {
+      final GnFileEvaluation evaluation = await evaluate('''
+if (current_toolchain == host_toolchain) {
+  source_set("host_only") {
+    sources = [ "a.cc" ]
+  }
+}
+''');
+      expect(evaluation.targets.single.condition, Condition.always);
+      await expectLater(
+        evaluate('''
+if (current_toolchain == unknown_toolchain) {
+  source_set("x") {
+    sources = [ "a.cc" ]
+  }
+}
+'''),
+        throwsGnError(line: 1, message: 'needs both values to be known'),
+      );
+    });
+
+    test('leaves skipped targets alone', () async {
+      final GnFileEvaluation evaluation = await evaluate(
+        '''
+mystery_template("snapshot") {
+  dart_main = "//flutter/x/main.dart"
+  deps = [ exec_script("nope.py") ]
+}
+source_set("x") {
+  sources = [ "x.cc" ]
+}
+''',
+        skip: <String>{'snapshot'},
+      );
+      expect(evaluation.skipped, <String>['snapshot']);
+      expect(evaluation.targets.map((GnTarget t) => t.name), <String>['x']);
     });
 
     test('records imports and comments', () async {
@@ -331,7 +426,7 @@ source_set("x") {
   sources = [ "$root_gen_dir/a.cc" ]
 }
 '''),
-          throwsGnError(line: 2, message: 'string expansion is not supported'),
+          throwsGnError(line: 2, message: r'string expansion of $root_gen_dir is not supported'),
         );
       });
 
@@ -398,6 +493,12 @@ source_set("example") {
   }
 }
 
+config("dynamic_symbols") {
+  if (is_clang && is_linux) {
+    ldflags = [ "-rdynamic" ]
+  }
+}
+
 executable("example_unittests") {
   testonly = true
   sources = [ "example_unittests.cc" ]
@@ -405,6 +506,7 @@ executable("example_unittests") {
     ":example",
     "//flutter/testing",
   ]
+  public_configs = [ ":dynamic_symbols" ]
 }
 ''');
       expect(output, '''
@@ -444,6 +546,14 @@ cc_library(
         "//engine/src/flutter:config",
         "@icu",
     ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "dynamic_symbols",
+    linkopts = [
+        "-rdynamic",  # is_clang && is_linux
+    ],
 )
 
 cc_test(
@@ -453,11 +563,115 @@ cc_test(
     copts = FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
+        ":dynamic_symbols",
         ":example",
         "//engine/src/flutter/testing",
     ],
 )
 ''');
+    });
+
+    test('static libraries are not alwayslink; tests may have no sources', () async {
+      final String output = await convert('''
+static_library("archive") {
+  sources = [ "a.cc" ]
+}
+
+executable("archive_unittests") {
+  testonly = true
+  sources = []
+  deps = [
+    ":archive",
+    "//flutter/third_party/googletest:gtest",
+    "//flutter/third_party/googletest:gmock",
+    "//flutter/third_party/googletest:gtest_main",
+  ]
+}
+''');
+      expect(output, isNot(contains('alwayslink')));
+      // gmock and gtest are one Bazel target; the duplicate is dropped.
+      expect(
+        output,
+        contains('''
+cc_test(
+    name = "archive_unittests",
+    size = "small",
+    deps = [
+        ":archive",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+'''),
+      );
+    });
+
+    test('renders the runtime mode and slimpeller as select()', () async {
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  if (flutter_runtime_mode == "profile") {
+    sources += [ "profile.cc" ]
+  }
+  if (flutter_runtime_mode != "debug") {
+    sources += [ "optimized.cc" ]
+  }
+  if (!slimpeller) {
+    sources += [ "skia.cc" ]
+  }
+}
+''');
+      expect(
+        output,
+        contains('''
+    srcs = ["a.cc"] + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "profile.cc",  # flutter_runtime_mode == "profile"
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_debug": [],
+        "//conditions:default": [
+            "optimized.cc",  # flutter_runtime_mode != "debug"
+        ],
+    }) + select({
+        "//engine/src/flutter/common:slimpeller_enabled": [],
+        "//conditions:default": [
+            "skia.cc",  # !slimpeller
+        ],
+    }),
+'''),
+      );
+    });
+
+    test('appends the manifest appendix and lists skipped targets', () async {
+      final String output = await convert(
+        '''
+source_set("x") {
+  sources = [ "x.cc" ]
+}
+source_set("later") {
+  sources = [ "later.cc" ]
+  deps = [ "//flutter/not_yet" ]
+}
+''',
+        skip: <String>{'later'},
+        appendix: 'exports_files(["fixtures_location.cc"])\n',
+      );
+      expect(output, contains('# Not converted: later.\n'));
+      expect(output, isNot(contains('not_yet')));
+      expect(
+        output,
+        endsWith('''
+    alwayslink = True,
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+exports_files(["fixtures_location.cc"])
+'''),
+      );
     });
 
     test('renders undecided conditions as select()', () async {
@@ -505,16 +719,16 @@ source_set("x") {
         convert('''
 source_set("x") {
   sources = [ "a.cc" ]
-  if (slimpeller) {
-    sources += [ "slim.cc" ]
+  if (shell_enable_metal) {
+    sources += [ "metal.cc" ]
   }
 }
-'''),
+''', assumptions: Assumptions(const <String, GnValue>{})),
         throwsA(
           isA<GnError>().having(
             (GnError e) => e.message,
             'message',
-            contains('no config_setting for `slimpeller`'),
+            contains('no config_setting for `shell_enable_metal`'),
           ),
         ),
       );
@@ -607,21 +821,18 @@ shared_library("x") {
   });
 
   group('round trip', () {
-    /// The checked-in files the converter generates; a difference means the
-    /// GN file changed without regenerating, or the converter did.
-    const generated = <String, List<String>>{
-      '//flutter/fml': <String>['fml_benchmarks'],
-    };
-
-    for (final MapEntry<String, List<String>> entry in generated.entries) {
-      test(entry.key, () async {
+    // The checked-in files the converter generates (see the manifest); a
+    // difference means the GN file changed without regenerating, or the
+    // converter did.
+    for (final ConvertedFile file in convertedFiles) {
+      test(file.gnPackage, () async {
         // The package lives at engine/src/flutter/tools/gn_to_bazel.
         final String directory = p.join(
           Directory.current.path,
           '..',
           '..',
           '..',
-          entry.key.substring(2),
+          file.gnPackage.substring(2),
         );
         final GnBlock tree = await loadGnFile(p.join(directory, 'BUILD.gn'), gnBinary: gnBinary);
         final GnFileEvaluation evaluation = evaluateGnFile(
@@ -629,13 +840,17 @@ shared_library("x") {
           assumptions: linuxHostAssumptions(),
           templates: templateMappings.keys.toSet(),
           externalVariables: knownExternalVariables,
+          skipTargets: file.skip.keys.toSet(),
         );
         final String output = emitBuildFile(
           evaluation,
-          gnPackage: entry.key,
-          skipTargets: entry.value.toSet(),
+          gnPackage: file.gnPackage,
+          skipTargets: file.skip.keys.toSet(),
+          appendix: file.appendix,
         );
         expect(output, File(p.join(directory, 'BUILD.bazel')).readAsStringSync());
+        // Every skip in the manifest names a target that exists.
+        expect(evaluation.skipped, unorderedEquals(file.skip.keys));
       });
     }
   });
