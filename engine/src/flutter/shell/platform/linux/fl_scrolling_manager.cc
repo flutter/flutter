@@ -151,7 +151,10 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
   }
 }
 
-void fl_scrolling_manager_handle_rotation_begin(FlScrollingManager* self) {
+void fl_scrolling_manager_handle_rotation_begin(FlScrollingManager* self,
+                                                gboolean has_position,
+                                                gdouble x,
+                                                gdouble y) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
@@ -163,13 +166,20 @@ void fl_scrolling_manager_handle_rotation_begin(FlScrollingManager* self) {
   if (!self->zoom_started) {
     self->scale = 1;
     self->rotation = 0;
-    fl_engine_send_pointer_pan_zoom_event(
-        engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
-        kPanZoomStart, 0, 0, 0, 0);
+    if (!has_position) {
+      x = self->last_x;
+      y = self->last_y;
+    }
+    fl_engine_send_pointer_pan_zoom_event(engine, self->view_id,
+                                          g_get_real_time(), x, y,
+                                          kPanZoomStart, 0, 0, 0, 0);
   }
 }
 
 void fl_scrolling_manager_handle_rotation_update(FlScrollingManager* self,
+                                                 gboolean has_position,
+                                                 gdouble x,
+                                                 gdouble y,
                                                  gdouble rotation) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
@@ -179,12 +189,19 @@ void fl_scrolling_manager_handle_rotation_update(FlScrollingManager* self,
   }
 
   self->rotation = rotation;
-  fl_engine_send_pointer_pan_zoom_event(
-      engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
-      kPanZoomUpdate, 0, 0, self->scale, self->rotation);
+  if (!has_position) {
+    x = self->last_x;
+    y = self->last_y;
+  }
+  fl_engine_send_pointer_pan_zoom_event(engine, self->view_id,
+                                        g_get_real_time(), x, y, kPanZoomUpdate,
+                                        0, 0, self->scale, self->rotation);
 }
 
-void fl_scrolling_manager_handle_rotation_end(FlScrollingManager* self) {
+void fl_scrolling_manager_handle_rotation_end(FlScrollingManager* self,
+                                              gboolean has_position,
+                                              gdouble x,
+                                              gdouble y) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
@@ -194,13 +211,20 @@ void fl_scrolling_manager_handle_rotation_end(FlScrollingManager* self) {
 
   self->rotate_started = FALSE;
   if (!self->zoom_started) {
-    fl_engine_send_pointer_pan_zoom_event(
-        engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
-        kPanZoomEnd, 0, 0, 0, 0);
+    if (!has_position) {
+      x = self->last_x;
+      y = self->last_y;
+    }
+    fl_engine_send_pointer_pan_zoom_event(engine, self->view_id,
+                                          g_get_real_time(), x, y, kPanZoomEnd,
+                                          0, 0, 0, 0);
   }
 }
 
-void fl_scrolling_manager_handle_zoom_begin(FlScrollingManager* self) {
+void fl_scrolling_manager_handle_zoom_begin(FlScrollingManager* self,
+                                            gboolean has_position,
+                                            gdouble x,
+                                            gdouble y) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
@@ -212,13 +236,20 @@ void fl_scrolling_manager_handle_zoom_begin(FlScrollingManager* self) {
   if (!self->rotate_started) {
     self->scale = 1;
     self->rotation = 0;
-    fl_engine_send_pointer_pan_zoom_event(
-        engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
-        kPanZoomStart, 0, 0, 0, 0);
+    if (!has_position) {
+      x = self->last_x;
+      y = self->last_y;
+    }
+    fl_engine_send_pointer_pan_zoom_event(engine, self->view_id,
+                                          g_get_real_time(), x, y,
+                                          kPanZoomStart, 0, 0, 0, 0);
   }
 }
 
 void fl_scrolling_manager_handle_zoom_update(FlScrollingManager* self,
+                                             gboolean has_position,
+                                             gdouble x,
+                                             gdouble y,
                                              gdouble scale) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
@@ -228,12 +259,19 @@ void fl_scrolling_manager_handle_zoom_update(FlScrollingManager* self,
   }
 
   self->scale = scale;
-  fl_engine_send_pointer_pan_zoom_event(
-      engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
-      kPanZoomUpdate, 0, 0, self->scale, self->rotation);
+  if (!has_position) {
+    x = self->last_x;
+    y = self->last_y;
+  }
+  fl_engine_send_pointer_pan_zoom_event(engine, self->view_id,
+                                        g_get_real_time(), x, y, kPanZoomUpdate,
+                                        0, 0, self->scale, self->rotation);
 }
 
-void fl_scrolling_manager_handle_zoom_end(FlScrollingManager* self) {
+void fl_scrolling_manager_handle_zoom_end(FlScrollingManager* self,
+                                          gboolean has_position,
+                                          gdouble x,
+                                          gdouble y) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
@@ -243,8 +281,12 @@ void fl_scrolling_manager_handle_zoom_end(FlScrollingManager* self) {
 
   self->zoom_started = FALSE;
   if (!self->rotate_started) {
-    fl_engine_send_pointer_pan_zoom_event(
-        engine, self->view_id, g_get_real_time(), self->last_x, self->last_y,
-        kPanZoomEnd, 0, 0, 0, 0);
+    if (!has_position) {
+      x = self->last_x;
+      y = self->last_y;
+    }
+    fl_engine_send_pointer_pan_zoom_event(engine, self->view_id,
+                                          g_get_real_time(), x, y, kPanZoomEnd,
+                                          0, 0, 0, 0);
   }
 }
