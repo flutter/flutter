@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_STATUS_H_
 #define FLUTTER_FML_STATUS_H_
 
+#include <string>
 #include <string_view>
 
 namespace fml {
@@ -37,6 +38,8 @@ class Status final {
   /// Creates an 'ok' status.
   Status();
 
+  /// Creates a status with the given code. The message is copied, so it may
+  /// be built at runtime and need not outlive the status.
   Status(fml::StatusCode code, std::string_view message);
 
   fml::StatusCode code() const;
@@ -48,11 +51,13 @@ class Status final {
   /// @return 'true' when the code is kOk.
   bool ok() const;
 
+  /// The returned view is valid for as long as this status is alive and not
+  /// assigned to.
   std::string_view message() const;
 
  private:
   fml::StatusCode code_;
-  std::string_view message_;
+  std::string message_;
 };
 
 inline Status::Status() : code_(fml::StatusCode::kOk), message_() {}

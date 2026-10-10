@@ -352,6 +352,7 @@ if (enable_unittests) {
       "paths_unittests.cc",
       "raster_thread_merger_unittests.cc",
       "safe_math_unittests.cc",
+      "status_unittests.cc",
       "string_conversion_unittests.cc",
       "synchronization/count_down_latch_unittests.cc",
       "synchronization/semaphore_unittest.cc",
