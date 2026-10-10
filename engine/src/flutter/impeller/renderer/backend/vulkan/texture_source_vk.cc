@@ -4,7 +4,39 @@
 
 #include "impeller/renderer/backend/vulkan/texture_source_vk.h"
 
+#include <algorithm>
+
 namespace impeller {
+
+namespace {
+
+// Whether a cached attachment set is the one a render pass asks for. A
+// released attachment never matches: its weak pointer is expired, so a new
+// texture at the same address compares unequal.
+bool SameAttachments(const FramebufferAttachmentsVK& cached,
+                     const FramebufferAttachmentsVK& wanted) {
+  if (cached.size() != wanted.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < cached.size(); i++) {
+    std::shared_ptr<const TextureSourceVK> source = cached[i].source.lock();
+    if (!source || source != wanted[i].source.lock() ||
+        cached[i].mip_level != wanted[i].mip_level ||
+        cached[i].slice != wanted[i].slice) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool AnyReleased(const FramebufferAttachmentsVK& attachments) {
+  return std::any_of(attachments.begin(), attachments.end(),
+                     [](const FramebufferAttachmentVK& attachment) {
+                       return attachment.source.expired();
+                     });
+}
+
+}  // namespace
 
 TextureSourceVK::TextureSourceVK(TextureDescriptor desc) : desc_(desc) {}
 
@@ -58,34 +90,47 @@ fml::Status TextureSourceVK::SetLayout(const BarrierVK& barrier) const {
   return {};
 }
 
-void TextureSourceVK::SetCachedFrameData(const FramebufferAndRenderPass& data,
-                                         SampleCount sample_count,
-                                         uint32_t mip_level,
-                                         uint32_t slice,
-                                         uint64_t attachments_key) {
+void TextureSourceVK::SetCachedFrameData(
+    const FramebufferAndRenderPass& data,
+    SampleCount sample_count,
+    uint32_t mip_level,
+    uint32_t slice,
+    const FramebufferAttachmentsVK& attachments) {
+  // A framebuffer whose attachment has been released can never be handed out
+  // again. The command buffers that used it hold their own references.
+  frame_data_.erase(std::remove_if(frame_data_.begin(), frame_data_.end(),
+                                   [](const CachedFrameDataEntry& entry) {
+                                     return AnyReleased(entry.attachments);
+                                   }),
+                    frame_data_.end());
   for (auto& entry : frame_data_) {
     if (entry.sample_count == sample_count && entry.mip_level == mip_level &&
-        entry.slice == slice && entry.attachments_key == attachments_key) {
+        entry.slice == slice &&
+        SameAttachments(entry.attachments, attachments)) {
       entry.data = data;
       return;
     }
   }
-  frame_data_.push_back(
-      {sample_count, mip_level, slice, attachments_key, data});
+  frame_data_.push_back({sample_count, mip_level, slice, attachments, data});
 }
 
 FramebufferAndRenderPass TextureSourceVK::GetCachedFrameData(
     SampleCount sample_count,
     uint32_t mip_level,
     uint32_t slice,
-    uint64_t attachments_key) const {
+    const FramebufferAttachmentsVK& attachments) const {
   for (const auto& entry : frame_data_) {
     if (entry.sample_count == sample_count && entry.mip_level == mip_level &&
-        entry.slice == slice && entry.attachments_key == attachments_key) {
+        entry.slice == slice &&
+        SameAttachments(entry.attachments, attachments)) {
       return entry.data;
     }
   }
   return {};
+}
+
+size_t TextureSourceVK::GetCachedFrameDataCountForTesting() const {
+  return frame_data_.size();
 }
 
 }  // namespace impeller

@@ -198,22 +198,23 @@ vk::ImageView TextureVK::GetRenderTargetView(uint32_t mip_level,
   return source_->GetRenderTargetView(mip_level, array_layer);
 }
 
-void TextureVK::SetCachedFrameData(const FramebufferAndRenderPass& data,
-                                   SampleCount sample_count,
-                                   uint32_t mip_level,
-                                   uint32_t slice,
-                                   uint64_t attachments_key) {
+void TextureVK::SetCachedFrameData(
+    const FramebufferAndRenderPass& data,
+    SampleCount sample_count,
+    uint32_t mip_level,
+    uint32_t slice,
+    const FramebufferAttachmentsVK& attachments) {
   source_->SetCachedFrameData(data, sample_count, mip_level, slice,
-                              attachments_key);
+                              attachments);
 }
 
 FramebufferAndRenderPass TextureVK::GetCachedFrameData(
     SampleCount sample_count,
     uint32_t mip_level,
     uint32_t slice,
-    uint64_t attachments_key) const {
+    const FramebufferAttachmentsVK& attachments) const {
   return source_->GetCachedFrameData(sample_count, mip_level, slice,
-                                     attachments_key);
+                                     attachments);
 }
 
 void TextureVK::SetMipMapGenerated() {

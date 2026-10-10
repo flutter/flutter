@@ -6,6 +6,7 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_TEXTURE_SOURCE_VK_H_
 
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 #include "flutter/fml/status.h"
@@ -24,6 +25,24 @@ struct FramebufferAndRenderPass {
   SharedHandleVK<vk::Framebuffer> framebuffer = nullptr;
   SharedHandleVK<vk::RenderPass> render_pass = nullptr;
 };
+
+class TextureSourceVK;
+
+/// One image view a framebuffer holds: the texture source it was made from
+/// and the subresource it views.
+///
+/// The source is held weakly. A cached framebuffer must not keep its
+/// attachments alive, and an attachment that has been released must never
+/// match again, even when a new texture is later allocated at the same
+/// address.
+struct FramebufferAttachmentVK {
+  std::weak_ptr<const TextureSourceVK> source;
+  uint32_t mip_level = 0u;
+  uint32_t slice = 0u;
+};
+
+/// The image views of a framebuffer, in attachment order.
+using FramebufferAttachmentsVK = std::vector<FramebufferAttachmentVK>;
 
 //------------------------------------------------------------------------------
 /// @brief      Abstract base class that represents a vkImage and an
@@ -146,29 +165,34 @@ class TextureSourceVK {
   /// objects are compatible with any future render pass that targets the
   /// same subresource.
   ///
-  /// [attachments_key] identifies the *rest* of the attachment set — the depth
-  /// and stencil textures, and any color attachment beyond the first. A
-  /// framebuffer holds image views of all of them, so a cache keyed on this
-  /// texture alone hands back a framebuffer referring to somebody else's
-  /// depth: valid while that texture lives, and a dangling view once it does
-  /// not.
+  /// [attachments] lists every image view the framebuffer holds. A cache keyed
+  /// on this texture alone hands back a framebuffer referring to somebody
+  /// else's depth (or multisample color) texture: valid while that texture
+  /// lives, and a dangling view once it does not.
+  ///
+  /// Entries whose attachments have since been released are dropped here, so
+  /// a texture paired with a stream of transient depth textures does not
+  /// accumulate framebuffers.
   void SetCachedFrameData(const FramebufferAndRenderPass& data,
                           SampleCount sample_count,
                           uint32_t mip_level = 0u,
                           uint32_t slice = 0u,
-                          uint64_t attachments_key = 0u);
+                          const FramebufferAttachmentsVK& attachments = {});
 
   /// Retrieve the cached framebuffer and render pass for the given
-  /// `(sample_count, mip_level, slice)` subresource.
+  /// `(sample_count, mip_level, slice)` subresource and attachment set.
   ///
   /// An empty `FramebufferAndRenderPass` is returned when no cached entry
   /// exists for that key. Entries are populated lazily on first use and
-  /// live for the lifetime of the texture.
+  /// live until this texture or one of their attachments is released.
   FramebufferAndRenderPass GetCachedFrameData(
       SampleCount sample_count,
       uint32_t mip_level = 0u,
       uint32_t slice = 0u,
-      uint64_t attachments_key = 0u) const;
+      const FramebufferAttachmentsVK& attachments = {}) const;
+
+  /// The number of cached framebuffers, for tests.
+  size_t GetCachedFrameDataCountForTesting() const;
 
  protected:
   const TextureDescriptor desc_;
@@ -180,7 +204,7 @@ class TextureSourceVK {
     SampleCount sample_count;
     uint32_t mip_level;
     uint32_t slice;
-    uint64_t attachments_key;
+    FramebufferAttachmentsVK attachments;
     FramebufferAndRenderPass data;
   };
   // Linear-scanned because N is typically 1 and bounded by
