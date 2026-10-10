@@ -253,7 +253,10 @@ struct RenderPassStateCache {
   BlendStateCache blend;
   StencilStateCache stencil;
   DepthStateCache depth;
+  VertexAttribStateCache attrib;
   std::optional<HandleGLES> program;
+  absl::flat_hash_map<HandleGLES, float, HandleGLES::Hash, HandleGLES::Equal>
+      configured_program_y_flip;
   CullMode cull_mode = CullMode::kNone;
   WindingOrder winding_order = WindingOrder::kClockwise;
 
@@ -388,8 +391,13 @@ struct RenderPassStateCache {
     }
 
     // Bind the y-flip uniform if the vertex shader declares it.
-    if (pipeline.NeedsYFlipUpdate(y_flip_value)) {
-      gl.Uniform1fv(pipeline.GetYFlipUniformLocation(), 1, &y_flip_value);
+    const GLint y_flip_location = pipeline.GetYFlipUniformLocation();
+    if (y_flip_location >= 0) {
+      auto it = configured_program_y_flip.find(program_handle);
+      if (it == configured_program_y_flip.end() || it->second != y_flip_value) {
+        gl.Uniform1fv(y_flip_location, 1, &y_flip_value);
+        configured_program_y_flip[program_handle] = y_flip_value;
+      }
     }
 
     program = program_handle;
@@ -600,7 +608,6 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   const float y_flip_value = flip_y ? -1.0f : 1.0f;
 
   RenderPassStateCache state_cache;
-  VertexAttribStateCache attrib_cache;
   const bool is_es = gl.GetCapabilities()->IsES();
   // Inverted to keep front-facing consistent under the vertex y-flip.
   gl.FrontFace(flip_y ? GL_CCW : GL_CW);
@@ -675,16 +682,16 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     ///       `RenderPass::ValidateIndexBuffer` here, as validation already runs
     ///       when the vertex/index buffers are set on the command.
     ///
-    attrib_cache.current_draw_attribs_mask = 0;
+    state_cache.attrib.current_draw_attribs_mask = 0;
     for (size_t i = 0; i < command.vertex_buffers.length; i++) {
       if (!BindVertexBuffer(gl, vertex_desc_gles,
                             vertex_buffers[i + command.vertex_buffers.offset],
-                            i, /*instance=*/0, &attrib_cache)) {
+                            i, /*instance=*/0, &state_cache.attrib)) {
         return false;
       }
     }
     if (is_es) {
-      attrib_cache.DisableUnusedAttribsBeforeDraw(gl);
+      state_cache.attrib.DisableUnusedAttribsBeforeDraw(gl);
     }
 
     //--------------------------------------------------------------------------
@@ -698,12 +705,12 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     /// Bind uniform data.
     ///
     if (!vertex_desc_gles->BindUniformData(
-            gl,                                              //
-            bound_textures,                                  //
-            bound_buffers,                                   //
-            /*texture_range=*/command.bound_textures,        //
-            /*buffer_range=*/command.bound_buffers,          //
-            /*state_cache=*/is_es ? &attrib_cache : nullptr  //
+            gl,                                                    //
+            bound_textures,                                        //
+            bound_buffers,                                         //
+            /*texture_range=*/command.bound_textures,              //
+            /*buffer_range=*/command.bound_buffers,                //
+            /*state_cache=*/is_es ? &state_cache.attrib : nullptr  //
             )) {
       return false;
     }
@@ -759,7 +766,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       if (is_es) {
         if (auto idx_handle = index_buffer_gles.GetHandle();
             idx_handle.has_value() &&
-            attrib_cache.bound_element_array_buffer == *idx_handle) {
+            state_cache.attrib.bound_element_array_buffer == *idx_handle) {
           idx_already_bound = true;
         }
       }
@@ -771,7 +778,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       if (is_es) {
         if (auto idx_handle = index_buffer_gles.GetHandle();
             idx_handle.has_value()) {
-          attrib_cache.bound_element_array_buffer = *idx_handle;
+          state_cache.attrib.bound_element_array_buffer = *idx_handle;
         }
       }
       index_offset = reinterpret_cast<const GLvoid*>(
@@ -798,12 +805,12 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       // were already bound above for instance 0.
       for (size_t instance = 0; instance < command.instance_count; instance++) {
         if (instance > 0u) {
-          attrib_cache.current_draw_attribs_mask = 0;
+          state_cache.attrib.current_draw_attribs_mask = 0;
           for (size_t i = 0; i < command.vertex_buffers.length; i++) {
             if (!BindVertexBuffer(
                     gl, vertex_desc_gles,
                     vertex_buffers[i + command.vertex_buffers.offset], i,
-                    instance, &attrib_cache)) {
+                    instance, &state_cache.attrib)) {
               return false;
             }
           }
@@ -833,7 +840,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
 
     //--------------------------------------------------------------------------
     /// Unbind vertex attribs (desktop GL VAO path only; ES defers cleanup to
-    /// pass end via attrib_cache).
+    /// pass end via state_cache.attrib).
     ///
     if (!is_es) {
       if (!vertex_desc_gles->UnbindVertexAttributes(gl)) {
@@ -843,7 +850,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
   }
 
   if (is_es) {
-    attrib_cache.ResetAtPassEnd(gl);
+    state_cache.attrib.ResetAtPassEnd(gl);
   }
 
   GLenum discard_target = GL_FRAMEBUFFER;

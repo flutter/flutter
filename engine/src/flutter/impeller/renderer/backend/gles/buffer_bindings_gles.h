@@ -6,6 +6,8 @@
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_BUFFER_BINDINGS_GLES_H_
 
 #include <array>
+#include <cstdint>
+#include <optional>
 #include <vector>
 
 #include "impeller/core/shader_types.h"
@@ -26,6 +28,8 @@ FML_TEST_CLASS(BufferBindingsGLESTest,
                BindsTexturesAcrossThePerStageUnitBoundary);
 FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondThePerStageLimit);
 FML_TEST_CLASS(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit);
+FML_TEST_CLASS(BufferBindingsGLESTest,
+               DeduplicatesActiveTextureBindTextureAndSamplerUniform);
 }  // namespace testing
 
 struct VertexAttribStateCache {
@@ -50,7 +54,8 @@ struct VertexAttribStateCache {
   uint32_t non_zero_divisor_mask = 0;
   std::array<AttribSlotState, kMaxVertexAttribs> slots = {};
   GLenum active_texture_unit = 0;
-  std::array<GLuint, kMaxTextureUnits> bound_textures = {};
+  std::array<std::optional<GLuint>, kMaxTextureUnits> bound_textures = {};
+  std::array<std::optional<uint64_t>, kMaxTextureUnits> bound_sampler_keys = {};
 
   void DisableUnusedAttribsBeforeDraw(const ProcTableGLES& gl) {
     uint32_t to_disable = enabled_attribs_mask & ~current_draw_attribs_mask;
@@ -136,6 +141,8 @@ class BufferBindingsGLES {
                   RejectsTexturesBeyondThePerStageLimit);
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
                   RejectsTexturesBeyondTheCombinedLimit);
+  FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
+                  DeduplicatesActiveTextureBindTextureAndSamplerUniform);
   //----------------------------------------------------------------------------
   /// @brief      The arguments to glVertexAttribPointer.
   ///

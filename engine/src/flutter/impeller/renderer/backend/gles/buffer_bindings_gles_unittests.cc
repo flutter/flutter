@@ -500,5 +500,226 @@ TEST(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit) {
       Range{0, fixture.bound_textures.size()}, Range{0, 0}));
 }
 
+TEST(BufferBindingsGLESTest,
+     DeduplicatesVertexAttributesAndDisablesUnusedAcrossDraws) {
+  auto mock_gles_impl = std::make_unique<NiceMock<MockGLESImpl>>();
+
+  // Attributes 0 and 1 enabled once on the first draw; attribute 2 enabled
+  // once when switching to the second pipeline.
+  EXPECT_CALL(*mock_gles_impl, EnableVertexAttribArray(0)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, EnableVertexAttribArray(1)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, EnableVertexAttribArray(2)).Times(1);
+  EXPECT_CALL(*mock_gles_impl,
+              VertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, _, _))
+      .Times(1);
+  EXPECT_CALL(*mock_gles_impl,
+              VertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, _, _))
+      .Times(1);
+  EXPECT_CALL(*mock_gles_impl,
+              VertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, _, _))
+      .Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(0, 0u)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(1, 0u)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(2, 1u)).Times(1);
+  // ResetAtPassEnd resets non-zero divisor on slot 2 back to 0.
+  EXPECT_CALL(*mock_gles_impl, VertexAttribDivisor(2, 0u)).Times(1);
+  // Attribute 1 is disabled before the third draw; attributes 0 and 2 are
+  // disabled at pass end.
+  EXPECT_CALL(*mock_gles_impl, DisableVertexAttribArray(1)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, DisableVertexAttribArray(0)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, DisableVertexAttribArray(2)).Times(1);
+
+  std::shared_ptr<MockGLES> mock_gl =
+      MockGLES::Init(std::move(mock_gles_impl),
+                     std::vector<const char*>{"GL_EXT_instanced_arrays"});
+  const ProcTableGLES& gl = mock_gl->GetProcTable();
+
+  ShaderStageIOSlot slot0 = {
+      .name = "pos",
+      .location = 0,
+      .set = 0,
+      .binding = 0,
+      .type = ShaderType::kFloat,
+      .bit_width = 32,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 0,
+  };
+  ShaderStageIOSlot slot1 = {
+      .name = "uv",
+      .location = 1,
+      .set = 0,
+      .binding = 0,
+      .type = ShaderType::kFloat,
+      .bit_width = 32,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 8,
+  };
+  ShaderStageIOSlot slot2_instanced = {
+      .name = "inst",
+      .location = 2,
+      .set = 0,
+      .binding = 0,
+      .type = ShaderType::kFloat,
+      .bit_width = 32,
+      .vec_size = 2,
+      .columns = 1,
+      .offset = 16,
+  };
+
+  BufferBindingsGLES bindings_a;
+  ASSERT_TRUE(bindings_a.RegisterVertexStageInput(
+      gl, {slot0, slot1},
+      {ShaderStageBufferLayout{.stride = 16,
+                               .binding = 0,
+                               .input_rate = VertexInputRate::kVertex}}));
+
+  BufferBindingsGLES bindings_b;
+  ASSERT_TRUE(bindings_b.RegisterVertexStageInput(
+      gl, {slot0, slot2_instanced},
+      {ShaderStageBufferLayout{.stride = 16,
+                               .binding = 0,
+                               .input_rate = VertexInputRate::kInstance}}));
+  // Override slot0 on bindings_b to stay vertex-rate with identical layout.
+  ASSERT_TRUE(bindings_b.RegisterVertexStageInput(
+      gl,
+      {slot0, ShaderStageIOSlot{.name = "inst",
+                                .location = 2,
+                                .set = 0,
+                                .binding = 1,
+                                .type = ShaderType::kFloat,
+                                .bit_width = 32,
+                                .vec_size = 2,
+                                .columns = 1,
+                                .offset = 0}},
+      {ShaderStageBufferLayout{
+           .stride = 16, .binding = 0, .input_rate = VertexInputRate::kVertex},
+       ShaderStageBufferLayout{.stride = 8,
+                               .binding = 1,
+                               .input_rate = VertexInputRate::kInstance}}));
+
+  VertexAttribStateCache state_cache;
+  state_cache.bound_array_buffer = 42u;
+
+  // Draw 1: binds slots 0 and 1.
+  state_cache.current_draw_attribs_mask = 0;
+  EXPECT_TRUE(bindings_a.BindVertexAttributes(gl, 0, 0, 0, &state_cache));
+  state_cache.DisableUnusedAttribsBeforeDraw(gl);
+
+  // Draw 2: identical VBO and layout on slots 0 and 1 -> all GL calls skipped.
+  state_cache.current_draw_attribs_mask = 0;
+  EXPECT_TRUE(bindings_a.BindVertexAttributes(gl, 0, 0, 0, &state_cache));
+  state_cache.DisableUnusedAttribsBeforeDraw(gl);
+
+  // Draw 3: switches to bindings_b (slots 0 and 2) -> slot 0 is deduplicated,
+  // slot 2 is configured with divisor 1, and unused slot 1 is disabled.
+  state_cache.current_draw_attribs_mask = 0;
+  EXPECT_TRUE(bindings_b.BindVertexAttributes(gl, 0, 0, 0, &state_cache));
+  EXPECT_TRUE(bindings_b.BindVertexAttributes(gl, 1, 0, 0, &state_cache));
+  state_cache.DisableUnusedAttribsBeforeDraw(gl);
+
+  // End of pass: resets non-zero divisor on slot 2 and disables slots 0 and 2.
+  state_cache.ResetAtPassEnd(gl);
+}
+
+TEST(BufferBindingsGLESTest,
+     DeduplicatesActiveTextureBindTextureAndSamplerUniform) {
+  auto impl = MakeSixteenUnitMockImpl();
+  EXPECT_CALL(*impl, ActiveTexture(GL_TEXTURE0)).Times(1);
+  EXPECT_CALL(*impl, BindTexture(GL_TEXTURE_2D, _)).Times(1);
+  EXPECT_CALL(*impl, TexParameteri(GL_TEXTURE_2D, _, _)).Times(5);
+  EXPECT_CALL(*impl, Uniform1i(100, 0)).Times(1);
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(impl));
+  BoundTexturesFixture fixture(
+      std::make_unique<ProcTableGLES>(kMockResolverGLES));
+  fixture.AddTextures(ShaderStage::kFragment, 1);
+  ASSERT_TRUE(fixture.reactor->React());
+
+  // Mark slice 0 initialized so the texture is eligible for unit caching.
+  const_cast<TextureGLES&>(
+      TextureGLES::Cast(*fixture.bound_textures[0].texture.resource))
+      .MarkSliceInitialized(0);
+
+  BufferBindingsGLES bindings;
+  bindings.SetUniformBindings(std::move(fixture.uniform_bindings));
+  std::vector<BufferResource> bound_buffers;
+  VertexAttribStateCache state_cache;
+
+  // First draw binds unit 0, texture, sampler parameters, and Uniform1i.
+  EXPECT_TRUE(bindings.BindUniformData(fixture.reactor->GetProcTable(),
+                                       fixture.bound_textures, bound_buffers,
+                                       Range{0, 1}, Range{0, 0}, &state_cache));
+
+  // Second draw with the same texture and sampler skips ActiveTexture,
+  // BindTexture, TexParameteri, and Uniform1i.
+  EXPECT_TRUE(bindings.BindUniformData(fixture.reactor->GetProcTable(),
+                                       fixture.bound_textures, bound_buffers,
+                                       Range{0, 1}, Range{0, 0}, &state_cache));
+}
+
+TEST(BufferBindingsGLESTest,
+     SkipsRedundantUniformBufferUploadAndBindWhenUnmodified) {
+  BufferBindingsGLES bindings;
+  auto mock_gles_impl = std::make_unique<NiceMock<MockGLESImpl>>();
+  const GLuint kProgram = 1;
+
+  ON_CALL(*mock_gles_impl, IsProgram(kProgram))
+      .WillByDefault(::testing::Return(GL_TRUE));
+  ON_CALL(*mock_gles_impl, GetProgramiv(kProgram, GL_ACTIVE_UNIFORM_BLOCKS, _))
+      .WillByDefault(::testing::SetArgPointee<2>(1));
+  ON_CALL(*mock_gles_impl,
+          GetActiveUniformBlockiv(kProgram, 0, GL_UNIFORM_BLOCK_NAME_LENGTH, _))
+      .WillByDefault(::testing::SetArgPointee<3>(9));
+  ON_CALL(*mock_gles_impl, GetActiveUniformBlockName(kProgram, 0, 9, _, _))
+      .WillByDefault(
+          [](GLuint, GLuint, GLsizei, GLsizei* length, GLchar* name) {
+            *length = 8;
+            std::memcpy(name, "FragInfo", 9);
+          });
+  ON_CALL(*mock_gles_impl,
+          GetUniformBlockIndex(kProgram, ::testing::StrEq("FragInfo")))
+      .WillByDefault(::testing::Return(0));
+  ON_CALL(*mock_gles_impl,
+          GetActiveUniformBlockiv(kProgram, 0, GL_UNIFORM_BLOCK_DATA_SIZE, _))
+      .WillByDefault(::testing::SetArgPointee<3>(kBlockDataSize));
+
+  // BindBuffer(GL_UNIFORM_BUFFER) and BufferData are called only on the first
+  // BindUniformData when the UBO is initialized; the second draw skips
+  // BindBuffer(GL_UNIFORM_BUFFER) because NeedsUpload() is false.
+  EXPECT_CALL(*mock_gles_impl, BindBuffer(GL_UNIFORM_BUFFER, _)).Times(1);
+  EXPECT_CALL(*mock_gles_impl, BufferData(GL_UNIFORM_BUFFER, _, _, _)).Times(1);
+  EXPECT_CALL(*mock_gles_impl,
+              BindBufferRange(GL_UNIFORM_BUFFER, 0, _, 0, kBlockDataSize))
+      .Times(2);
+
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(mock_gles_impl));
+  ASSERT_TRUE(bindings.ReadUniformsBindings(mock_gl->GetProcTable(), kProgram));
+
+  auto proc_table = std::make_unique<ProcTableGLES>(kMockResolverGLES);
+  auto worker = std::make_shared<TestWorker>();
+  auto reactor = std::make_shared<ReactorGLES>(std::move(proc_table));
+  reactor->AddWorker(worker);
+
+  ShaderMetadata shader_metadata = {.name = "FragInfo"};
+  auto backing_store = std::make_unique<Allocation>();
+  ASSERT_TRUE(backing_store->Truncate(Bytes{1024}));
+  DeviceBufferGLES device_buffer(DeviceBufferDescriptor{.size = 1024}, reactor,
+                                 std::move(backing_store));
+  BufferView buffer_view(&device_buffer, Range(0, kBlockDataSize));
+  std::vector<BufferResource> bound_buffers;
+  bound_buffers.push_back(BufferResource(&shader_metadata, buffer_view));
+  std::vector<TextureAndSampler> bound_textures;
+
+  EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
+                                       bound_buffers, Range{0, 0},
+                                       Range{0, 1}));
+  EXPECT_FALSE(device_buffer.NeedsUpload());
+  EXPECT_TRUE(bindings.BindUniformData(mock_gl->GetProcTable(), bound_textures,
+                                       bound_buffers, Range{0, 0},
+                                       Range{0, 1}));
+}
+
 }  // namespace testing
 }  // namespace impeller

@@ -604,9 +604,11 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
       const bool texture_already_bound =
           state_cache->bound_textures[active_index] == *tex_handle;
       const auto& sampler_gles = SamplerGLES::Cast(*data.sampler);
-      const bool needs_sampler_config =
-          texture_gles.GetConfiguredSamplerKey() !=
+      const uint64_t sampler_key =
           SamplerDescriptor::ToKey(sampler_gles.GetDescriptor());
+      const bool needs_sampler_config =
+          !texture_already_bound ||
+          state_cache->bound_sampler_keys[active_index] != sampler_key;
       if (!texture_already_bound || needs_sampler_config) {
         if (state_cache->active_texture_unit != target_unit) {
           gl.ActiveTexture(target_unit);
@@ -621,6 +623,7 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
         if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
           return std::nullopt;
         }
+        state_cache->bound_sampler_keys[active_index] = sampler_key;
       }
     } else {
       if (state_cache == nullptr ||
@@ -633,16 +636,21 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
       if (!const_cast<TextureGLES&>(texture_gles).Bind()) {
         return std::nullopt;
       }
+      const auto& sampler_gles = SamplerGLES::Cast(*data.sampler);
+      if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
+        return std::nullopt;
+      }
       if (state_cache != nullptr &&
           active_index < VertexAttribStateCache::kMaxTextureUnits) {
         if (auto tex_handle = texture_gles.GetGLHandle();
             tex_handle.has_value()) {
           state_cache->bound_textures[active_index] = *tex_handle;
+          state_cache->bound_sampler_keys[active_index] =
+              SamplerDescriptor::ToKey(sampler_gles.GetDescriptor());
+        } else {
+          state_cache->bound_textures[active_index] = std::nullopt;
+          state_cache->bound_sampler_keys[active_index] = std::nullopt;
         }
-      }
-      const auto& sampler_gles = SamplerGLES::Cast(*data.sampler);
-      if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
-        return std::nullopt;
       }
     }
 
