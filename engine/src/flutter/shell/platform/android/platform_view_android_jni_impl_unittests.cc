@@ -24,6 +24,7 @@
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 
 namespace flutter {
@@ -283,6 +284,12 @@ void* RegisterNativesAndFind(MockJNIEnv& mock_env, const char* name) {
   return found;
 }
 
+Shell* GetShellForTesting(const AndroidShellHolder& holder) {
+  auto* engine =
+      reinterpret_cast<EmbedderEngine*>(holder.GetEngineForTesting());
+  return engine ? &engine->GetShell() : nullptr;
+}
+
 // The PlatformData held by the holder's runtime controller.
 //
 // Only valid on the UI thread. AndroidShellHolder merges the platform and UI
@@ -292,7 +299,7 @@ void* RegisterNativesAndFind(MockJNIEnv& mock_env, const char* name) {
 // with RunNowAndFlushMessages, so they are visible as soon as the native
 // returns.
 const PlatformData& RuntimePlatformData(const AndroidShellHolder& holder) {
-  return holder.GetShellForTesting()
+  return GetShellForTesting(holder)
       ->GetEngine()
       ->GetRuntimeController()
       ->GetPlatformData();
@@ -1254,7 +1261,7 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   auto asset_manager = std::make_shared<AssetManager>();
   asset_manager->PushBack(std::make_unique<APKAssetProvider>(
       std::make_shared<TestAPKAssetProviderImpl>("initial_asset")));
-  holder->GetShellForTesting()->GetEngine()->UpdateAssetManager(asset_manager);
+  GetShellForTesting(*holder)->GetEngine()->UpdateAssetManager(asset_manager);
 
   auto initial_mapping = asset_manager->GetAsMapping("test_asset.txt");
   ASSERT_NE(initial_mapping, nullptr);
@@ -1684,7 +1691,7 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   EXPECT_CALL(*jni, GetDisplayDensity()).WillOnce(Return(kDisplayDensity));
 
   holder->UpdateDisplayMetrics();
-  EXPECT_DOUBLE_EQ(holder->GetShellForTesting()->GetMainDisplayRefreshRate(),
+  EXPECT_DOUBLE_EQ(GetShellForTesting(*holder)->GetMainDisplayRefreshRate(),
                    kRefreshRateHz);
   ASSERT_EQ(RuntimePlatformData(*holder).displays.size(), 1u);
   EXPECT_DOUBLE_EQ(RuntimePlatformData(*holder).displays[0].refresh_rate,
@@ -1838,7 +1845,7 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   constexpr int32_t kAndroidSdkDecoderPriority = -1;
   FlutterImageGeneratorRegistrationInfo info =
       AndroidImageGenerator::MakeFlutterImageGeneratorRegistrationInfo(
-          holder->GetShellForTesting()->GetTaskRunners().GetIOTaskRunner(),
+          GetShellForTesting(*holder)->GetTaskRunners().GetIOTaskRunner(),
           kAndroidSdkDecoderPriority);
 
   EXPECT_EQ(info.struct_size, sizeof(FlutterImageGeneratorRegistrationInfo));

@@ -11,8 +11,6 @@
 
 #include <android/hardware_buffer_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
-#include "flutter/shell/common/platform_view.h"
-#include "flutter/shell/common/snapshot_surface_producer.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
@@ -91,9 +89,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   /// @brief Whether the SurfaceControl based swapchain is enabled and active.
   bool IsSurfaceControlEnabled() const;
 
-  // |PlatformView|
-  void SetupImpellerContext() override;
-
  private:
   PlatformViewAndroid(
       PlatformView::Delegate& delegate,
@@ -103,6 +98,12 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
       std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler,
       PlatformDispatchTable platform_dispatch_table);
 
+  static PlatformDispatchTable WithAndroidCallbacks(
+      PlatformViewAndroid* self,
+      PlatformDispatchTable platform_dispatch_table,
+      const std::shared_ptr<PlatformMessageHandlerAndroid>&
+          platform_message_handler);
+
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidContext> android_context_;
   std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
@@ -110,24 +111,20 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   std::unique_ptr<AndroidSurface> android_surface_;
   bool android_meets_hcpp_criteria_ = false;
 
-  // |PlatformView|
-  std::unique_ptr<Surface> CreateRenderingSurface() override;
+  std::unique_ptr<Surface> CreateAndroidRenderingSurface();
 
-  // |PlatformView|
-  std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() override;
+  std::shared_ptr<ExternalViewEmbedder> CreateAndroidExternalViewEmbedder();
 
-  // |PlatformView|
-  std::unique_ptr<SnapshotSurfaceProducer> CreateSnapshotSurfaceProducer()
-      override;
+  std::unique_ptr<SnapshotSurfaceProducer>
+  CreateAndroidSnapshotSurfaceProducer();
 
-  // |PlatformView|
-  sk_sp<GrDirectContext> CreateResourceContext() const override;
+  sk_sp<GrDirectContext> CreateAndroidResourceContext() const;
 
-  // |PlatformView|
-  void ReleaseResourceContext() const override;
+  void ReleaseAndroidResourceContext() const;
 
-  // |PlatformView|
-  std::shared_ptr<impeller::Context> GetImpellerContext() const override;
+  std::shared_ptr<impeller::Context> GetAndroidImpellerContext() const;
+
+  void SetupAndroidImpellerContext();
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

@@ -18,6 +18,7 @@
 #include "flutter/shell/common/vsync_waiter.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
+#include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -263,6 +264,12 @@ class VsyncFrameRecorder
   std::vector<Frame> frames_;
 };
 
+Shell* GetShellForTesting(const AndroidShellHolder& holder) {
+  auto* engine =
+      reinterpret_cast<EmbedderEngine*>(holder.GetEngineForTesting());
+  return engine ? &engine->GetShell() : nullptr;
+}
+
 // Requests one frame from the vsync waiter the platform view creates for the
 // shell, from the UI thread like the animator does, and checks how it is
 // delivered.
@@ -272,7 +279,7 @@ void ExpectOneFrameOnUIThread(
       CreateHolderWithoutSurface(merged_platform_ui_thread);
   ASSERT_TRUE(holder->IsValid());
   fml::RefPtr<fml::TaskRunner> ui_task_runner =
-      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner();
+      GetShellForTesting(*holder)->GetTaskRunners().GetUITaskRunner();
   // Through the PlatformView base class, the way the shell calls it.
   PlatformView& platform_view = *holder->GetPlatformView();
   std::shared_ptr<VsyncWaiter> vsync_waiter = platform_view.CreateVSyncWaiter();
@@ -347,8 +354,8 @@ TEST(AndroidShellHolder, CreateWithMergedPlatformAndUIThread) {
   holder->NotifySurfaceCreated(window);
 
   EXPECT_EQ(
-      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
-      holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
+      GetShellForTesting(*holder)->GetTaskRunners().GetUITaskRunner(),
+      GetShellForTesting(*holder)->GetTaskRunners().GetPlatformTaskRunner());
 }
 
 TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
@@ -363,8 +370,8 @@ TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
   holder->NotifySurfaceCreated(window);
 
   EXPECT_NE(
-      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner(),
-      holder->GetShellForTesting()->GetTaskRunners().GetPlatformTaskRunner());
+      GetShellForTesting(*holder)->GetTaskRunners().GetUITaskRunner(),
+      GetShellForTesting(*holder)->GetTaskRunners().GetPlatformTaskRunner());
 }
 
 TEST(AndroidShellHolder, StartsWithDetachedLifecycleState) {
@@ -381,7 +388,7 @@ TEST(AndroidShellHolder, StartsWithDetachedLifecycleState) {
 
   // Frames stay off until Java reports a lifecycle state over
   // flutter/lifecycle.
-  EXPECT_EQ(holder->GetShellForTesting()
+  EXPECT_EQ(GetShellForTesting(*holder)
                 ->GetEngine()
                 ->GetRuntimeController()
                 ->GetPlatformData()
@@ -404,7 +411,7 @@ TEST(AndroidShellHolder, PendingVsyncIsDeliveredOnceAfterHolderIsDestroyed) {
       CreateHolderWithoutSurface(Settings::MergedPlatformUIThread::kEnabled);
   ASSERT_TRUE(holder->IsValid());
   fml::RefPtr<fml::TaskRunner> ui_task_runner =
-      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner();
+      GetShellForTesting(*holder)->GetTaskRunners().GetUITaskRunner();
   ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
   PlatformView& platform_view = *holder->GetPlatformView();
   // The test keeps the waiter alive. In an app the shell owns it and it dies
@@ -440,7 +447,7 @@ TEST(AndroidShellHolder, VsyncBatonsReturnThroughFlutterEngineOnVsync) {
       CreateHolderWithoutSurface(Settings::MergedPlatformUIThread::kEnabled);
   ASSERT_TRUE(holder->IsValid());
   fml::RefPtr<fml::TaskRunner> ui_task_runner =
-      holder->GetShellForTesting()->GetTaskRunners().GetUITaskRunner();
+      GetShellForTesting(*holder)->GetTaskRunners().GetUITaskRunner();
   // With merged threads every call below happens on the test thread.
   ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
 
@@ -665,6 +672,21 @@ TEST(AndroidShellHolder, GetScaledFontSizeForwardsToJni) {
   EXPECT_DOUBLE_EQ(
       platform_view.GetScaledFontSize(kUnscaledFontSize, kConfigurationId),
       kExpectedScaledFontSize);
+}
+
+TEST(AndroidShellHolder,
+     PlatformViewAndroidRoutesRenderingAndContextCallbacksThroughEmbedder) {
+  std::unique_ptr<AndroidShellHolder> holder =
+      CreateHolderWithoutSurface(Settings::MergedPlatformUIThread::kEnabled);
+  ASSERT_TRUE(holder->IsValid());
+
+  PlatformView& platform_view = *holder->GetPlatformView();
+  const PlatformView& const_platform_view = *holder->GetPlatformView();
+
+  EXPECT_NE(const_platform_view.GetImpellerContext(), nullptr);
+  EXPECT_NE(platform_view.CreateExternalViewEmbedder(), nullptr);
+  EXPECT_NE(platform_view.CreateSnapshotSurfaceProducer(), nullptr);
+  const_platform_view.ReleaseResourceContext();
 }
 
 }  // namespace testing

@@ -2,15 +2,15 @@
   "comment": "Coupling counts for shell/platform/android. Maintained by ci/bin/android_embedder_ratchet.dart; run its \"update\" command instead of editing counts by hand.",
   "metrics": {
     "shell_refs": {
-      "count": 11,
+      "count": 8,
       "enforce": "ratchet"
     },
     "get_shell_calls": {
-      "count": 5,
-      "enforce": "ratchet"
+      "count": 0,
+      "enforce": "zero"
     },
     "embedder_engine_refs": {
-      "count": 5,
+      "count": 4,
       "enforce": "ratchet"
     },
     "embedder_internal_includes": {
@@ -18,7 +18,7 @@
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
-      "count": 142,
+      "count": 140,
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {
@@ -26,8 +26,8 @@
       "enforce": "zero"
     },
     "platform_view_android_overrides": {
-      "count": 7,
-      "enforce": "ratchet"
+      "count": 0,
+      "enforce": "zero"
     },
     "gn_internal_deps": {
       "count": 14,

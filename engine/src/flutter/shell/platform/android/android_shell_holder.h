@@ -245,7 +245,9 @@ class AndroidShellHolder {
   void NotifySurfaceDestroyed();
 
   // Visible for testing.
-  Shell* GetShellForTesting() const;
+  FLUTTER_API_SYMBOL(FlutterEngine) GetEngineForTesting() const {
+    return engine_.get();
+  }
 
   // Visible for testing. Replacing an entry changes what the holder calls.
   FlutterEngineProcTable& GetEmbedderApiForTesting();

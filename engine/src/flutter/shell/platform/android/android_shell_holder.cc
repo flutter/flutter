@@ -436,14 +436,10 @@ void OnPlatformMessageResponse(const uint8_t* data,
 }
 
 // The holder owns its engine through an embedder API handle. Where embedder.h
-// has no equivalent yet, the holder reaches past the handle with a cast or
-// GetShell(). Keep each of those visible at its use so that
-// ci/bin/android_embedder_ratchet.dart counts it; the counts must reach zero
-// before the holder switches to FlutterEngineInitialize.
-
-Shell& GetShell(FLUTTER_API_SYMBOL(FlutterEngine) engine) {
-  return reinterpret_cast<EmbedderEngine*>(engine)->GetShell();
-}
+// has no equivalent yet, the holder reaches past the handle with a cast. Keep
+// each of those visible at its use so that ci/bin/android_embedder_ratchet.dart
+// counts it; the counts must reach zero before the holder switches to
+// FlutterEngineInitialize.
 
 FlutterEngineProcTable LoadEmbedderApi() {
   FlutterEngineProcTable embedder_api = {};
@@ -942,10 +938,6 @@ void AndroidShellHolder::NotifyLowMemoryWarning() {
 const std::shared_ptr<PlatformMessageHandler>&
 AndroidShellHolder::GetPlatformMessageHandler() const {
   return platform_message_handler_;
-}
-
-Shell* AndroidShellHolder::GetShellForTesting() const {
-  return engine_ ? &GetShell(engine_.get()) : nullptr;
 }
 
 void AndroidShellHolder::SetSemanticsEnabled(bool enabled) {
