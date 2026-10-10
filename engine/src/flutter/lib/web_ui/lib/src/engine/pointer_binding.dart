@@ -784,9 +784,7 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     final ui.Offset offset = computeEventOffsetToTarget(event, _view);
     var ignoreCtrlKey = false;
     if (isMacOS) {
-      ignoreCtrlKey =
-          (_keyboardConverter?.keyIsPressed(kPhysicalControlLeft) ?? false) ||
-          (_keyboardConverter?.keyIsPressed(kPhysicalControlRight) ?? false);
+      ignoreCtrlKey = _isPhysicalControlKeyPressed;
     }
     if (event.ctrlKey && !ignoreCtrlKey) {
       _pointerDataConverter.convert(
@@ -837,6 +835,36 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     return data;
   }
 
+  /// Whether a physical Control key is currently held down.
+  ///
+  /// Browsers also set [DomWheelEvent.ctrlKey] on the wheel events they
+  /// synthesize for trackpad pinch gestures, so that flag alone cannot tell a
+  /// pinch apart from the user scrolling with the Control key pressed. A pinch
+  /// never involves a key press, which is what the keyboard converter tracks.
+  bool get _isPhysicalControlKeyPressed =>
+      (_keyboardConverter?.keyIsPressed(kPhysicalControlLeft) ?? false) ||
+      (_keyboardConverter?.keyIsPressed(kPhysicalControlRight) ?? false);
+
+  /// Whether [event] is the browser's Control+wheel zoom shortcut.
+  ///
+  /// On Windows, Linux and ChromeOS, scrolling the wheel with the Control key
+  /// held zooms the page, and the framework should stay out of the way, just
+  /// like it does for the Control+Plus and Control+Minus shortcuts.
+  ///
+  /// macOS and iOS are excluded: Control+wheel does not zoom the browser
+  /// there, and [_convertWheelEventToPointerData] already reports a wheel
+  /// event with a physically pressed Control key as a plain scroll on macOS.
+  bool _isBrowserZoomShortcut(DomWheelEvent event) {
+    if (!event.ctrlKey) {
+      return false;
+    }
+    final ui_web.OperatingSystem os = ui_web.browser.operatingSystem;
+    if (os == ui_web.OperatingSystem.macOs || os == ui_web.OperatingSystem.iOs) {
+      return false;
+    }
+    return _isPhysicalControlKeyPressed;
+  }
+
   void _addWheelEventListener(DartDomEventListener handler) {
     _listeners.add(
       Listener.register(event: 'wheel', target: _viewTarget, handler: handler, passive: false),
@@ -861,6 +889,16 @@ mixin _WheelEventListenerMixin on _BaseAdapter {
     _lastWheelEventHandledByWidget = false;
 
     final wheelEvent = event as DomWheelEvent;
+
+    if (_isBrowserZoomShortcut(wheelEvent)) {
+      // The user is holding the Control key while turning the wheel. Outside
+      // of macOS that is the browser's own zoom shortcut, so the event is
+      // neither forwarded to the framework nor cancelled: the browser gets to
+      // zoom the page, exactly as it does on any other web page.
+      //
+      // See https://github.com/flutter/flutter/issues/129933.
+      return;
+    }
 
     // Dispatch to framework (this triggers onRespond callbacks synchronously)
     _callback(event, _convertWheelEventToPointerData(wheelEvent));
