@@ -1447,7 +1447,16 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)paste:(id)sender {
   NSString* pasteboardString = [UIPasteboard generalPasteboard].string;
   if (pasteboardString != nil) {
+    // This action reads the pasteboard and changes the document directly.
+    // Notify UIKit so its text and selection stay in sync.
+    // Keep these notifications out of insertText:, which UIKit also calls when
+    // committing marked text.
+    id<UITextInputDelegate> inputDelegate = self.inputDelegate;
+    [inputDelegate textWillChange:self];
+    [inputDelegate selectionWillChange:self];
     [self insertText:pasteboardString];
+    [inputDelegate selectionDidChange:self];
+    [inputDelegate textDidChange:self];
   }
 }
 
