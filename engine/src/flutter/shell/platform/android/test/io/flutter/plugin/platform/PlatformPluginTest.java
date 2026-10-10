@@ -16,6 +16,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -705,6 +706,24 @@ public class PlatformPluginTest {
     platformPlugin.mPlatformMessageHandler.setFrameworkHandlesBack(true);
 
     verify(mockPlatformPluginDelegate, times(1)).setFrameworkHandlesBack(true);
+  }
+
+  @Test
+  public void constructorAppliesReplayedFrameworkHandlesBackToDelegate() {
+    Activity mockActivity = mock(Activity.class);
+    PlatformPluginDelegate mockPlatformPluginDelegate = mock(PlatformPluginDelegate.class);
+    doAnswer(
+            invocation -> {
+              PlatformChannel.PlatformMessageHandler handler = invocation.getArgument(0);
+              handler.setFrameworkHandlesBack(true);
+              return null;
+            })
+        .when(mockPlatformChannel)
+        .setPlatformMessageHandler(any());
+
+    new PlatformPlugin(mockActivity, mockPlatformChannel, mockPlatformPluginDelegate);
+
+    verify(mockPlatformPluginDelegate).setFrameworkHandlesBack(true);
   }
 
   @Test
