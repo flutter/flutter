@@ -3,10 +3,10 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/base/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: base_unittests.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -50,4 +50,39 @@ cc_library(
         "@abseil-cpp//absl/status:statusor",
     ],
     alwayslink = True,
+)
+
+cc_library(
+    name = "base_unittests",
+    testonly = True,
+    srcs = [
+        "allocation_size_unittests.cc",
+        "allocation_unittests.cc",
+        "base_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":base",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+flutter_test_fixtures(name = "impeller_base_fixtures")
+
+cc_test(
+    name = "impeller_base_unittests",
+    deps = [
+        ":base_unittests",
+        ":impeller_base_fixtures",
+        "//engine/src/flutter/testing",
+    ],
 )
