@@ -273,6 +273,19 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(uint32_t, GetMaxSamplerAnisotropy, (), (const override));
   MOCK_METHOD(size_t, GetMinimumUniformAlignment, (), (const override));
   MOCK_METHOD(bool, NeedsPartitionedHostBuffer, (), (const, override));
+  MOCK_METHOD(uint32_t,
+              GetMaximumComputeWorkgroupInvocations,
+              (),
+              (const, override));
+  MOCK_METHOD((std::array<uint32_t, 3>),
+              GetMaximumComputeWorkgroupSize,
+              (),
+              (const, override));
+  MOCK_METHOD((std::array<uint32_t, 3>),
+              GetMaximumComputeWorkgroupCount,
+              (),
+              (const, override));
+  MOCK_METHOD(size_t, GetMaximumComputeSharedMemorySize, (), (const, override));
 };
 
 class MockCommandQueue : public CommandQueue {

@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <mutex>
+#include <string>
+#include <vector>
+
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
+#include "impeller/base/validation.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/fixtures/sample.comp.h"
 #include "impeller/fixtures/stage1.comp.h"
@@ -13,6 +18,8 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/compute_3d_test.comp.h"
 #include "impeller/renderer/compute_pipeline_builder.h"
+#include "impeller/renderer/increment_test.comp.h"
+#include "impeller/renderer/oversized_workgroup_test.comp.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/prefix_sum_test.comp.h"
 #include "impeller/renderer/threadgroup_sizing_test.comp.h"
@@ -26,13 +33,8 @@ std::shared_ptr<impeller::HostBuffer> CreateHostBufferFromContext(
 }
 
 // The number of workgroups needed to cover `invocations` invocations given a
-// per-workgroup `local_size`. A `local_size` of 0 means the shader sizes its
-// workgroup with a specialization constant, in which case the caller should
-// dispatch an explicit count rather than derive one here.
+// per-workgroup `local_size`.
 constexpr uint32_t WorkgroupCount(size_t invocations, uint32_t local_size) {
-  if (local_size == 0u) {
-    return 0u;
-  }
   return static_cast<uint32_t>((invocations + local_size - 1) / local_size);
 }
 }  // namespace
@@ -164,8 +166,11 @@ TEST_P(ComputeTest, CanComputePrefixSum) {
   CS::BindInputData(*pass, host_buffer->EmplaceStorageBuffer(input_data));
   CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
 
-  // The prefix sum is computed within a single workgroup whose size is sized to
-  // the device (a specialization constant), so dispatch exactly one.
+  // The prefix sum is computed within a single workgroup whose literal size
+  // covers the whole input, so dispatch exactly one.
+  static_assert(CS::kWorkgroupSize[0] == 128u && CS::kWorkgroupSize[1] == 1u &&
+                CS::kWorkgroupSize[2] == 1u);
+  static_assert(kCount <= CS::kWorkgroupSize[0]);
   ASSERT_TRUE(pass->Compute({1, 1, 1}).ok());
   ASSERT_TRUE(pass->EncodeCommands());
 
@@ -329,7 +334,8 @@ TEST_P(ComputeTest, CanComputePrefixSumLargeInteractive) {
     auto cmd_buffer = context->CreateCommandBuffer();
     auto pass = cmd_buffer->CreateComputePass();
 
-    static constexpr size_t kCount = 1023;
+    // The largest input one workgroup can sum.
+    static constexpr size_t kCount = CS::kWorkgroupSize[0];
 
     pass->SetPipeline(compute_pipeline);
 
@@ -541,56 +547,179 @@ TEST_P(ComputeTest, CanCompute1DimensionalData) {
   latch.Wait();
 }
 
-TEST_P(ComputeTest, ReturnsEarlyWhenAnyGridDimensionIsZero) {
-  using CS = SampleComputeShader;
+TEST_P(ComputeTest, ZeroWorkgroupCountIsNoOp) {
+  using CS = IncrementTestComputeShader;
   auto context = GetContext();
-  auto host_buffer = CreateHostBufferFromContext(context);
   ASSERT_TRUE(context);
   ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
-  using SamplePipelineBuilder = ComputePipelineBuilder<CS>;
   auto pipeline_desc =
-      SamplePipelineBuilder::MakeDefaultPipelineDescriptor(*context);
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
   ASSERT_TRUE(pipeline_desc.has_value());
   auto compute_pipeline =
       context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
   ASSERT_TRUE(compute_pipeline);
 
+  static constexpr size_t kCount = CS::kWorkgroupSize[0];
+  auto buffer = CreateHostVisibleDeviceBuffer<CS::Data<kCount>>(context, "Data");
+  CS::Data<kCount> initial = {};
+  ASSERT_TRUE(buffer->CopyHostBuffer(reinterpret_cast<const uint8_t*>(&initial),
+                                     Range{0, sizeof(initial)}, 0));
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  auto pass = cmd_buffer->CreateComputePass();
+  ASSERT_TRUE(pass && pass->IsValid());
+  pass->SetPipeline(compute_pipeline);
+  CS::BindData(*pass, DeviceBuffer::AsBufferView(buffer));
+
+  // A zero count in any dimension dispatches nothing and is not an error, like
+  // a draw with no vertices.
+  EXPECT_TRUE(pass->Compute({0, 1, 1}).ok());
+  EXPECT_TRUE(pass->Compute({1, 0, 1}).ok());
+  EXPECT_TRUE(pass->Compute({1, 1, 0}).ok());
+  ASSERT_TRUE(pass->EncodeCommands());
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(context->GetCommandQueue()
+                  ->Submit({cmd_buffer},
+                           [&latch, buffer](CommandBuffer::Status status) {
+                             EXPECT_EQ(status,
+                                       CommandBuffer::Status::kCompleted);
+                             buffer->Invalidate();
+                             auto* output = reinterpret_cast<CS::Data<kCount>*>(
+                                 buffer->OnGetContents());
+                             for (size_t i = 0; i < kCount; i++) {
+                               EXPECT_EQ(output->values[i], 0u);
+                             }
+                             latch.Signal();
+                           })
+                  .ok());
+  latch.Wait();
+}
+
+TEST_P(ComputeTest, BindingsPersistAcrossDispatches) {
+  using CS = IncrementTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  auto pipeline_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  static constexpr size_t kCount = CS::kWorkgroupSize[0] * 2;
+  CS::Data<kCount> initial = {};
+  auto buffer_a =
+      CreateHostVisibleDeviceBuffer<CS::Data<kCount>>(context, "Data A");
+  auto buffer_b =
+      CreateHostVisibleDeviceBuffer<CS::Data<kCount>>(context, "Data B");
+  ASSERT_TRUE(buffer_a->CopyHostBuffer(
+      reinterpret_cast<const uint8_t*>(&initial), Range{0, sizeof(initial)},
+      0));
+  ASSERT_TRUE(buffer_b->CopyHostBuffer(
+      reinterpret_cast<const uint8_t*>(&initial), Range{0, sizeof(initial)},
+      0));
+
   auto cmd_buffer = context->CreateCommandBuffer();
   auto pass = cmd_buffer->CreateComputePass();
   ASSERT_TRUE(pass && pass->IsValid());
 
-  static constexpr size_t kCount = 5;
+  const std::array<uint32_t, 3> workgroups = {
+      WorkgroupCount(kCount, CS::kWorkgroupSize[0]), 1, 1};
 
+  // Bind once and dispatch twice: the second dispatch reuses the pipeline and
+  // the binding.
   pass->SetPipeline(compute_pipeline);
+  CS::BindData(*pass, DeviceBuffer::AsBufferView(buffer_a));
+  ASSERT_TRUE(pass->Compute(workgroups).ok());
+  pass->AddBufferMemoryBarrier();
+  ASSERT_TRUE(pass->Compute(workgroups).ok());
+  pass->AddBufferMemoryBarrier();
 
-  CS::Info info{.count = kCount};
-  CS::Input0<kCount> input_0;
-  CS::Input1<kCount> input_1;
-  for (size_t i = 0; i < kCount; i++) {
-    input_0.elements[i] = Vector4(2.0 + i, 3.0 + i, 4.0 + i, 5.0 * i);
-    input_1.elements[i] = Vector4(6.0, 7.0, 8.0, 9.0);
-  }
+  // Changing a binding applies to later dispatches only, and is kept for the
+  // dispatch after that.
+  CS::BindData(*pass, DeviceBuffer::AsBufferView(buffer_b));
+  ASSERT_TRUE(pass->Compute(workgroups).ok());
+  pass->AddBufferMemoryBarrier();
+  ASSERT_TRUE(pass->Compute(workgroups).ok());
+  pass->AddBufferMemoryBarrier();
+  ASSERT_TRUE(pass->Compute(workgroups).ok());
+  ASSERT_TRUE(pass->EncodeCommands());
 
-  input_0.fixed_array[1] = IPoint32(2, 2);
-  input_1.fixed_array[0] = UintPoint32(3, 3);
-  input_0.some_int = 5;
-  input_1.some_struct = CS::SomeStruct{.vf = Point(3, 4), .i = 42};
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(
+      context->GetCommandQueue()
+          ->Submit(
+              {cmd_buffer},
+              [&latch, buffer_a, buffer_b](CommandBuffer::Status status) {
+                EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+                buffer_a->Invalidate();
+                buffer_b->Invalidate();
+                auto* a = reinterpret_cast<CS::Data<kCount>*>(
+                    buffer_a->OnGetContents());
+                auto* b = reinterpret_cast<CS::Data<kCount>*>(
+                    buffer_b->OnGetContents());
+                for (size_t i = 0; i < kCount; i++) {
+                  EXPECT_EQ(a->values[i], 2u) << "index " << i;
+                  EXPECT_EQ(b->values[i], 3u) << "index " << i;
+                }
+                latch.Signal();
+              })
+          .ok());
+  latch.Wait();
+}
 
-  auto output_buffer = CreateHostVisibleDeviceBuffer<CS::Output<kCount>>(
-      context, "Output Buffer");
+TEST_P(ComputeTest, OversizedWorkgroupFailsPipelineCreation) {
+  using CS = OversizedWorkgroupTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
 
-  CS::BindInfo(*pass, host_buffer->EmplaceUniform(info));
-  CS::BindInput0(*pass, host_buffer->EmplaceStorageBuffer(input_0));
-  CS::BindInput1(*pass, host_buffer->EmplaceStorageBuffer(input_1));
-  CS::BindOutput(*pass, DeviceBuffer::AsBufferView(output_buffer));
+  auto pipeline_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
+  ASSERT_EQ(pipeline_desc->GetWorkgroupSize(),
+            (std::array<uint32_t, 3>{1024u, 1024u, 1u}));
 
-  // Intentionally making the workgroup count zero in one dimension. No GPU will
-  // tolerate this.
-  auto status = pass->Compute({0, 1, 1});
-  EXPECT_FALSE(status.ok());
-  EXPECT_EQ(status.code(), fml::StatusCode::kCancelled);
-  pass->EncodeCommands();
+  std::mutex mutex;
+  std::vector<std::string> messages;
+  ImpellerValidationErrorsSetCallback(
+      [&](const char* message, const char* file, int line) {
+        std::scoped_lock lock(mutex);
+        messages.emplace_back(message);
+        return true;
+      });
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
+  ImpellerValidationErrorsSetCallback(nullptr);
+
+  EXPECT_FALSE(compute_pipeline);
+  std::scoped_lock lock(mutex);
+  EXPECT_THAT(messages, ::testing::Contains(::testing::HasSubstr(
+                            "has a workgroup size of 1024x1024x1")));
+}
+
+TEST_P(ComputeTest, CapabilitiesReportComputeLimits) {
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  const auto& caps = context->GetCapabilities();
+  ASSERT_TRUE(caps->SupportsCompute());
+
+  // The minimums every Metal and Vulkan device meets.
+  EXPECT_GE(caps->GetMaximumComputeWorkgroupInvocations(), 128u);
+  const auto size = caps->GetMaximumComputeWorkgroupSize();
+  EXPECT_GE(size[0], 128u);
+  EXPECT_GE(size[1], 128u);
+  EXPECT_GE(size[2], 64u);
+  const auto count = caps->GetMaximumComputeWorkgroupCount();
+  EXPECT_GE(count[0], 65535u);
+  EXPECT_GE(count[1], 65535u);
+  EXPECT_GE(count[2], 65535u);
+  EXPECT_GE(caps->GetMaximumComputeSharedMemorySize(), 16384u);
+  EXPECT_GT(caps->GetMinimumStorageBufferAlignment(), 0u);
 }
 
 }  // namespace testing

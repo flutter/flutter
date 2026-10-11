@@ -44,7 +44,12 @@ class ComputePass : public ResourceBinder {
   ///             shader. The total invocations along an axis is therefore the
   ///             workgroup count times the shader's local size.
   ///
-  /// @return     A cancelled status if any dimension is zero.
+  ///             The pipeline and resource bindings persist across dispatches
+  ///             in the pass. A later dispatch reuses them until they are
+  ///             replaced.
+  ///
+  /// @return     OK without dispatching anything if any dimension is zero. A
+  ///             cancelled status if no pipeline is bound.
   ///
   virtual fml::Status Compute(std::array<uint32_t, 3> workgroup_count) = 0;
 

@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/vulkan/compute_pass_vk.h"
 
+#include <vector>
+
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/compute_pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -41,78 +43,111 @@ void ComputePassVK::SetCommandLabel(std::string_view label) {
 #endif  // IMPELLER_DEBUG
 }
 
-// |ComputePass|
-void ComputePassVK::SetPipeline(
-    const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
-  const auto& pipeline_vk = ComputePipelineVK::Cast(*pipeline);
-  const vk::CommandBuffer& command_buffer_vk =
-      command_buffer_->GetCommandBuffer();
-  command_buffer_vk.bindPipeline(vk::PipelineBindPoint::eCompute,
-                                 pipeline_vk.GetPipeline());
-  pipeline_layout_ = pipeline_vk.GetPipelineLayout();
-
-  auto descriptor_result = command_buffer_->AllocateDescriptorSets(
-      pipeline_vk.GetDescriptorSetLayout(), pipeline_vk.GetPipelineKey(),
-      ContextVK::Cast(*context_));
-  if (!descriptor_result.ok()) {
-    return;
-  }
-  descriptor_set_ = descriptor_result.value();
-  pipeline_valid_ = true;
-}
-
-// |ComputePass|
-fml::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
-  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
-      workgroup_count[2] == 0u || !pipeline_valid_) {
-    bound_image_offset_ = 0u;
-    bound_buffer_offset_ = 0u;
-    descriptor_write_offset_ = 0u;
-    has_label_ = false;
-    pipeline_valid_ = false;
-    return fml::Status(fml::StatusCode::kCancelled,
-                       "Invalid pipeline or empty workgroup count.");
-  }
-
-  const ContextVK& context_vk = ContextVK::Cast(*context_);
-  for (auto i = 0u; i < descriptor_write_offset_; i++) {
-    write_workspace_[i].dstSet = descriptor_set_;
-  }
-
-  context_vk.GetDevice().updateDescriptorSets(descriptor_write_offset_,
-                                              write_workspace_.data(), 0u, {});
-  const vk::CommandBuffer& command_buffer_vk =
-      command_buffer_->GetCommandBuffer();
-
-  command_buffer_vk.bindDescriptorSets(
-      vk::PipelineBindPoint::eCompute,  // bind point
-      pipeline_layout_,                 // layout
-      0,                                // first set
-      1,                                // set count
-      &descriptor_set_,                 // sets
-      0,                                // offset count
-      nullptr                           // offsets
-  );
-
-  // The arguments are workgroup counts. The per-workgroup invocation count (the
-  // local size) is baked into the shader module, so dispatch the counts
-  // directly.
-  command_buffer_vk.dispatch(workgroup_count[0], workgroup_count[1],
-                             workgroup_count[2]);
-
+void ComputePassVK::PopCommandLabel() {
 #ifdef IMPELLER_DEBUG
   if (has_label_) {
     command_buffer_->PopDebugGroup();
   }
   has_label_ = false;
 #endif  // IMPELLER_DEBUG
+}
 
-  bound_image_offset_ = 0u;
-  bound_buffer_offset_ = 0u;
-  descriptor_write_offset_ = 0u;
-  has_label_ = false;
-  pipeline_valid_ = false;
+// |ComputePass|
+void ComputePassVK::SetPipeline(
+    const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
+  if (!pipeline) {
+    return;
+  }
+  const auto& pipeline_vk = ComputePipelineVK::Cast(*pipeline);
+  command_buffer_->GetCommandBuffer().bindPipeline(
+      vk::PipelineBindPoint::eCompute, pipeline_vk.GetPipeline());
+  pipeline_ = pipeline;
+  descriptor_set_dirty_ = true;
+}
 
+fml::Status ComputePassVK::BindDescriptorSet() {
+  const ContextVK& context_vk = ContextVK::Cast(*context_);
+  const auto& pipeline_vk = ComputePipelineVK::Cast(*pipeline_);
+
+  auto descriptor_result = command_buffer_->AllocateDescriptorSets(
+      pipeline_vk.GetDescriptorSetLayout(), pipeline_vk.GetPipelineKey(),
+      context_vk);
+  if (!descriptor_result.ok()) {
+    return descriptor_result.status();
+  }
+  vk::DescriptorSet descriptor_set = descriptor_result.value();
+
+  // Write every binding the pipeline declares that the pass has a resource
+  // for. Bindings made for another pipeline in the pass are kept for later
+  // dispatches but not written here.
+  std::vector<vk::WriteDescriptorSet> writes;
+  for (const DescriptorSetLayout& layout :
+       pipeline_->GetDescriptor().GetDescriptorSetLayouts()) {
+    auto found = bindings_.find(layout.binding);
+    if (found == bindings_.end() ||
+        found->second.type != layout.descriptor_type) {
+      continue;
+    }
+    const BoundResource& resource = found->second;
+    vk::WriteDescriptorSet write_set;
+    write_set.dstSet = descriptor_set;
+    write_set.dstBinding = layout.binding;
+    write_set.descriptorCount = 1u;
+    write_set.descriptorType = ToVKDescriptorType(resource.type);
+    if (resource.image_info.has_value()) {
+      write_set.pImageInfo = &resource.image_info.value();
+    } else if (resource.buffer_info.has_value()) {
+      write_set.pBufferInfo = &resource.buffer_info.value();
+    } else {
+      continue;
+    }
+    writes.push_back(write_set);
+  }
+
+  context_vk.GetDevice().updateDescriptorSets(writes.size(), writes.data(), 0u,
+                                              {});
+  command_buffer_->GetCommandBuffer().bindDescriptorSets(
+      vk::PipelineBindPoint::eCompute,  // bind point
+      pipeline_vk.GetPipelineLayout(),  // layout
+      0,                                // first set
+      1,                                // set count
+      &descriptor_set,                  // sets
+      0,                                // offset count
+      nullptr                           // offsets
+  );
+  descriptor_set_dirty_ = false;
+  return fml::Status();
+}
+
+// |ComputePass|
+fml::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
+  // A dispatch with no workgroups does nothing, like a draw with no vertices.
+  if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
+      workgroup_count[2] == 0u) {
+    PopCommandLabel();
+    return fml::Status();
+  }
+
+  if (!pipeline_) {
+    PopCommandLabel();
+    return fml::Status(fml::StatusCode::kCancelled,
+                       "No compute pipeline is bound.");
+  }
+
+  if (descriptor_set_dirty_) {
+    if (auto status = BindDescriptorSet(); !status.ok()) {
+      PopCommandLabel();
+      return status;
+    }
+  }
+
+  // The arguments are workgroup counts. The per-workgroup invocation count (the
+  // local size) is baked into the shader module, so dispatch the counts
+  // directly.
+  command_buffer_->GetCommandBuffer().dispatch(
+      workgroup_count[0], workgroup_count[1], workgroup_count[2]);
+
+  PopCommandLabel();
   return fml::Status();
 }
 
@@ -132,10 +167,7 @@ bool ComputePassVK::BindResource(ShaderStage stage,
                                  const ShaderMetadata* metadata,
                                  std::shared_ptr<const Texture> texture,
                                  raw_ptr<const Sampler> sampler) {
-  if (bound_image_offset_ >= kMaxBindings) {
-    return false;
-  }
-  if (!texture->IsValid() || !sampler) {
+  if (!texture || !texture->IsValid() || !sampler) {
     return false;
   }
   const TextureVK& texture_vk = TextureVK::Cast(*texture);
@@ -149,25 +181,19 @@ bool ComputePassVK::BindResource(ShaderStage stage,
   image_info.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
   image_info.sampler = sampler_vk.GetSampler();
   image_info.imageView = texture_vk.GetSampledImageView();
-  image_workspace_[bound_image_offset_++] = image_info;
 
-  vk::WriteDescriptorSet write_set;
-  write_set.dstBinding = slot.binding;
-  write_set.descriptorCount = 1u;
-  write_set.descriptorType = ToVKDescriptorType(type);
-  write_set.pImageInfo = &image_workspace_[bound_image_offset_ - 1];
-
-  write_workspace_[descriptor_write_offset_++] = write_set;
+  bindings_[static_cast<uint32_t>(slot.binding)] = {.type = type,
+                                                    .image_info = image_info};
+  descriptor_set_dirty_ = true;
   return true;
 }
 
 bool ComputePassVK::BindResource(size_t binding,
                                  DescriptorType type,
                                  BufferView view) {
-  if (bound_buffer_offset_ >= kMaxBindings) {
+  if (!view.GetBuffer()) {
     return false;
   }
-
   auto buffer = DeviceBufferVK::Cast(*view.GetBuffer()).GetBuffer();
   if (!buffer) {
     return false;
@@ -178,21 +204,14 @@ bool ComputePassVK::BindResource(size_t binding,
     return false;
   }
 
-  uint32_t offset = view.GetRange().offset;
-
   vk::DescriptorBufferInfo buffer_info;
   buffer_info.buffer = buffer;
-  buffer_info.offset = offset;
+  buffer_info.offset = view.GetRange().offset;
   buffer_info.range = view.GetRange().length;
-  buffer_workspace_[bound_buffer_offset_++] = buffer_info;
 
-  vk::WriteDescriptorSet write_set;
-  write_set.dstBinding = binding;
-  write_set.descriptorCount = 1u;
-  write_set.descriptorType = ToVKDescriptorType(type);
-  write_set.pBufferInfo = &buffer_workspace_[bound_buffer_offset_ - 1];
-
-  write_workspace_[descriptor_write_offset_++] = write_set;
+  bindings_[static_cast<uint32_t>(binding)] = {.type = type,
+                                               .buffer_info = buffer_info};
+  descriptor_set_dirty_ = true;
   return true;
 }
 

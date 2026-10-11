@@ -4,6 +4,7 @@
 
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 
+#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/shader_function.h"
 #include "impeller/renderer/shader_library.h"
@@ -70,6 +71,38 @@ ComputePipelineDescriptor& ComputePipelineDescriptor::SetWorkgroupSize(
 
 std::array<uint32_t, 3> ComputePipelineDescriptor::GetWorkgroupSize() const {
   return workgroup_size_;
+}
+
+bool ComputePipelineDescriptor::ValidateWorkgroupSize(
+    std::array<uint32_t, 3> max_size,
+    uint64_t max_invocations) const {
+  const auto& size = workgroup_size_;
+  if (size[0] == 0u || size[1] == 0u || size[2] == 0u) {
+    VALIDATION_LOG << "Compute pipeline " << label_
+                   << " has a workgroup size of 0 in some dimension. A compute "
+                      "shader must declare a literal local_size; sizing it "
+                      "with a specialization constant is not supported.";
+    return false;
+  }
+  if (size[0] > max_size[0] || size[1] > max_size[1] || size[2] > max_size[2]) {
+    VALIDATION_LOG << "Compute pipeline " << label_
+                   << " has a workgroup size of " << size[0] << "x" << size[1]
+                   << "x" << size[2] << ", which exceeds the device maximum of "
+                   << max_size[0] << "x" << max_size[1] << "x" << max_size[2]
+                   << ".";
+    return false;
+  }
+  const uint64_t invocations =
+      static_cast<uint64_t>(size[0]) * size[1] * size[2];
+  if (invocations > max_invocations) {
+    VALIDATION_LOG << "Compute pipeline " << label_
+                   << " has a workgroup size of " << size[0] << "x" << size[1]
+                   << "x" << size[2] << " (" << invocations
+                   << " invocations), which exceeds the maximum of "
+                   << max_invocations << " invocations per workgroup.";
+    return false;
+  }
+  return true;
 }
 
 const std::string& ComputePipelineDescriptor::GetLabel() const {
