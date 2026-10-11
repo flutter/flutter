@@ -97,13 +97,13 @@ abstract class MethodCodec {
 ///
 /// See also:
 ///
-///  * [MethodCodec], which throws a [PlatformException], if a received result
+///  * [MethodCodec], which throws a [PlatformException] if a received result
 ///    envelope represents an error.
 ///  * [MethodChannel.invokeMethod], which completes the returned future
-///    with a [PlatformException], if invoking the platform plugin method
+///    with a [PlatformException] if invoking the platform plugin method
 ///    results in an error envelope.
 ///  * [EventChannel.receiveBroadcastStream], which emits
-///    [PlatformException]s as error events, whenever an event received from the
+///    [PlatformException]s as error events whenever an event received from the
 ///    platform plugin is wrapped in an error envelope.
 class PlatformException implements Exception {
   /// Creates a [PlatformException] with the specified error [code] and optional
@@ -112,12 +112,22 @@ class PlatformException implements Exception {
   PlatformException({required this.code, this.message, this.details, this.stacktrace});
 
   /// An error code.
+  ///
+  /// The error code is supplied by the code that reports the error. Any
+  /// [String] can be used as an error code.
   final String code;
 
   /// A human-readable error message, possibly null.
+  ///
+  /// The code reporting the error is not required to provide a message.
   final String? message;
 
   /// Error details, possibly null.
+  ///
+  /// The error details are supplied by the code that reports the error. The
+  /// value must be supported by the [MethodCodec] used by the channel; for the
+  /// default `StandardMethodCodec`, the supported values are documented with
+  /// `StandardMessageCodec`.
   ///
   /// This property is `dynamic`, which means type-checking is skipped when accessing
   /// this property. To minimize the risk of type errors at runtime, the value should
