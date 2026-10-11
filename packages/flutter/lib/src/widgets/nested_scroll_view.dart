@@ -253,12 +253,10 @@ class NestedScrollView extends StatefulWidget {
   ///
   /// Defaults to matching platform conventions.
   ///
-  /// The [ScrollPhysics.applyBoundaryConditions] implementation of the provided
-  /// object should not allow scrolling outside the scroll extent range
-  /// described by the [ScrollMetrics.minScrollExtent] and
-  /// [ScrollMetrics.maxScrollExtent] properties passed to that method. If that
-  /// invariant is not maintained, the nested scroll view may respond to user
-  /// scrolling erratically.
+  /// The outer scroll position is always clamped to its scroll extents,
+  /// regardless of the provided [ScrollPhysics.applyBoundaryConditions]. The
+  /// provided physics governs its ballistic simulation and scrolling
+  /// permissions; it cannot enable overscroll of the outer position.
   ///
   /// This property only applies to the outer scroll view, composed of the
   /// slivers returned from [headerSliverBuilder]. Since the inner scroll view
