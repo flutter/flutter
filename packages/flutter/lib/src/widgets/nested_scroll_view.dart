@@ -1389,6 +1389,16 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
 /// All position activities read the same cached frame state. Replacing a
 /// position transfers its simulation to the new delegate; detaching one removes
 /// it from the group without restarting the remaining activities' clocks.
+/// Each activity supplies its animation time through [_NestedGroupSimulation].
+/// Only a time newer than [_time] advances the group, so x, dx, and isDone reads
+/// by different positions at the same time observe the same handoff.
+///
+/// A dependent group either waits for all bodies or starts with a header leader.
+/// Once waiting ends, only that leader advances the header. Header completion
+/// releases all bodies, each from its retained offset and the leader's arrival
+/// velocity. If every remaining body is waiting or done but not all arrived,
+/// the group stops without starting the header. Detaching all bodies switches
+/// to an outer-only simulation; newly attached bodies do not join this group.
 class _NestedBallisticGroup {
   _NestedBallisticGroup(
     this.coordinator,
@@ -1416,8 +1426,14 @@ class _NestedBallisticGroup {
   _NestedScrollPosition outer;
   final _simulations = <_NestedScrollPosition, _NestedCoordinatedSimulation>{};
   _NestedCoordinatedSimulation? _leader;
+  // True until every participating body arrives at an outer phase. It becomes
+  // false when the last arrival is selected as leader and is never re-enabled.
   late bool _waiting;
+  // Fixed at construction: none of the trajectories can need a header phase.
+  // Such bodies advance independently and never enter waiting or release.
   late bool _independent;
+  // Changes from false to true once the leader completes (or skips) its header
+  // phase. The leader's arrival then starts every parked body's final phase.
   bool _released = false;
   double _time = 0.0;
   Simulation? _outerOnly;
@@ -1616,6 +1632,11 @@ class _NestedBallisticGroup {
   }
 }
 
+/// Exposes one position's view of a group's cached trajectory to its activity.
+///
+/// Reads advance the shared clock before selecting this position's offset,
+/// velocity, or completion state. This wrapper does not own a separate physics
+/// simulation, and its position reference follows activity delegate replacement.
 class _NestedGroupSimulation extends Simulation {
   _NestedGroupSimulation(this.group, this.position);
   final _NestedBallisticGroup group;
@@ -1639,6 +1660,11 @@ class _NestedGroupSimulation extends Simulation {
   }
 }
 
+/// Drives one position while sharing motion and lifecycle with its group.
+///
+/// Position absorption updates the delegate and wrapper without resetting the
+/// animation clock. Dimension changes first try to preserve the group state;
+/// otherwise the coordinator rebuilds from the affected trajectory's velocity.
 class _NestedGroupedBallisticActivity extends BallisticScrollActivity {
   _NestedGroupedBallisticActivity(_NestedBallisticGroup group, _NestedScrollPosition position)
     : this._(group, position, _NestedGroupSimulation(group, position));
@@ -1697,6 +1723,31 @@ class _NestedGroupedBallisticActivity extends BallisticScrollActivity {
 /// phase uses its translated bounds to handle terminal overscroll. Zero velocity
 /// follows the same phase selection and lets the relevant physics decide whether
 /// a simulation is needed.
+///
+/// Each phase records its owner and a combined-coordinate end, or null for a
+/// terminal phase. From an in-range start, positive velocity selects header then
+/// body; negative velocity selects body-to-start, header, then body. Already
+/// completed parts are omitted, and zero velocity selects only the body. An
+/// out-of-range start first selects recovery to the nearest body boundary, then
+/// rebuilds the list from that boundary's position and velocity. A bodyOuter
+/// value translates the body's own bounds by the stationary header position.
+///
+/// Future-phase candidates avoid restarting a trajectory that the next physics
+/// would continue unchanged. They share the active segment's starting state and
+/// epoch, and remain eligible only while every sampled x and dx differs by at
+/// most precisionErrorTolerance and isDone agrees. At a boundary, the next
+/// retained candidate is adopted with the same epoch; otherwise a new segment
+/// starts from the boundary state. A rejected candidate cannot be revived by a
+/// later bounds update, and matching physics types alone never permit adoption.
+///
+/// Activities (or the group) call x, dx, and isDone with their animation time.
+/// [_advance] caches the newest time, while each segment sees time relative to
+/// its epoch. Position absorption retains that clock: replacing the active
+/// owner restarts its segment at the current state; replacing an inactive owner
+/// discards only that owner's candidates. Dimension updates retain a trajectory
+/// only if it reproduces the current state. If a single body detaches, the
+/// trajectory switches to outer-only coordinates; groups handle their own
+/// participant removal before advancing their trajectories.
 class _NestedCoordinatedSimulation extends Simulation {
   _NestedCoordinatedSimulation(
     this.coordinator,
@@ -1768,6 +1819,8 @@ class _NestedCoordinatedSimulation extends Simulation {
   }
 
   final _NestedScrollCoordinator coordinator;
+  // Set only when a single attached body detaches. Thereafter this trajectory
+  // owns just the outer position, and never switches back to combined space.
   bool _independentOuter = false;
   _NestedScrollPosition outer;
   _NestedScrollPosition inner;
@@ -1793,10 +1846,14 @@ class _NestedCoordinatedSimulation extends Simulation {
   var _time = 0.0;
   late double _pixels;
   late double _velocity;
+  // A null or completed segment stops time advancement. Releasing a waiting
+  // body into its final phase clears this flag before starting that segment.
   bool _done = false;
   // Groups request a pause before the outer phase. Arrival freezes this
   // trajectory until the group either resumes the header or releases the body.
   bool _holdBeforeOuter = false;
+  // Arrival sets this flag and freezes _time. _resumeOuter and _resumeBody clear
+  // it; a null header segment also clears it so bodies can continue directly.
   bool _waitingForOuter = false;
   ({double time, double velocity})? _bodyArrival;
   ({double time, double velocity})? _outerArrival;
@@ -2117,6 +2174,12 @@ class _NestedCoordinatedSimulation extends Simulation {
   }
 }
 
+/// Applies the header or body component of a shared single-body trajectory.
+///
+/// Both activities retain their animation clocks when their positions absorb
+/// replacements. The header may become idle before the body; ending it locally
+/// must not cancel the body's activity. A stationary header during recovery
+/// also must not block pointer input intended to interrupt the body.
 class _NestedCoordinatedBallisticActivity extends BallisticScrollActivity {
   _NestedCoordinatedBallisticActivity(
     this.coordinator,
