@@ -112,6 +112,9 @@ static constexpr struct {
     {"flutter.focus", kFlutterSemanticsActionFocus},
     {"flutter.expand", kFlutterSemanticsActionExpand},
     {"flutter.collapse", kFlutterSemanticsActionCollapse},
+    {"flutter.copy", kFlutterSemanticsActionCopy},
+    {"flutter.cut", kFlutterSemanticsActionCut},
+    {"flutter.paste", kFlutterSemanticsActionPaste},
     {"flutter.move-cursor-forward-by-character",
      kFlutterSemanticsActionMoveCursorForwardByCharacter, true},
     {"flutter.move-cursor-backward-by-character",
@@ -1007,6 +1010,17 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   const gboolean is_read_only = flags->is_text_field && flags->is_read_only;
   const gboolean is_multiline = flags->is_text_field && flags->is_multiline;
 
+  // Treat protection flags as authoritative even if an inconsistent semantics
+  // batch advertises clipboard actions. Pasting into editable passwords is
+  // safe; copying or cutting their contents is not.
+  if (flags->is_obscured) {
+    self->actions &= ~(static_cast<uint64_t>(kFlutterSemanticsActionCopy) |
+                       kFlutterSemanticsActionCut);
+  }
+  if (is_read_only) {
+    self->actions &= ~(static_cast<uint64_t>(kFlutterSemanticsActionCut) |
+                       kFlutterSemanticsActionPaste);
+  }
   self->actions_enabled = is_enabled && !is_hidden;
   self->text_actions_enabled = supports_text && self->actions_enabled;
   for (const auto& action : kNativeActions) {

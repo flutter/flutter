@@ -357,7 +357,8 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
       kFlutterSemanticsActionIncrease,     kFlutterSemanticsActionDecrease,
       kFlutterSemanticsActionShowOnScreen, kFlutterSemanticsActionDismiss,
       kFlutterSemanticsActionFocus,        kFlutterSemanticsActionExpand,
-      kFlutterSemanticsActionCollapse,
+      kFlutterSemanticsActionCollapse,     kFlutterSemanticsActionCopy,
+      kFlutterSemanticsActionCut,          kFlutterSemanticsActionPaste,
   };
   FlutterSemanticsNode2 adjustment = {};
   adjustment.id = 2;
@@ -1423,6 +1424,121 @@ TEST_F(FlViewGtk4AccessibilityTest, CursorActionsEncodeCollapsedSelection) {
     gtk_widget_activate_action(GTK_WIDGET(restored), action.name, nullptr);
   }
   EXPECT_EQ(calls, before + 1);
+}
+
+TEST_F(FlViewGtk4AccessibilityTest, ClipboardActionsRespectProtection) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) primary = fl_view_new(project);
+  g_object_ref_sink(primary);
+  FlEngine* engine = fl_view_get_engine(primary);
+  StartEngine(engine);
+  g_autoptr(FlView) view = fl_view_new_for_engine(engine);
+  g_object_ref_sink(view);
+  ASSERT_NE(fl_view_get_id(view), 0);
+  const struct {
+    const char* name;
+    FlutterSemanticsAction action;
+  } actions[] = {
+      {"flutter.copy", kFlutterSemanticsActionCopy},
+      {"flutter.cut", kFlutterSemanticsActionCut},
+      {"flutter.paste", kFlutterSemanticsActionPaste},
+  };
+  size_t calls = 0;
+  FlutterSemanticsAction expected = kFlutterSemanticsActionCopy;
+  fl_engine_get_embedder_api(engine)->SendSemanticsAction =
+      MOCK_ENGINE_PROC(SendSemanticsAction,
+                       ([&](auto, const FlutterSendSemanticsActionInfo* info) {
+                         EXPECT_EQ(info->view_id, fl_view_get_id(view));
+                         EXPECT_EQ(info->node_id, 0u);
+                         EXPECT_EQ(info->action, expected);
+                         EXPECT_EQ(info->data_length, 0u);
+                         calls++;
+                         return kSuccess;
+                       }));
+  FlutterSemanticsFlags flags = {};
+  flags.is_text_field = true;
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.value = "Selected text";
+  root.text_selection_base = 0;
+  root.text_selection_extent = 8;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  const auto apply_update = [&]() {
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+  };
+  apply_update();
+  g_autoptr(GtkAccessible) native =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_TRUE(GTK_IS_WIDGET(native));
+  GtkWidget* widget = GTK_WIDGET(native);
+  for (const auto& action : actions) {
+    SCOPED_TRACE(action.name);
+    root.actions = action.action;
+    expected = action.action;
+    apply_update();
+    const size_t before = calls;
+    EXPECT_TRUE(gtk_widget_activate_action(widget, action.name, nullptr));
+    EXPECT_EQ(calls, before + 1);
+    for (const auto& other : actions) {
+      if (other.action != action.action) {
+        gtk_widget_activate_action(widget, other.name, nullptr);
+      }
+    }
+    root.actions = static_cast<FlutterSemanticsAction>(0);
+    apply_update();
+    gtk_widget_activate_action(widget, action.name, nullptr);
+    root.actions = action.action;
+    flags.is_enabled = kFlutterTristateFalse;
+    apply_update();
+    gtk_widget_activate_action(widget, action.name, nullptr);
+    flags.is_enabled = kFlutterTristateTrue;
+    flags.is_hidden = true;
+    apply_update();
+    gtk_widget_activate_action(widget, action.name, nullptr);
+    EXPECT_EQ(calls, before + 1);
+    flags.is_hidden = false;
+  }
+  root.actions = static_cast<FlutterSemanticsAction>(
+      kFlutterSemanticsActionCopy | kFlutterSemanticsActionCut |
+      kFlutterSemanticsActionPaste);
+  const struct {
+    bool obscured;
+    bool read_only;
+    FlutterSemanticsAction allowed;
+  } cases[] = {
+      {false, true, kFlutterSemanticsActionCopy},
+      {true, false, kFlutterSemanticsActionPaste},
+      {true, true, static_cast<FlutterSemanticsAction>(0)},
+      {false, false, root.actions},
+  };
+  for (const auto& test : cases) {
+    SCOPED_TRACE(testing::Message() << "obscured=" << test.obscured
+                                    << " read_only=" << test.read_only);
+    flags.is_obscured = test.obscured;
+    flags.is_read_only = test.read_only;
+    apply_update();
+    for (const auto& action : actions) {
+      SCOPED_TRACE(action.name);
+      const size_t before = calls;
+      expected = action.action;
+      gtk_widget_activate_action(widget, action.name, nullptr);
+      EXPECT_EQ(calls, before + ((test.allowed & action.action) != 0 ? 1 : 0));
+    }
+  }
+  const size_t before = calls;
+  g_object_run_dispose(G_OBJECT(view));
+  for (const auto& action : actions) {
+    gtk_widget_activate_action(widget, action.name, nullptr);
+  }
+  EXPECT_EQ(calls, before);
 }
 
 TEST_F(FlViewGtk4AccessibilityTest, TextSelectionActionsUseUtf16Offsets) {

@@ -90,7 +90,12 @@ This separate integration test needs a GTK runtime with native accessible-tree
 support, PyGObject with Atspi introspection, `dbus-run-session`, Xvfb, `xauth`,
 and the AT-SPI bus launcher and registry. It creates a private session/display,
 finds its fixture by PID, and invokes the exported tap, directional scrolling,
-increase/decrease, show-on-screen, dismiss, focus, and expand/collapse actions.
+increase/decrease, show-on-screen, dismiss, focus, expand/collapse, and clipboard
+actions. Clipboard actions operate on Flutter's current selection; they do not
+implement the range-based AT-SPI EditableText interface or manipulate the host
+clipboard in this fixture. Unit tests additionally verify that copy/cut are
+blocked for obscured content and cut/paste for read-only fields, while advertised
+paste remains available for editable obscured fields.
 The fixture asserts the resulting Flutter
 embedder actions and their order. It does not validate a Dart callback,
 Orca behavior, or full text-editing support.
