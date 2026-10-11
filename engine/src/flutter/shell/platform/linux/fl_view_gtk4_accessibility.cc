@@ -121,25 +121,6 @@ static_assert(offsetof(FlGtkAccessibleInterface4_10, get_bounds) ==
               offsetof(GtkAccessibleInterface, get_bounds));
 #endif
 
-#if GTK_CHECK_VERSION(4, 22, 0)
-static_assert(sizeof(FlGtkAccessibleTextInterface4_22) ==
-              sizeof(GtkAccessibleTextInterface));
-static_assert(offsetof(FlGtkAccessibleTextInterface4_22, set_caret_position) ==
-              offsetof(GtkAccessibleTextInterface, set_caret_position));
-static_assert(offsetof(FlGtkAccessibleTextInterface4_22, set_selection) ==
-              offsetof(GtkAccessibleTextInterface, set_selection));
-#elif GTK_CHECK_VERSION(4, 14, 0)
-static_assert(sizeof(FlGtkAccessibleTextInterface4_14) ==
-              sizeof(GtkAccessibleTextInterface));
-#endif
-#if GTK_CHECK_VERSION(4, 14, 0)
-static_assert(offsetof(FlGtkAccessibleTextInterface4_14, get_contents) ==
-              offsetof(GtkAccessibleTextInterface, get_contents));
-static_assert(offsetof(FlGtkAccessibleTextInterface4_14,
-                       get_default_attributes) ==
-              offsetof(GtkAccessibleTextInterface, get_default_attributes));
-#endif
-
 enum {
   PROP_GTK4_ACCESSIBLE_NODE_0,
   PROP_GTK4_ACCESSIBLE_NODE_ACCESSIBLE_ROLE,
@@ -846,12 +827,9 @@ static void fl_gtk4_text_accessible_node_text_iface_init(
   iface->get_attributes = fl_gtk4_text_accessible_node_get_attributes;
   iface->get_default_attributes =
       fl_gtk4_text_accessible_node_get_default_attributes;
-  if (gtk_check_version(4, 22, 0) == nullptr) {
-    auto* editable = reinterpret_cast<FlGtkAccessibleTextInterface4_22*>(iface);
-    editable->set_caret_position =
-        fl_gtk4_text_accessible_node_set_caret_position;
-    editable->set_selection = fl_gtk4_text_accessible_node_set_selection;
-  }
+  fl_gtk_runtime_accessible_text_install_editing_callbacks(
+      iface, fl_gtk4_text_accessible_node_set_caret_position,
+      fl_gtk4_text_accessible_node_set_selection);
 }
 
 static guint utf16_offset_to_character_offset(const gchar* text, gint offset) {

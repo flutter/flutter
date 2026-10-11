@@ -124,3 +124,29 @@ It implies `--check-text` and can be combined with `--check-focus`. The mock
 embedder verifies the action payload; this does not exercise Dart editing or
 text insertion/deletion commands. Cached caret/selection state remains governed
 by subsequent Flutter semantics updates, not optimistic native mutations.
+
+### GTK 4.22 interface safety
+
+`FlGtk4RuntimeApiTest.EditingCallbacksOnlyWriteTheSupportedTail` checks that
+installation changes only the two new callbacks on a supported runtime and
+changes no bytes on an older runtime. The incomplete-argument test checks that
+rejected installations do not partially overwrite an interface.
+`OlderRuntimeDoesNotAccessBeyondTextInterface` places an old-size interface
+against a protected memory page: any access to the newer tail faults. This test
+must run on an older GTK runtime; its skip on GTK 4.22+ is not a safety pass.
+Run the compatibility validator with prepared older and newer runtime images.
+
+The checked-in header also asserts every text-interface member offset available
+in the build headers, plus the range layout and GTK 4.22 callback signatures.
+Check it independently of the engine build against installed GTK 4.22+ headers:
+
+```sh
+c++ -std=c++20 -fsyntax-only -x c++ -DFLUTTER_LINUX_GTK4=1 \
+  $(pkg-config --cflags gtk4) \
+  engine/src/flutter/shell/platform/linux/fl_gtk4_runtime_api.h
+```
+
+Repeat with each supported header environment. Old headers cannot validate
+members they do not declare. Header checks, protected-tail runtime tests, and
+`--check-selection` AT-SPI dispatch tests cover different risks; none alone
+establishes compatibility with an untested GTK release or architecture.

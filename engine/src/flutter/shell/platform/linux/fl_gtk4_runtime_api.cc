@@ -314,6 +314,21 @@ gboolean fl_gtk_runtime_supports_native_accessibility_text() {
 #endif
 }
 
+gboolean fl_gtk_runtime_accessible_text_install_editing_callbacks(
+    FlGtkAccessibleTextInterface4_14* iface,
+    decltype(FlGtkAccessibleTextInterface4_22::set_caret_position) caret,
+    decltype(FlGtkAccessibleTextInterface4_22::set_selection) selection) {
+  if (iface == nullptr || caret == nullptr || selection == nullptr ||
+      gtk_check_version(4, 22, 0) != nullptr ||
+      !fl_gtk_runtime_supports_native_accessibility_text()) {
+    return FALSE;
+  }
+  auto* editable = reinterpret_cast<FlGtkAccessibleTextInterface4_22*>(iface);
+  editable->set_caret_position = caret;
+  editable->set_selection = selection;
+  return TRUE;
+}
+
 GType fl_gtk_runtime_accessible_text_get_type() {
 #if !defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT) && \
     GTK_CHECK_VERSION(4, 14, 0)

@@ -1201,25 +1201,45 @@ TEST_F(FlViewGtk4AccessibilityTest, TextSelectionActionsUseUtf16Offsets) {
   EXPECT_FALSE(iface->set_selection(native, 0, nullptr));
   range.length = G_MAXSIZE;
   EXPECT_FALSE(iface->set_selection(native, 0, &range));
+  range = {G_MAXSIZE, 0};
+  EXPECT_FALSE(iface->set_selection(native, 0, &range));
   EXPECT_EQ(calls, 2);
 
+  range = {1, 1};
   root.actions = static_cast<FlutterSemanticsAction>(0);
   fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
                                            &update);
   EXPECT_FALSE(iface->set_caret_position(native, 0));
+  EXPECT_FALSE(iface->set_selection(native, 0, &range));
   root.actions = kFlutterSemanticsActionSetSelection;
+  flags.is_enabled = kFlutterTristateFalse;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  EXPECT_FALSE(iface->set_caret_position(native, 0));
+  EXPECT_FALSE(iface->set_selection(native, 0, &range));
+  flags.is_enabled = kFlutterTristateNone;
   flags.is_obscured = true;
   fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
                                            &update);
   EXPECT_FALSE(iface->set_caret_position(native, 0));
+  EXPECT_FALSE(iface->set_selection(native, 0, &range));
   flags.is_obscured = false;
   flags.is_hidden = true;
   fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
                                            &update);
   EXPECT_FALSE(iface->set_caret_position(native, 0));
+  EXPECT_FALSE(iface->set_selection(native, 0, &range));
+  flags.is_hidden = false;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  expected_base = 1;
+  expected_extent = 3;
+  EXPECT_TRUE(iface->set_selection(native, 0, &range));
+  EXPECT_EQ(calls, 3);
   g_object_run_dispose(G_OBJECT(view));
   EXPECT_FALSE(iface->set_caret_position(native, 0));
-  EXPECT_EQ(calls, 2);
+  EXPECT_FALSE(iface->set_selection(native, 0, &range));
+  EXPECT_EQ(calls, 3);
 }
 
 TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {

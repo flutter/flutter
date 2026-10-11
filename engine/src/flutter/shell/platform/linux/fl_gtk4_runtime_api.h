@@ -7,6 +7,9 @@
 
 #include <gtk/gtk.h>
 
+#include <cstddef>
+#include <type_traits>
+
 #if FLUTTER_LINUX_GTK4
 
 #if GTK_CHECK_VERSION(4, 14, 0)
@@ -82,8 +85,8 @@ struct FlGtkAccessibleInterface4_10 {
 // the build headers so a GTK 4.8-header build can use the query interface when
 // the loaded GTK library exports it. The trailing extents/offset callbacks
 // were added in GTK 4.16 and must not be installed without a separately
-// validated 4.16 layout gate. GTK 4.22 setter callbacks are intentionally not
-// represented: runtime symbol lookup cannot append interface fields safely.
+// validated 4.16 layout gate. The separately gated 4.22 tail below must never
+// be accessed merely because a symbol lookup succeeded.
 struct FlGtkAccessibleTextRange4_14 {
   gsize start;
   gsize length;
@@ -137,6 +140,64 @@ struct FlGtkAccessibleTextInterface4_22 {
                             gsize i,
                             FlGtkAccessibleTextRange4_14* range);
 };
+
+// Keep these checks with the mirrors so header-only ABI checks and all engine
+// consumers validate them, even when the native accessibility backend is off.
+#if GTK_CHECK_VERSION(4, 14, 0)
+static_assert(sizeof(FlGtkAccessibleTextRange4_14) ==
+              sizeof(GtkAccessibleTextRange));
+static_assert(alignof(FlGtkAccessibleTextRange4_14) ==
+              alignof(GtkAccessibleTextRange));
+static_assert(offsetof(FlGtkAccessibleTextRange4_14, start) ==
+              offsetof(GtkAccessibleTextRange, start));
+static_assert(offsetof(FlGtkAccessibleTextRange4_14, length) ==
+              offsetof(GtkAccessibleTextRange, length));
+#define FL_CHECK_TEXT_OFFSET(member)                                  \
+  static_assert(offsetof(FlGtkAccessibleTextInterface4_14, member) == \
+                offsetof(GtkAccessibleTextInterface, member))
+FL_CHECK_TEXT_OFFSET(g_iface);
+FL_CHECK_TEXT_OFFSET(get_contents);
+FL_CHECK_TEXT_OFFSET(get_contents_at);
+FL_CHECK_TEXT_OFFSET(get_caret_position);
+FL_CHECK_TEXT_OFFSET(get_selection);
+FL_CHECK_TEXT_OFFSET(get_attributes);
+FL_CHECK_TEXT_OFFSET(get_default_attributes);
+#if GTK_CHECK_VERSION(4, 16, 0)
+FL_CHECK_TEXT_OFFSET(get_extents);
+FL_CHECK_TEXT_OFFSET(get_offset);
+#endif
+#undef FL_CHECK_TEXT_OFFSET
+#if GTK_CHECK_VERSION(4, 22, 0)
+static_assert(sizeof(FlGtkAccessibleTextInterface4_22) ==
+              sizeof(GtkAccessibleTextInterface));
+static_assert(alignof(FlGtkAccessibleTextInterface4_22) ==
+              alignof(GtkAccessibleTextInterface));
+static_assert(offsetof(FlGtkAccessibleTextInterface4_22, base) == 0);
+static_assert(offsetof(FlGtkAccessibleTextInterface4_22, set_caret_position) ==
+              offsetof(GtkAccessibleTextInterface, set_caret_position));
+static_assert(offsetof(FlGtkAccessibleTextInterface4_22, set_selection) ==
+              offsetof(GtkAccessibleTextInterface, set_selection));
+static_assert(
+    std::is_same_v<decltype(GtkAccessibleTextInterface::set_caret_position),
+                   gboolean (*)(GtkAccessibleText*, unsigned int)>);
+static_assert(
+    std::is_same_v<
+        decltype(GtkAccessibleTextInterface::set_selection),
+        gboolean (*)(GtkAccessibleText*, gsize, GtkAccessibleTextRange*)>);
+#elif GTK_CHECK_VERSION(4, 16, 0)
+static_assert(sizeof(FlGtkAccessibleTextInterface4_14) ==
+              sizeof(GtkAccessibleTextInterface));
+#else
+static_assert(offsetof(FlGtkAccessibleTextInterface4_14, get_extents) ==
+              sizeof(GtkAccessibleTextInterface));
+#endif
+#endif
+
+// Install only on GTK 4.22+, without touching the interface on rejection.
+gboolean fl_gtk_runtime_accessible_text_install_editing_callbacks(
+    FlGtkAccessibleTextInterface4_14* iface,
+    decltype(FlGtkAccessibleTextInterface4_22::set_caret_position) caret,
+    decltype(FlGtkAccessibleTextInterface4_22::set_selection) selection);
 
 struct FlGtkRuntimeApi {
   gboolean gtk_at_least_4_10;
