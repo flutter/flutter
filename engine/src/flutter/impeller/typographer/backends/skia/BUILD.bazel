@@ -1,0 +1,38 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/typographer/backends/skia/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "typographer_skia_backend",
+    srcs = [
+        "text_frame_skia.cc",
+        "typeface_skia.cc",
+        "typographer_context_skia.cc",
+    ],
+    hdrs = [
+        "text_frame_skia.h",
+        "typeface_skia.h",
+        "typographer_context_skia.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    # text_frame_skia.cc includes skparagraph's Paragraph.h.
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/typographer",
+        "@skia",
+        "@skia//modules/skparagraph",
+    ],
+    alwayslink = True,
+)

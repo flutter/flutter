@@ -1,0 +1,94 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/txt/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: txt_benchmarks, txt_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "txt_config",
+    includes = ["src"],
+)
+
+cc_library(
+    name = "allow_posix_names",
+)
+
+cc_library(
+    name = "txt",
+    srcs = [
+        "src/skia/paragraph_builder_skia.cc",
+        "src/skia/paragraph_skia.cc",
+        "src/txt/asset_font_manager.cc",
+        "src/txt/font_asset_provider.cc",
+        "src/txt/font_collection.cc",
+        "src/txt/font_features.cc",
+        "src/txt/paragraph_builder.cc",
+        "src/txt/paragraph_style.cc",
+        "src/txt/placeholder_run.cc",
+        "src/txt/platform_linux.cc",  # !(is_mac || is_ios) && !(is_android) && is_linux
+        "src/txt/test_font_manager.cc",
+        "src/txt/text_decoration.cc",
+        "src/txt/text_shadow.cc",
+        "src/txt/text_style.cc",
+        "src/txt/typeface_font_asset_provider.cc",
+    ],
+    hdrs = [
+        "src/skia/paragraph_builder_skia.h",
+        "src/skia/paragraph_skia.h",
+        "src/txt/asset_font_manager.h",
+        "src/txt/font_asset_provider.h",
+        "src/txt/font_collection.h",
+        "src/txt/font_features.h",
+        "src/txt/font_style.h",
+        "src/txt/font_weight.h",
+        "src/txt/line_metrics.h",
+        "src/txt/paragraph.h",
+        "src/txt/paragraph_builder.h",
+        "src/txt/paragraph_style.h",
+        "src/txt/placeholder_run.h",
+        "src/txt/platform.h",
+        "src/txt/run_metrics.h",
+        "src/txt/test_font_manager.h",
+        "src/txt/text_baseline.h",
+        "src/txt/text_decoration.h",
+        "src/txt/text_shadow.h",
+        "src/txt/text_style.h",
+        "src/txt/typeface_font_asset_provider.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":txt_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "@googletest//:gtest_prod",
+        "@harfbuzz",
+        "@icu",
+        "@skia",
+        "@skia//modules/skparagraph",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "txt_fixtures",
+    fixtures = [
+        "third_party/fonts/NotoColorEmoji.ttf",
+        "third_party/fonts/Roboto-Regular.ttf",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+exports_files(glob(["third_party/fonts/*"]))

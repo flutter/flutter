@@ -1,0 +1,81 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/display_list/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: display_list_unittests, display_list_unittests_golden, skia_conversions_unittests, aiks_playground, aiks_unittests, aiks_unittests_golden.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "skia_conversions",
+    srcs = ["skia_conversions.cc"],
+    hdrs = ["skia_conversions.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/core",
+        "//engine/src/flutter/impeller/geometry",
+        "@skia",
+        "@skia//modules/skparagraph",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "display_list",
+    srcs = [
+        "aiks_context.cc",
+        "canvas.cc",
+        "color_filter.cc",
+        "dl_atlas_geometry.cc",
+        "dl_dispatcher.cc",
+        "dl_image_impeller.cc",
+        "dl_runtime_effect_impeller.cc",
+        "dl_text_impeller.cc",
+        "dl_vertices_geometry.cc",
+        "image_filter.cc",
+        "nine_patch_converter.cc",
+        "paint.cc",
+    ],
+    hdrs = [
+        "aiks_context.h",
+        "canvas.h",
+        "color_filter.h",
+        "dl_atlas_geometry.h",
+        "dl_dispatcher.h",
+        "dl_image_impeller.h",
+        "dl_runtime_effect_impeller.h",
+        "dl_text_impeller.h",
+        "dl_vertices_geometry.h",
+        "image_filter.h",
+        "nine_patch_converter.h",
+        "paint.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":skia_conversions",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/entity",
+        "//engine/src/flutter/impeller/runtime_stage",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "@abseil-cpp//absl/hash",
+        "@skia",
+    ],
+    alwayslink = True,
+)

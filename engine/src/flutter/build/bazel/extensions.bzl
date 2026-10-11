@@ -135,6 +135,14 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/llvm_libc",
         build_file = _OVERLAYS + ":llvm_libc/BUILD.llvm_libc.bazel",
     ),
+    # Text shaping for txt and Skia's skshaper (research/08, step 5): the
+    # secondary tree's GN over the synced tree.
+    "harfbuzz": struct(
+        path = "engine/src/flutter/third_party/harfbuzz",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/harfbuzz/BUILD.gn"],
+        gn_repository = "@harfbuzz=//flutter/third_party/harfbuzz",
+    ),
     # Impeller's tessellator (research/08, step 4): the secondary tree's GN
     # over the synced tree.
     "libtess2": struct(
@@ -159,7 +167,11 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = [
             "engine/src/flutter/skia/BUILD.gn",
             "engine/src/flutter/skia/modules/skcms/BUILD.gn",
+            "engine/src/flutter/skia/modules/skparagraph/BUILD.gn",
+            "engine/src/flutter/skia/modules/skshaper/BUILD.gn",
+            "engine/src/flutter/skia/modules/skunicode/BUILD.gn",
             "engine/src/flutter/third_party/skia/src/partition_alloc/BUILD.gn",
+            "engine/src/flutter/third_party/skia/third_party/icu/config/BUILD.gn",
         ],
         gn_repository = "@skia=//flutter/third_party/skia",
     ),
