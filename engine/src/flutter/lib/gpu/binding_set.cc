@@ -48,8 +48,11 @@ bool BindingSet::AddUniform(
   if (!uniform_struct) {
     return false;
   }
-  if (!buffer || offset_in_bytes + length_in_bytes >
-                     buffer->GetDeviceBufferDescriptor().size) {
+  if (!buffer) {
+    return false;
+  }
+  const size_t size = buffer->GetDeviceBufferDescriptor().size;
+  if (offset_in_bytes > size || length_in_bytes > size - offset_in_bytes) {
     return false;
   }
 
@@ -58,6 +61,39 @@ bool BindingSet::AddUniform(
       .stage = shader.GetShaderStage(),
       .slot = uniform_struct->slot,
       .metadata = &uniform_struct->metadata,
+      .view = impeller::BufferView(
+          buffer, impeller::Range(offset_in_bytes, length_in_bytes)),
+  });
+  return true;
+}
+
+bool BindingSet::AddStorageBuffer(
+    Shader& shader,
+    int storage_buffer_index,
+    const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
+    size_t offset_in_bytes,
+    size_t length_in_bytes) {
+  if (shader.GetShaderStage() != impeller::ShaderStage::kCompute) {
+    return false;
+  }
+  const Shader::StorageBufferBinding* storage_buffer =
+      shader.GetStorageBufferAt(storage_buffer_index);
+  if (!storage_buffer) {
+    return false;
+  }
+  if (!buffer) {
+    return false;
+  }
+  const size_t size = buffer->GetDeviceBufferDescriptor().size;
+  if (offset_in_bytes > size || length_in_bytes > size - offset_in_bytes) {
+    return false;
+  }
+
+  RetainShader(shader);
+  storage_buffer_bindings_.push_back(BufferBinding{
+      .stage = shader.GetShaderStage(),
+      .slot = storage_buffer->slot,
+      .metadata = &storage_buffer->metadata,
       .view = impeller::BufferView(
           buffer, impeller::Range(offset_in_bytes, length_in_bytes)),
   });
@@ -96,6 +132,7 @@ bool BindingSet::AddTexture(
 void BindingSet::Clear() {
   buffer_bindings_.clear();
   texture_bindings_.clear();
+  storage_buffer_bindings_.clear();
   shaders_.clear();
 }
 
@@ -107,6 +144,11 @@ const std::vector<BindingSet::BufferBinding>& BindingSet::GetBufferBindings()
 const std::vector<BindingSet::TextureBinding>& BindingSet::GetTextureBindings()
     const {
   return texture_bindings_;
+}
+
+const std::vector<BindingSet::BufferBinding>&
+BindingSet::GetStorageBufferBindings() const {
+  return storage_buffer_bindings_;
 }
 
 }  // namespace gpu
@@ -134,6 +176,21 @@ bool InternalFlutterGpu_BindingSet_AddUniform(
   return wrapper->AddUniform(*shader, uniform_struct_index,
                              device_buffer->GetBuffer(), offset_in_bytes,
                              length_in_bytes);
+}
+
+bool InternalFlutterGpu_BindingSet_AddStorageBuffer(
+    flutter::gpu::BindingSet* wrapper,
+    flutter::gpu::Shader* shader,
+    int storage_buffer_index,
+    flutter::gpu::DeviceBuffer* device_buffer,
+    int offset_in_bytes,
+    int length_in_bytes) {
+  if (offset_in_bytes < 0 || length_in_bytes < 0) {
+    return false;
+  }
+  return wrapper->AddStorageBuffer(*shader, storage_buffer_index,
+                                   device_buffer->GetBuffer(), offset_in_bytes,
+                                   length_in_bytes);
 }
 
 bool InternalFlutterGpu_BindingSet_AddTexture(flutter::gpu::BindingSet* wrapper,
