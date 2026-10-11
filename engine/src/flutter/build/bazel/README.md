@@ -124,10 +124,15 @@ the overlays (`@dart`, `@icu`, `@zlib`, `@boringssl`, libc++ and the sysroot)
 and `gn_files` in the main repository (`//engine/src/build`,
 `//engine/src/flutter/build`, ...). They were measured on the build graph
 (GN's inputs, clang's `-MMD` output, the Dart compilers' depfiles, `ninja -t
-inputs`) and written with some slack; a Dart roll that reads from a new area
-fails the sandboxed build with a missing file, and the fix is a glob. The
-tools come from the same places as for the rest of the build: `@gn`,
-`@ninja`, `@clang_linux_x64`, `@sysroot_linux_x64`, and `@cpython3` as the
+inputs`) and written with some slack -- except for the secondary source
+tree, of which only the directories the wrapped build loads are inputs
+(`gn gen --root-target` reads ten files under `flutter/build`; the rest of
+`flutter/build/secondary` is BUILD.gn files for the engine's own
+dependencies, and listing them made every edit to one of them rebuild the
+Dart SDK from scratch). A Dart roll that reads from a new area fails the
+sandboxed build with a missing file, and the fix is a glob. The tools come
+from the same places as for the rest of the build: `@gn`, `@ninja`,
+`@clang_linux_x64`, `@sysroot_linux_x64`, and `@cpython3` as the
 `--script-executable` in place of depot_tools' `vpython3`.
 
 ```
