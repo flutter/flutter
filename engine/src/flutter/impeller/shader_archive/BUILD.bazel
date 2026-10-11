@@ -1,0 +1,71 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/shader_archive/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: shader_archive_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel/flatbuffers:flatbuffers.bzl", "flatbuffers")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "shader_archive_config",
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/impeller:impeller_public_config",
+    ],
+)
+
+flatbuffers(
+    name = "shader_archive_flatbuffers",
+    flatbuffers = ["shader_archive.fbs"],
+    deps = [
+        ":shader_archive_config",
+        "@flatbuffers",
+    ],
+)
+
+cc_library(
+    name = "shader_archive",
+    srcs = [
+        "shader_archive.cc",
+        "shader_archive_writer.cc",
+    ],
+    hdrs = [
+        "shader_archive.h",
+        "shader_archive_types.h",
+        "shader_archive_writer.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":shader_archive_flatbuffers",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "@abseil-cpp//absl/status:statusor",
+    ],
+    alwayslink = True,
+)
+
+cc_binary(
+    name = "shader_archiver",
+    srcs = ["shader_archive_main.cc"],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":shader_archive",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+    ],
+)

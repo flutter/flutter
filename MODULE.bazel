@@ -55,6 +55,7 @@ use_repo(
     "libcxxabi",
     "libjpeg-turbo",
     "libpng",
+    "libtess2",
     "libwebp",
     "llvm_libc",
     "ninja",
