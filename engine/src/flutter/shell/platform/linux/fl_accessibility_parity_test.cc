@@ -80,9 +80,16 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
       true;
   flags[4].is_obscured = true;
   semantics[3].value = "Hello world";
+  semantics[3].actions = static_cast<FlutterSemanticsAction>(
+      kFlutterSemanticsActionCopy | kFlutterSemanticsActionCut |
+      kFlutterSemanticsActionPaste);
   semantics[3].text_selection_base = 2;
   semantics[3].text_selection_extent = 5;
   semantics[4].value = "fixture-private-value";
+  // Deliberately inconsistent embedder input exercises adapter-side defense.
+  semantics[4].actions = semantics[3].actions;
+  semantics[4].hint = "Enter your password";
+  semantics[4].tooltip = "Protected input";
   semantics[9].value = "A\xF0\x9F\x98\x80 caf\xC3\xA9";
   semantics[9].text_selection_base = 1;
   semantics[9].text_selection_extent = 3;
@@ -147,10 +154,22 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
                 slider_calls++;
                 semantics[5].value = "51%";
                 changed = &semantics[5];
+                // Protect an existing Text object without changing its role.
+                flags[3].is_obscured = true;
+                {
+                  FlutterSemanticsNode2* editor = &semantics[3];
+                  FlutterSemanticsUpdate2 partial = {};
+                  partial.view_id = update.view_id;
+                  partial.node_count = 1;
+                  partial.nodes = &editor;
+                  apply_update(&partial);
+                }
                 break;
               case 6:
                 EXPECT_EQ(info->action, kFlutterSemanticsActionScrollDown);
                 scroll_calls++;
+                flags[3].is_obscured = false;
+                changed = &semantics[3];
                 break;
               case 8:
                 EXPECT_EQ(info->action, kFlutterSemanticsActionTap);

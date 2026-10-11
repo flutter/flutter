@@ -1767,6 +1767,32 @@ TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {
   ASSERT_NE(after, nullptr);
   ASSERT_EQ(g_bytes_get_size(after), 1u);
   EXPECT_EQ(*static_cast<const char*>(g_bytes_get_data(after, nullptr)), '\0');
+
+  // A role change replaces the native object. Clients holding the old text
+  // object must not be able to read its former value after protection changes.
+  flags.is_obscured = false;
+  root.label = nullptr;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  flags.is_obscured = true;
+  flags.is_text_field = false;
+  flags.is_button = true;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) replacement =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_NE(replacement, readable);
+  EXPECT_FALSE(gtk_test_accessible_has_property(readable,
+                                                GTK_ACCESSIBLE_PROPERTY_LABEL));
+  EXPECT_FALSE(gtk_test_accessible_has_property(
+      readable, GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT));
+  g_autoptr(GBytes) detached =
+      fl_view_gtk4_accessibility_ref_native_text_for_testing(readable);
+  ASSERT_NE(detached, nullptr);
+  ASSERT_EQ(g_bytes_get_size(detached), 1u);
+  EXPECT_EQ(*static_cast<const char*>(g_bytes_get_data(detached, nullptr)),
+            '\0');
 }
 
 }  // namespace

@@ -11,6 +11,7 @@ are reported in JSON; --strict also fails when any differences remain.
 """
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -80,6 +81,49 @@ def descendants(root):
   raise RuntimeError('Parity tree exceeded traversal limit')
 
 
+def protected_value_checks(Atspi, node, secret):
+  """Query exported value surfaces; retain only disclosure booleans."""
+  node.clear_cache()
+  surfaces = {
+      'name': node.get_name(),
+      'description': node.get_description(),
+      'attributes': node.get_attributes(),
+  }
+  text = node.get_text_iface()
+  if text is not None:
+    surfaces['text'] = Atspi.Text.get_text(text, 0, -1)
+    surfaces['text_default_attributes'] = text.get_default_attributes()
+    if text.get_character_count() > 0:
+      surfaces['text_attributes'] = text.get_text_attributes(0)
+    for index in range(text.get_n_selections()):
+      selection = Atspi.Text.get_selection(text, index)
+      if selection is not None:
+        surfaces[f'selected_text_{index}'] = Atspi.Text.get_text(
+            text, selection.start_offset, selection.end_offset
+        )
+  value = node.get_value_iface()
+  if value is not None:
+    surfaces['value_text'] = value.get_text()
+  action = node.get_action_iface()
+  actions = [] if action is None else [
+      normalized_action(action.get_action_name(i)) for i in range(action.get_n_actions())
+  ]
+  return {
+      'disclosure': {name: secret in str(value) for name, value in surfaces.items()},
+      'copy_advertised': 'copy' in actions,
+      'cut_advertised': 'cut' in actions,
+      'paste_advertised': 'paste' in actions,
+      'role': node.get_role_name(),
+  }
+
+
+def require_protected(checks):
+  if any(checks['disclosure'].values()) or checks['copy_advertised'] or checks['cut_advertised']:
+    raise RuntimeError('GTK4 exposed a protected value or advertised copy/cut')
+  if not checks['paste_advertised']:
+    raise RuntimeError('GTK4 lost the permitted paste action on protected input')
+
+
 def snapshot(Atspi, nodes):
   result = {}
   for name, node in sorted(nodes.items()):
@@ -132,7 +176,8 @@ def invoke(node, expected):
   raise RuntimeError(f'{node.get_name()} rejected {expected}')
 
 
-def run_backend(Atspi, binary, output):
+def run_backend(Atspi, binary, output, require_password_privacy=False):
+  from gi.repository import GLib
   command = [binary, '--gtest_filter=FlAccessibilityParityTest.ExternalAtspiParity']
   with process(command, output) as fixture:
     root = wait_until(lambda: find_root(Atspi, fixture), 'parity root')
@@ -144,6 +189,9 @@ def run_backend(Atspi, binary, output):
     if nodes.keys() != expected:
       raise RuntimeError(f'Incomplete parity tree: {sorted(nodes)}')
     before = snapshot(Atspi, nodes)
+    password = protected_value_checks(Atspi, nodes['Password'], 'fixture-private-value')
+    if require_password_privacy:
+      require_protected(password)
     # No node in this fixture has selected or expanded semantics, including
     # explicit false. Their absence must not advertise these capabilities.
     for name, record in before.items():
@@ -160,13 +208,72 @@ def run_backend(Atspi, binary, output):
       return not nodes['Checked'].get_state_set().contains(Atspi.StateType.CHECKED)
 
     wait_until(unchecked, 'partial checkbox update')
-    invoke(nodes['Slider'], 'increase')
+    text_events = []
+
+    def on_protected_text(event, unused):
+      if event.source == nodes['Editor']:
+        # Event payloads may contain removed text. Never persist those strings.
+        payload = str(event.any_data)
+        text_events.append({
+            'type': event.type,
+            'start': event.detail1,
+            'length': event.detail2,
+            'exposes_value': 'Hello world' in payload,
+            'payload_redacted': set(payload) <= {'*'},
+            'payload_length': len(payload),
+        })
+
+    listener = Atspi.EventListener.new(on_protected_text, None)
+    listener.register('object:text-changed')
+    try:
+      invoke(nodes['Slider'], 'increase')
+      if require_password_privacy:
+
+        def editor_protected():
+          context = GLib.MainContext.default()
+          while context.pending():
+            context.iteration(False)
+          checks = protected_value_checks(Atspi, nodes['Editor'], 'Hello world')
+          if (not text_events or any(checks['disclosure'].values()) or checks['copy_advertised'] or
+              checks['cut_advertised']):
+            return None
+          return checks
+
+        protected_editor = wait_until(editor_protected, 'existing editor becomes protected')
+        require_protected(protected_editor)
+        if any(event['exposes_value'] or not event['payload_redacted'] for event in text_events):
+          raise RuntimeError('GTK4 disclosed protected contents in a text-change event')
+        if [(event['type'], event['start'], event['length'], event['payload_length'])
+            for event in text_events] != [('object:text-changed:delete', 0, 11, 11)]:
+          raise RuntimeError('GTK4 did not preserve the protected deletion notification range')
+      else:
+        # GTK3 is a baseline, not the privacy oracle for synthetic clear input.
+        protected_editor = protected_value_checks(Atspi, nodes['Editor'], 'Hello world')
+    finally:
+      listener.deregister('object:text-changed')
     invoke(nodes['Scroll region'], 'scrolldown')
+
+    def editor_restored():
+      nodes['Editor'].clear_cache()
+      text = nodes['Editor'].get_text_iface()
+      return text is not None and Atspi.Text.get_text(text, 0, -1) == 'Hello world'
+
+    wait_until(editor_restored, 'editor readable again')
     after = snapshot(Atspi, nodes)
     invoke(nodes['Finish comparison'], 'tap')
     if fixture.wait(timeout=10) != 0:
       raise RuntimeError('Fixture did not receive exactly the expected actions')
-    return {'before': before, 'after': after}
+    return {
+        'before': before,
+        'after': after,
+        'password_checks': {
+            'initial': password,
+            'existing_editor_protected': protected_editor,
+            'protection_text_events': text_events,
+            'editor_restored': True,
+        },
+        'action_checks': {'correct_view_and_node': True, 'exactly_once': True},
+    }
 
 
 def main():
@@ -208,7 +315,7 @@ def main():
     try:
       with accessibility_bus(output) as Atspi:
         gtk3 = run_backend(Atspi, args.gtk3, output)
-        gtk4 = run_backend(Atspi, args.gtk4, output)
+        gtk4 = run_backend(Atspi, args.gtk4, output, require_password_privacy=True)
       output.seek(0)
       runtimes = [
           json.loads(line.removeprefix('PARITY_RUNTIME '))
@@ -220,6 +327,18 @@ def main():
       report = {
           'environment': {'gtk3': runtimes[0], 'gtk4': runtimes[1], 'display': 'x11'}, 'gtk3': gtk3,
           'gtk4': gtk4, 'differences': differences(gtk3, gtk4)
+      }
+      # Identify the tested artifacts even when the checkout has local edits.
+      source = Path(__file__).resolve().parent.parent
+      files = {
+          'gtk3_binary': Path(args.gtk3),
+          'gtk4_binary': Path(args.gtk4),
+          'collector': Path(__file__),
+          'fixture': source / 'fl_accessibility_parity_test.cc',
+          'gtk4_adapter': source / 'fl_view_gtk4_accessibility.cc',
+      }
+      report['environment']['sha256'] = {
+          name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in files.items()
       }
       encoded = json.dumps(report, indent=2, ensure_ascii=True) + '\n'
       if args.output:

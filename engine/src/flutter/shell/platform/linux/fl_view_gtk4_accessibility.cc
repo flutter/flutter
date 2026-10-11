@@ -516,7 +516,13 @@ static void fl_gtk4_accessible_node_detach(FlGtk4AccessibleNode* self) {
   self->view = nullptr;
   self->has_bounds = FALSE;
   self->actions_enabled = FALSE;
+  self->text_actions_enabled = FALSE;
   self->actions = 0;
+  // A client may retain a replaced text object when the new semantics become
+  // protected. Detached objects must not keep readable contents or selection.
+  g_clear_pointer(&self->text, g_free);
+  self->text_selection_base = 0;
+  self->text_selection_extent = 0;
   for (const auto& action : kNativeActions) {
     gtk_widget_action_set_enabled(GTK_WIDGET(self), action.name, FALSE);
   }
@@ -904,7 +910,8 @@ static guint utf16_offset_to_character_offset(const gchar* text, gint offset) {
 static void fl_gtk4_text_accessible_node_set_text(FlGtk4AccessibleNode* self,
                                                   const gchar* text,
                                                   gint selection_base,
-                                                  gint selection_extent) {
+                                                  gint selection_extent,
+                                                  gboolean is_obscured) {
   const gchar* new_text = text == nullptr ? "" : text;
   const gboolean text_changed = g_strcmp0(self->text, new_text) != 0;
   guint change_start = 0;
@@ -934,7 +941,16 @@ static void fl_gtk4_text_accessible_node_set_text(FlGtk4AccessibleNode* self,
     }
     removed = g_utf8_strlen(old_start, old_end - old_start);
     inserted = g_utf8_strlen(new_start, new_end - new_start);
-    // GTK reads removed contents synchronously; notify before changing text.
+    // GTK reads removed contents synchronously into the AT-SPI event payload.
+    // When protection is enabled, redact them first so the deletion event can
+    // invalidate AT caches without broadcasting the formerly readable value.
+    // Preserve the old character count for GTK's pre-removal query contract.
+    if (is_obscured) {
+      gchar* redacted =
+          g_strnfill(fl_gtk4_text_accessible_node_get_text_length(self), '*');
+      g_free(self->text);
+      self->text = redacted;
+    }
     if (removed != 0) {
       fl_gtk_runtime_accessible_text_update_contents(
           GTK_ACCESSIBLE(self), 1, change_start, change_start + removed);
@@ -1074,7 +1090,8 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
     fl_gtk4_text_accessible_node_set_text(
         self, supports_text ? value : nullptr,
         supports_text ? semantics->text_selection_base : 0,
-        supports_text ? semantics->text_selection_extent : 0);
+        supports_text ? semantics->text_selection_extent : 0,
+        flags->is_obscured);
   }
   if (semantics->heading_level > 0) {
     fl_gtk4_accessible_node_set_int_property(
