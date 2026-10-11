@@ -32,6 +32,9 @@ namespace gpu {
 /// Binding the set on a render pass costs one slot assignment no matter how
 /// many resources it holds, so a renderer that draws many nodes with the same
 /// material stops paying per-resource bind work per draw.
+///
+/// A set can hold bindings for any stage. A render pass replays its vertex
+/// and fragment bindings, and a compute pass its compute bindings.
 class BindingSet : public RefCountedDartWrappable<BindingSet> {
   DEFINE_WRAPPERTYPEINFO();
   FML_FRIEND_MAKE_REF_COUNTED(BindingSet);

@@ -24,9 +24,11 @@ base class TextureBinding {
 /// draws and passes.
 ///
 /// Create one with [GpuContext.createBindingSet] and bind it with
-/// [RenderPass.bindSet]. Binding costs one slot assignment no matter how many
-/// resources the set holds, so a renderer that draws one material across many
-/// nodes stops paying per-resource bind work on every draw.
+/// [RenderPass.bindSet] or [ComputePass.bindSet]. Binding costs one slot
+/// assignment no matter how many resources the set holds, so a renderer that
+/// draws one material across many nodes stops paying per-resource bind work
+/// on every draw. A render pass uses a set's vertex and fragment shader
+/// bindings, and a compute pass its compute shader bindings.
 ///
 /// A set references its resources rather than copying them, so it stays valid
 /// for as long as the bound buffers and textures do. Data that changes from

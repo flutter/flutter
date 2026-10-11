@@ -19,10 +19,12 @@ BindingSet::BindingSet() = default;
 
 BindingSet::~BindingSet() = default;
 
-// Whether a shader stage can take resource bindings from a render pass.
-static bool IsRenderStage(impeller::ShaderStage stage) {
+// Whether a shader stage can take resource bindings from a render or compute
+// pass.
+static bool IsBindableStage(impeller::ShaderStage stage) {
   return stage == impeller::ShaderStage::kVertex ||
-         stage == impeller::ShaderStage::kFragment;
+         stage == impeller::ShaderStage::kFragment ||
+         stage == impeller::ShaderStage::kCompute;
 }
 
 void BindingSet::RetainShader(Shader& shader) {
@@ -40,7 +42,7 @@ bool BindingSet::AddUniform(
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
     size_t offset_in_bytes,
     size_t length_in_bytes) {
-  if (!IsRenderStage(shader.GetShaderStage())) {
+  if (!IsBindableStage(shader.GetShaderStage())) {
     return false;
   }
   const Shader::UniformBinding* uniform_struct =
@@ -105,7 +107,7 @@ bool BindingSet::AddTexture(
     int uniform_texture_index,
     std::shared_ptr<const impeller::Texture> texture,
     impeller::raw_ptr<const impeller::Sampler> sampler) {
-  if (!IsRenderStage(shader.GetShaderStage())) {
+  if (!IsBindableStage(shader.GetShaderStage())) {
     return false;
   }
   const Shader::TextureBinding* texture_binding =

@@ -5,6 +5,8 @@
 #ifndef FLUTTER_LIB_GPU_CONTEXT_H_
 #define FLUTTER_LIB_GPU_CONTEXT_H_
 
+#include <cstdint>
+
 #include "dart_api.h"
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
@@ -14,6 +16,12 @@ namespace flutter {
 namespace gpu {
 
 bool SupportsNormalOffscreenMSAA(const impeller::Context& context);
+
+/// Whether Flutter GPU supports compute on `context`: true on Metal and
+/// Vulkan, false on OpenGL ES. This is independent of
+/// `impeller::Capabilities::SupportsCompute`, since it reports whether
+/// Flutter GPU implements its whole compute contract on the backend.
+bool SupportsCompute(const impeller::Context& context);
 
 class Context : public RefCountedDartWrappable<Context> {
   DEFINE_WRAPPERTYPEINFO();
@@ -80,6 +88,29 @@ extern int InternalFlutterGpu_Context_GetMinimumUniformByteAlignment(
 
 FLUTTER_GPU_EXPORT
 extern int InternalFlutterGpu_Context_GetMinimumStorageBufferAlignment(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_Context_GetSupportsCompute(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern uint32_t
+InternalFlutterGpu_Context_GetMaximumComputeWorkgroupInvocations(
+    flutter::gpu::Context* wrapper);
+
+FLUTTER_GPU_EXPORT
+extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupSize(
+    flutter::gpu::Context* wrapper,
+    int dimension);
+
+FLUTTER_GPU_EXPORT
+extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupCount(
+    flutter::gpu::Context* wrapper,
+    int dimension);
+
+FLUTTER_GPU_EXPORT
+extern int64_t InternalFlutterGpu_Context_GetMaximumComputeSharedMemorySize(
     flutter::gpu::Context* wrapper);
 
 FLUTTER_GPU_EXPORT

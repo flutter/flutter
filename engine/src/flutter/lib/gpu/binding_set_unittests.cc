@@ -147,9 +147,9 @@ TEST(FlutterGpuBindingSetTest, AddUniformRejectsAViewPastTheEndOfTheBuffer) {
   EXPECT_TRUE(set->GetBufferBindings().empty());
 }
 
-// Only the vertex and fragment stages take bindings from a render pass.
-TEST(FlutterGpuBindingSetTest, AddRejectsNonRenderStages) {
-  auto shader = MakeShader(impeller::ShaderStage::kCompute);
+// Only the vertex, fragment and compute stages take bindings from a pass.
+TEST(FlutterGpuBindingSetTest, AddRejectsUnknownStages) {
+  auto shader = MakeShader(impeller::ShaderStage::kUnknown);
   auto set = fml::MakeRefCounted<BindingSet>();
   auto buffer = MakeBuffer(128);
 
@@ -157,6 +157,30 @@ TEST(FlutterGpuBindingSetTest, AddRejectsNonRenderStages) {
                                /*offset_in_bytes=*/0,
                                /*length_in_bytes=*/64));
   EXPECT_TRUE(set->GetBufferBindings().empty());
+}
+
+// A compute pass replays a set's compute bindings, and a render pass skips
+// them.
+TEST(FlutterGpuBindingSetTest, AddAcceptsComputeStageUniformsAndTextures) {
+  auto shader = MakeShader(impeller::ShaderStage::kCompute);
+  auto set = fml::MakeRefCounted<BindingSet>();
+  auto buffer = MakeBuffer(128);
+  auto texture = MakeTexture();
+  std::shared_ptr<const impeller::Sampler> sampler =
+      std::make_shared<impeller::testing::MockSampler>(
+          impeller::SamplerDescriptor{});
+
+  EXPECT_TRUE(set->AddUniform(*shader, /*uniform_struct_index=*/0, buffer,
+                              /*offset_in_bytes=*/0,
+                              /*length_in_bytes=*/64));
+  EXPECT_TRUE(
+      set->AddTexture(*shader, /*uniform_texture_index=*/0, texture,
+                      impeller::raw_ptr<const impeller::Sampler>(sampler)));
+  ASSERT_EQ(set->GetBufferBindings().size(), 1u);
+  EXPECT_EQ(set->GetBufferBindings()[0].stage, impeller::ShaderStage::kCompute);
+  ASSERT_EQ(set->GetTextureBindings().size(), 1u);
+  EXPECT_EQ(set->GetTextureBindings()[0].stage,
+            impeller::ShaderStage::kCompute);
 }
 
 TEST(FlutterGpuBindingSetTest, AddTextureResolvesTheShaderBinding) {

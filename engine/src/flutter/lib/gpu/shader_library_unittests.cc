@@ -338,9 +338,15 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferLoadsComputeMetadata) {
   ASSERT_NE(output, nullptr);
   EXPECT_EQ(output->access, Shader::StorageBufferBinding::Access::kWriteOnly);
   EXPECT_EQ(output->slot.binding, 1u);
-  // A storage buffer the compiler dead-code-eliminated is not bindable.
-  EXPECT_EQ(shader->GetStorageBuffer("Dced"), nullptr);
-  EXPECT_EQ(shader->GetStorageBufferIndex("Dced"), -1);
+  // A storage buffer the Metal compiler dead-code-eliminated is kept, so that
+  // a compute shader takes the same bindings on every backend. Its sentinel
+  // index tells the compute pass not to bind it on the backend.
+  const auto* dced = shader->GetStorageBuffer("Dced");
+  ASSERT_NE(dced, nullptr);
+  EXPECT_EQ(dced->slot.ext_res_0, sentinel);
+  EXPECT_EQ(dced->size_in_bytes, 16u);
+  EXPECT_EQ(dced->runtime_array_stride, 8u);
+  EXPECT_EQ(shader->GetStorageBufferIndex("Missing"), -1);
 
   // Dart binds by index, resolved once from the name.
   const int input_index = shader->GetStorageBufferIndex("Input");
@@ -350,11 +356,13 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferLoadsComputeMetadata) {
   EXPECT_NE(input_index, output_index);
   EXPECT_EQ(shader->GetStorageBufferAt(input_index), input);
   EXPECT_EQ(shader->GetStorageBufferAt(output_index), output);
-  EXPECT_EQ(shader->GetStorageBufferAt(2), nullptr);
+  EXPECT_EQ(shader->GetStorageBufferAt(shader->GetStorageBufferIndex("Dced")),
+            dced);
+  EXPECT_EQ(shader->GetStorageBufferAt(3), nullptr);
   EXPECT_EQ(shader->GetStorageBufferAt(-1), nullptr);
   EXPECT_EQ(input->metadata.name, "Input");
 
-  // Each live storage buffer gets a descriptor set layout, which the Vulkan
+  // Each storage buffer gets a descriptor set layout, which the Vulkan
   // pipeline layout is built from.
   size_t storage_layouts = 0;
   for (const auto& layout : shader->GetDescriptorSetLayouts()) {
@@ -363,7 +371,7 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferLoadsComputeMetadata) {
       storage_layouts++;
     }
   }
-  EXPECT_EQ(storage_layouts, 2u);
+  EXPECT_EQ(storage_layouts, 3u);
 }
 
 // A storage buffer entry without a name, as a malformed `fromBytes` payload

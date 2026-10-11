@@ -32,6 +32,9 @@ bool CommandBuffer::Encodable::EncodeCommands() const {
   if (blit_pass) {
     return blit_pass->EncodeCommands();
   }
+  if (compute_pass) {
+    return compute_pass->EncodeCommands();
+  }
   return false;
 }
 
@@ -61,6 +64,33 @@ bool CommandBuffer::EndRenderPass(const impeller::RenderPass* render_pass) {
     return true;
   }
   return EndOpenPass();
+}
+
+std::shared_ptr<impeller::ComputePass> CommandBuffer::CreateComputePass() {
+  if (!EndOpenPass()) {
+    return nullptr;
+  }
+  auto compute_pass = command_buffer_->CreateComputePass();
+  if (!compute_pass) {
+    return nullptr;
+  }
+  Encodable encodable;
+  encodable.compute_pass = compute_pass;
+  encodables_.push_back(std::move(encodable));
+  has_open_pass_ = true;
+  return compute_pass;
+}
+
+bool CommandBuffer::EndComputePass(const impeller::ComputePass* compute_pass) {
+  if (!compute_pass || !has_open_pass_ ||
+      encodables_.back().compute_pass.get() != compute_pass) {
+    return true;
+  }
+  return EndOpenPass();
+}
+
+const std::shared_ptr<impeller::Context>& CommandBuffer::GetContext() const {
+  return context_;
 }
 
 bool CommandBuffer::EndOpenPass() {

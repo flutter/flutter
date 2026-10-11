@@ -43,7 +43,12 @@ ComputePassMTL::ComputePassMTL(std::shared_ptr<const Context> context,
   is_valid_ = true;
 }
 
-ComputePassMTL::~ComputePassMTL() = default;
+ComputePassMTL::~ComputePassMTL() {
+  if (!did_finish_encoding_) {
+    [encoder_ endEncoding];
+    did_finish_encoding_ = true;
+  }
+}
 
 bool ComputePassMTL::IsValid() const {
   return is_valid_;
@@ -167,6 +172,7 @@ fml::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
 
 bool ComputePassMTL::EncodeCommands() const {
   [encoder_ endEncoding];
+  did_finish_encoding_ = true;
   return true;
 }
 

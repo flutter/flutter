@@ -124,7 +124,11 @@ void Shader::ResetFrom(Shader& other) {
 }
 
 bool Shader::RegisterSync(Context& context) {
-  auto& lib = *context.GetContext().GetShaderLibrary();
+  return RegisterSync(context.GetContext());
+}
+
+bool Shader::RegisterSync(impeller::Context& context) {
+  auto& lib = *context.GetShaderLibrary();
   const std::string scoped_name = GetScopedName();
 
   std::shared_ptr<const impeller::ShaderFunction> existing =
@@ -137,8 +141,7 @@ bool Shader::RegisterSync(Context& context) {
   // Evict it (and any pipelines that referenced it) before registering the
   // new code mapping. Mirrors `RuntimeEffectContents::RegisterShader`.
   if (existing && is_dirty_) {
-    context.GetContext().GetPipelineLibrary()->RemovePipelinesWithEntryPoint(
-        existing);
+    context.GetPipelineLibrary()->RemovePipelinesWithEntryPoint(existing);
     lib.UnregisterFunction(scoped_name, stage_);
   }
 

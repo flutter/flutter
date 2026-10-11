@@ -12,6 +12,7 @@
 #include "impeller/core/texture.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/command_queue.h"
+#include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_library.h"
@@ -115,6 +116,44 @@ class MockRenderPass : public RenderPass {
               (const Context& context),
               (const, override));
   MOCK_METHOD(void, OnSetLabel, (std::string_view label), (override));
+};
+
+class MockComputePass : public ComputePass {
+ public:
+  explicit MockComputePass(std::shared_ptr<const Context> context)
+      : ComputePass(std::move(context)) {}
+  MOCK_METHOD(bool, IsValid, (), (const, override));
+  MOCK_METHOD(void, SetCommandLabel, (std::string_view label), (override));
+  MOCK_METHOD(
+      void,
+      SetPipeline,
+      (const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline),
+      (override));
+  MOCK_METHOD(fml::Status,
+              Compute,
+              ((std::array<uint32_t, 3>)workgroup_count),
+              (override));
+  MOCK_METHOD(void, AddBufferMemoryBarrier, (), (override));
+  MOCK_METHOD(void, AddTextureMemoryBarrier, (), (override));
+  MOCK_METHOD(bool, EncodeCommands, (), (const, override));
+  MOCK_METHOD(void, OnSetLabel, (const std::string& label), (override));
+  MOCK_METHOD(bool,
+              BindResource,
+              (ShaderStage stage,
+               DescriptorType type,
+               const ShaderUniformSlot& slot,
+               const ShaderMetadata* metadata,
+               BufferView view),
+              (override));
+  MOCK_METHOD(bool,
+              BindResource,
+              (ShaderStage stage,
+               DescriptorType type,
+               const SampledImageSlot& slot,
+               const ShaderMetadata* metadata,
+               std::shared_ptr<const Texture> texture,
+               raw_ptr<const Sampler> sampler),
+              (override));
 };
 
 class MockPipelineLibrary : public PipelineLibrary {
