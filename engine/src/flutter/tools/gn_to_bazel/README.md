@@ -131,7 +131,13 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    target, so that Skia's `SK_VULKAN` and friends reach the engine as they
    do under GN. A public config's compiler flags cannot ride a dependency:
    they are inlined into the owner, and dependents get them from the
-   `propagatedCopts` table, against which the owner's file is checked.
+   `propagatedCopts` table, against which the owner's file is checked. A
+   private config of another file (`configs += [ "../../:skia_private" ]`)
+   is an `implementation_deps` entry: Bazel applies it to the target's own
+   compiles alone, which is GN's private semantics. A file of another
+   package of the main repository (a font under `//flutter/txt` as a
+   fixture) is labelled through that package, which the manifest-derived
+   `mainRepositoryLayout` knows; an unknown owner is an error.
    `cflags_c` and `cflags_cc` go to `conlyopts` and `cxxopts`; a `-std=` in a
    target's flags is dropped, because GN's compiler config sets the standard
    after every target's flags and the target's never takes effect. A file

@@ -13,6 +13,8 @@
 /// checked in; they are listed for what they need.
 library;
 
+import 'bazel_mapping.dart';
+
 /// One generated file.
 final class ConvertedFile {
   const ConvertedFile(
@@ -471,3 +473,21 @@ ConvertedFile? manifestEntry(String gnPackage) {
   }
   return null;
 }
+
+/// The hand-written packages of the main repository whose files a generated
+/// file may name (the generated packages are [convertedFiles]).
+const Set<String> handWrittenPackages = <String>{
+  'engine/src',
+  'engine/src/flutter',
+  'engine/src/flutter/impeller/tools',
+};
+
+/// The main repository's layout: its packages are the generated ones and
+/// [handWrittenPackages], so that a file of another package (a font under
+/// //flutter/txt as a fixture of display_list) is labelled through it.
+final OutputLayout mainRepositoryLayout = OutputLayout.main(
+  packages: <String>{
+    for (final ConvertedFile file in convertedFiles) 'engine/src/${file.gnPackage.substring(2)}',
+    ...handWrittenPackages,
+  },
+);

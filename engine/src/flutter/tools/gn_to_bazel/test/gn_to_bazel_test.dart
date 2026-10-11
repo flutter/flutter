@@ -925,7 +925,7 @@ executable("example_unittests") {
 # Generated from //flutter/example/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -969,7 +969,7 @@ cc_test(
     name = "example_unittests",
     size = "small",
     srcs = ["example_unittests.cc"],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":dynamic_symbols",
@@ -1866,6 +1866,114 @@ impeller_shaders(
       );
     });
 
+    test('a file of another package is labelled through it', () async {
+      // The layout knows the main repository's packages; a fixture under
+      // //flutter/txt is //engine/src/flutter/txt's file.
+      const layout = OutputLayout.main(
+        packages: <String>{'engine/src/flutter/txt', 'engine/src/flutter/example'},
+      );
+      expect(
+        await convert('''
+test_fixtures("fixtures") {
+  fixtures = [
+    "//flutter/txt/third_party/fonts/Roboto-Regular.ttf",
+    "data/local.txt",
+  ]
+}
+''', layout: layout),
+        contains('''
+flutter_test_fixtures(
+    name = "fixtures",
+    fixtures = [
+        "data/local.txt",
+        "//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf",
+    ],
+)
+'''),
+      );
+      await expectLater(
+        convert('''
+test_fixtures("fixtures") {
+  fixtures = [ "//flutter/elsewhere/font.ttf" ]
+}
+''', layout: layout),
+        throwsGnError(line: 2, message: 'outside the package of the generated file'),
+      );
+    });
+
+    test('a private config of another file is an implementation dependency', () async {
+      // `../skia:skia_private` names a sibling directory's config; as a
+      // private config its library applies to this target's compiles only.
+      // The implicit name of a directory label is the directory's.
+      expect(absoluteGnLabel('../../:x', package: '//a/b/c'), '//a:x');
+      expect(absoluteGnLabel('../base', package: '//a/b', implicitName: true), '//a/base:base');
+      expect(absoluteGnLabel(':x', package: '//a/b'), '//a/b:x');
+      final String output = await convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  configs += [ "../skia:skia_private" ]
+  public_configs = [ "//flutter/impeller:impeller_public_config" ]
+}
+
+source_set("headers") {
+  sources = [ "b.h" ]
+  configs += [ "../skia:skia_private" ]
+}
+''');
+      expect(
+        output,
+        contains('''
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+    ],
+    implementation_deps = ["@skia//:skia_private"],
+    alwayslink = True,
+)
+'''),
+      );
+      // A header-only library compiles nothing for the config to apply to.
+      expect(output, contains('cc_library(\n    name = "headers",\n    hdrs = ["b.h"],\n)\n'));
+    });
+
+    test('output_name on a source_set is ignored; an import inside a target', () async {
+      expect(
+        await convert('''
+source_set("x") {
+  output_name = "libx"
+  sources = [ "a.cc" ]
+}
+'''),
+        contains('name = "x"'),
+      );
+      // GN brings a .gni's variables into the block's scope; a file already
+      // imported at file level changes nothing, any other is refused.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'lib/lists.gni': 'example_sources = [ "a.cc" ]\n',
+        'lib/other.gni': 'other_sources = [ "b.cc" ]\n',
+        'pkg/BUILD.gn': '''
+import("//lib/lists.gni")
+
+source_set("x") {
+  import("//lib/lists.gni")
+  sources = example_sources
+}
+''',
+        'bad/BUILD.gn': '''
+source_set("x") {
+  import("//lib/other.gni")
+  sources = other_sources
+}
+''',
+      });
+      final GnFileEvaluation evaluation = evaluateIn(tree, '//pkg/BUILD.gn');
+      expect(strings(evaluation.targets.single, 'sources'), <String>['a.cc']);
+      expect(
+        () => evaluateIn(tree, '//bad/BUILD.gn'),
+        throwsGnError(line: 2, message: 'import of //lib/other.gni inside a target'),
+      );
+    });
+
     test('generated and foreign include directories', () async {
       // The root of the generated tree is the engine's include root; a
       // directory of another repository comes with the dependency on it.
@@ -1982,6 +2090,7 @@ shared_library("x") {
           gnPackage: file.gnPackage,
           skipTargets: file.skip.keys.toSet(),
           appendix: file.appendix,
+          layout: mainRepositoryLayout,
         );
         expect(output, File(p.join(directory, 'BUILD.bazel')).readAsStringSync());
         // Every skip in the manifest names a target that exists.

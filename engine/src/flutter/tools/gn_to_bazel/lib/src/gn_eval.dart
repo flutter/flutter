@@ -870,7 +870,16 @@ final class _Evaluator {
     switch (call.name) {
       case 'import':
         if (target != null) {
-          throw GnError(call.location, 'import inside a target');
+          // The .gni's variables enter the block's scope; when the file was
+          // imported at file level already (skunicode, skparagraph) they
+          // are visible through the enclosing scope and nothing changes.
+          // Any other file would make the target's variables depend on an
+          // import the converter never evaluated.
+          final String gnPath = _importPath(call, scope);
+          if (!result.imports.contains(gnPath)) {
+            throw GnError(call.location, 'import of $gnPath inside a target');
+          }
+          return;
         }
         _import(call, scope);
         return;

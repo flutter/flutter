@@ -83,8 +83,14 @@ Future<int> run(List<String> arguments) async {
       differences++;
       continue;
     }
-    // `dir:*` describes the targets; configs are described one by one.
-    final Map<String, Object?> described = await _gnDesc(gn, outDir, '$gnPackage:*');
+    // `dir:*` describes the targets; configs are described one by one (a
+    // directory of configs alone has no targets, and gn desc says so).
+    final Map<String, Object?> described = await _gnDesc(
+      gn,
+      outDir,
+      '$gnPackage:*',
+      failIfMissing: false,
+    );
     final seen = <String>{...skip.map((String name) => '$gnPackage:$name')};
     // The all_dependent_configs the file itself names (as opposed to those
     // GN propagates in from dependencies in other files).
@@ -393,17 +399,8 @@ List<String> _strings(Object? json) =>
     json is List<Object?> ? json.cast<String>() : const <String>[];
 
 /// `//flutter/skia`, `:x`, `modules/skcms` and `//a/b:c` as `//dir:name`.
-String _absoluteLabel(String value, String gnPackage) {
-  var label = value.startsWith(':')
-      ? '$gnPackage$value'
-      : value.startsWith('//')
-      ? value
-      : '//${p.posix.normalize('${gnPackage.substring(2)}/$value')}';
-  if (!label.contains(':')) {
-    label = '$label:${label.substring(label.lastIndexOf('/') + 1)}';
-  }
-  return label;
-}
+String _absoluteLabel(String value, String gnPackage) =>
+    absoluteGnLabel(value, package: gnPackage, implicitName: true);
 
 String _stripToolchain(String label) {
   final int paren = label.indexOf('(');

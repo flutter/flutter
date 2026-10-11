@@ -60,9 +60,12 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/googletest:gtest': '@googletest//:gtest',
   '//flutter/third_party/googletest:gtest_main': '@googletest//:gtest_main',
   '//flutter/third_party/googletest:gmock': '@googletest//:gtest',
+  '//flutter/third_party/googletest:gtest_prod': '@googletest//:gtest_prod',
   // The secondary tree's forwarders.
   '//third_party/icu': '@icu',
+  '//third_party/icu:icuuc': '@icu//:icuuc',
   '//third_party/zlib': '@zlib',
+  '//third_party/freetype2': '@freetype2',
   '//third_party/boringssl': '//engine/src/flutter/third_party/boringssl',
   // The Dart SDK, built by gn_build.
   '//flutter/third_party/dart/runtime:dart_api': '@dart//:dart_api_headers',
@@ -104,6 +107,7 @@ const Map<String, String> labelOverrides = <String, String>{
   '//third_party/shaderc_flutter': '@shaderc//:shaderc_flutter',
   '//flutter/third_party/re2': '@re2',
   '//third_party/libtess2': '@libtess2',
+  '//flutter/third_party/harfbuzz': '@harfbuzz',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -130,6 +134,7 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/shaderc/': '@shaderc//',
   '//flutter/third_party/re2/': '@re2//',
   '//flutter/third_party/libtess2/': '@libtess2//',
+  '//flutter/third_party/harfbuzz/': '@harfbuzz//',
 };
 
 /// Generated include directories (`$root_gen_dir/flutter`) that are an
@@ -240,11 +245,12 @@ final class BazelLabel {
 /// `//flutter/third_party/skia`).
 @immutable
 final class OutputLayout {
-  const OutputLayout.main()
+  /// The main repository; [packages] are the Bazel packages that exist in
+  /// it (`engine/src/flutter/fml`), for files of another package.
+  const OutputLayout.main({this.packages = const <String>{}})
     : repository = '',
       repositoryGnRoot = '//',
       pathPrefix = 'engine/src/',
-      packages = const <String>{},
       secondarySource = null;
 
   const OutputLayout.repository(
@@ -295,8 +301,9 @@ final class OutputLayout {
     return '$pathPrefix${gnPath.substring(root.length)}';
   }
 
-  /// The package (from [packages]) that owns a repository-relative path.
-  String owningPackage(String relativePath) {
+  /// The package (from [packages]) that owns a repository-relative path, or
+  /// null when none does (in an external repository the root always does).
+  String? owningPackage(String relativePath) {
     String? best;
     for (final String package in packages) {
       if (package.isEmpty || relativePath == package || relativePath.startsWith('$package/')) {
@@ -305,8 +312,33 @@ final class OutputLayout {
         }
       }
     }
-    return best ?? '';
+    return best;
   }
+}
+
+/// A GN label as written (`//a/b:c`, `//a/b`, `:c`, `modules/skcms`,
+/// `../base`, `../../:skia_private`) made absolute, [package] being the GN
+/// directory of the file it was written in. A relative label is a
+/// directory, possibly with a name after the colon, relative to that
+/// directory; the two parts are resolved apart so that `../../:x` is
+/// `//grandparent:x`. With [implicitName], `//a/b` is `//a/b:b`.
+String absoluteGnLabel(String gnLabel, {required String package, bool implicitName = false}) {
+  String label;
+  if (gnLabel.startsWith(':')) {
+    label = '$package$gnLabel';
+  } else if (gnLabel.startsWith('//')) {
+    label = gnLabel;
+  } else {
+    final int colon = gnLabel.indexOf(':');
+    final String directory = colon < 0 ? gnLabel : gnLabel.substring(0, colon);
+    final String name = colon < 0 ? '' : gnLabel.substring(colon);
+    final String normalized = p.posix.normalize('${package.substring(2)}/$directory');
+    label = '//${normalized == '.' ? '' : normalized}$name';
+  }
+  if (implicitName && !label.contains(':')) {
+    label = '$label:${label.substring(label.lastIndexOf('/') + 1)}';
+  }
+  return label;
 }
 
 /// Translates a GN label to a Bazel label.
@@ -324,11 +356,7 @@ String bazelLabel(String gnLabel, {required String package, GnLocation? location
   if (gnLabel.startsWith(':')) {
     return gnLabel;
   }
-  // `modules/skcms` and `../base` are relative to the directory of the GN
-  // file.
-  final absolute = gnLabel.startsWith('//')
-      ? gnLabel
-      : '//${p.posix.normalize('${package.substring(2)}/$gnLabel')}';
+  final String absolute = absoluteGnLabel(gnLabel, package: package);
   final String? override = labelOverrides[absolute];
   if (override != null) {
     return override;
@@ -386,6 +414,17 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
     '//engine/src/flutter/impeller:impeller_public_config',
   ),
   '//flutter/third_party/icu:icu_config': ConfigImplied(),
+  // Skia's text modules list //flutter/skia's private config from their own
+  // files (`configs += [ "../../:skia_private" ]`); its library carries
+  // SK_GAMMA_APPLY_TO_A8, which the dependency makes public where GN's
+  // private config kept it to the module (decision 14's kind of delta;
+  // nothing outside Skia reads it).
+  '//flutter/skia:skia_private': ConfigDependency('@skia//:skia_private'),
+  // skunicode hides ICU's C++ API with Skia's own config (private, so an
+  // implementation dependency: txt, downstream, uses that API).
+  '//flutter/third_party/skia/third_party/icu/config:no_cxx': ConfigDependency(
+    '@skia//third_party/icu/config:no_cxx',
+  ),
   // shaderc lists SPIRV-Tools' public config itself (`configs +=`).
   '//flutter/third_party/vulkan-deps/spirv-tools/src:spvtools_public_config': ConfigDependency(
     '@spirv-tools//:spvtools_public_config',
@@ -540,7 +579,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     '//engine/src/flutter/testing:testing.bzl',
     'flutter_test_fixtures',
     <String, TemplateArgument>{
-      'fixtures': TemplateArgument('fixtures', TemplateArgumentKind.labels),
+      'fixtures': TemplateArgument('fixtures', TemplateArgumentKind.files),
       'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
     },
   ),
