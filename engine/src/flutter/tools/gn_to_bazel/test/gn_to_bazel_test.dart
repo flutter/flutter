@@ -2091,12 +2091,73 @@ source_set("x") {
       );
       await expectLater(
         convert('''
-shared_library("x") {
+action_foreach("x") {
+  script = "x.py"
+  sources = [ "a.txt" ]
+  outputs = [ "x.h" ]
+}
+'''),
+        throwsGnError(line: 1, message: 'action_foreach() is not converted yet'),
+      );
+    });
+
+    test('a shared_library is a shared cc_binary named after its output, with an alias', () async {
+      final String output = await convert('''
+shared_library("x_shared") {
+  output_name = "x"
+  sources = [ "a.cc" ]
+  deps = [ ":y" ]
+}
+source_set("y") {
+  sources = [ "y.cc" ]
+}
+''');
+      expect(
+        output,
+        contains('''
+cc_binary(
+    name = "libx.so",
+    srcs = ["a.cc"],
+    copts = CHROMIUM_CODE_COPTS,
+    linkshared = True,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":y",
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+    ],
+)
+
+alias(
+    name = "x_shared",
+    actual = ":libx.so",
+)
+'''),
+      );
+      // Without output_name the target's own name is the library's.
+      expect(
+        await convert('''
+shared_library("z") {
   sources = [ "a.cc" ]
 }
 '''),
-        throwsGnError(line: 1, message: 'shared_library() is not converted yet'),
+        contains('    name = "libz.so",\n'),
       );
+      // A library named like the shared library's output would declare the
+      // same libw.so; it gives the implicit output up.
+      final String clash = await convert('''
+source_set("w") {
+  sources = [ "w.cc" ]
+}
+shared_library("w_shared") {
+  output_name = "w"
+  sources = [ "a.cc" ]
+  deps = [ ":w" ]
+}
+''');
+      expect(clash, contains('    name = "w",\n    srcs = ["w.cc"],\n'));
+      expect(clash, contains('    linkstatic = True,\n'));
+      expect(clash, contains('    name = "libw.so",\n'));
     });
   });
 
