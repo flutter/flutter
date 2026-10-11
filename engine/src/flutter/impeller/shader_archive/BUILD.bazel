@@ -3,11 +3,11 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/shader_archive/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: shader_archive_unittests.
 
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 load("//engine/src/flutter/build/bazel/flatbuffers:flatbuffers.bzl", "flatbuffers")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -67,5 +67,37 @@ cc_binary(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/impeller/base",
+    ],
+)
+
+cc_library(
+    name = "shader_archive_unittests",
+    testonly = True,
+    srcs = ["shader_archive_unittests.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":shader_archive",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+flutter_test_fixtures(name = "impeller_shader_archive_fixtures")
+
+cc_test(
+    name = "impeller_shader_archive_unittests",
+    deps = [
+        ":impeller_shader_archive_fixtures",
+        ":shader_archive_unittests",
+        "//engine/src/flutter/testing",
     ],
 )

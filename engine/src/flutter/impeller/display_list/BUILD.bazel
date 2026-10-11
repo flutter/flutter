@@ -3,10 +3,11 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/display_list/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: display_list_unittests, display_list_unittests_golden, skia_conversions_unittests, aiks_playground, aiks_unittests, aiks_unittests_golden.
+# Not converted: display_list_unittests, display_list_unittests_golden, aiks_playground, aiks_unittests, aiks_unittests_golden.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -78,4 +79,35 @@ cc_library(
         "@skia",
     ],
     alwayslink = True,
+)
+
+cc_library(
+    name = "skia_conversions_unittests",
+    testonly = True,
+    srcs = ["skia_conversions_unittests.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":skia_conversions",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+flutter_test_fixtures(name = "impeller_skia_conversions_fixtures")
+
+cc_test(
+    name = "impeller_skia_conversions_unittests",
+    deps = [
+        ":impeller_skia_conversions_fixtures",
+        ":skia_conversions_unittests",
+        "//engine/src/flutter/testing",
+    ],
 )
