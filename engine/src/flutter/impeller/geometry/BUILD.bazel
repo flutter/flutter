@@ -3,10 +3,11 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/geometry/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: geometry_asserts, geometry_unittests, geometry_benchmarks.
+# Not converted: geometry_benchmarks.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -81,4 +82,64 @@ cc_library(
         "//engine/src/flutter/impeller/base",
     ],
     alwayslink = True,
+)
+
+cc_library(
+    name = "geometry_asserts",
+    testonly = True,
+    hdrs = ["geometry_asserts.h"],
+    deps = [
+        ":geometry",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+)
+
+cc_library(
+    name = "geometry_unittests",
+    testonly = True,
+    srcs = [
+        "arc_unittests.cc",
+        "geometry_unittests.cc",
+        "matrix_unittests.cc",
+        "path_source_unittests.cc",
+        "point_unittests.cc",
+        "rational_unittests.cc",
+        "rect_unittests.cc",
+        "round_rect_unittests.cc",
+        "round_superellipse_unittests.cc",
+        "rounding_radii_unittests.cc",
+        "rstransform_unittests.cc",
+        "saturated_math_unittests.cc",
+        "size_unittests.cc",
+        "trig_unittests.cc",
+        "wangs_formula_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":geometry",
+        ":geometry_asserts",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+flutter_test_fixtures(name = "impeller_geometry_fixtures")
+
+cc_test(
+    name = "impeller_geometry_unittests",
+    deps = [
+        ":geometry_unittests",
+        ":impeller_geometry_fixtures",
+        "//engine/src/flutter/testing",
+    ],
 )
