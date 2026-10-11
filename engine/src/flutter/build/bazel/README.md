@@ -12,7 +12,9 @@ Nothing in this directory is used by the GN build.
 | `toolchains/` | The hermetic C/C++ toolchains (`cc_toolchain_config.bzl` holds the flag tables, `BUILD.bazel` the `cc_toolchain`/`toolchain` targets per platform, `tests/` a smoke test). |
 | `copts.bzl` | What GN adds per target rather than per toolchain, for `BUILD` files to spell out: `FLUTTER_COPTS` / `FLUTTER_LOCAL_DEFINES` for first-party code (`chromium_code`, `//flutter:config`) and `FLUTTER_THIRD_PARTY_COPTS` for overlays (`no_chromium_code`). |
 | `gn_build/` | The `gn_build` rule (`gn_build.bzl`, action script `gn_build.py`): a GN build of part of the tree as one Bazel action, for the subtrees that keep their GN rules during the migration. |
-| `gn_action/` | The `gn_action` rule: GN's `action()` -- one run of a Python script under the hermetic `@cpython3` -- as the generated `BUILD` files emit it, with the path tokens (`$(execpath ...)`, `$(src ...)`, `$(gen ...)`) the converter writes for `rebase_path()` results. |
+| `gn_action/` | The `gn_action` rule: GN's `action()` -- one run of a Python script under the hermetic `@cpython3` -- as the generated `BUILD` files emit it, with the path tokens (`$(execpath ...)`, `$(src ...)`, `$(gen ...)`) the converter writes for `rebase_path()` results; `gn_copy` for `copy()`; `run_python` for other rules that run the engine's scripts. |
+| `flatbuffers/` | The engine's `flatbuffers()` GN template as a macro: `flatc` per schema, the generated headers as a library. |
+| `impeller/` | The engine's `impeller_shaders()` GN template as a macro over three rules (`impellerc_compile`, `shader_archive`, `embed_blob`); see below. |
 | `dart_wrap/` | The Dart SDK, built with `gn_build`: `BUILD.gn` lists the GN targets, `BUILD.bazel` the args, the inputs and the `cc_library` facades; `tests/` starts the VM from the archive. |
 
 ## How dependencies reach Bazel during the transition
@@ -154,6 +156,27 @@ have no Bazel targets yet and stay inside `libcommon_embedder_dart_io.a`;
 produces, embeds the absolute path of the build directory (as the GN build's
 does), so it differs between sandboxed runs; and the Dart version script
 looks for `git` on `PATH` at `gn gen` time (and copes without it).
+
+## Impeller's shader pipeline
+
+Every Impeller library with shaders invokes `impeller_shaders()`
+(impeller/tools/shaders.gni); the converter emits the invocation as a call
+of the macro in `impeller/shaders.bzl`, whose body is the template's,
+rewritten once: for each backend of a Linux host (GLES 2, GLES 3, Vulkan)
+`impellerc_compile` runs `//engine/src/flutter/impeller/compiler:impellerc`
+once per shader, `shader_archive` packs the compiled shaders with
+`shader_archiver`, `embed_blob` turns the archive into a C++ array with
+`impeller/tools/xxd.py`, and `cc_library` wraps the blob and the reflection
+headers. The targets keep GN's names (`impellerc_vk_entity_shaders`,
+`embed_gles3_entity_shaders`, ...) so the two trees read alike; the oracle
+knows them as the template's inner targets.
+
+The tools run in Bazel's exec configuration -- GN's `host_toolchain` for
+`compiled_action` -- which on a host build means `impellerc`'s closure
+(Skia, SPIRV-Tools, glslang, shaderc) is compiled a second time, in
+`bazel-out/*-exec-*`, where GN compiles it once because its default
+toolchain is the host's. That is the cost of a build that can also cross
+compile; a remote or disk cache absorbs it.
 
 ## Adding a dependency
 
