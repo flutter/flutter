@@ -137,7 +137,8 @@ def run_fixture(binary, output, check_focus=False, check_text=False):
             raise RuntimeError('AT-SPI selection did not convert UTF-16 offsets')
           cases = [
               (1, Atspi.TextGranularity.CHAR, 1, 2, '\U0001f600'),
-              (4, Atspi.TextGranularity.WORD, 3, 7, 'caf\u00e9'),
+              (4, Atspi.TextGranularity.WORD, 3, 9, 'caf\u00e9. '),
+              (8, Atspi.TextGranularity.WORD, 3, 9, 'caf\u00e9. '),
               (12, Atspi.TextGranularity.SENTENCE, 9, len(expected), 'Next sentence!'),
               (len(expected), Atspi.TextGranularity.CHAR, len(expected), len(expected), ''),
           ]

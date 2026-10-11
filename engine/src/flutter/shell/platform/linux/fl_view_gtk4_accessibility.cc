@@ -662,23 +662,24 @@ static GBytes* fl_gtk4_text_accessible_node_get_contents_at(
 
   if (granularity == FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_WORD ||
       granularity == FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_SENTENCE) {
-    // Match GTK3's linguistic boundaries without treating Pango's layout as
-    // Flutter's visual layout. Only compute these attributes when queried.
+    // Use linguistic boundaries without treating Pango's layout as Flutter's
+    // visual layout. Only compute these attributes when queried.
     PangoLayout* layout = gtk_widget_create_pango_layout(
         GTK_WIDGET(self), fl_gtk4_text_accessible_node_get_text(self));
     int n_attrs = 0;
     const PangoLogAttr* attrs =
         pango_layout_get_log_attrs_readonly(layout, &n_attrs);
     guint first = offset;
-    guint last = offset;
+    // GTK ranges extend to the next start, including intervening separators.
+    guint last = offset < length ? offset + 1 : length;
     const gboolean word =
         granularity == FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_WORD;
     while (first > 0 && !(word ? attrs[first].is_word_start
                                : attrs[first].is_sentence_start)) {
       first--;
     }
-    while (last < length &&
-           !(word ? attrs[last].is_word_end : attrs[last].is_sentence_end)) {
+    while (last < length && !(word ? attrs[last].is_word_start
+                                   : attrs[last].is_sentence_start)) {
       last++;
     }
     g_object_unref(layout);
