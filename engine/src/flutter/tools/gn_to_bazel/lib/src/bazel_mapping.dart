@@ -162,7 +162,6 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//third_party/freetype2:freetype2': <String>['-Wno-unused-function', '-Wno-unused-variable'],
   '//flutter/third_party/wuffs:wuffs': <String>['-Wno-unused-function', '-Wno-c++11-narrowing'],
   '//third_party/inja:inja': <String>['-Wno-unused-variable', '-Wno-newline-eof'],
-  '//flutter/third_party/flatbuffers:flatbuffers': <String>['-Wno-newline-eof'],
   '//flutter/third_party/vulkan-deps/glslang/src:glslang_lib_sources': <String>['-Wno-conversion'],
   '//flutter/third_party/vulkan-deps/glslang/src:glslang_sources': <String>['-Wno-conversion'],
   '//flutter/third_party/vulkan-deps/glslang/src:glslang_default_resource_limits_sources': <String>[
