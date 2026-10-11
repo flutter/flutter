@@ -7,10 +7,35 @@
 # files for dependencies which ship none. Inputs of the rules that wrap a GN
 # build of part of the tree. The bazel/ subdirectory is its own package.
 
+# What a wrapped GN build reads here. The build configuration (config/, dart/,
+# the .gni files) is in whole, with slack: it is small and changes rarely. The
+# secondary tree is not: a wrapped build loads only the BUILD.gn files of its
+# own dependencies (for the Dart SDK: the C++ runtime, zlib, BoringSSL, ICU,
+# perfetto, gtest -- `gn gen --root-target=//flutter/build/bazel/dart_wrap`
+# reads 10 files under flutter/build, and ninja none), and listing the whole
+# tree would make every edit to flatbuffers' or harfbuzz's BUILD.gn rebuild
+# the Dart SDK from scratch. A wrapped build that starts reading from a new
+# directory fails with a missing file in the sandbox; the fix is a line here.
 filegroup(
     name = "gn_files",
     srcs = glob(
-        ["**"],
+        [
+            "*.gni",
+            "*.py",
+            "*.sh",
+            "archives/**",
+            "config/**",
+            "dart/**",
+            "esbuild/**",
+            "secondary/flutter/third_party/libcxxabi/**",
+            "secondary/flutter/third_party/llvm_libc/**",
+            "secondary/testing/**",
+            "secondary/third_party/boringssl/**",
+            "secondary/third_party/dart/**",
+            "secondary/third_party/icu/**",
+            "secondary/third_party/perfetto/**",
+            "secondary/third_party/zlib/**",
+        ],
         exclude = [
             # Bazel's own files are not GN inputs.
             "**/BUILD.bazel",
