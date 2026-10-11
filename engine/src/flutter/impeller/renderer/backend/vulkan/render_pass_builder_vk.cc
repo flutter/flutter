@@ -215,14 +215,15 @@ vk::UniqueRenderPass RenderPassBuilderVK::Build(
   deps[1].dependencyFlags = kSelfDependencyFlags;
 
   // Outgoing dependency. The resolve step or color attachment must complete
-  // before we can sample from the image. This dependency is ignored for the
-  // onscreen as we will already insert a barrier before presenting the
-  // swapchain.
+  // before we can sample from the image, in a later render pass or compute
+  // pass. This dependency is ignored for the onscreen as we will already insert
+  // a barrier before presenting the swapchain.
   deps[2].srcSubpass = 0u;  // first subpass
   deps[2].dstSubpass = VK_SUBPASS_EXTERNAL;
   deps[2].srcStageMask = vk::PipelineStageFlagBits::eColorAttachmentOutput;
   deps[2].srcAccessMask = vk::AccessFlagBits::eColorAttachmentWrite;
-  deps[2].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader;
+  deps[2].dstStageMask = vk::PipelineStageFlagBits::eFragmentShader |
+                         vk::PipelineStageFlagBits::eComputeShader;
   deps[2].dstAccessMask = vk::AccessFlagBits::eShaderRead;
   deps[2].dependencyFlags = kSelfDependencyFlags;
 

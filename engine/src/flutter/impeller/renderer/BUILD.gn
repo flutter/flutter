@@ -21,10 +21,14 @@ if (impeller_enable_compute) {
 
     shaders = [
       "compute_3d_test.comp",
+      "computed_vertices_test.frag",
+      "computed_vertices_test.vert",
       "increment_test.comp",
       "oversized_workgroup_test.comp",
       "prefix_sum_test.comp",
+      "texture_reader_test.comp",
       "threadgroup_sizing_test.comp",
+      "vertex_writer_test.comp",
     ]
   }
 }
