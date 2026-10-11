@@ -178,10 +178,7 @@ cc_test(
   ),
   ConvertedFile(
     '//flutter/impeller/tessellator',
-    skip: <String, String>{
-      'tessellator_shared': 'shared_library() is not converted yet',
-      'tessellator_unittests': 'needs //flutter/impeller/playground',
-    },
+    skip: <String, String>{'tessellator_unittests': 'needs //flutter/impeller/playground'},
   ),
   ConvertedFile(
     '//flutter/impeller/renderer',
