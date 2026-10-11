@@ -80,15 +80,47 @@ exports_files(["fixtures_location.cc"])
   ),
   ConvertedFile(
     '//flutter/impeller/base',
-    skip: <String, String>{'base_unittests': 'needs //flutter/testing:testing_lib'},
+    // GN links base_unittests (a source_set of suites) into the one
+    // impeller_unittests binary of //flutter/impeller, which needs every
+    // Impeller suite; until those exist, the suite runs on its own with
+    // the engine's gtest main and an empty fixtures library (the binary's
+    // compiled-in paths; GN's come from //flutter/impeller/fixtures).
+    appendix: '''
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+flutter_test_fixtures(name = "impeller_base_fixtures")
+
+cc_test(
+    name = "impeller_base_unittests",
+    deps = [
+        ":base_unittests",
+        ":impeller_base_fixtures",
+        "//engine/src/flutter/testing",
+    ],
+)
+''',
   ),
   ConvertedFile(
     '//flutter/impeller/geometry',
-    skip: <String, String>{
-      'geometry_asserts': 'needs //flutter/testing:testing_lib',
-      'geometry_unittests': 'needs //flutter/display_list/testing',
-      'geometry_benchmarks': 'needs //flutter/impeller/entity',
-    },
+    skip: <String, String>{'geometry_benchmarks': 'needs //flutter/impeller/entity'},
+    // As for //flutter/impeller/base: the suite runs on its own until
+    // impeller_unittests has all of them.
+    appendix: '''
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+flutter_test_fixtures(name = "impeller_geometry_fixtures")
+
+cc_test(
+    name = "impeller_geometry_unittests",
+    deps = [
+        ":geometry_unittests",
+        ":impeller_geometry_fixtures",
+        "//engine/src/flutter/testing",
+    ],
+)
+''',
   ),
   ConvertedFile(
     '//flutter/display_list',
