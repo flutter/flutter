@@ -52,10 +52,7 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
   ConvertedFile(
     '//flutter/testing',
     skip: <String, String>{
-      'testing_lib': 'needs //flutter/display_list',
-      'testing': 'needs testing_lib',
       'dart': 'needs //flutter/runtime',
-      'skia': 'needs //flutter/skia',
       'vmservice_kernel': 'dart_snapshot_kernel template',
       'vmservice_snapshot': 'dart_snapshot_aot template',
       'fixture_test': 'needs //flutter/runtime',
@@ -123,6 +120,38 @@ exports_files(["fixtures_location.cc"])
   ConvertedFile('//flutter/impeller/compiler/shader_lib'),
   ConvertedFile('//flutter/impeller/compiler/shader_lib/flutter'),
   ConvertedFile('//flutter/impeller/compiler/shader_lib/impeller'),
+  // The shader pipeline's users (research/08, step 4): impeller_shaders()
+  // invocations become the macro in build/bazel/impeller.
+  ConvertedFile(
+    '//flutter/impeller/shader_archive',
+    skip: <String, String>{'shader_archive_unittests': 'needs //flutter/testing:testing_lib'},
+  ),
+  ConvertedFile(
+    '//flutter/impeller/tessellator',
+    skip: <String, String>{
+      'tessellator_shared': 'shared_library() is not converted yet',
+      'tessellator_unittests': 'needs //flutter/impeller/playground',
+    },
+  ),
+  ConvertedFile(
+    '//flutter/impeller/renderer',
+    skip: <String, String>{
+      'renderer_unittests': 'needs //flutter/impeller/playground',
+      'renderer_unittests_golden': 'needs //flutter/impeller/playground',
+      'renderer_dart_unittests': 'needs //flutter/lib/gpu',
+    },
+  ),
+  ConvertedFile(
+    '//flutter/impeller/typographer',
+    skip: <String, String>{'typographer_unittests': 'needs //flutter/impeller/playground'},
+  ),
+  ConvertedFile(
+    '//flutter/impeller/entity',
+    skip: <String, String>{
+      'entity_test_helpers': 'needs //flutter/impeller/playground',
+      'entity_unittests': 'needs //flutter/impeller/playground',
+    },
+  ),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia
@@ -414,6 +443,20 @@ cc_library(
         "libshaderc_util/src/*.h",
     ]),
     textual_hdrs = glob(["libshaderc_util/include/**/*.inc"]),
+)
+''',
+  ),
+  // libtess2 as the engine builds it (secondary tree). Engine code includes
+  // it by its path under //flutter ("third_party/libtess2/Include/
+  // tesselator.h"); the view travels with the dependency, as for json.
+  ConvertedFile(
+    '//third_party/libtess2',
+    implicitDeps: <String>['@libtess2//:flutter_root_headers'],
+    appendix: '''
+cc_library(
+    name = "flutter_root_headers",
+    hdrs = ["Include/tesselator.h"],
+    include_prefix = "third_party/libtess2",
 )
 ''',
   ),
