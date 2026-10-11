@@ -52,6 +52,9 @@ class Shader : public RefCountedDartWrappable<Shader> {
     };
 
     impeller::ShaderUniformSlot slot;
+    /// Names the buffer. Binding sets and compute passes also use its address
+    /// to identify the binding.
+    impeller::ShaderMetadata metadata;
     Access access = Access::kReadWrite;
     /// The size of the block, counting a trailing runtime-sized array as empty.
     size_t size_in_bytes = 0;
@@ -140,6 +143,12 @@ class Shader : public RefCountedDartWrappable<Shader> {
   /// The texture counterpart to `GetUniformStructAt`.
   const Shader::TextureBinding* GetUniformTextureAt(int index) const;
 
+  /// The storage buffer counterpart to `GetUniformStructIndex`.
+  int GetStorageBufferIndex(const std::string& name) const;
+
+  /// The storage buffer counterpart to `GetUniformStructAt`.
+  const Shader::StorageBufferBinding* GetStorageBufferAt(int index) const;
+
  private:
   Shader();
 
@@ -162,6 +171,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
   // rebuilt whenever the maps are replaced (`Make`, `ResetFrom`).
   std::vector<const UniformBinding*> uniform_struct_order_;
   std::vector<const TextureBinding*> uniform_texture_order_;
+  std::vector<const StorageBufferBinding*> storage_buffer_order_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
   bool is_dirty_ = true;
 
@@ -203,6 +213,21 @@ FLUTTER_GPU_EXPORT
 extern int InternalFlutterGpu_Shader_GetUniformTextureIndex(
     flutter::gpu::Shader* wrapper,
     Dart_Handle texture_name_handle);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Shader_GetStorageBufferIndex(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle storage_buffer_name_handle);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Shader_GetStorageBufferSizeAt(
+    flutter::gpu::Shader* wrapper,
+    int storage_buffer_index);
+
+FLUTTER_GPU_EXPORT
+extern int InternalFlutterGpu_Shader_GetStorageBufferRuntimeArrayStrideAt(
+    flutter::gpu::Shader* wrapper,
+    int storage_buffer_index);
 
 // Test-only: exposes the per-shader dirty bit so tests can assert that
 // reload deduplication keeps unchanged shaders clean.

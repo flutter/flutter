@@ -257,6 +257,27 @@ const Shader::TextureBinding* Shader::GetUniformTextureAt(int index) const {
   return uniform_texture_order_[index];
 }
 
+int Shader::GetStorageBufferIndex(const std::string& name) const {
+  const StorageBufferBinding* binding = GetStorageBuffer(name);
+  if (binding == nullptr) {
+    return -1;
+  }
+  for (size_t i = 0; i < storage_buffer_order_.size(); i++) {
+    if (storage_buffer_order_[i] == binding) {
+      return static_cast<int>(i);
+    }
+  }
+  return -1;
+}
+
+const Shader::StorageBufferBinding* Shader::GetStorageBufferAt(
+    int index) const {
+  if (index < 0 || static_cast<size_t>(index) >= storage_buffer_order_.size()) {
+    return nullptr;
+  }
+  return storage_buffer_order_[index];
+}
+
 void Shader::RebuildBindingOrder() {
   uniform_struct_order_.clear();
   uniform_struct_order_.reserve(uniform_structs_.size());
@@ -267,6 +288,11 @@ void Shader::RebuildBindingOrder() {
   uniform_texture_order_.reserve(uniform_textures_.size());
   for (const auto& entry : uniform_textures_) {
     uniform_texture_order_.push_back(&entry.second);
+  }
+  storage_buffer_order_.clear();
+  storage_buffer_order_.reserve(storage_buffers_.size());
+  for (const auto& entry : storage_buffers_) {
+    storage_buffer_order_.push_back(&entry.second);
   }
 }
 
@@ -301,6 +327,35 @@ int InternalFlutterGpu_Shader_GetUniformTextureIndex(
     Dart_Handle texture_name_handle) {
   auto name = tonic::StdStringFromDart(texture_name_handle);
   return wrapper->GetUniformTextureIndex(name);
+}
+
+int InternalFlutterGpu_Shader_GetStorageBufferIndex(
+    flutter::gpu::Shader* wrapper,
+    Dart_Handle storage_buffer_name_handle) {
+  auto name = tonic::StdStringFromDart(storage_buffer_name_handle);
+  return wrapper->GetStorageBufferIndex(name);
+}
+
+int InternalFlutterGpu_Shader_GetStorageBufferSizeAt(
+    flutter::gpu::Shader* wrapper,
+    int storage_buffer_index) {
+  const auto* storage_buffer =
+      wrapper->GetStorageBufferAt(storage_buffer_index);
+  if (storage_buffer == nullptr) {
+    return -1;
+  }
+  return static_cast<int>(storage_buffer->size_in_bytes);
+}
+
+int InternalFlutterGpu_Shader_GetStorageBufferRuntimeArrayStrideAt(
+    flutter::gpu::Shader* wrapper,
+    int storage_buffer_index) {
+  const auto* storage_buffer =
+      wrapper->GetStorageBufferAt(storage_buffer_index);
+  if (storage_buffer == nullptr) {
+    return -1;
+  }
+  return static_cast<int>(storage_buffer->runtime_array_stride);
 }
 
 int InternalFlutterGpu_Shader_GetUniformMemberOffset(

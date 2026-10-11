@@ -19,8 +19,9 @@ base class TextureBinding {
   final SamplerOptions? sampler;
 }
 
-/// An immutable group of uniform and texture bindings, resolved against
-/// shader reflection once at creation and reusable across draws and passes.
+/// An immutable group of uniform, texture and storage buffer bindings,
+/// resolved against shader reflection once at creation and reusable across
+/// draws and passes.
 ///
 /// Create one with [GpuContext.createBindingSet] and bind it with
 /// [RenderPass.bindSet]. Binding costs one slot assignment no matter how many
@@ -37,8 +38,12 @@ base class BindingSet extends NativeFieldWrapperClass1 {
     this._gpuContext,
     Map<UniformSlot, BufferView> uniforms,
     Map<UniformSlot, TextureBinding> textures,
+    Map<StorageBufferSlot, BufferView> storageBuffers,
   ) : _uniforms = Map<UniformSlot, BufferView>.unmodifiable(uniforms),
-      _textures = Map<UniformSlot, TextureBinding>.unmodifiable(textures) {
+      _textures = Map<UniformSlot, TextureBinding>.unmodifiable(textures),
+      _storageBuffers = Map<StorageBufferSlot, BufferView>.unmodifiable(
+        storageBuffers,
+      ) {
     _initialize();
     _populate();
   }
@@ -46,6 +51,7 @@ base class BindingSet extends NativeFieldWrapperClass1 {
   final GpuContext _gpuContext;
   final Map<UniformSlot, BufferView> _uniforms;
   final Map<UniformSlot, TextureBinding> _textures;
+  final Map<StorageBufferSlot, BufferView> _storageBuffers;
 
   /// The shader reload epoch the native bindings were resolved against. A
   /// reload replaces the reflection data they point at, so the set is
@@ -54,7 +60,8 @@ base class BindingSet extends NativeFieldWrapperClass1 {
 
   /// Resolves every entry against shader reflection and hands it to the
   /// native set. Throws for a name the shader does not declare, a buffer view
-  /// that runs past the end of its buffer, or an invalid sampler.
+  /// that runs past the end of its buffer or cannot back its storage buffer,
+  /// or an invalid sampler.
   void _populate() {
     for (final MapEntry<UniformSlot, BufferView> entry in _uniforms.entries) {
       final UniformSlot slot = entry.key;
@@ -105,6 +112,26 @@ base class BindingSet extends NativeFieldWrapperClass1 {
       }
     }
 
+    final int storageAlignment = _gpuContext.minimumStorageBufferByteAlignment;
+    for (final MapEntry<StorageBufferSlot, BufferView> entry
+        in _storageBuffers.entries) {
+      final StorageBufferSlot slot = entry.key;
+      final BufferView view = entry.value;
+      final int storageBufferIndex = slot._validateView(view, storageAlignment);
+      if (!_addStorageBuffer(
+        slot.shader,
+        storageBufferIndex,
+        view.buffer,
+        view.offsetInBytes,
+        view.lengthInBytes,
+      )) {
+        throw Exception(
+          "Failed to bind storage buffer '${slot.storageBufferName}'. Only "
+          'compute shaders take storage buffers.',
+        );
+      }
+    }
+
     _epoch = _shaderReloadEpoch;
   }
 
@@ -129,6 +156,17 @@ base class BindingSet extends NativeFieldWrapperClass1 {
   external bool _addUniform(
     Shader shader,
     int uniformStructIndex,
+    DeviceBuffer buffer,
+    int offsetInBytes,
+    int lengthInBytes,
+  );
+
+  @Native<
+    Bool Function(Pointer<Void>, Pointer<Void>, Int, Pointer<Void>, Int, Int)
+  >(symbol: 'InternalFlutterGpu_BindingSet_AddStorageBuffer')
+  external bool _addStorageBuffer(
+    Shader shader,
+    int storageBufferIndex,
     DeviceBuffer buffer,
     int offsetInBytes,
     int lengthInBytes,

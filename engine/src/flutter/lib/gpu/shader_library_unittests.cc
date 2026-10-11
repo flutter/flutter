@@ -340,6 +340,19 @@ TEST(FlutterGpuShaderLibraryTest, MakeFromFlatbufferLoadsComputeMetadata) {
   EXPECT_EQ(output->slot.binding, 1u);
   // A storage buffer the compiler dead-code-eliminated is not bindable.
   EXPECT_EQ(shader->GetStorageBuffer("Dced"), nullptr);
+  EXPECT_EQ(shader->GetStorageBufferIndex("Dced"), -1);
+
+  // Dart binds by index, resolved once from the name.
+  const int input_index = shader->GetStorageBufferIndex("Input");
+  const int output_index = shader->GetStorageBufferIndex("Output");
+  ASSERT_GE(input_index, 0);
+  ASSERT_GE(output_index, 0);
+  EXPECT_NE(input_index, output_index);
+  EXPECT_EQ(shader->GetStorageBufferAt(input_index), input);
+  EXPECT_EQ(shader->GetStorageBufferAt(output_index), output);
+  EXPECT_EQ(shader->GetStorageBufferAt(2), nullptr);
+  EXPECT_EQ(shader->GetStorageBufferAt(-1), nullptr);
+  EXPECT_EQ(input->metadata.name, "Input");
 
   // Each live storage buffer gets a descriptor set layout, which the Vulkan
   // pipeline layout is built from.

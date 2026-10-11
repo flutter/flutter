@@ -46,6 +46,15 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return _getMinimumUniformByteAlignment();
   }
 
+  /// The minimum alignment of a [BufferView]'s offset when it is bound as a
+  /// storage buffer (see [ComputePass.bindStorageBuffer]).
+  ///
+  /// [HostBuffer.emplace] aligns every emplacement to both this and
+  /// [minimumUniformByteAlignment].
+  int get minimumStorageBufferByteAlignment {
+    return _getMinimumStorageBufferAlignment();
+  }
+
   /// Whether the backend supports multisample anti-aliasing for offscreen
   /// color and stencil attachments. A subset of OpenGLES-only devices do not
   /// support this functionality.
@@ -297,16 +306,19 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     return CommandBuffer._(this);
   }
 
-  /// Creates a reusable group of uniform and texture bindings.
+  /// Creates a reusable group of uniform, texture and storage buffer
+  /// bindings.
   ///
   /// Every entry is resolved against its shader's reflection data here, so
   /// binding the set later costs one slot assignment instead of per-resource
   /// work on every draw. See [RenderPass.bindSet].
   ///
-  /// The keys come from [Shader.getUniformSlot], so a single set may span the
-  /// vertex and fragment stages. Throws if a slot names a uniform the shader
-  /// does not declare, if a [BufferView] runs past the end of its buffer, or
-  /// if a [SamplerOptions] is invalid.
+  /// The keys come from [Shader.getUniformSlot] and
+  /// [Shader.getStorageBufferSlot], so a single set may span the vertex and
+  /// fragment stages. Only compute shaders take [storageBuffers]. Throws if a
+  /// slot names a binding the shader does not declare, if a [BufferView] runs
+  /// past the end of its buffer, if a [SamplerOptions] is invalid, or if a
+  /// storage buffer view fails the checks described on [StorageBufferSlot].
   ///
   /// ```dart
   /// final gpu.BindingSet material = gpu.gpuContext.createBindingSet(
@@ -320,8 +332,10 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     Map<UniformSlot, BufferView> uniforms = const <UniformSlot, BufferView>{},
     Map<UniformSlot, TextureBinding> textures =
         const <UniformSlot, TextureBinding>{},
+    Map<StorageBufferSlot, BufferView> storageBuffers =
+        const <StorageBufferSlot, BufferView>{},
   }) {
-    return BindingSet._(this, uniforms, textures);
+    return BindingSet._(this, uniforms, textures, storageBuffers);
   }
 
   RenderPipeline createRenderPipeline(
@@ -362,6 +376,11 @@ base class GpuContext extends NativeFieldWrapperClass1 {
     symbol: 'InternalFlutterGpu_Context_GetMinimumUniformByteAlignment',
   )
   external int _getMinimumUniformByteAlignment();
+
+  @Native<Int Function(Pointer<Void>)>(
+    symbol: 'InternalFlutterGpu_Context_GetMinimumStorageBufferAlignment',
+  )
+  external int _getMinimumStorageBufferAlignment();
 
   @Native<Bool Function(Pointer<Void>)>(
     symbol: 'InternalFlutterGpu_Context_GetSupportsOffscreenMSAA',

@@ -25,8 +25,9 @@
 namespace flutter {
 namespace gpu {
 
-/// A group of uniform and texture bindings, resolved against shader
-/// reflection once at creation and replayed by every draw that binds it.
+/// A group of uniform, texture and storage buffer bindings, resolved against
+/// shader reflection once at creation and replayed by every draw that binds
+/// it.
 ///
 /// Binding the set on a render pass costs one slot assignment no matter how
 /// many resources it holds, so a renderer that draws many nodes with the same
@@ -71,6 +72,15 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
                   size_t offset_in_bytes,
                   size_t length_in_bytes);
 
+  /// The storage buffer counterpart to `AddUniform`. Only compute shaders
+  /// take storage buffers, so this returns false for any other stage.
+  bool AddStorageBuffer(
+      Shader& shader,
+      int storage_buffer_index,
+      const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
+      size_t offset_in_bytes,
+      size_t length_in_bytes);
+
   /// The texture counterpart to `AddUniform`.
   bool AddTexture(Shader& shader,
                   int uniform_texture_index,
@@ -85,6 +95,8 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
 
   const std::vector<TextureBinding>& GetTextureBindings() const;
 
+  const std::vector<BufferBinding>& GetStorageBufferBindings() const;
+
  private:
   /// Keeps `shader` alive for this set's lifetime, since the bindings point
   /// into reflection data the shader owns.
@@ -92,6 +104,7 @@ class BindingSet : public RefCountedDartWrappable<BindingSet> {
 
   std::vector<BufferBinding> buffer_bindings_;
   std::vector<TextureBinding> texture_bindings_;
+  std::vector<BufferBinding> storage_buffer_bindings_;
   std::vector<fml::RefPtr<Shader>> shaders_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(BindingSet);
@@ -114,6 +127,15 @@ extern bool InternalFlutterGpu_BindingSet_AddUniform(
     flutter::gpu::BindingSet* wrapper,
     flutter::gpu::Shader* shader,
     int uniform_struct_index,
+    flutter::gpu::DeviceBuffer* device_buffer,
+    int offset_in_bytes,
+    int length_in_bytes);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_BindingSet_AddStorageBuffer(
+    flutter::gpu::BindingSet* wrapper,
+    flutter::gpu::Shader* shader,
+    int storage_buffer_index,
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes);

@@ -364,6 +364,11 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
                         .binding =
                             static_cast<size_t>(storage_buffer->binding()),
                     },
+                .metadata =
+                    impeller::ShaderMetadata{
+                        .name = storage_buffer->name()->c_str(),
+                        .members = {},
+                    },
                 .access = ToStorageBufferAccess(storage_buffer->access()),
                 .size_in_bytes =
                     static_cast<size_t>(storage_buffer->size_in_bytes()),

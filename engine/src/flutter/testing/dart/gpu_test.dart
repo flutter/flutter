@@ -8,6 +8,7 @@
 // ignore_for_file: avoid_relative_lib_imports
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -290,8 +291,20 @@ void main() async {
     final gpu.BufferView view1 = hostBuffer.emplace(
       Int8List.fromList(<int>[0, 1, 2, 3]).buffer.asByteData(),
     );
-    expect(view1.offsetInBytes, equals(gpu.gpuContext.minimumUniformByteAlignment));
+    // Emplacements are aligned for use as either a uniform or a storage buffer.
+    final int alignment = math.max(
+      gpu.gpuContext.minimumUniformByteAlignment,
+      gpu.gpuContext.minimumStorageBufferByteAlignment,
+    );
+    expect(view1.offsetInBytes, equals(alignment));
     expect(view1.lengthInBytes, 4);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.minimumStorageBufferByteAlignment', () async {
+    final int alignment = gpu.gpuContext.minimumStorageBufferByteAlignment;
+    expect(alignment, greaterThanOrEqualTo(1));
+    // Device alignments are powers of two.
+    expect(alignment & (alignment - 1), 0);
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('HostBuffer.reset', () async {
