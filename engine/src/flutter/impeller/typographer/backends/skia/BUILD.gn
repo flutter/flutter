@@ -19,4 +19,7 @@ impeller_component("typographer_skia_backend") {
     "//flutter/impeller/typographer",
     "//flutter/skia",
   ]
+
+  # text_frame_skia.cc includes skparagraph's Paragraph.h.
+  deps = [ "//flutter/skia/modules/skparagraph" ]
 }
