@@ -283,9 +283,22 @@ final class GnScopeValue extends GnValue {
   String toString() => '{${variables.keys.join(', ')}}';
 }
 
-/// A value the converter cannot know: the result of `rebase_path()` or
-/// `exec_script()`. It may be stored (a `.gni` may compute arguments the
-/// engine never uses) but is an error wherever it would reach the output.
+/// The root under which the evaluator places GN's build directory
+/// (`root_build_dir`, `root_out_dir`; `target_out_dir` is `//@out/obj/<dir>`).
+const String buildDirRoot = '//@out';
+
+/// The root under which the evaluator places GN's generated-file tree
+/// (`root_gen_dir`; `target_gen_dir` is `//@gen/<dir>`).
+const String genDirRoot = '//@gen';
+
+/// Brackets a `rebase_path(x, root_build_dir)` result inside a string: the
+/// absolute GN path of x, for the emitter to turn into a Bazel path.
+const String rebasedPathMarker = '\u0001';
+
+/// A value the converter cannot know: the result of `rebase_path()` to a
+/// directory other than the build directory, or of `exec_script()`. It may
+/// be stored (a `.gni` may compute arguments the engine never uses) but is
+/// an error wherever it would reach the output.
 final class GnOpaqueValue extends GnValue {
   const GnOpaqueValue(this.description);
 
@@ -1297,7 +1310,29 @@ final class _Evaluator {
         return _Expression.scalar(
           GnStringValue(_absolutePath(_stringExpression(args[0], scope), node)),
         );
-      case GnFunctionCall(name: 'rebase_path' || 'exec_script'):
+      case GnFunctionCall(name: 'rebase_path', :final List<GnNode> args):
+        // rebase_path(x, root_build_dir): the path of x as the build runs
+        // it. Kept as a marked absolute path inside the string, which the
+        // emitter turns into the action rule's path tokens; any other
+        // destination is unknowable here.
+        if (args.isNotEmpty &&
+            args.length <= 2 &&
+            (args.length == 1 ||
+                (args[1] is GnIdentifier && (args[1] as GnIdentifier).name == 'root_build_dir'))) {
+          final String path = _absolutePath(_stringExpression(args[0], scope), node);
+          return _Expression.scalar(GnStringValue('$rebasedPathMarker$path$rebasedPathMarker'));
+        }
+        return _Expression.scalar(GnOpaqueValue(_gnText(node)));
+      case GnFunctionCall(name: 'get_label_info', :final List<GnNode> args):
+        if (args.length != 2) {
+          throw GnError(node.location, 'get_label_info() takes a label and a property');
+        }
+        return _Expression.scalar(
+          GnStringValue(
+            _labelInfo(_stringExpression(args[0], scope), _stringExpression(args[1], scope), node),
+          ),
+        );
+      case GnFunctionCall(name: 'exec_script'):
         // Unknowable here; an error if it ever reaches the output.
         return _Expression.scalar(GnOpaqueValue(_gnText(node)));
       case GnFunctionCall(:final String name):
@@ -1319,6 +1354,53 @@ final class _Evaluator {
     return tree.gnPath(p.normalize(p.join(p.dirname(node.location.file), path)));
   }
 
+  /// The GN directory of the file containing [node] (`//flutter/fml`).
+  String _directoryOf(GnNode node) {
+    final GnSourceTree? tree = settings.tree;
+    if (tree == null) {
+      throw GnError(node.location, 'build directory variables need the source tree');
+    }
+    return tree.gnDirectory(node.location.file);
+  }
+
+  /// GN's build directory variables, as paths under roots that stand for
+  /// the build directory ([buildDirRoot]) and the generated-file tree
+  /// ([genDirRoot]); the emitter maps them to Bazel's output tree.
+  String? _buildDirVariable(String name, GnNode node) {
+    return switch (name) {
+      'root_build_dir' || 'root_out_dir' => buildDirRoot,
+      'root_gen_dir' => genDirRoot,
+      'target_gen_dir' => '$genDirRoot${_directoryOf(node).substring(1)}',
+      'target_out_dir' => '$buildDirRoot/obj${_directoryOf(node).substring(1)}',
+      _ => null,
+    };
+  }
+
+  /// get_label_info(label, what) for the properties that are paths or
+  /// names; a toolchain suffix (`($default_toolchain)`) is ignored.
+  String _labelInfo(String label, String what, GnNode node) {
+    var bare = label;
+    final int paren = bare.indexOf('(');
+    if (paren >= 0) {
+      bare = bare.substring(0, paren);
+    }
+    final int colon = bare.indexOf(':');
+    final String directory = colon < 0 ? bare : bare.substring(0, colon);
+    final String dir = directory.isEmpty ? _directoryOf(node) : _absolutePath(directory, node);
+    final String name = colon < 0
+        ? dir.substring(dir.lastIndexOf('/') + 1)
+        : bare.substring(colon + 1);
+    return switch (what) {
+      'dir' => dir,
+      'name' => name,
+      'target_gen_dir' => '$genDirRoot${dir.substring(1)}',
+      'target_out_dir' => '$buildDirRoot/obj${dir.substring(1)}',
+      'root_gen_dir' => genDirRoot,
+      'root_out_dir' => buildDirRoot,
+      _ => throw GnError(node.location, 'get_label_info(..., "$what") is not supported'),
+    };
+  }
+
   _Expression _variableValue(String name, GnNode node, _Scope scope) {
     final GnVariable? variable = scope.lookup(name);
     if (variable != null) {
@@ -1332,6 +1414,10 @@ final class _Evaluator {
       // The engine's `.gni` variables that build files read are all lists of
       // flags.
       return _Expression(<_Value>[_Value(GnReference(name), _comments(node))], isList: true);
+    }
+    final String? buildDir = _buildDirVariable(name, node);
+    if (buildDir != null) {
+      return _Expression.scalar(GnStringValue(buildDir));
     }
     throw GnError(node.location, 'unknown variable $name');
   }
@@ -1430,7 +1516,7 @@ final class _Evaluator {
     final out = StringBuffer();
     for (final Match match in _expansion.allMatches(text)) {
       final String name = match.group(1) ?? match.group(2)!;
-      final String? value = _knownString(name, scope);
+      final String? value = _knownString(name, scope, node);
       if (value == null) {
         throw GnError(node.location, 'string expansion of \$$name is not supported: ${node.raw}');
       }
@@ -1451,7 +1537,7 @@ final class _Evaluator {
 
   /// The value of [name] when it is a string the converter knows: an
   /// assumption, or a local variable holding one unconditional string.
-  String? _knownString(String name, _Scope? scope) {
+  String? _knownString(String name, _Scope? scope, [GnNode? node]) {
     final GnVariable? variable = scope?.lookup(name);
     if (variable != null) {
       final List<GnValue>? items = variable.unconditionalItems;
@@ -1461,7 +1547,10 @@ final class _Evaluator {
       return null;
     }
     final GnValue? assumed = assumptions[name];
-    return assumed is GnStringValue ? assumed.value : null;
+    if (assumed is GnStringValue) {
+      return assumed.value;
+    }
+    return node == null ? null : _buildDirVariable(name, node);
   }
 
   // -------------------------------------------------------------------------

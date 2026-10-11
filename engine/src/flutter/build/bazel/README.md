@@ -12,6 +12,7 @@ Nothing in this directory is used by the GN build.
 | `toolchains/` | The hermetic C/C++ toolchains (`cc_toolchain_config.bzl` holds the flag tables, `BUILD.bazel` the `cc_toolchain`/`toolchain` targets per platform, `tests/` a smoke test). |
 | `copts.bzl` | What GN adds per target rather than per toolchain, for `BUILD` files to spell out: `FLUTTER_COPTS` / `FLUTTER_LOCAL_DEFINES` for first-party code (`chromium_code`, `//flutter:config`) and `FLUTTER_THIRD_PARTY_COPTS` for overlays (`no_chromium_code`). |
 | `gn_build/` | The `gn_build` rule (`gn_build.bzl`, action script `gn_build.py`): a GN build of part of the tree as one Bazel action, for the subtrees that keep their GN rules during the migration. |
+| `gn_action/` | The `gn_action` rule: GN's `action()` -- one run of a Python script under the hermetic `@cpython3` -- as the generated `BUILD` files emit it, with the path tokens (`$(execpath ...)`, `$(src ...)`, `$(gen ...)`) the converter writes for `rebase_path()` results. |
 | `dart_wrap/` | The Dart SDK, built with `gn_build`: `BUILD.gn` lists the GN targets, `BUILD.bazel` the args, the inputs and the `cc_library` facades; `tests/` starts the VM from the archive. |
 
 ## How dependencies reach Bazel during the transition

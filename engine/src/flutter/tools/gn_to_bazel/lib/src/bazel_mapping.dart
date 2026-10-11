@@ -99,6 +99,9 @@ const Map<String, String> labelOverrides = <String, String>{
   '//third_party/spirv_cross_flutter': '@spirv-cross',
   '//flutter/third_party/flatbuffers': '@flatbuffers',
   '//flutter/third_party/vulkan-deps/spirv-headers/src': '@spirv-headers',
+  '//flutter/third_party/vulkan-deps/spirv-tools/src': '@spirv-tools',
+  '//flutter/third_party/vulkan-deps/glslang/src': '@glslang',
+  '//third_party/shaderc_flutter': '@shaderc',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -120,6 +123,9 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/vulkan-deps/spirv-cross/src/': '@spirv-cross//',
   '//flutter/third_party/flatbuffers/': '@flatbuffers//',
   '//flutter/third_party/vulkan-deps/spirv-headers/src/': '@spirv-headers//',
+  '//flutter/third_party/vulkan-deps/spirv-tools/src/': '@spirv-tools//',
+  '//flutter/third_party/vulkan-deps/glslang/src/': '@glslang//',
+  '//flutter/third_party/shaderc/': '@shaderc//',
 };
 
 /// Compiler flags that GN hands to the dependents of a target through one
@@ -137,6 +143,11 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/third_party/wuffs:wuffs': <String>['-Wno-unused-function', '-Wno-c++11-narrowing'],
   '//third_party/inja:inja': <String>['-Wno-unused-variable', '-Wno-newline-eof'],
   '//flutter/third_party/flatbuffers:flatbuffers': <String>['-Wno-newline-eof'],
+  '//flutter/third_party/vulkan-deps/glslang/src:glslang_lib_sources': <String>['-Wno-conversion'],
+  '//flutter/third_party/vulkan-deps/glslang/src:glslang_sources': <String>['-Wno-conversion'],
+  '//flutter/third_party/vulkan-deps/glslang/src:glslang_default_resource_limits_sources': <String>[
+    '-Wno-conversion',
+  ],
 };
 
 /// A Bazel label taken apart: `@repo//package:name`.
@@ -291,6 +302,12 @@ final class OutputLayout {
 /// for `:local` labels; [location] is where the label was written, for the
 /// error when it has no Bazel home.
 String bazelLabel(String gnLabel, {required String package, GnLocation? location}) {
+  // `:x($default_toolchain)` is `:x` here: a Bazel build has one
+  // configuration of each target.
+  final int paren = gnLabel.indexOf('(');
+  if (paren > 0 && gnLabel.endsWith(')')) {
+    gnLabel = gnLabel.substring(0, paren);
+  }
   if (gnLabel.startsWith(':')) {
     return gnLabel;
   }
@@ -356,6 +373,10 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
     '//engine/src/flutter/impeller:impeller_public_config',
   ),
   '//flutter/third_party/icu:icu_config': ConfigImplied(),
+  // shaderc lists SPIRV-Tools' public config itself (`configs +=`).
+  '//flutter/third_party/vulkan-deps/spirv-tools/src:spvtools_public_config': ConfigDependency(
+    '@spirv-tools//:spvtools_public_config',
+  ),
   '//build/config/compiler:chromium_code': ConfigWarningSet(chromiumCode: true),
   '//build/config/compiler:no_chromium_code': ConfigWarningSet(chromiumCode: false),
 };
@@ -391,6 +412,7 @@ const Set<String> knownExternalVariables = <String>{
   'current_os',
   'current_toolchain',
   'default_library_type',
+  'default_toolchain',
   'host_cpu',
   'host_os',
   'host_toolchain',
@@ -469,6 +491,13 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//flutter/impeller/tools/args.gni',
     '//flutter/impeller/tools/component.gni',
     '//flutter/third_party/glfw/glfw_args.gni',
+    // The engine's answers to the Khronos trees' build_overrides (where
+    // SPIRV-Headers and SPIRV-Tools are, build_with_chromium = false) and
+    // their own argument files.
+    '//build_overrides/build.gni',
+    '//build_overrides/spirv_tools.gni',
+    '//build_overrides/glslang.gni',
+    '//flutter/third_party/vulkan-deps/',
   },
   known: <String>{
     '//flutter/build/dart/dart.gni',
@@ -491,6 +520,7 @@ Assumptions linuxHostAssumptions() {
     'current_os': GnStringValue('linux'),
     'current_toolchain': GnStringValue('//build/toolchain/linux:clang_x64'),
     'default_library_type': GnStringValue('static_library'),
+    'default_toolchain': GnStringValue('//build/toolchain/linux:clang_x64'),
     'host_cpu': GnStringValue('x64'),
     'host_os': GnStringValue('linux'),
     'host_toolchain': GnStringValue('//build/toolchain/linux:clang_x64'),
