@@ -282,7 +282,83 @@ cc_library(
 )
 ''',
   ),
-  ConvertedFile('//flutter/third_party/vulkan-deps/spirv-headers/src'),
+  ConvertedFile(
+    '//flutter/third_party/vulkan-deps/spirv-headers/src',
+    implicitDeps: <String>['@spirv-headers//:headers'],
+    // The GN target lists eleven headers; SPIRV-Tools and glslang include
+    // others (spirv.hpp11, the extended instruction set headers). The
+    // actions of SPIRV-Tools read the grammars and the registry from here.
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "include/**/*.h",
+        "include/**/*.hpp",
+    ]),
+    includes = ["include"],
+    textual_hdrs = glob(["include/**/*.hpp11"]),
+)
+
+exports_files(glob(["include/**"]))
+''',
+  ),
+  // The two Khronos trees whose GN runs scripts (tables and headers
+  // generated from SPIRV-Headers' grammars; glslang's build info): their
+  // action() targets become gn_action rules (research/08, step 2).
+  ConvertedFile(
+    '//flutter/third_party/vulkan-deps/spirv-tools/src',
+    implicitDeps: <String>['@spirv-tools//:headers'],
+    // Eight headers under source/ (val/instruction.h, the precompiled
+    // header stubs, diff/) are in no GN list.
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "include/**/*.h",
+        "include/**/*.hpp",
+        "source/**/*.h",
+    ]),
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/third_party/vulkan-deps/glslang/src',
+    implicitDeps: <String>['@glslang//:headers'],
+    // The GN lists leave out headers the sources include
+    // (MachineIndependent/span.h, StandAlone/Worklist.h).
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "SPIRV/*.h",
+        "StandAlone/*.h",
+        "glslang/**/*.h",
+    ]),
+    textual_hdrs = glob(["SPIRV/*.hpp11"]),
+)
+''',
+  ),
+  // shaderc as the engine builds it: the secondary tree's GN over the synced
+  // tree, on glslang and SPIRV-Tools.
+  ConvertedFile(
+    '//third_party/shaderc_flutter',
+    implicitDeps: <String>['@shaderc//:headers'],
+    // The engine's lists leave out headers the sources include
+    // (libshaderc_util/shader_stage.h).
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "libshaderc/include/**/*.h",
+        "libshaderc/include/**/*.hpp",
+        "libshaderc/src/*.h",
+        "libshaderc_util/include/**/*.h",
+        "libshaderc_util/src/*.h",
+    ]),
+    textual_hdrs = glob(["libshaderc_util/include/**/*.inc"]),
+)
+''',
+  ),
 ];
 
 /// The manifest entry for a GN directory, from either list.

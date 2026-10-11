@@ -64,6 +64,14 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/third_party/freetype2/BUILD.gn"],
         gn_repository = "@freetype2=//flutter/third_party/freetype2",
     ),
+    # glslang's and SPIRV-Tools' own GN (upstream files): their action()
+    # targets become gn_action rules.
+    "glslang": struct(
+        path = "engine/src/flutter/third_party/vulkan-deps/glslang/src",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/glslang/src/BUILD.gn"],
+        gn_repository = "@glslang=//flutter/third_party/vulkan-deps/glslang/src",
+    ),
     # The shader compiler's dependencies (research/08): engine GN in the
     # secondary tree describing a synced tree by absolute path, converted at
     # fetch time like the codecs above.
@@ -153,6 +161,18 @@ _SOURCE_REPOSITORIES = {
         build_file = None,
         gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/spirv-headers/src/BUILD.gn"],
         gn_repository = "@spirv-headers=//flutter/third_party/vulkan-deps/spirv-headers/src",
+    ),
+    "spirv-tools": struct(
+        path = "engine/src/flutter/third_party/vulkan-deps/spirv-tools/src",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/spirv-tools/src/BUILD.gn"],
+        gn_repository = "@spirv-tools=//flutter/third_party/vulkan-deps/spirv-tools/src",
+    ),
+    "shaderc": struct(
+        path = "engine/src/flutter/third_party/shaderc",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/third_party/shaderc_flutter/BUILD.gn"],
+        gn_repository = "@shaderc=//flutter/third_party/shaderc",
     ),
     "wuffs": struct(
         path = "engine/src/flutter/third_party/wuffs",
