@@ -143,6 +143,26 @@ class StandardCapabilities final : public Capabilities {
     return needs_partitioned_host_buffer_;
   }
 
+  // |Capabilities|
+  uint32_t GetMaximumComputeWorkgroupInvocations() const override {
+    return maximum_compute_workgroup_invocations_;
+  }
+
+  // |Capabilities|
+  std::array<uint32_t, 3> GetMaximumComputeWorkgroupSize() const override {
+    return maximum_compute_workgroup_size_;
+  }
+
+  // |Capabilities|
+  std::array<uint32_t, 3> GetMaximumComputeWorkgroupCount() const override {
+    return maximum_compute_workgroup_count_;
+  }
+
+  // |Capabilities|
+  size_t GetMaximumComputeSharedMemorySize() const override {
+    return maximum_compute_shared_memory_size_;
+  }
+
  private:
   StandardCapabilities(bool supports_offscreen_msaa,
                        bool supports_ssbo,
@@ -166,7 +186,11 @@ class StandardCapabilities final : public Capabilities {
                        bool supports_texture_compression_bc,
                        bool supports_texture_compression_etc2,
                        bool supports_texture_compression_astc,
-                       bool supports_texture_compression_astc_hdr)
+                       bool supports_texture_compression_astc_hdr,
+                       uint32_t maximum_compute_workgroup_invocations,
+                       std::array<uint32_t, 3> maximum_compute_workgroup_size,
+                       std::array<uint32_t, 3> maximum_compute_workgroup_count,
+                       size_t maximum_compute_shared_memory_size)
       : supports_offscreen_msaa_(supports_offscreen_msaa),
         supports_ssbo_(supports_ssbo),
         supports_texture_to_texture_blits_(supports_texture_to_texture_blits),
@@ -192,7 +216,13 @@ class StandardCapabilities final : public Capabilities {
         supports_texture_compression_etc2_(supports_texture_compression_etc2),
         supports_texture_compression_astc_(supports_texture_compression_astc),
         supports_texture_compression_astc_hdr_(
-            supports_texture_compression_astc_hdr) {}
+            supports_texture_compression_astc_hdr),
+        maximum_compute_workgroup_invocations_(
+            maximum_compute_workgroup_invocations),
+        maximum_compute_workgroup_size_(maximum_compute_workgroup_size),
+        maximum_compute_workgroup_count_(maximum_compute_workgroup_count),
+        maximum_compute_shared_memory_size_(
+            maximum_compute_shared_memory_size) {}
 
   friend class CapabilitiesBuilder;
 
@@ -219,6 +249,10 @@ class StandardCapabilities final : public Capabilities {
   bool supports_texture_compression_etc2_ = false;
   bool supports_texture_compression_astc_ = false;
   bool supports_texture_compression_astc_hdr_ = false;
+  uint32_t maximum_compute_workgroup_invocations_ = 0;
+  std::array<uint32_t, 3> maximum_compute_workgroup_size_ = {0u, 0u, 0u};
+  std::array<uint32_t, 3> maximum_compute_workgroup_count_ = {0u, 0u, 0u};
+  size_t maximum_compute_shared_memory_size_ = 0;
 
   StandardCapabilities(const StandardCapabilities&) = delete;
 
@@ -359,6 +393,30 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetNeedsPartitionedHostBuffer(
   return *this;
 }
 
+CapabilitiesBuilder& CapabilitiesBuilder::SetMaximumComputeWorkgroupInvocations(
+    uint32_t value) {
+  maximum_compute_workgroup_invocations_ = value;
+  return *this;
+}
+
+CapabilitiesBuilder& CapabilitiesBuilder::SetMaximumComputeWorkgroupSize(
+    std::array<uint32_t, 3> value) {
+  maximum_compute_workgroup_size_ = value;
+  return *this;
+}
+
+CapabilitiesBuilder& CapabilitiesBuilder::SetMaximumComputeWorkgroupCount(
+    std::array<uint32_t, 3> value) {
+  maximum_compute_workgroup_count_ = value;
+  return *this;
+}
+
+CapabilitiesBuilder& CapabilitiesBuilder::SetMaximumComputeSharedMemorySize(
+    size_t value) {
+  maximum_compute_shared_memory_size_ = value;
+  return *this;
+}
+
 std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
   return std::unique_ptr<StandardCapabilities>(new StandardCapabilities(   //
@@ -384,7 +442,11 @@ std::unique_ptr<Capabilities> CapabilitiesBuilder::Build() {
       supports_texture_compression_bc_,                                    //
       supports_texture_compression_etc2_,                                  //
       supports_texture_compression_astc_,                                  //
-      supports_texture_compression_astc_hdr_                               //
+      supports_texture_compression_astc_hdr_,                              //
+      maximum_compute_workgroup_invocations_,                              //
+      maximum_compute_workgroup_size_,                                     //
+      maximum_compute_workgroup_count_,                                    //
+      maximum_compute_shared_memory_size_                                  //
       ));
 }
 

@@ -36,15 +36,24 @@ class ComputePipelineDescriptor final
   std::shared_ptr<const ShaderFunction> GetStageEntrypoint() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Set the workgroup (threadgroup) size declared by the shader.
+  /// @brief      Set the workgroup (threadgroup) size declared by the shader
+  ///             with a literal `local_size`.
   ///
-  ///             A dimension of 0 is sized by a specialization constant and
-  ///             resolved by the backend at dispatch (for example, to the
-  ///             device maximum).
+  ///             Pipeline creation fails if any dimension is 0 (the shader
+  ///             sizes its workgroup with a specialization constant, which is
+  ///             not supported) or if the size exceeds the device limits.
   ///
   ComputePipelineDescriptor& SetWorkgroupSize(std::array<uint32_t, 3> size);
 
   std::array<uint32_t, 3> GetWorkgroupSize() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Whether the workgroup size is non-zero and within the given
+  ///             per-dimension and total invocation limits. Logs a validation
+  ///             error naming the pipeline if it is not.
+  ///
+  bool ValidateWorkgroupSize(std::array<uint32_t, 3> max_size,
+                             uint64_t max_invocations) const;
 
   // Comparable<ComputePipelineDescriptor>
   std::size_t GetHash() const override;

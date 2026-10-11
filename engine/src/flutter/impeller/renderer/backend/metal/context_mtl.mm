@@ -5,6 +5,8 @@
 #include "impeller/renderer/backend/metal/context_mtl.h"
 #include <Metal/Metal.h>
 
+#include <array>
+#include <limits>
 #include <memory>
 
 #include "flutter/fml/concurrent_message_loop.h"
@@ -69,6 +71,17 @@ static bool DeviceSupportsTextureCompressionAstcHdr(id<MTLDevice> device) {
   return [device supportsFamily:MTLGPUFamilyApple6];
 }
 
+// Metal reports the threadgroup size limit per dimension. The limit on the
+// total number of threads in a threadgroup equals the x limit on every Metal
+// GPU family (1024, or 512 before A11). A pipeline can lower it further, which
+// pipeline creation checks.
+static std::array<uint32_t, 3> DeviceMaxThreadsPerThreadgroup(
+    id<MTLDevice> device) {
+  const MTLSize size = device.maxThreadsPerThreadgroup;
+  return {static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height),
+          static_cast<uint32_t>(size.depth)};
+}
+
 static std::unique_ptr<Capabilities> InferMetalCapabilities(
     id<MTLDevice> device,
     PixelFormat color_format) {
@@ -104,6 +117,15 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsTextureCompression(
           CompressedTextureFamily::kASTCHDR,
           DeviceSupportsTextureCompressionAstcHdr(device))
+      .SetMaximumComputeWorkgroupInvocations(
+          DeviceMaxThreadsPerThreadgroup(device)[0])
+      .SetMaximumComputeWorkgroupSize(DeviceMaxThreadsPerThreadgroup(device))
+      // Metal does not limit the threadgroup count of a dispatch beyond the
+      // 32-bit grid coordinates a shader sees.
+      .SetMaximumComputeWorkgroupCount({std::numeric_limits<uint32_t>::max(),
+                                        std::numeric_limits<uint32_t>::max(),
+                                        std::numeric_limits<uint32_t>::max()})
+      .SetMaximumComputeSharedMemorySize(device.maxThreadgroupMemoryLength)
 #if FML_OS_IOS && !TARGET_OS_SIMULATOR
       .SetMinimumUniformAlignment(16)
 #else

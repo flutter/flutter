@@ -814,6 +814,25 @@ bool CapabilitiesVK::NeedsPartitionedHostBuffer() const {
   return false;
 }
 
+uint32_t CapabilitiesVK::GetMaximumComputeWorkgroupInvocations() const {
+  return device_properties_.limits.maxComputeWorkGroupInvocations;
+}
+
+std::array<uint32_t, 3> CapabilitiesVK::GetMaximumComputeWorkgroupSize() const {
+  const auto& size = device_properties_.limits.maxComputeWorkGroupSize;
+  return {size[0], size[1], size[2]};
+}
+
+std::array<uint32_t, 3> CapabilitiesVK::GetMaximumComputeWorkgroupCount()
+    const {
+  const auto& count = device_properties_.limits.maxComputeWorkGroupCount;
+  return {count[0], count[1], count[2]};
+}
+
+size_t CapabilitiesVK::GetMaximumComputeSharedMemorySize() const {
+  return device_properties_.limits.maxComputeSharedMemorySize;
+}
+
 bool CapabilitiesVK::HasExtension(RequiredCommonDeviceExtensionVK ext) const {
   return required_common_device_extensions_.find(ext) !=
          required_common_device_extensions_.end();

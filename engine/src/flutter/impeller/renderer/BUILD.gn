@@ -21,6 +21,8 @@ if (impeller_enable_compute) {
 
     shaders = [
       "compute_3d_test.comp",
+      "increment_test.comp",
+      "oversized_workgroup_test.comp",
       "prefix_sum_test.comp",
       "threadgroup_sizing_test.comp",
     ]

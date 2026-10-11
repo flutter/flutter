@@ -156,9 +156,9 @@ std::optional<nlohmann::json> Reflector::GenerateTemplateArguments() const {
   }
 
   // Compute shader workgroup (threadgroup) size. A value of 0 in any dimension
-  // means that dimension is sized by a specialization constant and is resolved
-  // by the backend at pipeline creation (for example, to the device maximum).
-  // Only meaningful for compute shaders.
+  // means that dimension is sized by a specialization constant, which the
+  // runtime does not support: pipeline creation rejects it. Only meaningful for
+  // compute shaders.
   {
     const std::array<uint32_t, 3> workgroup_size =
         ReflectWorkgroupSize().value_or(std::array<uint32_t, 3>{0u, 0u, 0u});
@@ -674,7 +674,7 @@ std::optional<std::array<uint32_t, 3>> Reflector::ReflectWorkgroupSize() const {
   const auto local_size = [&](const spirv_cross::SpecializationConstant& spec,
                               uint32_t index) -> uint32_t {
     // A non-zero id means this dimension is driven by a specialization
-    // constant; leave it as the runtime-resolved sentinel of 0.
+    // constant; report it as 0.
     return spec.id != 0
                ? 0u
                : compiler_->get_execution_mode_argument(

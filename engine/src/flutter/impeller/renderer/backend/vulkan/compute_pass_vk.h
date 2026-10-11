@@ -5,6 +5,9 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMPUTE_PASS_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMPUTE_PASS_VK_H_
 
+#include <map>
+#include <optional>
+
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/compute_pass.h"
@@ -21,22 +24,25 @@ class ComputePassVK final : public ComputePass {
  private:
   friend class CommandBufferVK;
 
+  // A resource bound to one binding index of the pass.
+  struct BoundResource {
+    DescriptorType type;
+    std::optional<vk::DescriptorBufferInfo> buffer_info;
+    std::optional<vk::DescriptorImageInfo> image_info;
+  };
+
   std::shared_ptr<CommandBufferVK> command_buffer_;
   std::string label_;
   bool is_valid_ = false;
 
-  // Per-command state.
-  std::array<vk::DescriptorImageInfo, kMaxBindings> image_workspace_;
-  std::array<vk::DescriptorBufferInfo, kMaxBindings> buffer_workspace_;
-  std::array<vk::WriteDescriptorSet, kMaxBindings + kMaxBindings>
-      write_workspace_;
-  size_t bound_image_offset_ = 0u;
-  size_t bound_buffer_offset_ = 0u;
-  size_t descriptor_write_offset_ = 0u;
+  // The pipeline and bindings persist across dispatches in the pass.
+  std::shared_ptr<Pipeline<ComputePipelineDescriptor>> pipeline_;
+  std::map<uint32_t, BoundResource> bindings_;
+  // Whether the pipeline or a binding changed since the last dispatch, so the
+  // next dispatch needs a new descriptor set. A descriptor set that an earlier
+  // dispatch in this command buffer uses is never rewritten.
+  bool descriptor_set_dirty_ = true;
   bool has_label_ = false;
-  bool pipeline_valid_ = false;
-  vk::DescriptorSet descriptor_set_ = {};
-  vk::PipelineLayout pipeline_layout_ = {};
 
   ComputePassVK(std::shared_ptr<const Context> context,
                 std::shared_ptr<CommandBufferVK> command_buffer);
@@ -82,6 +88,12 @@ class ComputePassVK final : public ComputePass {
                     raw_ptr<const Sampler> sampler) override;
 
   bool BindResource(size_t binding, DescriptorType type, BufferView view);
+
+  // Allocates, writes and binds a descriptor set for the current pipeline and
+  // bindings.
+  fml::Status BindDescriptorSet();
+
+  void PopCommandLabel();
 };
 
 }  // namespace impeller

@@ -243,6 +243,7 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
     }
   }
   auto weak_this = weak_from_this();
+  const MTLSize max_threads_per_threadgroup = device_.maxThreadsPerThreadgroup;
 
   auto completion_handler =
       ^(id<MTLComputePipelineState> _Nullable compute_pipeline_state,
@@ -251,6 +252,19 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
         if (error != nil) {
           VALIDATION_LOG << "Could not create compute pipeline: "
                          << error.localizedDescription.UTF8String;
+          promise->set_value(nullptr);
+          return;
+        }
+
+        // Metal supplies the threadgroup size at dispatch and aborts if it
+        // exceeds the device or pipeline limit, so check the shader's declared
+        // size here. The pipeline's total limit can be below the device's, for
+        // example when the shader uses many registers.
+        if (!descriptor.ValidateWorkgroupSize(
+                {static_cast<uint32_t>(max_threads_per_threadgroup.width),
+                 static_cast<uint32_t>(max_threads_per_threadgroup.height),
+                 static_cast<uint32_t>(max_threads_per_threadgroup.depth)},
+                compute_pipeline_state.maxTotalThreadsPerThreadgroup)) {
           promise->set_value(nullptr);
           return;
         }
