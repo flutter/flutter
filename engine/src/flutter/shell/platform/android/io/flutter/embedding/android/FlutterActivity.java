@@ -49,11 +49,13 @@ import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivityLaunchConfigs.BackgroundMode;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.embedding.engine.flags.FlutterEngineFlagsProviderImpl;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.embedding.engine.plugins.util.GeneratedPluginRegister;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -1041,8 +1043,25 @@ public class FlutterActivity extends Activity
    */
   @NonNull
   @Override
+  @SuppressWarnings("deprecation")
+  public List<String> getFlutterEngineFlags() {
+    if (FlutterActivityAndFragmentDelegate.isGetFlutterShellArgsOverridden(
+        FlutterActivity.class, this)) {
+      // If the user overrides getFlutterShellArgs(), we assume they want to
+      // use the deprecated method, and return the flags from there.
+      return Arrays.asList(getFlutterShellArgs().toArray());
+    }
+    return FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(getIntent());
+  }
+
+  @NonNull
+  @Override
+  @Deprecated
   public FlutterShellArgs getFlutterShellArgs() {
-    return FlutterShellArgs.fromIntent(getIntent());
+    Log.w(
+        TAG,
+        "FlutterShellArgs is deprecated and will be removed in the next stable release. Migrate to getFlutterEngineFlags. See https://docs.flutter.dev/release/breaking-changes/restrict-android-engine-flags-release-mode for details.");
+    return new FlutterShellArgs(FlutterEngineFlagsProviderImpl.INSTANCE.getFlags(getIntent()));
   }
 
   /**

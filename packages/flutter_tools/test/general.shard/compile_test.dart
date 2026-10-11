@@ -371,4 +371,79 @@ void main() {
 
     expect(compiler.extraFrontEndOptions, containsAll(kDdcLibraryBundleFlags));
   });
+
+  group('ResidentCompilerFactory deprecated JS interop', () {
+    DefaultResidentCompiler createCompiler({
+      required TargetPlatform targetPlatform,
+      bool? deprecatedJsInterop,
+    }) {
+      return const ResidentCompilerFactory().create(
+        targetPlatform: targetPlatform,
+        buildInfo: BuildInfo(
+          BuildMode.debug,
+          null,
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+          webEnableHotReload: true,
+          deprecatedJsInterop: deprecatedJsInterop,
+        ),
+        logger: BufferLogger.test(),
+        processManager: FakeProcessManager.any(),
+        artifacts: Artifacts.test(),
+        platform: FakePlatform(),
+        fileSystem: MemoryFileSystem.test(),
+        shutdownHooks: FakeShutdownHooks(),
+        config: Config.test(),
+      ) as DefaultResidentCompiler;
+    }
+
+    const deprecatedJsInteropFlags = <String>[
+      '--deprecated-js-interop',
+      '--no-deprecated-js-interop',
+    ];
+
+    testWithoutContext('passes no flag to DDC by default', () {
+      final DefaultResidentCompiler compiler = createCompiler(targetPlatform: .web_javascript);
+
+      expect(compiler.extraFrontEndOptions, isNot(anyElement(isIn(deprecatedJsInteropFlags))));
+    });
+
+    testWithoutContext('forwards the flag to DDC', () {
+      expect(
+        createCompiler(
+          targetPlatform: .web_javascript,
+          deprecatedJsInterop: false,
+        ).extraFrontEndOptions,
+        contains('--no-deprecated-js-interop'),
+      );
+      expect(
+        createCompiler(
+          targetPlatform: .web_javascript,
+          deprecatedJsInterop: true,
+        ).extraFrontEndOptions,
+        contains('--deprecated-js-interop'),
+      );
+    });
+
+    testWithoutContext('does not forward the flag to non-web targets', () {
+      final DefaultResidentCompiler compiler = createCompiler(
+        targetPlatform: .android_arm64,
+        deprecatedJsInterop: false,
+      );
+
+      expect(compiler.extraFrontEndOptions, isNot(anyElement(isIn(deprecatedJsInteropFlags))));
+    });
+
+    testWithoutContext('uses a different cached kernel for each flag value', () {
+      final initializeFromDillPaths = <String?>{
+        for (final bool? value in <bool?>[null, true, false])
+          createCompiler(
+            targetPlatform: .web_javascript,
+            deprecatedJsInterop: value,
+          ).initializeFromDill,
+      };
+
+      expect(initializeFromDillPaths, hasLength(3));
+    });
+  });
 }

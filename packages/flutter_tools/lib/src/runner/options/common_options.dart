@@ -505,6 +505,37 @@ class DarwinAddToAppOptionsBundle extends OptionBundle {
   ];
 }
 
+/// A bundle encapsulating general options for desktop (`linux` and `windows`) builds.
+class DesktopBuildOptionsBundle extends OptionBundle {
+  const DesktopBuildOptionsBundle();
+
+  static const configOnly = FlagOptionDescriptor(
+    name: 'config-only',
+    help: 'Update the project configuration without performing a build.',
+  );
+
+  @override
+  List<OptionBundle> get subBundles => const <OptionBundle>[
+    CommonBuildOptionsBundle(),
+    BuildModeOptionsBundle(),
+    DartCompileOptionsBundle(),
+  ];
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
+    BuildInfoOptions.flavor,
+    BuildInfoOptions.splitDebugInfo,
+    BuildInfoOptions.obfuscate,
+    BuildInfoOptions.extraFrontEndOptions,
+    BuildInfoOptions.extraGenSnapshotOptions,
+    BuildInfoOptions.performanceMeasurementFile,
+    BuildInfoOptions.analyzeSize,
+    BuildInfoOptions.codeSizeDirectory,
+    BuildInfoOptions.trackWidgetCreation,
+    configOnly,
+  ];
+}
+
 /// Typed option descriptors specific to `DebuggingOptions` and resident runners (`run`, `drive`, `test`).
 abstract final class DebuggingOptionDescriptors {
   static const enableImpeller = NullableFlagOptionDescriptor(

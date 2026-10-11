@@ -56,6 +56,8 @@ class MockRuntimeDelegate : public RuntimeDelegate {
 
   void SetNeedsReportTimings(bool value) override {};
 
+  void ResetInternalState() override {}
+
   std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
       const std::vector<std::string>& supported_locale_data) override {
     return nullptr;
