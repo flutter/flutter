@@ -38,6 +38,12 @@ const String flutterConfigLabel = '//flutter:config';
 /// trees the engine describes with GN never use it.
 const String defaultIncludeDirsLabel = '//engine/src:include_root';
 
+/// The C++ standard library GN's BUILDCONFIG.gn links into every executable
+/// and shared library (its default deps). The root `.bazelrc` attaches it to
+/// executables through `--@bazel_tools//tools/cpp:link_extra_libs`, which
+/// does not reach shared binaries; the converter lists it in their deps.
+const String cxxRuntimeLabel = '//engine/src/flutter/build/bazel/toolchains:cxx_runtime';
+
 /// The `size` of a generated `cc_test`. GN has no notion of it; the engine's
 /// suites are small unless listed in [testSizes].
 const String defaultTestSize = 'small';

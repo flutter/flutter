@@ -130,7 +130,13 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `source_set`/`static_library` to `cc_library` (with headers in `hdrs`, or
    the `public` list when there is one; a `source_set` is `alwayslink`,
    since GN links all of its objects), `group` to a `cc_library` of only
-   `deps`, test executables to `cc_test`, `config` to a header-only
+   `deps`, test executables to `cc_test`, `shared_library` to a
+   `cc_binary(linkshared = True)` named after the file GN produces
+   (`lib<output_name>.so`, which Bazel requires of a shared binary) with an
+   `alias` under the GN name, the C++ runtime in its `deps` (GN's default
+   deps; Bazel's `link_extra_libs` reaches executables only) and any
+   `cc_library` of the same file that would declare the same `.so` made
+   `linkstatic`, `config` to a header-only
    `cc_library` carrying the defines, include directories and link flags that
    dependents list in `deps`, known `.gni` templates to the matching Bazel
    macros. GN's `deps` and `public_deps` both become `deps`: GN's include

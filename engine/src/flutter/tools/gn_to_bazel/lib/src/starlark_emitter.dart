@@ -204,6 +204,9 @@ final class _Emitter {
     loads.putIfAbsent(_absoluteLabel(bzl), () => <String>{}).add(symbol);
   }
 
+  /// The `lib<name>.so` files the file's shared libraries produce.
+  final Set<String> _sharedLibraryOutputs = <String>{};
+
   /// Registers the `load("file", "symbol", ...)` lines at the top of
   /// [appendix] as the file's own and returns the appendix without them.
   String _takeLoads(String appendix) {
@@ -262,6 +265,8 @@ final class _Emitter {
         _convertCcTarget(target, 'cc_library', library: true);
       case 'executable':
         _convertCcTarget(target, _isTest(target) ? 'cc_test' : 'cc_binary', library: false);
+      case 'shared_library':
+        _convertCcTarget(target, 'cc_binary', library: false, shared: true);
       case 'config':
         _convertConfig(target);
       case 'group':
@@ -550,11 +555,27 @@ final class _Emitter {
     rules.add(rule);
   }
 
-  void _convertCcTarget(GnTarget target, String kind, {required bool library}) {
+  /// A `source_set`/`static_library` ([library]), an `executable`, or a
+  /// `shared_library` ([shared]: a `cc_binary` with `linkshared`, named
+  /// after the file GN produces -- `lib<output_name>.so`, as Bazel requires
+  /// of a shared binary -- with an `alias` under the GN target's name).
+  void _convertCcTarget(
+    GnTarget target,
+    String kind, {
+    required bool library,
+    bool shared = false,
+  }) {
     _use('@rules_cc//cc:defs.bzl', kind);
-    final rule = _Rule(kind, target.name, target.comments);
+    final String name = shared
+        ? 'lib${_singleString(target.variables['output_name']) ?? target.name}.so'
+        : target.name;
+    final rule = _Rule(kind, name, target.comments);
     if (kind == 'cc_test') {
       rule.scalars['size'] = '"${testSizes[target.name] ?? defaultTestSize}"';
+    }
+    if (shared) {
+      rule.scalars['linkshared'] = 'True';
+      _sharedLibraryOutputs.add(name);
     }
     var chromiumCode = true;
     // With an explicit `public` list the headers in `sources` are private.
@@ -614,9 +635,10 @@ final class _Emitter {
           }
         case 'lib_dirs':
           _requireEmpty(variable);
-        case 'output_name' when target.rule == 'source_set':
+        case 'output_name' when target.rule == 'source_set' || shared:
           // A source_set produces no file, so GN ignores the name (harfbuzz's
-          // GN sets one); on a library or binary it would rename the output.
+          // GN sets one); a shared library's is in the rule's name already;
+          // on anything else it would rename the output.
           break;
         default:
           if (_ignoredVariables.contains(variable.name) || variable.forwarded) {
@@ -728,7 +750,16 @@ final class _Emitter {
       rules.add(helper);
       rule.list('deps').addUnique(Condition.always, _Item(':${helper.name}'));
     }
+    if (shared) {
+      // GN's default deps link the C++ runtime into every shared library;
+      // Bazel's link_extra_libs reaches executables only.
+      rule.list('deps').addUnique(Condition.always, _Item(_localLabel(cxxRuntimeLabel)));
+    }
     rules.add(rule);
+    if (shared) {
+      // GN's name for the library, for dependents and the command line.
+      rules.add(_Rule('alias', target.name, const <String>[])..scalars['actual'] = '":$name"');
+    }
   }
 
   /// An include directory in another repository (`include_dirs =
@@ -1451,6 +1482,22 @@ final class _Emitter {
     return result;
   }
 
+  /// The value of a variable that must be one unconditional string, or null
+  /// when the variable is not set.
+  String? _singleString(GnVariable? variable) {
+    if (variable == null) {
+      return null;
+    }
+    final List<GnValue>? items = variable.unconditionalItems;
+    if (items == null || items.length != 1 || items.single is! GnStringValue) {
+      throw GnError(
+        variable.assignments.first.location,
+        '${variable.name} must be a single unconditional string',
+      );
+    }
+    return (items.single as GnStringValue).value;
+  }
+
   void _scalar(_Rule rule, String attribute, GnVariable variable) {
     final List<GnValue>? items = variable.unconditionalItems;
     if (items == null || items.length != 1) {
@@ -1479,6 +1526,16 @@ final class _Emitter {
     // not use) belong with the file's; buildifier would move them there.
     if (appendix != null) {
       appendix = _takeLoads(appendix);
+    }
+    // A cc_library declares lib<name>.so as an implicit output; when a
+    // shared library of the file produces that very file (GN's
+    // `tessellator` source_set, which makes no file, next to
+    // `tessellator_shared` with output_name "tessellator"), the library
+    // gives it up. Dependents link it statically either way.
+    for (final _Rule rule in rules) {
+      if (rule.kind == 'cc_library' && _sharedLibraryOutputs.contains('lib${rule.name}.so')) {
+        rule.scalars['linkstatic'] = 'True';
+      }
     }
     final out = StringBuffer()
       ..write(_licenseHeader)
