@@ -150,8 +150,18 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    source of the dependent, since the outputs are inputs of its compile in
    Bazel where GN only ordered the two. A generated directory in
    `include_dirs` is the package's, as Bazel's `includes` spans the output
-   tree; an include directory in another repository is dropped with a note
-   (the dependency on that repository carries it, or nothing does).
+   tree; an ancestor package's (`$root_gen_dir/flutter`) is a dependency on
+   the target whose `includes` already name that directory
+   (`genDirIncludeTargets`); an include directory in another repository is
+   dropped with a note (the dependency on that repository carries it, or
+   nothing does). `copy()` becomes a `gn_copy`, whose content is its
+   sources; GN's destination under the build directory is recorded, not
+   reproduced. A known template's invocation becomes the macro call its
+   `TemplateMapping` describes, argument by argument: files of the package,
+   labels, configs (which become the labels of their config libraries) or a
+   scalar; the template's body is the macro's (`flatbuffers()` in
+   `build/bazel/flatbuffers`), and the targets it expands to in GN are the
+   mapping's `innerTargets`, which the oracle expects.
 
 `bazel_mapping.dart` holds the converter's knowledge of the engine: label
 translations for synced dependencies (`//flutter/third_party/icu` is `@icu`,
