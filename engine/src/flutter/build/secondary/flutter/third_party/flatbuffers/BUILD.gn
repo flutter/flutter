@@ -6,8 +6,6 @@ _src_root = "//flutter/third_party/flatbuffers"
 
 config("flatbuffers_public_configs") {
   include_dirs = [ "$_src_root/include" ]
-
-  cflags = [ "-Wno-newline-eof" ]
 }
 
 source_set("flatbuffers") {
