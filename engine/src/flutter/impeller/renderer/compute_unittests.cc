@@ -948,5 +948,57 @@ TEST_P(ComputeTest, ComputePassReadsTextureWrittenByRenderPass) {
   latch.Wait();
 }
 
+TEST_P(ComputeTest, RemovingComputeEntryPointEvictsOnlyItsPipelines) {
+  using CS = IncrementTestComputeShader;
+  using OtherCS = ThreadgroupSizingTestComputeShader;
+  using VS = ComputedVerticesTestVertexShader;
+  using FS = ComputedVerticesTestFragmentShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+  auto library = context->GetPipelineLibrary();
+
+  auto render_desc =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(render_desc.has_value());
+  render_desc->SetSampleCount(SampleCount::kCount1);
+  render_desc->ClearStencilAttachments();
+  render_desc->ClearDepthAttachment();
+  auto render_pipeline = library->GetPipeline(render_desc).Get();
+  ASSERT_TRUE(render_pipeline);
+
+  auto compute_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(compute_desc.has_value());
+  auto compute_pipeline = library->GetPipeline(compute_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  auto other_desc =
+      ComputePipelineBuilder<OtherCS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(other_desc.has_value());
+  auto other_pipeline = library->GetPipeline(other_desc).Get();
+  ASSERT_TRUE(other_pipeline);
+
+  // Removing a compute function, as a hot reload does, must skip the cached
+  // render pipelines, which have no compute entry point, and evict only the
+  // compute pipelines that use that function.
+  library->RemovePipelinesWithEntryPoint(compute_desc->GetStageEntrypoint());
+
+  EXPECT_TRUE(library->HasPipeline(*render_desc));
+  EXPECT_EQ(library->GetPipeline(render_desc).Get(), render_pipeline);
+  EXPECT_EQ(library->GetPipeline(other_desc).Get(), other_pipeline);
+  auto recreated_pipeline = library->GetPipeline(compute_desc).Get();
+  ASSERT_TRUE(recreated_pipeline);
+  EXPECT_NE(recreated_pipeline, compute_pipeline);
+
+  // Removing a vertex function evicts its render pipelines and leaves the
+  // compute pipelines.
+  library->RemovePipelinesWithEntryPoint(
+      render_desc->GetEntrypointForStage(ShaderStage::kVertex));
+  EXPECT_FALSE(library->HasPipeline(*render_desc));
+  EXPECT_EQ(library->GetPipeline(compute_desc).Get(), recreated_pipeline);
+  EXPECT_EQ(library->GetPipeline(other_desc).Get(), other_pipeline);
+}
+
 }  // namespace testing
 }  // namespace impeller

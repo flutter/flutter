@@ -302,9 +302,18 @@ bool PipelineLibraryMTL::HasPipeline(const PipelineDescriptor& descriptor) {
 void PipelineLibraryMTL::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
   Lock lock(pipelines_mutex_);
+  // Skip pipelines without an entry point for the function's stage: render
+  // pipelines have none for the compute stage. Compute pipelines are cached
+  // separately.
   fml::erase_if(pipelines_, [&](auto item) {
-    return item->first.GetEntrypointForStage(function->GetStage())
-        ->IsEqual(*function);
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        item->first.GetEntrypointForStage(function->GetStage());
+    return entrypoint && entrypoint->IsEqual(*function);
+  });
+  fml::erase_if(compute_pipelines_, [&](auto item) {
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        item->first.GetStageEntrypoint();
+    return entrypoint && entrypoint->IsEqual(*function);
   });
 }
 
