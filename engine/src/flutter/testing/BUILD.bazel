@@ -6,7 +6,7 @@
 # Not converted: dart, vmservice_kernel, vmservice_snapshot, fixture_test, vulkan, test_swiftshader_utils, test_swangle_utils, opengl.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -46,7 +46,7 @@ cc_library(
         "testing.h",
         "thread_test.h",
     ],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -69,7 +69,7 @@ cc_library(
         "display_list_testing.h",
         "sk_data_fixtures.h",
     ],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":testing_core",
@@ -86,7 +86,7 @@ cc_library(
     name = "run_all_unittests",
     testonly = True,
     srcs = ["run_all_unittests.cc"],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":dynamic_symbols",
@@ -114,7 +114,7 @@ cc_library(
         "assertions_skia.h",
         "canvas_test.h",
     ],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":testing_lib",

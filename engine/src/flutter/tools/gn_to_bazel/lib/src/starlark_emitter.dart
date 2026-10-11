@@ -7,8 +7,6 @@ library;
 
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
-
 import 'bazel_mapping.dart';
 import 'gn_ast.dart';
 import 'gn_eval.dart';
@@ -590,6 +588,10 @@ final class _Emitter {
           }
         case 'lib_dirs':
           _requireEmpty(variable);
+        case 'output_name' when target.rule == 'source_set':
+          // A source_set produces no file, so GN ignores the name (harfbuzz's
+          // GN sets one); on a library or binary it would rename the output.
+          break;
         default:
           if (_ignoredVariables.contains(variable.name) || variable.forwarded) {
             // A template forwards its invoker's bookkeeping (`enabled`, ...)
@@ -631,10 +633,16 @@ final class _Emitter {
 
     // A header-only library compiles nothing: GN ignores its flags and
     // defines (they apply to no compile and propagate to no one), and so
-    // does the generated rule.
+    // does the generated rule; its private configs likewise.
     final bool compiles = !(rule.lists['srcs']?.isEmpty ?? true);
     if (!compiles) {
-      const <String>['copts', 'conlyopts', 'cxxopts', 'local_defines'].forEach(rule.lists.remove);
+      const <String>[
+        'copts',
+        'conlyopts',
+        'cxxopts',
+        'local_defines',
+        'implementation_deps',
+      ].forEach(rule.lists.remove);
     }
     if (compiles) {
       // GN applies chromium_code (or no_chromium_code) to every target, and
@@ -647,6 +655,13 @@ final class _Emitter {
           ? 'FLUTTER_COPTS'
           : 'CHROMIUM_CODE_COPTS';
       _use('//engine/src/flutter/build/bazel:copts.bzl', constant);
+      // gmock's public config (-Wno-inconsistent-missing-override) reaches
+      // every test target through testing_core's public_deps; see copts.bzl.
+      final bool testonly = kind == 'cc_test' || rule.scalars['testonly'] == 'True';
+      if (testonly) {
+        _use('//engine/src/flutter/build/bazel:copts.bzl', 'FLUTTER_TESTONLY_COPTS');
+        rule.list('copts').always.insert(0, const _Item('FLUTTER_TESTONLY_COPTS', quoted: false));
+      }
       rule.list('copts').always.insert(0, _Item(constant, quoted: false));
       if (chromiumCode) {
         _use('//engine/src/flutter/build/bazel:copts.bzl', 'FLUTTER_LOCAL_DEFINES');
@@ -860,17 +875,7 @@ final class _Emitter {
   }
 
   /// A GN label as written in this file, as `//dir:name`.
-  String _gnLabel(String value) {
-    var label = value.startsWith(':')
-        ? '$gnPackage$value'
-        : value.startsWith('//')
-        ? value
-        : '//${p.posix.normalize('${gnPackage.substring(2)}/$value')}';
-    if (!label.contains(':')) {
-      label = '$label:${label.substring(label.lastIndexOf('/') + 1)}';
-    }
-    return label;
-  }
+  String _gnLabel(String value) => absoluteGnLabel(value, package: gnPackage, implicitName: true);
 
   /// config("x") becomes a header-only library carrying the defines, include
   /// directories and link flags, which dependents list in deps; Bazel
@@ -1225,16 +1230,20 @@ final class _Emitter {
         '${layout.repository.isEmpty ? '' : layout.repository} (root ${layout.repositoryGnRoot})',
       );
     }
-    final String owner = layout.isMain ? package.package : layout.owningPackage(relative);
+    // The deepest package owns a file: the one being generated (which the
+    // layout need not list) or another the layout knows.
+    final String current = package.package;
+    final bool underCurrent = relative == current || relative.startsWith('$current/');
+    String? owner = layout.owningPackage(relative);
+    if (underCurrent && (owner == null || owner.length < current.length)) {
+      owner = current;
+    }
+    if (owner == null) {
+      throw GnError(location, '$gnFilePath is outside the package of the generated file');
+    }
     final ownerPrefix = owner.isEmpty ? '' : '$owner/';
-    if (owner == package.package) {
-      if (relative == owner) {
-        return '.';
-      }
-      if (!relative.startsWith(ownerPrefix)) {
-        throw GnError(location, '$gnFilePath is outside the package of the generated file');
-      }
-      return relative.substring(ownerPrefix.length);
+    if (owner == current) {
+      return relative == owner ? '.' : relative.substring(ownerPrefix.length);
     }
     final String rest = relative == owner ? '' : relative.substring(ownerPrefix.length);
     return '//$owner:$rest';
@@ -1345,7 +1354,10 @@ final class _Emitter {
   /// defines become `local_defines` (a dependency's `defines` would leak to
   /// dependents, which GN's private configs never do), its include
   /// directories `includes`, its link flags `linkopts`, its compiler flags
-  /// `copts`.
+  /// `copts`. A private config of another file is an `implementation_deps`
+  /// entry, which Bazel applies to this target's compiles alone -- GN's
+  /// private semantics -- except on a binary, which has no such attribute
+  /// and no dependents.
   bool _configsInto(
     _Rule rule,
     GnVariable variable,
@@ -1385,7 +1397,7 @@ final class _Emitter {
         }
         final ConfigEffect? effect = config.startsWith(':')
             ? ConfigDependency(config)
-            : configEffects[config] ?? configEffects['$gnPackage$config'];
+            : configEffects[config] ?? configEffects[_gnLabel(config)];
         if (effect == null) {
           throw GnError(assignment.location, 'config $config has no Bazel mapping');
         }
@@ -1401,7 +1413,10 @@ final class _Emitter {
             if (assignment.op == '-=') {
               throw GnError(assignment.location, 'removing config $config is not supported');
             }
-            rule.list('deps').addUnique(assignment.condition, _item(label, element));
+            final attribute = private && local == null && rule.kind == 'cc_library'
+                ? 'implementation_deps'
+                : 'deps';
+            rule.list(attribute).addUnique(assignment.condition, _item(label, element));
           case ConfigImplied():
             break;
         }
@@ -1501,7 +1516,11 @@ final class _Emitter {
     'srcs',
     'hdrs',
   ];
-  static const List<String> _trailingAttributes = <String>['deps', 'alwayslink'];
+  static const List<String> _trailingAttributes = <String>[
+    'deps',
+    'implementation_deps',
+    'alwayslink',
+  ];
 
   static int _attributeRank(String attribute) {
     final int leading = _leadingAttributes.indexOf(attribute);
@@ -1558,9 +1577,10 @@ final class _Emitter {
   void _renderList(StringBuffer out, _ListAttribute list, _Rule rule, String attribute) {
     final bool sorted = _sortedAttributes.contains(attribute);
     final parts = <String>[];
-    // A bare constant (FLUTTER_COPTS, FLUTTER_LOCAL_DEFINES) leads as itself.
+    // Bare constants (FLUTTER_COPTS, FLUTTER_TESTONLY_COPTS,
+    // FLUTTER_LOCAL_DEFINES) lead as themselves.
     final always = List<_Item>.of(list.always);
-    if (always.isNotEmpty && !always.first.quoted && always.first.comment == null) {
+    while (always.isNotEmpty && !always.first.quoted && always.first.comment == null) {
       parts.add(always.removeAt(0).text);
     }
     if (always.isNotEmpty || parts.isEmpty && list.conditional.isEmpty) {
