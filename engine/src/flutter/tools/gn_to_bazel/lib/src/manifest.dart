@@ -139,7 +139,9 @@ cc_test(
   // (research/08, step 3).
   ConvertedFile(
     '//flutter/impeller/core',
-    skip: <String, String>{'allocator_unittests': 'needs //flutter/testing:testing_lib'},
+    skip: <String, String>{
+      'allocator_unittests': 'needs //flutter/impeller/renderer/testing:mocks',
+    },
   ),
   ConvertedFile(
     '//flutter/impeller/runtime_stage',
@@ -157,7 +159,22 @@ cc_test(
   // invocations become the macro in build/bazel/impeller.
   ConvertedFile(
     '//flutter/impeller/shader_archive',
-    skip: <String, String>{'shader_archive_unittests': 'needs //flutter/testing:testing_lib'},
+    // The suite on its own, as for //flutter/impeller/base.
+    appendix: '''
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+flutter_test_fixtures(name = "impeller_shader_archive_fixtures")
+
+cc_test(
+    name = "impeller_shader_archive_unittests",
+    deps = [
+        ":impeller_shader_archive_fixtures",
+        ":shader_archive_unittests",
+        "//engine/src/flutter/testing",
+    ],
+)
+''',
   ),
   ConvertedFile(
     '//flutter/impeller/tessellator',
@@ -193,12 +210,26 @@ cc_test(
     skip: <String, String>{
       'display_list_unittests': 'needs //flutter/impeller/playground',
       'display_list_unittests_golden': 'needs //flutter/impeller/playground',
-      'skia_conversions_unittests':
-          'part of impeller_unittests, which needs the Impeller test suites',
       'aiks_playground': 'needs //flutter/impeller/playground',
       'aiks_unittests': 'needs //flutter/impeller/playground',
       'aiks_unittests_golden': 'needs //flutter/impeller/playground',
     },
+    // The skia_conversions suite on its own, as for //flutter/impeller/base.
+    appendix: '''
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+flutter_test_fixtures(name = "impeller_skia_conversions_fixtures")
+
+cc_test(
+    name = "impeller_skia_conversions_unittests",
+    deps = [
+        ":impeller_skia_conversions_fixtures",
+        ":skia_conversions_unittests",
+        "//engine/src/flutter/testing",
+    ],
+)
+''',
   ),
   ConvertedFile(
     '//flutter/txt',
