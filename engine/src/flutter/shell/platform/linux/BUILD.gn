@@ -511,10 +511,45 @@ executable("flutter_linux_unittests") {
   ]
 }
 
+# Real GTK3 export must run without the GTK replacements in the unit-test suite.
+executable("flutter_linux_accessibility_parity_tests") {
+  testonly = true
+  sources = [
+    "fl_accessibility_parity_test.cc",
+    "testing/fl_test_gtk_logs.cc",
+    "testing/fl_test_gtk_logs.h",
+    "testing/linux_test.cc",
+    "testing/linux_test.h",
+    "testing/mock_engine.cc",
+  ]
+  public_configs = [ "//flutter:config" ]
+  configs += [
+    "//flutter/shell/platform/linux/config:gtk",
+    "//flutter/shell/platform/linux/config:epoxy",
+    "//flutter/shell/platform/linux/config:wayland_client",
+    "//flutter/shell/platform/linux/config:wayland_egl",
+  ]
+  defines = [
+    "FLUTTER_ENGINE_NO_PROTOTYPES",
+    "FLUTTER_LINUX_COMPILATION",
+  ]
+  deps = [
+    ":flutter_linux_fixtures",
+    ":flutter_linux_gschemas",
+    ":flutter_linux_sources_gtk3",
+    "//flutter/runtime:libdart",
+    "//flutter/shell/platform/common:common_cpp_enums",
+    "//flutter/shell/platform/embedder:embedder_headers",
+    "//flutter/shell/platform/embedder:embedder_test_utils",
+    "//flutter/testing",
+  ]
+}
+
 executable("flutter_linux_gtk4_unittests") {
   testonly = true
 
   sources = [
+    "fl_accessibility_parity_test.cc",
     "fl_accessibility_semantics_store_test.cc",
     "fl_application_test.cc",
     "fl_basic_message_channel_test.cc",

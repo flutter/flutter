@@ -79,6 +79,44 @@ python3 -m unittest discover \
   -p validate_gtk4_runtime_compat_test.py
 ```
 
+## GTK3/GTK4 AT-SPI comparison
+
+```sh
+autoninja -C engine/src/out/host_debug_unopt \
+  flutter_linux_accessibility_parity_tests flutter_linux_gtk4_unittests
+python3 engine/src/flutter/shell/platform/linux/testing/run_atspi_parity_test.py \
+  --gtk3 engine/src/out/host_debug_unopt/flutter_linux_accessibility_parity_tests \
+  --gtk4 engine/src/out/host_debug_unopt/flutter_linux_gtk4_unittests \
+  --output /tmp/flutter-atspi-parity.json
+```
+
+Both binaries compile the same semantics fixture: a button, checkbox, editable
+and obscured text, Unicode selection, slider, scroll actions, and nested groups.
+The client verifies complete export, absence of defunct nodes, action dispatch,
+and a partial checkbox-state update. It records roles, interfaces, states,
+normalized action names, children and text queries before and after the actions.
+Loaded GTK/GLib versions are included in the JSON report. Protected text is
+represented only by whether the fixture value was exposed, never its contents.
+
+The GTK3 target uses real GTK; the regular unit-test binary replaces native GTK
+functions and cannot perform this export test. GTK4 needs native text support
+(GTK 4.14+); GTK 4.8 fallback is tested by the runtime compatibility validator.
+The command needs the same AT-SPI/Xvfb prerequisites as the activation test below.
+
+The default command fails on broken common behavior and reports remaining
+backend differences. Add `--strict` to fail on any difference, including native
+interface/role differences; there is no allowlist hiding discrepancies. Passing
+the common checks does not establish full parity or real Dart/Orca behavior.
+No rendering or performance comparison is performed by this fixture.
+
+Test the report comparison without a display:
+
+```sh
+python3 -m unittest discover \
+  -s engine/src/flutter/shell/platform/linux/testing \
+  -p run_atspi_parity_test_test.py
+```
+
 ## Native AT-SPI activation
 
 ```sh
