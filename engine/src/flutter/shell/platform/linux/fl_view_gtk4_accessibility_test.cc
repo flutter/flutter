@@ -342,6 +342,15 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   if (check_selection) {
     text.actions = kFlutterSemanticsActionSetSelection;
   }
+  const FlutterSemanticsAction cursor_actions[] = {
+      kFlutterSemanticsActionMoveCursorForwardByCharacter,
+      kFlutterSemanticsActionMoveCursorBackwardByCharacter,
+      kFlutterSemanticsActionMoveCursorForwardByWord,
+      kFlutterSemanticsActionMoveCursorBackwardByWord,
+  };
+  for (const auto action : cursor_actions) {
+    text.actions = static_cast<FlutterSemanticsAction>(text.actions | action);
+  }
   const FlutterSemanticsAction adjustment_actions[] = {
       kFlutterSemanticsActionScrollLeft,   kFlutterSemanticsActionScrollRight,
       kFlutterSemanticsActionScrollUp,     kFlutterSemanticsActionScrollDown,
@@ -368,6 +377,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   size_t text_updates = 0;
   size_t selection_calls = 0;
   size_t adjustment_calls = 0;
+  size_t cursor_calls = 0;
   const gchar* text_values[] = {
       "New \xF0\x9F\x98\x80 text",
       "New \xF0\x9F\x98\x81 text",
@@ -379,6 +389,28 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
       SendSemanticsAction,
       ([&](auto, const FlutterSendSemanticsActionInfo* info) {
         EXPECT_EQ(info->view_id, view_id);
+        if (info->node_id == 1 &&
+            info->action != kFlutterSemanticsActionSetSelection) {
+          EXPECT_TRUE(check_text);
+          EXPECT_LT(cursor_calls, G_N_ELEMENTS(cursor_actions));
+          if (cursor_calls < G_N_ELEMENTS(cursor_actions)) {
+            EXPECT_EQ(info->action, cursor_actions[cursor_calls]);
+          }
+          g_autoptr(GBytes) bytes = g_bytes_new(info->data, info->data_length);
+          g_autoptr(FlStandardMessageCodec) codec =
+              fl_standard_message_codec_new();
+          g_autoptr(FlValue) value = fl_message_codec_decode_message(
+              FL_MESSAGE_CODEC(codec), bytes, nullptr);
+          EXPECT_NE(value, nullptr);
+          if (value != nullptr) {
+            EXPECT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_BOOL);
+            if (fl_value_get_type(value) == FL_VALUE_TYPE_BOOL) {
+              EXPECT_FALSE(fl_value_get_bool(value));
+            }
+          }
+          cursor_calls++;
+          return kSuccess;
+        }
         if (info->node_id == 2) {
           EXPECT_LT(adjustment_calls, G_N_ELEMENTS(adjustment_actions));
           if (adjustment_calls < G_N_ELEMENTS(adjustment_actions)) {
@@ -463,6 +495,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   EXPECT_EQ(text_updates, check_text ? 4u : 0u);
   EXPECT_EQ(selection_calls, check_selection ? 2u : 0u);
   EXPECT_EQ(adjustment_calls, G_N_ELEMENTS(adjustment_actions));
+  EXPECT_EQ(cursor_calls, check_text ? G_N_ELEMENTS(cursor_actions) : 0u);
   gtk_window_set_child(window, nullptr);
   gtk_box_append(GTK_BOX(view), surface);
   gtk_window_destroy(window);
@@ -1249,6 +1282,147 @@ TEST_F(FlViewGtk4AccessibilityTest, TextQueriesUseLinguisticBoundaries) {
         g_bytes_get_size(contents));
     EXPECT_STREQ(actual, test.expected);
   }
+}
+
+TEST_F(FlViewGtk4AccessibilityTest, CursorActionsEncodeCollapsedSelection) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing() ||
+      !fl_gtk_runtime_supports_native_accessibility_text()) {
+    GTEST_SKIP() << "Native accessible text requires GTK 4.14+";
+  }
+  g_autoptr(FlView) primary = fl_view_new(project);
+  g_object_ref_sink(primary);
+  FlEngine* engine = fl_view_get_engine(primary);
+  StartEngine(engine);
+  g_autoptr(FlView) view = fl_view_new_for_engine(engine);
+  g_object_ref_sink(view);
+  ASSERT_NE(fl_view_get_id(view), 0);
+  const struct {
+    const char* name;
+    FlutterSemanticsAction action;
+  } actions[] = {
+      {"flutter.move-cursor-forward-by-character",
+       kFlutterSemanticsActionMoveCursorForwardByCharacter},
+      {"flutter.move-cursor-backward-by-character",
+       kFlutterSemanticsActionMoveCursorBackwardByCharacter},
+      {"flutter.move-cursor-forward-by-word",
+       kFlutterSemanticsActionMoveCursorForwardByWord},
+      {"flutter.move-cursor-backward-by-word",
+       kFlutterSemanticsActionMoveCursorBackwardByWord},
+  };
+  size_t calls = 0;
+  FlutterSemanticsAction expected = actions[0].action;
+  fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction,
+      ([&](auto, const FlutterSendSemanticsActionInfo* info) {
+        EXPECT_EQ(info->view_id, fl_view_get_id(view));
+        EXPECT_EQ(info->node_id, 0u);
+        EXPECT_EQ(info->action, expected);
+        g_autoptr(GBytes) bytes = g_bytes_new(info->data, info->data_length);
+        g_autoptr(FlStandardMessageCodec) codec =
+            fl_standard_message_codec_new();
+        g_autoptr(FlValue) value = fl_message_codec_decode_message(
+            FL_MESSAGE_CODEC(codec), bytes, nullptr);
+        EXPECT_NE(value, nullptr);
+        if (value != nullptr) {
+          EXPECT_EQ(fl_value_get_type(value), FL_VALUE_TYPE_BOOL);
+          if (fl_value_get_type(value) == FL_VALUE_TYPE_BOOL) {
+            EXPECT_FALSE(fl_value_get_bool(value));
+          }
+        }
+        calls++;
+        return kSuccess;
+      }));
+  FlutterSemanticsFlags flags = {};
+  flags.is_text_field = true;
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.value = "A\xF0\x9F\x98\x80 word";
+  root.text_selection_base = root.text_selection_extent = 1;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  const auto apply_update = [&]() {
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+  };
+  apply_update();
+  g_autoptr(GtkAccessible) native =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_TRUE(GTK_IS_WIDGET(native));
+  GtkWidget* widget = GTK_WIDGET(native);
+  auto* iface = static_cast<FlGtkAccessibleTextInterface4_14*>(
+      g_type_interface_peek(G_OBJECT_GET_CLASS(native),
+                            fl_gtk_runtime_accessible_text_get_type()));
+  ASSERT_NE(iface, nullptr);
+  for (const auto& action : actions) {
+    SCOPED_TRACE(action.name);
+    expected = action.action;
+    root.actions = action.action;
+    apply_update();
+    const size_t before = calls;
+    EXPECT_TRUE(gtk_widget_activate_action(widget, action.name, nullptr));
+    EXPECT_EQ(calls, before + 1);
+    // Flutter decides the new position and supplies authoritative semantics.
+    EXPECT_EQ(iface->get_caret_position(native), 1u);
+    for (const auto& other : actions) {
+      if (other.action != action.action) {
+        gtk_widget_activate_action(widget, other.name, nullptr);
+      }
+    }
+    root.actions = static_cast<FlutterSemanticsAction>(0);
+    apply_update();
+    gtk_widget_activate_action(widget, action.name, nullptr);
+    root.actions = action.action;
+    flags.is_enabled = kFlutterTristateFalse;
+    apply_update();
+    gtk_widget_activate_action(widget, action.name, nullptr);
+    flags.is_enabled = kFlutterTristateTrue;
+    flags.is_hidden = true;
+    apply_update();
+    gtk_widget_activate_action(widget, action.name, nullptr);
+    flags.is_hidden = false;
+    flags.is_obscured = true;
+    apply_update();
+    gtk_widget_activate_action(widget, action.name, nullptr);
+    EXPECT_EQ(calls, before + 1);
+    flags.is_obscured = false;
+  }
+  for (const auto& action : actions) {
+    root.actions =
+        static_cast<FlutterSemanticsAction>(root.actions | action.action);
+  }
+  // Even an inconsistent non-text semantics node must not expose cursor
+  // actions.
+  flags.is_text_field = false;
+  apply_update();
+  g_autoptr(GtkAccessible) non_text =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_TRUE(GTK_IS_WIDGET(non_text));
+  const size_t before = calls;
+  for (const auto& action : actions) {
+    gtk_widget_activate_action(GTK_WIDGET(non_text), action.name, nullptr);
+    gtk_widget_activate_action(widget, action.name, nullptr);
+  }
+  EXPECT_EQ(calls, before);
+  flags.is_text_field = true;
+  apply_update();
+  g_autoptr(GtkAccessible) restored =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_TRUE(GTK_IS_WIDGET(restored));
+  expected = actions[0].action;
+  EXPECT_TRUE(gtk_widget_activate_action(GTK_WIDGET(restored), actions[0].name,
+                                         nullptr));
+  EXPECT_EQ(calls, before + 1);
+  g_object_run_dispose(G_OBJECT(view));
+  for (const auto& action : actions) {
+    gtk_widget_activate_action(GTK_WIDGET(restored), action.name, nullptr);
+  }
+  EXPECT_EQ(calls, before + 1);
 }
 
 TEST_F(FlViewGtk4AccessibilityTest, TextSelectionActionsUseUtf16Offsets) {

@@ -116,9 +116,12 @@ triggers a semantics text replacement and checks deletion/insertion payloads,
 caret and selection notifications, and the resulting queryable state. A repeated
 identical semantics batch must not produce additional notifications. Incremental
 edits cover Unicode replacement with unchanged prefixes/suffixes, insertion-only
-and deletion-only changes, without whole-field or zero-length events. This flag can
-be combined with `--check-focus`; neither check validates editable-text actions
-or visual line wrapping.
+and deletion-only changes, without whole-field or zero-length events. The client
+also invokes forward/backward character and word cursor actions and verifies
+their Flutter boolean payload (do not extend the selection). This works without
+GTK 4.22 selection setters. It does not validate actual Dart caret movement,
+text insertion/deletion, or visual line wrapping. This flag can be combined with
+`--check-focus`.
 
 On GTK 4.22 or later, `--check-selection` verifies that AT-SPI caret and
 selection commands reach Flutter as `SetSelection` actions with UTF-16 offsets.

@@ -142,6 +142,21 @@ def run_fixture(binary, output, check_focus=False, check_text=False, check_selec
           text_node = wait_until(
               lambda: find_fixture('Flutter AT-SPI text fixture'), 'native text node'
           )
+          cursor = text_node.get_action_iface()
+          if cursor is None:
+            raise RuntimeError('Text node does not export AT-SPI Action')
+          cursor_names = [cursor.get_action_name(i) for i in range(cursor.get_n_actions())]
+          expected_cursor_names = [
+              'flutter.move-cursor-forward-by-character',
+              'flutter.move-cursor-backward-by-character',
+              'flutter.move-cursor-forward-by-word',
+              'flutter.move-cursor-backward-by-word',
+          ]
+          if sorted(cursor_names) != sorted(expected_cursor_names):
+            raise RuntimeError(f'Unexpected cursor actions: {cursor_names}')
+          for name in expected_cursor_names:
+            if not cursor.do_action(cursor_names.index(name)):
+              raise RuntimeError(f'AT-SPI rejected {name}')
           text = text_node.get_text_iface()
           if text is None:
             raise RuntimeError('Native text node does not export AT-SPI Text')

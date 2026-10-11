@@ -92,11 +92,12 @@ struct _FlGtk4TextAccessibleNodeClass {
   FlGtk4AccessibleNodeClass parent_class;
 };
 
-// Only parameterless actions belong here. Text selection and other actions
-// with payloads need dedicated adapters.
+// Actions exposed without GTK parameters. Cursor movement encodes Flutter's
+// boolean payload below; arbitrary selection and text edits need adapters.
 static constexpr struct {
   const char* name;
   FlutterSemanticsAction action;
+  bool moves_cursor = false;
 } kNativeActions[] = {
     {"flutter.tap", kFlutterSemanticsActionTap},
     {"flutter.long-press", kFlutterSemanticsActionLongPress},
@@ -111,6 +112,14 @@ static constexpr struct {
     {"flutter.focus", kFlutterSemanticsActionFocus},
     {"flutter.expand", kFlutterSemanticsActionExpand},
     {"flutter.collapse", kFlutterSemanticsActionCollapse},
+    {"flutter.move-cursor-forward-by-character",
+     kFlutterSemanticsActionMoveCursorForwardByCharacter, true},
+    {"flutter.move-cursor-backward-by-character",
+     kFlutterSemanticsActionMoveCursorBackwardByCharacter, true},
+    {"flutter.move-cursor-forward-by-word",
+     kFlutterSemanticsActionMoveCursorForwardByWord, true},
+    {"flutter.move-cursor-backward-by-word",
+     kFlutterSemanticsActionMoveCursorBackwardByWord, true},
 };
 
 #if GTK_CHECK_VERSION(4, 10, 0)
@@ -569,9 +578,24 @@ static void fl_gtk4_accessible_node_activate(GtkWidget* widget,
   for (const auto& action : kNativeActions) {
     if (g_str_equal(name, action.name) &&
         (self->actions & action.action) != 0) {
+      g_autoptr(GBytes) message = nullptr;
+      if (action.moves_cursor) {
+        if (!self->text_actions_enabled) {
+          return;
+        }
+        // Match GTK3: move the cursor without extending the selection.
+        g_autoptr(FlValue) extend_selection = fl_value_new_bool(false);
+        g_autoptr(FlStandardMessageCodec) codec =
+            fl_standard_message_codec_new();
+        message = fl_message_codec_encode_message(FL_MESSAGE_CODEC(codec),
+                                                  extend_selection, nullptr);
+        if (message == nullptr) {
+          return;
+        }
+      }
       fl_engine_dispatch_semantics_action(fl_view_get_engine(self->view),
                                           self->view_id, self->semantics_id,
-                                          action.action, nullptr);
+                                          action.action, message);
       return;
     }
   }
@@ -988,7 +1012,8 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   for (const auto& action : kNativeActions) {
     gtk_widget_action_set_enabled(
         GTK_WIDGET(self), action.name,
-        self->actions_enabled && (self->actions & action.action) != 0);
+        self->actions_enabled && (self->actions & action.action) != 0 &&
+            (!action.moves_cursor || self->text_actions_enabled));
   }
 
   const gboolean is_focusable =
