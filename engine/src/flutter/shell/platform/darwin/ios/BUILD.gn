@@ -319,7 +319,6 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterUndoManagerPluginTest.mm",
       "framework/Source/FlutterViewControllerTest.mm",
       "framework/Source/FlutterViewTest.mm",
-      "framework/Source/PlatformTaskRunnerTests.mm",
       "framework/Source/SemanticsObjectTest.mm",
       "framework/Source/SemanticsObjectTestMocks.h",
       "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
