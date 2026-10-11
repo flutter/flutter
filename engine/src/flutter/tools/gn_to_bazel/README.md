@@ -139,7 +139,19 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    (engine code: it lists `//flutter:config` or depends on engine code),
    `CHROMIUM_CODE_COPTS` (the third-party trees the engine describes with
    GN, such as Skia) or `FLUTTER_THIRD_PARTY_COPTS` (`no_chromium_code`),
-   from `build/bazel/copts.bzl`.
+   from `build/bazel/copts.bzl`. `action()` becomes a `gn_action`
+   (`build/bazel/gn_action`): GN's build-directory variables evaluate to
+   paths under `//@gen` and `//@out`, `rebase_path(x, root_build_dir)`
+   becomes a marked path that only an action's `args` may carry, and the
+   emitter writes it as the rule's token -- `$(execpath label)` for a source
+   file (declared as an input if GN did not), `$(src dir)` for a source
+   directory, `$(gen path)` for anything generated; outputs must be under
+   `$target_gen_dir`. A dependency on an action of the same file becomes a
+   source of the dependent, since the outputs are inputs of its compile in
+   Bazel where GN only ordered the two. A generated directory in
+   `include_dirs` is the package's, as Bazel's `includes` spans the output
+   tree; an include directory in another repository is dropped with a note
+   (the dependency on that repository carries it, or nothing does).
 
 `bazel_mapping.dart` holds the converter's knowledge of the engine: label
 translations for synced dependencies (`//flutter/third_party/icu` is `@icu`,
