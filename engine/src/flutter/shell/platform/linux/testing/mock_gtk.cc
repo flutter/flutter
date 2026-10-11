@@ -42,6 +42,11 @@ MockGtk::MockGtk() {
                 dlsym(RTLD_NEXT, "gdk_event_get_axis"));
             return original(event, axis, value);
           });
+  ON_CALL(*this, gdk_window_get_display(::testing::_))
+      .WillByDefault([](GdkWindow*) {
+        return GDK_DISPLAY(
+            g_object_new(gdk_wayland_display_get_type(), nullptr));
+      });
   ON_CALL(*this, gdk_window_get_width(::testing::_))
       .WillByDefault(::testing::Return(100));
   ON_CALL(*this, gdk_window_get_height(::testing::_))
@@ -122,6 +127,9 @@ GdkWindowState gdk_window_get_state(GdkWindow* window) {
 
 GdkDisplay* gdk_window_get_display(GdkWindow* window) {
   check_thread();
+  if (mock != nullptr) {
+    return mock->gdk_window_get_display(window);
+  }
   return GDK_DISPLAY(g_object_new(gdk_wayland_display_get_type(), nullptr));
 }
 
@@ -138,6 +146,9 @@ GdkMonitor* gdk_display_get_monitor(GdkDisplay* display, int n) {
 GdkMonitor* gdk_display_get_monitor_at_window(GdkDisplay* display,
                                               GdkWindow* window) {
   check_thread();
+  if (mock != nullptr) {
+    return mock->gdk_display_get_monitor_at_window(display, window);
+  }
   return nullptr;
 }
 
