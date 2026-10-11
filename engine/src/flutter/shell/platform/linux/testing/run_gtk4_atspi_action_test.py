@@ -127,7 +127,8 @@ def run_fixture(binary, output, check_focus=False, check_text=False, check_selec
           raise RuntimeError('Adjustment node does not export AT-SPI Action')
         expected_actions = [
             'flutter.scroll-left', 'flutter.scroll-right', 'flutter.scroll-up',
-            'flutter.scroll-down', 'flutter.increase', 'flutter.decrease'
+            'flutter.scroll-down', 'flutter.increase', 'flutter.decrease', 'flutter.show-on-screen',
+            'flutter.dismiss', 'flutter.focus', 'flutter.expand', 'flutter.collapse'
         ]
         adjustment_names = [
             adjustment.get_action_name(i) for i in range(adjustment.get_n_actions())

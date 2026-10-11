@@ -114,7 +114,7 @@ TEST_F(FlViewGtk4AccessibilityTest, NativeActionsRespectCurrentSemantics) {
 }
 
 TEST_F(FlViewGtk4AccessibilityTest,
-       ScrollAndAdjustmentActionsRespectCurrentSemantics) {
+       ParameterlessActionsRespectCurrentSemantics) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
   }
@@ -135,6 +135,11 @@ TEST_F(FlViewGtk4AccessibilityTest,
       {"flutter.scroll-down", kFlutterSemanticsActionScrollDown},
       {"flutter.increase", kFlutterSemanticsActionIncrease},
       {"flutter.decrease", kFlutterSemanticsActionDecrease},
+      {"flutter.show-on-screen", kFlutterSemanticsActionShowOnScreen},
+      {"flutter.dismiss", kFlutterSemanticsActionDismiss},
+      {"flutter.focus", kFlutterSemanticsActionFocus},
+      {"flutter.expand", kFlutterSemanticsActionExpand},
+      {"flutter.collapse", kFlutterSemanticsActionCollapse},
   };
   size_t calls = 0;
   FlutterSemanticsAction expected = kFlutterSemanticsActionScrollLeft;
@@ -338,9 +343,12 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
     text.actions = kFlutterSemanticsActionSetSelection;
   }
   const FlutterSemanticsAction adjustment_actions[] = {
-      kFlutterSemanticsActionScrollLeft, kFlutterSemanticsActionScrollRight,
-      kFlutterSemanticsActionScrollUp,   kFlutterSemanticsActionScrollDown,
-      kFlutterSemanticsActionIncrease,   kFlutterSemanticsActionDecrease,
+      kFlutterSemanticsActionScrollLeft,   kFlutterSemanticsActionScrollRight,
+      kFlutterSemanticsActionScrollUp,     kFlutterSemanticsActionScrollDown,
+      kFlutterSemanticsActionIncrease,     kFlutterSemanticsActionDecrease,
+      kFlutterSemanticsActionShowOnScreen, kFlutterSemanticsActionDismiss,
+      kFlutterSemanticsActionFocus,        kFlutterSemanticsActionExpand,
+      kFlutterSemanticsActionCollapse,
   };
   FlutterSemanticsNode2 adjustment = {};
   adjustment.id = 2;

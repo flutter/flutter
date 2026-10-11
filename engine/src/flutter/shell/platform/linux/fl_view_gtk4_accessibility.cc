@@ -106,6 +106,11 @@ static constexpr struct {
     {"flutter.scroll-down", kFlutterSemanticsActionScrollDown},
     {"flutter.increase", kFlutterSemanticsActionIncrease},
     {"flutter.decrease", kFlutterSemanticsActionDecrease},
+    {"flutter.show-on-screen", kFlutterSemanticsActionShowOnScreen},
+    {"flutter.dismiss", kFlutterSemanticsActionDismiss},
+    {"flutter.focus", kFlutterSemanticsActionFocus},
+    {"flutter.expand", kFlutterSemanticsActionExpand},
+    {"flutter.collapse", kFlutterSemanticsActionCollapse},
 };
 
 #if GTK_CHECK_VERSION(4, 10, 0)
