@@ -48,13 +48,19 @@ class ComputePass : public ResourceBinder {
   ///             in the pass. A later dispatch reuses them until they are
   ///             replaced.
   ///
+  ///             Writes by earlier dispatches in the pass and by earlier passes
+  ///             are visible to this dispatch, and its writes are visible to
+  ///             later dispatches, passes and host reads, without a manual
+  ///             barrier.
+  ///
   /// @return     OK without dispatching anything if any dimension is zero. A
   ///             cancelled status if no pipeline is bound.
   ///
   virtual fml::Status Compute(std::array<uint32_t, 3> workgroup_count) = 0;
 
   /// @brief Ensures all previously encoded compute command's buffer writes are
-  ///        visible to any subsequent compute commands.
+  ///        visible to any subsequent compute commands. Dispatches are already
+  ///        synchronized automatically, so this is only a manual override.
   ///
   ///        On Vulkan, it does not matter if the compute command is in a
   ///        different command buffer, only that it is executed later in queue
@@ -62,7 +68,8 @@ class ComputePass : public ResourceBinder {
   virtual void AddBufferMemoryBarrier() = 0;
 
   /// @brief Ensures all previously encoded compute command's texture writes are
-  ///        visible to any subsequent compute commands.
+  ///        visible to any subsequent compute commands. Dispatches are already
+  ///        synchronized automatically, so this is only a manual override.
   ///
   ///        On Vulkan, it does not matter if the compute command is in a
   ///        different command buffer, only that it is executed later in queue

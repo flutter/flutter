@@ -141,6 +141,20 @@ fml::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
     }
   }
 
+  // Make the writes of earlier dispatches in the pass visible to this one,
+  // and order this dispatch's writes after their reads and writes.
+  if (has_dispatched_) {
+    vk::MemoryBarrier barrier;
+    barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
+    barrier.dstAccessMask =
+        vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite;
+    command_buffer_->GetCommandBuffer().pipelineBarrier(
+        vk::PipelineStageFlagBits::eComputeShader,
+        vk::PipelineStageFlagBits::eComputeShader, {}, 1, &barrier, 0, {}, 0,
+        {});
+  }
+  has_dispatched_ = true;
+
   // The arguments are workgroup counts. The per-workgroup invocation count (the
   // local size) is baked into the shader module, so dispatch the counts
   // directly.
@@ -245,22 +259,37 @@ void ComputePassVK::AddTextureMemoryBarrier() {
 
 // |ComputePass|
 bool ComputePassVK::EncodeCommands() const {
-  // Since we only use global memory barrier, we don't have to worry about
-  // compute to compute dependencies across cmd buffers. Instead, we pessimize
-  // here and assume that we wrote to a storage image or buffer and that a
-  // render pass will read from it. if there are ever scenarios where we end up
-  // with compute to compute dependencies this should be revisited.
-
-  // This does not currently handle image barriers as we do not use them
-  // for anything.
+  // A pass that dispatched nothing has no writes to order.
+  if (!has_dispatched_) {
+    return true;
+  }
+  // Make the pass's writes visible to every later consumer in queue order,
+  // whether in this command buffer or a later one: draws reading vertex,
+  // index, indirect or uniform data, any shader stage, copies and host reads.
+  // Order later writes after the pass's reads and writes too.
+  //
+  // This does not currently handle image layout transitions, since compute
+  // passes do not write images.
   vk::MemoryBarrier barrier;
   barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
   barrier.dstAccessMask =
-      vk::AccessFlagBits::eIndexRead | vk::AccessFlagBits::eVertexAttributeRead;
+      vk::AccessFlagBits::eIndirectCommandRead |
+      vk::AccessFlagBits::eIndexRead |
+      vk::AccessFlagBits::eVertexAttributeRead |
+      vk::AccessFlagBits::eUniformRead | vk::AccessFlagBits::eShaderRead |
+      vk::AccessFlagBits::eShaderWrite | vk::AccessFlagBits::eTransferRead |
+      vk::AccessFlagBits::eTransferWrite | vk::AccessFlagBits::eHostRead;
 
   command_buffer_->GetCommandBuffer().pipelineBarrier(
       vk::PipelineStageFlagBits::eComputeShader,
-      vk::PipelineStageFlagBits::eVertexInput, {}, 1, &barrier, 0, {}, 0, {});
+      vk::PipelineStageFlagBits::eDrawIndirect |
+          vk::PipelineStageFlagBits::eVertexInput |
+          vk::PipelineStageFlagBits::eVertexShader |
+          vk::PipelineStageFlagBits::eFragmentShader |
+          vk::PipelineStageFlagBits::eComputeShader |
+          vk::PipelineStageFlagBits::eTransfer |
+          vk::PipelineStageFlagBits::eHost,
+      {}, 1, &barrier, 0, {}, 0, {});
 
   return true;
 }

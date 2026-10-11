@@ -32,8 +32,10 @@ ComputePassMTL::ComputePassMTL(std::shared_ptr<const Context> context,
   if (!buffer_) {
     return;
   }
+  // A serial encoder runs each dispatch after the previous one finishes and
+  // makes its writes visible, so dependent dispatches need no manual barrier.
   encoder_ = [buffer_ computeCommandEncoderWithDispatchType:
-                          MTLDispatchType::MTLDispatchTypeConcurrent];
+                          MTLDispatchType::MTLDispatchTypeSerial];
   if (!encoder_) {
     return;
   }
