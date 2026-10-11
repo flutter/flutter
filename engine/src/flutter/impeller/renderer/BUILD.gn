@@ -78,6 +78,7 @@ impeller_component("renderer") {
     "shader_key.h",
     "shader_library.cc",
     "shader_library.h",
+    "shader_stage_compatibility_checker.h",
     "snapshot.cc",
     "snapshot.h",
     "surface.cc",
