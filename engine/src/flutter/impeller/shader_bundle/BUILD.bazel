@@ -1,0 +1,18 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/shader_bundle/BUILD.gn by gn_to_bazel; do not edit.
+
+load("//engine/src/flutter/build/bazel/flatbuffers:flatbuffers.bzl", "flatbuffers")
+
+package(default_visibility = ["//visibility:public"])
+
+flatbuffers(
+    name = "shader_bundle_flatbuffers",
+    flatbuffers = ["shader_bundle.fbs"],
+    deps = [
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "@flatbuffers",
+    ],
+)

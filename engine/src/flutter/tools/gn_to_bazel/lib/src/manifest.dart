@@ -105,6 +105,24 @@ exports_files(["fixtures_location.cc"])
       'primitive_rendering_benchmarks': 'needs display_list_benchmarks_source',
     },
   ),
+  // The shader compiler, impellerc, and what it needs of Impeller
+  // (research/08, step 3).
+  ConvertedFile(
+    '//flutter/impeller/core',
+    skip: <String, String>{'allocator_unittests': 'needs //flutter/testing:testing_lib'},
+  ),
+  ConvertedFile(
+    '//flutter/impeller/runtime_stage',
+    skip: <String, String>{'runtime_stage_unittests': 'needs //flutter/impeller/playground'},
+  ),
+  ConvertedFile('//flutter/impeller/shader_bundle'),
+  ConvertedFile(
+    '//flutter/impeller/compiler',
+    skip: <String, String>{'compiler_unittests': 'needs //flutter/testing:testing_lib'},
+  ),
+  ConvertedFile('//flutter/impeller/compiler/shader_lib'),
+  ConvertedFile('//flutter/impeller/compiler/shader_lib/flutter'),
+  ConvertedFile('//flutter/impeller/compiler/shader_lib/impeller'),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia
@@ -264,7 +282,22 @@ cc_library(
   // GN in the secondary source tree over synced trees it names by absolute
   // path (`$source_root/...`), and SPIRV-Headers' own GN.
   ConvertedFile('//third_party/inja'),
-  ConvertedFile('//flutter/third_party/json'),
+  ConvertedFile(
+    '//flutter/third_party/json',
+    implicitDeps: <String>['@json//:flutter_root_headers'],
+    // Engine code includes json by its path under //flutter
+    // ("third_party/json/include/nlohmann/json.hpp"), which GN's
+    // //flutter:config resolves on disk. The view under that path travels
+    // with the dependency: a target that includes it depends on json, as
+    // `gn check` asks.
+    appendix: '''
+cc_library(
+    name = "flutter_root_headers",
+    hdrs = glob(["include/**/*.hpp"]),
+    include_prefix = "third_party/json",
+)
+''',
+  ),
   ConvertedFile('//third_party/spirv_cross_flutter'),
   ConvertedFile(
     '//flutter/third_party/flatbuffers',
@@ -335,6 +368,31 @@ cc_library(
         "glslang/**/*.h",
     ]),
     textual_hdrs = glob(["SPIRV/*.hpp11"]),
+)
+''',
+  ),
+  // re2 as the engine builds it (secondary tree); the util/ headers its
+  // sources include are in no list. Engine code includes re2 by its path
+  // under the engine's source root ("flutter/third_party/re2/re2/re2.h"),
+  // which GN's `-I//` resolves on disk; that view travels with the
+  // dependency, as for json.
+  ConvertedFile(
+    '//flutter/third_party/re2',
+    implicitDeps: <String>['@re2//:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "re2/*.h",
+        "util/*.h",
+    ]),
+    deps = [":engine_root_headers"],
+)
+
+cc_library(
+    name = "engine_root_headers",
+    hdrs = glob(["re2/*.h"]),
+    include_prefix = "flutter/third_party/re2",
 )
 ''',
   ),

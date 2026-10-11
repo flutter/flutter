@@ -1,0 +1,118 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/compiler/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: compiler_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "utilities",
+    srcs = ["utilities.cc"],
+    hdrs = ["utilities.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    # Current versions of libcxx have deprecated some of the UTF-16 string
+    # conversion APIs.
+    local_defines = FLUTTER_LOCAL_DEFINES + ["_LIBCPP_DISABLE_DEPRECATION_WARNINGS"],
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/geometry",
+        "//engine/src/flutter/impeller/runtime_stage",
+    ],
+    alwayslink = True,
+)
+
+# include_dirs: @spirv-cross// comes with the dependency on @spirv-cross.
+cc_library(
+    name = "compiler_lib",
+    srcs = [
+        "compiler.cc",
+        "compiler_backend.cc",
+        "constants.cc",
+        "includer.cc",
+        "reflector.cc",
+        "runtime_stage_data.cc",
+        "shader_bundle.cc",
+        "shader_bundle_data.cc",
+        "source_options.cc",
+        "spirv_compiler.cc",
+        "spirv_sksl.cc",
+        "switches.cc",
+        "types.cc",
+        "uniform_sorter.cc",
+    ],
+    hdrs = [
+        "code_gen_template.h",
+        "compiler.h",
+        "compiler_backend.h",
+        "constants.h",
+        "include_dir.h",
+        "includer.h",
+        "logger.h",
+        "reflector.h",
+        "runtime_stage_data.h",
+        "shader_bundle.h",
+        "shader_bundle_data.h",
+        "source_options.h",
+        "spirv_compiler.h",
+        "spirv_sksl.h",
+        "switches.h",
+        "types.h",
+        "uniform_sorter.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-unused-variable",  # from //third_party/inja
+        "-Wno-newline-eof",  # from //third_party/inja
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    # Current versions of libcxx have deprecated some of the UTF-16 string
+    # conversion APIs.
+    local_defines = FLUTTER_LOCAL_DEFINES + ["_LIBCPP_DISABLE_DEPRECATION_WARNINGS"],
+    deps = [
+        ":utilities",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/geometry",
+        "//engine/src/flutter/impeller/runtime_stage",
+        "//engine/src/flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
+        # All third_party deps must be included by the global license script.
+        "@abseil-cpp//absl/status",
+        "@inja",
+        "@re2",
+        "@shaderc//:shaderc_flutter",
+        "@skia",
+        "@spirv-cross//:spirv_cross_flutter",
+    ],
+    alwayslink = True,
+)
+
+cc_binary(
+    name = "impellerc",
+    srcs = ["impellerc_main.cc"],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":compiler_lib",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/compiler/shader_lib",
+    ],
+)
+
+cc_library(
+    name = "compiler",
+    deps = [":impellerc"],
+)
