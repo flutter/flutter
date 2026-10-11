@@ -117,8 +117,8 @@ base class StorageBufferSlot {
   /// runtime-sized array as empty.
   ///
   /// Returns null if the shader does not declare a storage buffer with this
-  /// name, including one the shader compiler removed because the shader never
-  /// uses it.
+  /// name. A storage buffer the shader declares but never uses is reflected
+  /// like any other, on every backend.
   int? get sizeInBytes {
     return _resolvedIndex < 0 ? null : _sizeInBytes;
   }

@@ -17,6 +17,7 @@
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/blit_pass.h"
 #include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
 
@@ -45,6 +46,18 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   /// Ends [render_pass] if it is the open pass. Does nothing if it was
   /// already ended by a later command.
   bool EndRenderPass(const impeller::RenderPass* render_pass);
+
+  /// Ends the open pass, then creates a compute pass and makes it the open
+  /// pass. Returns null if either step fails.
+  ///
+  /// The open pass is ended first for the same reason as in
+  /// `CreateRenderPass`: the Metal compute pass constructor begins encoding.
+  std::shared_ptr<impeller::ComputePass> CreateComputePass();
+
+  /// The compute counterpart to `EndRenderPass`.
+  bool EndComputePass(const impeller::ComputePass* compute_pass);
+
+  const std::shared_ptr<impeller::Context>& GetContext() const;
 
   bool AddCompletionCallback(
       impeller::CommandBuffer::CompletionCallback completion_callback);
@@ -80,13 +93,16 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   struct Encodable {
     std::shared_ptr<impeller::RenderPass> render_pass;
     std::shared_ptr<impeller::BlitPass> blit_pass;
+    std::shared_ptr<impeller::ComputePass> compute_pass;
 
     bool EncodeCommands() const;
   };
 
   /// Ends the pass that is recording, if any. On Metal and Vulkan the pass is
   /// encoded now, which ends its backend encoder. On OpenGL ES every pass is
-  /// encoded in creation order at submit, on the raster thread.
+  /// encoded in creation order at submit, on the raster thread. (OpenGL ES
+  /// never records compute passes, since Flutter GPU does not support compute
+  /// there.)
   bool EndOpenPass();
 
   std::shared_ptr<impeller::BlitPass> GetOrCreateBlitPass();

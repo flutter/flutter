@@ -24,6 +24,17 @@ bool SupportsNormalOffscreenMSAA(const impeller::Context& context) {
          !capabilities->SupportsImplicitResolvingMSAA();
 }
 
+bool SupportsCompute(const impeller::Context& context) {
+  switch (context.GetBackendType()) {
+    case impeller::Context::BackendType::kMetal:
+    case impeller::Context::BackendType::kVulkan:
+      return true;
+    case impeller::Context::BackendType::kOpenGLES:
+      return false;
+  }
+  return false;
+}
+
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, Context);
 
 std::shared_ptr<impeller::Context> Context::default_context_;
@@ -140,6 +151,57 @@ extern int InternalFlutterGpu_Context_GetMinimumStorageBufferAlignment(
   return wrapper->GetContext()
       .GetCapabilities()
       ->GetMinimumStorageBufferAlignment();
+}
+
+extern bool InternalFlutterGpu_Context_GetSupportsCompute(
+    flutter::gpu::Context* wrapper) {
+  return flutter::gpu::SupportsCompute(wrapper->GetContext());
+}
+
+// The compute limits are zero wherever Flutter GPU does not support compute,
+// whatever the backend reports.
+
+extern uint32_t
+InternalFlutterGpu_Context_GetMaximumComputeWorkgroupInvocations(
+    flutter::gpu::Context* wrapper) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context)) {
+    return 0u;
+  }
+  return context.GetCapabilities()->GetMaximumComputeWorkgroupInvocations();
+}
+
+extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupSize(
+    flutter::gpu::Context* wrapper,
+    int dimension) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context) || dimension < 0 ||
+      dimension > 2) {
+    return 0u;
+  }
+  return context.GetCapabilities()->GetMaximumComputeWorkgroupSize()[dimension];
+}
+
+extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupCount(
+    flutter::gpu::Context* wrapper,
+    int dimension) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context) || dimension < 0 ||
+      dimension > 2) {
+    return 0u;
+  }
+  return context.GetCapabilities()
+      ->GetMaximumComputeWorkgroupCount()[dimension];
+}
+
+extern int64_t InternalFlutterGpu_Context_GetMaximumComputeSharedMemorySize(
+    flutter::gpu::Context* wrapper) {
+  const impeller::Context& context = wrapper->GetContext();
+  if (!flutter::gpu::SupportsCompute(context)) {
+    return 0;
+  }
+  return static_cast<int64_t>(
+      context.GetCapabilities()->GetMaximumComputeSharedMemorySize());
 }
 
 extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(

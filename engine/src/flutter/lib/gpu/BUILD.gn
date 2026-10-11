@@ -36,6 +36,10 @@ source_set("gpu") {
       "binding_set.h",
       "command_buffer.cc",
       "command_buffer.h",
+      "compute_pass.cc",
+      "compute_pass.h",
+      "compute_pipeline.cc",
+      "compute_pipeline.h",
       "context.cc",
       "context.h",
       "device_buffer.cc",
@@ -91,6 +95,7 @@ if (enable_unittests && !is_fuchsia) {
     sources = [
       "binding_set_unittests.cc",
       "command_buffer_unittests.cc",
+      "compute_pass_unittests.cc",
       "render_pass_unittests.cc",
       "render_pipeline_unittests.cc",
       "shader_library_unittests.cc",

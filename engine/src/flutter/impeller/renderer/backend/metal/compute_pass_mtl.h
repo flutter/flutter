@@ -32,6 +32,9 @@ class ComputePassMTL final : public ComputePass {
   std::array<uint32_t, 3> workgroup_size_ = {0u, 0u, 0u};
   bool is_valid_ = false;
   bool has_label_ = false;
+  // Whether the encoder ended. Metal aborts if an encoder is released without
+  // ending, so the destructor ends one that `EncodeCommands` never did.
+  mutable bool did_finish_encoding_ = false;
 
   ComputePassMTL(std::shared_ptr<const Context> context,
                  id<MTLCommandBuffer> buffer);

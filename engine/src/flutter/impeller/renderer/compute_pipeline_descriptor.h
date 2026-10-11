@@ -8,6 +8,7 @@
 #include <array>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "impeller/base/comparable.h"
@@ -54,6 +55,15 @@ class ComputePipelineDescriptor final
   ///
   bool ValidateWorkgroupSize(std::array<uint32_t, 3> max_size,
                              uint64_t max_invocations) const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      The error `ValidateWorkgroupSize` would log, without logging
+  ///             it, or std::nullopt if the workgroup size is valid. For
+  ///             callers that report the error themselves.
+  ///
+  std::optional<std::string> CheckWorkgroupSize(
+      std::array<uint32_t, 3> max_size,
+      uint64_t max_invocations) const;
 
   // Comparable<ComputePipelineDescriptor>
   std::size_t GetHash() const override;

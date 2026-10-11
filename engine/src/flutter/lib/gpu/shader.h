@@ -86,6 +86,12 @@ class Shader : public RefCountedDartWrappable<Shader> {
 
   bool RegisterSync(Context& context);
 
+  /// Registers this shader with `context`'s shader library if it is not
+  /// registered yet, or re-registers it if it is dirty, evicting every
+  /// pipeline built from the earlier registration. Returns false if
+  /// registration failed.
+  bool RegisterSync(impeller::Context& context);
+
   /// Whether this shader needs to be re-registered with the impeller shader
   /// library on next use. Fresh shaders start dirty. Set back to false by
   /// `RegisterSync` after registration completes, and back to true by

@@ -253,10 +253,20 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
 
     std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts;
 
+    // Metal's shader compiler removes resources a shader never uses, and
+    // reflection stamps them with the optimized-out sentinel, while Vulkan
+    // keeps them. A compute pass requires every resource its shader declares
+    // to be bound, so a compute shader keeps them on every backend, and the
+    // compute pass skips the backend bind for them. Render stages drop them.
+    const bool keep_optimized_out =
+        backend_shader->stage() ==
+        impeller::fb::shaderbundle::ShaderStage::kCompute;
+
     std::unordered_map<std::string, Shader::UniformBinding> uniform_structs;
     if (backend_shader->uniform_structs() != nullptr) {
       for (const auto& uniform : *backend_shader->uniform_structs()) {
-        if (uniform->ext_res_0() == impeller::kOptimizedOutBinding) {
+        if (!keep_optimized_out &&
+            uniform->ext_res_0() == impeller::kOptimizedOutBinding) {
           // A dead-code-eliminated uniform block, dropped for the same reason
           // as the optimized-out samplers below.
           continue;
@@ -312,7 +322,8 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
     std::unordered_map<std::string, Shader::TextureBinding> uniform_textures;
     if (backend_shader->uniform_textures() != nullptr) {
       for (const auto& uniform : *backend_shader->uniform_textures()) {
-        if (uniform->ext_res_0() == impeller::kOptimizedOutBinding) {
+        if (!keep_optimized_out &&
+            uniform->ext_res_0() == impeller::kOptimizedOutBinding) {
           // The shader compiler dead-code-eliminated this sampler. Reflection
           // still lists it but stamps the out-of-range binding sentinel, so
           // drop it here rather than register a binding that cannot be bound.
@@ -349,8 +360,8 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
           // does not require optional fields to be present.
           continue;
         }
-        if (storage_buffer->ext_res_0() == impeller::kOptimizedOutBinding) {
-          // Dropped for the same reason as the optimized-out uniforms above.
+        if (!keep_optimized_out &&
+            storage_buffer->ext_res_0() == impeller::kOptimizedOutBinding) {
           continue;
         }
         storage_buffers[storage_buffer->name()->str()] =
