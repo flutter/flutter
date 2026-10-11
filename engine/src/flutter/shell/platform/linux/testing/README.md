@@ -117,3 +117,10 @@ edits cover Unicode replacement with unchanged prefixes/suffixes, insertion-only
 and deletion-only changes, without whole-field or zero-length events. This flag can
 be combined with `--check-focus`; neither check validates editable-text actions
 or visual line wrapping.
+
+On GTK 4.22 or later, `--check-selection` verifies that AT-SPI caret and
+selection commands reach Flutter as `SetSelection` actions with UTF-16 offsets.
+It implies `--check-text` and can be combined with `--check-focus`. The mock
+embedder verifies the action payload; this does not exercise Dart editing or
+text insertion/deletion commands. Cached caret/selection state remains governed
+by subsequent Flutter semantics updates, not optimistic native mutations.

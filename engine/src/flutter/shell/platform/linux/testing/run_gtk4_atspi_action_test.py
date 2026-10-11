@@ -58,7 +58,7 @@ def wait_until(predicate, description, seconds=10):
   raise RuntimeError(f'Timed out waiting for {description}')
 
 
-def run_fixture(binary, output, check_focus=False, check_text=False):
+def run_fixture(binary, output, check_focus=False, check_text=False, check_selection=False):
   import gi
   gi.require_version('Atspi', '2.0')
   from gi.repository import Atspi, Gio, GLib
@@ -221,6 +221,11 @@ def run_fixture(binary, output, check_focus=False, check_text=False):
           finally:
             for event_type in event_types:
               listener.deregister(event_type)
+          if check_selection:
+            if not text.set_caret_offset(5):
+              raise RuntimeError('AT-SPI rejected caret command')
+            if not Atspi.Text.set_selection(text, 0, 4, 5):
+              raise RuntimeError('AT-SPI rejected selection command')
         if check_focus:
           focus_events = []
 
@@ -259,6 +264,8 @@ def run_fixture(binary, output, check_focus=False, check_text=False):
           print('PASS: AT-SPI observed focus gain and loss without duplicate events')
         if check_text:
           print('PASS: AT-SPI text queries and live text/caret/selection notifications')
+        if check_selection:
+          print('PASS: AT-SPI caret/selection commands reached the Flutter embedder')
 
 
 def main():
@@ -266,8 +273,14 @@ def main():
   parser.add_argument('binary', type=lambda value: str(Path(value).resolve()))
   parser.add_argument('--check-focus', action='store_true', help='Verify focus events (GTK 4.18+)')
   parser.add_argument('--check-text', action='store_true', help='Verify text queries (GTK 4.14+)')
+  parser.add_argument(
+      '--check-selection',
+      action='store_true',
+      help='Verify caret/selection commands; includes --check-text (GTK 4.22+)'
+  )
   parser.add_argument('--isolated-session', action='store_true', help=argparse.SUPPRESS)
   args = parser.parse_args()
+  args.check_text = args.check_text or args.check_selection
   if not Path(args.binary).is_file():
     parser.error(f'Unit test binary not found: {args.binary}')
   if not args.isolated_session:
@@ -282,20 +295,22 @@ def main():
         GIO_USE_VFS='local',
         FLUTTER_TEST_ATSPI_ACTION='1',
         FLUTTER_TEST_ATSPI_FOCUS='1' if args.check_focus else '0',
-        FLUTTER_TEST_ATSPI_TEXT='1' if args.check_text else '0'
+        FLUTTER_TEST_ATSPI_TEXT='1' if args.check_text else '0',
+        FLUTTER_TEST_ATSPI_SELECTION='1' if args.check_selection else '0'
     )
     return subprocess.run([
         'xvfb-run', '-a', 'dbus-run-session', '--', sys.executable,
         str(Path(__file__).resolve()
            ), '--isolated-session', args.binary, *(['--check-focus'] if args.check_focus else []),
-        *(['--check-text'] if args.check_text else [])
+        *(['--check-text'] if args.check_text else []),
+        *(['--check-selection'] if args.check_selection else [])
     ],
                           env=environment,
                           timeout=45,
                           check=False).returncode
   with tempfile.TemporaryFile(mode='w+') as output:
     try:
-      run_fixture(args.binary, output, args.check_focus, args.check_text)
+      run_fixture(args.binary, output, args.check_focus, args.check_text, args.check_selection)
     finally:
       output.seek(0)
       print(output.read(), end='')

@@ -129,6 +129,15 @@ struct FlGtkAccessibleTextInterface4_14 {
                          unsigned int* offset);
 };
 
+// GTK 4.22 appends editing callbacks; never access this tail on older runtimes.
+struct FlGtkAccessibleTextInterface4_22 {
+  FlGtkAccessibleTextInterface4_14 base;
+  gboolean (*set_caret_position)(GtkAccessible* self, unsigned int offset);
+  gboolean (*set_selection)(GtkAccessible* self,
+                            gsize i,
+                            FlGtkAccessibleTextRange4_14* range);
+};
+
 struct FlGtkRuntimeApi {
   gboolean gtk_at_least_4_10;
   gboolean gtk_at_least_4_14;

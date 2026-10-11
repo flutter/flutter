@@ -14,6 +14,7 @@
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #include "flutter/shell/platform/linux/fl_renderable.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_test_gtk_logs.h"
 #include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "flutter/testing/testing.h"
@@ -221,6 +222,12 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   button.flags2 = &flags;
   const bool check_text =
       g_strcmp0(g_getenv("FLUTTER_TEST_ATSPI_TEXT"), "1") == 0;
+  const bool check_selection =
+      g_strcmp0(g_getenv("FLUTTER_TEST_ATSPI_SELECTION"), "1") == 0;
+  if (check_selection) {
+    ASSERT_TRUE(check_text);
+    ASSERT_EQ(gtk_check_version(4, 22, 0), nullptr);
+  }
   if (check_text) {
     ASSERT_TRUE(fl_gtk_runtime_supports_native_accessibility_text());
   }
@@ -233,6 +240,9 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   text.value = "A\xF0\x9F\x98\x80 caf\xC3\xA9. Next sentence!\nFinal";
   text.text_selection_base = 1;
   text.text_selection_extent = 3;
+  if (check_selection) {
+    text.actions = kFlutterSemanticsActionSetSelection;
+  }
   int32_t children[] = {1};
   if (check_text) {
     button.child_count = 1;
@@ -244,49 +254,68 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   update.node_count = check_text ? 2 : 1;
   update.nodes = nodes;
   size_t text_updates = 0;
+  size_t selection_calls = 0;
   const gchar* text_values[] = {
       "New \xF0\x9F\x98\x80 text",
       "New \xF0\x9F\x98\x81 text",
       "New \xF0\x9F\x98\x81 added text",
       "New \xF0\x9F\x98\x81 text",
   };
-  fl_engine_get_embedder_api(view_engine)->SendSemanticsAction =
-      MOCK_ENGINE_PROC(SendSemanticsAction,
-                       ([&](auto, const FlutterSendSemanticsActionInfo* info) {
-                         EXPECT_EQ(info->view_id, view_id);
-                         EXPECT_EQ(info->node_id, 0u);
-                         EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
-                         if (check_text && text_updates < 4) {
-                           text.value = text_values[text_updates++];
-                           text.text_selection_base = 4;
-                           text.text_selection_extent = 6;
-                           fl_view_gtk4_accessibility_handle_update(
-                               view->accessibility_backend, &update);
-                           // Repeating the same batch must not emit text
-                           // events.
-                           fl_view_gtk4_accessibility_handle_update(
-                               view->accessibility_backend, &update);
-                           return kSuccess;
-                         }
-                         calls++;
-                         if (check_focus && calls <= 2) {
-                           flags.is_focused = calls == 1
-                                                  ? kFlutterTristateTrue
-                                                  : kFlutterTristateFalse;
-                           fl_view_gtk4_accessibility_handle_update(
-                               view->accessibility_backend, &update);
-                           // Neither a geometry-only change nor a repeated
-                           // batch should duplicate the focus notification.
-                           button.rect.right++;
-                           fl_view_gtk4_accessibility_handle_update(
-                               view->accessibility_backend, &update);
-                           fl_view_gtk4_accessibility_handle_update(
-                               view->accessibility_backend, &update);
-                         } else {
-                           g_main_loop_quit(loop);
-                         }
-                         return kSuccess;
-                       }));
+  fl_engine_get_embedder_api(view_engine)
+      ->SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction,
+      ([&](auto, const FlutterSendSemanticsActionInfo* info) {
+        EXPECT_EQ(info->view_id, view_id);
+        if (info->action == kFlutterSemanticsActionSetSelection) {
+          EXPECT_TRUE(check_selection);
+          EXPECT_EQ(info->node_id, 1u);
+          EXPECT_LT(selection_calls, 2u);
+          g_autoptr(GBytes) bytes = g_bytes_new(info->data, info->data_length);
+          g_autoptr(FlStandardMessageCodec) codec =
+              fl_standard_message_codec_new();
+          g_autoptr(FlValue) value = fl_message_codec_decode_message(
+              FL_MESSAGE_CODEC(codec), bytes, nullptr);
+          EXPECT_NE(value, nullptr);
+          if (value != nullptr) {
+            EXPECT_EQ(fl_value_get_int(fl_value_lookup_string(value, "base")),
+                      selection_calls == 0 ? 6 : 4);
+            EXPECT_EQ(fl_value_get_int(fl_value_lookup_string(value, "extent")),
+                      6);
+          }
+          selection_calls++;
+          return kSuccess;
+        }
+        EXPECT_EQ(info->node_id, 0u);
+        EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
+        if (check_text && text_updates < 4) {
+          text.value = text_values[text_updates++];
+          text.text_selection_base = 4;
+          text.text_selection_extent = 6;
+          fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                                   &update);
+          // Repeating the same batch must not emit text events.
+          fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                                   &update);
+          return kSuccess;
+        }
+        calls++;
+        if (check_focus && calls <= 2) {
+          flags.is_focused =
+              calls == 1 ? kFlutterTristateTrue : kFlutterTristateFalse;
+          fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                                   &update);
+          // Neither a geometry-only change nor a repeated
+          // batch should duplicate the focus notification.
+          button.rect.right++;
+          fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                                   &update);
+          fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                                   &update);
+        } else {
+          g_main_loop_quit(loop);
+        }
+        return kSuccess;
+      }));
   fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
                                            &update);
 
@@ -310,6 +339,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   g_source_remove(timeout);
   EXPECT_EQ(calls, check_focus ? 3u : 1u);
   EXPECT_EQ(text_updates, check_text ? 4u : 0u);
+  EXPECT_EQ(selection_calls, check_selection ? 2u : 0u);
   gtk_window_set_child(window, nullptr);
   gtk_box_append(GTK_BOX(view), surface);
   gtk_window_destroy(window);
@@ -1096,6 +1126,100 @@ TEST_F(FlViewGtk4AccessibilityTest, TextQueriesUseLinguisticBoundaries) {
         g_bytes_get_size(contents));
     EXPECT_STREQ(actual, test.expected);
   }
+}
+
+TEST_F(FlViewGtk4AccessibilityTest, TextSelectionActionsUseUtf16Offsets) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing() ||
+      gtk_check_version(4, 22, 0) != nullptr) {
+    GTEST_SKIP() << "Native text selection actions require GTK 4.22+";
+  }
+  g_autoptr(FlView) primary = fl_view_new(project);
+  g_object_ref_sink(primary);
+  FlEngine* engine = fl_view_get_engine(primary);
+  StartEngine(engine);
+  g_autoptr(FlView) view = fl_view_new_for_engine(engine);
+  g_object_ref_sink(view);
+  ASSERT_NE(fl_view_get_id(view), 0);
+  int calls = 0;
+  gint64 expected_base = 1;
+  gint64 expected_extent = 3;
+  fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction,
+      ([&](auto, const FlutterSendSemanticsActionInfo* info) {
+        EXPECT_EQ(info->view_id, fl_view_get_id(view));
+        EXPECT_EQ(info->node_id, 0u);
+        EXPECT_EQ(info->action, kFlutterSemanticsActionSetSelection);
+        g_autoptr(GBytes) bytes = g_bytes_new(info->data, info->data_length);
+        g_autoptr(FlStandardMessageCodec) codec =
+            fl_standard_message_codec_new();
+        g_autoptr(FlValue) value = fl_message_codec_decode_message(
+            FL_MESSAGE_CODEC(codec), bytes, nullptr);
+        EXPECT_NE(value, nullptr);
+        if (value != nullptr) {
+          EXPECT_EQ(fl_value_get_int(fl_value_lookup_string(value, "base")),
+                    expected_base);
+          EXPECT_EQ(fl_value_get_int(fl_value_lookup_string(value, "extent")),
+                    expected_extent);
+        }
+        calls++;
+        return kSuccess;
+      }));
+  FlutterSemanticsFlags flags = {};
+  flags.is_text_field = true;
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.value =
+      "A\xF0\x9F\x98\x80"
+      "e\xCC\x81";
+  root.actions = kFlutterSemanticsActionSetSelection;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GtkAccessible) native =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_NE(native, nullptr);
+  auto* iface = static_cast<FlGtkAccessibleTextInterface4_22*>(
+      g_type_interface_peek(G_OBJECT_GET_CLASS(native),
+                            fl_gtk_runtime_accessible_text_get_type()));
+  ASSERT_NE(iface, nullptr);
+  ASSERT_NE(iface->set_selection, nullptr);
+  ASSERT_NE(iface->set_caret_position, nullptr);
+  FlGtkAccessibleTextRange4_14 range = {1, 1};
+  EXPECT_TRUE(iface->set_selection(native, 0, &range));
+  EXPECT_EQ(calls, 1);
+  EXPECT_EQ(iface->base.get_caret_position(native), 0u);
+  expected_base = expected_extent = 5;
+  EXPECT_TRUE(iface->set_caret_position(native, 4));
+  EXPECT_EQ(calls, 2);
+  EXPECT_FALSE(iface->set_caret_position(native, 5));
+  EXPECT_FALSE(iface->set_selection(native, 1, &range));
+  EXPECT_FALSE(iface->set_selection(native, 0, nullptr));
+  range.length = G_MAXSIZE;
+  EXPECT_FALSE(iface->set_selection(native, 0, &range));
+  EXPECT_EQ(calls, 2);
+
+  root.actions = static_cast<FlutterSemanticsAction>(0);
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  EXPECT_FALSE(iface->set_caret_position(native, 0));
+  root.actions = kFlutterSemanticsActionSetSelection;
+  flags.is_obscured = true;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  EXPECT_FALSE(iface->set_caret_position(native, 0));
+  flags.is_obscured = false;
+  flags.is_hidden = true;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  EXPECT_FALSE(iface->set_caret_position(native, 0));
+  g_object_run_dispose(G_OBJECT(view));
+  EXPECT_FALSE(iface->set_caret_position(native, 0));
+  EXPECT_EQ(calls, 2);
 }
 
 TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {

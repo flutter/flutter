@@ -13,6 +13,7 @@
 #include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
 
 typedef struct _FlGtk4AccessibleNode FlGtk4AccessibleNode;
 typedef struct _FlGtk4AccessibleNodeClass FlGtk4AccessibleNodeClass;
@@ -59,6 +60,7 @@ struct _FlGtk4AccessibleNode {
   int32_t semantics_id;
   uint64_t actions;
   gboolean actions_enabled;
+  gboolean text_actions_enabled;
 
   gchar* text;
   guint text_selection_base;
@@ -119,9 +121,18 @@ static_assert(offsetof(FlGtkAccessibleInterface4_10, get_bounds) ==
               offsetof(GtkAccessibleInterface, get_bounds));
 #endif
 
-#if GTK_CHECK_VERSION(4, 14, 0)
+#if GTK_CHECK_VERSION(4, 22, 0)
+static_assert(sizeof(FlGtkAccessibleTextInterface4_22) ==
+              sizeof(GtkAccessibleTextInterface));
+static_assert(offsetof(FlGtkAccessibleTextInterface4_22, set_caret_position) ==
+              offsetof(GtkAccessibleTextInterface, set_caret_position));
+static_assert(offsetof(FlGtkAccessibleTextInterface4_22, set_selection) ==
+              offsetof(GtkAccessibleTextInterface, set_selection));
+#elif GTK_CHECK_VERSION(4, 14, 0)
 static_assert(sizeof(FlGtkAccessibleTextInterface4_14) ==
               sizeof(GtkAccessibleTextInterface));
+#endif
+#if GTK_CHECK_VERSION(4, 14, 0)
 static_assert(offsetof(FlGtkAccessibleTextInterface4_14, get_contents) ==
               offsetof(GtkAccessibleTextInterface, get_contents));
 static_assert(offsetof(FlGtkAccessibleTextInterface4_14,
@@ -781,6 +792,51 @@ static void fl_gtk4_text_accessible_node_get_default_attributes(
   }
 }
 
+static gboolean fl_gtk4_text_accessible_node_set_selection(
+    GtkAccessible* accessible,
+    gsize index,
+    FlGtkAccessibleTextRange4_14* range) {
+  auto* self = FL_GTK4_ACCESSIBLE_NODE(accessible);
+  const guint length = fl_gtk4_text_accessible_node_get_text_length(self);
+  if (index != 0 || range == nullptr || self->view == nullptr ||
+      !self->actions_enabled || !self->text_actions_enabled ||
+      (self->actions & kFlutterSemanticsActionSetSelection) == 0 ||
+      range->start > length || range->length > length - range->start) {
+    return FALSE;
+  }
+  // GTK offsets count characters; Flutter's selection action uses UTF-16 units.
+  gint64 base = 0;
+  gint64 extent = 0;
+  const gchar* cursor = fl_gtk4_text_accessible_node_get_text(self);
+  for (gsize i = 0; i < range->start + range->length; i++) {
+    const int units = g_utf8_get_char(cursor) > 0xffff ? 2 : 1;
+    if (i < range->start) {
+      base += units;
+    }
+    extent += units;
+    cursor = g_utf8_next_char(cursor);
+  }
+  g_autoptr(FlValue) value = fl_value_new_map();
+  fl_value_set_string_take(value, "base", fl_value_new_int(base));
+  fl_value_set_string_take(value, "extent", fl_value_new_int(extent));
+  g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
+  g_autoptr(GBytes) message =
+      fl_message_codec_encode_message(FL_MESSAGE_CODEC(codec), value, nullptr);
+  fl_engine_dispatch_semantics_action(
+      fl_view_get_engine(self->view), self->view_id, self->semantics_id,
+      kFlutterSemanticsActionSetSelection, message);
+  // Flutter semantics remains authoritative; do not optimistically change
+  // state.
+  return TRUE;
+}
+
+static gboolean fl_gtk4_text_accessible_node_set_caret_position(
+    GtkAccessible* accessible,
+    unsigned int offset) {
+  FlGtkAccessibleTextRange4_14 range = {offset, 0};
+  return fl_gtk4_text_accessible_node_set_selection(accessible, 0, &range);
+}
+
 static void fl_gtk4_text_accessible_node_text_iface_init(
     FlGtkAccessibleTextInterface4_14* iface) {
   iface->get_contents = fl_gtk4_text_accessible_node_get_contents;
@@ -790,6 +846,12 @@ static void fl_gtk4_text_accessible_node_text_iface_init(
   iface->get_attributes = fl_gtk4_text_accessible_node_get_attributes;
   iface->get_default_attributes =
       fl_gtk4_text_accessible_node_get_default_attributes;
+  if (gtk_check_version(4, 22, 0) == nullptr) {
+    auto* editable = reinterpret_cast<FlGtkAccessibleTextInterface4_22*>(iface);
+    editable->set_caret_position =
+        fl_gtk4_text_accessible_node_set_caret_position;
+    editable->set_selection = fl_gtk4_text_accessible_node_set_selection;
+  }
 }
 
 static guint utf16_offset_to_character_offset(const gchar* text, gint offset) {
@@ -919,6 +981,7 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   const gboolean is_multiline = flags->is_text_field && flags->is_multiline;
 
   self->actions_enabled = is_enabled && !is_hidden;
+  self->text_actions_enabled = supports_text && self->actions_enabled;
   gtk_widget_action_set_enabled(
       GTK_WIDGET(self), "flutter.tap",
       self->actions_enabled && (self->actions & kFlutterSemanticsActionTap));

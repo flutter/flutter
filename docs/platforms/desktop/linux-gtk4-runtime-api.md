@@ -73,6 +73,7 @@ and the complete symbol set used by that capability:
 | Accessible text mutation | GTK 4.22 | Caret/selection setters are not bound; newer interface fields cannot be added safely by symbol lookup |
 | Announcements | GTK 4.14 | Announcement wrapper does nothing |
 | Platform-state notifications | GTK 4.18 | Native nodes retain queryable focus state but do not emit these notifications |
+| Caret and selection commands | GTK 4.22 | Native text remains queryable without the newer command callbacks |
 | DMA-BUF texture APIs | GTK 4.14 | Compositor cannot select the DMA-BUF texture route |
 
 Accessibility bounds apply Flutter’s affine and projective transform to the
@@ -141,6 +142,10 @@ mirrors. The text interface has additional GTK 4.16 slots for extents and
 offset mapping; those slots must not be installed unless their exact ABI and
 capability gate are validated. GTK 4.22 adds caret and selection setters, but
 those are interface methods rather than independently resolvable symbols.
+The implementation uses a separate 4.22 interface tail and writes it only after
+checking the loaded GTK version. Commands require the current Flutter
+`SetSelection` action and convert character offsets to UTF-16. Subsequent
+Flutter semantics updates remain authoritative for the resulting state.
 The accessibility implementation installs callbacks only after its runtime
 capability gate succeeds. With suitable newer headers, compile-time
 size and offset assertions check parts of those layouts against GTK.
