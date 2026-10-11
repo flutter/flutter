@@ -33,7 +33,6 @@ source_set("inja") {
     "$source_root/include/inja/parser.hpp",
     "$source_root/include/inja/renderer.hpp",
     "$source_root/include/inja/statistics.hpp",
-    "$source_root/include/inja/string_view.hpp",
     "$source_root/include/inja/template.hpp",
     "$source_root/include/inja/token.hpp",
     "$source_root/include/inja/utils.hpp",
