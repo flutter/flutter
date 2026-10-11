@@ -26,6 +26,7 @@ void main() {
       logger: logger,
       fileSystem: globals.fs,
       artifacts: globals.artifacts!,
+      platform: globals.platform,
     );
     return shaderCompiler.compileShader(
       input: file,
@@ -62,6 +63,7 @@ void main() {
       logger: logger,
       fileSystem: globals.fs,
       artifacts: globals.artifacts!,
+      platform: globals.platform,
     );
     final bool compileResult = await shaderCompiler.compileShader(
       input: globals.fs.file(inkSparklePath),
