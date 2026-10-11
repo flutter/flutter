@@ -1,0 +1,60 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/runtime_stage/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: runtime_stage_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel/flatbuffers:flatbuffers.bzl", "flatbuffers")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "runtime_stage_config",
+    includes = ["."],
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/impeller:impeller_public_config",
+    ],
+)
+
+flatbuffers(
+    name = "runtime_stage_types_flatbuffers",
+    flatbuffers = ["runtime_stage_types.fbs"],
+    deps = [
+        ":runtime_stage_config",
+        "@flatbuffers",
+    ],
+)
+
+flatbuffers(
+    name = "runtime_stage_flatbuffers",
+    flatbuffers = ["runtime_stage.fbs"],
+    deps = [
+        ":runtime_stage_config",
+        ":runtime_stage_types_flatbuffers",
+        "@flatbuffers",
+    ],
+)
+
+cc_library(
+    name = "runtime_stage",
+    srcs = ["runtime_stage.cc"],
+    hdrs = ["runtime_stage.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":runtime_stage_flatbuffers",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/core",
+        "@abseil-cpp//absl/status:statusor",
+    ],
+    alwayslink = True,
+)
