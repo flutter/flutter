@@ -204,6 +204,32 @@ final class _Emitter {
     loads.putIfAbsent(_absoluteLabel(bzl), () => <String>{}).add(symbol);
   }
 
+  /// Registers the `load("file", "symbol", ...)` lines at the top of
+  /// [appendix] as the file's own and returns the appendix without them.
+  String _takeLoads(String appendix) {
+    final List<String> lines = appendix.trim().split('\n');
+    var first = 0;
+    while (first < lines.length) {
+      final String line = lines[first].trim();
+      if (line.isEmpty) {
+        first++;
+        continue;
+      }
+      final RegExpMatch? load = _loadStatement.firstMatch(line);
+      if (load == null) {
+        break;
+      }
+      for (final RegExpMatch symbol in _quotedString.allMatches(load.group(2)!)) {
+        _use(load.group(1)!, symbol.group(1)!);
+      }
+      first++;
+    }
+    return lines.sublist(first).join('\n');
+  }
+
+  static final RegExp _loadStatement = RegExp(r'^load\("([^"]+)"((?:,\s*"[^"]+")+)\)$');
+  static final RegExp _quotedString = RegExp(r'"([^"]+)"');
+
   /// [label] as written from the generated file without shortening: a
   /// main-repository label (`//engine/src/...`) is qualified with the main
   /// repository's name when the file lives in an external repository.
@@ -1449,6 +1475,11 @@ final class _Emitter {
   // -------------------------------------------------------------------------
 
   String render(String gnFile, List<String> skipped, {String? appendix}) {
+    // An appendix's own `load()`s (a rule or macro the generated part does
+    // not use) belong with the file's; buildifier would move them there.
+    if (appendix != null) {
+      appendix = _takeLoads(appendix);
+    }
     final out = StringBuffer()
       ..write(_licenseHeader)
       ..writeln()

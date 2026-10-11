@@ -1100,6 +1100,48 @@ exports_files(["fixtures_location.cc"])
       );
     });
 
+    test("an appendix's load() statements join the file's", () async {
+      final String output = await convert(
+        '''
+source_set("x") {
+  sources = [ "x.cc" ]
+}
+''',
+        appendix: '''
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+flutter_test_fixtures(name = "x_fixtures")
+
+cc_test(
+    name = "x_unittests",
+    deps = [":x"],
+)
+''',
+      );
+      expect(
+        output,
+        contains('''
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+'''),
+      );
+      expect(
+        output,
+        endsWith('''
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+flutter_test_fixtures(name = "x_fixtures")
+
+cc_test(
+    name = "x_unittests",
+    deps = [":x"],
+)
+'''),
+      );
+    });
+
     test('renders undecided conditions as select()', () async {
       final String output = await convert('''
 source_set("x") {
