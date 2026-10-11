@@ -103,6 +103,7 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/vulkan-deps/glslang/src': '@glslang',
   '//third_party/shaderc_flutter': '@shaderc//:shaderc_flutter',
   '//flutter/third_party/re2': '@re2',
+  '//third_party/libtess2': '@libtess2',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -128,6 +129,7 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/vulkan-deps/glslang/src/': '@glslang//',
   '//flutter/third_party/shaderc/': '@shaderc//',
   '//flutter/third_party/re2/': '@re2//',
+  '//flutter/third_party/libtess2/': '@libtess2//',
 };
 
 /// Generated include directories (`$root_gen_dir/flutter`) that are an
@@ -509,10 +511,29 @@ final class TemplateMapping {
   final Map<String, TemplateArgument> arguments;
 
   /// The other targets an invocation expands to in GN, as patterns over the
-  /// invocation's name (`flatc_{name}`), besides those GN's convention
-  /// prefixes with `_`. The macro's business; the oracle expects them.
+  /// invocation's name (`flatc_{name}`) and, for the shader templates, the
+  /// backend (`impellerc_{backend}_{name}` over [impellerShaderBackends]),
+  /// besides those GN's convention prefixes with `_`. The macro's business;
+  /// the oracle expects them.
   final List<String> innerTargets;
+
+  /// [innerTargets] expanded for [name].
+  Iterable<String> innerTargetsOf(String name) sync* {
+    for (final String pattern in innerTargets) {
+      final String named = pattern.replaceAll('{name}', name);
+      if (named.contains('{backend}')) {
+        yield* impellerShaderBackends.map((String b) => named.replaceAll('{backend}', b));
+      } else {
+        yield named;
+      }
+    }
+  }
 }
+
+/// The backends impeller/tools/shaders.gni expands to on a Linux host
+/// (GLES 2, GLES 3, Vulkan; no Metal), as the shader rules in
+/// build/bazel/impeller mirror them.
+const List<String> impellerShaderBackends = <String>['gles', 'gles3', 'vk'];
 
 const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   'test_fixtures': TemplateMapping(
@@ -536,6 +557,49 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
       'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
     },
     innerTargets: <String>['flatc_{name}'],
+  ),
+  // impeller/tools/shaders.gni: impellerc per shader per backend, the
+  // archives, the embedded blobs and the reflection libraries. GN's `name`
+  // is the library name (`entity` in `entity_shaders_vk`); Bazel's is the
+  // target's.
+  'impeller_shaders': TemplateMapping(
+    '//engine/src/flutter/build/bazel/impeller:shaders.bzl',
+    'impeller_shaders',
+    <String, TemplateArgument>{
+      'name': TemplateArgument('library_name', TemplateArgumentKind.scalar),
+      'shaders': TemplateArgument('shaders', TemplateArgumentKind.files),
+      'analyze': TemplateArgument('analyze', TemplateArgumentKind.scalar),
+      'enable_opengles': TemplateArgument('enable_opengles', TemplateArgumentKind.scalar),
+      'gles_language_version': TemplateArgument(
+        'gles_language_version',
+        TemplateArgumentKind.scalar,
+      ),
+      'vulkan_language_version': TemplateArgument(
+        'vulkan_language_version',
+        TemplateArgumentKind.scalar,
+      ),
+      'metal_version': TemplateArgument('metal_version', TemplateArgumentKind.scalar),
+      'use_half_textures': TemplateArgument('use_half_textures', TemplateArgumentKind.scalar),
+      'require_framebuffer_fetch': TemplateArgument(
+        'require_framebuffer_fetch',
+        TemplateArgumentKind.scalar,
+      ),
+      'gles_exclusions': TemplateArgument('gles_exclusions', TemplateArgumentKind.files),
+      'vulkan_exclusions': TemplateArgument('vulkan_exclusions', TemplateArgumentKind.files),
+      'entry_point_prefix': TemplateArgument('entry_point_prefix', TemplateArgumentKind.scalar),
+      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+    },
+    innerTargets: <String>[
+      '{backend}_{name}',
+      'impellerc_{backend}_{name}',
+      'genlib_{backend}_{name}',
+      'gen_blob_embed_{backend}_{name}',
+      'embed_{backend}_{name}',
+      'embed_embed_{backend}_{name}',
+      'reflect_{backend}_{name}',
+      'reflect_reflect_{backend}_{name}',
+      'analyze_{backend}_{name}',
+    ],
   ),
 };
 

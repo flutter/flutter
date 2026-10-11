@@ -127,8 +127,8 @@ Future<int> run(List<String> arguments) async {
         // A known template becomes a Bazel macro; what it expands to in GN
         // (a group over `_`-prefixed targets, or the names the mapping
         // records) is the macro's business.
-        for (final String pattern in template.innerTargets) {
-          seen.add('$gnPackage:${pattern.replaceAll('{name}', target.name)}');
+        for (final String inner in template.innerTargetsOf(target.name)) {
+          seen.add('$gnPackage:$inner');
         }
         continue;
       }
