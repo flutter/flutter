@@ -1739,6 +1739,11 @@ class _NestedGroupedBallisticActivity extends BallisticScrollActivity {
 /// retained candidate is adopted with the same epoch; otherwise a new segment
 /// starts from the boundary state. A rejected candidate cannot be revived by a
 /// later bounds update, and matching physics types alone never permit adoption.
+/// Each segment creates its active simulation and candidates for later phases.
+/// A boundary search creates two more simulations from the segment's starting
+/// state: one coarse forward scan and one fine forward scan of the bracket.
+/// Both advance monotonically. The fine bracket's time and velocity are linearly
+/// interpolated; the component offsets are placed exactly at the boundary.
 ///
 /// Activities (or the group) call x, dx, and isDone with their animation time.
 /// [_advance] caches the newest time, while each segment sees time relative to
@@ -2133,20 +2138,52 @@ class _NestedCoordinatedSimulation extends Simulation {
   ({double time, double velocity}) _boundaryState(double boundary, double endTime) {
     double low = _time - _segmentEpoch;
     double high = endTime - _segmentEpoch;
-    // Recreate probes from the segment's initial state instead of querying the
-    // live simulation backwards. Work is bounded even after a long frame.
+    final double direction = (boundary - _segmentStartPixels).sign;
     Simulation probe() =>
         _createSegment(_phase, pixels: _segmentStartPixels, velocity: _segmentStartVelocity)!;
-    for (var iteration = 0; iteration < 25; iteration += 1) {
-      final double middle = (low + high) / 2.0;
-      if ((probe().x(middle) - boundary) * (boundary - _segmentStartPixels).sign >= 0.0) {
-        high = middle;
-      } else {
-        low = middle;
+
+    // Bound both work and allocations even after a long frame. Reusing the live
+    // segment here would query times earlier than its latest frame sample.
+    const divisions = 128;
+    final Simulation coarse = probe();
+    final start = low;
+    final double width = high - low;
+    for (var step = 1; step <= divisions; step += 1) {
+      final double time = step == divisions ? high : start + width * step / divisions;
+      if ((coarse.x(time) - boundary) * direction >= 0.0) {
+        high = time;
+        break;
       }
+      low = time;
     }
-    final double elapsed = (low + high) / 2.0;
-    return (time: _segmentEpoch + elapsed, velocity: probe().dx(elapsed));
+
+    final Simulation fine = probe();
+    var lowerTime = low;
+    double lowerPixels = fine.x(low);
+    double lowerVelocity = fine.dx(low);
+    if (high == low || (lowerPixels - boundary) * direction >= 0.0) {
+      return (time: _segmentEpoch + low, velocity: lowerVelocity);
+    }
+    for (var step = 1; step <= divisions; step += 1) {
+      final double time = step == divisions ? high : low + (high - low) * step / divisions;
+      final double pixels = fine.x(time);
+      final double velocity = fine.dx(time);
+      if ((pixels - boundary) * direction >= 0.0 || step == divisions) {
+        final double fraction = pixels == lowerPixels
+            ? 1.0
+            : clampDouble((boundary - lowerPixels) / (pixels - lowerPixels), 0.0, 1.0);
+        // The fine probe has reached the upper endpoint. Interpolate its saved
+        // samples instead of asking it for dx at an earlier, interpolated time.
+        return (
+          time: _segmentEpoch + lowerTime + (time - lowerTime) * fraction,
+          velocity: lowerVelocity + (velocity - lowerVelocity) * fraction,
+        );
+      }
+      lowerTime = time;
+      lowerPixels = pixels;
+      lowerVelocity = velocity;
+    }
+    throw StateError('The final boundary sample must return a result.');
   }
 
   double get outerOffset {

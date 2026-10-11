@@ -24,14 +24,16 @@ class _PhysicsScrollBehavior extends ScrollBehavior {
 }
 
 class _RecordingBallisticPhysics extends ClampingScrollPhysics {
-  const _RecordingBallisticPhysics(this.metrics, {super.parent});
+  const _RecordingBallisticPhysics(this.metrics, {this.velocities, super.parent});
   final List<ScrollMetrics> metrics;
+  final List<double>? velocities;
   @override
   _RecordingBallisticPhysics applyTo(ScrollPhysics? ancestor) =>
-      _RecordingBallisticPhysics(metrics, parent: buildParent(ancestor));
+      _RecordingBallisticPhysics(metrics, velocities: velocities, parent: buildParent(ancestor));
   @override
   Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
     metrics.add(position.copyWith());
+    velocities?.add(velocity);
     return super.createBallisticSimulation(position, velocity);
   }
 }
@@ -63,24 +65,42 @@ class _CustomPhysics extends ClampingScrollPhysics {
 
 // Identical motion with independently configured completion rules.
 class _TimedPhysics extends ScrollPhysics {
-  const _TimedPhysics(this.duration, {this.queries, this.velocityFactor = 1.0, super.parent});
+  const _TimedPhysics(
+    this.duration, {
+    this.queries,
+    this.simulations,
+    this.velocityFactor = 1.0,
+    super.parent,
+  });
 
   final double duration;
   final List<double>? queries;
+  final List<Simulation>? simulations;
   final double velocityFactor;
 
   @override
   _TimedPhysics applyTo(ScrollPhysics? ancestor) => _TimedPhysics(
     duration,
     queries: queries,
+    simulations: simulations,
     velocityFactor: velocityFactor,
     parent: buildParent(ancestor),
   );
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) => velocity == 0.0
-      ? null
-      : _TimedSimulation(position.pixels, velocity * velocityFactor, duration, queries);
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+    if (velocity == 0.0) {
+      return null;
+    }
+    final simulation = _TimedSimulation(
+      position.pixels,
+      velocity * velocityFactor,
+      duration,
+      queries,
+    );
+    simulations?.add(simulation);
+    return simulation;
+  }
 }
 
 class _TimedSimulation extends Simulation {
@@ -1449,9 +1469,13 @@ void main() {
     WidgetTester tester,
   ) async {
     final queries = <double>[];
+    final simulations = <Simulation>[];
     final key = GlobalKey<NestedScrollViewState>();
     await tester.pumpWidget(
-      _buildBallisticTestWidget(key, bodyPhysics: _TimedPhysics(60, queries: queries)),
+      _buildBallisticTestWidget(
+        key,
+        bodyPhysics: _TimedPhysics(60, queries: queries, simulations: simulations),
+      ),
     );
     final ScrollPosition outer = key.currentState!.outerController.position;
     final ScrollPosition inner = key.currentState!.innerController.position;
@@ -1474,12 +1498,65 @@ void main() {
         );
     await tester.pump();
     queries.clear();
+    simulations.clear();
     await tester.pump(const Duration(seconds: 10));
     expect(inner.pixels, inner.minScrollExtent);
     expect(outer.pixels, closeTo(reference.x(9), .001));
-    expect(queries.length, lessThanOrEqualTo(100));
+    // At most 128 coarse x reads and 129 fine x/dx pairs, plus frame reads.
+    expect(queries.length, lessThanOrEqualTo(400));
+    // Two boundary probes and the next body candidate, regardless of how long
+    // the frame took. Each _TimedSimulation also rejects backward time reads.
+    expect(simulations.length, lessThanOrEqualTo(3));
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  for (final milliseconds in <int>[32, 100, 1000, 10000]) {
+    testWidgets('NestedScrollView preserves spring arrival velocity over $milliseconds ms', (
+      WidgetTester tester,
+    ) async {
+      final metrics = <ScrollMetrics>[];
+      final velocities = <double>[];
+      final key = GlobalKey<NestedScrollViewState>();
+      await tester.pumpWidget(
+        _buildBallisticTestWidget(
+          key,
+          physics: _RecordingBallisticPhysics(metrics, velocities: velocities),
+          bodyPhysics: const BouncingScrollPhysics(),
+        ),
+      );
+      final ScrollPosition outer = key.currentState!.outerController.position;
+      final ScrollPosition inner = key.currentState!.innerController.position;
+      outer.jumpTo(100);
+      await tester.pumpAndSettle();
+      inner.setPixels(-50);
+      final Simulation reference = inner.physics.createBallisticSimulation(inner, 3000)!;
+      var arrival = 0.0;
+      while (reference.x(arrival) < inner.minScrollExtent) {
+        arrival += .0000001;
+      }
+      final double expectedVelocity = reference.dx(arrival);
+      inner
+          .drag(DragStartDetails(), () {})
+          .end(
+            DragEndDetails(
+              primaryVelocity: -3000,
+              velocity: const Velocity(pixelsPerSecond: Offset(0, -3000)),
+            ),
+          );
+      await tester.pump();
+      metrics.clear();
+      velocities.clear();
+      await tester.pump(Duration(milliseconds: milliseconds));
+      expect(metrics, isNotEmpty);
+      expect(metrics.first.pixels, closeTo(100, .001));
+      expect(velocities.first, closeTo(expectedVelocity, .1));
+      await tester.pumpAndSettle();
+      expect(outer.outOfRange, isFalse);
+      expect(inner.outOfRange, isFalse);
+      expect(tester.binding.transientCallbackCount, 0);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   for (final useBehavior in <bool>[false, true]) {
     testWidgets('NestedScrollView clamps explicit bouncing outer (behavior: $useBehavior)', (
