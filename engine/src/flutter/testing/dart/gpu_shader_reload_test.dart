@@ -96,6 +96,66 @@ void drawUnlitTriangle(RenderPassState state, gpu.RenderPipeline pipeline) {
   state.commandBuffer.submit();
 }
 
+/// Fills a zeroed vertex buffer with a triangle at a quarter of full size,
+/// scales it with `ComputeScale` from [library], and draws it over a red
+/// clear. Returns whether the triangle covers the corners of the viewport,
+/// which it does once scaled to full size.
+Future<bool> computedTriangleCoversViewport(
+  gpu.ShaderLibrary library,
+  gpu.ComputePipeline scale,
+) async {
+  final gpu.ComputePipeline generate = gpu.gpuContext.createComputePipeline(
+    library['ComputeTriangle']!,
+  );
+  final gpu.DeviceBuffer vertices = gpu.gpuContext.createDeviceBufferWithCopy(ByteData(3 * 2 * 4));
+  final verticesView = gpu.BufferView(
+    vertices,
+    offsetInBytes: 0,
+    lengthInBytes: vertices.sizeInBytes,
+  );
+  final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+  final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+  final gpu.ComputePass computePass = commandBuffer.createComputePass();
+  computePass.bindPipeline(generate);
+  computePass.bindUniform(
+    generate.shader.getUniformSlot('TriangleInfo'),
+    transients.emplace(float32(<double>[0.25, 0, 0, 0])),
+  );
+  computePass.bindStorageBuffer(generate.shader.getStorageBufferSlot('Vertices'), verticesView);
+  computePass.dispatch(1);
+  computePass.bindPipeline(scale);
+  computePass.bindStorageBuffer(scale.shader.getStorageBufferSlot('Vertices'), verticesView);
+  computePass.dispatch(1);
+
+  final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 16, 16);
+  final gpu.RenderPass renderPass = commandBuffer.createRenderPass(
+    gpu.RenderTarget.singleColor(
+      gpu.ColorAttachment(texture: texture, clearValue: Vector4(1, 0, 0, 1)),
+    ),
+  );
+  final gpu.RenderPipeline pipeline = gpu.gpuContext.createRenderPipeline(
+    library['UnlitVertex']!,
+    library['UnlitFragment']!,
+  );
+  renderPass.bindPipeline(pipeline);
+  renderPass.bindVertexBuffer(verticesView);
+  renderPass.bindUniform(
+    pipeline.vertexShader.getUniformSlot('VertInfo'),
+    transients.emplace(unlitUBO(Matrix4.identity(), Vector4(0, 1, 0, 1))),
+  );
+  renderPass.draw(3);
+
+  final completer = Completer<void>();
+  commandBuffer.submit(completionCallback: (bool success) => completer.complete());
+  await completer.future;
+
+  final ByteData bytes = (await texture.asImage().toByteData())!;
+  // Every corner keeps the red clear color unless the triangle covers it.
+  const red = 0xFF0000FF;
+  return <int>[0, 15, 15 * 16, 16 * 16 - 1].every((int pixel) => bytes.getUint32(pixel * 4) != red);
+}
+
 void main() {
   // Repeated `fromAsset` calls for the same asset path return the same
   // `ShaderLibrary` instance. The cache backs hot reload: the
@@ -256,6 +316,41 @@ void main() {
   // After an in-place reload from bytes, pipelines built with the refreshed
   // shaders must still draw. Exercises the dirty-bit eviction path
   // (`Shader::RegisterSync`) through the bytes reload entry point.
+  // A ComputePipeline built before a reload runs the reloaded code at its
+  // next dispatch. `ComputeScale` doubles the vertices in test.shaderbundle
+  // and quadruples them in test_reload.shaderbundle.
+  test('reinitializeFromBytes reloads compute shaders for existing pipelines', () async {
+    if (!gpu.gpuContext.supportsCompute) {
+      markTestSkipped('Compute is not supported by this GpuContext.');
+      return;
+    }
+    final ByteData bytes = await loadAssetBytes('test.shaderbundle');
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromBytes(bytes))!;
+    final gpu.Shader scaleShader = library['ComputeScale']!;
+    final gpu.ComputePipeline scale = gpu.gpuContext.createComputePipeline(scaleShader);
+    expect(scaleShader.debugIsDirty, isFalse);
+    // A quarter-size triangle doubled is only half size.
+    expect(await computedTriangleCoversViewport(library, scale), isFalse);
+
+    final ByteData reloadBytes = await loadAssetBytes('test_reload.shaderbundle');
+    expect(library.reinitializeFromBytes(reloadBytes), isNull);
+    expect(identical(library['ComputeScale'], scaleShader), isTrue);
+    expect(scaleShader.debugIsDirty, isTrue);
+    expect(library['ComputeTriangle']!.debugIsDirty, isFalse);
+
+    // Quadrupled, it covers the viewport.
+    expect(await computedTriangleCoversViewport(library, scale), isTrue);
+    expect(scaleShader.debugIsDirty, isFalse, reason: 'the dispatch re-registers the shader');
+    // A pipeline created after the reload runs the reloaded code too.
+    expect(
+      await computedTriangleCoversViewport(
+        library,
+        gpu.gpuContext.createComputePipeline(scaleShader),
+      ),
+      isTrue,
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('reinitializeFromBytes evicts and re-registers shader functions cleanly', () async {
     final ByteData bytes = await loadAssetBytes('test.shaderbundle');
     final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromBytes(bytes))!;

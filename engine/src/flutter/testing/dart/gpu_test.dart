@@ -80,6 +80,84 @@ Matcher throwsPassEndedBy(String endedBy) {
   );
 }
 
+/// Matches a [StateError] saying that a ComputePass was ended by [endedBy].
+Matcher throwsComputePassEndedBy(String endedBy) {
+  return throwsA(
+    isA<StateError>().having(
+      (StateError e) => e.message,
+      'message',
+      'This ComputePass was ended by $endedBy.',
+    ),
+  );
+}
+
+/// Whether the context runs compute. Tests that dispatch skip themselves
+/// where it does not.
+bool skipUnlessComputeIsSupported() {
+  if (!gpu.gpuContext.supportsCompute) {
+    markTestSkipped('Compute is not supported by this GpuContext.');
+    return true;
+  }
+  return false;
+}
+
+Future<gpu.Shader> getComputeShader(String name) async {
+  final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromAsset('test.shaderbundle'))!;
+  return library[name]!;
+}
+
+Future<gpu.ComputePipeline> createComputePipeline(String name) async {
+  return gpu.gpuContext.createComputePipeline(await getComputeShader(name));
+}
+
+/// A zero-filled buffer for the three vec2 vertex positions that the compute
+/// fixtures write.
+gpu.DeviceBuffer createTriangleVertexBuffer() {
+  return gpu.gpuContext.createDeviceBufferWithCopy(ByteData(3 * 2 * 4));
+}
+
+gpu.BufferView wholeBuffer(gpu.DeviceBuffer buffer) {
+  return gpu.BufferView(buffer, offsetInBytes: 0, lengthInBytes: buffer.sizeInBytes);
+}
+
+/// The `TriangleInfo` uniform of the `ComputeTriangle` fixture.
+ByteData triangleInfo(double scale) {
+  return float32(<double>[scale, 0, 0, 0]);
+}
+
+/// Records a render pass on [commandBuffer] that clears a new texture to red
+/// and draws the triangle in [vertices] over it in lime, and returns the
+/// texture.
+Future<gpu.Texture> drawComputedTriangle(
+  gpu.CommandBuffer commandBuffer,
+  gpu.BufferView vertices,
+) async {
+  final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 100, 100);
+  final gpu.RenderPass renderPass = commandBuffer.createRenderPass(
+    gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: texture, clearValue: Colors.red)),
+  );
+  final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+  renderPass.bindPipeline(pipeline);
+  renderPass.bindVertexBuffer(vertices);
+  renderPass.bindUniform(
+    pipeline.vertexShader.getUniformSlot('VertInfo'),
+    gpu.gpuContext.createHostBuffer().emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+  );
+  renderPass.draw(3);
+  return texture;
+}
+
+/// Expects the corners of [texture] to be lime where the computed triangle
+/// [covers] the whole viewport, and the red clear color otherwise. The compute
+/// fixtures write a full-viewport triangle only at a scale of 1.
+Future<void> expectTriangleCoversViewport(gpu.Texture texture, {required bool covers}) async {
+  final ByteData bytes = await readTextureBytes(texture);
+  final expected = covers ? 0x00FF00FF : 0xFF0000FF;
+  for (final (int x, int y) in <(int, int)>[(1, 1), (98, 1), (1, 98), (98, 98)]) {
+    expect(pixelAt(bytes, texture, x, y), expected, reason: 'pixel ($x, $y)');
+  }
+}
+
 Future<gpu.RenderPipeline> createUnlitRenderPipeline() async {
   final gpu.ShaderLibrary? library = await gpu.ShaderLibrary.fromAsset('test.shaderbundle');
   assert(library != null);
@@ -1531,6 +1609,577 @@ void main() async {
     expect(
       () => state.renderPass.setCullMode(gpu.CullMode.none),
       throwsPassEndedBy('CommandBuffer.submit()'),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.supportsCompute is true on Metal and Vulkan only', () async {
+    expect(
+      gpu.gpuContext.supportsCompute,
+      impellerBackend == 'metal' || impellerBackend == 'vulkan',
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Compute throws where GpuContext.supportsCompute is false', () async {
+    if (gpu.gpuContext.supportsCompute) {
+      markTestSkipped('Compute is supported by this GpuContext.');
+      return;
+    }
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    expect(() => commandBuffer.createComputePass(), throwsUnsupportedError);
+    final gpu.Shader shader = await getComputeShader('ComputeTriangle');
+    expect(() => gpu.gpuContext.createComputePipeline(shader), throwsUnsupportedError);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('A compute pass writes vertices that a later render pass draws', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.ComputePipeline pipeline = await createComputePipeline('ComputeTriangle');
+    final gpu.DeviceBuffer vertices = createTriangleVertexBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+    computePass.bindPipeline(pipeline);
+    computePass.bindUniform(
+      pipeline.shader.getUniformSlot('TriangleInfo'),
+      gpu.gpuContext.createHostBuffer().emplace(triangleInfo(1.0)),
+    );
+    computePass.bindStorageBuffer(
+      pipeline.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(vertices),
+    );
+    computePass.dispatch(1);
+    final gpu.Texture texture = await drawComputedTriangle(commandBuffer, wholeBuffer(vertices));
+    await submitAndWait(commandBuffer);
+
+    // The vertex buffer starts zeroed, so the triangle only covers the
+    // viewport if the dispatch wrote it before the draw read it.
+    await expectTriangleCoversViewport(texture, covers: true);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Dependent dispatches in one compute pass see earlier writes', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.ComputePipeline generate = await createComputePipeline('ComputeTriangle');
+    final gpu.ComputePipeline scale = await createComputePipeline('ComputeScale');
+    final gpu.DeviceBuffer vertices = createTriangleVertexBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+    computePass.bindPipeline(generate);
+    computePass.bindUniform(
+      generate.shader.getUniformSlot('TriangleInfo'),
+      gpu.gpuContext.createHostBuffer().emplace(triangleInfo(0.25)),
+    );
+    computePass.bindStorageBuffer(
+      generate.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(vertices),
+    );
+    computePass.dispatch(1);
+    computePass.bindPipeline(scale);
+    computePass.bindStorageBuffer(
+      scale.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(vertices),
+    );
+    // Each dispatch doubles what the one before it wrote, without a barrier
+    // and with the bindings left in place: 0.25 to 0.5 to 1. A dispatch with
+    // no workgroups does nothing.
+    computePass.dispatch(1);
+    computePass.dispatch(0);
+    computePass.dispatch(1, 1, 0);
+    computePass.dispatch(1);
+    final gpu.Texture texture = await drawComputedTriangle(commandBuffer, wholeBuffer(vertices));
+    await submitAndWait(commandBuffer);
+
+    await expectTriangleCoversViewport(texture, covers: true);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Compute passes in separate CommandBuffers see earlier writes', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.ComputePipeline generate = await createComputePipeline('ComputeTriangle');
+    final gpu.ComputePipeline scale = await createComputePipeline('ComputeScale');
+    final gpu.DeviceBuffer vertices = createTriangleVertexBuffer();
+
+    final gpu.CommandBuffer first = gpu.gpuContext.createCommandBuffer();
+    final gpu.ComputePass generatePass = first.createComputePass();
+    generatePass.bindPipeline(generate);
+    generatePass.bindUniform(
+      generate.shader.getUniformSlot('TriangleInfo'),
+      gpu.gpuContext.createHostBuffer().emplace(triangleInfo(0.5)),
+    );
+    generatePass.bindStorageBuffer(
+      generate.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(vertices),
+    );
+    generatePass.dispatch(1);
+    first.submit();
+
+    final gpu.CommandBuffer second = gpu.gpuContext.createCommandBuffer();
+    final gpu.ComputePass scalePass = second.createComputePass();
+    scalePass.bindPipeline(scale);
+    scalePass.bindStorageBuffer(
+      scale.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(vertices),
+    );
+    scalePass.dispatch(1);
+    final gpu.Texture texture = await drawComputedTriangle(second, wholeBuffer(vertices));
+    await submitAndWait(second);
+
+    await expectTriangleCoversViewport(texture, covers: true);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('A binding set binds compute shader resources', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.ComputePipeline pipeline = await createComputePipeline('ComputeTriangle');
+    final gpu.DeviceBuffer vertices = createTriangleVertexBuffer();
+    final gpu.DeviceBuffer otherVertices = createTriangleVertexBuffer();
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.BindingSet bindingSet = gpu.gpuContext.createBindingSet(
+      uniforms: <gpu.UniformSlot, gpu.BufferView>{
+        pipeline.shader.getUniformSlot('TriangleInfo'): transients.emplace(triangleInfo(1.0)),
+      },
+      storageBuffers: <gpu.StorageBufferSlot, gpu.BufferView>{
+        pipeline.shader.getStorageBufferSlot('Vertices'): wholeBuffer(otherVertices),
+      },
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+    computePass.bindPipeline(pipeline);
+    computePass.bindSet(bindingSet);
+    // An individual bind overrides the set's binding.
+    computePass.bindStorageBuffer(
+      pipeline.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(vertices),
+    );
+    computePass.dispatch(1);
+    final gpu.Texture texture = await drawComputedTriangle(commandBuffer, wholeBuffer(vertices));
+    final gpu.Texture otherTexture = await drawComputedTriangle(
+      commandBuffer,
+      wholeBuffer(otherVertices),
+    );
+    await submitAndWait(commandBuffer);
+
+    await expectTriangleCoversViewport(texture, covers: true);
+    await expectTriangleCoversViewport(otherTexture, covers: false);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('A compute shader samples a bound texture', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.ComputePipeline pipeline = await createComputePipeline('ComputeTextureTriangle');
+    final gpu.Texture scaleTexture = gpu.gpuContext.createTexture(
+      gpu.StorageMode.hostVisible,
+      1,
+      1,
+    );
+    // A red channel of 1 scales the triangle to cover the viewport.
+    scaleTexture.overwrite(Uint8List.fromList(<int>[0xFF, 0, 0, 0xFF]).buffer.asByteData());
+    final gpu.DeviceBuffer vertices = createTriangleVertexBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+    computePass.bindPipeline(pipeline);
+    computePass.bindTexture(pipeline.shader.getUniformSlot('scale_texture'), scaleTexture);
+    computePass.bindStorageBuffer(
+      pipeline.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(vertices),
+    );
+    computePass.dispatch(1);
+    final gpu.Texture texture = await drawComputedTriangle(commandBuffer, wholeBuffer(vertices));
+    await submitAndWait(commandBuffer);
+
+    await expectTriangleCoversViewport(texture, covers: true);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Shader.getStorageBufferSlot reflects the storage buffer layout', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.Shader shader = await getComputeShader('ComputeReflection');
+    final gpu.StorageBufferSlot input = shader.getStorageBufferSlot('InputData');
+    expect(input.sizeInBytes, 16);
+    expect(input.runtimeArrayStrideInBytes, 16);
+    final gpu.StorageBufferSlot output = shader.getStorageBufferSlot('OutputData');
+    expect(output.sizeInBytes, 0);
+    expect(output.runtimeArrayStrideInBytes, 16);
+    final gpu.StorageBufferSlot accumulator = shader.getStorageBufferSlot('Accumulator');
+    expect(accumulator.sizeInBytes, 16);
+    expect(accumulator.runtimeArrayStrideInBytes, 0);
+    expect(identical(shader.getStorageBufferSlot('InputData'), input), isTrue);
+
+    final gpu.StorageBufferSlot missing = shader.getStorageBufferSlot('NotAStorageBuffer');
+    expect(missing.sizeInBytes, isNull);
+    expect(missing.runtimeArrayStrideInBytes, isNull);
+
+    // `Unused` is declared but never read. Metal's shader compiler removes it
+    // and Vulkan's keeps it, but it reflects the same on both.
+    final gpu.StorageBufferSlot unused = shader.getStorageBufferSlot('Unused');
+    expect(unused.sizeInBytes, 16);
+    expect(unused.runtimeArrayStrideInBytes, 0);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('ComputePass.bindStorageBuffer validates the BufferView', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.Shader shader = await getComputeShader('ComputeReflection');
+    // InputData is a 16-byte header followed by 16-byte elements.
+    final gpu.StorageBufferSlot input = shader.getStorageBufferSlot('InputData');
+    final int alignment = gpu.gpuContext.minimumStorageBufferByteAlignment;
+    final gpu.DeviceBuffer buffer = gpu.gpuContext.createDeviceBuffer(
+      gpu.StorageMode.devicePrivate,
+      alignment + 256,
+    );
+    gpu.BufferView view(int offset, int length) {
+      return gpu.BufferView(buffer, offsetInBytes: offset, lengthInBytes: length);
+    }
+
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+
+    // A header and zero, one or two elements.
+    computePass.bindStorageBuffer(input, view(0, 16));
+    computePass.bindStorageBuffer(input, view(0, 48));
+    computePass.bindStorageBuffer(input, view(alignment, 32));
+
+    // Shorter than the header.
+    expect(
+      () => computePass.bindStorageBuffer(input, view(0, 8)),
+      throwsA(
+        isA<ArgumentError>().having(
+          (ArgumentError e) => e.message,
+          'message',
+          contains('needs at least 16 bytes'),
+        ),
+      ),
+    );
+    // A partial trailing element.
+    expect(
+      () => computePass.bindStorageBuffer(input, view(0, 40)),
+      throwsA(
+        isA<ArgumentError>().having(
+          (ArgumentError e) => e.message,
+          'message',
+          contains('partial element'),
+        ),
+      ),
+    );
+    // Past the end of the buffer, or empty.
+    expect(() => computePass.bindStorageBuffer(input, view(alignment, 512)), throwsArgumentError);
+    expect(() => computePass.bindStorageBuffer(input, view(0, 0)), throwsArgumentError);
+    // A storage buffer the shader does not declare.
+    expect(
+      () => computePass.bindStorageBuffer(
+        shader.getStorageBufferSlot('NotAStorageBuffer'),
+        view(0, 16),
+      ),
+      throwsA(isA<Exception>()),
+    );
+    // An offset that is not a multiple of the alignment.
+    if (alignment > 1) {
+      expect(
+        () => computePass.bindStorageBuffer(input, view(alignment ~/ 2, 32)),
+        throwsA(
+          isA<ArgumentError>().having(
+            (ArgumentError e) => e.message,
+            'message',
+            contains('minimumStorageBufferByteAlignment'),
+          ),
+        ),
+      );
+    }
+
+    // Binding sets check storage buffer views the same way.
+    expect(
+      () => gpu.gpuContext.createBindingSet(
+        storageBuffers: <gpu.StorageBufferSlot, gpu.BufferView>{input: view(0, 40)},
+      ),
+      throwsArgumentError,
+    );
+    gpu.gpuContext.createBindingSet(
+      storageBuffers: <gpu.StorageBufferSlot, gpu.BufferView>{input: view(0, 32)},
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Storage buffers only bind to compute shaders', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    final gpu.DeviceBuffer buffer = gpu.gpuContext.createDeviceBuffer(
+      gpu.StorageMode.devicePrivate,
+      64,
+    );
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+    // The vertex shader declares no storage buffers, nor does a compute pass
+    // take its uniforms.
+    expect(
+      () => computePass.bindStorageBuffer(
+        pipeline.vertexShader.getStorageBufferSlot('VertInfo'),
+        wholeBuffer(buffer),
+      ),
+      throwsA(isA<Exception>()),
+    );
+    expect(
+      () => computePass.bindUniform(
+        pipeline.vertexShader.getUniformSlot('VertInfo'),
+        wholeBuffer(buffer),
+      ),
+      throwsA(isA<Exception>()),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('ComputePass.dispatch throws without a pipeline or a binding', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.ComputePipeline pipeline = await createComputePipeline('ComputeTriangle');
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+
+    expect(() => computePass.dispatch(1), throwsStateError);
+    // With no workgroups there is nothing to dispatch, so nothing is needed.
+    computePass.dispatch(0);
+    expect(() => computePass.dispatch(-1), throwsRangeError);
+
+    computePass.bindPipeline(pipeline);
+    computePass.bindUniform(
+      pipeline.shader.getUniformSlot('TriangleInfo'),
+      gpu.gpuContext.createHostBuffer().emplace(triangleInfo(1.0)),
+    );
+    expect(
+      () => computePass.dispatch(1),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains("storage buffer 'Vertices', but nothing is bound to it"),
+        ),
+      ),
+    );
+
+    // Once bound, the same pass dispatches.
+    computePass.bindStorageBuffer(
+      pipeline.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(createTriangleVertexBuffer()),
+    );
+    computePass.dispatch(1);
+    // Clearing drops the bindings but keeps the pipeline.
+    computePass.clearBindings();
+    expect(() => computePass.dispatch(1), throwsA(isA<Exception>()));
+    await submitAndWait(commandBuffer);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('Resources a compute shader never uses must be bound on every backend', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.ComputePipeline generate = await createComputePipeline('ComputeTriangle');
+    final gpu.ComputePipeline scale = await createComputePipeline('ComputeScaleWithUnused');
+    final gpu.DeviceBuffer vertices = createTriangleVertexBuffer();
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+    computePass.bindPipeline(generate);
+    computePass.bindUniform(
+      generate.shader.getUniformSlot('TriangleInfo'),
+      transients.emplace(triangleInfo(0.5)),
+    );
+    computePass.bindStorageBuffer(
+      generate.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(vertices),
+    );
+    computePass.dispatch(1);
+
+    // `Unused` and `UnusedInfo` are declared but never read. Metal's shader
+    // compiler removes them and Vulkan's keeps them, so the shader only takes
+    // the same bindings on both if they are required on both.
+    computePass.bindPipeline(scale);
+    computePass.bindStorageBuffer(
+      scale.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(vertices),
+    );
+    Matcher throwsUnbound(String binding) {
+      return throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('$binding, but nothing is bound to it'),
+        ),
+      );
+    }
+
+    expect(() => computePass.dispatch(1), throwsUnbound("uniform struct 'UnusedInfo'"));
+    computePass.bindUniform(
+      scale.shader.getUniformSlot('UnusedInfo'),
+      transients.emplace(float32(<double>[0, 0, 0, 0])),
+    );
+    expect(() => computePass.dispatch(1), throwsUnbound("storage buffer 'Unused'"));
+    final gpu.StorageBufferSlot unused = scale.shader.getStorageBufferSlot('Unused');
+    expect(unused.sizeInBytes, 16);
+    // The binding is validated like any other.
+    expect(
+      () => computePass.bindStorageBuffer(
+        unused,
+        gpu.BufferView(createTriangleVertexBuffer(), offsetInBytes: 0, lengthInBytes: 8),
+      ),
+      throwsArgumentError,
+    );
+    computePass.bindStorageBuffer(
+      unused,
+      wholeBuffer(gpu.gpuContext.createDeviceBufferWithCopy(ByteData(16))),
+    );
+    computePass.dispatch(1);
+    final gpu.Texture texture = await drawComputedTriangle(commandBuffer, wholeBuffer(vertices));
+    await submitAndWait(commandBuffer);
+
+    // Half size doubled covers the viewport.
+    await expectTriangleCoversViewport(texture, covers: true);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext reports compute limits where compute is supported', () async {
+    final gpu.ComputeExtent size = gpu.gpuContext.maxComputeWorkgroupSize;
+    final gpu.ComputeExtent count = gpu.gpuContext.maxComputeWorkgroupCount;
+    if (!gpu.gpuContext.supportsCompute) {
+      expect(gpu.gpuContext.maxComputeWorkgroupInvocations, 0);
+      expect(size, const gpu.ComputeExtent(0, 0, 0));
+      expect(count, const gpu.ComputeExtent(0, 0, 0));
+      expect(gpu.gpuContext.maxComputeSharedMemorySizeInBytes, 0);
+      return;
+    }
+    // At least the portable floor that every device with compute meets.
+    expect(gpu.gpuContext.maxComputeWorkgroupInvocations, greaterThanOrEqualTo(128));
+    expect(size.x, greaterThanOrEqualTo(128));
+    expect(size.y, greaterThanOrEqualTo(128));
+    expect(size.z, greaterThanOrEqualTo(64));
+    expect(count.x, greaterThan(0));
+    expect(count.y, greaterThan(0));
+    expect(count.z, greaterThan(0));
+    expect(gpu.gpuContext.maxComputeSharedMemorySizeInBytes, greaterThanOrEqualTo(16384));
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createComputePipeline rejects a workgroup over the device limits', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.Shader shader = await getComputeShader('ComputeOversized');
+    expect(
+      () => gpu.gpuContext.createComputePipeline(shader),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('has a workgroup size of 1024x1024x1'),
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('GpuContext.createComputePipeline rejects a render shader', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.RenderPipeline renderPipeline = await createUnlitRenderPipeline();
+    expect(
+      () => gpu.gpuContext.createComputePipeline(renderPipeline.vertexShader),
+      throwsA(
+        isA<Exception>().having(
+          (Exception e) => e.toString(),
+          'message',
+          contains('is not a compute shader'),
+        ),
+      ),
+    );
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('ComputePass throws once the next pass is created', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.ComputePipeline pipeline = await createComputePipeline('ComputeTriangle');
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.ComputePass first = commandBuffer.createComputePass();
+    final gpu.ComputePass second = commandBuffer.createComputePass();
+    expect(() => first.dispatch(1), throwsComputePassEndedBy('CommandBuffer.createComputePass()'));
+
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.devicePrivate, 4, 4);
+    final gpu.RenderPass renderPass = commandBuffer.createRenderPass(
+      gpu.RenderTarget.singleColor(gpu.ColorAttachment(texture: texture)),
+    );
+    expect(
+      () => second.bindPipeline(pipeline),
+      throwsComputePassEndedBy('CommandBuffer.createRenderPass()'),
+    );
+
+    // A compute pass ends the render pass before it too.
+    final gpu.ComputePass third = commandBuffer.createComputePass();
+    expect(
+      () => renderPass.setCullMode(gpu.CullMode.none),
+      throwsPassEndedBy('CommandBuffer.createComputePass()'),
+    );
+    await submitAndWait(commandBuffer);
+    expect(() => third.clearBindings(), throwsComputePassEndedBy('CommandBuffer.submit()'));
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('ComputePass throws once a copy is recorded', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+    final gpu.Texture texture = gpu.gpuContext.createTexture(gpu.StorageMode.hostVisible, 1, 1);
+    final gpu.DeviceBuffer source = gpu.gpuContext.createDeviceBufferWithCopy(
+      Uint8List.fromList(<int>[0xFF, 0x00, 0x00, 0xFF]).buffer.asByteData(),
+    );
+    commandBuffer.copyBufferToTexture(
+      gpu.BufferView(source, offsetInBytes: 0, lengthInBytes: 4),
+      gpu.TextureRegion(texture),
+    );
+    expect(
+      () => computePass.dispatch(1),
+      throwsComputePassEndedBy('CommandBuffer.copyBufferToTexture()'),
+    );
+    await submitAndWait(commandBuffer);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('ComputePass throws once ended, and end can be called again', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+    computePass.end();
+    computePass.end();
+    expect(() => computePass.dispatch(1), throwsComputePassEndedBy('ComputePass.end()'));
+    await submitAndWait(commandBuffer);
+    computePass.end();
+    expect(() => computePass.clearBindings(), throwsComputePassEndedBy('ComputePass.end()'));
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('CommandBuffer.createComputePass throws after submit', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+    await submitAndWait(commandBuffer);
+    expect(
+      () => commandBuffer.createComputePass(),
+      throwsA(
+        isA<StateError>().having(
+          (StateError e) => e.message,
+          'message',
+          'CommandBuffer.createComputePass() was called after the CommandBuffer was submitted.',
+        ),
+      ),
     );
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
