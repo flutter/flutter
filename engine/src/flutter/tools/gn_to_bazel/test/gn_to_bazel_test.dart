@@ -1814,6 +1814,58 @@ flatbuffers("schema") {
       );
     });
 
+    test('an impeller_shaders invocation becomes the macro call', () async {
+      // GN's `name` is the library name; a condition the assumptions decide
+      // folds (is_linux), one they refute vanishes (metal_version under
+      // is_mac).
+      final String output = await convert(
+        '''
+impeller_shaders("entity_shaders") {
+  name = "entity"
+  if (is_linux) {
+    vulkan_language_version = 130
+  }
+  if (is_mac && !is_ios) {
+    metal_version = "2.3"
+  }
+  use_half_textures = true
+  shaders = [
+    "shaders/solid_fill.vert",
+    "shaders/blending/advanced_blend.frag",
+  ]
+}
+''',
+        templates: <String>{'impeller_shaders'},
+      );
+      expect(
+        output,
+        contains('''
+load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impeller_shaders")
+
+package(default_visibility = ["//visibility:public"])
+
+impeller_shaders(
+    name = "entity_shaders",
+    library_name = "entity",
+    shaders = [
+        "shaders/solid_fill.vert",
+        "shaders/blending/advanced_blend.frag",
+    ],
+    use_half_textures = True,
+    vulkan_language_version = 130,
+)
+'''),
+      );
+      expect(
+        templateMappings['impeller_shaders']!.innerTargetsOf('entity_shaders'),
+        containsAll(<String>[
+          'vk_entity_shaders',
+          'impellerc_gles3_entity_shaders',
+          'reflect_reflect_gles_entity_shaders',
+        ]),
+      );
+    });
+
     test('generated and foreign include directories', () async {
       // The root of the generated tree is the engine's include root; a
       // directory of another repository comes with the dependency on it.
