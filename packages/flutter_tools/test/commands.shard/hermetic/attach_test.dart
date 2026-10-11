@@ -1225,6 +1225,7 @@ void main() {
     testUsingContext(
       'exits when multiple devices connected',
       () async {
+        terminal = FakeTerminal(stdinHasTerminal: false);
         final command = AttachCommand(
           buildSystem: buildSystem,
           buildTargets: const BuildTargetsImpl(),
@@ -1248,7 +1249,6 @@ void main() {
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
         DeviceManager: () => testDeviceManager,
-        AnsiTerminal: () => FakeTerminal(stdinHasTerminal: false),
       },
     );
 
