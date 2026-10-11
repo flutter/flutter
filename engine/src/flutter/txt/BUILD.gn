@@ -77,6 +77,7 @@ source_set("txt") {
     "//flutter/fml",
     "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/skia",
+    "//flutter/third_party/googletest:gtest_prod",
     "//flutter/third_party/harfbuzz",
     "//flutter/third_party/icu",
   ]
