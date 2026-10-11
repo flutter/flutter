@@ -23,6 +23,8 @@ execution root, in a sandbox that holds exactly the declared inputs: an
 undeclared input GN would have tolerated is a failure here, by design.
 """
 
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
+
 def _expand(ctx, arg, targets):
     out = ""
     rest = arg
@@ -111,5 +113,30 @@ gn_action = rule(
             cfg = "exec",
         ),
         "_python_runtime": attr.label(default = "@cpython3//:runtime"),
+    },
+)
+
+def _gn_copy_impl(ctx):
+    # The copy's content is its sources. GN's destination (`outputs`, under
+    # the build directory) is the artifact layout, which packaging assembles;
+    # here the files travel as they are. The empty CcInfo keeps the edges
+    # that GN has from libraries and binaries to copies, which order them.
+    return [
+        DefaultInfo(files = depset(ctx.files.srcs)),
+        CcInfo(),
+    ]
+
+gn_copy = rule(
+    implementation = _gn_copy_impl,
+    doc = "A GN copy(): its sources, as they are. See the implementation for why the destination is not reproduced.",
+    attrs = {
+        "srcs": attr.label_list(
+            allow_files = True,
+            mandatory = True,
+            doc = "GN's `sources`.",
+        ),
+        "outputs": attr.string_list(
+            doc = "GN's `outputs`, for the record: where the build directory would hold the copies.",
+        ),
     },
 )
