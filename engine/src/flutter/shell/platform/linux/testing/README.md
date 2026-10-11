@@ -92,8 +92,9 @@ python3 engine/src/flutter/shell/platform/linux/testing/run_atspi_parity_test.py
 
 Both binaries compile the same semantics fixture: a button, checkbox, editable
 and obscured text, Unicode selection, slider, scroll actions, and nested groups.
-The client verifies complete export, absence of defunct nodes, action dispatch,
-and a partial checkbox-state update. It records roles, interfaces, states,
+The client verifies complete export, absence of defunct nodes, undefined
+selection/expansion capabilities, action dispatch, and a partial checkbox-state
+update. It records roles, interfaces, states,
 normalized action names, children and text queries before and after the actions.
 Loaded GTK/GLib versions are included in the JSON report. Protected text is
 represented only by whether the fixture value was exposed, never its contents.

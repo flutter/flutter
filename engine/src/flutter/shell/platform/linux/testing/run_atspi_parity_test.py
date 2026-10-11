@@ -144,6 +144,11 @@ def run_backend(Atspi, binary, output):
     if nodes.keys() != expected:
       raise RuntimeError(f'Incomplete parity tree: {sorted(nodes)}')
     before = snapshot(Atspi, nodes)
+    # No node in this fixture has selected or expanded semantics, including
+    # explicit false. Their absence must not advertise these capabilities.
+    for name, record in before.items():
+      if {'selectable', 'expandable'} & set(record['states']):
+        raise RuntimeError(f'{name} advertises absent selection/expansion semantics')
     if 'checked' not in before['Checked']['states']:
       raise RuntimeError('Initial checkbox does not expose checked state')
     if before['Editor'].get('text', {}).get('contents') != 'Hello world':

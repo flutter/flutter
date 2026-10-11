@@ -1004,8 +1004,6 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   const gboolean is_enabled = flags->is_enabled != kFlutterTristateFalse;
   const gboolean is_focused = flags->is_focused == kFlutterTristateTrue;
   const gboolean is_hidden = flags->is_hidden;
-  const gboolean is_selected = flags->is_selected == kFlutterTristateTrue;
-  const gboolean is_expanded = flags->is_expanded == kFlutterTristateTrue;
   const gboolean is_required = flags->is_required == kFlutterTristateTrue;
   const gboolean is_read_only = flags->is_text_field && flags->is_read_only;
   const gboolean is_multiline = flags->is_text_field && flags->is_multiline;
@@ -1107,10 +1105,22 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
                                          is_hidden);
   fl_gtk4_accessible_node_set_state_bool(self, GTK_ACCESSIBLE_STATE_DISABLED,
                                          !is_enabled);
-  fl_gtk4_accessible_node_set_state_bool(self, GTK_ACCESSIBLE_STATE_SELECTED,
-                                         is_selected);
-  fl_gtk4_accessible_node_set_state_bool(self, GTK_ACCESSIBLE_STATE_EXPANDED,
-                                         is_expanded);
+  // Undefined differs from false: setting these states makes GTK advertise
+  // selectable/expandable capabilities, even when their values are false.
+  if (flags->is_selected == kFlutterTristateNone) {
+    fl_gtk4_accessible_node_reset_state(self, GTK_ACCESSIBLE_STATE_SELECTED);
+  } else {
+    fl_gtk4_accessible_node_set_state_bool(
+        self, GTK_ACCESSIBLE_STATE_SELECTED,
+        flags->is_selected == kFlutterTristateTrue);
+  }
+  if (flags->is_expanded == kFlutterTristateNone) {
+    fl_gtk4_accessible_node_reset_state(self, GTK_ACCESSIBLE_STATE_EXPANDED);
+  } else {
+    fl_gtk4_accessible_node_set_state_bool(
+        self, GTK_ACCESSIBLE_STATE_EXPANDED,
+        flags->is_expanded == kFlutterTristateTrue);
+  }
   if (flags->is_checked != kFlutterCheckStateNone ||
       flags->is_toggled != kFlutterTristateNone) {
     GtkAccessibleTristate checked_value = GTK_ACCESSIBLE_TRISTATE_FALSE;

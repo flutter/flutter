@@ -23,6 +23,55 @@ namespace {
 
 class FlViewGtk4AccessibilityTest : public flutter::testing::LinuxTest {};
 
+TEST_F(FlViewGtk4AccessibilityTest, OptionalStatesPreserveUndefined) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  const struct {
+    FlutterTristate selected;
+    FlutterTristate expanded;
+  } cases[] = {
+      {kFlutterTristateNone, kFlutterTristateNone},
+      {kFlutterTristateFalse, kFlutterTristateNone},
+      {kFlutterTristateTrue, kFlutterTristateFalse},
+      {kFlutterTristateNone, kFlutterTristateTrue},
+      {kFlutterTristateNone, kFlutterTristateNone},
+  };
+  for (const auto& test : cases) {
+    SCOPED_TRACE(testing::Message() << "selected=" << test.selected
+                                    << " expanded=" << test.expanded);
+    flags.is_selected = test.selected;
+    flags.is_expanded = test.expanded;
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    g_autoptr(GtkAccessible) native =
+        fl_view_gtk4_accessibility_ref_native_root_for_testing(
+            view->accessibility_backend);
+    ASSERT_NE(native, nullptr);
+    const auto check = [&](GtkAccessibleState state, FlutterTristate value) {
+      EXPECT_EQ(gtk_test_accessible_has_state(native, state),
+                value != kFlutterTristateNone);
+      if (value != kFlutterTristateNone) {
+        g_autofree gchar* mismatch = gtk_test_accessible_check_state(
+            native, state, value == kFlutterTristateTrue);
+        EXPECT_EQ(mismatch, nullptr);
+      }
+    };
+    check(GTK_ACCESSIBLE_STATE_SELECTED, test.selected);
+    check(GTK_ACCESSIBLE_STATE_EXPANDED, test.expanded);
+  }
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, NativeActionsRespectCurrentSemantics) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
