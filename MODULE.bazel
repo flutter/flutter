@@ -58,6 +58,7 @@ use_repo(
     "libwebp",
     "llvm_libc",
     "ninja",
+    "re2",
     "shaderc",
     "skia",
     "spirv-cross",

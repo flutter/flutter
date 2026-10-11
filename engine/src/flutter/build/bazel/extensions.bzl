@@ -135,6 +135,12 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/llvm_libc",
         build_file = _OVERLAYS + ":llvm_libc/BUILD.llvm_libc.bazel",
     ),
+    "re2": struct(
+        path = "engine/src/flutter/third_party/re2",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/re2/BUILD.gn"],
+        gn_repository = "@re2=//flutter/third_party/re2",
+    ),
     # Skia as the engine builds it: //flutter/skia/BUILD.gn (the engine's
     # wrapper over Skia's gn/*.gni source lists), converted at fetch time so
     # that Skia rolls need no regeneration (research/07). Skia's own Bazel
