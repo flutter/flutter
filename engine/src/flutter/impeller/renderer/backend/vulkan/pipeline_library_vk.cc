@@ -62,31 +62,23 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
   if (!strong_device) {
     return nullptr;
   }
-  auto device_properties = strong_device->GetPhysicalDevice().getProperties();
-  auto max_wg_size = device_properties.limits.maxComputeWorkGroupSize;
 
-  // Specialization constant 0 carries the workgroup size. Set it to the device
-  // maximum. This only affects shaders that declare their size with
-  // `local_size_x_id = 0`. A shader with a literal `local_size` has no such
-  // constant, so Vulkan ignores this and uses the size baked into the module.
-  vk::SpecializationMapEntry specialization_map_entry[1];
-
-  uint32_t workgroup_size_x = max_wg_size[0];
-  specialization_map_entry[0].constantID = 0;
-  specialization_map_entry[0].offset = 0;
-  specialization_map_entry[0].size = sizeof(uint32_t);
-
-  vk::SpecializationInfo specialization_info;
-  specialization_info.mapEntryCount = 1;
-  specialization_info.pMapEntries = &specialization_map_entry[0];
-  specialization_info.dataSize = sizeof(uint32_t);
-  specialization_info.pData = &workgroup_size_x;
+  // The workgroup size is baked into the shader module. Check it against the
+  // device limits here so that an oversized workgroup fails with a clear error
+  // rather than as undefined behavior in the driver.
+  const vk::PhysicalDeviceLimits limits =
+      strong_device->GetPhysicalDevice().getProperties().limits;
+  if (!desc.ValidateWorkgroupSize(
+          {limits.maxComputeWorkGroupSize[0], limits.maxComputeWorkGroupSize[1],
+           limits.maxComputeWorkGroupSize[2]},
+          limits.maxComputeWorkGroupInvocations)) {
+    return nullptr;
+  }
 
   vk::PipelineShaderStageCreateInfo info;
   info.setStage(vk::ShaderStageFlagBits::eCompute);
   info.setPName("main");
   info.setModule(ShaderFunctionVK::Cast(entrypoint.get())->GetModule());
-  info.setPSpecializationInfo(&specialization_info);
   pipeline_info.setStage(info);
 
   //----------------------------------------------------------------------------
@@ -270,9 +262,18 @@ void PipelineLibraryVK::RemovePipelinesWithEntryPoint(
     std::shared_ptr<const ShaderFunction> function) {
   Lock lock(pipelines_mutex_);
 
+  // Skip pipelines without an entry point for the function's stage: render
+  // pipelines have none for the compute stage. Compute pipelines are cached
+  // separately.
   fml::erase_if(pipelines_, [&](auto item) {
-    return item->first.GetEntrypointForStage(function->GetStage())
-        ->IsEqual(*function);
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        item->first.GetEntrypointForStage(function->GetStage());
+    return entrypoint && entrypoint->IsEqual(*function);
+  });
+  fml::erase_if(compute_pipelines_, [&](auto item) {
+    const std::shared_ptr<const ShaderFunction> entrypoint =
+        item->first.GetStageEntrypoint();
+    return entrypoint && entrypoint->IsEqual(*function);
   });
 }
 

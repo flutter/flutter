@@ -5,6 +5,7 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_GLES_CAPABILITIES_GLES_H_
 
+#include <array>
 #include <cstddef>
 
 #include "impeller/base/backend_cast.h"
@@ -175,6 +176,18 @@ class CapabilitiesGLES final
 
   // |Capabilities|
   bool NeedsPartitionedHostBuffer() const override;
+
+  // |Capabilities|
+  uint32_t GetMaximumComputeWorkgroupInvocations() const override;
+
+  // |Capabilities|
+  std::array<uint32_t, 3> GetMaximumComputeWorkgroupSize() const override;
+
+  // |Capabilities|
+  std::array<uint32_t, 3> GetMaximumComputeWorkgroupCount() const override;
+
+  // |Capabilities|
+  size_t GetMaximumComputeSharedMemorySize() const override;
 
  private:
   bool supports_texture_to_texture_blits_ = false;

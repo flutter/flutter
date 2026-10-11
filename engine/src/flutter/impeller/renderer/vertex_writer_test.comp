@@ -1,0 +1,20 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// Writes the positions of a triangle that covers the whole viewport, one
+// invocation per vertex.
+layout(local_size_x = 3) in;
+
+layout(std430) buffer;
+
+layout(binding = 0) writeonly buffer Vertices {
+  vec2 positions[];
+}
+vertices;
+
+void main() {
+  uint ident = gl_GlobalInvocationID.x;
+  vertices.positions[ident] =
+      vec2(ident == 1u ? 3.0 : -1.0, ident == 2u ? 3.0 : -1.0);
+}
