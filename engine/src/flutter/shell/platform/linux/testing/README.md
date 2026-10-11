@@ -107,6 +107,9 @@ GTK 4.18 headers to enable these notifications.
 On GTK 4.14 or later, add `--check-text` to verify the exported AT-SPI Text
 interface: contents, Unicode character count, UTF-16 selection conversion,
 caret offset, and character/word/sentence ranges. It includes an end-of-text
-character query to ensure it does not repeat the whole field. This flag can
+character query to ensure it does not repeat the whole field. The client also
+triggers a semantics text replacement and checks deletion/insertion payloads,
+caret and selection notifications, and the resulting queryable state. A repeated
+identical semantics batch must not produce additional notifications. This flag can
 be combined with `--check-focus`; neither check validates editable-text actions
 or visual line wrapping.

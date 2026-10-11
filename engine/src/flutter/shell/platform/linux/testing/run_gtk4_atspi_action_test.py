@@ -146,6 +146,50 @@ def run_fixture(binary, output, check_focus=False, check_text=False):
             actual = (result.start_offset, result.end_offset, result.content)
             if actual != (start, end, contents):
               raise RuntimeError(f'Unexpected AT-SPI text range at {offset}: {actual!r}')
+          events = []
+          event_types = (
+              'object:text-changed', 'object:text-caret-moved', 'object:text-selection-changed'
+          )
+
+          def on_text(event, *_):
+            if (event.source.get_process_id() == fixture.pid and
+                event.source.get_name() == 'Flutter AT-SPI text fixture'):
+              events.append((event.type, event.detail1, event.detail2, event.any_data))
+
+          listener = Atspi.EventListener.new(on_text, None)
+          for event_type in event_types:
+            listener.register(event_type)
+          try:
+            if not action.do_action(0):
+              raise RuntimeError('AT-SPI rejected text-update trigger')
+
+            def received_text():
+              context = GLib.MainContext.default()
+              while context.pending():
+                context.iteration(False)
+              return len(events) >= 4
+
+            wait_until(received_text, 'text, caret and selection notifications', seconds=5)
+            changed = [event for event in events if event[0].startswith('object:text-changed:')]
+            replacement = 'New \U0001f600 text'
+            expected_changes = [
+                ('object:text-changed:delete', 0, len(expected), expected),
+                ('object:text-changed:insert', 0, len(replacement), replacement),
+            ]
+            if changed != expected_changes:
+              raise RuntimeError(f'Unexpected AT-SPI text changes: {changed!r}')
+            caret = [event[1] for event in events if event[0] == 'object:text-caret-moved']
+            selections = [event for event in events if event[0] == 'object:text-selection-changed']
+            if caret != [5] or len(selections) != 1 or len(events) != 4:
+              raise RuntimeError(f'Unexpected caret/selection notifications: {events!r}')
+            if Atspi.Text.get_text(text, 0, -1) != replacement or text.get_caret_offset() != 5:
+              raise RuntimeError('Updated text queries disagree with events')
+            selection = Atspi.Text.get_selection(text, 0)
+            if (selection.start_offset, selection.end_offset) != (4, 5):
+              raise RuntimeError('Updated selection does not use character offsets')
+          finally:
+            for event_type in event_types:
+              listener.deregister(event_type)
         if check_focus:
           focus_events = []
 
@@ -183,7 +227,7 @@ def run_fixture(binary, output, check_focus=False, check_text=False):
         if check_focus:
           print('PASS: AT-SPI observed focus gain and loss without duplicate events')
         if check_text:
-          print('PASS: AT-SPI text, Unicode selection, word and sentence queries')
+          print('PASS: AT-SPI text queries and live text/caret/selection notifications')
 
 
 def main():
