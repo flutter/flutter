@@ -40,10 +40,21 @@ source_set("re2") {
   ]
   deps = [
     "//third_party/abseil-cpp/absl/base",
+    "//third_party/abseil-cpp/absl/base:core_headers",
+    "//third_party/abseil-cpp/absl/container:fixed_array",
     "//third_party/abseil-cpp/absl/container:flat_hash_map",
     "//third_party/abseil-cpp/absl/container:flat_hash_set",
+    "//third_party/abseil-cpp/absl/container:inlined_vector",
+    "//third_party/abseil-cpp/absl/flags:flag",
+    "//third_party/abseil-cpp/absl/hash",
     "//third_party/abseil-cpp/absl/log",
+    "//third_party/abseil-cpp/absl/log:absl_check",
+    "//third_party/abseil-cpp/absl/log:absl_log",
     "//third_party/abseil-cpp/absl/log:check",
     "//third_party/abseil-cpp/absl/strings",
+    "//third_party/abseil-cpp/absl/strings:str_format",
+    "//third_party/abseil-cpp/absl/synchronization",
+    "//third_party/abseil-cpp/absl/types:optional",
+    "//third_party/abseil-cpp/absl/types:span",
   ]
 }
