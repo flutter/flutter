@@ -588,8 +588,7 @@ Command: /home/android/gradlew assembleRelease
 
     testUsingContext('handler', () async {
       await licenseNotAcceptedHandler.handler(
-        line:
-            'You have not accepted the license agreements of the following SDK components: [foo, bar]',
+        line: 'You have not accepted the license agreements of the following SDK components: [foo, bar]',
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         usesAndroidX: true,
       );
@@ -1704,8 +1703,60 @@ An exception occurred applying plugin request [id: 'kotlin-android']
     },
   );
 
+  group('new AGP DSL error', () {
+    const useNewAgpDslErrorExample = r'''
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/Users/jesswon/Desktop/fresh_flutter_app/android/app/build.gradle.kts'
+
+* What went wrong:
+An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-plugin']
+> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'.
+   > java.lang.NullPointerException (no error message)
+''';
+
+    testWithoutContext('matches the new AGP DSL failure', () {
+      expect(formatTestErrorMessage(useNewAgpDslErrorExample, useNewAgpDslErrorHandler), isTrue);
+    });
+
+    testWithoutContext('does not match unsupported dependency version errors', () {
+      const unsupportedAgpVersionErrorExample = r'''
+FAILURE: Build failed with an exception.
+
+* Where:
+Build file '/path/to/my_app/android/app/build.gradle.kts' line: 1
+
+* What went wrong:
+An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-plugin']
+> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'.
+   > Error: Your project's Android Gradle Plugin version (10.0.0) is not yet supported. Flutter does not support Android Gradle Plugin 10, and support will be added in a future Flutter release. Please downgrade your Android Gradle Plugin version to a version below 10.0.0 to continue.
+     Alternatively, use the flag "--android-skip-build-dependency-validation" to bypass this check (unsupported; your build may fail).
+''';
+      expect(
+        formatTestErrorMessage(unsupportedAgpVersionErrorExample, useNewAgpDslErrorHandler),
+        isFalse,
+      );
+    });
+
+    testWithoutContext('does not match other errors thrown while applying the plugin', () {
+      const minimumGradleVersionErrorExample = r'''
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-plugin']
+> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'.
+   > Error: Your project's Gradle version (8.13.0) is lower than Flutter's minimum supported version of 8.14.0. Please upgrade your Gradle version.
+''';
+      expect(
+        formatTestErrorMessage(minimumGradleVersionErrorExample, useNewAgpDslErrorHandler),
+        isFalse,
+      );
+    });
+  });
+
   testUsingContext(
-    'Failure to apply kotlin-android plugin',
+    'Failure to apply Flutter Gradle plugin with the new AGP DSL',
     () async {
       const useNewAgpDslErrorHandlerExample = r'''
 FAILURE: Build failed with an exception.

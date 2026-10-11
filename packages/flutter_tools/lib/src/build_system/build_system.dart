@@ -620,12 +620,10 @@ abstract class BuildSystem {
 
 class FlutterBuildSystem extends BuildSystem {
   const FlutterBuildSystem({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Logger logger,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _logger = logger;
+    required this._fileSystem,
+    required this._platform,
+    required this._logger,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;

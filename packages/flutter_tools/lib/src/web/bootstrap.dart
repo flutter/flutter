@@ -299,7 +299,11 @@ const styles = `
       content: '';
       position: absolute;
       height: 100%;
+      width: 100%;
+      left: 0;
       background-color: #0175C2;
+      transform-origin: left;
+      will-change: transform;
       animation: indeterminate_first 2.0s infinite ease-out;
   }
 
@@ -307,29 +311,29 @@ const styles = `
       content: '';
       position: absolute;
       height: 100%;
+      width: 100%;
+      left: 0;
       background-color: #02569B;
+      transform-origin: left;
+      will-change: transform;
       animation: indeterminate_second 2.0s infinite ease-in;
   }
 
   @keyframes indeterminate_first {
       0% {
-          left: -100%;
-          width: 100%;
+          transform: translateX(-100%) scaleX(1);
       }
       100% {
-          left: 100%;
-          width: 10%;
+          transform: translateX(100%) scaleX(0.1);
       }
   }
 
   @keyframes indeterminate_second {
       0% {
-          left: -150%;
-          width: 100%;
+          transform: translateX(-150%) scaleX(1);
       }
       100% {
-          left: 100%;
-          width: 10%;
+          transform: translateX(100%) scaleX(0.1);
       }
   }
 `;
@@ -347,10 +351,11 @@ const indeterminate = document.createElement('div');
 indeterminate.className = "indeterminate";
 loader.appendChild(indeterminate);
 
-document.addEventListener('dart-app-ready', function (e) {
-   loader.parentNode.removeChild(loader);
-   styleSheet.parentNode.removeChild(styleSheet);
-});
+window._removeFlutterLoader = function() {
+  loader.remove();
+  styleSheet.remove();
+  window._removeFlutterLoader = null;
+};
 ''';
 }
 
@@ -392,6 +397,9 @@ String generateDDCLibraryBundleMainModule({
       const sdkOptions = {
         nativeNonNullAsserts: $nativeNullAssertions,
       };
+      if (window._removeFlutterLoader) {
+        window._removeFlutterLoader();
+      }
       dartDevEmbedder.runMain(appName, sdkOptions);
     }
     /* MAIN_EXTENSION_MARKER */
@@ -437,7 +445,12 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 
   // See the generateMainModule doc comment.
   var child = {};
-  child.main = app[Object.keys(app)[0]].main;
+  child.main = function() {
+    if (window._removeFlutterLoader) {
+      window._removeFlutterLoader();
+    }
+    return app[Object.keys(app)[0]].main.apply(this, arguments);
+  };
 
   /* MAIN_EXTENSION_MARKER */
   child.main();

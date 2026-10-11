@@ -144,12 +144,10 @@ void main() {
   test('Resize image sets tag', () async {
     final bytes = Uint8List.fromList(kBlueSquarePng);
     final provider = ResizeImage(MemoryImage(bytes), width: 40, height: 40);
-    final completer =
-        provider.loadBuffer(
-              await provider.obtainKey(ImageConfiguration.empty),
-              noOpDecoderBufferCallback,
-            )
-            as MultiFrameImageStreamCompleter;
+    final completer = provider.loadBuffer(
+      await provider.obtainKey(ImageConfiguration.empty),
+      noOpDecoderBufferCallback,
+    ) as MultiFrameImageStreamCompleter;
 
     expect(completer.debugLabel, 'MemoryImage(${describeIdentity(bytes)}) - Resized(40×40)');
   });

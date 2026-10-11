@@ -74,8 +74,7 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
   fml::AutoResetWaitableEvent latch;
   task_runner->PostTask([&latch, &image]() {
     latch.Wait();
-    auto context = std::make_shared<impeller::testing::MockImpellerContext>();
-    EXPECT_EQ(image->GetImpellerTexture(context), nullptr);
+    EXPECT_EQ(image->wrapper_->texture(), nullptr);
   });
 
   image = DlDeferredImageGPUImpeller::Make(
@@ -86,8 +85,7 @@ TEST(DlDeferredImageGPUImpeller, TrashesDisplayList) {
   latch.Signal();
 
   PostTaskSync(task_runner, [&]() {
-    auto context = std::make_shared<impeller::testing::MockImpellerContext>();
-    EXPECT_NE(image->GetImpellerTexture(context), nullptr);
+    EXPECT_NE(image->wrapper_->texture(), nullptr);
     snapshot_delegate.reset();
   });
 }

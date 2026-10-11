@@ -13,7 +13,7 @@ import 'text_editing.dart';
 /// an [EditingState] with new composition values; namely, [EditingState.composingBaseOffset]
 /// and [EditingState.composingExtentOffset].
 ///
-/// A class with this mixin should call [addCompositionEventHandlers] on initalization, and
+/// A class with this mixin should call [addCompositionEventHandlers] on initialization, and
 /// [removeCompositionEventHandlers] on deinitalization.
 ///
 /// See also:

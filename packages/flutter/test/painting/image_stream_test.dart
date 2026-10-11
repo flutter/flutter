@@ -576,6 +576,65 @@ void main() {
     imageCache.clear();
   });
 
+  testWidgets('re-adding a listener while a frame callback is pending does not crash', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/30340.
+    final mockCodec = MockCodec();
+    mockCodec.frameCount = 2;
+    mockCodec.repetitionCount = -1;
+    final codecCompleter = Completer<Codec>();
+
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: codecCompleter.future,
+      scale: 1.0,
+    );
+
+    final emittedImages = <ImageInfo>[];
+    addTearDown(() {
+      for (final image in emittedImages) {
+        image.dispose();
+      }
+    });
+    final listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
+      emittedImages.add(image);
+    });
+    imageStream.addListener(listener);
+    // Mirrors ImageCache keeping the completer alive with zero listeners.
+    final ImageStreamCompleterHandle handle = imageStream.keepAlive();
+
+    codecCompleter.complete(mockCodec);
+    await tester.idle();
+
+    // Decoding the first frame schedules a frame callback.
+    mockCodec.completeNextFrame(FakeFrameInfo(const Duration(milliseconds: 200), image20x10));
+    await tester.idle();
+    expect(mockCodec.numFramesAsked, 1);
+
+    // Before that callback runs, drop to zero listeners and re-add one, as
+    // _ImageState does when TickerMode toggles. This restarts decoding and
+    // discards the decoded frame.
+    imageStream.removeListener(listener);
+    imageStream.addListener(listener);
+    expect(mockCodec.numFramesAsked, 2);
+
+    // The stale callback must not touch the discarded frame.
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(emittedImages, isEmpty);
+
+    // When the restarted decode completes, the animation resumes.
+    mockCodec.completeNextFrame(FakeFrameInfo(const Duration(milliseconds: 200), image200x100));
+    await tester.idle();
+    await tester.pump();
+    expect(emittedImages, hasLength(1));
+    expect(emittedImages.single.image.width, 200);
+
+    handle.dispose();
+    imageStream.removeListener(listener);
+    imageCache.clear();
+  });
+
   testWidgets('multiple stream listeners', (WidgetTester tester) async {
     final mockCodec = MockCodec();
     mockCodec.frameCount = 2;
@@ -1022,9 +1081,8 @@ void main() {
         final streamController = StreamController<ImageChunkEvent>();
         addTearDown(streamController.close);
         final ImageStreamCompleterHandle imageStreamCompleterHandle =
-            FakeEventReportingImageStreamCompleter(
-              chunkEvents: streamController.stream,
-            ).keepAlive();
+            FakeEventReportingImageStreamCompleter(chunkEvents: streamController.stream)
+                .keepAlive();
         imageStreamCompleterHandle.dispose();
       }, ImageStreamCompleterHandle),
       areCreateAndDispose,

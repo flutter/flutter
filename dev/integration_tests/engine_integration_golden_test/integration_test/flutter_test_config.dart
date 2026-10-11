@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter_test/flutter_test.dart';
+library;
+
 import 'dart:async';
+
 import 'package:flutter_goldens/flutter_goldens.dart' as flutter_goldens;
 
 /// Configures [goldenFileComparator] for the test suite using `package:flutter_goldens`.

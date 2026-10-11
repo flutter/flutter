@@ -41,18 +41,17 @@ source_set("libcxxabi") {
   configs += [ "//flutter/third_party/libcxx:src_include" ]
 
   # No translation units in the engine are built with exceptions. But, using
-  # Objective-C exceptions requires some infrastructure setup for exceptions.
-  # Build support for the same in cxxabi on Darwin.
-  if (is_mac || is_ios) {
+  # Objective-C exceptions requires some infrastructure setup for exceptions,
+  # as do the sanitizer runtimes on Linux, which reference __cxa_begin_catch
+  # and __gxx_personality_v0. Build support for the same in cxxabi there.
+  if (is_mac || is_ios || is_linux) {
     configs -= [ "//build/config/gcc:no_exceptions" ]
     sources += [
       "src/cxa_exception.cpp",
       "src/cxa_personality.cpp",
     ]
   } else {
-    if (!is_tsan) {
-      sources += [ "src/cxa_noexception.cpp" ]
-    }
+    sources += [ "src/cxa_noexception.cpp" ]
   }
 
   # Third party dependencies may depend on RTTI. Add support for the same in

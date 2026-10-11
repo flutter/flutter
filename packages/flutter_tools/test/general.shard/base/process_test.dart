@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
@@ -197,6 +198,24 @@ void main() {
         ),
         throwsProcessException(),
       );
+    });
+
+    testWithoutContext(' decodes output with the given encoding', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>['tree'],
+          // Fails the command match unless this encoding is passed to the
+          // process manager.
+          encoding: utf8,
+          stdout: '├── a\n└── b',
+          stderr: '│',
+        ),
+      );
+
+      final RunResult result = await processUtils.run(<String>['tree'], encoding: utf8);
+
+      expect(result.stdout, '├── a\n└── b');
+      expect(result.stderr, '│');
     });
   });
 
@@ -463,19 +482,15 @@ void main() {
       expect(logger.statusText, contains(analytics.getConsentMessage));
     }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
 
-    testUsingContext(
-      'does not print analytics welcome message if Analytics instance indicates it should not be printed',
-      () async {
-        setExitFunctionForTests((int exitCode) {});
+    testUsingContext('does not print analytics welcome message if Analytics instance indicates it should not be printed', () async {
+      setExitFunctionForTests((int exitCode) {});
 
-        analytics.clientShowedMessage();
+      analytics.clientShowedMessage();
 
-        final shutdownHooks = ShutdownHooks();
-        await exitWithHooks(0, shutdownHooks: shutdownHooks);
-        expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
-      },
-      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
-    );
+      final shutdownHooks = ShutdownHooks();
+      await exitWithHooks(0, shutdownHooks: shutdownHooks);
+      expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
+    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
 
     testUsingContext('[sync] exceptions thrown from a hook do not crash the tool', () async {
       setExitFunctionForTests((int exitCode) {});

@@ -45,12 +45,11 @@ class ConnectionResult {
   final vm_service.VmService vmService;
 }
 
-typedef VmServiceFactory =
-    Future<vm_service.VmService> Function(
-      Uri, {
-      CompressionOptions compression,
-      required Logger logger,
-    });
+typedef VmServiceFactory = Future<vm_service.VmService> Function(
+  Uri, {
+  CompressionOptions compression,
+  required Logger logger,
+});
 
 /// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
@@ -84,8 +83,8 @@ class WebDevFS implements DevFS {
     required this.logger,
     required this.platform,
     this.testMode = false,
-    Map<String, String> webDefines = const <String, String>{},
-  }) : _webDefines = webDefines {
+    this._webDefines = const <String, String>{},
+  }) {
     // TODO(srujzs): Remove this assertion when the library bundle format is
     // supported without canary mode.
     if (ddcModuleSystem) {
@@ -243,6 +242,16 @@ class WebDevFS implements DevFS {
     return baseUri;
   }
 
+  /// Signal that the underlying web asset server is ready to handle requests.
+  ///
+  /// The HTTP server starts listening early during [create] so the port and URI
+  /// are known before compilation. However, incoming HTTP requests are held
+  /// until initial compilation completes and the DWDS connection listener is
+  /// registered so clients do not load incomplete assets or miss connection events.
+  void markReady() {
+    webAssetServer.markReady();
+  }
+
   @override
   Future<void> destroy() async {
     await webAssetServer.dispose();
@@ -393,9 +402,8 @@ class WebDevFS implements DevFS {
         return UpdateFSReport();
       }
       if (dirtyEntries.isNotEmpty) {
-        await LocalDevFSWriter(
-          fileSystem: fileSystem,
-        ).write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
+        await LocalDevFSWriter(fileSystem: fileSystem)
+            .write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
       }
     }
     await _validateTemplateFile('index.html');

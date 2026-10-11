@@ -43,6 +43,7 @@ executable("flutter_shell_native_unittests") {
   visibility = [ "*" ]
   testonly = true
   sources = [
+    "android_context_dynamic_impeller_unittests.cc",
     "android_context_gl_impeller_unittests.cc",
     "android_image_generator_unittests.cc",
     "android_shell_holder_unittests.cc",
@@ -240,6 +241,7 @@ android_java_sources = [
   "io/flutter/embedding/android/FlutterTextureView.java",
   "io/flutter/embedding/android/FlutterView.java",
   "io/flutter/embedding/android/FlutterViewDelegate.java",
+  "io/flutter/embedding/android/IntentUtils.java",
   "io/flutter/embedding/android/KeyChannelResponder.java",
   "io/flutter/embedding/android/KeyData.java",
   "io/flutter/embedding/android/KeyEmbedderResponder.java",
@@ -253,7 +255,6 @@ android_java_sources = [
   "io/flutter/embedding/engine/FlutterEngine.java",
   "io/flutter/embedding/engine/FlutterEngineCache.java",
   "io/flutter/embedding/engine/FlutterEngineConnectionRegistry.java",
-  "io/flutter/embedding/engine/FlutterEngineFlags.java",
   "io/flutter/embedding/engine/FlutterEngineGroup.java",
   "io/flutter/embedding/engine/FlutterEngineGroupCache.java",
   "io/flutter/embedding/engine/FlutterJNI.java",
@@ -265,6 +266,8 @@ android_java_sources = [
   "io/flutter/embedding/engine/dart/PlatformTaskQueue.java",
   "io/flutter/embedding/engine/deferredcomponents/DeferredComponentManager.java",
   "io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManager.java",
+  "io/flutter/embedding/engine/flags/FlutterEngineFlags.java",
+  "io/flutter/embedding/engine/flags/FlutterEngineFlagsProvider.java",
   "io/flutter/embedding/engine/image/BitmapMetadataReader.java",
   "io/flutter/embedding/engine/image/ExifMetadataReader.java",
   "io/flutter/embedding/engine/image/FlutterImageDecoder.java",
@@ -357,6 +360,7 @@ android_java_sources = [
   "io/flutter/plugin/platform/PlatformPlugin.java",
   "io/flutter/plugin/platform/PlatformView.java",
   "io/flutter/plugin/platform/PlatformViewFactory.java",
+  "io/flutter/plugin/platform/PlatformViewGestureTracker.java",
   "io/flutter/plugin/platform/PlatformViewRegistry.java",
   "io/flutter/plugin/platform/PlatformViewRegistryImpl.java",
   "io/flutter/plugin/platform/PlatformViewRenderTarget.java",
@@ -390,9 +394,17 @@ android_java_sources = [
   "io/flutter/view/MenuRoleConfigurator.java",
   "io/flutter/view/ProgressBarRoleConfigurator.java",
   "io/flutter/view/RoleConfiguratorFactory.java",
+  "io/flutter/view/SliderRoleConfigurator.java",
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
 ]
+
+if (flutter_runtime_mode == "release" ||
+    flutter_runtime_mode == "jit_release") {
+  android_java_sources += [ "release/io/flutter/embedding/engine/flags/FlutterEngineFlagsProviderImpl.java" ]
+} else {
+  android_java_sources += [ "debug/io/flutter/embedding/engine/flags/FlutterEngineFlagsProviderImpl.java" ]
+}
 
 embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/activity-1.8.1.jar",
@@ -700,11 +712,6 @@ action("pom_content_hash_embedding") {
     "--include-embedding-dependencies",
     "true",
   ]
-}
-
-# TODO(jsimmons): remove this placeholder when it is no longer used by the LUCI recipes
-group("robolectric_tests") {
-  deps = [ ":android_jar" ]
 }
 
 zip_bundle("android_symbols") {
