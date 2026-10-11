@@ -64,6 +64,18 @@ FLUTTER_COPTS = CHROMIUM_CODE_COPTS + [
     "-Wunreachable-code",
 ]
 
+# What //flutter/third_party/googletest:gmock's public config (gmock_config,
+# in the engine's GN for googletest) hands to every dependent: the
+# MOCK_METHOD macros omit `override`. GN propagates it along public_deps,
+# and //flutter/testing:testing_core has gmock in its public_deps, so it
+# reaches every test target; Bazel cannot carry a flag along a dependency
+# and @googletest's upstream BUILD has no such copt, so testonly targets add
+# this list. Over-approximate for a testonly target that never includes
+# gmock, harmlessly: it only turns a warning off.
+FLUTTER_TESTONLY_COPTS = [
+    "-Wno-inconsistent-missing-override",
+]
+
 # //build/config/compiler:chromium_code (defines).
 FLUTTER_LOCAL_DEFINES = [
     "__STDC_CONSTANT_MACROS",

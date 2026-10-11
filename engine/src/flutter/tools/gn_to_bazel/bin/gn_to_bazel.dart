@@ -209,7 +209,7 @@ Future<int> run(List<String> arguments) async {
 /// the GN directories being converted.
 OutputLayout _layout(String? repository, Iterable<String> gnPackages, {String? secondarySource}) {
   if (repository == null) {
-    return const OutputLayout.main();
+    return mainRepositoryLayout;
   }
   final int equals = repository.indexOf('=');
   if (!repository.startsWith('@') ||
