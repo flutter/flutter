@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/testing/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: testing_lib, testing, dart, skia, vmservice_kernel, vmservice_snapshot, fixture_test, vulkan, test_swiftshader_utils, test_swangle_utils, opengl.
+# Not converted: dart, vmservice_kernel, vmservice_snapshot, fixture_test, vulkan, test_swiftshader_utils, test_swangle_utils, opengl.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
@@ -57,6 +57,30 @@ cc_library(
     alwayslink = True,
 )
 
+# ":testing_core" plus the display_list test helpers.
+cc_library(
+    name = "testing_lib",
+    testonly = True,
+    srcs = [
+        "display_list_testing.cc",
+        "sk_data_fixtures.cc",
+    ],
+    hdrs = [
+        "display_list_testing.h",
+        "sk_data_fixtures.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":testing_core",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/impeller/typographer",
+    ],
+    alwayslink = True,
+)
+
 # The gtest main() used by the engine's unit test binaries.
 cc_library(
     name = "run_all_unittests",
@@ -68,6 +92,34 @@ cc_library(
         ":dynamic_symbols",
         ":testing_core",
         "//engine/src:include_root",
+    ],
+    alwayslink = True,
+)
+
+# The gtest main() together with all test helpers.
+cc_library(
+    name = "testing",
+    testonly = True,
+    deps = [
+        ":run_all_unittests",
+        ":testing_lib",
+    ],
+)
+
+cc_library(
+    name = "skia",
+    testonly = True,
+    srcs = ["assertions_skia.cc"],
+    hdrs = [
+        "assertions_skia.h",
+        "canvas_test.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":testing_lib",
+        "//engine/src:include_root",
+        "@skia",
     ],
     alwayslink = True,
 )

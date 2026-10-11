@@ -135,6 +135,14 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/llvm_libc",
         build_file = _OVERLAYS + ":llvm_libc/BUILD.llvm_libc.bazel",
     ),
+    # Impeller's tessellator (research/08, step 4): the secondary tree's GN
+    # over the synced tree.
+    "libtess2": struct(
+        path = "engine/src/flutter/third_party/libtess2",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/third_party/libtess2/BUILD.gn"],
+        gn_repository = "@libtess2=//flutter/third_party/libtess2",
+    ),
     "re2": struct(
         path = "engine/src/flutter/third_party/re2",
         build_file = None,
