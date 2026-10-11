@@ -114,6 +114,100 @@ TEST_F(FlViewGtk4AccessibilityTest, NativeActionsRespectCurrentSemantics) {
 }
 
 TEST_F(FlViewGtk4AccessibilityTest,
+       ScrollAndAdjustmentActionsRespectCurrentSemantics) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) primary = fl_view_new(project);
+  g_object_ref_sink(primary);
+  FlEngine* engine = fl_view_get_engine(primary);
+  StartEngine(engine);
+  g_autoptr(FlView) view = fl_view_new_for_engine(engine);
+  g_object_ref_sink(view);
+  ASSERT_NE(fl_view_get_id(view), 0);
+  const struct {
+    const char* name;
+    FlutterSemanticsAction action;
+  } actions[] = {
+      {"flutter.scroll-left", kFlutterSemanticsActionScrollLeft},
+      {"flutter.scroll-right", kFlutterSemanticsActionScrollRight},
+      {"flutter.scroll-up", kFlutterSemanticsActionScrollUp},
+      {"flutter.scroll-down", kFlutterSemanticsActionScrollDown},
+      {"flutter.increase", kFlutterSemanticsActionIncrease},
+      {"flutter.decrease", kFlutterSemanticsActionDecrease},
+  };
+  size_t calls = 0;
+  FlutterSemanticsAction expected = kFlutterSemanticsActionScrollLeft;
+  fl_engine_get_embedder_api(engine)->SendSemanticsAction =
+      MOCK_ENGINE_PROC(SendSemanticsAction,
+                       ([&](auto, const FlutterSendSemanticsActionInfo* info) {
+                         EXPECT_EQ(info->view_id, fl_view_get_id(view));
+                         EXPECT_EQ(info->node_id, 0u);
+                         EXPECT_EQ(info->action, expected);
+                         EXPECT_EQ(info->data_length, 0u);
+                         calls++;
+                         return kSuccess;
+                       }));
+  FlutterSemanticsFlags flags = {};
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  FlutterSemanticsNode2* nodes[] = {&root};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  const auto apply_update = [&]() {
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+  };
+  apply_update();
+  g_autoptr(GtkAccessible) native =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  ASSERT_TRUE(GTK_IS_WIDGET(native));
+  GtkWidget* widget = GTK_WIDGET(native);
+  for (const auto& action : actions) {
+    SCOPED_TRACE(action.name);
+    expected = action.action;
+    root.actions = action.action;
+    apply_update();
+    const size_t before = calls;
+    EXPECT_TRUE(gtk_widget_activate_action(widget, action.name, nullptr));
+    EXPECT_EQ(calls, before + 1);
+    for (const auto& other : actions) {
+      if (other.action != action.action) {
+        gtk_widget_activate_action(widget, other.name, nullptr);
+      }
+    }
+    root.actions = static_cast<FlutterSemanticsAction>(0);
+    apply_update();
+    gtk_widget_activate_action(widget, action.name, nullptr);
+    root.actions = action.action;
+    flags.is_enabled = kFlutterTristateFalse;
+    apply_update();
+    gtk_widget_activate_action(widget, action.name, nullptr);
+    flags.is_enabled = kFlutterTristateTrue;
+    flags.is_hidden = true;
+    apply_update();
+    gtk_widget_activate_action(widget, action.name, nullptr);
+    EXPECT_EQ(calls, before + 1);
+    flags.is_hidden = false;
+  }
+  // Re-enable every action before disposal to exercise lifetime gating.
+  for (const auto& action : actions) {
+    root.actions =
+        static_cast<FlutterSemanticsAction>(root.actions | action.action);
+  }
+  apply_update();
+  const size_t before = calls;
+  g_object_run_dispose(G_OBJECT(view));
+  for (const auto& action : actions) {
+    gtk_widget_activate_action(widget, action.name, nullptr);
+  }
+  EXPECT_EQ(calls, before);
+}
+
+TEST_F(FlViewGtk4AccessibilityTest,
        NativeProxyUsesSurfaceLifecycleWithoutLayout) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
@@ -243,18 +337,29 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   if (check_selection) {
     text.actions = kFlutterSemanticsActionSetSelection;
   }
-  int32_t children[] = {1};
-  if (check_text) {
-    button.child_count = 1;
-    button.children_in_traversal_order = children;
+  const FlutterSemanticsAction adjustment_actions[] = {
+      kFlutterSemanticsActionScrollLeft, kFlutterSemanticsActionScrollRight,
+      kFlutterSemanticsActionScrollUp,   kFlutterSemanticsActionScrollDown,
+      kFlutterSemanticsActionIncrease,   kFlutterSemanticsActionDecrease,
+  };
+  FlutterSemanticsNode2 adjustment = {};
+  adjustment.id = 2;
+  adjustment.label = "Flutter AT-SPI adjustment fixture";
+  for (const auto action : adjustment_actions) {
+    adjustment.actions =
+        static_cast<FlutterSemanticsAction>(adjustment.actions | action);
   }
-  FlutterSemanticsNode2* nodes[] = {&button, &text};
+  int32_t children[] = {2, 1};
+  button.child_count = check_text ? 2 : 1;
+  button.children_in_traversal_order = children;
+  FlutterSemanticsNode2* nodes[] = {&button, &adjustment, &text};
   FlutterSemanticsUpdate2 update = {};
   update.view_id = view_id;
-  update.node_count = check_text ? 2 : 1;
+  update.node_count = check_text ? 3 : 2;
   update.nodes = nodes;
   size_t text_updates = 0;
   size_t selection_calls = 0;
+  size_t adjustment_calls = 0;
   const gchar* text_values[] = {
       "New \xF0\x9F\x98\x80 text",
       "New \xF0\x9F\x98\x81 text",
@@ -266,6 +371,15 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
       SendSemanticsAction,
       ([&](auto, const FlutterSendSemanticsActionInfo* info) {
         EXPECT_EQ(info->view_id, view_id);
+        if (info->node_id == 2) {
+          EXPECT_LT(adjustment_calls, G_N_ELEMENTS(adjustment_actions));
+          if (adjustment_calls < G_N_ELEMENTS(adjustment_actions)) {
+            EXPECT_EQ(info->action, adjustment_actions[adjustment_calls]);
+          }
+          EXPECT_EQ(info->data_length, 0u);
+          adjustment_calls++;
+          return kSuccess;
+        }
         if (info->action == kFlutterSemanticsActionSetSelection) {
           EXPECT_TRUE(check_selection);
           EXPECT_EQ(info->node_id, 1u);
@@ -340,6 +454,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   EXPECT_EQ(calls, check_focus ? 3u : 1u);
   EXPECT_EQ(text_updates, check_text ? 4u : 0u);
   EXPECT_EQ(selection_calls, check_selection ? 2u : 0u);
+  EXPECT_EQ(adjustment_calls, G_N_ELEMENTS(adjustment_actions));
   gtk_window_set_child(window, nullptr);
   gtk_box_append(GTK_BOX(view), surface);
   gtk_window_destroy(window);

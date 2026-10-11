@@ -89,8 +89,9 @@ python3 engine/src/flutter/shell/platform/linux/testing/run_gtk4_atspi_action_te
 This separate integration test needs a GTK runtime with native accessible-tree
 support, PyGObject with Atspi introspection, `dbus-run-session`, Xvfb, `xauth`,
 and the AT-SPI bus launcher and registry. It creates a private session/display,
-finds its fixture by PID, and invokes the exported action. The fixture asserts
-the resulting Flutter embedder action. It does not validate a Dart callback,
+finds its fixture by PID, and invokes the exported tap, directional scrolling,
+and increase/decrease actions. The fixture asserts the resulting Flutter
+embedder actions and their order. It does not validate a Dart callback,
 Orca behavior, or full text-editing support.
 
 The external-client fixture skips in ordinary GoogleTest runs. The runtime

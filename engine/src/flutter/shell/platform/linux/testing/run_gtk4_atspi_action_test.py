@@ -119,6 +119,24 @@ def run_fixture(binary, output, check_focus=False, check_text=False, check_selec
         names = [action.get_action_name(i) for i in range(action.get_n_actions())]
         if names != ['flutter.tap']:
           raise RuntimeError(f'Unexpected native actions: {names}')
+        adjustment_node = wait_until(
+            lambda: find_fixture('Flutter AT-SPI adjustment fixture'), 'native adjustment node'
+        )
+        adjustment = adjustment_node.get_action_iface()
+        if adjustment is None:
+          raise RuntimeError('Adjustment node does not export AT-SPI Action')
+        expected_actions = [
+            'flutter.scroll-left', 'flutter.scroll-right', 'flutter.scroll-up',
+            'flutter.scroll-down', 'flutter.increase', 'flutter.decrease'
+        ]
+        adjustment_names = [
+            adjustment.get_action_name(i) for i in range(adjustment.get_n_actions())
+        ]
+        if sorted(adjustment_names) != sorted(expected_actions):
+          raise RuntimeError(f'Unexpected adjustment actions: {adjustment_names}')
+        for name in expected_actions:
+          if not adjustment.do_action(adjustment_names.index(name)):
+            raise RuntimeError(f'AT-SPI rejected {name}')
         if check_text:
           text_node = wait_until(
               lambda: find_fixture('Flutter AT-SPI text fixture'), 'native text node'
