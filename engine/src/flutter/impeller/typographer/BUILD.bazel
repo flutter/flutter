@@ -1,0 +1,55 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/typographer/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: typographer_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "typographer",
+    srcs = [
+        "font.cc",
+        "font_glyph_pair.cc",
+        "glyph.cc",
+        "glyph_atlas.cc",
+        "lazy_glyph_atlas.cc",
+        "rectangle_packer.cc",
+        "text_frame.cc",
+        "text_run.cc",
+        "typeface.cc",
+        "typographer_context.cc",
+    ],
+    hdrs = [
+        "font.h",
+        "font_glyph_pair.h",
+        "glyph.h",
+        "glyph_atlas.h",
+        "lazy_glyph_atlas.h",
+        "rectangle_packer.h",
+        "text_frame.h",
+        "text_run.h",
+        "typeface.h",
+        "typographer_context.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list:dl_path",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/geometry",
+        "//engine/src/flutter/impeller/renderer",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@skia",
+    ],
+    alwayslink = True,
+)

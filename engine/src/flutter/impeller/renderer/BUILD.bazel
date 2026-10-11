@@ -1,0 +1,106 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/renderer/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: renderer_unittests, renderer_unittests_golden, renderer_dart_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impeller_shaders")
+
+package(default_visibility = ["//visibility:public"])
+
+impeller_shaders(
+    name = "compute_shaders",
+    enable_opengles = False,
+    library_name = "compute",
+    shaders = [
+        "compute_3d_test.comp",
+        "prefix_sum_test.comp",
+        "threadgroup_sizing_test.comp",
+    ],
+    vulkan_language_version = 130,
+)
+
+cc_library(
+    name = "renderer",
+    srcs = [
+        "blit_command.cc",
+        "blit_pass.cc",
+        "capabilities.cc",
+        "command.cc",
+        "command_buffer.cc",
+        "command_buffer_scheduling_receipt.cc",
+        "command_queue.cc",
+        "compute_pass.cc",
+        "compute_pipeline_builder.cc",
+        "compute_pipeline_descriptor.cc",
+        "context.cc",
+        "pipeline.cc",
+        "pipeline_builder.cc",
+        "pipeline_compile_queue.cc",
+        "pipeline_descriptor.cc",
+        "pipeline_library.cc",
+        "render_pass.cc",
+        "render_target.cc",
+        "sampler_library.cc",
+        "shader_function.cc",
+        "shader_key.cc",
+        "shader_library.cc",
+        "snapshot.cc",
+        "surface.cc",
+        "texture_util.cc",
+        "vertex_buffer_builder.cc",
+        "vertex_descriptor.cc",
+    ],
+    hdrs = [
+        "blit_command.h",
+        "blit_pass.h",
+        "capabilities.h",
+        "command.h",
+        "command_buffer.h",
+        "command_buffer_scheduling_receipt.h",
+        "command_queue.h",
+        "compute_pass.h",
+        "compute_pipeline_builder.h",
+        "compute_pipeline_descriptor.h",
+        "context.h",
+        "pipeline.h",
+        "pipeline_builder.h",
+        "pipeline_compile_queue.h",
+        "pipeline_descriptor.h",
+        "pipeline_library.h",
+        "pool.h",
+        "render_pass.h",
+        "render_target.h",
+        "sampler_library.h",
+        "shader_function.h",
+        "shader_key.h",
+        "shader_library.h",
+        "shader_stage_compatibility_checker.h",
+        "snapshot.h",
+        "surface.h",
+        "texture_util.h",
+        "vertex_buffer_builder.h",
+        "vertex_descriptor.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":compute_shaders",  # impeller_enable_compute
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/core",
+        "//engine/src/flutter/impeller/geometry",
+        "//engine/src/flutter/impeller/runtime_stage",
+        "//engine/src/flutter/impeller/tessellator",
+        "@abseil-cpp//absl/container:linked_hash_map",
+        "@abseil-cpp//absl/strings",
+    ],
+    alwayslink = True,
+)
