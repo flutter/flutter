@@ -47,12 +47,19 @@ Future<String> convert(
   Assumptions? assumptions,
   String gnPackage = '//flutter/example',
   Set<String> externalVariables = knownExternalVariables,
+  Set<String> templates = const <String>{'test_fixtures'},
   Set<String> skip = const <String>{},
   String? appendix,
   OutputLayout layout = const OutputLayout.main(),
 }) async {
   return emitBuildFile(
-    await evaluate(gn, assumptions: assumptions, externalVariables: externalVariables, skip: skip),
+    await evaluate(
+      gn,
+      assumptions: assumptions,
+      externalVariables: externalVariables,
+      templates: templates,
+      skip: skip,
+    ),
     gnPackage: gnPackage,
     skipTargets: skip,
     appendix: appendix,
@@ -1697,6 +1704,155 @@ cc_binary(
     ],
 )
 '''),
+      );
+    });
+
+    test('copy() becomes a gn_copy that records the destination', () async {
+      expect(
+        await convert(r'''
+copy("shaders") {
+  sources = [
+    "a.glsl",
+    "b.glsl",
+  ]
+  outputs = [ "$root_out_dir/shader_lib/{{source_file_part}}" ]
+}
+'''),
+        contains(r'''
+load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
+
+package(default_visibility = ["//visibility:public"])
+
+gn_copy(
+    name = "shaders",
+    srcs = [
+        "a.glsl",
+        "b.glsl",
+    ],
+    outputs = ["$root_out_dir/shader_lib/{{source_file_part}}"],
+)
+'''),
+      );
+    });
+
+    test('a template invocation maps its files, labels, configs and scalars', () async {
+      // The flatbuffers template's public config carries two generated
+      // include directories: the package's own (the `includes` of the
+      // config's library span the output tree too) and //flutter's, which
+      // is the target whose `includes` already name that directory.
+      final String output = await convert(
+        r'''
+config("schema_config") {
+  include_dirs = [
+    "$root_gen_dir/flutter",
+    "$root_gen_dir/flutter/example",
+    "include",
+  ]
+}
+
+source_set("other") {
+  sources = [ "other.cc" ]
+}
+
+flatbuffers("schema") {
+  testonly = true
+  flatbuffers = [ "schema.fbs" ]
+  public_configs = [ ":schema_config" ]
+  public_deps = [ "//flutter/third_party/flatbuffers" ]
+  deps = [ ":other" ]
+}
+''',
+        templates: <String>{'flatbuffers'},
+      );
+      expect(
+        output,
+        contains('''
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel/flatbuffers:flatbuffers.bzl", "flatbuffers")
+'''),
+      );
+      expect(
+        output,
+        contains('''
+cc_library(
+    name = "schema_config",
+    includes = [
+        ".",
+        "include",
+    ],
+    deps = ["//engine/src/flutter:config"],
+)
+'''),
+      );
+      expect(
+        output,
+        contains('''
+flatbuffers(
+    name = "schema",
+    testonly = True,
+    flatbuffers = ["schema.fbs"],
+    deps = [
+        ":other",
+        ":schema_config",
+        "@flatbuffers",
+    ],
+)
+'''),
+      );
+      await expectLater(
+        convert(
+          '''
+flatbuffers("schema") {
+  flatbuffers = [ "schema.fbs" ]
+  public_configs = [ "//build/config:mystery" ]
+}
+''',
+          templates: <String>{'flatbuffers'},
+        ),
+        throwsGnError(line: 3, message: 'no Bazel dependency mapping for a flatbuffers macro'),
+      );
+    });
+
+    test('generated and foreign include directories', () async {
+      // The root of the generated tree is the engine's include root; a
+      // directory of another repository comes with the dependency on it.
+      expect(
+        await convert(r'''
+source_set("x") {
+  sources = [ "a.cc" ]
+  include_dirs = [
+    "$root_gen_dir",
+    "//flutter/third_party/vulkan-deps/spirv-cross/src/",
+  ]
+  deps = [ "//third_party/spirv_cross_flutter" ]
+}
+'''),
+        contains('''
+# include_dirs: @spirv-cross// comes with the dependency on @spirv-cross.
+cc_library(
+    name = "x",
+    srcs = ["a.cc"],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "@spirv-cross//:spirv_cross_flutter",
+    ],
+    alwayslink = True,
+)
+'''),
+      );
+      // Another package's generated directory has no target to stand for
+      // it.
+      await expectLater(
+        convert(r'''
+source_set("x") {
+  sources = [ "a.cc" ]
+  include_dirs = [ "$root_gen_dir/flutter/elsewhere" ]
+}
+'''),
+        throwsGnError(line: 3, message: 'outside the package of the generated file'),
       );
     });
 

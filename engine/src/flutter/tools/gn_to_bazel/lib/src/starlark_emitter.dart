@@ -161,7 +161,7 @@ String emitBuildFile(
 }
 
 /// Target variables that say nothing Bazel needs.
-const Set<String> _ignoredVariables = <String>{'check_includes', 'visibility'};
+const Set<String> _ignoredVariables = <String>{'check_includes', 'metadata', 'visibility'};
 
 final class _Emitter {
   _Emitter(this.gnPackage, this.layout, this.implicitDeps, this.tree)
@@ -244,6 +244,8 @@ final class _Emitter {
         _convertGroup(target);
       case 'action':
         _convertAction(target);
+      case 'copy':
+        _convertCopy(target);
       default:
         throw GnError(target.location, '${target.rule}() is not converted yet');
     }
@@ -440,19 +442,84 @@ final class _Emitter {
     return isTestonly && target.name.endsWith('tests');
   }
 
+  /// A known template becomes a call of its Bazel macro, with the arguments
+  /// the mapping names translated by kind (see [TemplateMapping.arguments]).
   void _convertTemplate(GnTarget target, TemplateMapping template) {
     _use(template.bzl, template.symbol);
     final rule = _Rule(template.symbol, target.name, target.comments);
     for (final GnVariable variable in target.variables.values) {
+      final TemplateArgument? argument = template.arguments[variable.name];
+      if (argument == null) {
+        if (_ignoredVariables.contains(variable.name)) {
+          continue;
+        }
+        throw GnError(
+          variable.assignments.first.location,
+          '${target.rule}() argument ${variable.name} is not handled by the ${template.symbol} macro mapping',
+        );
+      }
+      switch (argument.kind) {
+        case TemplateArgumentKind.files:
+          _filesInto(rule.list(argument.attribute), variable);
+        case TemplateArgumentKind.labels:
+          _labelsInto(rule.list(argument.attribute), variable, target);
+        case TemplateArgumentKind.configs:
+          _forEachItem(variable, into: rule.list(argument.attribute), (_Element e) {
+            final String config = _string(e);
+            final String label;
+            if (config.startsWith(':')) {
+              if (!localConfigs.containsKey(config.substring(1))) {
+                throw GnError(e.assignment.location, 'unknown local config $config');
+              }
+              label = config;
+            } else {
+              final ConfigEffect? effect = configEffects[_gnLabel(config)];
+              if (effect is! ConfigDependency) {
+                throw GnError(
+                  e.assignment.location,
+                  'config $config has no Bazel dependency mapping for a ${template.symbol} macro',
+                );
+              }
+              label = _localLabel(effect.label);
+            }
+            rule.list(argument.attribute).addUnique(e.condition, _item(label, e));
+          });
+        case TemplateArgumentKind.scalar:
+          _scalar(rule, argument.attribute, variable);
+      }
+    }
+    rules.add(rule);
+  }
+
+  /// copy("x") becomes a `gn_copy`: its sources as they are, GN's
+  /// destination recorded (see build/bazel/gn_action).
+  void _convertCopy(GnTarget target) {
+    _use('//engine/src/flutter/build/bazel/gn_action:gn_action.bzl', 'gn_copy');
+    final rule = _Rule('gn_copy', target.name, target.comments);
+    for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
-        case 'fixtures':
-          _labelsInto(rule.list('fixtures'), variable, target);
+        case 'sources':
+          _filesInto(rule.list('srcs'), variable);
+        case 'outputs':
+          // As GN wrote them, for the record.
+          _forEachItem(variable, into: rule.list('outputs'), (_Element e) {
+            final String text = _string(e)
+                .replaceFirst('$genDirRoot/', r'$root_gen_dir/')
+                .replaceFirst('$buildDirRoot/', r'$root_out_dir/');
+            rule.list('outputs').add(e.condition, _item(text, e));
+          });
+        case 'deps':
+        case 'public_deps':
+          _labelsInto(rule.list('deps'), variable, target);
         case 'testonly':
           _scalar(rule, 'testonly', variable);
         default:
+          if (_ignoredVariables.contains(variable.name) || variable.forwarded) {
+            break;
+          }
           throw GnError(
             variable.assignments.first.location,
-            '${target.rule}() argument ${variable.name} is not handled by the ${template.symbol} macro mapping',
+            'variable ${variable.name} of copy ${target.name} is not converted yet',
           );
       }
     }
@@ -501,7 +568,7 @@ final class _Emitter {
         case 'defines':
           _stringsInto(rule.list('local_defines'), variable);
         case 'include_dirs':
-          _filesInto(rule.list('includes'), variable);
+          _includeDirsInto(rule, variable, Condition.always);
         case 'configs':
         case 'public_configs':
         case 'all_dependent_configs':
@@ -820,7 +887,7 @@ final class _Emitter {
         case 'defines':
           _stringsInto(rule.list('defines'), variable);
         case 'include_dirs':
-          _filesInto(rule.list('includes'), variable);
+          _includeDirsInto(rule, variable, Condition.always);
         case 'libs':
         case 'frameworks':
         case 'ldflags':
@@ -876,7 +943,8 @@ final class _Emitter {
         case 'defines':
           attribute = 'local_defines';
         case 'include_dirs':
-          attribute = 'includes';
+          _includeDirsInto(rule, variable, use.condition);
+          continue;
         case 'ldflags':
           attribute = 'linkopts';
         case 'visibility':
@@ -1135,14 +1203,22 @@ final class _Emitter {
     } else if (absolute.startsWith('$genDirRoot/')) {
       absolute = '//${absolute.substring(genDirRoot.length + 1)}';
     }
+    if (absolute.length > 2 && absolute.endsWith('/')) {
+      absolute = absolute.substring(0, absolute.length - 1);
+    }
     final String? relative = layout.relativePath(absolute);
-    if (relative == null) {
-      // A file of another repository, which is a single package here.
+    if (relative == null || layout.isMain) {
+      // A file of another repository (a synced tree, which the main
+      // repository ignores), which is a single package here.
       for (final MapEntry<String, String> entry in labelRepositoryPrefixes.entries) {
-        if (absolute.startsWith(entry.key) && entry.value.endsWith('//')) {
-          return '${entry.value}:${absolute.substring(entry.key.length)}';
+        if (entry.value.endsWith('//') &&
+            (absolute.startsWith(entry.key) || '$absolute/' == entry.key)) {
+          final String rest = '$absolute/' == entry.key ? '' : absolute.substring(entry.key.length);
+          return rest.isEmpty ? entry.value : '${entry.value}:$rest';
         }
       }
+    }
+    if (relative == null) {
       throw GnError(
         location,
         '$gnFilePath is outside the output repository '
@@ -1168,6 +1244,42 @@ final class _Emitter {
     _forEachItem(variable, into: attribute, (_Element e) {
       attribute.addUnique(e.condition, _item(_filePath(_string(e), e.assignment.location), e));
     });
+  }
+
+  /// `include_dirs`: `includes` entries, except that a generated directory
+  /// of an ancestor package (`$root_gen_dir/flutter`) is a dependency on
+  /// the target whose `includes` already spans it (see
+  /// [genDirIncludeTargets]); [under] is the condition of the config that
+  /// carries them, when they are inlined.
+  void _includeDirsInto(_Rule rule, GnVariable variable, Condition under) {
+    _forEachItem(variable, into: rule.list('includes'), (_Element e) {
+      final String path = _string(e);
+      final String? ancestor = _genDirIncludeTarget(path);
+      if (ancestor != null) {
+        rule.list('deps').addUnique(under.and(e.condition), _Item(_localLabel(ancestor)));
+        return;
+      }
+      rule
+          .list('includes')
+          .addUnique(under.and(e.condition), _item(_filePath(path, e.assignment.location), e));
+    });
+  }
+
+  /// The dependency standing for a generated include directory of an
+  /// ancestor package, or null when the directory is this package's or a
+  /// plain source directory.
+  String? _genDirIncludeTarget(String path) {
+    final absolute = path.startsWith('//') ? path : '$gnPackage/$path';
+    if (!absolute.startsWith(genDirRoot)) {
+      return null;
+    }
+    final directory = absolute == genDirRoot
+        ? '//'
+        : '//${absolute.substring(genDirRoot.length + 1)}';
+    if (directory == gnPackage || directory.startsWith('$gnPackage/')) {
+      return null;
+    }
+    return genDirIncludeTargets[directory];
   }
 
   static const Set<String> _headerExtensions = <String>{'.h', '.hh', '.hpp', '.inc'};
@@ -1354,14 +1466,32 @@ final class _Emitter {
     return out.toString();
   }
 
-  /// `@` loads first, as buildifier orders them.
+  /// buildifier's order: `@` loads first, then by the package's path
+  /// components and the file name, so that a package precedes its
+  /// subpackages (`//a/b:x.bzl` before `//a/b/c:y.bzl`, where a plain string
+  /// comparison would put `/` before `:`).
   static int _compareLoads(String a, String b) {
     final bool externalA = a.startsWith('@');
     final bool externalB = b.startsWith('@');
     if (externalA != externalB) {
       return externalA ? -1 : 1;
     }
-    return a.compareTo(b);
+    List<String> key(String label) {
+      final int colon = label.indexOf(':');
+      final String package = colon < 0 ? label : label.substring(0, colon);
+      final String file = colon < 0 ? '' : label.substring(colon + 1);
+      return <String>[...package.split('/'), ':$file'];
+    }
+
+    final List<String> ka = key(a);
+    final List<String> kb = key(b);
+    for (var i = 0; i < ka.length && i < kb.length; i++) {
+      final int c = ka[i].compareTo(kb[i]);
+      if (c != 0) {
+        return c;
+      }
+    }
+    return ka.length.compareTo(kb.length);
   }
 
   static const List<String> _leadingAttributes = <String>[
