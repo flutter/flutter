@@ -90,8 +90,20 @@ def protected_value_checks(Atspi, node, secret):
       'attributes': node.get_attributes(),
   }
   text = node.get_text_iface()
+  text_record = None
   if text is not None:
     surfaces['text'] = Atspi.Text.get_text(text, 0, -1)
+    text_record = {
+        'count':
+            text.get_character_count(),
+        'caret':
+            text.get_caret_offset(),
+        'masked':
+            set(surfaces['text']) <= {'*'},
+        'selections': [[selection.start_offset, selection.end_offset]
+                       for i in range(text.get_n_selections())
+                       if (selection := Atspi.Text.get_selection(text, i)) is not None],
+    }
     surfaces['text_default_attributes'] = text.get_default_attributes()
     if text.get_character_count() > 0:
       surfaces['text_attributes'] = text.get_text_attributes(0)
@@ -114,6 +126,7 @@ def protected_value_checks(Atspi, node, secret):
       'cut_advertised': 'cut' in actions,
       'paste_advertised': 'paste' in actions,
       'role': node.get_role_name(),
+      'text': text_record,
   }
 
 
@@ -122,6 +135,8 @@ def require_protected(checks):
     raise RuntimeError('GTK4 exposed a protected value or advertised copy/cut')
   if not checks['paste_advertised']:
     raise RuntimeError('GTK4 lost the permitted paste action on protected input')
+  if checks['text'] is None or not checks['text']['masked']:
+    raise RuntimeError('GTK4 did not expose masked protected Text')
 
 
 def snapshot(Atspi, nodes):
@@ -234,8 +249,8 @@ def run_backend(Atspi, binary, output, require_password_privacy=False):
           while context.pending():
             context.iteration(False)
           checks = protected_value_checks(Atspi, nodes['Editor'], 'Hello world')
-          if (not text_events or any(checks['disclosure'].values()) or checks['copy_advertised'] or
-              checks['cut_advertised']):
+          if (len(text_events) < 2 or any(checks['disclosure'].values()) or
+              checks['copy_advertised'] or checks['cut_advertised']):
             return None
           return checks
 
@@ -244,13 +259,39 @@ def run_backend(Atspi, binary, output, require_password_privacy=False):
         if any(event['exposes_value'] or not event['payload_redacted'] for event in text_events):
           raise RuntimeError('GTK4 disclosed protected contents in a text-change event')
         if [(event['type'], event['start'], event['length'], event['payload_length'])
-            for event in text_events] != [('object:text-changed:delete', 0, 11, 11)]:
+            for event in text_events] != [('object:text-changed:delete', 0, 11, 11),
+                                          ('object:text-changed:insert', 0, 11, 11)]:
           raise RuntimeError('GTK4 did not preserve the protected deletion notification range')
       else:
         # GTK3 is a baseline, not the privacy oracle for synthetic clear input.
         protected_editor = protected_value_checks(Atspi, nodes['Editor'], 'Hello world')
     finally:
       listener.deregister('object:text-changed')
+    protected_unicode = protected_value_checks(Atspi, nodes['Unicode'], 'A\U0001f600 caf\u00e9')
+    protected_selection_supported = False
+    if require_password_privacy:
+      require_protected(protected_unicode)
+      if protected_editor['text'] != {'count': 11, 'caret': 5, 'masked': True, 'selections':
+          [[2, 5]]} or protected_unicode['text'] != {'count': 7, 'caret': 2, 'masked': True,
+                                                     'selections': [[1, 2]]}:
+        raise RuntimeError('GTK4 lost protected length/caret/selection or Unicode offsets')
+      # Custom nodes need not expose toolkit metadata. Use the loaded runtime
+      # printed by this fixture, without seeking its shared output descriptor.
+      runtime_lines = os.pread(output.fileno(),
+                               os.fstat(output.fileno()).st_size, 0).decode().splitlines()
+      runtimes = [
+          json.loads(line.removeprefix('PARITY_RUNTIME '))
+          for line in runtime_lines
+          if line.startswith('PARITY_RUNTIME ')
+      ]
+      if not runtimes:
+        raise RuntimeError('Fixture did not identify its runtime for protected selection')
+      version = tuple(int(part) for part in runtimes[-1]['gtk'].split('.')[:2])
+      protected_selection_supported = version >= (4, 22)
+      if protected_selection_supported:
+        text = nodes['Unicode'].get_text_iface()
+        if not Atspi.Text.set_selection(text, 0, 1, 2):
+          raise RuntimeError('GTK4 rejected protected Unicode selection')
     invoke(nodes['Scroll region'], 'scrolldown')
 
     def editor_restored():
@@ -269,6 +310,8 @@ def run_backend(Atspi, binary, output, require_password_privacy=False):
         'password_checks': {
             'initial': password,
             'existing_editor_protected': protected_editor,
+            'unicode_protected': protected_unicode,
+            'unicode_selection_supported': protected_selection_supported,
             'protection_text_events': text_events,
             'editor_restored': True,
         },

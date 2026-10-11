@@ -99,6 +99,21 @@ normalized action names, children and text queries before and after the actions.
 Loaded GTK/GLib versions are included in the JSON report. Protected text is
 represented only by whether the fixture value was exposed, never its contents.
 
+The comparison also checks protected Text: masking, character count, caret and
+selection, suppression of copy/cut, and preservation of advertised paste. It
+protects existing ASCII and Unicode fields, checks that deletion/insertion event
+payloads contain only masks, and restores readable contents. On GTK 4.22+ it
+sends a native protected selection request and verifies the Flutter UTF-16
+payload. Older text-capable runtimes still exercise the query checks and report
+selection-command support separately. The report includes binary/source-file
+checksums and successful action-routing assertions.
+
+GTK3 is a regression baseline for usable behavior. Its synthetic obscured-value
+disclosure and UTF-16 offsets in AT-SPI character queries are not target behavior.
+Masked Text support does not solve password-role identification: GTK 4.22's
+native exporter recognizes password roles through concrete GtkText/editable
+delegates, rather than a public property for custom accessible objects.
+
 The GTK3 target uses real GTK; the regular unit-test binary replaces native GTK
 functions and cannot perform this export test. GTK4 needs native text support
 (GTK 4.14+); GTK 4.8 fallback is tested by the runtime compatibility validator.

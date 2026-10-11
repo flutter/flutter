@@ -63,6 +63,8 @@ struct _FlGtk4AccessibleNode {
   gboolean text_actions_enabled;
 
   gchar* text;
+  // Protected text keeps only character-to-UTF-16 boundaries, never raw text.
+  GArray* protected_text_offsets;
   guint text_selection_base;
   guint text_selection_extent;
 
@@ -521,6 +523,7 @@ static void fl_gtk4_accessible_node_detach(FlGtk4AccessibleNode* self) {
   // A client may retain a replaced text object when the new semantics become
   // protected. Detached objects must not keep readable contents or selection.
   g_clear_pointer(&self->text, g_free);
+  g_clear_pointer(&self->protected_text_offsets, g_array_unref);
   self->text_selection_base = 0;
   self->text_selection_extent = 0;
   for (const auto& action : kNativeActions) {
@@ -541,6 +544,7 @@ static void fl_gtk4_accessible_node_dispose(GObject* object) {
   g_clear_object(&self->at_context);
   g_clear_pointer(&self->children, g_ptr_array_unref);
   g_clear_pointer(&self->text, g_free);
+  g_clear_pointer(&self->protected_text_offsets, g_array_unref);
 
   G_OBJECT_CLASS(fl_gtk4_accessible_node_parent_class)->dispose(object);
 }
@@ -846,14 +850,23 @@ static gboolean fl_gtk4_text_accessible_node_set_selection(
   // GTK offsets count characters; Flutter's selection action uses UTF-16 units.
   gint64 base = 0;
   gint64 extent = 0;
-  const gchar* cursor = fl_gtk4_text_accessible_node_get_text(self);
-  for (gsize i = 0; i < range->start + range->length; i++) {
-    const int units = g_utf8_get_char(cursor) > 0xffff ? 2 : 1;
-    if (i < range->start) {
-      base += units;
+  if (self->protected_text_offsets != nullptr) {
+    if (range->start + range->length >= self->protected_text_offsets->len) {
+      return FALSE;
     }
-    extent += units;
-    cursor = g_utf8_next_char(cursor);
+    base = g_array_index(self->protected_text_offsets, guint, range->start);
+    extent = g_array_index(self->protected_text_offsets, guint,
+                           range->start + range->length);
+  } else {
+    const gchar* cursor = fl_gtk4_text_accessible_node_get_text(self);
+    for (gsize i = 0; i < range->start + range->length; i++) {
+      const int units = g_utf8_get_char(cursor) > 0xffff ? 2 : 1;
+      if (i < range->start) {
+        base += units;
+      }
+      extent += units;
+      cursor = g_utf8_next_char(cursor);
+    }
   }
   g_autoptr(FlValue) value = fl_value_new_map();
   fl_value_set_string_take(value, "base", fl_value_new_int(base));
@@ -912,7 +925,25 @@ static void fl_gtk4_text_accessible_node_set_text(FlGtk4AccessibleNode* self,
                                                   gint selection_base,
                                                   gint selection_extent,
                                                   gboolean is_obscured) {
-  const gchar* new_text = text == nullptr ? "" : text;
+  const gchar* source_text = text == nullptr ? "" : text;
+  g_autofree gchar* masked_text = nullptr;
+  if (is_obscured) {
+    masked_text = g_strnfill(g_utf8_strlen(source_text, -1), '*');
+    if (self->protected_text_offsets == nullptr) {
+      self->protected_text_offsets = g_array_new(FALSE, FALSE, sizeof(guint));
+    }
+    g_array_set_size(self->protected_text_offsets, 0);
+    guint units = 0;
+    g_array_append_val(self->protected_text_offsets, units);
+    for (const gchar* cursor = source_text; *cursor != '\0';
+         cursor = g_utf8_next_char(cursor)) {
+      units += g_utf8_get_char(cursor) > 0xffff ? 2 : 1;
+      g_array_append_val(self->protected_text_offsets, units);
+    }
+  } else {
+    g_clear_pointer(&self->protected_text_offsets, g_array_unref);
+  }
+  const gchar* new_text = is_obscured ? masked_text : source_text;
   const gboolean text_changed = g_strcmp0(self->text, new_text) != 0;
   guint change_start = 0;
   guint removed = 0;
@@ -960,9 +991,9 @@ static void fl_gtk4_text_accessible_node_set_text(FlGtk4AccessibleNode* self,
   }
 
   const guint new_base =
-      utf16_offset_to_character_offset(new_text, selection_base);
+      utf16_offset_to_character_offset(source_text, selection_base);
   const guint new_extent =
-      utf16_offset_to_character_offset(new_text, selection_extent);
+      utf16_offset_to_character_offset(source_text, selection_extent);
   const gboolean caret_changed = self->text_selection_extent != new_extent;
   const gboolean selection_changed =
       self->text_selection_base != new_base || caret_changed;
@@ -994,7 +1025,7 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
     FlGtk4AccessibleNode* self) {
   const GtkAccessibleRole role = fl_view_gtk4_accessibility_get_role(semantics);
   const gboolean supports_text =
-      semantics->flags.is_text_field && !semantics->flags.is_obscured &&
+      semantics->flags.is_text_field &&
       fl_gtk_runtime_supports_native_accessibility_text();
   // Do not evaluate the text-node type check unless GTK 4.14 is available:
   // evaluating its GType registers the dynamically resolved interface.
@@ -1083,12 +1114,12 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
 
   fl_gtk4_accessible_node_set_string_property(
       self, GTK_ACCESSIBLE_PROPERTY_VALUE_TEXT, value);
-  // A text node may survive a transition to obscured or non-text semantics.
-  // Clear its cached contents as well as the properties exposed above.
+  // Protected Text exposes only masking characters with usable caret/selection
+  // offsets. Non-text transitions clear the cached contents.
   if (fl_gtk_runtime_supports_native_accessibility_text() &&
       FL_IS_GTK4_TEXT_ACCESSIBLE_NODE(self)) {
     fl_gtk4_text_accessible_node_set_text(
-        self, supports_text ? value : nullptr,
+        self, supports_text ? semantics->value : nullptr,
         supports_text ? semantics->text_selection_base : 0,
         supports_text ? semantics->text_selection_extent : 0,
         flags->is_obscured);

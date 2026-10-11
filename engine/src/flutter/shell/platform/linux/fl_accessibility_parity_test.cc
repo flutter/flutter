@@ -8,6 +8,7 @@
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/linux/fl_engine_private.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
+#include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
 #include "gtest/gtest.h"
 
 #if FLUTTER_LINUX_GTK4
@@ -93,6 +94,8 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
   semantics[9].value = "A\xF0\x9F\x98\x80 caf\xC3\xA9";
   semantics[9].text_selection_base = 1;
   semantics[9].text_selection_extent = 3;
+  semantics[9].actions = static_cast<FlutterSemanticsAction>(
+      semantics[3].actions | kFlutterSemanticsActionSetSelection);
   flags[5].is_slider = true;
   semantics[5].value = "50%";
   semantics[5].actions = static_cast<FlutterSemanticsAction>(
@@ -135,12 +138,13 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
   size_t slider_calls = 0;
   size_t scroll_calls = 0;
   size_t finish_calls = 0;
+  size_t protected_selection_calls = 0;
   fl_engine_get_embedder_api(view_engine)->SendSemanticsAction =
       MOCK_ENGINE_PROC(
           SendSemanticsAction,
           ([&](auto, const FlutterSendSemanticsActionInfo* info) {
             EXPECT_EQ(info->view_id, update.view_id);
-            EXPECT_EQ(info->data_length, 0u);
+            EXPECT_EQ(info->data_length == 0u, info->node_id != 9);
             FlutterSemanticsNode2* changed = nullptr;
             switch (info->node_id) {
               case 1:
@@ -156,12 +160,14 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
                 changed = &semantics[5];
                 // Protect an existing Text object without changing its role.
                 flags[3].is_obscured = true;
+                flags[9].is_obscured = true;
                 {
-                  FlutterSemanticsNode2* editor = &semantics[3];
+                  FlutterSemanticsNode2* protected_nodes[] = {&semantics[3],
+                                                              &semantics[9]};
                   FlutterSemanticsUpdate2 partial = {};
                   partial.view_id = update.view_id;
-                  partial.node_count = 1;
-                  partial.nodes = &editor;
+                  partial.node_count = G_N_ELEMENTS(protected_nodes);
+                  partial.nodes = protected_nodes;
                   apply_update(&partial);
                 }
                 break;
@@ -169,8 +175,38 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
                 EXPECT_EQ(info->action, kFlutterSemanticsActionScrollDown);
                 scroll_calls++;
                 flags[3].is_obscured = false;
+                flags[9].is_obscured = false;
+                {
+                  FlutterSemanticsNode2* unicode = &semantics[9];
+                  FlutterSemanticsUpdate2 partial = {};
+                  partial.view_id = update.view_id;
+                  partial.node_count = 1;
+                  partial.nodes = &unicode;
+                  apply_update(&partial);
+                }
                 changed = &semantics[3];
                 break;
+              case 9: {
+                EXPECT_TRUE(flags[9].is_obscured);
+                EXPECT_EQ(info->action, kFlutterSemanticsActionSetSelection);
+                g_autoptr(GBytes) bytes =
+                    g_bytes_new(info->data, info->data_length);
+                g_autoptr(FlStandardMessageCodec) codec =
+                    fl_standard_message_codec_new();
+                g_autoptr(FlValue) selection = fl_message_codec_decode_message(
+                    FL_MESSAGE_CODEC(codec), bytes, nullptr);
+                EXPECT_NE(selection, nullptr);
+                if (selection != nullptr) {
+                  EXPECT_EQ(fl_value_get_int(
+                                fl_value_lookup_string(selection, "base")),
+                            1);
+                  EXPECT_EQ(fl_value_get_int(
+                                fl_value_lookup_string(selection, "extent")),
+                            3);
+                }
+                protected_selection_calls++;
+                break;
+              }
               case 8:
                 EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
                 finish_calls++;
@@ -208,6 +244,12 @@ TEST_F(FlAccessibilityParityTest, ExternalAtspiParity) {
   EXPECT_EQ(slider_calls, 1u);
   EXPECT_EQ(scroll_calls, 1u);
   EXPECT_EQ(finish_calls, 1u);
+#if FLUTTER_LINUX_GTK4
+  EXPECT_EQ(protected_selection_calls,
+            gtk_check_version(4, 22, 0) == nullptr ? 1u : 0u);
+#else
+  EXPECT_EQ(protected_selection_calls, 0u);
+#endif
 #if FLUTTER_LINUX_GTK4
   gtk_window_set_child(window, nullptr);
   gtk_box_append(GTK_BOX(view), surface);

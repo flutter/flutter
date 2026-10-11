@@ -1437,7 +1437,7 @@ TEST_F(FlViewGtk4AccessibilityTest, CursorActionsEncodeCollapsedSelection) {
     flags.is_obscured = true;
     apply_update();
     gtk_widget_activate_action(widget, action.name, nullptr);
-    EXPECT_EQ(calls, before + 1);
+    EXPECT_EQ(calls, before + 2);
     flags.is_obscured = false;
   }
   for (const auto& action : actions) {
@@ -1683,8 +1683,28 @@ TEST_F(FlViewGtk4AccessibilityTest, TextSelectionActionsUseUtf16Offsets) {
   flags.is_obscured = true;
   fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
                                            &update);
-  EXPECT_FALSE(iface->set_caret_position(native, 0));
-  EXPECT_FALSE(iface->set_selection(native, 0, &range));
+  g_autoptr(GBytes) masked =
+      fl_view_gtk4_accessibility_ref_native_text_for_testing(native);
+  ASSERT_NE(masked, nullptr);
+  EXPECT_EQ(g_bytes_get_size(masked), 4u);
+  EXPECT_EQ(memcmp(g_bytes_get_data(masked, nullptr), "****", 4), 0);
+  expected_base = expected_extent = 3;
+  EXPECT_TRUE(iface->set_caret_position(native, 2));
+  expected_base = 1;
+  expected_extent = 3;
+  EXPECT_TRUE(iface->set_selection(native, 0, &range));
+  EXPECT_EQ(calls, 4);
+  EXPECT_EQ(iface->base.get_caret_position(native), 0u);
+  // Identical masks may represent different UTF-16 boundaries. A partial
+  // update must refresh the mapping even when no text notification is needed.
+  const char* original = root.value;
+  root.value = "Abcd";
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  expected_base = expected_extent = 2;
+  EXPECT_TRUE(iface->set_caret_position(native, 2));
+  EXPECT_EQ(calls, 5);
+  root.value = original;
   flags.is_obscured = false;
   flags.is_hidden = true;
   fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
@@ -1697,11 +1717,11 @@ TEST_F(FlViewGtk4AccessibilityTest, TextSelectionActionsUseUtf16Offsets) {
   expected_base = 1;
   expected_extent = 3;
   EXPECT_TRUE(iface->set_selection(native, 0, &range));
-  EXPECT_EQ(calls, 3);
+  EXPECT_EQ(calls, 6);
   g_object_run_dispose(G_OBJECT(view));
   EXPECT_FALSE(iface->set_caret_position(native, 0));
   EXPECT_FALSE(iface->set_selection(native, 0, &range));
-  EXPECT_EQ(calls, 3);
+  EXPECT_EQ(calls, 6);
 }
 
 TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {
@@ -1734,20 +1754,21 @@ TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {
   if (!fl_gtk_runtime_supports_native_accessibility_text()) {
     return;
   }
+  g_autoptr(GBytes) initial_mask =
+      fl_view_gtk4_accessibility_ref_native_text_for_testing(native);
+  ASSERT_NE(initial_mask, nullptr);
+  EXPECT_EQ(g_bytes_get_size(initial_mask), strlen(root.value));
+  g_autofree gchar* expected_mask = g_strnfill(strlen(root.value), '*');
+  EXPECT_EQ(memcmp(g_bytes_get_data(initial_mask, nullptr), expected_mask,
+                   strlen(root.value)),
+            0);
   flags.is_obscured = false;
   fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
                                            &update);
   g_autoptr(GtkAccessible) readable =
       fl_view_gtk4_accessibility_ref_native_root_for_testing(
           view->accessibility_backend);
-  ASSERT_NE(readable, native);
-  auto* obsolete_iface = reinterpret_cast<FlGtkAccessibleInterface4_10*>(
-      GTK_ACCESSIBLE_GET_IFACE(native));
-  g_autoptr(GtkAccessible) obsolete_parent =
-      obsolete_iface->get_accessible_parent(native);
-  EXPECT_EQ(obsolete_parent, nullptr);
-  EXPECT_FALSE(
-      obsolete_iface->get_bounds(native, nullptr, nullptr, nullptr, nullptr));
+  ASSERT_EQ(readable, native);
   g_autoptr(GBytes) before =
       fl_view_gtk4_accessibility_ref_native_text_for_testing(readable);
   ASSERT_NE(before, nullptr);
@@ -1765,8 +1786,10 @@ TEST_F(FlViewGtk4AccessibilityTest, ObscuredValueIsNotExported) {
   g_autoptr(GBytes) after =
       fl_view_gtk4_accessibility_ref_native_text_for_testing(readable);
   ASSERT_NE(after, nullptr);
-  ASSERT_EQ(g_bytes_get_size(after), 1u);
-  EXPECT_EQ(*static_cast<const char*>(g_bytes_get_data(after, nullptr)), '\0');
+  ASSERT_EQ(g_bytes_get_size(after), strlen(root.value));
+  EXPECT_EQ(memcmp(g_bytes_get_data(after, nullptr), expected_mask,
+                   strlen(root.value)),
+            0);
 
   // A role change replaces the native object. Clients holding the old text
   // object must not be able to read its former value after protection changes.
