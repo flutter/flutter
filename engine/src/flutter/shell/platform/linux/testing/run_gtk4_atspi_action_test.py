@@ -126,7 +126,7 @@ def run_fixture(binary, output, check_focus=False, check_text=False):
           text = text_node.get_text_iface()
           if text is None:
             raise RuntimeError('Native text node does not export AT-SPI Text')
-          expected = 'A\U0001f600 caf\u00e9. Next sentence!'
+          expected = 'A\U0001f600 caf\u00e9. Next sentence!\nFinal'
           if Atspi.Text.get_text(text, 0,
                                  -1) != expected or text.get_character_count() != len(expected):
             raise RuntimeError('AT-SPI text contents or character count disagrees with semantics')
@@ -139,7 +139,9 @@ def run_fixture(binary, output, check_focus=False, check_text=False):
               (1, Atspi.TextGranularity.CHAR, 1, 2, '\U0001f600'),
               (4, Atspi.TextGranularity.WORD, 3, 9, 'caf\u00e9. '),
               (8, Atspi.TextGranularity.WORD, 3, 9, 'caf\u00e9. '),
-              (12, Atspi.TextGranularity.SENTENCE, 9, len(expected), 'Next sentence!'),
+              (12, Atspi.TextGranularity.SENTENCE, 9, 24, 'Next sentence!\n'),
+              (4, Atspi.TextGranularity.PARAGRAPH, 0, 24, expected[:24]),
+              (24, Atspi.TextGranularity.PARAGRAPH, 24, len(expected), 'Final'),
               (len(expected), Atspi.TextGranularity.CHAR, len(expected), len(expected), ''),
           ]
           for offset, granularity, start, end, contents in cases:

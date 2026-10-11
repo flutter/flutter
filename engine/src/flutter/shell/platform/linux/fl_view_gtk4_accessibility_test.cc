@@ -230,7 +230,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   text.id = 1;
   text.flags2 = &text_flags;
   text.label = "Flutter AT-SPI text fixture";
-  text.value = "A\xF0\x9F\x98\x80 caf\xC3\xA9. Next sentence!";
+  text.value = "A\xF0\x9F\x98\x80 caf\xC3\xA9. Next sentence!\nFinal";
   text.text_selection_base = 1;
   text.text_selection_extent = 3;
   int32_t children[] = {1};
@@ -999,7 +999,7 @@ TEST_F(FlViewGtk4AccessibilityTest, CharacterQueriesRespectTextEnd) {
   }
 }
 
-TEST_F(FlViewGtk4AccessibilityTest, WordAndSentenceQueriesUseTextBoundaries) {
+TEST_F(FlViewGtk4AccessibilityTest, TextQueriesUseLinguisticBoundaries) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing() ||
       !fl_gtk_runtime_supports_native_accessibility_text()) {
     GTEST_SKIP() << "Native accessible text requires GTK 4.14+";
@@ -1047,6 +1047,29 @@ TEST_F(FlViewGtk4AccessibilityTest, WordAndSentenceQueriesUseTextBoundaries) {
        "e\xCC\x81lan "},
       {"", 0, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_WORD, 0, 0, ""},
       {"", G_MAXUINT, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_SENTENCE, 0, 0, ""},
+      {"one\ntwo", 0, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 0, 4,
+       "one\n"},
+      {"one\ntwo", 3, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 0, 4,
+       "one\n"},
+      {"one\ntwo", 4, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 4, 7,
+       "two"},
+      {"one\ntwo", G_MAXUINT, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 4,
+       7, "two"},
+      {"one\r\ntwo", 4, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 0, 5,
+       "one\r\n"},
+      {"one\r\ntwo", 5, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 5, 8,
+       "two"},
+      {"one\rtwo", 4, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 4, 7,
+       "two"},
+      {"caf\xC3\xA9\xE2\x80\xA9next", 4,
+       FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 0, 5,
+       "caf\xC3\xA9\xE2\x80\xA9"},
+      {"caf\xC3\xA9\xE2\x80\xA9next", 5,
+       FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 5, 9, "next"},
+      {"one\n\ntwo", 4, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 4, 5,
+       "\n"},
+      {"one\n", 4, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 4, 4, ""},
+      {"", 0, FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH, 0, 0, ""},
   };
   for (const BoundaryCase& test : cases) {
     SCOPED_TRACE(testing::Message() << test.text << ":" << test.offset);

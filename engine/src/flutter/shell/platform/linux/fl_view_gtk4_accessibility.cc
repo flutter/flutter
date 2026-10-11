@@ -692,6 +692,32 @@ static GBytes* fl_gtk4_text_accessible_node_get_contents_at(
     return fl_gtk4_text_accessible_node_get_contents(accessible, first, last);
   }
 
+  if (granularity == FL_GTK_ACCESSIBLE_TEXT_GRANULARITY_PARAGRAPH) {
+    const gchar* paragraph = fl_gtk4_text_accessible_node_get_text(self);
+    guint first = 0;
+    guint last = 0;
+    while (true) {
+      int delimiter = 0;
+      int next = 0;
+      pango_find_paragraph_boundary(paragraph, -1, &delimiter, &next);
+      last = first + g_utf8_strlen(paragraph, next);
+      // Include separators up to the next paragraph start. If there is no
+      // delimiter, this is the last paragraph (possibly an empty trailing one).
+      if (offset < last || delimiter == next) {
+        break;
+      }
+      paragraph += next;
+      first = last;
+    }
+    if (start != nullptr) {
+      *start = first;
+    }
+    if (end != nullptr) {
+      *end = last;
+    }
+    return fl_gtk4_text_accessible_node_get_contents(accessible, first, last);
+  }
+
   // Semantics does not provide visual line runs; keep the whole-text fallback
   // for layout-dependent queries rather than inventing Flutter's wrapping.
   if (start != nullptr) {
