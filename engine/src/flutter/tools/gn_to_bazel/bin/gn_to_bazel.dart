@@ -156,6 +156,7 @@ Future<int> run(List<String> arguments) async {
         appendix: manifest?.appendix,
         layout: layout,
         implicitDeps: manifest?.implicitDeps ?? const <String>[],
+        tree: tree,
       );
       if (buildifier != null) {
         output = await _format(buildifier, output);

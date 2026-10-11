@@ -121,6 +121,8 @@ Future<int> run(List<String> arguments) async {
         gnPackage,
         evaluation.allDependentConfigs,
         namedAllDependentConfigs: named,
+        localTargets: <String, GnTarget>{for (final GnTarget t in evaluation.targets) t.name: t},
+        outDir: options.option('out')!,
       );
     }
     for (final String label in described.keys) {
@@ -146,6 +148,8 @@ int _compare(
   String gnPackage,
   Map<String, Set<String>> inherited, {
   required Set<String> namedAllDependentConfigs,
+  required Map<String, GnTarget> localTargets,
+  required String outDir,
 }) {
   var differences = 0;
   // Items under conditions the assumptions did not decide cannot be
@@ -218,7 +222,19 @@ int _compare(
     return result;
   }
 
-  String path(String value) => _absolutePath(value, gnPackage);
+  // GN's generated-file directory is the converter's `//@gen` root.
+  final String gnGenDir = p.posix.normalize('//$outDir/gen');
+  String path(String value) {
+    final String absolute = _absolutePath(value, gnPackage);
+    if (absolute == gnGenDir) {
+      return p.posix.normalize(genDirRoot);
+    }
+    if (absolute.startsWith('$gnGenDir/')) {
+      return p.posix.normalize('$genDirRoot/${absolute.substring(gnGenDir.length + 1)}');
+    }
+    return absolute;
+  }
+
   String labelOf(String value) => _absoluteLabel(value, gnPackage);
 
   check('sources', items('sources', path), _strings(gnTarget['sources']).map(path).toSet());
@@ -268,10 +284,29 @@ int _compare(
     );
   }
   if (type == 'config') {
-    check('defines', items('defines', (String s) => s), _strings(gnTarget['defines']).toSet());
+    // gn desc reports a config's nested configs (`configs = [...]`)
+    // flattened into its own defines and include_dirs.
+    Set<String> flattened(String variable, String Function(String) normalize) {
+      final result = <String>{...items(variable, normalize)};
+      for (final GnValue nested
+          in target.variables['configs']?.unconditionalItems ?? const <GnValue>[]) {
+        if (nested is GnStringValue && nested.value.startsWith(':')) {
+          final GnTarget? config = localTargets[nested.value.substring(1)];
+          final GnVariable? v = config?.variables[variable];
+          for (final GnValue item in v?.unconditionalItems ?? const <GnValue>[]) {
+            if (item is GnStringValue) {
+              result.add(normalize(item.value));
+            }
+          }
+        }
+      }
+      return result;
+    }
+
+    check('defines', flattened('defines', (String s) => s), _strings(gnTarget['defines']).toSet());
     check(
       'include_dirs',
-      items('include_dirs', path),
+      flattened('include_dirs', path),
       _strings(gnTarget['include_dirs']).map(path).toSet(),
     );
   }

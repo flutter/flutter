@@ -299,10 +299,10 @@ source_set("x") {
       await expectLater(
         evaluate(r'''
 source_set("x") {
-  sources = [ "$root_gen_dir/a.cc" ]
+  sources = [ "$mystery_dir/a.cc" ]
 }
 '''),
-        throwsGnError(line: 2, message: r'string expansion of $root_gen_dir is not supported'),
+        throwsGnError(line: 2, message: r'string expansion of $mystery_dir is not supported'),
       );
     });
 
@@ -485,10 +485,10 @@ my_template("x") {
         await expectLater(
           evaluate(r'''
 source_set("x") {
-  sources = [ "$root_gen_dir/a.cc" ]
+  sources = [ "$mystery_dir/a.cc" ]
 }
 '''),
-          throwsGnError(line: 2, message: r'string expansion of $root_gen_dir is not supported'),
+          throwsGnError(line: 2, message: r'string expansion of $mystery_dir is not supported'),
         );
       });
 
@@ -764,9 +764,78 @@ source_set("x") {
         expect(sources[1].items, <GnValue>[const GnStringValue('slim.cc')]);
       });
 
+      test('converts action() with rebased paths and generated outputs', () async {
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/example/gen.py': '',
+          'flutter/example/CHANGES': '',
+          'flutter/example/grammars/core.json': '',
+          'flutter/example/BUILD.gn': r'''
+action("tables") {
+  script = "gen.py"
+  grammar_dir = "grammars"
+  out_file = "${target_gen_dir}/tables.inc"
+  sources = [ "$grammar_dir/core.json" ]
+  outputs = [ out_file ]
+  args = [
+    "--grammar=" + rebase_path("$grammar_dir/core.json", root_build_dir),
+    "--grammar-dir",
+    rebase_path(grammar_dir, root_build_dir),
+    rebase_path("CHANGES", root_build_dir),
+    "--out",
+    rebase_path(out_file, root_build_dir),
+  ]
+}
+
+config("gen_dirs") {
+  include_dirs = [ get_label_info(":tables", "target_gen_dir") + "/include" ]
+}
+
+source_set("lib") {
+  sources = [ "lib.cc" ]
+  deps = [ ":tables" ]
+  configs += [ ":gen_dirs" ]
+}
+''',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(tree, '//flutter/example/BUILD.gn'),
+          gnPackage: '//flutter/example',
+          tree: tree,
+        );
+        expect(
+          output,
+          contains(r'''
+gn_action(
+    name = "tables",
+    srcs = ["grammars/core.json"],
+    args = [
+        "--grammar=$(execpath :grammars/core.json)",
+        "--grammar-dir",
+        "$(src engine/src/flutter/example/grammars)",
+        "$(execpath :CHANGES)",
+        "--out",
+        "$(gen engine/src/flutter/example/tables.inc)",
+    ],
+    inputs = ["CHANGES"],
+    outputs = ["tables.inc"],
+    script = "gen.py",
+)
+'''),
+        );
+        // The action's outputs are sources of its dependent; the generated
+        // include directory is the package's (Bazel's `includes` spans the
+        // output tree).
+        expect(output, contains('srcs = [\n        "lib.cc",\n        ":tables",\n    ],'));
+        expect(output, contains('includes = ["include"]'));
+        expect(
+          output,
+          contains('load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_action")'),
+        );
+      });
+
       test('keeps rebase_path() and exec_script() opaque until they are used', () async {
         final GnFileEvaluation evaluation = await evaluate('''
-_unused = rebase_path("//somewhere")
+_unused = rebase_path("//somewhere", "//elsewhere")
 _also_unused = exec_script("list.py", [], "list lines")
 source_set("x") {
   sources = [ "a.cc" ]
@@ -777,10 +846,23 @@ source_set("x") {
           convert('''
 source_set("x") {
   sources = [ "a.cc" ]
-  include_dirs = [ rebase_path("//somewhere") ]
+  include_dirs = [ rebase_path("//somewhere", "//elsewhere") ]
 }
 '''),
-          throwsGnError(line: 3, message: 'expected a string, got <rebase_path("//somewhere")>'),
+          throwsGnError(
+            line: 3,
+            message: 'expected a string, got <rebase_path("//somewhere", "//elsewhere")>',
+          ),
+        );
+        // A path rebased to the build directory is for an action's args.
+        await expectLater(
+          convert('''
+source_set("x") {
+  sources = [ "a.cc" ]
+  include_dirs = [ rebase_path("//somewhere", root_build_dir) ]
+}
+'''),
+          throwsGnError(line: 3, message: 'only usable in the args of an action()'),
         );
       });
     });

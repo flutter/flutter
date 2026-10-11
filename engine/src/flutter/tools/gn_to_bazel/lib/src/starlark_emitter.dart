@@ -5,6 +5,8 @@
 /// Starlark generation: from the evaluated GN targets to a `BUILD.bazel`.
 library;
 
+import 'dart:io';
+
 import 'package:path/path.dart' as p;
 
 import 'bazel_mapping.dart';
@@ -99,7 +101,7 @@ final class _ListAttribute {
 
 /// A generated rule.
 final class _Rule {
-  _Rule(this.kind, this.name, this.comments);
+  _Rule(this.kind, this.name, List<String> comments) : comments = List<String>.of(comments);
 
   final String kind;
   final String name;
@@ -126,8 +128,9 @@ String emitBuildFile(
   String? appendix,
   OutputLayout layout = const OutputLayout.main(),
   List<String> implicitDeps = const <String>[],
+  GnSourceTree? tree,
 }) {
-  final emitter = _Emitter(gnPackage, layout, implicitDeps)
+  final emitter = _Emitter(gnPackage, layout, implicitDeps, tree)
     ..inheritedConfigs.addAll(evaluation.allDependentConfigs)
     ..conditionalInheritance.addAll(evaluation.conditionalAllDependentConfigs);
   for (final GnTarget target in evaluation.targets) {
@@ -161,11 +164,15 @@ String emitBuildFile(
 const Set<String> _ignoredVariables = <String>{'check_includes', 'visibility'};
 
 final class _Emitter {
-  _Emitter(this.gnPackage, this.layout, this.implicitDeps)
+  _Emitter(this.gnPackage, this.layout, this.implicitDeps, this.tree)
     : package = BazelLabel.parse(bazelLabel(gnPackage, package: gnPackage));
 
   final String gnPackage;
   final OutputLayout layout;
+
+  /// The source tree, when available: tells a rebased directory from a
+  /// rebased file in an action's arguments.
+  final GnSourceTree? tree;
 
   /// Labels every compiled target depends on (the manifest's implicitDeps).
   final List<String> implicitDeps;
@@ -235,6 +242,8 @@ final class _Emitter {
         _convertConfig(target);
       case 'group':
         _convertGroup(target);
+      case 'action':
+        _convertAction(target);
       default:
         throw GnError(target.location, '${target.rule}() is not converted yet');
     }
@@ -251,7 +260,7 @@ final class _Emitter {
       switch (variable.name) {
         case 'deps':
         case 'public_deps':
-          _labelsInto(rule.list('deps'), variable, target);
+          _depsInto(rule, variable, target);
         case 'testonly':
           _scalar(rule, 'testonly', variable);
         case 'public_configs':
@@ -278,6 +287,147 @@ final class _Emitter {
       rule.list('deps').addUnique(Condition.always, _Item(_localLabel(config)));
     }
     rules.add(rule);
+  }
+
+  /// action("x") becomes a `gn_action` (build/bazel/gn_action): the script
+  /// runs once with GN's arguments, in which `rebase_path(f, root_build_dir)`
+  /// results become the rule's path tokens -- `$(execpath label)` for a
+  /// source file, `$(src dir)` for a source directory, `$(gen path)` for
+  /// anything under `$target_gen_dir`. Outputs are declared relative to the
+  /// package, which is where GN's `$target_gen_dir` puts them. A file the
+  /// arguments name that GN never declared as an input is declared here:
+  /// the sandbox holds declared inputs only.
+  void _convertAction(GnTarget target) {
+    _use('//engine/src/flutter/build/bazel/gn_action:gn_action.bzl', 'gn_action');
+    final rule = _Rule('gn_action', target.name, target.comments);
+    final GnVariable? args = target.variables['args'];
+    for (final GnVariable variable in target.variables.values) {
+      switch (variable.name) {
+        case 'script':
+          final List<GnValue>? items = variable.unconditionalItems;
+          if (items == null || items.length != 1 || items.single is! GnStringValue) {
+            throw GnError(variable.assignments.first.location, 'script must be one plain string');
+          }
+          rule.scalars['script'] =
+              '"${_filePath((items.single as GnStringValue).value, variable.assignments.first.location)}"';
+        case 'sources':
+          _filesInto(rule.list('srcs'), variable);
+        case 'inputs':
+          _filesInto(rule.list('inputs'), variable);
+        case 'outputs':
+          _outputsInto(rule.list('outputs'), variable, target);
+        case 'args':
+          break; // After the inputs, which it may add to.
+        case 'deps':
+        case 'public_deps':
+          _labelsInto(rule.list('deps'), variable, target);
+        case 'testonly':
+          _scalar(rule, 'testonly', variable);
+        case 'depfile':
+        case 'pool':
+          // The sandbox declares every input; pools are a scheduling matter.
+          break;
+        case 'data' || 'data_deps' || 'response_file_contents' || 'metadata' || 'assert_no_deps':
+          throw GnError(
+            variable.assignments.first.location,
+            'action variable ${variable.name} is not converted yet',
+          );
+        default:
+          // GN refuses an assignment that has no effect, so any other
+          // variable of the block is a helper whose value reached the
+          // attributes above.
+          break;
+      }
+    }
+    if (args != null) {
+      _argsInto(rule, args, target);
+    }
+    rules.add(rule);
+  }
+
+  /// An action's outputs, as paths relative to the package: GN requires them
+  /// under the build directory, and the rule declares them under the
+  /// package's output directory, so they must be under `$target_gen_dir`.
+  void _outputsInto(_ListAttribute attribute, GnVariable variable, GnTarget target) {
+    final genDir = '$genDirRoot${gnPackage.substring(1)}/';
+    _forEachItem(variable, into: attribute, (_Element e) {
+      final String path = _string(e);
+      if (!path.startsWith(genDir)) {
+        throw GnError(
+          e.assignment.location,
+          'output $path of ${target.name} is not under its target_gen_dir; only such outputs are supported',
+        );
+      }
+      attribute.addUnique(e.condition, _item(path.substring(genDir.length), e));
+    });
+  }
+
+  /// An action's `args`, with each rebased path replaced by the rule's token
+  /// for it.
+  void _argsInto(_Rule rule, GnVariable variable, GnTarget target) {
+    final _ListAttribute attribute = rule.list('args');
+    final declared = <String>{
+      for (final String list in <String>['srcs', 'inputs'])
+        for (final _Item item in rule.list(list).always) item.text,
+    };
+    _forEachItem(variable, into: attribute, (_Element e) {
+      final String text = _rawString(e);
+      final List<String> parts = text.split(rebasedPathMarker);
+      if (parts.length.isEven) {
+        throw GnError(e.assignment.location, 'unbalanced rebased path in argument $text');
+      }
+      final out = StringBuffer();
+      for (var i = 0; i < parts.length; i++) {
+        if (i.isEven) {
+          out.write(parts[i]);
+          continue;
+        }
+        out.write(_pathToken(parts[i], e.assignment.location, rule, declared, target));
+      }
+      attribute.add(e.condition, _item(out.toString(), e));
+    });
+  }
+
+  /// The rule's token for the absolute GN path [path] named by a
+  /// `rebase_path(..., root_build_dir)`.
+  String _pathToken(
+    String path,
+    GnLocation location,
+    _Rule rule,
+    Set<String> declared,
+    GnTarget target,
+  ) {
+    if (path.startsWith('$genDirRoot/')) {
+      final String? relative = layout.relativePath('//${path.substring(genDirRoot.length + 1)}');
+      if (relative == null) {
+        throw GnError(location, 'generated path $path is outside the output repository');
+      }
+      return '\$(gen $relative)';
+    }
+    if (path.startsWith(buildDirRoot)) {
+      throw GnError(
+        location,
+        'a path in the build directory ($path) cannot be expressed; convert by hand',
+      );
+    }
+    final String file = _filePath(path, location);
+    final bool isDirectory = switch (tree) {
+      final GnSourceTree t => FileSystemEntity.isDirectorySync(t.resolve(path)),
+      null => !declared.contains(file),
+    };
+    if (isDirectory) {
+      final String? relative = layout.relativePath(path);
+      if (relative == null) {
+        throw GnError(location, 'directory $path is outside the output repository');
+      }
+      return '\$(src $relative)';
+    }
+    if (!declared.contains(file)) {
+      rule.list('inputs').addUnique(Condition.always, _Item(file));
+      declared.add(file);
+    }
+    final label = file.startsWith('//') || file.startsWith('@') ? file : ':$file';
+    return '\$(execpath $label)';
   }
 
   /// The engine's test executables are testonly and named `*tests`
@@ -346,7 +496,7 @@ final class _Emitter {
           // compiles that cannot find the headers their dependencies'
           // headers include. The defines dependents gain this way are what
           // the parity check against GN measures.
-          _labelsInto(rule.list('deps'), variable, target);
+          _depsInto(rule, variable, target);
           _propagatedFlagsInto(rule, variable);
         case 'defines':
           _stringsInto(rule.list('local_defines'), variable);
@@ -445,20 +595,24 @@ final class _Emitter {
       if (target.rule == 'source_set') {
         rule.scalars['alwayslink'] = 'True';
       }
-      // What GN leaves implicit (the headers of the tree, say) is a public
-      // dependency, so that dependents outside the file see it too.
-      for (final String dep in implicitDeps) {
-        rule.list('deps').addUnique(Condition.always, _Item(_localLabel(dep)));
-      }
       // GN's default include dirs, applied to every target by BUILDCONFIG.gn.
       if (layout.isMain) {
         rule.list('deps').addUnique(Condition.always, _Item(_localLabel(defaultIncludeDirsLabel)));
       }
     }
+    // What GN leaves implicit (the headers of the tree, say) is a public
+    // dependency, so that dependents outside the file see it too -- of a
+    // header-only library as well, whose headers include the tree's.
+    for (final String dep in implicitDeps) {
+      rule.list('deps').addUnique(Condition.always, _Item(_localLabel(dep)));
+    }
     // cc_binary and cc_test have no `includes`; a target's own include_dirs
     // ride a header-only library it depends on, which puts the same -I on
     // the same compiles.
     final _ListAttribute? includes = rule.lists['includes'];
+    if (includes != null) {
+      _dropForeignIncludeDirs(rule, includes, target);
+    }
     if (kind != 'cc_library' && includes != null && !includes.isEmpty) {
       rule.lists.remove('includes');
       final helper = _Rule('cc_library', '${target.name}_include_dirs', const <String>[]);
@@ -467,6 +621,66 @@ final class _Emitter {
       rule.list('deps').addUnique(Condition.always, _Item(':${helper.name}'));
     }
     rules.add(rule);
+  }
+
+  /// An include directory in another repository (`include_dirs =
+  /// [ "${spirv_headers}/include" ]`) has no `includes` form, which is
+  /// package-relative. When the target depends on that repository, the
+  /// directory is the one its dependency's public config carries (the GN
+  /// pattern: a dependency plus its include dir), so it is dropped with a
+  /// note; otherwise it is an error.
+  void _dropForeignIncludeDirs(_Rule rule, _ListAttribute includes, GnTarget target) {
+    // The repositories the target depends on, through targets of this file
+    // too.
+    final depRepositories = <String>{};
+    final visited = <String>{};
+    void visit(GnTarget t) {
+      if (!visited.add(t.name)) {
+        return;
+      }
+      for (final name in <String>['deps', 'public_deps']) {
+        for (final GnAssignment a in t.variables[name]?.assignments ?? const <GnAssignment>[]) {
+          for (final GnValue v in a.items) {
+            if (v is! GnStringValue) {
+              continue;
+            }
+            final String label = bazelLabel(v.value, package: gnPackage, location: a.location);
+            if (label.startsWith('@')) {
+              final int slashes = label.indexOf('//');
+              depRepositories.add(slashes < 0 ? label : label.substring(0, slashes));
+            } else if (label.startsWith(':')) {
+              final GnTarget? local = localTargets[label.substring(1)];
+              if (local != null) {
+                visit(local);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    visit(target);
+    bool foreign(_Item item) => item.text.startsWith('@');
+    for (final item in <_Item>[
+      ...includes.always.where(foreign),
+      for (final List<_Item> items in includes.conditional.values) ...items.where(foreign),
+    ]) {
+      final String repository = item.text.substring(0, item.text.indexOf('//'));
+      // Without a dependency on the repository the directory cannot be
+      // expressed, and the target cannot need it beyond what its own
+      // dependencies carry: a file-wide GN config applied where nothing
+      // includes from that tree. The sandboxed compile is the check.
+      rule.comments.add(
+        depRepositories.contains(repository)
+            ? '# include_dirs: ${item.text} comes with the dependency on $repository.'
+            : '# include_dirs: ${item.text} dropped; no dependency on $repository carries it.',
+      );
+    }
+    includes.always.removeWhere(foreign);
+    for (final List<_Item> items in includes.conditional.values) {
+      items.removeWhere(foreign);
+    }
+    includes.conditional.removeWhere((Condition c, List<_Item> items) => items.isEmpty);
   }
 
   /// Whether GN compiles [target] with //flutter:config: it lists the
@@ -614,6 +828,9 @@ final class _Emitter {
         case 'visibility':
           // Local configs are only ever used by their own package.
           break;
+        case 'configs':
+          // A config's own configs apply wherever it applies: dependencies.
+          _labelsInto(rule.list('deps'), variable, target);
         case 'cflags' || 'cflags_c' || 'cflags_cc' || 'cflags_objc' || 'cflags_objcc'
             when locallyUsedConfigs.contains(target.name):
           // Carried by the targets of this file that list the config.
@@ -663,6 +880,21 @@ final class _Emitter {
         case 'ldflags':
           attribute = 'linkopts';
         case 'visibility':
+          continue;
+        case 'configs':
+          // The config's own configs apply to the target along with it.
+          if (!flagsOnly) {
+            _forEachItem(variable, into: rule.list('deps'), (_Element e) {
+              final String label = bazelLabel(
+                _string(e),
+                package: gnPackage,
+                location: e.assignment.location,
+              );
+              rule
+                  .list('deps')
+                  .addUnique(use.condition.and(e.condition), _Item(_localLabel(label)));
+            });
+          }
           continue;
         default:
           if (variable.forwarded) {
@@ -783,6 +1015,18 @@ final class _Emitter {
   }
 
   static String _string(_Element element) {
+    final String value = _rawString(element);
+    if (value.contains(rebasedPathMarker)) {
+      throw GnError(
+        element.assignment.location,
+        'a rebase_path(..., root_build_dir) result is only usable in the args of an action()',
+      );
+    }
+    return value;
+  }
+
+  /// [_string] for an action's args, where a rebased path belongs.
+  static String _rawString(_Element element) {
     final GnValue value = element.value;
     if (value is! GnStringValue) {
       throw GnError(element.assignment.location, 'expected a string, got $value');
@@ -834,6 +1078,33 @@ final class _Emitter {
     });
   }
 
+  /// GN's `action()` targets of this file, whose outputs a dependent takes
+  /// as sources: in GN a dependency on an action only orders it before the
+  /// compile, the files being on disk; in Bazel the compile's inputs must
+  /// name them.
+  bool _isLocalAction(String gnLabel) {
+    if (!gnLabel.startsWith(':')) {
+      return false;
+    }
+    String name = gnLabel.substring(1);
+    final int paren = name.indexOf('(');
+    if (paren >= 0) {
+      name = name.substring(0, paren);
+    }
+    return localTargets[name]?.rule == 'action';
+  }
+
+  /// Like [_labelsInto] for a compiled target's dependencies: those on
+  /// actions of this file go to [sources] instead.
+  void _depsInto(_Rule rule, GnVariable variable, GnTarget target) {
+    _forEachItem(variable, into: rule.list('deps'), (_Element e) {
+      final String gnLabel = _string(e);
+      final String label = bazelLabel(gnLabel, package: gnPackage, location: e.assignment.location);
+      final list = _isLocalAction(gnLabel) ? 'srcs' : 'deps';
+      rule.list(list).addUnique(e.condition, _item(_localLabel(label), e));
+    });
+  }
+
   /// The shortest way to write [label] from the generated file: `:x` within
   /// its package, `//pkg:x` within its repository. An absolute label's `//`
   /// is the main repository, as everywhere in the mapping tables.
@@ -850,13 +1121,28 @@ final class _Emitter {
   /// does. A path outside the output repository is an error: the GN file
   /// then names something Bazel cannot see from here.
   String _filePath(String gnFilePath, GnLocation location) {
-    final String absolute = gnFilePath.startsWith('//')
+    String absolute = gnFilePath.startsWith('//')
         ? gnFilePath
         : gnFilePath == '.'
         ? gnPackage
         : '$gnPackage/$gnFilePath';
+    // A generated directory (`$target_gen_dir`, `get_label_info(...,
+    // "target_gen_dir")`) as an include directory: Bazel's `includes`
+    // names the source directory and its twin in the output tree at once,
+    // so the path is the source path's.
+    if (absolute == genDirRoot) {
+      absolute = '//';
+    } else if (absolute.startsWith('$genDirRoot/')) {
+      absolute = '//${absolute.substring(genDirRoot.length + 1)}';
+    }
     final String? relative = layout.relativePath(absolute);
     if (relative == null) {
+      // A file of another repository, which is a single package here.
+      for (final MapEntry<String, String> entry in labelRepositoryPrefixes.entries) {
+        if (absolute.startsWith(entry.key) && entry.value.endsWith('//')) {
+          return '${entry.value}:${absolute.substring(entry.key.length)}';
+        }
+      }
       throw GnError(
         location,
         '$gnFilePath is outside the output repository '
@@ -900,12 +1186,40 @@ final class _Emitter {
       final String path = _string(e);
       final int dot = path.lastIndexOf('.');
       final String extension = dot < 0 ? '' : path.substring(dot);
-      final bool header = splitHeaders && _headerExtensions.contains(extension);
-      rule
-          .list(header ? 'hdrs' : 'srcs')
-          .addUnique(e.condition, _item(_filePath(path, e.assignment.location), e));
+      final String list;
+      if (splitHeaders && _headerExtensions.contains(extension)) {
+        list = 'hdrs';
+      } else if (_headerExtensions.contains(extension) || _sourceExtensions.contains(extension)) {
+        list = 'srcs';
+      } else {
+        // A file Bazel's C++ rules would refuse in srcs (glslang's
+        // spirv.hpp11): GN compiles nothing from it either, so it is a
+        // textual header, which takes any file.
+        list = 'textual_hdrs';
+      }
+      rule.list(list).addUnique(e.condition, _item(_filePath(path, e.assignment.location), e));
     });
   }
+
+  /// What Bazel compiles from `srcs`.
+  static const Set<String> _sourceExtensions = <String>{
+    '.c',
+    '.cc',
+    '.cpp',
+    '.cxx',
+    '.c++',
+    '.C',
+    '.m',
+    '.mm',
+    '.S',
+    '.s',
+    '.asm',
+    '.o',
+    '.a',
+    '.lo',
+    '.so',
+    '.def',
+  };
 
   /// Applies `configs`, `public_configs` or `all_dependent_configs`;
   /// returns whether the target is still chromium_code.
