@@ -75,6 +75,28 @@ directories of configs -- with `gn desc` of a real GN out directory. Run it on
 every new conversion: the generated file is right when the oracle agrees and
 Bazel builds it.
 
+### Compile-command parity
+
+```sh
+(cd ../.. && ./flutter/third_party/gn/gn gen out/host_debug_unopt --export-compile-commands)
+bazel aquery --output=jsonproto -c dbg \
+    'mnemonic("CppCompile", deps(//engine/src/flutter/display_list:display_list_unittests))' \
+    > /tmp/aquery.json
+python3 tool/compile_command_diff.py --aquery=/tmp/aquery.json \
+    --compile-commands=../../out/host_debug_unopt/compile_commands.json --engine-only
+```
+
+checks the other end: for every source file both systems compile, the flags of
+the two compiler invocations, normalized (paths engine-relative, outputs and
+depfiles dropped, each build system's own include mechanics ignored, the exec
+configuration left out). The accepted differences are a dependency's public
+defines reaching transitive dependents in Bazel where GN stops them after a
+private edge (`U_STATIC_IMPLEMENTATION`, `XML_STATIC`, `SK_SHAPER_*`; GN's
+`deps` and `public_deps` both become `deps`, see "How it works"), GN's `-I` for
+directories Bazel serves through `include_prefix`, and GN carrying a shader
+*tool*'s `all_dependent_configs` into `impeller/renderer`. Anything else is a
+converter gap or a GN oddity worth a look; `--full` lists every class.
+
 ## How it works
 
 GN build files are programs; Bazel wants data. The converter has three layers:
