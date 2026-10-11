@@ -1,0 +1,40 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/display_list/testing/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: display_list_surface_provider.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "display_list_testing",
+    testonly = True,
+    srcs = ["dl_test_snippets.cc"],
+    hdrs = [
+        "dl_test_equality.h",
+        "dl_test_mock_path_receiver.h",
+        "dl_test_snippets.h",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        "//engine/src/flutter/testing:testing_lib",
+        "//engine/src/flutter/txt",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "surface_provider_config",
+    defines = [
+        "ENABLE_SOFTWARE_BENCHMARKS",  # surface_provider_include_software
+    ],
+)

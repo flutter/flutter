@@ -48,6 +48,7 @@ use_repo(
     "glslang",
     "gn",
     "googletest",
+    "harfbuzz",
     "icu",
     "inja",
     "json",
