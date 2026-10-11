@@ -243,16 +243,21 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   update.view_id = view_id;
   update.node_count = check_text ? 2 : 1;
   update.nodes = nodes;
-  bool text_updated = false;
+  size_t text_updates = 0;
+  const gchar* text_values[] = {
+      "New \xF0\x9F\x98\x80 text",
+      "New \xF0\x9F\x98\x81 text",
+      "New \xF0\x9F\x98\x81 added text",
+      "New \xF0\x9F\x98\x81 text",
+  };
   fl_engine_get_embedder_api(view_engine)->SendSemanticsAction =
       MOCK_ENGINE_PROC(SendSemanticsAction,
                        ([&](auto, const FlutterSendSemanticsActionInfo* info) {
                          EXPECT_EQ(info->view_id, view_id);
                          EXPECT_EQ(info->node_id, 0u);
                          EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
-                         if (check_text && !text_updated) {
-                           text_updated = true;
-                           text.value = "New \xF0\x9F\x98\x80 text";
+                         if (check_text && text_updates < 4) {
+                           text.value = text_values[text_updates++];
                            text.text_selection_base = 4;
                            text.text_selection_extent = 6;
                            fl_view_gtk4_accessibility_handle_update(
@@ -304,7 +309,7 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   g_main_loop_run(loop);
   g_source_remove(timeout);
   EXPECT_EQ(calls, check_focus ? 3u : 1u);
-  EXPECT_EQ(text_updated, check_text);
+  EXPECT_EQ(text_updates, check_text ? 4u : 0u);
   gtk_window_set_child(window, nullptr);
   gtk_box_append(GTK_BOX(view), surface);
   gtk_window_destroy(window);

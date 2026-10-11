@@ -187,6 +187,34 @@ def run_fixture(binary, output, check_focus=False, check_text=False):
             selection = Atspi.Text.get_selection(text, 0)
             if (selection.start_offset, selection.end_offset) != (4, 5):
               raise RuntimeError('Updated selection does not use character offsets')
+            # Preserve a Unicode prefix/suffix, replace characters sharing UTF-8
+            # leading bytes, then exercise insertion-only and deletion-only edits.
+            edits = [
+                (
+                    'New \U0001f601 text', [
+                        ('object:text-changed:delete', 4, 1, '\U0001f600'),
+                        ('object:text-changed:insert', 4, 1, '\U0001f601'),
+                    ]
+                ),
+                ('New \U0001f601 added text', [('object:text-changed:insert', 6, 6, 'added ')]),
+                ('New \U0001f601 text', [('object:text-changed:delete', 6, 6, 'added ')]),
+            ]
+            for replacement, expected_events in edits:
+              events.clear()
+              if not action.do_action(0):
+                raise RuntimeError('AT-SPI rejected incremental text-update trigger')
+
+              def received_edit():
+                context = GLib.MainContext.default()
+                while context.pending():
+                  context.iteration(False)
+                return len(events) >= len(expected_events)
+
+              wait_until(received_edit, 'incremental text notifications', seconds=5)
+              if events != expected_events:
+                raise RuntimeError(f'Unexpected incremental text notifications: {events!r}')
+              if Atspi.Text.get_text(text, 0, -1) != replacement:
+                raise RuntimeError('Incremental text queries disagree with events')
           finally:
             for event_type in event_types:
               listener.deregister(event_type)

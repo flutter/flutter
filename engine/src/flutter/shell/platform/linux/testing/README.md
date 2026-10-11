@@ -110,6 +110,8 @@ caret offset, and character/word/sentence ranges. It includes an end-of-text
 character query to ensure it does not repeat the whole field. The client also
 triggers a semantics text replacement and checks deletion/insertion payloads,
 caret and selection notifications, and the resulting queryable state. A repeated
-identical semantics batch must not produce additional notifications. This flag can
+identical semantics batch must not produce additional notifications. Incremental
+edits cover Unicode replacement with unchanged prefixes/suffixes, insertion-only
+and deletion-only changes, without whole-field or zero-length events. This flag can
 be combined with `--check-focus`; neither check validates editable-text actions
 or visual line wrapping.

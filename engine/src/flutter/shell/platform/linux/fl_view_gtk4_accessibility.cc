@@ -787,19 +787,43 @@ static void fl_gtk4_text_accessible_node_set_text(FlGtk4AccessibleNode* self,
                                                   gint selection_base,
                                                   gint selection_extent) {
   const gchar* new_text = text == nullptr ? "" : text;
-  const guint old_length = fl_gtk4_text_accessible_node_get_text_length(self);
   const gboolean text_changed = g_strcmp0(self->text, new_text) != 0;
-  if (text_changed && self->text != nullptr) {
-    fl_gtk_runtime_accessible_text_update_contents(GTK_ACCESSIBLE(self), 1, 0,
-                                                   old_length);
-  }
-
+  guint change_start = 0;
+  guint removed = 0;
+  guint inserted = 0;
   if (text_changed) {
+    const gchar* old_start = fl_gtk4_text_accessible_node_get_text(self);
+    const gchar* new_start = new_text;
+    const gchar* old_end = old_start + strlen(old_start);
+    const gchar* new_end = new_start + strlen(new_start);
+    // Trim equal code points, not bytes: UTF-8 characters can share leading
+    // bytes. A single replacement range preserves unchanged prefix/suffix text.
+    while (*old_start != '\0' && *new_start != '\0' &&
+           g_utf8_get_char(old_start) == g_utf8_get_char(new_start)) {
+      old_start = g_utf8_next_char(old_start);
+      new_start = g_utf8_next_char(new_start);
+      change_start++;
+    }
+    while (old_end > old_start && new_end > new_start) {
+      const gchar* old_previous = g_utf8_prev_char(old_end);
+      const gchar* new_previous = g_utf8_prev_char(new_end);
+      if (g_utf8_get_char(old_previous) != g_utf8_get_char(new_previous)) {
+        break;
+      }
+      old_end = old_previous;
+      new_end = new_previous;
+    }
+    removed = g_utf8_strlen(old_start, old_end - old_start);
+    inserted = g_utf8_strlen(new_start, new_end - new_start);
+    // GTK reads removed contents synchronously; notify before changing text.
+    if (removed != 0) {
+      fl_gtk_runtime_accessible_text_update_contents(
+          GTK_ACCESSIBLE(self), 1, change_start, change_start + removed);
+    }
     g_free(self->text);
     self->text = g_strdup(new_text);
   }
 
-  const guint text_length = fl_gtk4_text_accessible_node_get_text_length(self);
   const guint new_base =
       utf16_offset_to_character_offset(new_text, selection_base);
   const guint new_extent =
@@ -810,9 +834,9 @@ static void fl_gtk4_text_accessible_node_set_text(FlGtk4AccessibleNode* self,
   self->text_selection_base = new_base;
   self->text_selection_extent = new_extent;
 
-  if (text_changed) {
-    fl_gtk_runtime_accessible_text_update_contents(GTK_ACCESSIBLE(self), 0, 0,
-                                                   text_length);
+  if (inserted != 0) {
+    fl_gtk_runtime_accessible_text_update_contents(
+        GTK_ACCESSIBLE(self), 0, change_start, change_start + inserted);
   }
   if (caret_changed) {
     fl_gtk_runtime_accessible_text_update_caret_position(GTK_ACCESSIBLE(self));
