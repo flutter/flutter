@@ -57,25 +57,61 @@ def _src_path(ctx, path):
 def _gen_path(ctx, path):
     return ctx.bin_dir.path + "/" + _src_path(ctx, path)
 
+def run_python(ctx, script, arguments, inputs, outputs, mnemonic, progress_message):
+    """Runs a Python script with the checkout's hermetic interpreter.
+
+    For rules whose attrs include PYTHON_ATTRS. The script runs from the
+    execution root, without bytecode caches, with a fixed hash seed.
+
+    Args:
+      ctx: the rule context.
+      script: the script, a File.
+      arguments: the script's arguments.
+      inputs: the files the script reads (the script itself is added).
+      outputs: the files it writes.
+      mnemonic: the action's mnemonic.
+      progress_message: the action's progress message.
+    """
+    ctx.actions.run(
+        executable = ctx.executable._python,
+        # -B: no bytecode caches next to the script.
+        arguments = ["-B", script.path] + arguments,
+        inputs = depset([script] + inputs),
+        tools = ctx.attr._python_runtime[DefaultInfo].files,
+        outputs = outputs,
+        mnemonic = mnemonic,
+        progress_message = progress_message,
+        env = {
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONHASHSEED": "0",
+        },
+    )
+
+# The attributes run_python needs: the interpreter and its runtime files.
+PYTHON_ATTRS = {
+    "_python": attr.label(
+        default = "@cpython3//:bin/python3",
+        allow_single_file = True,
+        executable = True,
+        cfg = "exec",
+    ),
+    "_python_runtime": attr.label(default = "@cpython3//:runtime"),
+}
+
 def _gn_action_impl(ctx):
     outputs = [ctx.actions.declare_file(path) for path in ctx.attr.outputs]
     dep_files = [f for dep in ctx.attr.deps for f in dep[DefaultInfo].files.to_list()]
     inputs = ctx.files.srcs + ctx.files.inputs + dep_files
     targets = ctx.attr.srcs + ctx.attr.inputs + ctx.attr.deps
     arguments = [_expand(ctx, arg, targets) for arg in ctx.attr.args]
-    ctx.actions.run(
-        executable = ctx.executable._python,
-        # -B: no bytecode caches next to the script.
-        arguments = ["-B", ctx.file.script.path] + arguments,
-        inputs = depset([ctx.file.script] + inputs),
-        tools = ctx.attr._python_runtime[DefaultInfo].files,
+    run_python(
+        ctx,
+        script = ctx.file.script,
+        arguments = arguments,
+        inputs = inputs,
         outputs = outputs,
         mnemonic = "GnAction",
         progress_message = "GN action %{label}",
-        env = {
-            "PYTHONDONTWRITEBYTECODE": "1",
-            "PYTHONHASHSEED": "0",
-        },
     )
     return [DefaultInfo(files = depset(outputs))]
 
@@ -106,14 +142,7 @@ gn_action = rule(
         "args": attr.string_list(
             doc = "GN's `args`, with paths as $(execpath LABEL), $(src PATH) and $(gen PATH) tokens.",
         ),
-        "_python": attr.label(
-            default = "@cpython3//:bin/python3",
-            allow_single_file = True,
-            executable = True,
-            cfg = "exec",
-        ),
-        "_python_runtime": attr.label(default = "@cpython3//:runtime"),
-    },
+    } | PYTHON_ATTRS,
 )
 
 def _gn_copy_impl(ctx):
