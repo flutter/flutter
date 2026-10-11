@@ -96,12 +96,13 @@ const Map<String, String> labelOverrides = <String, String>{
   // and SPIRV-Headers' own GN, each a fetch-time repository.
   '//third_party/inja': '@inja',
   '//flutter/third_party/json': '@json',
-  '//third_party/spirv_cross_flutter': '@spirv-cross',
+  '//third_party/spirv_cross_flutter': '@spirv-cross//:spirv_cross_flutter',
   '//flutter/third_party/flatbuffers': '@flatbuffers',
   '//flutter/third_party/vulkan-deps/spirv-headers/src': '@spirv-headers',
   '//flutter/third_party/vulkan-deps/spirv-tools/src': '@spirv-tools',
   '//flutter/third_party/vulkan-deps/glslang/src': '@glslang',
-  '//third_party/shaderc_flutter': '@shaderc',
+  '//third_party/shaderc_flutter': '@shaderc//:shaderc_flutter',
+  '//flutter/third_party/re2': '@re2',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -126,6 +127,16 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/vulkan-deps/spirv-tools/src/': '@spirv-tools//',
   '//flutter/third_party/vulkan-deps/glslang/src/': '@glslang//',
   '//flutter/third_party/shaderc/': '@shaderc//',
+  '//flutter/third_party/re2/': '@re2//',
+};
+
+/// Generated include directories (`$root_gen_dir/flutter`) that are an
+/// ancestor package's: Bazel's `includes` is package-relative, and the
+/// target whose `includes` names that package's directory already covers
+/// its twin in the output tree, so the directory is a dependency on it.
+const Map<String, String> genDirIncludeTargets = <String, String>{
+  '//': defaultIncludeDirsLabel,
+  '//flutter': '//engine/src/flutter:config',
 };
 
 /// Compiler flags that GN hands to the dependents of a target through one
@@ -460,19 +471,71 @@ const Map<String, String> referenceConstants = <String, String>{
   'flutter_cflags_objcc': 'FLUTTER_CFLAGS_OBJCC',
 };
 
+/// How a template argument translates to a macro attribute.
+enum TemplateArgumentKind {
+  /// Files of the package (`fixtures`, `flatbuffers`).
+  files,
+
+  /// Labels (`deps`).
+  labels,
+
+  /// Configs, which become labels of their config libraries.
+  configs,
+
+  /// A scalar (`testonly`).
+  scalar,
+}
+
+/// One argument of a known template: the macro attribute it becomes and how.
+final class TemplateArgument {
+  const TemplateArgument(this.attribute, this.kind);
+
+  final String attribute;
+  final TemplateArgumentKind kind;
+}
+
 /// The `.gni` templates the converter knows, with the Bazel macro for each
-/// (`load` label and symbol).
+/// (`load` label and symbol) and the arguments it accepts.
 final class TemplateMapping {
-  const TemplateMapping(this.bzl, this.symbol);
+  const TemplateMapping(
+    this.bzl,
+    this.symbol,
+    this.arguments, {
+    this.innerTargets = const <String>[],
+  });
 
   final String bzl;
   final String symbol;
+  final Map<String, TemplateArgument> arguments;
+
+  /// The other targets an invocation expands to in GN, as patterns over the
+  /// invocation's name (`flatc_{name}`), besides those GN's convention
+  /// prefixes with `_`. The macro's business; the oracle expects them.
+  final List<String> innerTargets;
 }
 
 const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
   'test_fixtures': TemplateMapping(
     '//engine/src/flutter/testing:testing.bzl',
     'flutter_test_fixtures',
+    <String, TemplateArgument>{
+      'fixtures': TemplateArgument('fixtures', TemplateArgumentKind.labels),
+      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+    },
+  ),
+  // build/secondary/flutter/third_party/flatbuffers/flatbuffers.gni: flatc
+  // over the schemas, the generated headers as a library.
+  'flatbuffers': TemplateMapping(
+    '//engine/src/flutter/build/bazel/flatbuffers:flatbuffers.bzl',
+    'flatbuffers',
+    <String, TemplateArgument>{
+      'flatbuffers': TemplateArgument('flatbuffers', TemplateArgumentKind.files),
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      'public_deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      'public_configs': TemplateArgument('deps', TemplateArgumentKind.configs),
+      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+    },
+    innerTargets: <String>['flatc_{name}'],
   ),
 };
 
@@ -504,7 +567,11 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//flutter/common/config.gni',
     '//flutter/impeller/tools/shaders.gni',
     '//flutter/shell/config.gni',
+    // Declares the version arguments and asserts they are set; nothing
+    // converted reads them (impeller/compiler imports it without use).
+    '//flutter/shell/version/version.gni',
     '//flutter/testing/testing.gni',
+    '//flutter/third_party/flatbuffers/flatbuffers.gni',
     '//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni',
   },
 );

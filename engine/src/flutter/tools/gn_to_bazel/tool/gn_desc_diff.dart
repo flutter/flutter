@@ -95,12 +95,41 @@ Future<int> run(List<String> arguments) async {
           for (final GnValue v in a.items)
             if (v is GnStringValue) _absoluteLabel(v.value, gnPackage),
     };
+    // A config nesting a config of another file (`configs = [
+    // "//flutter/impeller:impeller_public_config" ]`): gn desc flattens it
+    // into the nesting config; the converter makes it a dependency on that
+    // config's library, which carries the same, so its own description
+    // stands for it here.
+    final nestedElsewhere = <String, Map<String, Object?>>{};
+    for (final GnTarget target in evaluation.targets) {
+      if (target.rule != 'config') {
+        continue;
+      }
+      for (final GnValue nested
+          in target.variables['configs']?.unconditionalItems ?? const <GnValue>[]) {
+        if (nested is GnStringValue && !nested.value.startsWith(':')) {
+          final String nestedLabel = _absoluteLabel(nested.value, gnPackage);
+          final Map<String, Object?> config = await _gnDesc(
+            gn,
+            outDir,
+            nestedLabel,
+            failIfMissing: false,
+          );
+          nestedElsewhere[nestedLabel] = config[nestedLabel] as Map<String, Object?>? ?? const {};
+        }
+      }
+    }
     for (final GnTarget target in evaluation.targets) {
       final label = '$gnPackage:${target.name}';
       seen.add(label);
-      if (templateMappings.containsKey(target.rule)) {
+      final TemplateMapping? template = templateMappings[target.rule];
+      if (template != null) {
         // A known template becomes a Bazel macro; what it expands to in GN
-        // (a group over `_`-prefixed targets) is the macro's business.
+        // (a group over `_`-prefixed targets, or the names the mapping
+        // records) is the macro's business.
+        for (final String pattern in template.innerTargets) {
+          seen.add('$gnPackage:${pattern.replaceAll('{name}', target.name)}');
+        }
         continue;
       }
       var gnTarget = described[label] as Map<String, Object?>?;
@@ -122,6 +151,7 @@ Future<int> run(List<String> arguments) async {
         evaluation.allDependentConfigs,
         namedAllDependentConfigs: named,
         localTargets: <String, GnTarget>{for (final GnTarget t in evaluation.targets) t.name: t},
+        nestedElsewhere: nestedElsewhere,
         outDir: options.option('out')!,
       );
     }
@@ -149,6 +179,7 @@ int _compare(
   Map<String, Set<String>> inherited, {
   required Set<String> namedAllDependentConfigs,
   required Map<String, GnTarget> localTargets,
+  required Map<String, Map<String, Object?>> nestedElsewhere,
   required String outDir,
 }) {
   var differences = 0;
@@ -285,12 +316,16 @@ int _compare(
   }
   if (type == 'config') {
     // gn desc reports a config's nested configs (`configs = [...]`)
-    // flattened into its own defines and include_dirs.
+    // flattened into its own defines and include_dirs: a local one from
+    // the converter's view of it, one of another file from gn desc's.
     Set<String> flattened(String variable, String Function(String) normalize) {
       final result = <String>{...items(variable, normalize)};
       for (final GnValue nested
           in target.variables['configs']?.unconditionalItems ?? const <GnValue>[]) {
-        if (nested is GnStringValue && nested.value.startsWith(':')) {
+        if (nested is! GnStringValue) {
+          continue;
+        }
+        if (nested.value.startsWith(':')) {
           final GnTarget? config = localTargets[nested.value.substring(1)];
           final GnVariable? v = config?.variables[variable];
           for (final GnValue item in v?.unconditionalItems ?? const <GnValue>[]) {
@@ -298,6 +333,9 @@ int _compare(
               result.add(normalize(item.value));
             }
           }
+        } else {
+          final Map<String, Object?>? config = nestedElsewhere[labelOf(nested.value)];
+          result.addAll(_strings(config?[variable]).map(normalize));
         }
       }
       return result;
