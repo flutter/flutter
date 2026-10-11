@@ -319,6 +319,7 @@ if (enable_ios_unittests) {
       "framework/Source/FlutterUndoManagerPluginTest.mm",
       "framework/Source/FlutterViewControllerTest.mm",
       "framework/Source/FlutterViewTest.mm",
+      "framework/Source/PlatformTaskRunnerTests.mm",
       "framework/Source/SemanticsObjectTest.mm",
       "framework/Source/SemanticsObjectTestMocks.h",
       "framework/Source/UIViewController_FlutterScreenAndSceneIfLoadedTest.mm",
@@ -388,6 +389,11 @@ shared_library("create_flutter_framework_dylib") {
   output_name = "Flutter"
 
   ldflags = [ "-Wl,-install_name,@rpath/Flutter.framework/Flutter" ]
+
+  # Keep the public Swift API of the internal Swift modules from being exported; see
+  # //flutter/testing/symbols/verify_exported.dart.
+  configs +=
+      [ "//flutter/shell/platform/darwin/common:swift_unexported_symbols" ]
 
   public = _flutter_framework_headers
 

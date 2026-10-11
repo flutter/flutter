@@ -61,6 +61,18 @@ config("test_config") {
   lib_dirs = [ "$_platform_path/Developer/usr/lib" ]
 }
 
+# Prevents the public Swift API of the internal Swift modules compiled into the engine binaries
+# (`InternalFlutterSwift`, `InternalFlutterSwiftCommon`, ...) from being exported: the API is only
+# consumed by the engine itself (Swift) and its ObjC interface, which uses the ObjC runtime symbols.
+# The release binaries must not export symbols besides the Objective-C interface, see
+# //flutter/testing/symbols/verify_exported.dart.
+config("swift_unexported_symbols") {
+  if (is_mac || is_ios) {
+    ldflags = [ "-Wl,-unexported_symbols_list," +
+                rebase_path("swift_unexported_symbols.exp", root_build_dir) ]
+  }
+}
+
 config("swift_testing_config") {
   if (is_ios) {
     _platform_path = ios_platform_path

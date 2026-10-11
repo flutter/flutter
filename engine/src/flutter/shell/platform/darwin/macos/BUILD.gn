@@ -182,6 +182,11 @@ shared_library("flutter_framework_dylib") {
     "-fapplication-extension",
   ]
 
+  # Keep the public Swift API of the internal Swift modules from being exported; see
+  # //flutter/testing/symbols/verify_exported.dart.
+  configs +=
+      [ "//flutter/shell/platform/darwin/common:swift_unexported_symbols" ]
+
   deps = [ ":flutter_framework_source" ]
 }
 
