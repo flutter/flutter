@@ -93,9 +93,8 @@ exports_files(["fixtures_location.cc"])
   ConvertedFile(
     '//flutter/display_list',
     skip: <String, String>{
-      'display_list_fixtures': 'fixture in //flutter/txt/third_party/fonts, which has no package',
-      'display_list_unittests': 'needs //flutter/display_list/testing',
-      'display_list_rendertests': 'needs //flutter/display_list/testing',
+      'display_list_rendertests':
+          'needs //flutter/display_list/testing:display_list_surface_provider',
       'display_list_builder_benchmarks': 'needs //flutter/benchmarking',
       'display_list_region_benchmarks': 'needs //flutter/benchmarking',
       'display_list_transform_benchmarks': 'needs //flutter/benchmarking',
@@ -154,6 +153,36 @@ exports_files(["fixtures_location.cc"])
       'entity_unittests': 'needs //flutter/impeller/playground',
     },
   ),
+  // The display_list_unittests chain (research/08, step 5): the text stack
+  // and Impeller's display list.
+  ConvertedFile('//flutter/impeller/typographer/backends/skia'),
+  ConvertedFile(
+    '//flutter/impeller/display_list',
+    skip: <String, String>{
+      'display_list_unittests': 'needs //flutter/impeller/playground',
+      'display_list_unittests_golden': 'needs //flutter/impeller/playground',
+      'skia_conversions_unittests':
+          'part of impeller_unittests, which needs the Impeller test suites',
+      'aiks_playground': 'needs //flutter/impeller/playground',
+      'aiks_unittests': 'needs //flutter/impeller/playground',
+      'aiks_unittests_golden': 'needs //flutter/impeller/playground',
+    },
+  ),
+  ConvertedFile(
+    '//flutter/txt',
+    skip: <String, String>{
+      'txt_benchmarks': 'needs //flutter/third_party/benchmark',
+      'txt_unittests': 'needs //flutter/runtime:test_font',
+    },
+    // The fonts are fixtures of other packages' tests (display_list's).
+    appendix: '''
+exports_files(glob(["third_party/fonts/*"]))
+''',
+  ),
+  ConvertedFile(
+    '//flutter/display_list/testing',
+    skip: <String, String>{'display_list_surface_provider': 'needs //flutter/common/graphics'},
+  ),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia
@@ -211,15 +240,59 @@ cc_library(
     '//flutter/skia/modules/skcms',
     implicitDeps: <String>['@skia//:skia_headers'],
     // Transform_inl.h is in none of skcms's source lists (Skia's Bazel
-    // build has it as a textual header, which the lists leave out).
+    // build has it as a textual header, which the lists leave out). The
+    // prefix is the engine's path for the module (include_prefix replaces
+    // the package's own path).
     appendix: '''
 cc_library(
     name = "skcms_headers",
     hdrs = glob(["**/*.h"]),
-    include_prefix = "third_party/skia",
+    include_prefix = "third_party/skia/modules/skcms",
 )
 ''',
   ),
+  // Skia's text modules (research/08, step 5): the engine's GN over Skia's
+  // module source lists, like //flutter/skia itself. Each is a package, so
+  // the root's glob stops at it: each exports its own headers under the
+  // path engine code includes them by, as skcms does.
+  ConvertedFile(
+    '//flutter/skia/modules/skunicode',
+    implicitDeps: <String>['@skia//:skia_headers', '@skia//modules/skunicode:skunicode_headers'],
+    appendix: '''
+cc_library(
+    name = "skunicode_headers",
+    hdrs = glob(["**/*.h"]),
+    include_prefix = "third_party/skia/modules/skunicode",
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/skia/modules/skshaper',
+    implicitDeps: <String>['@skia//:skia_headers', '@skia//modules/skshaper:skshaper_headers'],
+    appendix: '''
+cc_library(
+    name = "skshaper_headers",
+    hdrs = glob(["**/*.h"]),
+    include_prefix = "third_party/skia/modules/skshaper",
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/skia/modules/skparagraph',
+    implicitDeps: <String>[
+      '@skia//:skia_headers',
+      '@skia//modules/skparagraph:skparagraph_headers',
+    ],
+    appendix: '''
+cc_library(
+    name = "skparagraph_headers",
+    hdrs = glob(["**/*.h"]),
+    include_prefix = "third_party/skia/modules/skparagraph",
+)
+''',
+  ),
+  // Skia's own GN for the config that hides ICU's C++ API from skunicode.
+  ConvertedFile('//flutter/third_party/skia/third_party/icu/config'),
   ConvertedFile(
     '//flutter/third_party/skia/src/partition_alloc',
     implicitDeps: <String>['@skia//:skia_headers'],
@@ -445,6 +518,24 @@ cc_library(
         "libshaderc_util/src/*.h",
     ]),
     textual_hdrs = glob(["libshaderc_util/include/**/*.inc"]),
+)
+''',
+  ),
+  // harfbuzz as the engine builds it (secondary tree); its sources include
+  // the .hh headers beside them, which no list names, and some include other
+  // .cc files (hb-common.cc includes hb-static.cc; the amalgamation
+  // harfbuzz.cc includes them all).
+  ConvertedFile(
+    '//flutter/third_party/harfbuzz',
+    implicitDeps: <String>['@harfbuzz//:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "src/**/*.h",
+        "src/**/*.hh",
+    ]),
+    textual_hdrs = glob(["src/**/*.cc"]),
 )
 ''',
   ),
