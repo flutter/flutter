@@ -76,9 +76,9 @@ cc_library(
         # some GLES3 features if the driver supports them.
         "@angle//:include/GLES3/gl3.h",  # !is_android && !is_fuchsia
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":gles_config",  # !is_android && !is_fuchsia

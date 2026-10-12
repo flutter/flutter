@@ -245,9 +245,9 @@ cc_library(
         "render_target_cache.h",
         "save_layer_utils.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES + ["_USE_MATH_DEFINES"],
     deps = [
         ":entity_shaders",

@@ -51,9 +51,9 @@ cc_library(
         "texture_descriptor.h",
         "vertex_buffer.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -76,9 +76,9 @@ cc_library(
         "sampler_descriptor_unittests.cc",
         "shader_types_unittests.cc",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":core",

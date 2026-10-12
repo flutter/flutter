@@ -21,9 +21,9 @@ cc_library(
         "typeface_skia.h",
         "typographer_context_skia.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     # text_frame_skia.cc includes skparagraph's Paragraph.h.
     deps = [

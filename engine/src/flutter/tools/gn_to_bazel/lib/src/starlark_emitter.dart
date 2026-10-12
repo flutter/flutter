@@ -128,6 +128,11 @@ final class _Rule {
   final Map<String, _ListAttribute> lists = <String, _ListAttribute>{};
   final Map<String, String> scalars = <String, String>{};
 
+  /// A target's own unconditional compiler flags by attribute (`copts`,
+  /// `conlyopts`, `cxxopts`), which lead the attribute as they lead GN's
+  /// command line; spliced in once the copts constants are placed.
+  final Map<String, List<_Item>> ownFlags = <String, List<_Item>>{};
+
   _ListAttribute list(String attribute) => lists.putIfAbsent(attribute, _ListAttribute.new);
 }
 
@@ -740,7 +745,7 @@ final class _Emitter {
         case 'cflags_cc':
         case 'cflags_objc':
         case 'cflags_objcc':
-          _compilerFlagsInto(rule, variable, Condition.always);
+          _compilerFlagsInto(rule, variable, Condition.always, own: true);
         case 'testonly':
           // cc_test is testonly by definition.
           if (kind != 'cc_test') {
@@ -841,6 +846,11 @@ final class _Emitter {
       // GN's default include dirs, applied to every target by BUILDCONFIG.gn.
       if (layout.isMain) {
         rule.list('deps').addUnique(Condition.always, _Item(_localLabel(defaultIncludeDirsLabel)));
+      }
+      // The target's own flags lead, as in GN's command line (see
+      // _compilerFlagsInto); the constants and the configs' flags follow.
+      for (final MapEntry<String, List<_Item>> own in rule.ownFlags.entries) {
+        rule.list(own.key).always.insertAll(0, own.value);
       }
     }
     // What GN leaves implicit (the headers of the tree, say) is a public
@@ -991,8 +1001,18 @@ final class _Emitter {
   }
 
   /// `cflags*` of a target or a config into the rule's flag attributes,
-  /// under [condition] on top of each item's own.
-  void _compilerFlagsInto(_Rule rule, GnVariable variable, Condition condition) {
+  /// under [condition] on top of each item's own. A target's [own] flags
+  /// come before every config's in GN's command line (lib/ui turns
+  /// `-Wimplicit-float-conversion` on and `default_warning_flags` then turns
+  /// its int-to-float part back off), so they are kept apart and rendered
+  /// ahead of the copts constants; a flag under a condition still follows,
+  /// in its `select()`.
+  void _compilerFlagsInto(
+    _Rule rule,
+    GnVariable variable,
+    Condition condition, {
+    bool own = false,
+  }) {
     final String attribute = switch (variable.name) {
       'cflags_c' => 'conlyopts',
       'cflags_cc' => 'cxxopts',
@@ -1007,7 +1027,12 @@ final class _Emitter {
       if (item.quoted && item.text.startsWith('-std=')) {
         return;
       }
-      rule.list(attribute).add(condition.and(e.condition), item);
+      final Condition under = condition.and(e.condition);
+      if (own && under == Condition.always) {
+        rule.ownFlags.putIfAbsent(attribute, () => <_Item>[]).add(item);
+        return;
+      }
+      rule.list(attribute).add(under, item);
     });
   }
 
@@ -1913,17 +1938,30 @@ final class _Emitter {
   void _renderList(StringBuffer out, _ListAttribute list, _Rule rule, String attribute) {
     final bool sorted = _sortedAttributes.contains(attribute);
     final parts = <String>[];
-    // Bare constants (FLUTTER_COPTS, FLUTTER_TESTONLY_COPTS,
-    // FLUTTER_LOCAL_DEFINES) lead as themselves.
-    final always = List<_Item>.of(list.always);
-    while (always.isNotEmpty &&
-        !always.first.quoted &&
-        !always.first.expression &&
-        always.first.comment == null) {
-      parts.add(always.removeAt(0).text);
+    // Bare list constants (FLUTTER_COPTS, FLUTTER_TESTONLY_COPTS,
+    // FLUTTER_LOCAL_DEFINES) stand as themselves wherever they sit; the
+    // elements between them form list literals (a target's own flags lead
+    // its copts, ahead of the constants, as in GN).
+    bool constant(_Item item) => !item.quoted && !item.expression && item.comment == null;
+    final elements = <_Item>[];
+    void flush() {
+      if (elements.isNotEmpty) {
+        parts.add(_renderItems(sorted ? _sortItems(elements) : elements, indent: 4));
+        elements.clear();
+      }
     }
-    if (always.isNotEmpty || parts.isEmpty && list.conditional.isEmpty) {
-      parts.add(_renderItems(sorted ? _sortItems(always) : always, indent: 4));
+
+    for (final _Item item in list.always) {
+      if (constant(item)) {
+        flush();
+        parts.add(item.text);
+      } else {
+        elements.add(item);
+      }
+    }
+    flush();
+    if (parts.isEmpty && list.conditional.isEmpty) {
+      parts.add('[]');
     }
     for (final MapEntry<Condition, List<_Item>> entry in list.conditional.entries) {
       parts.add(_renderSelect(entry.key, sorted ? _sortItems(entry.value) : entry.value, rule));
