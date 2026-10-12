@@ -261,6 +261,10 @@ final class _Emitter {
     loads.putIfAbsent(_absoluteLabel(bzl), () => <String>{}).add(symbol);
   }
 
+  /// The `config_setting_group`s this file declares for conjunctions of
+  /// mixed settings, by condition (see [_conjunctionSetting]).
+  final Map<Condition, String> _conjunctionGroups = <Condition, String>{};
+
   /// The `lib<name>.so` files the file's shared libraries produce.
   final Set<String> _sharedLibraryOutputs = <String>{};
 
@@ -309,10 +313,12 @@ final class _Emitter {
     _convertTarget(target);
     // A target GN defines only under a condition exists in Bazel but is
     // incompatible wherever the condition does not hold: dependents cannot
-    // build it there, as in GN they could not name it.
+    // build it there, as in GN they could not name it. (The condition may
+    // add a config_setting_group of its own after the target's rules.)
     if (target.condition != Condition.always) {
+      final int last = rules.length;
       final String compatibility = _compatibility(target);
-      for (final _Rule rule in rules.skip(first)) {
+      for (final _Rule rule in rules.sublist(first, last)) {
         rule.scalars['target_compatible_with'] = compatibility;
       }
     }
@@ -1613,20 +1619,33 @@ final class _Emitter {
   /// negation, if any, is the default; where no case holds the attribute is
   /// unset (`None`), as GN leaves the variable undefined there.
   String _renderScalarSelect(List<GnScalarCase> cases, _Rule rule, GnVariable variable) {
+    // The cases exclude each other by construction (each stands only where
+    // no later write happens), so their keys never match together. The one
+    // key added beside them -- `None` under the complement of a case that is
+    // a negation, where GN leaves the variable undefined -- must not overlap
+    // another case either, or Bazel would find two keys with two values.
     final branches = <String, String>{};
-    String? fallback;
+    final resolved = <GnScalarCase, _SelectKeys>{
+      for (final scalarCase in cases)
+        scalarCase: _selectKeys(
+          scalarCase.condition,
+          rule,
+          scalarCase.assignment.location,
+          () => 'of the value of ${variable.name} (${rule.kind} ${rule.name})',
+        ),
+    };
     for (final scalarCase in cases) {
-      final String value = _scalarText(scalarCase);
-      final _SelectKeys keys = _selectKeys(
-        scalarCase.condition,
-        rule,
-        scalarCase.assignment.location,
-        () => 'of the value of ${variable.name} (${rule.kind} ${rule.name})',
-      );
+      final _SelectKeys keys = resolved[scalarCase]!;
       if (!keys.negated) {
         for (final String setting in keys.settings) {
-          branches[setting] = value;
+          branches[setting] = _scalarText(scalarCase);
         }
+      }
+    }
+    String? fallback;
+    for (final scalarCase in cases) {
+      final _SelectKeys keys = resolved[scalarCase]!;
+      if (!keys.negated) {
         continue;
       }
       if (fallback != null) {
@@ -1635,9 +1654,34 @@ final class _Emitter {
           'two values of ${variable.name} hold under negations; a select() has one default',
         );
       }
-      fallback = value;
-      for (final String setting in keys.settings) {
-        branches.putIfAbsent(setting, () => 'None');
+      fallback = _scalarText(scalarCase);
+      // The complement's terms, one per key: `!is_win && !is_mac` (the
+      // else of a chain) has `is_win` and `is_mac`, which are other cases'
+      // own keys and keep their values; a term that merely overlaps another
+      // case would make two keys match with two values.
+      final List<Condition> complementTerms = switch (scalarCase.condition) {
+        ConditionAnd(:final List<Condition> terms) => <Condition>[
+          for (final Condition t in terms) t.negated,
+        ],
+        final Condition c => <Condition>[c.negated],
+      };
+      for (var i = 0; i < keys.settings.length; i++) {
+        final String setting = keys.settings[i];
+        if (branches.containsKey(setting)) {
+          continue;
+        }
+        final Condition term = complementTerms[i];
+        for (final other in cases) {
+          if (other != scalarCase && term.and(other.condition) != Condition.never) {
+            throw GnError(
+              scalarCase.assignment.location,
+              '${variable.name} is unset where `$term` holds without `${other.condition}`, '
+              'which a select() cannot say beside the value under `${other.condition}`; '
+              'give the assignment under `${scalarCase.condition}` an else branch',
+            );
+          }
+        }
+        branches[setting] = 'None';
       }
     }
     final out = StringBuffer('select({\n');
@@ -1925,12 +1969,63 @@ final class _Emitter {
         return _SelectKeys(<String>[
           for (final Condition t in terms) _setting(t.negated, rule),
         ], negated: true);
+      case ConditionAnd(:final List<Condition> terms):
+        return _SelectKeys(<String>[
+          _conjunctionSetting(condition, terms, rule, location, where),
+        ], negated: false);
       default:
         throw GnError(
           location,
           'condition `$condition` ${where()} cannot be expressed as a select()',
         );
     }
+  }
+
+  /// A `config_setting_group(match_all = ...)` of this file for a
+  /// conjunction of mixed settings (`impeller_enable_opengles && !is_wasm`):
+  /// each asserted term by its setting, each denied OS predicate by the
+  /// complement group of //engine/src/flutter/build/bazel. One per distinct
+  /// condition, named after it.
+  String _conjunctionSetting(
+    Condition condition,
+    List<Condition> terms,
+    _Rule rule,
+    GnLocation location,
+    String Function() where,
+  ) {
+    final String? existing = _conjunctionGroups[condition];
+    if (existing != null) {
+      return existing;
+    }
+    final settings = <String>[];
+    for (final term in terms) {
+      switch (term) {
+        case ConditionVariable():
+        case ConditionComparison(equals: true):
+          settings.add(_setting(term, rule));
+        case ConditionNot(operand: ConditionVariable(:final String name))
+            when negatedSettings.containsKey(name):
+          settings.add(_absoluteLabel(negatedSettings[name]!));
+        default:
+          throw GnError(
+            location,
+            'condition `$condition` ${where()} cannot be expressed as a select(): '
+            'no config_setting holds exactly when `$term` does',
+          );
+      }
+    }
+    final name =
+        'when_${condition.gnSource.replaceAll('&&', 'and').replaceAll('!', 'not_').replaceAll(RegExp('[^A-Za-z0-9_]+'), '_').replaceAll(RegExp('_+'), '_').replaceAll(RegExp(r'_$'), '')}';
+    _use('@bazel_skylib//lib:selects.bzl', 'selects');
+    final group = _Rule('selects.config_setting_group', name, <String>[
+      '# `$condition`, for the select()s of this file.',
+    ]);
+    for (final setting in settings) {
+      group.list('match_all').always.add(_Item(setting));
+    }
+    rules.add(group);
+    _conjunctionGroups[condition] = ':$name';
+    return ':$name';
   }
 
   /// The config_setting that is true exactly when [condition] (a variable or

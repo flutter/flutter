@@ -672,6 +672,64 @@ if (enable_unittests) {
     }),
 '''),
         );
+        // A conjunction of mixed settings keys a config_setting_group of
+        // the file; a denied OS predicate is its complement group. A denied
+        // flag has no complement and stays an error.
+        final String mixed = await convert(
+          '''
+if (enable_unittests && !is_wasm) {
+  source_set("x") {
+    sources = [ "a.cc" ]
+  }
+}
+impeller_shaders("entity_shaders") {
+  name = "entity"
+  if (impeller_enable_opengles && !is_wasm) {
+    gles_language_version = 460
+  }
+  shaders = [ "shaders/solid_fill.vert" ]
+}
+''',
+          templates: <String>{'impeller_shaders'},
+          assumptions: Assumptions(const <String, GnValue>{}),
+        );
+        expect(
+          mixed,
+          contains('''
+load("@bazel_skylib//lib:selects.bzl", "selects")
+'''),
+        );
+        expect(
+          mixed,
+          contains('''
+# `enable_unittests && !is_wasm`, for the select()s of this file.
+selects.config_setting_group(
+    name = "when_enable_unittests_and_not_is_wasm",
+    match_all = [
+        "//engine/src/flutter/testing:unittests_enabled",
+        "//engine/src/flutter/build/bazel:not_wasm",
+    ],
+)
+'''),
+        );
+        expect(
+          mixed,
+          contains('''
+    target_compatible_with = select({
+        ":when_enable_unittests_and_not_is_wasm": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+'''),
+        );
+        expect(
+          mixed,
+          contains('''
+    gles_language_version = select({
+        ":when_impeller_enable_opengles_and_not_is_wasm": 460,
+        "//conditions:default": None,
+    }),
+'''),
+        );
         await expectLater(
           convert('''
 if (enable_unittests && !slimpeller) {
@@ -680,7 +738,10 @@ if (enable_unittests && !slimpeller) {
   }
 }
 ''', assumptions: Assumptions(const <String, GnValue>{})),
-          throwsGnError(line: 2, message: 'cannot be expressed as a select()'),
+          throwsGnError(
+            line: 2,
+            message: 'no config_setting holds exactly when `!slimpeller` does',
+          ),
         );
       });
     });
@@ -1591,9 +1652,47 @@ impeller_shaders(
     });
 
     test('rejects scalar cases a select() cannot hold', () async {
-      // A value in force under a conjunction (`!is_win && slimpeller`: the
-      // first write stands where the second does not happen); a name that
-      // varies, which no target can have.
+      // A value under a conjunction keys a config_setting_group when every
+      // term has a setting (`!is_win && slimpeller`). Two shapes have no
+      // select(): a negated case whose complement overlaps another case
+      // (`!is_win` then `!slimpeller`: unset where slimpeller holds and
+      // is_win does, which no key can say beside the group's value), and a
+      // denied flag inside a conjunction (no complement setting). A name
+      // that varies no target can have.
+      final String grouped = await convert(
+        '''
+impeller_shaders("entity_shaders") {
+  name = "entity"
+  if (!is_win && slimpeller) {
+    metal_version = "2.1"
+  }
+  shaders = [ "shaders/solid_fill.vert" ]
+}
+''',
+        templates: <String>{'impeller_shaders'},
+        assumptions: Assumptions(const <String, GnValue>{}),
+      );
+      expect(
+        grouped,
+        contains('''
+    metal_version = select({
+        ":when_not_is_win_and_slimpeller": "2.1",
+        "//conditions:default": None,
+    }),
+'''),
+      );
+      expect(
+        grouped,
+        contains('''
+selects.config_setting_group(
+    name = "when_not_is_win_and_slimpeller",
+    match_all = [
+        "//engine/src/flutter/build/bazel:not_win",
+        "//engine/src/flutter/common:slimpeller_enabled",
+    ],
+)
+'''),
+      );
       await expectLater(
         convert(
           '''
@@ -1601,9 +1700,6 @@ impeller_shaders("entity_shaders") {
   name = "entity"
   if (!is_win) {
     metal_version = "2.1"
-  }
-  if (!is_mac) {
-    gles_language_version = 460
   }
   if (!slimpeller) {
     metal_version = "2.4"
@@ -1614,7 +1710,26 @@ impeller_shaders("entity_shaders") {
           templates: <String>{'impeller_shaders'},
           assumptions: Assumptions(const <String, GnValue>{}),
         ),
-        throwsGnError(line: 4, message: 'cannot be expressed as a select()'),
+        throwsGnError(line: 7, message: 'metal_version is unset where `slimpeller` holds without'),
+      );
+      await expectLater(
+        convert(
+          '''
+impeller_shaders("entity_shaders") {
+  name = "entity"
+  if (!slimpeller) {
+    metal_version = "2.1"
+  }
+  if (!is_win) {
+    metal_version = "2.4"
+  }
+  shaders = [ "shaders/solid_fill.vert" ]
+}
+''',
+          templates: <String>{'impeller_shaders'},
+          assumptions: Assumptions(const <String, GnValue>{}),
+        ),
+        throwsGnError(line: 4, message: 'no config_setting holds exactly when `!slimpeller` does'),
       );
       await expectLater(
         convert('''

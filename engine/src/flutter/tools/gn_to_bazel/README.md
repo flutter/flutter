@@ -53,9 +53,12 @@ or the negation of one or several (`!is_win`; `!is_win && !is_mac`, the
 as they are built, using the one fact BUILDCONFIG.gn guarantees: the `is_*`
 OS predicates (and the values one variable is compared with) are mutually
 exclusive, so the path of `else if (is_mac)` after `if (is_ios)` is
-`is_mac`, not `!is_ios && is_mac`. Anything that still needs a conjunction
-of mixed settings is an error (a `config_setting_group` would be the Bazel
-form; no converted file needs one yet).
+`is_mac`, not `!is_ios && is_mac`. A conjunction of mixed settings
+(`impeller_enable_opengles && !is_wasm`) keys a `config_setting_group`
+generated into the file (`when_<condition>`, `match_all` over the terms'
+settings), where a denied OS predicate is its complement group in
+`//engine/src/flutter/build/bazel` (`not_wasm`: any of the other seven); a
+denied flag has no complement and stays an error.
 
 A scalar (`metal_version`, `testonly`) may be assigned under conditions,
 including reassigned: its cases -- each value with the condition under
