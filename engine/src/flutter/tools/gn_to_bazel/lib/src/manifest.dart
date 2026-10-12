@@ -420,6 +420,41 @@ exports_files(["dl_rendering_unittests.cc"])
   // (referenceConstants), the Bazel side of what tools/gn computes.
   ConvertedFile('//flutter/shell/version'),
   ConvertedFile('//flutter/common/graphics'),
+  ConvertedFile('//flutter/vulkan/procs'),
+  // flutter_vma/config.gni's disable_vma_stl_shared_mutex: tools/gn sets it
+  // where the C++ library has no std::shared_mutex (iOS; Windows hosts),
+  // read in Bazel terms as those target platforms.
+  ConvertedFile(
+    '//flutter/flutter_vma',
+    appendix: '''
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+selects.config_setting_group(
+    name = "without_stl_shared_mutex",
+    match_any = [
+        "@platforms//os:ios",
+        "@platforms//os:windows",
+    ],
+)
+''',
+  ),
+  // Impeller's rendering backends (what //flutter/impeller's group and
+  // //flutter/flow need); their test suites wait on impeller/playground.
+  ConvertedFile(
+    '//flutter/impeller/renderer/backend/gles',
+    skip: <String, String>{
+      'mock_gles': 'with gles_unittests',
+      'gles_unittests': 'needs //flutter/impeller/playground:playground_test',
+    },
+  ),
+  ConvertedFile(
+    '//flutter/impeller/renderer/backend/vulkan',
+    skip: <String, String>{
+      'mock_vulkan': 'with vulkan_unittests (it includes a SwiftShader header the GN never names)',
+      'vulkan_unittests': 'needs //flutter/impeller/playground:playground_test',
+    },
+  ),
+  ConvertedFile('//flutter/impeller/renderer/backend'),
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.
@@ -821,6 +856,9 @@ cc_library(
 )
 ''',
   ),
+  // VulkanMemoryAllocator: one header, listed by the secondary tree's GN;
+  // its config's include directory and defines ride the dependency.
+  ConvertedFile('//flutter/third_party/vulkan_memory_allocator'),
 ];
 
 /// The manifest entry for a GN directory, from either list.

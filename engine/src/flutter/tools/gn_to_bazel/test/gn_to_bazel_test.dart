@@ -2118,6 +2118,27 @@ cc_library(
       );
     });
 
+    test('an include directory of another repository is a dependency on its library', () async {
+      final String output = await convert('''
+config("gles_config") {
+  include_dirs = [ "//flutter/third_party/angle/include" ]
+}
+
+source_set("gles") {
+  sources = [
+    "gles.cc",
+    "//flutter/third_party/angle/include/GLES3/gl3.h",
+  ]
+  public_configs = [ ":gles_config" ]
+}
+''');
+      expect(
+        output,
+        contains('cc_library(\n    name = "gles_config",\n    deps = ["@angle//:headers"],\n)\n'),
+      );
+      expect(output, contains('"@angle//:include/GLES3/gl3.h"'));
+    });
+
     test('all_dependent_configs cross private deps; engine code gets FLUTTER_COPTS', () async {
       final String output = await convert('''
 config("vulkan_public") {
