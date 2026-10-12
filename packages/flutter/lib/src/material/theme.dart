@@ -61,13 +61,13 @@ class Theme extends StatelessWidget {
 
   static ThemeData? _cachedFallbackTheme;
 
-  // The theme [Theme.of] returns when there is no [Theme] ancestor.
-  //
-  // The fallback is cached because constructing a [ThemeData] is expensive,
-  // but it is rebuilt whenever [defaultTargetPlatform] no longer matches the
-  // platform it was built for (for example under a [TargetPlatformVariant] or
-  // after a platform override), so a theme-less subtree adapts to the current
-  // platform the same way a [MaterialApp] would.
+  /// The theme [Theme.of] returns when there is no [Theme] ancestor.
+  ///
+  /// The fallback is cached because constructing a [ThemeData] is expensive,
+  /// but it is rebuilt whenever [defaultTargetPlatform] no longer matches the
+  /// platform it was built for (for example under a `TargetPlatformVariant` or
+  /// after a platform override), so a theme-less subtree adapts to the current
+  /// platform the same way a [MaterialApp] would.
   static ThemeData get _fallbackTheme {
     if (_cachedFallbackTheme?.platform != defaultTargetPlatform) {
       _cachedFallbackTheme = ThemeData.fallback();
