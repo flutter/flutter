@@ -118,7 +118,7 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   std::unique_ptr<SnapshotSurfaceProducer>
   CreateAndroidSnapshotSurfaceProducer();
 
-  sk_sp<GrDirectContext> CreateAndroidResourceContext() const;
+  bool MakeAndroidResourceContextCurrent() const;
 
   void ReleaseAndroidResourceContext() const;
 

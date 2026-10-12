@@ -10,7 +10,6 @@
 #include "flutter/shell/platform/android/image_external_texture.h"
 
 #include "flutter/impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
-#include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
 
 namespace flutter {

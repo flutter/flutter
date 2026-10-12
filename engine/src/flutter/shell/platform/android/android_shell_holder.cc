@@ -803,7 +803,7 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
 
   const uint64_t spawned_holder_id = NextHolderId();
   // embedder.h has no spawn API yet.
-  std::unique_ptr<EmbedderEngine> spawned =
+  auto spawned =
       reinterpret_cast<EmbedderEngine*>(engine_.get())
           ->Spawn(&run_config.config, initial_route, on_create_platform_view,
                   MakeExternalTextureResolver(spawned_holder_id));

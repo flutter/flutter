@@ -61,6 +61,7 @@ class PlatformViewEmbedder : public PlatformView {
   using CreateSnapshotSurfaceProducerCallback =
       std::function<std::unique_ptr<SnapshotSurfaceProducer>()>;
   using CreateResourceContextCallback = std::function<sk_sp<GrDirectContext>()>;
+  using MakeResourceCurrentCallback = std::function<bool()>;
   using ReleaseResourceContextCallback = std::function<void()>;
   using GetImpellerContextCallback =
       std::function<std::shared_ptr<impeller::Context>()>;
@@ -90,6 +91,7 @@ class PlatformViewEmbedder : public PlatformView {
     CreateSnapshotSurfaceProducerCallback
         create_snapshot_surface_producer_callback;                   // optional
     CreateResourceContextCallback create_resource_context_callback;  // optional
+    MakeResourceCurrentCallback make_resource_current_callback;      // optional
     ReleaseResourceContextCallback
         release_resource_context_callback;                         // optional
     GetImpellerContextCallback get_impeller_context_callback;      // optional

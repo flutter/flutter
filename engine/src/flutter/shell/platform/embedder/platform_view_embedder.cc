@@ -8,6 +8,11 @@
 
 #include "flutter/fml/make_copyable.h"
 
+#if !SLIMPELLER && defined(SHELL_ENABLE_GL)
+#include "flutter/shell/common/shell_io_manager.h"
+#include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
+#endif  // !SLIMPELLER && defined(SHELL_ENABLE_GL)
+
 namespace flutter {
 
 class PlatformViewEmbedder::EmbedderPlatformMessageHandler
@@ -208,6 +213,22 @@ void PlatformViewEmbedder::SetupImpellerContext() {
 sk_sp<GrDirectContext> PlatformViewEmbedder::CreateResourceContext() const {
   if (platform_dispatch_table_.create_resource_context_callback != nullptr) {
     return platform_dispatch_table_.create_resource_context_callback();
+  }
+  if (platform_dispatch_table_.make_resource_current_callback != nullptr) {
+#if !SLIMPELLER && defined(SHELL_ENABLE_GL)
+    sk_sp<GrDirectContext> resource_context;
+    if (platform_dispatch_table_.make_resource_current_callback()) {
+      resource_context = ShellIOManager::CreateCompatibleResourceLoadingContext(
+          GrBackendApi::kOpenGL,
+          GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
+    } else {
+      FML_DLOG(ERROR) << "Could not make the resource context current.";
+    }
+    return resource_context;
+#else
+    platform_dispatch_table_.make_resource_current_callback();
+    return nullptr;
+#endif  // !SLIMPELLER && defined(SHELL_ENABLE_GL)
   }
   if (embedder_surface_ == nullptr) {
     FML_LOG(ERROR) << "Embedder surface was null.";

@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "flutter/impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
 #include "flutter/impeller/toolkit/glvk/trampoline.h"
 #include "flutter/shell/platform/android/surface_texture_external_texture.h"

@@ -8,7 +8,6 @@
 #include <sys/system_properties.h>
 #endif
 
-#include "flutter/common/graphics/gl_context_switch.h"
 #include "flutter/fml/logging.h"
 #include "flutter/impeller/toolkit/egl/surface.h"
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"

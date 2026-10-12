@@ -502,5 +502,35 @@ TEST(PlatformViewEmbedderTest,
   latch.Wait();
 }
 
+TEST(PlatformViewEmbedderTest,
+     SubclassWithoutSurfaceForwardsMakeResourceCurrentCallback) {
+  ThreadHost thread_host("io.flutter.test." + GetCurrentTestName() + ".",
+                         ThreadHost::Type::kPlatform);
+  flutter::TaskRunners task_runners = flutter::TaskRunners(
+      GetCurrentTestName(), thread_host.platform_thread->GetTaskRunner(),
+      nullptr, nullptr, nullptr);
+  fml::AutoResetWaitableEvent latch;
+  task_runners.GetPlatformTaskRunner()->PostTask([&latch, task_runners] {
+    MockDelegate delegate;
+    bool make_resource_current_called = false;
+
+    PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table;
+    platform_dispatch_table.make_resource_current_callback =
+        [&make_resource_current_called]() -> bool {
+      make_resource_current_called = true;
+      return false;
+    };
+
+    SurfacelessPlatformViewEmbedder embedder(
+        delegate, task_runners, std::move(platform_dispatch_table));
+    const PlatformView& const_platform_view = embedder;
+
+    EXPECT_FALSE(const_platform_view.CreateResourceContext());
+    EXPECT_TRUE(make_resource_current_called);
+    latch.Signal();
+  });
+  latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter

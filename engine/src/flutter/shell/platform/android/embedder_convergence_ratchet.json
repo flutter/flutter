@@ -10,7 +10,7 @@
       "enforce": "zero"
     },
     "embedder_engine_refs": {
-      "count": 3,
+      "count": 2,
       "enforce": "ratchet"
     },
     "embedder_internal_includes": {
@@ -18,7 +18,7 @@
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
-      "count": 88,
+      "count": 79,
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {

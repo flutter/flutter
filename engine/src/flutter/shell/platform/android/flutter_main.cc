@@ -20,7 +20,6 @@
 #include "flutter/fml/platform/android/paths_android.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
-#include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "impeller/toolkit/android/proc_table.h"

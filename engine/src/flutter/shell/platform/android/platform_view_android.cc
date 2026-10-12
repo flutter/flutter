@@ -11,8 +11,6 @@
 
 #include "common/settings.h"
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/shell/common/shell_io_manager.h"
-#include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/shell/platform/android/android_context_dynamic_impeller.h"
 #include "flutter/shell/platform/android/android_context_gl_impeller.h"
 #include "flutter/shell/platform/android/android_context_vk_impeller.h"
@@ -172,9 +170,10 @@ PlatformViewAndroid::WithAndroidCallbacks(
     platform_dispatch_table.create_snapshot_surface_producer_callback =
         [self]() { return self->CreateAndroidSnapshotSurfaceProducer(); };
   }
-  if (!platform_dispatch_table.create_resource_context_callback) {
-    platform_dispatch_table.create_resource_context_callback = [self]() {
-      return self->CreateAndroidResourceContext();
+  if (!platform_dispatch_table.create_resource_context_callback &&
+      !platform_dispatch_table.make_resource_current_callback) {
+    platform_dispatch_table.make_resource_current_callback = [self]() {
+      return self->MakeAndroidResourceContextCurrent();
     };
   }
   if (!platform_dispatch_table.release_resource_context_callback) {
@@ -411,28 +410,11 @@ PlatformViewAndroid::CreateAndroidSnapshotSurfaceProducer() {
   return std::make_unique<AndroidSnapshotSurfaceProducer>(*android_surface_);
 }
 
-sk_sp<GrDirectContext> PlatformViewAndroid::CreateAndroidResourceContext()
-    const {
+bool PlatformViewAndroid::MakeAndroidResourceContextCurrent() const {
   if (!android_surface_) {
-    return nullptr;
+    return false;
   }
-#if !SLIMPELLER
-  sk_sp<GrDirectContext> resource_context;
-  if (android_surface_->ResourceContextMakeCurrent()) {
-    // TODO(chinmaygarde): Currently, this code depends on the fact that only
-    // the OpenGL surface will be able to make a resource context current. If
-    // this changes, this assumption breaks. Handle the same.
-    resource_context = ShellIOManager::CreateCompatibleResourceLoadingContext(
-        GrBackendApi::kOpenGL,
-        GPUSurfaceGLDelegate::GetDefaultPlatformGLInterface());
-  } else {
-    FML_DLOG(ERROR) << "Could not make the resource context current.";
-  }
-  return resource_context;
-#else
-  android_surface_->ResourceContextMakeCurrent();
-  return nullptr;
-#endif  //  !SLIMPELLER
+  return android_surface_->ResourceContextMakeCurrent();
 }
 
 void PlatformViewAndroid::ReleaseAndroidResourceContext() const {
