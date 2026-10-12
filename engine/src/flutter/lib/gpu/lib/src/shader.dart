@@ -70,7 +70,8 @@ base class UniformSlot {
 }
 
 /// A storage buffer declared by a compute shader, looked up by its block name
-/// with [Shader.getStorageBufferSlot].
+/// with [Shader.getStorageBufferSlot], which only returns slots for storage
+/// buffers the shader declares.
 ///
 /// Bind a [BufferView] to it with [ComputePass.bindStorageBuffer], or through
 /// a [BindingSet]. A bound view must cover at least [sizeInBytes]. When the
@@ -88,9 +89,10 @@ base class StorageBufferSlot {
   final String storageBufferName;
 
   // The reflection index for the name-free bind path, resolved through one
-  // native call on first use and cached until a shader hot reload, along with
-  // the block layout the bind-time checks read. -1 means the shader has no
-  // storage buffer with this slot's name.
+  // native call and cached until a shader hot reload, along with the block
+  // layout the bind-time checks read. -1 means the shader has no storage
+  // buffer with this slot's name, which can only happen after a hot reload
+  // removed it.
   int _index = _kSlotIndexUnresolved;
   int _sizeInBytes = 0;
   int _runtimeArrayStride = 0;
@@ -113,23 +115,38 @@ base class StorageBufferSlot {
     return _index;
   }
 
+  /// The reflection index of this slot. Throws a [StateError] if a hot reload
+  /// removed the storage buffer from the shader.
+  int get _checkedIndex {
+    final int index = _resolvedIndex;
+    if (index < 0) {
+      throw StateError(
+        "The shader no longer declares a storage buffer named '$storageBufferName'. "
+        'A hot reload removed it.',
+      );
+    }
+    return index;
+  }
+
   /// The reflected size of the storage buffer's block, counting a trailing
   /// runtime-sized array as empty.
   ///
-  /// Returns null if the shader does not declare a storage buffer with this
-  /// name. A storage buffer the shader declares but never uses is reflected
-  /// like any other, on every backend.
-  int? get sizeInBytes {
-    return _resolvedIndex < 0 ? null : _sizeInBytes;
+  /// A storage buffer the shader declares but never uses is reflected like
+  /// any other, on every backend. Throws a [StateError] if a hot reload
+  /// removed the storage buffer from the shader.
+  int get sizeInBytes {
+    _checkedIndex;
+    return _sizeInBytes;
   }
 
   /// The stride of the runtime-sized array the block ends in, or 0 if it does
   /// not end in one.
   ///
-  /// Returns null if the shader does not declare a storage buffer with this
-  /// name.
-  int? get runtimeArrayStrideInBytes {
-    return _resolvedIndex < 0 ? null : _runtimeArrayStride;
+  /// Throws a [StateError] if a hot reload removed the storage buffer from the
+  /// shader.
+  int get runtimeArrayStrideInBytes {
+    _checkedIndex;
+    return _runtimeArrayStride;
   }
 
   /// Returns the reflection index of this slot after checking that [view]
@@ -137,12 +154,7 @@ base class StorageBufferSlot {
   /// block, holds whole runtime array elements, and starts at an offset
   /// aligned to [alignment]. Throws otherwise.
   int _validateView(BufferView view, int alignment) {
-    final int index = _resolvedIndex;
-    if (index < 0) {
-      throw Exception(
-        "Failed to bind storage buffer (no storage buffer named '$storageBufferName')",
-      );
-    }
+    final int index = _checkedIndex;
     if (view.offsetInBytes < 0 ||
         view.lengthInBytes <= 0 ||
         view.offsetInBytes + view.lengthInBytes > view.buffer.sizeInBytes) {
@@ -197,14 +209,22 @@ base class Shader extends NativeFieldWrapperClass1 {
   /// Returns the slot for the storage buffer whose block is named
   /// [storageBufferName] in this compute shader.
   ///
-  /// The lookup is lazy: a name the shader does not declare still returns a
-  /// slot, whose [StorageBufferSlot.sizeInBytes] is null and which throws when
-  /// bound. Repeated calls with the same name return the same slot.
+  /// Throws an [ArgumentError] if the shader does not declare a storage buffer
+  /// with that name. Repeated calls with the same name return the same slot.
+  /// If a hot reload later removes the storage buffer from the shader, using
+  /// the slot throws a [StateError].
   StorageBufferSlot getStorageBufferSlot(String storageBufferName) {
-    return _storageBufferSlots[storageBufferName] ??= StorageBufferSlot._(
-      this,
-      storageBufferName,
-    );
+    final StorageBufferSlot slot = _storageBufferSlots[storageBufferName] ??=
+        StorageBufferSlot._(this, storageBufferName);
+    if (slot._resolvedIndex < 0) {
+      _storageBufferSlots.remove(storageBufferName);
+      throw ArgumentError.value(
+        storageBufferName,
+        'storageBufferName',
+        'The shader declares no storage buffer with this name',
+      );
+    }
+    return slot;
   }
 
   @Native<Int Function(Pointer<Void>, Handle)>(

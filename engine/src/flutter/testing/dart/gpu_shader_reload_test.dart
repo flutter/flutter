@@ -351,6 +351,48 @@ void main() {
     );
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  // `ComputeScaleWithUnused` declares the storage buffer `Unused` in
+  // test.shaderbundle, and test_reload.shaderbundle replaces it with a shader
+  // that does not. A slot for `Unused` taken before the reload reports the
+  // removal when it is used, and a slot for a storage buffer the reload kept
+  // still works.
+  test('a reload that removes a storage buffer makes its slot throw', () async {
+    if (!gpu.gpuContext.supportsCompute) {
+      markTestSkipped('Compute is not supported by this GpuContext.');
+      return;
+    }
+    final ByteData bytes = await loadAssetBytes('test.shaderbundle');
+    final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromBytes(bytes))!;
+    final gpu.Shader shader = library['ComputeScaleWithUnused']!;
+    final gpu.StorageBufferSlot unused = shader.getStorageBufferSlot('Unused');
+    final gpu.StorageBufferSlot vertices = shader.getStorageBufferSlot('Vertices');
+    expect(unused.sizeInBytes, 16);
+    final gpu.DeviceBuffer buffer = gpu.gpuContext.createDeviceBuffer(
+      gpu.StorageMode.devicePrivate,
+      64,
+    );
+    final view = gpu.BufferView(buffer, offsetInBytes: 0, lengthInBytes: 16);
+    final gpu.BindingSet set = gpu.gpuContext.createBindingSet(
+      storageBuffers: <gpu.StorageBufferSlot, gpu.BufferView>{unused: view},
+    );
+
+    final ByteData reloadBytes = await loadAssetBytes('test_reload.shaderbundle');
+    expect(library.reinitializeFromBytes(reloadBytes), isNull);
+    expect(identical(library['ComputeScaleWithUnused'], shader), isTrue);
+
+    expect(() => unused.sizeInBytes, throwsStateError);
+    expect(() => unused.runtimeArrayStrideInBytes, throwsStateError);
+    expect(() => shader.getStorageBufferSlot('Unused'), throwsArgumentError);
+    final gpu.ComputePass pass = gpu.gpuContext.createCommandBuffer().createComputePass();
+    expect(() => pass.bindStorageBuffer(unused, view), throwsStateError);
+    expect(() => pass.bindSet(set), throwsStateError);
+
+    expect(identical(shader.getStorageBufferSlot('Vertices'), vertices), isTrue);
+    expect(vertices.sizeInBytes, 0);
+    expect(vertices.runtimeArrayStrideInBytes, 8);
+    pass.bindStorageBuffer(vertices, view);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   test('reinitializeFromBytes evicts and re-registers shader functions cleanly', () async {
     final ByteData bytes = await loadAssetBytes('test.shaderbundle');
     final gpu.ShaderLibrary library = (await gpu.ShaderLibrary.fromBytes(bytes))!;

@@ -1814,9 +1814,8 @@ void main() async {
     expect(accumulator.runtimeArrayStrideInBytes, 0);
     expect(identical(shader.getStorageBufferSlot('InputData'), input), isTrue);
 
-    final gpu.StorageBufferSlot missing = shader.getStorageBufferSlot('NotAStorageBuffer');
-    expect(missing.sizeInBytes, isNull);
-    expect(missing.runtimeArrayStrideInBytes, isNull);
+    // There is no slot for a storage buffer the shader does not declare.
+    expect(() => shader.getStorageBufferSlot('NotAStorageBuffer'), throwsArgumentError);
 
     // `Unused` is declared but never read. Metal's shader compiler removes it
     // and Vulkan's keeps it, but it reflects the same on both.
@@ -1874,13 +1873,13 @@ void main() async {
     // Past the end of the buffer, or empty.
     expect(() => computePass.bindStorageBuffer(input, view(alignment, 512)), throwsArgumentError);
     expect(() => computePass.bindStorageBuffer(input, view(0, 0)), throwsArgumentError);
-    // A storage buffer the shader does not declare.
+    // A storage buffer the shader does not declare has no slot to bind.
     expect(
       () => computePass.bindStorageBuffer(
         shader.getStorageBufferSlot('NotAStorageBuffer'),
         view(0, 16),
       ),
-      throwsA(isA<Exception>()),
+      throwsArgumentError,
     );
     // An offset that is not a multiple of the alignment.
     if (alignment > 1) {
@@ -1926,7 +1925,7 @@ void main() async {
         pipeline.vertexShader.getStorageBufferSlot('VertInfo'),
         wholeBuffer(buffer),
       ),
-      throwsA(isA<Exception>()),
+      throwsArgumentError,
     );
     expect(
       () => computePass.bindUniform(
