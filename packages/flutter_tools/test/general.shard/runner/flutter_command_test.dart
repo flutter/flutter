@@ -897,6 +897,30 @@ void main() {
     );
 
     testUsingContext(
+      'getBuildInfo parses AndroidGradleConfig options and populates toGradleConfig',
+      () async {
+        final command = DummyAllBuildOptionsFlutterCommand();
+        await createTestCommandRunner(command).run(<String>[
+          'dummy',
+          '--android-project-arg=x=1',
+          '--android-project-cache-dir=/c',
+          '--no-android-gradle-daemon',
+        ]);
+
+        final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.androidGradleConfig.gradleDaemon, isFalse);
+        expect(
+          AndroidBuildInfo(buildInfo).toGradleConfig(),
+          containsAll(<String>['-Px=1', '--project-cache-dir=/c']),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
       'getBuildInfo respects historical ExtraFrontEndOptions and ExtraGenSnapshotOptions aliases',
       () async {
         final command = DummyAllBuildOptionsFlutterCommand();

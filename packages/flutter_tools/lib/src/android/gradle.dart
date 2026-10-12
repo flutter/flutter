@@ -457,7 +457,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     FlutterProject project,
     AndroidBuildInfo androidBuildInfo,
   ) async {
-    if (!androidBuildInfo.skipBuildDependencyValidation) {
+    if (!androidBuildInfo.buildInfo.androidGradleConfig.skipBuildDependencyValidation) {
       final Version? javaVersionObj = _java?.version;
       final String? javaVersion = javaVersionObj != null
           ? '${javaVersionObj.major}.${javaVersionObj.minor}.${javaVersionObj.patch}'
@@ -570,10 +570,10 @@ To fix this, you can either:
     } else {
       options.add('-q');
     }
-    if (!androidBuildInfo.gradleDaemon) {
+    if (!buildInfo.androidGradleConfig.gradleDaemon) {
       options.add('--no-daemon');
     }
-    if (androidBuildInfo.skipBuildDependencyValidation) {
+    if (buildInfo.androidGradleConfig.skipBuildDependencyValidation) {
       options.add('-PskipDependencyChecks=true');
     }
     final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
@@ -647,9 +647,6 @@ To fix this, you can either:
     }
     if (buildInfo.fileSystemScheme != null) {
       options.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-    }
-    if (androidBuildInfo.splitPerAbi) {
-      options.add('-Psplit-per-abi=true');
     }
 
     options.addAll(_getAndroidNdkProvisioningProperties());
@@ -900,7 +897,7 @@ To fix this, you can either:
     } else {
       command.add('-q');
     }
-    if (!androidBuildInfo.gradleDaemon) {
+    if (!buildInfo.androidGradleConfig.gradleDaemon) {
       command.add('--no-daemon');
     }
 

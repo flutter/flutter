@@ -324,10 +324,6 @@ void main() {
     expect(BuildInfo.debug.androidGradleConfig.enableHcpp, isNull);
     expect(BuildInfo.debug.androidGradleConfig.explicitEnableHcpp, isNull);
 
-    const defaultAndroidBuildInfo = AndroidBuildInfo(BuildInfo.debug);
-    expect(defaultAndroidBuildInfo.gradleDaemon, isTrue);
-    expect(defaultAndroidBuildInfo.skipBuildDependencyValidation, isFalse);
-
     const customConfig = AndroidGradleConfig(
       projectArgs: <String>['a=1', 'b=2'],
       projectCacheDir: '/custom/cache',
@@ -343,10 +339,11 @@ void main() {
       packageConfigPath: 'foo/.dart_tool/package_config.json',
       androidGradleConfig: customConfig,
     );
-    const customAndroidBuildInfo = AndroidBuildInfo(customBuildInfo);
 
-    expect(customAndroidBuildInfo.gradleDaemon, isFalse);
-    expect(customAndroidBuildInfo.skipBuildDependencyValidation, isTrue);
+    expect(customBuildInfo.androidGradleConfig.projectArgs, <String>['a=1', 'b=2']);
+    expect(customBuildInfo.androidGradleConfig.projectCacheDir, '/custom/cache');
+    expect(customBuildInfo.androidGradleConfig.gradleDaemon, isFalse);
+    expect(customBuildInfo.androidGradleConfig.skipBuildDependencyValidation, isTrue);
     expect(customBuildInfo.copyWith().androidGradleConfig, same(customConfig));
   });
 
@@ -370,7 +367,7 @@ void main() {
         projectCacheDir: '/custom/cache',
       ),
     );
-    const androidBuildInfo = AndroidBuildInfo(buildInfo);
+    const androidBuildInfo = AndroidBuildInfo(buildInfo, splitPerAbi: true);
 
     expect(androidBuildInfo.toGradleConfig(), <String>[
       '-Pdart-defines=${encodeDartDefinesMap(<String, String>{'foo': '2', 'bar': '2'})}',
@@ -386,6 +383,7 @@ void main() {
       '-Pfoo=bar',
       '-Pfizz=bazz',
       '--project-cache-dir=/custom/cache',
+      '-Psplit-per-abi=true',
     ]);
   });
 

@@ -476,16 +476,11 @@ class AndroidBuildInfo {
   /// from source (i.e., not using a prebuilt application binary).
   final List<String>? releaseManifestEngineShellArgs;
 
-  /// Whether to enable the Gradle daemon when performing an Android build.
-  bool get gradleDaemon => buildInfo.androidGradleConfig.gradleDaemon;
-
-  /// Whether to skip checking of individual versions of our Android build time
-  /// dependencies.
-  bool get skipBuildDependencyValidation =>
-      buildInfo.androidGradleConfig.skipBuildDependencyValidation;
-
-  /// Convert this config to a series of project level arguments to be passed
-  /// on the command line to gradle.
+  /// Converts [buildInfo], [BuildInfo.androidGradleConfig], and [splitPerAbi]
+  /// into project-level arguments to be passed on the command line to Gradle.
+  ///
+  /// Note that [targetArchs] (`-Ptarget-platform`) is resolved by the Gradle
+  /// builder so `--local-engine` can override it from the local engine path.
   List<String> toGradleConfig() {
     final AndroidGradleConfig gradleConfig = buildInfo.androidGradleConfig;
     // PACKAGE_CONFIG not currently supported.
@@ -513,6 +508,7 @@ class AndroidBuildInfo {
       for (final String projectArg in gradleConfig.projectArgs) '-P$projectArg',
       if (gradleConfig.projectCacheDir != null)
         '--project-cache-dir=${gradleConfig.projectCacheDir}',
+      if (splitPerAbi) '-Psplit-per-abi=true',
     ];
   }
 }

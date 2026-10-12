@@ -3354,7 +3354,7 @@ Gradle Crashed
     );
 
     testUsingContext(
-      'skips Java and Gradle compatibility check when androidSkipBuildDependencyValidation is true',
+      'skips Java and Gradle compatibility check when skipBuildDependencyValidation is true',
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
@@ -3426,9 +3426,7 @@ Gradle Crashed
               'dev',
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
-              androidGradleConfig: AndroidGradleConfig(
-                skipBuildDependencyValidation: true,
-              ), // Skip validation
+              androidGradleConfig: AndroidGradleConfig(skipBuildDependencyValidation: true),
             ),
           ),
           target: 'lib/main.dart',
