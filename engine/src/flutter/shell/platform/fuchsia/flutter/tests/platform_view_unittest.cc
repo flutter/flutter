@@ -1742,11 +1742,13 @@ TEST_F(PlatformViewTests,
 }
 
 TEST_F(PlatformViewTests,
-       TouchGestureResponsePolicy_DeferralCommitsMidInteraction) {
+       TouchGestureResponsePolicy_DeferralDisambiguatesEdgeSwipeAndTap) {
   constexpr std::array<std::array<float, 2>, 2> kRect = {{{0, 0}, {100, 100}}};
   constexpr std::array<float, 9> kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
-  constexpr fuchsia::ui::pointer::TouchInteractionId kIxn = {
+  constexpr fuchsia::ui::pointer::TouchInteractionId kSwipeIxn = {
       .device_id = 0u, .pointer_id = 1u, .interaction_id = 1u};
+  constexpr fuchsia::ui::pointer::TouchInteractionId kTapIxn = {
+      .device_id = 0u, .pointer_id = 1u, .interaction_id = 2u};
 
   MockPlatformViewDelegate delegate;
   flutter::TaskRunners task_runners("test_runners", nullptr, nullptr, nullptr,
@@ -1761,6 +1763,8 @@ TEST_F(PlatformViewTests,
   RunLoopUntilIdle();
   (void)touch_server.UploadedResponses();
 
+  // Configure a 32px left-edge region with deferResponse MAYBE_SUPPRESS (which
+  // defaults touchSlop to kDefaultTouchSlop = 18.0 logical pixels).
   auto msg_response = FakePlatformMessageResponse::Create();
   platform_view.HandlePlatformMessage(
       msg_response->WithMessage("flutter/platform_views",
@@ -1770,8 +1774,7 @@ TEST_F(PlatformViewTests,
               "defaultResponse": "NO",
               "regions": [
                 {
-                  "rectLTRB": [0.0, 0.0, 50.0, 50.0],
-                  "deferSamples": 2,
+                  "rectLTRB": [0.0, 0.0, 32.0, 100.0],
                   "deferResponse": "MAYBE_SUPPRESS",
                   "response": "YES_PRIORITIZE"
                 }
@@ -1780,45 +1783,98 @@ TEST_F(PlatformViewTests,
           })"));
   msg_response->ExpectCompleted("[0]");
 
-  std::vector<fuchsia::ui::pointer::TouchEvent> events;
-  events.emplace_back(
+  // 1. Edge swipe: starts at (5, 50), moves within slop to (15, 50) (dx=10 <=
+  // 18), then exceeds slop at (25, 50) (dx=20 > 18), and lifts at (25, 50).
+  std::vector<fuchsia::ui::pointer::TouchEvent> swipe_events;
+  swipe_events.emplace_back(
       TouchEventBuilder::New()
           .AddTime(1000u)
           .AddViewParameters(kRect, kRect, kIdentity)
-          .AddSample(kIxn, fuchsia::ui::pointer::EventPhase::ADD, {25.f, 25.f})
+          .AddSample(kSwipeIxn, fuchsia::ui::pointer::EventPhase::ADD,
+                     {5.f, 50.f})
           .Build());
-  events.emplace_back(TouchEventBuilder::New()
-                          .AddTime(2000u)
-                          .AddSample(kIxn,
-                                     fuchsia::ui::pointer::EventPhase::CHANGE,
-                                     {26.f, 26.f})
-                          .Build());
-  events.emplace_back(TouchEventBuilder::New()
-                          .AddTime(3000u)
-                          .AddSample(kIxn,
-                                     fuchsia::ui::pointer::EventPhase::CHANGE,
-                                     {27.f, 27.f})
-                          .Build());
-  events.emplace_back(TouchEventBuilder::New()
-                          .AddTime(4000u)
-                          .AddSample(kIxn,
-                                     fuchsia::ui::pointer::EventPhase::REMOVE,
-                                     {27.f, 27.f})
-                          .Build());
-  touch_server.ScheduleCallback(std::move(events));
+  swipe_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(2000u)
+          .AddSample(kSwipeIxn, fuchsia::ui::pointer::EventPhase::CHANGE,
+                     {15.f, 50.f})
+          .Build());
+  swipe_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(3000u)
+          .AddSample(kSwipeIxn, fuchsia::ui::pointer::EventPhase::CHANGE,
+                     {25.f, 50.f})
+          .Build());
+  swipe_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(4000u)
+          .AddSample(kSwipeIxn, fuchsia::ui::pointer::EventPhase::REMOVE,
+                     {25.f, 50.f})
+          .Build());
+  touch_server.ScheduleCallback(std::move(swipe_events));
   RunLoopUntilIdle();
 
-  auto responses = touch_server.UploadedResponses();
-  ASSERT_TRUE(responses.has_value());
-  ASSERT_EQ(responses->size(), 4u);
-  EXPECT_EQ((*responses)[0].response_type(),
+  auto swipe_responses = touch_server.UploadedResponses();
+  ASSERT_TRUE(swipe_responses.has_value());
+  ASSERT_EQ(swipe_responses->size(), 4u);
+  EXPECT_EQ((*swipe_responses)[0].response_type(),
             fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS);
-  EXPECT_EQ((*responses)[1].response_type(),
+  EXPECT_EQ((*swipe_responses)[1].response_type(),
             fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS);
-  EXPECT_EQ((*responses)[2].response_type(),
+  EXPECT_EQ((*swipe_responses)[2].response_type(),
             fuchsia::ui::pointer::TouchResponseType::YES_PRIORITIZE);
-  EXPECT_EQ((*responses)[3].response_type(),
+  EXPECT_EQ((*swipe_responses)[3].response_type(),
             fuchsia::ui::pointer::TouchResponseType::YES_PRIORITIZE);
+
+  // 2. Edge tap with stationary/jittering CHANGE samples: stays within 18px
+  // slop across multiple CHANGE samples, then rejects with NO on REMOVE.
+  std::vector<fuchsia::ui::pointer::TouchEvent> tap_events;
+  tap_events.emplace_back(TouchEventBuilder::New()
+                              .AddTime(5000u)
+                              .AddSample(kTapIxn,
+                                         fuchsia::ui::pointer::EventPhase::ADD,
+                                         {5.f, 50.f})
+                              .Build());
+  tap_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(6000u)
+          .AddSample(kTapIxn, fuchsia::ui::pointer::EventPhase::CHANGE,
+                     {5.f, 50.f})
+          .Build());
+  tap_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(7000u)
+          .AddSample(kTapIxn, fuchsia::ui::pointer::EventPhase::CHANGE,
+                     {6.f, 51.f})
+          .Build());
+  tap_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(8000u)
+          .AddSample(kTapIxn, fuchsia::ui::pointer::EventPhase::CHANGE,
+                     {6.f, 51.f})
+          .Build());
+  tap_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(9000u)
+          .AddSample(kTapIxn, fuchsia::ui::pointer::EventPhase::REMOVE,
+                     {6.f, 51.f})
+          .Build());
+  touch_server.ScheduleCallback(std::move(tap_events));
+  RunLoopUntilIdle();
+
+  auto tap_responses = touch_server.UploadedResponses();
+  ASSERT_TRUE(tap_responses.has_value());
+  ASSERT_EQ(tap_responses->size(), 5u);
+  EXPECT_EQ((*tap_responses)[0].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*tap_responses)[1].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*tap_responses)[2].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*tap_responses)[3].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*tap_responses)[4].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::NO);
 }
 
 }  // namespace flutter_runner::testing

@@ -8,6 +8,7 @@
 #include <zircon/status.h>
 #include <zircon/types.h>
 
+#include <cmath>
 #include <limits>
 
 #include "flutter/fml/logging.h"
@@ -172,8 +173,8 @@ uint64_t PackFuchsiaDeviceIdAndPointerId(uint32_t fuchsia_device_id,
 // TODO(fxbug.dev/87074): Let PointerDataPacketConverter synthesize events.
 //
 // Flutter gestures expect a gesture to start within the logical view space, and
-// is not tolerant of floating point drift. This function coerces just the DOWN
-// event's coordinate to start within the logical view.
+// is not tolerant of floating point drift. This function coerces the ADD and
+// synthesized DOWN events' coordinates to start within the logical view.
 std::pair<flutter::PointerData, std::optional<flutter::PointerData>>
 CreateTouchDraft(const fup_TouchEvent& event,
                  const fup_ViewParameters& view_parameters) {
@@ -199,15 +200,15 @@ CreateTouchDraft(const fup_TouchEvent& event,
 
   // Match Flutter pointer's state machine with synthesized events.
   if (ptr.change == flutter::PointerData::Change::kAdd) {
+    // Ensure gesture recognition and policy region matching: ADD and DOWN start
+    // in the logical view space.
+    auto [x, y] =
+        ClampToViewSpace(ptr.physical_x, ptr.physical_y, view_parameters);
+    ptr.physical_x = x;
+    ptr.physical_y = y;
     flutter::PointerData down;
     memcpy(&down, &ptr, sizeof(flutter::PointerData));
     down.change = flutter::PointerData::Change::kDown;
-    {  // Ensure gesture recognition: DOWN starts in the logical view space.
-      auto [x, y] =
-          ClampToViewSpace(down.physical_x, down.physical_y, view_parameters);
-      down.physical_x = x;
-      down.physical_y = y;
-    }
     return {std::move(ptr), std::move(down)};
   } else if (ptr.change == flutter::PointerData::Change::kRemove) {
     flutter::PointerData up;
@@ -400,26 +401,37 @@ fup_TouchResponseType PointerDelegate::EvaluatePolicy(
     active->id = ixn;
     active->start_x = logical_x;
     active->start_y = logical_y;
-    active->sample_count = 0;
+    active->committed = false;
   }
 
   const float match_x = active->start_x;
   const float match_y = active->start_y;
-  const uint32_t sample_index = active->sample_count++;
+  const float displacement =
+      std::hypot(logical_x - match_x, logical_y - match_y);
 
-  fup_TouchResponseType result = policy_->default_response;
-  if (sample_index < policy_->default_defer_samples) {
-    result = policy_->default_defer_response;
-  }
+  fup_TouchResponseType target_response = policy_->default_response;
+  float touch_slop = policy_->default_touch_slop;
+  fup_TouchResponseType defer_response = policy_->default_defer_response;
 
   for (const auto& region : policy_->regions) {
     if (region.Contains(match_x, match_y)) {
-      if (sample_index < region.defer_samples) {
-        result = region.defer_response;
-      } else {
-        result = region.response;
-      }
+      target_response = region.response;
+      touch_slop = region.touch_slop;
+      defer_response = region.defer_response;
       break;
+    }
+  }
+
+  if (touch_slop <= 0.f || displacement > touch_slop) {
+    active->committed = true;
+  }
+
+  fup_TouchResponseType result = target_response;
+  if (!active->committed) {
+    if (phase == fup_EventPhase::REMOVE || phase == fup_EventPhase::CANCEL) {
+      result = policy_->default_response;
+    } else {
+      result = defer_response;
     }
   }
 

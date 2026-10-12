@@ -305,7 +305,7 @@ TEST_P(PointerDelegateTouchTest, Coordinates_DownEventClampedToView) {
 
   const auto& add_event = (*pointers)[0];
   EXPECT_FLOAT_EQ(add_event.physical_x, 10.f);
-  EXPECT_FLOAT_EQ(add_event.physical_y, kSmallDiscrepancy);
+  EXPECT_EQ(add_event.physical_y, 0.f);
 
   const auto& down_event = (*pointers)[1];
   EXPECT_FLOAT_EQ(down_event.physical_x, 10.f);
@@ -1222,19 +1222,21 @@ TEST_F(PointerDelegateTest,
   }
 }
 
-TEST_F(PointerDelegateTest, GesturePolicy_DeferralAndMidInteractionCommit) {
+TEST_F(PointerDelegateTest,
+       GesturePolicy_DeferralDisambiguatesEdgeSwipeAndTap) {
   ResetPointerDelegate(/*intercept_all_input=*/false);
-  // Start with a policy that answers MAYBE_SUPPRESS (4) on the first 2 samples
-  // and commits to YES_PRIORITIZE (9) from the 3rd sample onward.
+  // Configure a left-edge region [0, 0, 10, 20] with defer_response
+  // MAYBE_SUPPRESS, touch_slop = 5.0 logical pixels, and response
+  // YES_PRIORITIZE.
   GestureResponsePolicy policy;
   policy.default_response = fup_TouchResponseType::NO;
   policy.regions.push_back({
       .left = 0.f,
       .top = 0.f,
       .right = 10.f,
-      .bottom = 10.f,
+      .bottom = 20.f,
       .response = fup_TouchResponseType::YES_PRIORITIZE,
-      .defer_samples = 2u,
+      .touch_slop = 5.f,
       .defer_response = fup_TouchResponseType::MAYBE_SUPPRESS,
   });
   pointer_delegate_->SetGestureResponsePolicy(std::move(policy));
@@ -1243,40 +1245,127 @@ TEST_F(PointerDelegateTest, GesturePolicy_DeferralAndMidInteractionCommit) {
   RunLoopUntilIdle();
   (void)touch_source_->UploadedResponses();
 
-  std::vector<fup_TouchEvent> events;
-  events.emplace_back(TouchEventBuilder::New()
-                          .AddTime(1000u)
-                          .AddViewParameters(kRect, kRect, kIdentity)
-                          .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
-                          .Build());
-  events.emplace_back(
+  // 1. Edge swipe: ADD at (2, 10), CHANGE within slop at (6, 10) (dx=4 <= 5),
+  // CHANGE exceeding slop at (9, 10) (dx=7 > 5), and REMOVE at (9, 10).
+  std::vector<fup_TouchEvent> swipe_events;
+  swipe_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(1000u)
+          .AddViewParameters(kRect, kRect, kIdentity)
+          .AddSample(kIxnOne, fup_EventPhase::ADD, {2.f, 10.f})
+          .Build());
+  swipe_events.emplace_back(
       TouchEventBuilder::New()
           .AddTime(2000u)
-          .AddSample(kIxnOne, fup_EventPhase::CHANGE, {6.f, 6.f})
+          .AddSample(kIxnOne, fup_EventPhase::CHANGE, {6.f, 10.f})
           .Build());
-  events.emplace_back(
+  swipe_events.emplace_back(
       TouchEventBuilder::New()
           .AddTime(3000u)
-          .AddSample(kIxnOne, fup_EventPhase::CHANGE, {7.f, 7.f})
+          .AddSample(kIxnOne, fup_EventPhase::CHANGE, {9.f, 10.f})
           .Build());
-  events.emplace_back(
+  swipe_events.emplace_back(
       TouchEventBuilder::New()
           .AddTime(4000u)
-          .AddSample(kIxnOne, fup_EventPhase::REMOVE, {7.f, 7.f})
+          .AddSample(kIxnOne, fup_EventPhase::REMOVE, {9.f, 10.f})
           .Build());
+  touch_source_->ScheduleCallback(std::move(swipe_events));
+  RunLoopUntilIdle();
+
+  auto swipe_responses = touch_source_->UploadedResponses();
+  ASSERT_TRUE(swipe_responses.has_value());
+  ASSERT_EQ(swipe_responses->size(), 4u);
+  EXPECT_EQ((*swipe_responses)[0].response_type(),
+            fup_TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*swipe_responses)[1].response_type(),
+            fup_TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*swipe_responses)[2].response_type(),
+            fup_TouchResponseType::YES_PRIORITIZE);
+  EXPECT_EQ((*swipe_responses)[3].response_type(),
+            fup_TouchResponseType::YES_PRIORITIZE);
+
+  // 2. Edge tap with multiple stationary/sub-slop CHANGE samples: stays within
+  // touch_slop across 3 CHANGE samples, then rejects with default_response (NO)
+  // on REMOVE so child views underneath receive the tap.
+  constexpr fup_TouchIxnId kIxnTwo = {1u, 1u, 2u};
+  std::vector<fup_TouchEvent> tap_events;
+  tap_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(5000u)
+          .AddSample(kIxnTwo, fup_EventPhase::ADD, {2.f, 10.f})
+          .Build());
+  tap_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(6000u)
+          .AddSample(kIxnTwo, fup_EventPhase::CHANGE, {2.f, 10.f})
+          .Build());
+  tap_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(7000u)
+          .AddSample(kIxnTwo, fup_EventPhase::CHANGE, {3.f, 11.f})
+          .Build());
+  tap_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(8000u)
+          .AddSample(kIxnTwo, fup_EventPhase::CHANGE, {3.f, 11.f})
+          .Build());
+  tap_events.emplace_back(
+      TouchEventBuilder::New()
+          .AddTime(9000u)
+          .AddSample(kIxnTwo, fup_EventPhase::REMOVE, {3.f, 11.f})
+          .Build());
+  touch_source_->ScheduleCallback(std::move(tap_events));
+  RunLoopUntilIdle();
+
+  auto tap_responses = touch_source_->UploadedResponses();
+  ASSERT_TRUE(tap_responses.has_value());
+  ASSERT_EQ(tap_responses->size(), 5u);
+  EXPECT_EQ((*tap_responses)[0].response_type(),
+            fup_TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*tap_responses)[1].response_type(),
+            fup_TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*tap_responses)[2].response_type(),
+            fup_TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*tap_responses)[3].response_type(),
+            fup_TouchResponseType::MAYBE_SUPPRESS);
+  EXPECT_EQ((*tap_responses)[4].response_type(), fup_TouchResponseType::NO);
+}
+
+TEST_F(PointerDelegateTest, GesturePolicy_AddClampedToViewMatchesEdgeRegion) {
+  ResetPointerDelegate(/*intercept_all_input=*/false);
+  GestureResponsePolicy policy;
+  policy.default_response = fup_TouchResponseType::NO;
+  policy.regions.push_back({
+      .left = 0.f,
+      .top = 0.f,
+      .right = 10.f,
+      .bottom = 10.f,
+      .response = fup_TouchResponseType::YES_PRIORITIZE,
+  });
+  pointer_delegate_->SetGestureResponsePolicy(std::move(policy));
+
+  pointer_delegate_->WatchLoop([](std::vector<flutter::PointerData>) {});
+  RunLoopUntilIdle();
+  (void)touch_source_->UploadedResponses();
+
+  // An ADD sample with slight negative floating-point drift (-0.00003f) outside
+  // the [0, 0] minimum view bound is clamped to 0.f before region evaluation,
+  // matching the [0, 0, 10, 10] edge region.
+  const float kSmallDiscrepancy = -0.00003f;
+  std::vector<fup_TouchEvent> events =
+      TouchEventBuilder::New()
+          .AddTime(1000u)
+          .AddViewParameters(kRect, kRect, kIdentity)
+          .AddSample(kIxnOne, fup_EventPhase::ADD,
+                     {kSmallDiscrepancy, kSmallDiscrepancy})
+          .BuildAsVector();
   touch_source_->ScheduleCallback(std::move(events));
   RunLoopUntilIdle();
 
   auto responses = touch_source_->UploadedResponses();
   ASSERT_TRUE(responses.has_value());
-  ASSERT_EQ(responses->size(), 4u);
+  ASSERT_EQ(responses->size(), 1u);
   EXPECT_EQ((*responses)[0].response_type(),
-            fup_TouchResponseType::MAYBE_SUPPRESS);
-  EXPECT_EQ((*responses)[1].response_type(),
-            fup_TouchResponseType::MAYBE_SUPPRESS);
-  EXPECT_EQ((*responses)[2].response_type(),
-            fup_TouchResponseType::YES_PRIORITIZE);
-  EXPECT_EQ((*responses)[3].response_type(),
             fup_TouchResponseType::YES_PRIORITIZE);
 }
 

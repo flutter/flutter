@@ -31,15 +31,21 @@ struct IxnHasher {
 // Axis-aligned region in logical view coordinates paired with a gesture
 // contest response for touches starting inside the region.
 struct GestureResponseRegion {
+  // Default touch slop in logical pixels matching Flutter's kTouchSlop (18.0).
+  static constexpr float kDefaultTouchSlop = 18.0f;
+
   float left = 0.f;
   float top = 0.f;
   float right = 0.f;
   float bottom = 0.f;
   fuchsia::ui::pointer::TouchResponseType response =
       fuchsia::ui::pointer::TouchResponseType::NO;
-  // Number of initial samples in an interaction to answer with
-  // |defer_response| before committing to |response|.
-  uint32_t defer_samples = 0;
+  // Minimum pointer displacement in logical pixels from the initial ADD sample
+  // required before committing to |response|. When > 0, samples with
+  // displacement <= |touch_slop| answer |defer_response|, and an uncommitted
+  // REMOVE or CANCEL answers the policy's |default_response| so edge taps are
+  // yielded to child views underneath.
+  float touch_slop = 0.f;
   fuchsia::ui::pointer::TouchResponseType defer_response =
       fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS;
 
@@ -54,7 +60,7 @@ struct GestureResponsePolicy {
   std::vector<GestureResponseRegion> regions;
   fuchsia::ui::pointer::TouchResponseType default_response =
       fuchsia::ui::pointer::TouchResponseType::NO;
-  uint32_t default_defer_samples = 0;
+  float default_touch_slop = 0.f;
   fuchsia::ui::pointer::TouchResponseType default_defer_response =
       fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS;
 };
@@ -158,7 +164,7 @@ class PointerDelegate {
     fuchsia::ui::pointer::TouchInteractionId id{};
     float start_x = 0.f;
     float start_y = 0.f;
-    uint32_t sample_count = 0;
+    bool committed = false;
   };
   static constexpr size_t kMaxActiveInteractions = 16;
   std::array<ActiveInteraction, kMaxActiveInteractions> active_interactions_{};

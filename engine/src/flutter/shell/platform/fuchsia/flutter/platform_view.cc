@@ -953,13 +953,14 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
         return false;
       }
     }
-    auto default_defer_it = args.FindMember("defaultDeferSamples");
-    if (default_defer_it == args.MemberEnd()) {
-      default_defer_it = args.FindMember("deferSamples");
+    auto default_slop_it = args.FindMember("defaultTouchSlop");
+    if (default_slop_it == args.MemberEnd()) {
+      default_slop_it = args.FindMember("touchSlop");
     }
-    if (default_defer_it != args.MemberEnd() &&
-        default_defer_it->value.IsUint()) {
-      policy.default_defer_samples = default_defer_it->value.GetUint();
+    if (default_slop_it != args.MemberEnd() &&
+        default_slop_it->value.IsNumber()) {
+      policy.default_touch_slop =
+          static_cast<float>(default_slop_it->value.GetDouble());
     }
     auto default_defer_resp_it = args.FindMember("defaultDeferResponse");
     if (default_defer_resp_it == args.MemberEnd()) {
@@ -968,6 +969,9 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
     if (default_defer_resp_it != args.MemberEnd()) {
       parse_response_type(default_defer_resp_it->value,
                           &policy.default_defer_response);
+      if (default_slop_it == args.MemberEnd()) {
+        policy.default_touch_slop = GestureResponseRegion::kDefaultTouchSlop;
+      }
     }
 
     auto regions_it = args.FindMember("regions");
@@ -1007,13 +1011,16 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
         if (resp_it != reg_val.MemberEnd()) {
           parse_response_type(resp_it->value, &region.response);
         }
-        auto defer_it = reg_val.FindMember("deferSamples");
-        if (defer_it != reg_val.MemberEnd() && defer_it->value.IsUint()) {
-          region.defer_samples = defer_it->value.GetUint();
+        auto slop_it = reg_val.FindMember("touchSlop");
+        if (slop_it != reg_val.MemberEnd() && slop_it->value.IsNumber()) {
+          region.touch_slop = static_cast<float>(slop_it->value.GetDouble());
         }
         auto defer_resp_it = reg_val.FindMember("deferResponse");
         if (defer_resp_it != reg_val.MemberEnd()) {
           parse_response_type(defer_resp_it->value, &region.defer_response);
+          if (slop_it == reg_val.MemberEnd()) {
+            region.touch_slop = GestureResponseRegion::kDefaultTouchSlop;
+          }
         }
         policy.regions.push_back(region);
       }
