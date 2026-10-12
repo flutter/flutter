@@ -228,12 +228,25 @@ cc_test(
 )
 ''',
   ),
+  // txt_unittests' embedded test font. The rest of the file is the Dart
+  // runtime glue, which needs tonic, lib/snapshot and the shell.
+  ConvertedFile(
+    '//flutter/runtime',
+    skip: <String, String>{
+      'libdart': 'needs //flutter/lib/snapshot',
+      'dart_plugin_registrant': 'needs //flutter/third_party/tonic',
+      'runtime': 'needs //flutter/third_party/tonic, //flutter/lib/ui, //flutter/common',
+      'runtime_fixtures': 'Dart fixtures (dart_main) are not supported yet',
+      'runtime_unittests': 'needs :runtime',
+      'no_plugin_registrant': 'Dart fixtures (dart_main) are not supported yet',
+      'no_dart_plugin_registrant_unittests': 'needs //flutter/lib/snapshot',
+      'plugin_registrant': 'Dart fixtures (dart_main) are not supported yet',
+      'dart_plugin_registrant_unittests': 'needs //flutter/lib/snapshot',
+    },
+  ),
   ConvertedFile(
     '//flutter/txt',
-    skip: <String, String>{
-      'txt_benchmarks': 'needs //flutter/third_party/benchmark',
-      'txt_unittests': 'needs //flutter/runtime:test_font',
-    },
+    skip: <String, String>{'txt_benchmarks': 'needs //flutter/third_party/benchmark'},
     // The fonts are fixtures of other packages' tests (display_list's).
     appendix: '''
 exports_files(glob(["third_party/fonts/*"]))

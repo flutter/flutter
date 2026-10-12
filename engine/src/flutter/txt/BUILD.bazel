@@ -3,10 +3,10 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/txt/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: txt_benchmarks, txt_unittests.
+# Not converted: txt_benchmarks.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -85,6 +85,30 @@ flutter_test_fixtures(
     fixtures = [
         "third_party/fonts/NotoColorEmoji.ttf",
         "third_party/fonts/Roboto-Regular.ttf",
+    ],
+)
+
+cc_test(
+    name = "txt_unittests",
+    size = "small",
+    srcs = [
+        "tests/font_collection_tests.cc",
+        "tests/paragraph_builder_skia_tests.cc",
+        "tests/paragraph_unittests.cc",
+        "tests/txt_run_all_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":txt",
+        ":txt_config",
+        ":txt_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/runtime:test_font",
+        "//engine/src/flutter/testing:skia",
+        "//engine/src/flutter/testing:testing_lib",
+        "@skia//modules/skparagraph",
     ],
 )
 
