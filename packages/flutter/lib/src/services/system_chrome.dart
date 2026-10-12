@@ -609,9 +609,12 @@ abstract final class SystemChrome {
   ///
   /// On iOS 27 or later, applications linked against the iOS 27 SDK or later must
   /// use view controller-based status bar appearance to change status bar
-  /// visibility. Set `UIViewControllerBasedStatusBarAppearance` to `true` in the
-  /// application's `Info.plist`, or omit the key to use its default value of
-  /// `true`.
+  /// visibility. The iOS 27 SDK's `UIApplication.h` documents this restriction on
+  /// the `UIApplication.statusBarHidden` setter.
+  ///
+  /// Set `UIViewControllerBasedStatusBarAppearance` to `true` in the application's
+  /// `Info.plist`, or omit the key to use its default value of `true`, as described
+  /// in [Apple's status bar configuration documentation](https://developer.apple.com/documentation/bundleresources/information-property-list/uiviewcontrollerbasedstatusbarappearance).
   static Future<void> setEnabledSystemUIMode(
     SystemUiMode mode, {
     List<SystemUiOverlay>? overlays,

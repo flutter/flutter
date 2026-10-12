@@ -15,8 +15,8 @@ const _viewControllerBasedStatusBarAppearance = 'UIViewControllerBasedStatusBarA
 ///
 /// This updates the source Info.plist selected by the build configuration.
 /// Builds started directly from Xcode require updating the plist manually.
-class StatusBarAppearanceMigration extends ProjectMigrator {
-  StatusBarAppearanceMigration(
+class StatusBarAppearanceMigrator extends ProjectMigrator {
+  StatusBarAppearanceMigrator(
     this._infoPlist,
     super.logger, {
     required this._xcode,

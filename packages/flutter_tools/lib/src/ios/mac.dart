@@ -302,24 +302,30 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
+  // These migrations need the resolved build settings to select files for the
+  // current build configuration.
+  final buildSettingsMigrators = <ProjectMigrator>[];
   final String? infoPlistBuildSetting = buildSettings['INFOPLIST_FILE'];
   if (infoPlistBuildSetting != null && infoPlistBuildSetting.isNotEmpty) {
     final String infoPlistPath = substituteXcodeVariables(infoPlistBuildSetting, buildSettings);
     final String? sourceRoot = buildSettings['SRCROOT'];
     if (globals.fs.path.isAbsolute(infoPlistPath) || sourceRoot != null) {
-      await StatusBarAppearanceMigration(
-        globals.fs.file(
-          globals.fs.path.isAbsolute(infoPlistPath)
-              ? infoPlistPath
-              : globals.fs.path.join(sourceRoot!, infoPlistPath),
+      buildSettingsMigrators.add(
+        StatusBarAppearanceMigrator(
+          globals.fs.file(
+            globals.fs.path.isAbsolute(infoPlistPath)
+                ? infoPlistPath
+                : globals.fs.path.join(sourceRoot!, infoPlistPath),
+          ),
+          globals.logger,
+          xcode: globals.xcode!,
+          environmentType: environmentType,
+          plistParser: globals.plistParser,
         ),
-        globals.logger,
-        xcode: globals.xcode!,
-        environmentType: environmentType,
-        plistParser: globals.plistParser,
-      ).migrate();
+      );
     }
   }
+  await ProjectMigration(buildSettingsMigrators).run();
 
   final String? targetBuildDirPath = buildSettings['TARGET_BUILD_DIR'];
   final Directory? targetBuildDir = targetBuildDirPath != null

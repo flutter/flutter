@@ -83,7 +83,7 @@ class PlistParser {
   /// If the value is null, then the key will be removed.
   ///
   /// Returns true if successful.
-  bool replaceKey(String plistFilePath, {required String key, String? value}) {
+  bool replaceKeyWithString(String plistFilePath, {required String key, String? value}) {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
     }

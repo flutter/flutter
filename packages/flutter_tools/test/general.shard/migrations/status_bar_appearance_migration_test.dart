@@ -29,9 +29,9 @@ void main() {
     plistParser = RecordingPlistParser();
   });
 
-  StatusBarAppearanceMigration migration({
+  StatusBarAppearanceMigrator migration({
     EnvironmentType environmentType = EnvironmentType.physical,
-  }) => StatusBarAppearanceMigration(
+  }) => StatusBarAppearanceMigrator(
     infoPlist,
     logger,
     xcode: xcode,
@@ -137,7 +137,7 @@ void main() {
   testWithoutContext('does not migrate or query the SDK again after updating the plist', () async {
     infoPlist.createSync();
     plistParser.setProperty(statusBarAppearanceKey, false);
-    final StatusBarAppearanceMigration migrator = migration();
+    final StatusBarAppearanceMigrator migrator = migration();
     await migrator.migrate();
     logger.clear();
 
