@@ -1,0 +1,17 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# This directory on the include path: GN's `include_dirs = [
+# "//flutter/third_party" ]` (tonic's public config, which lets its headers
+# be included as "tonic/..."), for the generated BUILD files to depend on
+# (the converter's includeDirLibraries). The trees gclient syncs below this
+# directory are external repositories, not part of this package.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "include_dir",
+    includes = ["."],
+    visibility = ["//engine/src/flutter:__subpackages__"],
+)

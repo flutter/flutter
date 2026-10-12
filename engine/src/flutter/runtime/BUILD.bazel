@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/runtime/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: libdart, dart_plugin_registrant, runtime, runtime_fixtures, runtime_unittests, no_plugin_registrant, no_dart_plugin_registrant_unittests, plugin_registrant, dart_plugin_registrant_unittests.
+# Not converted: libdart, runtime, runtime_fixtures, runtime_unittests, no_plugin_registrant, no_dart_plugin_registrant_unittests, plugin_registrant, dart_plugin_registrant_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
@@ -26,6 +26,21 @@ cc_library(
         "//engine/src/flutter:config",
         "//engine/src/flutter/txt",
         "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "dart_plugin_registrant",
+    srcs = ["dart_plugin_registrant.cc"],
+    hdrs = ["dart_plugin_registrant.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/third_party/tonic",
+        "@dart//:dart_api_headers",
     ],
     alwayslink = True,
 )

@@ -25,6 +25,12 @@ cc_library(
     name = "dart_api_headers",
     hdrs = glob(["runtime/include/**/*.h"]),
     include_prefix = "third_party/dart",
+    # dart_public_config's include_dirs (runtime/ and runtime/include/): a few
+    # sources include "dart_api.h" bare (lib/ui's scene_builder.cc).
+    includes = [
+        "runtime",
+        "runtime/include",
+    ],
 )
 
 # The embedder-side headers of runtime/bin that the engine includes
