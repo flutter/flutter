@@ -15,7 +15,6 @@
 #include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"
-#include "flutter/impeller/toolkit/android/hardware_buffer.h"
 
 namespace flutter {
 

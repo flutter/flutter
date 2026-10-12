@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/android/android_egl_surface.h"
 
