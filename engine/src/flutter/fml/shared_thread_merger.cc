@@ -59,8 +59,7 @@ bool SharedThreadMerger::DecrementLease(RasterThreadMergerId caller) {
     FML_CHECK(lease_term_ref > 0)
         << "lease_term should always be positive when merged, lease_term="
         << lease_term_ref;
-    lease_term_ref--;
-    if (lease_term_ref == 0) {
+    if (--lease_term_ref == 0) {
       // Remove the expired lease so future draws by this caller are ignored
       // while another caller keeps the shared queues merged.
       lease_term_by_caller_.erase(entry);
@@ -68,11 +67,11 @@ bool SharedThreadMerger::DecrementLease(RasterThreadMergerId caller) {
   } else {
     // The caller may still draw after its lease expires or is removed while
     // another caller keeps the shared queues merged.
-    FML_LOG(WARNING) << "The caller does not exist when calling "
-                        "DecrementLease(), ignored. This may happens after "
-                        "the caller's lease expires or the caller is erased in "
-                        "UnMergeNowIfLastOne(). caller="
-                     << caller;
+    FML_VLOG(1) << "The caller does not exist when calling "
+                   "DecrementLease(), ignored. This may happen after "
+                   "the caller's lease expires or the caller is erased in "
+                   "UnMergeNowIfLastOne(). caller="
+                << caller;
   }
   if (IsAllLeaseTermsZeroUnSafe()) {
     // Unmerge only after all callers' leases have expired or been removed.
