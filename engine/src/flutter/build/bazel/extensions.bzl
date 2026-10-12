@@ -19,7 +19,7 @@ are always downloaded.
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load(":deps.lock.bzl", "CIPD_DEPS", "GIT_DEPS")
-load(":repositories.bzl", "cipd_package", "synced_repository")
+load(":repositories.bzl", "cipd_package", "engine_version_repository", "synced_repository")
 
 _OVERLAYS = "//engine/src/flutter/build/bazel/third_party"
 
@@ -404,4 +404,28 @@ def _synced_deps_impl(mctx):
 synced_deps = module_extension(
     implementation = _synced_deps_impl,
     doc = "Exposes DEPS dependencies (synced trees, or downloads for toolchains) as repositories.",
+)
+
+# The trees whose HEAD tools/gn reports as skia_version and dart_version.
+_SKIA_PATH = "engine/src/flutter/third_party/skia"
+_DART_PATH = "engine/src/flutter/third_party/dart"
+
+def _engine_version_impl(mctx):
+    for path in (_SKIA_PATH, _DART_PATH):
+        if path not in GIT_DEPS:
+            fail("engine_version: %s is not a git dependency in DEPS (deps.lock.bzl is stale?)" % path)
+    engine_version_repository(
+        name = "engine_version",
+        skia_version = GIT_DEPS[_SKIA_PATH]["revision"],
+        dart_version = GIT_DEPS[_DART_PATH]["revision"],
+    )
+    return mctx.extension_metadata(
+        root_module_direct_deps = "all",
+        root_module_direct_dev_deps = [],
+        reproducible = True,
+    )
+
+engine_version = module_extension(
+    implementation = _engine_version_impl,
+    doc = "Exposes the version strings of shell/version/version.gni as @engine_version//:version.bzl.",
 )

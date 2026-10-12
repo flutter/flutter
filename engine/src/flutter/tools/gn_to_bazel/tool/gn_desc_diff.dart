@@ -59,7 +59,7 @@ Future<int> run(List<String> arguments) async {
         spec.substring(spec.indexOf('=') + 1),
       ),
   });
-  final Map<String, List<String>> referenceValues = _referenceValues(assumptions);
+  final Map<String, List<String>> referenceValues = _referenceValues(await _gnArgs(gn, outDir));
   final tree = GnSourceTree(root, gnBinary: gn);
 
   var differences = 0;
@@ -178,20 +178,23 @@ Future<int> run(List<String> arguments) async {
   return differences == 0 ? 0 : 1;
 }
 
-/// The lists build files read by reference from an imported `.gni`, as GN
-/// computes them under the assumptions.
+/// The values of the variables build files read by reference from an
+/// imported `.gni`, as GN has them in the out directory.
 ///
-/// The converter leaves such a reference as the constant of copts.bzl that
-/// [referenceConstants] names (`FLUTTER_FEATURE_DEFINES`), whose content
-/// tool/compile_command_diff.py checks against GN's compile commands; the
-/// comparison here needs the GN value, which is config.gni's arithmetic over
-/// `flutter_runtime_mode` and `slimpeller`. Those two are Bazel flags rather
-/// than assumptions, so they default as GN's declare_args() do (debug, false)
-/// unless `--assume` says otherwise for the out directory.
-Map<String, List<String>> _referenceValues(Assumptions assumptions) {
-  final GnValue? mode = assumptions['flutter_runtime_mode'];
-  final String runtimeMode = mode is GnStringValue ? mode.value : 'debug';
-  final GnValue? slimpeller = assumptions['slimpeller'];
+/// The converter leaves such a reference as the Starlark constant
+/// [referenceConstants] names (`FLUTTER_FEATURE_DEFINES`, the version strings
+/// of `@engine_version`), whose Bazel-side content tool/compile_command_diff.py
+/// checks against GN's compile commands; the comparison here needs the GN
+/// value, read from the out directory's arguments ([_gnArgs]): the version
+/// arguments as `tools/gn` set them, and `feature_defines_list` as
+/// config.gni computes it from `flutter_runtime_mode` and `slimpeller`.
+Map<String, List<String>> _referenceValues(Map<String, GnValue> args) {
+  String string(String name) {
+    final GnValue? value = args[name];
+    return value is GnStringValue ? value.value : '';
+  }
+
+  final GnValue? slimpeller = args['slimpeller'];
   return <String, List<String>>{
     'feature_defines_list': <String>[
       'FLUTTER_RUNTIME_MODE_DEBUG=1',
@@ -199,7 +202,7 @@ Map<String, List<String>> _referenceValues(Assumptions assumptions) {
       'FLUTTER_RUNTIME_MODE_RELEASE=3',
       'FLUTTER_RUNTIME_MODE_JIT_RELEASE=4',
       'DART_LEGACY_API=[[deprecated]]',
-      ...switch (runtimeMode) {
+      ...switch (string('flutter_runtime_mode')) {
         'debug' => const <String>['FLUTTER_RUNTIME_MODE=1', 'FLUTTER_JIT_RUNTIME=1'],
         'profile' => const <String>['FLUTTER_RUNTIME_MODE=2'],
         'release' => const <String>['FLUTTER_RUNTIME_MODE=3', 'FLUTTER_RELEASE=1'],
@@ -212,6 +215,37 @@ Map<String, List<String>> _referenceValues(Assumptions assumptions) {
       },
       if (slimpeller is GnBoolValue && slimpeller.value) 'SLIMPELLER=1',
     ],
+    for (final String name in <String>[
+      'engine_version',
+      'content_hash',
+      'skia_version',
+      'dart_version',
+    ])
+      name: <String>[string(name)],
+  };
+}
+
+/// The out directory's GN arguments (`gn args --list --short --json`): each
+/// argument's current value, or its default where args.gn leaves it.
+Future<Map<String, GnValue>> _gnArgs(String gn, String outDir) async {
+  final ProcessResult result = await Process.run(gn, <String>[
+    'args',
+    outDir,
+    '--list',
+    '--short',
+    '--json',
+  ]);
+  if (result.exitCode != 0) {
+    throw StateError('gn args $outDir --list failed: ${result.stderr}');
+  }
+  final stdout = result.stdout as String;
+  final entries = jsonDecode(stdout.substring(stdout.indexOf('['))) as List<Object?>;
+  return <String, GnValue>{
+    for (final Object? entry in entries)
+      if (entry is Map<String, Object?>)
+        entry['name']! as String: Assumptions.parseValue(
+          ((entry['current'] ?? entry['default'])! as Map<String, Object?>)['value']! as String,
+        ),
   };
 }
 
@@ -286,6 +320,16 @@ int _compare(
         final Iterable<String> values = switch (item) {
           GnStringValue(:final String value) => <String>[value],
           GnReference(:final String name) => referenceValues[name] ?? const <String>[],
+          GnExpandedString(:final List<GnValue> parts) => <String>[
+            parts
+                .map(
+                  (GnValue part) => switch (part) {
+                    GnReference(:final String name) => referenceValues[name]?.join() ?? '',
+                    _ => (part as GnStringValue).value,
+                  },
+                )
+                .join(),
+          ],
           _ => const <String>[],
         };
         for (final value in values) {

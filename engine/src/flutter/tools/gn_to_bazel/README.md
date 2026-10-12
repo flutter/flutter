@@ -46,8 +46,13 @@ list config.gni computes from those (`feature_defines_list`, read by
 reference in `//flutter/common:flutter_config`) is not evaluated: it is the
 constant of `build/bazel/copts.bzl` that `referenceConstants` names
 (`FLUTTER_FEATURE_DEFINES`, the same arithmetic over the flags), as the
-Objective-C flag lists already are. The oracle below supplies the GN value
-for its out directory.
+Objective-C flag lists already are. A string around such a variable
+(`"FLUTTER_ENGINE_VERSION=\"$engine_version\""` in `shell/version`)
+renders as a concatenation with the constant -- here one of
+`@engine_version//:version.bzl`, which a repository rule writes at fetch
+time from git and DEPS, as `tools/gn` computes version.gni's arguments at
+gen time. The oracle below reads the GN values from the out directory's
+arguments (`gn args --list`).
 Beneath any `--assume` sit the build's invariants (`buildInvariants`):
 `is_clang = true`, which every configuration `tools/gn` writes has and the
 clang-only Bazel toolchains cannot contradict, and `dart_src`, where DEPS
@@ -216,7 +221,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `mainRepositoryLayout` knows; an unknown owner is an error.
    `cflags_c` and `cflags_cc` go to `conlyopts` and `cxxopts`; a `-std=` in a
    target's flags is dropped, because GN's compiler config sets the standard
-   after every target's flags and the target's never takes effect. A file
+   after every target's flags and the target's never takes effect. Bazel
+   reads `defines`, `copts` and `linkopts` with Make-variable substitution
+   and shell tokenization where GN hands the compiler each string as it is,
+   so those strings are escaped to survive the reading (`X="v"` is written
+   `X=\"v\"`; `$` is doubled). A file
    listed twice is emitted once. Every compiled target gets `FLUTTER_COPTS`
    (engine code: it lists `//flutter:config` or depends on engine code),
    `CHROMIUM_CODE_COPTS` (the third-party trees the engine describes with

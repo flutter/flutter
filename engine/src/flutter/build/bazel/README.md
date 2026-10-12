@@ -6,8 +6,8 @@ Nothing in this directory is used by the GN build.
 | File | Role |
 | --- | --- |
 | `deps.lock.bzl` | **Generated** from `DEPS` by `tools/bazel_tools/bin/gen_deps.dart`; never edit by hand. The pins (`VARS`, `GIT_DEPS`, `CIPD_DEPS`, `GCLIENT_GN_ARGS`) as Starlark data. |
-| `repositories.bzl` | Repository rules: `synced_repository` (a directory populated by `gclient sync`, consumed in place) and `cipd_package` (a CIPD instance downloaded over HTTPS, no `cipd` client needed). |
-| `extensions.bzl` | The `synced_deps` module extension: the table of repositories the root `MODULE.bazel` imports with `use_repo`, backed by the pins in `deps.lock.bzl` and `build/linux/sysroot_scripts/sysroots.json`. |
+| `repositories.bzl` | Repository rules: `synced_repository` (a directory populated by `gclient sync`, consumed in place), `cipd_package` (a CIPD instance downloaded over HTTPS, no `cipd` client needed) and `engine_version_repository` (the version strings `tools/gn` computes at gen time -- git HEAD, the content hash, Skia's and Dart's DEPS revisions -- as `@engine_version//:version.bzl`, for `shell/version`). |
+| `extensions.bzl` | The `synced_deps` module extension: the table of repositories the root `MODULE.bazel` imports with `use_repo`, backed by the pins in `deps.lock.bzl` and `build/linux/sysroot_scripts/sysroots.json`; and `engine_version`, which declares `@engine_version`. |
 | `third_party/<name>/BUILD.<name>.bazel` | Overlay root `BUILD` files for dependencies that ship no usable Bazel build files. Deliberately not named `BUILD.bazel`, so Bazel does not treat them as packages of this repository. |
 | `toolchains/` | The hermetic C/C++ toolchains (`cc_toolchain_config.bzl` holds the flag tables, `BUILD.bazel` the `cc_toolchain`/`toolchain` targets per platform, `tests/` a smoke test). |
 | `copts.bzl` | What GN adds per target rather than per toolchain, for `BUILD` files to spell out: `FLUTTER_COPTS` / `FLUTTER_LOCAL_DEFINES` for first-party code (`chromium_code`, `//flutter:config`) and `FLUTTER_THIRD_PARTY_COPTS` for overlays (`no_chromium_code`). |

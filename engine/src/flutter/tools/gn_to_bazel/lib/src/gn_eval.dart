@@ -382,6 +382,30 @@ final class GnReference extends GnValue {
   String toString() => name;
 }
 
+/// A string with a `$name` expansion of a variable the converter does not
+/// evaluate (`"FLUTTER_ENGINE_VERSION=\"$engine_version\""`): its literal
+/// parts and its references, in order. The Bazel side holds each reference
+/// as a constant; where such a string may go is the emitter's decision.
+final class GnExpandedString extends GnValue {
+  const GnExpandedString(this.parts);
+
+  /// [GnStringValue] and [GnReference] parts.
+  final List<GnValue> parts;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GnExpandedString &&
+      other.parts.length == parts.length &&
+      Iterable<int>.generate(parts.length).every((int i) => other.parts[i] == parts[i]);
+
+  @override
+  int get hashCode => Object.hashAll(parts);
+
+  @override
+  String toString() =>
+      '"${parts.map((GnValue p) => p is GnReference ? '\$${p.name}' : (p as GnStringValue).value).join()}"';
+}
+
 /// A GN scope held in a variable: `x = { a = [...] }`, or a template's
 /// `invoker`. Members are read as `x.a`.
 final class GnScopeValue extends GnValue {
@@ -1735,7 +1759,7 @@ final class _Evaluator {
       return GnIntValue(node.intValue);
     }
     if (node.hasExpansion) {
-      return GnStringValue(_expand(node, scope));
+      return _expand(node, scope);
     }
     return GnStringValue(node.stringValue);
   }
@@ -1745,20 +1769,29 @@ final class _Evaluator {
   );
 
   /// Resolves `$name` and `${name}` in a string from the known strings
-  /// (assumptions and local scalar variables); anything else is an error.
-  String _expand(GnLiteral node, _Scope? scope) {
+  /// (assumptions and local scalar variables). An external variable with no
+  /// assumed value stays a reference inside a [GnExpandedString]; anything
+  /// else is an error.
+  GnValue _expand(GnLiteral node, _Scope? scope) {
     final String text = node.stringValue;
     var last = 0;
-    final out = StringBuffer();
+    final parts = <GnValue>[];
+    final literal = StringBuffer();
     for (final Match match in _expansion.allMatches(text)) {
       final String name = match.group(1) ?? match.group(2)!;
       final String? value = _knownString(name, scope, node);
-      if (value == null) {
+      literal.write(text.substring(last, match.start));
+      if (value != null) {
+        literal.write(value);
+      } else if (settings.externalVariables.contains(name)) {
+        if (literal.isNotEmpty) {
+          parts.add(GnStringValue(literal.toString()));
+          literal.clear();
+        }
+        parts.add(GnReference(name));
+      } else {
         throw GnError(node.location, 'string expansion of \$$name is not supported: ${node.raw}');
       }
-      out
-        ..write(text.substring(last, match.start))
-        ..write(value);
       last = match.end;
     }
     if (last < text.length) {
@@ -1766,9 +1799,15 @@ final class _Evaluator {
       if (rest.contains(r'$')) {
         throw GnError(node.location, 'string expansion is not supported: ${node.raw}');
       }
-      out.write(rest);
+      literal.write(rest);
     }
-    return out.toString();
+    if (parts.isEmpty) {
+      return GnStringValue(literal.toString());
+    }
+    if (literal.isNotEmpty) {
+      parts.add(GnStringValue(literal.toString()));
+    }
+    return GnExpandedString(List<GnValue>.unmodifiable(parts));
   }
 
   /// The value of [name] when it is a string the converter knows: an
