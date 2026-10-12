@@ -633,9 +633,11 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
   g_autoptr(FlView) view = fl_view_new(project);
   g_object_ref_sink(view);
   StartEngine(fl_view_get_engine(view));
+  const bool overlap =
+      g_strcmp0(g_getenv("FLUTTER_TEST_ATSPI_OVERLAP"), "1") == 0;
   FlutterSemanticsFlags flags[4] = {};
   flags[3].is_button = true;
-  flags[3].is_hidden = true;
+  flags[3].is_hidden = !overlap;
   flags[2].is_button = true;
   FlutterSemanticsNode2 root = {};
   root.id = 0;
@@ -656,6 +658,8 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
   int32_t group_children[] = {2, 3};
   group.child_count = 2;
   group.children_in_traversal_order = group_children;
+  int32_t hit_order[] = {2, 3};
+  group.children_in_hit_test_order = hit_order;
   FlutterSemanticsNode2 button = {};
   button.id = 2;
   button.label = "Geometry button";
@@ -668,7 +672,8 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
   // nor intercept point lookup for the visible button.
   FlutterSemanticsNode2 hidden = button;
   hidden.id = 3;
-  hidden.label = "Hidden geometry button";
+  hidden.label =
+      overlap ? "Overlapping geometry button" : "Hidden geometry button";
   hidden.flags2 = &flags[3];
   FlutterSemanticsNode2* nodes[] = {&root, &group, &button, &hidden};
   FlutterSemanticsUpdate2 update = {};
@@ -688,9 +693,11 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
                          if (calls++ == 0) {
                            root.transform.transX += 12;
                            root.transform.transY += 8;
-                           FlutterSemanticsNode2* partial[] = {&root};
+                           hit_order[0] = 3;
+                           hit_order[1] = 2;
+                           FlutterSemanticsNode2* partial[] = {&root, &group};
                            FlutterSemanticsUpdate2 ancestor = update;
-                           ancestor.node_count = 1;
+                           ancestor.node_count = overlap ? 2 : 1;
                            ancestor.nodes = partial;
                            fl_view_gtk4_accessibility_handle_update(
                                view->accessibility_backend, &ancestor);

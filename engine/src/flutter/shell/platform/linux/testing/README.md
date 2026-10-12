@@ -171,6 +171,29 @@ Use a GTK runtime with those corrections to pass this gate; the Flutter bridge
 does not carry a workaround. The default geometry command continues to test bounds on stock GTK.
 Passing hit checks does not establish clipping or Flutter paint/hit-test order.
 
+## Independent reading and hit-test order
+
+```sh
+python3 engine/src/flutter/shell/platform/linux/testing/run_gtk4_atspi_overlap_test.py \
+  engine/src/out/host_debug_unopt/flutter_linux_gtk4_unittests \
+  --output /tmp/flutter-gtk4-atspi-overlap.json
+```
+
+This explicit gate currently fails even with the GTK coordinate and hidden-node
+corrections. Two visible buttons overlap and retain reading order `[2, 3]`.
+Flutter supplies hit order `[2, 3]`, then a native tap changes it to `[3, 2]`
+with a parent-only partial update. Native point lookup should change its target
+from node 2 to node 3. GTK's generic lookup instead picks node 3 in both phases.
+The runner records both phases, stable object identity and exactly two native
+taps, writes the report, and exits 1 when hit order is wrong. Use the corrected
+GTK runtime to isolate this limitation from the earlier coordinate bugs.
+
+The semantics store preserves the independent order, including order-only
+updates, but the released GtkAccessible interface has no custom hit-test hook.
+Reordering the exported children would change screen-reader reading order.
+The unresolved API requirement is tracked in the accessibility investigation;
+passing the ordinary geometry gate does not establish overlap-order parity.
+
 ## Native AT-SPI activation
 
 ```sh

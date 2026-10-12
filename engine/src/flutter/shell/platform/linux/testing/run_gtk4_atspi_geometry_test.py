@@ -217,6 +217,7 @@ def main():
           environment.pop(key, None)
         environment.update(
             FLUTTER_TEST_ATSPI_GEOMETRY='1',
+            FLUTTER_TEST_ATSPI_OVERLAP='0',
             GTK_A11Y='atspi',
             GDK_BACKEND='x11',
             GDK_SCALE=str(scale),
