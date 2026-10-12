@@ -87,6 +87,22 @@ fatal. And the toolchain passes the `includes` of `cc_library` rules with
 warnings in headers found through `-isystem`: with the default, `-Werror`
 would silently stop covering the engine's own headers.
 
+The toolchain's header trees -- the sysroot's `usr/include`, libc++'s
+`include`, clang's builtin headers under `lib/clang/<version>/include` --
+are declared as *directory* inputs rather than file by file. Every compile
+action lists the toolchain's files, and the default `linux-sandbox` stages
+each input as a symlink per action: as ~11,000 files they were 70 % of a
+compile's inputs and most of the sandbox's cost (a cold build of the Phase 0
+exit test took 943 s sandboxed against 551 s unsandboxed); as three
+directories they are three symlinks. Two things make this sound: the root
+`.bazelrc` starts the server with `-DBAZEL_TRACK_SOURCE_DIRECTORIES=1`, so
+Bazel tracks the directories' contents (without it, every action warns and
+a change inside a directory may go unnoticed), and
+`cxx_builtin_include_directories` names the same directories (exec-root
+relative, through `%workspace%`), since Bazel's undeclared-inclusion check
+can no longer match their headers file by file. The trees change only with
+a `DEPS`/`sysroots.json` roll, which re-fetches the repository.
+
 ```
 bazelisk test //engine/src/flutter/build/bazel/toolchains/tests:cc_toolchain_smoke_test
 ```

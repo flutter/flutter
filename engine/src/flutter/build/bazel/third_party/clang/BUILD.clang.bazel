@@ -16,16 +16,29 @@ _MULTICALL = ["bin/llvm"]
 
 _TARGET = "x86_64-unknown-linux-gnu"
 
+# A file in the builtin include directory, lib/clang/<version>/include; the
+# toolchain takes its directory as a builtin include directory (found by
+# glob, since the version changes with every roll).
+filegroup(
+    name = "resource_include_marker",
+    srcs = glob(["lib/clang/*/include/stddef.h"]),
+)
+
 # The compiler driver plus everything it reads implicitly: the resource
 # directory (builtin headers, compiler-rt, sanitizer ignorelists) and the
-# per-target runtime directory (libunwind, the bundled libc++).
+# per-target runtime directory (libunwind, the bundled libc++). The builtin
+# headers are one directory input (a glob of directories, since the version
+# in the path changes with every roll) rather than ~200 files per action;
+# the root .bazelrc enables sound directory tracking.
 filegroup(
     name = "compiler_files",
     srcs = [
         "bin/clang",
         "bin/clang++",
-    ] + _MULTICALL + glob([
-        "lib/clang/*/include/**",
+    ] + _MULTICALL + glob(
+        ["lib/clang/*/include"],
+        exclude_directories = 0,
+    ) + glob([
         "lib/clang/*/share/**",
         "lib/clang/*/lib/" + _TARGET + "/**",
         "lib/" + _TARGET + "/**",

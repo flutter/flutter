@@ -343,11 +343,21 @@ def _impl(ctx):
         action_configs = action_configs,
         builtin_sysroot = sysroot,
         # Headers included from these directories need not be declared as
-        # inputs. Everything else the compiler can reach (libc++, the clang
-        # resource directory) is declared through the toolchain's files.
+        # inputs file by file: the sysroot, the C++ standard library and
+        # clang's builtin headers, which reach every compile as *directory*
+        # inputs through the toolchain's files (one symlink per action in
+        # the sandbox instead of ~11,000; see build/bazel/third_party/sysroot).
+        # %workspace% makes an entry exec-root relative, like the paths in the
+        # compiler's dependency files; a bare relative path would be taken
+        # relative to this package.
         cxx_builtin_include_directories = [
             "%sysroot%/usr/include",
             "%sysroot%/usr/local/include",
+        ] + [
+            "%workspace%/" + marker.dirname
+            for marker in ctx.files.cxx_include_markers
+        ] + [
+            "%workspace%/" + ctx.file.resource_include_marker.dirname,
         ],
     )
 
@@ -373,6 +383,11 @@ flutter_cc_toolchain_config = rule(
             mandatory = True,
             allow_files = True,
             doc = "One file per C++ standard library include directory (-nostdinc++ replacements), in search order; their directories are added with -I.",
+        ),
+        "resource_include_marker": attr.label(
+            mandatory = True,
+            allow_single_file = True,
+            doc = "A file in clang's builtin include directory (lib/clang/<version>/include); the directory is a builtin include directory.",
         ),
     },
     provides = [CcToolchainConfigInfo],
