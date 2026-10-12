@@ -18,9 +18,12 @@ package(default_visibility = ["//visibility:public"])
 # The toolchain derives its include path from this file's location.
 exports_files(["include/__config"])
 
+# One directory input rather than its ~2,100 files: every C++ compile lists
+# it through the toolchain, and the sandbox stages each input per action
+# (research/08 §5; the root .bazelrc enables sound directory tracking).
 filegroup(
     name = "headers",
-    srcs = glob(["include/**"]),
+    srcs = ["include"],
 )
 
 # libc++'s private headers, also needed by libc++abi
