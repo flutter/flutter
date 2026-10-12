@@ -694,18 +694,20 @@ final class GnFileEvaluation {
 /// [Assumptions] say (`--assume=none` included): `tools/gn` passes
 /// `is_clang=true` to every configuration it writes (`--no-clang` is a
 /// developer escape hatch no builder uses), and the Bazel toolchains are
-/// clang only, so a Bazel build never has a `!is_clang` branch to take.
-const Map<String, GnValue> toolchainInvariants = <String, GnValue>{'is_clang': GnBoolValue(true)};
+/// clang only, so a Bazel build never has a `!is_clang` branch to take;
+/// `dart_src` (dart.gni) is where DEPS puts the Dart SDK and where the Bazel
+/// wrap builds it from, and no builder overrides it.
+const Map<String, GnValue> buildInvariants = <String, GnValue>{
+  'is_clang': GnBoolValue(true),
+  'dart_src': GnStringValue('//flutter/third_party/dart'),
+};
 
 /// Values the converter may take as given for GN variables (build arguments
 /// and platform predicates), so that the branches they rule out are skipped
 /// and the ones they imply are unconditional.
 final class Assumptions {
   Assumptions(Map<String, GnValue> values)
-    : _values = Map<String, GnValue>.unmodifiable(<String, GnValue>{
-        ...toolchainInvariants,
-        ...values,
-      });
+    : _values = Map<String, GnValue>.unmodifiable(<String, GnValue>{...buildInvariants, ...values});
 
   final Map<String, GnValue> _values;
 

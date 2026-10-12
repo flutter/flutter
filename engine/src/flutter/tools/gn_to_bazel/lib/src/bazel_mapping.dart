@@ -722,7 +722,7 @@ Assumptions linuxHostAssumptions() {
     'target_os': GnStringValue('linux'),
     'is_android': GnBoolValue(false),
     'is_apple': GnBoolValue(false),
-    // is_clang: a toolchain invariant (gn_eval's toolchainInvariants).
+    // is_clang, dart_src: build invariants (gn_eval's buildInvariants).
     'is_component_build': GnBoolValue(false),
     'is_fuchsia': GnBoolValue(false),
     'is_ios': GnBoolValue(false),
@@ -732,8 +732,6 @@ Assumptions linuxHostAssumptions() {
     'is_qnx': GnBoolValue(false),
     'is_wasm': GnBoolValue(false),
     'is_win': GnBoolValue(false),
-    // //flutter/build/dart/dart.gni
-    'dart_src': GnStringValue('//flutter/third_party/dart'),
     // //flutter/common/config.gni
     'enable_backtrace': GnBoolValue(true),
     'enable_unittests': GnBoolValue(true),
