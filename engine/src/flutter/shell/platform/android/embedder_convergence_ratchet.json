@@ -18,7 +18,7 @@
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
-      "count": 99,
+      "count": 89,
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {

@@ -558,28 +558,22 @@ AndroidShellHolder::AndroidShellHolder(
   static size_t thread_host_count = 1;
   auto thread_label = std::to_string(thread_host_count++);
 
-  auto mask = ThreadHost::Type::kRaster | ThreadHost::Type::kIo;
+  thread_host_ = std::make_shared<ThreadHost>();
   if (settings.merged_platform_ui_thread !=
       Settings::MergedPlatformUIThread::kEnabled) {
-    mask |= ThreadHost::Type::kUi;
+    thread_host_->ui_thread = std::make_unique<fml::Thread>(
+        AndroidPlatformThreadConfigSetter,
+        fml::Thread::ThreadConfig(thread_label + ".ui",
+                                  fml::Thread::ThreadPriority::kDisplay));
   }
-
-  flutter::ThreadHost::ThreadHostConfig host_config(
-      thread_label, mask, AndroidPlatformThreadConfigSetter);
-  host_config.ui_config = fml::Thread::ThreadConfig(
-      flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-          flutter::ThreadHost::Type::kUi, thread_label),
-      fml::Thread::ThreadPriority::kDisplay);
-  host_config.raster_config = fml::Thread::ThreadConfig(
-      flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-          flutter::ThreadHost::Type::kRaster, thread_label),
-      fml::Thread::ThreadPriority::kRaster);
-  host_config.io_config = fml::Thread::ThreadConfig(
-      flutter::ThreadHost::ThreadHostConfig::MakeThreadName(
-          flutter::ThreadHost::Type::kIo, thread_label),
-      fml::Thread::ThreadPriority::kNormal);
-
-  thread_host_ = std::make_shared<ThreadHost>(host_config);
+  thread_host_->raster_thread = std::make_unique<fml::Thread>(
+      AndroidPlatformThreadConfigSetter,
+      fml::Thread::ThreadConfig(thread_label + ".raster",
+                                fml::Thread::ThreadPriority::kRaster));
+  thread_host_->io_thread = std::make_unique<fml::Thread>(
+      AndroidPlatformThreadConfigSetter,
+      fml::Thread::ThreadConfig(thread_label + ".io",
+                                fml::Thread::ThreadPriority::kNormal));
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
   std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;

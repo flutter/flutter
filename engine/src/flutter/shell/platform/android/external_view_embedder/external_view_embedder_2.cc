@@ -6,7 +6,6 @@
 
 #include <cmath>
 
-#include "display_list/dl_color.h"
 #include "flow/view_slicer.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"

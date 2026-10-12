@@ -7,7 +7,6 @@
 
 #include <mutex>
 
-#include "flutter/flow/surface.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 

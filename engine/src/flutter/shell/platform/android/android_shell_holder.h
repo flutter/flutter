@@ -9,7 +9,7 @@
 #include <type_traits>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/common/thread_host.h"
+#include "flutter/fml/thread.h"
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
@@ -266,6 +266,14 @@ class AndroidShellHolder {
   using UniqueEngine =
       std::unique_ptr<std::remove_pointer_t<FLUTTER_API_SYMBOL(FlutterEngine)>,
                       EngineDeleter>;
+
+  // Owns the Android shell's dedicated UI, raster, and IO threads, shared
+  // across shells spawned via Spawn().
+  struct ThreadHost {
+    std::unique_ptr<fml::Thread> ui_thread;
+    std::unique_ptr<fml::Thread> raster_thread;
+    std::unique_ptr<fml::Thread> io_thread;
+  };
 
   const flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
