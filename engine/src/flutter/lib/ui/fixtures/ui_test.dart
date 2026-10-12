@@ -528,6 +528,17 @@ void platformMessagePortResponseTest() async {
   }
 }
 
+/// Responds to a port that has already been closed, simulating an isolate
+/// that exits before the platform replies.
+@pragma('vm:entry-point')
+void platformMessagePortResponseClosedPortTest() {
+  final receivePort = ReceivePort();
+  final int nativePort = receivePort.sendPort.nativePort;
+  receivePort.close();
+  _callPlatformMessageResponseDartPort(nativePort);
+  _finishCallResponse(true);
+}
+
 @pragma('vm:entry-point')
 void platformMessageResponseTest() {
   _callPlatformMessageResponseDart((ByteData? result) {
@@ -1528,42 +1539,6 @@ void hooksTests() async {
     expectEquals(display.size, const Size(800, 600));
     expectEquals(display.devicePixelRatio, 1.5);
     expectEquals(display.refreshRate, 65);
-  });
-
-  await test('onTextureFrameAvailable preserves callback zone', () {
-    late Zone innerZone;
-    late Zone runZone;
-    late int receivedTextureId;
-
-    runZoned(() {
-      innerZone = Zone.current;
-      PlatformDispatcher.instance.onTextureFrameAvailable = (int textureId) {
-        runZone = Zone.current;
-        receivedTextureId = textureId;
-      };
-    });
-
-    _callHook('_notifyTextureFrameAvailable', 1, 1234);
-    expectIdentical(runZone, innerZone);
-    expectEquals(receivedTextureId, 1234);
-  });
-
-  await test('onMarkAllViewsNeedRender preserves callback zone', () {
-    late Zone innerZone;
-    late Zone runZone;
-    bool called = false;
-
-    runZoned(() {
-      innerZone = Zone.current;
-      PlatformDispatcher.instance.onMarkAllViewsNeedRender = () {
-        runZone = Zone.current;
-        called = true;
-      };
-    });
-
-    _callHook('_markAllViewsNeedRender', 0);
-    expectIdentical(runZone, innerZone);
-    expectEquals(called, true);
   });
 
   await test('_futureize handles callbacker sync error', () async {

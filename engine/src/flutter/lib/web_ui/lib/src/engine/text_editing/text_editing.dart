@@ -592,7 +592,7 @@ class EngineAutofillForm {
   /// On the other hand, overall for text editing there is already a lifecycle
   /// for subscriptions: All the subscriptions of the DOM elements are to the
   /// `subscriptions` property of [DefaultTextEditingStrategy].
-  /// [TextEditingStrategy] manages all subscription lifecyle. All
+  /// [TextEditingStrategy] manages all subscription lifecycle. All
   /// listeners with no exceptions are added during
   /// [TextEditingStrategy.addEventHandlers] method call and all
   /// listeners are removed during [TextEditingStrategy.disable] method call.
@@ -798,7 +798,7 @@ class TextEditingDeltaState {
   ///
   /// For a deletion, the length and the direction of the deletion (backward or forward)
   /// are calculated by comparing the new and last editing states.
-  /// If the deletion is backward, the length is susbtracted from the [deltaEnd]
+  /// If the deletion is backward, the length is subtracted from the [deltaEnd]
   /// that we set when beforeinput was fired to determine the [deltaStart].
   /// If the deletion is forward, [deltaStart] is set to the new editing state baseOffset
   /// and [deltaEnd] is set to [deltaStart] incremented by the length of the deletion.
@@ -1364,14 +1364,14 @@ abstract class TextEditingStrategy {
 
   /// Update the element's position.
   ///
-  /// The position will be updated everytime Flutter Framework sends
+  /// The position will be updated every time Flutter Framework sends
   /// 'TextInput.setEditableSizeAndTransform' message.
   void updateElementPlacement(EditableTextGeometry geometry);
 
   /// Set editing state of the element.
   ///
   /// This includes text and selection relelated states. The editing state will
-  /// be updated everytime Flutter Framework sends 'TextInput.setEditingState'
+  /// be updated every time Flutter Framework sends 'TextInput.setEditingState'
   /// message.
   void setEditingState(EditingState editingState);
 
@@ -1614,6 +1614,18 @@ abstract class DefaultTextEditingStrategy
   }
 
   void applyConfiguration(InputConfiguration config) {
+    // A `TextInput.updateConfig` message only describes the focused field, so
+    // the [EngineAutofillForm] decoded from it has no DOM form. While the
+    // editing element is part of a live form, keep that form. Otherwise
+    // [disable] would remove the element from the form instead of letting the
+    // form go dormant, and the next connection could not reuse it.
+    if (isEnabled && config.autofillGroup != null) {
+      final EngineAutofillForm? activeGroup = inputConfiguration.autofillGroup;
+      if (activeGroup?.formElement != null) {
+        config = config.copyWith(autofillGroup: activeGroup);
+      }
+    }
+
     inputConfiguration = config;
 
     if (config.readOnly) {
@@ -2293,7 +2305,7 @@ class AndroidTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
 /// Firefox behaviour for text editing.
 ///
 /// Selections are different in Firefox. [addEventHandlers] strategy is
-/// impelemented diefferently in Firefox.
+/// implemented differently in Firefox.
 class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
   FirefoxTextEditingStrategy(super.owner);
 

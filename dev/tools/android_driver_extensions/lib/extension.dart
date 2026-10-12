@@ -25,9 +25,9 @@ const CommandExtension nativeDriverCommands = NativeDriverCommandExtension(
 ///
 /// A singleton default instance of this class is [nativeDriverCommands].
 final class NativeDriverCommandExtension implements CommandExtension {
-  /// Creates a new [NativeDriverCommandExtension] with the given [channel].
+  /// Creates a new [NativeDriverCommandExtension] with the given [_channel].
   ///
-  /// Can be used in exceptional cases where a custom [MethodChannel] is needed;
+  /// Can be used in exceptional cases where a custom [flt.MethodChannel] is needed;
   /// otherwise, use the singleton [nativeDriverCommands].
   const NativeDriverCommandExtension(this._channel);
   final flt.MethodChannel _channel;
