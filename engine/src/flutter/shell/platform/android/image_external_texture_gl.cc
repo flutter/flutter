@@ -41,14 +41,22 @@ void ImageExternalTextureGL::Attach(PaintContext& context) {
   }
 }
 
-void ImageExternalTextureGL::UpdateImage(JavaLocalRef& hardware_buffer,
-                                         const SkRect& bounds,
-                                         PaintContext& context) {
-  AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
+void ImageExternalTextureGL::UpdateImage(
+    AHardwareBuffer* latest_hardware_buffer,
+    const SkRect& bounds,
+    PaintContext& context) {
   std::optional<HardwareBufferKey> key =
       impeller::android::HardwareBuffer::GetSystemUniqueID(
           latest_hardware_buffer);
-  auto existing_image = image_lru_.FindImage(key);
+  auto descriptor =
+      impeller::android::HardwareBuffer::Describe(latest_hardware_buffer);
+  if (!descriptor.has_value()) {
+    return;
+  }
+  auto existing_image = image_lru_.FindImage(
+      key, descriptor.value(), [this](HardwareBufferKey evicted_key) {
+        gl_entries_.erase(evicted_key);
+      });
   if (existing_image != nullptr) {
     dl_image_ = existing_image;
     return;
@@ -59,7 +67,11 @@ void ImageExternalTextureGL::UpdateImage(JavaLocalRef& hardware_buffer,
     return;
   }
 
-  dl_image_ = CreateDlImage(context, bounds, key, std::move(egl_image));
+  auto image = CreateDlImage(context, bounds, key, std::move(egl_image));
+  if (!image) {
+    return;
+  }
+  dl_image_ = std::move(image);
   if (key.has_value()) {
     gl_entries_.erase(image_lru_.AddImage(dl_image_, key.value()));
   }
@@ -75,7 +87,7 @@ void ImageExternalTextureGL::ProcessFrame(PaintContext& context,
   if (hardware_buffer.is_null()) {
     return;
   }
-  UpdateImage(hardware_buffer, bounds, context);
+  UpdateImage(AHardwareBufferFor(hardware_buffer), bounds, context);
   CloseHardwareBuffer(hardware_buffer);
 }
 
@@ -108,11 +120,18 @@ impeller::UniqueEGLImageKHR ImageExternalTextureGL::CreateEGLImage(
 
   impeller::EGLImageKHRWithDisplay maybe_image =
       impeller::EGLImageKHRWithDisplay{
-          eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
-                            client_buffer, 0),
-          display};
+          CreateEGLImageKHR(display, client_buffer), display};
 
+  if (maybe_image.image == EGL_NO_IMAGE_KHR) {
+    return {};
+  }
   return impeller::UniqueEGLImageKHR(maybe_image);
+}
+
+EGLImageKHR ImageExternalTextureGL::CreateEGLImageKHR(EGLDisplay display,
+                                                      EGLClientBuffer buffer) {
+  return eglCreateImageKHR(display, EGL_NO_CONTEXT, EGL_NATIVE_BUFFER_ANDROID,
+                           buffer, nullptr);
 }
 
 }  // namespace flutter
