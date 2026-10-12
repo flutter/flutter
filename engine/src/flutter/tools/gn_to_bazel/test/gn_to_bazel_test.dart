@@ -2139,6 +2139,36 @@ source_set("gles") {
       expect(output, contains('"@angle//:include/GLES3/gl3.h"'));
     });
 
+    test('a suite run_tests.py runs with arguments gets them as args and data', () async {
+      final GnFileEvaluation evaluation = await evaluate('''
+executable("flow_unittests") {
+  testonly = true
+  sources = [ "flow_run_all_unittests.cc" ]
+  deps = [ "//flutter/testing:testing_lib" ]
+}
+''');
+      final String output = emitBuildFile(evaluation, gnPackage: '//flutter/flow');
+      expect(
+        output,
+        contains('''
+    args = [
+        "--golden-dir=engine/src/flutter/testing/resources",
+        "--font-file=engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf",
+    ],
+'''),
+      );
+      expect(
+        output,
+        contains('''
+    data = [
+        "//engine/src/flutter/testing:resources",
+        "//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf",
+    ],
+'''),
+      );
+      expect(output, contains('size = "medium"'));
+    });
+
     test('all_dependent_configs cross private deps; engine code gets FLUTTER_COPTS', () async {
       final String output = await convert('''
 config("vulkan_public") {
