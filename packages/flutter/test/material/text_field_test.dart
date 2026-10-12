@@ -3237,19 +3237,9 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    switch (defaultTargetPlatform) {
-      // On Apple platforms, dragging the base handle makes it the extent.
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        expect(controller.selection.baseOffset, 11);
-        expect(controller.selection.extentOffset, 2);
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        expect(controller.selection.baseOffset, 2);
-        expect(controller.selection.extentOffset, 11);
-    }
+    // On iOS, dragging the base handle makes it the extent.
+    expect(controller.selection.baseOffset, 11);
+    expect(controller.selection.extentOffset, 2);
 
     // Drag the left handle 2 letters to the left again.
     endpoints = globalize(
@@ -3265,19 +3255,9 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.iOS:
-      case TargetPlatform.macOS:
-        // The left handle was already the extent, and it remains so.
-        expect(controller.selection.baseOffset, 11);
-        expect(controller.selection.extentOffset, 0);
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-      case TargetPlatform.linux:
-      case TargetPlatform.windows:
-        expect(controller.selection.baseOffset, 0);
-        expect(controller.selection.extentOffset, 11);
-    }
+    // The left handle was already the extent, and it remains so.
+    expect(controller.selection.baseOffset, 11);
+    expect(controller.selection.extentOffset, 0);
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
   testWidgets(
