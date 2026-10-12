@@ -42,9 +42,10 @@ the condition as a comment. `--assume name=value` replaces the defaults;
 needs a `config_setting` for each variable involved (see `conditionSettings`).
 What the defaults leave open on purpose -- `is_debug`, the runtime mode,
 `slimpeller` -- becomes a `select()` on the engine's config_settings.
-Beneath any `--assume` sits `is_clang = true` (`toolchainInvariants`): every
-configuration `tools/gn` writes has it, and the Bazel toolchains are clang
-only.
+Beneath any `--assume` sit the build's invariants (`buildInvariants`):
+`is_clang = true`, which every configuration `tools/gn` writes has and the
+clang-only Bazel toolchains cannot contradict, and `dart_src`, where DEPS
+puts the Dart SDK and the Bazel wrap builds it from.
 
 A `select()` holds a condition that is one setting, several joined by `||`,
 or the negation of one or several (`!is_win`; `!is_win && !is_mac`, the
