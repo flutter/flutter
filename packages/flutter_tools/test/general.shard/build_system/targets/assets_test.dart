@@ -26,12 +26,10 @@ import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart'
     show DartHooksResult;
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart' show FlutterCodeAsset;
 import 'package:font_asset/font_asset.dart' show FontAsset;
-import 'package:record_use/record_use.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
 import '../../../src/fake_process_manager.dart';
-import '../../../src/fakes.dart' show CompleterIOSink;
 import '../../../src/package_config.dart';
 
 void main() {
@@ -1064,11 +1062,9 @@ flutter:
   );
 
   testUsingContext(
-    'Icon fonts from hooks are subset by the icon tree shaker like fonts from the pubspec',
+    'Fonts from hooks are copied directly by CopyAssets without invoking IconTreeShaker',
     () async {
       final artifacts = Artifacts.test();
-      final String fontSubsetPath = artifacts.getArtifactPath(Artifact.fontSubset);
-      fileSystem.file(fontSubsetPath).createSync(recursive: true);
       final processManager = FakeProcessManager.empty();
       final environment = Environment.test(
         fileSystem.currentDirectory,
@@ -1089,12 +1085,13 @@ flutter:
         packages: <String, String>{'bar': 'bar'},
       );
 
-      // `package:bar` provides the icon font through its build hook. Hooks
+      // `package:bar` provides the icon font through its build/link hook. Hooks
       // report absolute file URIs; a relative one would not round-trip through
       // `Uri.toFilePath` on Windows hosts with this posix memory file system.
+      const fontBytes = <int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112];
       final File hookFont = fileSystem.currentDirectory.childFile('bar/fonts/BarIcons.ttf')
         ..createSync(recursive: true)
-        ..writeAsBytesSync(<int>[0, 1, 0, 0, 0, 15, 0, 128, 0, 3, 0, 112]);
+        ..writeAsBytesSync(fontBytes);
       environment.buildDir
           .childFile(LinkHooks.resultFilename)
           .writeAsStringSync(
@@ -1116,58 +1113,17 @@ flutter:
               ).toJson(),
             ),
           );
-      // The app uses `const IconData(0xe84e, fontFamily: 'BarIcons', fontPackage: 'bar')`.
-      const iconDataClass = Class(
-        'IconData',
-        Library('package:flutter/src/widgets/icon_data.dart'),
-      );
-      environment.buildDir
-          .childFile('recorded_uses.json')
-          .writeAsStringSync(
-            json.encode(
-              Recordings(
-                calls: const <DefinitionWithStaticCalls, List<CallReference>>{},
-                instances: <DefinitionWithInstances, List<InstanceReference>>{
-                  iconDataClass: const <InstanceReference>[
-                    InstanceConstantReference(
-                      instanceConstant: InstanceConstant(
-                        definition: iconDataClass,
-                        fields: <String, Constant>{
-                          'codePoint': IntConstant(59470),
-                          'fontFamily': StringConstant('BarIcons'),
-                          'fontPackage': StringConstant('bar'),
-                        },
-                      ),
-                      loadingUnit: LoadingUnit('root'),
-                    ),
-                  ],
-                },
-              ).toJson(),
-            ),
-          );
 
       final File bundledFont = environment.buildDir
           .childDirectory('flutter_assets')
           .childFile('packages/bar/fonts/BarIcons.ttf');
-      final stdinSink = CompleterIOSink();
-      processManager.addCommand(
-        FakeCommand(
-          command: <Pattern>[fontSubsetPath, bundledFont.path, hookFont.path],
-          stdin: stdinSink,
-          onRun: (List<String> command) {
-            fileSystem.file(command[1])
-              ..createSync(recursive: true)
-              ..writeAsBytesSync(<int>[0]);
-          },
-        ),
-      );
 
       await const CopyAssets().build(environment);
 
       expect(logger.errorText, isEmpty);
       expect(processManager, hasNoRemainingExpectations);
-      expect(stdinSink.getAndClear(), '59470\n');
       expect(bundledFont, exists);
+      expect(bundledFont.readAsBytesSync(), fontBytes);
       expect(
         json.decode(
           environment.buildDir

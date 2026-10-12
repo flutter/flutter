@@ -73,7 +73,8 @@ dependencies:
   hooks: 2.2.0
   code_assets: 2.1.0
   data_assets: 0.20.0
-  font_asset: 0.1.0
+  font_asset: 0.2.0
+  font_subset: 0.2.1
   record_use: 1.1.1
 
   # We depend on very specific internal implementation details of the
@@ -141,4 +142,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: r8dq9m
+# PUBSPEC CHECKSUM: 68d7p7

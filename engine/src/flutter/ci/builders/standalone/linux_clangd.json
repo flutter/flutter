@@ -3,7 +3,7 @@
     "This build is only used to generate compile_commands.json for clangd ",
     "and should not be used for any other purpose.",
     "",
-    "Note the `flutter/tools/font_subset` target is only used because if no ",
+    "Note the `flutter/fml` target is only used because if no ",
     "targets are specified, the build will fail, and if an empty list of ",
     "targets are specified, all targets are built (wasteful/slow)"
   ],
@@ -23,7 +23,7 @@
   "description": "Tests clangd on Linux.",
   "ninja": {
     "config": "ci/linux_unopt_debug_no_rbe",
-    "targets": ["flutter/tools/font_subset"]
+    "targets": ["flutter/fml"]
   },
   "tests": [
     {

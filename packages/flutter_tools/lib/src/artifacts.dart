@@ -80,9 +80,6 @@ enum Artifact {
   fuchsiaKernelCompiler('kernel_compiler.snapshot'),
   fuchsiaFlutterRunner('', isFuchsiaRunner: true),
 
-  /// Tools related to subsetting or icon font files.
-  fontSubset('font-subset', isExecutable: true),
-
   /// The location of file generators.
   flutterToolsFileGenerators.directory();
 
@@ -537,7 +534,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
       case Artifact.flutterXcframework:
-      case Artifact.fontSubset:
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
       case Artifact.icuData:
@@ -586,7 +582,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
       case Artifact.flutterXcframework:
-      case Artifact.fontSubset:
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
       case Artifact.icuData:
@@ -634,7 +629,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterMacOSXcframework:
       case Artifact.flutterPatchedSdkPath:
       case Artifact.flutterTester:
-      case Artifact.fontSubset:
       case Artifact.fuchsiaFlutterRunner:
       case Artifact.fuchsiaKernelCompiler:
       case Artifact.icuData:
@@ -687,7 +681,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.flutterMacOSXcframework:
       case Artifact.flutterTester:
       case Artifact.flutterXcframework:
-      case Artifact.fontSubset:
       case Artifact.engineDartSdkPath:
       case Artifact.engineDartBinary:
       case Artifact.engineDartAotRuntime:
@@ -814,12 +807,6 @@ class CachedArtifacts implements Artifacts {
       case Artifact.skyEnginePath:
         final Directory dartPackageDirectory = _cache.getCacheDir('pkg');
         return _fileSystem.path.join(dartPackageDirectory.path, artifact.getFileName(_platform));
-      case Artifact.fontSubset:
-        return _cache
-            .getArtifactDirectory('engine')
-            .childDirectory(_enginePlatformDirectoryName(platform))
-            .childFile(artifact.getFileName(_platform, mode))
-            .path;
       case Artifact.flutterFramework:
       case Artifact.flutterFrameworkDsym:
       case Artifact.flutterXcframework:
@@ -1193,8 +1180,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
           localEngineInfo.targetOutPath,
           'flutter$jitOrAot${productOrNo}_runner-0.far',
         );
-      case Artifact.fontSubset:
-        return _fileSystem.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.linuxDesktopPath:
       case Artifact.linuxHeaders:
       case Artifact.windowsDesktopPath:
@@ -1344,7 +1329,6 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
         case Artifact.skyEnginePath:
         case Artifact.fuchsiaKernelCompiler:
         case Artifact.fuchsiaFlutterRunner:
-        case Artifact.fontSubset:
         case Artifact.flutterToolsFileGenerators:
           break;
       }

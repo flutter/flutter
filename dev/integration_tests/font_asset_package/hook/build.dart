@@ -32,6 +32,7 @@ void main(List<String> arguments) async {
         family: 'HookIcons',
         file: fontFile,
       ),
+      routing: input.config.linkingEnabled ? const ToLinkHook('font_asset') : const ToAppBundle(),
     );
   });
 }

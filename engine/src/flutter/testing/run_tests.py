@@ -40,7 +40,6 @@ OUT_DIR = os.path.join(BUILDROOT_DIR, 'out')
 GOLDEN_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'testing', 'resources')
 FONTS_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'txt', 'third_party', 'fonts')
 ROBOTO_FONT_PATH = os.path.join(FONTS_DIR, 'Roboto-Regular.ttf')
-FONT_SUBSET_DIR = os.path.join(BUILDROOT_DIR, 'flutter', 'tools', 'font_subset')
 
 ENCODING = 'UTF-8'
 
@@ -1263,7 +1262,6 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
       'java',
       'android',
       'objc',
-      'font-subset',
       'impeller-golden',
   ]
 
@@ -1496,12 +1494,6 @@ Flutter Wiki page on the subject: https://github.com/flutter/flutter/wiki/Testin
   if 'benchmarks' in types and not is_windows():
     run_benchmark_tests(build_dir)
     run_engine_benchmarks(build_dir, engine_filter)
-
-  if 'font-subset' in types:
-    cmd = ['python3', 'test.py', '--variant', args.variant]
-    if 'arm64' in args.variant:
-      cmd += ['--target-cpu', 'arm64']
-    run_cmd(cmd, cwd=FONT_SUBSET_DIR)
 
   if 'impeller-golden' in types:
     run_impeller_golden_tests(build_dir, require_skia_gold=not args.no_skia_gold)

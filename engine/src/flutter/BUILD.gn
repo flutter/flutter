@@ -147,7 +147,6 @@ group("flutter") {
       "//flutter/build/dart/test:gen_executable_call",
       "//flutter/shell/testing",
       "//flutter/tools/engine_tool:tests",
-      "//flutter/tools/font_subset",
     ]
   }
 

@@ -8,7 +8,6 @@ import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
 
 import 'android/java.dart';
-import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -50,7 +49,6 @@ class FlutterCache extends Cache {
     for (final String artifactName in IosUsbArtifacts.artifactNames) {
       registerArtifact(IosUsbArtifacts(artifactName, this, platform: platform));
     }
-    registerArtifact(FontSubsetArtifacts(this, platform: platform));
     registerArtifact(
       PubDependencies(
         logger: logger,
@@ -738,45 +736,6 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
     }
     return _doUpdate(artifactUpdater);
   }
-}
-
-/// Cached artifacts for font subsetting.
-class FontSubsetArtifacts extends EngineCachedArtifact {
-  FontSubsetArtifacts(Cache cache, {required this._platform})
-    : super(artifactName, cache, DevelopmentArtifact.universal);
-
-  final Platform _platform;
-
-  static const artifactName = 'font-subset';
-
-  @override
-  String get displayName => 'Font Subsets';
-
-  @override
-  List<List<String>> getBinaryDirs() {
-    // Linux and Windows both support arm64 and x64.
-    final String arch = cache.getHostPlatformArchName();
-    final artifacts = <String, List<String>>{
-      'macos': <String>['darwin-x64', 'darwin-$arch/$artifactName.zip'],
-      'linux': <String>['linux-$arch', 'linux-$arch/$artifactName.zip'],
-      'windows': <String>['windows-$arch', 'windows-$arch/$artifactName.zip'],
-    };
-    if (cache.includeAllPlatforms) {
-      return artifacts.values.toList();
-    } else {
-      final List<String>? binaryDirs = artifacts[_platform.operatingSystem];
-      if (binaryDirs == null) {
-        throwToolExit('Unsupported operating system: ${_platform.operatingSystem}');
-      }
-      return <List<String>>[binaryDirs];
-    }
-  }
-
-  @override
-  List<String> getLicenseDirs() => const <String>[];
-
-  @override
-  List<String> getPackageDirs() => const <String>[];
 }
 
 /// Cached iOS/USB binary artifacts.

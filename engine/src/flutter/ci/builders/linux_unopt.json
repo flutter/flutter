@@ -26,7 +26,6 @@
             "ninja": {
                 "config": "ci/host_debug_unopt",
                 "targets": [
-                    "flutter/tools/font_subset",
                     "flutter:unittests",
                     "flutter/build/dart:dart_sdk",
                     "flutter/shell/platform/common/client_wrapper:client_wrapper_unittests",
@@ -65,7 +64,7 @@
                         "--variant",
                         "ci/host_debug_unopt",
                         "--type",
-                        "dart,dart-host,engine,font-subset",
+                        "dart,dart-host,engine",
                         "--engine-capture-core-dump",
                         "--use-sanitizer-suppressions"
                     ]

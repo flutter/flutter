@@ -33,13 +33,6 @@ const unameCommandForX64 = FakeCommand(command: <String>['uname', '-m'], stdout:
 const unameCommandForArm64 = FakeCommand(command: <String>['uname', '-m'], stdout: 'aarch64');
 
 void main() {
-  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
-
-  // x64 host.
-  const kx64CheckCommand = FakeCommand(
-    command: <String>['sysctl', 'hw.optional.arm64'],
-    exitCode: 1,
-  );
   late FakeProcessManager fakeProcessManager;
 
   setUp(() {
@@ -1171,124 +1164,6 @@ void main() {
     expect(packageResolver.resolved, <List<String>>[
       <String>['fuchsia-debug-symbols-x64', '123456'],
       <String>['fuchsia-debug-symbols-arm64', '123456'],
-    ]);
-  });
-
-  testWithoutContext('FontSubset in universal artifacts', () {
-    final cache = Cache.test(processManager: FakeProcessManager.any());
-    final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
-
-    expect(artifacts.developmentArtifact, DevelopmentArtifact.universal);
-  });
-
-  testWithoutContext('FontSubset artifacts on x64 linux', () {
-    fakeProcessManager.addCommand(unameCommandForX64);
-
-    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxX64);
-    final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
-    cache.includeAllPlatforms = false;
-
-    expect(artifacts.getBinaryDirs(), <List<String>>[
-      <String>['linux-x64', 'linux-x64/font-subset.zip'],
-    ]);
-  });
-
-  testWithoutContext('FontSubset artifacts on arm64 linux', () {
-    fakeProcessManager.addCommand(unameCommandForArm64);
-
-    final Cache cache = createCache(FakePlatform(), currentAbi: Abi.linuxArm64);
-    final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform());
-    cache.includeAllPlatforms = false;
-
-    expect(artifacts.getBinaryDirs(), <List<String>>[
-      <String>['linux-arm64', 'linux-arm64/font-subset.zip'],
-    ]);
-  });
-
-  testWithoutContext('FontSubset artifacts on windows', () {
-    final Cache cache = createCache(
-      FakePlatform(operatingSystem: 'windows'),
-      currentAbi: Abi.windowsX64,
-    );
-    final artifacts = FontSubsetArtifacts(
-      cache,
-      platform: FakePlatform(operatingSystem: 'windows'),
-    );
-    cache.includeAllPlatforms = false;
-
-    expect(artifacts.getBinaryDirs(), <List<String>>[
-      <String>['windows-x64', 'windows-x64/font-subset.zip'],
-    ]);
-  });
-
-  testWithoutContext('FontSubset artifacts on macos', () {
-    fakeProcessManager.addCommands(<FakeCommand>[kWhichSysctlCommand, kx64CheckCommand]);
-
-    final Cache cache = createCache(
-      FakePlatform(operatingSystem: 'macos'),
-      currentAbi: Abi.macosX64,
-    );
-    final artifacts = FontSubsetArtifacts(cache, platform: FakePlatform(operatingSystem: 'macos'));
-    cache.includeAllPlatforms = false;
-
-    expect(artifacts.getBinaryDirs(), <List<String>>[
-      <String>['darwin-x64', 'darwin-x64/font-subset.zip'],
-    ]);
-  });
-
-  testWithoutContext('FontSubset artifacts on fuchsia', () {
-    fakeProcessManager.addCommand(unameCommandForX64);
-
-    final Cache cache = createCache(FakePlatform(operatingSystem: 'fuchsia'));
-    final artifacts = FontSubsetArtifacts(
-      cache,
-      platform: FakePlatform(operatingSystem: 'fuchsia'),
-    );
-    cache.includeAllPlatforms = false;
-
-    expect(
-      artifacts.getBinaryDirs,
-      throwsToolExit(message: 'Unsupported operating system: fuchsia'),
-    );
-  });
-
-  testWithoutContext('FontSubset artifacts for all platforms on x64 hosts', () {
-    fakeProcessManager.addCommand(unameCommandForX64);
-
-    final Cache cache = createCache(
-      FakePlatform(operatingSystem: 'fuchsia'),
-      currentAbi: Abi.linuxX64,
-    );
-    final artifacts = FontSubsetArtifacts(
-      cache,
-      platform: FakePlatform(operatingSystem: 'fuchsia'),
-    );
-    cache.includeAllPlatforms = true;
-
-    expect(artifacts.getBinaryDirs(), <List<String>>[
-      <String>['darwin-x64', 'darwin-x64/font-subset.zip'],
-      <String>['linux-x64', 'linux-x64/font-subset.zip'],
-      <String>['windows-x64', 'windows-x64/font-subset.zip'],
-    ]);
-  });
-
-  testWithoutContext('FontSubset artifacts for all platforms on arm64 hosts', () {
-    fakeProcessManager.addCommand(unameCommandForArm64);
-
-    final Cache cache = createCache(
-      FakePlatform(operatingSystem: 'fuchsia'),
-      currentAbi: Abi.linuxArm64,
-    );
-    final artifacts = FontSubsetArtifacts(
-      cache,
-      platform: FakePlatform(operatingSystem: 'fuchsia'),
-    );
-    cache.includeAllPlatforms = true;
-
-    expect(artifacts.getBinaryDirs(), <List<String>>[
-      <String>['darwin-x64', 'darwin-arm64/font-subset.zip'],
-      <String>['linux-arm64', 'linux-arm64/font-subset.zip'],
-      <String>['windows-arm64', 'windows-arm64/font-subset.zip'],
     ]);
   });
 

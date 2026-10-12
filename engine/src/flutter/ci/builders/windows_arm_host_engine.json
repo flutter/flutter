@@ -12,7 +12,6 @@
                         "out/ci/host_debug_arm64/zip_archives/windows-arm64/artifacts.zip",
                         "out/ci/host_debug_arm64/zip_archives/windows-arm64/impeller_sdk.zip",
                         "out/ci/host_debug_arm64/zip_archives/windows-arm64/windows-arm64-embedder.zip",
-                        "out/ci/host_debug_arm64/zip_archives/windows-arm64/font-subset.zip",
                         "out/ci/host_debug_arm64/zip_archives/dart-sdk-windows-arm64.zip",
                         "out/ci/host_debug_arm64/zip_archives/windows-arm64-debug/windows-arm64-flutter.zip",
                         "out/ci/host_debug_arm64/zip_archives/windows-arm64/flutter-cpp-client-wrapper.zip"
@@ -47,7 +46,6 @@
                 "targets": [
                     "flutter/build/archives:artifacts",
                     "flutter/build/archives:embedder",
-                    "flutter/tools/font_subset",
                     "flutter/build/archives:dart_sdk_archive",
                     "flutter/shell/platform/windows/client_wrapper:client_wrapper_archive",
                     "flutter/build/archives:windows_flutter",

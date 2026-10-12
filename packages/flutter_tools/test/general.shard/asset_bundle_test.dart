@@ -213,15 +213,16 @@ flutter:
             'AssetManifest.bin',
           ]),
         );
-        // Hook fonts get the same asset kind as pubspec fonts, which is what
-        // makes `copyAssets` run the icon tree shaker on them.
+        // Pubspec fonts get [AssetKind.font] (so `copyAssets` runs
+        // `IconTreeShaker` on them), while hook fonts get [AssetKind.regular]
+        // (because `package:font_asset`'s link hook tree-shakes them).
+        expect(bundle.entries['fonts/FromPubspec.ttf']!.kind, AssetKind.font);
         for (final key in <String>[
-          'fonts/FromPubspec.ttf',
           'packages/my_app/fonts/Roboto-Regular.ttf',
           'packages/my_app/fonts/Roboto-BoldItalic.ttf',
           'packages/other_pkg/fonts/CustomIcons.ttf',
         ]) {
-          expect(bundle.entries[key]!.kind, AssetKind.font, reason: key);
+          expect(bundle.entries[key]!.kind, AssetKind.regular, reason: key);
         }
         expect(
           await bundle.entries['packages/other_pkg/fonts/CustomIcons.ttf']!.contentsAsBytes(),

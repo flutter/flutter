@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:font_subset/font_subset.dart' show FontSubsetException, fontSubsetExecutable;
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 import 'package:process/process.dart';
 import 'package:record_use/record_use.dart';
 
-import '../../artifacts.dart';
 import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
@@ -41,7 +41,6 @@ class IconTreeShaker {
     required this._processManager,
     required Logger logger,
     required FileSystem fileSystem,
-    required this._artifacts,
     required this._targetPlatform,
   }) : _logger = logger,
        _fs = fileSystem,
@@ -54,6 +53,11 @@ class IconTreeShaker {
       );
     }
   }
+
+  /// Default path to the `font-subset` binary when running against a non-local
+  /// test [FileSystem].
+  @visibleForTesting
+  static const defaultTestFontSubsetPath = '/font-subset';
 
   /// The MIME types for supported font sets.
   static const kTtfMimeTypes = <String>{
@@ -77,7 +81,6 @@ class IconTreeShaker {
       '{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/icon_tree_shaker.dart',
     ),
     Source.pattern('{BUILD_DIR}/recorded_uses.json'),
-    Source.artifact(Artifact.fontSubset),
   ];
 
   final Environment _environment;
@@ -88,7 +91,6 @@ class IconTreeShaker {
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fs;
-  final Artifacts _artifacts;
   final TargetPlatform _targetPlatform;
 
   /// Whether font subsetting should be used for this [Environment].
@@ -212,9 +214,20 @@ class IconTreeShaker {
       return false;
     }
 
-    final File fontSubset = _fs.file(_artifacts.getArtifactPath(Artifact.fontSubset));
-    if (!fontSubset.existsSync()) {
-      throw IconTreeShakerException._('The font-subset utility is missing. Run "flutter doctor".');
+    final File fontSubset;
+    if (_fs is LocalFileSystem) {
+      try {
+        fontSubset = _fs.file((await fontSubsetExecutable()).path);
+      } on FontSubsetException catch (e) {
+        throw IconTreeShakerException._('Failed to resolve font-subset utility: $e');
+      }
+    } else {
+      fontSubset = _fs.file(defaultTestFontSubsetPath);
+      if (!fontSubset.existsSync()) {
+        throw IconTreeShakerException._(
+          'The font-subset utility is missing. Run "flutter doctor".',
+        );
+      }
     }
 
     final cmd = <String>[fontSubset.path, outputPath, input.path];

@@ -573,9 +573,9 @@ class ManifestAssetBundle implements AssetBundle {
       assetVariants[asset] = <_Asset>[asset];
     }
 
-    // Fonts from hooks are bundled with [AssetKind.font], exactly like fonts
-    // from the `fonts:` section of the pubspec, so that the icon tree shaker
-    // in `copyAssets` applies to them.
+    // Fonts from hooks are bundled with [AssetKind.regular] because icon font
+    // tree-shaking for hook fonts happens in `package:font_asset`'s link hook
+    // rather than in `copyAssets`.
     for (final FontHookAsset fontAsset in flutterHookResult?.fontAssets ?? <FontHookAsset>[]) {
       final String filePath = fontAsset.file.toFilePath();
       final asset = _Asset(
@@ -583,7 +583,6 @@ class ManifestAssetBundle implements AssetBundle {
         relativeUri: Uri(path: _fileSystem.path.basename(filePath)),
         entryUri: _hookFontEntryUri(fontAsset),
         package: packageConfig[fontAsset.package],
-        kind: AssetKind.font,
       );
       if (assetVariants.containsKey(asset)) {
         _logger.printError(

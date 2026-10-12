@@ -37,7 +37,7 @@
                 "--variant",
                 "ci/host_debug_unopt",
                 "--type",
-                "engine,font-subset",
+                "engine",
                 "--engine-capture-core-dump"
             ]
         },

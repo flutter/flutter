@@ -100,7 +100,6 @@ List<String> binariesWithoutEntitlements(String flutterRoot) {
     'artifacts/engine/darwin-x64-profile/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64-release/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
     'artifacts/engine/darwin-x64/FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
-    'artifacts/engine/darwin-x64/font-subset',
     'artifacts/engine/darwin-x64/frontend_server_aot.dart.snapshot',
     'artifacts/engine/darwin-x64/impellerc',
     'artifacts/engine/darwin-x64/libpath_ops.dylib',

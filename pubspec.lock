@@ -458,10 +458,18 @@ packages:
     dependency: "direct main"
     description:
       name: font_asset
-      sha256: cd9263e6bd5f2d628e99df9aaf3e949a3e1b98c06ed486f58b8281a25679b357
+      sha256: "3b9d14bce15eef07d9a32229c4d2eb535dd70af5c5f99ac29b74a7c023448a03"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.0"
+    version: "0.2.0"
+  font_subset:
+    dependency: "direct main"
+    description:
+      name: font_subset
+      sha256: "421fdb67ba4cc11e02946cde65cdcd2415af688f0ea555c397aad2c27a3ff386"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
   frontend_server_client:
     dependency: "direct main"
     description:

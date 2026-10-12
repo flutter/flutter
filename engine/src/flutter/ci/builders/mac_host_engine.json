@@ -355,8 +355,7 @@
                     "base_path": "out/ci/host_release/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/ci/host_release/zip_archives/darwin-x64-release/artifacts.zip",
-                        "out/ci/host_release/zip_archives/darwin-x64/font-subset.zip"
+                        "out/ci/host_release/zip_archives/darwin-x64-release/artifacts.zip"
                     ],
                     "name": "ci/host_release",
                     "realm": "production"
@@ -389,8 +388,7 @@
             "ninja": {
                 "config": "ci/host_release",
                 "targets": [
-                    "flutter/build/archives:artifacts",
-                    "flutter/tools/font_subset"
+                    "flutter/build/archives:artifacts"
                 ]
             },
             "postsubmit_overrides": {
@@ -875,7 +873,6 @@
                     "base_path": "out/ci/mac_release_arm64/zip_archives/",
                     "type": "gcs",
                     "include_paths": [
-                        "out/ci/mac_release_arm64/zip_archives/darwin-arm64/font-subset.zip",
                         "out/ci/mac_release_arm64/zip_archives/darwin-arm64-release/artifacts.zip"
                     ],
                     "name": "mac_release_arm64",
@@ -911,8 +908,7 @@
             "ninja": {
                 "config": "ci/mac_release_arm64",
                 "targets": [
-                    "flutter/build/archives:artifacts",
-                    "flutter/tools/font_subset"
+                    "flutter/build/archives:artifacts"
                 ]
             },
            "postsubmit_overrides": {

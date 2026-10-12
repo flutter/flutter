@@ -72,7 +72,7 @@ void main() {
     artifacts = Artifacts.test();
     fileSystem = MemoryFileSystem.test();
     logger = BufferLogger.test();
-    fontSubsetPath = artifacts.getArtifactPath(Artifact.fontSubset);
+    fontSubsetPath = IconTreeShaker.defaultTestFontSubsetPath;
 
     fontSubsetArgs = <String>[fontSubsetPath, outputPath, inputPath];
 
@@ -105,7 +105,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -131,7 +130,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -151,7 +149,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -171,7 +168,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -198,7 +194,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
     final stdinSink = CompleterIOSink();
@@ -248,7 +243,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -280,7 +274,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -315,7 +308,6 @@ void main() {
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
-        artifacts: artifacts,
         targetPlatform: platform,
       );
 
@@ -350,7 +342,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android_arm64,
     );
 
@@ -389,7 +380,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.web_javascript,
     );
 
@@ -429,7 +419,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -461,7 +450,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -495,7 +483,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -528,7 +515,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -577,7 +563,6 @@ void main() {
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
-        artifacts: artifacts,
         targetPlatform: TargetPlatform.android,
       );
 
@@ -618,7 +603,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -650,7 +634,6 @@ void main() {
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
-        artifacts: artifacts,
         targetPlatform: TargetPlatform.android,
       );
 
@@ -692,7 +675,6 @@ void main() {
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
-        artifacts: artifacts,
         targetPlatform: TargetPlatform.android,
       );
 
@@ -723,7 +705,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -753,7 +734,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.web_javascript,
     );
 
@@ -807,7 +787,6 @@ void main() {
         logger: logger,
         processManager: processManager,
         fileSystem: fileSystem,
-        artifacts: artifacts,
         targetPlatform: TargetPlatform.android,
       );
 
@@ -887,7 +866,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.web_javascript,
     );
 
@@ -949,7 +927,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
@@ -1007,7 +984,6 @@ void main() {
       logger: logger,
       processManager: processManager,
       fileSystem: fileSystem,
-      artifacts: artifacts,
       targetPlatform: TargetPlatform.android,
     );
 
