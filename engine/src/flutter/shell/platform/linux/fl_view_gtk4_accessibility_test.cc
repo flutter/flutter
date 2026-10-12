@@ -23,6 +23,77 @@ namespace {
 
 class FlViewGtk4AccessibilityTest : public flutter::testing::LinuxTest {};
 
+TEST_F(FlViewGtk4AccessibilityTest, ScrollContainersPreserveRoleAcrossUpdates) {
+  if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
+    GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
+  }
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlutterSemanticsFlags flags = {};
+  FlutterSemanticsNode2 root = {};
+  root.flags2 = &flags;
+  root.label = "Scroll region";
+  FlutterSemanticsNode2 child = {};
+  child.id = 1;
+  child.label = "Content";
+  FlutterSemanticsNode2* nodes[] = {&root, &child};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = 1;
+  update.nodes = nodes;
+  const auto apply = [&]() {
+    fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                             &update);
+    return fl_view_gtk4_accessibility_ref_native_root_for_testing(
+        view->accessibility_backend);
+  };
+
+  // An ordinary label retains its text role.
+  g_autoptr(GtkAccessible) label = apply();
+  EXPECT_EQ(gtk_accessible_get_accessible_role(label),
+            GTK_ACCESSIBLE_ROLE_LABEL);
+  root.actions = kFlutterSemanticsActionScrollDown;
+  g_autoptr(GtkAccessible) container = apply();
+  EXPECT_EQ(gtk_accessible_get_accessible_role(container),
+            GTK_ACCESSIBLE_ROLE_GROUP);
+  EXPECT_NE(container, label);
+  const FlutterSemanticsAction directions[] = {
+      kFlutterSemanticsActionScrollUp, kFlutterSemanticsActionScrollLeft,
+      kFlutterSemanticsActionScrollRight};
+  for (auto direction : directions) {
+    root.actions = direction;
+    g_autoptr(GtkAccessible) current = apply();
+    EXPECT_EQ(current, container);
+  }
+
+  // Reaching a boundary can remove directional actions; implicit scrolling
+  // still identifies a container. Adding children must not replace it either.
+  root.actions = static_cast<FlutterSemanticsAction>(0);
+  flags.has_implicit_scrolling = true;
+  g_autoptr(GtkAccessible) boundary = apply();
+  EXPECT_EQ(boundary, container);
+  int32_t child_id = 1;
+  root.child_count = 1;
+  root.children_in_traversal_order = &child_id;
+  update.node_count = 2;
+  g_autoptr(GtkAccessible) populated = apply();
+  EXPECT_EQ(populated, container);
+  g_autoptr(GtkAccessible) native_child =
+      fl_gtk_runtime_accessible_get_first_accessible_child(populated);
+  ASSERT_NE(native_child, nullptr);
+
+  // Explicit control semantics take precedence over scrolling capability.
+  flags.is_text_field = true;
+  g_autoptr(GtkAccessible) editor = apply();
+  EXPECT_EQ(gtk_accessible_get_accessible_role(editor),
+            GTK_ACCESSIBLE_ROLE_TEXT_BOX);
+  flags.is_text_field = false;
+  flags.is_button = true;
+  g_autoptr(GtkAccessible) button = apply();
+  EXPECT_EQ(gtk_accessible_get_accessible_role(button),
+            GTK_ACCESSIBLE_ROLE_BUTTON);
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, OptionalStatesPreserveUndefined) {
   if (!fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing()) {
     GTEST_SKIP() << "Native GtkAccessible traversal requires GTK 4.10+";
@@ -203,6 +274,8 @@ TEST_F(FlViewGtk4AccessibilityTest,
                          return kSuccess;
                        }));
   FlutterSemanticsFlags flags = {};
+  // Keep the container role stable while individual scroll actions disappear.
+  flags.has_implicit_scrolling = true;
   FlutterSemanticsNode2 root = {};
   root.flags2 = &flags;
   FlutterSemanticsNode2* nodes[] = {&root};

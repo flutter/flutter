@@ -215,6 +215,17 @@ static GtkAccessibleRole fl_view_gtk4_accessibility_get_role(
   if (flags->is_button) {
     return GTK_ACCESSIBLE_ROLE_BUTTON;
   }
+  // Scroll containers may temporarily have no exported children or available
+  // directional actions. Keep their container role at scroll boundaries and
+  // as children appear. Explicit control roles above still take precedence.
+  const uint64_t scroll_actions =
+      kFlutterSemanticsActionScrollLeft | kFlutterSemanticsActionScrollRight |
+      kFlutterSemanticsActionScrollUp | kFlutterSemanticsActionScrollDown;
+  if (flags->has_implicit_scrolling || (semantics->actions & scroll_actions)) {
+    // A semantic group preserves the name; GTK's generic containers prohibit
+    // accessible names, even when the label property is supplied.
+    return GTK_ACCESSIBLE_ROLE_GROUP;
+  }
   if (semantics->child_count > 0) {
     return GTK_ACCESSIBLE_ROLE_GROUP;
   }
