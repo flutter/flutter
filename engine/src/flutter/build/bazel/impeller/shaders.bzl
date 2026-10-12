@@ -310,6 +310,7 @@ def impeller_shaders(
         gles_exclusions = [],
         vulkan_exclusions = [],
         entry_point_prefix = "imp_",
+        target_compatible_with = None,
         **kwargs):
     """Precompiled shaders and their reflection library (GN's impeller_shaders).
 
@@ -331,6 +332,8 @@ def impeller_shaders(
       gles_exclusions: shaders not compiled for GLES.
       vulkan_exclusions: shaders not compiled for Vulkan.
       entry_point_prefix: --entry-point-prefix.
+      target_compatible_with: applied to every target created, since GN
+        defines the whole set under one condition (or not at all).
       **kwargs: `testonly`, `visibility` for the group.
     """
     _unused = (analyze, vulkan_language_version, metal_version, use_half_textures)  # buildifier: disable=unused-variable
@@ -369,6 +372,7 @@ def impeller_shaders(
             entry_point_prefix = entry_point_prefix,
             mnemonic = backend.mnemonic,
             testonly = testonly,
+            target_compatible_with = target_compatible_with,
             visibility = ["//visibility:private"],
         )
         shader_archive(
@@ -377,6 +381,7 @@ def impeller_shaders(
             out = "genlib_" + tag + ".shar",
             entry_point_prefix = entry_point_prefix,
             testonly = testonly,
+            target_compatible_with = target_compatible_with,
             visibility = ["//visibility:private"],
         )
         embed = backend.embed % library_name
@@ -387,6 +392,7 @@ def impeller_shaders(
             header = embed + ".h",
             source = embed + ".cc",
             testonly = testonly,
+            target_compatible_with = target_compatible_with,
             visibility = ["//visibility:private"],
         )
 
@@ -401,6 +407,7 @@ def impeller_shaders(
             local_defines = FLUTTER_LOCAL_DEFINES,
             deps = ["//engine/src/flutter:config"],
             testonly = testonly,
+            target_compatible_with = target_compatible_with,
             alwayslink = True,
         )
 
@@ -417,17 +424,20 @@ def impeller_shaders(
                 "//engine/src/flutter/impeller/core",
             ],
             testonly = testonly,
+            target_compatible_with = target_compatible_with,
             alwayslink = True,
         )
         cc_library(
             name = tag,
             deps = [":embed_" + tag] + ([":reflect_" + tag] if backend.reflect else []),
             testonly = testonly,
+            target_compatible_with = target_compatible_with,
         )
         backends.append(":" + tag)
 
     cc_library(
         name = name,
         deps = backends,
+        target_compatible_with = target_compatible_with,
         **kwargs
     )

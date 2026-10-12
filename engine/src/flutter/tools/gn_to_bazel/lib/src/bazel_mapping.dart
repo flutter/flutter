@@ -451,6 +451,15 @@ const Map<String, String> conditionSettings = <String, String>{
   'is_win': '@platforms//os:windows',
   'is_debug': '//engine/src/flutter/build/bazel:unoptimized',
   'slimpeller': '//engine/src/flutter/common:slimpeller_enabled',
+  // testing.gni's default, `current_toolchain == host_toolchain || is_fuchsia
+  // || is_mac`, read in Bazel terms (the group in //flutter/testing's
+  // appendix).
+  'enable_unittests': '//engine/src/flutter/testing:unittests_enabled',
+  // impeller/tools/args.gni's backend arguments: flags whose defaults GN
+  // derives from the platform (impeller/tools/BUILD.bazel).
+  'impeller_enable_metal': '//engine/src/flutter/impeller/tools:metal',
+  'impeller_enable_opengles': '//engine/src/flutter/impeller/tools:opengles',
+  'impeller_enable_vulkan': '//engine/src/flutter/impeller/tools:vulkan',
 };
 
 /// The Bazel config_setting for `variable == "value"`, by variable and value.
@@ -511,6 +520,12 @@ const Set<String> knownExternalVariables = <String>{
   // //flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni
   'fuchsia_arch_root',
   'fuchsia_sdk',
+  // //flutter/impeller/tools/args.gni (evaluated): the backend arguments are
+  // Bazel flags, so declare_args() keeps their names rather than GN's
+  // per-platform default formulas.
+  'impeller_enable_metal',
+  'impeller_enable_opengles',
+  'impeller_enable_vulkan',
 };
 
 /// Starlark expressions for GN references that have a Bazel-side constant.
@@ -729,6 +744,10 @@ Assumptions linuxHostAssumptions() {
     'test_enable_metal': GnBoolValue(false),
     'test_enable_software': GnBoolValue(true),
     'test_enable_vulkan': GnBoolValue(true),
+    // //flutter/impeller/tools/args.gni, as its defaults come out on Linux.
+    'impeller_enable_metal': GnBoolValue(false),
+    'impeller_enable_opengles': GnBoolValue(true),
+    'impeller_enable_vulkan': GnBoolValue(true),
     // Skia's arguments as tools/gn sets them for a Linux host; the rest take
     // the defaults of //flutter/third_party/skia/gn/skia.gni.
     'skia_enable_pdf': GnBoolValue(false),

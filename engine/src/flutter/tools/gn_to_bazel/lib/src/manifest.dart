@@ -65,8 +65,27 @@ const List<ConvertedFile> convertedFiles = <ConvertedFile>[
     },
     // The fixtures macro in testing.bzl compiles this file into every
     // fixtures library, from whichever package declares one.
+    //
+    // GN's `enable_unittests` (testing.gni: `current_toolchain ==
+    // host_toolchain || is_fuchsia || is_mac`, which no builder overrides)
+    // read in Bazel terms: a configuration counts when its OS is one the
+    // engine's tests run on. The exec configuration is the host's platform,
+    // so tools see it enabled as GN's host toolchain does; an Android, iOS
+    // or wasm target configuration does not.
     appendix: '''
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
 exports_files(["fixtures_location.cc"])
+
+selects.config_setting_group(
+    name = "unittests_enabled",
+    match_any = [
+        "@platforms//os:fuchsia",
+        "@platforms//os:linux",
+        "@platforms//os:macos",
+        "@platforms//os:windows",
+    ],
+)
 ''',
   ),
   ConvertedFile(
