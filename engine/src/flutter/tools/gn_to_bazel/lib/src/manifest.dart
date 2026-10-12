@@ -288,6 +288,20 @@ cc_test(
 )
 ''',
   ),
+  // The desktop embeddings' shared code, as far as it reaches today: the
+  // public headers, the input model, the isolate scope, the engine
+  // switches and the core (path utilities, windowing), with the core's
+  // tests -- the first converted test to link the Dart VM from the wrap.
+  ConvertedFile('//flutter/shell/geometry'),
+  ConvertedFile(
+    '//flutter/shell/platform/common',
+    skip: <String, String>{
+      'common_cpp_accessibility': 'needs //flutter/third_party/accessibility and the embedder',
+      'common_cpp': 'needs the embedder, the client wrapper and rapidjson',
+      'common_cpp_fixtures': 'with common_cpp_unittests',
+      'common_cpp_unittests': 'needs :common_cpp',
+    },
+  ),
   // txt_unittests' embedded test font. The rest of the file is the Dart
   // runtime glue, which needs tonic, lib/snapshot and the shell.
   ConvertedFile(
