@@ -349,9 +349,8 @@ object FlutterPluginUtils {
      * Configuring only the variant named on the command line avoids that. Removing the check was
      * tried on AGP/Gradle 7.2.0/7.5 and still caused build failures.
      *
-     * Callers gate both the compile task registration in
-     * [FlutterPlugin][com.flutter.gradle.FlutterPlugin] and, through it, the assets that
-     * `flutter assemble` produces.
+     * Callers in [FlutterPlugin][com.flutter.gradle.FlutterPlugin] gate the compile task and
+     * everything that depends on it.
      *
      * TODO: Remove this AGP hack. https://github.com/flutter/flutter/issues/109560
      *  That issue records the original rationale verbatim, the Gradle invocations that were
