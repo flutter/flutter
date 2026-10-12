@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/display_list/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: display_list_rendertests, display_list_builder_benchmarks, display_list_region_benchmarks, display_list_transform_benchmarks, display_list_benchmarks_source, display_list_benchmarks, primitive_rendering_benchmarks.
+# Not converted: display_list_builder_benchmarks, display_list_region_benchmarks, display_list_transform_benchmarks, display_list_benchmarks_source, display_list_benchmarks, primitive_rendering_benchmarks.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
@@ -212,5 +212,25 @@ cc_test(
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
         "//engine/src/flutter/testing",
         "//engine/src/flutter/testing:skia",
+    ],
+)
+
+cc_test(
+    name = "display_list_rendertests",
+    size = "small",
+    srcs = ["//engine/src/flutter/display_list/testing:dl_rendering_unittests.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":display_list",
+        ":display_list_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/display_list/testing:display_list_surface_provider",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/strings",
     ],
 )

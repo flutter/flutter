@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/display_list/testing/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: display_list_surface_provider.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
@@ -38,3 +37,33 @@ cc_library(
         "ENABLE_SOFTWARE_BENCHMARKS",  # surface_provider_include_software
     ],
 )
+
+cc_library(
+    name = "display_list_surface_provider",
+    testonly = True,
+    srcs = [
+        "dl_test_surface_provider.cc",
+        "skia/dl_test_surface_instance_skia.cc",
+        "skia/dl_test_surface_provider_skia_software.cc",  # surface_provider_include_software
+        "skia/dl_test_surface_software.cc",  # surface_provider_include_software
+    ],
+    hdrs = [
+        "dl_test_surface_provider.h",
+        "skia/dl_test_surface_instance_skia.h",
+        "skia/dl_test_surface_software.h",  # surface_provider_include_software
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":surface_provider_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+exports_files(["dl_rendering_unittests.cc"])
