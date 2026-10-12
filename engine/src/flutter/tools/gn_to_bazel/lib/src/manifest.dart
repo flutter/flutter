@@ -414,6 +414,9 @@ exports_files(glob(["third_party/fonts/*"]))
     skip: <String, String>{'display_list_surface_provider': 'needs //flutter/common/graphics'},
   ),
   ConvertedFile('//flutter/assets'),
+  // The four defines take their values from @engine_version//:version.bzl
+  // (referenceConstants), the Bazel side of what tools/gn computes.
+  ConvertedFile('//flutter/shell/version'),
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.
