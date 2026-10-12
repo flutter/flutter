@@ -684,6 +684,23 @@ cc_library(
 exports_files(glob(["include/**"]))
 ''',
   ),
+  ConvertedFile(
+    '//flutter/third_party/vulkan-deps/vulkan-headers/src',
+    implicitDeps: <String>['@vulkan-headers//:headers'],
+    // The GN target lists nineteen headers; vulkan.h includes the platform
+    // headers the config's defines select (vulkan_xcb.h, vulkan_wayland.h)
+    // and vulkan.hpp its generated companions, none of them listed.
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "include/**/*.h",
+        "include/**/*.hpp",
+    ]),
+    includes = ["include"],
+)
+''',
+  ),
   // The two Khronos trees whose GN runs scripts (tables and headers
   // generated from SPIRV-Headers' grammars; glslang's build info): their
   // action() targets become gn_action rules (research/08, step 2).
