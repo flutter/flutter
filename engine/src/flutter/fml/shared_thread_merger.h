@@ -62,8 +62,8 @@ class SharedThreadMerger
   bool enabled_ = false;
 
   /// The |MergeWithLease| or |ExtendLeaseTo| method will record the caller
-  /// into this lease_term_by_caller_ map, |UnMergeNowIfLastOne|
-  /// method will remove the caller from this lease_term_by_caller_.
+  /// into this lease_term_by_caller_ map. |DecrementLease| removes callers
+  /// whose leases expire, and |UnMergeNowIfLastOne| removes its caller.
   std::map<RasterThreadMergerId, std::atomic_size_t> lease_term_by_caller_;
 
   bool IsAllLeaseTermsZeroUnSafe() const;
