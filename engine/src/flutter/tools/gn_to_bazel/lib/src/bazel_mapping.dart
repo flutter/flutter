@@ -120,6 +120,8 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/rapidjson': '@rapidjson',
   // The Vulkan headers (header-only; the tree's own GN).
   '//flutter/third_party/vulkan-deps/vulkan-headers/src': '@vulkan-headers',
+  // VulkanMemoryAllocator (header-only; the secondary tree's GN).
+  '//flutter/third_party/vulkan_memory_allocator': '@vulkan_memory_allocator',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -145,6 +147,10 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/vulkan-deps/spirv-tools/src/': '@spirv-tools//',
   '//flutter/third_party/vulkan-deps/glslang/src/': '@glslang//',
   '//flutter/third_party/vulkan-deps/vulkan-headers/src/': '@vulkan-headers//',
+  '//flutter/third_party/vulkan_memory_allocator/': '@vulkan_memory_allocator//',
+  // ANGLE's headers (the overlay); the GLES backend lists two among its
+  // sources.
+  '//flutter/third_party/angle/': '@angle//',
   '//flutter/third_party/shaderc/': '@shaderc//',
   '//flutter/third_party/re2/': '@re2//',
   '//flutter/third_party/libtess2/': '@libtess2//',
@@ -158,6 +164,16 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
 const Map<String, String> genDirIncludeTargets = <String, String>{
   '//': defaultIncludeDirsLabel,
   '//flutter': '//engine/src/flutter:config',
+};
+
+/// Include directories in another repository that a Bazel library of that
+/// repository carries in its `includes`: GN's `include_dirs = [
+/// "//flutter/third_party/angle/include" ]` cannot be written as a
+/// package-relative `includes`, so the directory becomes a dependency on the
+/// library, which puts the same `-I` on the same compiles. Keys are GN
+/// paths as `//dir`.
+const Map<String, String> includeDirLibraries = <String, String>{
+  '//flutter/third_party/angle/include': '@angle//:headers',
 };
 
 /// Compiler flags that GN hands to the dependents of a target through one
@@ -184,6 +200,17 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   // vulkan_headers_config's one flag, under is_clang.
   '//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers': <String>[
     '-Wno-redundant-parens',
+  ],
+  // vulkan_memory_allocator_config's cflags_cc, under is_clang.
+  '//flutter/third_party/vulkan_memory_allocator:vulkan_memory_allocator': <String>[
+    '-Wno-c++98-compat-extra-semi',
+    '-Wno-deprecated-copy',
+    '-Wno-implicit-fallthrough',
+    '-Wno-nullability-completeness',
+    '-Wno-suggest-destructor-override',
+    '-Wno-suggest-override',
+    '-Wno-unused-private-field',
+    '-Wno-unused-variable',
   ],
 };
 
@@ -473,6 +500,9 @@ const Map<String, String> conditionSettings = <String, String>{
   'impeller_enable_metal': '//engine/src/flutter/impeller/tools:metal',
   'impeller_enable_opengles': '//engine/src/flutter/impeller/tools:opengles',
   'impeller_enable_vulkan': '//engine/src/flutter/impeller/tools:vulkan',
+  // flutter_vma/config.gni's argument, which tools/gn derives from the host
+  // (iOS and Windows): the group in //flutter/flutter_vma's appendix.
+  'disable_vma_stl_shared_mutex': '//engine/src/flutter/flutter_vma:without_stl_shared_mutex',
 };
 
 /// The config_setting that holds exactly when a GN predicate is *false*, for
@@ -555,6 +585,10 @@ const Set<String> knownExternalVariables = <String>{
   'dart_version',
   'engine_version',
   'skia_version',
+  // //flutter/flutter_vma/config.gni: tools/gn sets it for iOS and Windows
+  // hosts, where the C++ library lacks std::shared_mutex (a setting in
+  // //flutter/flutter_vma's appendix).
+  'disable_vma_stl_shared_mutex',
   // //flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni
   'fuchsia_arch_root',
   'fuchsia_sdk',
@@ -764,6 +798,12 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // converted reads them (impeller/compiler imports it without use).
     '//flutter/shell/version/version.gni',
     '//flutter/testing/testing.gni',
+    // Declares disable_vma_stl_shared_mutex (above).
+    '//flutter/flutter_vma/config.gni',
+    // Declares enable_vulkan_validation_layers; nothing converted reads it.
+    '//flutter/vulkan/config.gni',
+    // The native_activity_apk template, invoked under is_android alone.
+    '//flutter/testing/android/native_activity/native_activity.gni',
     '//flutter/third_party/flatbuffers/flatbuffers.gni',
     '//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni',
   },
@@ -813,6 +853,8 @@ Assumptions linuxHostAssumptions() {
     'test_enable_metal': GnBoolValue(false),
     'test_enable_software': GnBoolValue(true),
     'test_enable_vulkan': GnBoolValue(true),
+    // //flutter/flutter_vma/config.gni: a Linux host has std::shared_mutex.
+    'disable_vma_stl_shared_mutex': GnBoolValue(false),
     // //flutter/impeller/tools/args.gni, as its defaults come out on Linux.
     'impeller_enable_metal': GnBoolValue(false),
     'impeller_enable_opengles': GnBoolValue(true),

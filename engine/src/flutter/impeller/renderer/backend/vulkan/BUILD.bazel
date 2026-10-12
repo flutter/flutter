@@ -1,0 +1,138 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/renderer/backend/vulkan/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: mock_vulkan, vulkan_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "vulkan",
+    srcs = [
+        "allocator_vk.cc",
+        "barrier_vk.cc",
+        "blit_pass_vk.cc",
+        "capabilities_vk.cc",
+        "command_buffer_vk.cc",
+        "command_pool_vk.cc",
+        "command_queue_vk.cc",
+        "compute_pass_vk.cc",
+        "compute_pipeline_vk.cc",
+        "context_vk.cc",
+        "debug_report_vk.cc",
+        "descriptor_pool_vk.cc",
+        "device_buffer_vk.cc",
+        "driver_info_vk.cc",
+        "fence_waiter_vk.cc",
+        "formats_vk.cc",
+        "gpu_tracer_vk.cc",
+        "pipeline_cache_data_vk.cc",
+        "pipeline_cache_vk.cc",
+        "pipeline_compile_queue_vulkan.cc",
+        "pipeline_library_vk.cc",
+        "pipeline_vk.cc",
+        "queue_vk.cc",
+        "render_pass_builder_vk.cc",
+        "render_pass_vk.cc",
+        "resource_manager_vk.cc",
+        "sampler_library_vk.cc",
+        "sampler_vk.cc",
+        "shader_function_vk.cc",
+        "shader_library_vk.cc",
+        "shared_object_vk.cc",
+        "surface_context_vk.cc",
+        "swapchain/khr/khr_swapchain_image_vk.cc",
+        "swapchain/khr/khr_swapchain_impl_vk.cc",
+        "swapchain/khr/khr_swapchain_vk.cc",
+        "swapchain/surface_vk.cc",
+        "swapchain/swapchain_transients_vk.cc",
+        "swapchain/swapchain_vk.cc",
+        "texture_source_vk.cc",
+        "texture_vk.cc",
+        "tracked_objects_vk.cc",
+        "vertex_descriptor_vk.cc",
+        "vma.cc",
+        "workarounds_vk.cc",
+        "yuv_conversion_library_vk.cc",
+        "yuv_conversion_vk.cc",
+    ],
+    hdrs = [
+        "allocator_vk.h",
+        "barrier_vk.h",
+        "blit_pass_vk.h",
+        "capabilities_vk.h",
+        "command_buffer_vk.h",
+        "command_pool_vk.h",
+        "command_queue_vk.h",
+        "compute_pass_vk.h",
+        "compute_pipeline_vk.h",
+        "context_vk.h",
+        "debug_report_vk.h",
+        "descriptor_pool_vk.h",
+        "device_buffer_vk.h",
+        "device_holder_vk.h",
+        "driver_info_vk.h",
+        "fence_waiter_vk.h",
+        "formats_vk.h",
+        "gpu_tracer_vk.h",
+        "limits_vk.h",
+        "pipeline_cache_data_vk.h",
+        "pipeline_cache_vk.h",
+        "pipeline_compile_queue_vulkan.h",
+        "pipeline_library_vk.h",
+        "pipeline_vk.h",
+        "queue_vk.h",
+        "render_pass_builder_vk.h",
+        "render_pass_vk.h",
+        "resource_manager_vk.h",
+        "sampler_library_vk.h",
+        "sampler_vk.h",
+        "shader_function_vk.h",
+        "shader_library_vk.h",
+        "shared_object_vk.h",
+        "surface_context_vk.h",
+        "swapchain/khr/khr_swapchain_image_vk.h",
+        "swapchain/khr/khr_swapchain_impl_vk.h",
+        "swapchain/khr/khr_swapchain_vk.h",
+        "swapchain/surface_vk.h",
+        "swapchain/swapchain_transients_vk.h",
+        "swapchain/swapchain_vk.h",
+        "texture_source_vk.h",
+        "texture_vk.h",
+        "tracked_objects_vk.h",
+        "vertex_descriptor_vk.h",
+        "vk.h",
+        "vma.h",
+        "workarounds_vk.h",
+        "yuv_conversion_library_vk.h",
+        "yuv_conversion_vk.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-deprecated-copy",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-implicit-fallthrough",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-nullability-completeness",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-suggest-destructor-override",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-suggest-override",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-unused-private-field",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-unused-variable",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wthread-safety-analysis",  # is_clang
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/flutter_vma",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/renderer",
+        "//engine/src/flutter/impeller/shader_archive",
+        "@vulkan-headers//:vulkan_headers",
+        "@vulkan_memory_allocator",
+    ],
+    alwayslink = True,
+)
