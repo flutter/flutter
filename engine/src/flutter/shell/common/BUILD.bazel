@@ -1,0 +1,68 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/common/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: common, shell_unittests_gpu_configuration, shell_unittests_fixtures, shell_benchmarks, shell_test_fixture_sources, shell_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "platform_message_handler",
+    hdrs = ["platform_message_handler.h"],
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+)
+
+cc_library(
+    name = "display",
+    srcs = [
+        "display.cc",
+        "variable_refresh_rate_display.cc",
+    ],
+    hdrs = [
+        "display.h",
+        "variable_refresh_rate_display.h",
+        "variable_refresh_rate_reporter.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "snapshot_pixel_format",
+    hdrs = ["snapshot_pixel_format.h"],
+)
+
+# These are in their own source_set to avoid a dependency cycle with //common/graphics
+cc_library(
+    name = "base64",
+    srcs = ["base64.cc"],
+    hdrs = ["base64.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "shell_test_fixture_sources_config",
+    defines = [
+        # Required for MSVC STL
+        "_ENABLE_ATOMIC_ALIGNMENT_FIX",
+    ],
+)
