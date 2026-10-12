@@ -76,6 +76,11 @@ class PlatformHandler {
       const std::string& sound_type,
       std::unique_ptr<MethodResult<rapidjson::Document>> result);
 
+  // Sets the title of the top-level window to |label|.
+  virtual void SetApplicationSwitcherDescription(
+      const std::string& label,
+      std::unique_ptr<MethodResult<rapidjson::Document>> result);
+
   // Handle a request from the framework to exit the application.
   virtual void SystemExitApplication(
       AppExitType exit_type,

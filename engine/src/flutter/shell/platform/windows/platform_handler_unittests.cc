@@ -47,6 +47,12 @@ static constexpr char kClipboardSetDataUnknownTypeMessage[] =
     "{\"method\":\"Clipboard.setData\",\"args\":{\"madeuptype\":\"hello\"}}";
 static constexpr char kSystemSoundTypeAlertMessage[] =
     "{\"method\":\"SystemSound.play\",\"args\":\"SystemSoundType.alert\"}";
+static constexpr char kSetApplicationSwitcherDescriptionMessage[] =
+    "{\"method\":\"SystemChrome.setApplicationSwitcherDescription\","
+    "\"args\":{\"label\":\"My Title\",\"primaryColor\":4278190080}}";
+static constexpr char kSetApplicationSwitcherDescriptionBadMessage[] =
+    "{\"method\":\"SystemChrome.setApplicationSwitcherDescription\","
+    "\"args\":{\"primaryColor\":4278190080}}";
 static constexpr char kSystemExitApplicationRequiredMessage[] =
     "{\"method\":\"System.exitApplication\",\"args\":{\"type\":\"required\","
     "\"exitCode\":1}}";
@@ -90,6 +96,11 @@ class MockPlatformHandler : public PlatformHandler {
               (override));
   MOCK_METHOD(void,
               SystemSoundPlay,
+              (const std::string&,
+               std::unique_ptr<MethodResult<rapidjson::Document>>),
+              (override));
+  MOCK_METHOD(void,
+              SetApplicationSwitcherDescription,
               (const std::string&,
                std::unique_ptr<MethodResult<rapidjson::Document>>),
               (override));
@@ -472,6 +483,41 @@ TEST_F(PlatformHandlerTest, PlaySystemSound) {
       SimulatePlatformMessage(&messenger, kSystemSoundTypeAlertMessage);
 
   EXPECT_EQ(result, "[null]");
+}
+
+TEST_F(PlatformHandlerTest, SetApplicationSwitcherDescription) {
+  UseHeadlessEngine();
+
+  TestBinaryMessenger messenger;
+  MockPlatformHandler platform_handler(&messenger, engine());
+
+  EXPECT_CALL(platform_handler,
+              SetApplicationSwitcherDescription("My Title", _))
+      .WillOnce([](const std::string& label,
+                   std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+        result->Success();
+      });
+
+  std::string result = SimulatePlatformMessage(
+      &messenger, kSetApplicationSwitcherDescriptionMessage);
+
+  EXPECT_EQ(result, "[null]");
+}
+
+TEST_F(PlatformHandlerTest, SetApplicationSwitcherDescriptionMissingLabel) {
+  UseHeadlessEngine();
+
+  TestBinaryMessenger messenger;
+  MockPlatformHandler platform_handler(&messenger, engine());
+
+  EXPECT_CALL(platform_handler, SetApplicationSwitcherDescription(_, _))
+      .Times(0);
+
+  std::string result = SimulatePlatformMessage(
+      &messenger, kSetApplicationSwitcherDescriptionBadMessage);
+
+  EXPECT_EQ(result,
+            "[\"Window title error\",\"Invalid window title request\",null]");
 }
 
 TEST_F(PlatformHandlerTest, SystemExitApplicationRequired) {

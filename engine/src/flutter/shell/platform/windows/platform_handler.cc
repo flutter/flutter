@@ -14,6 +14,7 @@
 #include "flutter/fml/platform/win/wstring_conversion.h"
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/method_result_functions.h"
 #include "flutter/shell/platform/common/json_method_codec.h"
+#include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/flutter_windows_view.h"
 
 static constexpr char kChannelName[] = "flutter/platform";
@@ -26,6 +27,9 @@ static constexpr char kRequestAppExitMethod[] = "System.requestAppExit";
 static constexpr char kInitializationCompleteMethod[] =
     "System.initializationComplete";
 static constexpr char kPlaySoundMethod[] = "SystemSound.play";
+static constexpr char kSetApplicationSwitcherDescriptionMethod[] =
+    "SystemChrome.setApplicationSwitcherDescription";
+static constexpr char kLabelKey[] = "label";
 
 static constexpr char kExitCodeKey[] = "exitCode";
 
@@ -47,6 +51,10 @@ static constexpr int kErrorSuccess = 0;
 static constexpr char kExitRequestError[] = "ExitApplication error";
 static constexpr char kInvalidExitRequestMessage[] =
     "Invalid application exit request";
+
+static constexpr char kWindowTitleError[] = "Window title error";
+static constexpr char kInvalidWindowTitleMessage[] =
+    "Invalid window title request";
 
 namespace flutter {
 
@@ -455,6 +463,22 @@ void PlatformHandler::QuitApplication(std::optional<HWND> hwnd,
   engine_->OnQuit(hwnd, wparam, lparam, exit_code);
 }
 
+void PlatformHandler::SetApplicationSwitcherDescription(
+    const std::string& label,
+    std::unique_ptr<MethodResult<rapidjson::Document>> result) {
+  FlutterWindowsView* view =
+      engine_ != nullptr ? engine_->view(kImplicitViewId) : nullptr;
+  HWND hwnd = view != nullptr ? view->GetWindowHandle() : nullptr;
+  if (hwnd != nullptr) {
+    // The view's HWND is a child window; the title belongs on its top-level
+    // window.
+    HWND root = ::GetAncestor(hwnd, GA_ROOT);
+    ::SetWindowText(root != nullptr ? root : hwnd,
+                    fml::Utf8ToWideString(label).c_str());
+  }
+  result->Success();
+}
+
 void PlatformHandler::HandleMethodCall(
     const MethodCall<rapidjson::Document>& method_call,
     std::unique_ptr<MethodResult<rapidjson::Document>> result) {
@@ -516,6 +540,20 @@ void PlatformHandler::HandleMethodCall(
     const rapidjson::Value& sound_type = method_call.arguments()[0];
 
     SystemSoundPlay(sound_type.GetString(), std::move(result));
+  } else if (method.compare(kSetApplicationSwitcherDescriptionMethod) == 0) {
+    const rapidjson::Value& arguments = *method_call.arguments();
+    if (!arguments.IsObject()) {
+      result->Error(kWindowTitleError, kInvalidWindowTitleMessage);
+      return;
+    }
+    rapidjson::Value::ConstMemberIterator itr = arguments.FindMember(kLabelKey);
+    if (itr == arguments.MemberEnd() || !itr->value.IsString()) {
+      result->Error(kWindowTitleError, kInvalidWindowTitleMessage);
+      return;
+    }
+    SetApplicationSwitcherDescription(
+        std::string(itr->value.GetString(), itr->value.GetStringLength()),
+        std::move(result));
   } else if (method.compare(kInitializationCompleteMethod) == 0) {
     // Deprecated but should not cause an error.
     result->Success();
