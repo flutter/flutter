@@ -1,0 +1,91 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/third_party/tonic/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "config",
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/third_party:include_dir",
+    ],
+)
+
+cc_library(
+    name = "tonic",
+    srcs = [
+        "common/log.cc",
+        "converter/dart_converter.cc",
+        "dart_class_library.cc",
+        "dart_class_provider.cc",
+        "dart_library_natives.cc",
+        "dart_list.cc",
+        "dart_message_handler.cc",
+        "dart_microtask_queue.cc",
+        "dart_persistent_value.cc",
+        "dart_state.cc",
+        "dart_weak_persistent_value.cc",
+        "dart_wrappable.cc",
+        "file_loader/file_loader.cc",
+        "file_loader/file_loader_posix.cc",  # !(is_win) && !(is_fuchsia)
+        "filesystem/filesystem/file.cc",
+        "filesystem/filesystem/path_posix.cc",  # !(is_win) && !(is_fuchsia)
+        "logging/dart_error.cc",
+        "logging/dart_invoke.cc",
+        "parsers/packages_map.cc",
+        "scopes/dart_isolate_scope.cc",
+        "typed_data/dart_byte_data.cc",
+        "typed_data/typed_list.cc",
+    ],
+    hdrs = [
+        "common/build_config.h",
+        "common/log.h",
+        "common/macros.h",
+        "converter/dart_converter.h",
+        "dart_args.h",
+        "dart_binding_macros.h",
+        "dart_class_library.h",
+        "dart_class_provider.h",
+        "dart_library_natives.h",
+        "dart_list.h",
+        "dart_message_handler.h",
+        "dart_microtask_queue.h",
+        "dart_persistent_value.h",
+        "dart_state.h",
+        "dart_weak_persistent_value.h",
+        "dart_wrappable.h",
+        "dart_wrapper_info.h",
+        "file_loader/file_loader.h",
+        # Deprecated.
+        "filesystem/filesystem/eintr_wrapper.h",
+        "filesystem/filesystem/file.h",
+        "filesystem/filesystem/path.h",
+        "filesystem/filesystem/portable_unistd.h",
+        "logging/dart_error.h",
+        "logging/dart_invoke.h",
+        "parsers/packages_map.h",
+        "scopes/dart_api_scope.h",
+        "scopes/dart_isolate_scope.h",
+        "typed_data/dart_byte_data.h",
+        "typed_data/float32_list.h",
+        "typed_data/float64_list.h",
+        "typed_data/int32_list.h",
+        "typed_data/typed_list.h",
+        "typed_data/uint16_list.h",
+        "typed_data/uint8_list.h",
+    ],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":config",
+        "//engine/src:include_root",
+        "@dart//:dart_api_headers",
+    ],
+    alwayslink = True,
+)

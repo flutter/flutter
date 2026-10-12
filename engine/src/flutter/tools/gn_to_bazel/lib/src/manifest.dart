@@ -395,8 +395,7 @@ cc_test(
     '//flutter/runtime',
     skip: <String, String>{
       'libdart': 'needs //flutter/lib/snapshot',
-      'dart_plugin_registrant': 'needs //flutter/third_party/tonic',
-      'runtime': 'needs //flutter/third_party/tonic, //flutter/lib/ui, //flutter/common',
+      'runtime': 'needs //flutter/lib/ui, //flutter/lib/gpu and //flutter/lib/io',
       'runtime_fixtures': 'Dart fixtures (dart_main) are not supported yet',
       'runtime_unittests': 'needs :runtime',
       'no_plugin_registrant': 'Dart fixtures (dart_main) are not supported yet',
@@ -462,6 +461,22 @@ selects.config_setting_group(
   ),
   ConvertedFile('//flutter/impeller/renderer/backend'),
   ConvertedFile('//flutter/flow'),
+  // The Dart bindings library (engine-owned third_party), on the way to
+  // lib/ui and runtime; its tests need the Dart snapshot and libdart.
+  ConvertedFile('//flutter/third_party/tonic'),
+  // dart:ui's bindings as a library; its suites and benchmarks need the
+  // Dart snapshot (//flutter/lib/snapshot), libdart and the shell's test
+  // fixtures.
+  ConvertedFile(
+    '//flutter/lib/ui',
+    skip: <String, String>{
+      'ui_unittests_fixtures': 'Dart fixtures (dart_main) are not supported yet',
+      'ui_benchmarks': 'needs //flutter/lib/snapshot and //flutter/benchmarking',
+      'ui_unittests': 'needs //flutter/lib/snapshot and the shell test fixtures',
+      'display_list_deferred_image_unittests': 'with ui_unittests',
+      'ui_testing_mocks': 'with ui_unittests',
+    },
+  ),
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.
@@ -884,6 +899,7 @@ const Set<String> handWrittenPackages = <String>{
   'engine/src',
   'engine/src/flutter',
   'engine/src/flutter/impeller/tools',
+  'engine/src/flutter/third_party',
 };
 
 /// The main repository's layout: its packages are the generated ones and
