@@ -170,8 +170,10 @@ interface class FlutterTestRunner {
     // Configure package:test to use the Flutter engine for child processes.
     final String flutterTesterBinPath = artifacts.getArtifactPath(Artifact.flutterTester);
 
-    final DebuggingOptions debuggingOptions = spec.debuggingOptions;
-    final FlutterProject? flutterProject = spec.flutterProject;
+    final TestExecutionSpecification(
+      :DebuggingOptions debuggingOptions,
+      :FlutterProject? flutterProject,
+    ) = spec;
 
     // Compute the command-line arguments for package:test.
     final List<String> testArgs = spec.toPackageTestArgs(
@@ -687,12 +689,14 @@ class SpawnPlugin extends PlatformPlugin {
 
     assert(testFiles.length > 1);
 
-    final FlutterProject flutterProject = spec.flutterProject!;
-    final DebuggingOptions debuggingOptions = spec.debuggingOptions;
-    final TestTimeRecorder? testTimeRecorder = spec.testTimeRecorder;
-    final String? testAssetDirectory = spec.testAssetDirectory;
-    final String? icudtlPath = spec.icudtlPath;
-    final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder = spec.nativeAssetsBuilder;
+    final TestExecutionSpecification(
+      :FlutterProject flutterProject!,
+      :DebuggingOptions debuggingOptions,
+      :TestTimeRecorder? testTimeRecorder,
+      :String? testAssetDirectory,
+      :String? icudtlPath,
+      :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    ) = spec;
 
     final Directory buildDirectory = fs.directory(
       fs.path.join(flutterProject.directory.path, getBuildDirectory()),
