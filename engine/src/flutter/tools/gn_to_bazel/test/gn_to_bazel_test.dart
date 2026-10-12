@@ -356,6 +356,102 @@ if (current_toolchain == unknown_toolchain) {
       );
     });
 
+    test('knows the OS predicates and the values of one variable exclude each other', () {
+      const Condition mac = ConditionVariable('is_mac');
+      const Condition ios = ConditionVariable('is_ios');
+      const Condition slim = ConditionVariable('slimpeller');
+      const Condition wasm = ConditionComparison('target_os', true, 'wasm');
+      const Condition fuchsia = ConditionComparison('target_os', true, 'fuchsia');
+      // The path of `else if (is_mac)` after `if (is_ios)`.
+      expect(ios.negated.and(mac), mac);
+      expect(mac.and(ios), Condition.never);
+      expect(mac.and(mac), mac);
+      expect(mac.and(mac.negated), Condition.never);
+      expect(mac.or(mac.negated), Condition.always);
+      expect(mac.negated.or(ios.negated), Condition.always);
+      expect(mac.negated.or(ios), mac.negated);
+      expect(wasm.and(fuchsia), Condition.never);
+      expect(wasm.and(fuchsia.negated), wasm);
+      expect(wasm.negated.or(fuchsia.negated), Condition.always);
+      // Unrelated predicates are left alone, in order; so is anything that
+      // would take more than one look (no resolution, no absorption).
+      expect(slim.and(mac), const ConditionAnd(<Condition>[slim, mac]));
+      expect(
+        mac.or(ios).negated,
+        const ConditionAnd(<Condition>[ConditionNot(mac), ConditionNot(ios)]),
+      );
+      expect(
+        slim.and(mac).negated.and(slim),
+        const ConditionAnd(<Condition>[
+          ConditionOr(<Condition>[ConditionNot(slim), ConditionNot(mac)]),
+          slim,
+        ]),
+      );
+    });
+
+    test('reads a scalar reassigned under conditions by its cases', () async {
+      final GnFileEvaluation evaluation = await evaluate('''
+include_gl = !is_fuchsia && !is_win
+if (slimpeller) {
+  include_gl = false
+}
+if (is_win) {
+  flavor = "win"
+} else if (is_mac) {
+  flavor = "mac"
+} else {
+  flavor = "posix"
+}
+if (is_mac) {
+  verbose = true
+} else {
+  verbose = false
+}
+source_set("x") {
+  sources = [ "x.cc" ]
+  if (include_gl) {
+    sources += [ "gl.cc" ]
+  }
+  if (verbose) {
+    sources += [ "verbose.cc" ]
+  }
+  output_name = flavor
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      final GnTarget target = evaluation.targets.single;
+      final List<GnAssignment> sources = target.variables['sources']!.assignments;
+      expect(
+        sources[1].condition,
+        const ConditionAnd(<Condition>[
+          ConditionNot(ConditionVariable('is_fuchsia')),
+          ConditionNot(ConditionVariable('is_win')),
+          ConditionNot(ConditionVariable('slimpeller')),
+        ]),
+      );
+      expect(sources[2].condition, const ConditionVariable('is_mac'));
+      final List<GnScalarCase> flavors = target.variables['output_name']!.cases(target.location);
+      expect(flavors.map((GnScalarCase c) => '$c'), <String>[
+        '[is_win] "win"',
+        '[is_mac] "mac"',
+        '[!is_win && !is_mac] "posix"',
+      ]);
+    });
+
+    test('takes is_clang as given under any assumptions', () async {
+      final GnFileEvaluation evaluation = await evaluate('''
+source_set("x") {
+  sources = [ "x.cc" ]
+  if (is_clang) {
+    cflags = [ "-Wno-shadow" ]
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+      expect(
+        evaluation.targets.single.variables['cflags']!.assignments.single.condition,
+        Condition.always,
+      );
+    });
+
     test('leaves skipped targets alone', () async {
       final GnFileEvaluation evaluation = await evaluate(
         '''
@@ -1199,6 +1295,132 @@ source_set("x") {
             contains('no config_setting for `shell_enable_metal`'),
           ),
         ),
+      );
+    });
+
+    test('renders a scalar with several cases as select()', () async {
+      // metal_version as impeller/renderer writes it (an else-if chain over
+      // the OS predicates, undefined elsewhere); vulkan_language_version
+      // written once under a condition; testonly with a default.
+      final String output = await convert(
+        '''
+impeller_shaders("entity_shaders") {
+  name = "entity"
+  testonly = true
+  if (is_win) {
+    testonly = false
+  }
+  if (is_ios) {
+    metal_version = "2.4"
+  } else if (is_mac) {
+    metal_version = "2.1"
+  }
+  if (slimpeller) {
+    vulkan_language_version = 130
+  }
+  shaders = [ "shaders/solid_fill.vert" ]
+}
+source_set("x") {
+  sources = [ "x.cc" ]
+  if (is_win) {
+    sources += [ "win.cc" ]
+  } else if (is_mac) {
+    sources += [ "mac.cc" ]
+  } else {
+    sources += [ "posix.cc" ]
+  }
+}
+''',
+        templates: <String>{'impeller_shaders'},
+        assumptions: Assumptions(const <String, GnValue>{}),
+      );
+      expect(
+        output,
+        contains('''
+impeller_shaders(
+    name = "entity_shaders",
+    testonly = select({
+        "@platforms//os:windows": False,
+        "//conditions:default": True,
+    }),
+    library_name = "entity",
+    metal_version = select({
+        "@platforms//os:ios": "2.4",
+        "@platforms//os:macos": "2.1",
+        "//conditions:default": None,
+    }),
+    shaders = ["shaders/solid_fill.vert"],
+    vulkan_language_version = select({
+        "//engine/src/flutter/common:slimpeller_enabled": 130,
+        "//conditions:default": None,
+    }),
+)
+'''),
+      );
+      // The else-if chain's branches key on their own OS; the final else
+      // (neither) empties both keys and keeps the branch as the default.
+      expect(
+        output,
+        contains('''
+    srcs = ["x.cc"] + select({
+        "@platforms//os:windows": [
+            "win.cc",  # is_win
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": [
+            "mac.cc",  # !(is_win) && is_mac
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:windows": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": [
+            "posix.cc",  # !(is_win) && !(is_mac)
+        ],
+    }),
+'''),
+      );
+    });
+
+    test('rejects scalar cases a select() cannot hold', () async {
+      // A value in force under a conjunction (`!is_win && slimpeller`: the
+      // first write stands where the second does not happen); a name that
+      // varies, which no target can have.
+      await expectLater(
+        convert(
+          '''
+impeller_shaders("entity_shaders") {
+  name = "entity"
+  if (!is_win) {
+    metal_version = "2.1"
+  }
+  if (!is_mac) {
+    gles_language_version = 460
+  }
+  if (!slimpeller) {
+    metal_version = "2.4"
+  }
+  shaders = [ "shaders/solid_fill.vert" ]
+}
+''',
+          templates: <String>{'impeller_shaders'},
+          assumptions: Assumptions(const <String, GnValue>{}),
+        ),
+        throwsGnError(line: 4, message: 'cannot be expressed as a select()'),
+      );
+      await expectLater(
+        convert('''
+shared_library("tessellator_shared") {
+  if (is_win) {
+    output_name = "libtessellator"
+  } else {
+    output_name = "tessellator"
+  }
+  sources = [ "a.cc" ]
+}
+''', assumptions: Assumptions(const <String, GnValue>{})),
+        throwsGnError(line: 3, message: 'output_name must be a single unconditional string'),
       );
     });
 

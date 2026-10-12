@@ -63,6 +63,16 @@ final class _Element {
   static String _uncomment(String comment) => comment.replaceFirst(RegExp(r'^#\s?'), '');
 }
 
+/// The config_settings a condition keys a `select()` with, and whether the
+/// branch goes under them (`is_win`, `is_mac || is_ios`) or under the default
+/// with those keys empty (`!is_win`, `!is_win && !is_mac`).
+final class _SelectKeys {
+  const _SelectKeys(this.settings, {required this.negated});
+
+  final List<String> settings;
+  final bool negated;
+}
+
 /// A list attribute: unconditional items, plus items per condition in the
 /// order the conditions first appeared.
 final class _ListAttribute {
@@ -1499,22 +1509,69 @@ final class _Emitter {
   }
 
   void _scalar(_Rule rule, String attribute, GnVariable variable) {
-    final List<GnValue>? items = variable.unconditionalItems;
-    if (items == null || items.length != 1) {
-      throw GnError(
-        variable.assignments.first.location,
-        '${variable.name} must be a single unconditional value',
-      );
+    final List<GnScalarCase> cases = variable.cases(variable.assignments.first.location);
+    if (cases.isEmpty) {
+      throw GnError(variable.assignments.first.location, '${variable.name} has no value');
     }
-    rule.scalars[attribute] = switch (items.single) {
+    if (cases.length == 1 && cases.single.condition == Condition.always) {
+      rule.scalars[attribute] = _scalarText(cases.single);
+      return;
+    }
+    rule.scalars[attribute] = _renderScalarSelect(cases, rule, variable);
+  }
+
+  static String _scalarText(GnScalarCase scalarCase) {
+    return switch (scalarCase.value) {
       GnBoolValue(:final bool value) => value ? 'True' : 'False',
       GnIntValue(:final int value) => '$value',
       GnStringValue(:final String value) => '"$value"',
       final GnValue other => throw GnError(
-        variable.assignments.first.location,
+        scalarCase.assignment.location,
         'unsupported value $other',
       ),
     };
+  }
+
+  /// `select()` over the cases of a scalar: a case under a config_setting
+  /// (or several, `is_mac || is_ios`) keys its value; the one case under a
+  /// negation, if any, is the default; where no case holds the attribute is
+  /// unset (`None`), as GN leaves the variable undefined there.
+  String _renderScalarSelect(List<GnScalarCase> cases, _Rule rule, GnVariable variable) {
+    final branches = <String, String>{};
+    String? fallback;
+    for (final scalarCase in cases) {
+      final String value = _scalarText(scalarCase);
+      final _SelectKeys keys = _selectKeys(
+        scalarCase.condition,
+        rule,
+        scalarCase.assignment.location,
+        () => 'of the value of ${variable.name} (${rule.kind} ${rule.name})',
+      );
+      if (!keys.negated) {
+        for (final String setting in keys.settings) {
+          branches[setting] = value;
+        }
+        continue;
+      }
+      if (fallback != null) {
+        throw GnError(
+          scalarCase.assignment.location,
+          'two values of ${variable.name} hold under negations; a select() has one default',
+        );
+      }
+      fallback = value;
+      for (final String setting in keys.settings) {
+        branches.putIfAbsent(setting, () => 'None');
+      }
+    }
+    final out = StringBuffer('select({\n');
+    for (final MapEntry<String, String> branch in branches.entries) {
+      out.writeln('        "${branch.key}": ${branch.value},');
+    }
+    out
+      ..writeln('        "//conditions:default": ${fallback ?? 'None'},')
+      ..write('    })');
+    return out.toString();
   }
 
   // -------------------------------------------------------------------------
@@ -1747,34 +1804,57 @@ final class _Emitter {
 
   /// `select()` for the items appended under [condition].
   String _renderSelect(Condition condition, List<_Item> items, _Rule rule) {
-    final settings = <String>[];
-    var negated = false;
+    final _SelectKeys keys = _selectKeys(
+      condition,
+      rule,
+      GnLocation('$gnPackage/BUILD.gn', 0, 0),
+      () => 'on ${rule.kind} ${rule.name}',
+    );
+    final String branch = _renderItems(items, indent: 8);
+    final out = StringBuffer('select({\n');
+    for (final String setting in keys.settings) {
+      out.writeln('        "$setting": ${keys.negated ? '[]' : branch},');
+    }
+    out.writeln('        "//conditions:default": ${keys.negated ? branch : '[]'},');
+    out.write('    })');
+    return out.toString();
+  }
+
+  /// How [condition] maps onto the keys of a `select()`: the settings of
+  /// its variables, and whether the branch belongs under them or, for a
+  /// negation (`!is_win`; `!is_win && !is_mac`, the `else` of a chain),
+  /// under the default with those keys empty.
+  _SelectKeys _selectKeys(
+    Condition condition,
+    _Rule rule,
+    GnLocation location,
+    String Function() where,
+  ) {
     switch (condition) {
       case ConditionVariable():
       case ConditionComparison(equals: true):
-        settings.add(_setting(condition, rule));
+        return _SelectKeys(<String>[_setting(condition, rule)], negated: false);
       case ConditionComparison(equals: false):
-        settings.add(_setting(condition.negated, rule));
-        negated = true;
+        return _SelectKeys(<String>[_setting(condition.negated, rule)], negated: true);
       case ConditionNot(:final Condition operand):
-        settings.add(_setting(operand, rule));
-        negated = true;
+        return _SelectKeys(<String>[_setting(operand, rule)], negated: true);
       case ConditionOr(:final List<Condition> terms):
-        settings.addAll(terms.map((Condition t) => _setting(t, rule)));
+        return _SelectKeys(<String>[
+          for (final Condition t in terms) _setting(t, rule),
+        ], negated: false);
+      case ConditionAnd(:final List<Condition> terms)
+          when terms.every(
+            (Condition t) => t is ConditionNot || t is ConditionComparison && !t.equals,
+          ):
+        return _SelectKeys(<String>[
+          for (final Condition t in terms) _setting(t.negated, rule),
+        ], negated: true);
       default:
         throw GnError(
-          GnLocation('$gnPackage/BUILD.gn', 0, 0),
-          'condition `$condition` on ${rule.kind} ${rule.name} cannot be expressed as a select()',
+          location,
+          'condition `$condition` ${where()} cannot be expressed as a select()',
         );
     }
-    final String branch = _renderItems(items, indent: 8);
-    final out = StringBuffer('select({\n');
-    for (final setting in settings) {
-      out.writeln('        "$setting": ${negated ? '[]' : branch},');
-    }
-    out.writeln('        "//conditions:default": ${negated ? branch : '[]'},');
-    out.write('    })');
-    return out.toString();
   }
 
   /// The config_setting that is true exactly when [condition] (a variable or

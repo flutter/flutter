@@ -42,6 +42,27 @@ the condition as a comment. `--assume name=value` replaces the defaults;
 needs a `config_setting` for each variable involved (see `conditionSettings`).
 What the defaults leave open on purpose -- `is_debug`, the runtime mode,
 `slimpeller` -- becomes a `select()` on the engine's config_settings.
+Beneath any `--assume` sits `is_clang = true` (`toolchainInvariants`): every
+configuration `tools/gn` writes has it, and the Bazel toolchains are clang
+only.
+
+A `select()` holds a condition that is one setting, several joined by `||`,
+or the negation of one or several (`!is_win`; `!is_win && !is_mac`, the
+`else` of a chain), whose branch becomes the default. Conditions simplify
+as they are built, using the one fact BUILDCONFIG.gn guarantees: the `is_*`
+OS predicates (and the values one variable is compared with) are mutually
+exclusive, so the path of `else if (is_mac)` after `if (is_ios)` is
+`is_mac`, not `!is_ios && is_mac`. Anything that still needs a conjunction
+of mixed settings is an error (a `config_setting_group` would be the Bazel
+form; no converted file needs one yet).
+
+A scalar (`metal_version`, `testonly`) may be assigned under conditions,
+including reassigned: its cases -- each value with the condition under
+which it is the last one written -- render as a `select()` on the
+attribute, with `None` where GN leaves the variable undefined. A boolean
+written that way is read back as one formula. A list may only be appended
+to in a branch, and a target's name cannot vary at all (`output_name` under
+`is_win`).
 
 ### Fetch-time conversion
 
