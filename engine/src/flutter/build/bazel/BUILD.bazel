@@ -38,3 +38,32 @@ selects.config_setting_group(
         ":fastbuild",
     ],
 )
+
+# The complements of BUILDCONFIG.gn's OS predicates. `!is_wasm` on its own
+# is a select() with the wasm key empty, but inside a conjunction
+# (`impeller_enable_opengles && !is_wasm`) a config_setting_group needs a
+# setting that *holds* when the OS is another one -- which, the predicates
+# being mutually exclusive, is any of the other seven. The converter names
+# these for the negated terms of the groups it generates.
+_OS_CONSTRAINTS = {
+    "android": "@platforms//os:android",
+    "fuchsia": "@platforms//os:fuchsia",
+    "ios": "@platforms//os:ios",
+    "linux": "@platforms//os:linux",
+    "mac": "@platforms//os:macos",
+    "qnx": "@platforms//os:qnx",
+    "wasm": "@platforms//os:emscripten",
+    "win": "@platforms//os:windows",
+}
+
+[
+    selects.config_setting_group(
+        name = "not_" + os,
+        match_any = [
+            constraint
+            for other, constraint in _OS_CONSTRAINTS.items()
+            if other != os
+        ],
+    )
+    for os in _OS_CONSTRAINTS
+]
