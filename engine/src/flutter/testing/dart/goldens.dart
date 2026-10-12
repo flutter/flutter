@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -65,17 +66,24 @@ class ImageComparer {
 
   /// Compares two images pixel by pixel.
   ///
-  /// If [maxColorDelta] is greater than 0, per-channel differences less than or
-  /// equal to [maxColorDelta] are considered identical.
+  /// Currently only [ColorSpace.sRGB] images are supported.
+  ///
+  /// If [maxColorDelta] is greater than 0.0, pixel differences whose vec3 RGB
+  /// Euclidean distance and alpha delta are less than or equal to [maxColorDelta]
+  /// are considered identical.
   ///
   /// If [maxDifferentPixelsRate] is greater than 0.0, the comparison passes if
   /// the ratio of different pixels to total pixels does not exceed this value.
   Future<bool> fuzzyCompareImages(
     Image golden,
     Image testImage, {
-    int maxColorDelta = 0,
+    double maxColorDelta = 0.0,
     double maxDifferentPixelsRate = 0.0,
   }) async {
+    assert(
+      golden.colorSpace == ColorSpace.sRGB && testImage.colorSpace == ColorSpace.sRGB,
+      'fuzzyCompareImages currently only supports sRGB images.',
+    );
     if (golden.width != testImage.width || golden.height != testImage.height) {
       return false;
     }
@@ -89,7 +97,7 @@ class ImageComparer {
 
     // When no tolerance thresholds are specified, compare full 32-bit RGBA pixel
     // values directly in a single pass with early exit on first mismatch.
-    if (maxColorDelta == 0 && maxDifferentPixelsRate == 0.0) {
+    if (maxColorDelta == 0.0 && maxDifferentPixelsRate == 0.0) {
       final Uint32List goldenUint32 = goldenData.buffer.asUint32List(
         goldenData.offsetInBytes,
         totalPixels,
@@ -110,7 +118,7 @@ class ImageComparer {
     // channels and count those exceeding [maxColorDelta] to determine whether
     // the proportion of different pixels is within [maxDifferentPixelsRate].
     var differentPixels = 0;
-    var maxObservedDelta = 0;
+    var maxObservedDelta = 0.0;
 
     final Uint8List goldenBytes = goldenData.buffer.asUint8List(
       goldenData.offsetInBytes,
@@ -122,7 +130,7 @@ class ImageComparer {
     );
 
     for (var i = 0; i < totalPixels; i++) {
-      final int pixelDelta = _maxChannelDelta(goldenBytes, testBytes, i * 4);
+      final double pixelDelta = _colorDistance(goldenBytes, testBytes, i * 4);
       if (pixelDelta > maxObservedDelta) {
         maxObservedDelta = pixelDelta;
       }
@@ -135,7 +143,7 @@ class ImageComparer {
     if (diffRate > maxDifferentPixelsRate) {
       print(
         'fuzzyCompareImages failed: '
-        'maxObservedDelta=$maxObservedDelta (threshold=$maxColorDelta), '
+        'maxObservedDelta=${maxObservedDelta.toStringAsFixed(3)} (threshold=$maxColorDelta), '
         'differentPixels=$differentPixels/$totalPixels '
         '(${(diffRate * 100).toStringAsFixed(3)}%, maxAllowed=${(maxDifferentPixelsRate * 100).toStringAsFixed(3)}%)',
       );
@@ -144,15 +152,17 @@ class ImageComparer {
     return true;
   }
 
-  static int _maxChannelDelta(Uint8List a, Uint8List b, int offset) {
-    int maxDelta = (a[offset] - b[offset]).abs();
-    for (var c = 1; c < 4; c++) {
-      final int diff = (a[offset + c] - b[offset + c]).abs();
-      if (diff > maxDelta) {
-        maxDelta = diff;
-      }
+  static double _colorDistance(Uint8List a, Uint8List b, int offset) {
+    final int dr = a[offset] - b[offset];
+    final int dg = a[offset + 1] - b[offset + 1];
+    final int db = a[offset + 2] - b[offset + 2];
+    final int da = (a[offset + 3] - b[offset + 3]).abs();
+    final int rgbDistSquared = dr * dr + dg * dg + db * db;
+    if (rgbDistSquared == 0 && da == 0) {
+      return 0.0;
     }
-    return maxDelta;
+    final double rgbDistance = math.sqrt(rgbDistSquared);
+    return math.max(rgbDistance, da.toDouble());
   }
 }
 

@@ -765,12 +765,12 @@ void main() async {
     final bool tabToSpaceComparison = await comparer.fuzzyCompareImages(
       tabImage,
       spaceImage,
-      maxColorDelta: 2,
+      maxColorDelta: 2.0,
     );
     final bool tabToTofuComparison = await comparer.fuzzyCompareImages(
       tabImage,
       tofuImage,
-      maxColorDelta: 2,
+      maxColorDelta: 2.0,
     );
 
     expect(tabToSpaceComparison, isTrue);
