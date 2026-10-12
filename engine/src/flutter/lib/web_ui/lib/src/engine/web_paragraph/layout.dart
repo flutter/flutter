@@ -9,6 +9,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_api.dart';
 import '../dom.dart';
+import '../view_embedder/style_manager.dart';
 import 'bidi.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
@@ -1193,12 +1194,14 @@ abstract class LineBlock {
     this.textRange,
     this.shiftFromLineStart,
   ) {
-    if (span.style.height == null) {
+    // When height is null or kTextHeightNone, disable the height multiplier
+    // and use the font's raw ascent and descent directly.
+    if (span.style.height == null || span.style.height == ui.kTextHeightNone) {
       _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent;
       _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent;
       return;
     }
-    final double fontSize = span.style.fontSize ?? 14.0;
+    final double fontSize = span.style.fontSize ?? StyleManager.defaultFontSize;
     final double runHeight = span.style.height! * fontSize;
     final double fontHeight = span.fontBoundingBoxAscent + span.fontBoundingBoxDescent;
     switch (span.style.leadingDistribution) {
