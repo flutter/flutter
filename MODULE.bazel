@@ -60,6 +60,7 @@ use_repo(
     "libwebp",
     "llvm_libc",
     "ninja",
+    "rapidjson",
     "re2",
     "shaderc",
     "skia",

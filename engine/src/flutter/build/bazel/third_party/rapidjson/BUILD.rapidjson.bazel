@@ -1,0 +1,36 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @rapidjson: the header-only JSON library of the desktop
+# embeddings, pinned in DEPS from flutter.googlesource.com's mirror.
+#
+# The mirror's own BUILD.gn would convert (a config of defines and include
+# directories over a source_set of headers), but its header list is two files
+# short of the tree -- internal/clzll.h, which reader.h includes, and uri.h --
+# which GN never notices and the sandbox does. Until the mirror's BUILD.gn
+# lists them, this file is that GN with the headers globbed: the same
+# defines, the same include directories.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "rapidjson",
+    hdrs = glob(["include/rapidjson/**/*.h"]),
+    # config("rapidjson_config"): rapidjson needs these defines to support
+    # C++11 features. These features are intentionally not autodetected by
+    # rapidjson.
+    defines = [
+        "RAPIDJSON_HAS_STDSTRING",
+        "RAPIDJSON_HAS_CXX11_RANGE_FOR",
+        "RAPIDJSON_HAS_CXX11_RVALUE_REFS",
+        "RAPIDJSON_HAS_CXX11_TYPETRAITS",
+        "RAPIDJSON_HAS_CXX11_NOEXCEPT",
+    ],
+    includes = [
+        ".",
+        "include",
+    ],
+)
