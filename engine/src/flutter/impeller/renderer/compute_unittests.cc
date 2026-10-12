@@ -948,6 +948,149 @@ TEST_P(ComputeTest, ComputePassReadsTextureWrittenByRenderPass) {
   latch.Wait();
 }
 
+TEST_P(ComputeTest, ComputePassReadsTextureWrittenByBlitPass) {
+  using CS = TextureReaderTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  auto compute_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(compute_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(compute_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  static constexpr ISize kSize = {4, 4};
+  TextureDescriptor texture_desc;
+  texture_desc.storage_mode = StorageMode::kDevicePrivate;
+  texture_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_desc.size = kSize;
+  texture_desc.usage = TextureUsage::kShaderRead;
+  auto texture = context->GetResourceAllocator()->CreateTexture(texture_desc);
+  ASSERT_TRUE(texture);
+
+  // Opaque green, which reads back the same in RGBA and BGRA order.
+  std::vector<uint8_t> pixels;
+  for (int i = 0; i < kSize.Area(); i++) {
+    pixels.insert(pixels.end(), {0, 255, 0, 255});
+  }
+  auto staging_buffer = context->GetResourceAllocator()->CreateBufferWithCopy(
+      pixels.data(), pixels.size());
+  ASSERT_TRUE(staging_buffer);
+
+  raw_ptr<const Sampler> sampler = context->GetSamplerLibrary()->GetSampler({});
+  ASSERT_TRUE(sampler);
+
+  auto output_buffer =
+      CreateHostVisibleDeviceBuffer<CS::OutputData>(context, "Output Buffer");
+  CS::OutputData initial = {};
+  ASSERT_TRUE(
+      output_buffer->CopyHostBuffer(reinterpret_cast<const uint8_t*>(&initial),
+                                    Range{0, sizeof(initial)}, 0));
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  {
+    auto pass = cmd_buffer->CreateBlitPass();
+    ASSERT_TRUE(
+        pass->AddCopy(DeviceBuffer::AsBufferView(staging_buffer), texture));
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+  {
+    auto pass = cmd_buffer->CreateComputePass();
+    ASSERT_TRUE(pass && pass->IsValid());
+    pass->SetPipeline(compute_pipeline);
+    CS::BindInputTexture(*pass, texture, sampler);
+    CS::BindOutputData(*pass, DeviceBuffer::AsBufferView(output_buffer));
+    ASSERT_TRUE(pass->Compute({1, 1, 1}).ok());
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(
+      context->GetCommandQueue()
+          ->Submit({cmd_buffer},
+                   [&latch, output_buffer](CommandBuffer::Status status) {
+                     EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+                     output_buffer->Invalidate();
+                     auto* output = reinterpret_cast<CS::OutputData*>(
+                         output_buffer->OnGetContents());
+                     EXPECT_EQ(output->color, Vector4(0, 1, 0, 1));
+                     latch.Signal();
+                   })
+          .ok());
+  latch.Wait();
+}
+
+TEST_P(ComputeTest, ComputePassReadsBufferWrittenByBlitPass) {
+  using CS = IncrementTestComputeShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  ASSERT_TRUE(context->GetCapabilities()->SupportsCompute());
+
+  auto pipeline_desc =
+      ComputePipelineBuilder<CS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(pipeline_desc.has_value());
+  auto compute_pipeline =
+      context->GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
+  ASSERT_TRUE(compute_pipeline);
+
+  // One 4-byte texel per value, so a single workgroup covers the texture.
+  static constexpr size_t kCount = CS::kWorkgroupSize[0];
+  TextureDescriptor texture_desc;
+  texture_desc.storage_mode = StorageMode::kDevicePrivate;
+  texture_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  texture_desc.size = ISize(kCount, 1);
+  texture_desc.usage = TextureUsage::kShaderRead;
+  auto texture = context->GetResourceAllocator()->CreateTexture(texture_desc);
+  ASSERT_TRUE(texture);
+  // Texel `i` holds `i` in its first byte, so it reads back as the
+  // little-endian uint `i`.
+  std::vector<uint8_t> pixels(kCount * 4, 0);
+  for (size_t i = 0; i < kCount; i++) {
+    pixels[i * 4] = static_cast<uint8_t>(i);
+  }
+  ASSERT_TRUE(texture->SetContents(pixels.data(), pixels.size()));
+
+  CS::Data<kCount> initial = {};
+  auto buffer =
+      CreateHostVisibleDeviceBuffer<CS::Data<kCount>>(context, "Data");
+  ASSERT_TRUE(buffer->CopyHostBuffer(reinterpret_cast<const uint8_t*>(&initial),
+                                     Range{0, sizeof(initial)}, 0));
+
+  auto cmd_buffer = context->CreateCommandBuffer();
+  {
+    auto pass = cmd_buffer->CreateBlitPass();
+    ASSERT_TRUE(pass->AddCopy(texture, buffer));
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+  {
+    auto pass = cmd_buffer->CreateComputePass();
+    ASSERT_TRUE(pass && pass->IsValid());
+    pass->SetPipeline(compute_pipeline);
+    CS::BindData(*pass, DeviceBuffer::AsBufferView(buffer));
+    ASSERT_TRUE(pass->Compute({1, 1, 1}).ok());
+    ASSERT_TRUE(pass->EncodeCommands());
+  }
+
+  fml::AutoResetWaitableEvent latch;
+  ASSERT_TRUE(
+      context->GetCommandQueue()
+          ->Submit({cmd_buffer},
+                   [&latch, buffer](CommandBuffer::Status status) {
+                     EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
+                     buffer->Invalidate();
+                     auto* output = reinterpret_cast<CS::Data<kCount>*>(
+                         buffer->OnGetContents());
+                     for (size_t i = 0; i < kCount; i++) {
+                       EXPECT_EQ(output->values[i], i + 1) << "index " << i;
+                     }
+                     latch.Signal();
+                   })
+          .ok());
+  latch.Wait();
+}
+
 TEST_P(ComputeTest, RemovingComputeEntryPointEvictsOnlyItsPipelines) {
   using CS = IncrementTestComputeShader;
   using OtherCS = ThreadgroupSizingTestComputeShader;
