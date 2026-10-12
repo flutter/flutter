@@ -549,6 +549,12 @@ const Set<String> knownExternalVariables = <String>{
   'test_enable_metal',
   'test_enable_software',
   'test_enable_vulkan',
+  // //flutter/shell/version/version.gni: set by tools/gn from git and DEPS;
+  // Bazel-side constants of @engine_version (referenceConstants).
+  'content_hash',
+  'dart_version',
+  'engine_version',
+  'skia_version',
   // //flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni
   'fuchsia_arch_root',
   'fuchsia_sdk',
@@ -560,11 +566,35 @@ const Set<String> knownExternalVariables = <String>{
   'impeller_enable_vulkan',
 };
 
-/// Starlark expressions for GN references that have a Bazel-side constant.
-const Map<String, String> referenceConstants = <String, String>{
-  'flutter_cflags_objc': 'FLUTTER_CFLAGS_OBJC',
-  'flutter_cflags_objcc': 'FLUTTER_CFLAGS_OBJCC',
-  'feature_defines_list': 'FLUTTER_FEATURE_DEFINES',
+/// A Starlark constant the Bazel side keeps for a GN variable the converter
+/// does not evaluate: the symbol and the `.bzl` file that defines it.
+final class ReferenceConstant {
+  const ReferenceConstant(this.file, this.symbol);
+
+  /// The label of the `.bzl` file to load.
+  final String file;
+
+  /// The symbol it defines.
+  final String symbol;
+}
+
+const String _coptsBzl = '//engine/src/flutter/build/bazel:copts.bzl';
+
+/// The `.bzl` the @engine_version repository writes at fetch time
+/// (build/bazel/extensions.bzl): the four arguments of
+/// shell/version/version.gni, which tools/gn computes from git and DEPS
+/// when it generates a GN build.
+const String _versionBzl = '@engine_version//:version.bzl';
+
+/// Starlark constants for GN references that have a Bazel-side value.
+const Map<String, ReferenceConstant> referenceConstants = <String, ReferenceConstant>{
+  'flutter_cflags_objc': ReferenceConstant(_coptsBzl, 'FLUTTER_CFLAGS_OBJC'),
+  'flutter_cflags_objcc': ReferenceConstant(_coptsBzl, 'FLUTTER_CFLAGS_OBJCC'),
+  'feature_defines_list': ReferenceConstant(_coptsBzl, 'FLUTTER_FEATURE_DEFINES'),
+  'engine_version': ReferenceConstant(_versionBzl, 'ENGINE_VERSION'),
+  'content_hash': ReferenceConstant(_versionBzl, 'CONTENT_HASH'),
+  'skia_version': ReferenceConstant(_versionBzl, 'SKIA_VERSION'),
+  'dart_version': ReferenceConstant(_versionBzl, 'DART_VERSION'),
 };
 
 /// How a template argument translates to a macro attribute.

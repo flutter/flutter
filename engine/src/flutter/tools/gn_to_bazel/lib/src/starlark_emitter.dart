@@ -17,12 +17,23 @@ const String _licenseHeader = '''
 # found in the LICENSE file.
 ''';
 
-/// One item of a Bazel list attribute: a string or a Starlark identifier.
+/// One item of a Bazel list attribute: a string, a Starlark identifier that
+/// is itself a list (`FLUTTER_COPTS`, hoisted to lead the attribute), or a
+/// Starlark expression that is one element (`"X=\"" + ENGINE_VERSION + "\""`).
 final class _Item {
-  const _Item(this.text, {this.quoted = true, this.comment, this.before = const <String>[]});
+  const _Item(
+    this.text, {
+    this.quoted = true,
+    this.expression = false,
+    this.comment,
+    this.before = const <String>[],
+  });
 
   final String text;
   final bool quoted;
+
+  /// An unquoted item that is an element of the list rather than a list.
+  final bool expression;
 
   /// A comment on the item's line (without `#`).
   final String? comment;
@@ -1133,7 +1144,7 @@ final class _Emitter {
       _forEachItem(variable, into: rule.list(attribute), (_Element e) {
         final String text = attribute == 'includes'
             ? _filePath(_string(e), e.assignment.location)
-            : _string(e);
+            : _tokenizerEscaped(_string(e));
         final item = _Item(text, comment: e.note, before: <String>[...e.comments.before]);
         rule.list(attribute).addUnique(use.condition.and(e.condition), item);
       });
@@ -1258,10 +1269,17 @@ final class _Emitter {
 
   /// An item for [element] with its comments; [note] false leaves the line
   /// comment for a following item.
-  static _Item _item(String text, _Element element, {bool quoted = true, bool note = true}) {
+  static _Item _item(
+    String text,
+    _Element element, {
+    bool quoted = true,
+    bool expression = false,
+    bool note = true,
+  }) {
     return _Item(
       text,
       quoted: quoted,
+      expression: expression,
       comment: note ? element.note : null,
       before: element.comments.before,
     );
@@ -1270,24 +1288,55 @@ final class _Emitter {
   _Item _flagItem(_Element element) {
     switch (element.value) {
       case GnStringValue(:final String value):
-        return _item(value, element);
+        return _item(_tokenizerEscaped(value), element);
       case GnReference(:final String name):
-        final String? constant = referenceConstants[name];
-        if (constant == null) {
-          throw GnError(element.assignment.location, 'no Bazel constant for $name');
-        }
-        _use('//engine/src/flutter/build/bazel:copts.bzl', constant);
-        return _item(constant, element, quoted: false);
+        return _item(_constant(name, element), element, quoted: false);
+      case GnExpandedString(:final List<GnValue> parts):
+        // `"X=\"$engine_version\""` as `"X=\\\"" + ENGINE_VERSION + "\\\""`; the
+        // constant's value is taken as it is.
+        final String text = parts
+            .map(
+              (GnValue part) => switch (part) {
+                GnReference(:final String name) => _constant(name, element),
+                _ => _Item(_tokenizerEscaped((part as GnStringValue).value)).starlark,
+              },
+            )
+            .join(' + ');
+        return _item(text, element, quoted: false, expression: true);
       default:
         throw GnError(element.assignment.location, 'unexpected flag value ${element.value}');
     }
   }
 
+  /// A string for an attribute Bazel reads with Make-variable substitution
+  /// and Bourne tokenization (`defines`, `local_defines`, `copts`,
+  /// `linkopts`). GN hands the compiler the string as it is, so Bazel's
+  /// reading of it must give the same string: quotes, backslashes and
+  /// whitespace escaped, `$` doubled. Most flags come through unchanged.
+  static String _tokenizerEscaped(String value) =>
+      value.replaceAllMapped(_tokenizerSpecial, (Match m) => '\\${m[0]}').replaceAll(r'$', r'$$');
+
+  static final RegExp _tokenizerSpecial = RegExp(r'''[\\"' \t]''');
+
+  /// The Starlark constant for a reference to [name], loaded from its file.
+  String _constant(String name, _Element element) {
+    final ReferenceConstant? constant = referenceConstants[name];
+    if (constant == null) {
+      throw GnError(element.assignment.location, 'no Bazel constant for $name');
+    }
+    _use(constant.file, constant.symbol);
+    return constant.symbol;
+  }
+
   void _stringsInto(_ListAttribute attribute, GnVariable variable) {
     _forEachItem(variable, into: attribute, (_Element e) {
       // A `.gni` list the Bazel side keeps as a constant (config.gni's
-      // feature_defines_list) stands as itself, like a flag list does.
-      attribute.add(e.condition, e.value is GnReference ? _flagItem(e) : _item(_string(e), e));
+      // feature_defines_list) stands as itself, like a flag list does; so
+      // does a string around a reference (version.gni's arguments).
+      attribute.add(
+        e.condition,
+        e.value is GnStringValue ? _item(_tokenizerEscaped(_string(e)), e) : _flagItem(e),
+      );
     });
   }
 
@@ -1847,7 +1896,10 @@ final class _Emitter {
     // Bare constants (FLUTTER_COPTS, FLUTTER_TESTONLY_COPTS,
     // FLUTTER_LOCAL_DEFINES) lead as themselves.
     final always = List<_Item>.of(list.always);
-    while (always.isNotEmpty && !always.first.quoted && always.first.comment == null) {
+    while (always.isNotEmpty &&
+        !always.first.quoted &&
+        !always.first.expression &&
+        always.first.comment == null) {
       parts.add(always.removeAt(0).text);
     }
     if (always.isNotEmpty || parts.isEmpty && list.conditional.isEmpty) {
