@@ -1000,25 +1000,21 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
   // The platform and UI threads are always merged on iOS, so the UI task runner is the platform
   // thread's task runner.
-  void* retained_engine = (__bridge_retained void*)self;
   fml::RefPtr<fml::TaskRunner> platform_runner = fml::MakeRefCounted<flutter::EmbedderTaskRunner>(
       flutter::EmbedderTaskRunner::DispatchTable{
           .post_task_callback =
               [](flutter::EmbedderTaskRunner* task_runner, uint64_t task_baton,
                  fml::TimePoint target_time) {
+                fml::RefPtr<flutter::EmbedderTaskRunner> strong_runner(task_runner);
                 [FlutterRunLoop.mainRunLoop
                     performAfterDelay:std::max(0.0,
                                                (target_time - fml::TimePoint::Now()).ToSecondsF())
                                 block:^{
-                                  task_runner->PostTask(task_baton);
+                                  strong_runner->PostTask(task_baton);
                                 }];
               },
           .runs_task_on_current_thread_callback = []() { return [NSThread isMainThread]; },
-          .destruction_callback =
-              [retained_engine]() {
-                FlutterEngine* engine = (__bridge_transfer FlutterEngine*)retained_engine;
-                engine = nil;
-              },
+          .destruction_callback = []() {},
       },
       0);
   flutter::TaskRunners task_runners(threadLabel.UTF8String,                       // label
