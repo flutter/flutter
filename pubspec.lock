@@ -457,11 +457,10 @@ packages:
   font_asset:
     dependency: "direct main"
     description:
-      path: "."
-      ref: hooks-v2
-      resolved-ref: "4bce1d5a3f21dfd0f2329dabc2ab1436e6f71b80"
-      url: "https://github.com/mosuem/font_asset.git"
-    source: git
+      name: font_asset
+      sha256: cd9263e6bd5f2d628e99df9aaf3e949a3e1b98c06ed486f58b8281a25679b357
+      url: "https://pub.dev"
+    source: hosted
     version: "0.1.0"
   frontend_server_client:
     dependency: "direct main"

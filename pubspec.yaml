@@ -227,10 +227,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-dependency_overrides:
-  font_asset:
-    git:
-      url: https://github.com/mosuem/font_asset.git
-      ref: hooks-v2
-
-# PUBSPEC CHECKSUM: gqo08r
+# PUBSPEC CHECKSUM: bpgi9i
