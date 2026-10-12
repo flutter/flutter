@@ -1497,7 +1497,7 @@ class TextLine {
     final double blockAscent;
     final double blockDescent;
     if (block is TextBlock) {
-      // Line always counts multiplied metrics
+      // Line always counts multiplied metrics.
       blockAscent = block.multipliedFontBoundingBoxAscent;
       blockDescent = block.multipliedFontBoundingBoxDescent;
       paintBoundsAscent = math.max(paintBoundsAscent, block.paintBoundsAscent);
@@ -1508,7 +1508,7 @@ class TextLine {
       blockAscent = block.ascent;
       blockDescent = block.descent;
       // There's no need to update paint bounds because placeholders aren't painted by the
-      // paragraph
+      // paragraph.
     } else {
       throw UnsupportedError('Unknown block type: $block');
     }
