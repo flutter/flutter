@@ -131,6 +131,13 @@ _SOURCE_REPOSITORIES = {
         gn_repository = "@libwebp=//flutter/third_party/libwebp",
         gn_secondary_dir = "engine/src/flutter/build/secondary/flutter/third_party/libwebp",
     ),
+    # The desktop embeddings' JSON library (header-only). The mirror's own GN
+    # lists two headers fewer than the tree has, so the overlay stands in
+    # (see BUILD.rapidjson.bazel).
+    "rapidjson": struct(
+        path = "engine/src/flutter/third_party/rapidjson",
+        build_file = _OVERLAYS + ":rapidjson/BUILD.rapidjson.bazel",
+    ),
     "llvm_libc": struct(
         path = "engine/src/flutter/third_party/llvm_libc",
         build_file = _OVERLAYS + ":llvm_libc/BUILD.llvm_libc.bazel",

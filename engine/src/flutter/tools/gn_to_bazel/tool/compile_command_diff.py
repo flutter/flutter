@@ -61,6 +61,7 @@ SYNCED_REPOSITORIES = {
     'libpng': 'flutter/third_party/libpng',
     'libtess2': 'flutter/third_party/libtess2',
     'libwebp': 'flutter/third_party/libwebp',
+    'rapidjson': 'flutter/third_party/rapidjson',
     'llvm_libc': 'flutter/third_party/llvm_libc',
     're2': 'flutter/third_party/re2',
     'shaderc': 'flutter/third_party/shaderc',
