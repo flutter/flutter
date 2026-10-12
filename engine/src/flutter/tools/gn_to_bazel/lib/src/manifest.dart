@@ -197,8 +197,6 @@ cc_test(
   ConvertedFile(
     '//flutter/display_list',
     skip: <String, String>{
-      'display_list_rendertests':
-          'needs //flutter/display_list/testing:display_list_surface_provider',
       'display_list_builder_benchmarks': 'needs //flutter/benchmarking',
       'display_list_region_benchmarks': 'needs //flutter/benchmarking',
       'display_list_transform_benchmarks': 'needs //flutter/benchmarking',
@@ -411,12 +409,17 @@ exports_files(glob(["third_party/fonts/*"]))
   ),
   ConvertedFile(
     '//flutter/display_list/testing',
-    skip: <String, String>{'display_list_surface_provider': 'needs //flutter/common/graphics'},
+    // display_list_rendertests' source, which //flutter/display_list/BUILD.gn
+    // lists across the package boundary.
+    appendix: '''
+exports_files(["dl_rendering_unittests.cc"])
+''',
   ),
   ConvertedFile('//flutter/assets'),
   // The four defines take their values from @engine_version//:version.bzl
   // (referenceConstants), the Bazel side of what tools/gn computes.
   ConvertedFile('//flutter/shell/version'),
+  ConvertedFile('//flutter/common/graphics'),
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.
