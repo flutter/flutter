@@ -1,0 +1,31 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/runtime/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: libdart, dart_plugin_registrant, runtime, runtime_fixtures, runtime_unittests, no_plugin_registrant, no_dart_plugin_registrant_unittests, plugin_registrant, dart_plugin_registrant_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "test_font",
+    srcs = ["test_font_data.cc"],
+    hdrs = ["test_font_data.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        # Though the test font data is small, we dont want to add to the binary size
+        # on the device (in profile and release modes). We only add the same on the
+        # host test shells and the debug device shell.
+        "EMBED_TEST_FONT_DATA=1",  # flutter_runtime_mode == "debug" || (current_toolchain == host_toolchain)
+    ],
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/txt",
+        "@skia",
+    ],
+    alwayslink = True,
+)
