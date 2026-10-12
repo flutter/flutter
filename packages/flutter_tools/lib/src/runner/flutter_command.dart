@@ -166,7 +166,6 @@ abstract final class FlutterOptions {
   static const kWebBrowserFlag = 'web-browser-flag';
   static const kWebResourcesCdnFlag = 'web-resources-cdn';
   static const kWebWasmFlag = 'wasm';
-  static const kWebExperimentalHotReload = 'web-experimental-hot-reload';
   static const kEnableImpeller = 'enable-impeller';
   static const kCodesignIdentity = 'codesign-identity';
   static const kCodesign = 'codesign';

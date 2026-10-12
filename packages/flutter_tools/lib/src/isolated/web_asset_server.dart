@@ -218,7 +218,6 @@ class WebAssetServer implements AssetReader {
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
-    bool shouldEnableMiddleware = true,
     Map<String, String> webDefines = const <String, String>{},
   }) async {
     final String hostname = webDevServerConfig.host;
@@ -381,12 +380,10 @@ class WebAssetServer implements AssetReader {
       // Use DWDS WebSocket-based connection instead of Chrome-based connection for debugging
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     );
-    var pipeline = const shelf.Pipeline();
-    if (shouldEnableMiddleware) {
-      pipeline = pipeline.addMiddleware(dwds.middleware);
-    }
-    pipeline = pipeline.addMiddleware(proxyMiddleware(proxy, logger));
-    final shelf.Handler dwdsHandler = pipeline.addHandler(server.handleRequest);
+    final shelf.Handler dwdsHandler = const shelf.Pipeline()
+        .addMiddleware(dwds.middleware)
+        .addMiddleware(proxyMiddleware(proxy, logger))
+        .addHandler(server.handleRequest);
     final shelf.Cascade cascade = shelf.Cascade().add(dwds.handler).add(dwdsHandler);
     final shelf.Handler serverHandler = const shelf.Pipeline()
         .addMiddleware(waitMiddleware)

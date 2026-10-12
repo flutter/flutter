@@ -35,6 +35,10 @@ const kDartCompilerExperiments = <String>[];
 /// [kDdcLibraryBundleFlags]) and which precompiled artifacts are served at
 /// runtime. Keeping these in sync is required: code compiled with canary
 /// features must be loaded alongside an SDK compiled the same way.
+///
+/// This must stay `true` until DDC emits the library bundle format without
+/// `--dartdevc-canary`. Until then, `--dartdevc-module-format=ddc` without
+/// canary selects the legacy DDC module format, which is no longer supported.
 const kDdcCanaryFeatures = true;
 
 // Flags passed when compiling with DDC.

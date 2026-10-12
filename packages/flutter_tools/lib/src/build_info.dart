@@ -1143,9 +1143,6 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
       .toList();
 }
 
-/// Indicates the module system DDC is targeting.
-enum DdcModuleFormat { ddc }
-
 /// Returns the compiler flags that select whether the deprecated JS interop
 /// libraries (such as `dart:html` and `dart:js`) may be used.
 ///

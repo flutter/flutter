@@ -47,12 +47,10 @@ const forceLoadModule = function (relativeUrl, root) {
 };
 ''';
 
-// TODO(srujzs): Delete this once it's no longer used internally.
-
 /// The JavaScript bootstrap script to support in-browser hot restart/reload.
 ///
-/// The [ddcModuleLoaderUrl] loads our cached RequireJS script file. The
-/// [mapperUrl] loads the special Dart stack trace mapper.
+/// The [ddcModuleLoaderUrl] defines the custom module loader.
+/// The [mapperUrl] loads the special Dart stack trace mapper.
 ///
 /// This file is served when the browser requests "main.dart.js" in debug mode,
 /// and is responsible for bootstrapping the library bundles and attaching
