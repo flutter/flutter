@@ -2,12 +2,43 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Build-wide engine configuration: the Bazel side of config.gni.
+# Generated from //flutter/common/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_FEATURE_DEFINES", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "flutter_config",
+    defines = FLUTTER_FEATURE_DEFINES,
+)
+
+cc_library(
+    name = "common",
+    srcs = [
+        "settings.cc",
+        "task_runners.cc",
+    ],
+    hdrs = [
+        "macros.h",
+        "settings.h",
+        "task_runners.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":flutter_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
 
 # GN's `flutter_runtime_mode` argument. Orthogonal to Bazel's compilation
 # mode, exactly as in GN: host_debug_unopt is `-c dbg`, host_debug is
@@ -45,35 +76,4 @@ bool_flag(
 config_setting(
     name = "slimpeller_enabled",
     flag_values = {":slimpeller": "True"},
-)
-
-# config("flutter_config"): `feature_defines_list` from config.gni, which
-# every engine library propagates to its dependents through fml.
-cc_library(
-    name = "flutter_config",
-    defines = [
-        "FLUTTER_RUNTIME_MODE_DEBUG=1",
-        "FLUTTER_RUNTIME_MODE_PROFILE=2",
-        "FLUTTER_RUNTIME_MODE_RELEASE=3",
-        "FLUTTER_RUNTIME_MODE_JIT_RELEASE=4",
-        "DART_LEGACY_API=[[deprecated]]",
-    ] + select({
-        ":runtime_mode_debug": [
-            "FLUTTER_RUNTIME_MODE=1",
-            "FLUTTER_JIT_RUNTIME=1",
-        ],
-        ":runtime_mode_profile": ["FLUTTER_RUNTIME_MODE=2"],
-        ":runtime_mode_release": [
-            "FLUTTER_RUNTIME_MODE=3",
-            "FLUTTER_RELEASE=1",
-        ],
-        ":runtime_mode_jit_release": [
-            "FLUTTER_RUNTIME_MODE=4",
-            "FLUTTER_RELEASE=1",
-            "FLUTTER_JIT_RUNTIME=1",
-        ],
-    }) + select({
-        ":slimpeller_enabled": ["SLIMPELLER=1"],
-        "//conditions:default": [],
-    }),
 )

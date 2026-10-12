@@ -527,6 +527,7 @@ const Set<String> knownExternalVariables = <String>{
   // //flutter/common/config.gni
   'enable_backtrace',
   'enable_unittests',
+  'feature_defines_list',
   'flutter_cflags_objc',
   'flutter_cflags_objcc',
   'flutter_runtime_mode',
@@ -555,6 +556,7 @@ const Set<String> knownExternalVariables = <String>{
 const Map<String, String> referenceConstants = <String, String>{
   'flutter_cflags_objc': 'FLUTTER_CFLAGS_OBJC',
   'flutter_cflags_objcc': 'FLUTTER_CFLAGS_OBJCC',
+  'feature_defines_list': 'FLUTTER_FEATURE_DEFINES',
 };
 
 /// How a template argument translates to a macro attribute.

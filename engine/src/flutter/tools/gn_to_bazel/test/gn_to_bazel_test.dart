@@ -2034,6 +2034,24 @@ cc_library(
       );
     });
 
+    test('a .gni list read by reference in defines is its copts.bzl constant', () async {
+      final String output = await convert('''
+config("flutter_config") {
+  defines = feature_defines_list
+}
+''');
+      expect(
+        output,
+        contains('load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_FEATURE_DEFINES")\n'),
+      );
+      expect(
+        output,
+        contains(
+          'cc_library(\n    name = "flutter_config",\n    defines = FLUTTER_FEATURE_DEFINES,\n)\n',
+        ),
+      );
+    });
+
     test('all_dependent_configs cross private deps; engine code gets FLUTTER_COPTS', () async {
       final String output = await convert('''
 config("vulkan_public") {

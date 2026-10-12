@@ -59,6 +59,7 @@ Future<int> run(List<String> arguments) async {
         spec.substring(spec.indexOf('=') + 1),
       ),
   });
+  final Map<String, List<String>> referenceValues = _referenceValues(assumptions);
   final tree = GnSourceTree(root, gnBinary: gn);
 
   var differences = 0;
@@ -158,6 +159,7 @@ Future<int> run(List<String> arguments) async {
         namedAllDependentConfigs: named,
         localTargets: <String, GnTarget>{for (final GnTarget t in evaluation.targets) t.name: t},
         nestedElsewhere: nestedElsewhere,
+        referenceValues: referenceValues,
         outDir: options.option('out')!,
       );
     }
@@ -176,6 +178,43 @@ Future<int> run(List<String> arguments) async {
   return differences == 0 ? 0 : 1;
 }
 
+/// The lists build files read by reference from an imported `.gni`, as GN
+/// computes them under the assumptions.
+///
+/// The converter leaves such a reference as the constant of copts.bzl that
+/// [referenceConstants] names (`FLUTTER_FEATURE_DEFINES`), whose content
+/// tool/compile_command_diff.py checks against GN's compile commands; the
+/// comparison here needs the GN value, which is config.gni's arithmetic over
+/// `flutter_runtime_mode` and `slimpeller`. Those two are Bazel flags rather
+/// than assumptions, so they default as GN's declare_args() do (debug, false)
+/// unless `--assume` says otherwise for the out directory.
+Map<String, List<String>> _referenceValues(Assumptions assumptions) {
+  final GnValue? mode = assumptions['flutter_runtime_mode'];
+  final String runtimeMode = mode is GnStringValue ? mode.value : 'debug';
+  final GnValue? slimpeller = assumptions['slimpeller'];
+  return <String, List<String>>{
+    'feature_defines_list': <String>[
+      'FLUTTER_RUNTIME_MODE_DEBUG=1',
+      'FLUTTER_RUNTIME_MODE_PROFILE=2',
+      'FLUTTER_RUNTIME_MODE_RELEASE=3',
+      'FLUTTER_RUNTIME_MODE_JIT_RELEASE=4',
+      'DART_LEGACY_API=[[deprecated]]',
+      ...switch (runtimeMode) {
+        'debug' => const <String>['FLUTTER_RUNTIME_MODE=1', 'FLUTTER_JIT_RUNTIME=1'],
+        'profile' => const <String>['FLUTTER_RUNTIME_MODE=2'],
+        'release' => const <String>['FLUTTER_RUNTIME_MODE=3', 'FLUTTER_RELEASE=1'],
+        'jit_release' => const <String>[
+          'FLUTTER_RUNTIME_MODE=4',
+          'FLUTTER_RELEASE=1',
+          'FLUTTER_JIT_RUNTIME=1',
+        ],
+        _ => const <String>['FLUTTER_RUNTIME_MODE=0'],
+      },
+      if (slimpeller is GnBoolValue && slimpeller.value) 'SLIMPELLER=1',
+    ],
+  };
+}
+
 /// Compares one target; returns the number of differences.
 int _compare(
   String label,
@@ -186,6 +225,7 @@ int _compare(
   required Set<String> namedAllDependentConfigs,
   required Map<String, GnTarget> localTargets,
   required Map<String, Map<String, Object?>> nestedElsewhere,
+  required Map<String, List<String>> referenceValues,
   required String outDir,
 }) {
   var differences = 0;
@@ -243,12 +283,17 @@ int _compare(
         continue;
       }
       for (final GnValue item in a.items) {
-        if (item is GnStringValue) {
+        final Iterable<String> values = switch (item) {
+          GnStringValue(:final String value) => <String>[value],
+          GnReference(:final String name) => referenceValues[name] ?? const <String>[],
+          _ => const <String>[],
+        };
+        for (final value in values) {
           switch (a.op) {
             case '-=':
-              result.remove(normalize(item.value));
+              result.remove(normalize(value));
             case '=' || '+=':
-              result.add(normalize(item.value));
+              result.add(normalize(value));
           }
         }
       }

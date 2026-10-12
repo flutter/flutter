@@ -1285,7 +1285,9 @@ final class _Emitter {
 
   void _stringsInto(_ListAttribute attribute, GnVariable variable) {
     _forEachItem(variable, into: attribute, (_Element e) {
-      attribute.add(e.condition, _item(_string(e), e));
+      // A `.gni` list the Bazel side keeps as a constant (config.gni's
+      // feature_defines_list) stands as itself, like a flag list does.
+      attribute.add(e.condition, e.value is GnReference ? _flagItem(e) : _item(_string(e), e));
     });
   }
 

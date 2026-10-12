@@ -90,3 +90,33 @@ FLUTTER_THIRD_PARTY_COPTS = [
     "-Wno-newline-eof",
     "-Wno-typedef-redefinition",
 ] + DEFAULT_WARNING_FLAGS
+
+# config.gni's `feature_defines_list`: the runtime mode and slimpeller as
+# macros, which //flutter/common:flutter_config (converted from GN) carries to
+# every engine library. GN's final `else` (FLUTTER_RUNTIME_MODE=0, an unknown
+# mode) cannot happen here: the `runtime_mode` flag only takes the four.
+FLUTTER_FEATURE_DEFINES = [
+    "FLUTTER_RUNTIME_MODE_DEBUG=1",
+    "FLUTTER_RUNTIME_MODE_PROFILE=2",
+    "FLUTTER_RUNTIME_MODE_RELEASE=3",
+    "FLUTTER_RUNTIME_MODE_JIT_RELEASE=4",
+    "DART_LEGACY_API=[[deprecated]]",
+] + select({
+    "//engine/src/flutter/common:runtime_mode_debug": [
+        "FLUTTER_RUNTIME_MODE=1",
+        "FLUTTER_JIT_RUNTIME=1",
+    ],
+    "//engine/src/flutter/common:runtime_mode_profile": ["FLUTTER_RUNTIME_MODE=2"],
+    "//engine/src/flutter/common:runtime_mode_release": [
+        "FLUTTER_RUNTIME_MODE=3",
+        "FLUTTER_RELEASE=1",
+    ],
+    "//engine/src/flutter/common:runtime_mode_jit_release": [
+        "FLUTTER_RUNTIME_MODE=4",
+        "FLUTTER_RELEASE=1",
+        "FLUTTER_JIT_RUNTIME=1",
+    ],
+}) + select({
+    "//engine/src/flutter/common:slimpeller_enabled": ["SLIMPELLER=1"],
+    "//conditions:default": [],
+})
