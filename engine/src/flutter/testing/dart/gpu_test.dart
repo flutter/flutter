@@ -125,9 +125,16 @@ ByteData triangleInfo(double scale) {
   return float32(<double>[scale, 0, 0, 0]);
 }
 
-/// Records a render pass on [commandBuffer] that clears a new texture to red
-/// and draws the triangle in [vertices] over it in lime, and returns the
-/// texture.
+/// [Colors.lime] as read back by [pixelAt]: opaque, full-intensity green.
+/// (vector_math's [Colors.green] is half intensity.)
+const int kLimePixel = 0x00FF00FF;
+
+/// [Colors.red] as read back by [pixelAt].
+const int kRedPixel = 0xFF0000FF;
+
+/// Records a render pass on [commandBuffer] that clears a new 100x100 texture
+/// to red and draws the triangle in [vertices] over it in lime, and returns
+/// the texture.
 Future<gpu.Texture> drawComputedTriangle(
   gpu.CommandBuffer commandBuffer,
   gpu.BufferView vertices,
@@ -147,12 +154,13 @@ Future<gpu.Texture> drawComputedTriangle(
   return texture;
 }
 
-/// Expects the corners of [texture] to be lime where the computed triangle
-/// [covers] the whole viewport, and the red clear color otherwise. The compute
-/// fixtures write a full-viewport triangle only at a scale of 1.
+/// Expects the corners of [texture] to be the triangle's lime where the
+/// computed triangle [covers] the whole viewport, and the red clear color
+/// otherwise. The compute fixtures write a full-viewport triangle only at a
+/// scale of 1.
 Future<void> expectTriangleCoversViewport(gpu.Texture texture, {required bool covers}) async {
   final ByteData bytes = await readTextureBytes(texture);
-  final expected = covers ? 0x00FF00FF : 0xFF0000FF;
+  final int expected = covers ? kLimePixel : kRedPixel;
   for (final (int x, int y) in <(int, int)>[(1, 1), (98, 1), (1, 98), (98, 98)]) {
     expect(pixelAt(bytes, texture, x, y), expected, reason: 'pixel ($x, $y)');
   }
@@ -1655,6 +1663,56 @@ void main() async {
     // The vertex buffer starts zeroed, so the triangle only covers the
     // viewport if the dispatch wrote it before the draw read it.
     await expectTriangleCoversViewport(texture, covers: true);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
+  test('A render pass draws computed vertices where the compute shader placed them', () async {
+    if (skipUnlessComputeIsSupported()) {
+      return;
+    }
+    final gpu.ComputePipeline pipeline = await createComputePipeline('ComputeTriangle');
+    final gpu.DeviceBuffer vertices = createTriangleVertexBuffer();
+    final gpu.CommandBuffer commandBuffer = gpu.gpuContext.createCommandBuffer();
+
+    final gpu.ComputePass computePass = commandBuffer.createComputePass();
+    computePass.bindPipeline(pipeline);
+    computePass.bindUniform(
+      pipeline.shader.getUniformSlot('TriangleInfo'),
+      gpu.gpuContext.createHostBuffer().emplace(triangleInfo(0.5)),
+    );
+    computePass.bindStorageBuffer(
+      pipeline.shader.getStorageBufferSlot('Vertices'),
+      wholeBuffer(vertices),
+    );
+    computePass.dispatch(1);
+    final gpu.Texture texture = await drawComputedTriangle(commandBuffer, wholeBuffer(vertices));
+    await submitAndWait(commandBuffer);
+
+    // At a scale of 0.5 the shader writes the vertices (-0.5, -0.5),
+    // (1.5, -0.5) and (-0.5, 1.5). In the 100x100 texture, with y pointing
+    // down, the triangle covers the pixels right of x = 25, above y = 75 and
+    // left of the diagonal x - y = 50. Each check is at least 5 pixels from an
+    // edge.
+    final ByteData bytes = await readTextureBytes(texture);
+    final expected = <(int, int), int>{
+      // Inside, near each edge.
+      (30, 70): kLimePixel,
+      (50, 50): kLimePixel,
+      (70, 30): kLimePixel,
+      (30, 10): kLimePixel,
+      // Left of x = 25, below y = 75, and past the diagonal.
+      (20, 50): kRedPixel,
+      (50, 80): kRedPixel,
+      (80, 20): kRedPixel,
+      // The corners.
+      (1, 1): kRedPixel,
+      (98, 1): kRedPixel,
+      (1, 98): kRedPixel,
+      (98, 98): kRedPixel,
+    };
+    for (final MapEntry<(int, int), int> entry in expected.entries) {
+      final (int x, int y) = entry.key;
+      expect(pixelAt(bytes, texture, x, y), entry.value, reason: 'pixel ($x, $y)');
+    }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
   test('Dependent dispatches in one compute pass see earlier writes', () async {
