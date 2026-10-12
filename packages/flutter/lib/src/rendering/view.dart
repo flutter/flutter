@@ -141,7 +141,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// [RenderView] object from configuring it. Typically, the object is created
   /// by the [View] widget and configured by the [RendererBinding] when the
   /// [RenderView] is registered with it by the [View] widget.
-  RenderView({RenderBox? child, ViewConfiguration? configuration, required this._view}) {
+  RenderView({RenderBox? child, ViewConfiguration? configuration, required ui.FlutterView view})
+    : _view = debugViewWithMetricsOverrides(view) {
     if (configuration != null) {
       this.configuration = configuration;
     }
