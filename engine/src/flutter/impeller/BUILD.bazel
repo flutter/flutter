@@ -26,3 +26,8 @@ cc_library(
     }),
     includes = [".."],
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+exports_files(glob(["fixtures/*"]))
