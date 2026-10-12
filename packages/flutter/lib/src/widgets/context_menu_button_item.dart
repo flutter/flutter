@@ -12,17 +12,13 @@ import 'framework.dart';
 
 /// The buttons that can appear in a context menu by default.
 ///
-/// Deprecated in favor of [ContextMenuButtonKind].
+/// Prefer using [ContextMenuButtonKind] instead, as [ContextMenuButtonType]
+/// cannot gain new values without breaking exhaustive switches.
 ///
 /// See also:
 ///
 ///  * [ContextMenuButtonItem], which uses this enum to describe a button in a
 ///    context menu.
-@Deprecated(
-  'Use ContextMenuButtonKind instead. '
-  'ContextMenuButtonType cannot gain new values without breaking exhaustive switches. '
-  'This feature was deprecated after v3.49.0-1.0.pre.',
-)
 enum ContextMenuButtonType {
   /// A button that cuts the current text selection.
   cut,
@@ -75,9 +71,9 @@ final class ContextMenuButtonKind {
   /// A name for this kind, useful for debugging.
   final String name;
 
-  // The closest ContextMenuButtonType for this kind, used to keep the
-  // deprecated ContextMenuButtonItem.type working. Kinds with no matching
-  // ContextMenuButtonType map to ContextMenuButtonType.custom.
+  /// The closest [ContextMenuButtonType] for this kind, used to keep
+  /// [ContextMenuButtonItem.type] working. Kinds with no matching
+  /// [ContextMenuButtonType] map to [ContextMenuButtonType.custom].
   final ContextMenuButtonType _legacyType;
 
   /// A button that cuts the current text selection.
@@ -167,7 +163,7 @@ final class ContextMenuButtonKind {
     custom,
   ];
 
-  // Returns the kind that corresponds to a deprecated ContextMenuButtonType.
+  /// Returns the kind that corresponds to a [ContextMenuButtonType].
   static ContextMenuButtonKind _fromLegacyType(ContextMenuButtonType type) {
     return switch (type) {
       ContextMenuButtonType.cut => cut,
@@ -200,15 +196,10 @@ final class ContextMenuButtonKind {
 class ContextMenuButtonItem {
   /// Creates a const instance of [ContextMenuButtonItem].
   ///
-  /// At most one of [kind] and the deprecated `type` may be given. If neither
-  /// is given, the button is a [ContextMenuButtonKind.custom] button.
+  /// At most one of [kind] or [type] may be given. If neither is given, the
+  /// button is a [ContextMenuButtonKind.custom] button.
   const ContextMenuButtonItem({
     required this.onPressed,
-    @Deprecated(
-      'Use kind instead. '
-      'ContextMenuButtonType cannot gain new values without breaking exhaustive switches. '
-      'This feature was deprecated after v3.49.0-1.0.pre.',
-    )
     ContextMenuButtonType? type,
     ContextMenuButtonKind? kind,
     this.label,
@@ -219,10 +210,17 @@ class ContextMenuButtonItem {
   /// The callback to be called when the button is pressed.
   final VoidCallback? onPressed;
 
+  /// The [ContextMenuButtonType] passed to the constructor, if any.
   final ContextMenuButtonType? _type;
+
+  /// The [ContextMenuButtonKind] passed to the constructor, if any.
   final ContextMenuButtonKind? _kind;
 
   /// The kind of button this represents.
+  ///
+  /// If created with [type], this returns the corresponding
+  /// [ContextMenuButtonKind]. Defaults to [ContextMenuButtonKind.custom] if
+  /// neither [kind] nor [type] was specified.
   ContextMenuButtonKind get kind {
     if (_kind != null) {
       return _kind;
@@ -235,14 +233,11 @@ class ContextMenuButtonItem {
 
   /// The type of button this represents.
   ///
+  /// Prefer using [kind] instead.
+  ///
   /// Kinds that have no equivalent [ContextMenuButtonType], such as
   /// [ContextMenuButtonKind.translate], are reported as
   /// [ContextMenuButtonType.custom].
-  @Deprecated(
-    'Use kind instead. '
-    'ContextMenuButtonType cannot gain new values without breaking exhaustive switches. '
-    'This feature was deprecated after v3.49.0-1.0.pre.',
-  )
   ContextMenuButtonType get type => _type ?? kind._legacyType;
 
   /// The label to display on the button.
@@ -256,11 +251,6 @@ class ContextMenuButtonItem {
   /// overridden.
   ContextMenuButtonItem copyWith({
     VoidCallback? onPressed,
-    @Deprecated(
-      'Use kind instead. '
-      'ContextMenuButtonType cannot gain new values without breaking exhaustive switches. '
-      'This feature was deprecated after v3.49.0-1.0.pre.',
-    )
     ContextMenuButtonType? type,
     ContextMenuButtonKind? kind,
     String? label,
