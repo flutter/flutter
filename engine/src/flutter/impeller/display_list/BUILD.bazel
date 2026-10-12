@@ -15,9 +15,9 @@ cc_library(
     name = "skia_conversions",
     srcs = ["skia_conversions.cc"],
     hdrs = ["skia_conversions.h"],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -62,9 +62,9 @@ cc_library(
         "nine_patch_converter.h",
         "paint.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":skia_conversions",
@@ -85,9 +85,9 @@ cc_library(
     name = "skia_conversions_unittests",
     testonly = True,
     srcs = ["skia_conversions_unittests.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":skia_conversions",

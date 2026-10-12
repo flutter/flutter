@@ -230,7 +230,10 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    (engine code: it lists `//flutter:config` or depends on engine code),
    `CHROMIUM_CODE_COPTS` (the third-party trees the engine describes with
    GN, such as Skia) or `FLUTTER_THIRD_PARTY_COPTS` (`no_chromium_code`),
-   from `build/bazel/copts.bzl`. `action()` becomes a `gn_action`
+   from `build/bazel/copts.bzl`; a target's own `cflags` come *before*
+   that constant, as they come before every config's flags on GN's command
+   line (lib/ui's `-Wimplicit-float-conversion` is followed, and partly
+   undone, by `default_warning_flags`). `action()` becomes a `gn_action`
    (`build/bazel/gn_action`): GN's build-directory variables evaluate to
    paths under `//@gen` and `//@out`, `rebase_path(x, root_build_dir)`
    becomes a marked path that only an action's `args` may carry, and the
