@@ -5,6 +5,7 @@
 # Generated from //flutter/testing/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: dart, vmservice_kernel, vmservice_snapshot, fixture_test, vulkan, test_swiftshader_utils, test_swangle_utils, opengl.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
@@ -142,3 +143,13 @@ cc_test(
 # (tools/gn_to_bazel/lib/src/manifest.dart).
 
 exports_files(["fixtures_location.cc"])
+
+selects.config_setting_group(
+    name = "unittests_enabled",
+    match_any = [
+        "@platforms//os:fuchsia",
+        "@platforms//os:linux",
+        "@platforms//os:macos",
+        "@platforms//os:windows",
+    ],
+)

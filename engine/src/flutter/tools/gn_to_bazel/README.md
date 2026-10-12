@@ -64,6 +64,23 @@ written that way is read back as one formula. A list may only be appended
 to in a branch, and a target's name cannot vary at all (`output_name` under
 `is_win`).
 
+A GN argument whose default GN derives from the platform -- Impeller's
+`impeller_enable_{metal,opengles,vulkan}`, and `enable_unittests` -- is a
+Bazel flag or setting (`impeller/tools/BUILD.bazel`, `//flutter/testing`'s
+appendix), named in `conditionSettings` and `knownExternalVariables`. In a
+`declare_args()` block such an argument keeps its name instead of its
+default's formula (Bazel sets the per-platform value in configuration);
+arguments derived from it (`impeller_enable_compute = vulkan || metal`)
+stay formulas over the settings. The host assumptions fix them as `tools/gn`
+would.
+
+A target GN defines only under a condition exists in Bazel with
+`target_compatible_with` incompatible wherever the condition fails, on every
+rule the target produced (the `impeller_shaders` macro forwards it to each
+target it creates). GN's placeholder idiom -- `if (c) { real(name) } else {
+group(name) {} }`, an empty group so that dependents can name the target
+unconditionally -- drops the group; any other duplicate name is an error.
+
 ### Fetch-time conversion
 
 ```sh

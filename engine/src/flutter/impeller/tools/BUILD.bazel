@@ -2,10 +2,41 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Impeller's build tools: the scripts its GN templates run. The templates
-# themselves are build/bazel/impeller.
+# Impeller's build tools: the scripts its GN templates run, and the Bazel side
+# of args.gni. The templates themselves are build/bazel/impeller.
+
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+
+package(default_visibility = ["//visibility:public"])
 
 exports_files(
     ["xxd.py"],
     visibility = ["//engine/src/flutter/build/bazel/impeller:__subpackages__"],
 )
+
+# GN's impeller_enable_metal, impeller_enable_opengles and
+# impeller_enable_vulkan: which rendering backends are built. args.gni derives
+# their defaults from the platform (Metal on Apple; OpenGL ES and Vulkan on
+# the desktops, Android and QNX, and wherever unit tests run; none on
+# Fuchsia). A flag has one default, so these are the Linux host's; the other
+# platforms' build configurations set them. The derived arguments
+# (impeller_supports_rendering = any of the three, impeller_enable_compute =
+# Vulkan or Metal) need no settings of their own: the converter writes them as
+# the select() over these.
+[
+    (
+        bool_flag(
+            name = "enable_" + backend,
+            build_setting_default = default,
+        ),
+        config_setting(
+            name = backend,
+            flag_values = {":enable_" + backend: "True"},
+        ),
+    )
+    for backend, default in [
+        ("metal", False),
+        ("opengles", True),
+        ("vulkan", True),
+    ]
+]

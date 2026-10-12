@@ -141,7 +141,11 @@ String emitBuildFile(
   final emitter = _Emitter(gnPackage, layout, implicitDeps, tree)
     ..inheritedConfigs.addAll(evaluation.allDependentConfigs)
     ..conditionalInheritance.addAll(evaluation.conditionalAllDependentConfigs);
+  final Set<GnTarget> placeholders = _placeholders(evaluation.targets);
   for (final GnTarget target in evaluation.targets) {
+    if (placeholders.contains(target)) {
+      continue;
+    }
     emitter.localTargets[target.name] = target;
     if (target.rule == 'config') {
       emitter.localConfigs[target.name] = target;
@@ -163,9 +167,52 @@ String emitBuildFile(
       skipped.add(target.name);
       continue;
     }
+    if (placeholders.contains(target)) {
+      continue;
+    }
     emitter.convert(target);
   }
   return emitter.render(evaluation.file, skipped, appendix: appendix);
+}
+
+/// GN's placeholder idiom: `if (c) { real(name) { … } } else { group(name) {
+/// } }` -- an empty group stands in for a target the configuration lacks, so
+/// that dependents can name it unconditionally (impeller_component does this
+/// for testonly components when unit tests are off). Bazel says the same
+/// thing with the real target's `target_compatible_with`, and two rules
+/// cannot share a name, so the placeholder goes. Any other duplicate name is
+/// an error.
+Set<GnTarget> _placeholders(List<GnTarget> targets) {
+  final byName = <String, List<GnTarget>>{};
+  for (final target in targets) {
+    byName.putIfAbsent(target.name, () => <GnTarget>[]).add(target);
+  }
+  final placeholders = <GnTarget>{};
+  for (final MapEntry<String, List<GnTarget>> entry in byName.entries) {
+    if (entry.value.length == 1) {
+      continue;
+    }
+    final List<GnTarget> group = entry.value;
+    final Iterable<GnTarget> empties = group.where(
+      (GnTarget t) =>
+          t.rule == 'group' &&
+          t.variables.keys.every(
+            (String v) => v == 'testonly' || v == 'visibility' || t.variables[v]!.forwarded,
+          ),
+    );
+    final Iterable<GnTarget> real = group.where((GnTarget t) => !empties.contains(t));
+    if (group.length != 2 ||
+        empties.length != 1 ||
+        real.single.condition != empties.single.condition.negated) {
+      throw GnError(
+        group[1].location,
+        'target ${entry.key} is defined more than once (under `${group[0].condition}` and '
+        '`${group[1].condition}`)',
+      );
+    }
+    placeholders.add(empties.single);
+  }
+  return placeholders;
 }
 
 /// Target variables that say nothing Bazel needs.
@@ -258,12 +305,41 @@ final class _Emitter {
   // -------------------------------------------------------------------------
 
   void convert(GnTarget target) {
+    final int first = rules.length;
+    _convertTarget(target);
+    // A target GN defines only under a condition exists in Bazel but is
+    // incompatible wherever the condition does not hold: dependents cannot
+    // build it there, as in GN they could not name it.
     if (target.condition != Condition.always) {
-      throw GnError(
-        target.location,
-        'target ${target.name} is defined under `${target.condition}`, which Bazel cannot express',
-      );
+      final String compatibility = _compatibility(target);
+      for (final _Rule rule in rules.skip(first)) {
+        rule.scalars['target_compatible_with'] = compatibility;
+      }
     }
+  }
+
+  /// `target_compatible_with` for a target defined under its condition:
+  /// compatible where the condition's settings hold, `@platforms//:incompatible`
+  /// elsewhere.
+  String _compatibility(GnTarget target) {
+    final _SelectKeys keys = _selectKeys(
+      target.condition,
+      _Rule(target.rule, target.name, const <String>[]),
+      target.location,
+      () => 'defining ${target.rule} ${target.name}',
+    );
+    const incompatible = '["@platforms//:incompatible"]';
+    final out = StringBuffer('select({\n');
+    for (final String setting in keys.settings) {
+      out.writeln('        "$setting": ${keys.negated ? incompatible : '[]'},');
+    }
+    out
+      ..writeln('        "//conditions:default": ${keys.negated ? '[]' : incompatible},')
+      ..write('    })');
+    return out.toString();
+  }
+
+  void _convertTarget(GnTarget target) {
     final TemplateMapping? template = templateMappings[target.rule];
     if (template != null) {
       _convertTemplate(target, template);

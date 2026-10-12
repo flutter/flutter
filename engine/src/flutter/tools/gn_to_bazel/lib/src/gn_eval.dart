@@ -1129,16 +1129,16 @@ final class _Evaluator {
   /// The value of an expression that must be a string.
   String _stringExpression(GnNode node, _Scope scope) {
     final _Expression expression = _expression(node, scope);
-    final GnValue? value = expression.scalar;
-    if (value is! GnStringValue) {
+    final String? value = _agreedString(expression);
+    if (value == null) {
       final got = expression.isList
           ? 'a list'
-          : value == null
+          : expression.scalar == null
           ? 'a value that depends on a condition ($expression)'
-          : '$value';
+          : '$expression';
       throw GnError(node.location, 'expected one string, got $got');
     }
-    return value.value;
+    return value;
   }
 
   // -------------------------------------------------------------------------
@@ -1229,7 +1229,10 @@ final class _Evaluator {
   }
 
   /// `declare_args() { x = default }`: the assumptions play the role of
-  /// args.gn and override the defaults.
+  /// args.gn and override the defaults; an argument the Bazel side defines
+  /// (one of the external variables, with no assumption) keeps its name --
+  /// the default's formula is how GN picks a value per platform, which Bazel
+  /// does in configuration instead.
   void _declareArgs(GnFunctionCall call, _Scope scope, Condition condition, List<String> source) {
     final GnBlock? block = call.block;
     if (block == null) {
@@ -1374,7 +1377,12 @@ final class _Evaluator {
     }
     final String name = left.name;
     final GnVariable? existing = scope.lookup(name);
-    final GnValue? assumed = _declaringArgs && node.op == '=' ? assumptions[name] : null;
+    final GnValue? assumed = !_declaringArgs || node.op != '='
+        ? null
+        : assumptions[name] ??
+              (settings.externalVariables.contains(name)
+                  ? GnConditionValue(ConditionVariable(name))
+                  : null);
     final _Expression value = assumed != null
         ? _Expression.scalar(assumed)
         : _isBooleanExpression(node.right)
@@ -1766,17 +1774,32 @@ final class _Evaluator {
   String? _knownString(String name, _Scope? scope, [GnNode? node]) {
     final GnVariable? variable = scope?.lookup(name);
     if (variable != null) {
-      final List<GnValue>? items = variable.unconditionalItems;
-      if (!variable.isList && items != null && items.length == 1 && items.single is GnStringValue) {
-        return (items.single as GnStringValue).value;
-      }
-      return null;
+      return variable.isList
+          ? null
+          : _agreedString(
+              _scalarItems(variable, node?.location ?? variable.assignments.first.location),
+            );
     }
     final GnValue? assumed = assumptions[name];
     if (assumed is GnStringValue) {
       return assumed.value;
     }
     return node == null ? null : _buildDirVariable(name, node);
+  }
+
+  /// The string a scalar expression is wherever it has a value: its one
+  /// unconditional value, or the value all of its cases agree on (a variable
+  /// written once in the branch that reads it has a single case under that
+  /// branch's condition; where no case holds, GN has no value either).
+  static String? _agreedString(_Expression expression) {
+    if (expression.isList || expression.items.isEmpty) {
+      return null;
+    }
+    final GnValue first = expression.items.first.value;
+    if (first is! GnStringValue || expression.items.any((_Value i) => i.value != first)) {
+      return null;
+    }
+    return first.value;
   }
 
   // -------------------------------------------------------------------------
