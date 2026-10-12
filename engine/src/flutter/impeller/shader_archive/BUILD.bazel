@@ -39,9 +39,9 @@ cc_library(
         "shader_archive_types.h",
         "shader_archive_writer.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":shader_archive_flatbuffers",
@@ -57,9 +57,9 @@ cc_library(
 cc_binary(
     name = "shader_archiver",
     srcs = ["shader_archive_main.cc"],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":shader_archive",
@@ -74,9 +74,9 @@ cc_library(
     name = "shader_archive_unittests",
     testonly = True,
     srcs = ["shader_archive_unittests.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":shader_archive",

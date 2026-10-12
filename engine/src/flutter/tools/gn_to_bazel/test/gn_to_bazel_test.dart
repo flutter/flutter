@@ -1850,7 +1850,7 @@ cc_library(
     ],
     hdrs = ["shared.h"],
     conlyopts = ["-Wno-c-only"],
-    copts = CHROMIUM_CODE_COPTS + ["-Wno-something"],
+    copts = ["-Wno-something"] + CHROMIUM_CODE_COPTS,
     cxxopts = ["-fno-rtti"],
 '''),
       );

@@ -39,9 +39,9 @@ cc_library(
         "validation.h",
         "version.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -60,9 +60,9 @@ cc_library(
         "allocation_unittests.cc",
         "base_unittests.cc",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":base",
