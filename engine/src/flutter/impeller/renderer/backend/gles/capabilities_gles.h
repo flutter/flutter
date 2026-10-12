@@ -189,16 +189,7 @@ class CapabilitiesGLES final
   bool NeedsPartitionedHostBuffer() const override;
 
   // |Capabilities|
-  uint32_t GetMaximumComputeWorkgroupInvocations() const override;
-
-  // |Capabilities|
-  std::array<uint32_t, 3> GetMaximumComputeWorkgroupSize() const override;
-
-  // |Capabilities|
-  std::array<uint32_t, 3> GetMaximumComputeWorkgroupCount() const override;
-
-  // |Capabilities|
-  size_t GetMaximumComputeSharedMemorySize() const override;
+  ComputeLimits GetComputeLimits() const override;
 
  private:
   bool supports_texture_to_texture_blits_ = false;

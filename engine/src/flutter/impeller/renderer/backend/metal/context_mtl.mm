@@ -71,15 +71,23 @@ static bool DeviceSupportsTextureCompressionAstcHdr(id<MTLDevice> device) {
   return [device supportsFamily:MTLGPUFamilyApple6];
 }
 
-// Metal reports the threadgroup size limit per dimension. The limit on the
-// total number of threads in a threadgroup equals the x limit on every Metal
-// GPU family (1024, or 512 before A11). A pipeline can lower it further, which
-// pipeline creation checks.
-static std::array<uint32_t, 3> DeviceMaxThreadsPerThreadgroup(
-    id<MTLDevice> device) {
+static ComputeLimits InferMetalComputeLimits(id<MTLDevice> device) {
   const MTLSize size = device.maxThreadsPerThreadgroup;
-  return {static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height),
-          static_cast<uint32_t>(size.depth)};
+  return ComputeLimits{
+      // The limit on the total number of threads in a threadgroup equals the
+      // x limit on every Metal GPU family (1024, or 512 before A11). A
+      // pipeline can lower it further, which pipeline creation checks.
+      .max_workgroup_invocations = static_cast<uint32_t>(size.width),
+      .max_workgroup_size = {static_cast<uint32_t>(size.width),
+                             static_cast<uint32_t>(size.height),
+                             static_cast<uint32_t>(size.depth)},
+      // Metal does not limit the threadgroup count of a dispatch beyond the
+      // 32-bit grid coordinates a shader sees.
+      .max_workgroup_count = {std::numeric_limits<uint32_t>::max(),
+                              std::numeric_limits<uint32_t>::max(),
+                              std::numeric_limits<uint32_t>::max()},
+      .max_shared_memory_size = device.maxThreadgroupMemoryLength,
+  };
 }
 
 static std::unique_ptr<Capabilities> InferMetalCapabilities(
@@ -117,15 +125,7 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsTextureCompression(
           CompressedTextureFamily::kASTCHDR,
           DeviceSupportsTextureCompressionAstcHdr(device))
-      .SetMaximumComputeWorkgroupInvocations(
-          DeviceMaxThreadsPerThreadgroup(device)[0])
-      .SetMaximumComputeWorkgroupSize(DeviceMaxThreadsPerThreadgroup(device))
-      // Metal does not limit the threadgroup count of a dispatch beyond the
-      // 32-bit grid coordinates a shader sees.
-      .SetMaximumComputeWorkgroupCount({std::numeric_limits<uint32_t>::max(),
-                                        std::numeric_limits<uint32_t>::max(),
-                                        std::numeric_limits<uint32_t>::max()})
-      .SetMaximumComputeSharedMemorySize(device.maxThreadgroupMemoryLength)
+      .SetComputeLimits(InferMetalComputeLimits(device))
 #if FML_OS_IOS && !TARGET_OS_SIMULATOR
       .SetMinimumUniformAlignment(16)
 #else

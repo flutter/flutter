@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/logging.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/compute_pipeline_vk.h"
@@ -148,36 +149,35 @@ absl::Status ComputePassVK::BindDescriptorSet() {
   context_vk.GetDevice().updateDescriptorSets(writes.size(), writes.data(), 0u,
                                               {});
   command_buffer_->GetCommandBuffer().bindDescriptorSets(
-      vk::PipelineBindPoint::eCompute,  // bind point
-      pipeline_vk.GetPipelineLayout(),  // layout
-      0,                                // first set
-      1,                                // set count
-      &descriptor_set,                  // sets
-      0,                                // offset count
-      nullptr                           // offsets
-  );
+      /*pipelineBindPoint=*/vk::PipelineBindPoint::eCompute,
+      /*layout=*/pipeline_vk.GetPipelineLayout(),
+      /*firstSet=*/0,
+      /*descriptorSetCount=*/1,
+      /*pDescriptorSets=*/&descriptor_set,
+      /*dynamicOffsetCount=*/0,
+      /*pDynamicOffsets=*/nullptr);
   descriptor_set_dirty_ = false;
   return absl::OkStatus();
 }
 
 // |ComputePass|
 absl::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
+  // The label set by `SetCommandLabel` applies to this dispatch only.
+  fml::ScopedCleanupClosure pop_label([this]() { PopCommandLabel(); });
+
   // A dispatch with no workgroups does nothing, like a draw with no vertices.
   if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
       workgroup_count[2] == 0u) {
-    PopCommandLabel();
     return absl::OkStatus();
   }
 
   if (!pipeline_) {
-    PopCommandLabel();
     return absl::Status(absl::StatusCode::kCancelled,
                        "No compute pipeline is bound.");
   }
 
   if (descriptor_set_dirty_) {
-    if (auto status = BindDescriptorSet(); !status.ok()) {
-      PopCommandLabel();
+    if (absl::Status status = BindDescriptorSet(); !status.ok()) {
       return status;
     }
   }
@@ -212,8 +212,6 @@ absl::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
   // directly.
   command_buffer_->GetCommandBuffer().dispatch(
       workgroup_count[0], workgroup_count[1], workgroup_count[2]);
-
-  PopCommandLabel();
   return absl::OkStatus();
 }
 

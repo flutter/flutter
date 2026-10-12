@@ -317,16 +317,7 @@ class CapabilitiesVK final : public Capabilities,
   bool NeedsPartitionedHostBuffer() const override;
 
   // |Capabilities|
-  uint32_t GetMaximumComputeWorkgroupInvocations() const override;
-
-  // |Capabilities|
-  std::array<uint32_t, 3> GetMaximumComputeWorkgroupSize() const override;
-
-  // |Capabilities|
-  std::array<uint32_t, 3> GetMaximumComputeWorkgroupCount() const override;
-
-  // |Capabilities|
-  size_t GetMaximumComputeSharedMemorySize() const override;
+  ComputeLimits GetComputeLimits() const override;
 
   //----------------------------------------------------------------------------
   /// @return     If fixed-rate compression for non-onscreen surfaces is

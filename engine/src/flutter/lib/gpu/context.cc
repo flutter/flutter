@@ -168,7 +168,9 @@ InternalFlutterGpu_Context_GetMaximumComputeWorkgroupInvocations(
   if (!flutter::gpu::SupportsCompute(context)) {
     return 0u;
   }
-  return context.GetCapabilities()->GetMaximumComputeWorkgroupInvocations();
+  return context.GetCapabilities()
+      ->GetComputeLimits()
+      .max_workgroup_invocations;
 }
 
 extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupSize(
@@ -179,7 +181,9 @@ extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupSize(
       dimension > 2) {
     return 0u;
   }
-  return context.GetCapabilities()->GetMaximumComputeWorkgroupSize()[dimension];
+  return context.GetCapabilities()
+      ->GetComputeLimits()
+      .max_workgroup_size[dimension];
 }
 
 extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupCount(
@@ -191,7 +195,8 @@ extern uint32_t InternalFlutterGpu_Context_GetMaximumComputeWorkgroupCount(
     return 0u;
   }
   return context.GetCapabilities()
-      ->GetMaximumComputeWorkgroupCount()[dimension];
+      ->GetComputeLimits()
+      .max_workgroup_count[dimension];
 }
 
 extern int64_t InternalFlutterGpu_Context_GetMaximumComputeSharedMemorySize(
@@ -201,7 +206,7 @@ extern int64_t InternalFlutterGpu_Context_GetMaximumComputeSharedMemorySize(
     return 0;
   }
   return static_cast<int64_t>(
-      context.GetCapabilities()->GetMaximumComputeSharedMemorySize());
+      context.GetCapabilities()->GetComputeLimits().max_shared_memory_size);
 }
 
 extern bool InternalFlutterGpu_Context_GetSupportsOffscreenMSAA(

@@ -44,6 +44,8 @@ class Shader : public RefCountedDartWrappable<Shader> {
     impeller::ShaderMetadata metadata;
   };
 
+  /// A storage buffer (an SSBO) that a compute shader declares, with the
+  /// reflection data needed to bind it and to size buffers for it.
   struct StorageBufferBinding {
     /// How the shader accesses the buffer, from its `readonly` or `writeonly`
     /// qualifier.
@@ -53,6 +55,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
       kWriteOnly,
     };
 
+    /// Where the buffer is bound on each backend.
     impeller::ShaderUniformSlot slot;
     /// Names the buffer. Binding sets and compute passes also use its address
     /// to identify the binding.
@@ -155,6 +158,10 @@ class Shader : public RefCountedDartWrappable<Shader> {
   int GetStorageBufferIndex(const std::string& name) const;
 
   /// The storage buffer counterpart to `GetUniformStructAt`.
+  ///
+  /// The result points into this shader's reflection data. It stays valid
+  /// while the shader is alive and until a reload replaces the shader's
+  /// payload (`ResetFrom`), after which it must not be dereferenced.
   const Shader::StorageBufferBinding* GetStorageBufferAt(int index) const;
 
  private:

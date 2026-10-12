@@ -51,17 +51,27 @@ class ShaderBundleData {
     size_t binding = 0u;
   };
 
+  /// Reflection data for a storage buffer (an SSBO) that a compute shader
+  /// declares, serialized as a `ShaderStorageBuffer` in the bundle.
   struct ShaderStorageBuffer {
+    /// The name of the buffer block.
     std::string name;
+    /// The backend's index for the buffer: the Metal buffer index, or the
+    /// binding on Vulkan. `kOptimizedOutBinding` if the backend compiler
+    /// removed the buffer because the shader never uses it.
     size_t ext_res_0 = 0u;
+    /// The descriptor set the shader declares the buffer in.
     size_t set = 0u;
+    /// The binding the shader declares the buffer at.
     size_t binding = 0u;
+    /// How the shader accesses the buffer, from its `readonly` or `writeonly`
+    /// qualifier.
     fb::shaderbundle::ShaderResourceAccess access =
         fb::shaderbundle::ShaderResourceAccess::kReadWrite;
-    // The size of the block, counting a trailing runtime-sized array as empty.
+    /// The size of the block, counting a trailing runtime-sized array as empty.
     size_t size_in_bytes = 0u;
-    // The stride of the block's trailing runtime-sized array, or zero if the
-    // block does not end in one.
+    /// The stride of the block's trailing runtime-sized array, or zero if the
+    /// block does not end in one.
     size_t runtime_array_stride = 0u;
   };
 

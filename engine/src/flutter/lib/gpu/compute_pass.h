@@ -81,10 +81,11 @@ class ComputePass : public RefCountedDartWrappable<ComputePass> {
 
   /// The texture counterpart to `BindUniform`. Returns an error if the
   /// texture or sampler is null.
-  absl::Status BindTexture(const Shader& shader,
-                           const Shader::TextureBinding* binding,
-                           std::shared_ptr<const impeller::Texture> texture,
-                           impeller::raw_ptr<const impeller::Sampler> sampler);
+  absl::Status BindTexture(
+      const Shader& shader,
+      const Shader::TextureBinding* binding,
+      std::shared_ptr<const impeller::Texture> texture,
+      const impeller::raw_ptr<const impeller::Sampler>& sampler);
 
   /// The number of binding set slots a pass can hold at once. Mirrors
   /// `ComputePass.maxBindingSets` in `gpu/lib/src/compute_pass.dart`.
@@ -110,6 +111,7 @@ class ComputePass : public RefCountedDartWrappable<ComputePass> {
   absl::Status ApplyBindings(const Shader& shader);
 
  private:
+  /// A texture bound individually, with the sampler to read it with.
   struct TextureBinding {
     std::shared_ptr<const impeller::Texture> texture;
     impeller::raw_ptr<const impeller::Sampler> sampler;

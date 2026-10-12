@@ -49,8 +49,6 @@ const std::shared_ptr<impeller::Context>& ComputePass::GetContext() const {
 }
 
 void ComputePass::SetPipeline(fml::RefPtr<ComputePipeline> pipeline) {
-  // On debug this makes a difference, but not on release builds.
-  // NOLINTNEXTLINE(performance-move-const-arg)
   pipeline_ = std::move(pipeline);
 }
 
@@ -133,7 +131,7 @@ absl::Status ComputePass::BindTexture(
     const Shader& shader,
     const Shader::TextureBinding* binding,
     std::shared_ptr<const impeller::Texture> texture,
-    impeller::raw_ptr<const impeller::Sampler> sampler) {
+    const impeller::raw_ptr<const impeller::Sampler>& sampler) {
   if (absl::Status status = ValidateBinding(shader, binding); !status.ok()) {
     return status;
   }
@@ -143,12 +141,11 @@ absl::Status ComputePass::BindTexture(
   if (!sampler) {
     return absl::InvalidArgumentError("The sampler is null.");
   }
-  texture_bindings_.insert_or_assign(
-      &binding->metadata, TextureBinding{
-                              .texture = std::move(texture),
-                              // NOLINTNEXTLINE(performance-move-const-arg)
-                              .sampler = std::move(sampler),
-                          });
+  texture_bindings_.insert_or_assign(&binding->metadata,
+                                     TextureBinding{
+                                         .texture = std::move(texture),
+                                         .sampler = sampler,
+                                     });
   bindings_dirty_ = true;
   return absl::OkStatus();
 }
@@ -157,8 +154,6 @@ void ComputePass::BindSet(size_t slot, fml::RefPtr<BindingSet> set) {
   if (slot >= kMaxBindingSets) {
     return;
   }
-  // On debug this makes a difference, but not on release builds.
-  // NOLINTNEXTLINE(performance-move-const-arg)
   binding_sets_[slot] = std::move(set);
   bindings_dirty_ = true;
 }
@@ -172,20 +167,46 @@ void ComputePass::ClearBindings() {
   bindings_dirty_ = true;
 }
 
-// Returns the entry of `bindings` that fills the binding described by
-// `metadata`, searching the binding sets from the highest slot down, so that
-// a higher slot wins where two sets hold the same binding.
-template <typename T>
-static const T* FindInSets(const std::array<fml::RefPtr<BindingSet>,
-                                            ComputePass::kMaxBindingSets>& sets,
-                           const std::vector<T>& (BindingSet::*bindings)()
-                               const,
-                           const impeller::ShaderMetadata* metadata) {
-  for (auto set = sets.rbegin(); set != sets.rend(); ++set) {
-    if (!*set) {
+using BindingSets =
+    std::array<fml::RefPtr<BindingSet>, ComputePass::kMaxBindingSets>;
+
+// Returns the uniform or storage buffer binding that fills the binding
+// `metadata` describes, from the highest binding set slot that holds one, so
+// that a higher slot wins where two sets hold the same binding.
+static const BindingSet::BufferBinding* FindBufferInSets(
+    const BindingSets& sets,
+    const impeller::ShaderMetadata* metadata) {
+  for (int slot = static_cast<int>(sets.size()) - 1; slot >= 0; slot--) {
+    const fml::RefPtr<BindingSet>& set = sets[slot];
+    if (!set) {
       continue;
     }
-    for (const T& binding : ((**set).*bindings)()) {
+    for (const BindingSet::BufferBinding& binding : set->GetBufferBindings()) {
+      if (binding.metadata == metadata) {
+        return &binding;
+      }
+    }
+    for (const BindingSet::BufferBinding& binding :
+         set->GetStorageBufferBindings()) {
+      if (binding.metadata == metadata) {
+        return &binding;
+      }
+    }
+  }
+  return nullptr;
+}
+
+// The texture counterpart to `FindBufferInSets`.
+static const BindingSet::TextureBinding* FindTextureInSets(
+    const BindingSets& sets,
+    const impeller::ShaderMetadata* metadata) {
+  for (int slot = static_cast<int>(sets.size()) - 1; slot >= 0; slot--) {
+    const fml::RefPtr<BindingSet>& set = sets[slot];
+    if (!set) {
+      continue;
+    }
+    for (const BindingSet::TextureBinding& binding :
+         set->GetTextureBindings()) {
       if (binding.metadata == metadata) {
         return &binding;
       }
@@ -210,18 +231,15 @@ absl::Status ComputePass::ApplyBindings(const Shader& shader) {
         " '", name, "', but nothing is bound to it."));
   };
 
-  for (int i = 0;; i++) {
-    const Shader::UniformBinding* binding = shader.GetUniformStructAt(i);
-    if (!binding) {
-      break;
-    }
+  for (int i = 0;
+       const Shader::UniformBinding* binding = shader.GetUniformStructAt(i);
+       i++) {
     const impeller::BufferView* view = nullptr;
     if (auto found = buffer_bindings_.find(&binding->metadata);
         found != buffer_bindings_.end()) {
       view = &found->second;
-    } else if (const auto* set_binding =
-                   FindInSets(binding_sets_, &BindingSet::GetBufferBindings,
-                              &binding->metadata)) {
+    } else if (const BindingSet::BufferBinding* set_binding =
+                   FindBufferInSets(binding_sets_, &binding->metadata)) {
       view = &set_binding->view;
     }
     if (!view) {
@@ -235,18 +253,15 @@ absl::Status ComputePass::ApplyBindings(const Shader& shader) {
                                 binding->slot, &binding->metadata, *view);
   }
 
-  for (int i = 0;; i++) {
-    const Shader::StorageBufferBinding* binding = shader.GetStorageBufferAt(i);
-    if (!binding) {
-      break;
-    }
+  for (int i = 0; const Shader::StorageBufferBinding* binding =
+                      shader.GetStorageBufferAt(i);
+       i++) {
     const impeller::BufferView* view = nullptr;
     if (auto found = buffer_bindings_.find(&binding->metadata);
         found != buffer_bindings_.end()) {
       view = &found->second;
-    } else if (const auto* set_binding = FindInSets(
-                   binding_sets_, &BindingSet::GetStorageBufferBindings,
-                   &binding->metadata)) {
+    } else if (const BindingSet::BufferBinding* set_binding =
+                   FindBufferInSets(binding_sets_, &binding->metadata)) {
       view = &set_binding->view;
     }
     if (!view) {
@@ -260,20 +275,17 @@ absl::Status ComputePass::ApplyBindings(const Shader& shader) {
                                 binding->slot, &binding->metadata, *view);
   }
 
-  for (int i = 0;; i++) {
-    const Shader::TextureBinding* binding = shader.GetUniformTextureAt(i);
-    if (!binding) {
-      break;
-    }
+  for (int i = 0;
+       const Shader::TextureBinding* binding = shader.GetUniformTextureAt(i);
+       i++) {
     std::shared_ptr<const impeller::Texture> texture;
     impeller::raw_ptr<const impeller::Sampler> sampler;
     if (auto found = texture_bindings_.find(&binding->metadata);
         found != texture_bindings_.end()) {
       texture = found->second.texture;
       sampler = found->second.sampler;
-    } else if (const auto* set_binding =
-                   FindInSets(binding_sets_, &BindingSet::GetTextureBindings,
-                              &binding->metadata)) {
+    } else if (const BindingSet::TextureBinding* set_binding =
+                   FindTextureInSets(binding_sets_, &binding->metadata)) {
       texture = set_binding->texture;
       sampler = set_binding->sampler;
     } else {
@@ -305,7 +317,7 @@ absl::Status ComputePass::Dispatch(std::array<uint32_t, 3> workgroup_count) {
   }
 
   const std::array<uint32_t, 3> max_count =
-      context_->GetCapabilities()->GetMaximumComputeWorkgroupCount();
+      context_->GetCapabilities()->GetComputeLimits().max_workgroup_count;
   if (workgroup_count[0] > max_count[0] || workgroup_count[1] > max_count[1] ||
       workgroup_count[2] > max_count[2]) {
     return absl::OutOfRangeError(absl::StrCat(
