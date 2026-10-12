@@ -164,9 +164,23 @@ cc_test(
   // (research/08, step 3).
   ConvertedFile(
     '//flutter/impeller/core',
-    skip: <String, String>{
-      'allocator_unittests': 'needs //flutter/impeller/renderer/testing:mocks',
-    },
+    // As for //flutter/impeller/base: the suite runs on its own until
+    // GN's impeller_unittests converts.
+    appendix: '''
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+flutter_test_fixtures(name = "impeller_core_fixtures")
+
+cc_test(
+    name = "impeller_core_unittests",
+    deps = [
+        ":allocator_unittests",
+        ":impeller_core_fixtures",
+        "//engine/src/flutter/testing",
+    ],
+)
+''',
   ),
   ConvertedFile(
     '//flutter/impeller/runtime_stage',
@@ -267,6 +281,9 @@ cc_test(
       'renderer_dart_unittests': 'needs //flutter/lib/gpu',
     },
   ),
+  // The gmock doubles of the renderer's interfaces, which the core and
+  // other suites test against.
+  ConvertedFile('//flutter/impeller/renderer/testing'),
   ConvertedFile(
     '//flutter/impeller/typographer',
     skip: <String, String>{'typographer_unittests': 'needs //flutter/impeller/playground'},

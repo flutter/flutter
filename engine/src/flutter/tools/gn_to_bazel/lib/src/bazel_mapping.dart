@@ -73,6 +73,8 @@ const Map<String, String> labelOverrides = <String, String>{
   '//third_party/zlib': '@zlib',
   '//third_party/freetype2': '@freetype2',
   '//third_party/boringssl': '//engine/src/flutter/third_party/boringssl',
+  '//third_party/googletest:gtest': '@googletest//:gtest',
+  '//third_party/googletest:gmock': '@googletest//:gtest',
   // The Dart SDK, built by gn_build.
   '//flutter/third_party/dart/runtime:dart_api': '@dart//:dart_api_headers',
   '//flutter/third_party/dart/runtime:libdart_jit':
