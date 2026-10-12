@@ -250,15 +250,42 @@ class Xcode {
     return _processUtils.run(<String>[...xcrunCommand(), command, ...args], throwOnError: true);
   }
 
-  Future<String> sdkLocation(EnvironmentType environmentType) async {
+  Future<String> sdkLocation(EnvironmentType environmentType) =>
+      _sdkPath(getSDKNameForIOSEnvironmentType(environmentType));
+
+  /// Returns the path to the default macOS SDK.
+  ///
+  /// Used as the SDK root by commands that build macOS without Xcode, which
+  /// otherwise provides it as the `SDKROOT` build setting.
+  Future<String> macOSSdkLocation() => _sdkPath(XcodeSdk.MacOSX.platformName);
+
+  Future<String> _sdkPath(String sdk) async {
     final RunResult runResult = await _processUtils.run(<String>[
       ...xcrunCommand(),
       '--sdk',
-      getSDKNameForIOSEnvironmentType(environmentType),
+      sdk,
       '--show-sdk-path',
     ]);
     if (runResult.exitCode != 0) {
       throwToolExit('Could not find SDK location: ${runResult.stderr}');
+    }
+    return runResult.stdout.trim();
+  }
+
+  /// Returns the version of the SDK identified by [sdk].
+  ///
+  /// [sdk] is passed to `xcrun --sdk` and may be either a canonical SDK name
+  /// (for example 'iphoneos', 'iphonesimulator', or 'macosx') or the absolute
+  /// path to an SDK root, such as Xcode's `SDKROOT` build setting.
+  Future<String> sdkVersion(String sdk) async {
+    final RunResult runResult = await _processUtils.run(<String>[
+      ...xcrunCommand(),
+      '--sdk',
+      sdk,
+      '--show-sdk-version',
+    ]);
+    if (runResult.exitCode != 0) {
+      throwToolExit('Could not find SDK version: ${runResult.stderr}');
     }
     return runResult.stdout.trim();
   }
