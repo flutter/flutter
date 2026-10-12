@@ -35,6 +35,7 @@ GtkAccessible* fl_view_gtk4_accessibility_ref_first_native_child_for_testing(
     GtkAccessible* accessible);
 GtkAccessible* fl_view_gtk4_accessibility_ref_next_native_sibling_for_testing(
     GtkAccessible* accessible);
+// GTK logical coordinates relative to the native accessible parent.
 gboolean fl_view_gtk4_accessibility_get_native_bounds_for_testing(
     GtkAccessible* accessible,
     int* x,

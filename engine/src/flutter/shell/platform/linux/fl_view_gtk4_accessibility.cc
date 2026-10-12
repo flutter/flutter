@@ -380,21 +380,44 @@ static gboolean fl_gtk4_accessible_node_get_bounds(GtkAccessible* accessible,
                                                    int* width,
                                                    int* height) {
   FlGtk4AccessibleNode* self = FL_GTK4_ACCESSIBLE_NODE(accessible);
-  if (!self->has_bounds) {
+  if (!self->has_bounds || self->view == nullptr ||
+      (self->parent != nullptr && !self->parent->has_bounds)) {
     return FALSE;
   }
 
+  // Composed semantics bounds are in view physical pixels. GTK expects logical
+  // coordinates relative to the accessible parent and adds ancestor positions
+  // when answering AT-SPI window-coordinate queries. Convert both origins in
+  // the same view space before subtracting to preserve rounding across levels.
+  const double scale =
+      MAX(gtk_widget_get_scale_factor(self->view->render_area), 1);
+  const int left = static_cast<int>(floor(self->bounds_x / scale));
+  const int top = static_cast<int>(floor(self->bounds_y / scale));
+  const int parent_left =
+      self->parent == nullptr
+          ? 0
+          : static_cast<int>(floor(self->parent->bounds_x / scale));
+  const int parent_top =
+      self->parent == nullptr
+          ? 0
+          : static_cast<int>(floor(self->parent->bounds_y / scale));
   if (x != nullptr) {
-    *x = self->bounds_x;
+    *x = left - parent_left;
   }
   if (y != nullptr) {
-    *y = self->bounds_y;
+    *y = top - parent_top;
   }
   if (width != nullptr) {
-    *width = self->bounds_width;
+    *width = static_cast<int>(ceil(
+                 (static_cast<double>(self->bounds_x) + self->bounds_width) /
+                 scale)) -
+             left;
   }
   if (height != nullptr) {
-    *height = self->bounds_height;
+    *height = static_cast<int>(ceil(
+                  (static_cast<double>(self->bounds_y) + self->bounds_height) /
+                  scale)) -
+              top;
   }
   return TRUE;
 }

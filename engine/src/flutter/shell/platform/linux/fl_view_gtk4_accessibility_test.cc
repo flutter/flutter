@@ -551,6 +551,106 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   gtk_window_destroy(window);
 }
 
+// Check GTK's parent-relative geometry through an external AT-SPI client.
+TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
+  if (g_strcmp0(g_getenv("FLUTTER_TEST_ATSPI_GEOMETRY"), "1") != 0) {
+    GTEST_SKIP() << "Requires an external AT-SPI geometry client";
+  }
+  ASSERT_TRUE(fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing());
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  StartEngine(fl_view_get_engine(view));
+  FlutterSemanticsFlags flags[3] = {};
+  flags[2].is_button = true;
+  FlutterSemanticsNode2 root = {};
+  root.id = 0;
+  root.label = "Geometry root";
+  root.flags2 = &flags[0];
+  root.rect = {5, 7, 305, 207};
+  root.transform = {.scaleX = 2, .transX = 30, .scaleY = 2, .transY = 40};
+  int32_t root_children[] = {1};
+  root.child_count = 1;
+  root.children_in_traversal_order = root_children;
+  FlutterSemanticsNode2 group = {};
+  group.id = 1;
+  group.label = "Geometry group";
+  group.flags2 = &flags[1];
+  group.rect = {3, 5, 103, 85};
+  group.transform.transX = 20;
+  group.transform.transY = 10;
+  int32_t group_children[] = {2};
+  group.child_count = 1;
+  group.children_in_traversal_order = group_children;
+  FlutterSemanticsNode2 button = {};
+  button.id = 2;
+  button.label = "Geometry button";
+  button.flags2 = &flags[2];
+  button.actions = kFlutterSemanticsActionTap;
+  button.rect = {4.5, 6.5, 24.5, 16.5};
+  button.transform.transX = 7;
+  button.transform.transY = 11;
+  FlutterSemanticsNode2* nodes[] = {&root, &group, &button};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = fl_view_get_id(view);
+  update.node_count = G_N_ELEMENTS(nodes);
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, FALSE);
+  size_t calls = 0;
+  fl_engine_get_embedder_api(fl_view_get_engine(view))->SendSemanticsAction =
+      MOCK_ENGINE_PROC(SendSemanticsAction,
+                       ([&](auto engine, const auto* info) {
+                         EXPECT_EQ(info->view_id, fl_view_get_id(view));
+                         EXPECT_EQ(info->node_id, 2u);
+                         EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
+                         if (calls++ == 0) {
+                           root.transform.transX += 12;
+                           root.transform.transY += 8;
+                           FlutterSemanticsNode2* partial[] = {&root};
+                           FlutterSemanticsUpdate2 ancestor = update;
+                           ancestor.node_count = 1;
+                           ancestor.nodes = partial;
+                           fl_view_gtk4_accessibility_handle_update(
+                               view->accessibility_backend, &ancestor);
+                         } else {
+                           g_main_loop_quit(loop);
+                         }
+                         return kSuccess;
+                       }));
+  g_autoptr(GtkWidget) surface = GTK_WIDGET(g_object_ref(view->render_area));
+  g_signal_handlers_disconnect_by_data(surface, view);
+  gtk_box_remove(GTK_BOX(view), surface);
+  g_autoptr(GtkWindow) window = GTK_WINDOW(gtk_window_new());
+  g_object_ref_sink(window);
+  GtkWidget* host = gtk_fixed_new();
+  gtk_window_set_child(window, host);
+  gtk_widget_set_size_request(surface, 700, 600);
+  gtk_fixed_put(GTK_FIXED(host), surface, 37, 29);
+  gtk_window_set_default_size(window, 800, 700);
+  gtk_window_present(window);
+  g_print("GEOMETRY_SCALE %d\n", gtk_widget_get_scale_factor(surface));
+  g_print("GEOMETRY_RUNTIME {\"gtk\":\"%u.%u.%u\",\"glib\":\"%u.%u.%u\"}\n",
+          gtk_get_major_version(), gtk_get_minor_version(),
+          gtk_get_micro_version(), glib_major_version, glib_minor_version,
+          glib_micro_version);
+  guint timeout = g_timeout_add_seconds(
+      15,
+      [](gpointer data) -> gboolean {
+        g_main_loop_quit(static_cast<GMainLoop*>(data));
+        return G_SOURCE_REMOVE;
+      },
+      loop);
+  g_main_loop_run(loop);
+  if (calls == 2) {
+    g_source_remove(timeout);
+  }
+  EXPECT_EQ(calls, 2u);
+  gtk_fixed_remove(GTK_FIXED(host), surface);
+  gtk_box_append(GTK_BOX(view), surface);
+  gtk_window_destroy(window);
+}
+
 TEST_F(FlViewGtk4AccessibilityTest, PresentBeforeRealizeDoesNotWarn) {
   FlView* view = fl_view_new(project);
   ASSERT_NE(view, nullptr);
@@ -1042,7 +1142,8 @@ TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
                                            &ancestor_update);
   EXPECT_TRUE(fl_view_gtk4_accessibility_get_native_bounds_for_testing(
       updated_first_child, &x, &y, &width, &height));
-  EXPECT_EQ(x, 110);
+  // The root now starts at x=100. GTK adds that ancestor position itself.
+  EXPECT_EQ(x, 10);
   EXPECT_EQ(y, 19);
   EXPECT_EQ(width, 28);
   EXPECT_EQ(height, 48);

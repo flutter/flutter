@@ -133,6 +133,28 @@ python3 -m unittest discover \
   -p run_atspi_parity_test_test.py
 ```
 
+## Native AT-SPI geometry
+
+```sh
+python3 engine/src/flutter/shell/platform/linux/testing/run_gtk4_atspi_geometry_test.py \
+  engine/src/out/host_debug_unopt/flutter_linux_gtk4_unittests \
+  --output /tmp/flutter-gtk4-atspi-geometry.json
+```
+
+Requires the same native-tree, AT-SPI and Xvfb prerequisites as activation below.
+The runner creates private sessions with desktop-service autoactivation disabled,
+then starts the required accessibility services. It verifies parent and window
+coordinates through three semantic levels, composed scale/translation, nonzero
+semantic rectangle origins, and a render surface offset within a GTK host.
+It runs at GTK scale factors 1 and 2, checking logical-coordinate conversion and
+outward rounding. A native tap triggers a root-only transform update; retained
+objects must report the updated geometry and dispatch exactly two Flutter taps.
+The JSON records GTK/GLib versions, scale, queried rectangles and the binary hash.
+
+This tests Component geometry with a mocked engine. It does not establish
+screen-coordinate support, clipping/hit testing, text character extents,
+Wayland behavior, arbitrary fractional desktop scaling, or real Dart layout.
+
 ## Native AT-SPI activation
 
 ```sh
