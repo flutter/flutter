@@ -703,6 +703,10 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//flutter/impeller/tools/impeller.gni',
     '//flutter/impeller/tools/args.gni',
     '//flutter/impeller/tools/component.gni',
+    // The shell_gpu_configuration template: a group over the GPU surfaces
+    // and a config of SHELL_ENABLE_* defines, chosen by the invoker's
+    // booleans.
+    '//flutter/shell/gpu/gpu.gni',
     '//flutter/third_party/glfw/glfw_args.gni',
     // The engine's answers to the Khronos trees' build_overrides (where
     // SPIRV-Headers and SPIRV-Tools are, build_with_chromium = false) and

@@ -414,6 +414,20 @@ exports_files(glob(["third_party/fonts/*"]))
     skip: <String, String>{'display_list_surface_provider': 'needs //flutter/common/graphics'},
   ),
   ConvertedFile('//flutter/assets'),
+  // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
+  // and the GPU surfaces; what converts now is what //flutter/common/graphics
+  // and the shell's own small libraries need.
+  ConvertedFile(
+    '//flutter/shell/common',
+    skip: <String, String>{
+      'common': 'needs //flutter/flow, //flutter/lib/ui, //flutter/runtime and //flutter/third_party/tonic',
+      'shell_unittests_gpu_configuration': 'needs //flutter/shell/gpu',
+      'shell_unittests_fixtures': 'Dart fixtures (dart_main) are not supported yet',
+      'shell_benchmarks': 'needs :common and //flutter/benchmarking',
+      'shell_test_fixture_sources': 'needs :common',
+      'shell_unittests': 'needs :common',
+    },
+  ),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia
