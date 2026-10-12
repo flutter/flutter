@@ -210,6 +210,22 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/vulkan-headers/src/BUILD.gn"],
         gn_repository = "@vulkan-headers=//flutter/third_party/vulkan-deps/vulkan-headers/src",
     ),
+    # VulkanMemoryAllocator (one header), from the secondary tree's GN: a
+    # config of defines and warning flags over the Vulkan headers.
+    "vulkan_memory_allocator": struct(
+        path = "engine/src/flutter/third_party/vulkan_memory_allocator",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/vulkan_memory_allocator/BUILD.gn"],
+        gn_repository = "@vulkan_memory_allocator=//flutter/third_party/vulkan_memory_allocator",
+    ),
+    # ANGLE's headers alone (GLES2/GLES3/EGL/KHR), which Impeller's GLES
+    # backend includes on every platform; ANGLE as a GL implementation (the
+    # test surfaces' libEGL/libGLESv2) is a later conversion of its 2,000-line
+    # BUILD.gn, so the overlay stands in until then.
+    "angle": struct(
+        path = "engine/src/flutter/third_party/angle",
+        build_file = _OVERLAYS + ":angle/BUILD.angle.bazel",
+    ),
     "shaderc": struct(
         path = "engine/src/flutter/third_party/shaderc",
         build_file = None,
