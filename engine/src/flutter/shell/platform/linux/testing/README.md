@@ -155,6 +155,19 @@ This tests Component geometry with a mocked engine. It does not establish
 screen-coordinate support, clipping/hit testing, text character extents,
 Wayland behavior, arbitrary fractional desktop scaling, or real Dart layout.
 
+Add `--check-hit-testing` to require native Contains and GetAccessibleAtPoint
+results to match the queried parent/window rectangles before and after the
+ancestor update. It checks rectangle boundaries and deepest-descendant lookup.
+The report records the loaded GTK library path and hash as well as its version.
+
+This strict gate fails on the tested stock GTK 4.22.5: containment compares local
+points to the object's position instead of size, and point lookup subtracts the
+queried object's origin twice. An independent GTK correction and standalone
+reproduction are tracked in the accessibility investigation. Use a GTK runtime
+with that correction to pass this gate; the Flutter bridge does not carry a
+workaround. The default geometry command continues to test bounds on stock GTK.
+Passing hit checks does not establish clipping or Flutter paint/hit-test order.
+
 ## Native AT-SPI activation
 
 ```sh
