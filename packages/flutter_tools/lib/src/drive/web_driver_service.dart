@@ -215,6 +215,21 @@ class WebDriverService extends DriverService {
         'For instructions on how to obtain and run a WebDriver server, see:\n'
         'https://flutter.dev/to/integration-test-on-web\n',
       );
+    } on async_io.WebDriverException catch (error) {
+      // The WebDriver server is reachable, but it could not create a browser
+      // session. This typically happens when the browser fails to launch, when
+      // the browser and WebDriver server versions do not match, or when the
+      // session request times out.
+      logger.printTrace('$error');
+      throwToolExit(
+        'Unable to start a WebDriver session for web testing.\n'
+        'The WebDriver server running at $driverPort could not create a browser session:\n'
+        '$error\n'
+        'Make sure the browser is installed and that its version is compatible with '
+        'the WebDriver server (e.g. chromedriver must match the installed Chrome version).\n'
+        'For instructions on how to obtain and run a WebDriver server, see:\n'
+        'https://flutter.dev/to/integration-test-on-web\n',
+      );
     }
 
     if (!isAndroidChrome && browserDimension != null) {

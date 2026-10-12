@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/net.dart';
@@ -19,6 +20,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/chrome_constants.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
+import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
@@ -410,6 +412,47 @@ void main() {
     },
     overrides: <Type, Generator>{
       WebRunnerFactory: () => FakeWebRunnerFactory(doResolveToError: true),
+    },
+  );
+
+  testUsingContext(
+    'WebDriverService exits the tool when the WebDriver server cannot create a session',
+    () async {
+      // A fake WebDriver server that rejects every session request, the way
+      // chromedriver does when it cannot launch the browser.
+      final io.HttpServer driverServer = await io.HttpServer.bind(
+        io.InternetAddress.loopbackIPv4,
+        0,
+      );
+      addTearDown(() => driverServer.close(force: true));
+      driverServer.listen((io.HttpRequest request) {
+        request.response
+          ..statusCode = io.HttpStatus.internalServerError
+          ..headers.contentType = io.ContentType.json
+          ..write(
+            json.encode(<String, Object?>{
+              'value': <String, Object?>{
+                'error': 'session not created',
+                'message': "session not created: DevToolsActivePort file doesn't exist",
+                'stacktrace': '',
+              },
+            }),
+          );
+        unawaited(request.response.close());
+      });
+
+      final WebDriverService service = setUpDriverService();
+      await expectLater(
+        service.startTest(
+          'test_driver/app_test.dart',
+          <String>[],
+          PackageConfig.empty,
+          browserName: 'chrome',
+          headless: true,
+          driverPort: driverServer.port,
+        ),
+        throwsToolExit(message: "DevToolsActivePort file doesn't exist"),
+      );
     },
   );
 }
