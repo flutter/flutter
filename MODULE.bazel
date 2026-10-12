@@ -68,6 +68,7 @@ use_repo(
     "spirv-headers",
     "spirv-tools",
     "sysroot_linux_x64",
+    "vulkan-headers",
     "wuffs",
     "zlib",
 )

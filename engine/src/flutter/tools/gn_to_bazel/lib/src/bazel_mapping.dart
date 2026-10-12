@@ -118,6 +118,8 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/harfbuzz': '@harfbuzz',
   // The desktop embeddings' JSON (header-only; its own GN in the synced tree).
   '//flutter/third_party/rapidjson': '@rapidjson',
+  // The Vulkan headers (header-only; the tree's own GN).
+  '//flutter/third_party/vulkan-deps/vulkan-headers/src': '@vulkan-headers',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -142,6 +144,7 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/vulkan-deps/spirv-headers/src/': '@spirv-headers//',
   '//flutter/third_party/vulkan-deps/spirv-tools/src/': '@spirv-tools//',
   '//flutter/third_party/vulkan-deps/glslang/src/': '@glslang//',
+  '//flutter/third_party/vulkan-deps/vulkan-headers/src/': '@vulkan-headers//',
   '//flutter/third_party/shaderc/': '@shaderc//',
   '//flutter/third_party/re2/': '@re2//',
   '//flutter/third_party/libtess2/': '@libtess2//',
@@ -177,6 +180,10 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/third_party/vulkan-deps/glslang/src:glslang_sources': <String>['-Wno-conversion'],
   '//flutter/third_party/vulkan-deps/glslang/src:glslang_default_resource_limits_sources': <String>[
     '-Wno-conversion',
+  ],
+  // vulkan_headers_config's one flag, under is_clang.
+  '//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers': <String>[
+    '-Wno-redundant-parens',
   ],
 };
 
@@ -516,6 +523,7 @@ const Set<String> knownExternalVariables = <String>{
   'is_ios',
   'is_linux',
   'is_mac',
+  'is_minimal_linux',
   'is_official_build',
   'is_qnx',
   'is_wasm',
@@ -714,6 +722,7 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     '//build_overrides/build.gni',
     '//build_overrides/spirv_tools.gni',
     '//build_overrides/glslang.gni',
+    '//build_overrides/vulkan_headers.gni',
     '//flutter/third_party/vulkan-deps/',
   },
   known: <String>{
@@ -755,6 +764,9 @@ Assumptions linuxHostAssumptions() {
     'is_ios': GnBoolValue(false),
     'is_linux': GnBoolValue(true),
     'is_mac': GnBoolValue(false),
+    // BUILDCONFIG.gn's default; tools/gn sets it only for the Dart SDK's
+    // own configuration (the wrap's args).
+    'is_minimal_linux': GnBoolValue(false),
     'is_official_build': GnBoolValue(true),
     'is_qnx': GnBoolValue(false),
     'is_wasm': GnBoolValue(false),

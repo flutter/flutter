@@ -201,6 +201,15 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/spirv-tools/src/BUILD.gn"],
         gn_repository = "@spirv-tools=//flutter/third_party/vulkan-deps/spirv-tools/src",
     ),
+    # The Vulkan headers (//flutter/common/graphics and the Vulkan backends),
+    # from the tree's own GN; the platform defines come out as the engine's
+    # build_overrides/vulkan_headers.gni sets them.
+    "vulkan-headers": struct(
+        path = "engine/src/flutter/third_party/vulkan-deps/vulkan-headers/src",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/third_party/vulkan-deps/vulkan-headers/src/BUILD.gn"],
+        gn_repository = "@vulkan-headers=//flutter/third_party/vulkan-deps/vulkan-headers/src",
+    ),
     "shaderc": struct(
         path = "engine/src/flutter/third_party/shaderc",
         build_file = None,
