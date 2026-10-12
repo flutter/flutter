@@ -207,6 +207,9 @@ const Map<String, String> genDirIncludeTargets = <String, String>{
 /// paths as `//dir`.
 const Map<String, String> includeDirLibraries = <String, String>{
   '//flutter/third_party/angle/include': '@angle//:headers',
+  // tonic's config: its headers as "tonic/..." and "third_party/tonic/...".
+  '//flutter/third_party': '//engine/src/flutter/third_party:include_dir',
+  '//flutter': '//engine/src/flutter:config',
 };
 
 /// Compiler flags that GN hands to the dependents of a target through one
