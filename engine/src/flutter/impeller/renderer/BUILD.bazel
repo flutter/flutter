@@ -85,9 +85,9 @@ cc_library(
         "vertex_buffer_builder.h",
         "vertex_descriptor.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":compute_shaders",  # impeller_enable_compute

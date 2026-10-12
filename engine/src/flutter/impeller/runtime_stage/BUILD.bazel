@@ -43,9 +43,9 @@ cc_library(
     name = "runtime_stage",
     srcs = ["runtime_stage.cc"],
     hdrs = ["runtime_stage.h"],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":runtime_stage_flatbuffers",

@@ -14,9 +14,9 @@ cc_library(
     name = "utilities",
     srcs = ["utilities.cc"],
     hdrs = ["utilities.h"],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     # Current versions of libcxx have deprecated some of the UTF-16 string
     # conversion APIs.
     local_defines = FLUTTER_LOCAL_DEFINES + ["_LIBCPP_DISABLE_DEPRECATION_WARNINGS"],
@@ -69,10 +69,11 @@ cc_library(
         "types.h",
         "uniform_sorter.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
         "-Wno-unused-variable",  # from //third_party/inja
         "-Wno-newline-eof",  # from //third_party/inja
-        "-Wthread-safety-analysis",  # is_clang
     ],
     # Current versions of libcxx have deprecated some of the UTF-16 string
     # conversion APIs.
@@ -100,9 +101,9 @@ cc_library(
 cc_binary(
     name = "impellerc",
     srcs = ["impellerc_main.cc"],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":compiler_lib",
@@ -127,9 +128,9 @@ cc_library(
         "switches_unittests.cc",
     ],
     hdrs = ["compiler_test.h"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":compiler_lib",

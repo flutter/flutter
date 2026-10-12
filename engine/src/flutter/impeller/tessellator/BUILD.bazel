@@ -20,9 +20,9 @@ cc_library(
         "path_tessellator.h",
         "tessellator.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     linkstatic = True,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
@@ -39,9 +39,9 @@ cc_library(
     name = "tessellator_libtess",
     srcs = ["tessellator_libtess.cc"],
     hdrs = ["tessellator_libtess.h"],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":tessellator",
@@ -61,9 +61,9 @@ cc_binary(
         "c/tessellator.cc",
         "c/tessellator.h",
     ],
-    copts = FLUTTER_COPTS + [
+    copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ],
+    ] + FLUTTER_COPTS,
     linkshared = True,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
