@@ -112,14 +112,16 @@ if (enable_unittests) {
     shader_bundle_output = "test_alt.shaderbundle"
   }
 
-  # Same entrypoint names as `flutter_gpu_shaders` but `UnlitFragment` and
-  # `ComputeScale` map to different sources. Used by `shader_reload_test.dart`
-  # to reload a bundle in place and verify only the changed shaders are marked
-  # dirty.
+  # Same entrypoint names as `flutter_gpu_shaders` but `UnlitFragment`,
+  # `ComputeScale` and `ComputeScaleWithUnused` map to different sources. Used
+  # by `shader_reload_test.dart` to reload a bundle in place and verify only
+  # the changed shaders are marked dirty, and that a storage buffer the reload
+  # removes (`Unused`) is reported as removed.
   impellerc("flutter_gpu_shaders_reload") {
     shaders = [
       "//flutter/impeller/fixtures/flutter_gpu_unlit_reload.frag",
       "//flutter/impeller/fixtures/flutter_gpu_unlit.vert",
+      "//flutter/impeller/fixtures/flutter_gpu_compute_scale.comp",
       "//flutter/impeller/fixtures/flutter_gpu_compute_scale_reload.comp",
       "//flutter/impeller/fixtures/flutter_gpu_compute_triangle.comp",
     ]
@@ -130,6 +132,7 @@ if (enable_unittests) {
       "\"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}",
       "\"ComputeScale\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_scale_reload.comp\"}",
       "\"ComputeTriangle\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_triangle.comp\"}",
+      "\"ComputeScaleWithUnused\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_scale.comp\"}",
     ]
     shader_bundle = "{" + string_join(", ", shader_bundle_entries) + "}"
     shader_bundle_output = "test_reload.shaderbundle"

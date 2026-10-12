@@ -131,8 +131,9 @@ base class ComputePass extends NativeFieldWrapperClass1
   /// Binds [bufferView] to the storage buffer [slot] for subsequent
   /// dispatches.
   ///
-  /// Throws if the shader declares no storage buffer named by [slot], or if
-  /// [bufferView] cannot back it: the view must lie within its buffer, cover
+  /// Throws a [StateError] if a hot reload removed the storage buffer from
+  /// [slot]'s shader, or an [ArgumentError] if [bufferView] cannot back it:
+  /// the view must lie within its buffer, cover
   /// [StorageBufferSlot.sizeInBytes], hold whole elements of a trailing
   /// runtime-sized array, and start at a multiple of
   /// [GpuContext.minimumStorageBufferByteAlignment]. Out-of-bounds storage
