@@ -87,6 +87,7 @@ Future<Depfile> copyAssets(
     logger: environment.logger,
     fileSystem: environment.fileSystem,
     artifacts: environment.artifacts,
+    platform: environment.platform,
   );
   final assetTransformer = AssetTransformer(
     processManager: environment.processManager,

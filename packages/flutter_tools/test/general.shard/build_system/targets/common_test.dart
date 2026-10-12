@@ -689,7 +689,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testUsingContext('AotElfProfile Produces correct output directory', () async {
+  testWithoutContext('AotElfProfile Produces correct output directory', () async {
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
       FakeCommand(
@@ -715,7 +715,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('AotElfRelease configures gen_snapshot with code size directory', () async {
+  testWithoutContext('AotElfRelease configures gen_snapshot with code size directory', () async {
     androidEnvironment.defines[kCodeSizeDirectory] = 'code_size_1';
     final String build = androidEnvironment.buildDir.path;
     processManager.addCommands(<FakeCommand>[
@@ -744,7 +744,7 @@ void main() {
     expect(processManager, hasNoRemainingExpectations);
   });
 
-  testUsingContext('AotElfProfile throws error if missing build mode', () async {
+  testWithoutContext('AotElfProfile throws error if missing build mode', () async {
     androidEnvironment.defines.remove(kBuildMode);
 
     expect(
@@ -753,7 +753,7 @@ void main() {
     );
   });
 
-  testUsingContext('AotElfProfile throws error if missing target platform', () async {
+  testWithoutContext('AotElfProfile throws error if missing target platform', () async {
     androidEnvironment.defines.remove(kTargetPlatform);
 
     expect(
@@ -873,7 +873,7 @@ void main() {
     },
   );
 
-  testUsingContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
+  testWithoutContext('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
     androidEnvironment.defines[kExtraGenSnapshotOptions] = 'foo,bar,baz=2';
     androidEnvironment.defines[kBuildMode] = BuildMode.profile.cliName;
     final String build = androidEnvironment.buildDir.path;
