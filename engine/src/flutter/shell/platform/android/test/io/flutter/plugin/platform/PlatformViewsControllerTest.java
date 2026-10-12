@@ -4,11 +4,10 @@
 
 package io.flutter.plugin.platform;
 
-import static android.os.Looper.getMainLooper;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import android.app.Presentation;
 import android.content.Context;
@@ -1519,7 +1518,7 @@ public class PlatformViewsControllerTest {
     platformViewsController.onBeginFrame();
     platformViewsController.onEndFrame();
 
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     verify(overlayImageView, times(1)).detachFromRenderer();
   }
 
