@@ -36,6 +36,7 @@ import argparse
 import collections
 import json
 import os
+import shlex
 import sys
 
 # Bazel's name for a synced tree -> its path under engine/src. Mirrors the
@@ -190,7 +191,9 @@ def gn_commands(compile_commands_path, wanted):
     source = os.path.normpath(os.path.join(out_dir, entry['file']))
     if source not in wanted:
       continue
-    commands[source] = normalize(entry['command'].split()[1:], 'gn', out_dir)
+    # The command is a shell line (ninja's): shlex gives the argv the compiler
+    # saw, with GN's \" around a define's value read as the quote it is.
+    commands[source] = normalize(shlex.split(entry['command'])[1:], 'gn', out_dir)
   return commands
 
 
