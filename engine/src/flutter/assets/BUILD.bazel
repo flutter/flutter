@@ -1,0 +1,54 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/assets/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "assets",
+    srcs = [
+        "asset_manager.cc",
+        "directory_asset_bundle.cc",
+        "native_assets.cc",
+    ],
+    hdrs = [
+        "asset_manager.h",
+        "asset_resolver.h",
+        "directory_asset_bundle.h",
+        "native_assets.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/fml",
+        "@rapidjson",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "assets_fixtures",
+)
+
+cc_test(
+    name = "assets_unittests",
+    size = "small",
+    srcs = ["native_assets_unittests.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":assets",
+        ":assets_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing",
+    ],
+)
