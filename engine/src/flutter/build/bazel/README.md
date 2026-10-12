@@ -199,6 +199,33 @@ The tools run in Bazel's exec configuration -- GN's `host_toolchain` for
 toolchain is the host's. That is the cost of a build that can also cross
 compile; a remote or disk cache absorbs it.
 
+## Build speed: the cache and the sandbox
+
+The root `.bazelrc` turns on a per-user disk cache (`~/.cache/
+flutter_engine_bazel`, garbage-collected to 20 GB). It is content-addressed
+and shared by every checkout and output base, so the second cold build of
+the same inputs -- after `bazel clean`, in a second checkout, after a branch
+switch and back -- is a cache hit for every action: measured at 78 s against
+772 s for `display_list_unittests` from a clean output base, the exec
+configuration included. It also covers a case the local action cache does
+not: setting a Starlark flag (`--//engine/src/flutter/impeller/tools:
+enable_vulkan=false`) and setting it back re-runs the affected actions
+(`fml`'s 674 compiles) without the disk cache, and takes 7 s with it. CI
+will use `--remote_cache` instead; the local cache is the same mechanism
+without the network.
+
+The sandbox is the other measured cost. With the toolchain's header trees as
+directory inputs (see the toolchain section) a compile has ~4,200 inputs,
+each a symlink per action; `--spawn_strategy=local` skips the sandbox and the
+cold build drops from ~770 s to ~550 s on this machine, at the price of not
+catching undeclared inputs -- fine for a developer, not for CI.
+`--sandbox_base=/dev/shm` keeps the sandbox and puts its trees on tmpfs
+(~620 s), but Bazel deletes sandbox directories asynchronously and a large
+build can exhaust the tmpfs's inodes (the exit test alone used 7 M of 12 M
+and left its tree behind after `bazel shutdown`); use it knowingly, with
+`--experimental_sandbox_async_tree_delete_idle_threads=0` or a sweep of
+`/dev/shm/bazel-sandbox.*`. Both belong in `user.bazelrc`, not here.
+
 ## Adding a dependency
 
 1. Make sure `deps.lock.bzl` is current (`gen_deps.dart --check`).
