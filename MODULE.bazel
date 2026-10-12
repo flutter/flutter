@@ -73,6 +73,12 @@ use_repo(
     "zlib",
 )
 
+# The version strings tools/gn computes when it generates a GN build (the
+# engine's git revision, the content hash, Skia's and Dart's DEPS revisions),
+# for //engine/src/flutter/shell/version.
+engine_version = use_extension("//engine/src/flutter/build/bazel:extensions.bzl", "engine_version")
+use_repo(engine_version, "engine_version")
+
 # The engine's hermetic C/C++ toolchains. Nothing falls back to a compiler
 # found on the host (see BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN in .bazelrc).
 register_toolchains(

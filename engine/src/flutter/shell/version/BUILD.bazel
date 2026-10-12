@@ -1,0 +1,29 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/version/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@engine_version//:version.bzl", "CONTENT_HASH", "DART_VERSION", "ENGINE_VERSION", "SKIA_VERSION")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "version",
+    srcs = ["version.cc"],
+    hdrs = ["version.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "FLUTTER_ENGINE_VERSION=\\\"" + ENGINE_VERSION + "\\\"",
+        "FLUTTER_CONTENT_HASH=\\\"" + CONTENT_HASH + "\\\"",
+        "SKIA_VERSION=\\\"" + SKIA_VERSION + "\\\"",
+        "DART_VERSION=\\\"" + DART_VERSION + "\\\"",
+    ],
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+    ],
+    alwayslink = True,
+)

@@ -313,6 +313,30 @@ source_set("x") {
       );
     });
 
+    test('keeps an external variable inside a string as a reference', () async {
+      final GnFileEvaluation evaluation = await evaluate(r'''
+source_set("version") {
+  sources = [ "version.cc" ]
+  defines = [
+    "FLUTTER_ENGINE_VERSION=\"$engine_version\"",
+    "BOTH=${engine_version}$content_hash",
+  ]
+}
+''');
+      expect(evaluation.targets.single.variables['defines']!.unconditionalItems, <GnValue>[
+        const GnExpandedString(<GnValue>[
+          GnStringValue('FLUTTER_ENGINE_VERSION="'),
+          GnReference('engine_version'),
+          GnStringValue('"'),
+        ]),
+        const GnExpandedString(<GnValue>[
+          GnStringValue('BOTH='),
+          GnReference('engine_version'),
+          GnReference('content_hash'),
+        ]),
+      ]);
+    });
+
     test('follows boolean variables, decided or not', () async {
       final GnFileEvaluation evaluation = await evaluate('''
 use_swiftshader = enable_unittests && shell_enable_gl
@@ -2049,6 +2073,48 @@ config("flutter_config") {
         contains(
           'cc_library(\n    name = "flutter_config",\n    defines = FLUTTER_FEATURE_DEFINES,\n)\n',
         ),
+      );
+    });
+
+    test('a string around an external reference is a concatenation; defines are escaped '
+        "for Bazel's tokenizer", () async {
+      final String output = await convert(r'''
+source_set("version") {
+  sources = [ "version.cc" ]
+  defines = [
+    "FLUTTER_ENGINE_VERSION=\"$engine_version\"",
+    "SKIA_VERSION=\"$skia_version\"",
+  ]
+  public_configs = [ "//flutter:config" ]
+}
+
+config("quoted") {
+  defines = [ "GREETING=\"hello world\"" ]
+}
+''');
+      expect(
+        output,
+        contains('load("@engine_version//:version.bzl", "ENGINE_VERSION", "SKIA_VERSION")\n'),
+      );
+      // Bazel tokenizes `defines` like a shell, so the quotes GN hands the
+      // compiler verbatim are escaped (`\"` in the attribute value).
+      expect(
+        output,
+        contains(r'''
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "FLUTTER_ENGINE_VERSION=\\\"" + ENGINE_VERSION + "\\\"",
+        "SKIA_VERSION=\\\"" + SKIA_VERSION + "\\\"",
+    ],
+'''),
+      );
+      expect(
+        output,
+        contains(r'''
+cc_library(
+    name = "quoted",
+    defines = ["GREETING=\\\"hello\\ world\\\""],
+)
+'''),
       );
     });
 
