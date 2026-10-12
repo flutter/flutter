@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:webdriver/async_io.dart' as async_io;
 
 import '../base/common.dart';
@@ -15,13 +16,13 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
@@ -30,16 +31,19 @@ import 'drive_service.dart';
 
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
-  WebDriverService({required this._dartSdkPath, required ToolContext toolContext})
-    : _processUtils = ProcessUtils(
-        processManager: toolContext.processManager,
-        logger: toolContext.logger,
-      ),
-      _toolContext = toolContext;
+  WebDriverService({
+    required this._analytics,
+    required this.buildSystem,
+    required this.buildTargets,
+    required this._dartSdkPath,
+    required this._toolContext,
+  });
 
-  final ToolContext _toolContext;
-  final ProcessUtils _processUtils;
+  final Analytics _analytics;
+  final BuildSystem buildSystem;
+  final BuildTargets buildTargets;
   final String _dartSdkPath;
+  final ToolContext _toolContext;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -66,12 +70,6 @@ class WebDriverService extends DriverService {
     Map<String, Object> platformArgs = const <String, Object>{},
     Map<String, String> webDefines = const <String, String>{},
   }) async {
-    final ToolContext(
-      :Logger logger,
-      :Terminal terminal,
-      :Platform platform,
-      :OutputPreferences outputPreferences,
-    ) = _toolContext;
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
       toolContext: _toolContext,
@@ -79,6 +77,7 @@ class WebDriverService extends DriverService {
       target: mainPath,
       userIdentifier: userIdentifier,
     );
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
       target: mainPath,
@@ -99,14 +98,11 @@ class WebDriverService extends DriverService {
       platformArgs: platformArgs,
       stayResident: true,
       webDefines: webDefines,
-      flutterProject: FlutterProject.current(),
-      fileSystem: globals.fs,
-      analytics: globals.analytics,
-      logger: logger,
-      terminal: terminal,
-      platform: platform,
-      outputPreferences: outputPreferences,
-      systemClock: globals.systemClock,
+      flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
+      analytics: _analytics,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
+      toolContext: _toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();
     final Future<int?> runFuture = _residentRunner.run(
@@ -163,13 +159,14 @@ class WebDriverService extends DriverService {
     List<String>? browserDimension,
     String? profileMemory,
   }) async {
-    final ToolContext(:Logger logger, :Platform platform) = _toolContext;
+    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
+        _toolContext;
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(browserName);
     final isAndroidChrome = browser == Browser.androidChrome;
     late int width;
     late int height;
-    Map<String, dynamic>? mobileEmulation;
+    Map<String, Object?>? mobileEmulation;
 
     // Do not resize Android Chrome browser.
     // For PC Chrome use mobileEmulation if dpr is provided.
@@ -182,8 +179,8 @@ class WebDriverService extends DriverService {
         width = int.parse(browserDimension[0]);
         height = int.parse(browserDimension[1]);
         if (len == 3) {
-          mobileEmulation = <String, dynamic>{
-            'deviceMetrics': <String, dynamic>{
+          mobileEmulation = <String, Object?>{
+            'deviceMetrics': <String, Object?>{
               'width': width,
               'height': height,
               'pixelRatio': double.parse(browserDimension[2]),
@@ -225,7 +222,7 @@ class WebDriverService extends DriverService {
       await window.setLocation(const math.Point<int>(0, 0));
       await window.setSize(math.Rectangle<int>(0, 0, width, height));
     }
-    final int result = await _processUtils.stream(
+    final int result = await processUtils.stream(
       <String>[_dartSdkPath, ...arguments, testFile],
       environment: <String, String>{
         ...platform.environment,
@@ -321,22 +318,22 @@ enum Browser implements CliEnum {
 /// Returns desired capabilities for given [browser], [headless], [chromeBinary]
 /// and [webBrowserFlags].
 @visibleForTesting
-Map<String, dynamic> getDesiredCapabilities(
+Map<String, Object?> getDesiredCapabilities(
   Browser browser,
   bool? headless, {
-  Platform platform = const LocalPlatform(),
-  List<String> webBrowserFlags = const <String>[],
+  required Platform platform,
   String? chromeBinary,
-  Map<String, dynamic>? mobileEmulation,
+  Map<String, Object?>? mobileEmulation,
+  List<String> webBrowserFlags = const <String>[],
 }) => switch (browser) {
-  Browser.chrome => <String, dynamic>{
+  Browser.chrome => <String, Object?>{
     'acceptInsecureCerts': true,
     'browserName': 'chrome',
     'goog:loggingPrefs': <String, String>{
       async_io.LogType.browser: 'INFO',
       async_io.LogType.performance: 'ALL',
     },
-    'goog:chromeOptions': <String, dynamic>{
+    'goog:chromeOptions': <String, Object?>{
       'w3c': true,
       'args': <String>[
         '--bwsi',
@@ -378,12 +375,12 @@ Map<String, dynamic> getDesiredCapabilities(
       'mobileEmulation': ?mobileEmulation,
     },
   },
-  Browser.firefox => <String, dynamic>{
+  Browser.firefox => <String, Object?>{
     'acceptInsecureCerts': true,
     'browserName': 'firefox',
-    'moz:firefoxOptions': <String, dynamic>{
+    'moz:firefoxOptions': <String, Object?>{
       'args': <String>[if (headless!) '-headless', ...webBrowserFlags],
-      'prefs': <String, dynamic>{
+      'prefs': <String, Object?>{
         'dom.file.createInChild': true,
         'dom.timeout.background_throttling_max_budget': -1,
         'media.autoplay.default': 0,
@@ -396,17 +393,17 @@ Map<String, dynamic> getDesiredCapabilities(
       'log': <String, String>{'level': 'trace'},
     },
   },
-  Browser.edge => <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'},
-  Browser.safari => <String, dynamic>{'browserName': 'safari'},
-  Browser.iosSafari => <String, dynamic>{
+  Browser.edge => <String, Object?>{'acceptInsecureCerts': true, 'browserName': 'edge'},
+  Browser.safari => <String, Object?>{'browserName': 'safari'},
+  Browser.iosSafari => <String, Object?>{
     'platformName': 'ios',
     'browserName': 'safari',
     'safari:useSimulator': true,
   },
-  Browser.androidChrome => <String, dynamic>{
+  Browser.androidChrome => <String, Object?>{
     'browserName': 'chrome',
     'platformName': 'android',
-    'goog:chromeOptions': <String, dynamic>{
+    'goog:chromeOptions': <String, Object?>{
       'androidPackage': 'com.android.chrome',
       'args': <String>['--disable-fullscreen', ...webBrowserFlags],
     },

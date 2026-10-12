@@ -4,6 +4,7 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -591,6 +592,65 @@ void main() {
     await runner.run(<String>['build', 'web', '--no-pub', '--no-wasm-dry-run']);
   });
 
+  testWithoutContext('Passes --no-deprecated-js-interop to dart2js but not dart2wasm', () async {
+    final buildCommand = TestWebBuildCommand(
+      fileSystem: fileSystem,
+      platform: fakePlatform,
+      processManager: processManager,
+      buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
+        expect(configs, hasLength(2));
+        final WebCompilerConfig wasmConfig = configs[0];
+        final WebCompilerConfig jsConfig = configs[1];
+        expect(wasmConfig.compileTarget, CompileTarget.wasm);
+        expect(jsConfig.compileTarget, CompileTarget.js);
+        expect(
+          jsConfig.toCommandOptions(BuildMode.release),
+          contains('--no-deprecated-js-interop'),
+        );
+        expect(
+          wasmConfig.toCommandOptions(BuildMode.release),
+          isNot(contains('--no-deprecated-js-interop')),
+        );
+      }),
+    );
+    final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+    setupFileSystemForEndToEndTest(fileSystem);
+    await runner.run(<String>['build', 'web', '--no-pub', '--wasm', '--no-deprecated-js-interop']);
+  });
+
+  for (final (List<String> flags, bool expectedOmit) in <(List<String>, bool)>[
+    (<String>[], false),
+    (<String>['--deprecated-js-interop'], false),
+    (<String>['--no-deprecated-js-interop'], true),
+  ]) {
+    testWithoutContext(
+      'Wasm dry run omits deprecated JS interop findings: $expectedOmit with $flags',
+      () async {
+        final buildCommand = TestWebBuildCommand(
+          fileSystem: fileSystem,
+          platform: fakePlatform,
+          processManager: processManager,
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            final List<WebCompilerConfig> configs = (target as WebServiceWorker).compileConfigs;
+            final WasmCompilerConfig dryRunConfig = configs.whereType<WasmCompilerConfig>().single;
+            expect(dryRunConfig.dryRun, isTrue);
+            expect(dryRunConfig.omitDeprecatedJsInteropFindings, expectedOmit);
+          }),
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+        setupFileSystemForEndToEndTest(fileSystem);
+        await runner.run(<String>['build', 'web', '--no-pub', ...flags]);
+      },
+    );
+  }
+
   testWithoutContext(
     'Defaults to web renderer skwasm mode and minify for wasm when no option is specified',
     () async {
@@ -619,6 +679,74 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
       setupFileSystemForEndToEndTest(fileSystem);
       await runner.run(<String>['build', 'web', '--no-pub', '--wasm']);
+    },
+  );
+
+  testWithoutContext(
+    'Web build propagates local engine options to build system Environment',
+    () async {
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('wasm_release')
+          .createSync(recursive: true);
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('host_release')
+          .createSync(recursive: true);
+
+      var buildInvoked = false;
+      final deferredArtifacts = DeferredArtifacts(Artifacts.test());
+      final buildCommand = TestWebBuildCommand(
+        fileSystem: fileSystem,
+        platform: fakePlatform,
+        processManager: processManager,
+        toolContext: FakeToolContext(
+          artifacts: deferredArtifacts,
+          cache: FakeCache(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: fakePlatform,
+          processManager: processManager,
+          projectFactory: FlutterProjectFactory(
+            fileSystem: fileSystem,
+            logger: BufferLogger.test(),
+          ),
+        ),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          buildInvoked = true;
+          expect(environment.artifacts.usesLocalArtifacts, isTrue);
+          expect(environment.artifacts.localEngineInfo, isNotNull);
+          expect(
+            fileSystem.path.basename(environment.artifacts.localEngineInfo!.targetOutPath),
+            'wasm_release',
+          );
+          expect(
+            fileSystem.path.basename(environment.artifacts.localEngineInfo!.hostOutPath),
+            'host_release',
+          );
+          expect(environment.engineVersion, isNull);
+        }),
+      );
+      final CommandRunner<void> runner = createTestCommandRunner(buildCommand);
+      setupFileSystemForEndToEndTest(fileSystem);
+
+      await runner.run(<String>[
+        '--local-engine=wasm_release',
+        '--local-engine-host=host_release',
+        '--local-engine-src-path=engine/src',
+        'build',
+        'web',
+        '--no-pub',
+      ]);
+
+      expect(buildInvoked, isTrue);
     },
   );
 

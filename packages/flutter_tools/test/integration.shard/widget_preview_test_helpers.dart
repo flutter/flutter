@@ -63,6 +63,7 @@ Future<Stream<String>> startWidgetPreview({
     );
     addTearDown(() async {
       await analysisServer.dispose();
+      await analysisServer.onExit;
     });
     await analysisServer.start();
     await analysisServer.connectToDtd(dtdUri: dtdUri);
