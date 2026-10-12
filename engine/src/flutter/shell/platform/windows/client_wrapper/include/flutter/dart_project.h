@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_WINDOWS_CLIENT_WRAPPER_INCLUDE_FLUTTER_DART_PROJECT_H_
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_CLIENT_WRAPPER_INCLUDE_FLUTTER_DART_PROJECT_H_
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -163,6 +164,15 @@ class DartProject {
   // Defaults to false.
   bool enable_flutter_gpu() const { return enable_flutter_gpu_; }
 
+  // Sets the folder in which the engine keeps the GPU programs it compiles,
+  // so that later launches load them instead of compiling them again. An
+  // empty path turns this off. By default the engine uses a folder under
+  // the user's local application data folder. The engines of a process
+  // share one cache, so give every engine the same setting.
+  void set_program_cache_path(const std::wstring& path) {
+    program_cache_path_ = path;
+  }
+
  private:
   // Accessors for internals are private, so that they can be changed if more
   // flexible options for project structures are needed later without it
@@ -175,6 +185,9 @@ class DartProject {
   const std::wstring& assets_path() const { return assets_path_; }
   const std::wstring& icu_data_path() const { return icu_data_path_; }
   const std::wstring& aot_library_path() const { return aot_library_path_; }
+  const std::optional<std::wstring>& program_cache_path() const {
+    return program_cache_path_;
+  }
 
   // The path to the assets directory.
   std::wstring assets_path_;
@@ -197,6 +210,8 @@ class DartProject {
   ImpellerSwitch impeller_switch_ = ImpellerSwitch::Default;
   // Whether the Flutter GPU API is enabled.
   bool enable_flutter_gpu_ = false;
+  // The folder for compiled GPU programs, if set.
+  std::optional<std::wstring> program_cache_path_;
 };
 
 }  // namespace flutter

@@ -76,6 +76,8 @@ FlutterProjectBundle GetTestProject() {
   properties.icu_data_path = L"C:\\foo\\icudtl.dat";
   properties.aot_library_path = L"C:\\foo\\aot.so";
   properties.impeller_switch = DefaultImpeller;
+  // Test engines keep no compiled programs in the user's folders.
+  properties.program_cache_path = L"";
 
   return FlutterProjectBundle{properties};
 }

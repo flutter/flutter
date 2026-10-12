@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "flutter/shell/platform/windows/client_wrapper/include/flutter/flutter_engine.h"
@@ -27,6 +28,10 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
     for (int i = 0; i < engine_properties.dart_entrypoint_argc; i++) {
       dart_entrypoint_arguments_.push_back(
           std::string(engine_properties.dart_entrypoint_argv[i]));
+    }
+    program_cache_path_.reset();
+    if (engine_properties.program_cache_path != nullptr) {
+      program_cache_path_ = engine_properties.program_cache_path;
     }
     return reinterpret_cast<FlutterDesktopEngineRef>(1);
   }
@@ -79,6 +84,10 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
     return dart_entrypoint_arguments_;
   }
 
+  const std::optional<std::wstring>& program_cache_path() {
+    return program_cache_path_;
+  }
+
   bool has_next_frame_callback() { return next_frame_callback_ != nullptr; }
   void run_next_frame_callback() {
     next_frame_callback_(next_frame_user_data_);
@@ -93,6 +102,7 @@ class TestFlutterWindowsApi : public testing::StubFlutterWindowsApi {
   bool destroy_called_ = false;
   bool reload_fonts_called_ = false;
   std::vector<std::string> dart_entrypoint_arguments_;
+  std::optional<std::wstring> program_cache_path_;
   VoidCallback next_frame_callback_ = nullptr;
   void* next_frame_user_data_ = nullptr;
   UINT last_external_message_ = 0;
@@ -113,6 +123,28 @@ TEST(FlutterEngineTest, CreateDestroy) {
   }
   // Destroying should implicitly shut down if it hasn't been done manually.
   EXPECT_EQ(test_api->destroy_called(), true);
+}
+
+TEST(FlutterEngineTest, PassesTheProgramCachePath) {
+  testing::ScopedStubFlutterWindowsApi scoped_api_stub(
+      std::make_unique<TestFlutterWindowsApi>());
+  auto test_api = static_cast<TestFlutterWindowsApi*>(scoped_api_stub.stub());
+  {
+    FlutterEngine engine(DartProject(L"fake/project/path"));
+    EXPECT_FALSE(test_api->program_cache_path().has_value());
+  }
+  {
+    DartProject project(L"fake/project/path");
+    project.set_program_cache_path(L"C:\\cache");
+    FlutterEngine engine(project);
+    EXPECT_EQ(test_api->program_cache_path(), L"C:\\cache");
+  }
+  {
+    DartProject project(L"fake/project/path");
+    project.set_program_cache_path(L"");
+    FlutterEngine engine(project);
+    EXPECT_EQ(test_api->program_cache_path(), L"");
+  }
 }
 
 TEST(FlutterEngineTest, CreateDestroyWithCustomEntrypoint) {

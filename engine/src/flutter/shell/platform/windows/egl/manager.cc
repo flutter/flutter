@@ -37,20 +37,26 @@ bool HasExtension(std::string_view extensions, std::string_view name) {
 
 int Manager::instance_count_ = 0;
 
-std::unique_ptr<Manager> Manager::Create(GpuPreference gpu_preference,
-                                         bool allow_inverted_surface) {
+std::unique_ptr<Manager> Manager::Create(
+    GpuPreference gpu_preference,
+    bool allow_inverted_surface,
+    std::unique_ptr<ProgramCache> program_cache) {
   std::unique_ptr<Manager> manager;
-  manager.reset(new Manager(gpu_preference, allow_inverted_surface));
+  manager.reset(new Manager(gpu_preference, allow_inverted_surface,
+                            std::move(program_cache)));
   if (!manager->IsValid()) {
     return nullptr;
   }
   return std::move(manager);
 }
 
-Manager::Manager(GpuPreference gpu_preference, bool allow_inverted_surface) {
+Manager::Manager(GpuPreference gpu_preference,
+                 bool allow_inverted_surface,
+                 std::unique_ptr<ProgramCache> program_cache) {
   ++instance_count_;
 
-  if (!InitializeDisplay(gpu_preference, allow_inverted_surface)) {
+  if (!InitializeDisplay(gpu_preference, allow_inverted_surface,
+                         std::move(program_cache))) {
     return;
   }
 
@@ -71,7 +77,8 @@ Manager::~Manager() {
 }
 
 bool Manager::InitializeDisplay(GpuPreference gpu_preference,
-                                bool allow_inverted_surface) {
+                                bool allow_inverted_surface,
+                                std::unique_ptr<ProgramCache> program_cache) {
   // If the request for a low power GPU is provided,
   // we will attempt to select GPU explicitly, via ANGLE extension
   // that allows to specify the GPU to use via LUID.
@@ -214,6 +221,12 @@ bool Manager::InitializeDisplay(GpuPreference gpu_preference,
 
       // Try the next config.
       continue;
+    }
+
+    // Before any context exists, so that ANGLE offers every program it
+    // links to the cache.
+    if (program_cache) {
+      ProgramCache::InstallForDisplay(display_, std::move(program_cache));
     }
 
     if (allow_inverted_surface) {

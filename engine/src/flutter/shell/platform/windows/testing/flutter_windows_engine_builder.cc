@@ -52,6 +52,8 @@ FlutterWindowsEngineBuilder::FlutterWindowsEngineBuilder(
   properties_.icu_data_path = context.GetIcuDataPath().c_str();
   properties_.aot_library_path = context.GetAotLibraryPath().c_str();
   properties_.impeller_switch = DefaultImpeller;
+  // Test engines keep no compiled programs in the user's folders.
+  properties_.program_cache_path = L"";
 }
 
 FlutterWindowsEngineBuilder::~FlutterWindowsEngineBuilder() = default;

@@ -47,6 +47,25 @@ TEST(FlutterProjectBundle, EnableFlutterGpu) {
   EXPECT_TRUE(project.enable_flutter_gpu());
 }
 
+TEST(FlutterProjectBundle, ProgramCachePath) {
+  FlutterDesktopEngineProperties properties = {};
+  properties.assets_path = L"foo\\flutter_assets";
+  properties.icu_data_path = L"foo\\icudtl.dat";
+
+  // Unset: the engine chooses the folder.
+  FlutterProjectBundle default_project(properties);
+  EXPECT_FALSE(default_project.program_cache_path().has_value());
+
+  properties.program_cache_path = L"C:\\cache";
+  FlutterProjectBundle project(properties);
+  EXPECT_EQ(project.program_cache_path(), L"C:\\cache");
+
+  // Empty turns the cache off.
+  properties.program_cache_path = L"";
+  FlutterProjectBundle disabled_project(properties);
+  EXPECT_EQ(disabled_project.program_cache_path(), L"");
+}
+
 TEST(FlutterProjectBundle, SwitchesEmpty) {
   FlutterDesktopEngineProperties properties = {};
   properties.assets_path = L"foo\\flutter_assets";

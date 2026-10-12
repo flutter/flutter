@@ -44,6 +44,10 @@ FlutterProjectBundle::FlutterProjectBundle(
 
   enable_flutter_gpu_ = properties.enable_flutter_gpu;
 
+  if (properties.program_cache_path != nullptr) {
+    program_cache_path_ = std::wstring(properties.program_cache_path);
+  }
+
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||
       (!aot_library_path_.empty() && aot_library_path_.is_relative())) {

@@ -23,6 +23,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/egl/context.h"
+#include "flutter/shell/platform/windows/egl/program_cache.h"
 #include "flutter/shell/platform/windows/egl/surface.h"
 #include "flutter/shell/platform/windows/egl/window_surface.h"
 
@@ -45,8 +46,13 @@ class Manager {
   // EGL_ANGLE_surface_orientation, window surfaces are created with an
   // inverted Y axis so that the default framebuffer shares Impeller's
   // top-left origin. See |surface_origin_is_top_left|.
-  static std::unique_ptr<Manager> Create(GpuPreference gpu_preference,
-                                         bool allow_inverted_surface);
+  //
+  // Keeps the GL programs that ANGLE compiles in |program_cache|, if there is
+  // one, so that later launches do not compile them again.
+  static std::unique_ptr<Manager> Create(
+      GpuPreference gpu_preference,
+      bool allow_inverted_surface,
+      std::unique_ptr<ProgramCache> program_cache = nullptr);
 
   virtual ~Manager();
 
@@ -105,7 +111,9 @@ class Manager {
  protected:
   // Creates a new surface manager retaining reference to the passed-in target
   // for the lifetime of the manager.
-  Manager(GpuPreference gpu_preference, bool allow_inverted_surface);
+  Manager(GpuPreference gpu_preference,
+          bool allow_inverted_surface,
+          std::unique_ptr<ProgramCache> program_cache = nullptr);
 
  private:
   // Number of active instances of Manager
@@ -117,7 +125,8 @@ class Manager {
 
   // Initialize the EGL display.
   bool InitializeDisplay(GpuPreference gpu_preference,
-                         bool allow_inverted_surface);
+                         bool allow_inverted_surface,
+                         std::unique_ptr<ProgramCache> program_cache);
 
   // Initialize the EGL configs.
   bool InitializeConfig();
