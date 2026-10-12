@@ -1,0 +1,155 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/common/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: common_cpp_accessibility, common_cpp, common_cpp_fixtures, common_cpp_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "desktop_library_implementation",
+    defines = ["FLUTTER_DESKTOP_LIBRARY"],
+)
+
+# Any files that are built by clients (client_wrapper code, library headers for
+# implementations using this shared code, etc.) include the public headers
+# assuming they are in the include path. This configuration should be added to
+# any such code that is also built by GN to make the includes work.
+cc_library(
+    name = "relative_flutter_library_headers",
+    includes = ["public"],
+)
+
+# The headers are a separate source set since the client wrapper is allowed
+# to depend on the public headers, but none of the rest of the code.
+cc_library(
+    name = "common_cpp_library_headers",
+    hdrs = [
+        "public/flutter_export.h",
+        "public/flutter_macros.h",
+        "public/flutter_messenger.h",
+        "public/flutter_plugin_registrar.h",
+        "public/flutter_texture_registrar.h",
+    ],
+)
+
+gn_copy(
+    name = "publish_headers",
+    srcs = [
+        "public/flutter_export.h",
+        "public/flutter_macros.h",
+        "public/flutter_messenger.h",
+        "public/flutter_plugin_registrar.h",
+        "public/flutter_texture_registrar.h",
+    ],
+    outputs = ["$root_out_dir/{{source_file_part}}"],
+)
+
+cc_library(
+    name = "common_cpp_input",
+    srcs = [
+        "text_editing_delta.cc",
+        "text_input_model.cc",
+    ],
+    hdrs = [
+        "text_editing_delta.h",
+        "text_input_model.h",
+        "text_range.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_DESKTOP_LIBRARY"],
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "common_cpp_isolate_scope",
+    srcs = ["isolate_scope.cc"],
+    hdrs = ["isolate_scope.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "@dart//:dart_api_headers",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "common_cpp_enums",
+    hdrs = [
+        "app_lifecycle_state.h",
+        "platform_provided_menu.h",
+    ],
+    deps = [
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+    ],
+)
+
+cc_library(
+    name = "common_cpp_switches",
+    srcs = ["engine_switches.cc"],
+    hdrs = ["engine_switches.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common:flutter_config",
+    ],
+    alwayslink = True,
+)
+
+# The portion of common_cpp that has no dependencies on the public/
+# headers. This division should be revisited once the Linux GTK
+# embedding is further along and it's clearer how much, if any, shared
+# API surface there will be.
+cc_library(
+    name = "common_cpp_core",
+    srcs = ["path_utils.cc"],
+    hdrs = [
+        "path_utils.h",
+        "windowing.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/geometry",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "common_cpp_core_fixtures",
+)
+
+cc_test(
+    name = "common_cpp_core_unittests",
+    size = "small",
+    srcs = ["path_utils_unittests.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":common_cpp_core",
+        ":common_cpp_core_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/testing",
+    ],
+)
