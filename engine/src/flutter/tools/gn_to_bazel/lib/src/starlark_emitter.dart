@@ -1468,11 +1468,21 @@ final class _Emitter {
         rule.list('deps').addUnique(under.and(e.condition), _Item(_localLabel(ancestor)));
         return;
       }
+      // A directory of another repository that one of its libraries carries
+      // (includeDirLibraries): the dependency puts the same -I on the compile.
+      final String? library = includeDirLibraries[_gnPath(path)];
+      if (library != null) {
+        rule.list('deps').addUnique(under.and(e.condition), _Item(_localLabel(library)));
+        return;
+      }
       rule
           .list('includes')
           .addUnique(under.and(e.condition), _item(_filePath(path, e.assignment.location), e));
     });
   }
+
+  /// A GN path as written in this file, as `//dir`.
+  String _gnPath(String path) => path.startsWith('//') ? path : '$gnPackage/$path';
 
   /// The dependency standing for a generated include directory of an
   /// ancestor package, or null when the directory is this package's or a

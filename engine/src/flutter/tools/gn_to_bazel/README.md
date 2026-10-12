@@ -244,6 +244,8 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    tree; an ancestor package's (`$root_gen_dir/flutter`) is a dependency on
    the target whose `includes` already name that directory
    (`genDirIncludeTargets`); an include directory in another repository is
+   a dependency on the library of that repository that carries it when
+   `includeDirLibraries` names one (ANGLE's `include/`), and is otherwise
    dropped with a note (the dependency on that repository carries it, or
    nothing does). `copy()` becomes a `gn_copy`, whose content is its
    sources; GN's destination under the build directory is recorded, not

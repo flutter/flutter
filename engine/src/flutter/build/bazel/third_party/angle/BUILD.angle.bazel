@@ -1,0 +1,27 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @angle: ANGLE's headers alone.
+#
+# Impeller's GLES backend compiles against the Khronos headers ANGLE ships
+# (GLES2/gl2ext.h, GLES3/gl3.h and what they include) on every platform --
+# GN's gles_config names `//flutter/third_party/angle/include` as an include
+# directory, and the backend resolves the GL functions at run time, so no
+# ANGLE library is linked. ANGLE as a GL implementation (libEGL_static and
+# libGLESv2_static for the test surfaces, from its 2,000-line BUILD.gn) is a
+# later conversion; until then this file serves the headers only.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# gles_config's include directory, as a library for its dependents.
+cc_library(
+    name = "headers",
+    hdrs = glob(["include/**/*.h"]),
+    includes = ["include"],
+)
+
+# For the GN targets that list ANGLE's headers among their sources.
+exports_files(glob(["include/**/*.h"]))
