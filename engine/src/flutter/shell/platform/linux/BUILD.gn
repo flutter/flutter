@@ -199,6 +199,7 @@ source_set("flutter_linux_sources") {
 
   deps = [
     "$dart_src/runtime:dart_api",
+    "//flutter/common",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/common:common_cpp_input",
@@ -334,6 +335,7 @@ executable("flutter_linux_unittests") {
     ":flutter_linux_fixtures",
     ":flutter_linux_gschemas",
     ":flutter_linux_sources",
+    "//flutter/common",
     "//flutter/runtime:libdart",
     "//flutter/shell/platform/common:common_cpp_enums",
     "//flutter/shell/platform/embedder:embedder_headers",

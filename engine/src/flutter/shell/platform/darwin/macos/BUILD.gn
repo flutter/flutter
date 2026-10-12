@@ -250,6 +250,7 @@ executable("flutter_desktop_darwin_unittests") {
   deps = [
     ":flutter_desktop_darwin_fixtures",
     ":flutter_framework_source",
+    "//flutter/common",
     "//flutter/fml",
     "//flutter/shell/platform/common:common_cpp_accessibility",
     "//flutter/shell/platform/common:common_cpp_core",
