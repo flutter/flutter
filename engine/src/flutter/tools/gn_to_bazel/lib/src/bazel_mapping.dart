@@ -116,6 +116,8 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/re2': '@re2',
   '//third_party/libtess2': '@libtess2',
   '//flutter/third_party/harfbuzz': '@harfbuzz',
+  // The desktop embeddings' JSON (header-only; its own GN in the synced tree).
+  '//flutter/third_party/rapidjson': '@rapidjson',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -134,6 +136,7 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/wuffs/': '@wuffs//',
   '//flutter/third_party/inja/': '@inja//',
   '//flutter/third_party/json/': '@json//',
+  '//flutter/third_party/rapidjson/': '@rapidjson//',
   '//flutter/third_party/vulkan-deps/spirv-cross/src/': '@spirv-cross//',
   '//flutter/third_party/flatbuffers/': '@flatbuffers//',
   '//flutter/third_party/vulkan-deps/spirv-headers/src/': '@spirv-headers//',
