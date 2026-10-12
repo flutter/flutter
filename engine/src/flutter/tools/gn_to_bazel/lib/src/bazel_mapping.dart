@@ -705,7 +705,7 @@ Assumptions linuxHostAssumptions() {
     'target_os': GnStringValue('linux'),
     'is_android': GnBoolValue(false),
     'is_apple': GnBoolValue(false),
-    'is_clang': GnBoolValue(true),
+    // is_clang: a toolchain invariant (gn_eval's toolchainInvariants).
     'is_component_build': GnBoolValue(false),
     'is_fuchsia': GnBoolValue(false),
     'is_ios': GnBoolValue(false),
