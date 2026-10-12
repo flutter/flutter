@@ -22,6 +22,7 @@ cc_library(
         "task_runners.cc",
     ],
     hdrs = [
+        "constants.h",
         "macros.h",
         "settings.h",
         "task_runners.h",

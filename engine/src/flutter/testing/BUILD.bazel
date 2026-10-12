@@ -153,3 +153,10 @@ selects.config_setting_group(
         "@platforms//os:windows",
     ],
 )
+
+# The goldens and other resources testing/run_tests.py hands suites with
+# --golden-dir (flow_unittests).
+filegroup(
+    name = "resources",
+    srcs = glob(["resources/**"]),
+)

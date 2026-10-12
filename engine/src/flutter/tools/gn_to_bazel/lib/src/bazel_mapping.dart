@@ -49,7 +49,40 @@ const String cxxRuntimeLabel = '//engine/src/flutter/build/bazel/toolchains:cxx_
 const String defaultTestSize = 'small';
 
 /// Test targets (by GN name) that need more than the default size.
-const Map<String, String> testSizes = <String, String>{};
+const Map<String, String> testSizes = <String, String>{
+  // 50 s on the host: the performance overlay goldens.
+  'flow_unittests': 'medium',
+};
+
+/// How a suite is run: the arguments testing/run_tests.py passes it and the
+/// files those arguments name, which become the `cc_test`'s `args` and
+/// `data`. GN's executable has no words for how it is run; the runner has.
+/// Paths in [args] are relative to the runfiles root, where Bazel starts a
+/// test (`engine/src/flutter/...`).
+final class TestRun {
+  const TestRun({required this.args, required this.data});
+
+  final List<String> args;
+
+  /// Bazel labels of the files and filegroups the arguments name.
+  final List<String> data;
+}
+
+/// Suites run with arguments, by GN label (`//dir:name`).
+const Map<String, TestRun> testRuns = <String, TestRun>{
+  // run_tests.py (Linux): the performance overlay goldens and the font the
+  // golden was rendered with.
+  '//flutter/flow:flow_unittests': TestRun(
+    args: <String>[
+      '--golden-dir=engine/src/flutter/testing/resources',
+      '--font-file=engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf',
+    ],
+    data: <String>[
+      '//engine/src/flutter/testing:resources',
+      '//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf',
+    ],
+  ),
+};
 
 /// GN labels with a Bazel home that is not the mechanical translation.
 ///

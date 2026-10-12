@@ -675,6 +675,16 @@ final class _Emitter {
     final rule = _Rule(kind, name, target.comments);
     if (kind == 'cc_test') {
       rule.scalars['size'] = '"${testSizes[target.name] ?? defaultTestSize}"';
+      // How run_tests.py runs the suite (testRuns), which GN cannot say.
+      final TestRun? run = testRuns['$gnPackage:${target.name}'];
+      if (run != null) {
+        for (final String arg in run.args) {
+          rule.list('args').addUnique(Condition.always, _Item(arg));
+        }
+        for (final String label in run.data) {
+          rule.list('data').addUnique(Condition.always, _Item(_localLabel(label)));
+        }
+      }
     }
     if (shared) {
       rule.scalars['linkshared'] = 'True';
