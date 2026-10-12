@@ -197,7 +197,7 @@ void main() {
 
     // See accessibility_inspector_test.dart for tests of the ext.flutter.accessibility
     // service extensions included in this count.
-    const accessibilityExtensionCount = 3;
+    const accessibilityExtensionCount = 4;
     expect(
       binding.extensions.keys.where((String name) => name.startsWith('accessibility.')),
       hasLength(accessibilityExtensionCount),

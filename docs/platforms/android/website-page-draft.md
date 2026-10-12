@@ -81,6 +81,20 @@ androidComponents {
 }
 ```
 
+Flutter's copy step reads the APK artifact (`SingleArtifact.APK`) and its
+`output-metadata.json` file. If a plugin or your build script transforms that
+artifact, the transform must keep the metadata and the APKs' ABI filters:
+
+- Use `toTransformMany(SingleArtifact.APK)` with
+  `ArtifactTransformationRequest`, which writes the metadata for you, or write
+  it with `BuiltArtifacts.save()` from a `toTransform` task.
+- Produce one APK for each variant output, with the same ABI filter.
+
+Otherwise the build fails with a Flutter error that names `SingleArtifact.APK`.
+Fix the transform, or contact the maintainer of the plugin that does it.
+Plugins that only read the APK, or that write extra APKs elsewhere after
+`assemble`, are not affected.
+
 ### Setting per-ABI or per-variant versionCode
 
 Before:
@@ -96,23 +110,58 @@ android.applicationVariants.all { variant ->
 After:
 
 ```kotlin
+import com.android.build.api.variant.FilterConfiguration
+
 androidComponents {
     onVariants(selector().all()) { variant ->
         variant.outputs.forEach { output ->
             val abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
-            val base = output.versionCode.orNull ?: 1
-            output.versionCode.set((abiCodes[abi] ?: 0) * 1000 + base)
+            output.versionCode.set((abiCodes[abi] ?: 0) * 1000 + flutter.versionCode)
         }
     }
 }
 ```
 
-Note: Flutter itself sets per-ABI version codes for `--split-per-abi` inside
-`onVariants`. If your CI mutates version codes in `afterEvaluate`, that runs at
-a different time than before; Flutter prints a warning when it detects a
-divergence between the DSL value and the final output value. To verify your
-mutations worked, inspect the built APK:
-`apkanalyzer manifest print versionCode build/app/outputs/flutter-apk/app-release.apk`
+Compute the value from a base you already know rather than by reading
+`output.versionCode`. AGP disallows reading `output.versionCode` during
+configuration when its compatibility mode
+(`android.compatibility.enableLegacyApi`) is off. `flutter.versionCode` is the
+value Flutter's templates set in `defaultConfig`. If your product flavors set
+their own `versionCode`, use the flavor's value for those variants.
+
+Note: For `--split-per-abi` builds, Flutter sets per-ABI version codes
+(`abiOffset * 1000 + versionCode`, with offsets 1 for `armeabi-v7a`, 2 for
+`arm64-v8a`, and 4 for `x86_64`) in its own `onVariants` callback. It takes
+`versionCode` from your `android {}` block (`defaultConfig` or a product
+flavor). A versionCode set only in `AndroidManifest.xml` is not offset.
+When the Flutter plugin is applied in the `plugins {}` block, as in Flutter's
+templates, that callback runs before an `androidComponents.onVariants` block
+in your app's build script, and a value your block sets replaces Flutter's.
+Flutter releases that set `versionCodeOverride` applied the offset after your
+block, so if your block derives `versionCode` from Flutter's value, the result
+differs from those releases. For example, multiplying by 10000 with
+`--build-number 42` gives `arm64-v8a` the versionCode `20420000`, where those
+releases gave `422000`. To keep the `422000`-style numbers, set the value from
+`flutter.versionCode` instead:
+
+```kotlin
+import com.android.build.api.variant.FilterConfiguration
+
+val flutterAbiOffsets = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86_64" to 4)
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.outputs.forEach { output ->
+            val abi = output.filters.find { it.filterType == FilterConfiguration.FilterType.ABI }?.identifier
+            val offset = flutterAbiOffsets[abi] ?: 0
+            output.versionCode.set(offset * 1000 + flutter.versionCode * 10000)
+        }
+    }
+}
+```
+
+To verify the result, inspect the built APK:
+`apkanalyzer manifest print versionCode build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`
 
 ### Custom build types and plugins
 

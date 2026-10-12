@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.embedding.engine;
+package io.flutter.embedding.engine.flags;
 
 import androidx.annotation.VisibleForTesting;
 import java.util.*;
@@ -190,10 +190,13 @@ public final class FlutterEngineFlags {
   /**
    * Sets whether the UI thread and platform thread should be merged.
    *
+   * <p>Accepts {@code enabled} (the default) or {@code mergeAfterLaunch}. {@code disabled} is not
+   * supported on Android.
+   *
    * <p>Allowed in release mode for performance purposes. Only settable via the manifest.
    */
   private static final Flag MERGED_PLATFORM_UI_THREAD =
-      new Flag("--merged-platform-ui-thread", "MergedPlatformUIThread", true);
+      new Flag("--merged-platform-ui-thread=", "MergedPlatformUIThread", true);
 
   /**
    * Specifies the path to the VM snapshot data file.
@@ -390,6 +393,13 @@ public final class FlutterEngineFlags {
       new Flag("--dump-skp-on-shader-compilation", "DumpSkpOnShaderCompilation");
 
   /**
+   * Only cache SkSL shaders, and do not compile to native shaders.
+   *
+   * <p>Settable via the command line and the manifest.
+   */
+  private static final Flag CACHE_SKSL = new Flag("--cache-sksl", "CacheSksl");
+
+  /**
    * Removes all persistent cache files for debugging.
    *
    * <p>Settable via the command line and the manifest.
@@ -460,6 +470,7 @@ public final class FlutterEngineFlags {
               OLD_GEN_HEAP_SIZE,
               VM_SNAPSHOT_DATA,
               ISOLATE_SNAPSHOT_DATA,
+              CACHE_SKSL,
               PURGE_PERSISTENT_CACHE,
               TRACE_STARTUP,
               LEAK_VM,

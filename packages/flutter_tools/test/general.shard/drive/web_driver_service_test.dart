@@ -5,15 +5,15 @@
 import 'dart:async';
 import 'dart:io' as io;
 
-import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/chrome_constants.dart';
@@ -26,6 +26,7 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 
 final kChromeArgs = <String>[
   '--bwsi',
@@ -51,7 +52,7 @@ final kChromeArgs = <String>[
 void main() {
   late FakeWebRunnerFactory fakeWebRunnerFactory;
 
-  testUsingContext('getDesiredCapabilities Chrome with headless on', () {
+  testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'chrome',
@@ -80,10 +81,10 @@ void main() {
       },
     };
 
-    expect(getDesiredCapabilities(Browser.chrome, true), expected);
+    expect(getDesiredCapabilities(Browser.chrome, true, platform: const LocalPlatform()), expected);
   });
 
-  testUsingContext('getDesiredCapabilities Chrome with headless off', () {
+  testWithoutContext('getDesiredCapabilities Chrome with headless off', () {
     const chromeBinary = 'random-binary';
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -105,10 +106,18 @@ void main() {
       },
     };
 
-    expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary: chromeBinary), expected);
+    expect(
+      getDesiredCapabilities(
+        Browser.chrome,
+        false,
+        platform: const LocalPlatform(),
+        chromeBinary: chromeBinary,
+      ),
+      expected,
+    );
   });
 
-  testUsingContext('getDesiredCapabilities Chrome with browser flags', () {
+  testWithoutContext('getDesiredCapabilities Chrome with browser flags', () {
     const webBrowserFlags = <String>[
       '--autoplay-policy=no-user-gesture-required',
       '--incognito',
@@ -139,12 +148,17 @@ void main() {
     };
 
     expect(
-      getDesiredCapabilities(Browser.chrome, false, webBrowserFlags: webBrowserFlags),
+      getDesiredCapabilities(
+        Browser.chrome,
+        false,
+        platform: const LocalPlatform(),
+        webBrowserFlags: webBrowserFlags,
+      ),
       expected,
     );
   });
 
-  testUsingContext('getDesiredCapabilities Firefox with headless on', () {
+  testWithoutContext('getDesiredCapabilities Firefox with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
@@ -164,10 +178,13 @@ void main() {
       },
     };
 
-    expect(getDesiredCapabilities(Browser.firefox, true), expected);
+    expect(
+      getDesiredCapabilities(Browser.firefox, true, platform: const LocalPlatform()),
+      expected,
+    );
   });
 
-  testUsingContext('getDesiredCapabilities Firefox with headless off', () {
+  testWithoutContext('getDesiredCapabilities Firefox with headless off', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
       'browserName': 'firefox',
@@ -187,10 +204,13 @@ void main() {
       },
     };
 
-    expect(getDesiredCapabilities(Browser.firefox, false), expected);
+    expect(
+      getDesiredCapabilities(Browser.firefox, false, platform: const LocalPlatform()),
+      expected,
+    );
   });
 
-  testUsingContext('getDesiredCapabilities Firefox with browser flags', () {
+  testWithoutContext('getDesiredCapabilities Firefox with browser flags', () {
     const webBrowserFlags = <String>['-url=https://example.com', '-private'];
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -212,34 +232,45 @@ void main() {
     };
 
     expect(
-      getDesiredCapabilities(Browser.firefox, false, webBrowserFlags: webBrowserFlags),
+      getDesiredCapabilities(
+        Browser.firefox,
+        false,
+        platform: const LocalPlatform(),
+        webBrowserFlags: webBrowserFlags,
+      ),
       expected,
     );
   });
 
-  testUsingContext('getDesiredCapabilities Edge', () {
+  testWithoutContext('getDesiredCapabilities Edge', () {
     final expected = <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'};
 
-    expect(getDesiredCapabilities(Browser.edge, false), expected);
+    expect(getDesiredCapabilities(Browser.edge, false, platform: const LocalPlatform()), expected);
   });
 
-  testUsingContext('getDesiredCapabilities macOS Safari', () {
+  testWithoutContext('getDesiredCapabilities macOS Safari', () {
     final expected = <String, dynamic>{'browserName': 'safari'};
 
-    expect(getDesiredCapabilities(Browser.safari, false), expected);
+    expect(
+      getDesiredCapabilities(Browser.safari, false, platform: const LocalPlatform()),
+      expected,
+    );
   });
 
-  testUsingContext('getDesiredCapabilities iOS Safari', () {
+  testWithoutContext('getDesiredCapabilities iOS Safari', () {
     final expected = <String, dynamic>{
       'platformName': 'ios',
       'browserName': 'safari',
       'safari:useSimulator': true,
     };
 
-    expect(getDesiredCapabilities(Browser.iosSafari, false), expected);
+    expect(
+      getDesiredCapabilities(Browser.iosSafari, false, platform: const LocalPlatform()),
+      expected,
+    );
   });
 
-  testUsingContext('getDesiredCapabilities android chrome', () {
+  testWithoutContext('getDesiredCapabilities android chrome', () {
     const webBrowserFlags = <String>['--autoplay-policy=no-user-gesture-required', '--incognito'];
     final expected = <String, dynamic>{
       'browserName': 'chrome',
@@ -255,7 +286,12 @@ void main() {
     };
 
     expect(
-      getDesiredCapabilities(Browser.androidChrome, false, webBrowserFlags: webBrowserFlags),
+      getDesiredCapabilities(
+        Browser.androidChrome,
+        false,
+        platform: const LocalPlatform(),
+        webBrowserFlags: webBrowserFlags,
+      ),
       expected,
     );
   });
@@ -388,21 +424,17 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   @override
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String? target,
-    bool? stayResident,
-    FlutterProject? flutterProject,
-    bool? ipv6,
+    required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    UrlTunneller? urlTunneller,
-    Logger? logger,
-    Terminal? terminal,
-    Platform? platform,
-    OutputPreferences? outputPreferences,
-    FileSystem? fileSystem,
-    SystemClock? systemClock,
-    Analytics? analytics,
+    required FlutterProject flutterProject,
+    required bool stayResident,
+    required ToolContext toolContext,
     bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
+    UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) {
     expect(stayResident, isTrue);
@@ -462,7 +494,13 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 WebDriverService setUpDriverService() {
-  return WebDriverService(toolContext: const DelegatingToolContext(), dartSdkPath: 'dart');
+  return WebDriverService(
+    analytics: const NoOpAnalytics(),
+    buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    buildTargets: const BuildTargetsImpl(),
+    dartSdkPath: 'dart',
+    toolContext: const DelegatingToolContext(),
+  );
 }
 
 class FakeDevice extends Fake implements Device {

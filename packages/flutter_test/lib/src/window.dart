@@ -702,6 +702,16 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _platformDispatcher.scheduleFrame();
   }
 
+  /// Resets the engine's internal caches.
+  ///
+  /// This is primarily intended for test harnesses to ensure test isolation
+  /// and prevent cached offscreen render targets or other transient engine
+  /// state from leaking across consecutive tests.
+  @override
+  void resetInternalState() {
+    _platformDispatcher.resetInternalState();
+  }
+
   @override
   bool get semanticsEnabled => _semanticsEnabledTestValue ?? _platformDispatcher.semanticsEnabled;
   bool? _semanticsEnabledTestValue;

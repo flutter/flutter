@@ -375,4 +375,47 @@ Future<void> testMain() async {
     expect(tightBoxes.single.toRect().height, closeTo(rawGlyphHeight, 1e-3));
     expect(tightBoxes.single.top, closeTo((60.0 - rawGlyphHeight) / 2, 1e-3));
   });
+
+  test('layout with kTextHeightNone disables parent height multiplier', () {
+    // Pushing a child TextStyle with kTextHeightNone overrides the parent ParagraphStyle's
+    // height multiplier (3.0) and lays out the line at its unscaled font height.
+    final builderWithNone = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20, height: 3.0),
+    );
+    builderWithNone.pushStyle(ui.TextStyle(height: ui.kTextHeightNone));
+    builderWithNone.addText('Hello');
+    final ui.Paragraph paragraphWithNone = builderWithNone.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+
+    final builderDefault = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20),
+    );
+    builderDefault.addText('Hello');
+    final ui.Paragraph paragraphDefault = builderDefault.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+
+    expect(paragraphWithNone.height, greaterThan(0));
+    expect(paragraphWithNone.height, paragraphDefault.height);
+  });
+
+  test('layout with ParagraphStyle(kTextHeightNone)', () {
+    // Passing kTextHeightNone directly on ParagraphStyle produces the same unscaled
+    // line height as omitting height (null), rather than multiplying by 0.0.
+    final builderWithNone = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20, height: ui.kTextHeightNone),
+    );
+    builderWithNone.addText('Hello');
+    final ui.Paragraph paragraphWithNone = builderWithNone.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+
+    final builderDefault = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20),
+    );
+    builderDefault.addText('Hello');
+    final ui.Paragraph paragraphDefault = builderDefault.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+
+    expect(paragraphWithNone.height, greaterThan(0));
+    expect(paragraphWithNone.height, paragraphDefault.height);
+  });
 }

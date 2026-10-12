@@ -2319,6 +2319,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   impeller::Flags impeller_flags;
   impeller_flags.use_sdfs = settings.impeller_use_sdfs;
+  impeller_flags.top_left_default_framebuffer_origin =
+      settings.impeller_top_left_default_framebuffer_origin;
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
