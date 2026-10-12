@@ -4,13 +4,11 @@
 
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 
-#include <sstream>
-
-#include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/shader_function.h"
 #include "impeller/renderer/shader_library.h"
 #include "impeller/renderer/vertex_descriptor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 
 namespace impeller {
 
@@ -75,47 +73,33 @@ std::array<uint32_t, 3> ComputePipelineDescriptor::GetWorkgroupSize() const {
   return workgroup_size_;
 }
 
-bool ComputePipelineDescriptor::ValidateWorkgroupSize(
+absl::Status ComputePipelineDescriptor::ValidateWorkgroupSize(
     std::array<uint32_t, 3> max_size,
     uint64_t max_invocations) const {
-  std::optional<std::string> error =
-      CheckWorkgroupSize(max_size, max_invocations);
-  if (error.has_value()) {
-    VALIDATION_LOG << error.value();
-    return false;
-  }
-  return true;
-}
-
-std::optional<std::string> ComputePipelineDescriptor::CheckWorkgroupSize(
-    std::array<uint32_t, 3> max_size,
-    uint64_t max_invocations) const {
-  const auto& size = workgroup_size_;
-  std::ostringstream stream;
+  const std::array<uint32_t, 3>& size = workgroup_size_;
   if (size[0] == 0u || size[1] == 0u || size[2] == 0u) {
-    stream << "Compute pipeline " << label_
-           << " has a workgroup size of 0 in some dimension. A compute shader "
-              "must declare a literal local_size; sizing it with a "
-              "specialization constant is not supported.";
-    return stream.str();
+    return absl::InvalidArgumentError(absl::StrCat(
+        "Compute pipeline ", label_,
+        " has a workgroup size of 0 in some dimension. A compute shader must "
+        "declare a literal local_size; sizing it with a specialization "
+        "constant is not supported."));
   }
   if (size[0] > max_size[0] || size[1] > max_size[1] || size[2] > max_size[2]) {
-    stream << "Compute pipeline " << label_ << " has a workgroup size of "
-           << size[0] << "x" << size[1] << "x" << size[2]
-           << ", which exceeds the device maximum of " << max_size[0] << "x"
-           << max_size[1] << "x" << max_size[2] << ".";
-    return stream.str();
+    return absl::InvalidArgumentError(absl::StrCat(
+        "Compute pipeline ", label_, " has a workgroup size of ", size[0], "x",
+        size[1], "x", size[2], ", which exceeds the device maximum of ",
+        max_size[0], "x", max_size[1], "x", max_size[2], "."));
   }
   const uint64_t invocations =
       static_cast<uint64_t>(size[0]) * size[1] * size[2];
   if (invocations > max_invocations) {
-    stream << "Compute pipeline " << label_ << " has a workgroup size of "
-           << size[0] << "x" << size[1] << "x" << size[2] << " (" << invocations
-           << " invocations), which exceeds the maximum of " << max_invocations
-           << " invocations per workgroup.";
-    return stream.str();
+    return absl::InvalidArgumentError(
+        absl::StrCat("Compute pipeline ", label_, " has a workgroup size of ",
+                     size[0], "x", size[1], "x", size[2], " (", invocations,
+                     " invocations), which exceeds the maximum of ",
+                     max_invocations, " invocations per workgroup."));
   }
-  return std::nullopt;
+  return absl::OkStatus();
 }
 
 const std::string& ComputePipelineDescriptor::GetLabel() const {

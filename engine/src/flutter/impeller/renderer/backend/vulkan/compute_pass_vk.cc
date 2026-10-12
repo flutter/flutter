@@ -6,6 +6,7 @@
 
 #include <vector>
 
+#include "flutter/fml/logging.h"
 #include "impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "impeller/renderer/backend/vulkan/compute_pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/formats_vk.h"
@@ -97,9 +98,7 @@ void ComputePassVK::PopCommandLabel() {
 // |ComputePass|
 void ComputePassVK::SetPipeline(
     const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) {
-  if (!pipeline) {
-    return;
-  }
+  FML_DCHECK(pipeline) << "A compute pass must not be given a null pipeline.";
   const auto& pipeline_vk = ComputePipelineVK::Cast(*pipeline);
   command_buffer_->GetCommandBuffer().bindPipeline(
       vk::PipelineBindPoint::eCompute, pipeline_vk.GetPipeline());

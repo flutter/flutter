@@ -6,7 +6,6 @@
 #define FLUTTER_LIB_GPU_COMPUTE_PIPELINE_H_
 
 #include <memory>
-#include <string>
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
@@ -16,9 +15,14 @@
 #include "impeller/renderer/compute_pipeline_descriptor.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/pipeline.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace flutter {
 namespace gpu {
+
+/// The Impeller pipeline a `ComputePipeline` builds for its shader.
+using BackendComputePipeline =
+    impeller::Pipeline<impeller::ComputePipelineDescriptor>;
 
 /// A compute pipeline built from a single compute shader.
 class ComputePipeline : public RefCountedDartWrappable<ComputePipeline> {
@@ -35,16 +39,15 @@ class ComputePipeline : public RefCountedDartWrappable<ComputePipeline> {
   /// Returns the backend pipeline for the shader's current code, building it
   /// on first use. A hot reload marks the shader dirty, which re-registers it
   /// (evicting the pipelines built from the old code) and builds a new
-  /// pipeline here. Returns null and sets `out_error` if the shader cannot be
-  /// registered or the pipeline cannot be built, for example because the
-  /// shader's workgroup size exceeds the device limits.
-  std::shared_ptr<impeller::Pipeline<impeller::ComputePipelineDescriptor>>
-  GetOrCreatePipeline(impeller::Context& context, std::string& out_error);
+  /// pipeline here. Returns an error if the shader cannot be registered or
+  /// the pipeline cannot be built, for example because the shader's
+  /// workgroup size exceeds the device limits.
+  absl::StatusOr<std::shared_ptr<BackendComputePipeline>> GetOrCreatePipeline(
+      impeller::Context& context);
 
  private:
   fml::RefPtr<Shader> shader_;
-  std::shared_ptr<impeller::Pipeline<impeller::ComputePipelineDescriptor>>
-      pipeline_;
+  std::shared_ptr<BackendComputePipeline> pipeline_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ComputePipeline);
 };

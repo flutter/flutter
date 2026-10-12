@@ -10,6 +10,8 @@
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/pipeline_library.h"
 #include "impeller/renderer/shader_library.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -26,24 +28,24 @@ const fml::RefPtr<Shader>& ComputePipeline::GetShader() const {
   return shader_;
 }
 
-std::shared_ptr<impeller::Pipeline<impeller::ComputePipelineDescriptor>>
-ComputePipeline::GetOrCreatePipeline(impeller::Context& context,
-                                     std::string& out_error) {
+absl::StatusOr<std::shared_ptr<BackendComputePipeline>>
+ComputePipeline::GetOrCreatePipeline(impeller::Context& context) {
   // A dirty shader was reloaded since it was registered. Re-registering it
   // evicts every pipeline built from the old code, including `pipeline_`.
-  if (shader_->IsDirty() && !shader_->RegisterSync(context)) {
-    pipeline_ = nullptr;
-    out_error = "Failed to register the compute shader '" +
-                shader_->GetEntrypoint() + "' with the shader library.";
-    return nullptr;
+  if (shader_->IsDirty()) {
+    if (absl::Status status = shader_->RegisterSync(context); !status.ok()) {
+      pipeline_ = nullptr;
+      return status;
+    }
   }
 
-  auto function = shader_->GetFunctionFromLibrary(*context.GetShaderLibrary());
+  std::shared_ptr<const impeller::ShaderFunction> function =
+      shader_->GetFunctionFromLibrary(*context.GetShaderLibrary());
   if (!function) {
     pipeline_ = nullptr;
-    out_error = "Unable to resolve the compute shader function '" +
-                shader_->GetEntrypoint() + "' from the shader library.";
-    return nullptr;
+    return absl::InternalError(
+        absl::StrCat("Unable to resolve the compute shader function '",
+                     shader_->GetEntrypoint(), "' from the shader library."));
   }
 
   // The library hands out a new function object whenever the shader is
@@ -59,9 +61,9 @@ ComputePipeline::GetOrCreatePipeline(impeller::Context& context,
   const std::optional<std::array<uint32_t, 3>>& workgroup_size =
       shader_->GetWorkgroupSize();
   if (!workgroup_size.has_value()) {
-    out_error = "The shader '" + shader_->GetEntrypoint() +
-                "' is not a compute shader.";
-    return nullptr;
+    return absl::InvalidArgumentError(
+        absl::StrCat("The shader '", shader_->GetEntrypoint(),
+                     "' is not a compute shader."));
   }
 
   impeller::ComputePipelineDescriptor desc;
@@ -73,29 +75,28 @@ ComputePipeline::GetOrCreatePipeline(impeller::Context& context,
 
   // Check the device limits here, rather than leaving it to the backend, so
   // that the reason reaches Dart instead of only the validation log.
-  const auto& capabilities = context.GetCapabilities();
-  if (std::optional<std::string> error = desc.CheckWorkgroupSize(
+  const std::shared_ptr<const impeller::Capabilities>& capabilities =
+      context.GetCapabilities();
+  if (absl::Status status = desc.ValidateWorkgroupSize(
           capabilities->GetMaximumComputeWorkgroupSize(),
           capabilities->GetMaximumComputeWorkgroupInvocations());
-      error.has_value()) {
-    out_error = std::move(error.value());
-    return nullptr;
+      !status.ok()) {
+    return status;
   }
 
-  auto pipeline =
+  std::shared_ptr<BackendComputePipeline> pipeline =
       context.GetPipelineLibrary()->GetPipeline(desc, /*async=*/false).Get();
   if (!pipeline) {
     // On Metal a pipeline can allow fewer invocations per workgroup than the
     // device, for example when the shader uses many registers. That is only
     // known once the backend builds the pipeline, which logs the reason.
-    const auto& size = workgroup_size.value();
-    out_error = "Failed to build the compute pipeline for the shader '" +
-                shader_->GetEntrypoint() + "'. Its workgroup size of " +
-                std::to_string(size[0]) + "x" + std::to_string(size[1]) + "x" +
-                std::to_string(size[2]) +
-                " may exceed what this pipeline supports on this device; the "
-                "Impeller validation log has the reason.";
-    return nullptr;
+    const std::array<uint32_t, 3>& size = workgroup_size.value();
+    return absl::InternalError(absl::StrCat(
+        "Failed to build the compute pipeline for the shader '",
+        shader_->GetEntrypoint(), "'. Its workgroup size of ", size[0], "x",
+        size[1], "x", size[2],
+        " may exceed what this pipeline supports on this device; the Impeller "
+        "validation log has the reason."));
   }
   pipeline_ = std::move(pipeline);
   return pipeline_;
@@ -119,17 +120,19 @@ Dart_Handle InternalFlutterGpu_ComputePipeline_Initialize(
         "GpuContext.supportsCompute before creating a ComputePipeline.");
   }
   if (compute_shader->GetShaderStage() != impeller::ShaderStage::kCompute) {
-    return tonic::ToDart("The shader '" + compute_shader->GetEntrypoint() +
-                         "' is not a compute shader.");
+    return tonic::ToDart(absl::StrCat("The shader '",
+                                      compute_shader->GetEntrypoint(),
+                                      "' is not a compute shader."));
   }
 
   auto pipeline = fml::MakeRefCounted<flutter::gpu::ComputePipeline>(
       fml::RefPtr<flutter::gpu::Shader>(compute_shader));
   // Build the backend pipeline now, so that a shader the device cannot run
   // fails here rather than at the first dispatch.
-  std::string error;
-  if (!pipeline->GetOrCreatePipeline(context, error)) {
-    return tonic::ToDart(error);
+  if (absl::StatusOr<std::shared_ptr<flutter::gpu::BackendComputePipeline>>
+          backend_pipeline = pipeline->GetOrCreatePipeline(context);
+      !backend_pipeline.ok()) {
+    return tonic::ToDart(std::string(backend_pipeline.status().message()));
   }
   pipeline->AssociateWithDartWrapper(wrapper);
   return Dart_Null();

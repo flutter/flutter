@@ -20,6 +20,7 @@
 #include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/render_pass.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace flutter {
 namespace gpu {
@@ -54,8 +55,10 @@ class CommandBuffer : public RefCountedDartWrappable<CommandBuffer> {
   /// `CreateRenderPass`: the Metal compute pass constructor begins encoding.
   std::shared_ptr<impeller::ComputePass> CreateComputePass();
 
-  /// The compute counterpart to `EndRenderPass`.
-  bool EndComputePass(const impeller::ComputePass* compute_pass);
+  /// Ends [compute_pass] if it is the open pass. Does nothing if it was
+  /// already ended by a later command. Returns an error if the pass fails to
+  /// encode. [compute_pass] must not be null.
+  absl::Status EndComputePass(const impeller::ComputePass* compute_pass);
 
   const std::shared_ptr<impeller::Context>& GetContext() const;
 

@@ -96,6 +96,7 @@ impeller_component("renderer") {
     "../geometry",
     "../runtime_stage",
     "../tessellator",
+    "//third_party/abseil-cpp/absl/status",
   ]
 
   if (impeller_enable_compute) {

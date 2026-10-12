@@ -351,7 +351,7 @@ static ShaderLibrary::ShaderMap ParseShaderBundle(
       }
     }
 
-    std::unordered_map<std::string, Shader::StorageBufferBinding>
+    absl::flat_hash_map<std::string, Shader::StorageBufferBinding>
         storage_buffers;
     if (backend_shader->storage_buffers() != nullptr) {
       for (const auto& storage_buffer : *backend_shader->storage_buffers()) {
