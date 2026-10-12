@@ -1757,6 +1757,10 @@ abstract class DefaultTextEditingStrategy
     }
     subscriptions.clear();
     removeCompositionEventHandlers(activeDomElement);
+    // A composition in progress can no longer be observed ending, so it must
+    // not carry over to the next text field.
+    composingText = null;
+    composingBase = null;
 
     // If focused element is a part of a form, it needs to stay on the DOM
     // until the autofill context of the form is finalized.
@@ -1773,9 +1777,18 @@ abstract class DefaultTextEditingStrategy
 
   @override
   void setEditingState(EditingState? editingState) {
+    final String? previousText = lastEditingState?.text;
     lastEditingState = editingState;
     if (!isEnabled || !editingState!.isValid) {
       return;
+    }
+    // Writing different text into the element ends any composition in
+    // progress, and Chrome does so without a `compositionend` event. This
+    // happens when an input formatter rejects a dead key character. Forget the
+    // composition so its stale range is not reported back to the framework.
+    if (editingState.text != previousText) {
+      composingText = null;
+      composingBase = null;
     }
     lastEditingState!.applyToDomElement(domElement);
   }
