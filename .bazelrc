@@ -36,5 +36,15 @@ build --dynamic_mode=off
 # this flag; cc_shared_library targets list it explicitly.
 build --@bazel_tools//tools/cpp:link_extra_libs=//engine/src/flutter/build/bazel/toolchains:cxx_runtime
 
+# A content-addressed cache of action outputs shared by every checkout and
+# output base of this user, garbage-collected to the cap by the idle server.
+# Half of a cold build is the exec configuration (impellerc's closure, built
+# once per output base); with the cache a second cold build of the same
+# inputs -- after `bazel clean`, in another checkout, after a branch switch
+# and back -- is a hit for every action (measured: 78 s against 772 s for the
+# Phase 0 exit test). CI will point --remote_cache at a shared one instead.
+build --disk_cache=~/.cache/flutter_engine_bazel
+build --experimental_disk_cache_gc_max_size=20G
+
 # Personal overrides (ignored by git).
 try-import %workspace%/user.bazelrc
