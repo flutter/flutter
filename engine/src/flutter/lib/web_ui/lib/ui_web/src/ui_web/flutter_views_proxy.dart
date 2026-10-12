@@ -44,23 +44,7 @@ class FlutterViewManagerProxy {
 
   /// Adds a view to the application, embedding it into the host element specified in options.
   int addView(FlutterViewOptions options) {
-    final FlutterViewConstraints? viewConstraints = options.viewConstraints;
-    return _viewManager
-        .createAndRegisterView(
-          JsFlutterViewOptions(
-            hostElement: options.hostElement as DomElement,
-            viewConstraints: viewConstraints != null
-                ? JsViewConstraints(
-                    minWidth: viewConstraints.minWidth,
-                    maxWidth: viewConstraints.maxWidth,
-                    minHeight: viewConstraints.minHeight,
-                    maxHeight: viewConstraints.maxHeight,
-                  )
-                : null,
-            initialData: options.initialData,
-          ),
-        )
-        .viewId;
+    return _viewManager.createAndRegisterView(options as JsFlutterViewOptions).viewId;
   }
 
   /// Removes and disposes the view with the given [viewId].
@@ -70,34 +54,56 @@ class FlutterViewManagerProxy {
 }
 
 /// Options for creating a new Flutter view.
-class FlutterViewOptions {
-  FlutterViewOptions({required this.hostElement, this.viewConstraints, this.initialData});
+///
+/// This is the same JS object that is passed to `app.addView(...)` from
+/// JavaScript.
+extension type FlutterViewOptions._(JSObject _) implements JSObject {
+  factory FlutterViewOptions({
+    required JSObject hostElement,
+    FlutterViewConstraints? viewConstraints,
+    Object? initialData,
+  }) => FlutterViewOptions._js(
+    hostElement: hostElement,
+    viewConstraints: viewConstraints,
+    initialData: initialData?.toJSAnyDeep,
+  );
+
+  external factory FlutterViewOptions._js({
+    required JSObject hostElement,
+    FlutterViewConstraints? viewConstraints,
+    JSAny? initialData,
+  });
 
   /// The DOM element into which the Flutter view will be embedded.
-  final JSObject hostElement;
+  external JSObject get hostElement;
 
   /// The constraints for the Flutter view.
-  final FlutterViewConstraints? viewConstraints;
+  external FlutterViewConstraints? get viewConstraints;
 
   /// Optional initial data to pass to the Flutter view.
-  final Object? initialData;
+  external JSAny? get initialData;
 }
 
 /// Constraints for the size of a Flutter view.
 ///
 /// Attributes are expressed in *logical* pixels.
-class FlutterViewConstraints {
-  FlutterViewConstraints({this.minWidth, this.maxWidth, this.minHeight, this.maxHeight});
+extension type FlutterViewConstraints._(JSObject _) implements JSObject {
+  external factory FlutterViewConstraints({
+    double? minWidth,
+    double? maxWidth,
+    double? minHeight,
+    double? maxHeight,
+  });
 
   /// The minimum width of the Flutter view.
-  final double? minWidth;
+  external double? get minWidth;
 
   /// The maximum width of the Flutter view.
-  final double? maxWidth;
+  external double? get maxWidth;
 
   /// The minimum height of the Flutter view.
-  final double? minHeight;
+  external double? get minHeight;
 
   /// The maximum height of the Flutter view.
-  final double? maxHeight;
+  external double? get maxHeight;
 }
