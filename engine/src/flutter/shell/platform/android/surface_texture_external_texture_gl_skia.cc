@@ -10,6 +10,7 @@
 
 #include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
+#include "flutter/third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 
