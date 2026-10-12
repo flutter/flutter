@@ -5,12 +5,12 @@
 #ifndef FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMPUTE_PASS_VK_H_
 #define FLUTTER_IMPELLER_RENDERER_BACKEND_VULKAN_COMPUTE_PASS_VK_H_
 
-#include <map>
 #include <optional>
 
 #include "impeller/renderer/backend/vulkan/pipeline_vk.h"
 #include "impeller/renderer/backend/vulkan/vk.h"
 #include "impeller/renderer/compute_pass.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
 
@@ -37,7 +37,7 @@ class ComputePassVK final : public ComputePass {
 
   // The pipeline and bindings persist across dispatches in the pass.
   std::shared_ptr<Pipeline<ComputePipelineDescriptor>> pipeline_;
-  std::map<uint32_t, BoundResource> bindings_;
+  absl::flat_hash_map<uint32_t, BoundResource> bindings_;
   // Whether the pipeline or a binding changed since the last dispatch, so the
   // next dispatch needs a new descriptor set. A descriptor set that an earlier
   // dispatch in this command buffer uses is never rewritten.

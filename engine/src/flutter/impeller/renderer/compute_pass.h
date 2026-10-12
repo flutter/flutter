@@ -32,6 +32,8 @@ class ComputePass : public ResourceBinder {
 
   virtual void SetCommandLabel(std::string_view label) = 0;
 
+  /// @brief Sets the pipeline for later dispatches in the pass. The pipeline
+  ///        must not be null.
   virtual void SetPipeline(
       const std::shared_ptr<Pipeline<ComputePipelineDescriptor>>& pipeline) = 0;
 

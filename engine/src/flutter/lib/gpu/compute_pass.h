@@ -8,9 +8,7 @@
 #include <array>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <string>
-#include <unordered_map>
 
 #include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/command_buffer.h"
@@ -28,6 +26,8 @@
 #include "impeller/core/texture.h"
 #include "impeller/renderer/compute_pass.h"
 #include "impeller/renderer/pipeline.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace flutter {
 namespace gpu {
@@ -47,11 +47,13 @@ class ComputePass : public RefCountedDartWrappable<ComputePass> {
   ~ComputePass() override;
 
   /// Ends the command buffer's open pass and starts recording this one.
-  bool Begin(flutter::gpu::CommandBuffer& command_buffer);
+  /// Returns an error if either step fails.
+  absl::Status Begin(flutter::gpu::CommandBuffer& command_buffer);
 
   /// Ends this pass if it is still the command buffer's open pass. Does
-  /// nothing if a later command already ended it.
-  bool End();
+  /// nothing if a later command already ended it. Returns an error if the
+  /// pass fails to encode.
+  absl::Status End();
 
   /// The context of the command buffer this pass records into. Null before
   /// `Begin`.
@@ -59,29 +61,30 @@ class ComputePass : public RefCountedDartWrappable<ComputePass> {
 
   void SetPipeline(fml::RefPtr<ComputePipeline> pipeline);
 
-  /// Binds a uniform struct of a compute shader. Returns false if `binding`
-  /// is null, `shader` is not a compute shader, or the view runs past the end
-  /// of `buffer`.
-  bool BindUniform(const Shader& shader,
-                   const Shader::UniformBinding* binding,
-                   const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
-                   size_t offset_in_bytes,
-                   size_t length_in_bytes);
+  /// Binds a uniform struct of a compute shader. Returns an error if
+  /// `binding` is null, `shader` is not a compute shader, or the view runs
+  /// past the end of `buffer`.
+  absl::Status BindUniform(
+      const Shader& shader,
+      const Shader::UniformBinding* binding,
+      const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
+      size_t offset_in_bytes,
+      size_t length_in_bytes);
 
   /// The storage buffer counterpart to `BindUniform`.
-  bool BindStorageBuffer(
+  absl::Status BindStorageBuffer(
       const Shader& shader,
       const Shader::StorageBufferBinding* binding,
       const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
       size_t offset_in_bytes,
       size_t length_in_bytes);
 
-  /// The texture counterpart to `BindUniform`. Returns false if the texture
-  /// or sampler is null.
-  bool BindTexture(const Shader& shader,
-                   const Shader::TextureBinding* binding,
-                   std::shared_ptr<const impeller::Texture> texture,
-                   impeller::raw_ptr<const impeller::Sampler> sampler);
+  /// The texture counterpart to `BindUniform`. Returns an error if the
+  /// texture or sampler is null.
+  absl::Status BindTexture(const Shader& shader,
+                           const Shader::TextureBinding* binding,
+                           std::shared_ptr<const impeller::Texture> texture,
+                           impeller::raw_ptr<const impeller::Sampler> sampler);
 
   /// The number of binding set slots a pass can hold at once. Mirrors
   /// `ComputePass.maxBindingSets` in `gpu/lib/src/compute_pass.dart`.
@@ -94,17 +97,17 @@ class ComputePass : public RefCountedDartWrappable<ComputePass> {
   void ClearBindings();
 
   /// Dispatches a grid of workgroups with the bound pipeline and bindings.
-  /// Returns an error message if nothing is bound, a binding the shader
-  /// declares is missing, the count exceeds the device limit, or the backend
-  /// fails. Dispatching zero workgroups along any dimension does nothing.
-  std::optional<std::string> Dispatch(std::array<uint32_t, 3> workgroup_count);
+  /// Returns an error if nothing is bound, a binding the shader declares is
+  /// missing, the count exceeds the device limit, or the backend fails.
+  /// Dispatching zero workgroups along any dimension does nothing.
+  absl::Status Dispatch(std::array<uint32_t, 3> workgroup_count);
 
   /// Hands the backend pass a resource for every binding `shader` declares,
   /// taking each from an individual bind if there is one, and otherwise from
   /// the highest binding set slot that holds it. Returns an error naming the
   /// first binding with no resource. Called by `Dispatch` whenever a binding
   /// or the pipeline changed since the last dispatch.
-  std::optional<std::string> ApplyBindings(const Shader& shader);
+  absl::Status ApplyBindings(const Shader& shader);
 
  private:
   struct TextureBinding {
@@ -118,15 +121,14 @@ class ComputePass : public RefCountedDartWrappable<ComputePass> {
 
   fml::RefPtr<ComputePipeline> pipeline_;
   // The backend pipeline last set on `compute_pass_`.
-  std::shared_ptr<impeller::Pipeline<impeller::ComputePipelineDescriptor>>
-      bound_pipeline_;
+  std::shared_ptr<BackendComputePipeline> bound_pipeline_;
 
   // Individual bindings, keyed by the shader metadata of the binding they
   // fill, which is unique to each binding of each shader.
   // Uniform and storage buffers.
-  std::unordered_map<const impeller::ShaderMetadata*, impeller::BufferView>
+  absl::flat_hash_map<const impeller::ShaderMetadata*, impeller::BufferView>
       buffer_bindings_;
-  std::unordered_map<const impeller::ShaderMetadata*, TextureBinding>
+  absl::flat_hash_map<const impeller::ShaderMetadata*, TextureBinding>
       texture_bindings_;
   std::array<fml::RefPtr<BindingSet>, kMaxBindingSets> binding_sets_;
   // Whether a binding changed since the backend pass last received them.

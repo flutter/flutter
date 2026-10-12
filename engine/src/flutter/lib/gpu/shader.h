@@ -18,6 +18,8 @@
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/shader_function.h"
 #include "impeller/renderer/vertex_descriptor.h"
+#include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace flutter {
 namespace gpu {
@@ -75,7 +77,7 @@ class Shader : public RefCountedDartWrappable<Shader> {
       std::unordered_map<std::string, UniformBinding> uniform_structs,
       std::unordered_map<std::string, TextureBinding> uniform_textures,
       std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts,
-      std::unordered_map<std::string, StorageBufferBinding> storage_buffers =
+      absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers =
           {},
       std::optional<std::array<uint32_t, 3>> workgroup_size = std::nullopt);
 
@@ -88,9 +90,9 @@ class Shader : public RefCountedDartWrappable<Shader> {
 
   /// Registers this shader with `context`'s shader library if it is not
   /// registered yet, or re-registers it if it is dirty, evicting every
-  /// pipeline built from the earlier registration. Returns false if
+  /// pipeline built from the earlier registration. Returns an error if
   /// registration failed.
-  bool RegisterSync(impeller::Context& context);
+  absl::Status RegisterSync(impeller::Context& context);
 
   /// Whether this shader needs to be re-registered with the impeller shader
   /// library on next use. Fresh shaders start dirty. Set back to false by
@@ -170,11 +172,12 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::vector<impeller::ShaderStageBufferLayout> layouts_;
   std::unordered_map<std::string, UniformBinding> uniform_structs_;
   std::unordered_map<std::string, TextureBinding> uniform_textures_;
-  std::unordered_map<std::string, StorageBufferBinding> storage_buffers_;
+  absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers_;
   std::optional<std::array<uint32_t, 3>> workgroup_size_;
-  // The maps' entries in a stable order for index-based lookup. Entry
-  // pointers stay valid for the maps' lifetime (node-based containers);
-  // rebuilt whenever the maps are replaced (`Make`, `ResetFrom`).
+  // The maps' entries in a stable order for index-based lookup. The maps are
+  // never modified after they are set, only replaced (`Make`, `ResetFrom`),
+  // so entry pointers stay valid until then, and the order is rebuilt
+  // whenever they are replaced.
   std::vector<const UniformBinding*> uniform_struct_order_;
   std::vector<const TextureBinding*> uniform_texture_order_;
   std::vector<const StorageBufferBinding*> storage_buffer_order_;

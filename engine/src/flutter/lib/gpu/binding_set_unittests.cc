@@ -62,7 +62,8 @@ constexpr size_t kParticlesBinding = 4;
 
 // A compute shader declaring one storage buffer ("Particles").
 fml::RefPtr<Shader> MakeComputeShader() {
-  std::unordered_map<std::string, Shader::StorageBufferBinding> storage_buffers;
+  absl::flat_hash_map<std::string, Shader::StorageBufferBinding>
+      storage_buffers;
   storage_buffers["Particles"] = Shader::StorageBufferBinding{
       .slot =
           impeller::ShaderUniformSlot{

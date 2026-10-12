@@ -68,10 +68,12 @@ std::unique_ptr<ComputePipelineVK> PipelineLibraryVK::CreateComputePipeline(
   // rather than as undefined behavior in the driver.
   const vk::PhysicalDeviceLimits limits =
       strong_device->GetPhysicalDevice().getProperties().limits;
-  if (!desc.ValidateWorkgroupSize(
+  if (absl::Status status = desc.ValidateWorkgroupSize(
           {limits.maxComputeWorkGroupSize[0], limits.maxComputeWorkGroupSize[1],
            limits.maxComputeWorkGroupSize[2]},
-          limits.maxComputeWorkGroupInvocations)) {
+          limits.maxComputeWorkGroupInvocations);
+      !status.ok()) {
+    VALIDATION_LOG << status.message();
     return nullptr;
   }
 

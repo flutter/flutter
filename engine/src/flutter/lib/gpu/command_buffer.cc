@@ -5,6 +5,7 @@
 #include "flutter/lib/gpu/command_buffer.h"
 
 #include "dart_api.h"
+#include "fml/logging.h"
 #include "fml/make_copyable.h"
 #include "impeller/core/buffer_view.h"
 #include "impeller/renderer/command_buffer.h"
@@ -81,12 +82,17 @@ std::shared_ptr<impeller::ComputePass> CommandBuffer::CreateComputePass() {
   return compute_pass;
 }
 
-bool CommandBuffer::EndComputePass(const impeller::ComputePass* compute_pass) {
-  if (!compute_pass || !has_open_pass_ ||
+absl::Status CommandBuffer::EndComputePass(
+    const impeller::ComputePass* compute_pass) {
+  FML_DCHECK(compute_pass);
+  if (!has_open_pass_ ||
       encodables_.back().compute_pass.get() != compute_pass) {
-    return true;
+    return absl::OkStatus();
   }
-  return EndOpenPass();
+  if (!EndOpenPass()) {
+    return absl::InternalError("Failed to encode the compute pass.");
+  }
+  return absl::OkStatus();
 }
 
 const std::shared_ptr<impeller::Context>& CommandBuffer::GetContext() const {

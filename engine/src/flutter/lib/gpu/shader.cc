@@ -14,6 +14,7 @@
 #include "impeller/renderer/shader_function.h"
 #include "impeller/renderer/shader_key.h"
 #include "impeller/renderer/shader_library.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -48,7 +49,7 @@ fml::RefPtr<Shader> Shader::Make(
     std::unordered_map<std::string, UniformBinding> uniform_structs,
     std::unordered_map<std::string, TextureBinding> uniform_textures,
     std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts,
-    std::unordered_map<std::string, StorageBufferBinding> storage_buffers,
+    absl::flat_hash_map<std::string, StorageBufferBinding> storage_buffers,
     std::optional<std::array<uint32_t, 3>> workgroup_size) {
   auto shader = fml::MakeRefCounted<Shader>();
   shader->library_id_ = std::move(library_id);
@@ -124,17 +125,17 @@ void Shader::ResetFrom(Shader& other) {
 }
 
 bool Shader::RegisterSync(Context& context) {
-  return RegisterSync(context.GetContext());
+  return RegisterSync(context.GetContext()).ok();
 }
 
-bool Shader::RegisterSync(impeller::Context& context) {
+absl::Status Shader::RegisterSync(impeller::Context& context) {
   auto& lib = *context.GetShaderLibrary();
   const std::string scoped_name = GetScopedName();
 
   std::shared_ptr<const impeller::ShaderFunction> existing =
       lib.GetFunction(scoped_name, stage_);
   if (existing && !is_dirty_) {
-    return true;  // Already registered and current.
+    return absl::OkStatus();  // Already registered and current.
   }
 
   // Dirty path: an earlier asset version still occupies the scoped slot.
@@ -153,10 +154,12 @@ bool Shader::RegisterSync(impeller::Context& context) {
         promise.set_value(result);
       }));
   if (!future.get()) {
-    return false;  // Registration failed.
+    return absl::InternalError(absl::StrCat("Failed to register the shader '",
+                                            entrypoint_,
+                                            "' with the shader library."));
   }
   is_dirty_ = false;
-  return true;
+  return absl::OkStatus();
 }
 
 std::shared_ptr<impeller::VertexDescriptor> Shader::CreateVertexDescriptor()

@@ -56,7 +56,8 @@ fml::RefPtr<Shader> MakeComputeShader() {
   texture_binding.metadata =
       impeller::ShaderMetadata{.name = "tex", .members = {}};
   uniform_textures["tex"] = texture_binding;
-  std::unordered_map<std::string, Shader::StorageBufferBinding> storage_buffers;
+  absl::flat_hash_map<std::string, Shader::StorageBufferBinding>
+      storage_buffers;
   storage_buffers["Particles"] = Shader::StorageBufferBinding{
       .slot =
           impeller::ShaderUniformSlot{
@@ -112,7 +113,7 @@ class FlutterGpuComputePassTest : public ::testing::Test {
     EXPECT_CALL(*impeller_command_buffer_, OnCreateComputePass)
         .WillOnce(Return(impeller_pass));
     auto pass = fml::MakeRefCounted<ComputePass>();
-    EXPECT_TRUE(pass->Begin(*command_buffer_));
+    EXPECT_TRUE(pass->Begin(*command_buffer_).ok());
     return pass;
   }
 
@@ -152,13 +153,13 @@ TEST_F(FlutterGpuComputePassTest, CreatingAndEndingFollowsThePassLifecycle) {
 
   ASSERT_TRUE(command_buffer_->CreateRenderPass(impeller::RenderTarget()));
   auto pass_a = fml::MakeRefCounted<ComputePass>();
-  ASSERT_TRUE(pass_a->Begin(*command_buffer_));
+  ASSERT_TRUE(pass_a->Begin(*command_buffer_).ok());
   auto pass_b = fml::MakeRefCounted<ComputePass>();
-  ASSERT_TRUE(pass_b->Begin(*command_buffer_));
+  ASSERT_TRUE(pass_b->Begin(*command_buffer_).ok());
   // pass_b is still open, so this must not end it.
-  EXPECT_TRUE(pass_a->End());
-  EXPECT_TRUE(pass_b->End());
-  EXPECT_TRUE(pass_b->End());
+  EXPECT_TRUE(pass_a->End().ok());
+  EXPECT_TRUE(pass_b->End().ok());
+  EXPECT_TRUE(pass_b->End().ok());
   EXPECT_TRUE(command_buffer_->Submit());
 }
 
@@ -173,14 +174,20 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsBindsTheShadersBindings) {
   auto particles = MakeBuffer(64);
 
   ASSERT_TRUE(pass->BindUniform(*shader, shader->GetUniformStruct("Params"),
-                                params, 0, 16));
-  ASSERT_TRUE(pass->BindStorageBuffer(
-      *shader, shader->GetStorageBuffer("Particles"), particles, 16, 32));
+                                params, 0, 16)
+                  .ok());
+  ASSERT_TRUE(pass->BindStorageBuffer(*shader,
+                                      shader->GetStorageBuffer("Particles"),
+                                      particles, 16, 32)
+                  .ok());
   ASSERT_TRUE(pass->BindTexture(*shader, shader->GetUniformTexture("tex"),
-                                texture_, Sampler()));
-  ASSERT_TRUE(pass->BindStorageBuffer(
-      *other_shader, other_shader->GetStorageBuffer("Particles"), particles, 0,
-      16));
+                                texture_, Sampler())
+                  .ok());
+  ASSERT_TRUE(
+      pass->BindStorageBuffer(*other_shader,
+                              other_shader->GetStorageBuffer("Particles"),
+                              particles, 0, 16)
+          .ok());
 
   EXPECT_CALL(*impeller_pass,
               BindResource(impeller::ShaderStage::kCompute,
@@ -207,7 +214,7 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsBindsTheShadersBindings) {
                            Sampler()))
       .WillOnce(Return(true));
 
-  EXPECT_EQ(pass->ApplyBindings(*shader), std::nullopt);
+  EXPECT_TRUE(pass->ApplyBindings(*shader).ok());
 }
 
 // Precedence matches render passes: an individual bind overrides a binding
@@ -231,7 +238,8 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsPrefersBindsThenHigherSets) {
   pass->BindSet(0, low_set);
   pass->BindSet(1, high_set);
   ASSERT_TRUE(pass->BindUniform(*shader, shader->GetUniformStruct("Params"),
-                                buffer, 128, 16));
+                                buffer, 128, 16)
+                  .ok());
 
   auto offset_is = [](size_t offset) {
     return Truly([offset](const impeller::BufferView& view) {
@@ -251,7 +259,7 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsPrefersBindsThenHigherSets) {
       BindResource(_, impeller::DescriptorType::kSampledImage, _, _, _, _))
       .WillOnce(Return(true));
 
-  EXPECT_EQ(pass->ApplyBindings(*shader), std::nullopt);
+  EXPECT_TRUE(pass->ApplyBindings(*shader).ok());
 }
 
 // Dispatching with a binding left empty would read whatever the backend has
@@ -262,24 +270,28 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsNamesAMissingBinding) {
   auto pass = BeginComputePass(impeller_pass);
   auto buffer = MakeBuffer(64);
   ASSERT_TRUE(pass->BindUniform(*shader, shader->GetUniformStruct("Params"),
-                                buffer, 0, 16));
+                                buffer, 0, 16)
+                  .ok());
   ASSERT_TRUE(pass->BindTexture(*shader, shader->GetUniformTexture("tex"),
-                                texture_, Sampler()));
+                                texture_, Sampler())
+                  .ok());
 
-  std::optional<std::string> error = pass->ApplyBindings(*shader);
-  ASSERT_TRUE(error.has_value());
-  EXPECT_EQ(error.value(),
+  absl::Status error = pass->ApplyBindings(*shader);
+  ASSERT_FALSE(error.ok());
+  EXPECT_EQ(error.message(),
             "The compute shader 'Entrypoint' declares the storage buffer "
             "'Particles', but nothing is bound to it.");
 
   // Clearing drops individual binds and sets alike.
-  ASSERT_TRUE(pass->BindStorageBuffer(
-      *shader, shader->GetStorageBuffer("Particles"), buffer, 0, 16));
-  EXPECT_EQ(pass->ApplyBindings(*shader), std::nullopt);
+  ASSERT_TRUE(pass->BindStorageBuffer(*shader,
+                                      shader->GetStorageBuffer("Particles"),
+                                      buffer, 0, 16)
+                  .ok());
+  EXPECT_TRUE(pass->ApplyBindings(*shader).ok());
   pass->ClearBindings();
   error = pass->ApplyBindings(*shader);
-  ASSERT_TRUE(error.has_value());
-  EXPECT_EQ(error.value(),
+  ASSERT_FALSE(error.ok());
+  EXPECT_EQ(error.message(),
             "The compute shader 'Entrypoint' declares the uniform struct "
             "'Params', but nothing is bound to it.");
 }
@@ -288,7 +300,8 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsNamesAMissingBinding) {
 // that every backend takes the same bindings, but they are not handed to the
 // backend.
 TEST_F(FlutterGpuComputePassTest, ApplyBindingsRequiresButSkipsOptimizedOut) {
-  std::unordered_map<std::string, Shader::StorageBufferBinding> storage_buffers;
+  absl::flat_hash_map<std::string, Shader::StorageBufferBinding>
+      storage_buffers;
   storage_buffers["Unused"] = Shader::StorageBufferBinding{
       .slot = impeller::ShaderUniformSlot{.name = "Unused",
                                           .ext_res_0 =
@@ -308,15 +321,17 @@ TEST_F(FlutterGpuComputePassTest, ApplyBindingsRequiresButSkipsOptimizedOut) {
   auto pass = BeginComputePass(impeller_pass);
   EXPECT_CALL(*impeller_pass, BindResource(_, _, _, _, _)).Times(0);
 
-  std::optional<std::string> error = pass->ApplyBindings(*shader);
-  ASSERT_TRUE(error.has_value());
-  EXPECT_EQ(error.value(),
+  absl::Status error = pass->ApplyBindings(*shader);
+  ASSERT_FALSE(error.ok());
+  EXPECT_EQ(error.message(),
             "The compute shader 'Entrypoint' declares the storage buffer "
             "'Unused', but nothing is bound to it.");
 
-  ASSERT_TRUE(pass->BindStorageBuffer(
-      *shader, shader->GetStorageBuffer("Unused"), MakeBuffer(16), 0, 16));
-  EXPECT_EQ(pass->ApplyBindings(*shader), std::nullopt);
+  ASSERT_TRUE(pass->BindStorageBuffer(*shader,
+                                      shader->GetStorageBuffer("Unused"),
+                                      MakeBuffer(16), 0, 16)
+                  .ok());
+  EXPECT_TRUE(pass->ApplyBindings(*shader).ok());
 }
 
 // Only compute shaders take bindings from a compute pass, and a view must lie
@@ -327,13 +342,18 @@ TEST_F(FlutterGpuComputePassTest, BindRejectsInvalidBindings) {
   auto pass = BeginComputePass(impeller_pass);
   auto buffer = MakeBuffer(64);
 
-  EXPECT_FALSE(pass->BindStorageBuffer(*shader, nullptr, buffer, 0, 16));
-  EXPECT_FALSE(pass->BindStorageBuffer(
-      *shader, shader->GetStorageBuffer("Particles"), buffer, 32, 48));
-  EXPECT_FALSE(pass->BindStorageBuffer(
-      *shader, shader->GetStorageBuffer("Particles"), nullptr, 0, 16));
+  EXPECT_FALSE(pass->BindStorageBuffer(*shader, nullptr, buffer, 0, 16).ok());
+  EXPECT_FALSE(pass->BindStorageBuffer(*shader,
+                                       shader->GetStorageBuffer("Particles"),
+                                       buffer, 32, 48)
+                   .ok());
+  EXPECT_FALSE(pass->BindStorageBuffer(*shader,
+                                       shader->GetStorageBuffer("Particles"),
+                                       nullptr, 0, 16)
+                   .ok());
   EXPECT_FALSE(pass->BindTexture(*shader, shader->GetUniformTexture("tex"),
-                                 nullptr, Sampler()));
+                                 nullptr, Sampler())
+                   .ok());
 
   auto fragment =
       Shader::Make("library", "Fragment", impeller::ShaderStage::kFragment,
@@ -342,7 +362,8 @@ TEST_F(FlutterGpuComputePassTest, BindRejectsInvalidBindings) {
                    /*descriptor_set_layouts=*/{});
   // The binding comes from a compute shader, but the shader is not one.
   EXPECT_FALSE(pass->BindUniform(*fragment, shader->GetUniformStruct("Params"),
-                                 buffer, 0, 16));
+                                 buffer, 0, 16)
+                   .ok());
 }
 
 // A dispatch with no workgroups does nothing, like a draw with no vertices,
@@ -352,11 +373,11 @@ TEST_F(FlutterGpuComputePassTest, DispatchNeedsAPipelineUnlessTheGridIsEmpty) {
   auto pass = BeginComputePass(impeller_pass);
   EXPECT_CALL(*impeller_pass, Compute).Times(0);
 
-  EXPECT_EQ(pass->Dispatch({0, 1, 1}), std::nullopt);
-  EXPECT_EQ(pass->Dispatch({4, 4, 0}), std::nullopt);
-  std::optional<std::string> error = pass->Dispatch({1, 1, 1});
-  ASSERT_TRUE(error.has_value());
-  EXPECT_EQ(error.value(), "No ComputePipeline is bound.");
+  EXPECT_TRUE(pass->Dispatch({0, 1, 1}).ok());
+  EXPECT_TRUE(pass->Dispatch({4, 4, 0}).ok());
+  absl::Status error = pass->Dispatch({1, 1, 1});
+  ASSERT_FALSE(error.ok());
+  EXPECT_EQ(error.message(), "No ComputePipeline is bound.");
 }
 
 }  // namespace

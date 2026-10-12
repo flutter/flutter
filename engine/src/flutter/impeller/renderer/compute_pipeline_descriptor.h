@@ -8,11 +8,11 @@
 #include <array>
 #include <cstdint>
 #include <memory>
-#include <optional>
 #include <string>
 
 #include "impeller/base/comparable.h"
 #include "impeller/core/shader_types.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -49,21 +49,14 @@ class ComputePipelineDescriptor final
   std::array<uint32_t, 3> GetWorkgroupSize() const;
 
   //----------------------------------------------------------------------------
-  /// @brief      Whether the workgroup size is non-zero and within the given
-  ///             per-dimension and total invocation limits. Logs a validation
-  ///             error naming the pipeline if it is not.
+  /// @brief      Checks that the workgroup size is non-zero and within the
+  ///             given per-dimension and total invocation limits.
   ///
-  bool ValidateWorkgroupSize(std::array<uint32_t, 3> max_size,
-                             uint64_t max_invocations) const;
-
-  //----------------------------------------------------------------------------
-  /// @brief      The error `ValidateWorkgroupSize` would log, without logging
-  ///             it, or std::nullopt if the workgroup size is valid. For
-  ///             callers that report the error themselves.
+  /// @return     OK if it is, or an invalid argument error naming the
+  ///             pipeline and the limit it breaks.
   ///
-  std::optional<std::string> CheckWorkgroupSize(
-      std::array<uint32_t, 3> max_size,
-      uint64_t max_invocations) const;
+  absl::Status ValidateWorkgroupSize(std::array<uint32_t, 3> max_size,
+                                     uint64_t max_invocations) const;
 
   // Comparable<ComputePipelineDescriptor>
   std::size_t GetHash() const override;

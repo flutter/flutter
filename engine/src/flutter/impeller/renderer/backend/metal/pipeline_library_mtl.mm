@@ -260,11 +260,13 @@ PipelineFuture<ComputePipelineDescriptor> PipelineLibraryMTL::GetPipeline(
         // exceeds the device or pipeline limit, so check the shader's declared
         // size here. The pipeline's total limit can be below the device's, for
         // example when the shader uses many registers.
-        if (!descriptor.ValidateWorkgroupSize(
+        if (absl::Status status = descriptor.ValidateWorkgroupSize(
                 {static_cast<uint32_t>(max_threads_per_threadgroup.width),
                  static_cast<uint32_t>(max_threads_per_threadgroup.height),
                  static_cast<uint32_t>(max_threads_per_threadgroup.depth)},
-                compute_pipeline_state.maxTotalThreadsPerThreadgroup)) {
+                compute_pipeline_state.maxTotalThreadsPerThreadgroup);
+            !status.ok()) {
+          VALIDATION_LOG << status.message();
           promise->set_value(nullptr);
           return;
         }

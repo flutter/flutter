@@ -12,6 +12,8 @@
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/capabilities.h"
 #include "impeller/renderer/sampler_library.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
+#include "third_party/abseil-cpp/absl/strings/str_cat.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -23,23 +25,23 @@ ComputePass::ComputePass() = default;
 
 ComputePass::~ComputePass() = default;
 
-bool ComputePass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
+absl::Status ComputePass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
   compute_pass_ = command_buffer.CreateComputePass();
   if (!compute_pass_) {
-    return false;
+    return absl::InternalError("Failed to begin ComputePass.");
   }
   context_ = command_buffer.GetContext();
   command_buffer_ = fml::Ref(&command_buffer);
-  return true;
+  return absl::OkStatus();
 }
 
-bool ComputePass::End() {
+absl::Status ComputePass::End() {
   if (!command_buffer_) {
-    return true;
+    return absl::OkStatus();
   }
-  bool result = command_buffer_->EndComputePass(compute_pass_.get());
+  absl::Status status = command_buffer_->EndComputePass(compute_pass_.get());
   command_buffer_ = nullptr;
-  return result;
+  return status;
 }
 
 const std::shared_ptr<impeller::Context>& ComputePass::GetContext() const {
@@ -52,61 +54,94 @@ void ComputePass::SetPipeline(fml::RefPtr<ComputePipeline> pipeline) {
   pipeline_ = std::move(pipeline);
 }
 
-static bool IsViewInBounds(
+// Checks that `binding` exists and belongs to a compute shader.
+static absl::Status ValidateBinding(const Shader& shader, const void* binding) {
+  if (!binding) {
+    return absl::InvalidArgumentError(
+        absl::StrCat("The shader '", shader.GetEntrypoint(),
+                     "' does not declare the binding."));
+  }
+  if (shader.GetShaderStage() != impeller::ShaderStage::kCompute) {
+    return absl::InvalidArgumentError(absl::StrCat(
+        "The shader '", shader.GetEntrypoint(), "' is not a compute shader."));
+  }
+  return absl::OkStatus();
+}
+
+// Checks that `buffer` is not null and holds the view.
+static absl::Status ValidateView(
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
     size_t offset_in_bytes,
     size_t length_in_bytes) {
   if (!buffer) {
-    return false;
+    return absl::InvalidArgumentError("The buffer is null.");
   }
   const size_t size = buffer->GetDeviceBufferDescriptor().size;
-  return offset_in_bytes <= size && length_in_bytes <= size - offset_in_bytes;
+  if (offset_in_bytes > size || length_in_bytes > size - offset_in_bytes) {
+    return absl::OutOfRangeError(absl::StrCat(
+        "The view of ", length_in_bytes, " bytes at offset ", offset_in_bytes,
+        " runs past the end of the ", size, "-byte buffer."));
+  }
+  return absl::OkStatus();
 }
 
-bool ComputePass::BindUniform(
+absl::Status ComputePass::BindUniform(
     const Shader& shader,
     const Shader::UniformBinding* binding,
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
     size_t offset_in_bytes,
     size_t length_in_bytes) {
-  if (!binding || shader.GetShaderStage() != impeller::ShaderStage::kCompute ||
-      !IsViewInBounds(buffer, offset_in_bytes, length_in_bytes)) {
-    return false;
+  if (absl::Status status = ValidateBinding(shader, binding); !status.ok()) {
+    return status;
+  }
+  if (absl::Status status =
+          ValidateView(buffer, offset_in_bytes, length_in_bytes);
+      !status.ok()) {
+    return status;
   }
   buffer_bindings_.insert_or_assign(
       &binding->metadata,
       impeller::BufferView(buffer,
                            impeller::Range(offset_in_bytes, length_in_bytes)));
   bindings_dirty_ = true;
-  return true;
+  return absl::OkStatus();
 }
 
-bool ComputePass::BindStorageBuffer(
+absl::Status ComputePass::BindStorageBuffer(
     const Shader& shader,
     const Shader::StorageBufferBinding* binding,
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
     size_t offset_in_bytes,
     size_t length_in_bytes) {
-  if (!binding || shader.GetShaderStage() != impeller::ShaderStage::kCompute ||
-      !IsViewInBounds(buffer, offset_in_bytes, length_in_bytes)) {
-    return false;
+  if (absl::Status status = ValidateBinding(shader, binding); !status.ok()) {
+    return status;
+  }
+  if (absl::Status status =
+          ValidateView(buffer, offset_in_bytes, length_in_bytes);
+      !status.ok()) {
+    return status;
   }
   buffer_bindings_.insert_or_assign(
       &binding->metadata,
       impeller::BufferView(buffer,
                            impeller::Range(offset_in_bytes, length_in_bytes)));
   bindings_dirty_ = true;
-  return true;
+  return absl::OkStatus();
 }
 
-bool ComputePass::BindTexture(
+absl::Status ComputePass::BindTexture(
     const Shader& shader,
     const Shader::TextureBinding* binding,
     std::shared_ptr<const impeller::Texture> texture,
     impeller::raw_ptr<const impeller::Sampler> sampler) {
-  if (!binding || shader.GetShaderStage() != impeller::ShaderStage::kCompute ||
-      !texture || !sampler) {
-    return false;
+  if (absl::Status status = ValidateBinding(shader, binding); !status.ok()) {
+    return status;
+  }
+  if (!texture) {
+    return absl::InvalidArgumentError("The texture is null.");
+  }
+  if (!sampler) {
+    return absl::InvalidArgumentError("The sampler is null.");
   }
   texture_bindings_.insert_or_assign(
       &binding->metadata, TextureBinding{
@@ -115,7 +150,7 @@ bool ComputePass::BindTexture(
                               .sampler = std::move(sampler),
                           });
   bindings_dirty_ = true;
-  return true;
+  return absl::OkStatus();
 }
 
 void ComputePass::BindSet(size_t slot, fml::RefPtr<BindingSet> set) {
@@ -168,10 +203,11 @@ static bool IsOptimizedOut(size_t backend_index) {
   return backend_index == impeller::kOptimizedOutBinding;
 }
 
-std::optional<std::string> ComputePass::ApplyBindings(const Shader& shader) {
-  auto missing = [&shader](const char* kind, const std::string& name) {
-    return "The compute shader '" + shader.GetEntrypoint() + "' declares the " +
-           kind + " '" + name + "', but nothing is bound to it.";
+absl::Status ComputePass::ApplyBindings(const Shader& shader) {
+  auto missing = [&shader](std::string_view kind, std::string_view name) {
+    return absl::FailedPreconditionError(absl::StrCat(
+        "The compute shader '", shader.GetEntrypoint(), "' declares the ", kind,
+        " '", name, "', but nothing is bound to it."));
   };
 
   for (int i = 0;; i++) {
@@ -252,40 +288,39 @@ std::optional<std::string> ComputePass::ApplyBindings(const Shader& shader) {
                                 std::move(texture), sampler);
   }
 
-  return std::nullopt;
+  return absl::OkStatus();
 }
 
-std::optional<std::string> ComputePass::Dispatch(
-    std::array<uint32_t, 3> workgroup_count) {
+absl::Status ComputePass::Dispatch(std::array<uint32_t, 3> workgroup_count) {
   if (!command_buffer_ || !compute_pass_) {
-    return "The ComputePass is not recording.";
+    return absl::FailedPreconditionError("The ComputePass is not recording.");
   }
   // Nothing to do, like a draw with no vertices.
   if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
       workgroup_count[2] == 0u) {
-    return std::nullopt;
+    return absl::OkStatus();
   }
   if (!pipeline_) {
-    return "No ComputePipeline is bound.";
+    return absl::FailedPreconditionError("No ComputePipeline is bound.");
   }
 
   const std::array<uint32_t, 3> max_count =
       context_->GetCapabilities()->GetMaximumComputeWorkgroupCount();
   if (workgroup_count[0] > max_count[0] || workgroup_count[1] > max_count[1] ||
       workgroup_count[2] > max_count[2]) {
-    return "The workgroup count " + std::to_string(workgroup_count[0]) + "x" +
-           std::to_string(workgroup_count[1]) + "x" +
-           std::to_string(workgroup_count[2]) +
-           " exceeds the device maximum of " + std::to_string(max_count[0]) +
-           "x" + std::to_string(max_count[1]) + "x" +
-           std::to_string(max_count[2]) + ".";
+    return absl::OutOfRangeError(absl::StrCat(
+        "The workgroup count ", workgroup_count[0], "x", workgroup_count[1],
+        "x", workgroup_count[2], " exceeds the device maximum of ",
+        max_count[0], "x", max_count[1], "x", max_count[2], "."));
   }
 
-  std::string error;
-  auto pipeline = pipeline_->GetOrCreatePipeline(*context_, error);
-  if (!pipeline) {
-    return error;
+  absl::StatusOr<std::shared_ptr<BackendComputePipeline>> pipeline_or =
+      pipeline_->GetOrCreatePipeline(*context_);
+  if (!pipeline_or.ok()) {
+    return pipeline_or.status();
   }
+  std::shared_ptr<BackendComputePipeline> pipeline =
+      std::move(pipeline_or).value();
   if (pipeline != bound_pipeline_) {
     compute_pass_->SetPipeline(pipeline);
     bound_pipeline_ = pipeline;
@@ -299,19 +334,18 @@ std::optional<std::string> ComputePass::Dispatch(
     bindings_dirty_ = true;
   }
   if (bindings_dirty_) {
-    if (std::optional<std::string> binding_error =
-            ApplyBindings(*pipeline_->GetShader());
-        binding_error.has_value()) {
-      return binding_error;
+    if (absl::Status status = ApplyBindings(*pipeline_->GetShader());
+        !status.ok()) {
+      return status;
     }
     bindings_dirty_ = false;
   }
 
-  fml::Status status = compute_pass_->Compute(workgroup_count);
-  if (!status.ok()) {
-    return std::string(status.message());
+  if (fml::Status status = compute_pass_->Compute(workgroup_count);
+      !status.ok()) {
+    return absl::InternalError(status.message());
   }
-  return std::nullopt;
+  return absl::OkStatus();
 }
 
 }  // namespace gpu
@@ -326,21 +360,23 @@ void InternalFlutterGpu_ComputePass_Initialize(Dart_Handle wrapper) {
   res->AssociateWithDartWrapper(wrapper);
 }
 
+// Returns null for OK, or the error message for Dart to throw.
+static Dart_Handle ToDartError(const absl::Status& status) {
+  if (status.ok()) {
+    return Dart_Null();
+  }
+  return tonic::ToDart(std::string(status.message()));
+}
+
 Dart_Handle InternalFlutterGpu_ComputePass_Begin(
     flutter::gpu::ComputePass* wrapper,
     flutter::gpu::CommandBuffer* command_buffer) {
-  if (!wrapper->Begin(*command_buffer)) {
-    return tonic::ToDart("Failed to begin ComputePass");
-  }
-  return Dart_Null();
+  return ToDartError(wrapper->Begin(*command_buffer));
 }
 
 Dart_Handle InternalFlutterGpu_ComputePass_End(
     flutter::gpu::ComputePass* wrapper) {
-  if (!wrapper->End()) {
-    return tonic::ToDart("Failed to end ComputePass");
-  }
-  return Dart_Null();
+  return ToDartError(wrapper->End());
 }
 
 void InternalFlutterGpu_ComputePass_BindPipeline(
@@ -359,9 +395,11 @@ bool InternalFlutterGpu_ComputePass_BindUniformIndexed(
   if (offset_in_bytes < 0 || length_in_bytes < 0) {
     return false;
   }
-  return wrapper->BindUniform(
-      *shader, shader->GetUniformStructAt(uniform_struct_index),
-      device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes);
+  return wrapper
+      ->BindUniform(*shader, shader->GetUniformStructAt(uniform_struct_index),
+                    device_buffer->GetBuffer(), offset_in_bytes,
+                    length_in_bytes)
+      .ok();
 }
 
 bool InternalFlutterGpu_ComputePass_BindStorageBufferIndexed(
@@ -374,9 +412,11 @@ bool InternalFlutterGpu_ComputePass_BindStorageBufferIndexed(
   if (offset_in_bytes < 0 || length_in_bytes < 0) {
     return false;
   }
-  return wrapper->BindStorageBuffer(
-      *shader, shader->GetStorageBufferAt(storage_buffer_index),
-      device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes);
+  return wrapper
+      ->BindStorageBuffer(
+          *shader, shader->GetStorageBufferAt(storage_buffer_index),
+          device_buffer->GetBuffer(), offset_in_bytes, length_in_bytes)
+      .ok();
 }
 
 bool InternalFlutterGpu_ComputePass_BindTextureIndexed(
@@ -397,10 +437,12 @@ bool InternalFlutterGpu_ComputePass_BindTextureIndexed(
       flutter::gpu::ToImpellerSamplerDescriptor(
           min_filter, mag_filter, mip_filter, width_address_mode,
           height_address_mode, max_anisotropy);
-  return wrapper->BindTexture(
-      *shader, shader->GetUniformTextureAt(uniform_texture_index),
-      texture->GetTexture(),
-      wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc));
+  return wrapper
+      ->BindTexture(
+          *shader, shader->GetUniformTextureAt(uniform_texture_index),
+          texture->GetTexture(),
+          wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc))
+      .ok();
 }
 
 void InternalFlutterGpu_ComputePass_BindSet(
@@ -427,12 +469,8 @@ Dart_Handle InternalFlutterGpu_ComputePass_Dispatch(
   if (workgroup_count_x < 0 || workgroup_count_y < 0 || workgroup_count_z < 0) {
     return tonic::ToDart("Workgroup counts must not be negative.");
   }
-  std::optional<std::string> error =
+  return ToDartError(
       wrapper->Dispatch({static_cast<uint32_t>(workgroup_count_x),
                          static_cast<uint32_t>(workgroup_count_y),
-                         static_cast<uint32_t>(workgroup_count_z)});
-  if (error.has_value()) {
-    return tonic::ToDart(error.value());
-  }
-  return Dart_Null();
+                         static_cast<uint32_t>(workgroup_count_z)}));
 }
