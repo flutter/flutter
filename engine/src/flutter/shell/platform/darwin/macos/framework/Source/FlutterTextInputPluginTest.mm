@@ -2542,7 +2542,7 @@ TEST(FlutterTextInputPluginTest, TextFieldDoesNotTakeOverFieldEditorWhileComposi
   [viewController loadView];
   // Create a NSWindow so that the native text field can become first responder.
   NSWindow* window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 800, 600)
-                                                 styleMask:NSBorderlessWindowMask
+                                                 styleMask:NSWindowStyleMaskBorderless
                                                    backing:NSBackingStoreBuffered
                                                      defer:NO];
   window.contentView = viewController.view;
