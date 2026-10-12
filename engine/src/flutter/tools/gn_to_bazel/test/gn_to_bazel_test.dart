@@ -620,13 +620,67 @@ if (slimpeller) {
   source_set("maybe") {
     sources = [ "b.cc" ]
   }
+} else {
+  source_set("otherwise") {
+    sources = [ "c.cc" ]
+  }
 }
 ''');
         expect(evaluation.targets[0].condition, Condition.always);
         expect(evaluation.targets[1].condition, const ConditionVariable('slimpeller'));
+        // The target exists in Bazel but is incompatible where GN would not
+        // define it.
+        final String output = emitBuildFile(evaluation, gnPackage: '//flutter/example');
         expect(
-          () => emitBuildFile(evaluation, gnPackage: '//flutter/example'),
-          throwsGnError(line: 7, message: 'defined under `slimpeller`'),
+          output,
+          contains('''
+cc_library(
+    name = "maybe",
+    srcs = ["b.cc"],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/common:slimpeller_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+'''),
+        );
+        expect(
+          output,
+          contains('''
+    target_compatible_with = select({
+        "//engine/src/flutter/common:slimpeller_enabled": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
+'''),
+        );
+        // Under --assume=none, enable_unittests is the testing package's
+        // setting; a conjunction of mixed settings has no select().
+        final String open = await convert('''
+if (enable_unittests) {
+  source_set("tests_only") {
+    sources = [ "a.cc" ]
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{}));
+        expect(
+          open,
+          contains('''
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+'''),
+        );
+        await expectLater(
+          convert('''
+if (enable_unittests && !slimpeller) {
+  source_set("x") {
+    sources = [ "a.cc" ]
+  }
+}
+''', assumptions: Assumptions(const <String, GnValue>{})),
+          throwsGnError(line: 2, message: 'cannot be expressed as a select()'),
         );
       });
     });
@@ -729,6 +783,159 @@ source_set("x") {
         ).targets.single;
         expect(strings(overridden, 'sources'), <String>['a.cc']);
         expect(strings(overridden, 'defines'), <String>['NAME=custom']);
+      });
+
+      test('an argument the Bazel side defines keeps its name', () async {
+        // impeller/tools/args.gni's shape: backend arguments with
+        // per-platform defaults, and arguments derived from them.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'lib/args.gni': '''
+declare_args() {
+  impeller_enable_metal = is_mac || is_ios
+  impeller_enable_vulkan = is_linux || is_win || enable_unittests
+}
+declare_args() {
+  impeller_enable_compute = impeller_enable_vulkan || impeller_enable_metal
+}
+''',
+          'flutter/a/BUILD.gn': '''
+import("//lib/args.gni")
+source_set("x") {
+  sources = [ "a.cc" ]
+  if (impeller_enable_vulkan) {
+    sources += [ "vk.cc" ]
+  }
+  if (impeller_enable_compute) {
+    sources += [ "compute.cc" ]
+  }
+}
+''',
+        });
+        // Under --assume=none the arguments are their Bazel settings; the
+        // derived one is the formula over them.
+        final GnTarget open = evaluateIn(
+          tree,
+          '//flutter/a/BUILD.gn',
+          assumptions: Assumptions(const <String, GnValue>{}),
+        ).targets.single;
+        final List<GnAssignment> sources = open.variables['sources']!.assignments;
+        expect(sources[1].condition, const ConditionVariable('impeller_enable_vulkan'));
+        expect(
+          sources[2].condition,
+          const ConditionOr(<Condition>[
+            ConditionVariable('impeller_enable_vulkan'),
+            ConditionVariable('impeller_enable_metal'),
+          ]),
+        );
+        expect(
+          emitBuildFile(
+            evaluateIn(
+              tree,
+              '//flutter/a/BUILD.gn',
+              assumptions: Assumptions(const <String, GnValue>{}),
+            ),
+            gnPackage: '//flutter/a',
+          ),
+          contains('''
+    }) + select({
+        "//engine/src/flutter/impeller/tools:vulkan": [
+            "compute.cc",  # impeller_enable_compute
+        ],
+        "//engine/src/flutter/impeller/tools:metal": [
+            "compute.cc",  # impeller_enable_compute
+        ],
+        "//conditions:default": [],
+    }),
+'''),
+        );
+        // The host assumptions decide them, as before.
+        final GnTarget host = evaluateIn(tree, '//flutter/a/BUILD.gn').targets.single;
+        expect(strings(host, 'sources'), <String>['a.cc', 'vk.cc', 'compute.cc']);
+      });
+
+      test('a placeholder group yields to the real target of its name', () async {
+        // impeller_component's shape: an empty group stands in for a
+        // testonly component when unit tests are off; the real target's
+        // type is a variable written once in the branch that uses it.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'lib/component.gni': '''
+template("component") {
+  if (defined(invoker.testonly) && invoker.testonly && !enable_unittests) {
+    group(target_name) {
+      not_needed(invoker, "*")
+    }
+  } else {
+    target_type = "source_set"
+    if (defined(invoker.target_type)) {
+      target_type = invoker.target_type
+    }
+    target(target_type, target_name) {
+      forward_variables_from(invoker, "*")
+    }
+  }
+}
+''',
+          'flutter/a/BUILD.gn': '''
+import("//lib/component.gni")
+component("x_unittests") {
+  testonly = true
+  sources = [ "x_unittests.cc" ]
+}
+component("x") {
+  sources = [ "x.cc" ]
+}
+''',
+          'flutter/b/BUILD.gn': '''
+if (slimpeller) {
+  source_set("twice") {
+    sources = [ "a.cc" ]
+  }
+}
+if (is_debug) {
+  source_set("twice") {
+    sources = [ "b.cc" ]
+  }
+}
+''',
+        });
+        final GnFileEvaluation open = evaluateIn(
+          tree,
+          '//flutter/a/BUILD.gn',
+          assumptions: Assumptions(const <String, GnValue>{}),
+        );
+        expect(open.targets.map((GnTarget t) => '${t.rule} ${t.name} [${t.condition}]'), <String>[
+          'group x_unittests [!enable_unittests]',
+          'source_set x_unittests [enable_unittests]',
+          'source_set x [true]',
+        ]);
+        final String output = emitBuildFile(open, gnPackage: '//flutter/a');
+        expect('cc_library('.allMatches(output).length, 2);
+        expect(
+          output,
+          contains('''
+cc_library(
+    name = "x_unittests",
+    testonly = True,
+    srcs = ["x_unittests.cc"],
+    copts = CHROMIUM_CODE_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    target_compatible_with = select({
+        "//engine/src/flutter/testing:unittests_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+'''),
+        );
+        expect(
+          () => emitBuildFile(
+            evaluateIn(
+              tree,
+              '//flutter/b/BUILD.gn',
+              assumptions: Assumptions(const <String, GnValue>{}),
+            ),
+            gnPackage: '//flutter/b',
+          ),
+          throwsGnError(line: 7, message: 'target twice is defined more than once'),
+        );
       });
 
       test('runs templates as closures with invoker and target_name', () {
