@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: impeller, impeller_unittesting, impeller_unittests, impeller_dart_unittests.
+# Not converted: impeller_unittesting, impeller_unittests, impeller_dart_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
@@ -25,6 +25,20 @@ cc_library(
         "//conditions:default": [],
     }),
     includes = [".."],
+)
+
+cc_library(
+    name = "impeller",
+    deps = [
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/entity",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/geometry",
+        "//engine/src/flutter/impeller/renderer",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/renderer/backend",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/tessellator",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+    ],
 )
 
 # What GN has no words for; maintained in the converter's manifest
