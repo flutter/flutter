@@ -15,6 +15,48 @@
 
 namespace impeller {
 
+// The stages in which render and blit passes access memory.
+static constexpr vk::PipelineStageFlags kGraphicsAndTransferStages =
+    vk::PipelineStageFlagBits::eDrawIndirect |
+    vk::PipelineStageFlagBits::eVertexInput |
+    vk::PipelineStageFlagBits::eVertexShader |
+    vk::PipelineStageFlagBits::eFragmentShader |
+    vk::PipelineStageFlagBits::eEarlyFragmentTests |
+    vk::PipelineStageFlagBits::eLateFragmentTests |
+    vk::PipelineStageFlagBits::eColorAttachmentOutput |
+    vk::PipelineStageFlagBits::eTransfer | vk::PipelineStageFlagBits::eHost;
+
+// The writes render and blit passes and the host can make.
+static constexpr vk::AccessFlags kGraphicsAndTransferWrites =
+    vk::AccessFlagBits::eShaderWrite |
+    vk::AccessFlagBits::eColorAttachmentWrite |
+    vk::AccessFlagBits::eDepthStencilAttachmentWrite |
+    vk::AccessFlagBits::eTransferWrite | vk::AccessFlagBits::eHostWrite;
+
+// Records a global memory barrier.
+//
+// https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples
+// suggests that anything more finely grained than a global memory barrier is
+// likely to be weakened into one.
+static void RecordMemoryBarrier(const vk::CommandBuffer& command_buffer,
+                                vk::PipelineStageFlags src_stage,
+                                vk::AccessFlags src_access,
+                                vk::PipelineStageFlags dst_stage,
+                                vk::AccessFlags dst_access) {
+  vk::MemoryBarrier barrier;
+  barrier.srcAccessMask = src_access;
+  barrier.dstAccessMask = dst_access;
+  command_buffer.pipelineBarrier(/*srcStageMask=*/src_stage,
+                                 /*dstStageMask=*/dst_stage,
+                                 /*dependencyFlags=*/{},
+                                 /*memoryBarrierCount=*/1,
+                                 /*pMemoryBarriers=*/&barrier,
+                                 /*bufferMemoryBarrierCount=*/0,
+                                 /*pBufferMemoryBarriers=*/nullptr,
+                                 /*imageMemoryBarrierCount=*/0,
+                                 /*pImageMemoryBarriers=*/nullptr);
+}
+
 ComputePassVK::ComputePassVK(std::shared_ptr<const Context> context,
                              std::shared_ptr<CommandBufferVK> command_buffer)
     : ComputePass(std::move(context)),
@@ -141,17 +183,28 @@ fml::Status ComputePassVK::Compute(std::array<uint32_t, 3> workgroup_count) {
     }
   }
 
-  // Make the writes of earlier dispatches in the pass visible to this one,
-  // and order this dispatch's writes after their reads and writes.
   if (has_dispatched_) {
-    vk::MemoryBarrier barrier;
-    barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
-    barrier.dstAccessMask =
-        vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite;
-    command_buffer_->GetCommandBuffer().pipelineBarrier(
+    // Make the writes of earlier dispatches in the pass visible to this one,
+    // and order this dispatch's writes after their reads and writes.
+    RecordMemoryBarrier(
+        command_buffer_->GetCommandBuffer(),
         vk::PipelineStageFlagBits::eComputeShader,
-        vk::PipelineStageFlagBits::eComputeShader, {}, 1, &barrier, 0, {}, 0,
-        {});
+        vk::AccessFlagBits::eShaderWrite,
+        vk::PipelineStageFlagBits::eComputeShader,
+        vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite);
+  } else {
+    // Make the writes of earlier render and blit passes visible to the first
+    // dispatch, and order its writes after their reads and writes. Recording
+    // this here, rather than in the render and blit passes, means only
+    // command buffers that use compute pay for it. The shader-read layout
+    // transitions those passes record complete before the fragment shader
+    // stage, which is in this barrier's source scope, so the transitions are
+    // ordered too.
+    RecordMemoryBarrier(
+        command_buffer_->GetCommandBuffer(), kGraphicsAndTransferStages,
+        kGraphicsAndTransferWrites, vk::PipelineStageFlagBits::eComputeShader,
+        vk::AccessFlagBits::eUniformRead | vk::AccessFlagBits::eShaderRead |
+            vk::AccessFlagBits::eShaderWrite);
   }
   has_dispatched_ = true;
 
@@ -229,32 +282,22 @@ bool ComputePassVK::BindResource(size_t binding,
   return true;
 }
 
-// Note:
-// https://github.com/KhronosGroup/Vulkan-Docs/wiki/Synchronization-Examples
-// Seems to suggest that anything more finely grained than a global memory
-// barrier is likely to be weakened into a global barrier. Confirming this on
-// mobile devices will require some experimentation.
-
 // |ComputePass|
 void ComputePassVK::AddBufferMemoryBarrier() {
-  vk::MemoryBarrier barrier;
-  barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
-  barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-
-  command_buffer_->GetCommandBuffer().pipelineBarrier(
-      vk::PipelineStageFlagBits::eComputeShader,
-      vk::PipelineStageFlagBits::eComputeShader, {}, 1, &barrier, 0, {}, 0, {});
+  RecordMemoryBarrier(command_buffer_->GetCommandBuffer(),
+                      vk::PipelineStageFlagBits::eComputeShader,
+                      vk::AccessFlagBits::eShaderWrite,
+                      vk::PipelineStageFlagBits::eComputeShader,
+                      vk::AccessFlagBits::eShaderRead);
 }
 
 // |ComputePass|
 void ComputePassVK::AddTextureMemoryBarrier() {
-  vk::MemoryBarrier barrier;
-  barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
-  barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
-
-  command_buffer_->GetCommandBuffer().pipelineBarrier(
-      vk::PipelineStageFlagBits::eComputeShader,
-      vk::PipelineStageFlagBits::eComputeShader, {}, 1, &barrier, 0, {}, 0, {});
+  RecordMemoryBarrier(command_buffer_->GetCommandBuffer(),
+                      vk::PipelineStageFlagBits::eComputeShader,
+                      vk::AccessFlagBits::eShaderWrite,
+                      vk::PipelineStageFlagBits::eComputeShader,
+                      vk::AccessFlagBits::eShaderRead);
 }
 
 // |ComputePass|
@@ -270,18 +313,10 @@ bool ComputePassVK::EncodeCommands() const {
   //
   // This does not currently handle image layout transitions, since compute
   // passes do not write images.
-  vk::MemoryBarrier barrier;
-  barrier.srcAccessMask = vk::AccessFlagBits::eShaderWrite;
-  barrier.dstAccessMask =
-      vk::AccessFlagBits::eIndirectCommandRead |
-      vk::AccessFlagBits::eIndexRead |
-      vk::AccessFlagBits::eVertexAttributeRead |
-      vk::AccessFlagBits::eUniformRead | vk::AccessFlagBits::eShaderRead |
-      vk::AccessFlagBits::eShaderWrite | vk::AccessFlagBits::eTransferRead |
-      vk::AccessFlagBits::eTransferWrite | vk::AccessFlagBits::eHostRead;
-
-  command_buffer_->GetCommandBuffer().pipelineBarrier(
+  RecordMemoryBarrier(
+      command_buffer_->GetCommandBuffer(),
       vk::PipelineStageFlagBits::eComputeShader,
+      vk::AccessFlagBits::eShaderWrite,
       vk::PipelineStageFlagBits::eDrawIndirect |
           vk::PipelineStageFlagBits::eVertexInput |
           vk::PipelineStageFlagBits::eVertexShader |
@@ -289,8 +324,12 @@ bool ComputePassVK::EncodeCommands() const {
           vk::PipelineStageFlagBits::eComputeShader |
           vk::PipelineStageFlagBits::eTransfer |
           vk::PipelineStageFlagBits::eHost,
-      {}, 1, &barrier, 0, {}, 0, {});
-
+      vk::AccessFlagBits::eIndirectCommandRead |
+          vk::AccessFlagBits::eIndexRead |
+          vk::AccessFlagBits::eVertexAttributeRead |
+          vk::AccessFlagBits::eUniformRead | vk::AccessFlagBits::eShaderRead |
+          vk::AccessFlagBits::eShaderWrite | vk::AccessFlagBits::eTransferRead |
+          vk::AccessFlagBits::eTransferWrite | vk::AccessFlagBits::eHostRead);
   return true;
 }
 

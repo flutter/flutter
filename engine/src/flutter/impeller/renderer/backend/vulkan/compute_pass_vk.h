@@ -42,7 +42,8 @@ class ComputePassVK final : public ComputePass {
   // next dispatch needs a new descriptor set. A descriptor set that an earlier
   // dispatch in this command buffer uses is never rewritten.
   bool descriptor_set_dirty_ = true;
-  // Whether a dispatch was recorded, so the next one needs a barrier.
+  // Whether a dispatch was recorded. The first dispatch waits on earlier
+  // render and blit passes, and each later one on the dispatch before it.
   bool has_dispatched_ = false;
   bool has_label_ = false;
 

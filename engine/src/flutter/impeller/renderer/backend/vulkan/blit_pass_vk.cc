@@ -134,16 +134,13 @@ bool BlitPassVK::OnCopyTextureToTextureCommand(
     return true;
   }
 
-  // The copy must complete before a later render or compute pass samples the
-  // destination.
   BarrierVK barrier;
   barrier.cmd_buffer = cmd_buffer;
   barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-  barrier.src_access = vk::AccessFlagBits::eTransferWrite;
-  barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
+  barrier.src_access = {};
+  barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
   barrier.dst_access = vk::AccessFlagBits::eShaderRead;
-  barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
-                      vk::PipelineStageFlagBits::eComputeShader;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
 
   return dst.SetLayout(barrier);
 }
@@ -173,9 +170,9 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
   barrier.src_stage = vk::PipelineStageFlagBits::eFragmentShader |
                       vk::PipelineStageFlagBits::eTransfer |
                       vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  // The copy below reads the image.
-  barrier.dst_access = vk::AccessFlagBits::eTransferRead;
-  barrier.dst_stage = vk::PipelineStageFlagBits::eTransfer;
+  barrier.dst_access = vk::AccessFlagBits::eShaderRead;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eVertexShader |
+                      vk::PipelineStageFlagBits::eFragmentShader;
 
   const auto& dst = DeviceBufferVK::Cast(*destination);
 
@@ -201,22 +198,16 @@ bool BlitPassVK::OnCopyTextureToBufferCommand(
                                image_copy           //
   );
 
-  // The copy must complete before a later compute pass reads or writes the
-  // buffer. If the buffer is used for readback, the host reads it too.
-  {
+  // If the buffer is used for readback, then apply a transfer -> host memory
+  // barrier.
+  if (destination->GetDeviceBufferDescriptor().readback) {
     vk::MemoryBarrier barrier;
     barrier.srcAccessMask = vk::AccessFlagBits::eTransferWrite;
-    barrier.dstAccessMask =
-        vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite;
-    vk::PipelineStageFlags dst_stage =
-        vk::PipelineStageFlagBits::eComputeShader;
-    if (destination->GetDeviceBufferDescriptor().readback) {
-      barrier.dstAccessMask |= vk::AccessFlagBits::eHostRead;
-      dst_stage |= vk::PipelineStageFlagBits::eHost;
-    }
+    barrier.dstAccessMask = vk::AccessFlagBits::eHostRead;
 
-    cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer, dst_stage,
-                               {}, 1, &barrier, 0, {}, 0, {});
+    cmd_buffer.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
+                               vk::PipelineStageFlagBits::eHost, {}, 1,
+                               &barrier, 0, {}, 0, {});
   }
 
   return true;
@@ -231,8 +222,7 @@ bool BlitPassVK::ConvertTextureToShaderRead(
   barrier.src_access = vk::AccessFlagBits::eTransferWrite;
   barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
   barrier.dst_access = vk::AccessFlagBits::eShaderRead;
-  barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
-                      vk::PipelineStageFlagBits::eComputeShader;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
 
   barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
@@ -310,8 +300,7 @@ bool BlitPassVK::OnCopyBufferToTextureCommand(
     barrier.src_access = vk::AccessFlagBits::eTransferWrite;
     barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
     barrier.dst_access = vk::AccessFlagBits::eShaderRead;
-    barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
-                        vk::PipelineStageFlagBits::eComputeShader;
+    barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
 
     barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
 
@@ -393,17 +382,15 @@ bool BlitPassVK::ResizeTexture(const std::shared_ptr<Texture>& source,
 
   );
 
-  // Convert back to shader read once the blit completes, for a later render or
-  // compute pass.
+  // Convert back to shader read
 
   BarrierVK barrier;
   barrier.cmd_buffer = cmd_buffer;
   barrier.new_layout = vk::ImageLayout::eShaderReadOnlyOptimal;
-  barrier.src_access = vk::AccessFlagBits::eTransferWrite;
-  barrier.src_stage = vk::PipelineStageFlagBits::eTransfer;
+  barrier.src_access = {};
+  barrier.src_stage = vk::PipelineStageFlagBits::eTopOfPipe;
   barrier.dst_access = vk::AccessFlagBits::eShaderRead;
-  barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader |
-                      vk::PipelineStageFlagBits::eComputeShader;
+  barrier.dst_stage = vk::PipelineStageFlagBits::eFragmentShader;
 
   return dst.SetLayout(barrier);
 }
@@ -533,9 +520,8 @@ bool BlitPassVK::OnGenerateMipmapCommand(std::shared_ptr<Texture> texture,
   barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead;
 
   cmd.pipelineBarrier(vk::PipelineStageFlagBits::eTransfer,
-                      vk::PipelineStageFlagBits::eFragmentShader |
-                          vk::PipelineStageFlagBits::eComputeShader,
-                      {}, {}, {}, {barrier});
+                      vk::PipelineStageFlagBits::eFragmentShader, {}, {}, {},
+                      {barrier});
 
   // We modified the layouts of this image from underneath it. Tell it its new
   // state so it doesn't try to perform redundant transitions under the hood.
