@@ -11,6 +11,13 @@
 # leaves no trace outside directories that are already ignored.
 common --symlink_prefix=engine/src/out/bazel-
 
+# The toolchain's sysroot and standard-library headers are directory inputs
+# (one symlink per action in the sandbox instead of ~11,000; see
+# build/bazel/third_party/sysroot). Bazel tracks the contents of directory
+# inputs soundly only with this property; without it every action warns and
+# a change inside the directory may go unnoticed.
+startup --host_jvm_args=-DBAZEL_TRACK_SOURCE_DIRECTORIES=1
+
 # Actions must not inherit the invoking user's environment.
 build --incompatible_strict_action_env
 
