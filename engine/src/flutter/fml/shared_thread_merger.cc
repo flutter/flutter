@@ -56,10 +56,11 @@ bool SharedThreadMerger::DecrementLease(RasterThreadMergerId caller) {
   bool exist = entry != lease_term_by_caller_.end();
   if (exist) {
     std::atomic_size_t& lease_term_ref = entry->second;
-    FML_CHECK(lease_term_ref > 0)
-        << "lease_term should always be positive when merged, lease_term="
-        << lease_term_ref;
-    lease_term_ref--;
+    // Another caller can keep the shared task queues merged after this
+    // caller's lease expires. Do not decrement an already expired lease.
+    if (lease_term_ref > 0) {
+      lease_term_ref--;
+    }
   } else {
     FML_LOG(WARNING) << "The caller does not exist when calling "
                         "DecrementLease(), ignored. This may happens after "
