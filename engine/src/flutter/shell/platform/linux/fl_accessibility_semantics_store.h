@@ -28,6 +28,8 @@ typedef struct {
   int32_t* children_in_traversal_order;
   int32_t heading_level;
   guint64 revision;
+  // Independent of reading order; null means the embedder supplied no order.
+  int32_t* children_in_hit_test_order;
 } FlAccessibilitySemanticsNode;
 
 G_DECLARE_FINAL_TYPE(FlAccessibilitySemanticsStore,

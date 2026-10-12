@@ -30,6 +30,7 @@ static void fl_accessibility_semantics_node_free(gpointer data) {
   g_free(node->value);
   g_free(node->tooltip);
   g_free(node->children_in_traversal_order);
+  g_free(node->children_in_hit_test_order);
   g_free(node);
 }
 
@@ -57,6 +58,12 @@ static FlAccessibilitySemanticsNode* fl_accessibility_semantics_node_new(
       semantics->children_in_traversal_order != nullptr) {
     node->children_in_traversal_order = static_cast<int32_t*>(
         g_memdup2(semantics->children_in_traversal_order,
+                  sizeof(int32_t) * semantics->child_count));
+  }
+  if (semantics->child_count > 0 &&
+      semantics->children_in_hit_test_order != nullptr) {
+    node->children_in_hit_test_order = static_cast<int32_t*>(
+        g_memdup2(semantics->children_in_hit_test_order,
                   sizeof(int32_t) * semantics->child_count));
   }
   node->heading_level = semantics->heading_level;
@@ -119,6 +126,19 @@ void fl_accessibility_semantics_store_handle_update(
           memcmp(previous->children_in_traversal_order,
                  semantics->children_in_traversal_order,
                  semantics->child_count * sizeof(int32_t)) == 0));
+    const gboolean same_hit_order =
+        previous != nullptr &&
+        previous->child_count == semantics->child_count &&
+        (semantics->child_count == 0 ||
+         (previous->children_in_hit_test_order == nullptr &&
+          semantics->children_in_hit_test_order == nullptr) ||
+         (previous->children_in_hit_test_order != nullptr &&
+          semantics->children_in_hit_test_order != nullptr &&
+          memcmp(previous->children_in_hit_test_order,
+                 semantics->children_in_hit_test_order,
+                 semantics->child_count * sizeof(int32_t)) == 0));
+    // Hit-order changes update the node revision without rebuilding/pruning the
+    // reading-order tree or manufacturing changes to child relationships.
     self->structure_changed |= !same_children;
     FlutterSemanticsFlags flags = {};
     if (semantics->flags2 != nullptr) {
@@ -126,7 +146,8 @@ void fl_accessibility_semantics_store_handle_update(
     }
     // Byte comparisons are conservative: padding differences may cause an
     // extra update, but never suppress a changed field.
-    if (same_children && g_strcmp0(previous->label, semantics->label) == 0 &&
+    if (same_children && same_hit_order &&
+        g_strcmp0(previous->label, semantics->label) == 0 &&
         g_strcmp0(previous->hint, semantics->hint) == 0 &&
         g_strcmp0(previous->value, semantics->value) == 0 &&
         g_strcmp0(previous->tooltip, semantics->tooltip) == 0 &&

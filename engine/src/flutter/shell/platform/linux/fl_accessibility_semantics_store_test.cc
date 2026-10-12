@@ -175,3 +175,78 @@ TEST(FlAccessibilitySemanticsStoreTest, ReplacesNodesOnSubsequentUpdates) {
   ASSERT_NE(node, nullptr);
   EXPECT_STREQ(node->label, "after");
 }
+
+TEST(FlAccessibilitySemanticsStoreTest, HitOrderUpdatesPreserveTraversalTree) {
+  g_autoptr(FlAccessibilitySemanticsStore) store =
+      fl_accessibility_semantics_store_new(123);
+  int32_t traversal[] = {1, 2};
+  int32_t hit_order[] = {1, 2};
+  FlutterSemanticsNode2 root = {};
+  root.child_count = 2;
+  root.children_in_traversal_order = traversal;
+  root.children_in_hit_test_order = hit_order;
+  FlutterSemanticsNode2 first = {};
+  first.id = 1;
+  FlutterSemanticsNode2 second = {};
+  second.id = 2;
+  FlutterSemanticsNode2* nodes[] = {&root, &first, &second};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = 123;
+  update.node_count = 3;
+  update.nodes = nodes;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  const auto* old_root = fl_accessibility_semantics_store_lookup_node(store, 0);
+  const guint64 revision = old_root->revision;
+  ASSERT_NE(old_root->children_in_hit_test_order, nullptr);
+  EXPECT_NE(old_root->children_in_hit_test_order, hit_order);
+  const auto* old_first =
+      fl_accessibility_semantics_store_lookup_node(store, 1);
+  const auto* old_second =
+      fl_accessibility_semantics_store_lookup_node(store, 2);
+
+  // Only the parent hit order changes; reading order and descendants remain.
+  hit_order[0] = 2;
+  hit_order[1] = 1;
+  EXPECT_EQ(old_root->children_in_hit_test_order[0], 1);
+  EXPECT_EQ(old_root->children_in_hit_test_order[1], 2);
+  update.node_count = 1;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  const auto* reordered =
+      fl_accessibility_semantics_store_lookup_node(store, 0);
+  EXPECT_GT(reordered->revision, revision);
+  ASSERT_NE(reordered->children_in_hit_test_order, nullptr);
+  EXPECT_EQ(reordered->children_in_hit_test_order[0], 2);
+  EXPECT_EQ(reordered->children_in_hit_test_order[1], 1);
+  EXPECT_FALSE(fl_accessibility_semantics_store_structure_changed(store));
+  EXPECT_EQ(reordered->children_in_traversal_order[0], 1);
+  EXPECT_EQ(reordered->children_in_traversal_order[1], 2);
+  EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 1), old_first);
+  EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 2), old_second);
+
+  // Identical order is a no-op; omission is a real update, not a stale order.
+  const guint64 reordered_revision = reordered->revision;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 0), reordered);
+  root.children_in_hit_test_order = nullptr;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  const auto* omitted = fl_accessibility_semantics_store_lookup_node(store, 0);
+  EXPECT_GT(omitted->revision, reordered_revision);
+  EXPECT_EQ(omitted->children_in_hit_test_order, nullptr);
+  EXPECT_FALSE(fl_accessibility_semantics_store_structure_changed(store));
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 0), omitted);
+
+  root.children_in_hit_test_order = hit_order;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  const auto* restored = fl_accessibility_semantics_store_lookup_node(store, 0);
+  ASSERT_NE(restored->children_in_hit_test_order, nullptr);
+  EXPECT_EQ(restored->children_in_hit_test_order[0], 2);
+  root.child_count = 0;
+  root.children_in_traversal_order = nullptr;
+  fl_accessibility_semantics_store_handle_update(store, &update);
+  EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 0)
+                ->children_in_hit_test_order,
+            nullptr);
+  EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 1), nullptr);
+  EXPECT_EQ(fl_accessibility_semantics_store_lookup_node(store, 2), nullptr);
+}
