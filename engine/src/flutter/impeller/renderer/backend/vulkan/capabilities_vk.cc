@@ -814,23 +814,18 @@ bool CapabilitiesVK::NeedsPartitionedHostBuffer() const {
   return false;
 }
 
-uint32_t CapabilitiesVK::GetMaximumComputeWorkgroupInvocations() const {
-  return device_properties_.limits.maxComputeWorkGroupInvocations;
-}
-
-std::array<uint32_t, 3> CapabilitiesVK::GetMaximumComputeWorkgroupSize() const {
-  const auto& size = device_properties_.limits.maxComputeWorkGroupSize;
-  return {size[0], size[1], size[2]};
-}
-
-std::array<uint32_t, 3> CapabilitiesVK::GetMaximumComputeWorkgroupCount()
-    const {
-  const auto& count = device_properties_.limits.maxComputeWorkGroupCount;
-  return {count[0], count[1], count[2]};
-}
-
-size_t CapabilitiesVK::GetMaximumComputeSharedMemorySize() const {
-  return device_properties_.limits.maxComputeSharedMemorySize;
+ComputeLimits CapabilitiesVK::GetComputeLimits() const {
+  const vk::PhysicalDeviceLimits& limits = device_properties_.limits;
+  return ComputeLimits{
+      .max_workgroup_invocations = limits.maxComputeWorkGroupInvocations,
+      .max_workgroup_size = {limits.maxComputeWorkGroupSize[0],
+                             limits.maxComputeWorkGroupSize[1],
+                             limits.maxComputeWorkGroupSize[2]},
+      .max_workgroup_count = {limits.maxComputeWorkGroupCount[0],
+                              limits.maxComputeWorkGroupCount[1],
+                              limits.maxComputeWorkGroupCount[2]},
+      .max_shared_memory_size = limits.maxComputeSharedMemorySize,
+  };
 }
 
 bool CapabilitiesVK::HasExtension(RequiredCommonDeviceExtensionVK ext) const {

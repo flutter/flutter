@@ -118,6 +118,7 @@ class MockRenderPass : public RenderPass {
   MOCK_METHOD(void, OnSetLabel, (std::string_view label), (override));
 };
 
+/// A compute pass whose recording calls tests can expect.
 class MockComputePass : public ComputePass {
  public:
   explicit MockComputePass(std::shared_ptr<const Context> context)
@@ -312,19 +313,7 @@ class MockCapabilities : public Capabilities {
   MOCK_METHOD(uint32_t, GetMaxSamplerAnisotropy, (), (const override));
   MOCK_METHOD(size_t, GetMinimumUniformAlignment, (), (const override));
   MOCK_METHOD(bool, NeedsPartitionedHostBuffer, (), (const, override));
-  MOCK_METHOD(uint32_t,
-              GetMaximumComputeWorkgroupInvocations,
-              (),
-              (const, override));
-  MOCK_METHOD((std::array<uint32_t, 3>),
-              GetMaximumComputeWorkgroupSize,
-              (),
-              (const, override));
-  MOCK_METHOD((std::array<uint32_t, 3>),
-              GetMaximumComputeWorkgroupCount,
-              (),
-              (const, override));
-  MOCK_METHOD(size_t, GetMaximumComputeSharedMemorySize, (), (const, override));
+  MOCK_METHOD(ComputeLimits, GetComputeLimits, (), (const, override));
 };
 
 class MockCommandQueue : public CommandQueue {

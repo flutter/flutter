@@ -75,11 +75,10 @@ ComputePipeline::GetOrCreatePipeline(impeller::Context& context) {
 
   // Check the device limits here, rather than leaving it to the backend, so
   // that the reason reaches Dart instead of only the validation log.
-  const std::shared_ptr<const impeller::Capabilities>& capabilities =
-      context.GetCapabilities();
+  const impeller::ComputeLimits limits =
+      context.GetCapabilities()->GetComputeLimits();
   if (absl::Status status = desc.ValidateWorkgroupSize(
-          capabilities->GetMaximumComputeWorkgroupSize(),
-          capabilities->GetMaximumComputeWorkgroupInvocations());
+          limits.max_workgroup_size, limits.max_workgroup_invocations);
       !status.ok()) {
     return status;
   }

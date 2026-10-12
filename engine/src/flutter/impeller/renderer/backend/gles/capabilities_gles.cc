@@ -428,23 +428,8 @@ bool CapabilitiesGLES::NeedsPartitionedHostBuffer() const {
 
 // The OpenGL ES backend does not support compute, so it reports no compute
 // limits.
-
-uint32_t CapabilitiesGLES::GetMaximumComputeWorkgroupInvocations() const {
-  return 0u;
-}
-
-std::array<uint32_t, 3> CapabilitiesGLES::GetMaximumComputeWorkgroupSize()
-    const {
-  return {0u, 0u, 0u};
-}
-
-std::array<uint32_t, 3> CapabilitiesGLES::GetMaximumComputeWorkgroupCount()
-    const {
-  return {0u, 0u, 0u};
-}
-
-size_t CapabilitiesGLES::GetMaximumComputeSharedMemorySize() const {
-  return 0u;
+ComputeLimits CapabilitiesGLES::GetComputeLimits() const {
+  return {};
 }
 
 }  // namespace impeller

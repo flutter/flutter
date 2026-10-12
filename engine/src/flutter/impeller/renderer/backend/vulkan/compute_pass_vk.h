@@ -16,6 +16,11 @@ namespace impeller {
 
 class CommandBufferVK;
 
+/// A compute pass that records dispatches into a Vulkan command buffer.
+///
+/// The first dispatch waits on the writes of earlier render and blit passes,
+/// each later dispatch waits on the one before it, and encoding the pass makes
+/// its writes visible to later work, so callers need no manual barriers.
 class ComputePassVK final : public ComputePass {
  public:
   // |ComputePass|
@@ -24,27 +29,36 @@ class ComputePassVK final : public ComputePass {
  private:
   friend class CommandBufferVK;
 
-  // A resource bound to one binding index of the pass.
+  /// A resource bound to one binding index of the pass.
   struct BoundResource {
+    /// The descriptor type the resource is bound as.
     DescriptorType type;
+    /// Set for a uniform or storage buffer.
     std::optional<vk::DescriptorBufferInfo> buffer_info;
+    /// Set for a sampled image.
     std::optional<vk::DescriptorImageInfo> image_info;
   };
 
+  /// The command buffer the pass records into.
   std::shared_ptr<CommandBufferVK> command_buffer_;
   std::string label_;
   bool is_valid_ = false;
 
-  // The pipeline and bindings persist across dispatches in the pass.
+  /// The pipeline of later dispatches. It persists across dispatches in the
+  /// pass until replaced.
   std::shared_ptr<Pipeline<ComputePipelineDescriptor>> pipeline_;
+  /// The resources of later dispatches, keyed by binding index. They persist
+  /// across dispatches in the pass until replaced.
   absl::flat_hash_map<uint32_t, BoundResource> bindings_;
-  // Whether the pipeline or a binding changed since the last dispatch, so the
-  // next dispatch needs a new descriptor set. A descriptor set that an earlier
-  // dispatch in this command buffer uses is never rewritten.
+  /// Whether the pipeline or a binding changed since the last dispatch, so the
+  /// next dispatch needs a new descriptor set. A descriptor set that an earlier
+  /// dispatch in this command buffer uses is never rewritten.
   bool descriptor_set_dirty_ = true;
-  // Whether a dispatch was recorded. The first dispatch waits on earlier
-  // render and blit passes, and each later one on the dispatch before it.
+  /// Whether a dispatch was recorded. The first dispatch waits on earlier
+  /// render and blit passes, and each later one on the dispatch before it.
   bool has_dispatched_ = false;
+  /// Whether `SetCommandLabel` pushed a debug group that the next dispatch
+  /// pops.
   bool has_label_ = false;
 
   ComputePassVK(std::shared_ptr<const Context> context,
@@ -90,12 +104,15 @@ class ComputePassVK final : public ComputePass {
                     std::shared_ptr<const Texture> texture,
                     raw_ptr<const Sampler> sampler) override;
 
+  /// Binds a uniform or storage buffer view at `binding` for later
+  /// dispatches. Returns false if the view has no buffer.
   bool BindResource(size_t binding, DescriptorType type, BufferView view);
 
-  // Allocates, writes and binds a descriptor set for the current pipeline and
-  // bindings.
+  /// Allocates, writes and binds a descriptor set for the current pipeline and
+  /// bindings.
   fml::Status BindDescriptorSet();
 
+  /// Pops the debug group pushed by `SetCommandLabel`, if any.
   void PopCommandLabel();
 };
 

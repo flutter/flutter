@@ -75,7 +75,24 @@ if (enable_unittests) {
     ]
 
     fixtures = rebase_path("//flutter/impeller/fixtures")
-    shader_bundle = "{\"InstancedFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_instanced.frag\"}, \"InstancedVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_instanced.vert\"}, \"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"UnlitFragmentAltInstance\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit_alt_instance.frag\"}, \"OptimizedOutSamplerFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_optimized_out_sampler.frag\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}, \"ArrayTextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_array_texture.frag\"}, \"ComputeReflection\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute.comp\"}, \"ComputeOversized\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_oversized.comp\"}, \"ComputeScale\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_scale.comp\"}, \"ComputeTextureTriangle\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_texture.comp\"}, \"ComputeTriangle\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_triangle.comp\"}, \"ComputeScaleWithUnused\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_unused.comp\"}}"
+    shader_bundle_entries = [
+      "\"InstancedFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_instanced.frag\"}",
+      "\"InstancedVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_instanced.vert\"}",
+      "\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit.frag\"}",
+      "\"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}",
+      "\"UnlitFragmentAltInstance\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit_alt_instance.frag\"}",
+      "\"OptimizedOutSamplerFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_optimized_out_sampler.frag\"}",
+      "\"TextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_texture.frag\"}",
+      "\"TextureVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_texture.vert\"}",
+      "\"ArrayTextureFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_array_texture.frag\"}",
+      "\"ComputeReflection\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute.comp\"}",
+      "\"ComputeOversized\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_oversized.comp\"}",
+      "\"ComputeScale\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_scale.comp\"}",
+      "\"ComputeTextureTriangle\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_texture.comp\"}",
+      "\"ComputeTriangle\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_triangle.comp\"}",
+      "\"ComputeScaleWithUnused\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_unused.comp\"}",
+    ]
+    shader_bundle = "{" + string_join(", ", shader_bundle_entries) + "}"
     shader_bundle_output = "test.shaderbundle"
   }
 
@@ -108,7 +125,13 @@ if (enable_unittests) {
     ]
 
     fixtures = rebase_path("//flutter/impeller/fixtures")
-    shader_bundle = "{\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit_reload.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}, \"ComputeScale\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_scale_reload.comp\"}, \"ComputeTriangle\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_triangle.comp\"}}"
+    shader_bundle_entries = [
+      "\"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"${fixtures}/flutter_gpu_unlit_reload.frag\"}",
+      "\"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"${fixtures}/flutter_gpu_unlit.vert\"}",
+      "\"ComputeScale\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_scale_reload.comp\"}",
+      "\"ComputeTriangle\": {\"type\": \"compute\", \"file\": \"${fixtures}/flutter_gpu_compute_triangle.comp\"}",
+    ]
+    shader_bundle = "{" + string_join(", ", shader_bundle_entries) + "}"
     shader_bundle_output = "test_reload.shaderbundle"
   }
 

@@ -142,15 +142,16 @@ void ComputePassMTL::PopCommandLabel() {
 }
 
 fml::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
+  // The label set by `SetCommandLabel` applies to this dispatch only.
+  fml::ScopedCleanupClosure pop_label([this]() { PopCommandLabel(); });
+
   // A dispatch with no workgroups does nothing, like a draw with no vertices.
   if (workgroup_count[0] == 0u || workgroup_count[1] == 0u ||
       workgroup_count[2] == 0u) {
-    PopCommandLabel();
     return fml::Status();
   }
 
   if (!pass_bindings_cache_.GetPipeline()) {
-    PopCommandLabel();
     return fml::Status(fml::StatusCode::kCancelled,
                        "No compute pipeline is bound.");
   }
@@ -165,8 +166,6 @@ fml::Status ComputePassMTL::Compute(std::array<uint32_t, 3> workgroup_count) {
        dispatchThreadgroups:MTLSizeMake(workgroup_count[0], workgroup_count[1],
                                         workgroup_count[2])
       threadsPerThreadgroup:threads_per_threadgroup];
-
-  PopCommandLabel();
   return fml::Status();
 }
 

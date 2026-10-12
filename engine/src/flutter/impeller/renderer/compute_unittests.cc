@@ -717,16 +717,15 @@ TEST_P(ComputeTest, CapabilitiesReportComputeLimits) {
   ASSERT_TRUE(caps->SupportsCompute());
 
   // The minimums every Metal and Vulkan device meets.
-  EXPECT_GE(caps->GetMaximumComputeWorkgroupInvocations(), 128u);
-  const auto size = caps->GetMaximumComputeWorkgroupSize();
-  EXPECT_GE(size[0], 128u);
-  EXPECT_GE(size[1], 128u);
-  EXPECT_GE(size[2], 64u);
-  const auto count = caps->GetMaximumComputeWorkgroupCount();
-  EXPECT_GE(count[0], 65535u);
-  EXPECT_GE(count[1], 65535u);
-  EXPECT_GE(count[2], 65535u);
-  EXPECT_GE(caps->GetMaximumComputeSharedMemorySize(), 16384u);
+  const ComputeLimits limits = caps->GetComputeLimits();
+  EXPECT_GE(limits.max_workgroup_invocations, 128u);
+  EXPECT_GE(limits.max_workgroup_size[0], 128u);
+  EXPECT_GE(limits.max_workgroup_size[1], 128u);
+  EXPECT_GE(limits.max_workgroup_size[2], 64u);
+  EXPECT_GE(limits.max_workgroup_count[0], 65535u);
+  EXPECT_GE(limits.max_workgroup_count[1], 65535u);
+  EXPECT_GE(limits.max_workgroup_count[2], 65535u);
+  EXPECT_GE(limits.max_shared_memory_size, 16384u);
   EXPECT_GT(caps->GetMinimumStorageBufferAlignment(), 0u);
 }
 
@@ -860,26 +859,32 @@ TEST_P(ComputeTest, RenderPassDrawsVerticesWrittenByComputePass) {
   }
 
   fml::AutoResetWaitableEvent latch;
-  ASSERT_TRUE(
-      context->GetCommandQueue()
-          ->Submit({cmd_buffer},
-                   [&latch, readback](CommandBuffer::Status status) {
-                     EXPECT_EQ(status, CommandBuffer::Status::kCompleted);
-                     readback->Invalidate();
-                     // The triangle covers the target, so every pixel is the
-                     // fragment shader's opaque green in either RGBA or BGRA
-                     // order. Without the computed vertices nothing is drawn
-                     // and the pixels stay transparent black.
-                     const uint8_t* pixels = readback->OnGetContents();
-                     for (int i = 0; i < kSize.Area(); i++) {
-                       EXPECT_EQ(pixels[i * 4 + 0], 0u) << "pixel " << i;
-                       EXPECT_EQ(pixels[i * 4 + 1], 255u) << "pixel " << i;
-                       EXPECT_EQ(pixels[i * 4 + 2], 0u) << "pixel " << i;
-                       EXPECT_EQ(pixels[i * 4 + 3], 255u) << "pixel " << i;
-                     }
-                     latch.Signal();
-                   })
-          .ok());
+  ASSERT_TRUE(context->GetCommandQueue()
+                  ->Submit({cmd_buffer},
+                           [&latch, readback](CommandBuffer::Status status) {
+                             EXPECT_EQ(status,
+                                       CommandBuffer::Status::kCompleted);
+                             readback->Invalidate();
+                             // The triangle covers the target, so every pixel
+                             // is the fragment shader's opaque green in either
+                             // RGBA or BGRA order. Without the computed
+                             // vertices nothing is drawn and the pixels stay
+                             // transparent black.
+                             const uint8_t* pixels = readback->OnGetContents();
+                             for (int i = 0; i < kSize.Area(); i++) {
+                               const int offset = i * 4;
+                               EXPECT_EQ(pixels[offset + 0], 0u)
+                                   << "pixel " << i << " at offset " << offset;
+                               EXPECT_EQ(pixels[offset + 1], 255u)
+                                   << "pixel " << i << " at offset " << offset;
+                               EXPECT_EQ(pixels[offset + 2], 0u)
+                                   << "pixel " << i << " at offset " << offset;
+                               EXPECT_EQ(pixels[offset + 3], 255u)
+                                   << "pixel " << i << " at offset " << offset;
+                             }
+                             latch.Signal();
+                           })
+                  .ok());
   latch.Wait();
 }
 
