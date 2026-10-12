@@ -444,6 +444,85 @@ void main() {
     });
   });
 
+  group('listBox', () {
+    testWidgets('failure case, empty child', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.listBox,
+            child: const ExcludeSemantics(child: Text('something')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(error.message, 'a listBox cannot be empty');
+    });
+
+    testWidgets('failure case, non option child', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.listBox,
+            explicitChildNodes: true,
+            child: Semantics(child: const Text('some child')),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(error.message, 'Children of listBox must have the option role');
+    });
+
+    testWidgets('failure case, non option child inside scrollable wrapper', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.listBox,
+            explicitChildNodes: true,
+            child: ListView(
+              children: <Widget>[Semantics(container: true, child: const Text('some child'))],
+            ),
+          ),
+        ),
+      );
+      final Object? exception = tester.takeException();
+      expect(exception, isFlutterError);
+      final error = exception! as FlutterError;
+      expect(error.message, 'Children of listBox must have the option role');
+    });
+
+    testWidgets('Success case with ListView wrapper', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Semantics(
+            role: SemanticsRole.listBox,
+            explicitChildNodes: true,
+            child: ListView(
+              children: <Widget>[
+                Semantics(
+                  role: SemanticsRole.option,
+                  selected: true,
+                  onTap: () {},
+                  child: const Text('apple'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('option', () {
     testWidgets('failure case, no listBox as its ancestor', (WidgetTester tester) async {
       await tester.pumpWidget(

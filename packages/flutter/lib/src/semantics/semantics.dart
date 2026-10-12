@@ -182,7 +182,7 @@ sealed class _DebugSemanticsRoleChecks {
       SemanticsRole.status => _noLiveRegion,
       SemanticsRole.list => _noCheckRequired,
       SemanticsRole.listItem => _semanticsListItem,
-      SemanticsRole.listBox => _noCheckRequired,
+      SemanticsRole.listBox => _semanticsListBox,
       SemanticsRole.option => _semanticsOption,
       SemanticsRole.complementary => _semanticsComplementary,
       SemanticsRole.contentInfo => _semanticsContentInfo,
@@ -511,6 +511,28 @@ sealed class _DebugSemanticsRoleChecks {
       );
     }
     return null;
+  }
+
+  static FlutterError? _semanticsListBox(SemanticsNode node) {
+    if (node.childrenCount < 1) {
+      return FlutterError('a listBox cannot be empty');
+    }
+    FlutterError? error;
+    bool validateListBoxChildren(SemanticsNode child) {
+      final SemanticsRole role = child.getSemanticsData().role;
+      if (role == SemanticsRole.option) {
+        return true;
+      }
+      if (role == SemanticsRole.none && child.childrenCount > 0) {
+        child.visitChildren(validateListBoxChildren);
+        return error == null;
+      }
+      error = FlutterError('Children of listBox must have the option role');
+      return false;
+    }
+
+    node.visitChildren(validateListBoxChildren);
+    return error;
   }
 
   static FlutterError? _semanticsOption(SemanticsNode node) {
