@@ -13,11 +13,15 @@ package(default_visibility = ["//visibility:public"])
 # The toolchain derives the --sysroot path from this file's location.
 exports_files(["BUILD.bazel"])
 
+# usr/include is one directory input rather than its ~9,000 files: every
+# compile action lists the toolchain's files, and the sandbox stages each
+# input as a symlink per action, which made the sysroot most of the cost of
+# sandboxing (research/08 §5). The tree changes only with a sysroots.json
+# roll, which re-fetches the repository.
 filegroup(
     name = "headers",
-    srcs = glob(
+    srcs = ["usr/include"] + glob(
         [
-            "usr/include/**",
             # Headers that live next to their library, which pkg-config
             # adds with -I (usr/lib/x86_64-linux-gnu/glib-2.0/include, ...).
             "usr/lib/*/*/include/**",

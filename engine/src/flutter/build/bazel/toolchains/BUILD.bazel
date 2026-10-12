@@ -74,6 +74,7 @@ flutter_cc_toolchain_config(
         "//engine/src/flutter/build/secondary/flutter/third_party/libcxx:config/__config_site",
     ],
     objcopy = "@clang_linux_x64//:bin/llvm-objcopy",
+    resource_include_marker = "@clang_linux_x64//:resource_include_marker",
     strip = "@clang_linux_x64//:bin/llvm-strip",
     sysroot_marker = "@sysroot_linux_x64//:BUILD.bazel",
     target_cpu = "k8",
