@@ -157,15 +157,18 @@ Wayland behavior, arbitrary fractional desktop scaling, or real Dart layout.
 
 Add `--check-hit-testing` to require native Contains and GetAccessibleAtPoint
 results to match the queried parent/window rectangles before and after the
-ancestor update. It checks rectangle boundaries and deepest-descendant lookup.
+ancestor update. It checks rectangle boundaries and deepest-descendant lookup,
+including an overlapping hidden sibling that must not intercept the visible
+button. Both modes verify that native child traversal excludes this sibling.
 The report records the loaded GTK library path and hash as well as its version.
 
 This strict gate fails on the tested stock GTK 4.22.5: containment compares local
 points to the object's position instead of size, and point lookup subtracts the
-queried object's origin twice. An independent GTK correction and standalone
-reproduction are tracked in the accessibility investigation. Use a GTK runtime
-with that correction to pass this gate; the Flutter bridge does not carry a
-workaround. The default geometry command continues to test bounds on stock GTK.
+queried object's origin twice. Point lookup also visits hidden nodes and their
+subtrees, unlike ordinary native child traversal. Independent GTK corrections
+and standalone reproductions are tracked in the accessibility investigation.
+Use a GTK runtime with those corrections to pass this gate; the Flutter bridge
+does not carry a workaround. The default geometry command continues to test bounds on stock GTK.
 Passing hit checks does not establish clipping or Flutter paint/hit-test order.
 
 ## Native AT-SPI activation

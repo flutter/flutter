@@ -633,7 +633,9 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
   g_autoptr(FlView) view = fl_view_new(project);
   g_object_ref_sink(view);
   StartEngine(fl_view_get_engine(view));
-  FlutterSemanticsFlags flags[3] = {};
+  FlutterSemanticsFlags flags[4] = {};
+  flags[3].is_button = true;
+  flags[3].is_hidden = true;
   flags[2].is_button = true;
   FlutterSemanticsNode2 root = {};
   root.id = 0;
@@ -651,8 +653,8 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
   group.rect = {3, 5, 103, 85};
   group.transform.transX = 20;
   group.transform.transY = 10;
-  int32_t group_children[] = {2};
-  group.child_count = 1;
+  int32_t group_children[] = {2, 3};
+  group.child_count = 2;
   group.children_in_traversal_order = group_children;
   FlutterSemanticsNode2 button = {};
   button.id = 2;
@@ -662,7 +664,13 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
   button.rect = {4.5, 6.5, 24.5, 16.5};
   button.transform.transX = 7;
   button.transform.transY = 11;
-  FlutterSemanticsNode2* nodes[] = {&root, &group, &button};
+  // A later, overlapping hidden sibling must neither enter native traversal
+  // nor intercept point lookup for the visible button.
+  FlutterSemanticsNode2 hidden = button;
+  hidden.id = 3;
+  hidden.label = "Hidden geometry button";
+  hidden.flags2 = &flags[3];
+  FlutterSemanticsNode2* nodes[] = {&root, &group, &button, &hidden};
   FlutterSemanticsUpdate2 update = {};
   update.view_id = fl_view_get_id(view);
   update.node_count = G_N_ELEMENTS(nodes);

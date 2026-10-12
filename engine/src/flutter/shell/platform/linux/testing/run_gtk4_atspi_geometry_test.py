@@ -112,6 +112,9 @@ def run_fixture(binary, output, scale, check_hit_testing=False):
         return checks
 
       def snapshot(dx, dy):
+        group.clear_cache()
+        if group.get_child_count() != 1 or group.get_child_at_index(0) != button:
+          raise RuntimeError('Hidden geometry sibling leaked into native traversal')
         physical = [[40 + dx, 54 + dy, 600, 400], [76 + dx, 70 + dy, 200, 160],
                     [93 + dx, 95 + dy, 40, 20]]
         bounds = [logical(b) for b in physical]
