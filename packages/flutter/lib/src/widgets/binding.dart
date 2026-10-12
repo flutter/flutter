@@ -1763,13 +1763,12 @@ mixin WidgetsBinding
   ///
   /// [initInstances] calls this, so an override runs before this binding — and
   /// before every binding mixed in after it — has finished initializing. Only
-  /// state a constructor established, or that a binding earlier in the mixin
-  /// application initialized, can be read from here: [platformDispatcher] can
-  /// be, and anything assigned after the call below cannot.
+  /// state that a constructor established, or that a binding earlier in the
+  /// mixin application initialized, can be read from here: [platformDispatcher]
+  /// can be, and anything assigned after the call below cannot.
   ///
-  /// Do not use this API in production applications or packages published to
-  /// pub.dev. Flutter will make breaking changes to this API, even in patch
-  /// versions.
+  /// {@macro flutter.widgets.binding.window.experimental}
+  @internal
   @protected
   WindowingOwner createWindowingOwner() => createDefaultWindowingOwner();
 
