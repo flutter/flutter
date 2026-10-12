@@ -115,6 +115,33 @@ void main() {
     expect(TargetPlatform.android.getName(), isNot(contains('ios')));
   });
 
+  testWithoutContext('TargetPlatform.os maps every platform to its operating system', () {
+    const expected = <TargetPlatform, TargetOperatingSystem>{
+      .android: .android,
+      .android_arm: .android,
+      .android_arm64: .android,
+      .android_x64: .android,
+      .ios: .ios,
+      .darwin: .macos,
+      .linux_x64: .linux,
+      .linux_arm64: .linux,
+      .linux_riscv64: .linux,
+      .windows_x64: .windows,
+      .windows_arm64: .windows,
+      .fuchsia_arm64: .fuchsia,
+      .fuchsia_x64: .fuchsia,
+      .web_javascript: .web,
+      .tester: .tester,
+      .unsupported: .unsupported,
+    };
+    // Every TargetPlatform value must be covered by this test.
+    expect(expected.keys, containsAll(TargetPlatform.values));
+    for (final MapEntry<TargetPlatform, TargetOperatingSystem>(key: platform, value: os)
+        in expected.entries) {
+      expect(platform.os, os, reason: '$platform');
+    }
+  });
+
   testUsingContext(
     'defaultIOSArchsForEnvironment',
     () {
@@ -502,5 +529,29 @@ void main() {
       globals.config.setValue('build-dir', 'injected_build_dir');
       expect(getBuildDirectory(), 'injected_build_dir');
     }, overrides: <Type, Generator>{Config: () => Config.test()});
+  });
+
+  group('deprecatedJsInterop', () {
+    testWithoutContext('passes no compiler flags when unset', () {
+      expect(deprecatedJsInteropCompilerFlags(null), isEmpty);
+    });
+
+    testWithoutContext('passes the matching compiler flag when set', () {
+      expect(deprecatedJsInteropCompilerFlags(true), <String>['--deprecated-js-interop']);
+      expect(deprecatedJsInteropCompilerFlags(false), <String>['--no-deprecated-js-interop']);
+    });
+
+    testWithoutContext('defaults to null and is preserved by copyWith', () {
+      expect(BuildInfo.debug.deprecatedJsInterop, isNull);
+
+      const buildInfo = BuildInfo(
+        BuildMode.debug,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+        deprecatedJsInterop: false,
+      );
+      expect(buildInfo.copyWith(dartDefines: <String>['foo=bar']).deprecatedJsInterop, isFalse);
+    });
   });
 }

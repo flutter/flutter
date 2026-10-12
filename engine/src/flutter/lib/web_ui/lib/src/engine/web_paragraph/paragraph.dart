@@ -36,6 +36,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
     ui.Color? color,
     ui.StrutStyle? strutStyle,
     this.textHeightBehavior,
+    this.hyphens,
   }) : _strutStyle = strutStyle as WebStrutStyle?,
        _textStyle = WebTextStyle(
          fontFamily: fontFamily,
@@ -60,6 +61,11 @@ class WebParagraphStyle implements ui.ParagraphStyle {
 
   final ui.TextHeightBehavior? textHeightBehavior;
 
+  // TODO(dbebawy): honor hyphens in the pure-Dart line-breaker/painter (no
+  // soft-hyphen glyph emitted at a break yet). Accepted and stored for now.
+  // https://github.com/flutter/flutter/issues/193506
+  final ui.Hyphens? hyphens;
+
   WebStrutStyle? get strutStyle => _strutStyle;
   final WebStrutStyle? _strutStyle;
 
@@ -78,7 +84,8 @@ class WebParagraphStyle implements ui.ParagraphStyle {
         ellipsis == other.ellipsis &&
         textHeightBehavior == other.textHeightBehavior &&
         _strutStyle == other._strutStyle &&
-        _textStyle == other._textStyle;
+        _textStyle == other._textStyle &&
+        hyphens == other.hyphens;
   }
 
   @override
@@ -91,6 +98,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
       textHeightBehavior,
       _strutStyle,
       _textStyle,
+      hyphens,
     );
   }
 
@@ -105,6 +113,7 @@ class WebParagraphStyle implements ui.ParagraphStyle {
           'maxLines: $maxLines, '
           'ellipsis: $ellipsis, '
           'textHeightBehavior: $textHeightBehavior, '
+          'hyphens: $hyphens, '
           'strutStyle: $_strutStyle, '
           'textAlign: $textAlign'
           'textStyle: $_textStyle'
@@ -1010,8 +1019,7 @@ class WebParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    final int codepointPosition = position.offset;
-    final ui.TextRange result = _layout.getLineBoundary(codepointPosition);
+    final ui.TextRange result = _layout.getLineBoundary(position);
     WebParagraphDebug.apiTrace('getLineBoundary($position): $result');
     return result;
   }
