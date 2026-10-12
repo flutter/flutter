@@ -303,32 +303,38 @@ static void set_scrolling_position(FlView* self, gdouble x, gdouble y) {
       self->scrolling_manager, x * scale_factor, y * scale_factor);
 }
 
-// Returns the position of the touchpad pinch currently being processed, in
-// window coordinates.
+// Returns the position of the touchpad pinch being processed by |gesture|, in
+// physical pixels.
 //
 // A pinch is frequently the very first interaction with a freshly opened
-// window, so the position must come from the gesture being handled: a position
-// cached from earlier pointer activity can be absent, in which case the gesture
-// would be delivered to Flutter at (0, 0). The framework hit-tests a pan/zoom
-// gesture at that position, so (0, 0) routes it to the top-left corner of the
-// window instead of to whatever is under the user's fingers.
+// window, so the position must come from the gesture being handled rather than
+// from a position cached during earlier pointer activity, which can be absent.
+// When no position is available the gesture would be delivered to Flutter at
+// (0, 0); the framework hit-tests a pan/zoom gesture at that position, so it
+// would land on the top-left corner of the window instead of on whatever is
+// under the user's fingers.
 //
-// Returns FALSE if the current event is not a touchpad pinch (for example a
+// The event is read from the gesture itself (see gtk_gesture_get_last_event())
+// rather than from gtk_get_current_event(), so that the position always
+// describes the gesture being handled. |sequence| is the sequence the signal
+// was emitted for; it is NULL for touchpad pinches, which are not associated
+// with a GdkEventSequence.
+//
+// Returns FALSE if |sequence| is not a touchpad pinch (for example a
 // touchscreen pinch), in which case the caller falls back to the last known
 // position.
-static gboolean get_touchpad_pinch_position(FlView* self,
-                                            gdouble* x,
-                                            gdouble* y) {
-  g_autoptr(GdkEvent) event = gtk_get_current_event();
-  if (event == nullptr ||
-      gdk_event_get_event_type(event) != GDK_TOUCHPAD_PINCH) {
+static gboolean get_gesture_pinch_position(GtkGesture* gesture,
+                                           GdkEventSequence* sequence,
+                                           gint scale_factor,
+                                           gdouble* x,
+                                           gdouble* y) {
+  const GdkEvent* event = gtk_gesture_get_last_event(gesture, sequence);
+  if (event == nullptr || event->type != GDK_TOUCHPAD_PINCH) {
     return FALSE;
   }
 
-  GdkEventTouchpadPinch* pinch = &event->touchpad_pinch;
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
-  *x = pinch->x * scale_factor;
-  *y = pinch->y * scale_factor;
+  *x = event->touchpad_pinch.x * scale_factor;
+  *y = event->touchpad_pinch.y * scale_factor;
   return TRUE;
 }
 
@@ -507,46 +513,73 @@ static gboolean leave_notify_event_cb(FlView* self,
       rotation, pressure);
 }
 
-static void gesture_rotation_begin_cb(FlView* self) {
+static void gesture_rotation_begin_cb(FlView* self,
+                                      GdkEventSequence* sequence,
+                                      GtkGesture* gesture) {
   gdouble x = 0.0, y = 0.0;
-  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gboolean has_position =
+      get_gesture_pinch_position(gesture, sequence, scale_factor, &x, &y);
   fl_scrolling_manager_handle_rotation_begin(self->scrolling_manager,
                                              has_position, x, y);
 }
 
 static void gesture_rotation_update_cb(FlView* self,
                                        gdouble rotation,
-                                       gdouble delta) {
+                                       gdouble delta,
+                                       GtkGestureRotate* gesture) {
   gdouble x = 0.0, y = 0.0;
-  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gboolean has_position = get_gesture_pinch_position(
+      GTK_GESTURE(gesture),
+      gtk_gesture_get_last_updated_sequence(GTK_GESTURE(gesture)), scale_factor,
+      &x, &y);
   fl_scrolling_manager_handle_rotation_update(self->scrolling_manager,
                                               has_position, x, y, rotation);
 }
 
-static void gesture_rotation_end_cb(FlView* self) {
+static void gesture_rotation_end_cb(FlView* self,
+                                    GdkEventSequence* sequence,
+                                    GtkGesture* gesture) {
   gdouble x = 0.0, y = 0.0;
-  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gboolean has_position =
+      get_gesture_pinch_position(gesture, sequence, scale_factor, &x, &y);
   fl_scrolling_manager_handle_rotation_end(self->scrolling_manager,
                                            has_position, x, y);
 }
 
-static void gesture_zoom_begin_cb(FlView* self) {
+static void gesture_zoom_begin_cb(FlView* self,
+                                  GdkEventSequence* sequence,
+                                  GtkGesture* gesture) {
   gdouble x = 0.0, y = 0.0;
-  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gboolean has_position =
+      get_gesture_pinch_position(gesture, sequence, scale_factor, &x, &y);
   fl_scrolling_manager_handle_zoom_begin(self->scrolling_manager, has_position,
                                          x, y);
 }
 
-static void gesture_zoom_update_cb(FlView* self, gdouble scale) {
+static void gesture_zoom_update_cb(FlView* self,
+                                   gdouble scale,
+                                   GtkGestureZoom* gesture) {
   gdouble x = 0.0, y = 0.0;
-  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gboolean has_position = get_gesture_pinch_position(
+      GTK_GESTURE(gesture),
+      gtk_gesture_get_last_updated_sequence(GTK_GESTURE(gesture)), scale_factor,
+      &x, &y);
   fl_scrolling_manager_handle_zoom_update(self->scrolling_manager, has_position,
                                           x, y, scale);
 }
 
-static void gesture_zoom_end_cb(FlView* self) {
+static void gesture_zoom_end_cb(FlView* self,
+                                GdkEventSequence* sequence,
+                                GtkGesture* gesture) {
   gdouble x = 0.0, y = 0.0;
-  gboolean has_position = get_touchpad_pinch_position(self, &x, &y);
+  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  gboolean has_position =
+      get_gesture_pinch_position(gesture, sequence, scale_factor, &x, &y);
   fl_scrolling_manager_handle_zoom_end(self->scrolling_manager, has_position, x,
                                        y);
 }
