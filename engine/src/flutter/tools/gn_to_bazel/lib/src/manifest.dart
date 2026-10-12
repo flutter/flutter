@@ -77,6 +77,12 @@ exports_files(["fixtures_location.cc"])
       'impeller_unittests': 'needs the Impeller test suites',
       'impeller_dart_unittests': 'needs //flutter/impeller/renderer',
     },
+    // The shader and image fixtures under fixtures/ are read by the suites
+    // of other packages (impeller/compiler's) until impeller/fixtures/BUILD.gn
+    // converts and the directory becomes a package of its own.
+    appendix: '''
+exports_files(glob(["fixtures/*"]))
+''',
   ),
   ConvertedFile(
     '//flutter/impeller/base',
@@ -150,7 +156,61 @@ cc_test(
   ConvertedFile('//flutter/impeller/shader_bundle'),
   ConvertedFile(
     '//flutter/impeller/compiler',
-    skip: <String, String>{'compiler_unittests': 'needs //flutter/testing:testing_lib'},
+    // The compiler's suite on its own, as for //flutter/impeller/base, with
+    // the shader fixtures it reads from //flutter/impeller/fixtures (GN's
+    // file_fixtures there, minus the images, fonts and generated runtime
+    // stages the other suites use; the tests write their intermediates next
+    // to them). The list goes when impeller/fixtures/BUILD.gn converts.
+    appendix: '''
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+flutter_test_fixtures(
+    name = "impeller_compiler_fixtures",
+    fixtures = ["//engine/src/flutter/impeller:fixtures/" + f for f in [
+        "array_assignment.frag",
+        "array_initialization_without_initializer.frag",
+        "array_initializer_with_constants.frag",
+        "array_initializer_with_variables.frag",
+        "check_gles_definition.frag",
+        "check_gles_unflipped_definition.frag",
+        "flutter_gpu_instanced.frag",
+        "flutter_gpu_instanced.vert",
+        "flutter_gpu_texture.frag",
+        "flutter_gpu_texture.vert",
+        "flutter_gpu_unlit.frag",
+        "flutter_gpu_unlit.vert",
+        "mat2_test.frag",
+        "multiple_stages.hlsl",
+        "resources_limit.vert",
+        "sa%m#ple.vert",
+        "sample.comp",
+        "sample.frag",
+        "sample.vert",
+        "sample_with_binding.vert",
+        "sample_with_positioned_uniforms.frag",
+        "sample_with_uniforms.frag",
+        "simple.vert.hlsl",
+        "stage1.comp",
+        "stage2.comp",
+        "struct_def_bug.vert",
+        "struct_internal.frag",
+        "test_texture.frag",
+        "texture_lookup.frag",
+        "types.h",
+        "y_flip_early_return.vert",
+    ]],
+)
+
+cc_test(
+    name = "impeller_compiler_unittests",
+    deps = [
+        ":compiler_unittests",
+        ":impeller_compiler_fixtures",
+        "//engine/src/flutter/testing",
+    ],
+)
+''',
   ),
   ConvertedFile('//flutter/impeller/compiler/shader_lib'),
   ConvertedFile('//flutter/impeller/compiler/shader_lib/flutter'),
