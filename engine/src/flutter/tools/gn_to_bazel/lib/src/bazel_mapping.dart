@@ -453,6 +453,7 @@ const Map<String, String> conditionSettings = <String, String>{
   'is_linux': '@platforms//os:linux',
   'is_mac': '@platforms//os:macos',
   'is_qnx': '@platforms//os:qnx',
+  'is_wasm': '@platforms//os:emscripten',
   'is_win': '@platforms//os:windows',
   'is_debug': '//engine/src/flutter/build/bazel:unoptimized',
   'slimpeller': '//engine/src/flutter/common:slimpeller_enabled',
@@ -465,6 +466,23 @@ const Map<String, String> conditionSettings = <String, String>{
   'impeller_enable_metal': '//engine/src/flutter/impeller/tools:metal',
   'impeller_enable_opengles': '//engine/src/flutter/impeller/tools:opengles',
   'impeller_enable_vulkan': '//engine/src/flutter/impeller/tools:vulkan',
+};
+
+/// The config_setting that holds exactly when a GN predicate is *false*, for
+/// the denied terms of a conjunction (`impeller_enable_opengles && !is_wasm`
+/// becomes a `config_setting_group(match_all)`, which needs a setting per
+/// term). On its own a denial needs none: its `select()` has the key empty
+/// and the default carrying the branch. The OS predicates exclude each other,
+/// so each complement is the group of the other seven (build/bazel/BUILD.bazel).
+const Map<String, String> negatedSettings = <String, String>{
+  'is_android': '//engine/src/flutter/build/bazel:not_android',
+  'is_fuchsia': '//engine/src/flutter/build/bazel:not_fuchsia',
+  'is_ios': '//engine/src/flutter/build/bazel:not_ios',
+  'is_linux': '//engine/src/flutter/build/bazel:not_linux',
+  'is_mac': '//engine/src/flutter/build/bazel:not_mac',
+  'is_qnx': '//engine/src/flutter/build/bazel:not_qnx',
+  'is_wasm': '//engine/src/flutter/build/bazel:not_wasm',
+  'is_win': '//engine/src/flutter/build/bazel:not_win',
 };
 
 /// The Bazel config_setting for `variable == "value"`, by variable and value.
