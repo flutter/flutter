@@ -386,6 +386,7 @@ TEST(PipelineCompileQueueGLESTest, StartsUpToMaxActiveJobsBeforeFinishing) {
   ASSERT_NE(queue, nullptr);
 
   std::vector<std::unique_ptr<MockCompileJob>> jobs;
+  jobs.reserve(3);
   for (int i = 0; i < 3; i++) {
     jobs.push_back(std::make_unique<MockCompileJob>());
   }
@@ -483,6 +484,7 @@ TEST(PipelineCompileQueueGLESTest, AwaitedActiveJobIsFinishedFirst) {
   ASSERT_NE(queue, nullptr);
 
   std::vector<std::unique_ptr<MockCompileJob>> jobs;
+  jobs.reserve(3);
   for (int i = 0; i < 3; i++) {
     jobs.push_back(std::make_unique<MockCompileJob>());
   }
