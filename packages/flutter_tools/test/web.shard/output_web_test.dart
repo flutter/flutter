@@ -5,6 +5,8 @@
 @Tags(<String>['flutter-test-driver'])
 library;
 
+import 'dart:async';
+
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/web/web_device.dart' show GoogleChromeDevice;
@@ -47,13 +49,20 @@ void main() {
   }
 
   testWithoutContext('flutter run outputs info messages from dwds in verbose mode', () async {
-    final Future<dynamic> info = expectLater(
-      flutter.stdout,
-      emitsThrough(contains('Loaded debug metadata')),
-    );
+    // Don't use `expectLater(flutter.stdout, ...)` here. `flutter.stdout` never
+    // closes, so if `flutter run` fails early, the pending `expectLater` keeps
+    // the test alive until it times out.
+    var sawDwdsInfo = false;
+    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+      if (line.contains('Loaded debug metadata')) {
+        sawDwdsInfo = true;
+      }
+    });
+    addTearDown(subscription.cancel);
+
     await start(verbose: true);
     await evaluate();
     await flutter.stop();
-    await info;
+    expect(sawDwdsInfo, isTrue, reason: 'Expected "Loaded debug metadata" in verbose output.');
   });
 }
