@@ -216,6 +216,26 @@ static void system_sound_play(const gchar* type, gpointer user_data) {
   }
 }
 
+// Called when Flutter wants to set the window title.
+static void system_chrome_set_application_switcher_description(
+    const gchar* label,
+    gpointer user_data) {
+  GtkWindow* window = nullptr;
+  GApplication* app = g_application_get_default();
+  if (app != nullptr && GTK_IS_APPLICATION(app)) {
+    window = gtk_application_get_active_window(GTK_APPLICATION(app));
+  }
+  if (window == nullptr) {
+    g_autoptr(GList) toplevels = gtk_window_list_toplevels();
+    if (toplevels != nullptr) {
+      window = GTK_WINDOW(toplevels->data);
+    }
+  }
+  if (window != nullptr) {
+    gtk_window_set_title(window, label);
+  }
+}
+
 // Called when Flutter wants to quit the application.
 static void system_navigator_pop(gpointer user_data) {
   quit_application();
@@ -248,6 +268,8 @@ static FlPlatformChannelVTable platform_channel_vtable = {
     .system_exit_application = system_exit_application,
     .system_initialization_complete = system_initialization_complete,
     .system_sound_play = system_sound_play,
+    .system_chrome_set_application_switcher_description =
+        system_chrome_set_application_switcher_description,
     .system_navigator_pop = system_navigator_pop,
 };
 
