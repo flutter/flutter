@@ -259,8 +259,12 @@ GN build files are programs; Bazel wants data. The converter has three layers:
 `bazel_mapping.dart` holds the converter's knowledge of the engine: label
 translations for synced dependencies (`//flutter/third_party/icu` is `@icu`,
 `//flutter/skia` is `@skia`), what each GN config contributes, which
-`config_setting` stands for which GN predicate, the import policy, and the
-test sizes. Extending the converter's coverage means adding to these tables.
+`config_setting` stands for which GN predicate, the import policy, the
+test sizes, and how `testing/run_tests.py` runs a suite (`testRuns`: the
+arguments it passes `flow_unittests` -- the goldens directory and the font --
+become the `cc_test`'s `args` and `data`, since GN's executable has no words
+for how it is run). Extending the converter's coverage means adding to these
+tables.
 
 ### Strict mode
 

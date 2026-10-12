@@ -133,12 +133,18 @@ selects.config_setting_group(
         "@platforms//os:windows",
     ],
 )
+
+# The goldens and other resources testing/run_tests.py hands suites with
+# --golden-dir (flow_unittests).
+filegroup(
+    name = "resources",
+    srcs = glob(["resources/**"]),
+)
 ''',
   ),
   ConvertedFile(
     '//flutter/impeller',
     skip: <String, String>{
-      'impeller': 'needs //flutter/impeller/{entity,renderer,display_list}',
       'impeller_unittesting': 'needs //flutter/impeller/testing',
       'impeller_unittests': 'needs the Impeller test suites',
       'impeller_dart_unittests': 'needs //flutter/impeller/renderer',
@@ -455,6 +461,7 @@ selects.config_setting_group(
     },
   ),
   ConvertedFile('//flutter/impeller/renderer/backend'),
+  ConvertedFile('//flutter/flow'),
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.
