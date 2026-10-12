@@ -172,6 +172,10 @@ class AOTSnapshotter {
     if (targetingApplePlatform) {
       // On iOS and macOS, we use Xcode to compile the snapshot into a dynamic
       // library that the end-developer can link into their app.
+      final Xcode? xcode = _xcode;
+      if (xcode == null) {
+        throw StateError('Xcode must be provided when targeting Apple platforms.');
+      }
       const frameworkName = 'App.framework';
       if (!quiet) {
         final String targetArch = cpuArch!.darwinArchName;
@@ -189,11 +193,20 @@ class AOTSnapshotter {
       final minOSVersion = platform == TargetPlatform.ios
           ? FlutterDarwinPlatform.ios.deploymentTarget().toString()
           : FlutterDarwinPlatform.macos.deploymentTarget().toString();
+
+      // sdkRoot is the SDK being built against (Xcode's SDKROOT for app
+      // builds), so xcrun reports that exact SDK's version.
+      if (sdkRoot == null) {
+        throw ArgumentError.notNull('sdkRoot');
+      }
+      final String sdkVersion = await xcode.sdkVersion(sdkRoot);
+
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-macho-dylib',
         '--macho=$aotSharedLibrary',
         '--macho-object=$relocatableObject',
         '--macho-min-os-version=$minOSVersion',
+        '--macho-sdk-version=$sdkVersion',
         '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
         '--macho-install-name=@rpath/$frameworkName/$frameworkSnapshotName',
       ]);
