@@ -47,6 +47,53 @@ final class ConvertedFile {
 }
 
 const List<ConvertedFile> convertedFiles = <ConvertedFile>[
+  // GN's config("flutter_config") is feature_defines_list, which copts.bzl
+  // keeps as FLUTTER_FEATURE_DEFINES over the flags below: the Bazel side
+  // of config.gni's arguments, which no GN file declares as targets.
+  ConvertedFile(
+    '//flutter/common',
+    appendix: '''
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+
+# GN's `flutter_runtime_mode` argument. Orthogonal to Bazel's compilation
+# mode, exactly as in GN: host_debug_unopt is `-c dbg`, host_debug is
+# `-c opt`, and host_release is `-c opt --//engine/src/flutter/common:runtime_mode=release`.
+string_flag(
+    name = "runtime_mode",
+    build_setting_default = "debug",
+    values = [
+        "debug",
+        "profile",
+        "release",
+        "jit_release",
+    ],
+)
+
+[
+    config_setting(
+        name = "runtime_mode_" + mode,
+        flag_values = {":runtime_mode": mode},
+    )
+    for mode in [
+        "debug",
+        "profile",
+        "release",
+        "jit_release",
+    ]
+]
+
+# GN's `slimpeller` argument: build without the Skia-backed rendering paths.
+bool_flag(
+    name = "slimpeller",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "slimpeller_enabled",
+    flag_values = {":slimpeller": "True"},
+)
+''',
+  ),
   ConvertedFile(
     '//flutter/fml',
     skip: <String, String>{'fml_benchmarks': 'needs //flutter/benchmarking'},

@@ -41,7 +41,13 @@ the condition as a comment. `--assume name=value` replaces the defaults;
 `--assume=none` keeps every condition and renders it as a `select()`, which
 needs a `config_setting` for each variable involved (see `conditionSettings`).
 What the defaults leave open on purpose -- `is_debug`, the runtime mode,
-`slimpeller` -- becomes a `select()` on the engine's config_settings.
+`slimpeller` -- becomes a `select()` on the engine's config_settings. A
+list config.gni computes from those (`feature_defines_list`, read by
+reference in `//flutter/common:flutter_config`) is not evaluated: it is the
+constant of `build/bazel/copts.bzl` that `referenceConstants` names
+(`FLUTTER_FEATURE_DEFINES`, the same arithmetic over the flags), as the
+Objective-C flag lists already are. The oracle below supplies the GN value
+for its out directory.
 Beneath any `--assume` sit the build's invariants (`buildInvariants`):
 `is_clang = true`, which every configuration `tools/gn` writes has and the
 clang-only Bazel toolchains cannot contradict, and `dart_src`, where DEPS
