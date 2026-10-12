@@ -26,7 +26,29 @@ import 'gn_ast.dart';
 // Conditions
 // ---------------------------------------------------------------------------
 
+/// The platform predicates `//build/config/BUILDCONFIG.gn` sets in one
+/// `if/else if` chain over `current_os`, so that exactly one of them holds in
+/// any toolchain. `is_apple` and `is_posix` are derived from them and not
+/// alternatives of the family.
+const Set<String> exclusiveOsPredicates = <String>{
+  'is_android',
+  'is_fuchsia',
+  'is_ios',
+  'is_linux',
+  'is_mac',
+  'is_qnx',
+  'is_wasm',
+  'is_win',
+};
+
 /// A boolean formula over GN variables.
+///
+/// [and] and [or] simplify as they combine: constants, repeated terms, a term
+/// beside its negation, and the families of mutually exclusive alternatives
+/// (the OS predicates; the values one variable is compared with), so that the
+/// path of `else if (is_mac)` after `if (is_ios)` is `is_mac`, not
+/// `!is_ios && is_mac`. Nothing else is rewritten: the formulas stay in the
+/// shape the GN source gave them.
 @immutable
 sealed class Condition {
   const Condition();
@@ -34,47 +56,125 @@ sealed class Condition {
   static const Condition always = ConditionConstant(true);
   static const Condition never = ConditionConstant(false);
 
-  Condition and(Condition other) {
-    if (this == always) {
-      return other;
+  Condition and(Condition other) => conjunction(<Condition>[this, other]);
+
+  Condition or(Condition other) => disjunction(<Condition>[this, other]);
+
+  /// The conjunction of [operands], simplified.
+  static Condition conjunction(List<Condition> operands) {
+    final terms = <Condition>[];
+    for (final operand in operands) {
+      if (operand == never) {
+        return never;
+      }
+      for (final Condition term in operand is ConditionAnd ? operand.terms : <Condition>[operand]) {
+        if (term == always || terms.contains(term)) {
+          continue;
+        }
+        if (terms.contains(term.negated)) {
+          return never;
+        }
+        terms.add(term);
+      }
     }
-    if (other == always) {
-      return this;
+    // Asserting one alternative of a family denies the others: `is_mac`
+    // beside `is_ios` never holds, beside `!is_ios` it says it all.
+    final asserted = <String, String>{};
+    for (final term in terms) {
+      final _Alternative? alternative = term._alternative;
+      if (alternative == null || !alternative.asserted) {
+        continue;
+      }
+      final String? other = asserted[alternative.family];
+      if (other != null && other != alternative.member) {
+        return never;
+      }
+      asserted[alternative.family] = alternative.member;
     }
-    if (this == never || other == never) {
-      return never;
-    }
-    return ConditionAnd(<Condition>[
-      if (this is ConditionAnd) ...(this as ConditionAnd).terms else this,
-      if (other is ConditionAnd) ...other.terms else other,
-    ]);
+    terms.removeWhere((Condition term) {
+      final _Alternative? alternative = term._alternative;
+      return alternative != null &&
+          !alternative.asserted &&
+          asserted[alternative.family] != null &&
+          asserted[alternative.family] != alternative.member;
+    });
+    return switch (terms.length) {
+      0 => always,
+      1 => terms.single,
+      _ => ConditionAnd(terms),
+    };
   }
 
-  Condition or(Condition other) {
-    if (this == never) {
-      return other;
+  /// The disjunction of [operands], simplified (the dual of [conjunction]:
+  /// denying two alternatives of a family always holds, and denying one
+  /// subsumes asserting another).
+  static Condition disjunction(List<Condition> operands) {
+    final terms = <Condition>[];
+    for (final operand in operands) {
+      if (operand == always) {
+        return always;
+      }
+      for (final Condition term in operand is ConditionOr ? operand.terms : <Condition>[operand]) {
+        if (term == never || terms.contains(term)) {
+          continue;
+        }
+        if (terms.contains(term.negated)) {
+          return always;
+        }
+        terms.add(term);
+      }
     }
-    if (other == never) {
-      return this;
+    final denied = <String, String>{};
+    for (final term in terms) {
+      final _Alternative? alternative = term._alternative;
+      if (alternative == null || alternative.asserted) {
+        continue;
+      }
+      final String? other = denied[alternative.family];
+      if (other != null && other != alternative.member) {
+        return always;
+      }
+      denied[alternative.family] = alternative.member;
     }
-    if (this == always || other == always) {
-      return always;
-    }
-    return ConditionOr(<Condition>[
-      if (this is ConditionOr) ...(this as ConditionOr).terms else this,
-      if (other is ConditionOr) ...other.terms else other,
-    ]);
+    terms.removeWhere((Condition term) {
+      final _Alternative? alternative = term._alternative;
+      return alternative != null &&
+          alternative.asserted &&
+          denied[alternative.family] != null &&
+          denied[alternative.family] != alternative.member;
+    });
+    return switch (terms.length) {
+      0 => never,
+      1 => terms.single,
+      _ => ConditionOr(terms),
+    };
   }
+
+  /// This formula as the assertion or denial of one alternative of a family
+  /// of mutually exclusive ones, if it is one.
+  _Alternative? get _alternative => switch (this) {
+    ConditionVariable(:final String name) when exclusiveOsPredicates.contains(name) => _Alternative(
+      'current_os',
+      name,
+      asserted: true,
+    ),
+    ConditionNot(operand: ConditionVariable(:final String name))
+        when exclusiveOsPredicates.contains(name) =>
+      _Alternative('current_os', name, asserted: false),
+    ConditionComparison(:final String name, :final bool equals, :final String value) =>
+      _Alternative(name, value, asserted: equals),
+    _ => null,
+  };
 
   Condition get negated => switch (this) {
     ConditionConstant(:final bool value) => ConditionConstant(!value),
     ConditionNot(:final Condition operand) => operand,
     ConditionComparison(:final String name, :final bool equals, :final String value) =>
       ConditionComparison(name, !equals, value),
-    ConditionAnd(:final List<Condition> terms) => ConditionOr(<Condition>[
+    ConditionAnd(:final List<Condition> terms) => disjunction(<Condition>[
       for (final Condition t in terms) t.negated,
     ]),
-    ConditionOr(:final List<Condition> terms) => ConditionAnd(<Condition>[
+    ConditionOr(:final List<Condition> terms) => conjunction(<Condition>[
       for (final Condition t in terms) t.negated,
     ]),
     _ => ConditionNot(this),
@@ -197,6 +297,16 @@ bool _sameTerms(List<Condition> a, List<Condition> b) {
     }
   }
   return true;
+}
+
+/// One alternative of a family of mutually exclusive ones (`is_mac` of the
+/// OS predicates; `"wasm"` of `target_os`), asserted or denied.
+final class _Alternative {
+  const _Alternative(this.family, this.member, {required this.asserted});
+
+  final String family;
+  final String member;
+  final bool asserted;
 }
 
 // ---------------------------------------------------------------------------
@@ -424,6 +534,52 @@ final class GnVariable {
     }
     return items;
   }
+
+  /// The values a scalar variable may hold and when: its `=` assignments in
+  /// program order, each in force where its own condition holds and no later
+  /// assignment's does (GN's last write wins). One case under
+  /// [Condition.always] is the plain variable; several are what a
+  /// `select()` renders.
+  List<GnScalarCase> cases(GnLocation use) {
+    if (isList) {
+      throw GnError(use, '$name is a list');
+    }
+    final cases = <GnScalarCase>[];
+    for (var i = 0; i < assignments.length; i++) {
+      final GnAssignment assignment = assignments[i];
+      if (assignment.op != '=' || assignment.items.length != 1) {
+        throw GnError(assignment.location, '${assignment.op} on the scalar $name is not supported');
+      }
+      Condition when = assignment.condition;
+      for (final GnAssignment later in assignments.skip(i + 1)) {
+        // A later write that cannot happen together with this one (the other
+        // branch of the `if`, another OS) cannot override it.
+        if (when.and(later.condition) != Condition.never) {
+          when = when.and(later.condition.negated);
+        }
+      }
+      if (when != Condition.never) {
+        cases.add(GnScalarCase(when, assignment.items.single, assignment));
+      }
+    }
+    return cases;
+  }
+}
+
+/// One value a scalar variable holds, and the condition under which it is
+/// the one in force.
+@immutable
+final class GnScalarCase {
+  const GnScalarCase(this.condition, this.value, this.assignment);
+
+  final Condition condition;
+  final GnValue value;
+
+  /// The assignment the value came from (for its comments and location).
+  final GnAssignment assignment;
+
+  @override
+  String toString() => '[$condition] $value';
 }
 
 /// A target: a call of a GN rule or template with a block.
@@ -534,11 +690,22 @@ final class GnFileEvaluation {
 // Assumptions
 // ---------------------------------------------------------------------------
 
+/// What holds in every configuration the engine builds, beneath whatever the
+/// [Assumptions] say (`--assume=none` included): `tools/gn` passes
+/// `is_clang=true` to every configuration it writes (`--no-clang` is a
+/// developer escape hatch no builder uses), and the Bazel toolchains are
+/// clang only, so a Bazel build never has a `!is_clang` branch to take.
+const Map<String, GnValue> toolchainInvariants = <String, GnValue>{'is_clang': GnBoolValue(true)};
+
 /// Values the converter may take as given for GN variables (build arguments
 /// and platform predicates), so that the branches they rule out are skipped
 /// and the ones they imply are unconditional.
 final class Assumptions {
-  Assumptions(Map<String, GnValue> values) : _values = Map<String, GnValue>.unmodifiable(values);
+  Assumptions(Map<String, GnValue> values)
+    : _values = Map<String, GnValue>.unmodifiable(<String, GnValue>{
+        ...toolchainInvariants,
+        ...values,
+      });
 
   final Map<String, GnValue> _values;
 
@@ -708,12 +875,19 @@ final class _Expression {
   final bool isList;
 
   /// The value of a scalar expression that holds unconditionally.
-  GnValue? get scalar =>
-      isList || items.single.condition != Condition.always ? null : items.single.value;
+  GnValue? get scalar => isList || items.length != 1 || items.single.condition != Condition.always
+      ? null
+      : items.single.value;
 
   @override
-  String toString() =>
-      isList ? '[${items.map((_Value i) => i.value).join(', ')}]' : '${items.single.value}';
+  String toString() => isList
+      ? '[${items.map((_Value i) => i.value).join(', ')}]'
+      : items
+            .map(
+              (_Value i) =>
+                  i.condition == Condition.always ? '${i.value}' : '[${i.condition}] ${i.value}',
+            )
+            .join(' | ');
 }
 
 /// What every evaluator of one conversion shares.
@@ -954,9 +1128,15 @@ final class _Evaluator {
 
   /// The value of an expression that must be a string.
   String _stringExpression(GnNode node, _Scope scope) {
-    final GnValue? value = _expression(node, scope).scalar;
+    final _Expression expression = _expression(node, scope);
+    final GnValue? value = expression.scalar;
     if (value is! GnStringValue) {
-      throw GnError(node.location, 'expected a string, got ${value ?? 'a list'}');
+      final got = expression.isList
+          ? 'a list'
+          : value == null
+          ? 'a value that depends on a condition ($expression)'
+          : '$value';
+      throw GnError(node.location, 'expected one string, got $got');
     }
     return value.value;
   }
@@ -1203,9 +1383,12 @@ final class _Evaluator {
     final GnVariable variable;
     if (node.op == '=') {
       // `=` defines a variable in the current scope (GN forbids shadowing an
-      // enclosing scope's variable, which is left to GN to diagnose).
+      // enclosing scope's variable, which is left to GN to diagnose). A
+      // scalar may be reassigned under a condition: its cases are read back
+      // with the last write winning. A list may not: that would be a whole
+      // list under a select(), which no GN file of the engine needs.
       variable = scope.variables.putIfAbsent(name, () => GnVariable(name, isList: value.isList));
-      if (variable.assignments.isNotEmpty && condition != Condition.always) {
+      if (variable.isList && variable.assignments.isNotEmpty && condition != Condition.always) {
         throw GnError(
           node.location,
           'conditional reassignment of $name is not supported; use += in the branch',
@@ -1266,7 +1449,7 @@ final class _Evaluator {
         ),
       );
       first = false;
-      if (op == '=') {
+      if (op == '=' && variable.isList) {
         op = '+=';
       }
     }
@@ -1432,8 +1615,11 @@ final class _Evaluator {
   }
 
   /// The elements of a variable, each under the condition of the append
-  /// that produced it. A scalar must be unconditional.
+  /// that produced it; for a scalar, its [GnVariable.cases].
   static _Expression _variableItems(GnVariable variable, GnNode node) {
+    if (!variable.isList) {
+      return _scalarItems(variable, node.location);
+    }
     final items = <_Value>[];
     for (final GnAssignment a in variable.assignments) {
       if (a.op == '-=') {
@@ -1463,13 +1649,44 @@ final class _Evaluator {
         );
       }
     }
-    if (!variable.isList && (items.length != 1 || items.single.condition != Condition.always)) {
-      throw GnError(
-        node.location,
-        'use of ${variable.name}, whose value depends on a condition, is not supported',
-      );
+    return _Expression(items, isList: true);
+  }
+
+  /// The value of a scalar: its one case, or its several cases each under
+  /// the condition where it is the value in force. Several boolean cases
+  /// fold into one formula — "some case holds and its value is true" — which
+  /// is exact wherever GN would let the variable be read (where no case
+  /// holds, GN has no value to give either).
+  static _Expression _scalarItems(GnVariable variable, GnLocation use) {
+    final List<GnScalarCase> cases = variable.cases(use);
+    if (cases.isEmpty) {
+      throw GnError(use, 'use of ${variable.name}, which has no value');
     }
-    return _Expression(items, isList: variable.isList);
+    if (cases.length == 1 && cases.single.condition == Condition.always) {
+      final GnScalarCase only = cases.single;
+      return _Expression(<_Value>[
+        _Value(only.value, only.assignment.commentsOf(0)),
+      ], isList: false);
+    }
+    if (cases.every((GnScalarCase c) => c.value is GnBoolValue || c.value is GnConditionValue)) {
+      final Condition holds = Condition.disjunction(<Condition>[
+        for (final GnScalarCase c in cases)
+          _valueCondition(c.value, use, variable.name).and(c.condition),
+      ]);
+      return _Expression.scalar(switch (holds) {
+        ConditionConstant(:final bool value) => GnBoolValue(value),
+        _ => GnConditionValue(holds),
+      });
+    }
+    return _Expression(<_Value>[
+      for (final GnScalarCase c in cases)
+        _Value(
+          c.value,
+          c.assignment.commentsOf(0),
+          condition: c.condition,
+          sourceConditions: c.assignment.sourceConditions,
+        ),
+    ], isList: false);
   }
 
   /// Whether [node] is a formula (`a && b`, `!a`, `x == "y"`) rather than a
@@ -1629,11 +1846,10 @@ final class _Evaluator {
   Condition _variableCondition(String name, GnLocation location, _Scope scope) {
     final GnVariable? variable = scope.lookup(name);
     if (variable != null) {
-      final List<GnValue>? items = variable.unconditionalItems;
-      if (items == null || items.length != 1) {
+      if (variable.isList) {
         throw GnError(location, 'condition on $name, which is not a plain boolean');
       }
-      return _valueCondition(items.single, location, name);
+      return _valueCondition(_scalarItems(variable, location).scalar, location, name);
     }
     final GnValue? assumed = assumptions[name];
     if (assumed != null) {
