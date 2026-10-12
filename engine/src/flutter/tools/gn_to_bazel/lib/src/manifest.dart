@@ -413,6 +413,7 @@ exports_files(glob(["third_party/fonts/*"]))
     '//flutter/display_list/testing',
     skip: <String, String>{'display_list_surface_provider': 'needs //flutter/common/graphics'},
   ),
+  ConvertedFile('//flutter/assets'),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia
