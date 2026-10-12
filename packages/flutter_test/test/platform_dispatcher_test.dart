@@ -27,6 +27,19 @@ void main() {
     expect(testPlatformDispatcher.someNewProperty, null);
   });
 
+  test('TestPlatformDispatcher delegates resetInternalState', () {
+    final fakePlatformDispatcher = _FakePlatformDispatcher(
+      displays: const <Display>[],
+      views: const <FlutterView>[],
+    );
+    final testPlatformDispatcher = TestPlatformDispatcher(
+      platformDispatcher: fakePlatformDispatcher,
+    );
+    expect(fakePlatformDispatcher.resetInternalStateCalled, isFalse);
+    testPlatformDispatcher.resetInternalState();
+    expect(fakePlatformDispatcher.resetInternalStateCalled, isTrue);
+  });
+
   testWidgets('TestPlatformDispatcher can fake locale', (WidgetTester tester) async {
     verifyPropertyFaked<Locale>(
       tester: tester,
@@ -344,4 +357,11 @@ class _FakePlatformDispatcher extends Fake implements PlatformDispatcher {
 
   @override
   double get textScaleFactor => 1.0;
+
+  bool resetInternalStateCalled = false;
+
+  @override
+  void resetInternalState() {
+    resetInternalStateCalled = true;
+  }
 }
