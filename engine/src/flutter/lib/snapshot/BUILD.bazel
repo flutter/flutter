@@ -2,19 +2,128 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Hand-written until lib/snapshot/BUILD.gn converts: that file is the Dart
-# platform kernel and core snapshot pipeline (compile_platform, gen_snapshot,
-# bin_to_linkable), which comes with the Dart build in a later phase. What
-# the engine's libraries need of it now is GN's source_set("snapshot_headers")
-# -- the declarations of the symbols the linkable snapshots define, which
-# //flutter/runtime reads -- and that is all this file has.
+# Hand-written: lib/snapshot/BUILD.gn is templates over the Dart tree's
+# tools (compile_platform from utils/compile_platform.gni, compiled_action
+# around gen_snapshot, bin_to_linkable) plus the macOS universal-binary and
+# cross-target plumbing of gen_snapshot itself, none of which the converter
+# reads yet. The pipeline below is that file's host path, target for target,
+# on the rules in //engine/src/flutter/build/bazel/dart:snapshot.bzl, with the
+# tools the wrapped Dart SDK build provides. The gen_snapshot/analyze_snapshot
+# exports (generate_snapshot_bins) are artifact packaging, a later phase.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel/dart:snapshot.bzl", "bin_to_assembly", "compile_platform", "core_snapshot")
 
 package(default_visibility = ["//visibility:public"])
 
+# compile_platform("strong_platform"): the Dart/Flutter core libraries to
+# kernel. GN's -Ddart.vm.product follows the runtime mode.
+compile_platform(
+    name = "strong_platform",
+    srcs = ["//engine/src/flutter/lib/ui:dart_ui"],
+    args = [
+        "--enable-experiment=generic-metadata",
+        "--nnbd-strong",
+        "--target=flutter",
+    ],
+    libraries_json = "libraries.json",
+    outline = "flutter_patched_sdk/vm_outline_strong.dill",
+    platform = "flutter_patched_sdk/platform_strong.dill",
+    product = select({
+        "//engine/src/flutter/common:runtime_mode_jit_release": True,
+        "//engine/src/flutter/common:runtime_mode_release": True,
+        "//conditions:default": False,
+    }),
+    tree = {"@dart//:sdk_lib": "flutter/third_party/dart"},
+)
+
+# group("kernel_platform_files")
+filegroup(
+    name = "kernel_platform_files",
+    srcs = [":strong_platform"],
+)
+
+# generated_file("vm_isolate_snapshot_data"), ("vm_isolate_snapshot_instructions"):
+# empty, for the artifact layout.
+write_file(
+    name = "vm_isolate_snapshot_data",
+    out = "vm_isolate_snapshot.bin",
+    content = [],
+)
+
+write_file(
+    name = "vm_isolate_snapshot_instructions",
+    out = "vm_snapshot_instructions.bin",
+    content = [],
+)
+
+# GN: --enable_asserts when is_debug and the runtime mode is debug.
+selects.config_setting_group(
+    name = "asserts",
+    match_all = [
+        "//engine/src/flutter/build/bazel:unoptimized",
+        "//engine/src/flutter/common:runtime_mode_debug",
+    ],
+)
+
+# compiled_action("generate_snapshot_bin")
+core_snapshot(
+    name = "generate_snapshot_bin",
+    data = "isolate_snapshot.bin",
+    enable_asserts = select({
+        ":asserts": True,
+        "//conditions:default": False,
+    }),
+    instructions = "isolate_snapshot_instructions.bin",
+    platform = ":flutter_patched_sdk/platform_strong.dill",
+)
+
+# bin_to_linkable(...): the blobs as symbols.
+bin_to_assembly(
+    name = "isolate_snapshot_data_linkable",
+    src = ":isolate_snapshot.bin",
+    symbol = "kDartSnapshotData",
+)
+
+bin_to_assembly(
+    name = "isolate_snapshot_instructions_linkable",
+    src = ":isolate_snapshot_instructions.bin",
+    executable = True,
+    symbol = "kDartSnapshotText",
+)
+
+bin_to_assembly(
+    name = "platform_strong_dill_linkable",
+    src = ":flutter_patched_sdk/platform_strong.dill",
+    size_symbol = "kPlatformStrongDillSize",
+    symbol = "kPlatformStrongDill",
+)
+
+# source_set("snapshot_headers")
 cc_library(
     name = "snapshot_headers",
     hdrs = ["snapshot.h"],
     deps = ["//engine/src:include_root"],
+)
+
+# source_set("snapshot"): the assembly, which `.incbin`s the blobs.
+cc_library(
+    name = "snapshot",
+    srcs = [
+        ":isolate_snapshot_data_linkable",
+        ":isolate_snapshot_instructions_linkable",
+        ":platform_strong_dill_linkable",
+    ],
+    additional_compiler_inputs = [
+        ":isolate_snapshot.bin",
+        ":isolate_snapshot_instructions.bin",
+        ":flutter_patched_sdk/platform_strong.dill",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [":snapshot_headers"],
+    alwayslink = True,
 )

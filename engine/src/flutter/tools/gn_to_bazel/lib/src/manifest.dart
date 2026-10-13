@@ -475,6 +475,14 @@ selects.config_setting_group(
       'display_list_deferred_image_unittests': 'with ui_unittests',
       'ui_testing_mocks': 'with ui_unittests',
     },
+    // dart_ui.gni's dart_ui_files: the dart:ui sources, which the platform
+    // compile in lib/snapshot reads through lib/snapshot/libraries.json.
+    appendix: '''
+filegroup(
+    name = "dart_ui",
+    srcs = glob(["*.dart"]),
+)
+''',
   ),
   ConvertedFile('//flutter/lib/io'),
   ConvertedFile('//flutter/vulkan'),
