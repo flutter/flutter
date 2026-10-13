@@ -219,7 +219,9 @@ cc_test(
     name = "display_list_rendertests",
     size = "small",
     srcs = ["//engine/src/flutter/display_list/testing:dl_rendering_unittests.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/common/graphics
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":display_list",

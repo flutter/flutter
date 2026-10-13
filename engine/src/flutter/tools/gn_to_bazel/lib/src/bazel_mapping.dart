@@ -218,7 +218,11 @@ const Map<String, String> includeDirLibraries = <String, String>{
 /// The converter adds them to the `copts` of every target that lists the
 /// dependency, and when it converts the dependency's own file it requires
 /// the public config to carry exactly these, so that the two sides cannot
-/// drift apart. Keys are GN labels as `//dir:name`.
+/// drift apart. GN also hands them on along `public_deps` chains (whoever
+/// depends on `flutter_vma` compiles with vulkan_memory_allocator's
+/// suppressions), so a target whose public_deps are listed here is listed
+/// here too, with the same flags; the converter checks that as well. Keys
+/// are GN labels as `//dir:name`.
 const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/third_party/freetype2:freetype2': <String>[
     '-Wno-unused-function',
@@ -227,28 +231,52 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   // The secondary tree's forwarder to the same target (harfbuzz names it).
   '//third_party/freetype2:freetype2': <String>['-Wno-unused-function', '-Wno-unused-variable'],
   '//flutter/third_party/wuffs:wuffs': <String>['-Wno-unused-function', '-Wno-c++11-narrowing'],
-  '//third_party/inja:inja': <String>['-Wno-unused-variable', '-Wno-newline-eof'],
-  '//flutter/third_party/vulkan-deps/glslang/src:glslang_lib_sources': <String>['-Wno-conversion'],
-  '//flutter/third_party/vulkan-deps/glslang/src:glslang_sources': <String>['-Wno-conversion'],
-  '//flutter/third_party/vulkan-deps/glslang/src:glslang_default_resource_limits_sources': <String>[
-    '-Wno-conversion',
-  ],
-  // vulkan_headers_config's one flag, under is_clang.
-  '//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers': <String>[
-    '-Wno-redundant-parens',
-  ],
-  // vulkan_memory_allocator_config's cflags_cc, under is_clang.
-  '//flutter/third_party/vulkan_memory_allocator:vulkan_memory_allocator': <String>[
-    '-Wno-c++98-compat-extra-semi',
-    '-Wno-deprecated-copy',
-    '-Wno-implicit-fallthrough',
-    '-Wno-nullability-completeness',
-    '-Wno-suggest-destructor-override',
-    '-Wno-suggest-override',
-    '-Wno-unused-private-field',
-    '-Wno-unused-variable',
-  ],
+  '//third_party/inja:inja': _injaCopts,
+  '//flutter/third_party/vulkan-deps/glslang/src:glslang_lib_sources': _glslangCopts,
+  '//flutter/third_party/vulkan-deps/glslang/src:glslang_sources': _glslangCopts,
+  '//flutter/third_party/vulkan-deps/glslang/src:glslang_default_resource_limits_sources':
+      _glslangCopts,
+  '//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers': _vulkanHeadersCopts,
+  '//flutter/third_party/vulkan_memory_allocator:vulkan_memory_allocator': _vmaCopts,
+  // Handed on through public_deps.
+  '//third_party/shaderc_flutter:shaderc_util_flutter': _glslangCopts,
+  '//third_party/shaderc_flutter:shaderc_flutter': _glslangCopts,
+  '//flutter/impeller/compiler:compiler_lib': <String>[..._injaCopts, ..._glslangCopts],
+  '//flutter/common/graphics:graphics': _vulkanHeadersCopts,
+  '//flutter/vulkan/procs:procs': _vulkanHeadersCopts,
+  '//flutter/flow:flow': _vulkanHeadersCopts,
+  '//flutter/lib/ui:ui': _vulkanHeadersCopts,
+  '//flutter/runtime:runtime': _vulkanHeadersCopts,
+  '//flutter/flutter_vma:flutter_vma': _vulkanCopts,
+  '//flutter/flutter_vma:flutter_skia_vma': _vulkanCopts,
+  '//flutter/impeller/renderer/backend/vulkan:vulkan': _vulkanCopts,
+  '//flutter/impeller/renderer/backend:backend': _vulkanCopts,
+  '//flutter/impeller:impeller': _vulkanCopts,
 };
+
+/// inja_public_config's flags.
+const List<String> _injaCopts = <String>['-Wno-unused-variable', '-Wno-newline-eof'];
+
+/// glslang_public's one flag.
+const List<String> _glslangCopts = <String>['-Wno-conversion'];
+
+/// vulkan_headers_config's one flag, under is_clang.
+const List<String> _vulkanHeadersCopts = <String>['-Wno-redundant-parens'];
+
+/// vulkan_memory_allocator_config's cflags_cc, under is_clang.
+const List<String> _vmaCopts = <String>[
+  '-Wno-c++98-compat-extra-semi',
+  '-Wno-deprecated-copy',
+  '-Wno-implicit-fallthrough',
+  '-Wno-nullability-completeness',
+  '-Wno-suggest-destructor-override',
+  '-Wno-suggest-override',
+  '-Wno-unused-private-field',
+  '-Wno-unused-variable',
+];
+
+/// What flutter_vma hands on: the headers' flag and the allocator's.
+const List<String> _vulkanCopts = <String>[..._vulkanHeadersCopts, ..._vmaCopts];
 
 /// A Bazel label taken apart: `@repo//package:name`.
 @immutable

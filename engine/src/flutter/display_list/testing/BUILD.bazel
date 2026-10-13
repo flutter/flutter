@@ -52,7 +52,9 @@ cc_library(
         "skia/dl_test_surface_instance_skia.h",
         "skia/dl_test_surface_software.h",  # surface_provider_include_software
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/common/graphics
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":surface_provider_config",

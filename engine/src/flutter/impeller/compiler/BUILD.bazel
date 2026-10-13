@@ -74,6 +74,7 @@ cc_library(
     ] + FLUTTER_COPTS + [
         "-Wno-unused-variable",  # from //third_party/inja
         "-Wno-newline-eof",  # from //third_party/inja
+        "-Wno-conversion",  # from //third_party/shaderc_flutter
     ],
     # Current versions of libcxx have deprecated some of the UTF-16 string
     # conversion APIs.
@@ -103,7 +104,11 @@ cc_binary(
     srcs = ["impellerc_main.cc"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-unused-variable",  # from :compiler_lib
+        "-Wno-newline-eof",  # from :compiler_lib
+        "-Wno-conversion",  # from :compiler_lib
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":compiler_lib",
@@ -130,7 +135,11 @@ cc_library(
     hdrs = ["compiler_test.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-unused-variable",  # from :compiler_lib
+        "-Wno-newline-eof",  # from :compiler_lib
+        "-Wno-conversion",  # from :compiler_lib
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":compiler_lib",
