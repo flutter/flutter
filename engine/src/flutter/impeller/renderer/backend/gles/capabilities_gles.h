@@ -11,6 +11,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/geometry/size.h"
+#include "impeller/renderer/backend/gles/formats_gles.h"
 #include "impeller/renderer/capabilities.h"
 
 namespace impeller {
@@ -103,6 +104,14 @@ class CapabilitiesGLES final
   // |Capabilities|
   bool SupportsTextureArrays() const override;
 
+  /// @brief Which vertex attribute formats beyond the OpenGL ES 2.0 floor this
+  ///        context can consume, used to translate a `VertexAttributeFormat`
+  ///        into its `glVertexAttribPointer` arguments.
+  const VertexFormatSupportGLES& GetVertexFormatSupport() const;
+
+  // |Capabilities|
+  bool SupportsVertexFormat(VertexAttributeFormat format) const override;
+
   // |Capabilities|
   bool SupportsOffscreenMSAA() const override;
 
@@ -194,6 +203,7 @@ class CapabilitiesGLES final
   bool supports_texture_compression_astc_hdr_ = false;
   uint32_t max_sampler_anisotropy_ = 1;
   PixelFormat default_glyph_atlas_format_ = PixelFormat::kUnknown;
+  VertexFormatSupportGLES vertex_format_support_;
 };
 
 }  // namespace impeller

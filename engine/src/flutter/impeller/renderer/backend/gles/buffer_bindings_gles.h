@@ -77,17 +77,21 @@ class BufferBindingsGLES {
   FML_FRIEND_TEST(testing::BufferBindingsGLESTest,
                   RejectsTexturesBeyondTheCombinedLimit);
   //----------------------------------------------------------------------------
-  /// @brief      The arguments to glVertexAttribPointer.
+  /// @brief      The arguments to glVertexAttribPointer, or to
+  ///             glVertexAttribIPointer when `integer` is set.
   ///
   struct VertexAttribPointer {
     GLuint index = 0u;
     GLint size = 4;
     GLenum type = GL_FLOAT;
-    GLenum normalized = GL_FALSE;
+    GLboolean normalized = GL_FALSE;
     GLsizei stride = 0u;
     GLsizei offset = 0u;
     // glVertexAttribDivisor value: 0 advances per vertex, 1 per instance.
     GLuint vertex_attrib_divisor = 0u;
+    // Integer-typed inputs must be bound with glVertexAttribIPointer, which
+    // delivers the value unconverted.
+    bool integer = false;
   };
   std::vector<std::vector<VertexAttribPointer>> vertex_attrib_arrays_;
 
