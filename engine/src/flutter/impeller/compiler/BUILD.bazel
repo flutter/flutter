@@ -6,7 +6,6 @@
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -153,48 +152,11 @@ cc_library(
 # What GN has no words for; maintained in the converter's manifest
 # (tools/gn_to_bazel/lib/src/manifest.dart).
 
-flutter_test_fixtures(
-    name = "impeller_compiler_fixtures",
-    fixtures = ["//engine/src/flutter/impeller:fixtures/" + f for f in [
-        "array_assignment.frag",
-        "array_initialization_without_initializer.frag",
-        "array_initializer_with_constants.frag",
-        "array_initializer_with_variables.frag",
-        "check_gles_definition.frag",
-        "check_gles_unflipped_definition.frag",
-        "flutter_gpu_instanced.frag",
-        "flutter_gpu_instanced.vert",
-        "flutter_gpu_texture.frag",
-        "flutter_gpu_texture.vert",
-        "flutter_gpu_unlit.frag",
-        "flutter_gpu_unlit.vert",
-        "mat2_test.frag",
-        "multiple_stages.hlsl",
-        "resources_limit.vert",
-        "sa%m#ple.vert",
-        "sample.comp",
-        "sample.frag",
-        "sample.vert",
-        "sample_with_binding.vert",
-        "sample_with_positioned_uniforms.frag",
-        "sample_with_uniforms.frag",
-        "simple.vert.hlsl",
-        "stage1.comp",
-        "stage2.comp",
-        "struct_def_bug.vert",
-        "struct_internal.frag",
-        "test_texture.frag",
-        "texture_lookup.frag",
-        "types.h",
-        "y_flip_early_return.vert",
-    ]],
-)
-
 cc_test(
     name = "impeller_compiler_unittests",
     deps = [
         ":compiler_unittests",
-        ":impeller_compiler_fixtures",
+        "//engine/src/flutter/impeller/fixtures:file_fixtures",
         "//engine/src/flutter/testing",
     ],
 )

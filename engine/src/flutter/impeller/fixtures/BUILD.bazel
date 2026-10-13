@@ -1,0 +1,234 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/fixtures/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impeller_shaders", "impellerc")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+impeller_shaders(
+    name = "modern_shader_fixtures",
+    analyze = False,
+    entry_point_prefix = "",
+    library_name = "modern_fixtures",
+    metal_version = "2.3",
+    require_framebuffer_fetch = True,
+    shaders = [
+        "sepia.frag",
+        "sepia.vert",
+        "swizzle.frag",
+    ],
+)
+
+impeller_shaders(
+    name = "shader_fixtures",
+    analyze = False,
+    entry_point_prefix = "",
+    gles_exclusions = [
+        "sample.comp",  # impeller_enable_opengles
+        "stage1.comp",  # impeller_enable_opengles
+        "stage2.comp",  # impeller_enable_opengles
+        "half.frag",  # impeller_enable_opengles
+    ],
+    library_name = "fixtures",
+    metal_version = "2.3",
+    shaders = [
+        "array.frag",
+        "array.vert",
+        "baby.frag",
+        "baby.vert",
+        "box_fade.frag",
+        "box_fade.vert",
+        "colors.frag",
+        "colors.vert",
+        "half.frag",
+        "impeller.frag",
+        "impeller.vert",
+        "inactive_uniforms.frag",
+        "inactive_uniforms.vert",
+        "instanced_attributes.frag",
+        "instanced_attributes.vert",
+        "instanced_draw.frag",
+        "instanced_draw.vert",
+        "mipmaps.frag",
+        "mipmaps.vert",
+        "planet.frag",
+        "planet.vert",
+        "sample.comp",
+        "simple.vert",
+        "spec_constant.frag",
+        "spec_constant.vert",
+        "stage1.comp",
+        "stage2.comp",
+        "test_texture.frag",
+        "test_texture.vert",
+        "texture.frag",
+        "texture.vert",
+    ],
+    vulkan_exclusions = [
+        "half.frag",  # impeller_enable_vulkan
+    ],
+)
+
+impellerc(
+    name = "runtime_stages",
+    iplr = True,
+    mnemonic = "IMPELLERC_IPLR",
+    shader_target_flags = [
+        "--sksl",
+        "--runtime-stage-metal",
+        "--runtime-stage-gles",
+        "--runtime-stage-gles3",
+        "--runtime-stage-vulkan",
+    ],
+    shaders = [
+        "ink_sparkle.frag",
+        "all_supported_uniforms.frag",
+        "runtime_stage_example.frag",
+        "runtime_stage_filter_example.frag",
+        "interop_runtime_stage_cs.frag",
+        "runtime_stage_simple.frag",
+        "runtime_stage_position.frag",
+        "runtime_stage_filter_circle.frag",
+        "runtime_stage_filter_warp.frag",
+        "gradient.frag",
+        "uniforms_and_sampler_1.frag",
+        "uniforms_and_sampler_2.frag",
+        "runtime_stage_border.frag",
+        "runtime_stage_vector_array.frag",
+    ],
+    sl_file_extension = "iplr",
+)
+
+impellerc(
+    name = "runtime_stages_non_sksl",
+    iplr = True,
+    mnemonic = "IMPELLERC_IPLR",
+    shader_target_flags = [
+        "--runtime-stage-metal",
+        "--runtime-stage-gles",
+        "--runtime-stage-gles3",
+        "--runtime-stage-vulkan",
+    ],
+    shaders = ["runtime_stage_simple_no_sksl.frag"],
+    sl_file_extension = "iplr",
+)
+
+flutter_test_fixtures(
+    name = "file_fixtures",
+    fixtures = [
+        "airplane.jpg",
+        "array_assignment.frag",
+        "array_initialization_without_initializer.frag",
+        "array_initializer_with_constants.frag",
+        "array_initializer_with_variables.frag",
+        "bay_bridge.jpg",
+        "blend_mode_dst.png",
+        "blend_mode_src.png",
+        "blue_noise.png",
+        "boston.jpg",
+        "check_gles_definition.frag",
+        "check_gles_unflipped_definition.frag",
+        "embarcadero.jpg",
+        "flutter_gpu_instanced.frag",
+        "flutter_gpu_instanced.vert",
+        "flutter_gpu_texture.frag",
+        "flutter_gpu_texture.vert",
+        "flutter_gpu_unlit.frag",
+        "flutter_gpu_unlit.vert",
+        "kalimba.jpg",
+        "mat2_test.frag",
+        "monkey.png",
+        "multiple_stages.hlsl",
+        "nine_patch2.png",
+        "nine_patch_corners.png",
+        "resources_limit.vert",
+        "sa%m#ple.vert",
+        "sample.comp",
+        "sample.frag",
+        "sample.vert",
+        "sample_with_binding.vert",
+        "sample_with_positioned_uniforms.frag",
+        "sample_with_uniforms.frag",
+        "simple.vert.hlsl",
+        "stage1.comp",
+        "stage2.comp",
+        "struct_def_bug.vert",
+        "struct_internal.frag",
+        "table_mountain_nx.png",
+        "table_mountain_ny.png",
+        "table_mountain_nz.png",
+        "table_mountain_px.png",
+        "table_mountain_py.png",
+        "table_mountain_pz.png",
+        "test_texture.frag",
+        "texture_lookup.frag",
+        "types.h",
+        "wtf.otf",
+        "y_flip_early_return.vert",
+        "//engine/src/flutter/txt:third_party/fonts/HomemadeApple.ttf",
+        "//engine/src/flutter/txt:third_party/fonts/NotoColorEmoji.ttf",
+        "//engine/src/flutter/txt:third_party/fonts/Roboto-Medium.ttf",
+        "//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf",
+        "//engine/src/flutter/txt:third_party/fonts/RobotoSlab-VariableFont_wght.ttf",
+        "//engine/src/flutter/txt:third_party/fonts/ahem.ttf",
+    ],
+    fixtures_targets = {
+        ":runtime_stages": ["*.iplr"],
+        ":runtime_stages_non_sksl": ["*.iplr"],
+    },
+    deps = [
+        ":runtime_stages",
+        ":runtime_stages_non_sksl",
+    ],
+)
+
+impellerc(
+    name = "flutter_gpu_shaders",
+    shader_bundle = "{\"InstancedFragment\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_instanced.frag\"}, \"InstancedVertex\": {\"type\": \"vertex\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_instanced.vert\"}, \"UnlitFragment\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_unlit.frag\"}, \"UnlitVertex\": {\"type\": \"vertex\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_unlit.vert\"}, \"TextureFragment\": {\"type\": \"fragment\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_texture.frag\"}, \"TextureVertex\": {\"type\": \"vertex\", \"file\": \"$(src engine/src/flutter/impeller/fixtures)/flutter_gpu_texture.vert\"}}",
+    shader_bundle_output = "playground.shaderbundle",
+    shaders = [
+        # Temporarily build Flutter GPU test shaders as runtime stages.
+        "flutter_gpu_instanced.frag",
+        "flutter_gpu_instanced.vert",
+        "flutter_gpu_unlit.frag",
+        "flutter_gpu_unlit.vert",
+        "flutter_gpu_texture.frag",
+        "flutter_gpu_texture.vert",
+    ],
+)
+
+flutter_test_fixtures(
+    name = "flutter_gpu_fixtures",
+    dart_main = "dart_tests.dart",
+    dart_packages = {"@vector_math//:dart_sources": "engine/src/flutter/third_party/pkg/vector_math"},
+    dart_srcs = glob(["*.dart"]) + ["//engine/src/flutter/lib/gpu:dart_sources"],
+    fixtures_targets = {":flutter_gpu_shaders": [
+        "*.iplr",
+        "*.shaderbundle",
+    ]},
+    deps = [":flutter_gpu_shaders"],
+)
+
+cc_library(
+    name = "fixtures",
+    testonly = True,
+    deps = [
+        ":file_fixtures",
+        ":modern_shader_fixtures",
+        ":shader_fixtures",
+    ],
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+exports_files(glob([
+    "*.frag",
+    "*.vert",
+    "ordering/*.frag",
+]))
