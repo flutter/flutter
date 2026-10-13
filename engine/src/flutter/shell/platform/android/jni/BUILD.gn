@@ -14,11 +14,9 @@ source_set("jni") {
   public_configs = [ "//flutter:config" ]
 
   deps = [
-    "//flutter/flow",
     "//flutter/fml",
     "//flutter/shell/platform/android/surface:native_window",
     "//flutter/shell/platform/embedder:embedder_headers",
-    "//flutter/skia",
   ]
 }
 

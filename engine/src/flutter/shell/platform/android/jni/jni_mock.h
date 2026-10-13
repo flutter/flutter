@@ -105,7 +105,8 @@ class JNIMock final : public PlatformViewAndroidJNI {
                int height,
                int viewWidth,
                int viewHeight,
-               MutatorsStack mutators_stack),
+               const FlutterPlatformViewMutation* const* mutations,
+               size_t mutations_count),
               (override));
 
   MOCK_METHOD(void,
@@ -144,7 +145,8 @@ class JNIMock final : public PlatformViewAndroidJNI {
                int32_t height,
                int32_t viewWidth,
                int32_t viewHeight,
-               MutatorsStack mutators_stack),
+               const FlutterPlatformViewMutation* const* mutations,
+               size_t mutations_count),
               (override));
 
   MOCK_METHOD(void, hidePlatformView2, (int32_t view_id), (override));

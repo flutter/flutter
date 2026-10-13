@@ -15,10 +15,16 @@
 #include "flutter/shell/platform/embedder/android/surface/android_native_window.h"
 #include "flutter/shell/platform/embedder/android/surface/android_surface.h"
 #include "flutter/shell/platform/embedder/android/surface/snapshot_surface_producer.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
 class ExternalViewEmbedder;
+
+std::shared_ptr<AndroidExternalViewEmbedderDelegate>
+MakeNativeWindowCompositorDelegate(
+    const FlutterNativeWindowCompositor* compositor,
+    void* fallback_user_data);
 
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
@@ -109,6 +115,13 @@ class AndroidRenderer {
   ///
   void SetExternalViewEmbedderDelegate(
       std::shared_ptr<AndroidExternalViewEmbedderDelegate> delegate);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Configures the platform-view and overlay-surface delegate
+  ///             from public `FlutterNativeWindowCompositor` callbacks.
+  ///
+  void SetCompositor(const FlutterNativeWindowCompositor* compositor,
+                     void* fallback_user_data);
 
   //----------------------------------------------------------------------------
   /// @brief      Creates the Android external-view embedder for this renderer

@@ -948,11 +948,16 @@ InferNativeWindowPlatformViewCreationCallback(
     };
   }
 
+  std::shared_ptr<flutter::AndroidExternalViewEmbedderDelegate>
+      compositor_delegate = flutter::MakeNativeWindowCompositorDelegate(
+          SAFE_ACCESS(native_window_config, compositor, nullptr), tx_user_data);
+
   std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
       std::move(external_view_embedder);
 
   return fml::MakeCopyable(
       [rendering_api = rendering_api.value(), create_transaction,
+       compositor_delegate = std::move(compositor_delegate),
        platform_dispatch_table, view_embedder,
        android_renderer_slot =
            std::move(android_renderer_slot)](flutter::Shell& shell) mutable {
@@ -961,6 +966,9 @@ InferNativeWindowPlatformViewCreationCallback(
             shell.GetTaskRunners(), delegate.OnPlatformViewGetSettings(),
             rendering_api, delegate.OnPlatformViewGetShutdownSafeIOTaskRunner(),
             create_transaction);
+        if (compositor_delegate) {
+          renderer->SetExternalViewEmbedderDelegate(compositor_delegate);
+        }
         if (android_renderer_slot) {
           *android_renderer_slot = renderer;
         }

@@ -57,6 +57,7 @@ source_set("native_window_renderer") {
     "external_view_embedder",
     "surface",
     "surface:native_window",
+    "//flutter/shell/platform/embedder:embedder_headers",
   ]
 
   deps = [
@@ -100,6 +101,7 @@ source_set("native_window_renderer_unittests") {
   deps = [
     ":native_window_renderer",
     "external_view_embedder:external_view_embedder_delegate_mock",
+    "//flutter/display_list",
     "//flutter/fml",
     "//flutter/shell/common",
     "//flutter/skia",

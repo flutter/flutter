@@ -1736,6 +1736,59 @@ void PlatformViewAndroidJNIImpl::HardwareBufferClose(
   FML_CHECK(fml::jni::CheckException(env));
 }
 
+namespace {
+
+void PushMutatorTransform(JNIEnv* env,
+                          jobject mutators_stack,
+                          const FlutterTransformation& t) {
+  jfloat matrix_array[9]{
+      static_cast<jfloat>(t.scaleX), static_cast<jfloat>(t.skewX),
+      static_cast<jfloat>(t.transX), static_cast<jfloat>(t.skewY),
+      static_cast<jfloat>(t.scaleY), static_cast<jfloat>(t.transY),
+      static_cast<jfloat>(t.pers0),  static_cast<jfloat>(t.pers1),
+      static_cast<jfloat>(t.pers2),
+  };
+  fml::jni::ScopedJavaLocalRef<jfloatArray> transform_matrix(
+      env, env->NewFloatArray(9));
+  env->SetFloatArrayRegion(transform_matrix.obj(), 0, 9, matrix_array);
+  env->CallVoidMethod(mutators_stack, g_mutators_stack_push_transform_method,
+                      transform_matrix.obj());
+}
+
+void PushMutatorClipRect(JNIEnv* env,
+                         jobject mutators_stack,
+                         const FlutterRect& r) {
+  env->CallVoidMethod(mutators_stack, g_mutators_stack_push_cliprect_method,
+                      static_cast<jfloat>(r.left), static_cast<jfloat>(r.top),
+                      static_cast<jfloat>(r.right),
+                      static_cast<jfloat>(r.bottom));
+}
+
+void PushMutatorClipRRect(JNIEnv* env,
+                          jobject mutators_stack,
+                          const FlutterRoundedRect& rr) {
+  jfloat radii[8] = {
+      static_cast<jfloat>(rr.upper_left_corner_radius.width),
+      static_cast<jfloat>(rr.upper_left_corner_radius.height),
+      static_cast<jfloat>(rr.upper_right_corner_radius.width),
+      static_cast<jfloat>(rr.upper_right_corner_radius.height),
+      static_cast<jfloat>(rr.lower_right_corner_radius.width),
+      static_cast<jfloat>(rr.lower_right_corner_radius.height),
+      static_cast<jfloat>(rr.lower_left_corner_radius.width),
+      static_cast<jfloat>(rr.lower_left_corner_radius.height),
+  };
+  fml::jni::ScopedJavaLocalRef<jfloatArray> radii_array(env,
+                                                        env->NewFloatArray(8));
+  env->SetFloatArrayRegion(radii_array.obj(), 0, 8, radii);
+  env->CallVoidMethod(mutators_stack, g_mutators_stack_push_cliprrect_method,
+                      static_cast<jfloat>(rr.rect.left),
+                      static_cast<jfloat>(rr.rect.top),
+                      static_cast<jfloat>(rr.rect.right),
+                      static_cast<jfloat>(rr.rect.bottom), radii_array.obj());
+}
+
+}  // namespace
+
 void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
     int view_id,
     int x,
@@ -1744,7 +1797,8 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
     int height,
     int viewWidth,
     int viewHeight,
-    MutatorsStack mutators_stack) {
+    const FlutterPlatformViewMutation* const* mutations,
+    size_t mutations_count) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
   auto java_object = java_object_.get(env);
   if (java_object.is_null()) {
@@ -1754,92 +1808,28 @@ void PlatformViewAndroidJNIImpl::FlutterViewOnDisplayPlatformView(
   jobject mutatorsStack = env->NewObject(g_mutators_stack_class->obj(),
                                          g_mutators_stack_init_method);
 
-  std::vector<std::shared_ptr<Mutator>>::const_iterator iter =
-      mutators_stack.Begin();
-  while (iter != mutators_stack.End()) {
-    switch ((*iter)->GetType()) {
-      case MutatorType::kTransform: {
-        const DlMatrix& matrix = (*iter)->GetMatrix();
-        DlScalar matrix_array[9]{
-            matrix.m[0], matrix.m[4], matrix.m[12],  //
-            matrix.m[1], matrix.m[5], matrix.m[13],  //
-            matrix.m[3], matrix.m[7], matrix.m[15],
-        };
-        fml::jni::ScopedJavaLocalRef<jfloatArray> transformMatrix(
-            env, env->NewFloatArray(9));
-
-        env->SetFloatArrayRegion(transformMatrix.obj(), 0, 9, matrix_array);
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_transform_method,
-                            transformMatrix.obj());
+  for (size_t i = 0; i < mutations_count; ++i) {
+    const FlutterPlatformViewMutation* mutation =
+        mutations ? mutations[i] : nullptr;
+    if (!mutation) {
+      continue;
+    }
+    switch (mutation->type) {
+      case kFlutterPlatformViewMutationTypeTransformation:
+        PushMutatorTransform(env, mutatorsStack, mutation->transformation);
         break;
-      }
-      case MutatorType::kClipRect: {
-        const DlRect& rect = (*iter)->GetRect();
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_cliprect_method,
-                            rect.GetLeft(),   //
-                            rect.GetTop(),    //
-                            rect.GetRight(),  //
-                            rect.GetBottom());
+      case kFlutterPlatformViewMutationTypeClipRect:
+        PushMutatorClipRect(env, mutatorsStack, mutation->clip_rect);
         break;
-      }
-      case MutatorType::kClipRRect: {
-        const DlRoundRect& rrect = (*iter)->GetRRect();
-        const DlRect& rect = rrect.GetBounds();
-        const DlRoundingRadii radii = rrect.GetRadii();
-        SkScalar radiis[8] = {
-            radii.top_left.width,     radii.top_left.height,
-            radii.top_right.width,    radii.top_right.height,
-            radii.bottom_right.width, radii.bottom_right.height,
-            radii.bottom_left.width,  radii.bottom_left.height,
-        };
-        fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
-            env, env->NewFloatArray(8));
-        env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_cliprrect_method,
-                            rect.GetLeft(),    //
-                            rect.GetTop(),     //
-                            rect.GetRight(),   //
-                            rect.GetBottom(),  //
-                            radiisArray.obj());
+      case kFlutterPlatformViewMutationTypeClipRoundedRect:
+        PushMutatorClipRRect(env, mutatorsStack, mutation->clip_rounded_rect);
         break;
-      }
-      case MutatorType::kClipRSE: {
-        const DlRoundRect& rrect = (*iter)->GetRSEApproximation();
-        const DlRect& rect = rrect.GetBounds();
-        const DlRoundingRadii radii = rrect.GetRadii();
-        SkScalar radiis[8] = {
-            radii.top_left.width,     radii.top_left.height,
-            radii.top_right.width,    radii.top_right.height,
-            radii.bottom_right.width, radii.bottom_right.height,
-            radii.bottom_left.width,  radii.bottom_left.height,
-        };
-        fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
-            env, env->NewFloatArray(8));
-        env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_cliprrect_method,
-                            rect.GetLeft(),    //
-                            rect.GetTop(),     //
-                            rect.GetRight(),   //
-                            rect.GetBottom(),  //
-                            radiisArray.obj());
-        break;
-      }
       // TODO(cyanglaz): Implement other mutators.
       // https://github.com/flutter/flutter/issues/58426
-      case MutatorType::kClipPath:
-      case MutatorType::kOpacity:
-      case MutatorType::kBackdropFilter:
-      case MutatorType::kBackdropClipRect:
-      case MutatorType::kBackdropClipRRect:
-      case MutatorType::kBackdropClipRSuperellipse:
-      case MutatorType::kBackdropClipPath:
+      case kFlutterPlatformViewMutationTypeClipPath:
+      case kFlutterPlatformViewMutationTypeOpacity:
         break;
     }
-    ++iter;
   }
 
   env->CallVoidMethod(java_object.obj(), g_on_display_platform_view_method,
@@ -2140,76 +2130,116 @@ void PlatformViewAndroidJNIImpl::destroyOverlaySurface2() {
 }
 
 namespace {
-class AndroidPathReceiver final : public DlPathReceiver {
- public:
-  explicit AndroidPathReceiver(JNIEnv* env)
-      : env_(env),
-        android_path_(env->NewObject(path_class->obj(), path_constructor)) {}
 
-  void SetFillType(DlPathFillType type) {
-    jfieldID fill_type_field_id;
-    switch (type) {
-      case DlPathFillType::kOdd:
-        fill_type_field_id = g_path_fill_type_even_odd_field;
+jobject BuildAndroidPath(JNIEnv* env, const FlutterPath& path) {
+  jobject android_path = env->NewObject(path_class->obj(), path_constructor);
+  jfieldID fill_type_field_id = path.fill_type == kFlutterPathFillTypeEvenOdd
+                                    ? g_path_fill_type_even_odd_field
+                                    : g_path_fill_type_winding_field;
+  fml::jni::ScopedJavaLocalRef<jobject> fill_type_enum(
+      env, env->GetStaticObjectField(g_path_fill_type_class->obj(),
+                                     fill_type_field_id));
+  FML_CHECK(fml::jni::CheckException(env));
+  FML_CHECK(!fill_type_enum.is_null());
+  env->CallVoidMethod(android_path, path_set_fill_type_method,
+                      fill_type_enum.obj());
+  FML_CHECK(fml::jni::CheckException(env));
+
+  size_t point_idx = 0;
+  size_t weight_idx = 0;
+  FlutterPoint current = {0.0, 0.0};
+  FlutterPoint contour_start = {0.0, 0.0};
+  for (size_t i = 0; i < path.verbs_count; ++i) {
+    switch (path.verbs[i]) {
+      case kFlutterPathVerbMove: {
+        const FlutterPoint& p2 = path.points[point_idx++];
+        env->CallVoidMethod(android_path, path_move_to_method,
+                            static_cast<jfloat>(p2.x),
+                            static_cast<jfloat>(p2.y));
+        current = p2;
+        contour_start = p2;
         break;
-      case DlPathFillType::kNonZero:
-        fill_type_field_id = g_path_fill_type_winding_field;
+      }
+      case kFlutterPathVerbLine: {
+        const FlutterPoint& p2 = path.points[point_idx++];
+        env->CallVoidMethod(android_path, path_line_to_method,
+                            static_cast<jfloat>(p2.x),
+                            static_cast<jfloat>(p2.y));
+        current = p2;
         break;
-      default:
-        // DlPathFillType does not have corresponding kInverseEvenOdd or
-        // kInverseWinding fill types.
-        return;
+      }
+      case kFlutterPathVerbQuad: {
+        const FlutterPoint& cp = path.points[point_idx++];
+        const FlutterPoint& p2 = path.points[point_idx++];
+        env->CallVoidMethod(
+            android_path, path_quad_to_method, static_cast<jfloat>(cp.x),
+            static_cast<jfloat>(cp.y), static_cast<jfloat>(p2.x),
+            static_cast<jfloat>(p2.y));
+        current = p2;
+        break;
+      }
+      case kFlutterPathVerbConic: {
+        const FlutterPoint& cp = path.points[point_idx++];
+        const FlutterPoint& p2 = path.points[point_idx++];
+        const jfloat weight =
+            static_cast<jfloat>(path.conic_weights[weight_idx++]);
+        if (path_conic_to_method) {
+          env->CallVoidMethod(
+              android_path, path_conic_to_method, static_cast<jfloat>(cp.x),
+              static_cast<jfloat>(cp.y), static_cast<jfloat>(p2.x),
+              static_cast<jfloat>(p2.y), weight);
+        } else if (current.x != cp.x || current.y != cp.y) {
+          if (cp.x != p2.x || cp.y != p2.y) {
+            // Subdivide the conic into two quadratics on API <= 34 where
+            // Path.conicTo is absent, matching DlPath::ReduceConic.
+            const float scale = 1.0f / (1.0f + weight);
+            const float tp1_x = static_cast<float>(current.x) * scale;
+            const float tp1_y = static_cast<float>(current.y) * scale;
+            const float tcp_x = static_cast<float>(cp.x) * (weight * scale);
+            const float tcp_y = static_cast<float>(cp.y) * (weight * scale);
+            const float tp2_x = static_cast<float>(p2.x) * scale;
+            const float tp2_y = static_cast<float>(p2.y) * scale;
+            const float mid_x = (tp1_x + tcp_x + tcp_x + tp2_x) * 0.5f;
+            const float mid_y = (tp1_y + tcp_y + tcp_y + tp2_y) * 0.5f;
+            env->CallVoidMethod(android_path, path_quad_to_method,
+                                tp1_x + tcp_x, tp1_y + tcp_y, mid_x, mid_y);
+            env->CallVoidMethod(
+                android_path, path_quad_to_method, tcp_x + tp2_x, tcp_y + tp2_y,
+                static_cast<jfloat>(p2.x), static_cast<jfloat>(p2.y));
+          } else {
+            env->CallVoidMethod(android_path, path_line_to_method,
+                                static_cast<jfloat>(cp.x),
+                                static_cast<jfloat>(cp.y));
+          }
+        } else if (cp.x != p2.x || cp.y != p2.y) {
+          env->CallVoidMethod(android_path, path_line_to_method,
+                              static_cast<jfloat>(p2.x),
+                              static_cast<jfloat>(p2.y));
+        }
+        current = p2;
+        break;
+      }
+      case kFlutterPathVerbCubic: {
+        const FlutterPoint& cp1 = path.points[point_idx++];
+        const FlutterPoint& cp2 = path.points[point_idx++];
+        const FlutterPoint& p2 = path.points[point_idx++];
+        env->CallVoidMethod(
+            android_path, path_cubic_to_method, static_cast<jfloat>(cp1.x),
+            static_cast<jfloat>(cp1.y), static_cast<jfloat>(cp2.x),
+            static_cast<jfloat>(cp2.y), static_cast<jfloat>(p2.x),
+            static_cast<jfloat>(p2.y));
+        current = p2;
+        break;
+      }
+      case kFlutterPathVerbClose:
+        env->CallVoidMethod(android_path, path_close_method);
+        current = contour_start;
+        break;
     }
+  }
+  return android_path;
+}
 
-    // Get the static enum field value (Path.FillType.WINDING or
-    // Path.FillType.EVEN_ODD)
-    fml::jni::ScopedJavaLocalRef<jobject> fill_type_enum =
-        fml::jni::ScopedJavaLocalRef<jobject>(
-            env_, env_->GetStaticObjectField(g_path_fill_type_class->obj(),
-                                             fill_type_field_id));
-    FML_CHECK(fml::jni::CheckException(env_));
-    FML_CHECK(!fill_type_enum.is_null());
-
-    // Call Path.setFillType(Path.FillType)
-    env_->CallVoidMethod(android_path_, path_set_fill_type_method,
-                         fill_type_enum.obj());
-    FML_CHECK(fml::jni::CheckException(env_));
-  }
-
-  void MoveTo(const DlPoint& p2, bool will_be_closed) override {
-    env_->CallVoidMethod(android_path_, path_move_to_method, p2.x, p2.y);
-  }
-  void LineTo(const DlPoint& p2) override {
-    env_->CallVoidMethod(android_path_, path_line_to_method, p2.x, p2.y);
-  }
-  void QuadTo(const DlPoint& cp, const DlPoint& p2) override {
-    env_->CallVoidMethod(android_path_, path_quad_to_method,  //
-                         cp.x, cp.y, p2.x, p2.y);
-  }
-  bool ConicTo(const DlPoint& cp, const DlPoint& p2, DlScalar weight) override {
-    if (!path_conic_to_method) {
-      return false;
-    }
-    env_->CallVoidMethod(android_path_, path_conic_to_method,  //
-                         cp.x, cp.y, p2.x, p2.y, weight);
-    return true;
-  };
-  void CubicTo(const DlPoint& cp1,
-               const DlPoint& cp2,
-               const DlPoint& p2) override {
-    env_->CallVoidMethod(android_path_, path_cubic_to_method,  //
-                         cp1.x, cp1.y, cp2.x, cp2.y, p2.x, p2.y);
-  }
-  void Close() override {
-    env_->CallVoidMethod(android_path_, path_close_method);
-  }
-
-  jobject TakePath() const { return android_path_; }
-
- private:
-  JNIEnv* env_;
-  jobject android_path_;
-};
 }  // namespace
 
 void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
@@ -2220,7 +2250,8 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
     int32_t height,
     int32_t viewWidth,
     int32_t viewHeight,
-    MutatorsStack mutators_stack) {
+    const FlutterPlatformViewMutation* const* mutations,
+    size_t mutations_count) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
   auto java_object = java_object_.get(env);
   if (java_object.is_null()) {
@@ -2230,120 +2261,34 @@ void PlatformViewAndroidJNIImpl::onDisplayPlatformView2(
   jobject mutatorsStack = env->NewObject(g_mutators_stack_class->obj(),
                                          g_mutators_stack_init_method);
 
-  std::vector<std::shared_ptr<Mutator>>::const_iterator iter =
-      mutators_stack.Begin();
-  while (iter != mutators_stack.End()) {
-    switch ((*iter)->GetType()) {
-      case MutatorType::kTransform: {
-        const DlMatrix& matrix = (*iter)->GetMatrix();
-        DlScalar matrix_array[9]{
-            matrix.m[0], matrix.m[4], matrix.m[12],  //
-            matrix.m[1], matrix.m[5], matrix.m[13],  //
-            matrix.m[3], matrix.m[7], matrix.m[15],
-        };
-        fml::jni::ScopedJavaLocalRef<jfloatArray> transformMatrix(
-            env, env->NewFloatArray(9));
-
-        env->SetFloatArrayRegion(transformMatrix.obj(), 0, 9, matrix_array);
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_transform_method,
-                            transformMatrix.obj());
+  for (size_t i = 0; i < mutations_count; ++i) {
+    const FlutterPlatformViewMutation* mutation =
+        mutations ? mutations[i] : nullptr;
+    if (!mutation) {
+      continue;
+    }
+    switch (mutation->type) {
+      case kFlutterPlatformViewMutationTypeTransformation:
+        PushMutatorTransform(env, mutatorsStack, mutation->transformation);
         break;
-      }
-      case MutatorType::kClipRect: {
-        const DlRect& rect = (*iter)->GetRect();
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_cliprect_method,
-                            rect.GetLeft(),   //
-                            rect.GetTop(),    //
-                            rect.GetRight(),  //
-                            rect.GetBottom());
+      case kFlutterPlatformViewMutationTypeClipRect:
+        PushMutatorClipRect(env, mutatorsStack, mutation->clip_rect);
         break;
-      }
-      case MutatorType::kClipRRect: {
-        const DlRoundRect& rrect = (*iter)->GetRRect();
-        const DlRect& rect = rrect.GetBounds();
-        const DlRoundingRadii& radii = rrect.GetRadii();
-        SkScalar radiis[8] = {
-            radii.top_left.width,     radii.top_left.height,
-            radii.top_right.width,    radii.top_right.height,
-            radii.bottom_right.width, radii.bottom_right.height,
-            radii.bottom_left.width,  radii.bottom_left.height,
-        };
-        fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
-            env, env->NewFloatArray(8));
-        env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_cliprrect_method,
-                            rect.GetLeft(),    //
-                            rect.GetTop(),     //
-                            rect.GetRight(),   //
-                            rect.GetBottom(),  //
-                            radiisArray.obj());
+      case kFlutterPlatformViewMutationTypeClipRoundedRect:
+        PushMutatorClipRRect(env, mutatorsStack, mutation->clip_rounded_rect);
         break;
-      }
-      case MutatorType::kClipRSE: {
-        const DlRoundRect& rrect = (*iter)->GetRSEApproximation();
-        const DlRect& rect = rrect.GetBounds();
-        const DlRoundingRadii& radii = rrect.GetRadii();
-        SkScalar radiis[8] = {
-            radii.top_left.width,     radii.top_left.height,
-            radii.top_right.width,    radii.top_right.height,
-            radii.bottom_right.width, radii.bottom_right.height,
-            radii.bottom_left.width,  radii.bottom_left.height,
-        };
-        fml::jni::ScopedJavaLocalRef<jfloatArray> radiisArray(
-            env, env->NewFloatArray(8));
-        env->SetFloatArrayRegion(radiisArray.obj(), 0, 8, radiis);
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_cliprrect_method,
-                            rect.GetLeft(),    //
-                            rect.GetTop(),     //
-                            rect.GetRight(),   //
-                            rect.GetBottom(),  //
-                            radiisArray.obj());
-        break;
-      }
-      case MutatorType::kOpacity: {
-        float opacity = (*iter)->GetAlphaFloat();
+      case kFlutterPlatformViewMutationTypeOpacity:
         env->CallVoidMethod(mutatorsStack, g_mutators_stack_push_opacity_method,
-                            opacity);
+                            static_cast<jfloat>(mutation->opacity));
         break;
-      }
-      case MutatorType::kClipPath: {
-        auto& dlPath = (*iter)->GetPath();
-        // The layer mutator mechanism should have already caught and
-        // redirected these simplified path cases, which is important because
-        // the conics they generate (in the case of oval and rrect) will
-        // not match the results of an impeller path conversion very closely.
-        FML_DCHECK(!dlPath.IsRect());
-        FML_DCHECK(!dlPath.IsOval());
-        FML_DCHECK(!dlPath.IsRoundRect());
-
-        // Define and populate an Android Path with data from the DlPath
-        AndroidPathReceiver receiver(env);
-        receiver.SetFillType(dlPath.GetFillType());
-
-        // TODO(flar): https://github.com/flutter/flutter/issues/164808
-        // Need to convert the fill type to the Android enum and
-        // call setFillType on the path...
-        dlPath.Dispatch(receiver);
-
-        env->CallVoidMethod(mutatorsStack,
-                            g_mutators_stack_push_clippath_method,
-                            receiver.TakePath());
-        break;
-      }
-      // TODO(cyanglaz): Implement other mutators.
-      // https://github.com/flutter/flutter/issues/58426
-      case MutatorType::kBackdropFilter:
-      case MutatorType::kBackdropClipRect:
-      case MutatorType::kBackdropClipRRect:
-      case MutatorType::kBackdropClipRSuperellipse:
-      case MutatorType::kBackdropClipPath:
+      case kFlutterPlatformViewMutationTypeClipPath:
+        if (mutation->clip_path) {
+          env->CallVoidMethod(mutatorsStack,
+                              g_mutators_stack_push_clippath_method,
+                              BuildAndroidPath(env, *mutation->clip_path));
+        }
         break;
     }
-    ++iter;
   }
 
   env->CallVoidMethod(java_object.obj(), g_on_display_platform_view2_method,
