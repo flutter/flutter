@@ -19,6 +19,8 @@
 
 namespace flutter {
 
+class AndroidEngineCallbacks;
+
 //----------------------------------------------------------------------------
 /// @brief      This is the Android owner of the core engine Shell.
 ///
@@ -280,6 +282,9 @@ class AndroidShellHolder {
   fml::WeakPtr<PlatformViewAndroid> platform_view_;
   std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
   std::shared_ptr<ThreadHost> thread_host_;
+  // The state behind the engine's FlutterProjectArgs callbacks. The engine
+  // passes it back to them as user_data, so it must outlive the engine.
+  std::unique_ptr<AndroidEngineCallbacks> engine_callbacks_;
   UniqueEngine engine_;
   // The embedder API functions that the holder calls engine_ through.
   FlutterEngineProcTable embedder_api_;
@@ -311,6 +316,7 @@ class AndroidShellHolder {
   AndroidShellHolder(const flutter::Settings& settings,
                      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
                      const std::shared_ptr<ThreadHost>& thread_host,
+                     std::unique_ptr<AndroidEngineCallbacks> engine_callbacks,
                      UniqueEngine engine,
                      uint64_t holder_id,
                      std::unique_ptr<APKAssetProvider> apk_asset_provider,

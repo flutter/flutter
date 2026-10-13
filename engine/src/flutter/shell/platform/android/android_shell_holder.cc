@@ -82,6 +82,68 @@ static PlatformData GetDefaultPlatformData() {
   return platform_data;
 }
 
+// The state behind the FlutterProjectArgs callbacks of one engine. The engine
+// passes it back to them as user_data, and its holder keeps it alive until
+// the engine has shut down.
+class AndroidEngineCallbacks {
+ public:
+  explicit AndroidEngineCallbacks(
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+      : jni_facade(std::move(jni_facade)) {}
+
+  // Asks Java which of the supported locales the platform would pick and
+  // returns it in storage that stays valid until the next call, as
+  // FlutterComputePlatformResolvedLocaleCallback2 allows. Java may answer
+  // with codes that differ from the supported ones (for example "iw" for
+  // "he"), so the answer is not matched back to an input locale.
+  const FlutterLocale* ComputePlatformResolvedLocale(
+      const FlutterLocale** supported_locales,
+      size_t locale_count) {
+    std::vector<std::string> supported_locale_data;
+    supported_locale_data.reserve(locale_count * kStringsPerLocale);
+    for (size_t i = 0; i < locale_count; ++i) {
+      const FlutterLocale* locale = supported_locales[i];
+      supported_locale_data.emplace_back(
+          locale->language_code ? locale->language_code : "");
+      supported_locale_data.emplace_back(
+          locale->country_code ? locale->country_code : "");
+      supported_locale_data.emplace_back(
+          locale->script_code ? locale->script_code : "");
+    }
+    std::unique_ptr<std::vector<std::string>> resolved =
+        jni_facade->FlutterViewComputePlatformResolvedLocale(
+            std::move(supported_locale_data));
+    if (!resolved || resolved->empty()) {
+      return nullptr;
+    }
+    resolved->resize(kStringsPerLocale);
+    resolved_locale_codes_ = std::move(*resolved);
+    resolved_locale_ = {
+        .struct_size = sizeof(FlutterLocale),
+        .language_code = resolved_locale_codes_[0].c_str(),
+        .country_code = resolved_locale_codes_[1].c_str(),
+        .script_code = resolved_locale_codes_[2].c_str(),
+        .variant_code = nullptr,
+    };
+    return &resolved_locale_;
+  }
+
+  const std::shared_ptr<PlatformViewAndroidJNI> jni_facade;
+
+  // Set on the platform thread when the Shell creates the platform view,
+  // before the engine can ask for a vsync.
+  std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
+
+ private:
+  // Language, country and script code, the order Java uses for locales.
+  static constexpr size_t kStringsPerLocale = 3;
+
+  std::vector<std::string> resolved_locale_codes_;
+  FlutterLocale resolved_locale_ = {};
+
+  FML_DISALLOW_COPY_AND_ASSIGN(AndroidEngineCallbacks);
+};
+
 namespace {
 
 // The ID of the implicit view in single-view mode.
@@ -448,45 +510,67 @@ FlutterEngineProcTable LoadEmbedderApi() {
 }
 
 // The embedder API callbacks of the PlatformView overrides that
-// PlatformViewAndroid no longer has.
+// PlatformViewAndroid no longer has. They take the C types of embedder.h,
+// so they are the FlutterProjectArgs callbacks FlutterEngineInitialize
+// expects. The user_data of each is the engine's AndroidEngineCallbacks.
+FlutterProjectArgs MakeProjectArgs() {
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+  args.vsync_callback = [](void* user_data, intptr_t baton) {
+    static_cast<AndroidEngineCallbacks*>(user_data)->vsync_waiter->AwaitVSync(
+        baton);
+  };
+  args.compute_platform_resolved_locale_callback2 =
+      [](const FlutterLocale** supported_locales, size_t locale_count,
+         void* user_data) -> const FlutterLocale* {
+    return static_cast<AndroidEngineCallbacks*>(user_data)
+        ->ComputePlatformResolvedLocale(supported_locales, locale_count);
+  };
+  args.on_pre_engine_restart_callback = [](void* user_data) {
+    static_cast<AndroidEngineCallbacks*>(user_data)
+        ->jni_facade->FlutterViewOnPreEngineRestart();
+  };
+  args.set_application_locale_callback = [](const char* locale,
+                                            void* user_data) {
+    static_cast<AndroidEngineCallbacks*>(user_data)
+        ->jni_facade->FlutterViewSetApplicationLocale(locale ? locale : "");
+  };
+  args.set_semantics_tree_enabled_callback = [](bool enabled, void* user_data) {
+    static_cast<AndroidEngineCallbacks*>(user_data)
+        ->jni_facade->FlutterViewSetSemanticsTreeEnabled(enabled);
+  };
+  args.dart_deferred_library_loader_callback = [](int64_t loading_unit_id,
+                                                  void* user_data) {
+    static_cast<AndroidEngineCallbacks*>(user_data)
+        ->jni_facade->RequestDartDeferredLibrary(
+            static_cast<int>(loading_unit_id));
+  };
+  args.get_scaled_font_size_callback =
+      [](double unscaled_font_size, int configuration_id, void* user_data) {
+        return static_cast<AndroidEngineCallbacks*>(user_data)
+            ->jni_facade->FlutterViewGetScaledFontSize(unscaled_font_size,
+                                                       configuration_id);
+      };
+  return args;
+}
+
+// The dispatch table of a PlatformViewAndroid: the FlutterProjectArgs
+// callbacks, translated the way FlutterEngineInitialize translates them,
+// plus semantics, which still arrive in engine types.
 PlatformViewAndroid::PlatformDispatchTable MakePlatformDispatchTable(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    const std::shared_ptr<VsyncWaiterAndroid>& vsync_waiter) {
-  return {
-      .update_semantics_callback =
-          [jni_facade](
-              int64_t view_id, const flutter::SemanticsNodeUpdates& update,
-              const flutter::CustomAccessibilityActionUpdates& actions) {
-            PlatformViewAndroidDelegate(jni_facade)
-                .UpdateSemantics(update, actions);
-          },
-      .vsync_callback =
-          [vsync_waiter](intptr_t baton) { vsync_waiter->AwaitVSync(baton); },
-      .compute_platform_resolved_locale_callback =
-          [jni_facade](const std::vector<std::string>& supported_locale_data) {
-            return jni_facade->FlutterViewComputePlatformResolvedLocale(
-                supported_locale_data);
-          },
-      .on_pre_engine_restart_callback =
-          [jni_facade]() { jni_facade->FlutterViewOnPreEngineRestart(); },
-      .set_application_locale_callback =
-          [jni_facade](std::string locale) {
-            jni_facade->FlutterViewSetApplicationLocale(std::move(locale));
-          },
-      .set_semantics_tree_enabled_callback =
-          [jni_facade](bool enabled) {
-            jni_facade->FlutterViewSetSemanticsTreeEnabled(enabled);
-          },
-      .request_dart_deferred_library_callback =
-          [jni_facade](intptr_t loading_unit_id) {
-            jni_facade->RequestDartDeferredLibrary(loading_unit_id);
-          },
-      .get_scaled_font_size_callback =
-          [jni_facade](double unscaled_font_size, int configuration_id) {
-            return jni_facade->FlutterViewGetScaledFontSize(unscaled_font_size,
-                                                            configuration_id);
-          },
-  };
+    AndroidEngineCallbacks* callbacks) {
+  const FlutterProjectArgs args = MakeProjectArgs();
+  fml::StatusOr<PlatformViewAndroid::PlatformDispatchTable> table =
+      PlatformDispatchTableFromProjectArgs(&args, callbacks);
+  FML_CHECK(table.ok()) << table.status().message();
+  table.value().update_semantics_callback =
+      [jni_facade](int64_t view_id, const flutter::SemanticsNodeUpdates& update,
+                   const flutter::CustomAccessibilityActionUpdates& actions) {
+        PlatformViewAndroidDelegate(jni_facade)
+            .UpdateSemantics(update, actions);
+      };
+  return std::move(table.value());
 }
 
 // Gives the vsync source the engine handle once the holder owns the engine,
@@ -552,6 +636,7 @@ AndroidShellHolder::AndroidShellHolder(
     AndroidRenderingAPI android_rendering_api)
     : settings_(settings),
       jni_facade_(jni_facade),
+      engine_callbacks_(std::make_unique<AndroidEngineCallbacks>(jni_facade)),
       embedder_api_(LoadEmbedderApi()),
       holder_id_(NextHolderId()),
       android_rendering_api_(android_rendering_api) {
@@ -579,16 +664,18 @@ AndroidShellHolder::AndroidShellHolder(
   std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
   AndroidRenderingAPI rendering_api = android_rendering_api_;
   auto on_create_platform_view =
-      [&jni_facade, &weak_platform_view, &vsync_waiter, rendering_api](
-          PlatformView::Delegate& delegate, const TaskRunners& runners) {
+      [&jni_facade, &weak_platform_view, &vsync_waiter, rendering_api,
+       callbacks = engine_callbacks_.get()](PlatformView::Delegate& delegate,
+                                            const TaskRunners& runners) {
         vsync_waiter = std::make_shared<VsyncWaiterAndroid>(runners);
+        callbacks->vsync_waiter = vsync_waiter;
         auto platform_view_android = std::make_unique<PlatformViewAndroid>(
             delegate,       // delegate
             runners,        // task runners
             jni_facade,     // JNI interop
             rendering_api,  // rendering API
             MakePlatformDispatchTable(jni_facade,
-                                      vsync_waiter)  // embedder callbacks
+                                      callbacks)  // embedder callbacks
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
@@ -688,6 +775,7 @@ AndroidShellHolder::AndroidShellHolder(
     const Settings& settings,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::shared_ptr<ThreadHost>& thread_host,
+    std::unique_ptr<AndroidEngineCallbacks> engine_callbacks,
     UniqueEngine engine,
     uint64_t holder_id,
     std::unique_ptr<APKAssetProvider> apk_asset_provider,
@@ -700,6 +788,7 @@ AndroidShellHolder::AndroidShellHolder(
       platform_message_handler_(
           platform_view ? platform_view->GetPlatformMessageHandler() : nullptr),
       thread_host_(thread_host),
+      engine_callbacks_(std::move(engine_callbacks)),
       engine_(std::move(engine)),
       embedder_api_(LoadEmbedderApi()),
       vsync_waiter_(std::move(vsync_waiter)),
@@ -780,18 +869,21 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
   FML_DCHECK(android_context);
 
   // This is a synchronous call, so the captures don't have race checks.
+  auto spawned_callbacks = std::make_unique<AndroidEngineCallbacks>(jni_facade);
   std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
   auto on_create_platform_view =
-      [&jni_facade, android_context, &weak_platform_view, &vsync_waiter](
-          PlatformView::Delegate& delegate, const TaskRunners& runners) {
+      [&jni_facade, android_context, &weak_platform_view, &vsync_waiter,
+       callbacks = spawned_callbacks.get()](PlatformView::Delegate& delegate,
+                                            const TaskRunners& runners) {
         vsync_waiter = std::make_shared<VsyncWaiterAndroid>(runners);
+        callbacks->vsync_waiter = vsync_waiter;
         auto platform_view_android = std::make_unique<PlatformViewAndroid>(
             delegate,         // delegate
             runners,          // task runners
             jni_facade,       // JNI interop
             android_context,  // Android context
             MakePlatformDispatchTable(jni_facade,
-                                      vsync_waiter)  // embedder callbacks
+                                      callbacks)  // embedder callbacks
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
@@ -816,8 +908,8 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
       reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(spawned.release()));
 
   return std::unique_ptr<AndroidShellHolder>(new AndroidShellHolder(
-      GetSettings(), jni_facade, thread_host_, std::move(engine),
-      spawned_holder_id,
+      GetSettings(), jni_facade, thread_host_, std::move(spawned_callbacks),
+      std::move(engine), spawned_holder_id,
       apk_asset_provider_ ? apk_asset_provider_->Clone() : nullptr,
       weak_platform_view, std::move(vsync_waiter),
       android_context->RenderingApi()));

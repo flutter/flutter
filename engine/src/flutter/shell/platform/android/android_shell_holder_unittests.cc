@@ -547,6 +547,46 @@ TEST(AndroidShellHolder, ComputePlatformResolvedLocalesForwardsToJni) {
   EXPECT_THAT(*resolved, ::testing::ElementsAre("fr", "FR", ""));
 }
 
+// java.util.Locale may report legacy language codes ("iw" for Hebrew), so the
+// locale Java picks can differ from every supported locale. The engine gets
+// Java's codes unchanged, as before the callbacks went through embedder.h.
+TEST(AndroidShellHolder, ComputePlatformResolvedLocalesKeepsJavaCodes) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+  const std::vector<std::string> supported = {"en", "US", "", "he", "IL", ""};
+  EXPECT_CALL(*jni, FlutterViewComputePlatformResolvedLocale(supported))
+      .WillOnce([](std::vector<std::string>) {
+        return std::make_unique<std::vector<std::string>>(
+            std::initializer_list<std::string>{"iw", "IL", ""});
+      });
+
+  PlatformView& platform_view = *holder->GetPlatformView();
+  std::unique_ptr<std::vector<std::string>> resolved =
+      platform_view.ComputePlatformResolvedLocales(supported);
+  ASSERT_NE(resolved, nullptr);
+  EXPECT_THAT(*resolved, ::testing::ElementsAre("iw", "IL", ""));
+}
+
+TEST(AndroidShellHolder, ComputePlatformResolvedLocalesWithoutAnswerIsEmpty) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+  const std::vector<std::string> supported = {"en", "US", ""};
+  EXPECT_CALL(*jni, FlutterViewComputePlatformResolvedLocale(supported))
+      .WillOnce([](std::vector<std::string>) {
+        return std::make_unique<std::vector<std::string>>();
+      });
+
+  PlatformView& platform_view = *holder->GetPlatformView();
+  std::unique_ptr<std::vector<std::string>> resolved =
+      platform_view.ComputePlatformResolvedLocales(supported);
+  ASSERT_NE(resolved, nullptr);
+  EXPECT_TRUE(resolved->empty());
+}
+
 TEST(AndroidShellHolder, OnPreEngineRestartForwardsToJni) {
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
