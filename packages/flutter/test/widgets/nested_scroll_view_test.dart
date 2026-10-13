@@ -6,7 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart'
-    show Drag, DragEndDetails, DragStartBehavior, DragStartDetails, Velocity;
+    show Drag, DragEndDetails, DragStartBehavior, DragStartDetails, DragUpdateDetails, Velocity;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -237,7 +237,286 @@ Widget _buildBallisticTestWidget(
   );
 }
 
+Widget _buildBallisticGroupTestWidget(
+  GlobalKey<NestedScrollViewState> key, {
+  int count = 2,
+  int firstItems = 100,
+  int secondItems = 100,
+  double height = 600,
+  List<ScrollDirection>? notifications,
+}) {
+  return Align(
+    alignment: Alignment.topCenter,
+    child: SizedBox(
+      height: height,
+      child: NotificationListener<UserScrollNotification>(
+        onNotification: (UserScrollNotification notification) {
+          notifications?.add(notification.direction);
+          return false;
+        },
+        child: _buildBallisticTestWidget(
+          key,
+          physics: const ClampingScrollPhysics(),
+          body: Row(
+            children: <Widget>[
+              for (var i = 0; i < count; i += 1)
+                Expanded(
+                  child: ListView.builder(
+                    primary: true,
+                    physics: i == 0 ? const ClampingScrollPhysics() : const BouncingScrollPhysics(),
+                    itemExtent: 50,
+                    itemCount: i == 0 ? firstItems : secondItems,
+                    itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+void _flingBallisticBody(ScrollPosition body, double velocity, {bool update = false}) {
+  final Drag drag = body.drag(DragStartDetails(), () {});
+  if (update) {
+    drag.update(
+      DragUpdateDetails(
+        globalPosition: Offset.zero,
+        primaryDelta: velocity > 0 ? -1 : 1,
+        delta: Offset(0, velocity > 0 ? -1 : 1),
+      ),
+    );
+  }
+  drag.end(
+    DragEndDetails(
+      primaryVelocity: -velocity,
+      velocity: Velocity(pixelsPerSecond: Offset(0, -velocity)),
+    ),
+  );
+}
+
+class _KeepAliveBallisticBody extends StatefulWidget {
+  const _KeepAliveBallisticBody();
+  @override
+  State<_KeepAliveBallisticBody> createState() => _KeepAliveBallisticBodyState();
+}
+
+class _KeepAliveBallisticBodyState extends State<_KeepAliveBallisticBody>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return ListView.builder(
+      primary: true,
+      itemExtent: 50,
+      itemCount: 100,
+      itemBuilder: (BuildContext context, int index) => const SizedBox.expand(),
+    );
+  }
+}
+
 void main() {
+  group('NestedScrollView ballistic lifecycle regressions', () {
+    testWidgets('kept-alive pages at start allow reverse header fling', (
+      WidgetTester tester,
+    ) async {
+      final key = GlobalKey<NestedScrollViewState>();
+      final controller = PageController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _buildBallisticTestWidget(
+          key,
+          body: PageView(
+            controller: controller,
+            children: const <Widget>[_KeepAliveBallisticBody(), _KeepAliveBallisticBody()],
+          ),
+        ),
+      );
+      controller.jumpToPage(1);
+      await tester.pumpAndSettle();
+      final ScrollPosition outer = key.currentState!.outerController.position;
+      final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
+      expect(bodies.length, 2);
+      outer.jumpTo(outer.maxScrollExtent);
+      await tester.pumpAndSettle();
+      expect(bodies.map((ScrollPosition p) => p.pixels), <double>[0, 0]);
+      _flingBallisticBody(bodies.last, -1000);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 32));
+      expect(outer.pixels, lessThan(outer.maxScrollExtent));
+      await tester.pumpAndSettle();
+    });
+
+    for (final items in <int>[1, 100]) {
+      testWidgets('reverse fling opens header with all bodies at start ($items)', (
+        WidgetTester tester,
+      ) async {
+        final key = GlobalKey<NestedScrollViewState>();
+        await tester.pumpWidget(
+          _buildBallisticGroupTestWidget(key, firstItems: items, secondItems: items),
+        );
+        final ScrollPosition outer = key.currentState!.outerController.position;
+        final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
+        outer.jumpTo(outer.maxScrollExtent);
+        await tester.pumpAndSettle();
+        expect(bodies.length, 2);
+        expect(bodies.map((ScrollPosition p) => p.pixels), <double>[0, 0]);
+        _flingBallisticBody(bodies.first, -1000);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 32));
+        expect(outer.pixels, lessThan(outer.maxScrollExtent));
+        expect(bodies.map((ScrollPosition p) => p.pixels), <double>[0, 0]);
+        await tester.pumpAndSettle();
+      });
+    }
+    for (final count in <int>[1, 2]) {
+      for (final start in <double>[100, 200]) {
+        testWidgets('idle follows all motion after boundary crossing ($count, $start)', (
+          WidgetTester tester,
+        ) async {
+          final key = GlobalKey<NestedScrollViewState>();
+          final notifications = <ScrollDirection>[];
+          await tester.pumpWidget(
+            _buildBallisticGroupTestWidget(key, count: count, notifications: notifications),
+          );
+          final ScrollPosition outer = key.currentState!.outerController.position;
+          final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
+          outer.jumpTo(start);
+          await tester.pumpAndSettle();
+          notifications.clear();
+          _flingBallisticBody(bodies.first, 1000, update: true);
+          await tester.pump();
+          var crossed = false;
+          for (var frame = 0; frame < 400; frame += 1) {
+            await tester.pump(const Duration(milliseconds: 16));
+            if (bodies.any((ScrollPosition p) => p.pixels > 0)) {
+              crossed = true;
+            }
+            final bool moving = <ScrollPosition>[
+              outer,
+              ...bodies,
+            ].any((ScrollPosition p) => p.isScrollingNotifier.value);
+            if (!moving) {
+              break;
+            }
+            expect(
+              notifications,
+              isNot(contains(ScrollDirection.idle)),
+              reason: 'idle during motion at frame $frame',
+            );
+          }
+          expect(crossed, isTrue);
+          expect(
+            <ScrollPosition>[
+              outer,
+              ...bodies,
+            ].every((ScrollPosition p) => !p.isScrollingNotifier.value),
+            isTrue,
+          );
+          expect(notifications, isNotEmpty);
+          expect(notifications.last, ScrollDirection.idle);
+          await tester.pumpAndSettle();
+        });
+      }
+    }
+    for (final released in <bool>[false, true]) {
+      testWidgets('resize preserves each independent body velocity ($released)', (
+        WidgetTester tester,
+      ) async {
+        final key = GlobalKey<NestedScrollViewState>();
+        late StateSetter rebuild;
+        double height = 600;
+        await tester.pumpWidget(
+          StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              rebuild = setState;
+              return _buildBallisticGroupTestWidget(key, height: height);
+            },
+          ),
+        );
+        final ScrollPosition outer = key.currentState!.outerController.position;
+        final List<ScrollPosition> bodies = key.currentState!.innerController.positions.toList();
+        outer.jumpTo(released ? 100 : outer.maxScrollExtent);
+        await tester.pumpAndSettle();
+        _flingBallisticBody(bodies.first, 1000);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 240));
+        expect(outer.pixels, outer.maxScrollExtent);
+        final List<double> before = bodies.map((ScrollPosition p) => p.activity!.velocity).toList();
+        expect((before[0] - before[1]).abs(), greaterThan(10));
+        rebuild(() {
+          height = 500;
+        });
+        await tester.pump();
+        for (var i = 0; i < 2; i += 1) {
+          expect(
+            bodies[i].activity!.velocity,
+            closeTo(before[i], .001),
+            reason: 'body $i must retain its own velocity, before=$before',
+          );
+        }
+        await tester.pumpAndSettle();
+      });
+    }
+
+    for (final released in <bool>[false, true]) {
+      for (final changed in <int>[0, 1]) {
+        testWidgets('shrinking one body leaves peer trajectory intact ($released, $changed)', (
+          WidgetTester tester,
+        ) async {
+          final samples = <List<double>>[];
+          for (final shrink in <bool>[false, true]) {
+            final key = GlobalKey<NestedScrollViewState>();
+            late StateSetter rebuild;
+            var short = false;
+            await tester.pumpWidget(
+              StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  rebuild = setState;
+                  return _buildBallisticGroupTestWidget(
+                    key,
+                    firstItems: short && changed == 0 ? 1 : 100,
+                    secondItems: short && changed == 1 ? 1 : 100,
+                  );
+                },
+              ),
+            );
+            final ScrollPosition outer = key.currentState!.outerController.position;
+            final List<ScrollPosition> bodies = key.currentState!.innerController.positions
+                .toList();
+            outer.jumpTo(released ? 100 : outer.maxScrollExtent);
+            await tester.pumpAndSettle();
+            _flingBallisticBody(bodies.first, 1000);
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 240));
+            rebuild(() {
+              short = shrink;
+            });
+            await tester.pump();
+            final sample = <double>[];
+            for (var frame = 0; frame < 16; frame += 1) {
+              await tester.pump(const Duration(milliseconds: 16));
+              sample.addAll(<double>[
+                bodies[1 - changed].pixels,
+                bodies[1 - changed].activity!.velocity,
+              ]);
+            }
+            samples.add(sample);
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull);
+            await tester.pumpWidget(const SizedBox.shrink());
+          }
+          for (var i = 0; i < samples[0].length; i += 1) {
+            expect(samples[1][i], closeTo(samples[0][i], .001), reason: 'peer sample $i');
+          }
+        });
+      }
+    }
+  });
+
   testWidgets('NestedScrollView keeps a scrolled body parked after another body recovers', (
     WidgetTester tester,
   ) async {
