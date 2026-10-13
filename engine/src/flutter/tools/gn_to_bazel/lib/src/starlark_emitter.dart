@@ -395,11 +395,14 @@ final class _Emitter {
   void _convertGroup(GnTarget target) {
     _use('@rules_cc//cc:defs.bzl', 'cc_library');
     final rule = _Rule('cc_library', target.name, target.comments);
+    final propagated = <String>[];
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'deps':
+          _depsInto(rule, variable, target);
         case 'public_deps':
           _depsInto(rule, variable, target);
+          _forwardedFlagsInto(propagated, variable);
         case 'testonly':
           _scalar(rule, 'testonly', variable);
         case 'public_configs':
@@ -410,7 +413,7 @@ final class _Emitter {
             target,
             chromiumCode: true,
             publicConfigs: const <String>{},
-            propagatedFlags: <String>[],
+            propagatedFlags: propagated,
           );
         default:
           if (_ignoredVariables.contains(variable.name) || variable.forwarded) {
@@ -422,6 +425,7 @@ final class _Emitter {
           );
       }
     }
+    _checkPropagatedFlags(target, propagated);
     for (final String config in inheritedConfigs[target.name] ?? const <String>{}) {
       rule.list('deps').addUnique(Condition.always, _Item(_localLabel(config)));
     }
@@ -709,6 +713,9 @@ final class _Emitter {
     // Two passes: the target's own variables, then its configs, so that a
     // config's flags follow the target's own as they do in GN.
     final configVariables = <GnVariable>[];
+    // The compiler flags this target hands its dependents, for the check
+    // against propagatedCopts.
+    final propagated = <String>[];
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'sources':
@@ -728,6 +735,9 @@ final class _Emitter {
           // the parity check against GN measures.
           _depsInto(rule, variable, target);
           _propagatedFlagsInto(rule, variable);
+          if (variable.name == 'public_deps') {
+            _forwardedFlagsInto(propagated, variable);
+          }
         case 'defines':
           _stringsInto(rule.list('local_defines'), variable);
         case 'include_dirs':
@@ -770,7 +780,6 @@ final class _Emitter {
           );
       }
     }
-    final propagated = <String>[];
     for (final variable in configVariables) {
       chromiumCode = _configsInto(
         rule,
@@ -1050,9 +1059,33 @@ final class _Emitter {
     });
   }
 
-  /// A target whose public configs carry compiler flags must be listed in
-  /// [propagatedCopts] with exactly those flags, since that table is how
-  /// its dependents get them.
+  /// The flags the public dependencies of [variable] hand this target
+  /// ([propagatedCopts]), which GN hands on to its dependents in turn --
+  /// public configs travel along public_deps chains -- collected into
+  /// [propagated] for [_checkPropagatedFlags]. The table knows no
+  /// conditions, so a conditional public dependency with flags to hand on
+  /// is refused.
+  void _forwardedFlagsInto(List<String> propagated, GnVariable variable) {
+    _forEachItem(variable, into: _ListAttribute(), (_Element e) {
+      final List<String>? flags = propagatedCopts[_gnLabel(_string(e))];
+      if (flags == null) {
+        return;
+      }
+      if (e.condition != Condition.always) {
+        throw GnError(
+          e.assignment.location,
+          'public dependency ${_string(e)} hands on compiler flags under `${e.condition}`, '
+          'which propagatedCopts cannot say',
+        );
+      }
+      propagated.addAll(flags);
+    });
+  }
+
+  /// A target that hands compiler flags to its dependents -- through its
+  /// own public configs, or those of its public_deps, which GN forwards --
+  /// must be listed in [propagatedCopts] with exactly those flags, since
+  /// that table is how its dependents get them.
   void _checkPropagatedFlags(GnTarget target, List<String> propagated) {
     final label = '$gnPackage:${target.name}';
     final Set<String> expected = propagatedCopts[label]?.toSet() ?? const <String>{};
@@ -1061,10 +1094,12 @@ final class _Emitter {
       throw GnError(
         target.location,
         actual.isEmpty
-            ? '$label is in propagatedCopts but its public configs carry no compiler flags'
-            : 'the public configs of $label carry compiler flags ${actual.toList()}, which Bazel '
-                  'cannot hand to its dependents; list them under $label in propagatedCopts '
-                  '(bazel_mapping.dart)${expected.isEmpty ? '' : ', which has ${expected.toList()}'}',
+            ? '$label is in propagatedCopts but its public configs and public_deps carry no '
+                  'compiler flags'
+            : 'the public configs and public_deps of $label hand compiler flags '
+                  '${actual.toList()} to its dependents, which Bazel cannot carry; list them '
+                  'under $label in propagatedCopts (bazel_mapping.dart)'
+                  '${expected.isEmpty ? '' : ', which has ${expected.toList()}'}',
       );
     }
   }
@@ -1669,6 +1704,10 @@ final class _Emitter {
               rule
                   .list('copts')
                   .addUnique(assignment.condition, _Item(flag, comment: 'from $config'));
+            }
+            if (!private) {
+              // Listed publicly, the config's flags reach dependents too.
+              propagatedFlags.addAll(copts);
             }
           case ConfigImplied():
             break;

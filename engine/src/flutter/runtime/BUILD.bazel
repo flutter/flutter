@@ -86,7 +86,9 @@ cc_library(
         "service_protocol.h",
         "skia_concurrent_executor.h",
     ],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/lib/ui
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":dart_plugin_registrant",

@@ -91,7 +91,17 @@ cc_library(
         "surface_frame.h",
         "view_slicer.h",
     ],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/common/graphics
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+        "-Wno-deprecated-copy",  # from //flutter/impeller
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller
+        "-Wno-nullability-completeness",  # from //flutter/impeller
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller
+        "-Wno-suggest-override",  # from //flutter/impeller
+        "-Wno-unused-private-field",  # from //flutter/impeller
+        "-Wno-unused-variable",  # from //flutter/impeller
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -134,7 +144,9 @@ cc_library(
         "testing/mock_raster_cache.h",
         "testing/mock_texture.h",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :flow
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":flow",
@@ -190,7 +202,9 @@ cc_test(
         "--golden-dir=engine/src/flutter/testing/resources",
         "--font-file=engine/src/flutter/txt/third_party/fonts/Roboto-Regular.ttf",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :flow
+    ],
     data = [
         "//engine/src/flutter/testing:resources",
         "//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf",
