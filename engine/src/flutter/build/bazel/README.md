@@ -16,6 +16,7 @@ Nothing in this directory is used by the GN build.
 | `flatbuffers/` | The engine's `flatbuffers()` GN template as a macro: `flatc` per schema, the generated headers as a library. |
 | `impeller/` | The engine's `impeller_shaders()` GN template as a macro over three rules (`impellerc_compile`, `shader_archive`, `embed_blob`); see below. |
 | `dart_wrap/` | The Dart SDK, built with `gn_build`: `BUILD.gn` lists the GN targets, `BUILD.bazel` the args, the inputs and the `cc_library` facades; `tests/` starts the VM from the archive. |
+| `dart/` | The engine's own Dart pipeline on the wrapped SDK's tools and the prebuilt SDK: `snapshot.bzl` (`compile_platform`, `core_snapshot`, `aot_snapshot`, `bin_to_assembly` -- `lib/snapshot/BUILD.gn`'s steps) and `kernel.bzl` (`dart_kernel`, GN's `flutter_frontend_server`); see below. |
 
 ## How dependencies reach Bazel during the transition
 
@@ -177,6 +178,46 @@ have no Bazel targets yet and stay inside `libcommon_embedder_dart_io.a`;
 produces, embeds the absolute path of the build directory (as the GN build's
 does), so it differs between sandboxed runs; and the Dart version script
 looks for `git` on `PATH` at `gn gen` time (and copes without it).
+
+## The Dart platform, the core snapshot and the test fixtures
+
+What GN does in `lib/snapshot/BUILD.gn` and `testing/testing.gni`, on the
+rules in `dart/`:
+
+1. `compile_platform` runs the wrapped build's `bootstrap_compile_platform.exe`
+   over `lib/snapshot/libraries.json`, which joins the Dart SDK's `sdk/lib`
+   tree (`@dart//:sdk_lib`) and `dart:ui` (`//engine/src/flutter/lib/ui:dart_ui`)
+   into `flutter_patched_sdk/platform_strong.dill`. The specification's
+   relative paths cross from the engine into the Dart tree, which the
+   execution root holds as another repository, so the rule stages a GN source
+   root of symlinks (each input at its GN path; `tree` places `@dart` at
+   `flutter/third_party/dart`) and compiles from it, as `gn_build` does.
+2. `core_snapshot` runs the wrapped build's `gen_snapshot --snapshot_kind=core`
+   over the platform; `bin_to_assembly` wraps each blob in an assembly file
+   with the Dart tree's script (`--incbin`, the blob an
+   `additional_compiler_inputs` of the library); `//engine/src/flutter/lib/snapshot:snapshot`
+   is the `cc_library` the VM links. The two blobs are byte-identical to the
+   GN build's.
+3. `flutter_test_fixtures(dart_main = ...)` (testing/testing.bzl) compiles a
+   test's Dart entry point to `assets/kernel_blob.bin` with `dart_kernel`: the
+   prebuilt SDK's `dartaotruntime` running its `frontend_server_aot.dart.snapshot`
+   (`@dart_sdk_linux_x64`, GN's `host_prebuilt_dart_sdk`) against the
+   platform and the engine's package configuration. `dart_snapshot_kernel`
+   and `dart_snapshot_aot` have macros of their own; the AOT snapshot exists
+   in the profile and release modes alone, where the kernel is compiled with
+   `--aot`.
+
+Two configuration choices are deliberate. The wrapped build's tools run from
+the *target* configuration (`cfg = "target"`), because GN builds `gen_snapshot`
+in the host toolchain, which for a host build is the default toolchain, and
+the core snapshot must match the VM it is linked with; cross builds, where
+`gen_snapshot` is a host binary targeting another architecture, are a later
+phase. And kernels are compiled under a virtual root (`--filesystem-root .`
+`--filesystem-scheme org-dartlang-root`), so that a source's URI in the
+kernel is `org-dartlang-root:///engine/src/flutter/...` on every machine
+rather than the sandbox's path; a test that needs a library's URI asks
+`flutter::testing::GetSourceUri` for it, which the fixtures library compiles
+in for each build (GN's is `file://` plus the absolute source root).
 
 ## Impeller's shader pipeline
 
