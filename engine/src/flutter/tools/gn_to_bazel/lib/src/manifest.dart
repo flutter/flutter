@@ -395,7 +395,6 @@ cc_test(
     '//flutter/runtime',
     skip: <String, String>{
       'libdart': 'needs //flutter/lib/snapshot',
-      'runtime': 'needs //flutter/lib/ui, //flutter/lib/gpu and //flutter/lib/io',
       'runtime_fixtures': 'Dart fixtures (dart_main) are not supported yet',
       'runtime_unittests': 'needs :runtime',
       'no_plugin_registrant': 'Dart fixtures (dart_main) are not supported yet',
@@ -477,13 +476,43 @@ selects.config_setting_group(
       'ui_testing_mocks': 'with ui_unittests',
     },
   ),
+  ConvertedFile('//flutter/lib/io'),
+  // The sampling profiler; GN links its suite into shell_unittests, which
+  // waits on the Dart snapshot, so it runs on its own meanwhile.
+  ConvertedFile(
+    '//flutter/shell/profiling',
+    appendix: '''
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+flutter_test_fixtures(name = "shell_profiling_fixtures")
+
+# The profiler calls the Dart API (Dart_SetThreadName); GN's shell_unittests
+# links libdart, so this binary does too.
+cc_test(
+    name = "shell_profiling_unittests",
+    deps = [
+        ":profiling_unittests",
+        ":shell_profiling_fixtures",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/testing",
+    ],
+)
+''',
+  ),
+  ConvertedFile(
+    '//flutter/lib/gpu',
+    skip: <String, String>{
+      'gpu_unittests_fixtures': 'with gpu_unittests',
+      'gpu_unittests': 'needs //flutter/testing:dart (the Dart runtime)',
+    },
+  ),
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.
   ConvertedFile(
     '//flutter/shell/common',
     skip: <String, String>{
-      'common': 'needs //flutter/flow, //flutter/lib/ui, //flutter/runtime and //flutter/third_party/tonic',
       'shell_unittests_gpu_configuration': 'needs //flutter/shell/gpu',
       'shell_unittests_fixtures': 'Dart fixtures (dart_main) are not supported yet',
       'shell_benchmarks': 'needs :common and //flutter/benchmarking',
@@ -899,6 +928,7 @@ const Set<String> handWrittenPackages = <String>{
   'engine/src',
   'engine/src/flutter',
   'engine/src/flutter/impeller/tools',
+  'engine/src/flutter/lib/snapshot',
   'engine/src/flutter/third_party',
 };
 

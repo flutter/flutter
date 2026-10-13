@@ -1,0 +1,68 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/lib/gpu/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: gpu_unittests_fixtures, gpu_unittests.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "gpu",
+    srcs = [
+        "binding_set.cc",  # !is_fuchsia
+        "command_buffer.cc",  # !is_fuchsia
+        "context.cc",  # !is_fuchsia
+        "device_buffer.cc",  # !is_fuchsia
+        "export.cc",  # !is_fuchsia
+        "formats.cc",  # !is_fuchsia
+        "render_pass.cc",  # !is_fuchsia
+        "render_pipeline.cc",  # !is_fuchsia
+        "shader.cc",  # !is_fuchsia
+        "shader_library.cc",  # !is_fuchsia
+        "surface.cc",  # !is_fuchsia
+        "texture.cc",  # !is_fuchsia
+    ],
+    hdrs = [
+        "binding_set.h",  # !is_fuchsia
+        "command_buffer.h",  # !is_fuchsia
+        "context.h",  # !is_fuchsia
+        "device_buffer.h",  # !is_fuchsia
+        "export.h",  # !is_fuchsia
+        "formats.h",  # !is_fuchsia
+        "render_pass.h",  # !is_fuchsia
+        "render_pipeline.h",  # !is_fuchsia
+        "shader.h",  # !is_fuchsia
+        "shader_library.h",  # !is_fuchsia
+        "surface.h",  # !is_fuchsia
+        "texture.h",  # !is_fuchsia
+    ],
+    copts = [
+        # Dart gives us doubles. Skia and Impeller work in floats.
+        # If Dart gives us a double > FLT_MAX or < -FLT_MAX, implicit conversion
+        # will convert it to either inf/-inf or FLT_MAX/-FLT_MAX (undefined
+        # behavior). This can result in surprising and difficult to debug behavior
+        # for Flutter application developers, so it should be explicitly handled
+        # via SafeNarrow.
+        "-Wimplicit-float-conversion",
+    ] + FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/impeller",
+        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/display_list:skia_conversions",
+        "//engine/src/flutter/impeller/shader_bundle:shader_bundle_flatbuffers",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/third_party/tonic",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+    ],
+    alwayslink = True,
+)

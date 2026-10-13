@@ -2644,11 +2644,12 @@ source_set("headers") {
       expect(
         output,
         contains('''
+    implementation_deps = ["@skia//:skia_private"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
         "//engine/src/flutter/impeller:impeller_public_config",
     ],
-    implementation_deps = ["@skia//:skia_private"],
     alwayslink = True,
 )
 '''),
