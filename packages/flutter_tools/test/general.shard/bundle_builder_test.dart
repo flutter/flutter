@@ -202,6 +202,7 @@ void main() {
         logger: BufferLogger.test(),
         projectDir: fileSystem.currentDirectory,
         buildMode: BuildMode.debug,
+        platform: FakePlatform(),
       );
 
       final File outputAssetFile = fileSystem.file('build/flutter_assets/my-asset.txt');

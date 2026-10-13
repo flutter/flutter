@@ -166,6 +166,7 @@ Future<void> writeBundle(
   required Logger logger,
   required Directory projectDir,
   required BuildMode buildMode,
+  required Platform platform,
 }) async {
   if (bundleDir.existsSync()) {
     try {
@@ -184,6 +185,7 @@ Future<void> writeBundle(
     logger: logger,
     fileSystem: fileSystem,
     artifacts: artifacts,
+    platform: platform,
   );
 
   final assetTransformer = AssetTransformer(
