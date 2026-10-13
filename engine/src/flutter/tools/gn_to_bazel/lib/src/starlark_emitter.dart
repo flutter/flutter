@@ -1654,7 +1654,7 @@ final class _Emitter {
             // `configs -= [chromium_code]` and `configs += [no_chromium_code]`
             // both mean the same thing.
             result = assignment.op == '-=' ? !chromiumCode : chromiumCode;
-          case ConfigDependency(:final String label):
+          case ConfigDependency(:final String label, :final List<String> copts):
             if (assignment.op == '-=') {
               throw GnError(assignment.location, 'removing config $config is not supported');
             }
@@ -1662,6 +1662,14 @@ final class _Emitter {
                 ? 'implementation_deps'
                 : 'deps';
             rule.list(attribute).addUnique(assignment.condition, _item(label, element));
+            // The config's compiler flags, which the dependency cannot
+            // carry: on this target's compiles, after its own flags and
+            // the constants, where a config's flags sit in GN.
+            for (final flag in copts) {
+              rule
+                  .list('copts')
+                  .addUnique(assignment.condition, _Item(flag, comment: 'from $config'));
+            }
           case ConfigImplied():
             break;
         }
@@ -1877,11 +1885,9 @@ final class _Emitter {
     'srcs',
     'hdrs',
   ];
-  static const List<String> _trailingAttributes = <String>[
-    'deps',
-    'implementation_deps',
-    'alwayslink',
-  ];
+  // buildifier's order: `deps` and `alwayslink` trail; `implementation_deps`
+  // is not in its priority table and sorts with the rest.
+  static const List<String> _trailingAttributes = <String>['deps', 'alwayslink'];
 
   static int _attributeRank(String attribute) {
     final int leading = _leadingAttributes.indexOf(attribute);

@@ -468,11 +468,13 @@ sealed class ConfigEffect {
 }
 
 /// The config is a dependency on a Bazel target carrying its defines and
-/// include directories.
+/// include directories, plus the compiler flags it applies ([copts]), which
+/// no dependency can carry and the listing target gets inlined.
 final class ConfigDependency extends ConfigEffect {
-  const ConfigDependency(this.label);
+  const ConfigDependency(this.label, {this.copts = const <String>[]});
 
   final String label;
+  final List<String> copts;
 }
 
 /// The config is implied by something else (a dependency that already
@@ -513,6 +515,30 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   ),
   '//build/config/compiler:chromium_code': ConfigWarningSet(chromiumCode: true),
   '//build/config/compiler:no_chromium_code': ConfigWarningSet(chromiumCode: false),
+  // The Dart runtime's own config, which lib/io lists privately: its
+  // defines ride the overlay's library (@dart//:dart_config); its flags are
+  // the ones below under every host configuration (dart_debug is false
+  // unless tools/gn is given --dart-debug, so the runtime, and this one
+  // file of the engine, compile with -O2 even in an unoptimized build).
+  '//flutter/third_party/dart/runtime:dart_config': ConfigDependency(
+    '@dart//:dart_config',
+    copts: <String>[
+      '-Wno-unused-parameter',
+      '-Wno-unused-private-field',
+      '-Wnon-virtual-dtor',
+      '-Wvla',
+      '-Woverloaded-virtual',
+      '-Wno-comments',
+      '-g3',
+      '-ggdb3',
+      '-fno-rtti',
+      '-fno-exceptions',
+      '-Wnewline-eof',
+      '-Wimplicit-fallthrough',
+      '-fno-strict-vtable-pointers',
+      '-O2',
+    ],
+  ),
 };
 
 /// The Bazel config_setting (or constraint) for a GN boolean predicate.

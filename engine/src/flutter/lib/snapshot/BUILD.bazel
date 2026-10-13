@@ -1,0 +1,20 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Hand-written until lib/snapshot/BUILD.gn converts: that file is the Dart
+# platform kernel and core snapshot pipeline (compile_platform, gen_snapshot,
+# bin_to_linkable), which comes with the Dart build in a later phase. What
+# the engine's libraries need of it now is GN's source_set("snapshot_headers")
+# -- the declarations of the symbols the linkable snapshots define, which
+# //flutter/runtime reads -- and that is all this file has.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "snapshot_headers",
+    hdrs = ["snapshot.h"],
+    deps = ["//engine/src:include_root"],
+)
