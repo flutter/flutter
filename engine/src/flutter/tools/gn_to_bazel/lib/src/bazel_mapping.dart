@@ -244,14 +244,18 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/impeller/compiler:compiler_lib': <String>[..._injaCopts, ..._glslangCopts],
   '//flutter/common/graphics:graphics': _vulkanHeadersCopts,
   '//flutter/vulkan/procs:procs': _vulkanHeadersCopts,
+  '//flutter/vulkan:vulkan': _vulkanHeadersCopts,
   '//flutter/flow:flow': _vulkanHeadersCopts,
   '//flutter/lib/ui:ui': _vulkanHeadersCopts,
   '//flutter/runtime:runtime': _vulkanHeadersCopts,
+  '//flutter/shell/gpu:gpu_surface_software': _vulkanHeadersCopts,
   '//flutter/flutter_vma:flutter_vma': _vulkanCopts,
   '//flutter/flutter_vma:flutter_skia_vma': _vulkanCopts,
   '//flutter/impeller/renderer/backend/vulkan:vulkan': _vulkanCopts,
   '//flutter/impeller/renderer/backend:backend': _vulkanCopts,
   '//flutter/impeller:impeller': _vulkanCopts,
+  '//flutter/shell/gpu:gpu_surface_gl': _vulkanCopts,
+  '//flutter/shell/gpu:gpu_surface_vulkan': _vulkanCopts,
 };
 
 /// inja_public_config's flags.
