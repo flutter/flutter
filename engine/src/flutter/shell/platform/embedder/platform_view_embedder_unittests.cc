@@ -639,5 +639,139 @@ TEST(PlatformViewEmbedderTest,
   EXPECT_EQ(result.status().code(), fml::StatusCode::kInvalidArgument);
 }
 
+namespace {
+// Records the arguments of the platform callbacks below.
+struct PlatformCallbackRecord {
+  void* application_locale_user_data = nullptr;
+  std::string application_locale;
+  void* semantics_tree_user_data = nullptr;
+  bool semantics_tree_enabled = false;
+  void* scaled_font_size_user_data = nullptr;
+  double unscaled_font_size = 0;
+  int configuration_id = 0;
+  void* resolved_locale_user_data = nullptr;
+  std::vector<std::string> supported_language_codes;
+  // Returned by the resolved-locale callback. It is not one of the supported
+  // locales, so the test also shows that the engine copies the result.
+  FlutterLocale resolved_locale = {
+      .struct_size = sizeof(FlutterLocale),
+      .language_code = "iw",
+      .country_code = "IL",
+      .script_code = "Hebr",
+      .variant_code = nullptr,
+  };
+};
+
+PlatformCallbackRecord& GetPlatformCallbackRecord() {
+  static PlatformCallbackRecord record;
+  return record;
+}
+
+FlutterProjectArgs ProjectArgsWithPlatformCallbacks() {
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+  args.set_application_locale_callback = [](const char* locale,
+                                            void* user_data) {
+    GetPlatformCallbackRecord().application_locale_user_data = user_data;
+    GetPlatformCallbackRecord().application_locale = locale;
+  };
+  args.set_semantics_tree_enabled_callback = [](bool enabled, void* user_data) {
+    GetPlatformCallbackRecord().semantics_tree_user_data = user_data;
+    GetPlatformCallbackRecord().semantics_tree_enabled = enabled;
+  };
+  args.get_scaled_font_size_callback = [](double unscaled_font_size,
+                                          int configuration_id,
+                                          void* user_data) -> double {
+    GetPlatformCallbackRecord().scaled_font_size_user_data = user_data;
+    GetPlatformCallbackRecord().unscaled_font_size = unscaled_font_size;
+    GetPlatformCallbackRecord().configuration_id = configuration_id;
+    // Any deterministic function of the inputs shows the result is returned.
+    return unscaled_font_size * 2 + configuration_id;
+  };
+  args.compute_platform_resolved_locale_callback2 =
+      [](const FlutterLocale** supported_locales, size_t locale_count,
+         void* user_data) -> const FlutterLocale* {
+    GetPlatformCallbackRecord().resolved_locale_user_data = user_data;
+    for (size_t i = 0; i < locale_count; ++i) {
+      GetPlatformCallbackRecord().supported_language_codes.emplace_back(
+          supported_locales[i]->language_code);
+    }
+    return &GetPlatformCallbackRecord().resolved_locale;
+  };
+  return args;
+}
+}  // namespace
+
+TEST(PlatformViewEmbedderTest,
+     DispatchTableFromProjectArgsForwardsPlatformCallbacksWithUserData) {
+  GetPlatformCallbackRecord() = {};
+  FlutterProjectArgs args = ProjectArgsWithPlatformCallbacks();
+  int user_data = 0;
+
+  fml::StatusOr<PlatformViewEmbedder::PlatformDispatchTable> result =
+      PlatformDispatchTableFromProjectArgs(&args, &user_data);
+
+  ASSERT_TRUE(result.ok());
+  const PlatformViewEmbedder::PlatformDispatchTable& table = result.value();
+
+  ASSERT_TRUE(table.set_application_locale_callback);
+  table.set_application_locale_callback("de-CH");
+  EXPECT_EQ(GetPlatformCallbackRecord().application_locale_user_data,
+            &user_data);
+  EXPECT_EQ(GetPlatformCallbackRecord().application_locale, "de-CH");
+
+  ASSERT_TRUE(table.set_semantics_tree_enabled_callback);
+  table.set_semantics_tree_enabled_callback(true);
+  EXPECT_EQ(GetPlatformCallbackRecord().semantics_tree_user_data, &user_data);
+  EXPECT_TRUE(GetPlatformCallbackRecord().semantics_tree_enabled);
+
+  // Arbitrary font size and configuration id; the callback doubles the size
+  // and adds the id.
+  constexpr double kUnscaledFontSize = 14.0;
+  constexpr int kConfigurationId = 3;
+  ASSERT_TRUE(table.get_scaled_font_size_callback);
+  EXPECT_EQ(
+      table.get_scaled_font_size_callback(kUnscaledFontSize, kConfigurationId),
+      kUnscaledFontSize * 2 + kConfigurationId);
+  EXPECT_EQ(GetPlatformCallbackRecord().scaled_font_size_user_data, &user_data);
+  EXPECT_EQ(GetPlatformCallbackRecord().unscaled_font_size, kUnscaledFontSize);
+  EXPECT_EQ(GetPlatformCallbackRecord().configuration_id, kConfigurationId);
+
+  // Locale data comes in triples: language, country, script.
+  ASSERT_TRUE(table.compute_platform_resolved_locale_callback);
+  std::unique_ptr<std::vector<std::string>> resolved =
+      table.compute_platform_resolved_locale_callback(
+          {"en", "US", "", "he", "IL", "Hebr"});
+  EXPECT_EQ(GetPlatformCallbackRecord().resolved_locale_user_data, &user_data);
+  EXPECT_EQ(GetPlatformCallbackRecord().supported_language_codes,
+            (std::vector<std::string>{"en", "he"}));
+  ASSERT_TRUE(resolved);
+  EXPECT_EQ(*resolved, (std::vector<std::string>{"iw", "IL", "Hebr"}));
+}
+
+TEST(PlatformViewEmbedderTest,
+     DispatchTableFromProjectArgsPrefersResolvedLocaleCallbackWithUserData) {
+  GetPlatformCallbackRecord() = {};
+  FlutterProjectArgs args = ProjectArgsWithPlatformCallbacks();
+  args.compute_platform_resolved_locale_callback =
+      [](const FlutterLocale**, size_t) -> const FlutterLocale* {
+    ADD_FAILURE() << "The callback without user_data must not be used when "
+                     "compute_platform_resolved_locale_callback2 is set.";
+    return nullptr;
+  };
+  int user_data = 0;
+
+  fml::StatusOr<PlatformViewEmbedder::PlatformDispatchTable> result =
+      PlatformDispatchTableFromProjectArgs(&args, &user_data);
+
+  ASSERT_TRUE(result.ok());
+  std::unique_ptr<std::vector<std::string>> resolved =
+      result.value().compute_platform_resolved_locale_callback(
+          {"en", "US", ""});
+  EXPECT_EQ(GetPlatformCallbackRecord().resolved_locale_user_data, &user_data);
+  ASSERT_TRUE(resolved);
+  EXPECT_EQ(resolved->front(), "iw");
+}
+
 }  // namespace testing
 }  // namespace flutter

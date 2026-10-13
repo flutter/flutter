@@ -2123,6 +2123,52 @@ CreateEmbedderSemanticsUpdateCallback(const FlutterProjectArgs* args,
   return nullptr;
 }
 
+// Calls `resolve` with the supported locales, which the engine passes as
+// triples of language, country and script code, and returns the resolved
+// locale in the same form (empty if there is none). The result is copied
+// before this returns.
+static std::unique_ptr<std::vector<std::string>> ComputePlatformResolvedLocale(
+    const std::vector<std::string>& supported_locales_data,
+    const std::function<const FlutterLocale*(const FlutterLocale**, size_t)>&
+        resolve) {
+  const size_t number_of_strings_per_locale = 3;
+  size_t locale_count =
+      supported_locales_data.size() / number_of_strings_per_locale;
+  std::vector<FlutterLocale> supported_locales;
+  std::vector<const FlutterLocale*> supported_locales_ptr;
+  supported_locales.reserve(locale_count);
+  for (size_t i = 0; i < locale_count; ++i) {
+    supported_locales.push_back(
+        {.struct_size = sizeof(FlutterLocale),
+         .language_code =
+             supported_locales_data[i * number_of_strings_per_locale + 0]
+                 .c_str(),
+         .country_code =
+             supported_locales_data[i * number_of_strings_per_locale + 1]
+                 .c_str(),
+         .script_code =
+             supported_locales_data[i * number_of_strings_per_locale + 2]
+                 .c_str(),
+         .variant_code = nullptr});
+    supported_locales_ptr.push_back(&supported_locales[i]);
+  }
+
+  const FlutterLocale* result =
+      resolve(supported_locales_ptr.data(), locale_count);
+
+  std::unique_ptr<std::vector<std::string>> out =
+      std::make_unique<std::vector<std::string>>();
+  if (result) {
+    std::string language_code(SAFE_ACCESS(result, language_code, ""));
+    if (language_code != "") {
+      out->push_back(language_code);
+      out->emplace_back(SAFE_ACCESS(result, country_code, ""));
+      out->emplace_back(SAFE_ACCESS(result, script_code, ""));
+    }
+  }
+  return out;
+}
+
 namespace flutter {
 
 fml::StatusOr<PlatformViewEmbedder::PlatformDispatchTable>
@@ -2183,49 +2229,24 @@ PlatformDispatchTableFromProjectArgs(const FlutterProjectArgs* args,
 
   flutter::PlatformViewEmbedder::ComputePlatformResolvedLocaleCallback
       compute_platform_resolved_locale_callback = nullptr;
-  if (SAFE_ACCESS(args, compute_platform_resolved_locale_callback, nullptr) !=
+  if (SAFE_ACCESS(args, compute_platform_resolved_locale_callback2, nullptr) !=
       nullptr) {
+    compute_platform_resolved_locale_callback =
+        [ptr = args->compute_platform_resolved_locale_callback2,
+         user_data](const std::vector<std::string>& supported_locales_data) {
+          return ComputePlatformResolvedLocale(
+              supported_locales_data,
+              [ptr, user_data](const FlutterLocale** supported_locales,
+                               size_t locale_count) {
+                return ptr(supported_locales, locale_count, user_data);
+              });
+        };
+  } else if (SAFE_ACCESS(args, compute_platform_resolved_locale_callback,
+                         nullptr) != nullptr) {
     compute_platform_resolved_locale_callback =
         [ptr = args->compute_platform_resolved_locale_callback](
             const std::vector<std::string>& supported_locales_data) {
-          const size_t number_of_strings_per_locale = 3;
-          size_t locale_count =
-              supported_locales_data.size() / number_of_strings_per_locale;
-          std::vector<FlutterLocale> supported_locales;
-          std::vector<const FlutterLocale*> supported_locales_ptr;
-          for (size_t i = 0; i < locale_count; ++i) {
-            supported_locales.push_back(
-                {.struct_size = sizeof(FlutterLocale),
-                 .language_code =
-                     supported_locales_data[i * number_of_strings_per_locale +
-                                            0]
-                         .c_str(),
-                 .country_code =
-                     supported_locales_data[i * number_of_strings_per_locale +
-                                            1]
-                         .c_str(),
-                 .script_code =
-                     supported_locales_data[i * number_of_strings_per_locale +
-                                            2]
-                         .c_str(),
-                 .variant_code = nullptr});
-            supported_locales_ptr.push_back(&supported_locales[i]);
-          }
-
-          const FlutterLocale* result =
-              ptr(supported_locales_ptr.data(), locale_count);
-
-          std::unique_ptr<std::vector<std::string>> out =
-              std::make_unique<std::vector<std::string>>();
-          if (result) {
-            std::string language_code(SAFE_ACCESS(result, language_code, ""));
-            if (language_code != "") {
-              out->push_back(language_code);
-              out->emplace_back(SAFE_ACCESS(result, country_code, ""));
-              out->emplace_back(SAFE_ACCESS(result, script_code, ""));
-            }
-          }
-          return out;
+          return ComputePlatformResolvedLocale(supported_locales_data, ptr);
         };
   }
 
@@ -2277,6 +2298,33 @@ PlatformDispatchTableFromProjectArgs(const FlutterProjectArgs* args,
         };
   }
 
+  flutter::PlatformViewEmbedder::SetApplicationLocaleCallback
+      set_application_locale_callback = nullptr;
+  if (SAFE_ACCESS(args, set_application_locale_callback, nullptr) != nullptr) {
+    set_application_locale_callback =
+        [ptr = args->set_application_locale_callback,
+         user_data](std::string locale) { ptr(locale.c_str(), user_data); };
+  }
+
+  flutter::PlatformViewEmbedder::SetSemanticsTreeEnabledCallback
+      set_semantics_tree_enabled_callback = nullptr;
+  if (SAFE_ACCESS(args, set_semantics_tree_enabled_callback, nullptr) !=
+      nullptr) {
+    set_semantics_tree_enabled_callback =
+        [ptr = args->set_semantics_tree_enabled_callback,
+         user_data](bool enabled) { ptr(enabled, user_data); };
+  }
+
+  flutter::PlatformViewEmbedder::GetScaledFontSizeCallback
+      get_scaled_font_size_callback = nullptr;
+  if (SAFE_ACCESS(args, get_scaled_font_size_callback, nullptr) != nullptr) {
+    get_scaled_font_size_callback = [ptr = args->get_scaled_font_size_callback,
+                                     user_data](double unscaled_font_size,
+                                                int configuration_id) {
+      return ptr(unscaled_font_size, configuration_id, user_data);
+    };
+  }
+
   return flutter::PlatformViewEmbedder::PlatformDispatchTable{
       update_semantics_callback,                  //
       platform_message_response_callback,         //
@@ -2285,10 +2333,10 @@ PlatformDispatchTableFromProjectArgs(const FlutterProjectArgs* args,
       on_pre_engine_restart_callback,             //
       channel_update_callback,                    //
       view_focus_change_request_callback,         //
-      nullptr,                                    //
-      nullptr,                                    //
+      set_application_locale_callback,            //
+      set_semantics_tree_enabled_callback,        //
       request_dart_deferred_library_callback,     //
-      nullptr,                                    //
+      get_scaled_font_size_callback,              //
   };
 }
 

@@ -2506,6 +2506,54 @@ typedef const FlutterLocale* (*FlutterComputePlatformResolvedLocaleCallback)(
     const FlutterLocale** /* supported_locales*/,
     size_t /* Number of locales*/);
 
+/// Callback that returns the locale the platform would natively resolve to,
+/// like `FlutterComputePlatformResolvedLocaleCallback`, but it also receives
+/// the `user_data` baton passed to `FlutterEngineInitialize`.
+///
+/// Embedders return the locale that most closely matches the user's or the
+/// device's preferred locale, normally one of `supported_locales`, or `NULL`
+/// if there is no match. The engine copies the returned locale as soon as the
+/// callback returns, so it may also point to storage that the embedder keeps
+/// valid until this callback is invoked again.
+///
+/// The callback is invoked synchronously on the UI thread.
+typedef const FlutterLocale* (*FlutterComputePlatformResolvedLocaleCallback2)(
+    const FlutterLocale** /* supported_locales */,
+    size_t /* number of locales */,
+    void* /* user data */);
+
+/// Callback invoked when the Dart application sets its locale with
+/// `PlatformDispatcher.setApplicationLocale`, so the embedder can pass it on
+/// to platform services such as accessibility.
+///
+/// `locale` is a BCP 47 language tag, for example "en-US". It is only valid
+/// during the call. The callback is invoked from a task posted to the platform
+/// thread.
+typedef void (*FlutterSetApplicationLocaleCallback)(const char* /* locale */,
+                                                    void* /* user data */);
+
+/// Callback invoked when the Dart application turns the semantics tree on or
+/// off with `PlatformDispatcher.setSemanticsTreeEnabled`. The callback is
+/// invoked from a task posted to the platform thread.
+typedef void (*FlutterSetSemanticsTreeEnabledCallback)(bool /* enabled */,
+                                                       void* /* user data */);
+
+/// Callback that applies the platform's text scaling to a font size, for
+/// `PlatformDispatcher.scaleFontSize`.
+///
+/// `configuration id` identifies the text scaling configuration that the
+/// framework received from the embedder in the `configurationId` entry of the
+/// platform settings message. Return the scaled size in logical pixels, or a
+/// negative value if it cannot be computed, for example because the
+/// configuration id is unknown.
+///
+/// The callback is invoked synchronously on the UI thread, so it must not wait
+/// for the platform thread.
+typedef double (*FlutterGetScaledFontSizeCallback)(
+    double /* unscaled font size */,
+    int /* configuration id */,
+    void* /* user data */);
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterEngineDisplay).
   size_t struct_size;
@@ -3481,6 +3529,26 @@ typedef struct {
 
   /// The number of image generators in the `image_generators` array.
   size_t image_generators_count;
+
+  /// A callback that computes the locale the platform would natively resolve
+  /// to. It does the same as `compute_platform_resolved_locale_callback` but
+  /// also receives the `user_data` passed to `FlutterEngineInitialize`. If
+  /// both are set, only this one is used.
+  FlutterComputePlatformResolvedLocaleCallback2
+      compute_platform_resolved_locale_callback2;
+
+  /// The callback invoked when the Dart application sets its locale. See
+  /// `FlutterSetApplicationLocaleCallback`.
+  FlutterSetApplicationLocaleCallback set_application_locale_callback;
+
+  /// The callback invoked when the Dart application turns the semantics tree
+  /// on or off. See `FlutterSetSemanticsTreeEnabledCallback`.
+  FlutterSetSemanticsTreeEnabledCallback set_semantics_tree_enabled_callback;
+
+  /// The callback the engine uses to scale font sizes the way the platform
+  /// does. See `FlutterGetScaledFontSizeCallback`. Embedders that send a
+  /// `configurationId` in the platform settings message must set it.
+  FlutterGetScaledFontSizeCallback get_scaled_font_size_callback;
 } FlutterProjectArgs;
 
 typedef struct {
