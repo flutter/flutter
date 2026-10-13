@@ -72,10 +72,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
 
   void TeardownSurface();
 
-  std::unique_ptr<Texture> CreateSurfaceTexture(
-      int64_t texture_id,
-      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture);
-
   std::unique_ptr<Texture> CreateImageTexture(
       int64_t texture_id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,

@@ -12,37 +12,6 @@
 namespace flutter {
 
 //------------------------------------------------------------------------------
-/// @brief      How a SurfaceTexture external texture talks to its producer.
-///             The engine makes every call on the raster thread, with the GL
-///             ES context of the texture current.
-///
-///             The fields match the OpenGL texture stream source that the
-///             embedder API is going to take, so the texture classes do not
-///             depend on JNI.
-///
-struct SurfaceTextureSource {
-  void* user_data = nullptr;
-
-  /// Attaches the producer to `texture_name`, a GL_TEXTURE_EXTERNAL_OES
-  /// texture.
-  void (*attach)(void* user_data, uint32_t texture_name) = nullptr;
-
-  /// Latches the newest frame and writes its UV transform, a column-major 4x4
-  /// matrix, to `transformation_out`.
-  void (*update)(void* user_data, float transformation_out[16]) = nullptr;
-
-  /// Detaches the producer from its texture, which deletes the texture name.
-  void (*detach)(void* user_data) = nullptr;
-
-  /// Whether a frame arrived since the last update. Only asked when the
-  /// texture is painted frozen. Optional; null means no.
-  bool (*has_pending_frame)(void* user_data) = nullptr;
-
-  /// Releases `user_data`. Called once, when the texture is destroyed.
-  void (*destruction)(void* user_data) = nullptr;
-};
-
-//------------------------------------------------------------------------------
 /// @brief      One AHardwareBuffer handed to a hardware buffer external
 ///             texture.
 ///

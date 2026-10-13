@@ -145,6 +145,18 @@ class EmbedderEngine {
 
   bool RegisterTexture(int64_t texture);
 
+  //----------------------------------------------------------------------------
+  /// @brief      Registers a texture the embedder API created itself, without
+  ///             the external texture resolver.
+  ///
+  /// @param[in]  texture  The texture. Must not be null.
+  ///
+  /// @attention  Only call this on a valid engine (`IsValid()`). The caller
+  ///             checks that first so that a texture that owns embedder data
+  ///             is never destroyed by a failed registration.
+  ///
+  void RegisterExternalTexture(std::shared_ptr<Texture> texture);
+
   bool UnregisterTexture(int64_t texture);
 
   bool MarkTextureFrameAvailable(int64_t texture);

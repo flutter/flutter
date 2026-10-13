@@ -4,6 +4,7 @@
 
 #define FML_USED_ON_EMBEDDER
 
+#include <atomic>
 #include <string>
 #include <utility>
 #include <vector>
@@ -5655,6 +5656,176 @@ TEST_F(EmbedderTest, EmbedderExternalTextureAllowsZeroTextureIdentifier) {
   EXPECT_EQ(
       FlutterEngineUnregisterExternalTexture(engine.get(), kZeroTextureId),
       kSuccess);
+}
+
+namespace {
+
+// Counts the destruction callbacks of an OpenGL stream texture. The engine
+// runs the callback on its raster thread.
+struct StreamTextureDestruction {
+  std::atomic<int> calls = 0;
+  fml::AutoResetWaitableEvent latch;
+};
+
+// A stream whose callbacks do nothing. The software renderer never paints
+// OpenGL stream textures, so only registration and destruction are exercised.
+FlutterOpenGLTextureStreamSource NoopOpenGLTextureStreamSource() {
+  return {
+      .struct_size = sizeof(FlutterOpenGLTextureStreamSource),
+      .attach_callback = [](void* user_data, uint32_t texture_name) {},
+      .update_callback = [](void* user_data, float transformation_out[16]) {},
+      .detach_callback = [](void* user_data) {},
+      .has_pending_frame_callback = nullptr,
+  };
+}
+
+FlutterExternalTextureInfo OpenGLStreamTextureInfo(
+    int64_t texture_id,
+    StreamTextureDestruction* destruction,
+    const FlutterOpenGLTextureStreamSource* source) {
+  return {
+      .struct_size = sizeof(FlutterExternalTextureInfo),
+      .texture_id = texture_id,
+      .type = kFlutterExternalTextureTypeOpenGLStream,
+      .user_data = destruction,
+      .open_gl_stream = source,
+      .destruction_callback =
+          [](void* user_data) {
+            auto* destruction =
+                static_cast<StreamTextureDestruction*>(user_data);
+            destruction->calls++;
+            destruction->latch.Signal();
+          },
+  };
+}
+
+}  // namespace
+
+//------------------------------------------------------------------------------
+/// FlutterEngineRegisterExternalTextureWithInfo rejects infos that do not
+/// describe a usable source, and then leaves `user_data` with the caller.
+///
+TEST_F(EmbedderTest, RegisterExternalTextureWithInfoRejectsInvalidArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  StreamTextureDestruction destruction;
+  const FlutterOpenGLTextureStreamSource source =
+      NoopOpenGLTextureStreamSource();
+  constexpr int64_t kTextureId = 1;
+  const FlutterExternalTextureInfo info =
+      OpenGLStreamTextureInfo(kTextureId, &destruction, &source);
+
+  EXPECT_EQ(FlutterEngineRegisterExternalTextureWithInfo(nullptr, &info),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineRegisterExternalTextureWithInfo(engine.get(), nullptr),
+            kInvalidArguments);
+
+  FlutterExternalTextureInfo short_info = info;
+  // Covers only the struct_size field.
+  short_info.struct_size = sizeof(size_t);
+  EXPECT_EQ(
+      FlutterEngineRegisterExternalTextureWithInfo(engine.get(), &short_info),
+      kInvalidArguments);
+
+  FlutterExternalTextureInfo unknown_type = info;
+  // Not a value of FlutterExternalTextureType.
+  constexpr int kUnknownTextureType = 1000;
+  unknown_type.type =
+      static_cast<FlutterExternalTextureType>(kUnknownTextureType);
+  EXPECT_EQ(
+      FlutterEngineRegisterExternalTextureWithInfo(engine.get(), &unknown_type),
+      kInvalidArguments);
+
+  FlutterExternalTextureInfo no_source = info;
+  no_source.open_gl_stream = nullptr;
+  EXPECT_EQ(
+      FlutterEngineRegisterExternalTextureWithInfo(engine.get(), &no_source),
+      kInvalidArguments);
+
+  FlutterOpenGLTextureStreamSource short_source = source;
+  short_source.struct_size = sizeof(size_t);
+  FlutterOpenGLTextureStreamSource no_attach = source;
+  no_attach.attach_callback = nullptr;
+  FlutterOpenGLTextureStreamSource no_update = source;
+  no_update.update_callback = nullptr;
+  FlutterOpenGLTextureStreamSource no_detach = source;
+  no_detach.detach_callback = nullptr;
+  for (const FlutterOpenGLTextureStreamSource* invalid_source :
+       {&short_source, &no_attach, &no_update, &no_detach}) {
+    const FlutterExternalTextureInfo invalid_info =
+        OpenGLStreamTextureInfo(kTextureId, &destruction, invalid_source);
+    EXPECT_EQ(FlutterEngineRegisterExternalTextureWithInfo(engine.get(),
+                                                           &invalid_info),
+              kInvalidArguments);
+  }
+
+  engine.reset();
+  EXPECT_EQ(destruction.calls, 0);
+}
+
+//------------------------------------------------------------------------------
+/// A texture registered with FlutterEngineRegisterExternalTextureWithInfo
+/// accepts the identifier 0 and owns `user_data` until it is unregistered.
+///
+TEST_F(EmbedderTest,
+       RegisterExternalTextureWithInfoRunsDestructionAfterUnregister) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  StreamTextureDestruction destruction;
+  const FlutterOpenGLTextureStreamSource source =
+      NoopOpenGLTextureStreamSource();
+  constexpr int64_t kZeroTextureId = 0;
+  const FlutterExternalTextureInfo info =
+      OpenGLStreamTextureInfo(kZeroTextureId, &destruction, &source);
+
+  ASSERT_EQ(FlutterEngineRegisterExternalTextureWithInfo(engine.get(), &info),
+            kSuccess);
+  EXPECT_EQ(FlutterEngineMarkExternalTextureFrameAvailable(engine.get(),
+                                                           kZeroTextureId),
+            kSuccess);
+  EXPECT_EQ(destruction.calls, 0);
+
+  ASSERT_EQ(
+      FlutterEngineUnregisterExternalTexture(engine.get(), kZeroTextureId),
+      kSuccess);
+  destruction.latch.Wait();
+  EXPECT_EQ(destruction.calls, 1);
+
+  engine.reset();
+  EXPECT_EQ(destruction.calls, 1);
+}
+
+//------------------------------------------------------------------------------
+/// The engine destroys a texture that is still registered when it shuts down,
+/// before FlutterEngineShutdown returns.
+///
+TEST_F(EmbedderTest, RegisterExternalTextureWithInfoRunsDestructionAtShutdown) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  StreamTextureDestruction destruction;
+  const FlutterOpenGLTextureStreamSource source =
+      NoopOpenGLTextureStreamSource();
+  constexpr int64_t kTextureId = 5;
+  const FlutterExternalTextureInfo info =
+      OpenGLStreamTextureInfo(kTextureId, &destruction, &source);
+  ASSERT_EQ(FlutterEngineRegisterExternalTextureWithInfo(engine.get(), &info),
+            kSuccess);
+
+  engine.reset();
+
+  EXPECT_EQ(destruction.calls, 1);
 }
 
 TEST_F(EmbedderTest, EmbedderNotifyCreatedAndDestroyedValidationAndLifecycle) {

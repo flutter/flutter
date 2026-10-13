@@ -2,23 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/surface_texture_external_texture_gl_impeller.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl_stream_impeller.h"
 
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 
 namespace flutter {
 
-SurfaceTextureExternalTextureGLImpeller::
-    SurfaceTextureExternalTextureGLImpeller(
+EmbedderExternalTextureGLStreamImpeller::
+    EmbedderExternalTextureGLStreamImpeller(
         const std::shared_ptr<impeller::ContextGLES>& context,
         int64_t id,
-        SurfaceTextureSource source)
-    : SurfaceTextureExternalTexture(id, source), impeller_context_(context) {}
+        EmbedderOpenGLTextureStream stream)
+    : EmbedderExternalTextureGLStream(id, stream), impeller_context_(context) {}
 
-SurfaceTextureExternalTextureGLImpeller::
-    ~SurfaceTextureExternalTextureGLImpeller() = default;
+EmbedderExternalTextureGLStreamImpeller::
+    ~EmbedderExternalTextureGLStreamImpeller() = default;
 
-void SurfaceTextureExternalTextureGLImpeller::ProcessFrame(
+void EmbedderExternalTextureGLStreamImpeller::ProcessFrame(
     PaintContext& context,
     const SkRect& bounds) {
   if (state_ == AttachmentState::kUninitialized) {
@@ -49,8 +49,8 @@ void SurfaceTextureExternalTextureGLImpeller::ProcessFrame(
   dl_image_ = impeller::DlImageImpeller::Make(texture_);
 }
 
-void SurfaceTextureExternalTextureGLImpeller::Detach() {
-  SurfaceTextureExternalTexture::Detach();
+void EmbedderExternalTextureGLStreamImpeller::Detach() {
+  EmbedderExternalTextureGLStream::Detach();
   // Detach will collect the texture handle.
   // See also: https://github.com/flutter/flutter/issues/152459
   texture_->Leak();

@@ -5,8 +5,11 @@
 #include "tests/embedder_test_context.h"
 #define FML_USED_ON_EMBEDDER
 
+#include <algorithm>
+#include <array>
 #include <atomic>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "GLES3/gl3.h"
@@ -5342,6 +5345,152 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownSceneToOpenGLSurfaces) {
 
   // There should no present calls on the root surface.
   ASSERT_EQ(context.GetSurfacePresentCount(), 0u);
+}
+
+namespace {
+
+// Records what the engine asks of an OpenGL stream texture. The engine calls
+// the stream and the destruction callback on its raster thread, so the counts
+// that are compared are snapshotted in the destruction callback, after the last
+// frame that painted the texture.
+struct RecordingOpenGLStream {
+  const std::thread::id test_thread = std::this_thread::get_id();
+  std::atomic<int> attach_calls = 0;
+  std::atomic<uint32_t> attached_texture_name = 0;
+  std::atomic<int> update_calls = 0;
+  std::atomic<int> detach_calls = 0;
+  std::atomic<bool> called_on_test_thread = false;
+  std::atomic<int> presents = 0;
+  int presents_at_destruction = 0;
+  int updates_at_destruction = 0;
+  fml::AutoResetWaitableEvent destroyed;
+
+  static RecordingOpenGLStream& From(void* user_data) {
+    return *static_cast<RecordingOpenGLStream*>(user_data);
+  }
+
+  void RecordCallingThread() {
+    if (std::this_thread::get_id() == test_thread) {
+      called_on_test_thread = true;
+    }
+  }
+};
+
+FlutterOpenGLTextureStreamSource RecordingOpenGLTextureStreamSource() {
+  return {
+      .struct_size = sizeof(FlutterOpenGLTextureStreamSource),
+      .attach_callback =
+          [](void* user_data, uint32_t texture_name) {
+            RecordingOpenGLStream& stream =
+                RecordingOpenGLStream::From(user_data);
+            stream.RecordCallingThread();
+            stream.attach_calls++;
+            stream.attached_texture_name = texture_name;
+          },
+      .update_callback =
+          [](void* user_data, float transformation_out[16]) {
+            RecordingOpenGLStream& stream =
+                RecordingOpenGLStream::From(user_data);
+            stream.RecordCallingThread();
+            stream.update_calls++;
+            // A column-major identity matrix.
+            constexpr std::array<float, 16> kIdentity = {
+                1, 0, 0, 0,  //
+                0, 1, 0, 0,  //
+                0, 0, 1, 0,  //
+                0, 0, 0, 1,  //
+            };
+            std::copy(kIdentity.begin(), kIdentity.end(), transformation_out);
+          },
+      .detach_callback =
+          [](void* user_data) {
+            RecordingOpenGLStream& stream =
+                RecordingOpenGLStream::From(user_data);
+            stream.RecordCallingThread();
+            stream.detach_calls++;
+          },
+      .has_pending_frame_callback = nullptr,
+  };
+}
+
+}  // namespace
+
+//------------------------------------------------------------------------------
+/// Impeller on OpenGL ES draws a texture registered with
+/// FlutterEngineRegisterExternalTextureWithInfo: it attaches the stream once
+/// and latches a frame for every frame that paints the texture, on the raster
+/// thread, and destroys the texture when it is unregistered.
+///
+TEST_F(EmbedderTest, ImpellerOpenGLDrawsOpenGLStreamTexture) {
+  // The size the render_texture fixture draws texture 1 at.
+  constexpr int kWidth = 800;
+  constexpr int kHeight = 600;
+  auto& context = GetEmbedderContext<EmbedderTestContextGL>();
+  EmbedderConfigBuilder builder(context);
+  RecordingOpenGLStream stream;
+  fml::AutoResetWaitableEvent presented;
+  context.SetGLPresentCallback([&](FlutterPresentInfo present_info) {
+    stream.presents++;
+    presented.Signal();
+  });
+  builder.AddCommandLineArgument("--enable-impeller");
+  builder.SetDartEntrypoint("render_texture");
+  builder.SetSurface(DlISize(kWidth, kHeight));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  const FlutterOpenGLTextureStreamSource source =
+      RecordingOpenGLTextureStreamSource();
+  // The texture the render_texture fixture draws.
+  constexpr int64_t kTextureId = 1;
+  const FlutterExternalTextureInfo info = {
+      .struct_size = sizeof(FlutterExternalTextureInfo),
+      .texture_id = kTextureId,
+      .type = kFlutterExternalTextureTypeOpenGLStream,
+      .user_data = &stream,
+      .open_gl_stream = &source,
+      .destruction_callback =
+          [](void* user_data) {
+            RecordingOpenGLStream& stream =
+                RecordingOpenGLStream::From(user_data);
+            stream.presents_at_destruction = stream.presents;
+            stream.updates_at_destruction = stream.update_calls;
+            stream.destroyed.Signal();
+          },
+  };
+  ASSERT_EQ(FlutterEngineRegisterExternalTextureWithInfo(engine.get(), &info),
+            kSuccess);
+
+  // Send a window metrics event so frames may be scheduled.
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = kWidth;
+  event.height = kHeight;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+  presented.Wait();
+  // Each mark redraws the last frame, which paints the texture again.
+  constexpr int kMarkedFrames = 3;
+  for (int i = 0; i < kMarkedFrames; i++) {
+    ASSERT_EQ(FlutterEngineMarkExternalTextureFrameAvailable(engine.get(),
+                                                             kTextureId),
+              kSuccess);
+    presented.Wait();
+  }
+  ASSERT_EQ(FlutterEngineUnregisterExternalTexture(engine.get(), kTextureId),
+            kSuccess);
+  stream.destroyed.Wait();
+
+  EXPECT_EQ(stream.attach_calls, 1);
+  EXPECT_NE(stream.attached_texture_name, 0u);
+  EXPECT_GE(stream.presents_at_destruction, 1 + kMarkedFrames);
+  // Every frame paints the texture unfrozen, so every frame latches.
+  EXPECT_EQ(stream.updates_at_destruction, stream.presents_at_destruction);
+  // The GL context outlives the texture.
+  EXPECT_EQ(stream.detach_calls, 0);
+  EXPECT_FALSE(stream.called_on_test_thread);
+  engine.reset();
 }
 
 INSTANTIATE_TEST_SUITE_P(

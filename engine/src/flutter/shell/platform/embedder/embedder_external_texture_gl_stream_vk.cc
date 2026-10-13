@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/surface_texture_external_texture_vk_impeller.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl_stream_vk.h"
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 
@@ -23,19 +23,18 @@ namespace flutter {
 
 using namespace impeller;
 
-SurfaceTextureExternalTextureVKImpeller::
-    SurfaceTextureExternalTextureVKImpeller(
-        std::shared_ptr<impeller::ContextVK> context,
-        int64_t id,
-        SurfaceTextureSource source)
-    : SurfaceTextureExternalTexture(id, source),
+EmbedderExternalTextureGLStreamVK::EmbedderExternalTextureGLStreamVK(
+    std::shared_ptr<impeller::ContextVK> context,
+    int64_t id,
+    EmbedderOpenGLTextureStream stream)
+    : EmbedderExternalTextureGLStream(id, stream),
       context_(std::move(context)),
       trampoline_(std::make_shared<glvk::Trampoline>()) {
   is_valid_ = trampoline_->IsValid();
 }
 
-SurfaceTextureExternalTextureVKImpeller::
-    ~SurfaceTextureExternalTextureVKImpeller() = default;
+EmbedderExternalTextureGLStreamVK::~EmbedderExternalTextureGLStreamVK() =
+    default;
 
 enum class LayoutUpdateMode {
   kSync,
@@ -115,10 +114,9 @@ static bool SetTextureLayout(const ContextVK& context,
   return true;
 }
 
-// |SurfaceTextureExternalTexture|
-void SurfaceTextureExternalTextureVKImpeller::ProcessFrame(
-    PaintContext& context,
-    const SkRect& bounds) {
+// |EmbedderExternalTextureGLStream|
+void EmbedderExternalTextureGLStreamVK::ProcessFrame(PaintContext& context,
+                                                     const SkRect& bounds) {
   if (!is_valid_ || !context.aiks_context) {
     VALIDATION_LOG << "Invalid external texture.";
     return;
@@ -173,18 +171,18 @@ void SurfaceTextureExternalTextureVKImpeller::ProcessFrame(
       std::make_shared<TextureVK>(surface_context.GetParent(), dst_texture));
 }
 
-// |SurfaceTextureExternalTexture|
-void SurfaceTextureExternalTextureVKImpeller::Detach() {
+// |EmbedderExternalTextureGLStream|
+void EmbedderExternalTextureGLStreamVK::Detach() {
   // Detaching from the underlying surface texture requires a context to be
   // current. On the other hand, the texture source is a pure Vulkan construct
   // and has no EGL related requirements.
   auto context = trampoline_->MakeCurrentContext();
-  SurfaceTextureExternalTexture::Detach();
+  EmbedderExternalTextureGLStream::Detach();
   cached_texture_source_.reset();
 }
 
 std::shared_ptr<impeller::AHBTextureSourceVK>
-SurfaceTextureExternalTextureVKImpeller::GetCachedTextureSource(
+EmbedderExternalTextureGLStreamVK::GetCachedTextureSource(
     const std::shared_ptr<Context>& context,
     const impeller::ISize& size) {
   if (cached_texture_source_ &&
@@ -222,8 +220,8 @@ SurfaceTextureExternalTextureVKImpeller::GetCachedTextureSource(
   return cached_texture_source_;
 }
 
-// |SurfaceTextureExternalTexture|
-void SurfaceTextureExternalTextureVKImpeller::DrawFrame(
+// |EmbedderExternalTextureGLStream|
+void EmbedderExternalTextureGLStreamVK::DrawFrame(
     PaintContext& context,
     const SkRect& bounds,
     const DlImageSampling sampling) const {

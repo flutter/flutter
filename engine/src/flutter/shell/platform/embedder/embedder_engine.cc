@@ -425,6 +425,12 @@ bool EmbedderEngine::RegisterTexture(int64_t texture) {
   return true;
 }
 
+void EmbedderEngine::RegisterExternalTexture(std::shared_ptr<Texture> texture) {
+  FML_DCHECK(IsValid());
+  FML_DCHECK(texture);
+  shell_->GetPlatformView()->RegisterTexture(std::move(texture));
+}
+
 bool EmbedderEngine::UnregisterTexture(int64_t texture) {
   if (!IsValid()) {
     return false;

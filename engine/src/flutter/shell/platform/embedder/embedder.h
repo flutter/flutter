@@ -3747,6 +3747,61 @@ typedef struct {
   int64_t engine_id;
 } FlutterEngineRunConfiguration;
 
+/// The kind of source behind a texture that
+/// `FlutterEngineRegisterExternalTextureWithInfo` registers.
+typedef enum {
+  /// A `GL_TEXTURE_EXTERNAL_OES` texture whose contents the embedder streams
+  /// in, such as the frames of an Android `SurfaceTexture`. See
+  /// `FlutterOpenGLTextureStreamSource`. The engine draws it when it renders
+  /// with Impeller on OpenGL ES, and on Android also with Skia on OpenGL ES
+  /// and with Impeller on Vulkan. Other renderers log an error and do not
+  /// draw it.
+  kFlutterExternalTextureTypeOpenGLStream,
+} FlutterExternalTextureType;
+
+/// The callbacks of a `kFlutterExternalTextureTypeOpenGLStream` texture. The
+/// engine calls them on the raster thread with an OpenGL ES context current:
+/// its own when it renders with OpenGL, or an interop context when it renders
+/// with Vulkan on Android. Each callback receives the `user_data` of the
+/// `FlutterExternalTextureInfo`.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterOpenGLTextureStreamSource).
+  size_t struct_size;
+  /// Attaches the stream to `texture_name`, a `GL_TEXTURE_EXTERNAL_OES`
+  /// texture the engine created. Called before the first update, and again
+  /// after the engine's graphics context is recreated.
+  void (*attach_callback)(void* /* user data */, uint32_t texture_name);
+  /// Latches the newest frame into the attached texture and writes the
+  /// transformation for its texture coordinates, a column-major 4x4 matrix,
+  /// to `transformation_out`. Called for every paint that is not frozen.
+  void (*update_callback)(void* /* user data */, float transformation_out[16]);
+  /// Detaches the stream from its texture, which deletes the texture name.
+  /// Called when the engine's graphics context goes away.
+  void (*detach_callback)(void* /* user data */);
+  /// Optional. Whether a frame arrived since the last update. The engine asks
+  /// when it paints the texture frozen, and updates it anyway if so.
+  bool (*has_pending_frame_callback)(void* /* user data */);
+} FlutterOpenGLTextureStreamSource;
+
+/// Describes a texture for `FlutterEngineRegisterExternalTextureWithInfo`.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterExternalTextureInfo).
+  size_t struct_size;
+  /// The identifier that the framework's `Texture` widget uses. Any value,
+  /// including 0.
+  int64_t texture_id;
+  /// The kind of source.
+  FlutterExternalTextureType type;
+  /// Passed to the callbacks of the source and to `destruction_callback`.
+  void* user_data;
+  /// The source when `type` is `kFlutterExternalTextureTypeOpenGLStream`.
+  const FlutterOpenGLTextureStreamSource* open_gl_stream;
+  /// Called once, after the texture is unregistered or the engine shuts down,
+  /// when the engine no longer calls the source. Not called if registration
+  /// fails. May be null.
+  VoidCallback destruction_callback;
+} FlutterExternalTextureInfo;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -4175,6 +4230,27 @@ FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier);
+
+//------------------------------------------------------------------------------
+/// @brief      Registers a texture whose frames come from the source in
+///             `info`. Unlike `FlutterEngineRegisterExternalTexture`, it does
+///             not use the renderer config's texture callbacks, and the
+///             engine picks how to draw the source for the renderer it uses.
+///             Unregister it with `FlutterEngineUnregisterExternalTexture`.
+///             Call `FlutterEngineMarkExternalTextureFrameAvailable` or
+///             schedule a frame when the source has a new frame.
+///
+/// @param[in]  engine  A running engine instance.
+/// @param[in]  info    The texture and its source. Only read during the call.
+///
+/// @return     The result of the call. `kInvalidArguments` if `info` is null,
+///             too small, of an unknown type, or its source misses a
+///             required callback.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineRegisterExternalTextureWithInfo(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterExternalTextureInfo* info);
 
 //------------------------------------------------------------------------------
 /// @brief      Enable or disable accessibility semantics.
@@ -5000,6 +5076,10 @@ typedef FlutterEngineResult (*FlutterEnginePlatformMessageTakePayloadFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterPlatformMessageResponseHandle* handle,
     FlutterPlatformMessagePayload* payload_out);
+typedef FlutterEngineResult (
+    *FlutterEngineRegisterExternalTextureWithInfoFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterExternalTextureInfo* info);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -5069,6 +5149,8 @@ typedef struct {
       DeregisterVMServiceUriCallback;
   FlutterEngineLaunchEngineFnPtr LaunchEngine;
   FlutterEnginePlatformMessageTakePayloadFnPtr PlatformMessageTakePayload;
+  FlutterEngineRegisterExternalTextureWithInfoFnPtr
+      RegisterExternalTextureWithInfo;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

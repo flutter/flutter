@@ -137,12 +137,6 @@ source_set("flutter_shell_native_src") {
     "platform_view_android.h",
     "platform_view_android_jni_impl.cc",
     "platform_view_android_jni_impl.h",
-    "surface_texture_external_texture.cc",
-    "surface_texture_external_texture.h",
-    "surface_texture_external_texture_gl_impeller.cc",
-    "surface_texture_external_texture_gl_impeller.h",
-    "surface_texture_external_texture_vk_impeller.cc",
-    "surface_texture_external_texture_vk_impeller.h",
     "texture_source.h",
     "vsync_waiter_android.cc",
     "vsync_waiter_android.h",
@@ -158,8 +152,6 @@ source_set("flutter_shell_native_src") {
       "android_surface_software.h",
       "image_external_texture_gl_skia.cc",
       "image_external_texture_gl_skia.h",
-      "surface_texture_external_texture_gl_skia.cc",
-      "surface_texture_external_texture_gl_skia.h",
     ]
   }
 

@@ -18,15 +18,12 @@
 #include "flutter/shell/platform/android/android_surface_dynamic_impeller.h"
 #include "flutter/shell/platform/android/android_surface_gl_impeller.h"
 #include "flutter/shell/platform/android/image_external_texture_gl_impeller.h"
-#include "flutter/shell/platform/android/surface_texture_external_texture_gl_impeller.h"
-#include "flutter/shell/platform/android/surface_texture_external_texture_vk_impeller.h"
 
 #if !SLIMPELLER
 #include "flutter/shell/platform/android/android_context_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_gl_skia.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
 #include "flutter/shell/platform/android/image_external_texture_gl_skia.h"
-#include "flutter/shell/platform/android/surface_texture_external_texture_gl_skia.h"
 #endif  // !SLIMPELLER
 
 #include "fml/logging.h"
@@ -281,48 +278,6 @@ void PlatformViewAndroid::ResizeSurface(const DlISize& size) {
         latch.Signal();
       });
   latch.Wait();
-}
-
-std::unique_ptr<Texture> PlatformViewAndroid::CreateSurfaceTexture(
-    int64_t texture_id,
-    const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
-  switch (android_context_->RenderingApi()) {
-    case AndroidRenderingAPI::kImpellerOpenGLES:
-      // Impeller GLES.
-      return std::make_unique<SurfaceTextureExternalTextureGLImpeller>(
-          std::static_pointer_cast<impeller::ContextGLES>(
-              android_context_->GetImpellerContext()),                //
-          texture_id,                                                 //
-          MakeJavaSurfaceTextureSource(jni_facade_, surface_texture)  //
-      );
-#if !SLIMPELLER
-    case AndroidRenderingAPI::kSkiaOpenGLES:
-      // Legacy GL.
-      return std::make_unique<SurfaceTextureExternalTextureGLSkia>(
-          texture_id,                                                 //
-          MakeJavaSurfaceTextureSource(jni_facade_, surface_texture)  //
-      );
-    case AndroidRenderingAPI::kSoftware:
-      FML_LOG(INFO) << "Software rendering does not support external textures.";
-      return nullptr;
-#endif  // !SLIMPELLER
-    case AndroidRenderingAPI::kImpellerVulkan:
-      FML_LOG(IMPORTANT)
-          << "Flutter recommends migrating plugins that create and "
-             "register surface textures to the new surface producer "
-             "API. See https://docs.flutter.dev/release/breaking-changes/"
-             "android-surface-plugins";
-      return std::make_unique<SurfaceTextureExternalTextureVKImpeller>(
-          std::static_pointer_cast<impeller::ContextVK>(
-              android_context_->GetImpellerContext()),                //
-          texture_id,                                                 //
-          MakeJavaSurfaceTextureSource(jni_facade_, surface_texture)  //
-      );
-    case AndroidRenderingAPI::kImpellerAutoselect:
-    default:
-      FML_CHECK(false);
-      return nullptr;
-  }
 }
 
 std::unique_ptr<Texture> PlatformViewAndroid::CreateImageTexture(

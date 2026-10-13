@@ -10,15 +10,20 @@
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/texture_source.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
 //------------------------------------------------------------------------------
-/// @brief      Makes the source of an external texture fed by a Java
-///             SurfaceTextureWrapper. `surface_texture` is the WeakReference
-///             to it that FlutterJNI registers.
+/// @brief      Describes an external texture fed by a Java
+///             SurfaceTextureWrapper, for
+///             FlutterEngineRegisterExternalTextureWithInfo.
+///             `surface_texture` is the WeakReference to it that FlutterJNI
+///             registers. If registration fails, the caller still owns the
+///             info's `user_data` and passes it to `destruction_callback`.
 ///
-SurfaceTextureSource MakeJavaSurfaceTextureSource(
+FlutterExternalTextureInfo MakeJavaSurfaceTextureInfo(
+    int64_t texture_id,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture);
 

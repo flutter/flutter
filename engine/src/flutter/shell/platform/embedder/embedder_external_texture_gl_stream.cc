@@ -2,11 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/surface_texture_external_texture.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl_stream.h"
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
-
-#include <GLES/glext.h>
 
 #include <utility>
 
@@ -14,29 +12,25 @@
 
 namespace flutter {
 
-SurfaceTextureExternalTexture::SurfaceTextureExternalTexture(
+EmbedderExternalTextureGLStream::EmbedderExternalTextureGLStream(
     int64_t id,
-    SurfaceTextureSource source)
-    : Texture(id), source_(source), transform_(SkMatrix::I()) {}
+    EmbedderOpenGLTextureStream stream)
+    : Texture(id), stream_(stream), transform_(SkMatrix::I()) {}
 
-SurfaceTextureExternalTexture::~SurfaceTextureExternalTexture() {
-  if (source_.destruction != nullptr) {
-    source_.destruction(source_.user_data);
-  }
-}
+EmbedderExternalTextureGLStream::~EmbedderExternalTextureGLStream() = default;
 
-void SurfaceTextureExternalTexture::OnGrContextCreated() {
+void EmbedderExternalTextureGLStream::OnGrContextCreated() {
   state_ = AttachmentState::kUninitialized;
 }
 
-void SurfaceTextureExternalTexture::MarkNewFrameAvailable() {
+void EmbedderExternalTextureGLStream::MarkNewFrameAvailable() {
   // NOOP.
 }
 
-void SurfaceTextureExternalTexture::Paint(PaintContext& context,
-                                          const DlRect& bounds,
-                                          bool freeze,
-                                          const DlImageSampling sampling) {
+void EmbedderExternalTextureGLStream::Paint(PaintContext& context,
+                                            const DlRect& bounds,
+                                            bool freeze,
+                                            const DlImageSampling sampling) {
   if (state_ == AttachmentState::kDetached) {
     return;
   }
@@ -52,14 +46,14 @@ void SurfaceTextureExternalTexture::Paint(PaintContext& context,
 
   if (!dl_image_) {
     FML_LOG(WARNING)
-        << "No DlImage available for SurfaceTextureExternalTexture to paint.";
+        << "No DlImage available for EmbedderExternalTextureGLStream to paint.";
     return;
   }
 
   DrawFrame(context, ToSkRect(bounds), sampling);
 }
 
-void SurfaceTextureExternalTexture::DrawFrame(
+void EmbedderExternalTextureGLStream::DrawFrame(
     PaintContext& context,
     const SkRect& bounds,
     const DlImageSampling sampling) const {
@@ -103,38 +97,40 @@ void SurfaceTextureExternalTexture::DrawFrame(
   context.canvas->DrawRect(DlRect::MakeWH(1, 1), paintWithShader);
 }
 
-void SurfaceTextureExternalTexture::OnGrContextDestroyed() {
+void EmbedderExternalTextureGLStream::OnGrContextDestroyed() {
   if (state_ == AttachmentState::kAttached) {
     Detach();
   }
   state_ = AttachmentState::kDetached;
 }
 
-void SurfaceTextureExternalTexture::OnTextureUnregistered() {}
+void EmbedderExternalTextureGLStream::OnTextureUnregistered() {}
 
-void SurfaceTextureExternalTexture::Detach() {
-  source_.detach(source_.user_data);
+void EmbedderExternalTextureGLStream::Detach() {
+  stream_.callbacks.detach_callback(stream_.user_data);
   dl_image_.reset();
 }
 
-void SurfaceTextureExternalTexture::Attach(int gl_tex_id) {
-  source_.attach(source_.user_data, static_cast<uint32_t>(gl_tex_id));
+void EmbedderExternalTextureGLStream::Attach(int gl_tex_id) {
+  stream_.callbacks.attach_callback(stream_.user_data,
+                                    static_cast<uint32_t>(gl_tex_id));
   state_ = AttachmentState::kAttached;
 }
 
-bool SurfaceTextureExternalTexture::ShouldUpdate() {
-  return source_.has_pending_frame != nullptr &&
-         source_.has_pending_frame(source_.user_data);
+bool EmbedderExternalTextureGLStream::ShouldUpdate() {
+  return stream_.callbacks.has_pending_frame_callback != nullptr &&
+         stream_.callbacks.has_pending_frame_callback(stream_.user_data);
 }
 
-void SurfaceTextureExternalTexture::Update() {
+void EmbedderExternalTextureGLStream::Update() {
   float transformation[16];
-  source_.update(source_.user_data, transformation);
+  stream_.callbacks.update_callback(stream_.user_data, transformation);
   static_assert(sizeof(SkScalar) == sizeof(float));
   transform_ = SkM44::ColMajor(transformation);
 }
 
-const SkM44& SurfaceTextureExternalTexture::GetCurrentUVTransformation() const {
+const SkM44& EmbedderExternalTextureGLStream::GetCurrentUVTransformation()
+    const {
   return transform_;
 }
 

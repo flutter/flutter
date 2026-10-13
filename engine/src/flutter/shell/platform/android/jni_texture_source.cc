@@ -17,7 +17,7 @@ namespace flutter {
 
 namespace {
 
-// The Java SurfaceTextureWrapper behind a SurfaceTextureSource.
+// The Java SurfaceTextureWrapper behind an OpenGL stream texture.
 struct JavaSurfaceTexture {
   JavaSurfaceTexture(
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
@@ -140,17 +140,25 @@ void DestroyImageTexture(void* user_data) {
 
 }  // namespace
 
-SurfaceTextureSource MakeJavaSurfaceTextureSource(
+FlutterExternalTextureInfo MakeJavaSurfaceTextureInfo(
+    int64_t texture_id,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
+  static const FlutterOpenGLTextureStreamSource kCallbacks = {
+      .struct_size = sizeof(FlutterOpenGLTextureStreamSource),
+      .attach_callback = &AttachSurfaceTexture,
+      .update_callback = &UpdateSurfaceTexture,
+      .detach_callback = &DetachSurfaceTexture,
+      .has_pending_frame_callback = &SurfaceTextureHasPendingFrame,
+  };
   return {
+      .struct_size = sizeof(FlutterExternalTextureInfo),
+      .texture_id = texture_id,
+      .type = kFlutterExternalTextureTypeOpenGLStream,
       .user_data =
           new JavaSurfaceTexture(std::move(jni_facade), surface_texture),
-      .attach = &AttachSurfaceTexture,
-      .update = &UpdateSurfaceTexture,
-      .detach = &DetachSurfaceTexture,
-      .has_pending_frame = &SurfaceTextureHasPendingFrame,
-      .destruction = &DestroySurfaceTexture,
+      .open_gl_stream = &kCallbacks,
+      .destruction_callback = &DestroySurfaceTexture,
   };
 }
 

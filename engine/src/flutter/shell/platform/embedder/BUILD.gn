@@ -62,6 +62,8 @@ template("embedder_source_set") {
       "embedder_asset_resolver.h",
       "embedder_engine.cc",
       "embedder_engine.h",
+      "embedder_external_texture_gl_stream.cc",
+      "embedder_external_texture_gl_stream.h",
       "embedder_external_texture_resolver.cc",
       "embedder_external_texture_resolver.h",
       "embedder_external_view.cc",
@@ -128,13 +130,42 @@ template("embedder_source_set") {
         "embedder_surface_gl_skia.h",
       ]
 
+      # The Skia implementation calls the system OpenGL ES library directly.
+      if (is_android && !slimpeller) {
+        sources += [
+          "embedder_external_texture_gl_stream_skia.cc",
+          "embedder_external_texture_gl_stream_skia.h",
+        ]
+      }
+
       if (impeller_supports_rendering) {
         sources += [
+          "embedder_external_texture_gl_stream_impeller.cc",
+          "embedder_external_texture_gl_stream_impeller.h",
           "embedder_surface_gl_impeller.cc",
           "embedder_surface_gl_impeller.h",
         ]
         deps += [ "//flutter/impeller/renderer/backend/gles" ]
       }
+    }
+
+    # OpenGL stream textures have their own source, and the Android Vulkan
+    # implementation blits them through the GL-to-Vulkan trampoline.
+    sources += [
+      "embedder_gl_stream_texture.cc",
+      "embedder_gl_stream_texture.h",
+    ]
+    if (is_android && embedder_enable_vulkan && impeller_supports_rendering) {
+      sources += [
+        "embedder_external_texture_gl_stream_vk.cc",
+        "embedder_external_texture_gl_stream_vk.h",
+      ]
+      deps += [
+        "//flutter/impeller/display_list",
+        "//flutter/impeller/renderer/backend/vulkan",
+        "//flutter/impeller/toolkit/android",
+        "//flutter/impeller/toolkit/glvk",
+      ]
     }
 
     if (impeller_supports_rendering) {
@@ -289,6 +320,7 @@ if (enable_unittests) {
     include_dirs = [ "." ]
 
     sources = [
+      "embedder_gl_stream_texture_unittests.cc",
       "embedder_semantics_update_unittests.cc",
       "platform_view_embedder_unittests.cc",
       "tests/embedder_config_builder.cc",

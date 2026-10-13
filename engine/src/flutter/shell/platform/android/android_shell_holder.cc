@@ -27,6 +27,7 @@
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/context/android_context.h"
+#include "flutter/shell/platform/android/jni_texture_source.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
@@ -1399,20 +1400,31 @@ void AndroidShellHolder::UpdateJavaAssetManager(
 void AndroidShellHolder::RegisterExternalTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
-  if (!platform_view_) {
-    return;
+  switch (android_rendering_api_) {
+    case AndroidRenderingAPI::kSoftware:
+      FML_LOG(INFO) << "Software rendering does not support external textures.";
+      return;
+    case AndroidRenderingAPI::kImpellerVulkan:
+    case AndroidRenderingAPI::kImpellerAutoselect:
+      FML_LOG(IMPORTANT)
+          << "Flutter recommends migrating plugins that create and "
+             "register surface textures to the new surface producer "
+             "API. See https://docs.flutter.dev/release/breaking-changes/"
+             "android-surface-plugins";
+      break;
+    case AndroidRenderingAPI::kImpellerOpenGLES:
+    case AndroidRenderingAPI::kSkiaOpenGLES:
+      break;
   }
-  std::unique_ptr<Texture> texture =
-      platform_view_->CreateSurfaceTexture(texture_id, surface_texture);
-  if (!texture) {
-    return;
-  }
-  GetPendingTextureTable().Put(holder_id_, texture_id, std::move(texture));
+  FlutterExternalTextureInfo info =
+      MakeJavaSurfaceTextureInfo(texture_id, jni_facade_, surface_texture);
   FlutterEngineResult result =
-      embedder_api_.RegisterExternalTexture(engine_.get(), texture_id);
-  GetPendingTextureTable().Take(holder_id_, texture_id);
+      embedder_api_.RegisterExternalTextureWithInfo(engine_.get(), &info);
   if (result != kSuccess) {
-    FML_LOG(ERROR) << "FlutterEngineRegisterExternalTexture failed: " << result;
+    // The engine did not take the source.
+    info.destruction_callback(info.user_data);
+    FML_LOG(ERROR) << "FlutterEngineRegisterExternalTextureWithInfo failed: "
+                   << result;
   }
 }
 

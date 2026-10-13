@@ -60,6 +60,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/platform/embedder/embedder_asset_resolver.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
+#include "flutter/shell/platform/embedder/embedder_gl_stream_texture.h"
 #include "flutter/shell/platform/embedder/embedder_image_generator.h"
 #include "flutter/shell/platform/embedder/embedder_platform_message_response.h"
 #include "flutter/shell/platform/embedder/embedder_render_target.h"
@@ -3547,6 +3548,39 @@ FlutterEngineResult FlutterEngineRegisterExternalTexture(
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineRegisterExternalTextureWithInfo(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterExternalTextureInfo* info) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  if (info == nullptr ||
+      info->struct_size < sizeof(FlutterExternalTextureInfo)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The external texture info was invalid.");
+  }
+  auto embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  // Checked before the texture takes ownership of info->user_data, so that a
+  // failed registration never runs the destruction callback.
+  if (!embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  std::unique_ptr<flutter::Texture> texture;
+  switch (info->type) {
+    case kFlutterExternalTextureTypeOpenGLStream:
+      texture = flutter::EmbedderGLStreamTexture::Create(*info);
+      break;
+  }
+  if (!texture) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        "The external texture source was missing a required callback or had "
+        "an unknown type.");
+  }
+  embedder_engine->RegisterExternalTexture(std::move(texture));
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineUnregisterExternalTexture(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier) {
@@ -4705,6 +4739,8 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
            FlutterEngineDeregisterVMServiceUriCallback);
   SET_PROC(LaunchEngine, FlutterEngineLaunchEngine);
   SET_PROC(PlatformMessageTakePayload, FlutterPlatformMessageTakePayload);
+  SET_PROC(RegisterExternalTextureWithInfo,
+           FlutterEngineRegisterExternalTextureWithInfo);
 #undef SET_PROC
 
   return kSuccess;

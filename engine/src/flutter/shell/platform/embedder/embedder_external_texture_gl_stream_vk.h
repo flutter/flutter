@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_TEXTURE_EXTERNAL_TEXTURE_VK_IMPELLER_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_TEXTURE_EXTERNAL_TEXTURE_VK_IMPELLER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_STREAM_VK_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_STREAM_VK_H_
 
 #include <memory>
 
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
 #include "flutter/impeller/toolkit/glvk/trampoline.h"
-#include "flutter/shell/platform/android/surface_texture_external_texture.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl_stream.h"
 
 namespace flutter {
 
@@ -32,21 +32,21 @@ namespace flutter {
 ///
 /// @see        `ImageExternalTextureVKImpeller`
 ///
-class SurfaceTextureExternalTextureVKImpeller final
-    : public SurfaceTextureExternalTexture {
+class EmbedderExternalTextureGLStreamVK final
+    : public EmbedderExternalTextureGLStream {
  public:
-  SurfaceTextureExternalTextureVKImpeller(
+  EmbedderExternalTextureGLStreamVK(
       std::shared_ptr<impeller::ContextVK> context,
       int64_t id,
-      SurfaceTextureSource source);
+      EmbedderOpenGLTextureStream stream);
 
-  ~SurfaceTextureExternalTextureVKImpeller() override;
+  ~EmbedderExternalTextureGLStreamVK() override;
 
-  SurfaceTextureExternalTextureVKImpeller(
-      const SurfaceTextureExternalTextureVKImpeller&) = delete;
+  EmbedderExternalTextureGLStreamVK(const EmbedderExternalTextureGLStreamVK&) =
+      delete;
 
-  SurfaceTextureExternalTextureVKImpeller& operator=(
-      const SurfaceTextureExternalTextureVKImpeller&) = delete;
+  EmbedderExternalTextureGLStreamVK& operator=(
+      const EmbedderExternalTextureGLStreamVK&) = delete;
 
  private:
   std::shared_ptr<impeller::ContextVK> context_;
@@ -54,13 +54,13 @@ class SurfaceTextureExternalTextureVKImpeller final
   std::shared_ptr<impeller::AHBTextureSourceVK> cached_texture_source_;
   bool is_valid_ = false;
 
-  // |SurfaceTextureExternalTexture|
+  // |EmbedderExternalTextureGLStream|
   void ProcessFrame(PaintContext& context, const SkRect& bounds) override;
 
-  // |SurfaceTextureExternalTexture|
+  // |EmbedderExternalTextureGLStream|
   void Detach() override;
 
-  // |SurfaceTextureExternalTexture|
+  // |EmbedderExternalTextureGLStream|
   void DrawFrame(PaintContext& context,
                  const SkRect& bounds,
                  const DlImageSampling sampling) const override;
@@ -72,4 +72,4 @@ class SurfaceTextureExternalTextureVKImpeller final
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_TEXTURE_EXTERNAL_TEXTURE_VK_IMPELLER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_STREAM_VK_H_

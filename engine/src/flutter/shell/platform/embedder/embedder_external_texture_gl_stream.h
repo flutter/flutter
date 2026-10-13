@@ -2,44 +2,53 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_TEXTURE_EXTERNAL_TEXTURE_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_TEXTURE_EXTERNAL_TEXTURE_H_
-
-#include <GLES/gl.h>
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_STREAM_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_STREAM_H_
 
 #include "flutter/common/graphics/texture.h"
-#include "flutter/shell/platform/android/texture_source.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 #include "third_party/skia/include/core/SkM44.h"
 
 namespace flutter {
 
 //------------------------------------------------------------------------------
-/// @brief      Instances of external textures peered to
+/// @brief      The callbacks of an OpenGL stream texture and the `user_data`
+///             they take. The texture does not own `user_data`.
+///
+struct EmbedderOpenGLTextureStream {
+  FlutterOpenGLTextureStreamSource callbacks = {};
+  void* user_data = nullptr;
+};
+
+//------------------------------------------------------------------------------
+/// @brief      Instances of external textures that draw the frames of an
+///             embedder's OpenGL texture stream
+///             (`kFlutterExternalTextureTypeOpenGLStream`), such as an
 ///             `android.graphics.SurfaceTexture`.
 ///
 ///             SurfaceTextures are used on older versions of Android (API <
 ///             29). On newer versions, the Android Hardware Buffer backend
 ///             `flutter::ImageExternalTexture` instances are used instead.
 ///
-///             Due to the way surface textures are designed, it is not possible
-///             to have a Vulkan renderer interoperate with such textures.
-///             Consequently, both Skia and Impeller only have OpenGL
-///             implementations for these kinds of textures.
+///             Due to the way surface textures are designed, a Vulkan renderer
+///             cannot sample them directly. Skia and Impeller have OpenGL
+///             implementations, and Impeller's Vulkan implementation on
+///             Android copies each frame through an OpenGL ES context.
 ///
 ///             This is an abstract base class. Minimally, subclasses override
 ///             the pure virtual `ProcessFrame` method to bind the package
 ///             specific texture implementation to the surface texture.
 ///
-class SurfaceTextureExternalTexture : public flutter::Texture {
+class EmbedderExternalTextureGLStream : public flutter::Texture {
  public:
   //----------------------------------------------------------------------------
-  /// @brief      Creates a texture that draws the frames of `source`. The
-  ///             texture calls `source.destruction` when it is destroyed.
+  /// @brief      Creates a texture that draws the frames of `stream`.
   ///
-  SurfaceTextureExternalTexture(int64_t id, SurfaceTextureSource source);
+  EmbedderExternalTextureGLStream(int64_t id,
+                                  EmbedderOpenGLTextureStream stream);
 
   // |Texture|
-  ~SurfaceTextureExternalTexture() override;
+  ~EmbedderExternalTextureGLStream() override;
 
  protected:
   //----------------------------------------------------------------------------
@@ -107,7 +116,7 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   ///
   enum class AttachmentState { kUninitialized, kAttached, kDetached };
 
-  const SurfaceTextureSource source_;
+  const EmbedderOpenGLTextureStream stream_;
   AttachmentState state_ = AttachmentState::kUninitialized;
   sk_sp<flutter::DlImage> dl_image_;
 
@@ -132,9 +141,9 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   // |Texture|
   void OnTextureUnregistered() override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(SurfaceTextureExternalTexture);
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureGLStream);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_TEXTURE_EXTERNAL_TEXTURE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_GL_STREAM_H_

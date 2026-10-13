@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/surface_texture_external_texture_gl_skia.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_gl_stream_skia.h"
 
 #include <GLES2/gl2.h>
 #define GL_GLEXT_PROTOTYPES
@@ -17,18 +17,18 @@
 
 namespace flutter {
 
-SurfaceTextureExternalTextureGLSkia::SurfaceTextureExternalTextureGLSkia(
+EmbedderExternalTextureGLStreamSkia::EmbedderExternalTextureGLStreamSkia(
     int64_t id,
-    SurfaceTextureSource source)
-    : SurfaceTextureExternalTexture(id, source) {}
+    EmbedderOpenGLTextureStream stream)
+    : EmbedderExternalTextureGLStream(id, stream) {}
 
-SurfaceTextureExternalTextureGLSkia::~SurfaceTextureExternalTextureGLSkia() {
+EmbedderExternalTextureGLStreamSkia::~EmbedderExternalTextureGLStreamSkia() {
   if (texture_name_ != 0) {
     glDeleteTextures(1, &texture_name_);
   }
 }
 
-void SurfaceTextureExternalTextureGLSkia::ProcessFrame(PaintContext& context,
+void EmbedderExternalTextureGLStreamSkia::ProcessFrame(PaintContext& context,
                                                        const SkRect& bounds) {
   if (state_ == AttachmentState::kUninitialized) {
     // Generate the texture handle.
@@ -49,8 +49,8 @@ void SurfaceTextureExternalTextureGLSkia::ProcessFrame(PaintContext& context,
       kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr));
 }
 
-void SurfaceTextureExternalTextureGLSkia::Detach() {
-  SurfaceTextureExternalTexture::Detach();
+void EmbedderExternalTextureGLStreamSkia::Detach() {
+  EmbedderExternalTextureGLStream::Detach();
   // Detach will collect the texture handle.
   // See also: https://github.com/flutter/flutter/issues/152459
   texture_name_ = 0;
