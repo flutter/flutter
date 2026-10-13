@@ -16,6 +16,12 @@ import 'package:ui/ui.dart' as ui;
 import '../common/test_initialization.dart';
 import '../common/texture_shader.dart';
 
+@JS('CanvasRenderingContext2D.prototype.getImageData')
+external JSFunction get _getImageData;
+
+@JS('CanvasRenderingContext2D.prototype.getImageData')
+external set _getImageData(JSFunction value);
+
 void main() {
   internalBootstrapBrowserTest(() => testMain);
 }
@@ -408,6 +414,28 @@ void testMain() {
       _pixel(first.rasterizer.debugDirectSurface!.canvasImageSource as DomHTMLCanvasElement),
       <int>[9, 0, 0, 255],
     );
+  });
+
+  test('slow reference readback does not consume the placeholder observation budget', () async {
+    final JSFunction original = _getImageData;
+    _getImageData = ((JSObject context, JSNumber x, JSNumber y, JSNumber width, JSNumber height) {
+      _getImageData = original;
+      // Simulate the first full-size readback taking longer than the
+      // observation window, without delaying subsequent observations.
+      final timer = Stopwatch()..start();
+      while (timer.elapsedMilliseconds < 150) {}
+      return original.callAsFunction(context, x, y, width, height);
+    }).toJSCaptureThis;
+    try {
+      await first.draw(9);
+      expect(first.rasterizer.debugIsDirect, isTrue);
+      expect(
+        _pixel(first.rasterizer.debugDirectSurface!.canvasImageSource as DomHTMLCanvasElement),
+        <int>[9, 0, 0, 255],
+      );
+    } finally {
+      _getImageData = original;
+    }
   });
 
   test('translucent and antialiased pixels survive bitmap to direct entry', () async {

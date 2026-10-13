@@ -215,10 +215,7 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
         await surface.setSize(currentFrameSize);
         await surface.rasterizeToCanvas(pictures.single);
         _presentedSource = surface.canvasImageSource;
-        // Bound placeholder observation separately from the native work we
-        // have already awaited. Cold context initialization can exceed 100 ms.
-        final deadline = Stopwatch()..start();
-        if (await _isPlaceholderReady(surface, _nextBitmaps.single, deadline) && !isDisposed) {
+        if (await _isPlaceholderReady(surface, _nextBitmaps.single) && !isDisposed) {
           _nextDirectCanvas = _nextCanvases.single;
         }
       }
@@ -229,12 +226,8 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
 
   // A native render callback and rAF are not presentation fences. Compare the
   // placeholder with the independently exported image before revealing it.
-  Future<bool> _isPlaceholderReady(
-    OnscreenSurface surface,
-    DomImageBitmap expected,
-    Stopwatch deadline,
-  ) async {
-    if (deadline.elapsedMilliseconds >= 100 || isDisposed) {
+  Future<bool> _isPlaceholderReady(OnscreenSurface surface, DomImageBitmap expected) async {
+    if (isDisposed) {
       return false;
     }
     final size = BitmapSize(expected.width, expected.height);
@@ -252,6 +245,9 @@ class HybridCanvasViewRasterizer extends ViewRasterizer {
     context.globalCompositeOperation = 'copy';
     context.drawImage(expected, 0, 0);
     final Int32List reference = _readPixels(context, size);
+    // Bound retries separately from native work and reference preparation.
+    // Either can exceed 100 ms on a cold, full-size canvas.
+    final deadline = Stopwatch()..start();
     var reads = 0;
     try {
       while (!isDisposed && reads < 3 && deadline.elapsedMilliseconds < 100) {
