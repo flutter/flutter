@@ -1311,6 +1311,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// of the binding. Changing the value of this property risks very confusing
   /// behavior as the [WindowingOwner] may be inconsistently registered or
   /// unregistered.
+  ///
+  /// The binding reads this once, when it is created, and installs the fake
+  /// owner only if windowing is enabled at that point. A test file that enables
+  /// windowing itself therefore has to do so before the binding exists, that
+  /// is, before its first `testWidgets` is declared.
   @protected
   bool get registerTestWindowingOwner => true;
 
@@ -1390,28 +1395,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       return _TestWindowingOwner(platformDispatcher: platformDispatcher);
     }
     return super.createWindowingOwner();
-  }
-
-  /// Replaces [windowingOwner] with a new instance created by
-  /// [createWindowingOwner].
-  ///
-  /// A test that needs an owner of its own, rather than whichever one an
-  /// earlier test left installed, calls this first. It is also how a test gets
-  /// a test windowing owner at all when windowing was enabled only after the
-  /// binding was created: the binding decides which owner to install when it
-  /// initializes, so flipping `isWindowingEnabled` in a `setUp` leaves the
-  /// unsupported owner in place until this is called.
-  ///
-  /// The windows the previous owner created are not destroyed, and the views
-  /// they registered stay registered. A test that creates windows destroys them
-  /// itself.
-  ///
-  /// This is part of Flutter's experimental windowing support: it throws an
-  /// [UnsupportedError] unless windowing is enabled by [isWindowingEnabled], and
-  /// Flutter will make breaking changes to it, even in patch versions. See
-  /// https://github.com/flutter/flutter/issues/30701.
-  void resetWindowingOwner() {
-    windowingOwner = createWindowingOwner();
   }
 
   @override

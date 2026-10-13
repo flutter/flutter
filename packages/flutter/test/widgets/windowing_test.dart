@@ -332,6 +332,13 @@ class _MutableWindowController extends WindowController {
 }
 
 void main() {
+  // The binding is created by the first testWidgets below and chooses its
+  // windowing owner then: flutter_test installs its test owner only if
+  // windowing is enabled at that moment. Enable it before any test is declared
+  // so that the 'test window controllers' group has a test owner to work with.
+  // Each group then sets the flag for its own tests.
+  isWindowingEnabled = true;
+
   group('Windowing', () {
     group('isWindowingEnabled is false', () {
       setUp(() {
@@ -2255,25 +2262,17 @@ void main() {
       });
 
       group('test window controllers', () {
-        // These tests exercise flutter_test's own window controller doubles, so
-        // they need a test windowing owner installed. The binding was created
-        // before this file's setUp enabled windowing and therefore holds the
-        // unsupported owner; install a test owner for each test here and put the
-        // previous one back afterwards.
-        setUp(() {
-          final WindowingOwner previousOwner = WidgetsBinding.instance.windowingOwner;
-          TestWidgetsFlutterBinding.instance.resetWindowingOwner();
-          addTearDown(() {
-            WidgetsBinding.instance.windowingOwner = previousOwner;
-          });
-        });
+        // These tests exercise flutter_test's own window controller doubles
+        // through the test windowing owner the binding installed (see the top of
+        // main). That owner is shared by the whole file, so each test destroys
+        // the windows it creates.
 
         testWidgets(
           'Destroying a test window controller removes its view from platformDispatcher',
           (WidgetTester tester) async {
             final WindowController controller = WidgetsBinding.instance.windowingOwner
                 .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
-            addTearDown(controller.dispose);
+            _destroyOnTearDown(controller);
             expect(tester.platformDispatcher.views, contains(controller.rootView));
 
             controller.destroy();
@@ -2296,7 +2295,7 @@ void main() {
 
           final WindowController controller = WidgetsBinding.instance.windowingOwner
               .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
-          addTearDown(controller.dispose);
+          _destroyOnTearDown(controller);
 
           // The view is registered with `notify: false` and the controller reports
           // the change itself once it has assigned `rootView`. Registering with a
@@ -2311,7 +2310,7 @@ void main() {
           (WidgetTester tester) async {
             final WindowController controller = WidgetsBinding.instance.windowingOwner
                 .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
-            addTearDown(controller.dispose);
+            _destroyOnTearDown(controller);
             final FlutterView rootView = controller.rootView;
             expect(tester.platformDispatcher.views, contains(rootView));
 
@@ -2355,7 +2354,7 @@ void main() {
             }),
             resizable: true,
           );
-          addTearDown(controller.dispose);
+          _destroyOnTearDown(controller);
 
           var metricsChangedCount = 0;
           final VoidCallback? previousMetricsChanged = tester.platformDispatcher.onMetricsChanged;
@@ -2388,7 +2387,7 @@ void main() {
           (WidgetTester tester) async {
             final WindowController parent = WidgetsBinding.instance.windowingOwner
                 .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
-            addTearDown(parent.dispose);
+            _destroyOnTearDown(parent);
             expect(parent.isActivated, isTrue);
 
             final DialogWindowController child = WidgetsBinding.instance.windowingOwner
@@ -2397,7 +2396,7 @@ void main() {
                   resizable: true,
                   parent: parent,
                 );
-            addTearDown(child.dispose);
+            _destroyOnTearDown(child);
             expect(child.isActivated, isTrue);
             expect(parent.isActivated, isFalse);
 
@@ -2420,7 +2419,7 @@ void main() {
           (WidgetTester tester) async {
             final WindowController parent = WidgetsBinding.instance.windowingOwner
                 .createWindowController(delegate: WindowControllerDelegate(), resizable: true);
-            addTearDown(parent.dispose);
+            _destroyOnTearDown(parent);
 
             final DialogWindowController child1 = WidgetsBinding.instance.windowingOwner
                 .createDialogWindowController(
@@ -2428,7 +2427,7 @@ void main() {
                   resizable: true,
                   parent: parent,
                 );
-            addTearDown(child1.dispose);
+            _destroyOnTearDown(child1);
 
             final DialogWindowController child2 = WidgetsBinding.instance.windowingOwner
                 .createDialogWindowController(
@@ -2436,7 +2435,7 @@ void main() {
                   resizable: true,
                   parent: parent,
                 );
-            addTearDown(child2.dispose);
+            _destroyOnTearDown(child2);
 
             parent.destroy();
             expect(parent.isDestroyed, isTrue);
@@ -2452,6 +2451,16 @@ void main() {
         );
       });
     });
+  });
+}
+
+// The test windowing owner is shared by every test in this file, so a test must
+// not leave the windows it creates behind: this destroys [controller] at
+// teardown, if the test has not already, and then disposes it.
+void _destroyOnTearDown(BaseWindowController controller) {
+  addTearDown(() {
+    controller.destroy();
+    controller.dispose();
   });
 }
 
