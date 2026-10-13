@@ -1,0 +1,12 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Hand-written until shell/vmservice/BUILD.gn converts: that file is the VM
+# service isolate's snapshot through the flutter_snapshot template
+# (build/dart/internal/flutter_snapshot.gni), which the converter does not
+# read yet. What //flutter/testing needs of this directory is the empty
+# entry point its own vmservice_kernel compiles, and that is all this file
+# has.
+
+exports_files(["empty.dart"])
