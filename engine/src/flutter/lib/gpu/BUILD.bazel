@@ -76,3 +76,11 @@ cc_library(
     ],
     alwayslink = True,
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)

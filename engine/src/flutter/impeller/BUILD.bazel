@@ -40,8 +40,3 @@ cc_library(
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
     ],
 )
-
-# What GN has no words for; maintained in the converter's manifest
-# (tools/gn_to_bazel/lib/src/manifest.dart).
-
-exports_files(glob(["fixtures/*"]))
