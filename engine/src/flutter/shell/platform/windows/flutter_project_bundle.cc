@@ -4,8 +4,10 @@
 
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 
+#include <charconv>
 #include <cstdlib>
 #include <filesystem>
+#include <string_view>
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/string_conversion.h"
@@ -15,6 +17,30 @@
 namespace flutter {
 
 namespace {
+
+// Parses a feature level written as "<major>_<minor>", such as "10_0".
+// Returns nullopt if |value| is not in that form.
+std::optional<egl::D3DFeatureLevel> ParseD3DFeatureLevel(
+    std::string_view value) {
+  const size_t separator = value.find('_');
+  if (separator == std::string_view::npos) {
+    return std::nullopt;
+  }
+  const char* major_begin = value.data();
+  const char* major_end = major_begin + separator;
+  const char* minor_begin = major_end + 1;
+  const char* minor_end = value.data() + value.size();
+
+  int major = 0;
+  int minor = 0;
+  auto major_result = std::from_chars(major_begin, major_end, major);
+  auto minor_result = std::from_chars(minor_begin, minor_end, minor);
+  if (major_result.ec != std::errc() || major_result.ptr != major_end ||
+      minor_result.ec != std::errc() || minor_result.ptr != minor_end) {
+    return std::nullopt;
+  }
+  return egl::D3DFeatureLevel{major, minor};
+}
 
 // Returns the D3D11 feature level cap from the environment, if set. The cap
 // lets tests emulate older GPUs, where ANGLE may only create OpenGL ES 2.0
@@ -27,7 +53,7 @@ std::optional<egl::D3DFeatureLevel> GetMaxD3DFeatureLevelFromEnvironment() {
   if (value == nullptr || value[0] == '\0') {
     return std::nullopt;
   }
-  std::optional<egl::D3DFeatureLevel> level = egl::ParseD3DFeatureLevel(value);
+  std::optional<egl::D3DFeatureLevel> level = ParseD3DFeatureLevel(value);
   if (!level.has_value()) {
     FML_LOG(WARNING) << "Ignoring " << kKey << "=" << value
                      << "; expected a feature level such as 10_0.";
