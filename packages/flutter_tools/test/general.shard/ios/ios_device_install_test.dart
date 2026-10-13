@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
@@ -364,14 +363,15 @@ IOSDevice setUpIOSDevice({
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
-    logger: logger,
-    fileSystem: testFileSystem,
-    fileSystemUtils: FileSystemUtils(fileSystem: testFileSystem, platform: platform),
-    processUtils: ProcessUtils(processManager: processManager, logger: logger),
-    xcode: null,
+    toolContext: FakeToolContext(
+      fs: testFileSystem,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+    ),
+    xcode: FakeXcode(),
     sdkVersion: '13.3',
     cpuArch: .arm64,
-    platform: platform,
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager,
@@ -395,8 +395,6 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
-    operatingSystemUtils: FakeOperatingSystemUtils(),
-    shutdownHooks: FakeShutdownHooks(),
     templateRenderer: FakeTemplateRenderer(),
   );
 }

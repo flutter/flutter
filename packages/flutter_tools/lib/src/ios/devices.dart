@@ -25,6 +25,7 @@ import '../base/user_messages.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
@@ -306,9 +307,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 class IOSDevice extends Device {
   IOSDevice(
     super.id, {
-    required this._fileSystem,
-    required this._fileSystemUtils,
-    required this._processUtils,
+    required ToolContext toolContext,
     required this.name,
     required this._cpuArch,
     this._cpuArchitectureString,
@@ -320,24 +319,30 @@ class IOSDevice extends Device {
     this._sdkVersion,
     this._modelCode,
     this._operatingSystemVersion,
-    required this._platform,
     required this._iosDeploy,
     required this._iMobileDevice,
     required this._coreDeviceControl,
     required this._coreDeviceLauncher,
     required this._xcodeDebug,
     required IProxy iProxy,
-    required super.logger,
     required this._analytics,
     required this._xcode,
-    required this._operatingSystemUtils,
-    required this._shutdownHooks,
     required this._templateRenderer,
-    UserMessages? userMessages,
-  }) : _iproxy = iProxy,
-       _logger = logger,
-       _userMessages = userMessages ?? UserMessages(),
-       super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true) {
+  }) : _fileSystem = toolContext.fs,
+       _fileSystemUtils = toolContext.fileSystemUtils,
+       _processUtils = toolContext.processUtils,
+       _platform = toolContext.platform,
+       _iproxy = iProxy,
+       _logger = toolContext.logger,
+       _operatingSystemUtils = toolContext.os,
+       _shutdownHooks = toolContext.shutdownHooks,
+       _userMessages = toolContext.userMessages,
+       super(
+         category: Category.mobile,
+         platformType: PlatformType.ios,
+         ephemeral: true,
+         logger: toolContext.logger,
+       ) {
     if (!_platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
       return;
@@ -358,7 +363,7 @@ class IOSDevice extends Device {
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
   final XcodeDebug _xcodeDebug;
-  final Xcode? _xcode;
+  final Xcode _xcode;
   final IProxy _iproxy;
   final ShutdownHooks _shutdownHooks;
   final UserMessages _userMessages;
@@ -1126,7 +1131,7 @@ class IOSDevice extends Device {
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
     // However, it doesn't work reliably until Xcode 26.
     // Use LLDB if Xcode version is greater than 26 and the feature is enabled.
-    final Version? xcodeVersion = _xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode.currentVersion;
     if (xcodeVersion != null && xcodeVersion.major >= 26 && featureFlags.isLLDBDebuggingEnabled) {
       final DeviceLogReader deviceLogReader = getLogReader(
         app: package,
@@ -1372,16 +1377,16 @@ class IOSDevice extends Device {
 
   @override
   bool get supportsScreenshot {
-    final Version? xcodeVersion = _xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode.currentVersion;
     if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
-      return _xcode!.isDevicectlInstalled;
+      return _xcode.isDevicectlInstalled;
     }
     return false;
   }
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
-    final Version? xcodeVersion = _xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode.currentVersion;
     if (isCoreDevice && xcodeVersion != null && xcodeVersion.major >= 27) {
       var success = false;
       try {

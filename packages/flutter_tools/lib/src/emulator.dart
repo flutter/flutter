@@ -44,15 +44,17 @@ class EmulatorManager {
          fileSystem: fileSystem,
          androidWorkflow: androidWorkflow,
        ) {
-    _emulatorDiscoverers.add(
-      IOSEmulators(
-        iosWorkflow: iosWorkflow,
-        logger: logger,
-        platform: platform,
-        processUtils: _processUtils,
-        xcode: xcode,
-      ),
-    );
+    if (iosWorkflow != null && xcode != null) {
+      _emulatorDiscoverers.add(
+        IOSEmulators(
+          iosWorkflow: iosWorkflow,
+          logger: logger,
+          platform: platform,
+          processUtils: _processUtils,
+          xcode: xcode,
+        ),
+      );
+    }
     _emulatorDiscoverers.add(_androidEmulators);
   }
 

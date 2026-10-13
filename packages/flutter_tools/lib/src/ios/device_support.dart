@@ -27,7 +27,7 @@ class IOSDeviceSupport {
 
   final Logger _logger;
   final ProcessUtils _processUtils;
-  final Xcode? _xcode;
+  final Xcode _xcode;
 
   final String _deviceId;
   final Directory? _homeDirectory;
@@ -55,7 +55,7 @@ class IOSDeviceSupport {
 
   /// Whether the prepareDeviceSupport command is available. Available on Xcode 16.3+.
   late final bool _prepareDeviceSupportCommandAvailable = () {
-    final Version? xcodeVersion = _xcode?.currentVersion;
+    final Version? xcodeVersion = _xcode.currentVersion;
     if (xcodeVersion == null || xcodeVersion < Version(16, 3, 0)) {
       return false;
     }

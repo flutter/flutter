@@ -21,17 +21,17 @@ class IOSEmulators extends EmulatorDiscovery {
     required this._xcode,
   });
 
-  final IOSWorkflow? _iosWorkflow;
+  final IOSWorkflow _iosWorkflow;
   final Logger _logger;
   final Platform _platform;
   final ProcessUtils _processUtils;
-  final Xcode? _xcode;
+  final Xcode _xcode;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
 
   @override
-  bool get canListAnything => _iosWorkflow?.canListEmulators ?? false;
+  bool get canListAnything => _iosWorkflow.canListEmulators;
 
   @override
   Future<List<Emulator>> get emulators async =>
@@ -51,7 +51,7 @@ class IOSEmulator extends Emulator {
 
   final Logger _logger;
   final ProcessUtils _processUtils;
-  final Xcode? _xcode;
+  final Xcode _xcode;
 
   @override
   String get name => 'iOS Simulator';
@@ -67,7 +67,7 @@ class IOSEmulator extends Emulator {
 
   @override
   Future<void> launch({bool coldBoot = false}) async {
-    final String? simulatorPath = _xcode?.getSimulatorPath();
+    final String? simulatorPath = _xcode.getSimulatorPath();
     if (simulatorPath == null) {
       throwToolExit('Could not find Simulator app');
     }
@@ -97,9 +97,9 @@ class IOSEmulator extends Emulator {
 List<IOSEmulator> getEmulators({
   required Logger logger,
   required ProcessUtils processUtils,
-  required Xcode? xcode,
+  required Xcode xcode,
 }) {
-  final String? simulatorPath = xcode?.getSimulatorPath();
+  final String? simulatorPath = xcode.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];
   }

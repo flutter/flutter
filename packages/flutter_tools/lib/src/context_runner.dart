@@ -29,6 +29,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
@@ -228,12 +229,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       HotRunnerConfig: () => HotRunnerConfig(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         analytics: globals.analytics,
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        operatingSystemUtils: globals.os,
-        platform: globals.platform,
         plistParser: globals.plistParser,
-        processManager: globals.processManager,
+        toolContext: _createGlobalToolContext(),
         xcode: globals.xcode!,
       ),
       IOSWorkflow: () => IOSWorkflow(
@@ -326,11 +323,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         userMessages: globals.userMessages,
       ),
       XCDevice: () => XCDevice(
-        processManager: globals.processManager,
-        logger: globals.logger,
-        artifacts: globals.artifacts!,
-        cache: globals.cache,
-        platform: globals.platform,
         xcode: globals.xcode!,
         iproxy: IProxy(
           artifacts: globals.artifacts!,
@@ -338,10 +330,9 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
           processManager: globals.processManager,
           dyLdLibEntry: globals.cache.dyLdLibEntry,
         ),
-        fileSystem: globals.fs,
         analytics: globals.analytics,
-        shutdownHooks: globals.shutdownHooks,
         templateRenderer: globals.templateRenderer,
+        toolContext: _createGlobalToolContext(),
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,
@@ -353,3 +344,34 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
     },
   );
 }
+
+/// Creates a [ToolContext] from [globals] for the fallbacks in [runInContext]
+/// that require one.
+ToolContext _createGlobalToolContext() => ToolContext(
+  artifacts: globals.artifacts!,
+  botDetector: globals.botDetector,
+  cache: globals.cache,
+  config: globals.config,
+  customDevicesConfig: globals.customDevicesConfig,
+  flutterVersion: globals.flutterVersion,
+  fs: globals.fs,
+  git: globals.git,
+  localEngineLocator: globals.localEngineLocator!,
+  logger: globals.logger,
+  nativeAssetsBuilder: globals.nativeAssetsBuilder,
+  os: globals.os,
+  outputPreferences: globals.outputPreferences,
+  persistentToolState: globals.persistentToolState!,
+  platform: globals.platform,
+  preRunValidator: globals.preRunValidator,
+  processInfo: globals.processInfo,
+  processManager: globals.processManager,
+  processUtils: globals.processUtils,
+  projectFactory: globals.projectFactory,
+  shutdownHooks: globals.shutdownHooks,
+  signals: globals.signals,
+  stdio: globals.stdio,
+  systemClock: globals.systemClock,
+  terminal: globals.terminal,
+  userMessages: globals.userMessages,
+);

@@ -679,18 +679,20 @@ void main() {
         );
         fileSystem = MemoryFileSystem.test();
         xcdevice = XCDevice(
-          processManager: fakeProcessManager,
-          logger: logger,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: logger,
+            platform: FakePlatform(operatingSystem: 'macos'),
+            processManager: fakeProcessManager,
+            shutdownHooks: FakeShutdownHooks(),
+          ),
           xcode: xcode,
-          platform: FakePlatform(operatingSystem: 'macos'),
-          artifacts: Artifacts.test(),
-          cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
-          fileSystem: fileSystem,
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: FakeXcodeDebug(),
           analytics: const NoOpAnalytics(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
         );
       });
@@ -713,18 +715,20 @@ void main() {
       final shutdownHooks = ShutdownHooks();
 
       final xcdevice = XCDevice(
-        processManager: FakeProcessManager.any(),
-        logger: logger,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          processManager: FakeProcessManager.any(),
+          shutdownHooks: shutdownHooks,
+        ),
         xcode: Xcode.test(processManager: FakeProcessManager.any()),
-        platform: FakePlatform(operatingSystem: 'macos'),
-        artifacts: Artifacts.test(),
-        cache: Cache.test(processManager: FakeProcessManager.any()),
         iproxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: MemoryFileSystem.test(),
         coreDeviceControl: FakeIOSCoreDeviceControl(),
         xcodeDebug: FakeXcodeDebug(),
         analytics: const NoOpAnalytics(),
-        shutdownHooks: shutdownHooks,
         templateRenderer: FakeTemplateRenderer(),
       );
 
@@ -758,18 +762,20 @@ void main() {
           fakeFlutterVersion: FakeFlutterVersion(),
         );
         xcdevice = XCDevice(
-          processManager: fakeProcessManager,
-          logger: logger,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: logger,
+            platform: FakePlatform(operatingSystem: 'macos'),
+            processManager: fakeProcessManager,
+            shutdownHooks: FakeShutdownHooks(),
+          ),
           xcode: xcode,
-          platform: FakePlatform(operatingSystem: 'macos'),
-          artifacts: Artifacts.test(),
-          cache: Cache.test(processManager: FakeProcessManager.any()),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
-          fileSystem: fileSystem,
           coreDeviceControl: coreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           analytics: fakeAnalytics,
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
         );
       });
@@ -1592,18 +1598,20 @@ void main() {
               ),
             );
             xcdevice = XCDevice(
-              processManager: fakeProcessManager,
-              logger: logger,
+              toolContext: FakeToolContext(
+                artifacts: Artifacts.test(),
+                cache: Cache.test(processManager: FakeProcessManager.any()),
+                fs: fileSystem,
+                logger: logger,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                processManager: fakeProcessManager,
+                shutdownHooks: FakeShutdownHooks(),
+              ),
               xcode: xcode,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              artifacts: Artifacts.test(),
-              cache: Cache.test(processManager: FakeProcessManager.any()),
               iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
-              fileSystem: fileSystem,
               coreDeviceControl: coreDeviceControl,
               xcodeDebug: FakeXcodeDebug(),
               analytics: fakeAnalytics,
-              shutdownHooks: FakeShutdownHooks(),
               templateRenderer: FakeTemplateRenderer(),
             );
             const devicesOutput = '''

@@ -20,6 +20,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../devfs.dart';
@@ -39,18 +40,21 @@ import 'plist_parser.dart';
 const iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
-  IOSSimulators({required this._iosSimulatorUtils, this._platform, this._iosWorkflow})
-    : super('iOS simulators');
+  IOSSimulators({
+    required this._iosSimulatorUtils,
+    required this._iosWorkflow,
+    required this._platform,
+  }) : super('iOS simulators');
 
   final IOSSimulatorUtils _iosSimulatorUtils;
-  final Platform? _platform;
-  final IOSWorkflow? _iosWorkflow;
+  final IOSWorkflow _iosWorkflow;
+  final Platform _platform;
 
   @override
-  bool get supportsPlatform => (_platform ?? _iosSimulatorUtils._platform).isMacOS;
+  bool get supportsPlatform => _platform.isMacOS;
 
   @override
-  bool get canListAnything => _iosWorkflow?.canListDevices ?? false;
+  bool get canListAnything => _iosWorkflow.canListDevices;
 
   @override
   Future<List<Device>> pollingGetDevices({
@@ -65,30 +69,28 @@ class IOSSimulators extends PollingDeviceDiscovery {
 class IOSSimulatorUtils {
   IOSSimulatorUtils({
     required this._analytics,
-    required this._fileSystem,
-    required Logger logger,
-    required this._operatingSystemUtils,
-    required this._platform,
     required this._plistParser,
-    required this._processManager,
+    required this._toolContext,
     required this._xcode,
-  }) : _simControl = SimControl(logger: logger, processManager: _processManager, xcode: _xcode);
+  }) : _simControl = SimControl(
+         logger: _toolContext.logger,
+         processManager: _toolContext.processManager,
+         xcode: _xcode,
+       );
 
-  final ProcessManager _processManager;
   final SimControl _simControl;
   final Xcode _xcode;
-  final OperatingSystemUtils _operatingSystemUtils;
-  final FileSystem _fileSystem;
-  final Platform _platform;
-  final PlistParser _plistParser;
   final Analytics _analytics;
+  final PlistParser _plistParser;
+  final ToolContext _toolContext;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulator>[];
     }
 
-    final cpuArch = CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+    final ToolContext(:Logger logger, :OperatingSystemUtils os) = _toolContext;
+    final cpuArch = CpuArch.fromHostPlatform(os.hostPlatform);
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
@@ -96,26 +98,23 @@ class IOSSimulatorUtils {
           final String? udid = device.udid;
           final String? name = device.name;
           if (udid == null) {
-            _simControl._logger.printTrace('Could not parse simulator udid');
+            logger.printTrace('Could not parse simulator udid');
             return null;
           }
           if (name == null) {
-            _simControl._logger.printTrace('Could not parse simulator name');
+            logger.printTrace('Could not parse simulator name');
             return null;
           }
           return IOSSimulator(
             udid,
+            analytics: _analytics,
+            cpuArch: cpuArch,
             name: name,
+            plistParser: _plistParser,
             simControl: _simControl,
             simulatorCategory: device.category,
-            logger: _simControl._logger,
-            cpuArch: cpuArch,
-            fileSystem: _fileSystem,
-            platform: _platform,
-            plistParser: _plistParser,
-            analytics: _analytics,
+            toolContext: _toolContext,
             xcode: _xcode,
-            processManager: _processManager,
           );
         })
         .whereType<IOSSimulator>()
@@ -377,36 +376,20 @@ class BootedSimDevice {
 class IOSSimulator extends Device {
   IOSSimulator(
     super.id, {
-    required this.name,
-    required this.simulatorCategory,
-    required this._simControl,
+    required this._analytics,
     required this._cpuArch,
-    required super.logger,
-    required this._fileSystem,
-    Platform? platform,
-    FileSystemUtils? fileSystemUtils,
-    PlistParser? plistParser,
-    Analytics? analytics,
-    this._xcode,
-    ProcessManager? processManager,
-  }) : _platform = platform ?? const LocalPlatform(),
-       _fileSystemUtils =
-           fileSystemUtils ??
-           FileSystemUtils(fileSystem: _fileSystem, platform: platform ?? const LocalPlatform()),
-       _plistParser =
-           plistParser ??
-           PlistParser(
-             fileSystem: _fileSystem,
-             logger: logger,
-             processManager: processManager ?? const LocalProcessManager(),
-           ),
-       _analytics = analytics ?? const NoOpAnalytics(),
-       _processUtils = ProcessUtils(
-         logger: logger,
-         processManager: processManager ?? const LocalProcessManager(),
-       ),
-       _logger = logger,
-       super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
+    required this.name,
+    required this._plistParser,
+    required this._simControl,
+    required this.simulatorCategory,
+    required this._toolContext,
+    required this._xcode,
+  }) : super(
+         category: Category.mobile,
+         ephemeral: true,
+         logger: _toolContext.logger,
+         platformType: PlatformType.ios,
+       );
 
   @override
   final String name;
@@ -416,18 +399,14 @@ class IOSSimulator extends Device {
   final SimControl _simControl;
 
   final CpuArch _cpuArch;
-  final Platform _platform;
-  final FileSystem _fileSystem;
-  final FileSystemUtils _fileSystemUtils;
-  final PlistParser _plistParser;
   final Analytics _analytics;
-  final Xcode? _xcode;
-  final ProcessUtils _processUtils;
-  final Logger _logger;
+  final PlistParser _plistParser;
+  final ToolContext _toolContext;
+  final Xcode _xcode;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
-    return LocalDevFSWriter(fileSystem: _fileSystem);
+    return LocalDevFSWriter(fileSystem: _toolContext.fs);
   }
 
   @override
@@ -487,7 +466,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> isSupported() async {
-    if (!_platform.isMacOS) {
+    if (!_toolContext.platform.isMacOS) {
       _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
     }
@@ -523,13 +502,14 @@ class IOSSimulator extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     if (!prebuiltApplication && package is BuildableIOSApp) {
-      _logger.printTrace('Building ${package.name} for $id.');
+      logger.printTrace('Building ${package.name} for $id.');
 
       try {
         await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo, mainPath);
       } on ToolExit catch (e) {
-        _logger.printError('${e.message}');
+        logger.printError('${e.message}');
         return LaunchResult.failed();
       }
     } else {
@@ -552,7 +532,7 @@ class IOSSimulator extends Device {
         ipv6: debuggingOptions.ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
-        logger: _logger,
+        logger: logger,
       );
     }
 
@@ -562,13 +542,13 @@ class IOSSimulator extends Device {
       // which should always yield the correct value and does not require
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
-      final String plistPath = _fileSystem.path.join(package.simulatorBundlePath, 'Info.plist');
+      final String plistPath = fs.path.join(package.simulatorBundlePath, 'Info.plist');
       final String? bundleIdentifier = _plistParser.getValueFromFile<String>(
         plistPath,
         PlistParser.kCFBundleIdentifierKey,
       );
       if (bundleIdentifier == null) {
-        _logger.printError(
+        logger.printError(
           'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier',
         );
         return LaunchResult.failed();
@@ -576,7 +556,7 @@ class IOSSimulator extends Device {
 
       await _simControl.launch(id, bundleIdentifier, launchArguments);
     } on Exception catch (error) {
-      _logger.printError('$error');
+      logger.printError('$error');
       return LaunchResult.failed();
     }
 
@@ -586,19 +566,19 @@ class IOSSimulator extends Device {
 
     // Wait for the service protocol port here. This will complete once the
     // device has printed "Dart VM Service is listening on..."
-    _logger.printTrace('Waiting for VM Service port to be available...');
+    logger.printTrace('Waiting for VM Service port to be available...');
 
     try {
       final Uri? deviceUri = await vmServiceDiscovery?.uri;
       if (deviceUri != null) {
         return LaunchResult.succeeded(vmServiceUri: deviceUri);
       }
-      _logger.printError(
+      logger.printError(
         'Error waiting for a debug connection: '
         'The log reader failed unexpectedly',
       );
     } on Exception catch (error) {
-      _logger.printError('Error waiting for a debug connection: $error');
+      logger.printError('Error waiting for a debug connection: $error');
     } finally {
       await vmServiceDiscovery?.cancel();
     }
@@ -610,6 +590,7 @@ class IOSSimulator extends Device {
     BuildInfo buildInfo,
     String? mainPath,
   ) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
@@ -625,8 +606,8 @@ class IOSSimulator extends Device {
       await diagnoseXcodeBuildFailure(
         buildResult,
         analytics: _analytics,
-        fileSystem: _fileSystem,
-        logger: _logger,
+        fileSystem: fs,
+        logger: logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
         device: this,
@@ -635,14 +616,14 @@ class IOSSimulator extends Device {
     }
 
     // Step 2: Assert that the Xcode project was successfully built.
-    final Directory bundle = _fileSystem.directory(app.simulatorBundlePath);
+    final Directory bundle = fs.directory(app.simulatorBundlePath);
     final bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
     }
 
     // Step 3: Install the updated bundle to the simulator.
-    await _simControl.install(id, _fileSystem.path.absolute(bundle.path));
+    await _simControl.install(id, fs.path.absolute(bundle.path));
   }
 
   @override
@@ -654,11 +635,13 @@ class IOSSimulator extends Device {
   }
 
   String get logFilePath {
-    final String? logPath = _platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'];
+    final ToolContext(:FileSystem fs, :FileSystemUtils fileSystemUtils, :Platform platform) =
+        _toolContext;
+    final String? logPath = platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'];
     return logPath != null
         ? logPath.replaceAll('%{id}', id)
-        : _fileSystem.path.join(
-            _fileSystemUtils.homeDirPath!,
+        : fs.path.join(
+            fileSystemUtils.homeDirPath!,
             'Library',
             'Logs',
             'CoreSimulator',
@@ -692,7 +675,7 @@ class IOSSimulator extends Device {
 
   @override
   void clearLogs() {
-    final File logFile = _fileSystem.file(logFilePath);
+    final File logFile = _toolContext.fs.file(logFilePath);
     if (logFile.existsSync()) {
       final RandomAccessFile randomFile = logFile.openSync(mode: FileMode.write);
       randomFile.truncateSync(0);
@@ -702,7 +685,7 @@ class IOSSimulator extends Device {
 
   Future<void> ensureLogsExists() async {
     if (await sdkMajorVersion < 11) {
-      final File logFile = _fileSystem.file(logFilePath);
+      final File logFile = _toolContext.fs.file(logFilePath);
       if (!logFile.existsSync()) {
         logFile.writeAsBytesSync(<int>[]);
       }
@@ -823,7 +806,13 @@ class IOSSimulatorRuntime {
 /// Launches the device log reader process on the host and parses the syslog.
 @visibleForTesting
 Future<Process> launchDeviceSystemLogTool(IOSSimulator device) async {
-  return device._processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
+  return device._toolContext.processUtils.start(<String>[
+    'tail',
+    '-n',
+    '0',
+    '-F',
+    device.logFilePath,
+  ]);
 }
 
 /// Launches the device log reader process on the host and parses unified logging.
@@ -852,8 +841,8 @@ Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName)
     notP('eventMessage CONTAINS " libxpc.dylib "'),
   ]);
 
-  return device._processUtils.start(<String>[
-    ...(device._xcode?.xcrunCommand() ?? const <String>['xcrun']),
+  return device._toolContext.processUtils.start(<String>[
+    ...device._xcode.xcrunCommand(),
     'simctl',
     'spawn',
     device.id,
@@ -870,7 +859,7 @@ Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName)
 Future<Process?> launchSystemLogTool(IOSSimulator device) async {
   // Versions of iOS prior to 11 tail the simulator syslog file.
   if (await device.sdkMajorVersion < 11) {
-    return device._processUtils.start(<String>[
+    return device._toolContext.processUtils.start(<String>[
       'tail',
       '-n',
       '0',
@@ -1039,7 +1028,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   String? _lastLine;
 
   void _onSysLogDeviceLine(String line) {
-    device._logger.printTrace('[DEVICE LOG] $line');
+    device._toolContext.logger.printTrace('[DEVICE LOG] $line');
     final Match? multi = _lastMessageMultipleRegex.matchAsPrefix(line);
 
     if (multi != null) {
@@ -1074,7 +1063,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
           addLogToStream(decodedJson);
         }
       } on FormatException {
-        device._logger.printError('Logger returned non-JSON response: $message');
+        device._toolContext.logger.printError('Logger returned non-JSON response: $message');
       }
     }
   }
@@ -1085,7 +1074,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   }
 
   void _onSystemLine(String line) {
-    device._logger.printTrace('[SYS LOG] $line');
+    device._toolContext.logger.printTrace('[SYS LOG] $line');
     if (!_flutterRunnerRegex.hasMatch(line)) {
       return;
     }

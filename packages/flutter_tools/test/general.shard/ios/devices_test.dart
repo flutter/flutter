@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -47,19 +46,15 @@ void main() {
     late IOSDeploy iosDeploy;
     late IMobileDevice iMobileDevice;
     late FileSystem fileSystem;
-    late FileSystemUtils fileSystemUtils;
     late IOSCoreDeviceControl coreDeviceControl;
     late IOSCoreDeviceLauncher coreDeviceLauncher;
     late XcodeDebug xcodeDebug;
-    late ProcessUtils processUtils;
 
     setUp(() {
       final artifacts = Artifacts.test();
       cache = Cache.test(processManager: FakeProcessManager.any());
       logger = BufferLogger.test();
-      processUtils = ProcessUtils(processManager: FakeProcessManager.any(), logger: logger);
       fileSystem = MemoryFileSystem.test();
-      fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: macPlatform);
       iosDeploy = IOSDeploy(
         artifacts: artifacts,
         cache: cache,
@@ -82,10 +77,7 @@ void main() {
       final device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
-        platform: macPlatform,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         iosDeploy: iosDeploy,
         analytics: FakeAnalytics(),
         iMobileDevice: iMobileDevice,
@@ -100,11 +92,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       );
       expect(await device.isSupported(), isTrue);
     });
@@ -114,10 +103,7 @@ void main() {
         final device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
-          platform: macPlatform,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
           analytics: FakeAnalytics(),
           iMobileDevice: iMobileDevice,
@@ -132,11 +118,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
-          xcode: null,
+          xcode: FakeXcode(),
         );
 
         expect(device.shouldAttachLLDBDebugger(DebuggingOptions.enabled(BuildInfo.debug)), isTrue);
@@ -167,11 +150,8 @@ void main() {
       final device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -184,11 +164,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       );
       expect(await device.isSupported(), isFalse);
     });
@@ -198,11 +175,8 @@ void main() {
         IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -216,11 +190,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
-          xcode: null,
+          xcode: FakeXcode(),
         ).majorSdkVersion,
         1,
       );
@@ -228,11 +199,8 @@ void main() {
         IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -246,11 +214,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
-          xcode: null,
+          xcode: FakeXcode(),
         ).majorSdkVersion,
         13,
       );
@@ -258,11 +223,8 @@ void main() {
         IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -276,11 +238,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
-          xcode: null,
+          xcode: FakeXcode(),
         ).majorSdkVersion,
         10,
       );
@@ -288,11 +247,8 @@ void main() {
         IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -306,11 +262,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
-          xcode: null,
+          xcode: FakeXcode(),
         ).majorSdkVersion,
         0,
       );
@@ -318,11 +271,8 @@ void main() {
         IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -336,11 +286,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
-          xcode: null,
+          xcode: FakeXcode(),
         ).majorSdkVersion,
         0,
       );
@@ -350,11 +297,8 @@ void main() {
       Version? sdkVersion = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -368,11 +312,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       ).sdkVersion;
       var expectedVersion = Version(13, 3, 1, text: '13.3.1');
       expect(sdkVersion, isNotNull);
@@ -382,11 +323,8 @@ void main() {
       sdkVersion = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -400,11 +338,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       ).sdkVersion;
       expectedVersion = Version(13, 3, 1, text: '13.3.1 (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -414,11 +349,8 @@ void main() {
       sdkVersion = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -432,11 +364,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       ).sdkVersion;
       expectedVersion = Version(16, 4, 1, text: '16.4.1(a) (20ADBC)');
       expect(sdkVersion, isNotNull);
@@ -446,11 +375,8 @@ void main() {
       sdkVersion = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -464,11 +390,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       ).sdkVersion;
       expectedVersion = Version(0, 0, 0, text: '0');
       expect(sdkVersion, isNotNull);
@@ -478,11 +401,8 @@ void main() {
       sdkVersion = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -495,22 +415,16 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       ).sdkVersion;
       expect(sdkVersion, isNull);
 
       sdkVersion = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -524,11 +438,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       ).sdkVersion;
       expect(sdkVersion, isNull);
     });
@@ -537,11 +448,8 @@ void main() {
       final device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -555,11 +463,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       );
 
       expect(await device.sdkNameAndVersion, 'iOS 13.3 17C54');
@@ -569,11 +474,8 @@ void main() {
       final device = IOSDevice(
         'device-123',
         iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
         analytics: FakeAnalytics(),
-        platform: macPlatform,
         iosDeploy: iosDeploy,
         iMobileDevice: iMobileDevice,
         coreDeviceControl: coreDeviceControl,
@@ -587,11 +489,8 @@ void main() {
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: processUtils,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       );
 
       expect(device.supportsRuntimeMode(BuildMode.debug), true);
@@ -608,11 +507,8 @@ void main() {
             IOSDevice(
               'device-123',
               iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-              fileSystem: fileSystem,
-              fileSystemUtils: fileSystemUtils,
-              logger: logger,
+              toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: platform),
               analytics: FakeAnalytics(),
-              platform: platform,
               iosDeploy: iosDeploy,
               iMobileDevice: iMobileDevice,
               coreDeviceControl: coreDeviceControl,
@@ -626,11 +522,8 @@ void main() {
               isPaired: true,
               devModeEnabled: true,
               isCoreDevice: false,
-              processUtils: processUtils,
-              operatingSystemUtils: FakeOperatingSystemUtils(),
-              shutdownHooks: FakeShutdownHooks(),
               templateRenderer: FakeTemplateRenderer(),
-              xcode: null,
+              xcode: FakeXcode(),
             );
           }, throwsAssertionError);
         },
@@ -705,11 +598,8 @@ void main() {
         device = IOSDevice(
           '123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           analytics: FakeAnalytics(),
-          platform: macPlatform,
           iosDeploy: iosDeploy,
           iMobileDevice: iMobileDevice,
           coreDeviceControl: coreDeviceControl,
@@ -723,11 +613,8 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: false,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
-          xcode: null,
+          xcode: FakeXcode(),
         );
         logReader1 = createLogReader(device, appPackage1, process1);
         logReader2 = createLogReader(device, appPackage2, process2);
@@ -758,10 +645,7 @@ void main() {
         device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
-          platform: macPlatform,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
           analytics: FakeAnalytics(),
           iMobileDevice: iMobileDevice,
@@ -776,9 +660,6 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(15, 0, 0)),
         );
@@ -793,10 +674,7 @@ void main() {
           device = IOSDevice(
             'device-123',
             iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-            fileSystem: fileSystem,
-            fileSystemUtils: fileSystemUtils,
-            logger: logger,
-            platform: macPlatform,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
             iosDeploy: iosDeploy,
             analytics: FakeAnalytics(),
             iMobileDevice: iMobileDevice,
@@ -811,9 +689,6 @@ void main() {
             isPaired: true,
             devModeEnabled: true,
             isCoreDevice: true,
-            processUtils: processUtils,
-            operatingSystemUtils: FakeOperatingSystemUtils(),
-            shutdownHooks: FakeShutdownHooks(),
             templateRenderer: FakeTemplateRenderer(),
             xcode: fakeXcode,
           );
@@ -830,10 +705,7 @@ void main() {
         device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
-          platform: macPlatform,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
           analytics: FakeAnalytics(),
           iMobileDevice: iMobileDevice,
@@ -848,9 +720,6 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
@@ -866,10 +735,7 @@ void main() {
         device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
-          platform: macPlatform,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
           analytics: FakeAnalytics(),
           iMobileDevice: iMobileDevice,
@@ -884,9 +750,6 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(27, 0, 0)),
         );
@@ -906,10 +769,7 @@ void main() {
         device = IOSDevice(
           'device-123',
           iProxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
-          fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils,
-          logger: logger,
-          platform: macPlatform,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger, platform: macPlatform),
           iosDeploy: iosDeploy,
           analytics: FakeAnalytics(),
           iMobileDevice: iMobileDevice,
@@ -924,9 +784,6 @@ void main() {
           isPaired: true,
           devModeEnabled: true,
           isCoreDevice: true,
-          processUtils: processUtils,
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          shutdownHooks: FakeShutdownHooks(),
           templateRenderer: FakeTemplateRenderer(),
           xcode: FakeXcode(currentVersion: Version(26, 0, 0)),
         );
@@ -978,10 +835,6 @@ void main() {
       xcodeDebug = FakeXcodeDebug();
 
       final testFileSystem = MemoryFileSystem.test();
-      final testFileSystemUtils = FileSystemUtils(
-        fileSystem: testFileSystem,
-        platform: macPlatform,
-      );
 
       device1 = IOSDevice(
         'd83d5bc53967baa0ee18626ba87b6254b2ab5418',
@@ -995,20 +848,19 @@ void main() {
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
-        logger: logger,
-        platform: macPlatform,
-        fileSystem: testFileSystem,
-        fileSystemUtils: testFileSystemUtils,
+        toolContext: FakeToolContext(
+          fs: testFileSystem,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       );
 
       device2 = IOSDevice(
@@ -1023,20 +875,19 @@ void main() {
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
-        logger: logger,
-        platform: macPlatform,
-        fileSystem: testFileSystem,
-        fileSystemUtils: testFileSystemUtils,
+        toolContext: FakeToolContext(
+          fs: testFileSystem,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: true,
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       );
     });
 
@@ -1348,10 +1199,6 @@ void main() {
       coreDeviceLauncher = FakeIOSCoreDeviceLauncher();
       xcodeDebug = FakeXcodeDebug();
       final testFileSystem = MemoryFileSystem.test();
-      final testFileSystemUtils = FileSystemUtils(
-        fileSystem: testFileSystem,
-        platform: macPlatform,
-      );
       notConnected1 = IOSDevice(
         '00000001-0000000000000000',
         name: 'iPad',
@@ -1364,20 +1211,19 @@ void main() {
         coreDeviceControl: coreDeviceControl,
         coreDeviceLauncher: coreDeviceLauncher,
         xcodeDebug: xcodeDebug,
-        logger: logger,
-        platform: macPlatform,
-        fileSystem: testFileSystem,
-        fileSystemUtils: testFileSystemUtils,
+        toolContext: FakeToolContext(
+          fs: testFileSystem,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
         connectionInterface: DeviceConnectionInterface.attached,
         isConnected: false,
         isPaired: true,
         devModeEnabled: true,
         isCoreDevice: false,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        shutdownHooks: FakeShutdownHooks(),
         templateRenderer: FakeTemplateRenderer(),
-        xcode: null,
+        xcode: FakeXcode(),
       );
     });
 

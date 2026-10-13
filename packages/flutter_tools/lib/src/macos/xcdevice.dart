@@ -5,21 +5,16 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
-import '../artifacts.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
-import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../ios/core_devices.dart';
@@ -53,57 +48,45 @@ enum XCDeviceEventInterface {
 class XCDevice {
   XCDevice({
     required this._analytics,
-    required Artifacts artifacts,
-    required Cache cache,
-    required this._fileSystem,
     required IProxy iproxy,
-    required this._logger,
-    required this._platform,
-    required ProcessManager processManager,
-    required this._shutdownHooks,
     required this._templateRenderer,
+    required this._toolContext,
     required this._xcode,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
-  }) : _processUtils = ProcessUtils(logger: _logger, processManager: processManager),
-       _fileSystemUtils = FileSystemUtils(fileSystem: _fileSystem, platform: _platform),
-       _operatingSystemUtils = OperatingSystemUtils(
-         fileSystem: _fileSystem,
-         logger: _logger,
-         platform: _platform,
-         processManager: processManager,
-       ),
+  }) : _processUtils = _toolContext.processUtils,
+       _logger = _toolContext.logger,
        _iMobileDevice = IMobileDevice(
-         artifacts: artifacts,
-         cache: cache,
-         logger: _logger,
-         processManager: processManager,
+         artifacts: _toolContext.artifacts,
+         cache: _toolContext.cache,
+         logger: _toolContext.logger,
+         processManager: _toolContext.processManager,
        ),
        _iosDeploy = IOSDeploy(
-         artifacts: artifacts,
-         cache: cache,
-         logger: _logger,
-         platform: _platform,
-         processManager: processManager,
+         artifacts: _toolContext.artifacts,
+         cache: _toolContext.cache,
+         logger: _toolContext.logger,
+         platform: _toolContext.platform,
+         processManager: _toolContext.processManager,
        ),
        _coreDeviceControl =
            coreDeviceControl ??
            IOSCoreDeviceControl(
-             fileSystem: _fileSystem,
-             logger: _logger,
-             processManager: processManager,
+             fileSystem: _toolContext.fs,
+             logger: _toolContext.logger,
+             processManager: _toolContext.processManager,
              xcode: _xcode,
            ),
        _xcodeDebug =
            xcodeDebug ??
            XcodeDebug(
-             logger: _logger,
-             processManager: processManager,
+             logger: _toolContext.logger,
+             processManager: _toolContext.processManager,
              xcode: _xcode,
-             fileSystem: _fileSystem,
+             fileSystem: _toolContext.fs,
            ),
        _iProxy = iproxy {
-    _shutdownHooks.addShutdownHook(dispose);
+    _toolContext.shutdownHooks.addShutdownHook(dispose);
 
     _setupDeviceIdentifierByEventStream();
   }
@@ -125,11 +108,6 @@ class XCDevice {
 
   final ProcessUtils _processUtils;
   final Logger _logger;
-  final FileSystem _fileSystem;
-  final FileSystemUtils _fileSystemUtils;
-  final OperatingSystemUtils _operatingSystemUtils;
-  final Platform _platform;
-  final ShutdownHooks _shutdownHooks;
   final IMobileDevice _iMobileDevice;
   final IOSDeploy _iosDeploy;
   final Xcode _xcode;
@@ -138,6 +116,7 @@ class XCDevice {
   final XcodeDebug _xcodeDebug;
   final Analytics _analytics;
   final TemplateRenderer _templateRenderer;
+  final ToolContext _toolContext;
 
   List<Object>? _cachedListResults;
 
@@ -655,9 +634,7 @@ class XCDevice {
           modelCode: modelCode,
           operatingSystemVersion: operatingSystemVersion,
           iProxy: _iProxy,
-          fileSystem: _fileSystem,
-          fileSystemUtils: _fileSystemUtils,
-          logger: _logger,
+          toolContext: _toolContext,
           analytics: _analytics,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,
@@ -666,20 +643,16 @@ class XCDevice {
             coreDeviceControl: _coreDeviceControl,
             logger: _logger,
             xcodeDebug: _xcodeDebug,
-            fileSystem: _fileSystem,
+            fileSystem: _toolContext.fs,
             processUtils: _processUtils,
             xcode: _xcode,
             deviceVersion: Version.parse(sdkVersionString),
           ),
           xcodeDebug: _xcodeDebug,
           xcode: _xcode,
-          platform: _platform,
           devModeEnabled: devModeEnabled,
           isPaired: isPaired,
           isCoreDevice: coreDevice != null,
-          processUtils: _processUtils,
-          shutdownHooks: _shutdownHooks,
-          operatingSystemUtils: _operatingSystemUtils,
           templateRenderer: _templateRenderer,
         );
       }
