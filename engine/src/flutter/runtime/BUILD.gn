@@ -114,6 +114,7 @@ source_set("runtime") {
     "//flutter/flow",
     "//flutter/fml",
     "//flutter/lib/io",
+    "//flutter/lib/snapshot:snapshot_headers",
     "//flutter/shell/common:display",
     "//flutter/skia",
     "//flutter/third_party/tonic",
