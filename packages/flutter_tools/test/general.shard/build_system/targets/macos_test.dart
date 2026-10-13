@@ -540,6 +540,15 @@ void main() {
             ),
           )
           .createSync(recursive: true);
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.vmserviceKernelDill,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.debug,
+            ),
+          )
+          .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
 
       final inputKernel = '${environment.buildDir.path}/app.dill';
@@ -609,6 +618,15 @@ void main() {
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.vmserviceSharedLibrary,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.profile,
+            ),
+          )
+          .createSync(recursive: true);
 
       await const ProfileMacOSBundleFlutterAssets().build(
         environment..defines[kBuildMode] = 'profile',
@@ -632,7 +650,6 @@ void main() {
         ),
         isNot(exists),
       );
-      expect(fileSystem.directory('VMService.framework'), isNot(exists));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -641,7 +658,7 @@ void main() {
   );
 
   testUsingContext(
-    'ProfileMacOSBundleFlutterAssets creates VMService.framework when vmserviceSharedLibrary exists',
+    'ProfileMacOSBundleFlutterAssets creates VMService.framework',
     () async {
       fileSystem
           .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
@@ -686,27 +703,32 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'ProfileMacOSBundleFlutterAssets does not create VMService.framework when vmserviceSharedLibrary does not exist',
-    () async {
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
+  testWithoutContext(
+    'ProfileMacOSBundleFlutterAssets tracks VMService.framework inputs and outputs',
+    () {
+      const target = ProfileMacOSBundleFlutterAssets();
+      final Directory vmServiceVersionDirectory = environment.outputDir
+          .childDirectory('VMService.framework')
+          .childDirectory('Versions')
+          .childDirectory('A');
 
-      await const ProfileMacOSBundleFlutterAssets().build(
-        environment..defines[kBuildMode] = 'profile',
+      expect(
+        target.inputs,
+        contains(
+          const Source.artifact(
+            Artifact.vmserviceSharedLibrary,
+            platform: TargetPlatform.darwin,
+            mode: BuildMode.profile,
+          ),
+        ),
       );
-
-      expect(environment.outputDir.childDirectory('VMService.framework'), isNot(exists));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
+      expect(
+        target.resolveOutputs(environment).sources.map((File file) => file.path),
+        containsAll(<String>[
+          vmServiceVersionDirectory.childFile('VMService').path,
+          vmServiceVersionDirectory.childDirectory('Resources').childFile('Info.plist').path,
+        ]),
+      );
     },
   );
 
@@ -780,6 +802,15 @@ void main() {
             ..createSync(recursive: true)
             ..writeAsStringSync('ABC');
       fileSystem.file(environment.buildDir.childFile('native_assets.json')).createSync();
+      fileSystem
+          .file(
+            artifacts.getArtifactPath(
+              Artifact.vmserviceSharedLibrary,
+              platform: TargetPlatform.darwin,
+              mode: BuildMode.profile,
+            ),
+          )
+          .createSync(recursive: true);
 
       await const ProfileMacOSBundleFlutterAssets().build(
         environment..defines[kBuildMode] = 'profile',

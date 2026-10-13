@@ -525,11 +525,9 @@ abstract class MacOSBundleFlutterAssets extends Target {
           platform: TargetPlatform.darwin,
           mode: BuildMode.debug,
         );
-        final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
-        // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
-        if (vmserviceDillFile.existsSync()) {
-          vmserviceDillFile.copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
-        }
+        environment.fileSystem
+            .file(vmserviceDill)
+            .copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
       } on Exception catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
       }
@@ -553,24 +551,19 @@ abstract class MacOSBundleFlutterAssets extends Target {
         mode: BuildMode.profile,
       );
       final File vmServiceDylibFile = environment.fileSystem.file(vmServiceDylibPath);
-      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
-      if (vmServiceDylibFile.existsSync()) {
-        final Directory vmServiceVersionDir = vmServiceRootDir
-            .childDirectory('Versions')
-            .childDirectory('A');
-        final Directory vmServiceResourcesDir = vmServiceVersionDir.childDirectory('Resources')
-          ..createSync(recursive: true);
+      final Directory vmServiceVersionDir = vmServiceRootDir
+          .childDirectory('Versions')
+          .childDirectory('A');
+      final Directory vmServiceResourcesDir = vmServiceVersionDir.childDirectory('Resources')
+        ..createSync(recursive: true);
 
-        vmServiceDylibFile.copySync(vmServiceVersionDir.childFile(_kVmServiceExecutableName).path);
-        vmServiceResourcesDir.childFile('Info.plist').writeAsStringSync(_kMacOSVmServiceInfoPlist);
+      vmServiceDylibFile.copySync(vmServiceVersionDir.childFile(_kVmServiceExecutableName).path);
+      vmServiceResourcesDir.childFile('Info.plist').writeAsStringSync(_kMacOSVmServiceInfoPlist);
 
-        try {
-          _createVersionedFrameworkSymlinks(vmServiceRootDir, _kVmServiceExecutableName);
-        } on FileSystemException catch (err) {
-          throw Exception('Failed to create symlinks for $_kVmServiceFrameworkName: $err');
-        }
-      } else if (vmServiceRootDir.existsSync()) {
-        vmServiceRootDir.deleteSync(recursive: true);
+      try {
+        _createVersionedFrameworkSymlinks(vmServiceRootDir, _kVmServiceExecutableName);
+      } on FileSystemException catch (err) {
+        throw Exception('Failed to create symlinks for $_kVmServiceFrameworkName: $err');
       }
     } else if (vmServiceRootDir.existsSync()) {
       vmServiceRootDir.deleteSync(recursive: true);
@@ -710,12 +703,21 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Source> get inputs => <Source>[
     ...super.inputs,
     const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+    const Source.artifact(
+      Artifact.vmserviceSharedLibrary,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.profile,
+    ),
   ];
 
   @override
   List<Source> get outputs => <Source>[
     ...super.outputs,
     const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+    const Source.pattern(
+      '{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/$_kVmServiceExecutableName',
+    ),
+    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/Resources/Info.plist'),
   ];
 }
 

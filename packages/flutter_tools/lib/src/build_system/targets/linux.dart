@@ -71,17 +71,13 @@ class UnpackLinux extends Target {
         'ephemeral',
       ),
     );
-    // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
-    final bool hasVmserviceSnapshot = environment.fileSystem
-        .file(environment.fileSystem.path.join(engineSourcePath, 'libvmservice_snapshot.so'))
-        .existsSync();
     final Depfile depfile = unpackDesktopArtifacts(
       fileSystem: environment.fileSystem,
       engineSourcePath: engineSourcePath,
       outputDirectory: outputDirectory,
       artifacts: <String>[
         ..._kLinuxArtifacts,
-        if (buildMode == BuildMode.profile && hasVmserviceSnapshot) 'libvmservice_snapshot.so',
+        if (buildMode == BuildMode.profile) 'libvmservice_snapshot.so',
       ],
       clientSourcePaths: <String>[headersPath],
       icuDataPath: environment.artifacts.getArtifactPath(
@@ -140,11 +136,9 @@ abstract class BundleLinuxAssets extends Target {
         Artifact.vmserviceKernelDill,
         mode: BuildMode.debug,
       );
-      final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
-      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
-      if (vmserviceDillFile.existsSync()) {
-        vmserviceDillFile.copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
-      }
+      environment.fileSystem
+          .file(vmserviceDill)
+          .copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
     }
     final String versionInfo = getVersionInfo(environment.defines);
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
@@ -223,11 +217,15 @@ class DebugBundleLinuxAssets extends BundleLinuxAssets {
   String get name => 'debug_bundle_${targetPlatform.getName()}_assets';
 
   @override
-  List<Source> get inputs => <Source>[const Source.pattern('{BUILD_DIR}/app.dill')];
+  List<Source> get inputs => <Source>[
+    const Source.pattern('{BUILD_DIR}/app.dill'),
+    const Source.artifact(Artifact.vmserviceKernelDill, mode: BuildMode.debug),
+  ];
 
   @override
   List<Source> get outputs => <Source>[
     const Source.pattern('{OUTPUT_DIR}/flutter_assets/kernel_blob.bin'),
+    const Source.pattern('{OUTPUT_DIR}/flutter_assets/vmservice_snapshot.dill'),
   ];
 }
 

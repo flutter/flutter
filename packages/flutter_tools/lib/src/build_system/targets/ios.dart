@@ -686,11 +686,9 @@ abstract class IosAssetBundle extends Target {
         Artifact.vmserviceKernelDill,
         mode: BuildMode.debug,
       );
-      final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
-      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
-      if (vmserviceDillFile.existsSync()) {
-        vmserviceDillFile.copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
-      }
+      environment.fileSystem
+          .file(vmserviceDill)
+          .copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
     } else {
       environment.buildDir
           .childDirectory('App.framework')
@@ -763,19 +761,14 @@ abstract class IosAssetBundle extends Target {
         mode: BuildMode.profile,
       );
       final File vmServiceDylibFile = environment.fileSystem.file(vmServiceDylibPath);
-      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
-      if (vmServiceDylibFile.existsSync()) {
-        vmServiceFrameworkDir.createSync(recursive: true);
-        final File vmServiceBinary = vmServiceFrameworkDir.childFile(_kVmServiceExecutableName);
-        vmServiceDylibFile.copySync(vmServiceBinary.path);
+      vmServiceFrameworkDir.createSync(recursive: true);
+      final File vmServiceBinary = vmServiceFrameworkDir.childFile(_kVmServiceExecutableName);
+      vmServiceDylibFile.copySync(vmServiceBinary.path);
 
-        final File vmServiceInfoPlist = vmServiceFrameworkDir.childFile('Info.plist')
-          ..writeAsStringSync(_kIosVmServiceInfoPlist);
-        await _updateMinimumOSVersion(vmServiceInfoPlist, environment);
-        await _signFramework(environment, vmServiceBinary, buildMode);
-      } else if (vmServiceFrameworkDir.existsSync()) {
-        vmServiceFrameworkDir.deleteSync(recursive: true);
-      }
+      final File vmServiceInfoPlist = vmServiceFrameworkDir.childFile('Info.plist')
+        ..writeAsStringSync(_kIosVmServiceInfoPlist);
+      await _updateMinimumOSVersion(vmServiceInfoPlist, environment);
+      await _signFramework(environment, vmServiceBinary, buildMode);
     } else if (vmServiceFrameworkDir.existsSync()) {
       vmServiceFrameworkDir.deleteSync(recursive: true);
     }
@@ -870,6 +863,23 @@ class ProfileIosApplicationBundle extends _IosAssetBundleWithDSYM {
 
   @override
   String get name => 'profile_ios_bundle_flutter_assets';
+
+  @override
+  List<Source> get inputs => <Source>[
+    ...super.inputs,
+    const Source.artifact(
+      Artifact.vmserviceSharedLibrary,
+      platform: TargetPlatform.ios,
+      mode: BuildMode.profile,
+    ),
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    ...super.outputs,
+    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/$_kVmServiceExecutableName'),
+    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Info.plist'),
+  ];
 
   @override
   List<Target> get dependencies => const <Target>[AotAssemblyProfile(), InstallCodeAssets()];

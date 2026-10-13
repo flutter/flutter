@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:process/process.dart';
 
 import '../application_package.dart';
-import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -24,11 +23,10 @@ import '../project.dart';
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
   MacOSDesignedForIPadDevice({
-    required super.artifacts,
-    required super.fileSystem,
-    required super.logger,
-    required super.operatingSystemUtils,
     required super.processManager,
+    required super.logger,
+    required super.fileSystem,
+    required super.operatingSystemUtils,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
 
@@ -124,13 +122,12 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   MacOSDesignedForIPadDevices({
-    required this._artifacts,
-    required this._fileSystem,
-    required this._iosWorkflow,
-    required this._logger,
-    required this._operatingSystemUtils,
     required this._platform,
+    required this._iosWorkflow,
     required this._processManager,
+    required this._logger,
+    required this._fileSystem,
+    required this._operatingSystemUtils,
   }) : super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
@@ -139,7 +136,6 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   final Logger _logger;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
-  final Artifacts _artifacts;
 
   @override
   bool get supportsPlatform => _platform.isMacOS;
@@ -169,7 +165,6 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
         logger: _logger,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
-        artifacts: _artifacts,
       ),
     ];
   }

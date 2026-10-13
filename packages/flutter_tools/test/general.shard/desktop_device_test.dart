@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'package:fake_async/fake_async.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -239,160 +238,6 @@ void main() {
     expect(result.started, true);
   });
 
-  testWithoutContext(
-    'startApp passes vmservice-kernel-path in debug mode when artifact exists',
-    () async {
-      final fileSystem = MemoryFileSystem.test();
-      final artifacts = FakeArtifacts();
-      final String dillPath = artifacts.getArtifactPath(
-        Artifact.vmserviceKernelDill,
-        platform: TargetPlatform.tester,
-        mode: BuildMode.debug,
-      );
-      fileSystem.file(dillPath).createSync(recursive: true);
-
-      final completer = Completer<void>();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>['debug'],
-          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
-          completer: completer,
-          environment: <String, String>{
-            'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-            'FLUTTER_ENGINE_SWITCH_2': 'enable-checked-mode=true',
-            'FLUTTER_ENGINE_SWITCH_3': 'verify-entry-points=true',
-            'FLUTTER_ENGINE_SWITCH_4': 'vmservice-kernel-path=$dillPath',
-            'FLUTTER_ENGINE_SWITCHES': '4',
-          },
-        ),
-      ]);
-      final FakeDesktopDevice device = setUpDesktopDevice(
-        fileSystem: fileSystem,
-        artifacts: artifacts,
-        processManager: processManager,
-      );
-      final package = FakeApplicationPackage();
-      final LaunchResult result = await device.startApp(
-        package,
-        prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      );
-
-      expect(result.started, true);
-    },
-  );
-
-  testWithoutContext('startApp passes aot-vmservice-shared-library-name in profile mode', () async {
-    final fileSystem = MemoryFileSystem.test();
-    final artifacts = FakeArtifacts();
-    final String dylibPath = artifacts.getArtifactPath(
-      Artifact.vmserviceSharedLibrary,
-      platform: TargetPlatform.tester,
-      mode: BuildMode.profile,
-    );
-    fileSystem.file(dylibPath).createSync(recursive: true);
-
-    final completer = Completer<void>();
-    final processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: const <String>['profile'],
-        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
-        completer: completer,
-        environment: <String, String>{
-          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-          'FLUTTER_ENGINE_SWITCH_2': 'aot-vmservice-shared-library-name=$dylibPath',
-          'FLUTTER_ENGINE_SWITCHES': '2',
-        },
-      ),
-    ]);
-    final FakeDesktopDevice device = setUpDesktopDevice(
-      fileSystem: fileSystem,
-      artifacts: artifacts,
-      processManager: processManager,
-    );
-    final package = FakeApplicationPackage();
-    final LaunchResult result = await device.startApp(
-      package,
-      prebuiltApplication: true,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-    );
-
-    expect(result.started, true);
-  });
-
-  testWithoutContext('startApp passes fallback aot-vmservice-shared-library-name basename in profile mode when artifact does not exist on host', () async {
-    final fileSystem = MemoryFileSystem.test();
-    final artifacts = FakeArtifacts();
-    final String dylibPath = artifacts.getArtifactPath(
-      Artifact.vmserviceSharedLibrary,
-      platform: TargetPlatform.tester,
-      mode: BuildMode.profile,
-    );
-    final String dylibBasename = fileSystem.path.basename(dylibPath);
-
-    final completer = Completer<void>();
-    final processManager = FakeProcessManager.list(<FakeCommand>[
-      FakeCommand(
-        command: const <String>['profile'],
-        stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
-        completer: completer,
-        environment: <String, String>{
-          'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-          'FLUTTER_ENGINE_SWITCH_2': 'aot-vmservice-shared-library-name=$dylibBasename',
-          'FLUTTER_ENGINE_SWITCHES': '2',
-        },
-      ),
-    ]);
-    final FakeDesktopDevice device = setUpDesktopDevice(
-      fileSystem: fileSystem,
-      artifacts: artifacts,
-      processManager: processManager,
-    );
-    final package = FakeApplicationPackage();
-    final LaunchResult result = await device.startApp(
-      package,
-      prebuiltApplication: true,
-      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-    );
-
-    expect(result.started, true);
-  });
-
-  testWithoutContext(
-    'startApp does not pass aot-vmservice-shared-library-name on Darwin in profile mode',
-    () async {
-      final fileSystem = MemoryFileSystem.test();
-      final artifacts = FakeArtifacts();
-
-      final completer = Completer<void>();
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: const <String>['profile'],
-          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
-          completer: completer,
-          environment: const <String, String>{
-            'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
-            'FLUTTER_ENGINE_SWITCHES': '1',
-          },
-        ),
-      ]);
-      final FakeDesktopDevice device = setUpDesktopDevice(
-        fileSystem: fileSystem,
-        artifacts: artifacts,
-        processManager: processManager,
-        targetPlatformOverride: TargetPlatform.darwin,
-      );
-      final package = FakeApplicationPackage();
-      final LaunchResult result = await device.startApp(
-        package,
-        prebuiltApplication: true,
-        debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-      );
-
-      expect(result.started, true);
-    },
-  );
-
   testWithoutContext('Port forwarder is a no-op', () async {
     final FakeDesktopDevice device = setUpDesktopDevice();
     final DevicePortForwarder portForwarder = device.portForwarder;
@@ -406,19 +251,6 @@ void main() {
     final FakeDesktopDevice device = setUpDesktopDevice();
 
     expect(device.createDevFSWriter(FakeApplicationPackage(), ''), isA<LocalDevFSWriter>());
-  });
-
-  testWithoutContext('DesktopDevice can be constructed with explicit artifacts', () {
-    final device = FakeDesktopDevice(
-      fileSystem: MemoryFileSystem.test(),
-      logger: BufferLogger.test(),
-      processManager: FakeProcessManager.any(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
-      artifacts: FakeArtifacts(),
-    );
-
-    expect(device.category, Category.desktop);
-    expect(device.name, 'dummy');
   });
 
   testWithoutContext('startApp supports dartEntrypointArgs', () async {
@@ -571,7 +403,6 @@ void main() {
         processManager: FakeProcessManager.any(),
         operatingSystemUtils: FakeOperatingSystemUtils(),
         logger: logger,
-        artifacts: FakeArtifacts(),
       );
 
       final package = FakeApplicationPackage();
@@ -752,18 +583,14 @@ FakeDesktopDevice setUpDesktopDevice({
   Logger? logger,
   ProcessManager? processManager,
   OperatingSystemUtils? operatingSystemUtils,
-  Artifacts? artifacts,
   bool nullExecutablePathForDevice = false,
-  TargetPlatform targetPlatformOverride = TargetPlatform.tester,
 }) {
   return FakeDesktopDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),
     operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
-    artifacts: artifacts ?? FakeArtifacts(),
     nullExecutablePathForDevice: nullExecutablePathForDevice,
-    targetPlatformOverride: targetPlatformOverride,
   );
 }
 
@@ -774,9 +601,7 @@ class FakeDesktopDevice extends DesktopDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
-    required super.artifacts,
     this.nullExecutablePathForDevice = false,
-    this.targetPlatformOverride = TargetPlatform.tester,
   }) : super('dummy', platformType: PlatformType.linux, ephemeral: false);
 
   /// The `mainPath` last passed to [buildForDevice].
@@ -786,13 +611,12 @@ class FakeDesktopDevice extends DesktopDevice {
   BuildInfo? lastBuildInfo;
 
   final bool nullExecutablePathForDevice;
-  final TargetPlatform targetPlatformOverride;
 
   @override
   String get name => 'dummy';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => targetPlatformOverride;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.unknown;
@@ -836,7 +660,6 @@ class FakeMacOSDevice extends MacOSDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
-    required super.artifacts,
   });
 
   @override

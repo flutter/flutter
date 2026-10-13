@@ -226,6 +226,9 @@ void main() {
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
+          .createSync();
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       fileSystem
@@ -414,6 +417,9 @@ void main() {
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
+          .createSync();
       // Project info
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
       // Plist file
@@ -506,6 +512,9 @@ void main() {
           .createSync();
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
           .createSync();
       // Project info
       fileSystem
@@ -690,7 +699,7 @@ void main() {
   );
 
   testUsingContext(
-    'ProfileIosApplicationBundle builds and signs VMService.framework when vmserviceSharedLibrary exists',
+    'ProfileIosApplicationBundle builds and signs VMService.framework',
     () async {
       environment.defines[kBuildMode] = 'profile';
       environment.defines[kCodesignIdentity] = 'ABC123';
@@ -794,70 +803,31 @@ void main() {
     },
   );
 
-  testUsingContext(
-    'ProfileIosApplicationBundle skips VMService.framework when vmserviceSharedLibrary does not exist',
-    () async {
-      environment.defines[kBuildMode] = 'profile';
-      environment.defines[kCodesignIdentity] = 'ABC123';
-      environment.defines[kXcodeAction] = 'build';
+  testWithoutContext(
+    'ProfileIosApplicationBundle tracks VMService.framework inputs and outputs',
+    () {
+      const target = ProfileIosApplicationBundle();
+      final Directory vmServiceFrameworkDirectory = environment.outputDir.childDirectory(
+        'VMService.framework',
+      );
 
-      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
-      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
-
-      fileSystem
-          .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
-          .createSync(recursive: true);
-
-      environment.buildDir
-          .childDirectory('App.framework')
-          .childFile('App')
-          .createSync(recursive: true);
-      environment.buildDir.childFile('native_assets.json').createSync();
-
-      final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
-      final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
-      final File infoPlist = frameworkDirectory.childFile('Info.plist');
-
-      processManager.addCommands(<FakeCommand>[
-        createPlutilFakeCommand(infoPlist),
-        FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.FinderInfo',
-            frameworkDirectoryBinary.path,
-          ],
+      expect(
+        target.inputs,
+        contains(
+          const Source.artifact(
+            Artifact.vmserviceSharedLibrary,
+            platform: TargetPlatform.ios,
+            mode: BuildMode.profile,
+          ),
         ),
-        FakeCommand(
-          command: <String>[
-            'xattr',
-            '-r',
-            '-d',
-            'com.apple.provenance',
-            frameworkDirectoryBinary.path,
-          ],
-        ),
-        FakeCommand(
-          command: <String>[
-            'codesign',
-            '--force',
-            '--sign',
-            'ABC123',
-            '--timestamp=none',
-            frameworkDirectoryBinary.path,
-          ],
-        ),
-      ]);
-
-      await const ProfileIosApplicationBundle().build(environment);
-      expect(processManager, hasNoRemainingExpectations);
-      expect(environment.outputDir.childDirectory('VMService.framework'), isNot(exists));
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => macPlatform,
+      );
+      expect(
+        target.resolveOutputs(environment).sources.map((File file) => file.path),
+        containsAll(<String>[
+          vmServiceFrameworkDirectory.childFile('VMService').path,
+          vmServiceFrameworkDirectory.childFile('Info.plist').path,
+        ]),
+      );
     },
   );
 

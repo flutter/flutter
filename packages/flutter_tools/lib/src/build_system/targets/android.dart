@@ -75,11 +75,9 @@ abstract class AndroidAssetBundle extends Target {
         Artifact.vmserviceKernelDill,
         mode: BuildMode.debug,
       );
-      final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
-      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
-      if (vmserviceDillFile.existsSync()) {
-        vmserviceDillFile.copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
-      }
+      environment.fileSystem
+          .file(vmserviceDill)
+          .copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
     }
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile assetDepfile = await copyAssets(
@@ -355,26 +353,6 @@ class AndroidAotBundle extends Target {
 
     final inputs = <File>[];
     final outputs = <File>[];
-
-    // Debug mode runs in JIT mode from Kernel (vmservice_snapshot.dill) and is
-    // packaged as an asset in DebugAndroidApplication. Profile mode compiles to
-    // AOT native code and requires the compiled libvmservice_snapshot.so library.
-    if (buildMode == BuildMode.profile) {
-      final String vmserviceSharedLib = environment.artifacts.getArtifactPath(
-        Artifact.vmserviceSharedLibrary,
-        platform: targetPlatform,
-        mode: buildMode,
-      );
-      final File vmserviceFile = environment.fileSystem.file(vmserviceSharedLib);
-      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
-      if (vmserviceFile.existsSync()) {
-        final File destinationVmservice = outputDirectory.childFile('libvmservice_snapshot.so');
-        vmserviceFile.copySync(destinationVmservice.path);
-        inputs.add(vmserviceFile);
-        outputs.add(destinationVmservice);
-      }
-    }
-
     final File manifestFile = buildDir.childFile('manifest.json');
     if (manifestFile.existsSync()) {
       final File destinationFile = outputDirectory.childFile('manifest.json');

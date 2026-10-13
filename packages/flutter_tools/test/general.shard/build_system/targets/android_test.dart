@@ -110,6 +110,9 @@ void main() {
     fileSystem
         .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
         .createSync(recursive: true);
+    fileSystem
+        .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
+        .createSync(recursive: true);
 
     await const DebugAndroidApplication().build(environment);
 
@@ -556,6 +559,9 @@ void main() {
           .createSync(recursive: true);
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync(recursive: true);
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
           .createSync(recursive: true);
       fileSystem
           .file('pubspec.yaml')

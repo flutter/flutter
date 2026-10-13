@@ -4,8 +4,6 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -36,7 +34,6 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
-        artifacts: FakeArtifacts(),
       );
 
       expect(discoverer.supportsPlatform, isFalse);
@@ -50,7 +47,6 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
-        artifacts: FakeArtifacts(),
       );
       expect(discoverer.supportsPlatform, isTrue);
 
@@ -67,7 +63,6 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_x64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
-        artifacts: FakeArtifacts(),
       );
       expect(discoverer.supportsPlatform, isTrue);
 
@@ -84,7 +79,6 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: false),
-        artifacts: FakeArtifacts(),
       );
       expect(discoverer.supportsPlatform, isTrue);
 
@@ -101,7 +95,6 @@ void main() {
         fileSystem: MemoryFileSystem.test(),
         operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
         iosWorkflow: FakeIOSWorkflow(canListDevices: true),
-        artifacts: FakeArtifacts(),
       );
       expect(discoverer.supportsPlatform, isTrue);
 
@@ -119,7 +112,10 @@ void main() {
   });
 
   testWithoutContext('MacOSDesignedForIPadDevice properties', () async {
-    final MacOSDesignedForIPadDevice device = setUpMacOSDesignedForIPadDevice(
+    final device = MacOSDesignedForIPadDevice(
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: MemoryFileSystem.test(),
       operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.darwin_arm64),
     );
     expect(device.id, 'mac-designed-for-ipad');
@@ -151,22 +147,6 @@ void main() {
     );
     expect(device.executablePathForDevice(FakeIOSApp(), BuildInfo.debug), null);
   });
-}
-
-MacOSDesignedForIPadDevice setUpMacOSDesignedForIPadDevice({
-  FileSystem? fileSystem,
-  Logger? logger,
-  ProcessManager? processManager,
-  OperatingSystemUtils? operatingSystemUtils,
-  Artifacts? artifacts,
-}) {
-  return MacOSDesignedForIPadDevice(
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
-    logger: logger ?? BufferLogger.test(),
-    processManager: processManager ?? FakeProcessManager.any(),
-    operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
-    artifacts: artifacts ?? FakeArtifacts(),
-  );
 }
 
 class FakeIOSWorkflow extends Fake implements IOSWorkflow {

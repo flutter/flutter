@@ -6,6 +6,7 @@
 
 #include <sstream>
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/trace_event.h"
@@ -234,17 +235,29 @@ fml::RefPtr<DartSnapshot> DartSnapshot::VMServiceIsolateSnapshotFromSettings(
     const Settings& settings) {
 #if DART_SNAPSHOT_STATIC_LINK
   return nullptr;
-#else   // DART_SNAPSHOT_STATIC_LINK
-  if (!Dart_IsPrecompiledRuntime() ||
-      settings.vmservice_snapshot_library_path.empty()) {
+#else  // DART_SNAPSHOT_STATIC_LINK
+  if (!Dart_IsPrecompiledRuntime()) {
     return nullptr;
   }
 
-  std::shared_ptr<const fml::Mapping> snapshot_data =
-      SearchMapping(nullptr, "", settings.vmservice_snapshot_library_path,
-                    DartSnapshot::kIsolateDataSymbol, false);
+  std::vector<std::string> library_paths =
+      settings.vmservice_snapshot_library_path;
+  if (library_paths.empty()) {
+#if FML_OS_IOS || FML_OS_MACOSX
+    library_paths = {"Frameworks/VMService.framework/VMService",
+                     "libvmservice_snapshot.dylib"};
+#elif FML_OS_WIN
+    library_paths = {"libvmservice_snapshot.dll"};
+#else
+    library_paths = {"libvmservice_snapshot.so",
+                     "lib/libvmservice_snapshot.so"};
+#endif
+  }
+
+  std::shared_ptr<const fml::Mapping> snapshot_data = SearchMapping(
+      nullptr, "", library_paths, DartSnapshot::kIsolateDataSymbol, false);
   std::shared_ptr<const fml::Mapping> snapshot_instructions =
-      SearchMapping(nullptr, "", settings.vmservice_snapshot_library_path,
+      SearchMapping(nullptr, "", library_paths,
                     DartSnapshot::kIsolateInstructionsSymbol, true);
   return IsolateSnapshotFromMappings(snapshot_data, snapshot_instructions);
 #endif  // DART_SNAPSHOT_STATIC_LINK

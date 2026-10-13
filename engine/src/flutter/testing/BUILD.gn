@@ -116,7 +116,7 @@ source_set("fixture_test") {
   ]
 
   if (flutter_runtime_mode == "profile" && !is_fuchsia && !is_qnx) {
-    public_deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+    data_deps = [ "//flutter/shell/vmservice:vmservice_snapshot" ]
   }
 }
 

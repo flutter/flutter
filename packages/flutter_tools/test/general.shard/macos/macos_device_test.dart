@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -28,7 +27,12 @@ final linux = FakePlatform();
 
 void main() {
   testWithoutContext('default configuration', () async {
-    final MacOSDevice device = setUpMacOSDevice();
+    final device = MacOSDevice(
+      processManager: FakeProcessManager.any(),
+      logger: BufferLogger.test(),
+      fileSystem: MemoryFileSystem.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
     final package = FakeMacOSApp();
 
     expect(await device.targetPlatform, TargetPlatform.darwin);
@@ -47,7 +51,8 @@ void main() {
 
   testWithoutContext('Attaches to log reader when running in release mode', () async {
     final completer = Completer<void>();
-    final MacOSDevice device = setUpMacOSDevice(
+    final device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
           command: const <String>['release/executable'],
@@ -56,6 +61,8 @@ void main() {
           completer: completer,
         ),
       ]),
+      logger: BufferLogger.test(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
     );
     final package = FakeMacOSApp();
 
@@ -85,7 +92,6 @@ void main() {
           featureFlags: TestFeatureFlags(isMacOSEnabled: true),
           platform: linux,
         ),
-        artifacts: FakeArtifacts(),
       ).devices(),
       isEmpty,
     );
@@ -101,7 +107,6 @@ void main() {
         platform: macOS,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         macOSWorkflow: MacOSWorkflow(featureFlags: TestFeatureFlags(), platform: macOS),
-        artifacts: FakeArtifacts(),
       );
 
       expect(await macOSDevices.devices(), isEmpty);
@@ -119,7 +124,6 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
-      artifacts: FakeArtifacts(),
     );
 
     expect(await macOSDevices.devices(), hasLength(1));
@@ -136,7 +140,6 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
-      artifacts: FakeArtifacts(),
     );
 
     expect(macOSDevices.wellKnownIds, <String>['macos']);
@@ -153,7 +156,6 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
-      artifacts: FakeArtifacts(),
     );
 
     // Timeout ignored.
@@ -166,7 +168,12 @@ void main() {
 
   testWithoutContext('isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final MacOSDevice device = setUpMacOSDevice(fileSystem: fileSystem);
+    final device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
 
     fileSystem.file('pubspec.yaml').createSync();
     fileSystem.directory('macos').createSync();
@@ -178,7 +185,12 @@ void main() {
   testWithoutContext('target platform display name on x86_64', () async {
     final fakeOperatingSystemUtils = FakeOperatingSystemUtils();
     fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_x64;
-    final MacOSDevice device = setUpMacOSDevice(operatingSystemUtils: fakeOperatingSystemUtils);
+    final device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: fakeOperatingSystemUtils,
+    );
 
     expect(await device.targetPlatformDisplayName, 'darwin-x64');
   });
@@ -186,14 +198,24 @@ void main() {
   testWithoutContext('target platform display name on ARM', () async {
     final fakeOperatingSystemUtils = FakeOperatingSystemUtils();
     fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm64;
-    final MacOSDevice device = setUpMacOSDevice(operatingSystemUtils: fakeOperatingSystemUtils);
+    final device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: fakeOperatingSystemUtils,
+    );
 
     expect(await device.targetPlatformDisplayName, 'darwin-arm64');
   });
 
   testWithoutContext('isSupportedForProject is false with no host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
-    final MacOSDevice device = setUpMacOSDevice(fileSystem: fileSystem);
+    final device = MacOSDevice(
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
     fileSystem.file('pubspec.yaml').createSync();
     final FlutterProject flutterProject = setUpFlutterProject(fileSystem.currentDirectory);
 
@@ -202,7 +224,12 @@ void main() {
 
   testWithoutContext('executablePathForDevice uses the correct package executable', () async {
     final package = FakeMacOSApp();
-    final MacOSDevice device = setUpMacOSDevice();
+    final device = MacOSDevice(
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      operatingSystemUtils: FakeOperatingSystemUtils(),
+    );
     const debugPath = 'debug/executable';
     const profilePath = 'profile/executable';
     const releasePath = 'release/executable';
@@ -211,22 +238,6 @@ void main() {
     expect(device.executablePathForDevice(package, BuildInfo.profile), profilePath);
     expect(device.executablePathForDevice(package, BuildInfo.release), releasePath);
   });
-}
-
-MacOSDevice setUpMacOSDevice({
-  FileSystem? fileSystem,
-  Logger? logger,
-  ProcessManager? processManager,
-  OperatingSystemUtils? operatingSystemUtils,
-  Artifacts? artifacts,
-}) {
-  return MacOSDevice(
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
-    logger: logger ?? BufferLogger.test(),
-    processManager: processManager ?? FakeProcessManager.any(),
-    operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
-    artifacts: artifacts ?? FakeArtifacts(),
-  );
 }
 
 FlutterProject setUpFlutterProject(Directory directory) {

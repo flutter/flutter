@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -53,7 +51,6 @@ void main() {
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.any(),
           fileSystem: MemoryFileSystem.test(),
-          artifacts: FakeArtifacts(),
         ).devices(),
         <Device>[],
       );
@@ -71,7 +68,6 @@ void main() {
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),
-        artifacts: FakeArtifacts(),
       ).devices(),
       hasLength(1),
     );
@@ -129,15 +125,12 @@ WindowsDevice setUpWindowsDevice({
   FileSystem? fileSystem,
   Logger? logger,
   ProcessManager? processManager,
-  OperatingSystemUtils? operatingSystemUtils,
-  Artifacts? artifacts,
 }) {
   return WindowsDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),
-    operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
-    artifacts: artifacts ?? FakeArtifacts(),
+    operatingSystemUtils: FakeOperatingSystemUtils(),
   );
 }
 
