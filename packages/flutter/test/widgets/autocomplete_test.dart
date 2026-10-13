@@ -4109,6 +4109,7 @@ void main() {
     // Swap in a focus node that, unlike the old one, is unfocused.
     await pumpRawAutocomplete(focusNode2);
     await tester.pump();
+    expect(focusNode2.hasListeners, isTrue);
     expect(focusNode2.hasFocus, isFalse);
     expect(focusNode1.hasListeners, isFalse);
 
