@@ -117,7 +117,7 @@ void addAarTask(Project project, SoftwareComponent component) {
 }
 
 // AGP reports this error when `singleVariant` is declared twice for one variant
-// (`checkSingleVariantUniqueness`, same text in AGP 8.11.1, 9.1.0 and 9.3.1:
+// (`checkSingleVariantUniqueness`:
 // https://android.googlesource.com/platform/tools/base/+/refs/tags/studio-2025.3.2/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/dsl/AbstractPublishing.kt#38).
 // Its class, com.android.builder.errors.EvalIssueException, is not public AGP API and is not on
 // this script's classpath, so the error is matched by its message.
