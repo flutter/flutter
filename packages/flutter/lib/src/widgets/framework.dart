@@ -7299,13 +7299,22 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
       _NullElement.instance,
     );
     Element? previousChild;
-    for (var i = 0; i < children.length; i += 1) {
-      final Element newChild = inflateWidget(
-        multiChildRenderObjectWidget.children[i],
-        IndexedSlot<Element?>(i, previousChild),
-      );
-      children[i] = newChild;
-      previousChild = newChild;
+    var i = 0;
+    try {
+      for (; i < children.length; i += 1) {
+        final Element newChild = inflateWidget(
+          multiChildRenderObjectWidget.children[i],
+          IndexedSlot<Element?>(i, previousChild),
+        );
+        children[i] = newChild;
+        previousChild = newChild;
+      }
+    } catch (_) {
+      // Expose the children that did mount, so that the clean-up of this failed
+      // mount (see [inflateWidget]) can deactivate them. Otherwise they remain
+      // registered as dependents of the inherited widgets above.
+      _children = children.sublist(0, i);
+      rethrow;
     }
     _children = children;
   }
