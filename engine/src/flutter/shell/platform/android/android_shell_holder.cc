@@ -27,6 +27,7 @@
 #include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/context/android_context.h"
+#include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
@@ -89,7 +90,8 @@ class AndroidEngineCallbacks {
  public:
   explicit AndroidEngineCallbacks(
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
-      : jni_facade(std::move(jni_facade)) {}
+      : jni_facade(std::move(jni_facade)),
+        platform_messages(this->jni_facade) {}
 
   // Asks Java which of the supported locales the platform would pick and
   // returns it in storage that stays valid until the next call, as
@@ -129,6 +131,9 @@ class AndroidEngineCallbacks {
   }
 
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade;
+
+  // Forwards the engine's platform messages to Java and Java's replies back.
+  PlatformMessageHandlerAndroid platform_messages;
 
   // Set on the platform thread when the Shell creates the platform view,
   // before the engine can ask for a vsync.
@@ -520,6 +525,15 @@ FlutterProjectArgs MakeProjectArgs() {
     static_cast<AndroidEngineCallbacks*>(user_data)->vsync_waiter->AwaitVSync(
         baton);
   };
+  args.platform_message_callback = [](const FlutterPlatformMessage* message,
+                                      void* user_data) {
+    static_cast<AndroidEngineCallbacks*>(user_data)
+        ->platform_messages.HandlePlatformMessage(*message);
+  };
+  // Java hands each message to its handler's thread or task queue itself, so
+  // the engine calls the callback on the sending thread instead of hopping to
+  // the platform thread first. Background isolates depend on this.
+  args.platform_message_callback_on_sending_thread = true;
   args.update_semantics_callback2 = [](const FlutterSemanticsUpdate2* update,
                                        void* user_data) {
     PlatformViewAndroidDelegate(
@@ -715,6 +729,8 @@ AndroidShellHolder::AndroidShellHolder(
   }
 
   if (engine_) {
+    engine_callbacks_->platform_messages.Attach(engine_.get(), &embedder_api_);
+
     // Concurrent worker threads are raw std::threads without an
     // fml::MessageLoop, whereas the dedicated IO thread (also tagged
     // kFlutterNativeThreadTypeWorker) always has an initialized
@@ -760,7 +776,6 @@ AndroidShellHolder::AndroidShellHolder(
 
   platform_view_ = weak_platform_view;
   FML_DCHECK(platform_view_);
-  platform_message_handler_ = platform_view_->GetPlatformMessageHandler();
   vsync_waiter_ = std::move(vsync_waiter);
   AttachVsyncWaiter(vsync_waiter_.get(), engine_.get(), &embedder_api_);
   GetFirstFrameCallbackTable().Register(holder_id_, platform_runner,
@@ -782,8 +797,6 @@ AndroidShellHolder::AndroidShellHolder(
     : settings_(settings),
       jni_facade_(jni_facade),
       platform_view_(platform_view),
-      platform_message_handler_(
-          platform_view ? platform_view->GetPlatformMessageHandler() : nullptr),
       thread_host_(thread_host),
       engine_callbacks_(std::move(engine_callbacks)),
       engine_(std::move(engine)),
@@ -796,6 +809,9 @@ AndroidShellHolder::AndroidShellHolder(
   FML_DCHECK(engine_);
   FML_DCHECK(platform_view_);
   FML_DCHECK(thread_host_);
+  // Messages the spawned engine sent before this point carry copied payloads;
+  // see PlatformMessageHandlerAndroid::Attach.
+  engine_callbacks_->platform_messages.Attach(engine_.get(), &embedder_api_);
   fml::MessageLoop::EnsureInitializedForCurrentThread();
   GetFirstFrameCallbackTable().Register(
       holder_id_, fml::MessageLoop::GetCurrent().GetTaskRunner(), jni_facade_);
@@ -809,7 +825,8 @@ AndroidShellHolder::~AndroidShellHolder() {
   if (vsync_waiter_) {
     vsync_waiter_->Detach();
   }
-  platform_message_handler_.reset();
+  // While the engine is still alive to release them through.
+  engine_callbacks_->platform_messages.ReleasePendingResponses();
   if (engine_) {
     FlutterEngineResult result = embedder_api_.Shutdown(engine_.release());
     if (result != kSuccess) {
@@ -997,9 +1014,18 @@ void AndroidShellHolder::NotifyLowMemoryWarning() {
   }
 }
 
-const std::shared_ptr<PlatformMessageHandler>&
-AndroidShellHolder::GetPlatformMessageHandler() const {
-  return platform_message_handler_;
+void AndroidShellHolder::InvokePlatformMessageResponseCallback(
+    int response_id,
+    const uint8_t* data,
+    size_t size) {
+  engine_callbacks_->platform_messages.InvokePlatformMessageResponseCallback(
+      response_id, data, size);
+}
+
+void AndroidShellHolder::InvokePlatformMessageEmptyResponseCallback(
+    int response_id) {
+  engine_callbacks_->platform_messages
+      .InvokePlatformMessageEmptyResponseCallback(response_id);
 }
 
 void AndroidShellHolder::SetSemanticsEnabled(bool enabled) {

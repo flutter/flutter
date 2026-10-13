@@ -4,6 +4,8 @@
 
 #include <memory>
 #include <mutex>
+#include <string>
+#include <thread>
 #include <vector>
 
 #include "flutter/flow/frame_timings.h"
@@ -29,7 +31,8 @@ class MockPlatformViewAndroidJNI : public PlatformViewAndroidJNI {
  public:
   MOCK_METHOD(void,
               FlutterViewHandlePlatformMessage,
-              (std::unique_ptr<flutter::PlatformMessage> message,
+              (const std::string& channel,
+               UniquePlatformMessagePayload payload,
                int responseId),
               (override));
   MOCK_METHOD(void,
@@ -284,34 +287,176 @@ TEST(AndroidShellHolder, Create) {
   holder->NotifySurfaceCreated(window);
 }
 
-TEST(AndroidShellHolder, HandlePlatformMessage) {
-  Settings settings;
-  settings.enable_software_rendering = false;
+namespace {
+
+std::string PayloadString(const UniquePlatformMessagePayload& payload) {
+  return std::string(reinterpret_cast<const char*>(payload->data),
+                     payload->data_size);
+}
+
+std::unique_ptr<PlatformMessage> MessageWithData(
+    const std::string& channel,
+    const std::string& data,
+    fml::RefPtr<PlatformMessageResponse> response) {
+  return std::make_unique<PlatformMessage>(
+      channel, fml::MallocMapping::Copy(data.data(), data.size()),
+      std::move(response));
+}
+
+// What the JNI facade received for one platform message from Dart.
+struct ForwardedMessage {
+  std::string channel;
+  UniquePlatformMessagePayload payload;
+  int response_id = 0;
+  std::thread::id thread;
+};
+
+// Records every platform message the holder forwards to Java.
+void RecordForwardedMessages(MockPlatformViewAndroidJNI& jni,
+                             std::vector<ForwardedMessage>& forwarded) {
+  EXPECT_CALL(jni, FlutterViewHandlePlatformMessage(::testing::_, ::testing::_,
+                                                    ::testing::_))
+      .WillRepeatedly([&forwarded](const std::string& channel,
+                                   UniquePlatformMessagePayload payload,
+                                   int response_id) {
+        forwarded.push_back({channel, std::move(payload), response_id,
+                             std::this_thread::get_id()});
+      });
+}
+
+// The handler the Shell sends platform messages from Dart to.
+std::shared_ptr<PlatformMessageHandler> MessageHandlerOf(
+    AndroidShellHolder& holder) {
+  return holder.GetPlatformView()->GetPlatformMessageHandler();
+}
+
+}  // namespace
+
+TEST(AndroidShellHolder,
+     PlatformMessageFromDartReachesJavaAndReplyReachesDart) {
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
-  auto holder = std::make_unique<AndroidShellHolder>(
-      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
-  EXPECT_NE(holder.get(), nullptr);
-  EXPECT_TRUE(holder->IsValid());
-  EXPECT_NE(holder->GetPlatformView().get(), nullptr);
-  auto window = fml::MakeRefCounted<AndroidNativeWindow>(
-      nullptr, /*is_fake_window=*/true);
-  holder->NotifySurfaceCreated(window);
-  EXPECT_TRUE(holder->GetPlatformMessageHandler());
-  size_t data_size = 4;
-  fml::MallocMapping bytes =
-      fml::MallocMapping(static_cast<uint8_t*>(malloc(data_size)), data_size);
+  std::vector<ForwardedMessage> forwarded;
+  RecordForwardedMessages(*jni, forwarded);
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  ASSERT_TRUE(holder->IsValid());
+  std::shared_ptr<PlatformMessageHandler> handler = MessageHandlerOf(*holder);
+  ASSERT_TRUE(handler);
+  // Java hands messages to their handlers' threads itself.
+  EXPECT_FALSE(handler->DoesHandlePlatformMessageOnPlatformThread());
   fml::RefPtr<MockPlatformMessageResponse> response =
       MockPlatformMessageResponse::Create();
-  auto message = std::make_unique<PlatformMessage>(
-      /*channel=*/"foo", /*data=*/std::move(bytes), /*response=*/response);
-  int response_id = 1;
-  EXPECT_CALL(*jni,
-              FlutterViewHandlePlatformMessage(::testing::_, response_id));
-  EXPECT_CALL(*response, CompleteEmpty());
-  holder->GetPlatformMessageHandler()->HandlePlatformMessage(
-      std::move(message));
-  holder->GetPlatformMessageHandler()
-      ->InvokePlatformMessageEmptyResponseCallback(response_id);
+
+  handler->HandlePlatformMessage(MessageWithData("foo", "abc", response));
+
+  ASSERT_EQ(forwarded.size(), 1u);
+  EXPECT_EQ(forwarded[0].channel, "foo");
+  ASSERT_TRUE(forwarded[0].payload);
+  EXPECT_EQ(PayloadString(forwarded[0].payload), "abc");
+  EXPECT_GT(forwarded[0].response_id, 0);
+
+  std::string reply;
+  EXPECT_CALL(*response, Complete(::testing::_))
+      .WillOnce([&reply](std::unique_ptr<fml::Mapping> data) {
+        reply.assign(reinterpret_cast<const char*>(data->GetMapping()),
+                     data->GetSize());
+      });
+  const std::string java_reply = "xyz";
+  holder->InvokePlatformMessageResponseCallback(
+      forwarded[0].response_id,
+      reinterpret_cast<const uint8_t*>(java_reply.data()), java_reply.size());
+
+  EXPECT_EQ(reply, "xyz");
+  // Java may still read the payload after it replied.
+  EXPECT_EQ(PayloadString(forwarded[0].payload), "abc");
+}
+
+TEST(AndroidShellHolder, NullAndZeroLengthRepliesStayDistinct) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::vector<ForwardedMessage> forwarded;
+  RecordForwardedMessages(*jni, forwarded);
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  std::shared_ptr<PlatformMessageHandler> handler = MessageHandlerOf(*holder);
+  fml::RefPtr<MockPlatformMessageResponse> null_reply =
+      MockPlatformMessageResponse::Create();
+  fml::RefPtr<MockPlatformMessageResponse> empty_reply =
+      MockPlatformMessageResponse::Create();
+  handler->HandlePlatformMessage(MessageWithData("null", "a", null_reply));
+  handler->HandlePlatformMessage(MessageWithData("empty", "b", empty_reply));
+  ASSERT_EQ(forwarded.size(), 2u);
+
+  EXPECT_CALL(*null_reply, CompleteEmpty());
+  holder->InvokePlatformMessageEmptyResponseCallback(forwarded[0].response_id);
+
+  size_t empty_reply_size = 1;
+  EXPECT_CALL(*empty_reply, Complete(::testing::_))
+      .WillOnce([&empty_reply_size](std::unique_ptr<fml::Mapping> data) {
+        empty_reply_size = data->GetSize();
+      });
+  // Java passes a direct buffer even for a zero-length reply.
+  const uint8_t java_buffer[1] = {};
+  holder->InvokePlatformMessageResponseCallback(forwarded[1].response_id,
+                                                java_buffer, 0);
+  EXPECT_EQ(empty_reply_size, 0u);
+}
+
+TEST(AndroidShellHolder, PlatformMessageWithoutDataReachesJavaWithoutPayload) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::vector<ForwardedMessage> forwarded;
+  RecordForwardedMessages(*jni, forwarded);
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+
+  MessageHandlerOf(*holder)->HandlePlatformMessage(
+      std::make_unique<PlatformMessage>("no-data", nullptr));
+
+  ASSERT_EQ(forwarded.size(), 1u);
+  EXPECT_EQ(forwarded[0].channel, "no-data");
+  EXPECT_FALSE(forwarded[0].payload);
+}
+
+TEST(AndroidShellHolder, PlatformMessageFromBackgroundThreadReachesJavaThere) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::vector<ForwardedMessage> forwarded;
+  RecordForwardedMessages(*jni, forwarded);
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  std::shared_ptr<PlatformMessageHandler> handler = MessageHandlerOf(*holder);
+  std::thread::id background_thread;
+
+  // A background isolate sends on its own thread.
+  std::thread background([&handler, &background_thread] {
+    background_thread = std::this_thread::get_id();
+    handler->HandlePlatformMessage(MessageWithData(
+        "background", "abc", MockPlatformMessageResponse::Create()));
+  });
+  background.join();
+
+  ASSERT_EQ(forwarded.size(), 1u);
+  EXPECT_EQ(forwarded[0].thread, background_thread);
+  EXPECT_NE(forwarded[0].thread, std::this_thread::get_id());
+}
+
+TEST(AndroidShellHolder, UnansweredPlatformMessagesAreDroppedWithTheHolder) {
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  std::vector<ForwardedMessage> forwarded;
+  RecordForwardedMessages(*jni, forwarded);
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithoutSurface(
+      Settings::MergedPlatformUIThread::kEnabled, jni);
+  fml::RefPtr<MockPlatformMessageResponse> response =
+      MockPlatformMessageResponse::Create();
+  EXPECT_CALL(*response, Complete(::testing::_)).Times(0);
+  EXPECT_CALL(*response, CompleteEmpty()).Times(0);
+  MessageHandlerOf(*holder)->HandlePlatformMessage(
+      MessageWithData("foo", "abc", response));
+  ASSERT_EQ(forwarded.size(), 1u);
+
+  holder.reset();
+
+  // Java still owns the payload, and may release it after the engine is gone.
+  EXPECT_EQ(PayloadString(forwarded[0].payload), "abc");
+  forwarded.clear();
 }
 
 TEST(AndroidShellHolder, CreateWithMergedPlatformAndUIThread) {

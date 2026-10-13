@@ -501,8 +501,10 @@ static void DispatchEmptyPlatformMessage(JNIEnv* env,
 static void CleanupMessageData(JNIEnv* env,
                                jobject jcaller,
                                jlong message_data) {
-  // Called from any thread.
-  free(reinterpret_cast<void*>(message_data));
+  // Called from any thread. Releases the payload that
+  // FlutterViewHandlePlatformMessage handed to Java.
+  UniquePlatformMessagePayload payload(
+      reinterpret_cast<FlutterPlatformMessagePayload*>(message_data));
 }
 
 static void DispatchPointerDataPacket(JNIEnv* env,
@@ -606,18 +608,15 @@ static void InvokePlatformMessageResponseCallback(JNIEnv* env,
   uint8_t* response_data =
       static_cast<uint8_t*>(env->GetDirectBufferAddress(message));
   FML_DCHECK(response_data != nullptr);
-  auto mapping = std::make_unique<fml::MallocMapping>(
-      fml::MallocMapping::Copy(response_data, response_data + position));
-  ANDROID_SHELL_HOLDER->GetPlatformMessageHandler()
-      ->InvokePlatformMessageResponseCallback(responseId, std::move(mapping));
+  ANDROID_SHELL_HOLDER->InvokePlatformMessageResponseCallback(
+      responseId, response_data, static_cast<size_t>(position));
 }
 
 static void InvokePlatformMessageEmptyResponseCallback(JNIEnv* env,
                                                        jobject jcaller,
                                                        jlong shell_holder,
                                                        jint responseId) {
-  ANDROID_SHELL_HOLDER->GetPlatformMessageHandler()
-      ->InvokePlatformMessageEmptyResponseCallback(responseId);
+  ANDROID_SHELL_HOLDER->InvokePlatformMessageEmptyResponseCallback(responseId);
 }
 
 static void NotifyLowMemoryWarning(JNIEnv* env,
@@ -1360,7 +1359,8 @@ PlatformViewAndroidJNIImpl::PlatformViewAndroidJNIImpl(
 PlatformViewAndroidJNIImpl::~PlatformViewAndroidJNIImpl() = default;
 
 void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessage(
-    std::unique_ptr<flutter::PlatformMessage> message,
+    const std::string& channel,
+    UniquePlatformMessagePayload payload,
     int responseId) {
   // Called from any thread.
   JNIEnv* env = fml::jni::AttachCurrentThread();
@@ -1371,18 +1371,16 @@ void PlatformViewAndroidJNIImpl::FlutterViewHandlePlatformMessage(
   }
 
   fml::jni::ScopedJavaLocalRef<jstring> java_channel =
-      fml::jni::StringToJavaString(env, message->channel());
+      fml::jni::StringToJavaString(env, channel);
 
-  if (message->hasData()) {
+  if (payload) {
     fml::jni::ScopedJavaLocalRef<jobject> message_array(
-        env, env->NewDirectByteBuffer(
-                 const_cast<uint8_t*>(message->data().GetMapping()),
-                 message->data().GetSize()));
-    // Message data is deleted in CleanupMessageData.
-    fml::MallocMapping mapping = message->releaseData();
+        env, env->NewDirectByteBuffer(const_cast<uint8_t*>(payload->data),
+                                      payload->data_size));
+    // The payload is released in CleanupMessageData.
     env->CallVoidMethod(java_object.obj(), g_handle_platform_message_method,
                         java_channel.obj(), message_array.obj(), responseId,
-                        reinterpret_cast<jlong>(mapping.Release()));
+                        reinterpret_cast<jlong>(payload.release()));
   } else {
     env->CallVoidMethod(java_object.obj(), g_handle_platform_message_method,
                         java_channel.obj(), nullptr, responseId, nullptr);

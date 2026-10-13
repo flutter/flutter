@@ -179,9 +179,7 @@ class PlatformViewEmbedder : public PlatformView {
   ///
   PlatformViewEmbedder(PlatformView::Delegate& delegate,
                        const flutter::TaskRunners& task_runners,
-                       PlatformDispatchTable platform_dispatch_table,
-                       std::shared_ptr<PlatformMessageHandler>
-                           platform_message_handler = nullptr);
+                       PlatformDispatchTable platform_dispatch_table);
 
  private:
   class EmbedderPlatformMessageHandler;

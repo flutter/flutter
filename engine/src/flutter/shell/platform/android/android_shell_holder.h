@@ -109,8 +109,19 @@ class AndroidShellHolder {
 
   void NotifyLowMemoryWarning();
 
-  const std::shared_ptr<PlatformMessageHandler>& GetPlatformMessageHandler()
-      const;
+  //----------------------------------------------------------------------------
+  /// @brief      Sends Java's reply to the platform message from Dart with
+  ///             `response_id`. Called from any thread.
+  ///
+  void InvokePlatformMessageResponseCallback(int response_id,
+                                             const uint8_t* data,
+                                             size_t size);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Sends a null reply to the platform message from Dart with
+  ///             `response_id`. Called from any thread.
+  ///
+  void InvokePlatformMessageEmptyResponseCallback(int response_id);
 
   //----------------------------------------------------------------------------
   /// @brief      Reads display metrics from the JNI facade and sends them to
@@ -280,7 +291,6 @@ class AndroidShellHolder {
   const flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   fml::WeakPtr<PlatformViewAndroid> platform_view_;
-  std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
   std::shared_ptr<ThreadHost> thread_host_;
   // The state behind the engine's FlutterProjectArgs callbacks. The engine
   // passes it back to them as user_data, so it must outlive the engine.

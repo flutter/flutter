@@ -201,6 +201,13 @@ using DispatchPlatformMessageFn =
     void (*)(JNIEnv*, jobject, jlong, jstring, jobject, jint, jint);
 using DispatchEmptyPlatformMessageFn =
     void (*)(JNIEnv*, jobject, jlong, jstring, jint);
+using InvokePlatformMessageResponseCallbackFn =
+    void (*)(JNIEnv*, jobject, jlong, jint, jobject, jint);
+using InvokePlatformMessageEmptyResponseCallbackFn = void (*)(JNIEnv*,
+                                                              jobject,
+                                                              jlong,
+                                                              jint);
+using CleanupMessageDataFn = void (*)(JNIEnv*, jobject, jlong);
 using DispatchPointerDataPacketFn =
     void (*)(JNIEnv*, jobject, jlong, jobject, jint);
 using RegisterTextureFn = void (*)(JNIEnv*, jobject, jlong, jlong, jobject);
@@ -1716,16 +1723,17 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   auto holder = std::make_unique<AndroidShellHolder>(
       settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
   ASSERT_TRUE(holder->IsValid());
-  ASSERT_NE(holder->GetPlatformMessageHandler(), nullptr);
-  EXPECT_EQ(holder->GetPlatformMessageHandler(),
-            holder->GetPlatformView()->GetPlatformMessageHandler());
+  std::shared_ptr<PlatformMessageHandler> handler =
+      holder->GetPlatformView()->GetPlatformMessageHandler();
+  ASSERT_NE(handler, nullptr);
+  EXPECT_FALSE(handler->DoesHandlePlatformMessageOnPlatformThread());
 
   std::string captured_channel;
-  EXPECT_CALL(*jni, FlutterViewHandlePlatformMessage(_, _))
-      .WillOnce([&](std::unique_ptr<flutter::PlatformMessage> message,
-                    int response_id) {
-        ASSERT_NE(message, nullptr);
-        captured_channel = message->channel();
+  EXPECT_CALL(*jni, FlutterViewHandlePlatformMessage(_, _, _))
+      .WillOnce([&](const std::string& channel,
+                    UniquePlatformMessagePayload payload, int response_id) {
+        captured_channel = channel;
+        EXPECT_EQ(payload, nullptr);
         EXPECT_GT(response_id, 0);
       });
 
@@ -1735,6 +1743,99 @@ TEST_F(PlatformViewAndroidJNIImplTest,
       std::make_unique<flutter::PlatformMessage>(
           "flutter/test_embedder_forward", nullptr));
   EXPECT_EQ(captured_channel, "flutter/test_embedder_forward");
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       PlatformMessageRepliesFromJavaCallEmbedderApi) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto reply = reinterpret_cast<InvokePlatformMessageResponseCallbackFn>(
+      RegisterNativesAndFind(mock_env,
+                             "nativeInvokePlatformMessageResponseCallback"));
+  auto empty_reply =
+      reinterpret_cast<InvokePlatformMessageEmptyResponseCallbackFn>(
+          RegisterNativesAndFind(
+              mock_env, "nativeInvokePlatformMessageEmptyResponseCallback"));
+  ASSERT_NE(reply, nullptr);
+  ASSERT_NE(empty_reply, nullptr);
+
+  Settings settings;
+  settings.enable_software_rendering = false;
+  auto jni = std::make_shared<JNIMock>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+  std::vector<int> response_ids;
+  EXPECT_CALL(*jni, FlutterViewHandlePlatformMessage(_, _, _))
+      .WillRepeatedly(
+          [&](const std::string& channel, UniquePlatformMessagePayload payload,
+              int response_id) { response_ids.push_back(response_id); });
+  std::shared_ptr<PlatformMessageHandler> handler =
+      holder->GetPlatformView()->GetPlatformMessageHandler();
+  handler->HandlePlatformMessage(
+      std::make_unique<flutter::PlatformMessage>("first", nullptr));
+  handler->HandlePlatformMessage(
+      std::make_unique<flutter::PlatformMessage>("second", nullptr));
+  ASSERT_EQ(response_ids.size(), 2u);
+
+  struct SentResponse {
+    const uint8_t* data;
+    size_t size;
+  };
+  std::vector<SentResponse> sent;
+  holder->GetEmbedderApiForTesting().SendPlatformMessageResponse =
+      MOCK_ENGINE_PROC(
+          SendPlatformMessageResponse,
+          ([&sent](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                   const FlutterPlatformMessageResponseHandle* handle,
+                   const uint8_t* data, size_t size) {
+            EXPECT_NE(engine, nullptr);
+            EXPECT_NE(handle, nullptr);
+            sent.push_back({data, size});
+            // Frees the handle.
+            return FlutterEngineSendPlatformMessageResponse(engine, handle,
+                                                            data, size);
+          }));
+  uint8_t java_buffer[] = {'x', 'y', 'z'};
+  // Arbitrary non-null handle for the direct ByteBuffer Java passes.
+  const jobject kJavaBuffer = reinterpret_cast<jobject>(400);
+  EXPECT_CALL(mock_env, GetDirectBufferAddress(kJavaBuffer))
+      .WillOnce(Return(java_buffer));
+
+  reply(&mock_env, nullptr, reinterpret_cast<jlong>(holder.get()),
+        response_ids[0], kJavaBuffer, sizeof(java_buffer));
+  empty_reply(&mock_env, nullptr, reinterpret_cast<jlong>(holder.get()),
+              response_ids[1]);
+
+  ASSERT_EQ(sent.size(), 2u);
+  EXPECT_EQ(sent[0].data, java_buffer);
+  EXPECT_EQ(sent[0].size, sizeof(java_buffer));
+  EXPECT_EQ(sent[1].data, nullptr);
+  EXPECT_EQ(sent[1].size, 0u);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest, CleanupMessageDataReleasesPayload) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto cleanup = reinterpret_cast<CleanupMessageDataFn>(
+      RegisterNativesAndFind(mock_env, "nativeCleanupMessageData"));
+  ASSERT_NE(cleanup, nullptr);
+  int releases = 0;
+  auto* payload = new FlutterPlatformMessagePayload{
+      .struct_size = sizeof(FlutterPlatformMessagePayload),
+      .data = nullptr,
+      .data_size = 0,
+      .user_data = &releases,
+      .destruction_callback =
+          [](void* user_data) { ++*static_cast<int*>(user_data); },
+  };
+
+  cleanup(&mock_env, nullptr, reinterpret_cast<jlong>(payload));
+  EXPECT_EQ(releases, 1);
+
+  // Messages without a payload hand Java no data to release.
+  cleanup(&mock_env, nullptr, 0);
+  EXPECT_EQ(releases, 1);
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest, NotifyLowMemoryWarningCallsEmbedderApi) {

@@ -13,7 +13,6 @@
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
@@ -90,19 +89,9 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   bool IsSurfaceControlEnabled() const;
 
  private:
-  PlatformViewAndroid(
-      PlatformView::Delegate& delegate,
-      const flutter::TaskRunners& task_runners,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      const std::shared_ptr<flutter::AndroidContext>& android_context,
-      std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler,
-      PlatformDispatchTable platform_dispatch_table);
-
   static PlatformDispatchTable WithAndroidCallbacks(
       PlatformViewAndroid* self,
-      PlatformDispatchTable platform_dispatch_table,
-      const std::shared_ptr<PlatformMessageHandlerAndroid>&
-          platform_message_handler);
+      PlatformDispatchTable platform_dispatch_table);
 
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidContext> android_context_;

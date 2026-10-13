@@ -6,6 +6,14 @@
 
 namespace flutter {
 
+void PlatformMessagePayloadDeleter::operator()(
+    FlutterPlatformMessagePayload* payload) const {
+  if (payload->destruction_callback != nullptr) {
+    payload->destruction_callback(payload->user_data);
+  }
+  delete payload;
+}
+
 PlatformViewAndroidJNI::~PlatformViewAndroidJNI() = default;
 
 }  // namespace flutter

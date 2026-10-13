@@ -146,16 +146,7 @@ PlatformViewAndroid::PlatformViewAndroid(
 PlatformViewEmbedder::PlatformDispatchTable
 PlatformViewAndroid::WithAndroidCallbacks(
     PlatformViewAndroid* self,
-    PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table,
-    const std::shared_ptr<PlatformMessageHandlerAndroid>&
-        platform_message_handler) {
-  if (!platform_dispatch_table.platform_message_response_callback) {
-    platform_dispatch_table.platform_message_response_callback =
-        [platform_message_handler](
-            std::unique_ptr<flutter::PlatformMessage> message) {
-          platform_message_handler->HandlePlatformMessage(std::move(message));
-        };
-  }
+    PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table) {
   if (!platform_dispatch_table.create_rendering_surface_callback) {
     platform_dispatch_table.create_rendering_surface_callback = [self]() {
       return self->CreateAndroidRenderingSurface();
@@ -200,28 +191,10 @@ PlatformViewAndroid::PlatformViewAndroid(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     const std::shared_ptr<flutter::AndroidContext>& android_context,
     PlatformDispatchTable platform_dispatch_table)
-    : PlatformViewAndroid(
-          delegate,
-          task_runners,
-          jni_facade,
-          android_context,
-          std::make_shared<PlatformMessageHandlerAndroid>(jni_facade),
-          std::move(platform_dispatch_table)) {}
-
-PlatformViewAndroid::PlatformViewAndroid(
-    PlatformView::Delegate& delegate,
-    const flutter::TaskRunners& task_runners,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    const std::shared_ptr<flutter::AndroidContext>& android_context,
-    std::shared_ptr<PlatformMessageHandlerAndroid> platform_message_handler,
-    PlatformDispatchTable platform_dispatch_table)
     : PlatformViewEmbedder(
           delegate,
           task_runners,
-          WithAndroidCallbacks(this,
-                               std::move(platform_dispatch_table),
-                               platform_message_handler),
-          platform_message_handler),
+          WithAndroidCallbacks(this, std::move(platform_dispatch_table))),
       jni_facade_(jni_facade),
       android_context_(android_context) {
   if (android_context_) {

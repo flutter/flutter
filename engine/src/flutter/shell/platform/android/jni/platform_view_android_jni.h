@@ -5,13 +5,15 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 
+#include <memory>
+#include <string>
 #include <utility>
 
 #include "flutter/fml/mapping.h"
 
 #include "flutter/flow/embedded_views.h"
-#include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 #if FML_OS_ANDROID
 #include "flutter/fml/platform/android/scoped_java_ref.h"
@@ -27,6 +29,18 @@ using JavaLocalRef = fml::jni::ScopedJavaLocalRef<jobject>;
 using JavaLocalRef = std::nullptr_t;
 #endif
 
+/// Releases a received platform message payload through its destruction
+/// callback.
+struct PlatformMessagePayloadDeleter {
+  void operator()(FlutterPlatformMessagePayload* payload) const;
+};
+
+/// The payload of a platform message from Dart, owned by the Android
+/// embedding. Null when the message has no payload.
+using UniquePlatformMessagePayload =
+    std::unique_ptr<FlutterPlatformMessagePayload,
+                    PlatformMessagePayloadDeleter>;
+
 //------------------------------------------------------------------------------
 /// Allows to call Java code running in the JVM from any thread. However, most
 /// methods can only be called from the platform thread as that is where the
@@ -40,10 +54,16 @@ class PlatformViewAndroidJNI {
   virtual ~PlatformViewAndroidJNI();
 
   //----------------------------------------------------------------------------
-  /// @brief      Sends a platform message. The message may be empty.
+  /// @brief      Sends a platform message from Dart to Java. `payload` is null
+  ///             if the message has no payload. Java answers with
+  ///             `responseId`.
+  ///
+  /// @note       Called on the thread that sent the message: the UI thread or
+  ///             a background isolate's thread.
   ///
   virtual void FlutterViewHandlePlatformMessage(
-      std::unique_ptr<flutter::PlatformMessage> message,
+      const std::string& channel,
+      UniquePlatformMessagePayload payload,
       int responseId) = 0;
 
   //----------------------------------------------------------------------------
