@@ -425,21 +425,6 @@ public class FlutterAssembleToolHelper {
         fileManager: fileManager,
         processManager: processManager
       )
-      if targetBuildMode.lowercased() == "profile"
-        && fileManager.fileExists(
-          atPath: "\(packagePath)/\(targetBuildMode)/Frameworks/VMService.xcframework"
-        )
-      {
-        try copyAndCodesignFramework(
-          frameworkName: "VMService",
-          packagePath: packagePath,
-          targetBuildMode: targetBuildMode,
-          targetPlatform: targetPlatform,
-          env: env,
-          fileManager: fileManager,
-          processManager: processManager
-        )
-      }
       updated = true
     }
     if updated {

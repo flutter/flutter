@@ -678,11 +678,13 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('macos_vmservice_dylib_bytes');
 
-      await const ProfileMacOSBundleFlutterAssets().build(
-        environment..defines[kBuildMode] = 'profile',
-      );
+      const target = ProfileMacOSBundleFlutterAssets();
+      await target.build(environment..defines[kBuildMode] = 'profile');
 
       final Directory vmServiceRoot = environment.outputDir.childDirectory('VMService.framework');
+      final Directory vmServiceVersionDirectory = vmServiceRoot
+          .childDirectory('Versions')
+          .childDirectory('A');
       expect(vmServiceRoot.childFile('Versions/A/VMService'), exists);
       expect(
         vmServiceRoot.childFile('Versions/A/VMService').readAsStringSync(),
@@ -696,22 +698,6 @@ void main() {
       expect(vmServiceRoot.childLink('Versions/Current').targetSync(), 'A');
       expect(vmServiceRoot.childLink('Resources').targetSync(), 'Versions/Current/Resources');
       expect(vmServiceRoot.childLink('VMService').targetSync(), 'Versions/Current/VMService');
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
-
-  testWithoutContext(
-    'ProfileMacOSBundleFlutterAssets tracks VMService.framework inputs and outputs',
-    () {
-      const target = ProfileMacOSBundleFlutterAssets();
-      final Directory vmServiceVersionDirectory = environment.outputDir
-          .childDirectory('VMService.framework')
-          .childDirectory('Versions')
-          .childDirectory('A');
-
       expect(
         target.inputs,
         contains(
@@ -729,31 +715,6 @@ void main() {
           vmServiceVersionDirectory.childDirectory('Resources').childFile('Info.plist').path,
         ]),
       );
-    },
-  );
-
-  testUsingContext(
-    'ReleaseMacOSBundleFlutterAssets deletes stale VMService.framework from outputDir',
-    () async {
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/vm_isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem
-          .file('bin/cache/artifacts/engine/darwin-x64/isolate_snapshot.bin')
-          .createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/App.framework/App').createSync(recursive: true);
-      fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
-
-      final Directory staleVmServiceDir = environment.outputDir.childDirectory(
-        'VMService.framework',
-      )..createSync(recursive: true);
-      staleVmServiceDir.childFile('Versions/A/VMService').createSync(recursive: true);
-
-      await const ReleaseMacOSBundleFlutterAssets().build(
-        environment..defines[kBuildMode] = 'release',
-      );
-
-      expect(staleVmServiceDir, isNot(exists));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -775,12 +736,17 @@ void main() {
           .file('${environment.buildDir.path}/App.framework.dSYM/Contents/Resources/DWARF/App')
           .createSync(recursive: true);
       fileSystem.file('${environment.buildDir.path}/native_assets.json').createSync();
+      environment.outputDir
+          .childDirectory('VMService.framework')
+          .childFile('Versions/A/VMService')
+          .createSync(recursive: true);
 
       await const ReleaseMacOSBundleFlutterAssets().build(
         environment..defines[kBuildMode] = 'release',
       );
 
       expect(fileSystem.file('App.framework.dSYM/Contents/Resources/DWARF/App'), exists);
+      expect(environment.outputDir.childDirectory('VMService.framework'), isNot(exists));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

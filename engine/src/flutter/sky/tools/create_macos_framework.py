@@ -88,13 +88,12 @@ def zip_framework(dst, args):
   # See: https://github.com/flutter/flutter/blob/62382c7b83a16b3f48dc06c19a47f6b8667005a5/dev/bots/suite_runners/run_verify_binaries_codesigned_tests.dart#L82-L130
   framework_dst = os.path.join(dst, 'FlutterMacOS.framework')
   sky_utils.write_codesign_config(os.path.join(framework_dst, 'entitlements.txt'), [])
-  without_entitlements = [
-      # TODO(cbracken): Remove the zip file from the path when outer zip is removed.
-      'FlutterMacOS.framework.zip/Versions/A/FlutterMacOS',
-  ]
   sky_utils.write_codesign_config(
       os.path.join(framework_dst, 'without_entitlements.txt'),
-      without_entitlements,
+      [
+          # TODO(cbracken): Remove the zip file from the path when outer zip is removed.
+          'FlutterMacOS.framework.zip/Versions/A/FlutterMacOS'
+      ]
   )
   sky_utils.create_zip(framework_dst, 'FlutterMacOS.framework.zip', ['.'])
   # pylint: enable=line-too-long

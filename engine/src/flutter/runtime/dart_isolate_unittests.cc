@@ -431,22 +431,6 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
   service_isolate_latch.Wait();
 }
 
-TEST_F(DartIsolateTest, CanResolveVMServiceKernel) {
-  auto settings = CreateSettingsForFixture();
-  settings.vmservice_kernel_path = GetDefaultKernelFilePath();
-  auto mapping = DartIsolate::ResolveVMServiceKernel(settings);
-  ASSERT_NE(mapping, nullptr);
-  ASSERT_GT(mapping->GetSize(), 0u);
-}
-
-TEST_F(DartIsolateTest, CannotResolveNonExistentVMServiceKernel) {
-  auto settings = CreateSettingsForFixture();
-  settings.vmservice_kernel_path = "/nonexistent/path/to/kernel.dill";
-  settings.assets_path = "";
-  auto mapping = DartIsolate::ResolveVMServiceKernel(settings);
-  ASSERT_EQ(mapping, nullptr);
-}
-
 TEST_F(DartIsolateTest,
        RootIsolateCreateCallbackIsMadeOnceAndBeforeIsolateRunning) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());

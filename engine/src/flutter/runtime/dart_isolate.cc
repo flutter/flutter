@@ -971,49 +971,40 @@ bool DartIsolate::Shutdown() {
   return true;
 }
 
-std::unique_ptr<fml::Mapping> DartIsolate::ResolveVMServiceKernel(
+static std::unique_ptr<fml::Mapping> ResolveVMServiceKernel(
     const Settings& settings) {
-  std::string kernel_path = settings.vmservice_kernel_path;
-  if (kernel_path.empty()) {
-    kernel_path = "vmservice_snapshot.dill";
+  constexpr const char* kKernelFileName = "vmservice_snapshot.dill";
+  std::vector<std::string> search_paths;
+  if (!settings.assets_path.empty()) {
+    search_paths.push_back(
+        fml::paths::JoinPaths({settings.assets_path, kKernelFileName}));
   }
-  std::unique_ptr<fml::Mapping> kernel;
-  if (fml::IsFile(kernel_path)) {
-    kernel = fml::FileMapping::CreateReadOnly(kernel_path);
+  if (!settings.application_kernel_asset.empty()) {
+    search_paths.push_back(fml::paths::JoinPaths(
+        {fml::paths::GetDirectoryName(settings.application_kernel_asset),
+         kKernelFileName}));
   }
-  if (!kernel && !settings.assets_path.empty()) {
-    std::string assets_kernel_path =
-        fml::paths::JoinPaths({settings.assets_path, kernel_path});
-    if (fml::IsFile(assets_kernel_path)) {
-      kernel = fml::FileMapping::CreateReadOnly(assets_kernel_path);
-    }
+  if (auto directory = fml::paths::GetExecutableDirectoryPath();
+      directory.first) {
+    search_paths.push_back(
+        fml::paths::JoinPaths({directory.second, kKernelFileName}));
+    search_paths.push_back(
+        fml::paths::JoinPaths({directory.second, "..", kKernelFileName}));
   }
-  if (!kernel) {
-    auto directory = fml::paths::GetExecutableDirectoryPath();
-    if (directory.first) {
-      std::string path_relative_to_executable =
-          fml::paths::JoinPaths({directory.second, kernel_path});
-      if (fml::IsFile(path_relative_to_executable)) {
-        kernel = fml::FileMapping::CreateReadOnly(path_relative_to_executable);
-      } else {
-        std::string path_relative_to_parent =
-            fml::paths::JoinPaths({directory.second, "..", kernel_path});
-        if (fml::IsFile(path_relative_to_parent)) {
-          kernel = fml::FileMapping::CreateReadOnly(path_relative_to_parent);
-        }
+#if defined(OS_FUCHSIA)
+  search_paths.push_back(
+      fml::paths::JoinPaths({"/pkg/data/assets", kKernelFileName}));
+#endif
+  search_paths.push_back(kKernelFileName);
+
+  for (const auto& path : search_paths) {
+    if (fml::IsFile(path)) {
+      if (auto kernel = fml::FileMapping::CreateReadOnly(path)) {
+        return kernel;
       }
     }
   }
-#if defined(OS_FUCHSIA)
-  if (!kernel) {
-    std::string fuchsia_path =
-        fml::paths::JoinPaths({"/pkg/data/assets", kernel_path});
-    if (fml::IsFile(fuchsia_path)) {
-      kernel = fml::FileMapping::CreateReadOnly(fuchsia_path);
-    }
-  }
-#endif
-  return kernel;
+  return nullptr;
 }
 
 Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(

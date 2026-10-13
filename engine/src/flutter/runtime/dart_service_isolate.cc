@@ -8,7 +8,6 @@
 #include <cstring>
 
 #include "flutter/fml/logging.h"
-#include "flutter/fml/mapping.h"
 #include "flutter/fml/posix_wrappers.h"
 #include "flutter/runtime/embedder_resources.h"
 #include "third_party/dart/runtime/include/dart_api.h"
