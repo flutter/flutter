@@ -1155,7 +1155,7 @@ name: my_app
             webEnableHotReload: true,
             extraFrontEndOptions: kDdcLibraryBundleFlags,
           ),
-          webUseWasm: true,
+          webConfig: const WebDebugConfig(useWasm: true),
         ),
       );
       fakeVmServiceHost = FakeVmServiceHost(
@@ -2326,7 +2326,7 @@ flutter:
 
       var debuggingOptions = DebuggingOptions.enabled(
         BuildInfo.debug,
-        webDevServerConfig: webDevServerConfig,
+        webConfig: const WebDebugConfig(devServerConfig: webDevServerConfig),
       );
       ResidentRunner residentWebRunner = setUpResidentRunner(
         flutterDevice,
@@ -2337,7 +2337,7 @@ flutter:
 
       debuggingOptions = DebuggingOptions.enabled(
         BuildInfo.debug,
-        webDevServerConfig: webDevServerConfig2,
+        webConfig: const WebDebugConfig(devServerConfig: webDevServerConfig2),
       );
       residentWebRunner = setUpResidentRunner(
         flutterDevice,
@@ -2427,7 +2427,10 @@ flutter:
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webUseWasm: true),
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo.debug,
+            webConfig: const WebDebugConfig(useWasm: true),
+          ),
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
@@ -2464,7 +2467,10 @@ flutter:
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.release, webUseWasm: true),
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo.release,
+            webConfig: const WebDebugConfig(useWasm: true),
+          ),
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,
@@ -2512,7 +2518,10 @@ flutter:
         final residentWebRunner = ResidentWebRunner(
           flutterDevice,
           flutterProject: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
-          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, webUseWasm: true),
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo.debug,
+            webConfig: const WebDebugConfig(useWasm: true),
+          ),
           stayResident: false,
           buildSystem: TestBuildSystem.all(BuildResult(success: true), (
             Target target,

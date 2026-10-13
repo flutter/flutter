@@ -645,9 +645,11 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             webEnableHotReload: true,
             includeUnsupportedPlatformLibraryStubs: true,
           ),
-          webEnableExposeUrl: false,
-          webEnableExpressionEvaluation: true,
-          webRunHeadless: boolArg(kHeadless),
+          webConfig: WebDebugConfig(
+            enableExposeUrl: false,
+            enableExpressionEvaluation: true,
+            runHeadless: boolArg(kHeadless),
+          ),
           devToolsServerAddress: devToolsServerAddress,
         );
         final String target = widgetPreviewScaffoldProject.directory
