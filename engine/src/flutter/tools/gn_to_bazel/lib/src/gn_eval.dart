@@ -443,6 +443,36 @@ final class GnOpaqueValue extends GnValue {
   String toString() => '<$description>';
 }
 
+/// The outputs of another target, as `get_target_outputs(label)` returns
+/// them (optionally through `filter_include`): the converter does not know
+/// what a template's targets produce, so the value names the target (an
+/// absolute GN label) and the file patterns kept, and the Bazel side takes
+/// the target's files.
+final class GnTargetOutputsValue extends GnValue {
+  const GnTargetOutputsValue(this.label, this.patterns);
+
+  /// The target, as `//dir:name`.
+  final String label;
+
+  /// `filter_include` patterns (`*.iplr`); empty for every output.
+  final List<String> patterns;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GnTargetOutputsValue &&
+      other.label == label &&
+      other.patterns.length == patterns.length &&
+      Iterable<int>.generate(patterns.length).every((int i) => other.patterns[i] == patterns[i]);
+
+  @override
+  int get hashCode => Object.hash(label, Object.hashAll(patterns));
+
+  @override
+  String toString() => patterns.isEmpty
+      ? 'get_target_outputs("$label")'
+      : 'filter_include(get_target_outputs("$label"), $patterns)';
+}
+
 /// A boolean whose value the assumptions did not decide: the result of
 /// `use_x = enable_unittests && shell_enable_gl`, kept as a formula so that
 /// `if (use_x)` can be followed.
@@ -1589,11 +1619,71 @@ final class _Evaluator {
       case GnFunctionCall(name: 'exec_script'):
         // Unknowable here; an error if it ever reaches the output.
         return _Expression.scalar(GnOpaqueValue(_gnText(node)));
+      case GnFunctionCall(name: 'get_target_outputs', :final List<GnNode> args):
+        if (args.length != 1) {
+          throw GnError(node.location, 'get_target_outputs() takes one label');
+        }
+        final String label = _stringExpression(args.single, scope);
+        return _Expression(<_Value>[
+          _Value(
+            GnTargetOutputsValue(
+              '${_labelInfo(label, 'dir', node)}:${_labelInfo(label, 'name', node)}',
+              const <String>[],
+            ),
+            GnItemComments.none,
+          ),
+        ], isList: true);
+      case GnFunctionCall(name: 'filter_include', :final List<GnNode> args):
+        if (args.length != 2) {
+          throw GnError(node.location, 'filter_include() takes a list and the patterns');
+        }
+        final _Expression list = _expression(args[0], scope);
+        final patterns = <String>[
+          for (final _Value v in _expression(args[1], scope).items)
+            if (v.value case GnStringValue(:final String value))
+              value
+            else
+              throw GnError(node.location, 'filter_include() patterns must be strings'),
+        ];
+        final kept = <_Value>[];
+        for (final _Value item in list.items) {
+          switch (item.value) {
+            case GnTargetOutputsValue(:final String label, patterns: final List<String> existing):
+              if (existing.isNotEmpty) {
+                throw GnError(
+                  node.location,
+                  'filter_include() over a filtered get_target_outputs()',
+                );
+              }
+              kept.add(
+                _Value(
+                  GnTargetOutputsValue(label, patterns),
+                  item.comments,
+                  condition: item.condition,
+                  sourceConditions: item.sourceConditions,
+                ),
+              );
+            case GnStringValue(:final String value):
+              if (patterns.any((String p) => _matchesFilePattern(value, p))) {
+                kept.add(item);
+              }
+            default:
+              throw GnError(node.location, 'filter_include() over ${item.value} is not supported');
+          }
+        }
+        return _Expression(kept, isList: true);
       case GnFunctionCall(:final String name):
         throw GnError(node.location, '$name() in an expression is not supported by the converter');
       default:
         throw GnError(node.location, 'unsupported expression (${node.runtimeType})');
     }
+  }
+
+  /// GN's file pattern match (`filter_include`): `*` matches any run of
+  /// characters, the rest is literal; the pattern covers the whole string.
+  static bool _matchesFilePattern(String value, String pattern) {
+    final String regex = pattern.split('*').map(RegExp.escape).join('.*');
+    return RegExp('^$regex\$').hasMatch(value);
   }
 
   /// The GN path of [path] as seen from the file containing [node].

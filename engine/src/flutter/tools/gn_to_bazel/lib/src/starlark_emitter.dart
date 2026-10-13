@@ -609,7 +609,11 @@ final class _Emitter {
       }
       switch (argument.kind) {
         case TemplateArgumentKind.files:
-          _filesInto(rule.list(argument.attribute), variable);
+          _filesInto(rule.list(argument.attribute), _withoutTargetOutputs(variable));
+          final Map<String, List<String>> targets = _targetOutputs(variable);
+          if (targets.isNotEmpty) {
+            rule.scalars['${argument.attribute}_targets'] = _dictText(targets);
+          }
         case TemplateArgumentKind.labels:
           _labelsInto(rule.list(argument.attribute), variable, target);
         case TemplateArgumentKind.configs:
@@ -642,9 +646,140 @@ final class _Emitter {
               '"${_filePath(file, variable.assignments.first.location)}"';
         case TemplateArgumentKind.scalar:
           _scalar(rule, argument.attribute, variable);
+        case TemplateArgumentKind.strings:
+          _stringsInto(rule.list(argument.attribute), variable);
+        case TemplateArgumentKind.pathString:
+          final String? text = _singleString(variable);
+          if (text == null) {
+            throw GnError(variable.assignments.first.location, '${variable.name} has no value');
+          }
+          rule.scalars[argument.attribute] = _starlarkString(
+            _withPathTokens(text, variable.assignments.first.location, rule, target),
+          );
+        case TemplateArgumentKind.ignored:
+          break;
       }
     }
+    // What GN discovers after the fact (templateAttributeOverrides).
+    templateAttributeOverrides['$gnPackage:${target.name}']?.forEach((
+      String attribute,
+      String text,
+    ) {
+      rule.scalars[attribute] = text;
+    });
     rules.add(rule);
+  }
+
+  /// [variable] without the `get_target_outputs()` items of its assignments.
+  GnVariable _withoutTargetOutputs(GnVariable variable) {
+    if (!variable.assignments.any(
+      (GnAssignment a) => a.items.any((GnValue v) => v is GnTargetOutputsValue),
+    )) {
+      return variable;
+    }
+    final copy = GnVariable(variable.name, isList: variable.isList, forwarded: variable.forwarded);
+    for (final GnAssignment a in variable.assignments) {
+      final items = <GnValue>[];
+      final comments = <GnItemComments>[];
+      for (var i = 0; i < a.items.length; i++) {
+        if (a.items[i] is GnTargetOutputsValue) {
+          continue;
+        }
+        items.add(a.items[i]);
+        comments.add(a.commentsOf(i));
+      }
+      copy.assignments.add(
+        GnAssignment(
+          a.location,
+          a.condition,
+          a.op,
+          items,
+          sourceConditions: a.sourceConditions,
+          comments: a.comments,
+          itemComments: comments,
+        ),
+      );
+    }
+    return copy;
+  }
+
+  /// The `get_target_outputs()` items of [variable]: Bazel label (as written
+  /// from this file) to the `filter_include` patterns kept. Unconditional
+  /// only: a conditional one would need a select() over a dictionary.
+  Map<String, List<String>> _targetOutputs(GnVariable variable) {
+    final targets = <String, List<String>>{};
+    for (final GnAssignment a in variable.assignments) {
+      for (final GnValue v in a.items) {
+        if (v is! GnTargetOutputsValue) {
+          continue;
+        }
+        if (!a.isUnconditional || a.op == '-=') {
+          throw GnError(
+            a.location,
+            'get_target_outputs() under a condition or removed is not supported',
+          );
+        }
+        final String label = _localLabel(
+          bazelLabel(v.label, package: gnPackage, location: a.location),
+        );
+        if (targets.containsKey(label) && targets[label] != v.patterns) {
+          throw GnError(
+            a.location,
+            'get_target_outputs($label) listed twice with different patterns',
+          );
+        }
+        targets[label] = v.patterns;
+      }
+    }
+    return targets;
+  }
+
+  /// A Starlark dictionary of label to string list, laid out as buildifier
+  /// lays BUILD files out: a dictionary or list of more than one element goes
+  /// one element per line (an attribute's text starts after four spaces).
+  static String _dictText(Map<String, List<String>> entries) {
+    String list(List<String> values, String indent) {
+      if (values.length <= 1) {
+        return '[${values.map(_starlarkString).join()}]';
+      }
+      final out = StringBuffer('[\n');
+      for (final value in values) {
+        out.writeln('$indent    ${_starlarkString(value)},');
+      }
+      return '$out$indent]';
+    }
+
+    if (entries.length == 1) {
+      final MapEntry<String, List<String>> e = entries.entries.single;
+      return '{${_starlarkString(e.key)}: ${list(e.value, '    ')}}';
+    }
+    final out = StringBuffer('{\n');
+    for (final MapEntry<String, List<String>> e in entries.entries) {
+      out.writeln('        ${_starlarkString(e.key)}: ${list(e.value, '        ')},');
+    }
+    return '$out    }';
+  }
+
+  /// [text] as a Starlark string literal.
+  static String _starlarkString(String text) =>
+      '"${text.replaceAll(r'\', r'\\').replaceAll('"', r'\"')}"';
+
+  /// [text] with each rebased path (see _argsInto) replaced by the rule's
+  /// token for it.
+  String _withPathTokens(String text, GnLocation location, _Rule rule, GnTarget target) {
+    final List<String> parts = text.split(rebasedPathMarker);
+    if (parts.length.isEven) {
+      throw GnError(location, 'unbalanced rebased path in $text');
+    }
+    final declared = <String>{
+      for (final String list in <String>['srcs', 'inputs', 'shaders'])
+        for (final _Item item in rule.list(list).always) item.text,
+    };
+    final out = StringBuffer();
+    for (var i = 0; i < parts.length; i++) {
+      out.write(i.isEven ? parts[i] : _pathToken(parts[i], location, rule, declared, target));
+    }
+    return out.toString();
   }
 
   /// copy("x") becomes a `gn_copy`: its sources as they are, GN's

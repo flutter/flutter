@@ -145,12 +145,6 @@ filegroup(
       'impeller_unittests': 'needs the Impeller test suites',
       'impeller_dart_unittests': 'needs //flutter/impeller/renderer',
     },
-    // The shader and image fixtures under fixtures/ are read by the suites
-    // of other packages (impeller/compiler's) until impeller/fixtures/BUILD.gn
-    // converts and the directory becomes a package of its own.
-    appendix: '''
-exports_files(glob(["fixtures/*"]))
-''',
   ),
   ConvertedFile(
     '//flutter/impeller/base',
@@ -237,56 +231,17 @@ cc_test(
   ConvertedFile(
     '//flutter/impeller/compiler',
     // The compiler's suite on its own, as for //flutter/impeller/base, with
-    // the shader fixtures it reads from //flutter/impeller/fixtures (GN's
-    // file_fixtures there, minus the images, fonts and generated runtime
-    // stages the other suites use; the tests write their intermediates next
-    // to them). The list goes when impeller/fixtures/BUILD.gn converts.
+    // the shader fixtures of //flutter/impeller/fixtures (GN's file_fixtures,
+    // which impeller_unittests links; the tests write their intermediates
+    // next to them).
     appendix: '''
 load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
-
-flutter_test_fixtures(
-    name = "impeller_compiler_fixtures",
-    fixtures = ["//engine/src/flutter/impeller:fixtures/" + f for f in [
-        "array_assignment.frag",
-        "array_initialization_without_initializer.frag",
-        "array_initializer_with_constants.frag",
-        "array_initializer_with_variables.frag",
-        "check_gles_definition.frag",
-        "check_gles_unflipped_definition.frag",
-        "flutter_gpu_instanced.frag",
-        "flutter_gpu_instanced.vert",
-        "flutter_gpu_texture.frag",
-        "flutter_gpu_texture.vert",
-        "flutter_gpu_unlit.frag",
-        "flutter_gpu_unlit.vert",
-        "mat2_test.frag",
-        "multiple_stages.hlsl",
-        "resources_limit.vert",
-        "sa%m#ple.vert",
-        "sample.comp",
-        "sample.frag",
-        "sample.vert",
-        "sample_with_binding.vert",
-        "sample_with_positioned_uniforms.frag",
-        "sample_with_uniforms.frag",
-        "simple.vert.hlsl",
-        "stage1.comp",
-        "stage2.comp",
-        "struct_def_bug.vert",
-        "struct_internal.frag",
-        "test_texture.frag",
-        "texture_lookup.frag",
-        "types.h",
-        "y_flip_early_return.vert",
-    ]],
-)
 
 cc_test(
     name = "impeller_compiler_unittests",
     deps = [
         ":compiler_unittests",
-        ":impeller_compiler_fixtures",
+        "//engine/src/flutter/impeller/fixtures:file_fixtures",
         "//engine/src/flutter/testing",
     ],
 )
@@ -331,6 +286,21 @@ cc_test(
   // The gmock doubles of the renderer's interfaces, which the core and
   // other suites test against.
   ConvertedFile('//flutter/impeller/renderer/testing'),
+  // The test fixtures: two shader libraries, the runtime stages and shader
+  // bundles (impellerc invoked directly) and the files, with the Dart entry
+  // point of the Flutter GPU tests.
+  ConvertedFile(
+    '//flutter/impeller/fixtures',
+    // lib/ui's shader fixtures compile shaders of this directory
+    // (`//flutter/impeller/fixtures/ink_sparkle.frag`, the Flutter GPU ones).
+    appendix: '''
+exports_files(glob([
+    "*.frag",
+    "*.vert",
+    "ordering/*.frag",
+]))
+''',
+  ),
   ConvertedFile(
     '//flutter/impeller/typographer',
     skip: <String, String>{'typographer_unittests': 'needs //flutter/impeller/playground'},
@@ -478,17 +448,9 @@ filegroup(
   ),
   ConvertedFile('//flutter/lib/io'),
   ConvertedFile('//flutter/vulkan'),
-  // The GPU surfaces; the suite needs //flutter/testing:vulkan, SwiftShader
-  // and the Dart runtime, and its executable the Impeller fixtures.
-  ConvertedFile(
-    '//flutter/shell/gpu',
-    skip: <String, String>{
-      'gpu_surface_vulkan_unittests':
-          'needs //flutter/testing:vulkan, //flutter/third_party/swiftshader and the Dart runtime',
-      'gpu_surface_unittests':
-          'needs //flutter/impeller/fixtures and :gpu_surface_vulkan_unittests',
-    },
-  ),
+  // The GPU surfaces and their suite (on SwiftShader's static library and
+  // the Impeller fixtures).
+  ConvertedFile('//flutter/shell/gpu'),
   // The sampling profiler; GN links its suite into shell_unittests, which
   // waits on the Dart snapshot, so it runs on its own meanwhile.
   ConvertedFile(
@@ -518,6 +480,14 @@ cc_test(
       'gpu_unittests_fixtures': 'with gpu_unittests',
       'gpu_unittests': 'needs //flutter/testing:dart (the Dart runtime)',
     },
+    // The Flutter GPU Dart library, which impeller/fixtures' entry point
+    // imports by relative path (templateAttributeOverrides).
+    appendix: '''
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)
+''',
   ),
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics

@@ -3,10 +3,10 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/gpu/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: gpu_surface_vulkan_unittests, gpu_surface_unittests.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -119,4 +119,67 @@ cc_library(
         "@skia",
     ],
     alwayslink = True,
+)
+
+cc_library(
+    name = "gpu_surface_vulkan_unittests",
+    testonly = True,
+    srcs = ["gpu_surface_vulkan_impeller_unittests.cc"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :gpu_surface_vulkan
+        "-Wno-c++98-compat-extra-semi",  # from :gpu_surface_vulkan
+        "-Wno-deprecated-copy",  # from :gpu_surface_vulkan
+        "-Wno-implicit-fallthrough",  # from :gpu_surface_vulkan
+        "-Wno-nullability-completeness",  # from :gpu_surface_vulkan
+        "-Wno-suggest-destructor-override",  # from :gpu_surface_vulkan
+        "-Wno-suggest-override",  # from :gpu_surface_vulkan
+        "-Wno-unused-private-field",  # from :gpu_surface_vulkan
+        "-Wno-unused-variable",  # from :gpu_surface_vulkan
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":gpu_surface_vulkan",
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/fixtures",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/runtime:libdart",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:vulkan",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+# SwiftShader, its ICD manifest and the Vulkan loader, next to the
+# suites below (GN: data_deps of //flutter/third_party/swiftshader and
+# ANGLE).
+flutter_gpu_test_backends(
+    name = "gpu_test_backends",
+)
+
+cc_test(
+    name = "gpu_surface_unittests",
+    size = "small",
+    srcs = ["gpu_surface_unittests.cc"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    data = [":gpu_test_backends"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":gpu_surface_vulkan_unittests",  # test_enable_vulkan
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/fixtures",
+        "//engine/src/flutter/testing",
+    ],
 )

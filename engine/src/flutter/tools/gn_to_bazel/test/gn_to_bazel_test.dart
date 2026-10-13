@@ -220,6 +220,51 @@ source_set("x") {
       expect(assignments[4].sourceConditions, <String>['!(slimpeller)']);
     });
 
+    test('keeps get_target_outputs() as a value naming the target, filtered', () async {
+      final GnFileEvaluation evaluation = await evaluate('''
+group("x") {
+  testonly = true
+  fixtures = [ "a.png" ] + filter_include(get_target_outputs("//flutter/test:stages"), [ "*.iplr" ])
+  fixtures += get_target_outputs("//flutter/other:bundle")
+  names = filter_include([ "a.iplr", "b.txt", "c.iplr" ], [ "*.iplr" ])
+}
+''');
+      final GnTarget target = evaluation.targets.single;
+      expect(
+        target.variables['fixtures']!.assignments.expand((GnAssignment a) => a.items),
+        <GnValue>[
+          const GnStringValue('a.png'),
+          const GnTargetOutputsValue('//flutter/test:stages', <String>['*.iplr']),
+          const GnTargetOutputsValue('//flutter/other:bundle', <String>[]),
+        ],
+      );
+      expect(target.variables['names']!.assignments.single.items, <GnValue>[
+        const GnStringValue('a.iplr'),
+        const GnStringValue('c.iplr'),
+      ]);
+    });
+
+    test('applies assumptions to a condition built outside evaluation', () {
+      final Assumptions assumptions = linuxHostAssumptions();
+      const Condition debug = ConditionVariable('is_debug');
+      expect(assumptions.apply(const ConditionVariable('is_win')), Condition.never);
+      expect(assumptions.apply(const ConditionNot(ConditionVariable('is_win'))), Condition.always);
+      expect(assumptions.apply(debug), debug);
+      expect(
+        assumptions.apply(
+          const ConditionAnd(<Condition>[
+            ConditionNot(ConditionVariable('is_win')),
+            ConditionNot(debug),
+          ]),
+        ),
+        const ConditionNot(debug),
+      );
+      expect(
+        assumptions.apply(const ConditionAnd(<Condition>[ConditionVariable('is_win'), debug])),
+        Condition.never,
+      );
+    });
+
     test('evaluates string comparisons and else-if chains', () async {
       final GnFileEvaluation evaluation = await evaluate('''
 source_set("x") {
