@@ -31,3 +31,17 @@ cc_test(
         "@vulkan-headers//:vulkan_headers",
     ],
 )
+
+# The driver as a static library, entered through vkGetInstanceProcAddr.
+cc_test(
+    name = "swiftshader_static_smoke_test",
+    size = "small",
+    srcs = ["swiftshader_static_smoke_test.cc"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static",
+        "@googletest//:gtest_main",
+        "@vulkan-headers//:vulkan_headers",
+    ],
+)

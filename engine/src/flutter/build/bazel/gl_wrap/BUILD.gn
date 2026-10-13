@@ -13,6 +13,7 @@ group("gl_wrap") {
   testonly = true
   deps = [
     ":angle",
+    ":swiftshader_static",
     "//flutter/third_party/swiftshader",
     "//flutter/third_party/vulkan-deps/vulkan-loader/src:libvulkan",
   ]
@@ -24,5 +25,14 @@ group("angle") {
   deps = [
     "//flutter/third_party/angle:libEGL_static",
     "//flutter/third_party/angle:libGLESv2_static",
+  ]
+}
+
+# Likewise libvk_swiftshader_static.a: the driver as a static library (GN's
+# complete_static_lib), which the Vulkan surface's suite links directly
+# rather than opening the shared one. The same objects as the driver's.
+group("swiftshader_static") {
+  deps = [
+    "//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static",
   ]
 }
