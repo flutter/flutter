@@ -181,25 +181,28 @@ Future<void> run(List<String> args) async {
       :ProcessManager processManager,
       :FlutterProjectFactory projectFactory,
     ) = dependencies.toolContext;
+    final debuggingOptions = DebuggingOptions.enabled(buildInfo);
     final testRunner = FlutterTestRunner(toolContext: dependencies.toolContext);
     exitCode = await testRunner.runTests(
       const TestWrapper(),
       tests.keys.map(Uri.file).toList(),
-      debuggingOptions: DebuggingOptions.enabled(buildInfo),
-      buildInfo: buildInfo,
-      watcher: collector,
-      enableVmService: collector != null,
-      precompiledDillFiles: tests,
-      concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
-      icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
-      coverageDirectory: coverageDirectory,
-      nativeAssetsBuilder: TestCompilerNativeAssetsBuilderImpl(
-        config: config,
-        fileSystem: fs,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        projectFactory: projectFactory,
+      TestExecutionSpecification(
+        debuggingOptions: debuggingOptions,
+        buildInfo: buildInfo,
+        watcher: collector,
+        enableVmService: collector != null,
+        precompiledDillFiles: tests,
+        concurrency: math.max(1, platform.numberOfProcessors - 2),
+        icudtlPath: fs.path.absolute(argResults[_kOptionIcudtl] as String),
+        coverageDirectory: coverageDirectory,
+        nativeAssetsBuilder: TestCompilerNativeAssetsBuilderImpl(
+          config: config,
+          fileSystem: fs,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+          projectFactory: projectFactory,
+        ),
       ),
     );
 
