@@ -9,8 +9,8 @@
 #include <string>
 #include <vector>
 
-#include <android/hardware_buffer_jni.h>
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/shell/platform/android/android_renderer.h"
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
@@ -18,27 +18,6 @@
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
 namespace flutter {
-
-class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
- public:
-  //----------------------------------------------------------------------------
-  /// @param[in]  create_transaction  Passed to the Vulkan surfaces it creates.
-  ///
-  AndroidSurfaceFactoryImpl(const std::shared_ptr<AndroidContext>& context,
-                            bool enable_impeller,
-                            bool lazy_shader_mode,
-                            CreateSurfaceTransaction create_transaction);
-
-  ~AndroidSurfaceFactoryImpl() override;
-
-  std::unique_ptr<AndroidSurface> CreateSurface() override;
-
- private:
-  const std::shared_ptr<AndroidContext>& android_context_;
-  const bool enable_impeller_;
-  const bool lazy_shader_mode_;
-  const CreateSurfaceTransaction create_transaction_;
-};
 
 // Renders on its own (Android surfaces and contexts) and takes the remaining
 // platform callbacks from the PlatformViewEmbedder dispatch table. An override
@@ -77,7 +56,7 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   void TeardownSurface();
 
   const std::shared_ptr<AndroidContext>& GetAndroidContext() {
-    return android_context_;
+    return renderer_->GetAndroidContext();
   }
 
   /// @brief Whether the SurfaceControl based swapchain is enabled and active.
@@ -88,27 +67,13 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
       PlatformViewAndroid* self,
       PlatformDispatchTable platform_dispatch_table);
 
+  static CreateSurfaceTransaction MakeCreateSurfaceTransaction(
+      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
-  std::shared_ptr<AndroidContext> android_context_;
-  std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
-
-  std::unique_ptr<AndroidSurface> android_surface_;
-  bool android_meets_hcpp_criteria_ = false;
-
-  std::unique_ptr<Surface> CreateAndroidRenderingSurface();
+  const std::unique_ptr<AndroidRenderer> renderer_;
 
   std::shared_ptr<ExternalViewEmbedder> CreateAndroidExternalViewEmbedder();
-
-  std::unique_ptr<SnapshotSurfaceProducer>
-  CreateAndroidSnapshotSurfaceProducer();
-
-  bool MakeAndroidResourceContextCurrent() const;
-
-  void ReleaseAndroidResourceContext() const;
-
-  std::shared_ptr<impeller::Context> GetAndroidImpellerContext() const;
-
-  void SetupAndroidImpellerContext();
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

@@ -18,7 +18,7 @@
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
-      "count": 38,
+      "count": 39,
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {
@@ -64,6 +64,12 @@
       "from": 71,
       "to": 77,
       "reason": "Textures step 1: the texture classes stop including the JNI headers and include what they use themselves (display_list geometry conversions, Skia SkM44 and SkColorSpace, Impeller AiksContext), which those headers pulled in before. The classes move to shell/platform/embedder in the next two steps."
+    },
+    {
+      "metric": "engine_internal_includes",
+      "from": 38,
+      "to": 39,
+      "reason": "android_renderer.cc includes impeller/renderer/backend/vulkan/context_vk.h for IsSurfaceControlEnabled, which PlatformViewAndroid reached through a transitive include; the file moves to shell/platform/embedder/android in the next step"
     }
   ]
 }
