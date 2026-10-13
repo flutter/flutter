@@ -668,6 +668,8 @@ class FlutterTesterOptions():
     if not self.enable_vm_service:
       command_args.append('--disable-vm-service')
     else:
+      # Port 0 instructs the OS to bind an available ephemeral port so parallel
+      # test runs do not collide on the default port (8181).
       command_args.append('--vm-service-port=0')
 
     if self.impeller_backend != '':

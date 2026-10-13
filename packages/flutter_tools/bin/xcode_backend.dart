@@ -154,8 +154,6 @@ class Context {
 
   Directory directoryFromPath(String path) => Directory(path);
 
-  File fileFromPath(String path) => File(path);
-
   /// Run given command ([bin]) in a synchronous subprocess.
   ///
   /// If [allowFail] is true, an exception will not be thrown even if the process returns a
@@ -358,6 +356,7 @@ class Context {
         environment['CODE_SIGNING_REQUIRED'] != 'NO';
 
     _embedAppFramework(xcodeFrameworksDir, codesign ? expandedCodeSignIdentity : null);
+    _embedVmServiceFramework(xcodeFrameworksDir, codesign ? expandedCodeSignIdentity : null);
 
     // Embed the actual Flutter.framework that the Flutter app expects to run against,
     // which could be a local build or an arch/type-specific build.
@@ -397,6 +396,32 @@ class Context {
     runRsync('${environment['BUILT_PRODUCTS_DIR']}/App.framework', xcodeFrameworksDir);
     if (expandedCodeSignIdentity != null) {
       _codesignFramework(expandedCodeSignIdentity, '$xcodeFrameworksDir/App.framework/App');
+    }
+  }
+
+  static const _kVmServiceFrameworkName = 'VMService.framework';
+  static const _kVmServiceExecutableName = 'VMService';
+
+  /// Embeds VMService.framework from BUILT_PRODUCTS_DIR into the Xcode Frameworks
+  /// directory when present in profile mode.
+  void _embedVmServiceFramework(String xcodeFrameworksDir, String? expandedCodeSignIdentity) {
+    if (parseFlutterBuildMode() != 'profile') {
+      return;
+    }
+    final String? builtProductsDir = environment['BUILT_PRODUCTS_DIR'];
+    if (builtProductsDir == null) {
+      return;
+    }
+    final vmServiceFrameworkPath = '$builtProductsDir/$_kVmServiceFrameworkName';
+    if (!directoryFromPath(vmServiceFrameworkPath).existsSync()) {
+      return;
+    }
+    runRsync(vmServiceFrameworkPath, xcodeFrameworksDir);
+    if (expandedCodeSignIdentity != null) {
+      _codesignFramework(
+        expandedCodeSignIdentity,
+        '$xcodeFrameworksDir/$_kVmServiceFrameworkName/$_kVmServiceExecutableName',
+      );
     }
   }
 
@@ -455,46 +480,6 @@ class Context {
   void _codesignFramework(String expandedCodeSignIdentity, String frameworkPath) {
     // NOTE: If you modify this function, you should likely also update the equivalent implementation in
     // packages/flutter_tools/templates/add_to_app/darwin/Tools/FlutterToolHelper/FlutterAssembleToolHelper.swift.tmpl
-    final File binaryFile = fileFromPath(frameworkPath);
-    Directory frameworkDir = binaryFile.parent;
-    while (!frameworkDir.path.endsWith('.framework') &&
-        frameworkDir.parent.path != frameworkDir.path) {
-      frameworkDir = frameworkDir.parent;
-    }
-    if (frameworkDir.path.endsWith('.framework')) {
-      final frameworksDirs = <Directory>[
-        directoryFromPath('${frameworkDir.path}/Frameworks'),
-        directoryFromPath('${frameworkDir.path}/Versions/A/Frameworks'),
-        directoryFromPath('${frameworkDir.path}/Versions/Current/Frameworks'),
-      ];
-      final seenPaths = <String>{};
-      for (final dir in frameworksDirs) {
-        if (dir.existsSync()) {
-          for (final FileSystemEntity entity in dir.listSync()) {
-            final String canonicalPath = entity.resolveSymbolicLinksSync();
-            if (!seenPaths.add(canonicalPath)) {
-              continue;
-            }
-            if (entity is File && (entity.path.endsWith('.dylib') || entity.path.endsWith('.so'))) {
-              runSync('codesign', <String>[
-                '--force',
-                '--verbose',
-                '--sign',
-                expandedCodeSignIdentity,
-                '--',
-                entity.path,
-              ]);
-            } else if (entity is Directory && entity.path.endsWith('.framework')) {
-              final String? nestedFrameworkName = _parseFrameworkNameFromDirectory(entity);
-              if (nestedFrameworkName != null) {
-                _codesignFramework(expandedCodeSignIdentity, '${entity.path}/$nestedFrameworkName');
-              }
-            }
-          }
-        }
-      }
-    }
-
     runSync('codesign', <String>[
       '--force',
       '--verbose',

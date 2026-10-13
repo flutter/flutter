@@ -425,6 +425,21 @@ public class FlutterAssembleToolHelper {
         fileManager: fileManager,
         processManager: processManager
       )
+      if targetBuildMode.lowercased() == "profile"
+        && fileManager.fileExists(
+          atPath: "\(packagePath)/\(targetBuildMode)/Frameworks/VMService.xcframework"
+        )
+      {
+        try copyAndCodesignFramework(
+          frameworkName: "VMService",
+          packagePath: packagePath,
+          targetBuildMode: targetBuildMode,
+          targetPlatform: targetPlatform,
+          env: env,
+          fileManager: fileManager,
+          processManager: processManager
+        )
+      }
       updated = true
     }
     if updated {
@@ -671,36 +686,6 @@ public class FlutterAssembleToolHelper {
 
       if let codesignIdentity = env["EXPANDED_CODE_SIGN_IDENTITY"] {
         if env["CODE_SIGNING_REQUIRED"] != "NO" {
-          let frameworkDir = "\(embeddedFrameworks)/\(frameworkPath.lastPathComponent)"
-          let subFrameworksDirs = [
-            "\(frameworkDir)/Frameworks",
-            "\(frameworkDir)/Versions/A/Frameworks",
-            "\(frameworkDir)/Versions/Current/Frameworks",
-          ]
-          for subDir in subFrameworksDirs {
-            if fileManager.fileExists(atPath: subDir),
-              let items = try? fileManager.contentsOfDirectory(
-                at: URL(fileURLWithPath: subDir),
-                includingPropertiesForKeys: nil,
-                options: []
-              )
-            {
-              for item in items {
-                if item.pathExtension == "dylib" || item.pathExtension == "so" {
-                  try processManager.run(
-                    executableURL: URL(fileURLWithPath: "/usr/bin/codesign"),
-                    arguments: [
-                      "--force", "--verbose", "--sign", codesignIdentity, "--",
-                      item.path,
-                    ],
-                    env: nil,
-                    failOnError: true
-                  )
-                }
-              }
-            }
-          }
-
           try processManager.run(
             executableURL: URL(fileURLWithPath: "/usr/bin/codesign"),
             arguments: [

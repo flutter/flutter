@@ -137,6 +137,19 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
         }
       }
     }
+
+    // Look for VMService.framework in the Frameworks directory when running precompiled code
+    // (e.g. profile mode).
+    if (settings.vmservice_snapshot_library_path.empty()) {
+      NSString* vmServiceFrameworkPath =
+          [mainBundle pathForResource:@"Frameworks/VMService.framework" ofType:@""];
+      if (vmServiceFrameworkPath.length > 0) {
+        NSString* executablePath = [NSBundle bundleWithPath:vmServiceFrameworkPath].executablePath;
+        if (executablePath.length > 0) {
+          settings.vmservice_snapshot_library_path.push_back(executablePath.UTF8String);
+        }
+      }
+    }
   }
 
   // Checks to see if the flutter assets directory is already present.

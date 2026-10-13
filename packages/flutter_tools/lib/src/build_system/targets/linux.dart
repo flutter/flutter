@@ -71,7 +71,7 @@ class UnpackLinux extends Target {
         'ephemeral',
       ),
     );
-    // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter.
+    // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
     final bool hasVmserviceSnapshot = environment.fileSystem
         .file(environment.fileSystem.path.join(engineSourcePath, 'libvmservice_snapshot.so'))
         .existsSync();
@@ -141,7 +141,7 @@ abstract class BundleLinuxAssets extends Target {
         mode: BuildMode.debug,
       );
       final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
-      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter.
+      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
       if (vmserviceDillFile.existsSync()) {
         vmserviceDillFile.copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
       }

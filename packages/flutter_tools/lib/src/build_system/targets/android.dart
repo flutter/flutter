@@ -77,7 +77,7 @@ abstract class AndroidAssetBundle extends Target {
         mode: BuildMode.debug,
       );
       final File vmserviceDillFile = environment.fileSystem.file(vmserviceDill);
-      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter.
+      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
       if (vmserviceDillFile.existsSync()) {
         vmserviceDillFile.copySync(outputDirectory.childFile('vmservice_snapshot.dill').path);
       }
@@ -367,6 +367,7 @@ class AndroidAotBundle extends Target {
         mode: buildMode,
       );
       final File vmserviceFile = environment.fileSystem.file(vmserviceSharedLib);
+      // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
       if (vmserviceFile.existsSync()) {
         final File destinationVmservice = outputDirectory.childFile('libvmservice_snapshot.so');
         vmserviceFile.copySync(destinationVmservice.path);

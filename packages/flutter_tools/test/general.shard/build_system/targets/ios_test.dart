@@ -679,7 +679,251 @@ void main() {
       expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
       expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
       expect(assetDirectory.childFile('vmservice_snapshot.dill'), isNot(exists));
+      expect(environment.outputDir.childDirectory('VMService.framework'), isNot(exists));
       expect(fakeAnalytics.sentEvents, isEmpty);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
+
+  testUsingContext(
+    'ProfileIosApplicationBundle builds and signs VMService.framework when vmserviceSharedLibrary exists',
+    () async {
+      environment.defines[kBuildMode] = 'profile';
+      environment.defines[kCodesignIdentity] = 'ABC123';
+      environment.defines[kXcodeAction] = 'build';
+
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+          .createSync(recursive: true);
+
+      environment.buildDir
+          .childDirectory('App.framework')
+          .childFile('App')
+          .createSync(recursive: true);
+      environment.buildDir.childFile('native_assets.json').createSync();
+
+      final String vmServiceDylibPath = artifacts.getArtifactPath(
+        Artifact.vmserviceSharedLibrary,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.profile,
+      );
+      fileSystem.file(vmServiceDylibPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('vmservice_dylib_bytes');
+
+      final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+      final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
+      final Directory vmServiceFrameworkDirectory = environment.outputDir.childDirectory(
+        'VMService.framework',
+      );
+      final File vmServiceBinary = vmServiceFrameworkDirectory.childFile('VMService');
+      final File vmServiceInfoPlist = vmServiceFrameworkDirectory.childFile('Info.plist');
+
+      processManager.addCommands(<FakeCommand>[
+        createPlutilFakeCommand(infoPlist),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        createPlutilFakeCommand(vmServiceInfoPlist),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', vmServiceBinary.path],
+        ),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', vmServiceBinary.path],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            vmServiceBinary.path,
+          ],
+        ),
+      ]);
+
+      await const ProfileIosApplicationBundle().build(environment);
+      expect(processManager, hasNoRemainingExpectations);
+
+      expect(vmServiceBinary, exists);
+      expect(vmServiceBinary.readAsStringSync(), 'vmservice_dylib_bytes');
+      expect(vmServiceInfoPlist, exists);
+      expect(
+        vmServiceInfoPlist.readAsStringSync(),
+        contains('<string>io.flutter.flutter.vmservice</string>'),
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
+
+  testUsingContext(
+    'ProfileIosApplicationBundle skips VMService.framework when vmserviceSharedLibrary does not exist',
+    () async {
+      environment.defines[kBuildMode] = 'profile';
+      environment.defines[kCodesignIdentity] = 'ABC123';
+      environment.defines[kXcodeAction] = 'build';
+
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+          .createSync(recursive: true);
+
+      environment.buildDir
+          .childDirectory('App.framework')
+          .childFile('App')
+          .createSync(recursive: true);
+      environment.buildDir.childFile('native_assets.json').createSync();
+
+      final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+      final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
+
+      processManager.addCommands(<FakeCommand>[
+        createPlutilFakeCommand(infoPlist),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+      ]);
+
+      await const ProfileIosApplicationBundle().build(environment);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(environment.outputDir.childDirectory('VMService.framework'), isNot(exists));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
+
+  testUsingContext(
+    'ReleaseIosApplicationBundle deletes stale VMService.framework from outputDir',
+    () async {
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kCodesignIdentity] = 'ABC123';
+      environment.defines[kXcodeAction] = 'build';
+
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+          .createSync(recursive: true);
+
+      environment.buildDir
+          .childDirectory('App.framework')
+          .childFile('App')
+          .createSync(recursive: true);
+      environment.buildDir.childFile('native_assets.json').createSync();
+
+      final Directory staleVmServiceDir = environment.outputDir.childDirectory(
+        'VMService.framework',
+      )..createSync(recursive: true);
+      staleVmServiceDir.childFile('VMService').createSync();
+
+      final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+      final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
+
+      processManager.addCommands(<FakeCommand>[
+        createPlutilFakeCommand(infoPlist),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+      ]);
+
+      await const ReleaseIosApplicationBundle().build(environment);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(staleVmServiceDir, isNot(exists));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

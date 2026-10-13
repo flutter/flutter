@@ -433,17 +433,17 @@ TEST_F(DartIsolateTest, CanCreateServiceIsolate) {
 
 TEST_F(DartIsolateTest, CanResolveVMServiceKernel) {
   auto settings = CreateSettingsForFixture();
-
-  // 1. Resolves when an explicit valid kernel path is specified.
   settings.vmservice_kernel_path = GetDefaultKernelFilePath();
   auto mapping = DartIsolate::ResolveVMServiceKernel(settings);
   ASSERT_NE(mapping, nullptr);
   ASSERT_GT(mapping->GetSize(), 0u);
+}
 
-  // 2. Returns nullptr when a nonexistent kernel path is specified.
+TEST_F(DartIsolateTest, CannotResolveNonExistentVMServiceKernel) {
+  auto settings = CreateSettingsForFixture();
   settings.vmservice_kernel_path = "/nonexistent/path/to/kernel.dill";
   settings.assets_path = "";
-  mapping = DartIsolate::ResolveVMServiceKernel(settings);
+  auto mapping = DartIsolate::ResolveVMServiceKernel(settings);
   ASSERT_EQ(mapping, nullptr);
 }
 

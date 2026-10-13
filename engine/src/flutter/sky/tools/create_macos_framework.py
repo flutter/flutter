@@ -65,10 +65,8 @@ def main():
   arm64_vmservice = os.path.join(arm64_out_dir, 'libvmservice_snapshot.dylib')
   x64_vmservice = os.path.join(x64_out_dir, 'libvmservice_snapshot.dylib')
   if os.path.exists(arm64_vmservice) and os.path.exists(x64_vmservice):
-    vmservice_framework_dir = os.path.join(fat_framework, 'Versions', 'A', 'Frameworks')
-    os.makedirs(vmservice_framework_dir, exist_ok=True)
     sky_utils.lipo([arm64_vmservice, x64_vmservice],
-                   os.path.join(vmservice_framework_dir, 'libvmservice_snapshot.dylib'))
+                   os.path.join(dst, 'libvmservice_snapshot.dylib'))
 
   # Create XCFramework from the arm64 and x64 fat framework.
   xcframeworks = [fat_framework]
@@ -94,11 +92,6 @@ def zip_framework(dst, args):
       # TODO(cbracken): Remove the zip file from the path when outer zip is removed.
       'FlutterMacOS.framework.zip/Versions/A/FlutterMacOS',
   ]
-  if os.path.exists(os.path.join(framework_dst, 'Versions', 'A', 'Frameworks',
-                                 'libvmservice_snapshot.dylib')):
-    without_entitlements.append(
-        'FlutterMacOS.framework.zip/Versions/A/Frameworks/libvmservice_snapshot.dylib'
-    )
   sky_utils.write_codesign_config(
       os.path.join(framework_dst, 'without_entitlements.txt'),
       without_entitlements,
@@ -146,7 +139,7 @@ def zip_xcframework_archive(dst, args):
       'FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/FlutterMacOS',
   ]
 
-  vmservice_dylib = 'FlutterMacOS.xcframework/macos-arm64_x86_64/FlutterMacOS.framework/Versions/A/Frameworks/libvmservice_snapshot.dylib'
+  vmservice_dylib = 'libvmservice_snapshot.dylib'
   if os.path.exists(os.path.join(dst, vmservice_dylib)):
     without_entitlements.append(vmservice_dylib)
 
@@ -169,6 +162,8 @@ def zip_xcframework_archive(dst, args):
       'without_entitlements.txt',
       'unsigned_binaries.txt',
   ]
+  if os.path.exists(os.path.join(dst, vmservice_dylib)):
+    zip_contents.append(vmservice_dylib)
 
   sky_utils.assert_valid_codesign_config(
       dst, zip_contents, with_entitlements, without_entitlements, unsigned_binaries

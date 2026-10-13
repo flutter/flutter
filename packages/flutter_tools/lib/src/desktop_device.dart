@@ -321,13 +321,15 @@ abstract class DesktopDevice extends Device {
         addFlag('enable-checked-mode=true');
         addFlag('verify-entry-points=true');
       }
-      if (debuggingOptions.buildInfo.isProfile) {
+      if (debuggingOptions.buildInfo.isProfile &&
+          targetPlatform != TargetPlatform.darwin &&
+          targetPlatform != TargetPlatform.ios) {
         final String artifactPath = _artifacts.getArtifactPath(
           Artifact.vmserviceSharedLibrary,
           platform: targetPlatform,
           mode: BuildMode.profile,
         );
-        // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter.
+        // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
         if (_fileSystem.file(artifactPath).existsSync()) {
           addFlag('aot-vmservice-shared-library-name=$artifactPath');
         } else {
@@ -340,7 +342,7 @@ abstract class DesktopDevice extends Device {
           platform: targetPlatform,
           mode: BuildMode.debug,
         );
-        // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter.
+        // TODO(bkonyi): Remove existsSync check once engine artifacts with VM service snapshot roll into Flutter, https://github.com/flutter/flutter/issues/191966.
         if (_fileSystem.file(artifactPath).existsSync()) {
           addFlag('vmservice-kernel-path=$artifactPath');
         }

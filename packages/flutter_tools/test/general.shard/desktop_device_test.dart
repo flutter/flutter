@@ -358,6 +358,41 @@ void main() {
     expect(result.started, true);
   });
 
+  testWithoutContext(
+    'startApp does not pass aot-vmservice-shared-library-name on Darwin in profile mode',
+    () async {
+      final fileSystem = MemoryFileSystem.test();
+      final artifacts = FakeArtifacts();
+
+      final completer = Completer<void>();
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['profile'],
+          stdout: 'The Dart VM service is listening on http://127.0.0.1/0\n',
+          completer: completer,
+          environment: const <String, String>{
+            'FLUTTER_ENGINE_SWITCH_1': 'enable-dart-profiling=true',
+            'FLUTTER_ENGINE_SWITCHES': '1',
+          },
+        ),
+      ]);
+      final FakeDesktopDevice device = setUpDesktopDevice(
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        processManager: processManager,
+        targetPlatformOverride: TargetPlatform.darwin,
+      );
+      final package = FakeApplicationPackage();
+      final LaunchResult result = await device.startApp(
+        package,
+        prebuiltApplication: true,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+      );
+
+      expect(result.started, true);
+    },
+  );
+
   testWithoutContext('Port forwarder is a no-op', () async {
     final FakeDesktopDevice device = setUpDesktopDevice();
     final DevicePortForwarder portForwarder = device.portForwarder;
@@ -719,6 +754,7 @@ FakeDesktopDevice setUpDesktopDevice({
   OperatingSystemUtils? operatingSystemUtils,
   Artifacts? artifacts,
   bool nullExecutablePathForDevice = false,
+  TargetPlatform targetPlatformOverride = TargetPlatform.tester,
 }) {
   return FakeDesktopDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
@@ -727,6 +763,7 @@ FakeDesktopDevice setUpDesktopDevice({
     operatingSystemUtils: operatingSystemUtils ?? FakeOperatingSystemUtils(),
     artifacts: artifacts ?? FakeArtifacts(),
     nullExecutablePathForDevice: nullExecutablePathForDevice,
+    targetPlatformOverride: targetPlatformOverride,
   );
 }
 
@@ -739,6 +776,7 @@ class FakeDesktopDevice extends DesktopDevice {
     required super.operatingSystemUtils,
     required super.artifacts,
     this.nullExecutablePathForDevice = false,
+    this.targetPlatformOverride = TargetPlatform.tester,
   }) : super('dummy', platformType: PlatformType.linux, ephemeral: false);
 
   /// The `mainPath` last passed to [buildForDevice].
@@ -748,12 +786,13 @@ class FakeDesktopDevice extends DesktopDevice {
   BuildInfo? lastBuildInfo;
 
   final bool nullExecutablePathForDevice;
+  final TargetPlatform targetPlatformOverride;
 
   @override
   String get name => 'dummy';
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
+  Future<TargetPlatform> get targetPlatform async => targetPlatformOverride;
 
   @override
   Future<CpuArch> get cpuArch async => CpuArch.unknown;

@@ -55,14 +55,14 @@ void DartFixture::SetSnapshotsAndAssets(Settings& settings) {
   if (DartVM::IsRunningPrecompiledCode()) {
     FML_CHECK(PrepareSettingsForAOTWithSymbols(settings, aot_symbols_));
 #if FML_OS_LINUX
-    settings.vmservice_snapshot_library_path.emplace_back(fml::paths::JoinPaths(
-        {GetTestingAssetsPath(), "libvmservice_snapshot.so"}));
+    settings.vmservice_snapshot_library_path.emplace_back(
+        "libvmservice_snapshot.so");
 #elif FML_OS_MACOSX
-    settings.vmservice_snapshot_library_path.emplace_back(fml::paths::JoinPaths(
-        {GetTestingAssetsPath(), "libvmservice_snapshot.dylib"}));
+    settings.vmservice_snapshot_library_path.emplace_back(
+        "libvmservice_snapshot.dylib");
 #elif FML_OS_WIN
-    settings.vmservice_snapshot_library_path.emplace_back(fml::paths::JoinPaths(
-        {GetTestingAssetsPath(), "libvmservice_snapshot.dll"}));
+    settings.vmservice_snapshot_library_path.emplace_back(
+        "libvmservice_snapshot.dll");
 #endif
   } else {
     settings.vmservice_kernel_path = "vmservice_snapshot.dill";
