@@ -47,70 +47,6 @@ import '../../src/package_config.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-ToolContext _createToolContext({
-  FileSystem? fileSystem,
-  Logger? logger,
-  ProcessManager? processManager,
-  Platform? platform,
-  Artifacts? artifacts,
-  AnsiTerminal? terminal,
-  Cache? cache,
-}) {
-  FileSystem? contextFs;
-  Logger? contextLogger;
-  Platform? contextPlatform;
-  ProcessManager? contextPm;
-  Artifacts? contextArtifacts;
-  AnsiTerminal? contextTerminal;
-  try {
-    contextFs = globals.fs;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextLogger = globals.logger;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextPlatform = globals.platform;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextPm = globals.processManager;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextArtifacts = globals.artifacts;
-  } on Object {
-    // ignore
-  }
-  try {
-    contextTerminal = globals.terminal;
-  } on Object {
-    // ignore
-  }
-  final FileSystem resolvedFs = fileSystem ?? (contextFs ?? MemoryFileSystem.test());
-  final Logger resolvedLogger = logger ?? (contextLogger ?? BufferLogger.test());
-  final Platform resolvedPlatform = platform ?? (contextPlatform ?? const LocalPlatform());
-  final ProcessManager resolvedProcessManager =
-      processManager ?? (contextPm ?? FakeProcessManager.any());
-  final Artifacts? resolvedArtifacts = artifacts ?? contextArtifacts;
-  final AnsiTerminal resolvedTerminal = terminal ?? (contextTerminal ?? FakeAnsiTerminal());
-  return FakeToolContext(
-    fs: resolvedFs,
-    logger: resolvedLogger,
-    platform: resolvedPlatform,
-    processManager: resolvedProcessManager,
-    artifacts: resolvedArtifacts,
-    terminal: resolvedTerminal,
-    cache: cache,
-    projectFactory: FlutterProjectFactory(fileSystem: resolvedFs, logger: resolvedLogger),
-  );
-}
-
 void main() {
   setUpAll(() {
     Cache.disableLocking();
@@ -134,7 +70,7 @@ void main() {
           appleContext: FakeAppleContext(),
           buildSystem: globals.buildSystem,
           buildTargets: globals.buildTargets,
-          toolContext: _createToolContext(),
+          toolContext: const DelegatingToolContext(),
         );
         expect(
           () => createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']),
@@ -173,7 +109,7 @@ void main() {
           appleContext: FakeAppleContext(),
           buildSystem: globals.buildSystem,
           buildTargets: globals.buildTargets,
-          toolContext: _createToolContext(),
+          toolContext: const DelegatingToolContext(),
         );
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
@@ -202,7 +138,7 @@ void main() {
           appleContext: FakeAppleContext(),
           buildSystem: globals.buildSystem,
           buildTargets: globals.buildTargets,
-          toolContext: _createToolContext(),
+          toolContext: const DelegatingToolContext(),
         );
         await expectLater(
           () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
@@ -222,7 +158,7 @@ void main() {
           appleContext: FakeAppleContext(),
           buildSystem: globals.buildSystem,
           buildTargets: globals.buildTargets,
-          toolContext: _createToolContext(),
+          toolContext: const DelegatingToolContext(),
         ),
       );
     });
@@ -392,7 +328,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           testDeviceManager.devices = <Device>[];
 
@@ -421,7 +357,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           final device = FakeDevice(isLocalEmulator: true);
           testDeviceManager
@@ -505,7 +441,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(
             targetPlatform: TargetPlatform.android_arm,
@@ -591,7 +527,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
@@ -628,7 +564,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
@@ -691,7 +627,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           final mockDevice = FakeDevice(sdkNameAndVersion: 'iOS 13')..startAppSuccess = false;
 
@@ -739,7 +675,7 @@ void main() {
           'can pass --device-user',
           () async {
             final command = DaemonCapturingRunCommand(
-              toolContext: _createToolContext(),
+              toolContext: const DelegatingToolContext(),
               appleContext: FakeAppleContext(),
             );
             final device = FakeDevice(platformType: PlatformType.android);
@@ -784,7 +720,7 @@ void main() {
                 appleContext: FakeAppleContext(),
                 buildSystem: globals.buildSystem,
                 buildTargets: globals.buildTargets,
-                toolContext: _createToolContext(),
+                toolContext: const DelegatingToolContext(),
               );
               final device = FakeDevice(
                 platformType: PlatformType.web,
@@ -823,7 +759,7 @@ void main() {
           'can disable devtools with --no-devtools',
           () async {
             final command = DaemonCapturingRunCommand(
-              toolContext: _createToolContext(),
+              toolContext: const DelegatingToolContext(),
               appleContext: FakeAppleContext(),
             );
             final device = FakeDevice();
@@ -949,7 +885,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
@@ -964,7 +900,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
@@ -982,7 +918,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
@@ -1000,7 +936,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           ).requiredArtifacts,
           unorderedEquals(<DevelopmentArtifact>{
             DevelopmentArtifact.universal,
@@ -1372,7 +1308,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
@@ -1400,7 +1336,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await expectLater(
             () => createTestCommandRunner(
@@ -1430,7 +1366,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
@@ -1462,7 +1398,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await expectLater(
             () =>
@@ -1488,7 +1424,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await expectLater(
             () => createTestCommandRunner(command).run(<String>[
@@ -1517,7 +1453,7 @@ void main() {
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1580,7 +1516,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
@@ -1611,7 +1547,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
@@ -1647,7 +1583,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1690,7 +1626,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
@@ -1724,7 +1660,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1771,7 +1707,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
@@ -1808,7 +1744,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -1872,7 +1808,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command)
               .run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
@@ -1898,7 +1834,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await expectLater(
             () =>
@@ -1924,7 +1860,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await expectLater(
             () =>
@@ -1950,7 +1886,7 @@ server:
             appleContext: FakeAppleContext(),
             buildSystem: globals.buildSystem,
             buildTargets: globals.buildTargets,
-            toolContext: _createToolContext(),
+            toolContext: const DelegatingToolContext(),
           );
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
@@ -2124,7 +2060,7 @@ server:
         appleContext: FakeAppleContext(),
         buildSystem: globals.buildSystem,
         buildTargets: globals.buildTargets,
-        toolContext: _createToolContext(),
+        toolContext: const DelegatingToolContext(),
       );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '--no-pub']),
@@ -2151,7 +2087,7 @@ server:
         appleContext: FakeAppleContext(),
         buildSystem: globals.buildSystem,
         buildTargets: globals.buildTargets,
-        toolContext: _createToolContext(),
+        toolContext: const DelegatingToolContext(),
       );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>[
@@ -2216,7 +2152,7 @@ server:
         appleContext: FakeAppleContext(),
         buildSystem: globals.buildSystem,
         buildTargets: globals.buildTargets,
-        toolContext: _createToolContext(),
+        toolContext: const DelegatingToolContext(),
       );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run']),
@@ -2242,7 +2178,7 @@ server:
         appleContext: FakeAppleContext(),
         buildSystem: globals.buildSystem,
         buildTargets: globals.buildTargets,
-        toolContext: _createToolContext(),
+        toolContext: const DelegatingToolContext(),
       );
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['run', '-d chrome', '--wasm']),
@@ -2268,7 +2204,7 @@ server:
         appleContext: FakeAppleContext(),
         buildSystem: globals.buildSystem,
         buildTargets: globals.buildTargets,
-        toolContext: _createToolContext(),
+        toolContext: const DelegatingToolContext(),
       );
       await expectLater(
         () =>
@@ -2640,7 +2576,7 @@ class TestRunCommandForUsageValues extends RunCommand {
          appleContext: appleContext ?? FakeAppleContext(),
          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
          buildTargets: const BuildTargetsImpl(),
-         toolContext: toolContext ?? _createToolContext(),
+         toolContext: toolContext ?? const DelegatingToolContext(),
        ) {
     this.devices = devices;
   }
@@ -2668,7 +2604,7 @@ class TestRunCommandWithFakeResidentRunner extends RunCommand {
         appleContext: appleContext ?? FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
-        toolContext: toolContext ?? _createToolContext(),
+        toolContext: toolContext ?? const DelegatingToolContext(),
       );
 
   late FakeResidentRunner fakeResidentRunner;
@@ -2696,7 +2632,7 @@ class TestRunCommandThatOnlyValidates extends RunCommand {
         appleContext: appleContext ?? FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
-        toolContext: toolContext ?? _createToolContext(),
+        toolContext: toolContext ?? const DelegatingToolContext(),
       );
 
   @override
@@ -2737,7 +2673,7 @@ class DaemonCapturingRunCommand extends RunCommand {
         appleContext: appleContext ?? FakeAppleContext(),
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
-        toolContext: toolContext ?? _createToolContext(),
+        toolContext: toolContext ?? const DelegatingToolContext(),
       );
 
   late Daemon daemon;
