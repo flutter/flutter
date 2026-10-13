@@ -45,6 +45,12 @@ const char* GetTestingAssetsPath() {
   return path.c_str();
 }
 
+std::string GetSourceUri(std::string_view relative_path) {
+  static const std::string prefix = PathFromEnvironmentOrDefault(
+      "FLUTTER_TEST_SOURCE_URI_PREFIX", GetCompiledInSourceUriPrefix());
+  return prefix + std::string(relative_path);
+}
+
 std::string GetCurrentTestName() {
   return ::testing::UnitTest::GetInstance()->current_test_info()->name();
 }
