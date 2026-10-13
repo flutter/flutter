@@ -723,7 +723,7 @@ void main() {
 
     testWithoutContext('WebDebugConfig defaults and useWasm defaulting', () {
       const defaultConfig = WebDebugConfig();
-      expect(defaultConfig.enableExposeUrl, isNull);
+      expect(defaultConfig.enableExposeUrl, isFalse);
       expect(defaultConfig.useSseForDebugProxy, isTrue);
       expect(defaultConfig.useSseForDebugBackend, isTrue);
       expect(defaultConfig.useSseForInjectedClient, isTrue);

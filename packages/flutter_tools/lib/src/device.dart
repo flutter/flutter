@@ -930,7 +930,7 @@ enum ImpellerStatus {
 class WebDebugConfig {
   /// Creates a [WebDebugConfig] with the given options.
   const WebDebugConfig({
-    this.enableExposeUrl,
+    this.enableExposeUrl = false,
     this.useSseForDebugProxy = true,
     this.useSseForDebugBackend = true,
     this.useSseForInjectedClient = true,
@@ -949,7 +949,7 @@ class WebDebugConfig {
 
   /// Creates a [WebDebugConfig] from a serialized JSON [json] map.
   factory WebDebugConfig.fromJson(Map<String, Object?> json) => WebDebugConfig(
-    enableExposeUrl: json['webEnableExposeUrl'] as bool?,
+    enableExposeUrl: json['webEnableExposeUrl'] as bool? ?? false,
     useSseForDebugProxy: json['webUseSseForDebugProxy']! as bool,
     useSseForDebugBackend: json['webUseSseForDebugBackend']! as bool,
     useSseForInjectedClient: json['webUseSseForInjectedClient']! as bool,
@@ -970,7 +970,7 @@ class WebDebugConfig {
   );
 
   /// Whether to enable exposing URLs via the daemon URL tunneller.
-  final bool? enableExposeUrl;
+  final bool enableExposeUrl;
 
   /// Whether to use Server-Sent Events (SSE) for the debug proxy.
   final bool useSseForDebugProxy;
