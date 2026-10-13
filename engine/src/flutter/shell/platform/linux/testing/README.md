@@ -309,3 +309,44 @@ Repeat with each supported header environment. Old headers cannot validate
 members they do not declare. Header checks, protected-tail runtime tests, and
 `--check-selection` AT-SPI dispatch tests cover different risks; none alone
 establishes compatibility with an untested GTK release or architecture.
+
+## Real-engine gradient pixels
+
+This is an opt-in GPU rendering regression, not a software widget golden. Create
+an ordinary small GTK4 app with this checkout, replace its main.dart with the
+fixture, and build it against the local engine:
+
+```sh
+bin/flutter create --platforms=linux --linux-gtk=gtk4 --project-name=gtk4_gradient_probe /tmp/gtk4_gradient_probe
+cp engine/src/flutter/shell/platform/linux/testing/fixtures/gradient_scene.dart /tmp/gtk4_gradient_probe/lib/main.dart
+# Run from /tmp/gtk4_gradient_probe, using this checkout's absolute bin/flutter:
+flutter --local-engine-src-path=/path/to/flutter/engine/src \
+  --local-engine=host_debug_unopt --local-engine-host=host_debug_unopt \
+  build linux --linux-gtk=gtk4 --debug
+```
+
+The fixture renders a short vertical control, a wider horizontal gradient, a
+translucent rounded diagonal gradient, and a large-radius radial gradient. It
+exports RepaintBoundary GPU image readback when GRADIENT_PROBE_OUTPUT is set by
+the driver, then scrolls by 40 logical pixels. The driver asserts RGBA samples
+against interpolation and alpha-compositing expectations, resizes the actual
+window, and verifies samples again. It also checks startup logs agree with the
+requested Impeller mode and records the loaded engine library hash.
+
+```sh
+python3 engine/src/flutter/shell/platform/linux/testing/run_gtk4_gradient_test.py \
+  /tmp/gtk4_gradient_probe/build/linux-gtk4/x64/debug/bundle/gtk4_gradient_probe \
+  --engine-dir=engine/src/out/host_debug_unopt --output=/tmp/gradient-pixels.json
+```
+
+Requires Pillow already installed locally, Xvfb, X11, and a runnable fixture
+bundle. The driver creates a private D-Bus/display session. Options:
+`--impeller=false`, `--gsk-renderer=gl`, `--gsk-renderer=vulkan`, and `--scale=2`.
+The requested GTK backend may fall back; `gsk_observed` is only populated if the
+runner logs `GRADIENT_GSK <G_OBJECT_TYPE_NAME(gtk_native_get_renderer(...))>`.
+Do not infer actual GTK backend solely from the requested setting.
+
+The principal assertion is engine-side image readback before GTK presentation.
+It proves gradient rasterization, scrolling and resize behavior on the tested
+engine; it does not assert exact final-screen pixels, GPU performance, arbitrary
+scales, external-texture behavior, or an unavailable Vulkan GTK backend.
