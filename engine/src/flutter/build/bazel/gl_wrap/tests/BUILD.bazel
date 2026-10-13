@@ -1,0 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Smoke test for the wrapped build of the GPU test backends: ANGLE on
+# SwiftShader through EGL, and SwiftShader as a Vulkan driver, each found
+# next to the binary as the engine's suites find them.
+
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends")
+
+flutter_gpu_test_backends(name = "gpu_test_backends")
+
+cc_test(
+    name = "gl_backends_smoke_test",
+    size = "small",
+    srcs = ["gl_backends_smoke_test.cc"],
+    copts = FLUTTER_COPTS,
+    data = [":gpu_test_backends"],
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "EGL_EGL_PROTOTYPES=1",
+        "EGL_EGLEXT_PROTOTYPES",
+        "GL_GLES_PROTOTYPES=1",
+        "VK_NO_PROTOTYPES",
+    ],
+    deps = [
+        "//engine/src/flutter/build/bazel/gl_wrap:angle",
+        "@angle//:headers",
+        "@googletest//:gtest_main",
+        "@vulkan-headers//:vulkan_headers",
+    ],
+)

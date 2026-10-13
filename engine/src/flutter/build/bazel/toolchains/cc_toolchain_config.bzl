@@ -147,6 +147,12 @@ _COMPLETE_LINK_ACTION_NAMES = CC_LINK_EXECUTABLE_ACTION_NAMES + [
 ]
 
 _LINUX_EXECUTABLE_LINK_FLAGS = [
+    # //build/config/gcc:executable_ldconfig: the executable's own directory
+    # is on its library search path, which is how a test finds the GPU test
+    # backends (libvk_swiftshader.so, build/bazel/gl_wrap) placed next to it
+    # with a bare dlopen, as in a GN build directory. Bazel's own rpath
+    # entries for shared dependencies come besides.
+    "-Wl,-rpath=$ORIGIN/",
     "-Wl,--disable-new-dtags",
 ]
 

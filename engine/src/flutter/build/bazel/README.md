@@ -16,6 +16,7 @@ Nothing in this directory is used by the GN build.
 | `flatbuffers/` | The engine's `flatbuffers()` GN template as a macro: `flatc` per schema, the generated headers as a library. |
 | `impeller/` | The engine's `impeller_shaders()` GN template as a macro over three rules (`impellerc_compile`, `shader_archive`, `embed_blob`); see below. |
 | `dart_wrap/` | The Dart SDK, built with `gn_build`: `BUILD.gn` lists the GN targets, `BUILD.bazel` the args, the inputs and the `cc_library` facades; `tests/` starts the VM from the archive. |
+| `gl_wrap/` | The GPU test backends -- ANGLE, SwiftShader, the Vulkan loader -- built with `gn_build` the same way; `stubs/` holds the stand-in GN files for the engine directories ANGLE's GN reaches; `tests/` renders through both. See below. |
 | `dart/` | The engine's own Dart pipeline on the wrapped SDK's tools and the prebuilt SDK: `snapshot.bzl` (`compile_platform`, `core_snapshot`, `aot_snapshot`, `bin_to_assembly` -- `lib/snapshot/BUILD.gn`'s steps) and `kernel.bzl` (`dart_kernel`, GN's `flutter_frontend_server`); see below. |
 
 ## How dependencies reach Bazel during the transition
@@ -218,6 +219,67 @@ kernel is `org-dartlang-root:///engine/src/flutter/...` on every machine
 rather than the sandbox's path; a test that needs a library's URI asks
 `flutter::testing::GetSourceUri` for it, which the fixtures library compiles
 in for each build (GN's is `file://` plus the absolute source root).
+
+## Wrapped GN builds: the GPU test backends
+
+The host suites render through ANGLE (OpenGL ES on Vulkan) and SwiftShader
+(Vulkan on the CPU): `//flutter/testing:opengl` links ANGLE's
+`libEGL_static` and `libGLESv2_static`, `:vulkan` opens SwiftShader's
+`libvk_swiftshader.so`, and ANGLE itself opens the Khronos loader
+(`libvulkan.so.1`) and, through it, SwiftShader. `gl_wrap/` builds the three
+with their own GN rules in one `gn_build` action, as `dart_wrap/` builds the
+Dart SDK: ANGLE's `BUILD.gn` is 2,000 lines over a dozen trees and
+SwiftShader's build is a JIT compiler's, and the suites are what matters
+now. The pruned graph is about 1,100 compiles (ANGLE, SwiftShader with its
+Subzero backend and its own SPIRV-Tools, the loader, abseil, zlib, libc++),
+four minutes on 24 cores.
+
+`libangle.a` holds the object closure of the two static libraries up to the
+`archive_boundaries` the Bazel side provides -- abseil (`@abseil-cpp`), zlib
+(`@zlib`, with `google:compression_utils_portable` added to the overlay for
+ANGLE's shader cache), SPIRV-Tools (`@spirv-tools`, which Impeller links as
+well: a second copy of its objects would collide) and the C++ runtime; the
+`:angle` facade lists them. One engine target is in the picture too: the
+engine's `build_overrides/angle.gni` names `//flutter/flutter_vma` as ANGLE's
+VulkanMemoryAllocator, so ANGLE's allocator wrapper compiles against the
+allocator's header through it and its implementation comes from
+`//engine/src/flutter/flutter_vma` (a dependency of the facade). Inside the
+wrapped build that directory is a stand-in GN file (`gl_wrap/stubs/`): a
+group with the real target's `public_deps` on the Vulkan headers and the
+allocator, and no sources. The trees are the overlays' `build_tree`
+filegroups (`@angle`, `@swiftshader`, `@vulkan_deps_tree` -- the
+`vulkan-deps` directory as files, distinct from the repositories Bazel builds
+from its subdirectories --, `@abseil_cpp_tree`, `@vulkan_memory_allocator_tree`),
+measured on the build as the Dart SDK's were, and without any `.git`: ANGLE's
+commit id comes from the `DEPS` pin through `ANGLE_UPSTREAM_HASH` (the rule's
+`env`), not from the checkout's git state.
+
+At run time the three files must sit **next to the test binary**. ANGLE opens
+the loader from, and points it (`VK_ICD_FILENAMES`) at the ICD manifest in,
+the directory of its own module -- the executable, with ANGLE linked
+statically -- and the manifest names `./libvk_swiftshader.so`; the engine's
+test utilities look next to the executable too, and `//flutter/vulkan/procs`
+opens the driver by bare name, which GN's `-rpath=$ORIGIN` resolves (the
+toolchain gives every executable the same rpath). In GN the files land in
+the build directory through `data_deps`. Here a suite lists
+`flutter_gpu_test_backends` (testing/testing.bzl) as `data`: a copy of the
+three files in the suite's own package, which is where the binary is in the
+runfiles tree (`bazel test`), in `bazel-bin` and for `bazel run`. The
+converter declares the target in every package with a suite of
+`gpuBackendTests` (bazel_mapping.dart) -- the suites whose GN `runtime_deps`
+name `libvk_swiftshader.so`, kept as a list because the converter sees one
+file at a time.
+
+```
+bazelisk build //engine/src/flutter/build/bazel/gl_wrap:gl_backends
+bazelisk test  //engine/src/flutter/build/bazel/gl_wrap/tests:gl_backends_smoke_test
+```
+
+The smoke test clears and reads back a pixel through EGL on ANGLE and
+SwiftShader, and opens SwiftShader as a Vulkan driver. As with the Dart SDK,
+host linux-x64 only for now, and `--strategy=GnBuild=local` keeps a regular
+GN build directory under `bazel-bin/.../gl_wrap/gl_backends.gn/root/out/bazel`
+for iterating.
 
 ## Impeller's shader pipeline
 
