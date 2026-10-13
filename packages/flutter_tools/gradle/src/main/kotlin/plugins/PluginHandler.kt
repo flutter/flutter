@@ -120,15 +120,18 @@ class PluginHandler(
             // Wait until the Android plugin loaded.
             pluginProject.afterEvaluate {
                 // Checks if there is a mismatch between the plugin compileSdkVersion and the project compileSdkVersion.
-                val projectCompileSdkVersion: CompileSdkVersion = getCompileSdkFromProject(project)
-                val pluginCompileSdkVersion: CompileSdkVersion = getCompileSdkFromProject(pluginProject)
-                if (pluginCompileSdkVersion.isHigherThan(projectCompileSdkVersion)) {
-                    project.logger.quiet(
-                        "Warning: The plugin $pluginName requires Android SDK version $pluginCompileSdkVersion or higher."
-                    )
-                    project.logger.quiet(
-                        "For more information about build configuration, see ${WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG}."
-                    )
+                // Skipped for add-to-app modules, where validateHostAppCompileSdk checks the host app instead.
+                if (FlutterPluginUtils.isFlutterAppProject(project)) {
+                    val projectCompileSdkVersion: CompileSdkVersion = getCompileSdkFromProject(project)
+                    val pluginCompileSdkVersion: CompileSdkVersion = getCompileSdkFromProject(pluginProject)
+                    if (pluginCompileSdkVersion.isHigherThan(projectCompileSdkVersion)) {
+                        project.logger.quiet(
+                            "Warning: The plugin $pluginName requires Android SDK version $pluginCompileSdkVersion or higher."
+                        )
+                        project.logger.quiet(
+                            "For more information about build configuration, see ${WEBSITE_DEPLOYMENT_ANDROID_BUILD_CONFIG}."
+                        )
+                    }
                 }
 
                 copyAppBuildTypesToPlugin(project, pluginProject)

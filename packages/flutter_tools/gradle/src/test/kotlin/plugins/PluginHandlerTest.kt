@@ -5,6 +5,7 @@
 package com.flutter.gradle.plugins
 
 import com.android.build.api.dsl.ApplicationBuildType
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.LibraryBuildType
 import com.flutter.gradle.FlutterExtension
 import com.flutter.gradle.FlutterPluginUtilsTest.Companion.EXAMPLE_ENGINE_VERSION
@@ -393,6 +394,38 @@ class PluginHandlerTest {
                     message.contains("The plugin camera_android_camerax requires Android SDK version 35 or higher")
                 }
             )
+        }
+    }
+
+    @Test
+    fun `configurePlugins does not log compileSdk warning for add-to-app modules`(
+        @TempDir tempDir: Path
+    ) {
+        val project = mockk<Project>()
+        val pluginProject = mockk<Project>()
+        val mockLogger = mockk<Logger>(relaxed = true)
+        every { project.logger } returns mockLogger
+
+        setupMockProjectDir(project, tempDir)
+        setupMockPluginProject(project, pluginProject)
+        // An add-to-app Flutter module is an Android library, not an application.
+        setUpMockLibraryAndroidExtension(project, compileSdk = 34)
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+        setUpMockLibraryAndroidExtension(pluginProject, compileSdk = 35)
+        setupMockPluginLoader(project, listOf(cameraDependency))
+
+        val capturePluginActionSlot = mutableListOf<Action<Project>>()
+
+        val pluginHandler = PluginHandler(project)
+        pluginHandler.configurePlugins(
+            engineVersionValue = EXAMPLE_ENGINE_VERSION
+        )
+
+        verify { pluginProject.afterEvaluate(capture(capturePluginActionSlot)) }
+        capturePluginActionSlot.forEach { it.execute(pluginProject) }
+
+        verify(exactly = 0) {
+            mockLogger.quiet(match { message -> message.contains("requires Android SDK version") })
         }
     }
 
