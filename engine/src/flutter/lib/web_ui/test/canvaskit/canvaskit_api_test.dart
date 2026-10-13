@@ -1412,7 +1412,7 @@ void _canvasTests() {
     canvas.drawParagraph(paragraph.skiaObject, 10, 20);
   });
 
-  test('Paragraph converts caret position to charactor position', () {
+  test('Paragraph converts caret position to character position', () {
     final builder = CkParagraphBuilder(CkParagraphStyle());
     builder.addText('Hello there');
     final CkParagraph paragraph = builder.build();
