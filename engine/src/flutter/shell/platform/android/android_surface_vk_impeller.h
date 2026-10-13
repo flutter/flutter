@@ -16,8 +16,13 @@ namespace flutter {
 
 class AndroidSurfaceVKImpeller : public AndroidSurface {
  public:
+  //----------------------------------------------------------------------------
+  /// @param[in]  create_transaction  Gives the swapchain an embedder-owned
+  ///             transaction for each frame. May be null.
+  ///
   explicit AndroidSurfaceVKImpeller(
-      const std::shared_ptr<AndroidContextVKImpeller>& android_context);
+      const std::shared_ptr<AndroidContextVKImpeller>& android_context,
+      CreateSurfaceTransaction create_transaction = nullptr);
 
   ~AndroidSurfaceVKImpeller() override;
 
@@ -44,11 +49,10 @@ class AndroidSurfaceVKImpeller : public AndroidSurface {
   std::shared_ptr<impeller::Context> GetImpellerContext() override;
 
   // |AndroidSurface|
-  bool SetNativeWindow(
-      fml::RefPtr<AndroidNativeWindow> window,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) override;
+  bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
  private:
+  const CreateSurfaceTransaction create_transaction_;
   std::shared_ptr<impeller::SurfaceContextVK> surface_context_vk_;
   fml::RefPtr<AndroidNativeWindow> native_window_;
   bool is_valid_ = false;

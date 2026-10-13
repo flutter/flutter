@@ -35,8 +35,7 @@ class AndroidSurfaceMock final : public GPUSurfaceGLDelegate,
 
   MOCK_METHOD(bool,
               SetNativeWindow,
-              (fml::RefPtr<AndroidNativeWindow> window,
-               const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade),
+              (fml::RefPtr<AndroidNativeWindow> window),
               (override));
 
   // |GPUSurfaceGLDelegate|

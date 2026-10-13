@@ -17,7 +17,9 @@
 namespace flutter {
 
 AndroidSurfaceVKImpeller::AndroidSurfaceVKImpeller(
-    const std::shared_ptr<AndroidContextVKImpeller>& android_context) {
+    const std::shared_ptr<AndroidContextVKImpeller>& android_context,
+    CreateSurfaceTransaction create_transaction)
+    : create_transaction_(std::move(create_transaction)) {
   is_valid_ = android_context->IsValid();
 
   auto& context_vk =
@@ -70,8 +72,7 @@ bool AndroidSurfaceVKImpeller::ResourceContextClearCurrent() {
 }
 
 bool AndroidSurfaceVKImpeller::SetNativeWindow(
-    fml::RefPtr<AndroidNativeWindow> window,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+    fml::RefPtr<AndroidNativeWindow> window) {
   if (window && (native_window_ == window)) {
     return OnScreenSurfaceResize(window->GetSize());
   }
@@ -82,9 +83,10 @@ bool AndroidSurfaceVKImpeller::SetNativeWindow(
     return false;
   }
 
-  impeller::CreateTransactionCB cb = [jni_facade = jni_facade]() {
-    FML_CHECK(jni_facade) << "JNI was nullptr";
-    ASurfaceTransaction* tx = jni_facade->createTransaction();
+  impeller::CreateTransactionCB cb = [create_transaction =
+                                          create_transaction_]() {
+    ASurfaceTransaction* tx =
+        create_transaction ? create_transaction() : nullptr;
     if (tx == nullptr) {
       return impeller::android::SurfaceTransaction();
     }

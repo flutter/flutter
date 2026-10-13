@@ -27,7 +27,6 @@
 #include "fml/logging.h"
 #if IMPELLER_ENABLE_VULKAN  // b/258506856 for why this is behind an if
 #include "flutter/shell/platform/android/android_surface_vk_impeller.h"
-#include "flutter/shell/platform/android/jni_texture_source.h"
 #endif
 #include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_wrapper.h"
@@ -54,10 +53,12 @@ AndroidContext::ContextSettings CreateContextSettings(
 AndroidSurfaceFactoryImpl::AndroidSurfaceFactoryImpl(
     const std::shared_ptr<AndroidContext>& context,
     bool enable_impeller,
-    bool lazy_shader_mode)
+    bool lazy_shader_mode,
+    CreateSurfaceTransaction create_transaction)
     : android_context_(context),
       enable_impeller_(enable_impeller),
-      lazy_shader_mode_(lazy_shader_mode) {}
+      lazy_shader_mode_(lazy_shader_mode),
+      create_transaction_(std::move(create_transaction)) {}
 
 AndroidSurfaceFactoryImpl::~AndroidSurfaceFactoryImpl() = default;
 
@@ -65,7 +66,8 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
   if (android_context_->IsDynamicSelection()) {
     auto cast_ptr = std::static_pointer_cast<AndroidContextDynamicImpeller>(
         android_context_);
-    return std::make_unique<AndroidSurfaceDynamicImpeller>(cast_ptr);
+    return std::make_unique<AndroidSurfaceDynamicImpeller>(cast_ptr,
+                                                           create_transaction_);
   }
   switch (android_context_->RenderingApi()) {
 #if !SLIMPELLER
@@ -80,11 +82,13 @@ std::unique_ptr<AndroidSurface> AndroidSurfaceFactoryImpl::CreateSurface() {
           std::static_pointer_cast<AndroidContextGLImpeller>(android_context_));
     case AndroidRenderingAPI::kImpellerVulkan:
       return std::make_unique<AndroidSurfaceVKImpeller>(
-          std::static_pointer_cast<AndroidContextVKImpeller>(android_context_));
+          std::static_pointer_cast<AndroidContextVKImpeller>(android_context_),
+          create_transaction_);
     case AndroidRenderingAPI::kImpellerAutoselect: {
       auto cast_ptr = std::static_pointer_cast<AndroidContextDynamicImpeller>(
           android_context_);
-      return std::make_unique<AndroidSurfaceDynamicImpeller>(cast_ptr);
+      return std::make_unique<AndroidSurfaceDynamicImpeller>(
+          cast_ptr, create_transaction_);
     }
   }
   FML_UNREACHABLE();
@@ -199,7 +203,10 @@ PlatformViewAndroid::PlatformViewAndroid(
         android_context_,                                      //
         delegate.OnPlatformViewGetSettings().enable_impeller,  //
         delegate.OnPlatformViewGetSettings()
-            .impeller_enable_lazy_shader_mode  //
+            .impeller_enable_lazy_shader_mode,  //
+        // HCPP frames join the FlutterView's transaction.
+        [jni_facade = jni_facade_]() { return jni_facade->createTransaction(); }
+        //
     );
     android_surface_ = surface_factory_->CreateSurface();
     android_meets_hcpp_criteria_ =
@@ -224,8 +231,8 @@ bool PlatformViewAndroid::SetNativeWindow(
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetRasterTaskRunner(),
       [&latch, surface = android_surface_.get(),
-       native_window = std::move(native_window), jni_facade = jni_facade_]() {
-        surface->SetNativeWindow(native_window, jni_facade);
+       native_window = std::move(native_window)]() {
+        surface->SetNativeWindow(native_window);
         latch.Signal();
       });
   latch.Wait();
@@ -241,9 +248,9 @@ void PlatformViewAndroid::SwapNativeWindow(
   fml::TaskRunner::RunNowOrPostTask(
       task_runners_.GetRasterTaskRunner(),
       [&latch, surface = android_surface_.get(),
-       native_window = std::move(native_window), jni_facade = jni_facade_]() {
+       native_window = std::move(native_window)]() {
         surface->TeardownOnScreenContext();
-        surface->SetNativeWindow(native_window, jni_facade);
+        surface->SetNativeWindow(native_window);
         latch.Signal();
       });
   latch.Wait();

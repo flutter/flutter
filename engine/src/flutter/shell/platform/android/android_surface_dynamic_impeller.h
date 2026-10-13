@@ -22,8 +22,13 @@ namespace flutter {
 /// The backing surface is created the first time [CreateGPUSurface] is called.
 class AndroidSurfaceDynamicImpeller : public AndroidSurface {
  public:
+  //----------------------------------------------------------------------------
+  /// @param[in]  create_transaction  Passed to the Vulkan surface, if that is
+  ///             the backend. May be null.
+  ///
   explicit AndroidSurfaceDynamicImpeller(
-      std::shared_ptr<AndroidContextDynamicImpeller>& android_context);
+      std::shared_ptr<AndroidContextDynamicImpeller>& android_context,
+      CreateSurfaceTransaction create_transaction = nullptr);
 
   ~AndroidSurfaceDynamicImpeller() override;
 
@@ -50,9 +55,7 @@ class AndroidSurfaceDynamicImpeller : public AndroidSurface {
   std::shared_ptr<impeller::Context> GetImpellerContext() override;
 
   // |AndroidSurface|
-  bool SetNativeWindow(
-      fml::RefPtr<AndroidNativeWindow> window,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) override;
+  bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) override;
 
   // |AndroidSurface|
   std::unique_ptr<Surface> CreateSnapshotSurface() override;
@@ -65,7 +68,7 @@ class AndroidSurfaceDynamicImpeller : public AndroidSurface {
   std::unique_ptr<AndroidSurfaceVKImpeller> vulkan_surface_;
   std::unique_ptr<AndroidSurfaceGLImpeller> gl_surface_;
   fml::RefPtr<AndroidNativeWindow> window_;
-  std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  const CreateSurfaceTransaction create_transaction_;
   bool is_valid_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidSurfaceDynamicImpeller);

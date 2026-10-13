@@ -11,8 +11,6 @@
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/shell/platform/android/android_shell_holder.h"
-#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 
 #include "third_party/skia/include/core/SkImage.h"
 
@@ -150,8 +148,7 @@ bool AndroidSurfaceSoftware::OnScreenSurfaceResize(const DlISize& size) {
 }
 
 bool AndroidSurfaceSoftware::SetNativeWindow(
-    fml::RefPtr<AndroidNativeWindow> window,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+    fml::RefPtr<AndroidNativeWindow> window) {
   native_window_ = std::move(window);
   if (!(native_window_ && native_window_->IsValid())) {
     return false;

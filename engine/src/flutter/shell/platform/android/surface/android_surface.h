@@ -5,18 +5,30 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_ANDROID_SURFACE_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_SURFACE_ANDROID_SURFACE_H_
 
+#include <functional>
 #include <memory>
 #include "flutter/flow/surface.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/android/context/android_context.h"
-#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 
 namespace impeller {
 class Context;
 }  // namespace impeller
 
+// From <android/surface_control.h>.
+struct ASurfaceTransaction;
+
 namespace flutter {
+
+//------------------------------------------------------------------------------
+/// @brief      Returns a transaction that the Vulkan swapchain adds its frames
+///             to, or null if the swapchain should create and apply its own.
+///             The embedder owns and applies a transaction it returns; with
+///             HCPP, that is how a frame lands together with the platform
+///             view changes of the same frame. Called on the raster thread.
+///
+using CreateSurfaceTransaction = std::function<ASurfaceTransaction*()>;
 
 class AndroidExternalViewEmbedder;
 
@@ -37,9 +49,7 @@ class AndroidSurface {
 
   virtual bool ResourceContextClearCurrent() = 0;
 
-  virtual bool SetNativeWindow(
-      fml::RefPtr<AndroidNativeWindow> window,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) = 0;
+  virtual bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> window) = 0;
 
   virtual std::unique_ptr<Surface> CreateSnapshotSurface();
 

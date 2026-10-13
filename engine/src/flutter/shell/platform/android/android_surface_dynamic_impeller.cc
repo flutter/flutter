@@ -5,14 +5,17 @@
 #include "flutter/shell/platform/android/android_surface_dynamic_impeller.h"
 
 #include <memory>
+#include <utility>
 
 #include "flutter/fml/memory/ref_ptr.h"
 
 namespace flutter {
 
 AndroidSurfaceDynamicImpeller::AndroidSurfaceDynamicImpeller(
-    std::shared_ptr<AndroidContextDynamicImpeller>& android_context)
-    : android_context_(android_context) {}
+    std::shared_ptr<AndroidContextDynamicImpeller>& android_context,
+    CreateSurfaceTransaction create_transaction)
+    : android_context_(android_context),
+      create_transaction_(std::move(create_transaction)) {}
 
 AndroidSurfaceDynamicImpeller::~AndroidSurfaceDynamicImpeller() = default;
 
@@ -32,13 +35,13 @@ std::unique_ptr<Surface> AndroidSurfaceDynamicImpeller::CreateGPUSurface(
     GrDirectContext* gr_context) {
   if (vulkan_surface_) {
     if (window_) {
-      vulkan_surface_->SetNativeWindow(window_, jni_facade_);
+      vulkan_surface_->SetNativeWindow(window_);
     }
     return vulkan_surface_->CreateGPUSurface(gr_context);
   }
   if (gl_surface_) {
     if (window_) {
-      gl_surface_->SetNativeWindow(window_, jni_facade_);
+      gl_surface_->SetNativeWindow(window_);
     }
     return gl_surface_->CreateGPUSurface(gr_context);
   }
@@ -50,7 +53,8 @@ void AndroidSurfaceDynamicImpeller::SetupImpellerSurface() {
   // contexts are read directly instead of going through |RenderingApi|, which
   // blocks until that very setup completes.
   if (auto vk_context = android_context_->GetVKContext()) {
-    vulkan_surface_ = std::make_unique<AndroidSurfaceVKImpeller>(vk_context);
+    vulkan_surface_ = std::make_unique<AndroidSurfaceVKImpeller>(
+        vk_context, create_transaction_);
   } else if (auto gl_context = android_context_->GetGLContext()) {
     gl_surface_ = std::make_unique<AndroidSurfaceGLImpeller>(gl_context);
   } else {
@@ -89,16 +93,14 @@ bool AndroidSurfaceDynamicImpeller::ResourceContextClearCurrent() {
 }
 
 bool AndroidSurfaceDynamicImpeller::SetNativeWindow(
-    fml::RefPtr<AndroidNativeWindow> window,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+    fml::RefPtr<AndroidNativeWindow> window) {
   if (vulkan_surface_) {
-    return vulkan_surface_->SetNativeWindow(window, jni_facade);
+    return vulkan_surface_->SetNativeWindow(window);
   }
   if (gl_surface_) {
-    return gl_surface_->SetNativeWindow(window, jni_facade);
+    return gl_surface_->SetNativeWindow(window);
   }
   window_ = window;
-  jni_facade_ = jni_facade;
   return true;
 }
 

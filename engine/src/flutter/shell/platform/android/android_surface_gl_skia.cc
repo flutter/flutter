@@ -10,7 +10,6 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/memory/ref_ptr.h"
 #include "flutter/shell/platform/android/android_egl_surface.h"
-#include "flutter/shell/platform/android/android_shell_holder.h"
 
 namespace flutter {
 
@@ -100,8 +99,7 @@ bool AndroidSurfaceGLSkia::ResourceContextClearCurrent() {
 }
 
 bool AndroidSurfaceGLSkia::SetNativeWindow(
-    fml::RefPtr<AndroidNativeWindow> window,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+    fml::RefPtr<AndroidNativeWindow> window) {
   FML_DCHECK(IsValid());
   FML_DCHECK(window);
   native_window_ = window;

@@ -355,7 +355,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFlutterView) {
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
             .WillOnce(Return(ByMove(std::move(surface_mock))));
 
-        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _));
+        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window));
 
         return android_surface_mock;
       });
@@ -560,7 +560,7 @@ TEST(AndroidExternalViewEmbedder, OverlayCoverTwoPlatformViews) {
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
             .WillOnce(Return(ByMove(std::move(surface_mock))));
 
-        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _));
+        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window));
         return android_surface_mock;
       });
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
@@ -662,7 +662,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFrameOverlayComposition) {
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
             .WillOnce(Return(ByMove(std::move(surface_mock))));
 
-        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _));
+        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window));
         return android_surface_mock;
       });
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
@@ -769,7 +769,7 @@ TEST(AndroidExternalViewEmbedder, SubmitFramePlatformViewWithoutAnyOverlay) {
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
             .WillOnce(Return(ByMove(std::move(surface_mock))));
 
-        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _));
+        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window));
         return android_surface_mock;
       });
   auto embedder = std::make_unique<AndroidExternalViewEmbedder>(
@@ -860,7 +860,7 @@ TEST(AndroidExternalViewEmbedder, DestroyOverlayLayersOnSizeChange) {
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
             .WillOnce(Return(ByMove(std::move(surface_mock))));
 
-        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _));
+        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window));
 
         return android_surface_mock;
       });
@@ -952,7 +952,7 @@ TEST(AndroidExternalViewEmbedder, DoesNotDestroyOverlayLayersOnSizeChange) {
         EXPECT_CALL(*android_surface_mock, CreateGPUSurface(gr_context.get()))
             .WillOnce(Return(ByMove(std::move(surface_mock))));
 
-        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window, _));
+        EXPECT_CALL(*android_surface_mock, SetNativeWindow(window));
 
         return android_surface_mock;
       });
@@ -1188,7 +1188,7 @@ TEST(AndroidExternalViewEmbedder2,
   auto surface_factory = std::make_shared<TestAndroidSurfaceFactory>([]() {
     auto android_surface = std::make_unique<AndroidSurfaceMock>();
     EXPECT_CALL(*android_surface, IsValid()).WillRepeatedly(Return(true));
-    EXPECT_CALL(*android_surface, SetNativeWindow(_, _))
+    EXPECT_CALL(*android_surface, SetNativeWindow(_))
         .WillRepeatedly(Return(true));
     EXPECT_CALL(*android_surface, CreateGPUSurface(_))
         .WillRepeatedly(Return(ByMove(std::make_unique<SurfaceMock>())));
@@ -1280,7 +1280,7 @@ TEST(AndroidExternalViewEmbedder2, FrameSizeChangeDoesNotDestroySurfaces) {
                          surface_mock = std::move(surface_mock)]() mutable {
         auto android_surface = std::make_unique<AndroidSurfaceMock>();
         EXPECT_CALL(*android_surface, IsValid()).WillRepeatedly(Return(true));
-        EXPECT_CALL(*android_surface, SetNativeWindow(_, _))
+        EXPECT_CALL(*android_surface, SetNativeWindow(_))
             .WillRepeatedly(Return(true));
         EXPECT_CALL(*android_surface, CreateGPUSurface(_))
             .WillOnce(Return(ByMove(std::move(surface_mock))));
@@ -1402,7 +1402,7 @@ TEST(AndroidExternalViewEmbedder2, ResizeDoesNotBlockRasterOnPlatformThread) {
       fml::MakeCopyable([surface_mock = std::move(surface_mock)]() mutable {
         auto android_surface = std::make_unique<AndroidSurfaceMock>();
         EXPECT_CALL(*android_surface, IsValid()).WillRepeatedly(Return(true));
-        EXPECT_CALL(*android_surface, SetNativeWindow(_, _))
+        EXPECT_CALL(*android_surface, SetNativeWindow(_))
             .WillRepeatedly(Return(true));
         EXPECT_CALL(*android_surface, CreateGPUSurface(_))
             .WillOnce(Return(ByMove(std::move(surface_mock))));
