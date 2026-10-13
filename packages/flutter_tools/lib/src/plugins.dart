@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
@@ -72,7 +73,7 @@ class Plugin {
     required bool isDevDependency,
     Set<String>? appDependencies,
   }) {
-    final (Plugin? plugin, List<String> errors) = _parseFromYaml(
+    final (:Plugin? plugin, :List<String> errors) = _parseFromYaml(
       name,
       path,
       pluginYaml,
@@ -88,18 +89,18 @@ class Plugin {
     return plugin!;
   }
 
-  static (Plugin?, List<String>) _parseFromYaml(
+  static ({Plugin? plugin, List<String> errors}) _parseFromYaml(
     String name,
     String path,
     YamlMap? pluginYaml,
     VersionConstraint? flutterConstraint,
     List<String> dependencies, {
-    FileSystem? fileSystem,
+    required FileSystem fileSystem,
     required bool isDevDependency,
     Set<String>? appDependencies,
   }) {
     if (pluginYaml == null) {
-      return (null, <String>['Invalid "plugin" specification.']);
+      return (plugin: null, errors: <String>['Invalid "plugin" specification.']);
     }
 
     final bool usesOldPluginFormat = const <String>{
@@ -115,7 +116,7 @@ class Plugin {
           'The flutter.plugin.platforms key cannot be used in combination with the old '
           'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys. '
           'See: https://flutter.dev/to/pubspec-plugin-platforms';
-      return (null, <String>[errorMessage]);
+      return (plugin: null, errors: <String>[errorMessage]);
     }
 
     if (!usesOldPluginFormat && !usesNewPluginFormat) {
@@ -123,7 +124,7 @@ class Plugin {
           'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
           'An instruction to format the `pubspec.yaml` can be found here: '
           'https://flutter.dev/to/pubspec-plugin-platforms';
-      return (null, <String>[errorMessage]);
+      return (plugin: null, errors: <String>[errorMessage]);
     }
 
     final bool isDirectDependency = appDependencies != null && appDependencies.contains(name);
@@ -152,13 +153,13 @@ class Plugin {
     );
   }
 
-  static (Plugin?, List<String>) _parseMultiPlatformYaml(
+  static ({Plugin? plugin, List<String> errors}) _parseMultiPlatformYaml(
     String name,
     String path,
     YamlMap pluginYaml,
     VersionConstraint? flutterConstraint,
     List<String> dependencies,
-    FileSystem? fileSystem,
+    FileSystem fileSystem,
     bool isDirectDependency, {
     required bool isDevDependency,
   }) {
@@ -166,10 +167,10 @@ class Plugin {
     if (platformsValue is! YamlMap?) {
       const errorMessage =
           'flutter.plugin.platforms should be a map with the platform name as the key';
-      return (null, <String>[errorMessage]);
+      return (plugin: null, errors: <String>[errorMessage]);
     }
     if (platformsValue == null) {
-      return (null, <String>['Invalid "platforms" specification.']);
+      return (plugin: null, errors: <String>['Invalid "platforms" specification.']);
     }
     final YamlMap platformsYaml = platformsValue;
 
@@ -183,7 +184,7 @@ class Plugin {
 
     void parseNativeOrDartPlatform<T extends PluginPlatform>(
       String platformKey,
-      (T?, List<String>) Function(YamlMap) parse,
+      ({T? plugin, List<String> errors}) Function(YamlMap) parse,
     ) {
       if (!platformsYaml.containsKey(platformKey)) {
         return;
@@ -193,7 +194,7 @@ class Plugin {
         errors.add('Invalid "$platformKey" plugin specification.');
         return;
       }
-      final (T? parsed, List<String> platformErrors) = parse(yamlValue);
+      final (plugin: T? parsed, errors: List<String> platformErrors) = parse(yamlValue);
       if (platformErrors.isNotEmpty) {
         errors.addAll(platformErrors);
         return;
@@ -241,10 +242,8 @@ class Plugin {
           errors.add('Invalid "web" plugin specification.');
         }
       } else {
-        final (WebPlugin? webPlugin, List<String> webErrors) = WebPlugin.parseFromYaml(
-          name,
-          yamlValue,
-        );
+        final (plugin: WebPlugin? webPlugin, errors: List<String> webErrors) =
+            WebPlugin.parseFromYaml(name, yamlValue);
         if (webErrors.isNotEmpty) {
           errors.addAll(webErrors);
         } else if (webPlugin != null) {
@@ -268,11 +267,11 @@ class Plugin {
     }
 
     if (errors.isNotEmpty) {
-      return (null, errors);
+      return (plugin: null, errors: errors);
     }
 
     return (
-      Plugin(
+      plugin: Plugin(
         name: name,
         path: path,
         platforms: platforms,
@@ -284,17 +283,17 @@ class Plugin {
         implementsPackage: implementsPackage,
         isDevDependency: isDevDependency,
       ),
-      const <String>[],
+      errors: const <String>[],
     );
   }
 
-  static (Plugin?, List<String>) _parseLegacyYaml(
+  static ({Plugin? plugin, List<String> errors}) _parseLegacyYaml(
     String name,
     String path,
     YamlMap pluginYaml,
     VersionConstraint? flutterConstraint,
     List<String> dependencies,
-    FileSystem? fileSystem,
+    FileSystem fileSystem,
     bool isDirectDependency, {
     required bool isDevDependency,
   }) {
@@ -326,7 +325,7 @@ class Plugin {
     ];
 
     if (errors.isNotEmpty) {
-      return (null, errors);
+      return (plugin: null, errors: errors);
     }
 
     final platforms = <String, PluginPlatform>{};
@@ -348,7 +347,7 @@ class Plugin {
       );
     }
     return (
-      Plugin(
+      plugin: Plugin(
         name: name,
         path: path,
         platforms: platforms,
@@ -359,7 +358,7 @@ class Plugin {
         isDirectDependency: isDirectDependency,
         isDevDependency: isDevDependency,
       ),
-      const <String>[],
+      errors: const <String>[],
     );
   }
 
@@ -388,12 +387,13 @@ class Plugin {
   }
 
   static List<String> validatePluginYaml(YamlMap? yaml) {
-    final (_, List<String> errors) = _parseFromYaml(
+    final (:List<String> errors, plugin: _) = _parseFromYaml(
       'plugin',
       '',
       yaml,
       null,
       const <String>[],
+      fileSystem: MemoryFileSystem.test(),
       isDevDependency: false,
     );
     return errors;
