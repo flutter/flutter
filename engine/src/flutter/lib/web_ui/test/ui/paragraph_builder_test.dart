@@ -5,6 +5,7 @@
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/ui.dart';
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 import '../common/test_initialization.dart';
 import 'utils.dart';
@@ -14,7 +15,11 @@ void main() {
 }
 
 Future<void> testMain() async {
-  setUpUnitTests(withImplicitView: true, setUpTestViewDimensions: false);
+  setUpUnitTests(
+    withImplicitView: true,
+    setUpTestViewDimensions: false,
+    testEnvironment: const ui_web.TestEnvironment(forceTestFonts: true),
+  );
 
   test('Should be able to build and layout a paragraph', () {
     final builder = ParagraphBuilder(ParagraphStyle());
