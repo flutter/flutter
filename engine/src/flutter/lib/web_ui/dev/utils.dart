@@ -150,7 +150,7 @@ class ProcessManager {
   /// The executable, from which the process was spawned.
   final String executable;
 
-  /// The arguments passed to the prcess.
+  /// The arguments passed to the process.
   final List<String> arguments;
 
   /// The current working directory (CWD) of the child process.
@@ -185,7 +185,7 @@ class ProcessManager {
   ///  * [failureIsSuccess] is false and the process exited with exit code 0.
   ///  * [failureIsSuccess] is true and the process exited with a non-zero exit code.
   ///
-  /// In all other cicumstances the future completes with an error.
+  /// In all other circumstances the future completes with an error.
   Future<int> wait() async {
     final int exitCode = await process.exitCode;
     if (!_failureIsSuccess && exitCode != 0) {
@@ -305,14 +305,14 @@ io.Directory getBuildDirectoryForRuntimeMode(RuntimeMode runtimeMode) => switch 
   RuntimeMode.release => environment.wasmReleaseOutDir,
 };
 
-/// There might be proccesses started during the tests.
+/// There might be processes started during the tests.
 ///
 /// Use this list to store those Processes, for cleaning up before shutdown.
 final List<io.Process> processesToCleanUp = <io.Process>[];
 
 /// There might be temporary directories created during the tests.
 ///
-/// Use this list to store those directories and for deleteing them before
+/// Use this list to store those directories and for deleting them before
 /// shutdown.
 final List<io.Directory> temporaryDirectories = <io.Directory>[];
 
@@ -324,7 +324,7 @@ typedef AsyncCallback = Future<void> Function();
 /// exit.
 final List<AsyncCallback> cleanupCallbacks = <AsyncCallback>[];
 
-/// Cleanup the remaning processes, close open browsers, delete temp files.
+/// Cleanup the remaining processes, close open browsers, delete temp files.
 Future<void> cleanup() async {
   // Cleanup remaining processes if any.
   if (processesToCleanUp.isNotEmpty) {

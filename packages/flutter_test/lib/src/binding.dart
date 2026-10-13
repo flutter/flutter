@@ -2268,6 +2268,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     // ignore: invalid_use_of_visible_for_testing_member
     ServicesBinding.instance.resetInternalState();
 
+    platformDispatcher.resetInternalState();
+
     if (invariantError != null) {
       debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
       reportTestException(invariantError, testDescription);
