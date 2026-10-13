@@ -12,9 +12,7 @@
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/embedder/android/android_renderer.h"
-#include "flutter/shell/platform/embedder/android/context/android_context.h"
-#include "flutter/shell/platform/embedder/android/surface/android_native_window.h"
-#include "flutter/shell/platform/embedder/android/surface/android_surface.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
 namespace flutter {
@@ -30,7 +28,7 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   PlatformViewAndroid(PlatformView::Delegate& delegate,
                       const flutter::TaskRunners& task_runners,
                       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-                      AndroidRenderingAPI rendering_api,
+                      FlutterNativeWindowBackend rendering_backend,
                       PlatformDispatchTable platform_dispatch_table);
 
   //----------------------------------------------------------------------------
@@ -47,14 +45,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
 
   ~PlatformViewAndroid() override;
 
-  bool SetNativeWindow(fml::RefPtr<AndroidNativeWindow> native_window);
-
-  void SwapNativeWindow(fml::RefPtr<AndroidNativeWindow> native_window);
-
-  void ResizeSurface(const DlISize& size);
-
-  void TeardownSurface();
-
   const std::shared_ptr<AndroidContext>& GetAndroidContext() {
     return renderer_->GetAndroidContext();
   }
@@ -62,9 +52,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   const std::shared_ptr<AndroidRenderer>& GetRenderer() const {
     return renderer_;
   }
-
-  /// @brief Whether the SurfaceControl based swapchain is enabled and active.
-  bool IsSurfaceControlEnabled() const;
 
  private:
   static PlatformDispatchTable WithAndroidCallbacks(

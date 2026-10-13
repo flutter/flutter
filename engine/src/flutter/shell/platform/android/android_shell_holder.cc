@@ -29,8 +29,6 @@
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
-#include "flutter/shell/platform/embedder/android/android_rendering_selector.h"
-#include "flutter/shell/platform/embedder/android/context/android_context.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
 namespace flutter {
@@ -590,7 +588,7 @@ struct ScopedRunConfiguration {
 AndroidShellHolder::AndroidShellHolder(
     const flutter::Settings& settings,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-    AndroidRenderingAPI android_rendering_api)
+    FlutterNativeWindowBackend android_rendering_api)
     : settings_(settings),
       jni_facade_(jni_facade),
       engine_callbacks_(std::make_unique<AndroidEngineCallbacks>(jni_facade)),
@@ -619,7 +617,7 @@ AndroidShellHolder::AndroidShellHolder(
 
   fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
   std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
-  AndroidRenderingAPI rendering_api = android_rendering_api_;
+  FlutterNativeWindowBackend rendering_api = android_rendering_api_;
   auto on_create_platform_view =
       [&jni_facade, &weak_platform_view, &vsync_waiter, rendering_api,
        callbacks = engine_callbacks_.get()](PlatformView::Delegate& delegate,
@@ -741,7 +739,7 @@ AndroidShellHolder::AndroidShellHolder(
     std::unique_ptr<APKAssetProvider> apk_asset_provider,
     const fml::WeakPtr<PlatformViewAndroid>& platform_view,
     std::shared_ptr<VsyncWaiterAndroid> vsync_waiter,
-    AndroidRenderingAPI rendering_api)
+    FlutterNativeWindowBackend rendering_api)
     : settings_(settings),
       jni_facade_(jni_facade),
       platform_view_(platform_view),
@@ -869,12 +867,20 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
   UniqueEngine engine(
       reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(spawned.release()));
 
+  FlutterNativeWindowRendererInfo renderer_info = {
+      .struct_size = sizeof(FlutterNativeWindowRendererInfo),
+  };
+  const FlutterNativeWindowBackend spawned_backend =
+      embedder_api_.GetNativeWindowRendererInfo(engine.get(), &renderer_info) ==
+              kSuccess
+          ? renderer_info.backend
+          : android_rendering_api_;
+
   return std::unique_ptr<AndroidShellHolder>(new AndroidShellHolder(
       GetSettings(), jni_facade, thread_host_, std::move(spawned_callbacks),
       std::move(engine), spawned_holder_id,
       apk_asset_provider_ ? apk_asset_provider_->Clone() : nullptr,
-      weak_platform_view, std::move(vsync_waiter),
-      android_context->RenderingApi()));
+      weak_platform_view, std::move(vsync_waiter), spawned_backend));
 }
 
 void AndroidShellHolder::Launch(
@@ -1349,19 +1355,19 @@ void AndroidShellHolder::RegisterExternalTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture) {
   switch (android_rendering_api_) {
-    case AndroidRenderingAPI::kSoftware:
+    case kFlutterNativeWindowBackendSoftware:
       FML_LOG(INFO) << "Software rendering does not support external textures.";
       return;
-    case AndroidRenderingAPI::kImpellerVulkan:
-    case AndroidRenderingAPI::kImpellerAutoselect:
+    case kFlutterNativeWindowBackendImpellerVulkan:
+    case kFlutterNativeWindowBackendImpellerAutoselect:
       FML_LOG(IMPORTANT)
           << "Flutter recommends migrating plugins that create and "
              "register surface textures to the new surface producer "
              "API. See https://docs.flutter.dev/release/breaking-changes/"
              "android-surface-plugins";
       break;
-    case AndroidRenderingAPI::kImpellerOpenGLES:
-    case AndroidRenderingAPI::kSkiaOpenGLES:
+    case kFlutterNativeWindowBackendImpellerOpenGLES:
+    case kFlutterNativeWindowBackendSkiaOpenGLES:
       break;
   }
   FlutterExternalTextureInfo info =
@@ -1380,7 +1386,7 @@ void AndroidShellHolder::RegisterImageTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
     bool drop_frames_on_context_destroyed) {
-  if (android_rendering_api_ == AndroidRenderingAPI::kSoftware) {
+  if (android_rendering_api_ == kFlutterNativeWindowBackendSoftware) {
     FML_LOG(INFO) << "Software rendering does not support external textures.";
     return;
   }
@@ -1417,8 +1423,14 @@ void AndroidShellHolder::MarkTextureFrameAvailable(int64_t texture_id) {
 
 void AndroidShellHolder::NotifySurfaceCreated(
     fml::RefPtr<AndroidNativeWindow> native_window) {
-  if (platform_view_ &&
-      platform_view_->SetNativeWindow(std::move(native_window))) {
+  FlutterNativeWindowInfo window_info = {
+      .struct_size = sizeof(FlutterNativeWindowInfo),
+      .window = native_window ? native_window->handle() : nullptr,
+      .is_fake_window = native_window && native_window->IsFakeWindow(),
+  };
+  FlutterEngineResult window_result =
+      embedder_api_.SetNativeWindow(engine_.get(), &window_info);
+  if (window_result == kSuccess) {
     FlutterEngineResult callback_result = embedder_api_.SetNextFrameCallback(
         engine_.get(), &OnFirstFrameRendered,
         reinterpret_cast<void*>(static_cast<uintptr_t>(holder_id_)));
@@ -1426,6 +1438,8 @@ void AndroidShellHolder::NotifySurfaceCreated(
       FML_LOG(ERROR) << "FlutterEngineSetNextFrameCallback failed: "
                      << callback_result;
     }
+  } else {
+    FML_LOG(ERROR) << "FlutterEngineSetNativeWindow failed: " << window_result;
   }
   FlutterEngineResult result = embedder_api_.NotifyCreated(engine_.get());
   if (result != kSuccess) {
@@ -1435,15 +1449,32 @@ void AndroidShellHolder::NotifySurfaceCreated(
 
 void AndroidShellHolder::NotifySurfaceWindowChanged(
     fml::RefPtr<AndroidNativeWindow> native_window) {
-  if (platform_view_) {
-    platform_view_->SwapNativeWindow(std::move(native_window));
+  FlutterNativeWindowInfo window_info = {
+      .struct_size = sizeof(FlutterNativeWindowInfo),
+      .window = native_window ? native_window->handle() : nullptr,
+      .is_fake_window = native_window && native_window->IsFakeWindow(),
+  };
+  FlutterEngineResult result =
+      embedder_api_.SetNativeWindow(engine_.get(), &window_info);
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineSetNativeWindow failed: " << result;
   }
   ScheduleFrame();
 }
 
 void AndroidShellHolder::NotifySurfaceChanged(int width, int height) {
-  if (platform_view_) {
-    platform_view_->ResizeSurface(DlISize(width, height));
+  if (width < 0 || height < 0) {
+    return;
+  }
+  FlutterNativeWindowResizeInfo resize_info = {
+      .struct_size = sizeof(FlutterNativeWindowResizeInfo),
+      .width = static_cast<size_t>(width),
+      .height = static_cast<size_t>(height),
+  };
+  FlutterEngineResult result =
+      embedder_api_.ResizeNativeWindow(engine_.get(), &resize_info);
+  if (result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineResizeNativeWindow failed: " << result;
   }
 }
 
@@ -1452,8 +1483,15 @@ void AndroidShellHolder::NotifySurfaceDestroyed() {
   if (result != kSuccess) {
     FML_LOG(ERROR) << "FlutterEngineNotifyDestroyed failed: " << result;
   }
-  if (platform_view_) {
-    platform_view_->TeardownSurface();
+  FlutterNativeWindowInfo detach_info = {
+      .struct_size = sizeof(FlutterNativeWindowInfo),
+      .window = nullptr,
+      .is_fake_window = false,
+  };
+  FlutterEngineResult window_result =
+      embedder_api_.SetNativeWindow(engine_.get(), &detach_info);
+  if (window_result != kSuccess) {
+    FML_LOG(ERROR) << "FlutterEngineSetNativeWindow failed: " << window_result;
   }
 }
 
@@ -1492,7 +1530,14 @@ void AndroidShellHolder::UpdateDisplayMetrics() {
 }
 
 bool AndroidShellHolder::IsSurfaceControlEnabled() {
-  return GetPlatformView()->IsSurfaceControlEnabled();
+  FlutterNativeWindowRendererInfo renderer_info = {
+      .struct_size = sizeof(FlutterNativeWindowRendererInfo),
+  };
+  if (embedder_api_.GetNativeWindowRendererInfo(engine_.get(),
+                                                &renderer_info) != kSuccess) {
+    return false;
+  }
+  return renderer_info.surface_control_enabled;
 }
 
 }  // namespace flutter

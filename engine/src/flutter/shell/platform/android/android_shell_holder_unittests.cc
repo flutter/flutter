@@ -192,7 +192,7 @@ std::unique_ptr<AndroidShellHolder> CreateHolderWithoutSurface(
   settings.enable_software_rendering = false;
   settings.merged_platform_ui_thread = merged_platform_ui_thread;
   return std::make_unique<AndroidShellHolder>(
-      settings, std::move(jni), AndroidRenderingAPI::kImpellerOpenGLES);
+      settings, std::move(jni), kFlutterNativeWindowBackendImpellerOpenGLES);
 }
 
 // Records the frames a vsync waiter delivers. Frame callbacks run on the UI
@@ -278,7 +278,7 @@ TEST(AndroidShellHolder, Create) {
   settings.enable_software_rendering = false;
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto holder = std::make_unique<AndroidShellHolder>(
-      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+      settings, jni, kFlutterNativeWindowBackendImpellerOpenGLES);
   EXPECT_NE(holder.get(), nullptr);
   EXPECT_TRUE(holder->IsValid());
   EXPECT_NE(holder->GetPlatformView().get(), nullptr);
@@ -463,7 +463,7 @@ TEST(AndroidShellHolder, CreateWithMergedPlatformAndUIThread) {
   Settings settings;
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto holder = std::make_unique<AndroidShellHolder>(
-      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+      settings, jni, kFlutterNativeWindowBackendImpellerOpenGLES);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       nullptr, /*is_fake_window=*/true);
   holder->NotifySurfaceCreated(window);
@@ -479,7 +479,7 @@ TEST(AndroidShellHolder, CreateWithUnMergedPlatformAndUIThread) {
       Settings::MergedPlatformUIThread::kDisabled;
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto holder = std::make_unique<AndroidShellHolder>(
-      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+      settings, jni, kFlutterNativeWindowBackendImpellerOpenGLES);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       nullptr, /*is_fake_window=*/true);
   holder->NotifySurfaceCreated(window);
@@ -498,7 +498,7 @@ TEST(AndroidShellHolder, StartsWithDetachedLifecycleState) {
             Settings::MergedPlatformUIThread::kEnabled);
   auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
   auto holder = std::make_unique<AndroidShellHolder>(
-      settings, jni, AndroidRenderingAPI::kImpellerOpenGLES);
+      settings, jni, kFlutterNativeWindowBackendImpellerOpenGLES);
   ASSERT_TRUE(holder->IsValid());
 
   // Frames stay off until Java reports a lifecycle state over
@@ -858,6 +858,121 @@ TEST(AndroidShellHolder, SpawnReturnsNullWhenKernelBlobUnreadable) {
         /*initial_route=*/"/", /*entrypoint_args=*/{}, kSpawnedEngineId);
     EXPECT_EQ(spawned, nullptr);
   }
+}
+
+TEST(AndroidShellHolder,
+     SurfaceLifecycleAndRendererInfoRouteThroughNativeWindowEmbedderProcs) {
+  std::unique_ptr<AndroidShellHolder> holder =
+      CreateHolderWithoutSurface(Settings::MergedPlatformUIThread::kEnabled);
+  ASSERT_TRUE(holder->IsValid());
+
+  std::vector<FlutterNativeWindowInfo> set_window_calls;
+  std::vector<FlutterNativeWindowResizeInfo> resize_calls;
+  int next_frame_calls = 0;
+  int notify_created_calls = 0;
+  int schedule_frame_calls = 0;
+  int notify_destroyed_calls = 0;
+  int renderer_info_calls = 0;
+
+  FlutterEngineProcTable& embedder_api = holder->GetEmbedderApiForTesting();
+  embedder_api.SetNativeWindow = MOCK_ENGINE_PROC(
+      SetNativeWindow, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                            const FlutterNativeWindowInfo* info) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(info, nullptr);
+        if (info != nullptr) {
+          EXPECT_EQ(info->struct_size, sizeof(FlutterNativeWindowInfo));
+          set_window_calls.push_back(*info);
+        }
+        return kSuccess;
+      }));
+  embedder_api.SetNextFrameCallback = MOCK_ENGINE_PROC(
+      SetNextFrameCallback, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                                 VoidCallback callback, void* user_data) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(callback, nullptr);
+        next_frame_calls++;
+        return kSuccess;
+      }));
+  embedder_api.NotifyCreated = MOCK_ENGINE_PROC(
+      NotifyCreated, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_NE(engine, nullptr);
+        notify_created_calls++;
+        return kSuccess;
+      }));
+  embedder_api.ScheduleFrame = MOCK_ENGINE_PROC(
+      ScheduleFrame, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_NE(engine, nullptr);
+        schedule_frame_calls++;
+        return kSuccess;
+      }));
+  embedder_api.ResizeNativeWindow = MOCK_ENGINE_PROC(
+      ResizeNativeWindow, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                               const FlutterNativeWindowResizeInfo* info) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(info, nullptr);
+        if (info != nullptr) {
+          EXPECT_EQ(info->struct_size, sizeof(FlutterNativeWindowResizeInfo));
+          resize_calls.push_back(*info);
+        }
+        return kSuccess;
+      }));
+  embedder_api.NotifyDestroyed = MOCK_ENGINE_PROC(
+      NotifyDestroyed, ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine) {
+        EXPECT_NE(engine, nullptr);
+        notify_destroyed_calls++;
+        return kSuccess;
+      }));
+  embedder_api.GetNativeWindowRendererInfo = MOCK_ENGINE_PROC(
+      GetNativeWindowRendererInfo,
+      ([&](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+           FlutterNativeWindowRendererInfo* info_out) {
+        EXPECT_NE(engine, nullptr);
+        EXPECT_NE(info_out, nullptr);
+        if (info_out != nullptr) {
+          EXPECT_EQ(info_out->struct_size,
+                    sizeof(FlutterNativeWindowRendererInfo));
+          info_out->backend = kFlutterNativeWindowBackendImpellerVulkan;
+          info_out->surface_control_enabled = true;
+        }
+        renderer_info_calls++;
+        return kSuccess;
+      }));
+
+  auto fake_window = fml::MakeRefCounted<AndroidNativeWindow>(
+      nullptr, /*is_fake_window=*/true);
+  holder->NotifySurfaceCreated(fake_window);
+  ASSERT_EQ(set_window_calls.size(), 1u);
+  EXPECT_EQ(set_window_calls[0].window, nullptr);
+  EXPECT_TRUE(set_window_calls[0].is_fake_window);
+  EXPECT_EQ(next_frame_calls, 1);
+  EXPECT_EQ(notify_created_calls, 1);
+
+  holder->NotifySurfaceWindowChanged(fake_window);
+  ASSERT_EQ(set_window_calls.size(), 2u);
+  EXPECT_EQ(set_window_calls[1].window, nullptr);
+  EXPECT_TRUE(set_window_calls[1].is_fake_window);
+  EXPECT_EQ(schedule_frame_calls, 1);
+
+  // Sample positive dimensions and negative sentinel to verify resize guard.
+  constexpr int kResizeWidth = 1080;
+  constexpr int kResizeHeight = 2400;
+  constexpr int kNegativeDimension = -1;
+  holder->NotifySurfaceChanged(kNegativeDimension, kResizeHeight);
+  EXPECT_TRUE(resize_calls.empty());
+  holder->NotifySurfaceChanged(kResizeWidth, kResizeHeight);
+  ASSERT_EQ(resize_calls.size(), 1u);
+  EXPECT_EQ(resize_calls[0].width, static_cast<size_t>(kResizeWidth));
+  EXPECT_EQ(resize_calls[0].height, static_cast<size_t>(kResizeHeight));
+
+  holder->NotifySurfaceDestroyed();
+  EXPECT_EQ(notify_destroyed_calls, 1);
+  ASSERT_EQ(set_window_calls.size(), 3u);
+  EXPECT_EQ(set_window_calls[2].window, nullptr);
+  EXPECT_FALSE(set_window_calls[2].is_fake_window);
+
+  EXPECT_TRUE(holder->IsSurfaceControlEnabled());
+  EXPECT_EQ(renderer_info_calls, 1);
 }
 
 }  // namespace testing

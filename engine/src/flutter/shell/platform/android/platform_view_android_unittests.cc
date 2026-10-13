@@ -23,9 +23,9 @@ TEST(AndroidPlatformView, DISABLED_SelectsVulkanBasedOnApiLevel) {
   settings.enable_impeller = true;
 
   EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 29),
-            AndroidRenderingAPI::kImpellerVulkan);
+            kFlutterNativeWindowBackendImpellerVulkan);
   EXPECT_EQ(FlutterMain::SelectedRenderingAPI(settings, 24),
-            AndroidRenderingAPI::kImpellerOpenGLES);
+            kFlutterNativeWindowBackendImpellerOpenGLES);
 }
 #endif  // !SLIMPELLER
 

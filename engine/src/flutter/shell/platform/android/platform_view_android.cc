@@ -10,16 +10,42 @@
 #include "common/settings.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_wrapper.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/embedder/android/android_rendering_selector.h"
-#include "flutter/shell/platform/embedder/android/context/android_context.h"
 
 namespace flutter {
+
+namespace {
+
+AndroidRenderingAPI ToAndroidRenderingAPI(FlutterNativeWindowBackend backend) {
+  switch (backend) {
+    case kFlutterNativeWindowBackendImpellerAutoselect:
+      return AndroidRenderingAPI::kImpellerAutoselect;
+    case kFlutterNativeWindowBackendImpellerVulkan:
+      return AndroidRenderingAPI::kImpellerVulkan;
+    case kFlutterNativeWindowBackendImpellerOpenGLES:
+      return AndroidRenderingAPI::kImpellerOpenGLES;
+    case kFlutterNativeWindowBackendSkiaOpenGLES:
+#if !SLIMPELLER
+      return AndroidRenderingAPI::kSkiaOpenGLES;
+#else
+      return AndroidRenderingAPI::kImpellerAutoselect;
+#endif
+    case kFlutterNativeWindowBackendSoftware:
+#if !SLIMPELLER
+      return AndroidRenderingAPI::kSoftware;
+#else
+      return AndroidRenderingAPI::kImpellerAutoselect;
+#endif
+  }
+  return AndroidRenderingAPI::kImpellerAutoselect;
+}
+
+}  // namespace
 
 PlatformViewAndroid::PlatformViewAndroid(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    AndroidRenderingAPI rendering_api,
+    FlutterNativeWindowBackend rendering_backend,
     PlatformDispatchTable platform_dispatch_table)
     : PlatformViewEmbedder(
           delegate,
@@ -29,7 +55,7 @@ PlatformViewAndroid::PlatformViewAndroid(
       renderer_(std::make_shared<AndroidRenderer>(
           task_runners,
           delegate.OnPlatformViewGetSettings(),
-          rendering_api,
+          ToAndroidRenderingAPI(rendering_backend),
           delegate.OnPlatformViewGetShutdownSafeIOTaskRunner(),
           MakeCreateSurfaceTransaction(jni_facade))) {}
 
@@ -99,28 +125,6 @@ PlatformViewAndroid::CreateAndroidExternalViewEmbedder() {
   return std::make_shared<AndroidExternalViewEmbedderWrapper>(
       renderer_->MeetsHCPPCriteria(), *renderer_->GetAndroidContext(),
       jni_facade_, renderer_->GetSurfaceFactory(), task_runners_);
-}
-
-bool PlatformViewAndroid::SetNativeWindow(
-    fml::RefPtr<AndroidNativeWindow> native_window) {
-  return renderer_->SetNativeWindow(std::move(native_window));
-}
-
-void PlatformViewAndroid::SwapNativeWindow(
-    fml::RefPtr<AndroidNativeWindow> native_window) {
-  renderer_->SwapNativeWindow(std::move(native_window));
-}
-
-void PlatformViewAndroid::ResizeSurface(const DlISize& size) {
-  renderer_->ResizeSurface(size);
-}
-
-void PlatformViewAndroid::TeardownSurface() {
-  renderer_->TeardownSurface();
-}
-
-bool PlatformViewAndroid::IsSurfaceControlEnabled() const {
-  return renderer_->IsSurfaceControlEnabled();
 }
 
 CreateSurfaceTransaction PlatformViewAndroid::MakeCreateSurfaceTransaction(

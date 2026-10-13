@@ -14,7 +14,7 @@
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
-#include "flutter/shell/platform/embedder/android/android_rendering_selector.h"
+#include "flutter/shell/platform/embedder/android/surface/android_native_window.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
@@ -50,7 +50,7 @@ class AndroidShellHolder {
 
   AndroidShellHolder(const flutter::Settings& settings,
                      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
-                     AndroidRenderingAPI android_rendering_api);
+                     FlutterNativeWindowBackend android_rendering_api);
 
   ~AndroidShellHolder();
 
@@ -309,7 +309,7 @@ class AndroidShellHolder {
   uint64_t next_pointer_flow_id_ = 0;
   const uint64_t holder_id_;
   std::unique_ptr<APKAssetProvider> apk_asset_provider_;
-  const AndroidRenderingAPI android_rendering_api_;
+  const FlutterNativeWindowBackend android_rendering_api_;
 
   void SendPlatformMessage(const std::string& name,
                            const uint8_t* message_data,
@@ -336,7 +336,7 @@ class AndroidShellHolder {
                      std::unique_ptr<APKAssetProvider> apk_asset_provider,
                      const fml::WeakPtr<PlatformViewAndroid>& platform_view,
                      std::shared_ptr<VsyncWaiterAndroid> vsync_waiter,
-                     AndroidRenderingAPI rendering_api);
+                     FlutterNativeWindowBackend rendering_api);
   static void ThreadDestructCallback(void* value);
 
   bool IsNDKImageDecoderAvailable();
