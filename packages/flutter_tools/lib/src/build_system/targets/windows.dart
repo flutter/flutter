@@ -187,8 +187,8 @@ class WindowsAotBundle extends Target {
   /// Create a [WindowsAotBundle] wrapper for [aotTarget].
   const WindowsAotBundle(this.aotTarget);
 
-  /// The [AotElfBase] subclass that produces the app.so.
-  final AotElfBase aotTarget;
+  /// The [AotSnapshotBase] subclass that produces the Windows AOT library.
+  final AotSnapshotBase aotTarget;
 
   @override
   String get name => 'windows_aot_bundle';
@@ -225,7 +225,7 @@ class ReleaseBundleWindowsAssets extends BundleWindowsAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    WindowsAotBundle(AotElfRelease(targetPlatform)),
+    WindowsAotBundle(AotSnapshotRelease(targetPlatform)),
   ];
 }
 
@@ -241,7 +241,7 @@ class ProfileBundleWindowsAssets extends BundleWindowsAssets {
   @override
   List<Target> get dependencies => <Target>[
     ...super.dependencies,
-    WindowsAotBundle(AotElfProfile(targetPlatform)),
+    WindowsAotBundle(AotSnapshotProfile(targetPlatform)),
   ];
 }
 

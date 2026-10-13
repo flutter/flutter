@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_engine_cli_flags.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -15,16 +16,19 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/commands/run.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -39,6 +43,7 @@ import '../../src/context.dart';
 import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
+import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
 void main() {
@@ -131,6 +136,10 @@ void main() {
       },
     );
 
+    testUsingContext('accepts --[no-]deprecated-js-interop', () {
+      expectAcceptsDeprecatedJsInteropFlag(RunCommand());
+    });
+
     group('run app', () {
       late MemoryFileSystem fs;
       late Artifacts artifacts;
@@ -167,6 +176,120 @@ void main() {
           final CommandRunner<void> runner = createTestCommandRunner(command);
           await runner.run(<String>['run', '--no-pub', '--use-application-binary=path/to/binary']);
           expect(command.prebuiltApplicationBinaryPath, 'path/to/binary');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      for (final String flag in AndroidEngineCliFlags.allFlags) {
+        testUsingContext(
+          'fails when --use-application-binary is provided with --release and --$flag for Android',
+          () async {
+            testDeviceManager.devices = <Device>[FakeDevice()];
+            final RunCommand command = TestRunCommandThatOnlyValidates();
+            final CommandRunner<void> runner = createTestCommandRunner(command);
+            final String flagArg = switch (flag) {
+              AndroidEngineCliFlags.route => '--route=/',
+              AndroidEngineCliFlags.traceAllowlist => '--trace-allowlist=foo',
+              AndroidEngineCliFlags.traceSkiaAllowlist => '--trace-skia-allowlist=foo',
+              AndroidEngineCliFlags.traceToFile => '--trace-to-file=path',
+              AndroidEngineCliFlags.dartFlags => '--dart-flags=--foo',
+              _ => '--$flag',
+            };
+            expect(
+              () => runner.run(<String>[
+                'run',
+                '--no-pub',
+                '--release',
+                flagArg,
+                '--use-application-binary=path/to/app.apk',
+              ]),
+              throwsA(
+                isA<ToolExit>().having(
+                  (ToolExit error) => error.message,
+                  'message',
+                  allOf(
+                    contains(flag),
+                    contains(
+                      'https://docs.flutter.dev/release/breaking-changes/restrict-command-line-flags-prebuilt-android-release-binaries',
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fs,
+            ProcessManager: () => FakeProcessManager.any(),
+            DeviceManager: () => testDeviceManager,
+          },
+        );
+      }
+
+      testUsingContext(
+        'succeeds when --use-application-binary is provided with --release and engine config flags for iOS',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+
+          await runner.run(<String>[
+            'run',
+            '--no-pub',
+            '--release',
+            '--route=/',
+            '--use-application-binary=path/to/app.ipa',
+          ]);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/app.ipa');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'succeeds when --use-application-binary is provided with --release and engine config flags for Windows',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+
+          await runner.run(<String>[
+            'run',
+            '--no-pub',
+            '--release',
+            '--route=/',
+            '--use-application-binary=path/to/app.exe',
+          ]);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/app.exe');
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          DeviceManager: () => testDeviceManager,
+        },
+      );
+
+      testUsingContext(
+        'succeeds when --use-application-binary is provided with --release and engine config flags for macOS',
+        () async {
+          testDeviceManager.devices = <Device>[FakeDevice()];
+          final RunCommand command = TestRunCommandThatOnlyValidates();
+          final CommandRunner<void> runner = createTestCommandRunner(command);
+
+          await runner.run(<String>[
+            'run',
+            '--no-pub',
+            '--release',
+            '--route=/',
+            '--use-application-binary=path/to/app.app',
+          ]);
+          expect(command.prebuiltApplicationBinaryPath, 'path/to/app.app');
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -2331,7 +2454,14 @@ class DaemonCapturingRunCommand extends RunCommand {
 }
 
 class CapturingAppDomain extends AppDomain {
-  CapturingAppDomain(super.daemon);
+  CapturingAppDomain(super.daemon)
+    : super(
+        analytics: const analytics.NoOpAnalytics(),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: const DelegatingToolContext(),
+        xcode: null,
+      );
 
   String? userIdentifier;
   bool? enableDevTools;
@@ -2412,19 +2542,16 @@ class FakeWebRunnerFactory extends Fake implements WebRunnerFactory {
   @override
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String? target,
-    required bool stayResident,
-    required DebuggingOptions debuggingOptions,
     required analytics.Analytics analytics,
-    required FileSystem fileSystem,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
+    required DebuggingOptions debuggingOptions,
     required FlutterProject flutterProject,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    required Logger logger,
-    required OutputPreferences outputPreferences,
-    required Platform platform,
-    required SystemClock systemClock,
-    required Terminal terminal,
+    required bool stayResident,
+    required ToolContext toolContext,
     bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
     Future<String> Function(String)? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) {

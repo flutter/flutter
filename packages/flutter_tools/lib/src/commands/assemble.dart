@@ -33,8 +33,8 @@ var _kDefaultTargets = <Target>[
   // Shared targets
   const CopyAssets(),
   const KernelSnapshot(),
-  const AotElfProfile(TargetPlatform.android_arm),
-  const AotElfRelease(TargetPlatform.android_arm),
+  const AotSnapshotProfile(TargetPlatform.android_arm),
+  const AotSnapshotRelease(TargetPlatform.android_arm),
   const AotAssemblyProfile(),
   const AotAssemblyRelease(),
   // macOS targets
@@ -99,11 +99,10 @@ class AssembleCommand extends FlutterCommand {
   AssembleCommand({
     required this._buildSystem,
     required this._featureFlags,
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     bool verboseHelp = false,
   }) : _toolContext = toolContext,
-       _verboseHelp = verboseHelp,
-       super(toolContext: toolContext) {
+       _verboseHelp = verboseHelp {
     requiresPubspecYaml();
     argParser.addMultiOption(
       'define',

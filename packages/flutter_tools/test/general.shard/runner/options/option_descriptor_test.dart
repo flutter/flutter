@@ -648,6 +648,94 @@ void main() {
         );
       }
     });
+
+    testUsingContext('AppleBuildOptionsBundle registers Apple build options', () {
+      final command = _FakeCommand(
+        name: 'ios',
+        description: 'Build iOS',
+        bundles: const <OptionBundle>[AppleBuildOptionsBundle()],
+      );
+      createTestCommandRunner(command);
+
+      const allOptions = <OptionDescriptor<Object?>>[
+        BuildInfoOptions.flavor,
+        BuildInfoOptions.splitDebugInfo,
+        BuildInfoOptions.obfuscate,
+        BuildInfoOptions.extraFrontEndOptions,
+        BuildInfoOptions.extraGenSnapshotOptions,
+        BuildInfoOptions.performanceMeasurementFile,
+        BuildInfoOptions.analyzeSize,
+        BuildInfoOptions.codeSizeDirectory,
+      ];
+
+      for (final descriptor in allOptions) {
+        expect(
+          command.argParser.options.containsKey(descriptor.name),
+          isTrue,
+          reason: 'Option ${descriptor.name} should be registered',
+        );
+      }
+    });
+
+    testUsingContext(
+      'DarwinCodeSignXCFrameworksOptionsBundle registers codesign and codesign-identity',
+      () {
+        final command = _FakeCommand(
+          name: 'ios-framework',
+          description: 'Build iOS Framework',
+          bundles: const <OptionBundle>[DarwinCodeSignXCFrameworksOptionsBundle()],
+        );
+        createTestCommandRunner(command);
+
+        const allOptions = <OptionDescriptor<Object?>>[
+          BuildInfoOptions.codesign,
+          BuildInfoOptions.codesignIdentity,
+        ];
+
+        for (final descriptor in allOptions) {
+          expect(
+            command.argParser.options.containsKey(descriptor.name),
+            isTrue,
+            reason: 'Option ${descriptor.name} should be registered',
+          );
+        }
+      },
+    );
+
+    testUsingContext(
+      'DarwinAddToAppOptionsBundle registers shared Darwin Add-to-App options and subBundles',
+      () {
+        final command = _FakeCommand(
+          name: 'ios-framework',
+          description: 'Build iOS Framework',
+          bundles: const <OptionBundle>[DarwinAddToAppOptionsBundle()],
+        );
+        createTestCommandRunner(command);
+
+        const allOptions = <OptionDescriptor<Object?>>[
+          CommonOptions.treeShakeIcons,
+          CommonOptions.target,
+          CommonOptions.pub,
+          BuildInfoOptions.splitDebugInfo,
+          BuildInfoOptions.obfuscate,
+          BuildInfoOptions.extraFrontEndOptions,
+          BuildInfoOptions.extraGenSnapshotOptions,
+          CommonOptions.dartDefines,
+          CommonOptions.dartDefineFromFile,
+          CommonOptions.enableExperiment,
+          BuildInfoOptions.codesign,
+          BuildInfoOptions.codesignIdentity,
+        ];
+
+        for (final descriptor in allOptions) {
+          expect(
+            command.argParser.options.containsKey(descriptor.name),
+            isTrue,
+            reason: 'Option ${descriptor.name} should be registered',
+          );
+        }
+      },
+    );
   });
 }
 

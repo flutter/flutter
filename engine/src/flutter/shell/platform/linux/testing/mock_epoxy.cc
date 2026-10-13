@@ -436,6 +436,10 @@ EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     return EGL_FALSE;
   }
 
+  if (mock) {
+    mock->eglSwapBuffers();
+  }
+
   return bool_success();
 }
 

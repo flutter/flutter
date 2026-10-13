@@ -76,15 +76,12 @@ Future<void> testMain() async {
       final double width5 = rects[5].toRect().width;
 
       expect(height <= paragraph.height, true);
-
-      // All lines except the last one adjusted by the longest line
       expect(width01 > 500, true);
       expect(width2 > 500, true);
       expect(width34 > 500, true);
       expect(width5 < 500, true);
 
       // Rectangles for whitespaces adjustments added correctly
-
       // Vertically
       expect(rects[0].toRect().top, rects[1].toRect().top);
       expect(rects[3].toRect().top, rects[4].toRect().top);
@@ -303,5 +300,48 @@ Future<void> testMain() async {
     expect(boxes1.isNotEmpty && boxes1.length == 1, true);
     expect(boxes2.isNotEmpty && boxes2.length == 1, true);
     expect(boxes1.first.toRect().bottom >= boxes2.first.toRect().top, true);
+  });
+
+  test('layout with kTextHeightNone disables parent height multiplier', () {
+    // Pushing a child TextStyle with kTextHeightNone overrides the parent ParagraphStyle's
+    // height multiplier (3.0) and lays out the line at its unscaled font height.
+    final builderWithNone = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20, height: 3.0),
+    );
+    builderWithNone.pushStyle(ui.TextStyle(height: ui.kTextHeightNone));
+    builderWithNone.addText('Hello');
+    final ui.Paragraph paragraphWithNone = builderWithNone.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+
+    final builderDefault = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20),
+    );
+    builderDefault.addText('Hello');
+    final ui.Paragraph paragraphDefault = builderDefault.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+
+    expect(paragraphWithNone.height, greaterThan(0));
+    expect(paragraphWithNone.height, paragraphDefault.height);
+  });
+
+  test('layout with ParagraphStyle(kTextHeightNone)', () {
+    // Passing kTextHeightNone directly on ParagraphStyle produces the same unscaled
+    // line height as omitting height (null), rather than multiplying by 0.0.
+    final builderWithNone = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20, height: ui.kTextHeightNone),
+    );
+    builderWithNone.addText('Hello');
+    final ui.Paragraph paragraphWithNone = builderWithNone.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+
+    final builderDefault = ui.ParagraphBuilder(
+      ui.ParagraphStyle(fontFamily: 'Arial', fontSize: 20),
+    );
+    builderDefault.addText('Hello');
+    final ui.Paragraph paragraphDefault = builderDefault.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+
+    expect(paragraphWithNone.height, greaterThan(0));
+    expect(paragraphWithNone.height, paragraphDefault.height);
   });
 }

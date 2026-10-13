@@ -91,7 +91,7 @@ void main() {
         );
 
         final runner = FlutterCommandRunner(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: true,
         );
         runner.addCommand(command);
@@ -130,7 +130,7 @@ void main() {
         );
 
         final runner = FlutterCommandRunner(
-          toolContext: DelegatingToolContext(),
+          toolContext: const DelegatingToolContext(),
           verboseHelp: true,
         );
         runner.addCommand(command);
@@ -146,6 +146,54 @@ void main() {
           ),
         );
       });
+
+      testUsingContext(
+        'generateTests is only true when --ci flag is passed, not when LUCI_CI env is set',
+        () async {
+          final fs = MemoryFileSystem.test();
+          final logger = BufferLogger.test();
+          final processManager = FakeProcessManager.list([]);
+          final command = BuildSwiftPackage(
+            analytics: FakeAnalytics(),
+            artifacts: FakeArtifacts(_engineArtifactPath),
+            buildSystem: FakeBuildSystem(),
+            cache: FakeCache(fs, _flutterRoot),
+            fileSystem: fs,
+            flutterVersion: FakeFlutterVersion(),
+            logger: logger,
+            platform: FakePlatform(environment: <String, String>{'LUCI_CI': 'True'}),
+            processManager: processManager,
+            templateRenderer: const MustacheTemplateRenderer(),
+            xcode: FakeXcode(),
+            featureFlags: FakeFeatureFlags(),
+            verboseHelp: false,
+            codesign: FakeDarwinAddToAppCodesigning(),
+          );
+
+          final runner = FlutterCommandRunner(
+            toolContext: const DelegatingToolContext(),
+            verboseHelp: true,
+          );
+          runner.addCommand(command);
+
+          await expectLater(
+            () => runner.run(<String>['swift-package', '--no-pub']),
+            throwsToolExit(),
+          );
+          expect(command.generateTests, isFalse);
+
+          await expectLater(
+            () => runner.run(<String>['--ci', 'swift-package', '--no-pub']),
+            throwsToolExit(),
+          );
+          expect(command.generateTests, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => MemoryFileSystem.test(),
+          ProcessManager: () => FakeProcessManager.any(),
+          Cache: () => FakeCache(MemoryFileSystem.test(), _flutterRoot),
+        },
+      );
 
       group('for output directory', () {
         late MemoryFileSystem fs;
@@ -183,7 +231,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
-              toolContext: DelegatingToolContext(),
+              toolContext: const DelegatingToolContext(),
               verboseHelp: true,
             );
             runner.addCommand(command);
@@ -242,7 +290,7 @@ void main() {
             projectDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
 
             final runner = FlutterCommandRunner(
-              toolContext: DelegatingToolContext(),
+              toolContext: const DelegatingToolContext(),
               verboseHelp: true,
             );
             runner.addCommand(command);

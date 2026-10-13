@@ -8,7 +8,6 @@ import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -153,7 +152,7 @@ class ProfileAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AotElfProfile(TargetPlatform.android_arm),
+    AotSnapshotProfile(TargetPlatform.android_arm),
     AotAndroidAssetBundle(),
   ];
 }
@@ -167,7 +166,7 @@ class ReleaseAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AotElfRelease(TargetPlatform.android_arm),
+    AotSnapshotRelease(TargetPlatform.android_arm),
     AotAndroidAssetBundle(),
   ];
 }
@@ -183,7 +182,7 @@ class ReleaseAndroidApplication extends CopyFlutterAotBundle {
 ///
 /// It will produce an 'app.so` in the build directory under a folder named with
 /// the matching Android ABI.
-class AndroidAot extends AotElfBase {
+class AndroidAot extends AotSnapshotBase {
   /// Create an [AndroidAot] implementation for a given [targetPlatform] and [buildMode].
   const AndroidAot(this.targetPlatform, this.buildMode);
 
@@ -198,6 +197,7 @@ class AndroidAot extends AotElfBase {
       '${targetPlatform.getName()}';
 
   /// The specific Android ABI we are building for.
+  @override
   final TargetPlatform targetPlatform;
 
   /// The selected build mode.
@@ -230,7 +230,6 @@ class AndroidAot extends AotElfBase {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
       processManager: environment.processManager,
       artifacts: environment.artifacts,
     );
