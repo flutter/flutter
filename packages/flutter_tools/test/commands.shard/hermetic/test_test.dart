@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/native_assets.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
@@ -1942,6 +1941,109 @@ resolution: workspace
       Platform: () => FakePlatform(operatingSystem: 'windows'),
     },
   );
+
+  group('TestFilterSpecification and TestExecutionSpecification', () {
+    testWithoutContext('TestFilterSpecification has expected defaults', () {
+      const filter = TestFilterSpecification();
+      expect(filter.names, isEmpty);
+      expect(filter.plainNames, isEmpty);
+      expect(filter.tags, isEmpty);
+      expect(filter.excludeTags, isEmpty);
+      expect(filter.presets, isEmpty);
+      expect(filter.runSkipped, isFalse);
+      expect(filter.shardIndex, isNull);
+      expect(filter.totalShards, isNull);
+    });
+
+    testWithoutContext(
+      'TestExecutionSpecification.toPackageTestArgs generates minimal args by default',
+      () {
+        final spec = TestExecutionSpecification(
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          buildInfo: BuildInfo.debug,
+        );
+
+        expect(spec.toPackageTestArgs(supportsColor: false), <String>[
+          '--no-color',
+          '--chain-stack-traces',
+        ]);
+        expect(spec.toPackageTestArgs(supportsColor: true), <String>['--chain-stack-traces']);
+      },
+    );
+
+    testWithoutContext(
+      'TestExecutionSpecification.toPackageTestArgs serializes all filter and execution flags',
+      () {
+        final spec = TestExecutionSpecification(
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          buildInfo: BuildInfo.debug,
+          filter: const TestFilterSpecification(
+            names: <String>['foo.*'],
+            plainNames: <String>['bar'],
+            tags: <String>['smoke'],
+            excludeTags: <String>['slow'],
+            presets: <String>['ci'],
+            runSkipped: true,
+            shardIndex: 1,
+            totalShards: 4,
+          ),
+          reporter: 'expanded',
+          fileReporter: 'json:out.json',
+          timeout: '30s',
+          ignoreTimeouts: true,
+          concurrency: 4,
+          randomSeed: '42',
+          failFast: true,
+        );
+
+        expect(spec.toPackageTestArgs(supportsColor: false, pauseAfterLoad: true), <String>[
+          '--no-color',
+          '--pause-after-load',
+          '-r',
+          'expanded',
+          '--file-reporter=json:out.json',
+          '--timeout',
+          '30s',
+          '--ignore-timeouts',
+          '--concurrency=4',
+          '--name',
+          'foo.*',
+          '--plain-name',
+          'bar',
+          '--test-randomize-ordering-seed=42',
+          '--tags',
+          'smoke',
+          '--exclude-tags',
+          'slow',
+          '--preset',
+          'ci',
+          '--fail-fast',
+          '--run-skipped',
+          '--total-shards=4',
+          '--shard-index=1',
+          '--chain-stack-traces',
+        ]);
+      },
+    );
+
+    testWithoutContext(
+      'TestExecutionSpecification.toPackageTestArgs prefers machine json reporter over reporter',
+      () {
+        final spec = TestExecutionSpecification(
+          debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+          buildInfo: BuildInfo.debug,
+          machine: true,
+          reporter: 'expanded',
+        );
+
+        expect(spec.toPackageTestArgs(supportsColor: true), <String>[
+          '-r',
+          'json',
+          '--chain-stack-traces',
+        ]);
+      },
+    );
+  });
 }
 
 class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
@@ -1949,68 +2051,28 @@ class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
 
   int exitCode;
   Duration? leastRunTime;
-  bool? lastEnableVmServiceValue;
-  late DebuggingOptions lastDebuggingOptionsValue;
-  String? lastFileReporterValue;
-  String? lastReporterOption;
-  int? lastConcurrency;
-  TestWatcher? lastTestWatcher;
+  TestExecutionSpecification? lastExecutionSpec;
+  bool? get lastEnableVmServiceValue => lastExecutionSpec?.enableVmService;
+  DebuggingOptions get lastDebuggingOptionsValue => lastExecutionSpec!.debuggingOptions;
+  String? get lastFileReporterValue => lastExecutionSpec?.fileReporter;
+  int? get lastConcurrency => lastExecutionSpec?.concurrency;
+  TestWatcher? get lastTestWatcher => lastExecutionSpec?.watcher;
   FakeVmServiceHost? fakeVmServiceHost;
-  List<String> lastNames = const <String>[];
-  List<String> lastPlainNames = const <String>[];
+  List<String> get lastNames => lastExecutionSpec?.filter.names ?? const <String>[];
 
   @override
   Future<int> runTests(
     TestWrapper testWrapper,
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    List<String> tags = const <String>[],
-    List<String> excludeTags = const <String>[],
-    List<String> presets = const <String>[],
-    bool enableVmService = false,
-    bool ipv6 = false,
-    bool machine = false,
-    String? precompiledDillPath,
-    Map<String, String>? precompiledDillFiles,
-    bool updateGoldens = false,
-    TestWatcher? watcher,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    Directory? coverageDirectory,
-    bool web = false,
-    bool useWasm = false,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool ignoreTimeouts = false,
-    bool failFast = false,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    Device? integrationTestDevice,
-    String? integrationTestUserIdentifier,
-    TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    BuildInfo? buildInfo,
-  }) async {
-    lastEnableVmServiceValue = enableVmService;
-    lastDebuggingOptionsValue = debuggingOptions;
-    lastFileReporterValue = fileReporter;
-    lastReporterOption = reporter;
-    lastConcurrency = concurrency;
-    lastTestWatcher = watcher;
-    lastNames = names;
-    lastPlainNames = plainNames;
+    List<Uri> testFiles,
+    TestExecutionSpecification spec,
+  ) async {
+    lastExecutionSpec = spec;
 
     if (leastRunTime != null) {
       await Future<void>.delayed(leastRunTime!);
     }
 
+    final TestWatcher? watcher = spec.watcher;
     if (watcher is CoverageCollector) {
       await watcher.collectCoverage(
         TestTestDevice(),
@@ -2022,32 +2084,7 @@ class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
   }
 
   @override
-  Never runTestsBySpawningLightweightEngines(
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    List<String> tags = const <String>[],
-    List<String> excludeTags = const <String>[],
-    List<String> presets = const <String>[],
-    bool machine = false,
-    bool updateGoldens = false,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool ignoreTimeouts = false,
-    bool failFast = false,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    TestTimeRecorder? testTimeRecorder,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  }) {
+  Never runTestsBySpawningLightweightEngines(List<Uri> testFiles, TestExecutionSpecification spec) {
     throw UnimplementedError();
   }
 }
