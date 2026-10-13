@@ -253,17 +253,10 @@ List<FlutterCommand> generateCommands({
     verboseHelp: verboseHelp,
   ),
   BuildCommand(
-    androidBuilder: AndroidGradleBuilder(
+    androidBuilder: AndroidGradleBuilder.fromContexts(
       analytics: toolDependencies.analytics,
-      androidStudio: toolDependencies.androidContext.androidStudio,
-      artifacts: toolDependencies.toolContext.artifacts,
-      fileSystem: toolDependencies.toolContext.fs,
-      gradleUtils: toolDependencies.androidContext.gradleUtils,
-      java: toolDependencies.androidContext.java,
-      logger: toolDependencies.toolContext.logger,
-      platform: toolDependencies.toolContext.platform,
-      processManager: toolDependencies.toolContext.processManager,
-      androidSdk: toolDependencies.androidContext.androidSdk,
+      androidContext: toolDependencies.androidContext,
+      toolContext: toolDependencies.toolContext,
     ),
     androidContext: toolDependencies.androidContext,
     appleContext: toolDependencies.appleContext,
