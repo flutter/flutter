@@ -939,6 +939,191 @@ TEST_F(EmbedderTest, PlatformMessageCallbackRunsOnSendingThreadsWhenRequested) {
 }
 
 //------------------------------------------------------------------------------
+/// The payload of a received message stays readable after the response is
+/// sent once the embedder takes it with FlutterPlatformMessageTakePayload,
+/// until the embedder calls its destruction callback. A message without data
+/// has a null payload and a zero-length message has a non-null one.
+///
+TEST_F(EmbedderTest, ReceivedPlatformMessagePayloadsCanOutliveTheResponse) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+
+  struct ReceivedMessage {
+    bool message_was_null = false;
+    size_t message_size = 0;
+    FlutterEngineResult take_result = kInternalInconsistency;
+    FlutterEngineResult second_take_result = kSuccess;
+    FlutterPlatformMessagePayload payload = {};
+    std::string payload_after_response;
+  };
+  // Written on the platform thread, read after `bytes_message_handled`.
+  std::map<std::string, ReceivedMessage> received;
+  fml::AutoResetWaitableEvent bytes_message_handled;
+  fml::AutoResetWaitableEvent bytes_reply_seen;
+  std::string bytes_reply;
+
+  context.AddFfiNativeCallback(
+      "SignalNativeMessage",
+      CREATE_FFI_LAMBDA(([&](Dart_Handle message_handle) {
+        bytes_reply =
+            tonic::DartConverter<std::string>::FromDart(message_handle);
+        bytes_reply_seen.Signal();
+      })));
+
+  fml::Thread platform_thread("test_platform_thread");
+  UniqueEngine engine;
+  platform_thread.GetTaskRunner()->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    builder.SetSurface(DlISize(1, 1));
+    builder.SetDartEntrypoint("platform_messages_with_null_empty_and_bytes");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          const std::string channel = message->channel;
+          if (channel != "null" && channel != "empty" && channel != "bytes") {
+            FlutterEngineSendPlatformMessageResponse(
+                engine.get(), message->response_handle, nullptr, 0);
+            return;
+          }
+          ReceivedMessage& entry = received[channel];
+          entry.message_was_null = message->message == nullptr;
+          entry.message_size = message->message_size;
+          entry.take_result = FlutterPlatformMessageTakePayload(
+              engine.get(), message->response_handle, &entry.payload);
+          FlutterPlatformMessagePayload second_payload = {};
+          entry.second_take_result = FlutterPlatformMessageTakePayload(
+              engine.get(), message->response_handle, &second_payload);
+          EXPECT_EQ(entry.payload.data, message->message);
+
+          const std::string reply = "reply to " + channel;
+          FlutterEngineSendPlatformMessageResponse(
+              engine.get(), message->response_handle,
+              reinterpret_cast<const uint8_t*>(reply.data()), reply.size());
+
+          // The response freed the handle, but not the payload.
+          if (entry.payload.data != nullptr) {
+            entry.payload_after_response.assign(
+                reinterpret_cast<const char*>(entry.payload.data),
+                entry.payload.data_size);
+          }
+          if (channel == "bytes") {
+            bytes_message_handled.Signal();
+          }
+        });
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+  bytes_message_handled.Wait();
+  bytes_reply_seen.Wait();
+
+  EXPECT_EQ(bytes_reply, "reply to bytes");
+  for (const char* channel : {"null", "empty", "bytes"}) {
+    SCOPED_TRACE(channel);
+    ASSERT_EQ(received.count(channel), 1u);
+    const ReceivedMessage& entry = received[channel];
+    EXPECT_EQ(entry.take_result, kSuccess);
+    EXPECT_EQ(entry.second_take_result, kInvalidArguments);
+    EXPECT_EQ(entry.payload.struct_size, sizeof(FlutterPlatformMessagePayload));
+  }
+
+  const ReceivedMessage& null_message = received["null"];
+  EXPECT_TRUE(null_message.message_was_null);
+  EXPECT_EQ(null_message.payload.data, nullptr);
+  EXPECT_EQ(null_message.payload.data_size, 0u);
+  EXPECT_EQ(null_message.payload.destruction_callback, nullptr);
+
+  const ReceivedMessage& empty_message = received["empty"];
+  EXPECT_FALSE(empty_message.message_was_null);
+  EXPECT_EQ(empty_message.message_size, 0u);
+  EXPECT_NE(empty_message.payload.data, nullptr);
+  EXPECT_EQ(empty_message.payload.data_size, 0u);
+
+  const ReceivedMessage& bytes_message = received["bytes"];
+  EXPECT_EQ(bytes_message.message_size, 3u);
+  EXPECT_EQ(bytes_message.payload_after_response, "abc");
+
+  for (auto& [channel, entry] : received) {
+    if (entry.payload.destruction_callback != nullptr) {
+      entry.payload.destruction_callback(entry.payload.user_data);
+    }
+  }
+
+  // The engine was created on its own thread, so it must be destroyed there.
+  fml::AutoResetWaitableEvent kill_latch;
+  platform_thread.GetTaskRunner()->PostTask([&] {
+    engine.reset();
+    kill_latch.Signal();
+  });
+  kill_latch.Wait();
+}
+
+//------------------------------------------------------------------------------
+/// FlutterPlatformMessageTakePayload rejects null arguments.
+///
+TEST_F(EmbedderTest, PlatformMessageTakePayloadRejectsNullArguments) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  FlutterPlatformMessageResponseHandle* handle = nullptr;
+  ASSERT_EQ(
+      FlutterPlatformMessageCreateResponseHandle(
+          engine.get(), [](const uint8_t*, size_t, void*) {}, nullptr, &handle),
+      kSuccess);
+  FlutterPlatformMessagePayload payload = {};
+
+  EXPECT_EQ(FlutterPlatformMessageTakePayload(nullptr, handle, &payload),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterPlatformMessageTakePayload(engine.get(), nullptr, &payload),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterPlatformMessageTakePayload(engine.get(), handle, nullptr),
+            kInvalidArguments);
+
+  EXPECT_EQ(FlutterPlatformMessageReleaseResponseHandle(engine.get(), handle),
+            kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// A received response handle can be released without responding, for
+/// example while the embedder shuts down. The Dart side then never gets a
+/// reply, and the engine shuts down normally.
+///
+TEST_F(EmbedderTest, ReceivedResponseHandleCanBeReleasedWithoutResponding) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  fml::AutoResetWaitableEvent bytes_message_released;
+  fml::Thread platform_thread("test_platform_thread");
+  UniqueEngine engine;
+  platform_thread.GetTaskRunner()->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    builder.SetSurface(DlISize(1, 1));
+    builder.SetDartEntrypoint("platform_messages_with_null_empty_and_bytes");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          // Releasing the handle frees the message, channel included.
+          const std::string channel = message->channel;
+          EXPECT_EQ(FlutterPlatformMessageReleaseResponseHandle(
+                        engine.get(),
+                        const_cast<FlutterPlatformMessageResponseHandle*>(
+                            message->response_handle)),
+                    kSuccess);
+          if (channel == "bytes") {
+            bytes_message_released.Signal();
+          }
+        });
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+  bytes_message_released.Wait();
+
+  // The engine was created on its own thread, so it must be destroyed there.
+  fml::AutoResetWaitableEvent kill_latch;
+  platform_thread.GetTaskRunner()->PostTask([&] {
+    engine.reset();
+    kill_latch.Signal();
+  });
+  kill_latch.Wait();
+}
+
+//------------------------------------------------------------------------------
 /// Tests that a null platform message cannot be send if the message_size
 /// isn't equals to 0.
 ///

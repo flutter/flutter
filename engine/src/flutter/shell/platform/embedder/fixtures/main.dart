@@ -488,6 +488,27 @@ void _sendPlatformMessageFromBackgroundIsolate(List<Object> args) {
   done.send(null);
 }
 
+/// Sends a message without data on channel 'null', a zero-length message on
+/// channel 'empty', and 'abc' on channel 'bytes'. The reply to 'bytes' is
+/// reported with signalNativeMessage.
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
+void platform_messages_with_null_empty_and_bytes() {
+  PlatformDispatcher.instance.sendPlatformMessage('null', null, null);
+  PlatformDispatcher.instance.sendPlatformMessage('empty', ByteData(0), null);
+  PlatformDispatcher.instance.sendPlatformMessage(
+    'bytes',
+    ByteData.sublistView(Uint8List.fromList(utf8.encode('abc'))),
+    (ByteData? reply) {
+      signalNativeMessage(
+        reply == null
+            ? 'null reply'
+            : utf8.decode(reply.buffer.asUint8List(reply.offsetInBytes, reply.lengthInBytes)),
+      );
+    },
+  );
+}
+
 Picture createSimplePicture() {
   final blackPaint = Paint();
   final whitePaint = Paint()..color = const Color.fromARGB(255, 255, 255, 255);

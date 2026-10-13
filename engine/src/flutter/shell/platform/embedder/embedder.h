@@ -1649,6 +1649,10 @@ typedef struct {
   /// The size of this struct. Must be sizeof(FlutterPlatformMessage).
   size_t struct_size;
   const char* channel;
+  /// The payload. In a message that the engine passes to
+  /// `platform_message_callback`, this is null if and only if the Dart side
+  /// sent no data; a zero-length payload is non-null, with a `message_size`
+  /// of 0.
   const uint8_t* message;
   size_t message_size;
   /// The response handle on which to invoke
@@ -1656,13 +1660,37 @@ typedef struct {
   /// `FlutterEngineSendPlatformMessageResponse` must be called for all messages
   /// received by the embedder. Failure to call
   /// `FlutterEngineSendPlatformMessageResponse` will cause a memory leak. It is
-  /// not safe to send multiple responses on a single response object.
+  /// not safe to send multiple responses on a single response object. A
+  /// received handle that will never be answered, for example because the
+  /// embedder is shutting down, can be collected with
+  /// `FlutterPlatformMessageReleaseResponseHandle` instead; the Dart side then
+  /// never receives a reply.
   const FlutterPlatformMessageResponseHandle* response_handle;
 } FlutterPlatformMessage;
 
 typedef void (*FlutterPlatformMessageCallback)(
     const FlutterPlatformMessage* /* message*/,
     void* /* user data */);
+
+/// The payload of a received platform message, moved out of its response
+/// handle with `FlutterPlatformMessageTakePayload` so that it outlives the
+/// response.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterPlatformMessagePayload).
+  size_t struct_size;
+  /// The payload. Null if and only if the message had no payload; a
+  /// zero-length payload is non-null, with a `data_size` of 0.
+  const uint8_t* data;
+  /// The number of bytes in `data`.
+  size_t data_size;
+  /// The baton to pass to `destruction_callback`.
+  void* user_data;
+  /// Releases `data`. Null if `data` is null. Otherwise the embedder must call
+  /// it exactly once, on any thread, when it no longer reads `data`. It may be
+  /// called before or after the response is sent, and after
+  /// `FlutterEngineShutdown`.
+  VoidCallback destruction_callback;
+} FlutterPlatformMessagePayload;
 
 typedef void (*FlutterDataCallback)(const uint8_t* /* data */,
                                     size_t /* size */,
@@ -4047,6 +4075,33 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
     size_t data_length);
 
 //------------------------------------------------------------------------------
+/// @brief      Moves the payload of a message that the engine passed to
+///             `platform_message_callback` out of its response handle, so that
+///             the payload stays valid after the response is sent. Without
+///             this call the payload is freed with the handle when the
+///             response is sent or the handle is released.
+///
+///             Call it at most once per handle, before the response is sent
+///             or the handle is released. `payload_out->data` is the
+///             `message` pointer that the callback received, and it stays
+///             valid until the embedder calls
+///             `payload_out->destruction_callback`.
+///
+/// @param[in]  engine       A running engine instance.
+/// @param[in]  handle       The response handle of a received message.
+/// @param[out] payload_out  Receives the payload, which the embedder then
+///                          owns.
+///
+/// @return     The result of the call. `kInvalidArguments` if an argument is
+///             null or the payload of `handle` was already taken.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterPlatformMessageTakePayload(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterPlatformMessageResponseHandle* handle,
+    FlutterPlatformMessagePayload* payload_out);
+
+//------------------------------------------------------------------------------
 /// @brief      This API is only meant to be used by platforms that need to
 ///             flush tasks on a message loop not controlled by the Flutter
 ///             engine.
@@ -4941,6 +4996,10 @@ typedef FlutterEngineResult (*FlutterEngineDeregisterVMServiceUriCallbackFnPtr)(
 typedef FlutterEngineResult (*FlutterEngineLaunchEngineFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterEngineRunConfiguration* config);
+typedef FlutterEngineResult (*FlutterEnginePlatformMessageTakePayloadFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterPlatformMessageResponseHandle* handle,
+    FlutterPlatformMessagePayload* payload_out);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -5009,6 +5068,7 @@ typedef struct {
   FlutterEngineDeregisterVMServiceUriCallbackFnPtr
       DeregisterVMServiceUriCallback;
   FlutterEngineLaunchEngineFnPtr LaunchEngine;
+  FlutterEnginePlatformMessageTakePayloadFnPtr PlatformMessageTakePayload;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

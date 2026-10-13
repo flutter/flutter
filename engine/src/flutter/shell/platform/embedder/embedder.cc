@@ -1812,7 +1812,28 @@ MakeViewportMetricsFromWindowMetrics(
 
 struct _FlutterPlatformMessageResponseHandle {
   std::unique_ptr<flutter::PlatformMessage> message;
+  // Set once FlutterPlatformMessageTakePayload has moved the payload out.
+  // Mutable because embedders only ever hold const handles.
+  mutable bool payload_taken = false;
 };
+
+namespace {
+
+// Stands in for the payload of a received zero-length message where malloc(0)
+// returned null, so that a zero-length payload is never null.
+constexpr uint8_t kEmptyPayloadByte = 0;
+
+// The payload pointer that embedders see for a received message: null if and
+// only if the Dart side sent no data.
+const uint8_t* ReceivedPayloadData(flutter::PlatformMessage& message) {
+  if (!message.hasData()) {
+    return nullptr;
+  }
+  const uint8_t* data = message.data().GetMapping();
+  return data != nullptr ? data : &kEmptyPayloadByte;
+}
+
+}  // namespace
 
 struct LoadedElfDeleter {
   void operator()(Dart_LoadedElf* elf) {
@@ -2211,7 +2232,7 @@ PlatformDispatchTableFromProjectArgs(const FlutterProjectArgs* args,
           const FlutterPlatformMessage incoming_message = {
               sizeof(FlutterPlatformMessage),  // struct_size
               message->channel().c_str(),      // channel
-              message->data().GetMapping(),    // message
+              ReceivedPayloadData(*message),   // message
               message->data().GetSize(),       // message_size
               handle,                          // response_handle
           };
@@ -3465,6 +3486,47 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
   return kSuccess;
 }
 
+// Note: This can execute on any thread.
+FlutterEngineResult FlutterPlatformMessageTakePayload(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterPlatformMessageResponseHandle* handle,
+    FlutterPlatformMessagePayload* payload_out) {
+  if (engine == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+  if (handle == nullptr || handle->message == nullptr ||
+      payload_out == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The response handle or the payload was null.");
+  }
+  if (handle->payload_taken) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The payload of this response handle was "
+                              "already taken.");
+  }
+  handle->payload_taken = true;
+
+  flutter::PlatformMessage& message = *handle->message;
+  // Read before releaseData() empties the message.
+  const uint8_t* data = ReceivedPayloadData(message);
+  fml::MallocMapping mapping = message.releaseData();
+  const size_t data_size = mapping.GetSize();
+  // The engine allocated the payload with malloc, and the caller now owns it.
+  uint8_t* allocation = mapping.Release();
+
+  *payload_out = {};
+  payload_out->struct_size = sizeof(FlutterPlatformMessagePayload);
+  payload_out->data = data;
+  payload_out->data_size = data_size;
+  if (data != nullptr) {
+    payload_out->user_data = allocation;
+    payload_out->destruction_callback = [](void* user_data) {
+      free(user_data);
+    };
+  }
+  return kSuccess;
+}
+
 FlutterEngineResult __FlutterEngineFlushPendingTasksNow() {
   fml::MessageLoop::GetCurrent().RunExpiredTasksNow();
   return kSuccess;
@@ -4642,6 +4704,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(DeregisterVMServiceUriCallback,
            FlutterEngineDeregisterVMServiceUriCallback);
   SET_PROC(LaunchEngine, FlutterEngineLaunchEngine);
+  SET_PROC(PlatformMessageTakePayload, FlutterPlatformMessageTakePayload);
 #undef SET_PROC
 
   return kSuccess;
