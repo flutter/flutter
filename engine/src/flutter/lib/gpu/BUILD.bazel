@@ -48,7 +48,17 @@ cc_library(
         # for Flutter application developers, so it should be explicitly handled
         # via SafeNarrow.
         "-Wimplicit-float-conversion",
-    ] + FLUTTER_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/impeller
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+        "-Wno-deprecated-copy",  # from //flutter/impeller
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller
+        "-Wno-nullability-completeness",  # from //flutter/impeller
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller
+        "-Wno-suggest-override",  # from //flutter/impeller
+        "-Wno-unused-private-field",  # from //flutter/impeller
+        "-Wno-unused-variable",  # from //flutter/impeller
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",

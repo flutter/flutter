@@ -41,7 +41,17 @@ cc_library(
     name = "flutter_skia_vma",
     srcs = ["flutter_skia_vma.cc"],
     hdrs = ["flutter_skia_vma.h"],
-    copts = FLUTTER_COPTS,
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from :flutter_vma
+        "-Wno-c++98-compat-extra-semi",  # from :flutter_vma
+        "-Wno-deprecated-copy",  # from :flutter_vma
+        "-Wno-implicit-fallthrough",  # from :flutter_vma
+        "-Wno-nullability-completeness",  # from :flutter_vma
+        "-Wno-suggest-destructor-override",  # from :flutter_vma
+        "-Wno-suggest-override",  # from :flutter_vma
+        "-Wno-unused-private-field",  # from :flutter_vma
+        "-Wno-unused-variable",  # from :flutter_vma
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":flutter_vma",

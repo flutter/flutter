@@ -2346,6 +2346,97 @@ config("unused") {
       );
     });
 
+    test('hands the flags on along public_deps chains', () async {
+      // flutter_vma: GN applies vulkan_memory_allocator's suppressions to
+      // whoever depends on flutter_vma, since it lists the allocator in
+      // public_deps; flutter_vma is in the table for that.
+      final String vma = await convert('''
+source_set("flutter_vma") {
+  sources = [ "flutter_vma.cc" ]
+  public_deps = [
+    "//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers",
+    "//flutter/third_party/vulkan_memory_allocator",
+  ]
+  public_configs = [ "//flutter:config" ]
+}
+''', gnPackage: '//flutter/flutter_vma');
+      expect(
+        vma,
+        contains('''
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/third_party/vulkan_memory_allocator
+'''),
+      );
+      // A dependent, directly or through another public dependency.
+      final String user = await convert('''
+source_set("vulkan") {
+  sources = [ "vulkan.cc" ]
+  deps = [ "//flutter/flutter_vma" ]
+}
+''');
+      expect(
+        user,
+        contains('''
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flutter_vma
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma
+'''),
+      );
+
+      // A target or group whose public_deps hand flags on must be in the
+      // table itself, like one whose own public config carries them.
+      await expectLater(
+        convert('''
+source_set("x") {
+  sources = [ "x.cc" ]
+  public_deps = [ "//flutter/third_party/wuffs" ]
+}
+'''),
+        throwsGnError(
+          line: 1,
+          message:
+              'the public configs and public_deps of //flutter/example:x hand compiler flags '
+              '[-Wno-unused-function, -Wno-c++11-narrowing] to its dependents',
+        ),
+      );
+      await expectLater(
+        convert('''
+group("g") {
+  public_deps = [ "//flutter/third_party/wuffs" ]
+}
+'''),
+        throwsGnError(line: 1, message: 'list them under //flutter/example:g in propagatedCopts'),
+      );
+      // A private dependency hands nothing on.
+      expect(
+        await convert('''
+group("g") {
+  deps = [ "//flutter/third_party/wuffs" ]
+}
+'''),
+        contains('deps = ["@wuffs"]'),
+      );
+      // The table knows no conditions.
+      await expectLater(
+        convert('''
+source_set("y") {
+  sources = [ "y.cc" ]
+  public_deps = []
+  if (flutter_runtime_mode == "release") {
+    public_deps += [ "//flutter/third_party/wuffs" ]
+  }
+}
+'''),
+        throwsGnError(
+          line: 5,
+          message:
+              'public dependency //flutter/third_party/wuffs hands on compiler flags under '
+              '`flutter_runtime_mode == "release"`, which propagatedCopts cannot say',
+        ),
+      );
+    });
+
     test('secondary source root: a BUILD.gn stands in for another directory', () {
       // wuffs: its BUILD.gn lives in //flutter/build/secondary.
       final GnSourceTree tree = sourceTree(<String, String>{
