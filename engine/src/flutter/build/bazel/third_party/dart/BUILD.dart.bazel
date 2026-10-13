@@ -33,6 +33,22 @@ cc_library(
     ],
 )
 
+# runtime/BUILD.gn's config("dart_config"), which the engine's dart:io glue
+# (//flutter/lib/io) lists privately: the defines it resolves to under every
+# host configuration tools/gn writes (dart_debug is false unless --dart-debug
+# is given; SUPPORT_PERFETTO and EXPERIMENTAL_VM_SERVICE are the Dart
+# arguments' defaults). Its compiler flags cannot ride a dependency; the
+# converter inlines them from its mapping (ConfigDependency.copts).
+cc_library(
+    name = "dart_config",
+    defines = [
+        "NDEBUG",
+        "SUPPORT_PERFETTO",
+        "EXPERIMENTAL_VM_SERVICE",
+    ],
+    deps = [":dart_api_headers"],
+)
+
 # The embedder-side headers of runtime/bin that the engine includes
 # (elf_loader.h, io_natives.h, platform.h), with the bin/ and platform/
 # headers they include among themselves relative to runtime/ (hence

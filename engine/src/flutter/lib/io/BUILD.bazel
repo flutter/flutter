@@ -1,0 +1,43 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/lib/io/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "io",
+    srcs = ["dart_io.cc"],
+    hdrs = ["dart_io.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-unused-parameter",  # from //flutter/third_party/dart/runtime:dart_config
+        "-Wno-unused-private-field",  # from //flutter/third_party/dart/runtime:dart_config
+        "-Wnon-virtual-dtor",  # from //flutter/third_party/dart/runtime:dart_config
+        "-Wvla",  # from //flutter/third_party/dart/runtime:dart_config
+        "-Woverloaded-virtual",  # from //flutter/third_party/dart/runtime:dart_config
+        "-Wno-comments",  # from //flutter/third_party/dart/runtime:dart_config
+        "-g3",  # from //flutter/third_party/dart/runtime:dart_config
+        "-ggdb3",  # from //flutter/third_party/dart/runtime:dart_config
+        "-fno-rtti",  # from //flutter/third_party/dart/runtime:dart_config
+        "-fno-exceptions",  # from //flutter/third_party/dart/runtime:dart_config
+        "-Wnewline-eof",  # from //flutter/third_party/dart/runtime:dart_config
+        "-Wimplicit-fallthrough",  # from //flutter/third_party/dart/runtime:dart_config
+        "-fno-strict-vtable-pointers",  # from //flutter/third_party/dart/runtime:dart_config
+        "-O2",  # from //flutter/third_party/dart/runtime:dart_config
+    ],
+    implementation_deps = ["@dart//:dart_config"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/third_party/tonic",
+        "@dart//:dart_api_headers",
+    ],
+    alwayslink = True,
+)

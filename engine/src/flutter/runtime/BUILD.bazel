@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/runtime/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: libdart, runtime, runtime_fixtures, runtime_unittests, no_plugin_registrant, no_dart_plugin_registrant_unittests, plugin_registrant, dart_plugin_registrant_unittests.
+# Not converted: libdart, runtime_fixtures, runtime_unittests, no_plugin_registrant, no_dart_plugin_registrant_unittests, plugin_registrant, dart_plugin_registrant_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
@@ -41,6 +41,74 @@ cc_library(
         "//engine/src/flutter/fml",
         "//engine/src/flutter/third_party/tonic",
         "@dart//:dart_api_headers",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "runtime",
+    srcs = [
+        "dart_isolate.cc",
+        "dart_isolate_group_data.cc",
+        "dart_service_isolate.cc",
+        "dart_snapshot.cc",
+        "dart_timestamp_provider.cc",
+        "dart_vm.cc",
+        "dart_vm_data.cc",
+        "dart_vm_initializer.cc",
+        "dart_vm_lifecycle.cc",
+        "embedder_resources.cc",
+        "isolate_configuration.cc",
+        "platform_data.cc",
+        "platform_isolate_manager.cc",
+        "runtime_controller.cc",
+        "runtime_delegate.cc",
+        "service_protocol.cc",
+        "skia_concurrent_executor.cc",
+    ],
+    hdrs = [
+        "dart_isolate.h",
+        "dart_isolate_group_data.h",
+        "dart_service_isolate.h",
+        "dart_snapshot.h",
+        "dart_timestamp_provider.h",
+        "dart_vm.h",
+        "dart_vm_data.h",
+        "dart_vm_initializer.h",
+        "dart_vm_lifecycle.h",
+        "embedder_resources.h",
+        "isolate_configuration.h",
+        "platform_data.h",
+        "platform_isolate_manager.h",
+        "ptrace_check.h",
+        "runtime_controller.h",
+        "runtime_delegate.h",
+        "service_protocol.h",
+        "skia_concurrent_executor.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":dart_plugin_registrant",
+        ":test_font",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
+        "//engine/src/flutter/build/bazel/dart_wrap:native_assets_api",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/gpu",
+        "//engine/src/flutter/lib/io",
+        "//engine/src/flutter/lib/snapshot:snapshot_headers",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/shell/common:display",
+        "//engine/src/flutter/third_party/tonic",
+        "//engine/src/flutter/txt",
+        "@dart//:dart_api_headers",
+        "@rapidjson",
+        "@skia",
     ],
     alwayslink = True,
 )
