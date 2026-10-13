@@ -1815,6 +1815,53 @@ typedef struct {
   int32_t heading_level;
 } FlutterSemanticsNode;
 
+/// The role of a semantics node. It mirrors `SemanticsRole` in `dart:ui`, and
+/// new values are appended as the framework adds roles.
+typedef enum {
+  kFlutterSemanticsRoleNone = 0,
+  kFlutterSemanticsRoleTab = 1,
+  kFlutterSemanticsRoleTabBar = 2,
+  kFlutterSemanticsRoleTabPanel = 3,
+  kFlutterSemanticsRoleDialog = 4,
+  kFlutterSemanticsRoleAlertDialog = 5,
+  kFlutterSemanticsRoleTable = 6,
+  kFlutterSemanticsRoleCell = 7,
+  kFlutterSemanticsRoleRow = 8,
+  kFlutterSemanticsRoleColumnHeader = 9,
+  kFlutterSemanticsRoleDragHandle = 10,
+  kFlutterSemanticsRoleSpinButton = 11,
+  kFlutterSemanticsRoleComboBox = 12,
+  kFlutterSemanticsRoleMenuBar = 13,
+  kFlutterSemanticsRoleMenu = 14,
+  kFlutterSemanticsRoleMenuItem = 15,
+  kFlutterSemanticsRoleMenuItemCheckbox = 16,
+  kFlutterSemanticsRoleMenuItemRadio = 17,
+  kFlutterSemanticsRoleList = 18,
+  kFlutterSemanticsRoleListItem = 19,
+  kFlutterSemanticsRoleForm = 20,
+  kFlutterSemanticsRoleTooltip = 21,
+  kFlutterSemanticsRoleLoadingSpinner = 22,
+  kFlutterSemanticsRoleProgressBar = 23,
+  kFlutterSemanticsRoleHotKey = 24,
+  kFlutterSemanticsRoleRadioGroup = 25,
+  kFlutterSemanticsRoleStatus = 26,
+  kFlutterSemanticsRoleAlert = 27,
+  kFlutterSemanticsRoleComplementary = 28,
+  kFlutterSemanticsRoleContentInfo = 29,
+  kFlutterSemanticsRoleMain = 30,
+  kFlutterSemanticsRoleNavigation = 31,
+  kFlutterSemanticsRoleRegion = 32,
+  kFlutterSemanticsRoleSlider = 33,
+} FlutterSemanticsRole;
+
+/// A 4x4 transformation matrix in column-major order: the element in row `r`
+/// and column `c` is `m[c * 4 + r]`.
+///
+/// Frozen, because structs hold it by value.
+typedef struct {
+  double m[16];
+} FlutterTransformation4x4;
+
 /// A node in the Flutter semantics tree.
 ///
 /// The semantics tree is maintained during the semantics phase of the pipeline
@@ -1929,6 +1976,38 @@ typedef struct {
   /// This is usually used for UI testing with tools that work by querying the
   /// native accessibility, like UI Automator, XCUITest, or Appium.
   const char* identifier;
+  /// The maximum number of characters the node's value may have, for example
+  /// the maximum length of a text field, or -1 if there is no limit.
+  int32_t max_value_length;
+  /// How many characters of `max_value_length` the value uses, or -1 if
+  /// `max_value_length` is -1.
+  int32_t current_value_length;
+  /// The id of the node that is this node's parent for accessibility
+  /// traversal when that differs from its parent in the tree, or -1 if there
+  /// is none.
+  int32_t traversal_parent;
+  /// The role of this node.
+  FlutterSemanticsRole role;
+  /// The URL this node links to, or an empty string if it is not a link.
+  const char* link_url;
+  /// The language of this node's content as a BCP 47 language tag, or an
+  /// empty string if it is the application's locale.
+  const char* locale;
+  /// The minimum of the node's value range as text, for example the minimum
+  /// of a slider, or an empty string.
+  const char* min_value;
+  /// The maximum of the node's value range as text, or an empty string.
+  const char* max_value;
+  /// The transform from this node's coordinate system to its parent's
+  /// coordinate system as a full 4x4 matrix. `transform` holds only the part
+  /// a 3x3 matrix can represent.
+  FlutterTransformation4x4 transform_4x4;
+  /// The transform used to hit test this node, from its coordinate system to
+  /// the coordinate system of its parent in hit test order.
+  FlutterTransformation4x4 hit_test_transform;
+  /// The length of `children_in_hit_test_order`. It can differ from
+  /// `child_count`, the length of `children_in_traversal_order`.
+  size_t hit_test_child_count;
 } FlutterSemanticsNode2;
 
 /// `FlutterSemanticsCustomAction` ID used as a sentinel to signal the end of a

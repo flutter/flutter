@@ -60,6 +60,62 @@ std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
   });
 }
 
+// The number of elements of a 4x4 matrix.
+constexpr size_t kMatrix4ElementCount = 16;
+
+// Copies all 16 elements, in the column-major order of
+// FlutterTransformation4x4.
+FlutterTransformation4x4 ToFlutterTransformation4x4(const SkM44& matrix) {
+  SkScalar column_major[kMatrix4ElementCount];
+  matrix.getColMajor(column_major);
+  FlutterTransformation4x4 result;
+  for (size_t i = 0; i < kMatrix4ElementCount; ++i) {
+    result.m[i] = column_major[i];
+  }
+  return result;
+}
+
+// FlutterSemanticsRole mirrors flutter::SemanticsRole value for value, so
+// AddNode converts between them with a cast.
+#define ASSERT_SAME_ROLE(name)                                       \
+  static_assert(static_cast<int32_t>(kFlutterSemanticsRole##name) == \
+                static_cast<int32_t>(flutter::SemanticsRole::k##name))
+ASSERT_SAME_ROLE(None);
+ASSERT_SAME_ROLE(Tab);
+ASSERT_SAME_ROLE(TabBar);
+ASSERT_SAME_ROLE(TabPanel);
+ASSERT_SAME_ROLE(Dialog);
+ASSERT_SAME_ROLE(AlertDialog);
+ASSERT_SAME_ROLE(Table);
+ASSERT_SAME_ROLE(Cell);
+ASSERT_SAME_ROLE(Row);
+ASSERT_SAME_ROLE(ColumnHeader);
+ASSERT_SAME_ROLE(DragHandle);
+ASSERT_SAME_ROLE(SpinButton);
+ASSERT_SAME_ROLE(ComboBox);
+ASSERT_SAME_ROLE(MenuBar);
+ASSERT_SAME_ROLE(Menu);
+ASSERT_SAME_ROLE(MenuItem);
+ASSERT_SAME_ROLE(MenuItemCheckbox);
+ASSERT_SAME_ROLE(MenuItemRadio);
+ASSERT_SAME_ROLE(List);
+ASSERT_SAME_ROLE(ListItem);
+ASSERT_SAME_ROLE(Form);
+ASSERT_SAME_ROLE(Tooltip);
+ASSERT_SAME_ROLE(LoadingSpinner);
+ASSERT_SAME_ROLE(ProgressBar);
+ASSERT_SAME_ROLE(HotKey);
+ASSERT_SAME_ROLE(RadioGroup);
+ASSERT_SAME_ROLE(Status);
+ASSERT_SAME_ROLE(Alert);
+ASSERT_SAME_ROLE(Complementary);
+ASSERT_SAME_ROLE(ContentInfo);
+ASSERT_SAME_ROLE(Main);
+ASSERT_SAME_ROLE(Navigation);
+ASSERT_SAME_ROLE(Region);
+ASSERT_SAME_ROLE(Slider);
+#undef ASSERT_SAME_ROLE
+
 }  // namespace
 
 namespace flutter {
@@ -292,6 +348,10 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       transform.get(SkMatrix::kMScaleY), transform.get(SkMatrix::kMTransY),
       transform.get(SkMatrix::kMPersp0), transform.get(SkMatrix::kMPersp1),
       transform.get(SkMatrix::kMPersp2)};
+  FlutterTransformation4x4 transform_4x4 =
+      ToFlutterTransformation4x4(node.transform);
+  FlutterTransformation4x4 hit_test_transform =
+      ToFlutterTransformation4x4(node.hitTestTransform);
 
   auto label_attributes = CreateStringAttributes(node.labelAttributes);
   auto hint_attributes = CreateStringAttributes(node.hintAttributes);
@@ -345,6 +405,17 @@ void EmbedderSemanticsUpdate2::AddNode(const SemanticsNode& node) {
       flags_.back().get(),
       node.headingLevel,
       node.identifier.c_str(),
+      node.maxValueLength,
+      node.currentValueLength,
+      node.traversalParent,
+      static_cast<FlutterSemanticsRole>(node.role),
+      node.linkUrl.c_str(),
+      node.locale.c_str(),
+      node.minValue.c_str(),
+      node.maxValue.c_str(),
+      transform_4x4,
+      hit_test_transform,
+      node.childrenInHitTestOrder.size(),
   });
 }
 
