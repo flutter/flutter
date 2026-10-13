@@ -84,6 +84,14 @@ final class AndroidNativeDriver implements NativeDriver {
   }
 
   @override
+  Future<bool> get isCrossWindowBlurEnabled async {
+    final Map<String, Object?> result = await _driver.sendCommand(
+      NativeCommand.getIsCrossWindowBlurEnabled,
+    );
+    return result['enabled']! as bool;
+  }
+
+  @override
   Future<void> waitUntilFirstFrameDisplayed() async {
     await _driver.sendCommand(NativeCommand.waitForFirstFrameDisplayed);
   }

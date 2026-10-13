@@ -1467,8 +1467,9 @@ public class FlutterJNI {
   }
 
   /**
-   * PROTOTYPE: backdrop blurs that cover HCPP platform views this frame, as [left, top, right,
-   * bottom, sigma, cornerRadius] per blur in physical pixels.
+   * Forwards this frame's backdrop blurs that cover HCPP platform views, as [left, top, right,
+   * bottom, sigma, cornerRadius] per blur in physical pixels. See {@link
+   * PlatformViewsController2#onBackdropBlurs}.
    */
   @UiThread
   @SuppressWarnings("unused")

@@ -89,9 +89,10 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   //
-  // PROTOTYPE: backdrop blurs that overlap a platform view are forwarded to
-  // the platform as SurfaceFlinger background-blur layers, because the
-  // platform view's pixels are not available to Flutter under HCPP.
+  // Backdrop blurs that overlap a platform view are forwarded to the
+  // platform, which asks SurfaceFlinger to blur behind the Flutter overlay,
+  // because the platform view's pixels are not available to Flutter under
+  // HCPP. See BackdropBlurCarrier.java.
   void PushFilterToVisitedPlatformViews(
       const std::shared_ptr<DlImageFilter>& filter,
       const DlRect& filter_rect) override;
@@ -165,16 +166,16 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The set of platform views that were visible in the last frame.
   absl::flat_hash_set<int64_t> views_visible_last_frame_;
 
-  // PROTOTYPE: backdrop blurs this frame that overlap a platform view, in
+  // Backdrop blurs this frame that overlap a platform view, in
   // device pixels, flattened as [left, top, right, bottom, sigma, corner] per
-  // blur. Sent to the platform to drive SurfaceFlinger blur layers.
+  // blur. Sent to the platform, which asks SurfaceFlinger to blur.
   std::vector<float> backdrop_blurs_;
 
-  // PROTOTYPE: per platform view, the region of its slice that must be drawn
-  // into the overlay (above the native blur layers) instead of the background.
+  // Per platform view, the region of its slice that must be drawn
+  // into the overlay (above the native blur) instead of the background.
   std::unordered_map<int64_t, DlRect> backdrop_overlay_rects_;
 
-  // PROTOTYPE: the most recent clip pushed to visited platform views, used as
+  // The most recent clip pushed to visited platform views, used as
   // a best-effort source for the corner radius of the next backdrop filter.
   // Stored as {width, height, corner radius} in logical pixels.
   std::optional<std::array<DlScalar, 3>> pending_backdrop_clip_;

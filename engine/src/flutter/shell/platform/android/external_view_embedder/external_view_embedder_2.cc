@@ -109,7 +109,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
           for (int64_t view_id : views_visible_last_frame) {
             jni_facade->hidePlatformView2(view_id);
           }
-          // PROTOTYPE: no platform views, so no native backdrop blurs.
+          // No platform views, so no native backdrop blurs.
           jni_facade->onBackdropBlurs2({});
 
           jni_facade->swapTransaction();
@@ -125,11 +125,11 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   }
 
   std::unordered_map<int64_t, DlRect> overlay_layers =
-      SliceViews(frame->Canvas(),          //
-                 composition_order_,       //
-                 slices_,                  //
-                 view_rects,               //
-                 backdrop_overlay_rects_   //
+      SliceViews(frame->Canvas(),         //
+                 composition_order_,      //
+                 slices_,                 //
+                 view_rects,              //
+                 backdrop_overlay_rects_  //
       );
 
   // If there is no overlay Surface, initialize one on the platform thread. This
@@ -232,8 +232,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
           jni_facade->hidePlatformView2(view_id);
         }
 
-        // PROTOTYPE: update the native blur layers in the same platform
-        // transaction as the platform view positions for this frame.
+        // Update the native backdrop blurs in the same platform transaction as
+        // the platform view positions for this frame.
         jni_facade->onBackdropBlurs2(backdrop_blurs);
 
         jni_facade->swapTransaction();

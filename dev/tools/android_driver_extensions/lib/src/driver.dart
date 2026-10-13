@@ -51,6 +51,12 @@ abstract interface class NativeDriver {
   /// Whether the device is an emulator.
   Future<bool> get isEmulator;
 
+  /// Whether SurfaceFlinger cross-window blur is enabled on the device.
+  ///
+  /// Blur can be unsupported by the device (for example most emulators) or
+  /// disabled at runtime (battery saver). Always `false` before Android 12.
+  Future<bool> get isCrossWindowBlurEnabled;
+
   /// Waits until the first frame is displayed on the native surface/view.
   ///
   /// Unlike [FlutterDriver.waitUntilFirstFrameRasterized], which only completes
