@@ -47,16 +47,6 @@ ProcTable::ProcTable() {
   FOR_EACH_ANDROID_PROC(RESOLVE_PROC);
 #undef RESOLVE_PROC
 
-  if (AChoreographer_postFrameCallback64) {
-    AChoreographer_postFrameCallback.Reset();
-  }
-
-#if FML_ARCH_CPU_32_BITS
-  // On 32-bit platforms, the nanosecond resolution timestamp causes overflow on
-  // the argument in the callback. Don't use it on those platforms.
-  AChoreographer_postFrameCallback.Reset();
-#endif  // FML_ARCH_CPU_32_BITS
-
   is_valid_ = true;
 }
 
@@ -64,10 +54,6 @@ ProcTable::~ProcTable() = default;
 
 bool ProcTable::IsValid() const {
   return is_valid_;
-}
-
-bool ProcTable::TraceIsEnabled() const {
-  return this->ATrace_isEnabled ? this->ATrace_isEnabled() : false;
 }
 
 }  // namespace impeller::android

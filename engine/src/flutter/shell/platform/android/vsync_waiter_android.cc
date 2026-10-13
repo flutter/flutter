@@ -14,7 +14,7 @@
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/fml/trace_event.h"
-#include "impeller/toolkit/android/choreographer.h"
+#include "flutter/shell/platform/android/ndk/choreographer.h"
 
 namespace flutter {
 
@@ -93,14 +93,12 @@ void VsyncWaiterAndroid::AwaitVSync(intptr_t baton) {
 }
 
 void VsyncWaiterAndroid::RequestFrame(intptr_t baton) {
-  const static bool use_choreographer =
-      impeller::android::Choreographer::IsAvailableOnPlatform();
+  const static bool use_choreographer = Choreographer::IsAvailableOnPlatform();
   if (use_choreographer) {
     fml::TaskRunner::RunNowOrPostTask(
         task_runners_.GetUITaskRunner(),
         [weak_this = weak_from_this(), baton]() {
-          const auto& choreographer =
-              impeller::android::Choreographer::GetInstance();
+          const auto& choreographer = Choreographer::GetInstance();
           bool posted =
               choreographer.PostFrameCallback([weak_this, baton](auto time) {
                 auto time_ns =

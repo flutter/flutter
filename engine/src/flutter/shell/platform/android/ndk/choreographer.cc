@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/impeller/toolkit/android/choreographer.h"
+#include "flutter/shell/platform/android/ndk/choreographer.h"
 
+#include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/shell/platform/android/ndk/ndk_proc_table.h"
 
-namespace impeller::android {
+namespace flutter {
 
 Choreographer& Choreographer::GetInstance() {
   static thread_local Choreographer tChoreographer;
@@ -21,7 +23,7 @@ Choreographer::Choreographer() {
   // We need a message loop on the current thread for the choreographer to
   // schedule callbacks for us on.
   fml::MessageLoop::EnsureInitializedForCurrentThread();
-  instance_ = GetProcTable().AChoreographer_getInstance();
+  instance_ = GetNDKProcTable().AChoreographer_getInstance();
 }
 
 Choreographer::~Choreographer() = default;
@@ -47,7 +49,7 @@ bool Choreographer::PostFrameCallback(FrameCallback callback) const {
   auto data = std::make_unique<InFlightData>();
   data->callback = std::move(callback);
 
-  const auto& table = GetProcTable();
+  const auto& table = GetNDKProcTable();
   if (table.AChoreographer_postFrameCallback64) {
     table.AChoreographer_postFrameCallback64(
         const_cast<AChoreographer*>(instance_),
@@ -76,9 +78,9 @@ bool Choreographer::PostFrameCallback(FrameCallback callback) const {
 }
 
 bool Choreographer::IsAvailableOnPlatform() {
-  return GetProcTable().AChoreographer_getInstance &&
-         (GetProcTable().AChoreographer_postFrameCallback64 ||
-          GetProcTable().AChoreographer_postFrameCallback);
+  return GetNDKProcTable().AChoreographer_getInstance &&
+         (GetNDKProcTable().AChoreographer_postFrameCallback64 ||
+          GetNDKProcTable().AChoreographer_postFrameCallback);
 }
 
-}  // namespace impeller::android
+}  // namespace flutter

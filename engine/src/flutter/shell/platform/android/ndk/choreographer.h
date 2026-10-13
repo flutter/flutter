@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_IMPELLER_TOOLKIT_ANDROID_CHOREOGRAPHER_H_
-#define FLUTTER_IMPELLER_TOOLKIT_ANDROID_CHOREOGRAPHER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_NDK_CHOREOGRAPHER_H_
+#define FLUTTER_SHELL_PLATFORM_ANDROID_NDK_CHOREOGRAPHER_H_
 
-#include "impeller/toolkit/android/proc_table.h"
+#include <android/choreographer.h>
 
 #include <chrono>
+#include <functional>
 #include <memory>
 
-namespace impeller::android {
+namespace flutter {
 
 //------------------------------------------------------------------------------
 /// @brief      This class describes access to the choreographer instance for
@@ -79,6 +80,6 @@ class Choreographer {
   explicit Choreographer();
 };
 
-}  // namespace impeller::android
+}  // namespace flutter
 
-#endif  // FLUTTER_IMPELLER_TOOLKIT_ANDROID_CHOREOGRAPHER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_NDK_CHOREOGRAPHER_H_

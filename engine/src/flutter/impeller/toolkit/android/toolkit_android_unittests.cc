@@ -4,7 +4,6 @@
 
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/testing/testing.h"
-#include "impeller/toolkit/android/choreographer.h"
 #include "impeller/toolkit/android/hardware_buffer.h"
 #include "impeller/toolkit/android/proc_table.h"
 #include "impeller/toolkit/android/surface_control.h"
@@ -96,40 +95,6 @@ TEST(ToolkitAndroidTest, SurfacControlsAreAvailable) {
     GTEST_SKIP() << "Surface controls are not supported on this platform.";
   }
   ASSERT_TRUE(SurfaceControl::IsAvailableOnPlatform());
-}
-
-TEST(ToolkitAndroidTest, ChoreographerIsAvailable) {
-  if (!Choreographer::IsAvailableOnPlatform()) {
-    GTEST_SKIP() << "Choreographer is not supported on this platform.";
-  }
-  ASSERT_TRUE(Choreographer::IsAvailableOnPlatform());
-}
-
-TEST(ToolkitAndroidTest, CanPostAndNotWaitForFrameCallbacks) {
-  if (!Choreographer::IsAvailableOnPlatform()) {
-    GTEST_SKIP() << "Choreographer is not supported on this platform.";
-  }
-  const auto& choreographer = Choreographer::GetInstance();
-  ASSERT_TRUE(choreographer.IsValid());
-  ASSERT_TRUE(choreographer.PostFrameCallback([](auto) {}));
-}
-
-TEST(ToolkitAndroidTest, CanPostAndWaitForFrameCallbacks) {
-  if (!Choreographer::IsAvailableOnPlatform()) {
-    GTEST_SKIP() << "Choreographer is not supported on this platform.";
-  }
-  if ((true)) {
-    GTEST_SKIP()
-        << "Disabled till the test harness is in an Android activity. "
-           "Running it without one will hang because the choreographer "
-           "frame callback will never execute.";
-  }
-  const auto& choreographer = Choreographer::GetInstance();
-  ASSERT_TRUE(choreographer.IsValid());
-  fml::AutoResetWaitableEvent event;
-  ASSERT_TRUE(choreographer.PostFrameCallback(
-      [&event](auto point) { event.Signal(); }));
-  event.Wait();
 }
 
 }  // namespace impeller::android::testing

@@ -12,7 +12,6 @@
 #include <android/hardware_buffer.h>
 #include <android/hardware_buffer_jni.h>
 #include <android/surface_control.h>
-#include <android/trace.h>
 
 #include <functional>
 
@@ -20,9 +19,6 @@
 #include "flutter/fml/native_library.h"
 
 namespace impeller::android {
-
-ASurfaceTransaction* ASurfaceTransaction_fromJava(JNIEnv* env,
-                                                  jobject transaction);
 
 //------------------------------------------------------------------------------
 /// @brief      The Android procs along with the device API level on which these
@@ -34,17 +30,11 @@ ASurfaceTransaction* ASurfaceTransaction_fromJava(JNIEnv* env,
 ///             at runtime before invoking them.
 ///
 ///             Typically, you'll never have to deal with the proc. table
-///             directly. Instead, rely on the handle wrappers (`Choreographer`,
-///             `HardwareBuffer`, etc..).
+///             directly. Instead, rely on the handle wrappers
+///             (`HardwareBuffer`, `SurfaceControl`, etc..).
 ///
 // clang-format off
 #define FOR_EACH_ANDROID_PROC(INVOKE)                              \
-  INVOKE(AChoreographer_getInstance, 24)                           \
-  _Pragma("GCC diagnostic push")                                   \
-  _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")  \
-  INVOKE(AChoreographer_postFrameCallback, 24)                     \
-  _Pragma("GCC diagnostic pop")                                    \
-  INVOKE(AChoreographer_postFrameCallback64, 29)                   \
   INVOKE(AHardwareBuffer_acquire, 26)                              \
   INVOKE(AHardwareBuffer_allocate, 26)                             \
   INVOKE(AHardwareBuffer_describe, 26)                             \
@@ -68,8 +58,6 @@ ASurfaceTransaction* ASurfaceTransaction_fromJava(JNIEnv* env,
   INVOKE(ASurfaceTransaction_setColor, 29)                         \
   INVOKE(ASurfaceTransaction_setOnComplete, 29)                    \
   INVOKE(ASurfaceTransactionStats_getPreviousReleaseFenceFd, 29)   \
-  INVOKE(ASurfaceTransaction_fromJava, 34)                         \
-  INVOKE(ATrace_isEnabled, 23)                                     \
   INVOKE(eglGetNativeClientBufferANDROID, 0)
 // clang-format on
 
@@ -115,14 +103,6 @@ struct ProcTable {
   /// @return     `true` if valid.
   ///
   bool IsValid() const;
-
-  //----------------------------------------------------------------------------
-  /// @brief      Check if tracing in enabled in the process. This call can be
-  ///             made at any API level.
-  ///
-  /// @return     If tracing is enabled.
-  ///
-  bool TraceIsEnabled() const;
 
 #define DEFINE_PROC(name, api) \
   AndroidProc<decltype(name)> name = {.proc_name = #name};

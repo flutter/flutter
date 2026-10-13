@@ -19,11 +19,11 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/jni_weak_ref.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
-#include "flutter/impeller/toolkit/android/proc_table.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/shell/platform/android/ndk/ndk_proc_table.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -2070,8 +2070,12 @@ ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction() {
   }
   FML_CHECK(fml::jni::CheckException(env));
 
-  return impeller::android::GetProcTable().ASurfaceTransaction_fromJava(
-      env, transaction.obj());
+  const NDKProcTable& ndk = GetNDKProcTable();
+  if (!ndk.ASurfaceTransaction_fromJava) {
+    FML_LOG(ERROR) << "ASurfaceTransaction_fromJava needs API level 34.";
+    return nullptr;
+  }
+  return ndk.ASurfaceTransaction_fromJava(env, transaction.obj());
 }
 
 void PlatformViewAndroidJNIImpl::swapTransaction() {

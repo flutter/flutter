@@ -11,8 +11,6 @@ config("public_android_config") {
 
 impeller_component("android") {
   sources = [
-    "choreographer.cc",
-    "choreographer.h",
     "hardware_buffer.cc",
     "hardware_buffer.h",
     "native_window.cc",
