@@ -629,9 +629,12 @@ final class GnTarget {
 
 /// The result of evaluating one GN file.
 final class GnFileEvaluation {
-  GnFileEvaluation(this.file);
+  GnFileEvaluation(this.file, this.assumptions);
 
   final String file;
+
+  /// The assumptions the file was evaluated under.
+  final Assumptions assumptions;
   final List<String> imports = <String>[];
   final List<GnTarget> targets = <GnTarget>[];
 
@@ -740,6 +743,31 @@ final class Assumptions {
   /// These assumptions with [overrides] added or replaced.
   Assumptions withValues(Map<String, GnValue> overrides) =>
       Assumptions(<String, GnValue>{..._values, ...overrides});
+
+  /// [condition], a formula built outside an evaluation (the mapping
+  /// tables'), with the variables these assumptions fix replaced by their
+  /// values and the result simplified -- what evaluating the same formula
+  /// from GN source would have produced.
+  Condition apply(Condition condition) {
+    switch (condition) {
+      case ConditionConstant():
+        return condition;
+      case ConditionVariable(:final String name):
+        final GnValue? assumed = _values[name];
+        return assumed is GnBoolValue ? ConditionConstant(assumed.value) : condition;
+      case ConditionComparison(:final String name, :final bool equals, :final String value):
+        final GnValue? assumed = _values[name];
+        return assumed is GnStringValue
+            ? ConditionConstant((assumed.value == value) == equals)
+            : condition;
+      case ConditionNot(:final Condition operand):
+        return apply(operand).negated;
+      case ConditionAnd(:final List<Condition> terms):
+        return Condition.conjunction(<Condition>[for (final Condition t in terms) apply(t)]);
+      case ConditionOr(:final List<Condition> terms):
+        return Condition.disjunction(<Condition>[for (final Condition t in terms) apply(t)]);
+    }
+  }
 
   /// Parses `name=value` where value is `true`, `false`, an integer or a
   /// string (quoted or not).
@@ -947,7 +975,7 @@ final class _Invocation {
 }
 
 final class _Evaluator {
-  _Evaluator(this.settings, String file) : result = GnFileEvaluation(file);
+  _Evaluator(this.settings, String file) : result = GnFileEvaluation(file, settings.assumptions);
 
   final _Settings settings;
   final GnFileEvaluation result;

@@ -84,6 +84,31 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
   ),
 };
 
+/// The suites that render through the GPU test backends -- ANGLE on
+/// SwiftShader (//flutter/testing:opengl), SwiftShader through the Vulkan
+/// loader (:vulkan) -- by GN label. GN's data_deps put the backends'
+/// libraries and ICD manifest in the build directory, next to every
+/// executable, and ANGLE and the test utilities look for them next to the
+/// running binary; each of these suites gets a copy in its own package
+/// (flutter_gpu_test_backends in testing.bzl) as `data`. The converter sees
+/// one file at a time and cannot follow the dependency to the backends, so
+/// the list is kept here; it is what `gn desc <out> <suite> runtime_deps`
+/// names libvk_swiftshader.so for.
+const Set<String> gpuBackendTests = <String>{
+  '//flutter/impeller:impeller_dart_unittests',
+  '//flutter/impeller:impeller_unittests',
+  '//flutter/lib/ui:ui_unittests',
+  '//flutter/runtime:runtime_unittests',
+  '//flutter/shell/common:shell_unittests',
+  '//flutter/shell/gpu:gpu_surface_unittests',
+  '//flutter/shell/platform/embedder:embedder_a11y_unittests',
+  '//flutter/shell/platform/embedder:embedder_unittests',
+};
+
+/// The name of the flutter_gpu_test_backends target the converter declares
+/// in a package with suites of [gpuBackendTests].
+const String gpuBackendsTargetName = 'gpu_test_backends';
+
 /// GN labels with a Bazel home that is not the mechanical translation.
 ///
 /// Keys are GN labels as written (without the implicit `:name` for
@@ -157,6 +182,12 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/vulkan-deps/vulkan-headers/src': '@vulkan-headers',
   // VulkanMemoryAllocator (header-only; the secondary tree's GN).
   '//flutter/third_party/vulkan_memory_allocator': '@vulkan_memory_allocator',
+  // The GPU test backends, built by gn_build (build/bazel/gl_wrap): ANGLE's
+  // two static libraries are one archive behind one facade, and
+  // SwiftShader's group of runtime files is the other.
+  '//flutter/third_party/angle:libEGL_static': '//engine/src/flutter/build/bazel/gl_wrap:angle',
+  '//flutter/third_party/angle:libGLESv2_static': '//engine/src/flutter/build/bazel/gl_wrap:angle',
+  '//flutter/third_party/swiftshader': '//engine/src/flutter/build/bazel/gl_wrap:swiftshader',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -527,6 +558,30 @@ final class ConfigWarningSet extends ConfigEffect {
   final bool chromiumCode;
 }
 
+/// The config is compiler flags alone (no defines, no include directories),
+/// from a file the converter does not convert: they are inlined into the
+/// listing target's `copts`, each group under the GN condition the config
+/// sets it in, as no dependency could carry them. Only private listings are
+/// supported: a public one would hand the flags on along dependency edges
+/// ([propagatedCopts]), which conditional flags do not fit.
+final class ConfigCopts extends ConfigEffect {
+  const ConfigCopts(this.copts);
+
+  /// The flags, each group with the condition under which the config sets
+  /// it.
+  final List<(Condition, List<String>)> copts;
+}
+
+/// The config is one GN's BUILDCONFIG.gn applies to every target and the
+/// Bazel toolchain carries for every compile: listing it adds nothing, and a
+/// target that removes it (`configs -= [...]`) gets the flags that undo it.
+final class ConfigToolchain extends ConfigEffect {
+  const ConfigToolchain({required this.removalCopts});
+
+  /// The flags that take the config's effect back on one target.
+  final List<String> removalCopts;
+}
+
 /// The configs the engine's build files mention, outside their own package.
 const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   '//flutter:config': ConfigDependency('//engine/src/flutter:config'),
@@ -555,6 +610,30 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   ),
   '//build/config/compiler:chromium_code': ConfigWarningSet(chromiumCode: true),
   '//build/config/compiler:no_chromium_code': ConfigWarningSet(chromiumCode: false),
+  // //build/config/clang:extra_warnings, part of BUILDCONFIG.gn's default
+  // configs and of the toolchain's flags (cc_toolchain_config.bzl); the one
+  // target that removes it (//flutter/testing:opengl) turns its two warnings
+  // back off. Its define (_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS, libc++'s
+  // annotations) stays: the removal is about the warnings.
+  '//build/config/clang:extra_warnings': ConfigToolchain(
+    removalCopts: <String>['-Wno-string-conversion', '-Wno-newline-eof'],
+  ),
+  // ANGLE's configs (build/bazel/gl_wrap builds ANGLE; the overlay @angle
+  // carries its headers and this define-only config).
+  '//flutter/third_party/angle:external_config': ConfigDependency('@angle//:headers'),
+  '//flutter/third_party/angle:gl_prototypes': ConfigDependency('@angle//:gl_prototypes'),
+  // SwiftShader's config, which the test utilities list privately: -Wno-shadow
+  // under clang, and -Os in an optimized build on anything but Windows.
+  '//flutter/third_party/swiftshader:swiftshader_config': ConfigCopts(<(Condition, List<String>)>[
+    (Condition.always, <String>['-Wno-shadow']),
+    (
+      ConditionAnd(<Condition>[
+        ConditionNot(ConditionVariable('is_win')),
+        ConditionNot(ConditionVariable('is_debug')),
+      ]),
+      <String>['-Os'],
+    ),
+  ]),
   // The Dart runtime's own config, which lib/io lists privately: its
   // defines ride the overlay's library (@dart//:dart_config); its flags are
   // the ones below under every host configuration (dart_debug is false

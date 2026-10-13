@@ -154,7 +154,7 @@ String emitBuildFile(
   List<String> implicitDeps = const <String>[],
   GnSourceTree? tree,
 }) {
-  final emitter = _Emitter(gnPackage, layout, implicitDeps, tree)
+  final emitter = _Emitter(gnPackage, layout, implicitDeps, tree, evaluation.assumptions)
     ..inheritedConfigs.addAll(evaluation.allDependentConfigs)
     ..conditionalInheritance.addAll(evaluation.conditionalAllDependentConfigs);
   final Set<GnTarget> placeholders = _placeholders(evaluation.targets);
@@ -235,7 +235,7 @@ Set<GnTarget> _placeholders(List<GnTarget> targets) {
 const Set<String> _ignoredVariables = <String>{'check_includes', 'metadata', 'visibility'};
 
 final class _Emitter {
-  _Emitter(this.gnPackage, this.layout, this.implicitDeps, this.tree)
+  _Emitter(this.gnPackage, this.layout, this.implicitDeps, this.tree, this.assumptions)
     : package = BazelLabel.parse(bazelLabel(gnPackage, package: gnPackage));
 
   final String gnPackage;
@@ -244,6 +244,10 @@ final class _Emitter {
   /// The source tree, when available: tells a rebased directory from a
   /// rebased file in an action's arguments.
   final GnSourceTree? tree;
+
+  /// The assumptions the file was evaluated under, for the conditions the
+  /// mapping tables state (ConfigCopts).
+  final Assumptions assumptions;
 
   /// Labels every compiled target depends on (the manifest's implicitDeps).
   final List<String> implicitDeps;
@@ -283,6 +287,10 @@ final class _Emitter {
 
   /// The `lib<name>.so` files the file's shared libraries produce.
   final Set<String> _sharedLibraryOutputs = <String>{};
+
+  /// Whether the file's flutter_gpu_test_backends target has been declared
+  /// (once, for all of the file's suites in [gpuBackendTests]).
+  bool _declaredGpuBackends = false;
 
   /// Registers the `load("file", "symbol", ...)` lines at the top of
   /// [appendix] as the file's own and returns the appendix without them.
@@ -700,6 +708,22 @@ final class _Emitter {
         for (final String label in run.data) {
           rule.list('data').addUnique(Condition.always, _Item(_localLabel(label)));
         }
+      }
+      // The GPU test backends next to the binary (gpuBackendTests), which
+      // GN's data_deps place in the build directory: one copy per package.
+      if (gpuBackendTests.contains('$gnPackage:${target.name}')) {
+        if (!_declaredGpuBackends) {
+          _declaredGpuBackends = true;
+          _use('//engine/src/flutter/testing:testing.bzl', 'flutter_gpu_test_backends');
+          rules.add(
+            _Rule('flutter_gpu_test_backends', gpuBackendsTargetName, const <String>[
+              '# SwiftShader, its ICD manifest and the Vulkan loader, next to the',
+              '# suites below (GN: data_deps of //flutter/third_party/swiftshader and',
+              '# ANGLE).',
+            ]),
+          );
+        }
+        rule.list('data').addUnique(Condition.always, const _Item(':$gpuBackendsTargetName'));
       }
     }
     if (shared) {
@@ -1746,6 +1770,39 @@ final class _Emitter {
             }
           case ConfigImplied():
             break;
+          case ConfigCopts(:final List<(Condition, List<String>)> copts):
+            if (assignment.op == '-=') {
+              throw GnError(assignment.location, 'removing config $config is not supported');
+            }
+            if (!private) {
+              throw GnError(
+                assignment.location,
+                'config $config carries flags alone and can only be listed privately',
+              );
+            }
+            for (final (Condition condition, List<String> flags) in copts) {
+              // The table's condition as GN would have evaluated it here.
+              final Condition under = assignment.condition.and(assumptions.apply(condition));
+              if (under == Condition.never) {
+                continue;
+              }
+              for (final flag in flags) {
+                rule.list('copts').addUnique(under, _Item(flag, comment: 'from $config'));
+              }
+            }
+          case ConfigToolchain(:final List<String> removalCopts):
+            if (assignment.op != '-=') {
+              // Already on every compile.
+              break;
+            }
+            if (!assignment.isUnconditional) {
+              throw GnError(assignment.location, 'conditional removal of $config is not supported');
+            }
+            for (final flag in removalCopts) {
+              rule
+                  .list('copts')
+                  .addUnique(Condition.always, _Item(flag, comment: 'configs -= $config'));
+            }
         }
       }
     }
