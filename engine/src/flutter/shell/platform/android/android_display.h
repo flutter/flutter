@@ -8,28 +8,23 @@
 #include <cstdint>
 
 #include "flutter/fml/macros.h"
-#include "flutter/shell/common/display.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 
 namespace flutter {
 
-/// A |Display| that listens to refresh rate changes.
-class AndroidDisplay : public Display {
+/// Reads display metrics from |PlatformViewAndroidJNI|.
+class AndroidDisplay {
  public:
   explicit AndroidDisplay(std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
-  ~AndroidDisplay() = default;
+  virtual ~AndroidDisplay() = default;
 
-  // |Display|
-  double GetRefreshRate() const override;
+  double GetRefreshRate() const;
 
-  // |Display|
-  virtual double GetWidth() const override;
+  virtual double GetWidth() const;
 
-  // |Display|
-  virtual double GetHeight() const override;
+  virtual double GetHeight() const;
 
-  // |Display|
-  virtual double GetDevicePixelRatio() const override;
+  virtual double GetDevicePixelRatio() const;
 
  private:
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;

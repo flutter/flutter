@@ -18,7 +18,7 @@
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
-      "count": 1,
+      "count": 0,
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {
@@ -30,7 +30,7 @@
       "enforce": "zero"
     },
     "gn_internal_deps": {
-      "count": 17,
+      "count": 0,
       "enforce": "report"
     }
   },

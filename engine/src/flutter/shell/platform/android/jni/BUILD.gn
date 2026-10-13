@@ -18,6 +18,8 @@ source_set("jni") {
     "//flutter/shell/platform/android/surface:native_window",
     "//flutter/shell/platform/embedder:embedder_headers",
   ]
+
+  public_deps = [ "//flutter/third_party/icu" ]
 }
 
 source_set("jni_mock") {
