@@ -525,7 +525,6 @@ cc_test(
   ConvertedFile(
     '//flutter/shell/common',
     skip: <String, String>{
-      'shell_unittests_gpu_configuration': 'needs //flutter/shell/gpu',
       'shell_unittests_fixtures': 'Dart fixtures (dart_main) are not supported yet',
       'shell_benchmarks': 'needs :common and //flutter/benchmarking',
       'shell_test_fixture_sources': 'needs :common',
