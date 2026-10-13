@@ -483,8 +483,9 @@ SKWASM_EXPORT void surface_renderPicturesOnWorker(
   // This will release the pictures when they leave scope.
   std::unique_ptr<sk_sp<flutter::DisplayList>[]> pictures_pointer =
       std::unique_ptr<sk_sp<flutter::DisplayList>[]>(pictures);
-  surface->RenderPicturesOnWorker(pictures_pointer.get(), picture_count, callback_id,
-                                  raster_start, capture_image_bitmaps);
+  surface->RenderPicturesOnWorker(pictures_pointer.get(), picture_count,
+                                  callback_id, raster_start,
+                                  capture_image_bitmaps);
 }
 
 SKWASM_EXPORT uint32_t surface_rasterizeImage(Skwasm::Surface* surface,
