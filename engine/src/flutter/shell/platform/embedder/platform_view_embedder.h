@@ -9,6 +9,7 @@
 
 #include "flow/embedded_views.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/status_or.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
@@ -237,6 +238,27 @@ class PlatformViewEmbedder : public PlatformView {
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewEmbedder);
 };
+
+//------------------------------------------------------------------------------
+/// @brief      Builds the dispatch table that `FlutterEngineInitialize` derives
+///             from the callbacks in `args`: semantics updates, platform
+///             messages, vsync, locale resolution, pre-restart, channel
+///             updates, view focus and deferred libraries. Every callback
+///             receives `user_data`. The rendering entries stay empty.
+///
+///             An embedding that creates its own `PlatformViewEmbedder` uses
+///             this to answer the same callbacks the same way.
+///
+/// @param[in]  args       The project arguments. May be null, which yields an
+///                        empty table.
+/// @param[in]  user_data  Passed through to every callback.
+///
+/// @return     The dispatch table, or `kInvalidArgument` if `args` sets more
+///             than one kind of semantics update callback.
+///
+fml::StatusOr<PlatformViewEmbedder::PlatformDispatchTable>
+PlatformDispatchTableFromProjectArgs(const FlutterProjectArgs* args,
+                                     void* user_data);
 
 }  // namespace flutter
 

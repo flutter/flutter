@@ -532,5 +532,112 @@ TEST(PlatformViewEmbedderTest,
   latch.Wait();
 }
 
+namespace {
+// Records the arguments of the FlutterProjectArgs callbacks below.
+struct ProjectArgsCallbackRecord {
+  void* vsync_user_data = nullptr;
+  intptr_t vsync_baton = 0;
+  void* pre_engine_restart_user_data = nullptr;
+  void* deferred_library_user_data = nullptr;
+  int64_t deferred_library_loading_unit_id = 0;
+};
+
+ProjectArgsCallbackRecord& GetProjectArgsCallbackRecord() {
+  static ProjectArgsCallbackRecord record;
+  return record;
+}
+}  // namespace
+
+TEST(PlatformViewEmbedderTest,
+     DispatchTableFromProjectArgsForwardsCallbacksWithUserData) {
+  GetProjectArgsCallbackRecord() = {};
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+  args.vsync_callback = [](void* user_data, intptr_t baton) {
+    GetProjectArgsCallbackRecord().vsync_user_data = user_data;
+    GetProjectArgsCallbackRecord().vsync_baton = baton;
+  };
+  args.on_pre_engine_restart_callback = [](void* user_data) {
+    GetProjectArgsCallbackRecord().pre_engine_restart_user_data = user_data;
+  };
+  args.dart_deferred_library_loader_callback = [](int64_t loading_unit_id,
+                                                  void* user_data) {
+    GetProjectArgsCallbackRecord().deferred_library_user_data = user_data;
+    GetProjectArgsCallbackRecord().deferred_library_loading_unit_id =
+        loading_unit_id;
+  };
+  int user_data = 0;
+
+  fml::StatusOr<PlatformViewEmbedder::PlatformDispatchTable> result =
+      PlatformDispatchTableFromProjectArgs(&args, &user_data);
+
+  ASSERT_TRUE(result.ok());
+  const PlatformViewEmbedder::PlatformDispatchTable& table = result.value();
+  // Arbitrary values that the callbacks must pass through unchanged.
+  constexpr intptr_t kBaton = 42;
+  constexpr intptr_t kLoadingUnitId = 7;
+  ASSERT_TRUE(table.vsync_callback);
+  table.vsync_callback(kBaton);
+  EXPECT_EQ(GetProjectArgsCallbackRecord().vsync_user_data, &user_data);
+  EXPECT_EQ(GetProjectArgsCallbackRecord().vsync_baton, kBaton);
+  ASSERT_TRUE(table.on_pre_engine_restart_callback);
+  table.on_pre_engine_restart_callback();
+  EXPECT_EQ(GetProjectArgsCallbackRecord().pre_engine_restart_user_data,
+            &user_data);
+  ASSERT_TRUE(table.request_dart_deferred_library_callback);
+  table.request_dart_deferred_library_callback(kLoadingUnitId);
+  EXPECT_EQ(GetProjectArgsCallbackRecord().deferred_library_user_data,
+            &user_data);
+  EXPECT_EQ(GetProjectArgsCallbackRecord().deferred_library_loading_unit_id,
+            kLoadingUnitId);
+
+  // The rendering entries never come from the project arguments.
+  EXPECT_FALSE(table.create_rendering_surface_callback);
+  EXPECT_FALSE(table.create_external_view_embedder_callback);
+  EXPECT_FALSE(table.create_snapshot_surface_producer_callback);
+  EXPECT_FALSE(table.create_resource_context_callback);
+  EXPECT_FALSE(table.make_resource_current_callback);
+  EXPECT_FALSE(table.release_resource_context_callback);
+  EXPECT_FALSE(table.get_impeller_context_callback);
+  EXPECT_FALSE(table.setup_impeller_context_callback);
+}
+
+TEST(PlatformViewEmbedderTest, DispatchTableFromEmptyProjectArgsIsEmpty) {
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+
+  fml::StatusOr<PlatformViewEmbedder::PlatformDispatchTable> result =
+      PlatformDispatchTableFromProjectArgs(&args, nullptr);
+
+  ASSERT_TRUE(result.ok());
+  const PlatformViewEmbedder::PlatformDispatchTable& table = result.value();
+  EXPECT_FALSE(table.update_semantics_callback);
+  EXPECT_FALSE(table.platform_message_response_callback);
+  EXPECT_FALSE(table.vsync_callback);
+  EXPECT_FALSE(table.compute_platform_resolved_locale_callback);
+  EXPECT_FALSE(table.on_pre_engine_restart_callback);
+  EXPECT_FALSE(table.on_channel_update);
+  EXPECT_FALSE(table.view_focus_change_request_callback);
+  EXPECT_FALSE(table.set_application_locale_callback);
+  EXPECT_FALSE(table.set_semantics_tree_enabled_callback);
+  EXPECT_FALSE(table.request_dart_deferred_library_callback);
+  EXPECT_FALSE(table.get_scaled_font_size_callback);
+}
+
+TEST(PlatformViewEmbedderTest,
+     DispatchTableFromProjectArgsRejectsTwoSemanticsCallbacks) {
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+  args.update_semantics_callback2 = [](const FlutterSemanticsUpdate2*, void*) {
+  };
+  args.update_semantics_callback = [](const FlutterSemanticsUpdate*, void*) {};
+
+  fml::StatusOr<PlatformViewEmbedder::PlatformDispatchTable> result =
+      PlatformDispatchTableFromProjectArgs(&args, nullptr);
+
+  ASSERT_FALSE(result.ok());
+  EXPECT_EQ(result.status().code(), fml::StatusCode::kInvalidArgument);
+}
+
 }  // namespace testing
 }  // namespace flutter
