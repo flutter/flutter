@@ -9,8 +9,10 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart' hide Source;
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -19,8 +21,7 @@ import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart' as core;
-import 'package:flutter_tools_core/flutter_tools_core.dart' hide Artifact, HostArtifact, Target;
+import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
@@ -36,6 +37,7 @@ final class _TestExtensionTarget extends ExtensionTarget {
     required this.name,
     this.errorMessage,
     super.isTopLevel,
+    super.outputDir,
     this.shouldSucceed = true,
     super.targetPlatform = 'linux-x64',
   });
@@ -47,20 +49,36 @@ final class _TestExtensionTarget extends ExtensionTarget {
   final bool shouldSucceed;
 
   @override
-  List<core.Target> get dependencies => const <core.Target>[];
-
-  @override
-  List<Source> get inputs => const <Source>[];
-
-  @override
-  List<Source> get outputs => const <Source>[];
-
-  @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
     return shouldSucceed
-        ? const ExtensionBuildResult.success()
-        : ExtensionBuildResult.failure(message: errorMessage ?? 'Build failed.');
+        ? const ExtensionBuildResult(success: true)
+        : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Build failed.');
   }
+}
+
+final class _SucceedingBuildService extends BuildService {
+  @override
+  List<ExtensionTarget> get targets => const <ExtensionTarget>[
+    _TestExtensionTarget(
+      description: 'Hermetic custom build target.',
+      name: 'custom-hermetic-build',
+      outputDir: '$kProjectDirPlaceholder/build/hermetic/$kBuildModePlaceholder',
+    ),
+    _TestExtensionTarget(
+      description: 'Hermetic assemble-only target.',
+      name: 'custom-hermetic-assemble-only',
+      isTopLevel: false,
+      outputDir: '$kProjectDirPlaceholder/build/hermetic/$kBuildModePlaceholder',
+    ),
+  ];
+}
+
+void _succeedingBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_SucceedingBuildService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
 }
 
 final class _FailingAndConflictingBuildService extends BuildService {
@@ -136,44 +154,45 @@ void main() {
   });
 
   group('Tool Extensions Build Integration - Disabled', () {
-    testUsingContext(
+    testWithoutContext(
       'ExtensionBuildManager.getBuildTargets() returns empty list when feature flag disabled',
       () async {
+        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          logger: logger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
-          logger: testLogger,
+          logger: logger,
         );
 
-        final targets = <ExtensionBuildTarget>[...await buildManager.getBuildTargets()];
+        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
         expect(targets, isEmpty);
 
         await manager.dispose();
       },
-      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
     );
 
-    testUsingContext(
+    testWithoutContext(
       'ExtensionBuildManager.build() returns failure when feature flag disabled',
       () async {
+        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags();
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          logger: logger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
-          logger: testLogger,
+          logger: logger,
         );
 
         final ExtensionBuildResult result = await buildManager.build(
@@ -190,7 +209,6 @@ void main() {
 
         await manager.dispose();
       },
-      overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
     );
 
     testUsingContext(
@@ -243,145 +261,113 @@ void main() {
       fs.file('/lib/main.dart').createSync(recursive: true);
     });
 
-    testUsingContext(
+    testWithoutContext(
       'ExtensionBuildManager.getBuildTargets() returns custom targets when feature flag enabled',
       () async {
+        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          logger: logger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
-          logger: testLogger,
+          logger: logger,
         );
 
-        final targets = <ExtensionBuildTarget>[...await buildManager.getBuildTargets()];
-        expect(targets, hasLength(6));
+        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
+        final List<ExtensionTarget> prototypeTargets = LinuxBuildService().targets;
+        expect(
+          targets.map((ExtensionBuildTarget t) => t.name),
+          equals(prototypeTargets.map((ExtensionTarget t) => t.name)),
+        );
         expect(buildManager.cachedTargets, equals(targets));
 
-        expect(targets[0].name, equals('custom-linux-build'));
-        expect(targets[0].targetPlatform, equals('linux-x64'));
         expect(targets[0].isTopLevel, isTrue);
         expect(targets[0].dependencies, isEmpty);
 
-        expect(targets[1].name, equals('custom-linux-assemble-only-debug'));
-        expect(targets[1].targetPlatform, equals('linux-x64'));
         expect(targets[1].isTopLevel, isFalse);
         expect(targets[1].dependencies, equals(<String>['copy_assets', 'kernel_snapshot_program']));
 
-        expect(targets[2].name, equals('custom-linux-aot-elf-profile'));
-        expect(targets[2].targetPlatform, equals('linux-x64'));
-        expect(targets[2].isTopLevel, isFalse);
-        expect(targets[2].dependencies, isEmpty);
-
-        expect(targets[3].name, equals('custom-linux-assemble-only-profile'));
-        expect(targets[3].targetPlatform, equals('linux-x64'));
-        expect(targets[3].isTopLevel, isFalse);
-        expect(
-          targets[3].dependencies,
-          equals(<String>['copy_assets', 'custom-linux-aot-elf-profile']),
-        );
-
-        expect(targets[4].name, equals('custom-linux-aot-elf-release'));
-        expect(targets[4].targetPlatform, equals('linux-x64'));
-        expect(targets[4].isTopLevel, isFalse);
-        expect(targets[4].dependencies, isEmpty);
-
-        expect(targets[5].name, equals('custom-linux-assemble-only-release'));
-        expect(targets[5].targetPlatform, equals('linux-x64'));
-        expect(targets[5].isTopLevel, isFalse);
-        expect(
-          targets[5].dependencies,
-          equals(<String>['copy_assets', 'custom-linux-aot-elf-release']),
-        );
-
         await manager.dispose();
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
       },
     );
 
-    testUsingContext(
-      'ExtensionBuildManager.build() throws ArgumentError when projectRoot, outputDir, or buildDir is relative',
-      () async {
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final buildManager = ExtensionBuildManager(
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          logger: testLogger,
-        );
+    testWithoutContext('ExtensionBuildManager.build() throws ArgumentError when projectRoot, outputDir, or buildDir is relative', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
 
-        await expectLater(
-          () => buildManager.build(
-            buildDir: Uri.parse('/.dart_tool/flutter_build'),
-            buildMode: .debug,
-            mainPath: 'lib/main.dart',
-            outputDir: Uri.parse('/build'),
-            projectRoot: Uri.parse('relative/path'),
-            resolvedArtifacts: const <String, String>{},
-            targetName: 'custom-linux-build',
-          ),
-          throwsArgumentError,
-        );
+      await expectLater(
+        () => buildManager.build(
+          buildDir: Uri.parse('/.dart_tool/flutter_build'),
+          buildMode: .debug,
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('/build'),
+          projectRoot: Uri.parse('relative/path'),
+          resolvedArtifacts: const <String, String>{},
+          targetName: 'custom-linux-build',
+        ),
+        throwsArgumentError,
+      );
 
-        await expectLater(
-          () => buildManager.build(
-            buildDir: Uri.parse('/.dart_tool/flutter_build'),
-            buildMode: .debug,
-            mainPath: 'lib/main.dart',
-            outputDir: Uri.parse('relative/output'),
-            projectRoot: Uri.parse('/project'),
-            resolvedArtifacts: const <String, String>{},
-            targetName: 'custom-linux-build',
-          ),
-          throwsArgumentError,
-        );
+      await expectLater(
+        () => buildManager.build(
+          buildDir: Uri.parse('/.dart_tool/flutter_build'),
+          buildMode: .debug,
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('relative/output'),
+          projectRoot: Uri.parse('/project'),
+          resolvedArtifacts: const <String, String>{},
+          targetName: 'custom-linux-build',
+        ),
+        throwsArgumentError,
+      );
 
-        await expectLater(
-          () => buildManager.build(
-            buildDir: Uri.parse('relative/build'),
-            buildMode: .debug,
-            mainPath: 'lib/main.dart',
-            outputDir: Uri.parse('/build'),
-            projectRoot: Uri.parse('/project'),
-            resolvedArtifacts: const <String, String>{},
-            targetName: 'custom-linux-build',
-          ),
-          throwsArgumentError,
-        );
+      await expectLater(
+        () => buildManager.build(
+          buildDir: Uri.parse('relative/build'),
+          buildMode: .debug,
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('/build'),
+          projectRoot: Uri.parse('/project'),
+          resolvedArtifacts: const <String, String>{},
+          targetName: 'custom-linux-build',
+        ),
+        throwsArgumentError,
+      );
 
-        await manager.dispose();
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-      },
-    );
+      await manager.dispose();
+    });
 
-    testUsingContext(
+    testWithoutContext(
       'ExtensionBuildManager.build() returns failure for unknown target',
       () async {
+        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          logger: logger,
           entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
-          logger: testLogger,
+          logger: logger,
         );
 
         final ExtensionBuildResult result = await buildManager.build(
@@ -401,18 +387,16 @@ void main() {
 
         await manager.dispose();
       },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-      },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'ExtensionBuildManager deduplicates targets across multiple extension entrypoints in order',
       () async {
+        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
+          logger: logger,
           entryPoints: <ExtensionEntryPoint>[
             _firstDuplicateExtensionEntryPoint,
             _secondDuplicateExtensionEntryPoint,
@@ -422,7 +406,7 @@ void main() {
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
-          logger: testLogger,
+          logger: logger,
         );
 
         final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
@@ -430,7 +414,7 @@ void main() {
         expect(targets.first.name, 'shared-target');
         expect(targets.first.description, 'First extension shared target.');
         expect(
-          testLogger.warningText,
+          logger.warningText,
           contains('Skipping duplicate build target "shared-target" from extension.'),
         );
 
@@ -447,9 +431,6 @@ void main() {
 
         await manager.dispose();
       },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-      },
     );
 
     testUsingContext(
@@ -459,7 +440,7 @@ void main() {
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+          entryPoints: <ExtensionEntryPoint>[_succeedingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final buildManager = ExtensionBuildManager(
@@ -484,10 +465,10 @@ void main() {
 
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
-        await commandRunner.run(<String>['build', 'custom-linux-build', '--no-pub']);
+        await commandRunner.run(<String>['build', 'custom-hermetic-build', '--no-pub']);
 
-        expect(command.subcommands.containsKey('custom-linux-build'), isTrue);
-        expect(command.subcommands.containsKey('custom-linux-assemble-only-debug'), isFalse);
+        expect(command.subcommands.containsKey('custom-hermetic-build'), isTrue);
+        expect(command.subcommands.containsKey('custom-hermetic-assemble-only'), isFalse);
 
         await manager.dispose();
       },
@@ -498,61 +479,133 @@ void main() {
       },
     );
 
-    testUsingContext(
-      'AssembleCommand includes custom targets and can run them when feature flag enabled',
+    testWithoutContext('AssembleCommand lazily queries extensions only for non-default targets and resolves dependencies', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+
+      Target? builtTarget;
+      final toolContext = FakeToolContext(
+        artifacts: Artifacts.test(fileSystem: fs),
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        fs: fs,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+      );
+
+      final defaultCommand = AssembleCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          builtTarget = target;
+        }),
+        extensionBuildManager: buildManager,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+      );
+      final CommandRunner<void> defaultRunner = createTestCommandRunner(defaultCommand);
+      await defaultRunner.run(<String>[
+        'assemble',
+        '-o',
+        '/out',
+        '-d',
+        'BuildMode=debug',
+        'copy_assets',
+      ]);
+      expect(builtTarget?.name, equals('copy_assets'));
+      // Built-in targets should not trigger extension isolate initialization.
+      expect(buildManager.cachedTargets, isEmpty);
+
+      final customCommand = AssembleCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+          Target target,
+          Environment environment,
+        ) {
+          builtTarget = target;
+        }),
+        extensionBuildManager: buildManager,
+        featureFlags: featureFlags,
+        toolContext: toolContext,
+      );
+      final CommandRunner<void> customRunner = createTestCommandRunner(customCommand);
+      await customRunner.run(<String>[
+        'assemble',
+        '-o',
+        '/out',
+        '-d',
+        'BuildMode=debug',
+        'custom-linux-assemble-only-debug',
+      ]);
+
+      expect(builtTarget, isNotNull);
+      expect(builtTarget!.name, equals('custom-linux-assemble-only-debug'));
+      expect(
+        builtTarget!.dependencies.map((Target t) => t.name),
+        equals(<String>['copy_assets', 'kernel_snapshot_program']),
+      );
+
+      await manager.dispose();
+    });
+
+    testWithoutContext(
+      'AssembleCommand executes extension target through FlutterBuildSystem',
       () async {
+        final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
-          logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[_succeedingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final buildManager = ExtensionBuildManager(
           extensionManager: manager,
           featureFlags: featureFlags,
-          logger: testLogger,
+          logger: logger,
         );
-
+        final buildSystem = FlutterBuildSystem(
+          fileSystem: fs,
+          logger: logger,
+          platform: FakePlatform(),
+        );
         final command = AssembleCommand(
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildSystem: buildSystem,
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             fs: fs,
-            logger: testLogger,
+            logger: logger,
+            processManager: FakeProcessManager.any(),
           ),
         );
+        final CommandRunner<void> runner = createTestCommandRunner(command);
 
-        final CommandRunner<void> commandRunner = createTestCommandRunner(command);
-
-        await commandRunner.run(<String>[
+        await runner.run(<String>[
           'assemble',
           '-o',
           '/out',
           '-d',
           'BuildMode=debug',
-          'custom-linux-assemble-only-debug',
+          'custom-hermetic-assemble-only',
         ]);
 
-        // Verify that the targets were created and dependencies can be resolved.
-        final List<Target> targets = command.createTargets();
-        expect(targets, hasLength(1));
-        final Target target = targets.first;
-        expect(target.name, equals('custom-linux-assemble-only-debug'));
-        expect(target.dependencies, hasLength(2));
-        expect(
-          target.dependencies.map((Target t) => t.name),
-          containsAll(<String>['copy_assets', 'kernel_snapshot_program']),
-        );
+        expect(logger.traceText, contains('build succeeded.'));
+        expect(fs.directory('/out').existsSync(), isTrue);
 
         await manager.dispose();
-      },
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isToolExtensionsEnabled: true),
-        FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager.any(),
       },
     );
 
@@ -615,8 +668,10 @@ void main() {
           featureFlags: featureFlags,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(fileSystem: fs),
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             fs: fs,
             logger: testLogger,
+            processManager: FakeProcessManager.any(),
           ),
         );
         final CommandRunner<void> assembleRunner = createTestCommandRunner(assembleCommand);
@@ -627,6 +682,7 @@ void main() {
           '-d',
           'BuildMode=debug',
           'copy_assets',
+          'failing-build',
         ]);
         expect(
           testLogger.warningText,

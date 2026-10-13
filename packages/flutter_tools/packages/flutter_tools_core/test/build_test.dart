@@ -5,27 +5,6 @@
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:test/test.dart';
 
-class _RecordingSourceVisitor implements SourceVisitor {
-  final visitedPatterns = <(String, bool)>[];
-  final visitedArtifacts = <(Artifact, String?, BuildMode?)>[];
-  final visitedHostArtifacts = <HostArtifact>[];
-
-  @override
-  void visitPattern(String pattern, bool optional) {
-    visitedPatterns.add((pattern, optional));
-  }
-
-  @override
-  void visitArtifact(Artifact artifact, String? platform, BuildMode? mode) {
-    visitedArtifacts.add((artifact, platform, mode));
-  }
-
-  @override
-  void visitHostArtifact(HostArtifact artifact) {
-    visitedHostArtifacts.add(artifact);
-  }
-}
-
 void main() {
   group('BuildMode', () {
     test('fromCliName parses valid build modes and throws on invalid mode', () {
@@ -69,115 +48,42 @@ void main() {
     });
   });
 
-  group('Artifact and HostArtifact', () {
-    test('equality, hashCode, and toString work as expected', () {
-      const artifact1 = Artifact('icuData');
-      const artifact2 = Artifact('icuData');
-      const artifact3 = Artifact('genSnapshot');
-
-      expect(artifact1, equals(artifact2));
-      expect(artifact1.hashCode, equals(artifact2.hashCode));
-      expect(artifact1, isNot(equals(artifact3)));
-      expect(artifact1.toString(), 'icuData');
-
-      const hostArtifact1 = HostArtifact('impellerc');
-      const hostArtifact2 = HostArtifact('impellerc');
-      const hostArtifact3 = HostArtifact('libtessellator');
-
-      expect(hostArtifact1, equals(hostArtifact2));
-      expect(hostArtifact1.hashCode, equals(hostArtifact2.hashCode));
-      expect(hostArtifact1, isNot(equals(hostArtifact3)));
-      expect(hostArtifact1.toString(), 'impellerc');
-    });
-
-    test('built-in constants have expected names and metadata', () {
-      expect(BuiltInArtifacts.icuData.name, 'icuData');
-      expect(BuiltInArtifacts.genSnapshot.name, 'genSnapshot');
-      expect(BuiltInArtifacts.flutterPatchedSdkPath.name, 'flutterPatchedSdkPath');
-      expect(BuiltInHostArtifacts.impellerc.name, 'impellerc');
-      expect(BuiltInHostArtifacts.libtessellator.name, 'libtessellator');
-      expect(BuiltInTargets.kernelSnapshot.name, 'kernel_snapshot_program');
-      expect(BuiltInTargets.copyAssets.name, 'copy_assets');
-    });
-  });
-
-  group('Source', () {
-    test('pattern, artifact, and hostArtifact serialize, deserialize, and visit', () {
-      const patternSource = Source.pattern('{PROJECT_DIR}/pubspec.yaml', optional: true);
-      expect(patternSource.implicit, isFalse);
-      expect(const Source.pattern('{OUTPUT_DIR}/bundle/*').implicit, isTrue);
-      expect(Source.fromJson(patternSource.toMap()), equals(patternSource));
+  group('ExtensionSource', () {
+    test('pattern, artifact, and hostArtifact serialize and deserialize', () {
+      const patternSource = ExtensionSource.pattern('{PROJECT_DIR}/pubspec.yaml', optional: true);
+      expect(ExtensionSource.fromJson(patternSource.toMap()), equals(patternSource));
       expect(patternSource.toString(), contains('{PROJECT_DIR}/pubspec.yaml'));
 
-      const artifactSource = Source.artifact(
+      const artifactSource = ExtensionSource.artifact(
         BuiltInArtifacts.genSnapshot,
         mode: .release,
         platform: 'linux-x64',
       );
-      expect(artifactSource.implicit, isFalse);
-      expect(Source.fromJson(artifactSource.toMap()), equals(artifactSource));
+      expect(ExtensionSource.fromJson(artifactSource.toMap()), equals(artifactSource));
       expect(artifactSource.toString(), contains('genSnapshot'));
 
-      const hostArtifactSource = Source.hostArtifact(BuiltInHostArtifacts.impellerc);
-      expect(hostArtifactSource.implicit, isFalse);
-      expect(Source.fromJson(hostArtifactSource.toMap()), equals(hostArtifactSource));
+      const hostArtifactSource = ExtensionSource.hostArtifact(BuiltInHostArtifacts.impellerc);
+      expect(ExtensionSource.fromJson(hostArtifactSource.toMap()), equals(hostArtifactSource));
       expect(hostArtifactSource.toString(), contains('impellerc'));
-
-      final visitor = _RecordingSourceVisitor();
-      patternSource.accept(visitor);
-      artifactSource.accept(visitor);
-      hostArtifactSource.accept(visitor);
-
-      expect(
-        visitor.visitedPatterns,
-        equals(<(String, bool)>[('{PROJECT_DIR}/pubspec.yaml', true)]),
-      );
-      expect(
-        visitor.visitedArtifacts,
-        equals(<(Artifact, String?, BuildMode?)>[
-          (BuiltInArtifacts.genSnapshot, 'linux-x64', .release),
-        ]),
-      );
-      expect(visitor.visitedHostArtifacts, equals(<HostArtifact>[BuiltInHostArtifacts.impellerc]));
     });
 
     test('fromJson throws ArgumentError on invalid type or missing fields', () {
       expect(
-        () => Source.fromJson(const <String, Object?>{'type': 'unknown'}),
+        () => ExtensionSource.fromJson(const <String, Object?>{'type': 'unknown'}),
         throwsArgumentError,
       );
       expect(
-        () => Source.fromJson(const <String, Object?>{'type': 'pattern'}),
+        () => ExtensionSource.fromJson(const <String, Object?>{'type': 'pattern'}),
         throwsArgumentError,
       );
       expect(
-        () => Source.fromJson(const <String, Object?>{'type': 'artifact'}),
+        () => ExtensionSource.fromJson(const <String, Object?>{'type': 'artifact'}),
         throwsArgumentError,
       );
       expect(
-        () => Source.fromJson(const <String, Object?>{'type': 'host_artifact'}),
+        () => ExtensionSource.fromJson(const <String, Object?>{'type': 'host_artifact'}),
         throwsArgumentError,
       );
-    });
-  });
-
-  group('SimpleTarget', () {
-    test('exposes configured metadata', () {
-      const target = SimpleTarget(
-        name: 'custom_target',
-        dependencies: <Target>[BuiltInTargets.copyAssets],
-        depfiles: <String>['custom.d'],
-        inputs: <Source>[Source.pattern('{PROJECT_DIR}/pubspec.yaml')],
-        outputDir: '{PROJECT_DIR}/out',
-        outputs: <Source>[Source.pattern('{OUTPUT_DIR}/out.bin')],
-      );
-
-      expect(target.name, 'custom_target');
-      expect(target.dependencies, equals(const <Target>[BuiltInTargets.copyAssets]));
-      expect(target.depfiles, equals(const <String>['custom.d']));
-      expect(target.inputs, equals(const <Source>[Source.pattern('{PROJECT_DIR}/pubspec.yaml')]));
-      expect(target.outputDir, '{PROJECT_DIR}/out');
-      expect(target.outputs, equals(const <Source>[Source.pattern('{OUTPUT_DIR}/out.bin')]));
     });
   });
 
@@ -187,14 +93,14 @@ void main() {
         description: 'A custom Linux build target.',
         name: 'custom-linux-build',
         targetPlatform: 'linux-x64',
-        dependencies: <String>['copy_assets'],
-        inputs: <Source>[
-          Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-          Source.artifact(BuiltInArtifacts.icuData),
+        dependencies: <String>[BuiltInTargets.copyAssets],
+        inputs: <ExtensionSource>[
+          ExtensionSource.pattern('{PROJECT_DIR}/pubspec.yaml'),
+          ExtensionSource.artifact(BuiltInArtifacts.icuData),
         ],
         isTopLevel: false,
         outputDir: '{PROJECT_DIR}/build/linux',
-        outputs: <Source>[Source.pattern('{OUTPUT_DIR}/bundle/*')],
+        outputs: <ExtensionSource>[ExtensionSource.pattern('{OUTPUT_DIR}/bundle/*')],
       );
 
       final Map<String, Object?> map = target.toMap();
@@ -202,7 +108,10 @@ void main() {
       expect(map[ExtensionBuildTarget.targetPlatformKey], 'linux-x64');
       expect(map[ExtensionBuildTarget.descriptionKey], 'A custom Linux build target.');
       expect(map[ExtensionBuildTarget.isTopLevelKey], isFalse);
-      expect(map[ExtensionBuildTarget.dependenciesKey], equals(<String>['copy_assets']));
+      expect(
+        map[ExtensionBuildTarget.dependenciesKey],
+        equals(<String>[BuiltInTargets.copyAssets]),
+      );
       expect(map[ExtensionBuildTarget.outputDirKey], '{PROJECT_DIR}/build/linux');
 
       final parsed = ExtensionBuildTarget.fromJson(map);
@@ -221,6 +130,31 @@ void main() {
       expect(parsed.inputs, isEmpty);
       expect(parsed.outputs, isEmpty);
       expect(parsed.outputDir, kBuildDirPlaceholder);
+    });
+
+    test('fromJson throws ArgumentError on malformed dependencies, inputs, or outputs', () {
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'dependencies': <Object?>[123],
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{'dependencies': 'invalid'}),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'inputs': <Object?>['not-a-map'],
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'outputs': <Object?>['not-a-map'],
+        }),
+        throwsArgumentError,
+      );
     });
 
     test('listFromJson handles valid and invalid lists', () {
@@ -261,7 +195,7 @@ void main() {
 
   group('ExtensionBuildResult', () {
     test('serializes and deserializes successful result without errorMessage', () {
-      const result = ExtensionBuildResult.success();
+      const result = ExtensionBuildResult(success: true);
 
       final Map<String, Object?> map = result.toMap();
       expect(map[ExtensionBuildResult.successKey], isTrue);
@@ -274,7 +208,7 @@ void main() {
     });
 
     test('serializes and deserializes failed result with errorMessage', () {
-      const result = ExtensionBuildResult.failure(message: 'Compilation failed.');
+      const result = ExtensionBuildResult(success: false, errorMessage: 'Compilation failed.');
 
       final Map<String, Object?> map = result.toMap();
       expect(map[ExtensionBuildResult.successKey], isFalse);

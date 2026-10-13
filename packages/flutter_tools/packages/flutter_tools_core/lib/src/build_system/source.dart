@@ -4,48 +4,91 @@
 
 import 'package:meta/meta.dart';
 
-import 'enums.dart';
+import '../build.dart';
 
-/// Visitor interface to resolve [Source] objects into files in the host.
-abstract class SourceVisitor {
-  void visitPattern(String pattern, bool optional);
-  void visitArtifact(Artifact artifact, String? platform, BuildMode? mode);
-  void visitHostArtifact(HostArtifact artifact);
+/// Represents an artifact downloaded from the Flutter cache (e.g. engine binaries, frameworks).
+///
+/// Extensions can reference these artifacts in their target inputs/outputs,
+/// and the host will resolve them to physical paths on the host before build execution.
+@immutable
+class ExtensionArtifact {
+  const ExtensionArtifact(this.name);
+
+  /// The unique identifying name of this artifact.
+  final String name;
+
+  @override
+  bool operator ==(Object other) => other is ExtensionArtifact && other.name == name;
+
+  @override
+  int get hashCode => name.hashCode;
+
+  @override
+  String toString() => name;
 }
 
-/// A description of an input or output of a Target.
+/// Represents an artifact used by the host build system (e.g. compilers, tools).
+///
+/// Extensions can reference these host-side artifacts in their target inputs/outputs,
+/// and the host will resolve them to physical paths on the host before build execution.
 @immutable
-abstract class Source {
-  const Source();
+class ExtensionHostArtifact {
+  const ExtensionHostArtifact(this.name);
 
-  /// This source is a file URL which contains some references to magic
-  /// environment variables defined in Environment.
-  const factory Source.pattern(String pattern, {bool optional}) = _PatternSource;
+  /// The unique identifying name of this host artifact.
+  final String name;
 
-  /// The source is provided by an [Artifact].
-  const factory Source.artifact(Artifact artifact, {BuildMode? mode, String? platform}) =
-      _ArtifactSource;
+  @override
+  bool operator ==(Object other) => other is ExtensionHostArtifact && other.name == name;
 
-  /// The source is provided by a [HostArtifact].
-  const factory Source.hostArtifact(HostArtifact artifact) = _HostArtifactSource;
+  @override
+  int get hashCode => name.hashCode;
 
-  /// Deserializes a [Source] from a JSON-serializable map.
-  factory Source.fromJson(Map<String, Object?> json) {
+  @override
+  String toString() => name;
+}
+
+/// A description of an input or output of an [ExtensionBuildTarget].
+@immutable
+sealed class ExtensionSource {
+  const ExtensionSource();
+
+  /// A file pattern that must begin with a directory placeholder such as
+  /// [kProjectDirPlaceholder], [kBuildDirPlaceholder], or [kOutputDirPlaceholder].
+  const factory ExtensionSource.pattern(String pattern, {bool optional}) = ExtensionPatternSource;
+
+  /// A source provided by an [ExtensionArtifact].
+  const factory ExtensionSource.artifact(
+    ExtensionArtifact artifact, {
+    BuildMode? mode,
+    String? platform,
+  }) = ExtensionArtifactSource;
+
+  /// A source provided by an [ExtensionHostArtifact].
+  const factory ExtensionSource.hostArtifact(ExtensionHostArtifact artifact) =
+      ExtensionHostArtifactSource;
+
+  /// Deserializes an [ExtensionSource] from a JSON-serializable map.
+  factory ExtensionSource.fromJson(Map<String, Object?> json) {
     return switch (json[typeKey]) {
-      patternType => Source.pattern(
+      patternType => ExtensionSource.pattern(
         switch (json[valueKey]) {
           final String value => value,
-          _ => throw ArgumentError('Missing or invalid "$valueKey" for $patternType Source.'),
+          _ => throw ArgumentError(
+            'Missing or invalid "$valueKey" for $patternType ExtensionSource.',
+          ),
         },
         optional: switch (json[optionalKey]) {
           final bool optional => optional,
           _ => false,
         },
       ),
-      artifactType => Source.artifact(
-        Artifact(switch (json[artifactKey]) {
+      artifactType => ExtensionSource.artifact(
+        ExtensionArtifact(switch (json[artifactKey]) {
           final String artifact => artifact,
-          _ => throw ArgumentError('Missing or invalid "$artifactKey" for $artifactType Source.'),
+          _ => throw ArgumentError(
+            'Missing or invalid "$artifactKey" for $artifactType ExtensionSource.',
+          ),
         }),
         mode: switch (json[modeKey]) {
           final String mode => BuildMode.fromCliName(mode),
@@ -56,15 +99,15 @@ abstract class Source {
           _ => null,
         },
       ),
-      hostArtifactType => Source.hostArtifact(
-        HostArtifact(switch (json[artifactKey]) {
+      hostArtifactType => ExtensionSource.hostArtifact(
+        ExtensionHostArtifact(switch (json[artifactKey]) {
           final String artifact => artifact,
           _ => throw ArgumentError(
-            'Missing or invalid "$artifactKey" for $hostArtifactType Source.',
+            'Missing or invalid "$artifactKey" for $hostArtifactType ExtensionSource.',
           ),
         }),
       ),
-      final Object? type => throw ArgumentError('Unknown Source type in JSON: $type'),
+      final Object? type => throw ArgumentError('Unknown ExtensionSource type in JSON: $type'),
     };
   }
 
@@ -86,86 +129,78 @@ abstract class Source {
   /// Map key for an artifact source's build mode.
   static const String modeKey = 'mode';
 
-  /// Type discriminator value for [Source.pattern].
+  /// Type discriminator value for [ExtensionSource.pattern].
   static const String patternType = 'pattern';
 
-  /// Type discriminator value for [Source.artifact].
+  /// Type discriminator value for [ExtensionSource.artifact].
   static const String artifactType = 'artifact';
 
-  /// Type discriminator value for [Source.hostArtifact].
+  /// Type discriminator value for [ExtensionSource.hostArtifact].
   static const String hostArtifactType = 'host_artifact';
-
-  /// Visit the particular source type.
-  void accept(SourceVisitor visitor);
-
-  /// Whether the output source provided can be known before executing the rule.
-  bool get implicit;
 
   /// Serializes the source to a JSON-serializable map.
   Map<String, Object?> toMap();
 }
 
+/// An [ExtensionSource] defined by a file pattern with a leading directory placeholder.
 @immutable
-class _PatternSource extends Source {
-  const _PatternSource(this.value, {this.optional = false});
+final class ExtensionPatternSource extends ExtensionSource {
+  const ExtensionPatternSource(this.value, {this.optional = false});
 
+  /// The file path pattern beginning with a directory placeholder.
   final String value;
+
+  /// Whether the file is optional when resolving inputs.
   final bool optional;
 
   @override
-  void accept(SourceVisitor visitor) => visitor.visitPattern(value, optional);
-
-  @override
-  bool get implicit => value.contains('*');
-
-  @override
   Map<String, Object?> toMap() => <String, Object?>{
-    Source.typeKey: Source.patternType,
-    Source.valueKey: value,
-    Source.optionalKey: optional,
+    ExtensionSource.typeKey: ExtensionSource.patternType,
+    ExtensionSource.valueKey: value,
+    ExtensionSource.optionalKey: optional,
   };
 
   @override
-  String toString() => 'Source.pattern($value, optional: $optional)';
+  String toString() => 'ExtensionSource.pattern($value, optional: $optional)';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is _PatternSource && other.value == value && other.optional == optional);
+      (other is ExtensionPatternSource && other.value == value && other.optional == optional);
 
   @override
   int get hashCode => Object.hash(value, optional);
 }
 
+/// An [ExtensionSource] provided by an [ExtensionArtifact].
 @immutable
-class _ArtifactSource extends Source {
-  const _ArtifactSource(this.artifact, {this.mode, this.platform});
+final class ExtensionArtifactSource extends ExtensionSource {
+  const ExtensionArtifactSource(this.artifact, {this.mode, this.platform});
 
-  final Artifact artifact;
+  /// The requested engine artifact.
+  final ExtensionArtifact artifact;
+
+  /// Optional build mode override for resolving the artifact.
   final BuildMode? mode;
+
+  /// Optional target platform name override for resolving the artifact.
   final String? platform;
 
   @override
-  void accept(SourceVisitor visitor) => visitor.visitArtifact(artifact, platform, mode);
-
-  @override
-  bool get implicit => false;
-
-  @override
   Map<String, Object?> toMap() => <String, Object?>{
-    Source.typeKey: Source.artifactType,
-    Source.artifactKey: artifact.name,
-    Source.platformKey: ?platform,
-    Source.modeKey: ?mode?.cliName,
+    ExtensionSource.typeKey: ExtensionSource.artifactType,
+    ExtensionSource.artifactKey: artifact.name,
+    ExtensionSource.platformKey: ?platform,
+    ExtensionSource.modeKey: ?mode?.cliName,
   };
 
   @override
-  String toString() => 'Source.artifact($artifact, mode: $mode, platform: $platform)';
+  String toString() => 'ExtensionSource.artifact($artifact, mode: $mode, platform: $platform)';
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is _ArtifactSource &&
+      (other is ExtensionArtifactSource &&
           other.artifact == artifact &&
           other.platform == platform &&
           other.mode == mode);
@@ -174,30 +209,27 @@ class _ArtifactSource extends Source {
   int get hashCode => Object.hash(artifact, platform, mode);
 }
 
+/// An [ExtensionSource] provided by an [ExtensionHostArtifact].
 @immutable
-class _HostArtifactSource extends Source {
-  const _HostArtifactSource(this.artifact);
+final class ExtensionHostArtifactSource extends ExtensionSource {
+  const ExtensionHostArtifactSource(this.artifact);
 
-  final HostArtifact artifact;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitHostArtifact(artifact);
-
-  @override
-  bool get implicit => false;
+  /// The requested host artifact.
+  final ExtensionHostArtifact artifact;
 
   @override
   Map<String, Object?> toMap() => <String, Object?>{
-    Source.typeKey: Source.hostArtifactType,
-    Source.artifactKey: artifact.name,
+    ExtensionSource.typeKey: ExtensionSource.hostArtifactType,
+    ExtensionSource.artifactKey: artifact.name,
   };
 
   @override
-  String toString() => 'Source.hostArtifact($artifact)';
+  String toString() => 'ExtensionSource.hostArtifact($artifact)';
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || (other is _HostArtifactSource && other.artifact == artifact);
+      identical(this, other) ||
+      (other is ExtensionHostArtifactSource && other.artifact == artifact);
 
   @override
   int get hashCode => artifact.hashCode;

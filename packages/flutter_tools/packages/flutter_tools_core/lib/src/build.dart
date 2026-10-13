@@ -8,9 +8,79 @@ import 'build_system/constants.dart';
 import 'build_system/source.dart';
 
 export 'build_system/constants.dart';
-export 'build_system/enums.dart';
 export 'build_system/source.dart';
-export 'build_system/target.dart';
+
+final _upperRegex = RegExp(r'[A-Z]');
+
+/// Convert `fooBar` to `foo_bar`.
+String _snakeCase(String str) {
+  return str.replaceAllMapped(
+    _upperRegex,
+    (Match m) => '${m.start == 0 ? '' : '_'}${m[0]!.toLowerCase()}',
+  );
+}
+
+/// Converts `fooBar` to `FooBar`.
+String _sentenceCase(String str) =>
+    str.isEmpty ? str : '${str[0].toUpperCase()}${str.substring(1)}';
+
+/// A summary of the compilation strategy used for Dart.
+enum BuildMode {
+  /// Built in JIT mode with no optimizations, enabled asserts, and a VM service.
+  debug,
+
+  /// Built in AOT mode with some optimizations and a VM service.
+  profile,
+
+  /// Built in AOT mode with all optimizations and no VM service.
+  release,
+
+  /// Built in JIT mode with all optimizations and no VM service.
+  jitRelease;
+
+  factory BuildMode.fromCliName(String value) => values.singleWhere(
+    (BuildMode element) => element.cliName == value,
+    orElse: () => throw ArgumentError('$value is not a supported build mode'),
+  );
+
+  static const releaseModes = <BuildMode>{release, jitRelease};
+  static const jitModes = <BuildMode>{debug, jitRelease};
+
+  /// Whether this mode is considered release.
+  ///
+  /// Useful for determining whether we should enable/disable asserts or
+  /// other development features.
+  bool get isRelease => releaseModes.contains(this);
+
+  /// Whether this mode is using the JIT runtime.
+  bool get isJit => jitModes.contains(this);
+
+  /// Whether this mode is using the precompiled runtime.
+  bool get isPrecompiled => !isJit;
+
+  /// [name] formatted in snake case.
+  ///
+  /// (e.g. debug, profile, release, jit_release)
+  String get cliName => _snakeCase(name);
+
+  /// [cliName] formatted in sentence case.
+  ///
+  /// (e.g. Debug, Profile, Release, Jit_release)
+  String get uppercaseName => _sentenceCase(cliName);
+
+  /// [cliName] with `_` replaced with a space.
+  ///
+  /// (e.g. debug, profile, release, jit release)
+  String get friendlyName => cliName.replaceAll('_', ' ');
+
+  /// [friendlyName] formatted in sentence case.
+  ///
+  /// (e.g. Debug, Profile, Release, Jit release)
+  String get uppercaseFriendlyName => _sentenceCase(friendlyName);
+
+  @override
+  String toString() => cliName;
+}
 
 /// Representation of a custom build target provided by a tool extension.
 @immutable
@@ -20,10 +90,10 @@ class ExtensionBuildTarget {
     required this.name,
     required this.targetPlatform,
     this.dependencies = const <String>[],
-    this.inputs = const <Source>[],
+    this.inputs = const <ExtensionSource>[],
     this.isTopLevel = true,
     this.outputDir = kBuildDirPlaceholder,
-    this.outputs = const <Source>[],
+    this.outputs = const <ExtensionSource>[],
   });
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
@@ -44,16 +114,24 @@ class ExtensionBuildTarget {
       dependencies: switch (json[dependenciesKey]) {
         final List<Object?> rawDependencies => <String>[
           for (final item in rawDependencies)
-            if (item case final String dep) dep,
+            switch (item) {
+              final String dep => dep,
+              _ => throw ArgumentError('Invalid entry in "$dependenciesKey": $item'),
+            },
         ],
-        _ => const <String>[],
+        null => const <String>[],
+        final Object? invalid => throw ArgumentError('Invalid "$dependenciesKey": $invalid'),
       },
       inputs: switch (json[inputsKey]) {
-        final List<Object?> rawInputs => <Source>[
+        final List<Object?> rawInputs => <ExtensionSource>[
           for (final item in rawInputs)
-            if (item case final Map<String, Object?> map) Source.fromJson(map),
+            switch (item) {
+              final Map<String, Object?> map => ExtensionSource.fromJson(map),
+              _ => throw ArgumentError('Invalid entry in "$inputsKey": $item'),
+            },
         ],
-        _ => const <Source>[],
+        null => const <ExtensionSource>[],
+        final Object? invalid => throw ArgumentError('Invalid "$inputsKey": $invalid'),
       },
       isTopLevel: switch (json[isTopLevelKey]) {
         final bool value => value,
@@ -64,11 +142,15 @@ class ExtensionBuildTarget {
         _ => kBuildDirPlaceholder,
       },
       outputs: switch (json[outputsKey]) {
-        final List<Object?> rawOutputs => <Source>[
+        final List<Object?> rawOutputs => <ExtensionSource>[
           for (final item in rawOutputs)
-            if (item case final Map<String, Object?> map) Source.fromJson(map),
+            switch (item) {
+              final Map<String, Object?> map => ExtensionSource.fromJson(map),
+              _ => throw ArgumentError('Invalid entry in "$outputsKey": $item'),
+            },
         ],
-        _ => const <Source>[],
+        null => const <ExtensionSource>[],
+        final Object? invalid => throw ArgumentError('Invalid "$outputsKey": $invalid'),
       },
     );
   }
@@ -124,23 +206,23 @@ class ExtensionBuildTarget {
   final List<String> dependencies;
 
   /// Input file patterns and artifacts.
-  final List<Source> inputs;
+  final List<ExtensionSource> inputs;
 
   /// Output file patterns.
-  final List<Source> outputs;
+  final List<ExtensionSource> outputs;
 
   /// The output directory pattern.
   final String outputDir;
 
   /// Serializes the build target to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
+    descriptionKey: description,
     nameKey: name,
     targetPlatformKey: targetPlatform,
-    descriptionKey: description,
     isTopLevelKey: isTopLevel,
     dependenciesKey: dependencies,
-    inputsKey: inputs.map((Source s) => s.toMap()).toList(),
-    outputsKey: outputs.map((Source s) => s.toMap()).toList(),
+    inputsKey: inputs.map((ExtensionSource s) => s.toMap()).toList(),
+    outputsKey: outputs.map((ExtensionSource s) => s.toMap()).toList(),
     outputDirKey: outputDir,
   };
 
@@ -152,9 +234,9 @@ class ExtensionBuildTarget {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other is ExtensionBuildTarget &&
+            other.description == description &&
             other.name == name &&
             other.targetPlatform == targetPlatform &&
-            other.description == description &&
             other.isTopLevel == isTopLevel &&
             other.outputDir == outputDir &&
             _listEquals(other.dependencies, dependencies) &&
@@ -164,9 +246,9 @@ class ExtensionBuildTarget {
 
   @override
   int get hashCode => Object.hash(
+    description,
     name,
     targetPlatform,
-    description,
     isTopLevel,
     outputDir,
     Object.hashAll(dependencies),
@@ -180,24 +262,13 @@ class ExtensionBuildTarget {
 class ExtensionBuildResult {
   const ExtensionBuildResult({required this.success, this.errorMessage});
 
-  /// Creates a successful build result.
-  const ExtensionBuildResult.success() : this(success: true);
-
-  /// Creates a failed build result with the given [message].
-  const ExtensionBuildResult.failure({required String message})
-    : this(success: false, errorMessage: message);
-
   /// Deserializes an [ExtensionBuildResult] from a JSON-serializable map.
   factory ExtensionBuildResult.fromJson(Map<String, Object?> json) {
-    final bool success = switch (json[successKey]) {
-      final bool value => value,
-      _ => false,
-    };
-    if (success) {
-      return const ExtensionBuildResult.success();
-    }
     return ExtensionBuildResult(
-      success: false,
+      success: switch (json[successKey]) {
+        final bool value => value,
+        _ => false,
+      },
       errorMessage: switch (json[errorMessageKey]) {
         final String value => value,
         _ => null,

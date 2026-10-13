@@ -15,6 +15,8 @@ import 'src/device.dart';
 import 'src/diagnostics.dart';
 import 'src/template.dart';
 
+export 'src/build.dart';
+
 /// Isolate entrypoint for the prototype Linux Flutter Tool Extension.
 void linuxExtensionEntryPoint(SendPort sendPort) {
   ToolExtensionEntryPoint.run(

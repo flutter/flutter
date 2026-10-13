@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_core/flutter_tools_core.dart'
-    hide Artifact, BuildMode, HostArtifact, Source, Target;
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -316,31 +315,30 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:Artifacts artifacts, :FileSystem fs) = toolContext;
-    final String projectRoot = fs.currentDirectory.path;
+    final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
-    final String buildModeName = buildInfo.mode.cliName;
-
-    final String buildDir = fs.path.join(projectRoot, '.dart_tool', 'flutter_build');
-    final String outputDir = fs.path.normalize(
-      target.outputDir
-          .replaceAll(kProjectDirPlaceholder, projectRoot)
-          .replaceAll(kBuildDirPlaceholder, buildDir)
-          .replaceAll(kBuildModePlaceholder, buildModeName)
-          .replaceAll(kTargetPlatformPlaceholder, target.targetPlatform),
+    final Directory buildDir = projectDir
+        .childDirectory('.dart_tool')
+        .childDirectory('flutter_build');
+    final Directory outputDir = resolveExtensionOutputDir(
+      buildDir: buildDir,
+      buildMode: buildInfo.mode,
+      fileSystem: fs,
+      projectDir: projectDir,
+      target: target,
     );
-
-    final Map<String, String> resolvedArtifacts = ArtifactResolver.resolveInputs(
+    final Map<String, String> resolvedArtifacts = resolveExtensionTargetArtifacts(
       artifacts: artifacts,
       buildMode: buildInfo.mode,
       target: target,
     );
 
     final ExtensionBuildResult result = await _buildManager.build(
-      buildDir: fs.directory(buildDir).uri,
+      buildDir: buildDir.uri,
       buildMode: buildInfo.mode,
       mainPath: targetFile,
-      outputDir: fs.directory(outputDir).uri,
-      projectRoot: fs.currentDirectory.uri,
+      outputDir: outputDir.uri,
+      projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
       targetName: target.name,
     );

@@ -49,13 +49,6 @@ var _kDefaultTargets = <Target>[
   const ProfileUnpackMacOS(),
   const ReleaseUnpackMacOS(),
   // Linux targets
-  const UnpackLinux(TargetPlatform.linux_x64),
-  const UnpackLinux(TargetPlatform.linux_arm64),
-  const UnpackLinux(TargetPlatform.linux_riscv64),
-  const AotElfProfile(TargetPlatform.linux_x64),
-  const AotElfProfile(TargetPlatform.linux_arm64),
-  const AotElfRelease(TargetPlatform.linux_x64),
-  const AotElfRelease(TargetPlatform.linux_arm64),
   const DebugBundleLinuxAssets(TargetPlatform.linux_x64),
   const DebugBundleLinuxAssets(TargetPlatform.linux_arm64),
   const DebugBundleLinuxAssets(TargetPlatform.linux_riscv64),
@@ -223,37 +216,37 @@ class AssembleCommand extends FlutterCommand {
   }
 
   /// The target(s) we are building.
-  List<Target> createTargets() {
+  Future<List<Target>> createTargets() async {
     final ArgResults argumentResults = argResults!;
     if (argumentResults.rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argumentResults.rest.first;
-    final targetMap = <String, Target>{};
-    Target resolveDependency(String dependencyName) {
-      final Target? target = targetMap[dependencyName];
-      if (target == null) {
-        throwToolExit('Target "$dependencyName" not found. It might not be registered.');
-      }
-      return target;
-    }
-
-    for (final Target target in _kDefaultTargets) {
-      targetMap[target.name] = target;
-    }
-    if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?) {
-      for (final ExtensionBuildTarget target in extensionBuildManager.cachedTargets) {
-        if (!targetMap.containsKey(target.name)) {
-          targetMap[target.name] = ExtensionAssembleTarget(
-            buildManager: extensionBuildManager,
-            buildTarget: target,
-            dependencyResolver: resolveDependency,
-          );
-        } else {
+    final targetMap = <String, Target>{
+      for (final Target target in _kDefaultTargets) target.name: target,
+    };
+    if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?
+        when argumentResults.rest.any((String targetName) => !targetMap.containsKey(targetName))) {
+      for (final ExtensionBuildTarget target in await extensionBuildManager.getBuildTargets()) {
+        if (targetMap.containsKey(target.name)) {
           _toolContext.logger.printWarning(
             'Skipping custom assemble target "${target.name}" because a target with that name already exists.',
           );
+          continue;
         }
+        targetMap[target.name] = ExtensionAssembleTarget(
+          buildManager: extensionBuildManager,
+          buildTarget: target,
+          dependencyResolver: (String dependencyName) {
+            final Target? dependency = targetMap[dependencyName];
+            if (dependency == null) {
+              throwToolExit(
+                'Target "$dependencyName" required by "${target.name}" not found. It might not be registered.',
+              );
+            }
+            return dependency;
+          },
+        );
       }
     }
     final results = <Target>[
@@ -375,11 +368,8 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?) {
-      await extensionBuildManager.getBuildTargets();
-    }
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
-    final List<Target> targets = createTargets();
+    final List<Target> targets = await createTargets();
     final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
     for (final target in targets) {
