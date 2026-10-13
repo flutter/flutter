@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/common/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: common, shell_unittests_gpu_configuration, shell_unittests_fixtures, shell_benchmarks, shell_test_fixture_sources, shell_unittests.
+# Not converted: shell_unittests_gpu_configuration, shell_unittests_fixtures, shell_benchmarks, shell_test_fixture_sources, shell_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
@@ -43,6 +43,87 @@ cc_library(
 cc_library(
     name = "snapshot_pixel_format",
     hdrs = ["snapshot_pixel_format.h"],
+)
+
+cc_library(
+    name = "common",
+    srcs = [
+        "animator.cc",
+        "context_options.cc",
+        "display_manager.cc",
+        "dl_op_spy.cc",
+        "engine.cc",
+        "pipeline.cc",
+        "platform_view.cc",
+        "pointer_data_dispatcher.cc",
+        "rasterizer.cc",
+        "resource_cache_limit_calculator.cc",
+        "run_configuration.cc",
+        "serialization_callbacks.cc",
+        "shell.cc",
+        "shell_io_manager.cc",
+        "skia_event_tracer_impl.cc",
+        "snapshot_controller.cc",
+        "snapshot_controller_impeller.cc",  # impeller_supports_rendering
+        "snapshot_controller_skia.cc",
+        "switches.cc",
+        "thread_host.cc",
+        "vsync_waiter.cc",
+        "vsync_waiter_fallback.cc",
+    ],
+    hdrs = [
+        "animator.h",
+        "context_options.h",
+        "display_manager.h",
+        "dl_op_spy.h",
+        "engine.h",
+        "pipeline.h",
+        "platform_view.h",
+        "pointer_data_dispatcher.h",
+        "rasterizer.h",
+        "resource_cache_limit_calculator.h",
+        "run_configuration.h",
+        "serialization_callbacks.h",
+        "shell.h",
+        "shell_io_manager.h",
+        "skia_event_tracer_impl.h",
+        "snapshot_controller.h",
+        "snapshot_controller_impeller.h",  # impeller_supports_rendering
+        "snapshot_controller_skia.h",
+        "snapshot_surface_producer.h",
+        "switch_defs.h",
+        "switches.h",
+        "thread_host.h",
+        "vsync_waiter.h",
+        "vsync_waiter_fallback.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":base64",
+        ":display",
+        ":platform_message_handler",
+        ":snapshot_pixel_format",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/shell/geometry",
+        "//engine/src/flutter/shell/profiling",
+        "//engine/src/flutter/shell/version",
+        "//engine/src/flutter/third_party/tonic",
+        "//engine/src/flutter/txt",
+        "@dart//:dart_api_headers",
+        "@rapidjson",
+        "@skia",
+    ],
+    alwayslink = True,
 )
 
 # These are in their own source_set to avoid a dependency cycle with //common/graphics
