@@ -1636,6 +1636,31 @@ void main() {
     testedExtensions.add(FoundationServiceExtensions.viewMetricsOverride.name);
   });
 
+  test('Service extensions - viewMetricsOverride reaches the framework', () async {
+    // The extension is the way tooling installs overrides, so the whole path
+    // — handler, registry, replay, binding — is exercised once end to end.
+    final int viewId = binding.platformDispatcher.views.single.viewId;
+    addTearDown(debugClearViewMetricsOverrides);
+    final observer = _MetricsObserver();
+    binding.addObserver(observer);
+    addTearDown(() => binding.removeObserver(observer));
+    final double realRatio = binding.platformDispatcher.implicitView!.devicePixelRatio;
+
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'viewId': '$viewId', 'overrides': '{"devicePixelRatio": 3.5}'},
+    );
+    expect(observer.metricsChanged, 1);
+    expect(binding.platformDispatcher.implicitView!.devicePixelRatio, 3.5);
+
+    await binding.testExtension(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      <String, String>{'clearAll': 'true'},
+    );
+    expect(observer.metricsChanged, 2);
+    expect(binding.platformDispatcher.implicitView!.devicePixelRatio, realRatio);
+  });
+
   test('Service extensions - activeDevToolsServerAddress', () async {
     Map<String, dynamic> result;
     result = await binding.testExtension(
@@ -1683,4 +1708,11 @@ void main() {
 
     testedExtensions.add(FoundationServiceExtensions.connectedVmServiceUri.name);
   });
+}
+
+class _MetricsObserver with WidgetsBindingObserver {
+  int metricsChanged = 0;
+
+  @override
+  void didChangeMetrics() => metricsChanged += 1;
 }
