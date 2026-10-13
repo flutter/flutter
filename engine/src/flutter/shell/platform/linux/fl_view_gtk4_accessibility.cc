@@ -546,6 +546,12 @@ static void fl_gtk4_accessible_node_set_platform_states(
 }
 
 static void fl_gtk4_accessible_node_detach(FlGtk4AccessibleNode* self) {
+  // End the proxy's GTK lifecycle before clearing semantics links. Removed
+  // ancestors may already have released their AT contexts, so descendants must
+  // not flush pending state notifications through that detached hierarchy.
+  if (gtk_widget_get_realized(GTK_WIDGET(self))) {
+    gtk_widget_unrealize(GTK_WIDGET(self));
+  }
   fl_gtk4_accessible_node_set_platform_states(self, FALSE, FALSE, FALSE);
   self->parent = nullptr;
   self->next_sibling = nullptr;

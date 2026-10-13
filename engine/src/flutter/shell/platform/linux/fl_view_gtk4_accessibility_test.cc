@@ -702,6 +702,16 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
                            fl_view_gtk4_accessibility_handle_update(
                                view->accessibility_backend, &ancestor);
                          } else {
+                           // Route navigation removes a realized subtree whose
+                           // descendants can still have pending GTK states.
+                           root.child_count = 0;
+                           root.children_in_traversal_order = nullptr;
+                           FlutterSemanticsNode2* partial[] = {&root};
+                           FlutterSemanticsUpdate2 removal = update;
+                           removal.node_count = 1;
+                           removal.nodes = partial;
+                           fl_view_gtk4_accessibility_handle_update(
+                               view->accessibility_backend, &removal);
                            g_main_loop_quit(loop);
                          }
                          return kSuccess;

@@ -149,6 +149,8 @@ semantic rectangle origins, and a render surface offset within a GTK host.
 It runs at GTK scale factors 1 and 2, checking logical-coordinate conversion and
 outward rounding. A native tap triggers a root-only transform update; retained
 objects must report the updated geometry and dispatch exactly two Flutter taps.
+The second tap removes the realized subtree, exercising native notifications
+and proxy teardown after clients have queried the nodes.
 The JSON records GTK/GLib versions, scale, queried rectangles and the binary hash.
 
 This tests Component geometry with a mocked engine. It does not establish
