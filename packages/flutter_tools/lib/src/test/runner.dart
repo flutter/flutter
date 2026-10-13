@@ -25,7 +25,6 @@ import '../device.dart';
 import '../native_assets.dart';
 import '../project.dart';
 import '../web/chrome.dart';
-import '../web/compile.dart';
 import '../web/memory_fs.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
@@ -191,15 +190,13 @@ interface class FlutterTestRunner {
           .absolute
           .uri
           .toFilePath();
-      final WebDebugConfig(:WebRendererMode renderer, :bool useWasm, :bool crossOriginIsolation) =
-          debuggingOptions.webConfig;
       final WebMemoryFS result = await WebTestCompiler(toolContext: _toolContext).initialize(
         projectDirectory: flutterProject!.directory,
         testOutputDir: tempBuildDir,
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
-        webRenderer: renderer,
-        useWasm: useWasm,
+        webRenderer: debuggingOptions.webConfig.renderer,
+        useWasm: debuggingOptions.webConfig.useWasm,
       );
       testArgs
         ..add('--platform=chrome')
@@ -218,13 +215,13 @@ interface class FlutterTestRunner {
             browserFinder: findChromeExecutable,
             logger: logger,
           ),
-          crossOriginIsolation: crossOriginIsolation,
+          crossOriginIsolation: debuggingOptions.webConfig.crossOriginIsolation,
           flutterProject: flutterProject,
           flutterTesterBinPath: flutterTesterBinPath,
           toolContext: _toolContext,
-          useWasm: useWasm,
+          useWasm: debuggingOptions.webConfig.useWasm,
           webMemoryFS: result,
-          webRenderer: renderer,
+          webRenderer: debuggingOptions.webConfig.renderer,
           pauseAfterLoad: debuggingOptions.startPaused,
           testTimeRecorder: spec.testTimeRecorder,
           updateGoldens: spec.updateGoldens,

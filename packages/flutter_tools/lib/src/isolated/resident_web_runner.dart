@@ -424,13 +424,12 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   WebCompilerConfig get _compilerConfig {
-    final WebDebugConfig(:bool useWasm, :WebRendererMode renderer) = debuggingOptions.webConfig;
-    if (useWasm) {
-      return WasmCompilerConfig(renderer: renderer);
+    if (debuggingOptions.webConfig.useWasm) {
+      return WasmCompilerConfig(renderer: debuggingOptions.webConfig.renderer);
     }
     return JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-      renderer: renderer,
+      renderer: debuggingOptions.webConfig.renderer,
       deprecatedJsInterop: debuggingOptions.buildInfo.deprecatedJsInterop,
     );
   }

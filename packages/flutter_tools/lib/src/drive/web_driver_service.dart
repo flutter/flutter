@@ -25,8 +25,6 @@ import '../device.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../web/chrome_constants.dart';
-import '../web/compile.dart';
-import '../web/devfs_config.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
@@ -79,31 +77,20 @@ class WebDriverService extends DriverService {
       userIdentifier: userIdentifier,
     );
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
-    final WebDebugConfig(
-      :WebDevServerConfig? devServerConfig,
-      :WebRendererMode renderer,
-      :bool useWasm,
-    ) = debuggingOptions.webConfig;
+    final webConfig = WebDebugConfig(
+      devServerConfig: debuggingOptions.webConfig.devServerConfig,
+      renderer: debuggingOptions.webConfig.renderer,
+      useWasm: debuggingOptions.webConfig.useWasm,
+    );
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
       target: mainPath,
       debuggingOptions: buildInfo.isRelease
-          ? DebuggingOptions.disabled(
-              buildInfo,
-              webConfig: WebDebugConfig(
-                devServerConfig: devServerConfig,
-                renderer: renderer,
-                useWasm: useWasm,
-              ),
-            )
+          ? DebuggingOptions.disabled(buildInfo, webConfig: webConfig)
           : DebuggingOptions.enabled(
               buildInfo,
               disablePortPublication: debuggingOptions.disablePortPublication,
-              webConfig: WebDebugConfig(
-                devServerConfig: devServerConfig,
-                renderer: renderer,
-                useWasm: useWasm,
-              ),
+              webConfig: webConfig,
             ),
       platformArgs: platformArgs,
       stayResident: true,
