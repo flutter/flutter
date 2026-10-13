@@ -17,17 +17,13 @@ import 'android/java.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
-import 'base/bot_detector.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/error_handling_io.dart';
-import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
-import 'base/platform.dart';
 import 'base/process.dart';
-import 'base/signals.dart';
 import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
@@ -58,10 +54,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
 import 'macos/xcode.dart';
 import 'mdns_discovery.dart';
-import 'native_assets.dart';
 import 'persistent_tool_state.dart';
-import 'pre_run_validator.dart';
-import 'project.dart';
 import 'reporting/crash_reporting.dart';
 import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
@@ -201,7 +194,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         androidWorkflow: androidWorkflow!,
         iosWorkflow: globals.iosWorkflow,
         java: globals.java,
-        toolContext: const DelegatingToolContext(),
+        toolContext: globals.toolContext,
         xcode: globals.xcode,
         androidSdk: globals.androidSdk,
       ),
@@ -234,7 +227,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         analytics: globals.analytics,
         plistParser: globals.plistParser,
-        toolContext: const DelegatingToolContext(),
+        toolContext: globals.toolContext,
         xcode: globals.xcode!,
       ),
       IOSWorkflow: () => IOSWorkflow(
@@ -304,6 +297,34 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
+      ToolContext: () => ToolContext(
+        artifacts: globals.artifacts!,
+        botDetector: globals.botDetector,
+        cache: globals.cache,
+        config: globals.config,
+        customDevicesConfig: globals.customDevicesConfig,
+        flutterVersion: globals.flutterVersion,
+        fs: globals.fs,
+        git: globals.git,
+        localEngineLocator: globals.localEngineLocator!,
+        logger: globals.logger,
+        nativeAssetsBuilder: globals.nativeAssetsBuilder,
+        os: globals.os,
+        outputPreferences: globals.outputPreferences,
+        persistentToolState: globals.persistentToolState!,
+        platform: globals.platform,
+        preRunValidator: globals.preRunValidator,
+        processInfo: globals.processInfo,
+        processManager: globals.processManager,
+        processUtils: globals.processUtils,
+        projectFactory: globals.projectFactory,
+        shutdownHooks: globals.shutdownHooks,
+        signals: globals.signals,
+        stdio: globals.stdio,
+        systemClock: globals.systemClock,
+        terminal: globals.terminal,
+        userMessages: globals.userMessages,
+      ),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,
@@ -336,7 +357,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         ),
         analytics: globals.analytics,
         templateRenderer: globals.templateRenderer,
-        toolContext: const DelegatingToolContext(),
+        toolContext: globals.toolContext,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,
@@ -347,165 +368,4 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
     },
   );
-}
-
-/// A [ToolContext] that dynamically delegates to [globals] for [runInContext]
-/// and `testUsingContext`.
-class DelegatingToolContext implements ToolContext {
-  const DelegatingToolContext({
-    this._artifacts,
-    this._botDetector,
-    this._cache,
-    this._config,
-    this._customDevicesConfig,
-    this._flutterVersion,
-    this._fs,
-    this._git,
-    this._localEngineLocator,
-    this._logger,
-    this._nativeAssetsBuilder,
-    this._os,
-    this._outputPreferences,
-    this._persistentToolState,
-    this._platform,
-    this._preRunValidator,
-    this._processInfo,
-    this._processManager,
-    this._processUtils,
-    this._projectFactory,
-    this._shutdownHooks,
-    this._signals,
-    this._stdio,
-    this._systemClock,
-    this._terminal,
-    this._userMessages,
-  });
-
-  final Artifacts? _artifacts;
-  final BotDetector? _botDetector;
-  final Cache? _cache;
-  final Config? _config;
-  final CustomDevicesConfig? _customDevicesConfig;
-  final FlutterVersion? _flutterVersion;
-  final FileSystem? _fs;
-  final Git? _git;
-  final LocalEngineLocator? _localEngineLocator;
-  final Logger? _logger;
-  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
-  final OperatingSystemUtils? _os;
-  final OutputPreferences? _outputPreferences;
-  final PersistentToolState? _persistentToolState;
-  final Platform? _platform;
-  final PreRunValidator? _preRunValidator;
-  final ProcessInfo? _processInfo;
-  final ProcessManager? _processManager;
-  final ProcessUtils? _processUtils;
-  final FlutterProjectFactory? _projectFactory;
-  final ShutdownHooks? _shutdownHooks;
-  final Signals? _signals;
-  final Stdio? _stdio;
-  final SystemClock? _systemClock;
-  final AnsiTerminal? _terminal;
-  final UserMessages? _userMessages;
-
-  @override
-  Artifacts get artifacts =>
-      _artifacts ??
-      globals.artifacts ??
-      CachedArtifacts(fileSystem: fs, platform: platform, cache: cache, operatingSystemUtils: os);
-
-  @override
-  BotDetector get botDetector => _botDetector ?? globals.botDetector;
-
-  @override
-  Cache get cache => _cache ?? globals.cache;
-
-  @override
-  Config get config => _config ?? globals.config;
-
-  @override
-  CustomDevicesConfig get customDevicesConfig =>
-      _customDevicesConfig ?? globals.customDevicesConfig;
-
-  @override
-  FlutterVersion get flutterVersion => _flutterVersion ?? globals.flutterVersion;
-
-  @override
-  FileSystem get fs => _fs ?? globals.fs;
-
-  @override
-  Git get git => _git ?? globals.git;
-
-  @override
-  LocalEngineLocator get localEngineLocator =>
-      _localEngineLocator ??
-      globals.localEngineLocator ??
-      LocalEngineLocator(
-        userMessages: userMessages,
-        logger: logger,
-        platform: platform,
-        fileSystem: fs,
-        flutterRoot: Cache.flutterRoot ?? '',
-      );
-
-  @override
-  Logger get logger => _logger ?? globals.logger;
-
-  @override
-  TestCompilerNativeAssetsBuilder? get nativeAssetsBuilder =>
-      _nativeAssetsBuilder ?? globals.nativeAssetsBuilder;
-
-  @override
-  OperatingSystemUtils get os => _os ?? globals.os;
-
-  @override
-  OutputPreferences get outputPreferences => _outputPreferences ?? globals.outputPreferences;
-
-  @override
-  PersistentToolState get persistentToolState =>
-      _persistentToolState ??
-      globals.persistentToolState ??
-      PersistentToolState.test(
-        directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
-        logger: logger,
-      );
-
-  @override
-  Platform get platform => _platform ?? globals.platform;
-
-  @override
-  PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
-
-  @override
-  ProcessInfo get processInfo => _processInfo ?? globals.processInfo;
-
-  @override
-  ProcessManager get processManager => _processManager ?? globals.processManager;
-
-  @override
-  ProcessUtils get processUtils => _processUtils ?? globals.processUtils;
-
-  @override
-  FlutterProjectFactory get projectFactory => _projectFactory ?? globals.projectFactory;
-
-  @override
-  ShutdownHooks get shutdownHooks => _shutdownHooks ?? globals.shutdownHooks;
-
-  @override
-  Signals get signals => _signals ?? globals.signals;
-
-  @override
-  Stdio get stdio => _stdio ?? globals.stdio;
-
-  @override
-  SystemClock get systemClock => _systemClock ?? globals.systemClock;
-
-  @override
-  AnsiTerminal get terminal => _terminal ?? globals.terminal;
-
-  @override
-  UserMessages get userMessages => _userMessages ?? globals.userMessages;
-
-  @override
-  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
 }

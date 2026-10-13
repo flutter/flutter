@@ -40,9 +40,11 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/emulator.dart';
+import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/git.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -63,8 +65,6 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import 'context.dart';
-
-export 'package:flutter_tools/src/context_runner.dart' show DelegatingToolContext;
 
 class FakeDyldEnvironmentArtifact extends ArtifactSet {
   FakeDyldEnvironmentArtifact() : super(DevelopmentArtifact.iOS);
@@ -1218,6 +1218,7 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
     this._deviceManager,
     this._doctor,
     this._emulatorManager,
+    this.extensionBuildManager,
     this.extensionManager,
     this._featureFlags,
     this._toolContext,
@@ -1261,6 +1262,9 @@ class FakeToolDependencies extends Fake implements ToolDependencies {
 
   @override
   EmulatorManager get emulatorManager => _emulatorManager ?? FakeEmulatorManager();
+
+  @override
+  final ExtensionBuildManager? extensionBuildManager;
 
   @override
   final ExtensionManager? extensionManager;
@@ -1423,6 +1427,157 @@ class FakeToolContext extends Fake implements ToolContext {
 
   @override
   late final UserMessages userMessages = _userMessages ?? UserMessages();
+
+  @override
+  FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
+}
+
+/// A [ToolContext] that dynamically delegates to [globals] for use in [testUsingContext].
+class DelegatingToolContext with Fake implements ToolContext {
+  const DelegatingToolContext({
+    this._artifacts,
+    this._botDetector,
+    this._cache,
+    this._config,
+    this._customDevicesConfig,
+    this._flutterVersion,
+    this._fs,
+    this._git,
+    this._localEngineLocator,
+    this._logger,
+    this._os,
+    this._outputPreferences,
+    this._persistentToolState,
+    this._platform,
+    this._preRunValidator,
+    this._processInfo,
+    this._processManager,
+    this._processUtils,
+    this._projectFactory,
+    this._shutdownHooks,
+    this._signals,
+    this._stdio,
+    this._systemClock,
+    this._terminal,
+    this._userMessages,
+  });
+
+  final Artifacts? _artifacts;
+  final BotDetector? _botDetector;
+  final Cache? _cache;
+  final Config? _config;
+  final CustomDevicesConfig? _customDevicesConfig;
+  final FlutterVersion? _flutterVersion;
+  final FileSystem? _fs;
+  final Git? _git;
+  final LocalEngineLocator? _localEngineLocator;
+  final Logger? _logger;
+  final OperatingSystemUtils? _os;
+  final OutputPreferences? _outputPreferences;
+  final PersistentToolState? _persistentToolState;
+  final Platform? _platform;
+  final PreRunValidator? _preRunValidator;
+  final ProcessInfo? _processInfo;
+  final ProcessManager? _processManager;
+  final ProcessUtils? _processUtils;
+  final FlutterProjectFactory? _projectFactory;
+  final ShutdownHooks? _shutdownHooks;
+  final Signals? _signals;
+  final Stdio? _stdio;
+  final SystemClock? _systemClock;
+  final AnsiTerminal? _terminal;
+  final UserMessages? _userMessages;
+
+  @override
+  Artifacts get artifacts => _artifacts ?? globals.artifacts ?? Artifacts.test();
+
+  @override
+  BotDetector get botDetector => _botDetector ?? globals.botDetector;
+
+  @override
+  Cache get cache => _cache ?? globals.cache;
+
+  @override
+  Config get config => _config ?? globals.config;
+
+  @override
+  CustomDevicesConfig get customDevicesConfig =>
+      _customDevicesConfig ?? globals.customDevicesConfig;
+
+  @override
+  FlutterVersion get flutterVersion => _flutterVersion ?? globals.flutterVersion;
+
+  @override
+  FileSystem get fs => _fs ?? globals.fs;
+
+  @override
+  Git get git => _git ?? globals.git;
+
+  @override
+  LocalEngineLocator get localEngineLocator =>
+      _localEngineLocator ??
+      globals.localEngineLocator ??
+      LocalEngineLocator(
+        userMessages: userMessages,
+        logger: logger,
+        platform: platform,
+        fileSystem: fs,
+        flutterRoot: Cache.flutterRoot ?? '',
+      );
+
+  @override
+  Logger get logger => _logger ?? globals.logger;
+
+  @override
+  OperatingSystemUtils get os => _os ?? globals.os;
+
+  @override
+  OutputPreferences get outputPreferences => _outputPreferences ?? globals.outputPreferences;
+
+  @override
+  PersistentToolState get persistentToolState =>
+      _persistentToolState ??
+      globals.persistentToolState ??
+      PersistentToolState.test(
+        directory: fs.systemTempDirectory.createTempSync('persistent_tool_state'),
+        logger: logger,
+      );
+
+  @override
+  Platform get platform => _platform ?? globals.platform;
+
+  @override
+  PreRunValidator get preRunValidator => _preRunValidator ?? const NoOpPreRunValidator();
+
+  @override
+  ProcessInfo get processInfo => _processInfo ?? globals.processInfo;
+
+  @override
+  ProcessManager get processManager => _processManager ?? globals.processManager;
+
+  @override
+  ProcessUtils get processUtils => _processUtils ?? globals.processUtils;
+
+  @override
+  FlutterProjectFactory get projectFactory => _projectFactory ?? globals.projectFactory;
+
+  @override
+  ShutdownHooks get shutdownHooks => _shutdownHooks ?? globals.shutdownHooks;
+
+  @override
+  Signals get signals => _signals ?? globals.signals;
+
+  @override
+  Stdio get stdio => _stdio ?? globals.stdio;
+
+  @override
+  SystemClock get systemClock => _systemClock ?? globals.systemClock;
+
+  @override
+  AnsiTerminal get terminal => _terminal ?? globals.terminal;
+
+  @override
+  UserMessages get userMessages => _userMessages ?? globals.userMessages;
 
   @override
   FileSystemUtils get fileSystemUtils => FileSystemUtils(fileSystem: fs, platform: platform);
