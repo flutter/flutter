@@ -2713,6 +2713,54 @@ test_fixtures("fixtures") {
       );
     });
 
+    test('a relative path with .. resolves as GN resolves it', () async {
+      // tonic's suite lists ../file_loader/file_loader_unittests.cc, a file
+      // of the parent package; a Dart entry point is a single file.
+      const layout = OutputLayout.main(
+        packages: <String>{'engine/src/flutter', 'engine/src/flutter/example'},
+      );
+      final String output = await convert('''
+test_fixtures("fixtures") {
+  dart_main = "fixtures/main.dart"
+  use_target_as_artifact_prefix = true
+}
+executable("example_unittests") {
+  testonly = true
+  sources = [
+    "../file_loader/file_loader_unittests.cc",
+    "sub/../local_unittest.cc",
+  ]
+}
+''', layout: layout);
+      expect(
+        output,
+        contains('''
+flutter_test_fixtures(
+    name = "fixtures",
+    dart_main = "fixtures/main.dart",
+    use_target_as_artifact_prefix = True,
+)
+'''),
+      );
+      expect(
+        output,
+        contains('''
+    srcs = [
+        "local_unittest.cc",
+        "//engine/src/flutter:file_loader/file_loader_unittests.cc",
+    ],
+'''),
+      );
+      await expectLater(
+        convert('''
+source_set("x") {
+  sources = [ "../../../../escape.cc" ]
+}
+'''),
+        throwsGnError(line: 2, message: 'leaves the source root'),
+      );
+    });
+
     test('a private config of another file is an implementation dependency', () async {
       // `../skia:skia_private` names a sibling directory's config; as a
       // private config its library applies to this target's compiles only.

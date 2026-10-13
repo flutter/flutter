@@ -1,0 +1,45 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/third_party/tonic/tests/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_test_fixtures(
+    name = "tonic_fixtures",
+    dart_main = "fixtures/tonic_test.dart",
+)
+
+cc_test(
+    name = "tonic_unittests",
+    size = "small",
+    srcs = [
+        "dart_persistent_handle_unittest.cc",
+        "dart_state_unittest.cc",
+        "dart_weak_persistent_handle_unittest.cc",
+        "ffi_native_unittest.cc",
+        "//engine/src/flutter/third_party/tonic:file_loader/file_loader_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/runtime:runtime
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":tonic_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/runtime:libdart",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:fixture_test",
+        "//engine/src/flutter/third_party/tonic",
+        "@dart//:dart_api_headers",
+        "@googletest//:gtest",
+    ],
+)
