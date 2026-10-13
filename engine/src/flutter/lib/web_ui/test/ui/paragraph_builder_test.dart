@@ -132,7 +132,8 @@ Future<void> testMain() async {
 
       expect(manual.numberOfLines, 2);
       expect(hidden.numberOfLines, 2);
-      expect(manual.longestLine, greaterThan(hidden.longestLine));
+      expect(manual.longestLine, 50);
+      expect(hidden.longestLine, 40);
     });
 
     test('unspecified behaves like manual', () {
