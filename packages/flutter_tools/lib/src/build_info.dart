@@ -482,32 +482,44 @@ class AndroidBuildInfo {
   /// Note that [targetArchs] (`-Ptarget-platform`) is resolved by the Gradle
   /// builder so `--local-engine` can override it from the local engine path.
   List<String> toGradleConfig() {
-    final AndroidGradleConfig gradleConfig = buildInfo.androidGradleConfig;
+    final BuildInfo(
+      :List<String> dartDefines,
+      :bool dartObfuscation,
+      :String? frontendServerStarterPath,
+      :List<String> extraFrontEndOptions,
+      :List<String> extraGenSnapshotOptions,
+      :String? splitDebugInfoPath,
+      :bool trackWidgetCreation,
+      :bool treeShakeIcons,
+      :String? performanceMeasurementFile,
+      :String? codeSizeDirectory,
+      androidGradleConfig: AndroidGradleConfig(
+        :bool? enableHcpp,
+        :bool? explicitEnableHcpp,
+        :List<String> projectArgs,
+        :String? projectCacheDir,
+      ),
+    ) = buildInfo;
     // PACKAGE_CONFIG not currently supported.
     return <String>[
-      if (buildInfo.dartDefines.isNotEmpty)
-        '-Pdart-defines=${encodeDartDefines(buildInfo.dartDefines)}',
-      '-Pdart-obfuscation=${buildInfo.dartObfuscation}',
-      if (buildInfo.frontendServerStarterPath != null)
-        '-Pfrontend-server-starter-path=${buildInfo.frontendServerStarterPath}',
-      if (buildInfo.extraFrontEndOptions.isNotEmpty)
-        '-Pextra-front-end-options=${buildInfo.extraFrontEndOptions.join(',')}',
-      if (buildInfo.extraGenSnapshotOptions.isNotEmpty)
-        '-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions.join(',')}',
-      if (buildInfo.splitDebugInfoPath != null)
-        '-Psplit-debug-info=${buildInfo.splitDebugInfoPath}',
-      '-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}',
-      '-Ptree-shake-icons=${buildInfo.treeShakeIcons}',
-      if (buildInfo.performanceMeasurementFile != null)
-        '-Pperformance-measurement-file=${buildInfo.performanceMeasurementFile}',
-      if (buildInfo.codeSizeDirectory != null)
-        '-Pcode-size-directory=${buildInfo.codeSizeDirectory}',
-      if (gradleConfig.enableHcpp != null) '-Penable-hcpp=${gradleConfig.enableHcpp}',
-      if (gradleConfig.explicitEnableHcpp != null)
-        '-Pexplicit-enable-hcpp=${gradleConfig.explicitEnableHcpp}',
-      for (final String projectArg in gradleConfig.projectArgs) '-P$projectArg',
-      if (gradleConfig.projectCacheDir != null)
-        '--project-cache-dir=${gradleConfig.projectCacheDir}',
+      if (dartDefines.isNotEmpty) '-Pdart-defines=${encodeDartDefines(dartDefines)}',
+      '-Pdart-obfuscation=$dartObfuscation',
+      if (frontendServerStarterPath != null)
+        '-Pfrontend-server-starter-path=$frontendServerStarterPath',
+      if (extraFrontEndOptions.isNotEmpty)
+        '-Pextra-front-end-options=${extraFrontEndOptions.join(',')}',
+      if (extraGenSnapshotOptions.isNotEmpty)
+        '-Pextra-gen-snapshot-options=${extraGenSnapshotOptions.join(',')}',
+      if (splitDebugInfoPath != null) '-Psplit-debug-info=$splitDebugInfoPath',
+      '-Ptrack-widget-creation=$trackWidgetCreation',
+      '-Ptree-shake-icons=$treeShakeIcons',
+      if (performanceMeasurementFile != null)
+        '-Pperformance-measurement-file=$performanceMeasurementFile',
+      if (codeSizeDirectory != null) '-Pcode-size-directory=$codeSizeDirectory',
+      if (enableHcpp != null) '-Penable-hcpp=$enableHcpp',
+      if (explicitEnableHcpp != null) '-Pexplicit-enable-hcpp=$explicitEnableHcpp',
+      for (final String projectArg in projectArgs) '-P$projectArg',
+      if (projectCacheDir != null) '--project-cache-dir=$projectCacheDir',
       if (splitPerAbi) '-Psplit-per-abi=true',
     ];
   }
