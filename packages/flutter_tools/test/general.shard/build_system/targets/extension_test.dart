@@ -267,34 +267,44 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    'ExtensionAssembleTarget throws ToolExit for invalid targetPlatform or artifact platformName',
-    () async {
-      final ExtensionAssembleTarget invalidTargetPlatformTarget = _createTarget(
-        targetPlatform: 'invalid-platform',
-      );
-
-      await expectLater(
-        () => invalidTargetPlatformTarget.build(environment),
-        throwsToolExit(
-          message: 'Invalid target platform "invalid-platform" for extension build target "custom-target".',
+  testWithoutContext('ExtensionAssembleTarget supports custom targetPlatform and throws ToolExit for invalid artifact platformName', () async {
+    final buildManager = FakeExtensionBuildManager();
+    final ExtensionAssembleTarget customTargetPlatformTarget = _createTarget(
+      buildManager: buildManager,
+      targetPlatform: 'custom-embedder-arm64',
+      inputs: const <ExtensionSource>[
+        ExtensionSource.artifact(BuiltInArtifacts.icuData),
+        ExtensionSource.artifact(
+          BuiltInArtifacts.genSnapshot,
+          platform: 'linux-arm64',
+          mode: .release,
         ),
-      );
+      ],
+    );
 
-      final ExtensionAssembleTarget invalidArtifactPlatformTarget = _createTarget(
-        inputs: const <ExtensionSource>[
-          ExtensionSource.artifact(BuiltInArtifacts.icuData, platform: 'invalid-artifact-platform'),
-        ],
-      );
+    await customTargetPlatformTarget.build(environment);
 
-      await expectLater(
-        () => invalidArtifactPlatformTarget.build(environment),
-        throwsToolExit(
-          message: 'Invalid platform name "invalid-artifact-platform" for artifact "icuData".',
-        ),
-      );
-    },
-  );
+    expect(
+      buildManager.invokedResolvedArtifacts,
+      equals(<String, String>{
+        'icuData': 'Artifact.icuData.debug',
+        'genSnapshot': 'Artifact.genSnapshot.TargetPlatform.linux_arm64.release',
+      }),
+    );
+
+    final ExtensionAssembleTarget invalidArtifactPlatformTarget = _createTarget(
+      inputs: const <ExtensionSource>[
+        ExtensionSource.artifact(BuiltInArtifacts.icuData, platform: 'invalid-artifact-platform'),
+      ],
+    );
+
+    await expectLater(
+      () => invalidArtifactPlatformTarget.build(environment),
+      throwsToolExit(
+        message: 'Invalid platform name "invalid-artifact-platform" for artifact "icuData".',
+      ),
+    );
+  });
 
   group('resolveExtensionOutputDir', () {
     final cases = <({String description, String pattern, String expectedPath})>[

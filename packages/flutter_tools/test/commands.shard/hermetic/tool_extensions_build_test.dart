@@ -36,6 +36,7 @@ final class _TestExtensionTarget extends ExtensionTarget {
     required super.description,
     required this.name,
     this.errorMessage,
+    this.inputs = const <ExtensionSource>[],
     super.isTopLevel,
     super.outputDir,
     this.shouldSucceed = true,
@@ -44,6 +45,9 @@ final class _TestExtensionTarget extends ExtensionTarget {
 
   @override
   final String name;
+
+  @override
+  final List<ExtensionSource> inputs;
 
   final String? errorMessage;
   final bool shouldSucceed;
@@ -91,9 +95,16 @@ final class _FailingAndConflictingBuildService extends BuildService {
       errorMessage: 'Custom build compilation error.',
     ),
     _TestExtensionTarget(
-      description: 'Custom build target with invalid platform.',
-      name: 'invalid-platform-build',
-      targetPlatform: 'invalid-platform',
+      description: 'Custom build target with custom embedder platform.',
+      name: 'custom-platform-build',
+      targetPlatform: 'custom-embedder-arm64',
+    ),
+    _TestExtensionTarget(
+      description: 'Custom build target with invalid artifact platform.',
+      name: 'invalid-artifact-platform-build',
+      inputs: <ExtensionSource>[
+        ExtensionSource.artifact(BuiltInArtifacts.icuData, platform: 'invalid-platform'),
+      ],
     ),
     _TestExtensionTarget(description: 'Conflicting bundle target.', name: 'bundle'),
     _TestExtensionTarget(
@@ -646,10 +657,12 @@ void main() {
           throwsToolExit(message: 'Build failed: Custom build compilation error.'),
         );
 
+        await commandRunner.run(<String>['build', 'custom-platform-build', '--no-pub']);
+
         await expectLater(
-          () => commandRunner.run(<String>['build', 'invalid-platform-build', '--no-pub']),
+          () => commandRunner.run(<String>['build', 'invalid-artifact-platform-build', '--no-pub']),
           throwsToolExit(
-            message: 'Invalid target platform "invalid-platform" for extension build target "invalid-platform-build".',
+            message: 'Invalid platform name "invalid-platform" for artifact "icuData".',
           ),
         );
 

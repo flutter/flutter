@@ -99,8 +99,8 @@ Directory resolveExtensionOutputDir({
 /// Resolves all engine and host artifact inputs declared on [target] using
 /// [artifacts] and [buildMode].
 ///
-/// Throws a [ToolExit] if [ExtensionBuildTarget.targetPlatform], any artifact
-/// platform name, or any requested artifact name is invalid or unsupported.
+/// Throws a [ToolExit] if any artifact platform name or requested artifact
+/// name is invalid or unsupported.
 Map<String, String> resolveExtensionTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
@@ -111,16 +111,14 @@ Map<String, String> resolveExtensionTargetArtifacts({
     try {
       targetPlatform = TargetPlatform.fromName(target.targetPlatform);
     } on Exception {
-      throwToolExit(
-        'Invalid target platform "${target.targetPlatform}" for extension build target "${target.name}".',
-      );
+      // Custom extension target platforms do not map to a built-in TargetPlatform.
     }
   }
   final resolvedArtifacts = <String, String>{};
   for (final ExtensionSource input in target.inputs) {
     switch (input) {
       case ExtensionPatternSource():
-        break;
+        continue;
       case ExtensionArtifactSource(
         :final ExtensionArtifact artifact,
         :final String? platform,
