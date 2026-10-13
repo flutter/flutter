@@ -106,12 +106,6 @@ exports_files([
   ),
   ConvertedFile(
     '//flutter/testing',
-    skip: <String, String>{
-      'vulkan': 'needs //flutter/vulkan',
-      'test_swiftshader_utils': 'needs //flutter/third_party/swiftshader',
-      'test_swangle_utils': 'needs //flutter/third_party/angle',
-      'opengl': 'needs //flutter/third_party/angle',
-    },
     // The fixtures macro in testing.bzl compiles this file into every
     // fixtures library, from whichever package declares one.
     //
