@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/display_list/image/dl_image_skia.h"
-#include "flutter/shell/platform/android/image_lru.h"
+#include "flutter/shell/platform/embedder/embedder_image_lru.h"
 #include "gtest/gtest.h"
 
 namespace flutter {

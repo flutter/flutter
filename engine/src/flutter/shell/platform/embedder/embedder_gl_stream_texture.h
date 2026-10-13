@@ -11,6 +11,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl_stream.h"
+#include "flutter/shell/platform/embedder/embedder_impeller_device_context.h"
 
 namespace flutter {
 
@@ -29,15 +30,23 @@ class EmbedderGLStreamTexture final : public Texture {
   ///             `info->user_data`, if it does not describe a usable OpenGL
   ///             stream source.
   ///
+  /// @param[in]  info            The texture and its source.
+  /// @param[in]  device_context  Returns the Impeller device context, which
+  ///                             the Vulkan implementation copies frames with.
+  ///                             May be null if the engine never renders with
+  ///                             Impeller on Vulkan.
+  ///
   static std::unique_ptr<EmbedderGLStreamTexture> Create(
-      const FlutterExternalTextureInfo& info);
+      const FlutterExternalTextureInfo& info,
+      EmbedderImpellerDeviceContextGetter device_context = nullptr);
 
   ~EmbedderGLStreamTexture() override;
 
  private:
   EmbedderGLStreamTexture(int64_t id,
                           EmbedderOpenGLTextureStream stream,
-                          VoidCallback destruction_callback);
+                          VoidCallback destruction_callback,
+                          EmbedderImpellerDeviceContextGetter device_context);
 
   // |Texture|
   void Paint(PaintContext& context,
@@ -62,6 +71,7 @@ class EmbedderGLStreamTexture final : public Texture {
 
   const EmbedderOpenGLTextureStream stream_;
   const VoidCallback destruction_callback_;
+  const EmbedderImpellerDeviceContextGetter device_context_;
   std::unique_ptr<EmbedderExternalTextureGLStream> implementation_;
   bool logged_unsupported_renderer_ = false;
 

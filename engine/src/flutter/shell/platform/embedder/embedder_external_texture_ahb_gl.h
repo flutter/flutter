@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_GL_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_GL_H_
+
+#include <android/hardware_buffer.h>
 
 #include <memory>
 #include <optional>
@@ -11,22 +13,23 @@
 
 #include "flutter/impeller/toolkit/egl/image.h"
 #include "flutter/impeller/toolkit/gles/texture.h"
-#include "flutter/shell/platform/android/image_external_texture.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_ahb.h"
 
 namespace flutter {
 
-class ImageExternalTextureGL : public ImageExternalTexture {
+class EmbedderExternalTextureAHBGL : public EmbedderExternalTextureAHB {
  public:
-  ImageExternalTextureGL(int64_t id, HardwareBufferSource source);
+  EmbedderExternalTextureAHBGL(int64_t id,
+                               EmbedderAndroidHardwareBufferSource source);
 
  protected:
-  // |ImageExternalTexture|
+  // |EmbedderExternalTextureAHB|
   void Attach(PaintContext& context) override;
 
-  // |ImageExternalTexture|
+  // |EmbedderExternalTextureAHB|
   void Detach() override;
 
-  // |ImageExternalTexture|
+  // |EmbedderExternalTextureAHB|
   void ProcessFrame(PaintContext& context, const SkRect& bounds) override;
 
   virtual sk_sp<flutter::DlImage> CreateDlImage(
@@ -51,9 +54,9 @@ class ImageExternalTextureGL : public ImageExternalTexture {
   // is removed from the LRU cache.
   std::unordered_map<HardwareBufferKey, GlEntry> gl_entries_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTextureGL);
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureAHBGL);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_GL_H_

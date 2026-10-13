@@ -2,34 +2,34 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_IMPELLER_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_IMPELLER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_GL_IMPELLER_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_GL_IMPELLER_H_
 
 #include <memory>
 #include <optional>
 
 #include "flutter/fml/macros.h"
 #include "flutter/impeller/renderer/backend/gles/context_gles.h"
-#include "flutter/shell/platform/android/image_external_texture_gl.h"
-#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_ahb_gl.h"
 
 namespace flutter {
 
-class ImageExternalTextureGLImpeller : public ImageExternalTextureGL {
+class EmbedderExternalTextureAHBGLImpeller
+    : public EmbedderExternalTextureAHBGL {
  public:
-  ImageExternalTextureGLImpeller(
+  EmbedderExternalTextureAHBGLImpeller(
       const std::shared_ptr<impeller::ContextGLES>& context,
       int64_t id,
-      HardwareBufferSource source);
+      EmbedderAndroidHardwareBufferSource source);
 
  private:
-  // |ImageExternalTexture|
+  // |EmbedderExternalTextureAHB|
   void Attach(PaintContext& context) override;
 
-  // |ImageExternalTexture|
+  // |EmbedderExternalTextureAHB|
   void Detach() override;
 
-  // |ImageExternalTextureGL|
+  // |EmbedderExternalTextureAHBGL|
   sk_sp<flutter::DlImage> CreateDlImage(
       PaintContext& context,
       const SkRect& bounds,
@@ -38,9 +38,9 @@ class ImageExternalTextureGLImpeller : public ImageExternalTextureGL {
 
   const std::shared_ptr<impeller::ContextGLES> impeller_context_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTextureGLImpeller);
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureAHBGLImpeller);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_GL_IMPELLER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_GL_IMPELLER_H_

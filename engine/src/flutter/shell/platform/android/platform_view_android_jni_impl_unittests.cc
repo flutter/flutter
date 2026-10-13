@@ -1397,15 +1397,36 @@ TEST_F(PlatformViewAndroidJNIImplTest, RegisterImageTextureCallsEmbedderApi) {
   std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
   ASSERT_TRUE(holder->IsValid());
 
-  std::vector<int64_t> registered_ids;
-  holder->GetEmbedderApiForTesting().RegisterExternalTexture = MOCK_ENGINE_PROC(
-      RegisterExternalTexture,
-      ([&registered_ids](FLUTTER_API_SYMBOL(FlutterEngine) engine,
-                         int64_t texture_identifier) {
-        EXPECT_NE(engine, nullptr);
-        registered_ids.push_back(texture_identifier);
-        return kSuccess;
-      }));
+  struct Registration {
+    int64_t texture_id;
+    bool drop_frames_on_context_destroyed;
+  };
+  std::vector<Registration> registrations;
+  holder->GetEmbedderApiForTesting().RegisterExternalTextureWithInfo =
+      MOCK_ENGINE_PROC(
+          RegisterExternalTextureWithInfo,
+          ([&registrations](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                            const FlutterExternalTextureInfo* info) {
+            EXPECT_NE(engine, nullptr);
+            EXPECT_EQ(info->struct_size, sizeof(FlutterExternalTextureInfo));
+            EXPECT_EQ(info->type,
+                      kFlutterExternalTextureTypeAndroidHardwareBuffer);
+            const FlutterAndroidHardwareBufferSource* source =
+                info->android_hardware_buffer;
+            EXPECT_NE(source, nullptr);
+            if (source != nullptr) {
+              EXPECT_EQ(source->struct_size,
+                        sizeof(FlutterAndroidHardwareBufferSource));
+              EXPECT_NE(source->acquire_frame_callback, nullptr);
+              registrations.push_back(
+                  {info->texture_id, source->drop_frames_on_context_destroyed});
+            }
+            // Stands in for the engine, which destroys the source once the
+            // texture is unregistered.
+            EXPECT_NE(info->destruction_callback, nullptr);
+            info->destruction_callback(info->user_data);
+            return kSuccess;
+          }));
 
   const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
   jobject jcaller = reinterpret_cast<jobject>(123);
@@ -1418,8 +1439,52 @@ TEST_F(PlatformViewAndroidJNIImplTest, RegisterImageTextureCallsEmbedderApi) {
   register_image_texture(&mock_env, jcaller, shell_holder, kResetTextureId,
                          jimage_entry, JNI_TRUE);
 
-  EXPECT_THAT(registered_ids,
-              ElementsAre(kKeepAliveTextureId, kResetTextureId));
+  ASSERT_EQ(registrations.size(), 2u);
+  EXPECT_EQ(registrations[0].texture_id, kKeepAliveTextureId);
+  EXPECT_FALSE(registrations[0].drop_frames_on_context_destroyed);
+  EXPECT_EQ(registrations[1].texture_id, kResetTextureId);
+  EXPECT_TRUE(registrations[1].drop_frames_on_context_destroyed);
+}
+
+TEST_F(PlatformViewAndroidJNIImplTest,
+       RegisterImageTextureReleasesEntryWhenEngineRejectsIt) {
+  MockJNIEnvProvider env_provider;
+  MockJNIEnv& mock_env = env_provider.env();
+  auto register_image_texture = reinterpret_cast<RegisterImageTextureFn>(
+      RegisterNativesAndFind(mock_env, "nativeRegisterImageTexture"));
+  ASSERT_NE(register_image_texture, nullptr);
+
+  std::unique_ptr<AndroidShellHolder> holder = CreateHolderWithMergedThreads();
+  ASSERT_TRUE(holder->IsValid());
+  holder->GetEmbedderApiForTesting().RegisterExternalTextureWithInfo =
+      MOCK_ENGINE_PROC(RegisterExternalTextureWithInfo,
+                       ([](FLUTTER_API_SYMBOL(FlutterEngine) engine,
+                           const FlutterExternalTextureInfo* info) {
+                         return kInternalInconsistency;
+                       }));
+
+  // A value no other test object uses, so only this entry's global references
+  // are counted.
+  jobject jimage_entry = reinterpret_cast<jobject>(4004);
+  int new_global_refs = 0;
+  int deleted_global_refs = 0;
+  EXPECT_CALL(mock_env, NewGlobalRef(jimage_entry))
+      .WillRepeatedly([&new_global_refs](jobject object) {
+        new_global_refs++;
+        return object;
+      });
+  EXPECT_CALL(mock_env, DeleteGlobalRef(jimage_entry))
+      .WillRepeatedly(
+          [&deleted_global_refs](jobject object) { deleted_global_refs++; });
+
+  const jlong shell_holder = reinterpret_cast<jlong>(holder.get());
+  jobject jcaller = reinterpret_cast<jobject>(123);
+  constexpr jlong kTextureId = 8;
+  register_image_texture(&mock_env, jcaller, shell_holder, kTextureId,
+                         jimage_entry, JNI_TRUE);
+
+  EXPECT_GT(new_global_refs, 0);
+  EXPECT_EQ(deleted_global_refs, new_global_refs);
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest,

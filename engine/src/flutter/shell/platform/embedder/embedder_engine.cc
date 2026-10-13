@@ -431,6 +431,18 @@ void EmbedderEngine::RegisterExternalTexture(std::shared_ptr<Texture> texture) {
   shell_->GetPlatformView()->RegisterTexture(std::move(texture));
 }
 
+EmbedderImpellerDeviceContextGetter
+EmbedderEngine::GetImpellerDeviceContextGetter() const {
+  FML_DCHECK(IsValid());
+  // A raw pointer, because the weak pointer may only be checked on the
+  // platform thread. The platform view outlives every registered texture: the
+  // shell destroys the rasterizer, which owns them, before the platform view.
+  // The shell itself asks the platform view for this context on the raster
+  // thread when it sets the context up.
+  PlatformView* platform_view = shell_->GetPlatformView().get();
+  return [platform_view]() { return platform_view->GetImpellerContext(); };
+}
+
 bool EmbedderEngine::UnregisterTexture(int64_t texture) {
   if (!IsValid()) {
     return false;

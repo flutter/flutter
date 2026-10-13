@@ -3757,6 +3757,13 @@ typedef enum {
   /// and with Impeller on Vulkan. Other renderers log an error and do not
   /// draw it.
   kFlutterExternalTextureTypeOpenGLStream,
+  /// Android only. Each frame is an `AHardwareBuffer`, such as the newest
+  /// image of an `android.media.ImageReader`. See
+  /// `FlutterAndroidHardwareBufferSource`. The engine draws it with Skia on
+  /// OpenGL ES, Impeller on OpenGL ES and Impeller on Vulkan; the software
+  /// renderer logs an error and does not draw it. Registration fails on other
+  /// platforms.
+  kFlutterExternalTextureTypeAndroidHardwareBuffer,
 } FlutterExternalTextureType;
 
 /// The callbacks of a `kFlutterExternalTextureTypeOpenGLStream` texture. The
@@ -3783,6 +3790,48 @@ typedef struct {
   bool (*has_pending_frame_callback)(void* /* user data */);
 } FlutterOpenGLTextureStreamSource;
 
+/// Alias for `AHardwareBuffer*`.
+typedef void* FlutterAndroidHardwareBufferHandle;
+
+/// A frame of a `kFlutterExternalTextureTypeAndroidHardwareBuffer` texture.
+typedef struct {
+  /// The size of this struct. Must be
+  /// sizeof(FlutterAndroidHardwareBufferFrame).
+  size_t struct_size;
+  /// The buffer holding the frame. Valid until `release_callback` runs. May be
+  /// null if the producer had a frame but could not hand out its buffer.
+  FlutterAndroidHardwareBufferHandle hardware_buffer;
+  /// Passed to `release_callback`.
+  void* release_user_data;
+  /// Called once, on the raster thread, when the engine no longer needs
+  /// `hardware_buffer`. The engine imports the buffer and releases it before
+  /// the paint returns, and keeps its own reference to what it imported. May
+  /// be null.
+  VoidCallback release_callback;
+} FlutterAndroidHardwareBufferFrame;
+
+/// The callbacks of a `kFlutterExternalTextureTypeAndroidHardwareBuffer`
+/// texture. The engine calls them on the raster thread. Each callback receives
+/// the `user_data` of the `FlutterExternalTextureInfo`.
+typedef struct {
+  /// The size of this struct. Must be
+  /// sizeof(FlutterAndroidHardwareBufferSource).
+  size_t struct_size;
+  /// Called for every paint that is not frozen. Writes the producer's newest
+  /// frame to `frame_out` and returns true, or returns false if there is none;
+  /// the texture then draws its current frame again. The engine caches what it
+  /// imported for each buffer (by `AHardwareBuffer_getId` where available), so
+  /// producers that cycle through a fixed set of buffers are imported once per
+  /// buffer.
+  bool (*acquire_frame_callback)(void* /* user data */,
+                                 FlutterAndroidHardwareBufferFrame* frame_out);
+  /// Whether the texture drops its current frame and its cache when the
+  /// engine's graphics context is destroyed. If false, it keeps them and draws
+  /// the current frame again once a context is back, which suits producers
+  /// that do not produce a new frame after the app returns to the foreground.
+  bool drop_frames_on_context_destroyed;
+} FlutterAndroidHardwareBufferSource;
+
 /// Describes a texture for `FlutterEngineRegisterExternalTextureWithInfo`.
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterExternalTextureInfo).
@@ -3800,6 +3849,9 @@ typedef struct {
   /// when the engine no longer calls the source. Not called if registration
   /// fails. May be null.
   VoidCallback destruction_callback;
+  /// The source when `type` is
+  /// `kFlutterExternalTextureTypeAndroidHardwareBuffer`.
+  const FlutterAndroidHardwareBufferSource* android_hardware_buffer;
 } FlutterExternalTextureInfo;
 
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES

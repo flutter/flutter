@@ -2,28 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/image_external_texture_gl_impeller.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_ahb_gl_impeller.h"
 
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/backend/gles/texture_gles.h"
 
 namespace flutter {
 
-ImageExternalTextureGLImpeller::ImageExternalTextureGLImpeller(
+EmbedderExternalTextureAHBGLImpeller::EmbedderExternalTextureAHBGLImpeller(
     const std::shared_ptr<impeller::ContextGLES>& context,
     int64_t id,
-    HardwareBufferSource source)
-    : ImageExternalTextureGL(id, source), impeller_context_(context) {}
+    EmbedderAndroidHardwareBufferSource source)
+    : EmbedderExternalTextureAHBGL(id, source), impeller_context_(context) {}
 
-void ImageExternalTextureGLImpeller::Detach() {}
+void EmbedderExternalTextureAHBGLImpeller::Detach() {}
 
-void ImageExternalTextureGLImpeller::Attach(PaintContext& context) {
+void EmbedderExternalTextureAHBGLImpeller::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
-    ImageExternalTextureGL::Attach(context);
+    EmbedderExternalTextureAHBGL::Attach(context);
   }
 }
 
-sk_sp<flutter::DlImage> ImageExternalTextureGLImpeller::CreateDlImage(
+sk_sp<flutter::DlImage> EmbedderExternalTextureAHBGLImpeller::CreateDlImage(
     PaintContext& context,
     const SkRect& bounds,
     std::optional<HardwareBufferKey> id,

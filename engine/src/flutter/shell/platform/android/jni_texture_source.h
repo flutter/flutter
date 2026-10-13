@@ -9,7 +9,6 @@
 
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/android/texture_source.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
@@ -28,13 +27,16 @@ FlutterExternalTextureInfo MakeJavaSurfaceTextureInfo(
     const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture);
 
 //------------------------------------------------------------------------------
-/// @brief      Makes the source of an external texture fed by a Java
-///             ImageTextureEntry. `image_texture_entry` is the WeakReference
-///             to it that FlutterJNI registers. Each frame is the hardware
-///             buffer of the entry's latest image; releasing the frame closes
-///             the Java HardwareBuffer.
+/// @brief      Describes an external texture fed by a Java ImageTextureEntry,
+///             for FlutterEngineRegisterExternalTextureWithInfo.
+///             `image_texture_entry` is the WeakReference to it that FlutterJNI
+///             registers. Each frame is the hardware buffer of the entry's
+///             latest image; releasing the frame closes the Java
+///             HardwareBuffer. If registration fails, the caller still owns the
+///             info's `user_data` and passes it to `destruction_callback`.
 ///
-HardwareBufferSource MakeJavaImageTextureSource(
+FlutterExternalTextureInfo MakeJavaImageTextureInfo(
+    int64_t texture_id,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
     bool drop_frames_on_context_destroyed);

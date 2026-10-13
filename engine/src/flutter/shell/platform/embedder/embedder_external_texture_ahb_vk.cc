@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/image_external_texture_vk_impeller.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_ahb_vk.h"
 
 #include <cstdint>
 
@@ -12,31 +12,33 @@
 
 namespace flutter {
 
-ImageExternalTextureVKImpeller::ImageExternalTextureVKImpeller(
+EmbedderExternalTextureAHBVK::EmbedderExternalTextureAHBVK(
     const std::shared_ptr<impeller::ContextVK>& impeller_context,
     int64_t id,
-    HardwareBufferSource source)
-    : ImageExternalTexture(id, source), impeller_context_(impeller_context) {}
+    EmbedderAndroidHardwareBufferSource source)
+    : EmbedderExternalTextureAHB(id, source),
+      impeller_context_(impeller_context) {}
 
-ImageExternalTextureVKImpeller::~ImageExternalTextureVKImpeller() {}
+EmbedderExternalTextureAHBVK::~EmbedderExternalTextureAHBVK() {}
 
-void ImageExternalTextureVKImpeller::Attach(PaintContext& context) {
+void EmbedderExternalTextureAHBVK::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
     // First processed frame we are attached.
     state_ = AttachmentState::kAttached;
   }
 }
 
-void ImageExternalTextureVKImpeller::Detach() {}
+void EmbedderExternalTextureAHBVK::Detach() {}
 
-void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
-                                                  const SkRect& bounds) {
+void EmbedderExternalTextureAHBVK::ProcessFrame(PaintContext& context,
+                                                const SkRect& bounds) {
   // Releases the buffer when this function returns.
   std::unique_ptr<AcquiredFrame> frame = AcquireFrame();
   if (!frame) {
     return;
   }
-  AHardwareBuffer* latest_hardware_buffer = frame->buffer();
+  AHardwareBuffer* latest_hardware_buffer =
+      static_cast<AHardwareBuffer*>(frame->buffer());
 
   auto hb_desc =
       impeller::android::HardwareBuffer::Describe(latest_hardware_buffer);

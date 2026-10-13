@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/image_external_texture_gl.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_ahb_gl.h"
 
-#include <android/hardware_buffer_jni.h>
-#include <android/sensor.h>
+#include <android/hardware_buffer.h>
 
 #include "flutter/impeller/toolkit/android/hardware_buffer.h"
 
 namespace flutter {
 
-ImageExternalTextureGL::ImageExternalTextureGL(int64_t id,
-                                               HardwareBufferSource source)
-    : ImageExternalTexture(id, source) {}
+EmbedderExternalTextureAHBGL::EmbedderExternalTextureAHBGL(
+    int64_t id,
+    EmbedderAndroidHardwareBufferSource source)
+    : EmbedderExternalTextureAHB(id, source) {}
 
-void ImageExternalTextureGL::Attach(PaintContext& context) {
+void EmbedderExternalTextureAHBGL::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
     // TODO(johnmccurtchan): We currently display the first frame after an
     // attach-detach cycle as blank. There seems to be an issue on some
@@ -28,7 +28,7 @@ void ImageExternalTextureGL::Attach(PaintContext& context) {
   }
 }
 
-void ImageExternalTextureGL::UpdateImage(
+void EmbedderExternalTextureAHBGL::UpdateImage(
     AHardwareBuffer* latest_hardware_buffer,
     const SkRect& bounds,
     PaintContext& context) {
@@ -52,22 +52,22 @@ void ImageExternalTextureGL::UpdateImage(
   }
 }
 
-void ImageExternalTextureGL::ProcessFrame(PaintContext& context,
-                                          const SkRect& bounds) {
+void EmbedderExternalTextureAHBGL::ProcessFrame(PaintContext& context,
+                                                const SkRect& bounds) {
   std::unique_ptr<AcquiredFrame> frame = AcquireFrame();
   if (!frame) {
     return;
   }
-  UpdateImage(frame->buffer(), bounds, context);
+  UpdateImage(static_cast<AHardwareBuffer*>(frame->buffer()), bounds, context);
   // `frame` releases the buffer here.
 }
 
-void ImageExternalTextureGL::Detach() {
+void EmbedderExternalTextureAHBGL::Detach() {
   image_lru_.Clear();
   gl_entries_.clear();
 }
 
-impeller::UniqueEGLImageKHR ImageExternalTextureGL::CreateEGLImage(
+impeller::UniqueEGLImageKHR EmbedderExternalTextureAHBGL::CreateEGLImage(
     AHardwareBuffer* hardware_buffer) {
   if (hardware_buffer == nullptr) {
     return impeller::UniqueEGLImageKHR();

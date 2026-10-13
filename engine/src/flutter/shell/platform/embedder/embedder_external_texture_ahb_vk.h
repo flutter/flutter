@@ -2,26 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_VK_IMPELLER_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_VK_IMPELLER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_VK_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_VK_H_
 
 #include <cstdint>
 #include <utility>
-#include "flutter/shell/platform/android/image_external_texture.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_ahb.h"
 
 #include "flutter/impeller/renderer/backend/vulkan/android/ahb_texture_source_vk.h"
-#include "flutter/shell/platform/android/android_context_vk_impeller.h"
+#include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
 
 namespace flutter {
 
-class ImageExternalTextureVKImpeller : public ImageExternalTexture {
+class EmbedderExternalTextureAHBVK : public EmbedderExternalTextureAHB {
  public:
-  ImageExternalTextureVKImpeller(
+  EmbedderExternalTextureAHBVK(
       const std::shared_ptr<impeller::ContextVK>& impeller_context,
       int64_t id,
-      HardwareBufferSource source);
+      EmbedderAndroidHardwareBufferSource source);
 
-  ~ImageExternalTextureVKImpeller() override;
+  ~EmbedderExternalTextureAHBVK() override;
 
  private:
   void Attach(PaintContext& context) override;
@@ -33,4 +33,4 @@ class ImageExternalTextureVKImpeller : public ImageExternalTexture {
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_VK_IMPELLER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_VK_H_

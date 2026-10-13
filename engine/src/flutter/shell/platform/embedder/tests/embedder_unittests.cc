@@ -5828,6 +5828,48 @@ TEST_F(EmbedderTest, RegisterExternalTextureWithInfoRunsDestructionAtShutdown) {
   EXPECT_EQ(destruction.calls, 1);
 }
 
+//------------------------------------------------------------------------------
+/// Android hardware buffer textures can only be registered on Android. Off
+/// Android, registration fails and leaves `user_data` with the caller.
+///
+TEST_F(EmbedderTest,
+       RegisterExternalTextureWithInfoRejectsAndroidHardwareBufferOffAndroid) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  // Minimal 1x1 surface for headless test engine launch.
+  builder.SetSurface(DlISize(1, 1));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  StreamTextureDestruction destruction;
+  const FlutterAndroidHardwareBufferSource source = {
+      .struct_size = sizeof(FlutterAndroidHardwareBufferSource),
+      .acquire_frame_callback =
+          [](void* user_data, FlutterAndroidHardwareBufferFrame* frame_out) {
+            return false;
+          },
+      .drop_frames_on_context_destroyed = false,
+  };
+  constexpr int64_t kTextureId = 3;
+  const FlutterExternalTextureInfo info = {
+      .struct_size = sizeof(FlutterExternalTextureInfo),
+      .texture_id = kTextureId,
+      .type = kFlutterExternalTextureTypeAndroidHardwareBuffer,
+      .user_data = &destruction,
+      .open_gl_stream = nullptr,
+      .destruction_callback =
+          [](void* user_data) {
+            static_cast<StreamTextureDestruction*>(user_data)->calls++;
+          },
+      .android_hardware_buffer = &source,
+  };
+
+  EXPECT_EQ(FlutterEngineRegisterExternalTextureWithInfo(engine.get(), &info),
+            kInvalidArguments);
+
+  engine.reset();
+  EXPECT_EQ(destruction.calls, 0);
+}
+
 TEST_F(EmbedderTest, EmbedderNotifyCreatedAndDestroyedValidationAndLifecycle) {
   EXPECT_EQ(FlutterEngineNotifyCreated(nullptr), kInvalidArguments);
   EXPECT_EQ(FlutterEngineNotifyDestroyed(nullptr), kInvalidArguments);

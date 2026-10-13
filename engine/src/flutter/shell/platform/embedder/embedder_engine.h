@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
 #include "flutter/shell/platform/embedder/embedder_image_generator.h"
+#include "flutter/shell/platform/embedder/embedder_impeller_device_context.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
 namespace flutter {
 
@@ -156,6 +157,13 @@ class EmbedderEngine {
   ///             is never destroyed by a failed registration.
   ///
   void RegisterExternalTexture(std::shared_ptr<Texture> texture);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Returns a function that textures call on the raster thread to
+  ///             get the Impeller device context of this engine's platform
+  ///             view. Only call this on a valid engine.
+  ///
+  EmbedderImpellerDeviceContextGetter GetImpellerDeviceContextGetter() const;
 
   bool UnregisterTexture(int64_t texture);
 

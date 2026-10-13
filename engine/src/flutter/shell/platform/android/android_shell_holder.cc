@@ -1431,21 +1431,21 @@ void AndroidShellHolder::RegisterExternalTexture(
 void AndroidShellHolder::RegisterImageTexture(
     int64_t texture_id,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-    ImageExternalTexture::ImageLifecycle lifecycle) {
-  if (!platform_view_) {
+    bool drop_frames_on_context_destroyed) {
+  if (android_rendering_api_ == AndroidRenderingAPI::kSoftware) {
+    FML_LOG(INFO) << "Software rendering does not support external textures.";
     return;
   }
-  std::unique_ptr<Texture> texture = platform_view_->CreateImageTexture(
-      texture_id, image_texture_entry, lifecycle);
-  if (!texture) {
-    return;
-  }
-  GetPendingTextureTable().Put(holder_id_, texture_id, std::move(texture));
+  FlutterExternalTextureInfo info =
+      MakeJavaImageTextureInfo(texture_id, jni_facade_, image_texture_entry,
+                               drop_frames_on_context_destroyed);
   FlutterEngineResult result =
-      embedder_api_.RegisterExternalTexture(engine_.get(), texture_id);
-  GetPendingTextureTable().Take(holder_id_, texture_id);
+      embedder_api_.RegisterExternalTextureWithInfo(engine_.get(), &info);
   if (result != kSuccess) {
-    FML_LOG(ERROR) << "FlutterEngineRegisterExternalTexture failed: " << result;
+    // The engine did not take the source.
+    info.destruction_callback(info.user_data);
+    FML_LOG(ERROR) << "FlutterEngineRegisterExternalTextureWithInfo failed: "
+                   << result;
   }
 }
 

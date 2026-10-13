@@ -47,9 +47,7 @@ executable("flutter_shell_native_unittests") {
     "android_image_generator_unittests.cc",
     "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
-    "external_texture_unittests.cc",
     "flutter_shell_native_unittests.cc",
-    "image_lru_unittests.cc",
     "ndk/ndk_proc_table_unittests.cc",
     "platform_view_android_jni_impl_unittests.cc",
     "platform_view_android_unittests.cc",
@@ -114,16 +112,6 @@ source_set("flutter_shell_native_src") {
     "apk_asset_provider.h",
     "flutter_main.cc",
     "flutter_main.h",
-    "image_external_texture.cc",
-    "image_external_texture.h",
-    "image_external_texture_gl.cc",
-    "image_external_texture_gl.h",
-    "image_external_texture_gl_impeller.cc",
-    "image_external_texture_gl_impeller.h",
-    "image_external_texture_vk_impeller.cc",
-    "image_external_texture_vk_impeller.h",
-    "image_lru.cc",
-    "image_lru.h",
     "jni_texture_source.cc",
     "jni_texture_source.h",
     "library_loader.cc",
@@ -137,7 +125,6 @@ source_set("flutter_shell_native_src") {
     "platform_view_android.h",
     "platform_view_android_jni_impl.cc",
     "platform_view_android_jni_impl.h",
-    "texture_source.h",
     "vsync_waiter_android.cc",
     "vsync_waiter_android.h",
   ]
@@ -150,8 +137,6 @@ source_set("flutter_shell_native_src") {
       "android_surface_gl_skia.h",
       "android_surface_software.cc",
       "android_surface_software.h",
-      "image_external_texture_gl_skia.cc",
-      "image_external_texture_gl_skia.h",
     ]
   }
 

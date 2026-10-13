@@ -22,7 +22,6 @@
 #endif  // defined(SHELL_ENABLE_GL)
 #if FML_OS_ANDROID && defined(SHELL_ENABLE_VULKAN)
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
-#include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl_stream_vk.h"
 #endif  // FML_OS_ANDROID && defined(SHELL_ENABLE_VULKAN)
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -30,7 +29,8 @@
 namespace flutter {
 
 std::unique_ptr<EmbedderGLStreamTexture> EmbedderGLStreamTexture::Create(
-    const FlutterExternalTextureInfo& info) {
+    const FlutterExternalTextureInfo& info,
+    EmbedderImpellerDeviceContextGetter device_context) {
   if (info.type != kFlutterExternalTextureTypeOpenGLStream) {
     return nullptr;
   }
@@ -46,16 +46,18 @@ std::unique_ptr<EmbedderGLStreamTexture> EmbedderGLStreamTexture::Create(
       info.texture_id,
       EmbedderOpenGLTextureStream{.callbacks = *source,
                                   .user_data = info.user_data},
-      info.destruction_callback));
+      info.destruction_callback, std::move(device_context)));
 }
 
 EmbedderGLStreamTexture::EmbedderGLStreamTexture(
     int64_t id,
     EmbedderOpenGLTextureStream stream,
-    VoidCallback destruction_callback)
+    VoidCallback destruction_callback,
+    EmbedderImpellerDeviceContextGetter device_context)
     : Texture(id),
       stream_(stream),
-      destruction_callback_(destruction_callback) {}
+      destruction_callback_(destruction_callback),
+      device_context_(std::move(device_context)) {}
 
 EmbedderGLStreamTexture::~EmbedderGLStreamTexture() {
   // The implementation calls the stream until it is gone.
@@ -79,14 +81,17 @@ EmbedderGLStreamTexture::CreateImplementation(PaintContext& context) {
             Id(), stream_);
 #endif  // defined(SHELL_ENABLE_GL)
 #if FML_OS_ANDROID && defined(SHELL_ENABLE_VULKAN)
-      case impeller::Context::BackendType::kVulkan:
-        // Like EmbedderExternalTextureGLStreamVK::ProcessFrame, this expects
-        // the surface context that onscreen and snapshot surfaces paint with.
+      case impeller::Context::BackendType::kVulkan: {
+        std::shared_ptr<impeller::Context> device =
+            device_context_ ? device_context_() : nullptr;
+        if (!device || device->GetBackendType() !=
+                           impeller::Context::BackendType::kVulkan) {
+          return nullptr;
+        }
         return std::make_unique<EmbedderExternalTextureGLStreamVK>(
-            std::static_pointer_cast<impeller::ContextVK>(
-                impeller::SurfaceContextVK::Cast(*impeller_context)
-                    .GetParent()),
-            Id(), stream_);
+            std::static_pointer_cast<impeller::ContextVK>(device), Id(),
+            stream_);
+      }
 #endif  // FML_OS_ANDROID && defined(SHELL_ENABLE_VULKAN)
       default:
         return nullptr;

@@ -58,10 +58,14 @@ template("embedder_source_set") {
   source_set(target_name) {
     sources = [
       "embedder.cc",
+      "embedder_ahb_texture.cc",
+      "embedder_ahb_texture.h",
       "embedder_asset_resolver.cc",
       "embedder_asset_resolver.h",
       "embedder_engine.cc",
       "embedder_engine.h",
+      "embedder_external_texture_ahb.cc",
+      "embedder_external_texture_ahb.h",
       "embedder_external_texture_gl_stream.cc",
       "embedder_external_texture_gl_stream.h",
       "embedder_external_texture_resolver.cc",
@@ -72,6 +76,9 @@ template("embedder_source_set") {
       "embedder_external_view_embedder.h",
       "embedder_image_generator.cc",
       "embedder_image_generator.h",
+      "embedder_image_lru.cc",
+      "embedder_image_lru.h",
+      "embedder_impeller_device_context.h",
       "embedder_include.c",
       "embedder_include2.c",
       "embedder_layers.cc",
@@ -157,6 +164,8 @@ template("embedder_source_set") {
     ]
     if (is_android && embedder_enable_vulkan && impeller_supports_rendering) {
       sources += [
+        "embedder_external_texture_ahb_vk.cc",
+        "embedder_external_texture_ahb_vk.h",
         "embedder_external_texture_gl_stream_vk.cc",
         "embedder_external_texture_gl_stream_vk.h",
       ]
@@ -165,6 +174,32 @@ template("embedder_source_set") {
         "//flutter/impeller/renderer/backend/vulkan",
         "//flutter/impeller/toolkit/android",
         "//flutter/impeller/toolkit/glvk",
+      ]
+    }
+
+    # Android hardware buffer textures import each buffer as an EGLImage when
+    # the engine renders with OpenGL ES.
+    if (is_android && embedder_enable_gl) {
+      sources += [
+        "embedder_external_texture_ahb_gl.cc",
+        "embedder_external_texture_ahb_gl.h",
+      ]
+      if (!slimpeller) {
+        sources += [
+          "embedder_external_texture_ahb_gl_skia.cc",
+          "embedder_external_texture_ahb_gl_skia.h",
+        ]
+      }
+      if (impeller_supports_rendering) {
+        sources += [
+          "embedder_external_texture_ahb_gl_impeller.cc",
+          "embedder_external_texture_ahb_gl_impeller.h",
+        ]
+      }
+      deps += [
+        "//flutter/impeller/toolkit/android",
+        "//flutter/impeller/toolkit/egl",
+        "//flutter/impeller/toolkit/gles",
       ]
     }
 
@@ -320,7 +355,9 @@ if (enable_unittests) {
     include_dirs = [ "." ]
 
     sources = [
+      "embedder_external_texture_ahb_unittests.cc",
       "embedder_gl_stream_texture_unittests.cc",
+      "embedder_image_lru_unittests.cc",
       "embedder_semantics_update_unittests.cc",
       "platform_view_embedder_unittests.cc",
       "tests/embedder_config_builder.cc",

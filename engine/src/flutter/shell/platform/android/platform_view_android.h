@@ -16,7 +16,6 @@
 #include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/android/surface/android_surface.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
-#include "shell/platform/android/image_external_texture.h"
 
 namespace flutter {
 
@@ -71,11 +70,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   void ResizeSurface(const DlISize& size);
 
   void TeardownSurface();
-
-  std::unique_ptr<Texture> CreateImageTexture(
-      int64_t texture_id,
-      const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-      ImageExternalTexture::ImageLifecycle lifecycle);
 
   const std::shared_ptr<AndroidContext>& GetAndroidContext() {
     return android_context_;

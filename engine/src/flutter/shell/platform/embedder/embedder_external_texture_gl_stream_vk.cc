@@ -16,7 +16,6 @@
 #include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
-#include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/texture_vk.h"
 
 namespace flutter {
@@ -124,12 +123,12 @@ void EmbedderExternalTextureGLStreamVK::ProcessFrame(PaintContext& context,
   DlMatrix matrix = context.canvas->GetMatrix();
   DlRect mapped_bounds = ToDlRect(bounds).TransformAndClipBounds(matrix);
 
-  const auto& surface_context =
-      SurfaceContextVK::Cast(*context.aiks_context->GetContext());
-  const auto& context_vk = ContextVK::Cast(*surface_context.GetParent());
+  // The device context, which the paint context's surface context (if any)
+  // wraps.
+  const ContextVK& context_vk = *context_;
 
   auto dst_texture = GetCachedTextureSource(
-      surface_context.GetParent(),                                        //
+      context_,                                                           //
       ISize::MakeWH(mapped_bounds.GetWidth(), mapped_bounds.GetHeight())  //
   );
   if (!dst_texture || !dst_texture->IsValid()) {
@@ -167,8 +166,8 @@ void EmbedderExternalTextureGLStreamVK::ProcessFrame(PaintContext& context,
 
   glDeleteTextures(1u, &src_gl_texture);
 
-  dl_image_ = DlImageImpeller::Make(
-      std::make_shared<TextureVK>(surface_context.GetParent(), dst_texture));
+  dl_image_ =
+      DlImageImpeller::Make(std::make_shared<TextureVK>(context_, dst_texture));
 }
 
 // |EmbedderExternalTextureGLStream|

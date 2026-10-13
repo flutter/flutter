@@ -2,19 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_H_
-
-#include "flutter/common/graphics/texture.h"
-#include "flutter/fml/logging.h"
-#include "flutter/shell/platform/android/image_lru.h"
-#include "flutter/shell/platform/android/texture_source.h"
-
-#include <android/hardware_buffer.h>
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_H_
 
 #include <memory>
 
+#include "flutter/common/graphics/texture.h"
+#include "flutter/fml/logging.h"
+#include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/embedder_image_lru.h"
+
 namespace flutter {
+
+//------------------------------------------------------------------------------
+/// @brief      The callbacks of an Android hardware buffer texture and the
+///             `user_data` they take. The texture does not own `user_data`.
+///
+struct EmbedderAndroidHardwareBufferSource {
+  FlutterAndroidHardwareBufferSource callbacks = {};
+  void* user_data = nullptr;
+};
 
 //------------------------------------------------------------------------------
 /// @brief      External texture peered to a sequence of
@@ -33,19 +40,16 @@ namespace flutter {
 ///             graphics packages that support OpenGL and Vulkan can have
 ///             multiple subclasses for each supported client-rendering API.
 ///
-class ImageExternalTexture : public flutter::Texture {
+class EmbedderExternalTextureAHB : public flutter::Texture {
  public:
-  /// Whether the last image should be reset when the context is destroyed.
-  enum class ImageLifecycle { kReset, kKeepAlive };
-
   //----------------------------------------------------------------------------
-  /// @brief      Creates a texture that draws the frames of `source`. The
-  ///             texture calls `source.destruction` when it is destroyed.
+  /// @brief      Creates a texture that draws the frames of `source`.
   ///
-  ImageExternalTexture(int64_t id, HardwareBufferSource source);
+  EmbedderExternalTextureAHB(int64_t id,
+                             EmbedderAndroidHardwareBufferSource source);
 
   // |flutter::Texture|
-  virtual ~ImageExternalTexture();
+  virtual ~EmbedderExternalTextureAHB();
 
  protected:
   //----------------------------------------------------------------------------
@@ -72,16 +76,18 @@ class ImageExternalTexture : public flutter::Texture {
   ///
   class AcquiredFrame {
    public:
-    explicit AcquiredFrame(const HardwareBufferFrame& frame);
+    explicit AcquiredFrame(const FlutterAndroidHardwareBufferFrame& frame);
 
     ~AcquiredFrame();
 
-    /// The frame's buffer. May be null where the device cannot hand out
-    /// AHardwareBuffers.
-    AHardwareBuffer* buffer() const { return frame_.buffer; }
+    /// The frame's buffer, an `AHardwareBuffer*`. May be null where the device
+    /// cannot hand out AHardwareBuffers.
+    FlutterAndroidHardwareBufferHandle buffer() const {
+      return frame_.hardware_buffer;
+    }
 
    private:
-    const HardwareBufferFrame frame_;
+    const FlutterAndroidHardwareBufferFrame frame_;
 
     FML_DISALLOW_COPY_AND_ASSIGN(AcquiredFrame);
   };
@@ -91,7 +97,7 @@ class ImageExternalTexture : public flutter::Texture {
   ///
   std::unique_ptr<AcquiredFrame> AcquireFrame();
 
-  const HardwareBufferSource source_;
+  const EmbedderAndroidHardwareBufferSource source_;
 
   enum class AttachmentState { kUninitialized, kAttached, kDetached };
   AttachmentState state_ = AttachmentState::kUninitialized;
@@ -117,9 +123,9 @@ class ImageExternalTexture : public flutter::Texture {
   // |flutter::ContextListener|
   void OnGrContextDestroyed() override;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTexture);
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderExternalTextureAHB);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_IMAGE_EXTERNAL_TEXTURE_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_EMBEDDER_EXTERNAL_TEXTURE_AHB_H_

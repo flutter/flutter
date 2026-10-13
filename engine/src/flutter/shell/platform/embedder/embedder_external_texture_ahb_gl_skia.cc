@@ -2,35 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/image_external_texture_gl_skia.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_ahb_gl_skia.h"
 
 #include "flutter/display_list/image/dl_image_skia.h"
 #include "flutter/third_party/skia/include/core/SkColorSpace.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
+#include "flutter/third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
 
 namespace flutter {
 
-ImageExternalTextureGLSkia::ImageExternalTextureGLSkia(
-    const std::shared_ptr<AndroidContextGLSkia>& context,
+EmbedderExternalTextureAHBGLSkia::EmbedderExternalTextureAHBGLSkia(
     int64_t id,
-    HardwareBufferSource source)
-    : ImageExternalTextureGL(id, source) {}
+    EmbedderAndroidHardwareBufferSource source)
+    : EmbedderExternalTextureAHBGL(id, source) {}
 
-void ImageExternalTextureGLSkia::Attach(PaintContext& context) {
+void EmbedderExternalTextureAHBGLSkia::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
     // After this call state_ will be AttachmentState::kAttached and egl_image_
     // will have been created if we still have an Image associated with us.
-    ImageExternalTextureGL::Attach(context);
+    EmbedderExternalTextureAHBGL::Attach(context);
   }
 }
 
-void ImageExternalTextureGLSkia::Detach() {
-  ImageExternalTextureGL::Detach();
+void EmbedderExternalTextureAHBGLSkia::Detach() {
+  EmbedderExternalTextureAHBGL::Detach();
 }
 
-void ImageExternalTextureGLSkia::BindImageToTexture(
+void EmbedderExternalTextureAHBGLSkia::BindImageToTexture(
     const impeller::UniqueEGLImageKHR& image,
     GLuint tex) {
   if (!image.is_valid() || tex == 0) {
@@ -41,7 +41,7 @@ void ImageExternalTextureGLSkia::BindImageToTexture(
                                static_cast<GLeglImageOES>(image.get().image));
 }
 
-sk_sp<flutter::DlImage> ImageExternalTextureGLSkia::CreateDlImage(
+sk_sp<flutter::DlImage> EmbedderExternalTextureAHBGLSkia::CreateDlImage(
     PaintContext& context,
     const SkRect& bounds,
     std::optional<HardwareBufferKey> id,

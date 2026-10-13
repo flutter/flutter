@@ -57,6 +57,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/embedder_ahb_texture.h"
 #include "flutter/shell/platform/embedder/embedder_asset_resolver.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_resolver.h"
@@ -3568,14 +3569,22 @@ FlutterEngineResult FlutterEngineRegisterExternalTextureWithInfo(
   std::unique_ptr<flutter::Texture> texture;
   switch (info->type) {
     case kFlutterExternalTextureTypeOpenGLStream:
-      texture = flutter::EmbedderGLStreamTexture::Create(*info);
+      texture = flutter::EmbedderGLStreamTexture::Create(
+          *info, embedder_engine->GetImpellerDeviceContextGetter());
+      break;
+    case kFlutterExternalTextureTypeAndroidHardwareBuffer:
+#if FML_OS_ANDROID
+      texture = flutter::EmbedderAHBTexture::Create(
+          *info, embedder_engine->GetImpellerDeviceContextGetter());
+#endif  // FML_OS_ANDROID
+      // Elsewhere there are no AHardwareBuffers, so the type is unsupported.
       break;
   }
   if (!texture) {
     return LOG_EMBEDDER_ERROR(
         kInvalidArguments,
-        "The external texture source was missing a required callback or had "
-        "an unknown type.");
+        "The external texture source was missing a required callback, had an "
+        "unknown type, or is not supported on this platform.");
   }
   embedder_engine->RegisterExternalTexture(std::move(texture));
   return kSuccess;

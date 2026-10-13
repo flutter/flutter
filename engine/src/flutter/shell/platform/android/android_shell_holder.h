@@ -219,10 +219,14 @@ class AndroidShellHolder {
   /// @brief      Registers an Android ImageTextureEntry-backed external
   ///             texture with the engine through the embedder API.
   ///
+  /// @param[in]  drop_frames_on_context_destroyed  Whether the texture drops
+  ///             its frame when the engine's graphics context goes away, for
+  ///             producers that reset when the app is backgrounded.
+  ///
   void RegisterImageTexture(
       int64_t texture_id,
       const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-      ImageExternalTexture::ImageLifecycle lifecycle);
+      bool drop_frames_on_context_destroyed);
 
   //----------------------------------------------------------------------------
   /// @brief      Unregisters an external texture from the engine through the

@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/android/jni_texture_source.h"
 
+#include <android/hardware_buffer.h>
+
 #include <algorithm>
 #include <array>
 #include <utility>
@@ -67,7 +69,7 @@ void DestroySurfaceTexture(void* user_data) {
   delete static_cast<JavaSurfaceTexture*>(user_data);
 }
 
-// The Java ImageTextureEntry behind a HardwareBufferSource.
+// The Java ImageTextureEntry behind an Android hardware buffer texture.
 struct JavaImageTexture {
   JavaImageTexture(
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
@@ -98,7 +100,8 @@ void ReleaseHardwareBuffer(void* user_data) {
   delete hardware_buffer;
 }
 
-bool AcquireImageFrame(void* user_data, HardwareBufferFrame* frame_out) {
+bool AcquireImageFrame(void* user_data,
+                       FlutterAndroidHardwareBufferFrame* frame_out) {
   TRACE_EVENT0("flutter", "ImageTextureAcquireFrame");
   auto& source = *static_cast<JavaImageTexture*>(user_data);
   JNIEnv* env = fml::jni::AttachCurrentThread();
@@ -125,12 +128,10 @@ bool AcquireImageFrame(void* user_data, HardwareBufferFrame* frame_out) {
       ndk.AHardwareBuffer_fromHardwareBuffer
           ? ndk.AHardwareBuffer_fromHardwareBuffer(env, hardware_buffer.obj())
           : nullptr;
-  *frame_out = {
-      .buffer = buffer,
-      .release_user_data =
-          new JavaHardwareBuffer(source.jni_facade, env, hardware_buffer.obj()),
-      .release = &ReleaseHardwareBuffer,
-  };
+  frame_out->hardware_buffer = buffer;
+  frame_out->release_user_data =
+      new JavaHardwareBuffer(source.jni_facade, env, hardware_buffer.obj());
+  frame_out->release_callback = &ReleaseHardwareBuffer;
   return true;
 }
 
@@ -162,16 +163,32 @@ FlutterExternalTextureInfo MakeJavaSurfaceTextureInfo(
   };
 }
 
-HardwareBufferSource MakeJavaImageTextureSource(
+FlutterExternalTextureInfo MakeJavaImageTextureInfo(
+    int64_t texture_id,
     std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
     const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
     bool drop_frames_on_context_destroyed) {
+  static const FlutterAndroidHardwareBufferSource kDroppingCallbacks = {
+      .struct_size = sizeof(FlutterAndroidHardwareBufferSource),
+      .acquire_frame_callback = &AcquireImageFrame,
+      .drop_frames_on_context_destroyed = true,
+  };
+  static const FlutterAndroidHardwareBufferSource kKeepingCallbacks = {
+      .struct_size = sizeof(FlutterAndroidHardwareBufferSource),
+      .acquire_frame_callback = &AcquireImageFrame,
+      .drop_frames_on_context_destroyed = false,
+  };
   return {
+      .struct_size = sizeof(FlutterExternalTextureInfo),
+      .texture_id = texture_id,
+      .type = kFlutterExternalTextureTypeAndroidHardwareBuffer,
       .user_data =
           new JavaImageTexture(std::move(jni_facade), image_texture_entry),
-      .acquire_frame = &AcquireImageFrame,
-      .drop_frames_on_context_destroyed = drop_frames_on_context_destroyed,
-      .destruction = &DestroyImageTexture,
+      .open_gl_stream = nullptr,
+      .destruction_callback = &DestroyImageTexture,
+      .android_hardware_buffer = drop_frames_on_context_destroyed
+                                     ? &kDroppingCallbacks
+                                     : &kKeepingCallbacks,
   };
 }
 

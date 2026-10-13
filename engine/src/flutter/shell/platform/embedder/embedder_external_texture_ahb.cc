@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/image_external_texture.h"
+#include "flutter/shell/platform/embedder/embedder_external_texture_ahb.h"
 
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 
@@ -10,19 +10,17 @@
 
 namespace flutter {
 
-ImageExternalTexture::ImageExternalTexture(int64_t id,
-                                           HardwareBufferSource source)
+EmbedderExternalTextureAHB::EmbedderExternalTextureAHB(
+    int64_t id,
+    EmbedderAndroidHardwareBufferSource source)
     : Texture(id), source_(source) {}
 
-ImageExternalTexture::~ImageExternalTexture() {
-  if (source_.destruction != nullptr) {
-    source_.destruction(source_.user_data);
-  }
-}
-void ImageExternalTexture::Paint(PaintContext& context,
-                                 const DlRect& bounds,
-                                 bool freeze,
-                                 const DlImageSampling sampling) {
+EmbedderExternalTextureAHB::~EmbedderExternalTextureAHB() = default;
+
+void EmbedderExternalTextureAHB::Paint(PaintContext& context,
+                                       const DlRect& bounds,
+                                       bool freeze,
+                                       const DlImageSampling sampling) {
   if (state_ == AttachmentState::kDetached) {
     return;
   }
@@ -41,27 +39,28 @@ void ImageExternalTexture::Paint(PaintContext& context,
         flutter::DlSrcRectConstraint::kStrict  // enforce edges
     );
   } else {
-    FML_LOG(INFO) << "No DlImage available for ImageExternalTexture to paint.";
+    FML_LOG(INFO)
+        << "No DlImage available for EmbedderExternalTextureAHB to paint.";
   }
 }
 
 // Implementing flutter::Texture.
-void ImageExternalTexture::MarkNewFrameAvailable() {
+void EmbedderExternalTextureAHB::MarkNewFrameAvailable() {
   // NOOP.
 }
 
 // Implementing flutter::Texture.
-void ImageExternalTexture::OnTextureUnregistered() {}
+void EmbedderExternalTextureAHB::OnTextureUnregistered() {}
 
 // Implementing flutter::ContextListener.
-void ImageExternalTexture::OnGrContextCreated() {
+void EmbedderExternalTextureAHB::OnGrContextCreated() {
   state_ = AttachmentState::kUninitialized;
 }
 
 // Implementing flutter::ContextListener.
-void ImageExternalTexture::OnGrContextDestroyed() {
+void EmbedderExternalTextureAHB::OnGrContextDestroyed() {
   if (state_ == AttachmentState::kAttached) {
-    if (source_.drop_frames_on_context_destroyed) {
+    if (source_.callbacks.drop_frames_on_context_destroyed) {
       dl_image_.reset();
       image_lru_.Clear();
     }
@@ -75,21 +74,23 @@ void ImageExternalTexture::OnGrContextDestroyed() {
   state_ = AttachmentState::kDetached;
 }
 
-ImageExternalTexture::AcquiredFrame::AcquiredFrame(
-    const HardwareBufferFrame& frame)
+EmbedderExternalTextureAHB::AcquiredFrame::AcquiredFrame(
+    const FlutterAndroidHardwareBufferFrame& frame)
     : frame_(frame) {}
 
-ImageExternalTexture::AcquiredFrame::~AcquiredFrame() {
-  if (frame_.release != nullptr) {
-    frame_.release(frame_.release_user_data);
+EmbedderExternalTextureAHB::AcquiredFrame::~AcquiredFrame() {
+  if (frame_.release_callback != nullptr) {
+    frame_.release_callback(frame_.release_user_data);
   }
 }
 
-std::unique_ptr<ImageExternalTexture::AcquiredFrame>
-ImageExternalTexture::AcquireFrame() {
-  TRACE_EVENT0("flutter", "ImageExternalTexture::AcquireFrame");
-  HardwareBufferFrame frame;
-  if (!source_.acquire_frame(source_.user_data, &frame)) {
+std::unique_ptr<EmbedderExternalTextureAHB::AcquiredFrame>
+EmbedderExternalTextureAHB::AcquireFrame() {
+  TRACE_EVENT0("flutter", "EmbedderExternalTextureAHB::AcquireFrame");
+  FlutterAndroidHardwareBufferFrame frame = {
+      .struct_size = sizeof(FlutterAndroidHardwareBufferFrame),
+  };
+  if (!source_.callbacks.acquire_frame_callback(source_.user_data, &frame)) {
     return nullptr;
   }
   return std::make_unique<AcquiredFrame>(frame);
