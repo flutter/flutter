@@ -35,6 +35,17 @@ _PRODUCT_MODES = [
     "//engine/src/flutter/common:runtime_mode_release",
 ]
 
+# The GPU test backends (build/bazel/gl_wrap): SwiftShader's Vulkan driver,
+# its ICD manifest and the Vulkan loader, which a suite needs in the
+# directory of its binary.
+_GPU_TEST_BACKEND_FILES = [
+    "libvk_swiftshader.so",
+    "libvulkan.so.1",
+    "vk_swiftshader_icd.json",
+]
+
+_GPU_TEST_BACKENDS_PACKAGE = "//engine/src/flutter/build/bazel/gl_wrap"
+
 def _quoted_define(name, value):
     return '%s=\\"%s\\"' % (name, value)
 
@@ -179,4 +190,40 @@ def flutter_test_fixtures(
         visibility = visibility,
         deps = ["//engine/src/flutter/testing:testing_core"],
         **kwargs
+    )
+
+def flutter_gpu_test_backends(name, visibility = None):
+    """The GPU test backends in this package, next to its test binaries.
+
+    GN's //flutter/third_party/swiftshader group and ANGLE's own data_deps
+    put SwiftShader's Vulkan driver, its ICD manifest and the Vulkan loader
+    in the build directory, next to every executable; ANGLE opens the loader
+    from, and points it at the manifest in, the directory of its own module
+    (the test binary, which links ANGLE statically), and the engine's test
+    utilities look next to the executable too. Here they are built once
+    (build/bazel/gl_wrap) and each suite that renders through them lists
+    this target as `data`: a copy of the three files in the suite's package,
+    which is where the binary sits in the runfiles tree, in bazel-bin and
+    for `bazel run`.
+
+    Args:
+      name: name of the target (a filegroup of the copies).
+      visibility: visibility of the target.
+    """
+    copies = []
+    for file in _GPU_TEST_BACKEND_FILES:
+        copy_file(
+            name = "_gb_%s_%s" % (name, file),
+            src = "%s:%s" % (_GPU_TEST_BACKENDS_PACKAGE, file),
+            out = file,
+            allow_symlink = True,
+            testonly = True,
+            visibility = ["//visibility:private"],
+        )
+        copies.append(file)
+    native.filegroup(
+        name = name,
+        srcs = copies,
+        testonly = True,
+        visibility = visibility,
     )
