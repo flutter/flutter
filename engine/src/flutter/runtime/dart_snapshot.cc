@@ -247,7 +247,8 @@ fml::RefPtr<DartSnapshot> DartSnapshot::VMServiceIsolateSnapshotFromSettings(
     library_paths = {"Frameworks/VMService.framework/VMService",
                      "libvmservice_snapshot.dylib"};
 #elif FML_OS_WIN
-    library_paths = {"libvmservice_snapshot.dll"};
+    library_paths = {"libvmservice_snapshot.dll",
+                     "data\\libvmservice_snapshot.dll"};
 #else
     library_paths = {"libvmservice_snapshot.so",
                      "lib/libvmservice_snapshot.so"};
