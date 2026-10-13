@@ -356,62 +356,6 @@ PendingPlatformMessageResponseTable& GetPendingResponseTable() {
   return *table;
 }
 
-// Stages platform-specific flutter::Texture instances created by
-// PlatformViewAndroid immediately before FlutterEngineRegisterExternalTexture
-// is invoked, so EmbedderExternalTextureResolver can claim ownership by
-// (holder_id, texture_id) without exposing C++ texture types in embedder.h.
-class PendingTextureTable {
- public:
-  void Put(uint64_t holder_id,
-           int64_t texture_id,
-           std::unique_ptr<Texture> texture) {
-    std::scoped_lock lock(mutex_);
-    entries_[holder_id][texture_id] = std::move(texture);
-  }
-
-  std::unique_ptr<Texture> Take(uint64_t holder_id, int64_t texture_id) {
-    std::scoped_lock lock(mutex_);
-    auto holder_it = entries_.find(holder_id);
-    if (holder_it == entries_.end()) {
-      return nullptr;
-    }
-    auto tex_it = holder_it->second.find(texture_id);
-    if (tex_it == holder_it->second.end()) {
-      return nullptr;
-    }
-    std::unique_ptr<Texture> texture = std::move(tex_it->second);
-    holder_it->second.erase(tex_it);
-    if (holder_it->second.empty()) {
-      entries_.erase(holder_it);
-    }
-    return texture;
-  }
-
-  void RemoveForHolder(uint64_t holder_id) {
-    std::scoped_lock lock(mutex_);
-    entries_.erase(holder_id);
-  }
-
- private:
-  std::mutex mutex_;
-  std::unordered_map<uint64_t,
-                     std::unordered_map<int64_t, std::unique_ptr<Texture>>>
-      entries_;
-};
-
-PendingTextureTable& GetPendingTextureTable() {
-  static auto* table = new PendingTextureTable();
-  return *table;
-}
-
-std::unique_ptr<EmbedderExternalTextureResolver> MakeExternalTextureResolver(
-    uint64_t holder_id) {
-  return std::make_unique<EmbedderExternalTextureResolver>(
-      [holder_id](int64_t texture_id) -> std::unique_ptr<Texture> {
-        return GetPendingTextureTable().Take(holder_id, texture_id);
-      });
-}
-
 struct FirstFrameCallbackEntry {
   fml::RefPtr<fml::TaskRunner> platform_task_runner;
   std::weak_ptr<PlatformViewAndroidJNI> jni_facade;
@@ -723,7 +667,7 @@ AndroidShellHolder::AndroidShellHolder(
   auto engine = std::make_unique<EmbedderEngine>(
       /*thread_host=*/nullptr, task_runners, settings_,
       /*run_configuration=*/std::nullopt, on_create_platform_view,
-      MakeExternalTextureResolver(holder_id_));
+      /*external_texture_resolver=*/nullptr);
   if (engine->LaunchShell(GetDefaultPlatformData())) {
     engine_.reset(
         reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(engine.release()));
@@ -836,7 +780,6 @@ AndroidShellHolder::~AndroidShellHolder() {
   }
   thread_host_.reset();
   GetPendingResponseTable().RemoveForHolder(holder_id_);
-  GetPendingTextureTable().RemoveForHolder(holder_id_);
 }
 
 void AndroidShellHolder::EngineDeleter::operator()(
@@ -911,8 +854,7 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
   // embedder.h has no spawn API yet.
   auto spawned =
       reinterpret_cast<EmbedderEngine*>(engine_.get())
-          ->Spawn(&run_config.config, initial_route, on_create_platform_view,
-                  MakeExternalTextureResolver(spawned_holder_id));
+          ->Spawn(&run_config.config, initial_route, on_create_platform_view);
   if (!spawned) {
     // If Spawn failed, the kernel blob wasn't readable or the shell failed to
     // spawn.
