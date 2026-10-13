@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <android/looper.h>
-
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -23,6 +21,7 @@
 #include "flutter/shell/platform/android/jni/mock_jni_env.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
+#include "flutter/shell/platform/android/testing/looper_test_utils.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
@@ -188,6 +187,11 @@ TEST_F(PlatformViewAndroidJNIImplTest, SetViewportMetricsEmptyArrays) {
 }
 
 namespace {
+
+// How long a test waits for a task posted to the test thread's platform task
+// runner. Such tasks normally run within milliseconds; two seconds keeps a
+// busy device from flaking.
+constexpr fml::TimeDelta kPlatformTaskTimeout = fml::TimeDelta::FromSeconds(2);
 
 // Signatures of FlutterJNI natives registered by PlatformViewAndroid::Register.
 using SetSemanticsEnabledFn = void (*)(JNIEnv*, jobject, jlong, jboolean);
@@ -1480,12 +1484,13 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   EXPECT_EQ(notify_created_calls, 1);
   ASSERT_NE(captured_first_frame_callback, nullptr);
 
-  EXPECT_CALL(*jni, FlutterViewOnFirstFrame()).Times(1);
+  bool first_frame_reported = false;
+  EXPECT_CALL(*jni, FlutterViewOnFirstFrame())
+      .WillOnce([&first_frame_reported]() { first_frame_reported = true; });
   captured_first_frame_callback(captured_first_frame_user_data);
-  // Poll the current thread's ALooper with a zero-millisecond timeout to drain
-  // the posted platform task without blocking.
-  constexpr int kImmediatePollTimeoutMs = 0;
-  ALooper_pollOnce(kImmediatePollTimeoutMs, nullptr, nullptr, nullptr);
+  // The callback posts to the platform task runner, which is this thread.
+  EXPECT_TRUE(PumpLooperUntil([&]() { return first_frame_reported; },
+                              kPlatformTaskTimeout));
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest,
@@ -1521,10 +1526,9 @@ TEST_F(PlatformViewAndroidJNIImplTest,
   EXPECT_CALL(*jni, FlutterViewOnFirstFrame()).Times(0);
   captured_first_frame_callback(captured_first_frame_user_data);
   holder.reset();
-  // Poll the current thread's ALooper with a zero-millisecond timeout to drain
-  // the posted platform task and verify the WeakPtr guard drops it safely.
-  constexpr int kImmediatePollTimeoutMs = 0;
-  ALooper_pollOnce(kImmediatePollTimeoutMs, nullptr, nullptr, nullptr);
+  // Run the posted platform task, which must find the holder gone and drop
+  // the callback.
+  EXPECT_TRUE(DrainCurrentThreadTasks(kPlatformTaskTimeout));
 }
 
 TEST_F(PlatformViewAndroidJNIImplTest,

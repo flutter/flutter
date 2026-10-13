@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <android/looper.h>
-
-#include <functional>
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -18,6 +15,7 @@
 #include "flutter/shell/common/vsync_waiter.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
+#include "flutter/shell/platform/android/testing/looper_test_utils.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "gmock/gmock.h"
@@ -175,10 +173,6 @@ constexpr fml::TimeDelta kVsyncTimeout = fml::TimeDelta::FromSeconds(2);
 // to catch duplicate deliveries. At 60 Hz this is 6 frames.
 constexpr fml::TimeDelta kSettleTime = fml::TimeDelta::FromMilliseconds(100);
 
-// Upper bound for one ALooper_pollOnce call while pumping, in milliseconds.
-// Short, so the pump notices completion within a fraction of a frame.
-constexpr int kPollIntervalMs = 5;
-
 // Frame interval the vsync waiter reports before Java sets a refresh rate.
 // vsync_waiter_android.cc starts at 60 Hz and converts 1e9 ns / 60 to whole
 // nanoseconds by truncation.
@@ -196,30 +190,6 @@ std::unique_ptr<AndroidShellHolder> CreateHolderWithoutSurface(
   settings.merged_platform_ui_thread = merged_platform_ui_thread;
   return std::make_unique<AndroidShellHolder>(
       settings, std::move(jni), AndroidRenderingAPI::kImpellerOpenGLES);
-}
-
-// Dispatches the ALooper of the current thread, which runs both fml tasks and
-// Choreographer frame callbacks, until |done| returns true or |timeout|
-// passes. With merged threads the UI task runner is the test thread, so
-// waiting on a latch instead would stall the vsync it waits for.
-bool PumpLooperUntil(const std::function<bool()>& done,
-                     fml::TimeDelta timeout) {
-  const fml::TimePoint deadline = fml::TimePoint::Now() + timeout;
-  while (!done()) {
-    if (fml::TimePoint::Now() >= deadline) {
-      return false;
-    }
-    if (ALooper_pollOnce(kPollIntervalMs, nullptr, nullptr, nullptr) ==
-        ALOOPER_POLL_ERROR) {
-      ADD_FAILURE() << "ALooper_pollOnce failed on the test thread.";
-      return false;
-    }
-  }
-  return true;
-}
-
-void PumpLooperFor(fml::TimeDelta duration) {
-  PumpLooperUntil([] { return false; }, duration);
 }
 
 // Records the frames a vsync waiter delivers. Frame callbacks run on the UI

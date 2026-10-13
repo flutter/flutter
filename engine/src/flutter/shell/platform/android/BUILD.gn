@@ -51,6 +51,7 @@ executable("flutter_shell_native_unittests") {
     "image_lru_unittests.cc",
     "platform_view_android_jni_impl_unittests.cc",
     "platform_view_android_unittests.cc",
+    "testing/looper_test_utils.h",
   ]
   if (!slimpeller) {
     sources += [ "android_context_gl_unittests.cc" ]
