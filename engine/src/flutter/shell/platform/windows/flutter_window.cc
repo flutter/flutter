@@ -996,7 +996,7 @@ void FlutterWindow::OnImeComposition(UINT const message,
         // Commit but don't end composing.
         int pos = GetCursorPositionForComposition(*text_input_manager_, lparam,
                                                   text->length());
-        OnComposeChange(text.value(), pos);
+        OnComposeChange(*text, pos);
         OnComposeCommit();
       } else if (ime_end_composition_deferred_) {
         // The IME ended a composition that it never started. For example, the
@@ -1004,7 +1004,7 @@ void FlutterWindow::OnImeComposition(UINT const message,
         // WM_IME_ENDCOMPOSITION followed by a GCS_RESULTSTR when a space or
         // punctuation key is pressed while nothing is being composed. There is
         // no composing text to replace, so the result is plain text input.
-        OnText(text.value());
+        OnText(*text);
       }
       // Otherwise the composition has already ended and its text was committed
       // by OnImeEndComposition. Some IMEs re-send that text in a trailing
