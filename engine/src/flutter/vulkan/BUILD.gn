@@ -8,6 +8,7 @@ if (is_fuchsia) {
 
 source_set("vulkan") {
   sources = [
+    "swiftshader_path.h",
     "vulkan_application.cc",
     "vulkan_application.h",
     "vulkan_backbuffer.cc",
