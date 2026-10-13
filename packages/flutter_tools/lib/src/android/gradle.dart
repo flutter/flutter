@@ -27,6 +27,8 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/android_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
@@ -163,28 +165,45 @@ const kMaxRetryTime = Duration(seconds: 10);
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
     required this._analytics,
-    required this._androidStudio,
+    required AndroidStudio? androidStudio,
     required this._artifacts,
     required FileSystem fileSystem,
-    required this._gradleUtils,
-    required this._java,
+    required GradleUtils gradleUtils,
+    required Java? java,
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
-    this._androidSdk,
-  }) : _fileSystem = fileSystem,
+    AndroidSdk? androidSdk,
+  }) : _androidContext = AndroidContext(
+         androidSdkBuilder: () => androidSdk,
+         androidStudioBuilder: () => androidStudio,
+         gradleUtilsBuilder: () => gradleUtils,
+         javaBuilder: () => java,
+       ),
+       _fileSystem = fileSystem,
        _logger = logger,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
+  AndroidGradleBuilder.fromContexts({
+    required this._analytics,
+    required this._androidContext,
+    required ToolContext toolContext,
+  }) : _artifacts = toolContext.artifacts,
+       _fileSystem = toolContext.fs,
+       _logger = toolContext.logger,
+       _fileSystemUtils = toolContext.fileSystemUtils,
+       _processUtils = toolContext.processUtils;
+
   final Analytics _analytics;
-  final Java? _java;
+  final AndroidContext _androidContext;
+  late final Java? _java = _androidContext.java;
   final Logger _logger;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
-  final GradleUtils _gradleUtils;
-  final AndroidStudio? _androidStudio;
-  final AndroidSdk? _androidSdk;
+  late final GradleUtils _gradleUtils = _androidContext.gradleUtils;
+  late final AndroidStudio? _androidStudio = _androidContext.androidStudio;
+  late final AndroidSdk? _androidSdk = _androidContext.androidSdk;
   final FileSystemUtils _fileSystemUtils;
   final ProcessUtils _processUtils;
 

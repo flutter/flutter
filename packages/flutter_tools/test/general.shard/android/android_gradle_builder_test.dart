@@ -95,18 +95,29 @@ void main() {
       AndroidStudio? androidStudio,
       AndroidSdk? androidSdk,
     }) {
-      return AndroidGradleBuilder(
-        logger: logger ?? BufferLogger.test(),
-        processManager: processManager ?? FakeProcessManager.any(),
-        fileSystem: fileSystem ?? globals.fs,
-        artifacts: artifacts ?? FakeArtifacts(),
-        gradleUtils: gradleUtils ?? FakeGradleUtils(),
-        platform: platform ?? FakePlatform(),
-        androidStudio: androidStudio ?? FakeAndroidStudio(),
-        androidSdk:
-            androidSdk ??
-            AndroidSdk((fileSystem ?? globals.fs).directory(missingSdkPath()), java: FakeJava()),
-        java: java ?? FakeJava(),
+      return AndroidGradleBuilder.fromContexts(
+        toolContext:
+            toolContext ??
+            FakeToolContext(
+              logger: logger,
+              processManager: processManager,
+              fs: fileSystem ?? globals.fs,
+              artifacts: artifacts,
+              platform: platform,
+            ),
+        androidContext:
+            androidContext ??
+            FakeAndroidContext(
+              java: java,
+              gradleUtils: gradleUtils,
+              androidStudio: androidStudio,
+              androidSdk:
+                  androidSdk ??
+                  AndroidSdk(
+                    (fileSystem ?? globals.fs).directory(missingSdkPath()),
+                    java: FakeJava(),
+                  ),
+            ),
         analytics: analytics ?? fakeAnalytics,
       );
     }

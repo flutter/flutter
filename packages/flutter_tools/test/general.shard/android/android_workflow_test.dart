@@ -40,7 +40,10 @@ void main() {
   });
 
   testWithoutContext('AndroidWorkflow handles a null AndroidSDK', () {
-    final androidWorkflow = AndroidWorkflow(featureFlags: TestFeatureFlags(), androidSdk: null);
+    final androidWorkflow = AndroidWorkflow(
+      featureFlags: TestFeatureFlags(),
+      androidSdkBuilder: () => null,
+    );
 
     expect(androidWorkflow.canLaunchDevices, false);
     expect(androidWorkflow.canListDevices, false);
@@ -52,7 +55,7 @@ void main() {
     androidSdk.adbPath = null;
     final androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(),
-      androidSdk: androidSdk,
+      androidSdkBuilder: () => androidSdk,
     );
 
     expect(androidWorkflow.canLaunchDevices, false);
@@ -66,7 +69,7 @@ void main() {
     androidSdk.adbPath = null;
     final androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(),
-      androidSdk: androidSdk,
+      androidSdkBuilder: () => androidSdk,
     );
 
     expect(androidWorkflow.appliesToHostPlatform, isTrue);
@@ -80,7 +83,7 @@ void main() {
     androidSdk.adbPath = 'path/to/adb';
     final androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(isAndroidEnabled: false),
-      androidSdk: androidSdk,
+      androidSdkBuilder: () => androidSdk,
     );
 
     expect(androidWorkflow.appliesToHostPlatform, false);
@@ -94,7 +97,7 @@ void main() {
     androidSdk.adbPath = 'path/to/adb';
     final androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(),
-      androidSdk: androidSdk,
+      androidSdkBuilder: () => androidSdk,
     );
 
     expect(androidWorkflow.appliesToHostPlatform, true);
@@ -109,7 +112,7 @@ void main() {
     androidSdk.emulatorPath = 'path/to/emulator';
     final androidWorkflow = AndroidWorkflow(
       featureFlags: TestFeatureFlags(),
-      androidSdk: androidSdk,
+      androidSdkBuilder: () => androidSdk,
     );
 
     expect(androidWorkflow.appliesToHostPlatform, true);
