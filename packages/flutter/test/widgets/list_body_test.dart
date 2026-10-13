@@ -188,4 +188,43 @@ void main() {
       ),
     );
   });
+
+  testWidgets('ListBody reports intrinsic heights along its main axis', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey vertical = GlobalKey();
+    final GlobalKey horizontal = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            SizedBox(
+              width: 200.0,
+              height: 300.0,
+              child: SingleChildScrollView(
+                child: ListBody(key: vertical, children: children),
+              ),
+            ),
+            SizedBox(
+              width: 300.0,
+              height: 150.0,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ListBody(key: horizontal, mainAxis: Axis.horizontal, children: children),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final RenderBox verticalBox = tester.renderObject(find.byKey(vertical));
+    expect(verticalBox.getMinIntrinsicHeight(200.0), 600.0);
+    expect(verticalBox.getMaxIntrinsicHeight(200.0), 600.0);
+
+    final RenderBox horizontalBox = tester.renderObject(find.byKey(horizontal));
+    expect(horizontalBox.getMinIntrinsicHeight(800.0), 150.0);
+    expect(horizontalBox.getMaxIntrinsicHeight(800.0), 150.0);
+  });
 }
