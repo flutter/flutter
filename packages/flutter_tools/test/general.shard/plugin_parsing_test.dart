@@ -613,4 +613,41 @@ void main() {
       throwsToolExit(message: 'Invalid "android" plugin specification.'),
     );
   });
+
+  testWithoutContext('Plugin parsing reports all errors across platforms at once', () {
+    final fileSystem = MemoryFileSystem.test();
+    const pluginYamlRaw =
+        'platforms:\n'
+        ' android:\n'
+        ' ios:\n'
+        '  pluginClass: IosClass\n'
+        '  dartFileName: src/ios_class.dart\n'
+        ' linux:\n'
+        '  dartPluginClass: LinuxClass\n'
+        '  dartFileName: ../invalid_path.dart\n'
+        ' web:\n'
+        '  pluginClass: "Invalid Class"\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+      () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message:
+            'Invalid plugin specification $_kTestPluginName.\n'
+            'Invalid "android" plugin specification.\n'
+            '"dartFileName" cannot be specified without "dartPluginClass" in iOS platform of plugin "$_kTestPluginName"\n'
+            'The plugin `$_kTestPluginName` has an invalid `dartFileName` for platform `linux` in pubspec.yaml.\n'
+            'The plugin `$_kTestPluginName` has an invalid `pluginClass` in its web plugin declaration.\n'
+            'The plugin `$_kTestPluginName` is missing the required field `fileName` in pubspec.yaml',
+      ),
+    );
+  });
 }
