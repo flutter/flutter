@@ -44,7 +44,7 @@ unless `impeller_malioc_path` is set.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
-load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "PYTHON_ATTRS", "run_python")
+load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "PYTHON_ATTRS", "expand_gn_paths", "run_python")
 
 # The shader library impellerc resolves `<impeller/...>` and `<flutter/...>`
 # includes against: GN's copy() targets, whose files are the directory's.
@@ -439,5 +439,230 @@ def impeller_shaders(
         name = name,
         deps = backends,
         target_compatible_with = target_compatible_with,
+        **kwargs
+    )
+
+# ---------------------------------------------------------------------------
+# impellerc(): the template invoked directly
+# ---------------------------------------------------------------------------
+
+# The target flags for which GN's template generates reflection state.
+_REFLECTING_FLAGS = [
+    "--metal-ios",
+    "--metal-desktop",
+    "--opengl-es",
+    "--opengl-desktop",
+    "--vulkan",
+]
+
+def _impellerc_run_impl(ctx):
+    shader_lib = ctx.files._shader_lib
+    if not shader_lib:
+        fail("%s: the shader library has no files" % ctx.label)
+    shader_lib_dir = shader_lib[0].dirname.rsplit("/", 1)[0]
+    shaders = ctx.files.srcs
+
+    # The arguments as impeller/tools/compiler.gni orders them, up to the
+    # per-run ones.
+    common = ["--include=" + shader_lib_dir] + ctx.attr.flags
+    if ctx.attr.gles_language_version:
+        common.append("--gles-language-version=%d" % ctx.attr.gles_language_version)
+    if ctx.attr.use_half_textures:
+        common.append("--use-half-textures")
+    if ctx.attr.require_framebuffer_fetch:
+        common.append("--require-framebuffer-fetch")
+    if ctx.attr.entry_point_prefix != None and ctx.attr.has_entry_point_prefix:
+        common.append("--entry-point-prefix=" + ctx.attr.entry_point_prefix)
+    if ctx.attr.json:
+        common.append("--json")
+    if ctx.attr.iplr:
+        common.append("--iplr")
+    defines = ["--define=" + define for define in ctx.attr.defines]
+    inputs = shaders + ctx.files.includes + shader_lib
+
+    if ctx.attr.shader_bundle:
+        # One invocation; the bundle names the shaders by path (the
+        # converter's $(src ...) tokens, which expand to execution-root
+        # relative paths, as GN's rebase_path gave absolute ones).
+        if len(ctx.outputs.outs) != 1:
+            fail("%s: a shader bundle is one output" % ctx.label)
+        out = ctx.outputs.outs[0]
+        bundle = expand_gn_paths(ctx, ctx.attr.shader_bundle, ctx.attr.srcs)
+        ctx.actions.run(
+            executable = ctx.executable._impellerc,
+            arguments = common + ["--sl=" + out.path, "--shader-bundle=" + bundle] + defines,
+            inputs = inputs,
+            outputs = [out],
+            mnemonic = ctx.attr.mnemonic,
+            progress_message = "impellerc %{output}",
+        )
+        return [DefaultInfo(files = depset([out]))]
+
+    if len(ctx.outputs.outs) != len(shaders):
+        fail("%s: one output per shader" % ctx.label)
+    reflecting = [flag for flag in ctx.attr.flags if flag in _REFLECTING_FLAGS]
+    products = []
+    for i, shader in enumerate(shaders):
+        sl = ctx.outputs.outs[i]
+        spirv = ctx.actions.declare_file(shader.basename + ".spirv", sibling = sl)
+        depfile = ctx.actions.declare_file(shader.basename + ".d", sibling = sl)
+        arguments = common + [
+            "--input=" + shader.path,
+            "--include=" + shader.dirname,
+            "--depfile=" + depfile.path,
+            "--sl=" + sl.path,
+            "--spirv=" + spirv.path,
+        ]
+        outputs = [sl, spirv, depfile]
+        products.append(sl)
+        if reflecting:
+            json = ctx.actions.declare_file(shader.basename + ".json", sibling = sl)
+            header = ctx.actions.declare_file(shader.basename + ".h", sibling = sl)
+            source = ctx.actions.declare_file(shader.basename + ".cc", sibling = sl)
+            arguments += [
+                "--reflection-json=" + json.path,
+                "--reflection-header=" + header.path,
+                "--reflection-cc=" + source.path,
+            ]
+            outputs += [json, header, source]
+
+            # GN's outputs: the compiled shader, the header and the source.
+            products += [header, source]
+        ctx.actions.run(
+            executable = ctx.executable._impellerc,
+            arguments = arguments + defines,
+            inputs = inputs,
+            outputs = outputs,
+            mnemonic = ctx.attr.mnemonic,
+            progress_message = "impellerc %{input}",
+        )
+    return [DefaultInfo(files = depset(products))]
+
+impellerc_run = rule(
+    implementation = _impellerc_run_impl,
+    doc = "GN's impellerc() template as invoked directly: one impellerc run per shader, or one run for a shader bundle. " +
+          "The target's files are GN's outputs (the compiled shaders, plus the reflection header and source when a reflecting target flag is given).",
+    attrs = {
+        "srcs": attr.label_list(
+            allow_files = True,
+            mandatory = True,
+            doc = "The shaders (GN's `shaders`).",
+        ),
+        "includes": attr.label_list(
+            allow_files = True,
+            doc = "Files the shaders may `#include` beside themselves.",
+        ),
+        "outs": attr.output_list(
+            mandatory = True,
+            doc = "The compiled shader of each source, in order (`<subdir>/<file>.<extension>`), or the one bundle.",
+        ),
+        "flags": attr.string_list(
+            doc = "GN's `shader_target_flags`.",
+        ),
+        "defines": attr.string_list(
+            doc = "GN's `defines`: impellerc's --define= macros.",
+        ),
+        "gles_language_version": attr.int(
+            doc = "--gles-language-version, 0 for none.",
+        ),
+        "use_half_textures": attr.bool(),
+        "require_framebuffer_fetch": attr.bool(),
+        "has_entry_point_prefix": attr.bool(
+            doc = "Whether --entry-point-prefix is passed at all (GN passes it only when the invoker sets it).",
+        ),
+        "entry_point_prefix": attr.string(),
+        "json": attr.bool(doc = "GN's `json`: --json."),
+        "iplr": attr.bool(doc = "GN's `iplr`: --iplr."),
+        "shader_bundle": attr.string(
+            doc = "GN's `shader_bundle`: the bundle's JSON, with the shaders' paths as $(src ...) tokens; one invocation.",
+        ),
+        "mnemonic": attr.string(
+            default = "Impellerc",
+        ),
+        "_impellerc": attr.label(
+            default = "//engine/src/flutter/impeller/compiler:impellerc",
+            executable = True,
+            cfg = "exec",
+        ),
+        "_shader_lib": attr.label_list(
+            default = _SHADER_LIB,
+            allow_files = True,
+        ),
+    },
+)
+
+def impellerc(
+        name,
+        shaders,
+        shader_target_flags = [],
+        sl_file_extension = None,
+        intermediates_subdir = None,
+        iplr = False,
+        json = False,
+        shader_bundle = None,
+        shader_bundle_output = None,
+        gles_language_version = None,
+        metal_version = None,
+        use_half_textures = False,
+        require_framebuffer_fetch = False,
+        entry_point_prefix = None,
+        defines = [],
+        mnemonic = None,
+        **kwargs):
+    """GN's impellerc() template (impeller/tools/compiler.gni), invoked directly.
+
+    The runtime stages and shader bundles of the test fixtures: one
+    impellerc run per shader writing `<intermediates_subdir>/<shader>.<sl_file_extension>`,
+    or, with `shader_bundle`, one run writing `<intermediates_subdir>/<shader_bundle_output>`.
+    The target's files are what GN's get_target_outputs() lists.
+
+    Args:
+      name: the target name.
+      shaders: the GLSL shaders.
+      shader_target_flags: impellerc's target flags (`--sksl`,
+        `--runtime-stage-vulkan`, `--vulkan`, ...).
+      sl_file_extension: the compiled shader's extension (`iplr`, `vkspv`).
+      intermediates_subdir: the subdirectory of the outputs, if any.
+      iplr: --iplr.
+      json: --json.
+      shader_bundle: the bundle's JSON (one invocation), paths as the
+        converter's $(src ...) tokens.
+      shader_bundle_output: the bundle's file name.
+      gles_language_version: --gles-language-version.
+      metal_version: Metal's; accepted (no Metal here).
+      use_half_textures: --use-half-textures.
+      require_framebuffer_fetch: --require-framebuffer-fetch.
+      entry_point_prefix: --entry-point-prefix, when set.
+      defines: --define= macros.
+      mnemonic: GN's `mnemonic`, the action's.
+      **kwargs: `testonly`, `visibility`, `target_compatible_with`.
+    """
+    _unused = metal_version  # buildifier: disable=unused-variable
+    prefix = intermediates_subdir + "/" if intermediates_subdir else ""
+    if shader_bundle != None:
+        if not shader_bundle_output:
+            fail("impellerc(%s): shader_bundle needs shader_bundle_output" % name)
+        outs = [prefix + shader_bundle_output]
+    else:
+        if not sl_file_extension:
+            fail("impellerc(%s): sl_file_extension is required without shader_bundle" % name)
+        outs = [prefix + shader.rsplit("/", 1)[-1] + "." + sl_file_extension for shader in shaders]
+    impellerc_run(
+        name = name,
+        srcs = shaders,
+        includes = native.glob(["**/*.glsl"], allow_empty = True),
+        outs = outs,
+        flags = shader_target_flags,
+        defines = defines,
+        gles_language_version = gles_language_version or 0,
+        use_half_textures = use_half_textures,
+        require_framebuffer_fetch = require_framebuffer_fetch,
+        has_entry_point_prefix = entry_point_prefix != None,
+        entry_point_prefix = entry_point_prefix or "",
+        json = json,
+        iplr = iplr,
+        shader_bundle = shader_bundle or "",
+        # Bazel's mnemonics are letters and digits (GN's IMPELLERC_IPLR).
+        mnemonic = "".join([c for c in (mnemonic or "Impellerc").elems() if c.isalnum()]),
         **kwargs
     )

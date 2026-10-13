@@ -25,7 +25,20 @@ undeclared input GN would have tolerated is a failure here, by design.
 
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 
-def _expand(ctx, arg, targets):
+def expand_gn_paths(ctx, arg, targets):
+    """Expands the path tokens of one argument (see the module docstring).
+
+    For rules besides gn_action whose arguments the converter writes with the
+    same tokens (the impellerc rule's shader bundle).
+
+    Args:
+      ctx: the rule context.
+      arg: the argument.
+      targets: the targets `$(execpath ...)` may name.
+
+    Returns:
+      The argument with every token replaced.
+    """
     out = ""
     rest = arg
     for _ in range(len(arg)):
@@ -103,7 +116,7 @@ def _gn_action_impl(ctx):
     dep_files = [f for dep in ctx.attr.deps for f in dep[DefaultInfo].files.to_list()]
     inputs = ctx.files.srcs + ctx.files.inputs + dep_files
     targets = ctx.attr.srcs + ctx.attr.inputs + ctx.attr.deps
-    arguments = [_expand(ctx, arg, targets) for arg in ctx.attr.args]
+    arguments = [expand_gn_paths(ctx, arg, targets) for arg in ctx.attr.args]
     run_python(
         ctx,
         script = ctx.file.script,
