@@ -55,6 +55,36 @@ Future<void> runAndroidEngineTests({required ImpellerBackend impellerBackend}) a
   });
 }
 
+/// Runs the Android engine tests using the Skia (OpenGL ES) rendering backend.
+///
+/// See [runAndroidEngineTests] for how to run these locally.
+Future<void> runAndroidEngineSkiaTests() async {
+  print('Running Flutter Driver Android Skia tests');
+
+  await _withPatchedManifest(ImpellerBackend.opengles, (
+    List<FileSystemEntity> mains,
+    File androidManifestXml,
+  ) async {
+    androidManifestXml.writeAsStringSync(
+      androidManifestXml.readAsStringSync().replaceFirst(
+        kImpellerMetadataEnabled,
+        kImpellerMetadataDisabled,
+      ),
+    );
+
+    for (final file in mains) {
+      if (file.path.contains('hcpp')) {
+        continue;
+      }
+      await _runTest(
+        file,
+        impellerBackend: ImpellerBackend.opengles,
+        additionalEnvironment: const <String, String>{'ANDROID_ENGINE_TEST_GOLDEN_VARIANT': 'skia'},
+      );
+    }
+  });
+}
+
 /// Runs the HCPP (Hybrid Composition++) subset of the Android engine tests.
 ///
 /// These live in `dev/integration_tests/android_engine_test/lib/hcpp` and only
@@ -199,6 +229,10 @@ Future<void> _runTest(
   }
 }
 
+const String kImpellerMetadataEnabled =
+    '<meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="true" />';
+const String kImpellerMetadataDisabled =
+    '<meta-data android:name="io.flutter.embedding.android.EnableImpeller" android:value="false" />';
 const String kHcppMetadataDisabled =
     '<meta-data android:name="io.flutter.embedding.android.EnableHcpp" android:value="false" />';
 const String kHcppMetadataEnabled =
