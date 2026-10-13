@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/fl_view_private.h"
 
 #include <gdk/wayland/gdkwayland.h>
+#include <cmath>
 
 #include "flutter/common/constants.h"
 #include "flutter/shell/platform/linux/fl_compositor_opengl.h"
@@ -33,6 +34,13 @@ void fl_view_gtk4_setup_subsurface(FlView* view) {
     return;
   }
 
+  const double surface_scale = fl_gtk_widget_get_scale(view->render_area);
+  // wl_surface buffer scale is integral. Use GTK's texture presentation for
+  // fractional surfaces until this optional path supports wp_viewporter.
+  if (surface_scale != floor(surface_scale)) {
+    return;
+  }
+
   FlWaylandDisplay* display =
       fl_wayland_display_get_for_display(gtk_widget_get_display(toplevel));
   if (display == nullptr) {
@@ -49,7 +57,8 @@ void fl_view_gtk4_setup_subsurface(FlView* view) {
   if (width <= 0 || height <= 0) {
     return;
   }
-  const int scale = MAX(gtk_widget_get_scale_factor(view->render_area), 1);
+  const int scale =
+      static_cast<int>(MAX(fl_gtk_widget_get_scale(view->render_area), 1.0));
   FlSubsurfaceEGL* subsurface_egl =
       fl_subsurface_egl_new(fl_engine_get_opengl_manager(view->engine),
                             subsurface, width, height, scale);
@@ -71,14 +80,22 @@ void fl_view_gtk4_setup_subsurface(FlView* view) {
   view->subsurface = subsurface;
   view->subsurface_egl = subsurface_egl;
   view->subsurface_enabled = TRUE;
+  view->subsurface_scale = scale;
   g_mutex_unlock(&view->subsurface_mutex);
 }
 
 void fl_view_gtk4_resize_subsurface(FlView* view, int width, int height) {
   g_mutex_lock(&view->subsurface_mutex);
+  const double surface_scale = fl_gtk_widget_get_scale(view->render_area);
+  if (view->subsurface_enabled && surface_scale != view->subsurface_scale) {
+    view->subsurface_enabled = FALSE;
+    g_clear_object(&view->subsurface_egl);
+    g_clear_object(&view->subsurface);
+  }
   const gboolean subsurface_enabled = view->subsurface_enabled;
   if (view->subsurface_enabled && view->subsurface_egl != nullptr) {
-    const int scale = MAX(gtk_widget_get_scale_factor(view->render_area), 1);
+    const int scale =
+        static_cast<int>(MAX(fl_gtk_widget_get_scale(view->render_area), 1.0));
     fl_subsurface_egl_resize(view->subsurface_egl, width * scale,
                              height * scale);
   }

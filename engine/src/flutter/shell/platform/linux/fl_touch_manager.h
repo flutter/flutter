@@ -38,10 +38,12 @@ FlTouchManager* fl_touch_manager_new(FlEngine* engine, FlutterViewId view_id);
 void fl_touch_manager_handle_touch_event(FlTouchManager* manager,
 #if FLUTTER_LINUX_GTK4
                                          GdkEvent* event,
+                                         gdouble event_x,
+                                         gdouble event_y,
 #else
                                          GdkEventTouch* event,
 #endif
-                                         gint scale_factor);
+                                         gdouble scale_factor);
 
 /**
  * fl_touch_manager_cancel_input:

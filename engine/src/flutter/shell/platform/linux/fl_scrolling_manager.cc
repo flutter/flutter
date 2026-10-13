@@ -79,7 +79,7 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* self,
                                               gboolean position_valid,
                                               gdouble scroll_delta_x,
                                               gdouble scroll_delta_y,
-                                              gint scale_factor) {
+                                              gdouble scale_factor) {
   g_return_if_fail(FL_IS_SCROLLING_MANAGER(self));
 
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));

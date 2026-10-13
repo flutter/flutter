@@ -38,6 +38,10 @@ struct _FlView {
   GdkRGBA* background_color;
   gboolean have_first_frame;
   gboolean needs_frame_after_realize;
+#if FLUTTER_LINUX_GTK4
+  GdkSurface* scale_surface;
+  gulong scale_changed_id;
+#endif
   FlWindowStateMonitor* window_state_monitor;
   FlScrollingManager* scrolling_manager;
   FlPointerManager* pointer_manager;
@@ -59,6 +63,7 @@ struct _FlView {
   FlSubsurface* subsurface;
   FlSubsurfaceEGL* subsurface_egl;
   gboolean subsurface_enabled;
+  int subsurface_scale;
 #endif
   GCancellable* cancellable;
 };

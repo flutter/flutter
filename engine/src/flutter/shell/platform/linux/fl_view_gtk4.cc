@@ -145,13 +145,13 @@ static gboolean scroll_cb(GtkEventControllerScroll* controller,
 
   fl_scrolling_manager_handle_scroll_event(
       view->scrolling_manager, event, x, y, position_valid, delta_x, delta_y,
-      gtk_widget_get_scale_factor(GTK_WIDGET(view)));
+      fl_gtk_widget_get_scale(GTK_WIDGET(view)));
   return TRUE;
 }
 
 gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
   GdkEventType event_type = gdk_event_get_event_type(event);
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(view));
+  double scale_factor = fl_gtk_widget_get_scale(GTK_WIDGET(view));
 
   switch (event_type) {
     case GDK_BUTTON_PRESS:
@@ -218,10 +218,15 @@ gboolean fl_view_gtk4_legacy_event_cb(FlView* view, GdkEvent* event) {
     case GDK_TOUCH_BEGIN:
     case GDK_TOUCH_UPDATE:
     case GDK_TOUCH_END:
-    case GDK_TOUCH_CANCEL:
-      fl_touch_manager_handle_touch_event(view->touch_manager, event,
+    case GDK_TOUCH_CANCEL: {
+      gdouble x = 0.0, y = 0.0;
+      if (!get_event_position(view, event, &x, &y)) {
+        return FALSE;
+      }
+      fl_touch_manager_handle_touch_event(view->touch_manager, event, x, y,
                                           scale_factor);
       return TRUE;
+    }
     default:
       return FALSE;
   }

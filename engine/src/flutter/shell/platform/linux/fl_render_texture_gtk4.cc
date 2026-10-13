@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
+#include <cmath>
+#include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_linux_gtk4_debug.h"
 
@@ -108,8 +110,8 @@ static void fl_render_texture_gtk4_measure(GtkWidget* widget,
   const int texture_size = orientation == GTK_ORIENTATION_HORIZONTAL
                                ? self->texture_width
                                : self->texture_height;
-  const int scale_factor = MAX(gtk_widget_get_scale_factor(widget), 1);
-  const int natural_size = (texture_size + scale_factor - 1) / scale_factor;
+  const double scale_factor = MAX(fl_gtk_widget_get_scale(widget), 1.0);
+  const int natural_size = static_cast<int>(ceil(texture_size / scale_factor));
 
   // The Flutter view fills its GTK allocation. Its backing texture must not
   // become a minimum size, otherwise a large frame can prevent the window

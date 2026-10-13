@@ -67,7 +67,7 @@ void fl_scrolling_manager_handle_scroll_event(FlScrollingManager* manager,
                                               gboolean position_valid,
                                               gdouble delta_x,
                                               gdouble delta_y,
-                                              gint scale_factor);
+                                              gdouble scale_factor);
 
 /**
  * fl_scrolling_manager_handle_rotation_begin:

@@ -43,6 +43,11 @@ static void log_fallback_once(const char* symbol, const char* fallback) {
 const FlGtkRuntimeApi* fl_gtk_runtime_api_get() {
   static const FlGtkRuntimeApi api = [] {
     FlGtkRuntimeApi result = {};
+    if (gtk_runtime_at_least(4, 12, 0)) {
+      result.gdk_surface_get_scale =
+          lookup_symbol<decltype(result.gdk_surface_get_scale)>(
+              "gdk_surface_get_scale");
+    }
     result.gtk_at_least_4_10 = gtk_runtime_at_least(4, 10, 0);
     result.gtk_at_least_4_14 = gtk_runtime_at_least(4, 14, 0);
     result.gtk_at_least_4_18 = gtk_runtime_at_least(4, 18, 0);
@@ -130,7 +135,8 @@ const FlGtkRuntimeApi* fl_gtk_runtime_api_get() {
 }
 
 void fl_gtk_runtime_accessible_update_platform_state(
-    GtkAccessible* self, FlGtkAccessiblePlatformState state) {
+    GtkAccessible* self,
+    FlGtkAccessiblePlatformState state) {
 #if defined(FLUTTER_LINUX_GTK4_RUNTIME_API_COMPAT)
   const FlGtkRuntimeApi* api = fl_gtk_runtime_api_get();
   if (api->gtk_at_least_4_18 &&

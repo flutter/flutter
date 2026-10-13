@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_LINUX_FL_GTK_GTK4_H_
 
 #include <gtk/gtk.h>
+#include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 
 typedef GdkSurface FlGdkSurface;
 
@@ -22,12 +23,16 @@ static inline gint fl_gtk_surface_get_scale_factor(FlGdkSurface* surface) {
   return gdk_surface_get_scale_factor(surface);
 }
 
+static inline double fl_gtk_surface_get_scale_with_api(
+    FlGdkSurface* surface,
+    const FlGtkRuntimeApi* api) {
+  return api->gdk_surface_get_scale != nullptr
+             ? api->gdk_surface_get_scale(surface)
+             : static_cast<double>(gdk_surface_get_scale_factor(surface));
+}
+
 static inline double fl_gtk_surface_get_scale(FlGdkSurface* surface) {
-#if GTK_CHECK_VERSION(4, 12, 0)
-  return gdk_surface_get_scale(surface);
-#else
-  return static_cast<double>(gdk_surface_get_scale_factor(surface));
-#endif
+  return fl_gtk_surface_get_scale_with_api(surface, fl_gtk_runtime_api_get());
 }
 
 static inline gint fl_gtk_surface_get_width(FlGdkSurface* surface) {

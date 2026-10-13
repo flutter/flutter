@@ -200,6 +200,7 @@ gboolean fl_gtk_runtime_accessible_text_install_editing_callbacks(
     decltype(FlGtkAccessibleTextInterface4_22::set_selection) selection);
 
 struct FlGtkRuntimeApi {
+  double (*gdk_surface_get_scale)(GdkSurface* surface);
   gboolean gtk_at_least_4_10;
   gboolean gtk_at_least_4_14;
   gboolean gtk_at_least_4_18;

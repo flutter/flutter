@@ -91,17 +91,15 @@ static gboolean redraw_cb(gpointer user_data) {
 
   // If Flutter is controlling the window size, then resize the view if
   // necessary.
-  gint scale_factor =
-      gtk_widget_get_scale_factor(GTK_WIDGET(self->render_area));
+  const double scale_factor =
+      fl_gtk_widget_get_scale(GTK_WIDGET(self->render_area));
   size_t width;
   size_t height;
 #if FLUTTER_LINUX_GTK4
-  width =
-      static_cast<size_t>(gtk_widget_get_width(GTK_WIDGET(self->render_area))) *
-      scale_factor;
-  height = static_cast<size_t>(
-               gtk_widget_get_height(GTK_WIDGET(self->render_area))) *
-           scale_factor;
+  width = fl_gtk_size_to_pixels(gtk_widget_get_width(self->render_area),
+                                scale_factor);
+  height = fl_gtk_size_to_pixels(gtk_widget_get_height(self->render_area),
+                                 scale_factor);
 #else
   GtkAllocation allocation;
   gtk_widget_get_allocation(GTK_WIDGET(self->render_area), &allocation);
@@ -274,7 +272,9 @@ static void handle_geometry_changed_with_size(FlView* self,
   }
 
   double scale = fl_gtk_widget_get_scale(GTK_WIDGET(self));
+#if !FLUTTER_LINUX_GTK4
   bool size_is_in_pixels = false;
+#endif
   if (width == 0 || height == 0) {
     // Try to fall back to the toplevel surface size if available.
     FlGdkSurface* surface = fl_gtk_widget_get_surface(GTK_WIDGET(self));
@@ -282,7 +282,9 @@ static void handle_geometry_changed_with_size(FlView* self,
       width = fl_gtk_surface_get_width(surface);
       height = fl_gtk_surface_get_height(surface);
       scale = fl_gtk_surface_get_scale(surface);
+#if !FLUTTER_LINUX_GTK4
       size_is_in_pixels = true;
+#endif
     }
     if (width == 0 || height == 0) {
       return;
@@ -310,10 +312,15 @@ static void handle_geometry_changed_with_size(FlView* self,
     display_id = fl_display_monitor_get_display_id(
         fl_engine_get_display_monitor(self->engine), monitor);
   }
+#if FLUTTER_LINUX_GTK4
+  size_t min_width = fl_gtk_size_to_pixels(width, scale);
+  size_t min_height = fl_gtk_size_to_pixels(height, scale);
+#else
   size_t min_width =
       size_is_in_pixels ? width : fl_gtk_size_to_pixels(width, scale);
   size_t min_height =
       size_is_in_pixels ? height : fl_gtk_size_to_pixels(height, scale);
+#endif
   size_t max_width = min_width;
   size_t max_height = min_height;
   fl_engine_send_window_metrics_event(self->engine, display_id, self->view_id,
@@ -428,8 +435,43 @@ static void fl_view_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface) {
   iface->get_registrar_for_plugin = fl_view_get_registrar_for_plugin;
 }
+#if FLUTTER_LINUX_GTK4
+static void surface_scale_changed_cb(FlView* self) {
+  fl_view_gtk4_resize_subsurface(self, gtk_widget_get_width(self->render_area),
+                                 gtk_widget_get_height(self->render_area));
+  handle_geometry_changed(self);
+  gtk_widget_queue_resize(self->render_area);
+  fl_engine_schedule_frame(self->engine);
+}
+
+static void disconnect_scale_surface(FlView* self) {
+  if (self->scale_surface != nullptr && self->scale_changed_id != 0) {
+    g_signal_handler_disconnect(self->scale_surface, self->scale_changed_id);
+    self->scale_changed_id = 0;
+  }
+  g_clear_object(&self->scale_surface);
+}
+
+static void unrealize_cb(FlView* self) {
+  disconnect_scale_surface(self);
+}
+#endif
+
 static void realize_cb(FlView* self) {
 #if FLUTTER_LINUX_GTK4
+  disconnect_scale_surface(self);
+  self->scale_surface = fl_gtk_widget_get_surface(self->render_area);
+  if (self->scale_surface != nullptr) {
+    g_object_ref(self->scale_surface);
+    const char* property =
+        g_object_class_find_property(G_OBJECT_GET_CLASS(self->scale_surface),
+                                     "scale") != nullptr
+            ? "notify::scale"
+            : "notify::scale-factor";
+    self->scale_changed_id =
+        g_signal_connect_swapped(self->scale_surface, property,
+                                 G_CALLBACK(surface_scale_changed_cb), self);
+  }
   fl_view_gtk4_setup_rendering(self);
 
   if (self->view_id != flutter::kFlutterImplicitViewId) {
@@ -585,6 +627,9 @@ static void fl_view_dispose(GObject* object) {
     self->update_semantics_cb_id = 0;
   }
 
+#if FLUTTER_LINUX_GTK4
+  disconnect_scale_surface(self);
+#endif
   g_clear_object(&self->render_context);
 #if !FLUTTER_LINUX_GTK4
   g_clear_object(&self->renderer);
@@ -796,6 +841,8 @@ static void fl_view_init(FlView* self) {
   gtk_widget_set_visible(GTK_WIDGET(self->render_area), TRUE);
   g_signal_connect_swapped(self->render_area, "realize", G_CALLBACK(realize_cb),
                            self);
+  g_signal_connect_swapped(self->render_area, "unrealize",
+                           G_CALLBACK(unrealize_cb), self);
   g_signal_connect_swapped(self->render_area, "resize", G_CALLBACK(resize_cb),
                            self);
 #else
@@ -823,7 +870,7 @@ G_MODULE_EXPORT FlView* fl_view_new_for_engine(FlEngine* engine) {
   self->engine = FL_ENGINE(g_object_ref(engine));
 
   size_t min_width = 1, min_height = 1, max_width = 1, max_height = 1;
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  double scale_factor = fl_gtk_widget_get_scale(GTK_WIDGET(self));
   self->view_id = fl_engine_add_view(
       engine, FL_RENDERABLE(self), min_width, min_height, max_width, max_height,
       scale_factor, self->cancellable, view_added_cb, self);
@@ -841,7 +888,7 @@ G_MODULE_EXPORT FlView* fl_view_new_sized_to_content(FlEngine* engine) {
   self->sized_to_content = TRUE;
   size_t min_width = 1, min_height = 1, max_width = G_MAXSIZE,
          max_height = G_MAXSIZE;
-  gint scale_factor = gtk_widget_get_scale_factor(GTK_WIDGET(self));
+  double scale_factor = fl_gtk_widget_get_scale(GTK_WIDGET(self));
   self->view_id = fl_engine_add_view(
       engine, FL_RENDERABLE(self), min_width, min_height, max_width, max_height,
       scale_factor, self->cancellable, view_added_cb, self);

@@ -10,6 +10,7 @@
 #include <cstddef>
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_gtk.h"
 #include "flutter/shell/platform/linux/fl_gtk4_runtime_api.h"
 #include "flutter/shell/platform/linux/fl_render_texture_gtk4.h"
 #include "flutter/shell/platform/linux/fl_view_private.h"
@@ -401,7 +402,7 @@ static gboolean fl_gtk4_accessible_node_get_bounds(GtkAccessible* accessible,
   // when answering AT-SPI window-coordinate queries. Convert both origins in
   // the same view space before subtracting to preserve rounding across levels.
   const double scale =
-      MAX(gtk_widget_get_scale_factor(self->view->render_area), 1);
+      MAX(fl_gtk_widget_get_scale(self->view->render_area), 1.0);
   const int left = static_cast<int>(floor(self->bounds_x / scale));
   const int top = static_cast<int>(floor(self->bounds_y / scale));
   const int parent_left =
