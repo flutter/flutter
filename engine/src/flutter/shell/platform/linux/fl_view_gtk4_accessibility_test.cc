@@ -1278,8 +1278,8 @@ TEST_F(FlViewGtk4AccessibilityTest, BuildsNativeTreeFromSemantics) {
     gsize text_length = 0;
     const gchar* text_data =
         static_cast<const gchar*>(g_bytes_get_data(text, &text_length));
-    EXPECT_STREQ(text_data, "one two");
-    EXPECT_EQ(text_length, std::strlen("one two"));
+    ASSERT_EQ(text_length, std::strlen("one two"));
+    EXPECT_EQ(std::memcmp(text_data, "one two", text_length), 0);
   }
 
   // Reordering and removal must preserve retained objects and repair sibling
