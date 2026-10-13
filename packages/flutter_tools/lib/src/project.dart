@@ -7,29 +7,22 @@ import 'dart:collection';
 import 'package:glob/glob.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 import 'package:xml/xml.dart';
 import 'package:yaml/yaml.dart';
 
 import 'android/android_builder.dart';
 import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
-import 'base/config.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/platform.dart';
 import 'base/project_migrator.dart';
-import 'base/template.dart';
-import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
-import 'cache.dart';
 import 'cmake_project.dart';
-import 'context/tool_context.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -38,7 +31,6 @@ import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart';
-import 'macos/cocoapods.dart';
 import 'macos/xcode.dart';
 import 'migrations/analysis_options_migration.dart';
 import 'package_graph.dart';
@@ -63,10 +55,21 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({required this._logger, required this._fileSystem});
+  FlutterProjectFactory({
+    required this._fileSystem,
+    required this._logger,
+    this._featureFlags,
+    this._plistParser,
+    this._xcode,
+    this._xcodeProjectInterpreter,
+  });
 
-  final Logger _logger;
+  final FeatureFlags? _featureFlags;
   final FileSystem _fileSystem;
+  final Logger _logger;
+  final PlistParser? _plistParser;
+  final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   @visibleForTesting
   final projects = <String, FlutterProject>{};
@@ -86,7 +89,16 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest, logger: _logger);
+      return FlutterProject(
+        directory,
+        manifest,
+        exampleManifest,
+        featureFlags: _featureFlags,
+        plistParser: _plistParser,
+        projectFactory: this,
+        xcode: _xcode,
+        xcodeProjectInterpreter: _xcodeProjectInterpreter,
+      );
     }
     return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -103,8 +115,11 @@ class FlutterProjectFactory {
         directory,
         manifest,
         exampleManifest,
-        logger: _logger,
+        featureFlags: _featureFlags,
+        plistParser: _plistParser,
         projectFactory: this,
+        xcode: _xcode,
+        xcodeProjectInterpreter: _xcodeProjectInterpreter,
       );
     });
   }
@@ -131,44 +146,20 @@ class FlutterProject {
     FlutterManifest manifest,
     this._exampleManifest, {
     this._buildDirectory,
-    this._cocoaPods,
     this._featureFlags,
-    this._logger,
     this._plistParser,
     this._projectFactory,
-    this._templateRenderer,
-    this._toolContext,
     this._xcode,
     this._xcodeProjectInterpreter,
   }) {
     _setManifest(manifest);
   }
 
-  final CocoaPods? _cocoaPods;
   final FeatureFlags? _featureFlags;
-  final Logger? _logger;
   final PlistParser? _plistParser;
   final FlutterProjectFactory? _projectFactory;
-  final TemplateRenderer? _templateRenderer;
-  final ToolContext? _toolContext;
   final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
-
-  Cache get projectCache => _toolContext?.cache ?? globals.cache;
-  CocoaPods? get projectCocoaPods => _cocoaPods ?? globals.cocoaPods;
-  Config get projectConfig => _toolContext?.config ?? globals.config;
-  FeatureFlags get projectFeatureFlags => _featureFlags ?? featureFlags;
-  FileSystemUtils get projectFileSystemUtils => _toolContext?.fileSystemUtils ?? globals.fsUtils;
-  Logger get projectLogger => _logger ?? _toolContext?.logger ?? globals.logger;
-  Platform get projectPlatform => _toolContext?.platform ?? globals.platform;
-  PlistParser get projectPlistParser => _plistParser ?? globals.plistParser;
-  ProcessManager get projectProcessManager =>
-      _toolContext?.processManager ?? globals.processManager;
-  TemplateRenderer get projectTemplateRenderer => _templateRenderer ?? globals.templateRenderer;
-  AnsiTerminal get projectTerminal => _toolContext?.terminal ?? globals.terminal;
-  Xcode? get projectXcode => _xcode ?? globals.xcode;
-  XcodeProjectInterpreter? get projectXcodeProjectInterpreter =>
-      _xcodeProjectInterpreter ?? globals.xcodeProjectInterpreter;
 
   FlutterProject? _workspaceRoot;
   bool _searchedForWorkspaceRoot = false;
@@ -261,7 +252,6 @@ class FlutterProject {
       manifest,
       exampleManifest,
       buildDirectory: buildDirectory ?? directory.childDirectory('build'),
-      logger: logger,
     );
   }
 
@@ -443,7 +433,13 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  late final ios = IosProject.fromFlutter(this);
+  late final ios = IosProject.fromFlutter(
+    this,
+    featureFlags: _featureFlags,
+    plistParser: _plistParser,
+    xcode: _xcode,
+    xcodeProjectInterpreter: _xcodeProjectInterpreter,
+  );
 
   /// The Android sub project of this project.
   late final android = AndroidProject._(this);
@@ -452,7 +448,12 @@ class FlutterProject {
   late final web = WebProject._(this);
 
   /// The MacOS sub project of this project.
-  late final macos = MacOSProject.fromFlutter(this);
+  late final macos = MacOSProject.fromFlutter(
+    this,
+    featureFlags: _featureFlags,
+    xcode: _xcode,
+    xcodeProjectInterpreter: _xcodeProjectInterpreter,
+  );
 
   /// The Linux sub project of this project.
   late final linux = LinuxProject.fromFlutter(this);
@@ -517,6 +518,11 @@ class FlutterProject {
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(logger: _manifest.logger),
+    featureFlags: _featureFlags,
+    plistParser: _plistParser,
+    projectFactory: _projectFactory,
+    xcode: _xcode,
+    xcodeProjectInterpreter: _xcodeProjectInterpreter,
   );
 
   /// The generated scaffolding project for hosting widget previews from this
@@ -687,13 +693,22 @@ class FlutterProject {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
     if (iosPlatform) {
-      await ios.ensureReadyForPlatformSpecificTooling();
+      await ios.ensureReadyForPlatformSpecificTooling(
+        cache: globals.cache,
+        config: globals.config,
+        fileSystemUtils: globals.fsUtils,
+        platform: globals.platform,
+        plistParser: globals.plistParser,
+        processManager: globals.processManager,
+        templateRenderer: globals.templateRenderer,
+        terminal: globals.terminal,
+      );
     }
     if (linuxPlatform) {
       await linux.ensureReadyForPlatformSpecificTooling();
     }
     if (macOSPlatform) {
-      await macos.ensureReadyForPlatformSpecificTooling();
+      await macos.ensureReadyForPlatformSpecificTooling(cache: globals.cache);
     }
     if (windowsPlatform) {
       await windows.ensureReadyForPlatformSpecificTooling();

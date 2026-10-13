@@ -45,19 +45,16 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform {
-  XcodeBasedProject({this._xcodeProjectInterpreter});
+  XcodeBasedProject({this._featureFlags, this._xcode, this._xcodeProjectInterpreter});
 
   static const _defaultHostAppName = 'Runner';
 
+  final FeatureFlags? _featureFlags;
+  final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   FileSystem get _fileSystem => parent.directory.fileSystem;
-  Cache get _projectCache => parent.projectCache;
-  FeatureFlags get _projectFeatureFlags => parent.projectFeatureFlags;
-  Logger get _projectLogger => parent.projectLogger;
-  Xcode? get _projectXcode => parent.projectXcode;
-  XcodeProjectInterpreter? get _projectXcodeProjectInterpreter =>
-      _xcodeProjectInterpreter ?? parent.projectXcodeProjectInterpreter;
+  Logger get _logger => parent.manifest.logger;
 
   /// The Xcode workspace (.xcworkspace directory) of the host app.
   Directory? get xcodeWorkspace {
@@ -104,7 +101,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// On the first call, this will find plugins in the project.
   /// On subsequent calls, this will return the cached list of plugins.
   Future<List<Plugin>> getPlugins() async {
-    _plugins ??= await findPlugins(parent, logger: _projectLogger);
+    _plugins ??= await findPlugins(parent, logger: _logger);
     return _plugins!;
   }
 
@@ -238,7 +235,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
       return false;
     }
 
-    final Xcode? xcode = _projectXcode;
+    final Xcode? xcode = _xcode;
     if (xcode == null || !xcode.isInstalled) {
       return false;
     }
@@ -249,10 +246,10 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   /// Return true if the Swift Package Manager feature is enabled and the project is
   /// [compatibleWithSwiftPackageManager].
   bool get usesSwiftPackageManager =>
-      _projectFeatureFlags.isSwiftPackageManagerEnabled && compatibleWithSwiftPackageManager;
+      (_featureFlags?.isSwiftPackageManagerEnabled ?? false) && compatibleWithSwiftPackageManager;
 
   Future<XcodeProjectInfo?> projectInfo() async {
-    final XcodeProjectInterpreter? interpreter = _projectXcodeProjectInterpreter;
+    final XcodeProjectInterpreter? interpreter = _xcodeProjectInterpreter;
     if (!xcodeProject.existsSync() || interpreter == null || !interpreter.isInstalled) {
       return null;
     }
@@ -350,7 +347,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
   Future<Map<String, String>?> _xcodeProjectBuildSettings(
     XcodeProjectBuildContext buildContext,
   ) async {
-    final XcodeProjectInterpreter? interpreter = _projectXcodeProjectInterpreter;
+    final XcodeProjectInterpreter? interpreter = _xcodeProjectInterpreter;
     if (interpreter == null || !interpreter.isInstalled) {
       return null;
     }
@@ -469,18 +466,18 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
 class IosProject extends XcodeBasedProject {
-  IosProject.fromFlutter(this.parent, {super.xcodeProjectInterpreter});
+  IosProject.fromFlutter(
+    this.parent, {
+    super.featureFlags,
+    this._plistParser,
+    super.xcode,
+    super.xcodeProjectInterpreter,
+  });
 
   @override
   final FlutterProject parent;
 
-  Config get _projectConfig => parent.projectConfig;
-  FileSystemUtils get _projectFileSystemUtils => parent.projectFileSystemUtils;
-  Platform get _projectPlatform => parent.projectPlatform;
-  PlistParser get _projectPlistParser => parent.projectPlistParser;
-  ProcessManager get _projectProcessManager => parent.projectProcessManager;
-  TemplateRenderer get _projectTemplateRenderer => parent.projectTemplateRenderer;
-  AnsiTerminal get _projectTerminal => parent.projectTerminal;
+  final PlistParser? _plistParser;
 
   @override
   String get pluginConfigKey => IOSPlugin.kConfigKey;
@@ -610,7 +607,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// When using Xcode 26+, print a warning if a plugin or its dependencies does not support
   /// arm64.
   Future<bool> pluginsSupportArmSimulator({required bool printWarnings}) async {
-    final Version? xcodeVersion = _projectXcode?.currentVersion;
+    final Version? xcodeVersion = _xcode?.currentVersion;
     final Directory podXcodeProject = hostAppRoot
         .childDirectory('Pods')
         .childDirectory('Pods.xcodeproj');
@@ -618,7 +615,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       return true;
     }
 
-    final XcodeProjectInterpreter? xcodeProjectInterpreter = _projectXcodeProjectInterpreter;
+    final XcodeProjectInterpreter? xcodeProjectInterpreter = _xcodeProjectInterpreter;
     if (xcodeProjectInterpreter == null) {
       // Xcode isn't installed, don't try to check.
       return true;
@@ -627,7 +624,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       podXcodeProject,
     );
     if (buildSettings == null || buildSettings.isEmpty) {
-      _projectLogger.printTrace('Unable to get build settings for Pods.');
+      _logger.printTrace('Unable to get build settings for Pods.');
       return true;
     }
 
@@ -648,7 +645,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
               return targetItem;
             })
             .join('\n');
-        _projectLogger.printWarning(
+        _logger.printWarning(
           'The following target(s) do not support arm64 architecture, which is a requirement for '
           'Apple Silicon iOS 26+ simulators:\n'
           '$list\n\n'
@@ -773,7 +770,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
         }
       }
     } on Exception catch (e) {
-      _projectLogger.printTrace('Failed to parse podfile.lock: $e');
+      _logger.printTrace('Failed to parse podfile.lock: $e');
     }
 
     return podDependencies;
@@ -877,7 +874,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     // Try parsing the default, first.
     if (defaultInfoPlist.existsSync()) {
       try {
-        fromPlist = _projectPlistParser.getValueFromFile<String>(
+        fromPlist = _plistParser?.getValueFromFile<String>(
           defaultHostInfoPlist.path,
           PlistParser.kCFBundleIdentifierKey,
         );
@@ -937,8 +934,8 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       if (entitlementPath != null) {
         final File entitlement = hostAppRoot.childFile(entitlementPath);
         if (entitlement.existsSync()) {
-          final List<String>? domains = _projectPlistParser
-              .getValueFromFile<List<Object>>(entitlement.path, PlistParser.kAssociatedDomainsKey)
+          final List<String>? domains = _plistParser
+              ?.getValueFromFile<List<Object>>(entitlement.path, PlistParser.kAssociatedDomainsKey)
               ?.cast<String>();
 
           if (domains != null) {
@@ -970,25 +967,45 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     // https://flutter.dev/to/xcode-name-config
     // The only source of truth for the name is Xcode's interpretation of the build settings.
     String? productName;
-    if (_projectXcodeProjectInterpreter?.isInstalled ?? false) {
+    if (_xcodeProjectInterpreter?.isInstalled ?? false) {
       final Map<String, String>? xcodeBuildSettings = await buildSettingsForBuildInfo(buildInfo);
       if (xcodeBuildSettings != null) {
         productName = xcodeBuildSettings[kProductNameKey];
       }
     }
     if (productName == null) {
-      _projectLogger.printTrace('$kProductNameKey not present, defaulting to $hostAppProjectName');
+      _logger.printTrace('$kProductNameKey not present, defaulting to $hostAppProjectName');
     }
     return productName ?? XcodeBasedProject._defaultHostAppName;
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    await _regenerateModuleFromTemplateIfNeeded();
-    await _updateLLDBIfNeeded();
+  // TODO(bkonyi): Take a ToolContext instead of individual dependencies once
+  // FlutterProject is migrated to ToolContext.
+  Future<void> ensureReadyForPlatformSpecificTooling({
+    required Cache cache,
+    required Config config,
+    required FileSystemUtils fileSystemUtils,
+    required Platform platform,
+    required PlistParser plistParser,
+    required ProcessManager processManager,
+    required TemplateRenderer templateRenderer,
+    required AnsiTerminal terminal,
+  }) async {
+    await _regenerateModuleFromTemplateIfNeeded(
+      cache: cache,
+      config: config,
+      fileSystemUtils: fileSystemUtils,
+      platform: platform,
+      plistParser: plistParser,
+      processManager: processManager,
+      templateRenderer: templateRenderer,
+      terminal: terminal,
+    );
+    await _updateLLDBIfNeeded(cache: cache, templateRenderer: templateRenderer);
     if (!_flutterLibRoot.existsSync()) {
       return;
     }
-    await _updateGeneratedXcodeConfigIfNeeded();
+    await _updateGeneratedXcodeConfigIfNeeded(cache: cache);
   }
 
   /// Check if one the [XcodeProjectInfo.targets] of the project is
@@ -1009,7 +1026,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       // In older versions of Xcode, if the target was a watchOS companion app,
       // the Info.plist file of the target contained the key WKCompanionAppBundleIdentifier.
       if (infoFile.existsSync()) {
-        final String? fromPlist = _projectPlistParser.getValueFromFile<String>(
+        final String? fromPlist = _plistParser?.getValueFromFile<String>(
           infoFile.path,
           'WKCompanionAppBundleIdentifier',
         );
@@ -1078,8 +1095,8 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     return false;
   }
 
-  Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
-    if (_projectCache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+  Future<void> _updateGeneratedXcodeConfigIfNeeded({required Cache cache}) async {
+    if (cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
@@ -1088,10 +1105,12 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     }
   }
 
-  Future<void> _updateLLDBIfNeeded() async {
-    if (_projectCache.isOlderThanToolsStamp(lldbInitFile) ||
-        _projectCache.isOlderThanToolsStamp(lldbHelperPythonFile)) {
-      final TemplateRenderer templateRenderer = _projectTemplateRenderer;
+  Future<void> _updateLLDBIfNeeded({
+    required Cache cache,
+    required TemplateRenderer templateRenderer,
+  }) async {
+    if (cache.isOlderThanToolsStamp(lldbInitFile) ||
+        cache.isOlderThanToolsStamp(lldbHelperPythonFile)) {
       await _renderTemplateToFile(_lldbInitTemplate, null, lldbInitFile, templateRenderer);
       await _renderTemplateToFile(
         _lldbPythonHelperTemplate,
@@ -1113,15 +1132,24 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     await file.writeAsString(renderedTemplate);
   }
 
-  Future<void> _regenerateModuleFromTemplateIfNeeded() async {
+  Future<void> _regenerateModuleFromTemplateIfNeeded({
+    required Cache cache,
+    required Config config,
+    required FileSystemUtils fileSystemUtils,
+    required Platform platform,
+    required PlistParser plistParser,
+    required ProcessManager processManager,
+    required TemplateRenderer templateRenderer,
+    required AnsiTerminal terminal,
+  }) async {
     if (!isModule) {
       return;
     }
-    final bool pubspecChanged = _projectFileSystemUtils.isOlderThanReference(
+    final bool pubspecChanged = fileSystemUtils.isOlderThanReference(
       entity: ephemeralModuleDirectory,
       referenceFile: parent.pubspecFile,
     );
-    final bool toolingChanged = _projectCache.isOlderThanToolsStamp(ephemeralModuleDirectory);
+    final bool toolingChanged = cache.isOlderThanToolsStamp(ephemeralModuleDirectory);
     if (!pubspecChanged && !toolingChanged) {
       return;
     }
@@ -1130,17 +1158,38 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     await _overwriteFromTemplate(
       _fileSystem.path.join('module', 'ios', 'library'),
       ephemeralModuleDirectory,
+      config: config,
+      fileSystemUtils: fileSystemUtils,
+      platform: platform,
+      plistParser: plistParser,
+      processManager: processManager,
+      templateRenderer: templateRenderer,
+      terminal: terminal,
     );
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
       await _overwriteFromTemplate(
         _fileSystem.path.join('module', 'ios', 'host_app_ephemeral'),
         ephemeralModuleDirectory,
+        config: config,
+        fileSystemUtils: fileSystemUtils,
+        platform: platform,
+        plistParser: plistParser,
+        processManager: processManager,
+        templateRenderer: templateRenderer,
+        terminal: terminal,
       );
       if (hasPlugins(parent)) {
         await _overwriteFromTemplate(
           _fileSystem.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
           ephemeralModuleDirectory,
+          config: config,
+          fileSystemUtils: fileSystemUtils,
+          platform: platform,
+          plistParser: plistParser,
+          processManager: processManager,
+          templateRenderer: templateRenderer,
+          terminal: terminal,
         );
       }
     }
@@ -1193,26 +1242,36 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     return ephemeralDirectory.childFile(_lldbPythonHelperTemplateName);
   }
 
-  Future<void> _overwriteFromTemplate(String path, Directory target) async {
+  Future<void> _overwriteFromTemplate(
+    String path,
+    Directory target, {
+    required Config config,
+    required FileSystemUtils fileSystemUtils,
+    required Platform platform,
+    required PlistParser plistParser,
+    required ProcessManager processManager,
+    required TemplateRenderer templateRenderer,
+    required AnsiTerminal terminal,
+  }) async {
     final Template template = await Template.fromName(
       path,
       fileSystem: _fileSystem,
       templateManifest: null,
-      logger: _projectLogger,
-      templateRenderer: _projectTemplateRenderer,
+      logger: _logger,
+      templateRenderer: templateRenderer,
     );
     final String iosBundleIdentifier =
         parent.manifest.iosBundleIdentifier ?? 'com.example.${parent.manifest.appName}';
 
     final String? iosDevelopmentTeam = await getCodeSigningIdentityDevelopmentTeam(
-      processManager: _projectProcessManager,
-      platform: _projectPlatform,
-      logger: _projectLogger,
-      config: _projectConfig,
-      terminal: _projectTerminal,
+      processManager: processManager,
+      platform: platform,
+      logger: _logger,
+      config: config,
+      terminal: terminal,
       fileSystem: _fileSystem,
-      fileSystemUtils: _projectFileSystemUtils,
-      plistParser: _projectPlistParser,
+      fileSystemUtils: fileSystemUtils,
+      plistParser: plistParser,
     );
 
     final String projectName = parent.manifest.appName;
@@ -1233,7 +1292,12 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
 
 /// The macOS sub project.
 class MacOSProject extends XcodeBasedProject {
-  MacOSProject.fromFlutter(this.parent);
+  MacOSProject.fromFlutter(
+    this.parent, {
+    super.featureFlags,
+    super.xcode,
+    super.xcodeProjectInterpreter,
+  });
 
   @override
   final FlutterProject parent;
@@ -1281,13 +1345,13 @@ class MacOSProject extends XcodeBasedProject {
   /// scheme's target.
   File get nameFile => ephemeralDirectory.childFile('.app_filename');
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
+  Future<void> ensureReadyForPlatformSpecificTooling({required Cache cache}) async {
     // TODO(stuartmorgan): Add create-from-template logic here.
-    await _updateGeneratedXcodeConfigIfNeeded();
+    await _updateGeneratedXcodeConfigIfNeeded(cache: cache);
   }
 
-  Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
-    if (_projectCache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+  Future<void> _updateGeneratedXcodeConfigIfNeeded({required Cache cache}) async {
+    if (cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,

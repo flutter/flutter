@@ -153,7 +153,9 @@ void main() {
     List<String>? additionalCommandArguments,
     String hostPlatformArch = 'x86_64',
   }) {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
+      fileSystem.currentDirectory,
+    );
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     final destination = configuration == 'Debug'
         ? 'platform=macOS,arch=$hostPlatformArch'

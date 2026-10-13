@@ -318,8 +318,60 @@ class ToolDependencies {
     finalAnalyticsInitialized = true;
 
     // 9. Project Factory and Operating System Utilities
+    final XcodeProjectInterpreter finalXcodeProjectInterpreter =
+        xcodeProjectInterpreter ??
+        XcodeProjectInterpreter(
+          platform: finalPlatform,
+          processManager: finalProcessManager,
+          logger: finalLogger,
+          fileSystem: finalFS,
+          analytics: finalAnalytics,
+        );
+
+    final Xcode finalXcode =
+        xcode ??
+        Xcode(
+          platform: finalPlatform,
+          processManager: finalProcessManager,
+          logger: finalLogger,
+          fileSystem: finalFS,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+          userMessages: finalUserMessages,
+        );
+
+    final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
+    final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
+      finalFS.path.join(projectRoot, 'pubspec.yaml'),
+      fileSystem: finalFS,
+      logger: finalLogger,
+    );
+
+    final FeatureFlags finalFeatureFlags =
+        featureFlags ??
+        FlutterFeatureFlags(
+          flutterVersion: finalFlutterVersion,
+          featuresConfig: FlutterFeaturesConfig(
+            globalConfig: finalConfig,
+            platform: finalPlatform,
+            projectManifest: projectManifest,
+          ),
+          platform: finalPlatform,
+        );
+
+    final PlistParser finalPlistParser =
+        plistParser ??
+        PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
+
     final FlutterProjectFactory finalProjectFactory =
-        projectFactory ?? FlutterProjectFactory(logger: finalLogger, fileSystem: finalFS);
+        projectFactory ??
+        FlutterProjectFactory(
+          featureFlags: finalFeatureFlags,
+          fileSystem: finalFS,
+          logger: finalLogger,
+          plistParser: finalPlistParser,
+          xcode: finalXcode,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+        );
 
     final finalOS = OperatingSystemUtils(
       fileSystem: finalFS,
@@ -376,27 +428,6 @@ class ToolDependencies {
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
     // 11. AppleContext Dependencies
-    final XcodeProjectInterpreter finalXcodeProjectInterpreter =
-        xcodeProjectInterpreter ??
-        XcodeProjectInterpreter(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          analytics: finalAnalytics,
-        );
-
-    final Xcode finalXcode =
-        xcode ??
-        Xcode(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          userMessages: finalUserMessages,
-        );
-
     final CocoaPods finalCocoaPods =
         cocoaPods ??
         CocoaPods(
@@ -445,25 +476,6 @@ class ToolDependencies {
           shutdownHooks: finalShutdownHooks,
         );
 
-    final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
-    final FlutterManifest? projectManifest = FlutterManifest.createFromPath(
-      finalFS.path.join(projectRoot, 'pubspec.yaml'),
-      fileSystem: finalFS,
-      logger: finalLogger,
-    );
-
-    final FeatureFlags finalFeatureFlags =
-        featureFlags ??
-        FlutterFeatureFlags(
-          flutterVersion: finalFlutterVersion,
-          featuresConfig: FlutterFeaturesConfig(
-            globalConfig: finalConfig,
-            platform: finalPlatform,
-            projectManifest: projectManifest,
-          ),
-          platform: finalPlatform,
-        );
-
     final IOSWorkflow finalIOSWorkflow =
         iosWorkflow ??
         IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
@@ -476,10 +488,6 @@ class ToolDependencies {
           processManager: finalProcessManager,
           xcode: finalXcode,
         );
-
-    final PlistParser finalPlistParser =
-        plistParser ??
-        PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
     // 12. AndroidContext Dependencies
     final AndroidStudio? finalAndroidStudio = androidStudio ?? AndroidStudio.latestValid();

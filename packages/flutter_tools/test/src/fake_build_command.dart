@@ -138,38 +138,53 @@ BuildCommand createFakeBuildCommand({
     }
   }
 
+  final FeatureFlags targetFeatureFlags = resolvedFeatureFlags ?? TestFeatureFlags();
+  final appleCtx = FakeAppleContext(
+    plistParser: resolvedPlistParser ?? FakePlistParser(),
+    xcode: xcode ?? FakeXcode(),
+    xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
+  );
+  final ToolContext targetToolContext =
+      toolContext ??
+      FakeToolContext(
+        artifacts: artifacts ?? FakeArtifacts(),
+        cache: cache ?? FakeCache(),
+        config: config ?? FakeConfig(),
+        fs: fs,
+        flutterVersion: flutterVersion ?? FakeFlutterVersion(),
+        logger: targetLogger,
+        os: targetOsUtils,
+        platform: targetPlatform,
+        processManager: targetProcessManager,
+        processUtils:
+            processUtils ??
+            ProcessUtils(processManager: targetProcessManager, logger: targetLogger),
+        projectFactory: FlutterProjectFactory(
+          featureFlags: targetFeatureFlags,
+          fileSystem: fs,
+          logger: targetLogger,
+          plistParser: appleCtx.plistParser,
+          xcode: appleCtx.xcode,
+          xcodeProjectInterpreter: appleCtx.xcodeProjectInterpreter,
+        ),
+        terminal: terminal ?? FakeTerminal(),
+      );
   final command = BuildCommand(
     androidBuilder: androidBuilder ?? FakeAndroidBuilder(),
     androidContext: FakeAndroidContext(androidSdk: androidSdk),
-    appleContext: FakeAppleContext(
-      plistParser: resolvedPlistParser ?? FakePlistParser(),
-      xcode: xcode ?? FakeXcode(),
-      xcodeProjectInterpreter: resolvedXcodeProjectInterpreter,
-    ),
+    appleContext: appleCtx,
     buildSystem: buildSystem ?? FakeBuildSystem(),
-    featureFlags: resolvedFeatureFlags ?? TestFeatureFlags(),
+    featureFlags: targetFeatureFlags,
     templateRenderer: templateRenderer ?? FakeTemplateRenderer(),
-    toolContext:
-        toolContext ??
-        FakeToolContext(
-          artifacts: artifacts ?? FakeArtifacts(),
-          cache: cache ?? FakeCache(),
-          config: config ?? FakeConfig(),
-          fs: fs,
-          flutterVersion: flutterVersion ?? FakeFlutterVersion(),
-          logger: targetLogger,
-          os: targetOsUtils,
-          platform: targetPlatform,
-          processManager: targetProcessManager,
-          processUtils:
-              processUtils ??
-              ProcessUtils(processManager: targetProcessManager, logger: targetLogger),
-          terminal: terminal ?? FakeTerminal(),
-        ),
+    toolContext: targetToolContext,
     verboseHelp: verboseHelp,
   );
   final ApplicationPackageFactory packageFactory =
-      applicationPackageFactory ?? FakeIOSApplicationPackageFactory(fileSystem: fs);
+      applicationPackageFactory ??
+      FakeIOSApplicationPackageFactory(
+        fileSystem: fs,
+        projectFactory: targetToolContext.projectFactory,
+      );
   command.applicationPackages = packageFactory;
   for (final Command<void> subcommand in command.subcommands.values) {
     if (subcommand is FlutterCommand) {
@@ -180,9 +195,10 @@ BuildCommand createFakeBuildCommand({
 }
 
 class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeIOSApplicationPackageFactory({required this.fileSystem});
+  FakeIOSApplicationPackageFactory({required this.fileSystem, this.projectFactory});
 
   final FileSystem fileSystem;
+  final FlutterProjectFactory? projectFactory;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -193,7 +209,9 @@ class FakeIOSApplicationPackageFactory extends Fake implements ApplicationPackag
     if (platform != TargetPlatform.ios) {
       return null;
     }
-    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
+    final FlutterProject project =
+        projectFactory?.fromDirectory(fileSystem.currentDirectory) ??
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
     if (!project.ios.exists) {
       return null;
     }

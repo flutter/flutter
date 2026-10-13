@@ -7,8 +7,10 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -16,6 +18,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
@@ -367,45 +370,55 @@ void main() {
 
     group('ensureReadyForPlatformSpecificTooling', () {
       group('lldb files are generated', () {
-        testUsingContext('when they are missing', () async {
+        testWithoutContext('when they are missing', () async {
           final fs = MemoryFileSystem.test();
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('ios').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest();
-          final flutterProject = FlutterProject(
-            projectDirectory,
-            manifest,
-            manifest,
-            toolContext: FakeToolContext(cache: FakeCache(olderThanToolsStamp: true), fs: fs),
-          );
+          final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
           final project = IosProject.fromFlutter(flutterProject);
           expect(project.lldbInitFile, isNot(exists));
           expect(project.lldbHelperPythonFile, isNot(exists));
 
-          await project.ensureReadyForPlatformSpecificTooling();
+          await project.ensureReadyForPlatformSpecificTooling(
+            cache: FakeCache(olderThanToolsStamp: true)
+              ..filesOlderThanToolsStamp['Generated.xcconfig'] = false,
+            config: Config.test(),
+            fileSystemUtils: FileSystemUtils(fileSystem: fs, platform: FakePlatform()),
+            platform: FakePlatform(),
+            plistParser: FakePlistParser(),
+            processManager: FakeProcessManager.empty(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            terminal: FakeTerminal(),
+          );
 
           expect(project.lldbInitFile, exists);
           expect(project.lldbHelperPythonFile, exists);
         });
 
-        testUsingContext('when they are older than tool', () async {
+        testWithoutContext('when they are older than tool', () async {
           final fs = MemoryFileSystem.test();
           final Directory projectDirectory = fs.directory('path');
           projectDirectory.childDirectory('ios').createSync(recursive: true);
           final FlutterManifest manifest = FakeFlutterManifest();
-          final flutterProject = FlutterProject(
-            projectDirectory,
-            manifest,
-            manifest,
-            toolContext: FakeToolContext(cache: FakeCache(olderThanToolsStamp: true), fs: fs),
-          );
+          final flutterProject = FlutterProject(projectDirectory, manifest, manifest);
           final project = IosProject.fromFlutter(flutterProject);
           project.lldbInitFile.createSync(recursive: true);
           project.lldbInitFile.writeAsStringSync('old');
           project.lldbHelperPythonFile.createSync(recursive: true);
           project.lldbHelperPythonFile.writeAsStringSync('old');
 
-          await project.ensureReadyForPlatformSpecificTooling();
+          await project.ensureReadyForPlatformSpecificTooling(
+            cache: FakeCache(olderThanToolsStamp: true)
+              ..filesOlderThanToolsStamp['Generated.xcconfig'] = false,
+            config: Config.test(),
+            fileSystemUtils: FileSystemUtils(fileSystem: fs, platform: FakePlatform()),
+            platform: FakePlatform(),
+            plistParser: FakePlistParser(),
+            processManager: FakeProcessManager.empty(),
+            templateRenderer: const MustacheTemplateRenderer(),
+            terminal: FakeTerminal(),
+          );
 
           expect(project.lldbInitFile.readAsStringSync(), contains('Generated file, do not edit.'));
           expect(
@@ -790,12 +803,6 @@ class FakeFlutterProject extends Fake implements FlutterProject {
 
   @override
   FlutterManifest get manifest => FakeFlutterManifest();
-
-  @override
-  XcodeProjectInterpreter? get projectXcodeProjectInterpreter => null;
-
-  @override
-  Logger get projectLogger => BufferLogger.test();
 }
 
 class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterpreter {
@@ -825,6 +832,9 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
   FakeFlutterManifest({this.isModule = false});
+
+  @override
+  Logger get logger => BufferLogger.test();
 
   @override
   bool isModule;
