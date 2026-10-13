@@ -57,7 +57,6 @@ dev_dependencies:
   http_multi_server: any
   http_parser: any
   io: any
-  js: any
   leak_tracker: any
   leak_tracker_flutter_testing: any
   leak_tracker_testing: any
@@ -82,4 +81,4 @@ dev_dependencies:
   webkit_inspection_protocol: any
   yaml: any
 
-# PUBSPEC CHECKSUM: rdqmb5
+# PUBSPEC CHECKSUM: f8dacp
