@@ -387,12 +387,7 @@ cc_test(
   ),
   // txt_unittests' embedded test font. The rest of the file is the Dart
   // runtime glue, which needs tonic, lib/snapshot and the shell.
-  ConvertedFile(
-    '//flutter/runtime',
-    skip: <String, String>{
-      'runtime_unittests': 'needs //flutter/shell/common:shell_test_fixture_sources',
-    },
-  ),
+  ConvertedFile('//flutter/runtime'),
   ConvertedFile(
     '//flutter/txt',
     skip: <String, String>{'txt_benchmarks': 'needs //flutter/third_party/benchmark'},
@@ -529,12 +524,7 @@ cc_test(
   // and the shell's own small libraries need.
   ConvertedFile(
     '//flutter/shell/common',
-    skip: <String, String>{
-      'shell_unittests_fixtures': 'Dart fixtures (dart_main) are not supported yet',
-      'shell_benchmarks': 'needs :common and //flutter/benchmarking',
-      'shell_test_fixture_sources': 'needs :common',
-      'shell_unittests': 'needs :common',
-    },
+    skip: <String, String>{'shell_benchmarks': 'needs //flutter/benchmarking'},
   ),
 ];
 

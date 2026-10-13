@@ -3,10 +3,11 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/common/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: shell_unittests_fixtures, shell_benchmarks, shell_test_fixture_sources, shell_unittests.
+# Not converted: shell_benchmarks.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -168,10 +169,140 @@ cc_library(
     ],
 )
 
+flutter_test_fixtures(
+    name = "shell_unittests_fixtures",
+    dart_main = "fixtures/shell_test.dart",
+    fixtures = [
+        "fixtures/hello_loop_2.gif",
+        "fixtures/shelltest_screenshot.png",
+        "//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf",
+    ],
+)
+
 cc_library(
     name = "shell_test_fixture_sources_config",
     defines = [
         # Required for MSVC STL
         "_ENABLE_ATOMIC_ALIGNMENT_FIX",
+    ],
+)
+
+cc_library(
+    name = "shell_test_fixture_sources",
+    testonly = True,
+    srcs = [
+        "shell_test.cc",
+        "shell_test_external_view_embedder.cc",
+        "shell_test_platform_view.cc",
+        "shell_test_platform_view_gl.cc",  # test_enable_gl
+        "shell_test_platform_view_vulkan.cc",  # test_enable_vulkan
+        "vsync_waiters_test.cc",
+    ],
+    hdrs = [
+        "shell_test.h",
+        "shell_test_external_view_embedder.h",
+        "shell_test_platform_view.h",
+        "shell_test_platform_view_gl.h",  # test_enable_gl
+        "shell_test_platform_view_vulkan.h",  # test_enable_vulkan
+        "vsync_waiters_test.h",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/common/graphics
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":common",
+        ":shell_test_fixture_sources_config",
+        ":shell_unittests_gpu_configuration",
+        ":shell_unittests_gpu_configuration_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/flutter_vma:flutter_skia_vma",  # test_enable_vulkan
+        "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:fixture_test",
+        "//engine/src/flutter/testing:opengl",  # test_enable_gl
+        "//engine/src/flutter/vulkan",  # test_enable_vulkan
+        "@rapidjson",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+# SwiftShader, its ICD manifest and the Vulkan loader, next to the
+# suites below (GN: data_deps of //flutter/third_party/swiftshader and
+# ANGLE).
+flutter_gpu_test_backends(
+    name = "gpu_test_backends",
+)
+
+cc_test(
+    name = "shell_unittests",
+    size = "medium",
+    srcs = [
+        "animator_unittests.cc",
+        "base64_unittests.cc",
+        "context_options_unittests.cc",
+        "dl_op_spy_unittests.cc",
+        "engine_animator_unittests.cc",
+        "engine_unittests.cc",
+        "input_events_unittests.cc",
+        "persistent_cache_unittests.cc",
+        "pipeline_unittests.cc",
+        "rasterizer_unittests.cc",
+        "resource_cache_limit_calculator_unittests.cc",
+        # TODO(63837): This test is hard-coded to use a TestGLSurface so it cannot
+        # run on fuchsia or when GL is not enabled.
+        "shell_io_manager_unittests.cc",  # !(is_fuchsia) && shell_enable_gl
+        "shell_unittests.cc",
+        "switches_unittests.cc",
+        "variable_refresh_rate_display_unittests.cc",
+        "vsync_waiter_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :shell_test_fixture_sources
+        "-Wno-c++98-compat-extra-semi",  # from :shell_test_fixture_sources
+        "-Wno-deprecated-copy",  # from :shell_test_fixture_sources
+        "-Wno-implicit-fallthrough",  # from :shell_test_fixture_sources
+        "-Wno-nullability-completeness",  # from :shell_test_fixture_sources
+        "-Wno-suggest-destructor-override",  # from :shell_test_fixture_sources
+        "-Wno-suggest-override",  # from :shell_test_fixture_sources
+        "-Wno-unused-private-field",  # from :shell_test_fixture_sources
+        "-Wno-unused-variable",  # from :shell_test_fixture_sources
+    ],
+    data = [":gpu_test_backends"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":base64",
+        ":common",
+        ":shell_test_fixture_sources",
+        ":shell_unittests_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/build/bazel/gl_wrap:angle",  # shell_enable_gl
+        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",  # !(is_fuchsia) && shell_enable_gl
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/runtime:libdart",
+        "//engine/src/flutter/shell/profiling:profiling_unittests",
+        "//engine/src/flutter/shell/version",
+        "//engine/src/flutter/testing:fixture_test",
+        "@googletest//:gtest",
     ],
 )
