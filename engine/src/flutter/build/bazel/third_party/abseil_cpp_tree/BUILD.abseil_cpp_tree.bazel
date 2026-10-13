@@ -1,0 +1,29 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @abseil_cpp_tree: the abseil-cpp tree as files (its
+# Chromium-style GN files included), for the wrapped GN build of the GPU
+# test backends (//engine/src/flutter/build/bazel/gl_wrap), whose ANGLE
+# depends on abseil. Bazel's own abseil is @abseil-cpp, upstream's rules
+# over the same tree; the wrap's archive stops at abseil, which the facades
+# take from there.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "build_tree",
+    srcs = glob(
+        ["**"],
+        exclude = [
+            "BUILD.bazel",
+            "REPO.bazel",
+            "*.bzl",
+            # The checkout's git state is no input of the build.
+            "**/.git/**",
+            "**/*_test.cc",
+            "**/*_benchmark.cc",
+            "absl/time/internal/cctz/testdata/**",
+        ],
+    ),
+)

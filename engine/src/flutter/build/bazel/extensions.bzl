@@ -226,6 +226,28 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/angle",
         build_file = _OVERLAYS + ":angle/BUILD.angle.bazel",
     ),
+    # Trees for the wrapped GN build of the GPU test backends
+    # (build/bazel/gl_wrap): SwiftShader, the vulkan-deps directory (over
+    # whose subdirectories @vulkan-headers, @spirv-tools, ... are separate
+    # repositories), abseil-cpp (whose Bazel rules are @abseil-cpp's) and the
+    # allocator (whose library is @vulkan_memory_allocator). Each is the
+    # synced directory as files, nothing more.
+    "swiftshader": struct(
+        path = "engine/src/flutter/third_party/swiftshader",
+        build_file = _OVERLAYS + ":swiftshader/BUILD.swiftshader.bazel",
+    ),
+    "vulkan_deps_tree": struct(
+        path = "engine/src/flutter/third_party/vulkan-deps",
+        build_file = _OVERLAYS + ":vulkan_deps_tree/BUILD.vulkan_deps_tree.bazel",
+    ),
+    "abseil_cpp_tree": struct(
+        path = "engine/src/third_party/abseil-cpp",
+        build_file = _OVERLAYS + ":abseil_cpp_tree/BUILD.abseil_cpp_tree.bazel",
+    ),
+    "vulkan_memory_allocator_tree": struct(
+        path = "engine/src/flutter/third_party/vulkan_memory_allocator",
+        build_file = _OVERLAYS + ":vulkan_memory_allocator_tree/BUILD.vulkan_memory_allocator_tree.bazel",
+    ),
     "shaderc": struct(
         path = "engine/src/flutter/third_party/shaderc",
         build_file = None,

@@ -38,6 +38,7 @@ synced_deps = use_extension("//engine/src/flutter/build/bazel:extensions.bzl", "
 use_repo(
     synced_deps,
     "abseil-cpp",
+    "abseil_cpp_tree",
     "angle",
     "boringssl",
     "clang_linux_x64",
@@ -69,9 +70,12 @@ use_repo(
     "spirv-cross",
     "spirv-headers",
     "spirv-tools",
+    "swiftshader",
     "sysroot_linux_x64",
     "vulkan-headers",
+    "vulkan_deps_tree",
     "vulkan_memory_allocator",
+    "vulkan_memory_allocator_tree",
     "wuffs",
     "zlib",
 )

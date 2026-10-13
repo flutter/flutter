@@ -12,9 +12,10 @@
 # secondary tree is not: a wrapped build loads only the BUILD.gn files of its
 # own dependencies (for the Dart SDK: the C++ runtime, zlib, BoringSSL, ICU,
 # perfetto, gtest -- `gn gen --root-target=//flutter/build/bazel/dart_wrap`
-# reads 10 files under flutter/build, and ninja none), and listing the whole
-# tree would make every edit to flatbuffers' or harfbuzz's BUILD.gn rebuild
-# the Dart SDK from scratch. A wrapped build that starts reading from a new
+# reads 10 files under flutter/build, and ninja none; for the GPU test
+# backends, the allocator and jsoncpp besides), and listing the whole tree
+# would make every edit to flatbuffers' or harfbuzz's BUILD.gn rebuild the
+# Dart SDK from scratch. A wrapped build that starts reading from a new
 # directory fails with a missing file in the sandbox; the fix is a line here.
 filegroup(
     name = "gn_files",
@@ -29,10 +30,12 @@ filegroup(
             "esbuild/**",
             "secondary/flutter/third_party/libcxxabi/**",
             "secondary/flutter/third_party/llvm_libc/**",
+            "secondary/flutter/third_party/vulkan_memory_allocator/**",
             "secondary/testing/**",
             "secondary/third_party/boringssl/**",
             "secondary/third_party/dart/**",
             "secondary/third_party/icu/**",
+            "secondary/third_party/jsoncpp/**",
             "secondary/third_party/perfetto/**",
             "secondary/third_party/zlib/**",
         ],
