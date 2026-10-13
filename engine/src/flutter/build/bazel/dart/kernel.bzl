@@ -37,15 +37,40 @@ def _dart_kernel_impl(ctx):
     platform = [f for f in ctx.files.platform if f.basename == "platform_strong.dill"]
     if len(platform) != 1:
         fail("%s: platform must provide platform_strong.dill" % ctx.label)
+
+    # Packages from other repositories (the trees gclient syncs, which the
+    # package configuration names by their paths under the source root):
+    # a second virtual root of symlinks, each file at that path.
+    staged = []
+    roots = ["."]
+    if ctx.attr.package_trees:
+        root_name = ctx.label.name + ".root"
+        for target, virtual_path in ctx.attr.package_trees.items():
+            for f in target[DefaultInfo].files.to_list():
+                if not f.short_path.startswith("../"):
+                    fail("%s: %s is in this repository; list it in srcs" % (ctx.label, f.short_path))
+                relative = f.short_path.split("/", 2)[2]
+                link = ctx.actions.declare_file(
+                    "/".join([root_name, virtual_path.strip("/"), relative]),
+                    sibling = ctx.outputs.out,
+                )
+                ctx.actions.symlink(output = link, target_file = f)
+                staged.append(link)
+        roots.append(ctx.outputs.out.dirname + "/" + root_name)
+
     args = ctx.actions.args()
     args.add(ctx.file._frontend_server)
     if ctx.attr.product:
         args.add("-Ddart.vm.product=true")
     args.add_all(ctx.attr.args)
-    args.add("--packages", ctx.file.package_config)
+
+    # The package configuration under the virtual scheme, so that the
+    # packages' roots resolve against every filesystem root.
+    args.add(ctx.file.package_config, format = "--packages=" + SOURCE_URI_SCHEME + ":///%s")
     args.add("--sdk-root", platform[0].dirname)
     args.add("--target=flutter")
-    args.add("--filesystem-root", ".")
+    for root in roots:
+        args.add("--filesystem-root", root)
     args.add("--filesystem-scheme", SOURCE_URI_SCHEME)
     args.add("--output-dill", ctx.outputs.out)
     args.add(ctx.file.main, format = SOURCE_URI_SCHEME + ":///%s")
@@ -53,7 +78,7 @@ def _dart_kernel_impl(ctx):
         executable = ctx.executable._dartaotruntime,
         arguments = [args],
         inputs = depset(
-            [ctx.file.main, ctx.file.package_config, ctx.file._frontend_server] + ctx.files.platform,
+            [ctx.file.main, ctx.file.package_config, ctx.file._frontend_server] + ctx.files.platform + staged,
             transitive = [depset(ctx.files.srcs)],
         ),
         outputs = [ctx.outputs.out],
@@ -74,6 +99,12 @@ dart_kernel = rule(
         "srcs": attr.label_list(
             allow_files = [".dart"],
             doc = "The other Dart sources the entry point reaches (GN's depfile).",
+        ),
+        "package_trees": attr.label_keyed_string_dict(
+            allow_files = True,
+            doc = "Sources of packages in other repositories (the trees gclient syncs), each mapped to " +
+                  "the path under the source root where the package configuration names the package " +
+                  "(`engine/src/flutter/third_party/pkg/vector_math`); staged under a second virtual root.",
         ),
         "out": attr.output(
             mandatory = True,

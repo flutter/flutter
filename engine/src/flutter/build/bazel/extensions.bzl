@@ -248,6 +248,12 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/vulkan_memory_allocator",
         build_file = _OVERLAYS + ":vulkan_memory_allocator_tree/BUILD.vulkan_memory_allocator_tree.bazel",
     ),
+    # package:vector_math, which lib/gpu's Dart library imports; the test
+    # fixtures that compile that library to kernel need its sources.
+    "vector_math": struct(
+        path = "engine/src/flutter/third_party/pkg/vector_math",
+        build_file = _OVERLAYS + ":vector_math/BUILD.vector_math.bazel",
+    ),
     "shaderc": struct(
         path = "engine/src/flutter/third_party/shaderc",
         build_file = None,

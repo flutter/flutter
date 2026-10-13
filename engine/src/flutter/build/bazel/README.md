@@ -206,7 +206,19 @@ rules in `dart/`:
    platform and the engine's package configuration. `dart_snapshot_kernel`
    and `dart_snapshot_aot` have macros of their own; the AOT snapshot exists
    in the profile and release modes alone, where the kernel is compiled with
-   `--aot`.
+   `--aot`. Fixtures that are other targets' outputs (GN's
+   `fixtures = get_target_outputs(":runtime_stages")`, through
+   `filter_include`) are `fixtures_targets`, a dictionary of target to
+   patterns, copied into `assets/` with the files; GN's `deps` of the
+   template are the library's runfiles, so that the targets producing
+   fixtures build with the test.
+   An entry point that imports a package from a synced tree
+   (`lib/gpu`'s library imports `package:vector_math`) names it in
+   `dart_packages`, each mapped to its path under the source root as the
+   package configuration knows it: `dart_kernel` stages the package's files
+   under a second `--filesystem-root` of symlinks at that path and passes
+   the package configuration under the virtual scheme, so that its relative
+   package roots resolve the same way on every machine.
 
 Two configuration choices are deliberate. The wrapped build's tools run from
 the *target* configuration (`cfg = "target"`), because GN builds `gen_snapshot`
