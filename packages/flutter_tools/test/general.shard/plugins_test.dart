@@ -2397,7 +2397,9 @@ platforms:
             fileSystem: globals.fs,
             isDevDependency: false,
           ),
-          throwsToolExit(message: 'Invalid "android" plugin specification.'),
+          throwsToolExit(
+            message: 'Invalid "android" plugin specification: the "default_package" field must be a string.',
+          ),
         );
       });
 
@@ -2418,7 +2420,9 @@ platforms:
             fileSystem: globals.fs,
             isDevDependency: false,
           ),
-          throwsToolExit(message: 'Invalid "linux" plugin specification.'),
+          throwsToolExit(
+            message: 'Invalid "linux" plugin specification: the "dartPluginClass" field must be a string.',
+          ),
         );
       });
 
@@ -2443,7 +2447,9 @@ platforms:
             fileSystem: globals.fs,
             isDevDependency: false,
           ),
-          throwsToolExit(message: 'Invalid "windows" plugin specification.'),
+          throwsToolExit(
+            message: 'Invalid "windows" plugin specification: the "dartFileName" field must be a string.',
+          ),
         );
       });
 
