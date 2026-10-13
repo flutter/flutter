@@ -180,6 +180,15 @@ void AndroidExternalViewEmbedderWrapper::PushFilterToVisitedPlatformViews(
 }
 
 // |ExternalViewEmbedder|
+void AndroidExternalViewEmbedderWrapper::PushVisitedPlatformView(
+    int64_t platform_view_id) {
+  EnsureInitialized();
+  if (hcpp_view_embedder_) {
+    hcpp_view_embedder_->PushVisitedPlatformView(platform_view_id);
+  }
+}
+
+// |ExternalViewEmbedder|
 void AndroidExternalViewEmbedderWrapper::PushClipRectToVisitedPlatformViews(
     const DlRect& clip_rect) {
   EnsureInitialized();

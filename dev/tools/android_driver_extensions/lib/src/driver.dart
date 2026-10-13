@@ -85,6 +85,14 @@ abstract interface class NativeDriver {
   /// for a view to tap on. The method completes when the tap is complete,
   /// or throws if a view cannot be found or tapped.
   Future<void> tap(NativeFinder finder);
+
+  /// Taps the screen at ([x], [y]) in physical pixels, through the OS input
+  /// pipeline (not Flutter's gesture binding), as a user's finger would.
+  ///
+  /// Unlike [FlutterDriver.tap], this exercises the platform's touch dispatch,
+  /// so it can verify that native views stacked above Flutter do not intercept
+  /// touches.
+  Future<void> tapAt(int x, int y);
 }
 
 /// An opaque handle to a screenshot taken on a native device.

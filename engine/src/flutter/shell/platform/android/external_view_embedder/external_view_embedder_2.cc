@@ -12,12 +12,34 @@
 #include "flutter/display_list/effects/image_filters/dl_blur_image_filter.h"
 #include "flutter/display_list/effects/image_filters/dl_color_filter_image_filter.h"
 #include "flutter/display_list/effects/image_filters/dl_compose_image_filter.h"
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/trace_event.h"
 #include "fml/make_copyable.h"
 #include "fml/synchronization/count_down_latch.h"
 
+#if FML_OS_ANDROID
+#include <android/api-level.h>
+#endif
+
 namespace flutter {
+
+namespace {
+// SurfaceView#setBlurRegions, which BackdropBlurCarrier.java relies on.
+constexpr int kMinApiLevelNativeBackdropBlur = 37;
+
+// Best initial guess before the platform has reported back (see
+// native_backdrop_blur_supported_): the API level check is the static part of
+// what BackdropBlurCarrier checks, so this is only wrong if blur is disabled
+// at runtime, and only until the first frame round-trips.
+bool DeviceLikelySupportsNativeBackdropBlur() {
+#if FML_OS_ANDROID
+  return android_get_device_api_level() >= kMinApiLevelNativeBackdropBlur;
+#else
+  return false;
+#endif
+}
+}  // namespace
 
 namespace {
 
@@ -50,7 +72,9 @@ AndroidExternalViewEmbedder2::AndroidExternalViewEmbedder2(
       surface_factory_(std::move(surface_factory)),
       surface_pool_(
           std::make_unique<SurfacePool>(/*use_new_surface_methods=*/true)),
-      task_runners_(task_runners) {}
+      task_runners_(task_runners),
+      native_backdrop_blur_supported_(std::make_shared<std::atomic<bool>>(
+          DeviceLikelySupportsNativeBackdropBlur())) {}
 
 // |ExternalViewEmbedder|
 void AndroidExternalViewEmbedder2::PrerollCompositeEmbeddedView(
@@ -101,6 +125,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
     frame->Submit();
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
         [this, jni_facade = jni_facade_,
+         native_blur_supported = native_backdrop_blur_supported_,
          views_visible_last_frame = views_visible_last_frame_]() {
           // This pointer is guaranteed to not be dangling as long as
           // DestroySurfaces is called before the embedder is deleted. See
@@ -110,7 +135,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
             jni_facade->hidePlatformView2(view_id);
           }
           // No platform views, so no native backdrop blurs.
-          jni_facade->onBackdropBlurs2({});
+          native_blur_supported->store(jni_facade->onBackdropBlurs2({}));
 
           jni_facade->swapTransaction();
           jni_facade->onEndFrame2();
@@ -201,6 +226,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
        slices = std::move(slices_),
        views_visible_last_frame = views_visible_last_frame_,
        backdrop_blurs = backdrop_blurs_,
+       native_blur_supported = native_backdrop_blur_supported_,
        overlay_layer_has_content_this_frame_]() mutable -> void {
         if (overlay_layer_has_content_this_frame_) {
           ShowOverlayLayerIfNeeded();
@@ -234,7 +260,8 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
         // Update the native backdrop blurs in the same platform transaction as
         // the platform view positions for this frame.
-        jni_facade->onBackdropBlurs2(backdrop_blurs);
+        native_blur_supported->store(
+            jni_facade->onBackdropBlurs2(backdrop_blurs));
 
         jni_facade->swapTransaction();
         jni_facade_->onEndFrame2();
@@ -266,6 +293,29 @@ void AndroidExternalViewEmbedder2::Reset() {
   slices_.clear();
   backdrop_blurs_.clear();
   backdrop_overlay_rects_.clear();
+  pending_backdrop_clip_.reset();
+}
+
+const std::vector<float>&
+AndroidExternalViewEmbedder2::GetBackdropBlursForTesting() const {
+  return backdrop_blurs_;
+}
+
+void AndroidExternalViewEmbedder2::SetNativeBackdropBlurSupportedForTesting(
+    bool supported) {
+  native_backdrop_blur_supported_->store(supported);
+}
+
+const std::unordered_map<int64_t, DlRect>&
+AndroidExternalViewEmbedder2::GetBackdropOverlayRectsForTesting() const {
+  return backdrop_overlay_rects_;
+}
+
+// |ExternalViewEmbedder|
+void AndroidExternalViewEmbedder2::PushVisitedPlatformView(
+    int64_t platform_view_id) {
+  // A clip pushed before this platform view wraps the view, not a backdrop
+  // filter that may follow it.
   pending_backdrop_clip_.reset();
 }
 
@@ -306,6 +356,13 @@ void AndroidExternalViewEmbedder2::PushFilterToVisitedPlatformViews(
   std::optional<std::array<DlScalar, 3>> clip = pending_backdrop_clip_;
   pending_backdrop_clip_.reset();
   if (!filter || composition_order_.empty()) {
+    return;
+  }
+  // Without native blur, leave the filter to Flutter: it blurs its own content
+  // behind the filter in the background layer as it always has, and only the
+  // platform view stays sharp. Redirecting the filter region into the overlay
+  // here would lose that.
+  if (!native_backdrop_blur_supported_->load()) {
     return;
   }
 
@@ -359,14 +416,20 @@ void AndroidExternalViewEmbedder2::PushFilterToVisitedPlatformViews(
   const float dpr = static_cast<float>(device_pixel_ratio_);
   const float sigma = std::max(blur->sigma_x(), blur->sigma_y()) * dpr;
 
-  // Best effort: use the most recent clip's corner radius if it is the clip
-  // that bounds this filter (same size, once scaled to device pixels).
+  // Best effort: use the corner radius of the clip pushed immediately before
+  // this filter, if that clip bounds the filter. The clip is reported in its
+  // local space and the filter rect in device pixels, so the two must agree
+  // once the device pixel ratio is applied. Any other transform between the
+  // clip and the filter (e.g. a Transform.scale) is not accounted for and the
+  // corners are left square; SurfaceFlinger blur regions take a single radius
+  // per corner, so only uniform scales could be mapped anyway.
   float corner = 0;
-  if (clip.has_value()) {
-    const float clip_w = (*clip)[0] * dpr;
-    const float clip_h = (*clip)[1] * dpr;
-    if (std::abs(clip_w - rect->GetWidth()) <= 2.0f &&
-        std::abs(clip_h - rect->GetHeight()) <= 2.0f) {
+  if (clip.has_value() && (*clip)[0] > 0 && (*clip)[1] > 0) {
+    const float scale_x = rect->GetWidth() / (*clip)[0];
+    const float scale_y = rect->GetHeight() / (*clip)[1];
+    const float tolerance = 0.01f * dpr;
+    if (std::abs(scale_x - dpr) <= tolerance &&
+        std::abs(scale_y - dpr) <= tolerance) {
       corner = (*clip)[2] * dpr;
     }
   }

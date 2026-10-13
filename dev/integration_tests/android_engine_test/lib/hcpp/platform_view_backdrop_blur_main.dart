@@ -22,13 +22,22 @@ import '../src/allow_list_devices.dart';
 /// asks SurfaceFlinger to blur behind the Flutter overlay instead (see
 /// `BackdropBlurCarrier.java`). On devices with native blur (API 37+ with
 /// cross-window blur enabled) both halves of the panel are blurred with no
-/// seam; elsewhere only the Flutter half is blurred.
+/// seam. Elsewhere the engine leaves the filter to Flutter, which blurs only
+/// the Flutter half; the platform view shows through sharp.
+///
+/// The toggle button is a plain Flutter widget drawn above the filter. Its
+/// center is reported to the driver (in physical pixels) so the test can tap
+/// it through the OS input pipeline.
 void main() async {
   ensureAndroidDevice();
   enableFlutterDriverExtension(
     handler: (String? command) async {
+      final ui.FlutterView view = ui.PlatformDispatcher.instance.views.first;
+      final ui.Offset center = _toggleButtonCenter * view.devicePixelRatio;
       return json.encode(<String, Object?>{
         'supported': await HybridAndroidViewController.checkIfSupported(),
+        'toggleButtonCenterX': center.dx.round(),
+        'toggleButtonCenterY': center.dy.round(),
       });
     },
     commands: <CommandExtension>[nativeDriverCommands],
@@ -38,6 +47,10 @@ void main() async {
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
   runApp(const _BackdropBlurApp());
 }
+
+/// Logical-pixel geometry shared by the layout and the driver handler.
+const Rect _toggleButtonRect = Rect.fromLTWH(190, 250, 100, 60);
+final Offset _toggleButtonCenter = _toggleButtonRect.center;
 
 final class _BackdropBlurApp extends StatefulWidget {
   const _BackdropBlurApp();
@@ -92,16 +105,16 @@ final class _BackdropBlurAppState extends State<_BackdropBlurApp> {
               ),
             // A sharp Flutter element above the blur, to verify the overlay
             // is still composited (unblurred) on top.
-            Positioned(
-              left: 190,
-              top: 250,
-              width: 100,
-              height: 60,
+            Positioned.fromRect(
+              rect: _toggleButtonRect,
               child: TextButton(
                 key: const ValueKey<String>('ToggleBlur'),
                 style: TextButton.styleFrom(backgroundColor: Colors.red),
                 onPressed: _toggleBlur,
-                child: const SizedBox.expand(),
+                // Lets the driver wait for the tap to have taken effect.
+                child: SizedBox.expand(
+                  key: ValueKey<String>(_blurVisible ? 'BlurShown' : 'BlurHidden'),
+                ),
               ),
             ),
           ],
@@ -117,8 +130,8 @@ final class _CheckerboardPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     const double cell = 40;
-    final Paint a = Paint()..color = const Color(0xFF6A1B9A);
-    final Paint b = Paint()..color = const Color(0xFFFFEB3B);
+    final a = Paint()..color = const Color(0xFF6A1B9A);
+    final b = Paint()..color = const Color(0xFFFFEB3B);
     for (double y = 0; y < size.height; y += cell) {
       for (double x = 0; x < size.width; x += cell) {
         final bool odd = ((x / cell).floor() + (y / cell).floor()).isOdd;

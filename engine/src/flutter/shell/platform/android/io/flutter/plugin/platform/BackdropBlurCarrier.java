@@ -28,6 +28,7 @@ import androidx.annotation.VisibleForTesting;
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterView;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.function.Consumer;
 
 /**
@@ -96,6 +97,8 @@ class BackdropBlurCarrier {
   private boolean crossWindowBlurEnabled = true;
   @Nullable private Consumer<Boolean> blurEnabledListener;
   private boolean loggedBlurUnavailable = false;
+  // Reused per frame to avoid garbage during animations; SurfaceView copies the regions.
+  private final ArrayList<BlurRegion> scratchRegions = new ArrayList<>();
 
   /**
    * Attaches to a {@link FlutterView}. Creates the carrier eagerly so that its surface exists
@@ -167,15 +170,16 @@ class BackdropBlurCarrier {
   /**
    * Applies this frame's backdrop blurs. Each blur is {@code [left, top, right, bottom, sigma,
    * cornerRadius]} in physical pixels, in the {@link FlutterView}'s coordinate space.
+   *
+   * @return whether native blur is available (API level, attachment and device settings). When
+   *     false, the engine keeps applying backdrop filters to Flutter's own content and only the
+   *     platform view stays sharp.
    */
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
-  void onBackdropBlurs(@NonNull float[] blurs) {
+  boolean onBackdropBlurs(@NonNull float[] blurs) {
     final int count = blurs.length / BLUR_FIELDS;
-    if (count == 0 && !hasBlurRegions) {
-      return;
-    }
-    if (carrier == null) {
+    if (!isSupported() || carrier == null) {
       if (count > 0 && !loggedBlurUnavailable) {
         Log.w(
             TAG,
@@ -185,10 +189,10 @@ class BackdropBlurCarrier {
                 + " mode if this effect is required.");
         loggedBlurUnavailable = true;
       }
-      return;
+      return false;
     }
-    if (count > 0 && !crossWindowBlurEnabled) {
-      if (!loggedBlurUnavailable) {
+    if (!crossWindowBlurEnabled) {
+      if (count > 0 && !loggedBlurUnavailable) {
         Log.w(
             TAG,
             "A BackdropFilter blur covers a platform view, but cross-window blur is disabled on"
@@ -196,26 +200,30 @@ class BackdropBlurCarrier {
         loggedBlurUnavailable = true;
       }
       clearBlurRegions();
-      return;
+      return false;
     }
-    applyBlurRegions(blurs, count);
+    if (count > 0 || hasBlurRegions) {
+      applyBlurRegions(blurs, count);
+    }
+    return true;
   }
 
   @RequiresApi(API_LEVELS.API_37)
   private void applyBlurRegions(@NonNull float[] blurs, int count) {
-    final ArrayList<BlurRegion> regions = new ArrayList<>(count);
+    scratchRegions.clear();
     for (int i = 0; i < count; i++) {
       final int base = i * BLUR_FIELDS;
-      final float corner = blurs[base + 5];
-      final float[] cornerRadii = {corner, corner, corner, corner, corner, corner, corner, corner};
-      regions.add(
+      final float[] cornerRadii = new float[8];
+      Arrays.fill(cornerRadii, blurs[base + 5]);
+      scratchRegions.add(
           new RoundedRectBlurRegion(
               new RectF(blurs[base], blurs[base + 1], blurs[base + 2], blurs[base + 3]),
               cornerRadii,
               /* alpha= */ 1.0f,
               sigmaToBlurRadius(blurs[base + 4])));
     }
-    carrier.setBlurRegions(regions);
+    carrier.setBlurRegions(scratchRegions);
+    scratchRegions.clear();
     hasBlurRegions = count > 0;
     // The overlay may have been created after the carrier's surface.
     if (!overlayParentedToCarrier) {
@@ -321,14 +329,19 @@ class BackdropBlurCarrier {
       return;
     }
     final AttachedSurfaceControl root = flutterView.getRootSurfaceControl();
-    if (root == null) {
-      return;
-    }
-    final SurfaceControl.Transaction tx = root.buildReparentTransaction(overlay);
+    final SurfaceControl.Transaction tx =
+        root == null ? null : root.buildReparentTransaction(overlay);
     if (tx != null) {
       tx.setLayer(overlay, OVERLAY_LAYER_Z).apply();
       tx.close();
+      return;
     }
+    // The window is gone (or refused), so there is no root to go back to. Detach the overlay
+    // rather than let the carrier's SurfaceControl take it down when it is released; the
+    // controller releases the overlay itself on detach.
+    final SurfaceControl.Transaction detach = new SurfaceControl.Transaction();
+    detach.reparent(overlay, null).apply();
+    detach.close();
   }
 
   @VisibleForTesting
@@ -340,5 +353,12 @@ class BackdropBlurCarrier {
   @Nullable
   SurfaceView getCarrierViewForTest() {
     return carrier;
+  }
+
+  /** Simulates the system toggling cross-window blur (e.g. battery saver). */
+  @VisibleForTesting
+  @RequiresApi(API_LEVELS.API_34)
+  void setCrossWindowBlurEnabledForTest(boolean enabled) {
+    onCrossWindowBlurEnabledChanged(enabled);
   }
 }

@@ -835,12 +835,13 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
    * Applies this frame's {@code BackdropFilter} blurs that cover platform views. Each blur is
    * {@code [left, top, right, bottom, sigma, cornerRadius]} in physical pixels. Called from the
    * engine before {@link #swapTransactions()} so the blur lands on the same frame as the platform
-   * view updates. See {@link BackdropBlurCarrier}.
+   * view updates. Returns whether native blur is available on this device; the engine leaves
+   * backdrop filters to Flutter when it is not. See {@link BackdropBlurCarrier}.
    */
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
-  public void onBackdropBlurs(@NonNull float[] blurs) {
-    backdropBlurCarrier.onBackdropBlurs(blurs);
+  public boolean onBackdropBlurs(@NonNull float[] blurs) {
+    return backdropBlurCarrier.onBackdropBlurs(blurs);
   }
 
   @RequiresApi(API_LEVELS.API_34)

@@ -253,8 +253,12 @@ class PlatformViewAndroidJNI {
 
   // Backdrop blurs covering platform views this frame, flattened as
   // [left, top, right, bottom, sigma, corner_radius] per blur, in device
-  // pixels. An empty vector clears any native blur.
-  virtual void onBackdropBlurs2(const std::vector<float>& blurs) {}
+  // pixels. An empty vector clears any native blur. Returns whether the
+  // platform can apply native backdrop blur at all (API level and device
+  // settings), so the embedder can leave filters to Flutter otherwise.
+  virtual bool onBackdropBlurs2(const std::vector<float>& blurs) {
+    return false;
+  }
 
   virtual void showOverlaySurface2() = 0;
 

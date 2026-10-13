@@ -1468,18 +1468,18 @@ public class FlutterJNI {
 
   /**
    * Forwards this frame's backdrop blurs that cover HCPP platform views, as [left, top, right,
-   * bottom, sigma, cornerRadius] per blur in physical pixels. See {@link
+   * bottom, sigma, cornerRadius] per blur in physical pixels. Returns whether native backdrop blur
+   * is available, so the engine can leave filters to Flutter when it is not. See {@link
    * PlatformViewsController2#onBackdropBlurs}.
    */
   @UiThread
   @SuppressWarnings("unused")
-  @SuppressLint("NewApi")
-  public void onBackdropBlurs2(@NonNull float[] blurs) {
+  public boolean onBackdropBlurs2(@NonNull float[] blurs) {
     ensureRunningOnMainThread();
-    if (platformViewsController2 == null) {
-      return;
+    if (platformViewsController2 == null || Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return false;
     }
-    platformViewsController2.onBackdropBlurs(blurs);
+    return platformViewsController2.onBackdropBlurs(blurs);
   }
 
   // ----- Start Localization Support ----

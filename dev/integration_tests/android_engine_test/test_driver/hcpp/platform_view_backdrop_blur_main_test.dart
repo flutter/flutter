@@ -19,8 +19,9 @@ import '../_luci_skia_gold_prelude.dart';
 ///
 /// - `.native_blur.png`: the platform view and the Flutter content behind the
 ///   panel are blurred together with no seam.
-/// - `.no_native_blur.png`: only the Flutter content is blurred; the platform
-///   view shows through sharp. This also guards against regressions where the
+/// - `.no_native_blur.png`: the engine leaves the filter to Flutter, so only
+///   the Flutter content under the panel is blurred and the platform view
+///   shows through sharp. This also guards against regressions where the
 ///   overlay (the panel's tint and the red button) goes missing.
 ///
 /// For local debugging, a (local) golden-file is required as a baseline:
@@ -63,10 +64,15 @@ void main() async {
     await flutterDriver.close();
   });
 
+  late final int toggleButtonX;
+  late final int toggleButtonY;
+
   test('verify that HCPP is supported and enabled', () async {
     final response = json.decode(await flutterDriver.requestData('')) as Map<String, Object?>;
 
     expect(response['supported'], true);
+    toggleButtonX = response['toggleButtonCenterX']! as int;
+    toggleButtonY = response['toggleButtonCenterY']! as int;
   }, timeout: Timeout.none);
 
   test('should blur the platform view and Flutter content under the panel', () async {
@@ -77,15 +83,19 @@ void main() async {
   }, timeout: Timeout.none);
 
   test('should remove the blur when the filter is removed, and restore it', () async {
-    // The red button sits in the Flutter overlay above the blur; tapping it
-    // also verifies that touches reach Flutter through the blur carrier.
-    await flutterDriver.tap(find.byValueKey('ToggleBlur'));
+    // The red button is Flutter content above the blur. Tap it through the OS
+    // input pipeline (not FlutterDriver.tap, which injects into Flutter's
+    // gesture binding directly) so the test also verifies that the blur
+    // carrier SurfaceView does not intercept touches.
+    await nativeDriver.tapAt(toggleButtonX, toggleButtonY);
+    await flutterDriver.waitFor(find.byValueKey('BlurHidden'));
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('$goldenPrefix.backdrop_blur.removed.png'),
     );
 
-    await flutterDriver.tap(find.byValueKey('ToggleBlur'));
+    await nativeDriver.tapAt(toggleButtonX, toggleButtonY);
+    await flutterDriver.waitFor(find.byValueKey('BlurShown'));
     await expectLater(
       nativeDriver.screenshot(),
       matchesGoldenFile('$goldenPrefix.backdrop_blur.$variant.png'),

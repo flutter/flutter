@@ -5,6 +5,7 @@
 package io.flutter.plugin.platform;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -28,7 +29,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.annotation.Config;
 
-@Config(manifest = Config.NONE)
 @RunWith(AndroidJUnit4.class)
 public class BackdropBlurCarrierTest {
   private static final float[] ONE_BLUR = {10f, 20f, 110f, 220f, /*sigma=*/ 6f, /*corner=*/ 8f};
@@ -55,7 +55,6 @@ public class BackdropBlurCarrierTest {
     final SurfaceView view = requireCarrier(carrier);
     assertEquals(flutterView, view.getParent());
     assertEquals(BackdropBlurCarrier.CARRIER_COMPOSITION_ORDER, view.getCompositionOrder());
-    assertEquals(SurfaceView.SURFACE_LIFECYCLE_FOLLOWS_ATTACHMENT, view.getSurfaceLifecycle());
     assertEquals(false, view.isClickable());
     assertEquals(false, view.isFocusable());
     assertEquals(View.IMPORTANT_FOR_ACCESSIBILITY_NO, view.getImportantForAccessibility());
@@ -65,14 +64,15 @@ public class BackdropBlurCarrierTest {
   public void detachRemovesTheCarrier() {
     Assume.assumeTrue(BackdropBlurCarrier.isSupported());
     final FlutterView flutterView = newFlutterView();
+    final int childrenBefore = flutterView.getChildCount();
     final BackdropBlurCarrier carrier = new BackdropBlurCarrier();
     carrier.attachToView(flutterView);
-    assertEquals(1, flutterView.getChildCount());
+    assertEquals(childrenBefore + 1, flutterView.getChildCount());
 
     carrier.detachFromView();
 
     assertNull(carrier.getCarrierViewForTest());
-    assertEquals(0, flutterView.getChildCount());
+    assertEquals(childrenBefore, flutterView.getChildCount());
   }
 
   @Test
@@ -80,8 +80,9 @@ public class BackdropBlurCarrierTest {
     Assume.assumeTrue(BackdropBlurCarrier.isSupported());
     final BackdropBlurCarrier carrier = new BackdropBlurCarrier();
     carrier.attachToView(newFlutterView());
+    carrier.setCrossWindowBlurEnabledForTest(true);
 
-    carrier.onBackdropBlurs(ONE_BLUR);
+    assertTrue(carrier.onBackdropBlurs(ONE_BLUR));
 
     final List<BlurRegion> regions = requireCarrier(carrier).getBlurRegions();
     assertEquals(1, regions.size());
@@ -100,11 +101,30 @@ public class BackdropBlurCarrierTest {
     Assume.assumeTrue(BackdropBlurCarrier.isSupported());
     final BackdropBlurCarrier carrier = new BackdropBlurCarrier();
     carrier.attachToView(newFlutterView());
+    carrier.setCrossWindowBlurEnabledForTest(true);
     carrier.onBackdropBlurs(ONE_BLUR);
     assertEquals(1, requireCarrier(carrier).getBlurRegions().size());
 
-    carrier.onBackdropBlurs(new float[0]);
+    assertTrue(carrier.onBackdropBlurs(new float[0]));
 
+    assertTrue(requireCarrier(carrier).getBlurRegions().isEmpty());
+  }
+
+  @Test
+  public void reportsNoNativeBlurAndClearsRegionsWhenCrossWindowBlurIsDisabled() {
+    Assume.assumeTrue(BackdropBlurCarrier.isSupported());
+    final BackdropBlurCarrier carrier = new BackdropBlurCarrier();
+    carrier.attachToView(newFlutterView());
+    carrier.setCrossWindowBlurEnabledForTest(true);
+    carrier.onBackdropBlurs(ONE_BLUR);
+    assertEquals(1, requireCarrier(carrier).getBlurRegions().size());
+
+    // The system toggles blur off (e.g. battery saver): regions are dropped immediately.
+    carrier.setCrossWindowBlurEnabledForTest(false);
+    assertTrue(requireCarrier(carrier).getBlurRegions().isEmpty());
+
+    // And the engine is told to fall back to Flutter-side blur.
+    assertFalse(carrier.onBackdropBlurs(ONE_BLUR));
     assertTrue(requireCarrier(carrier).getBlurRegions().isEmpty());
   }
 
@@ -112,7 +132,7 @@ public class BackdropBlurCarrierTest {
   public void isANoopWhenNotAttached() {
     final BackdropBlurCarrier carrier = new BackdropBlurCarrier();
     // Must not throw: the engine reports blurs regardless of API level.
-    carrier.onBackdropBlurs(ONE_BLUR);
+    assertFalse(carrier.onBackdropBlurs(ONE_BLUR));
     carrier.onBackdropBlurs(new float[0]);
     carrier.setOverlaySurfaceControl(null);
     carrier.detachFromView();
@@ -136,7 +156,7 @@ public class BackdropBlurCarrierTest {
   public void doesNotCreateACarrierBelowApi37() {
     final BackdropBlurCarrier carrier = new BackdropBlurCarrier();
     carrier.attachToView(newFlutterView());
-    carrier.onBackdropBlurs(ONE_BLUR);
+    assertFalse(carrier.onBackdropBlurs(ONE_BLUR));
     assertNull(carrier.getCarrierViewForTest());
   }
 

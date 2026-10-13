@@ -148,7 +148,7 @@ class PlatformViewAndroidJNIImpl final : public PlatformViewAndroidJNI {
 
   void hidePlatformView2(int32_t view_id) override;
 
-  void onBackdropBlurs2(const std::vector<float>& blurs) override;
+  bool onBackdropBlurs2(const std::vector<float>& blurs) override;
 
   void showOverlaySurface2() override;
 

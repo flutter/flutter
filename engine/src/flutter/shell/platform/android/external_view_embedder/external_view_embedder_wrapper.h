@@ -82,6 +82,9 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
       const DlRect& filter_rect) override;
 
   // |ExternalViewEmbedder|
+  void PushVisitedPlatformView(int64_t platform_view_id) override;
+
+  // |ExternalViewEmbedder|
   void PushClipRectToVisitedPlatformViews(const DlRect& clip_rect) override;
 
   // |ExternalViewEmbedder|

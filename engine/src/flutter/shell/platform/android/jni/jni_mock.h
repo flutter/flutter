@@ -147,6 +147,10 @@ class JNIMock final : public PlatformViewAndroidJNI {
               (override));
 
   MOCK_METHOD(void, hidePlatformView2, (int32_t view_id), (override));
+  MOCK_METHOD(bool,
+              onBackdropBlurs2,
+              (const std::vector<float>& blurs),
+              (override));
   MOCK_METHOD(void, onEndFrame2, (), (override));
   MOCK_METHOD(void, hideOverlaySurface2, (), (override));
   MOCK_METHOD(void, showOverlaySurface2, (), (override));

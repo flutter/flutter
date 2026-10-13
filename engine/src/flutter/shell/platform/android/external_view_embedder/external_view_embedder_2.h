@@ -98,6 +98,9 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
       const DlRect& filter_rect) override;
 
   // |ExternalViewEmbedder|
+  void PushVisitedPlatformView(int64_t platform_view_id) override;
+
+  // |ExternalViewEmbedder|
   void PushClipRectToVisitedPlatformViews(const DlRect& clip_rect) override;
 
   // |ExternalViewEmbedder|
@@ -110,6 +113,17 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
 
   // |ExternalViewEmbedder|
   void PushClipPathToVisitedPlatformViews(const DlPath& clip_path) override;
+
+  // The backdrop blurs collected so far this frame; see backdrop_blurs_.
+  const std::vector<float>& GetBackdropBlursForTesting() const;
+
+  // Overrides what the platform reported about native blur support.
+  void SetNativeBackdropBlurSupportedForTesting(bool supported);
+
+  // The regions forced into the overlay this frame; see
+  // backdrop_overlay_rects_.
+  const std::unordered_map<int64_t, DlRect>& GetBackdropOverlayRectsForTesting()
+      const;
 
   // Gets the rect based on the device pixel ratio of a platform view displayed
   // on the screen.
@@ -166,6 +180,13 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // The set of platform views that were visible in the last frame.
   absl::flat_hash_set<int64_t> views_visible_last_frame_;
 
+  // Whether the platform reported that it can apply native backdrop blur
+  // (see PlatformViewAndroidJNI::onBackdropBlurs2). Written on the platform
+  // thread, read on the raster thread; one frame of staleness is harmless.
+  // Starts optimistic on API levels that have SurfaceView#setBlurRegions so
+  // the first blurred frame is sliced correctly.
+  std::shared_ptr<std::atomic<bool>> native_backdrop_blur_supported_;
+
   // Backdrop blurs this frame that overlap a platform view, in
   // device pixels, flattened as [left, top, right, bottom, sigma, corner] per
   // blur. Sent to the platform, which asks SurfaceFlinger to blur.
@@ -175,9 +196,12 @@ class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
   // into the overlay (above the native blur) instead of the background.
   std::unordered_map<int64_t, DlRect> backdrop_overlay_rects_;
 
-  // The most recent clip pushed to visited platform views, used as
-  // a best-effort source for the corner radius of the next backdrop filter.
-  // Stored as {width, height, corner radius} in logical pixels.
+  // The most recent clip pushed to visited platform views, used as a
+  // best-effort source for the corner radius of the next backdrop filter
+  // (the common ClipRRect(child: BackdropFilter) shape). Cleared when a
+  // platform view is visited or a filter consumes it; a clip whose size does
+  // not match the filter is ignored. Stored as {width, height, corner radius}
+  // in the clip's local pixels.
   std::optional<std::array<DlScalar, 3>> pending_backdrop_clip_;
 
   // Whether an unsupported backdrop filter over a platform view was logged.
