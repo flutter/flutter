@@ -72,6 +72,7 @@ use_repo(
     "spirv-tools",
     "swiftshader",
     "sysroot_linux_x64",
+    "vector_math",
     "vulkan-headers",
     "vulkan_deps_tree",
     "vulkan_memory_allocator",
