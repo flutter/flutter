@@ -118,12 +118,13 @@ def _gn_build_impl(ctx):
         # PATH as the strict action environment defines it (the Dart build's
         # version script looks for git, and copes without it). The variables
         # keep Python from writing bytecode next to the sources and make its
-        # hashing deterministic for scripts that iterate over sets.
+        # hashing deterministic for scripts that iterate over sets; `env`
+        # adds what the wrapped build's own scripts read.
         use_default_shell_env = True,
         env = {
             "PYTHONDONTWRITEBYTECODE": "1",
             "PYTHONHASHSEED": "0",
-        },
+        } | ctx.attr.env,
         # The inputs are symlinks into the checkout (synced_repository), which
         # only resolve on this machine. Results can still be cached.
         execution_requirements = {"no-remote-exec": "1"},
@@ -179,6 +180,10 @@ _gn_build = rule(
             mandatory = True,
             doc = "The archiver, from the same toolchain as the GN build.",
         ),
+        "env": attr.string_dict(
+            doc = "Environment variables for the wrapped build, besides PATH and Python's: what " +
+                  "its scripts read (ANGLE's commit id, for one).",
+        ),
         "_script": attr.label(
             default = ":gn_build.py",
             allow_single_file = True,
@@ -208,7 +213,7 @@ def gn_build(name, outs = [], archives = {}, visibility = None, **kwargs):
       archives: archive file name -> GN library label (see the module docstring).
       visibility: visibility of the build target and the product targets.
       **kwargs: the attributes of the underlying rule (`build_file`, `root_target_dir`,
-        `ninja_target`, `tree`, `gn_args`, `archive_boundaries`, `ar`).
+        `ninja_target`, `tree`, `gn_args`, `archive_boundaries`, `ar`, `env`).
     """
     _gn_build(
         name = name,
