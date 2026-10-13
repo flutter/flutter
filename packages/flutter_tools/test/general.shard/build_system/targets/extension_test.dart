@@ -70,7 +70,7 @@ final class FakeTarget extends Fake implements Target {
 ExtensionAssembleTarget _createTarget({
   FakeExtensionBuildManager? buildManager,
   List<String> dependencies = const <String>[],
-  Target Function(String)? dependencyResolver,
+  DependencyResolverCallback? dependencyResolver,
   List<ExtensionSource> inputs = const <ExtensionSource>[],
   String name = 'custom-target',
   String outputDir = kBuildDirPlaceholder,
@@ -335,6 +335,11 @@ void main() {
         description: 'substitutes {BUILD_DIR}',
         pattern: '{BUILD_DIR}/custom-out',
         expectedPath: '/project/.dart_tool/flutter_build/custom-out',
+      ),
+      (
+        description: 'resolves relative outputDir against projectDir',
+        pattern: 'build/custom_out/{BUILD_MODE}',
+        expectedPath: '/project/build/custom_out/profile',
       ),
     ];
 

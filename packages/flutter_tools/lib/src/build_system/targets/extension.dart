@@ -12,6 +12,9 @@ import '../../experimental/extension_build_manager.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
 
+/// Resolves a build target dependency by its [dependency] name.
+typedef DependencyResolverCallback = Target Function(String dependency);
+
 /// A build target that delegates to a tool extension.
 class ExtensionAssembleTarget extends Target {
   ExtensionAssembleTarget({
@@ -24,7 +27,7 @@ class ExtensionAssembleTarget extends Target {
   final ExtensionBuildTarget buildTarget;
 
   final ExtensionBuildManager _buildManager;
-  final Target Function(String) _dependencyResolver;
+  final DependencyResolverCallback _dependencyResolver;
 
   @override
   String get name => buildTarget.name;
@@ -84,6 +87,8 @@ class ExtensionAssembleTarget extends Target {
 
 /// Resolves the output directory for [target] by substituting placeholders
 /// (`{PROJECT_DIR}`, `{BUILD_DIR}`, `{BUILD_MODE}`, and `{TARGET_PLATFORM}`).
+///
+/// Relative paths are resolved relative to [projectDir].
 Directory resolveExtensionOutputDir({
   required Directory buildDir,
   required BuildMode buildMode,
@@ -91,14 +96,15 @@ Directory resolveExtensionOutputDir({
   required Directory projectDir,
   required ExtensionBuildTarget target,
 }) {
-  final String outputPath = fileSystem.path.normalize(
-    target.outputDir
-        .replaceAll(kProjectDirPlaceholder, projectDir.path)
-        .replaceAll(kBuildDirPlaceholder, buildDir.path)
-        .replaceAll(kBuildModePlaceholder, buildMode.cliName)
-        .replaceAll(kTargetPlatformPlaceholder, target.targetPlatform),
-  );
-  return fileSystem.directory(outputPath);
+  String outputPath = target.outputDir
+      .replaceAll(kProjectDirPlaceholder, projectDir.path)
+      .replaceAll(kBuildDirPlaceholder, buildDir.path)
+      .replaceAll(kBuildModePlaceholder, buildMode.cliName)
+      .replaceAll(kTargetPlatformPlaceholder, target.targetPlatform);
+  if (fileSystem.path.isRelative(outputPath)) {
+    outputPath = fileSystem.path.join(projectDir.path, outputPath);
+  }
+  return fileSystem.directory(fileSystem.path.normalize(outputPath));
 }
 
 /// Resolves all engine and host artifact inputs declared on [target] using
