@@ -3,10 +3,11 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/runtime/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: libdart, runtime_fixtures, runtime_unittests, no_plugin_registrant, no_dart_plugin_registrant_unittests, plugin_registrant, dart_plugin_registrant_unittests.
+# Not converted: runtime_unittests.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -28,6 +29,27 @@ cc_library(
         "@skia",
     ],
     alwayslink = True,
+)
+
+# Picks the libdart implementation based on the Flutter runtime mode.
+cc_library(
+    name = "libdart",
+    deps = select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            "//engine/src/flutter/build/bazel/dart_wrap:libdart_aotruntime",  # flutter_runtime_mode == "profile" || (flutter_runtime_mode == "release")
+        ],
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "//engine/src/flutter/build/bazel/dart_wrap:libdart_aotruntime",  # flutter_runtime_mode == "profile" || (flutter_runtime_mode == "release")
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [],
+        "//engine/src/flutter/common:runtime_mode_release": [],
+        "//conditions:default": [
+            "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",  # !(flutter_runtime_mode == "profile" || (flutter_runtime_mode == "release"))
+            "//engine/src/flutter/lib/snapshot",  # !(flutter_runtime_mode == "profile" || (flutter_runtime_mode == "release"))
+        ],
+    }),
 )
 
 cc_library(
@@ -113,4 +135,60 @@ cc_library(
         "@skia",
     ],
     alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "runtime_fixtures",
+    dart_main = "fixtures/runtime_test.dart",
+)
+
+flutter_test_fixtures(
+    name = "no_plugin_registrant",
+    dart_main = "fixtures/no_dart_plugin_registrant_test.dart",
+    use_target_as_artifact_prefix = True,
+)
+
+cc_test(
+    name = "no_dart_plugin_registrant_unittests",
+    size = "small",
+    srcs = ["no_dart_plugin_registrant_unittests.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/testing:fixture_test
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":no_plugin_registrant",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:fixture_test",
+    ],
+)
+
+flutter_test_fixtures(
+    name = "plugin_registrant",
+    dart_main = "fixtures/dart_tool/flutter_build/dart_plugin_registrant.dart",
+    use_target_as_artifact_prefix = True,
+)
+
+cc_test(
+    name = "dart_plugin_registrant_unittests",
+    size = "small",
+    srcs = ["dart_plugin_registrant_unittests.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/testing:fixture_test
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":dart_plugin_registrant",
+        ":plugin_registrant",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:fixture_test",
+    ],
 )

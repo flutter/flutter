@@ -625,6 +625,13 @@ final class _Emitter {
             }
             rule.list(argument.attribute).addUnique(e.condition, _item(label, e));
           });
+        case TemplateArgumentKind.file:
+          final String? file = _singleString(variable);
+          if (file == null) {
+            throw GnError(variable.assignments.first.location, '${variable.name} has no value');
+          }
+          rule.scalars[argument.attribute] =
+              '"${_filePath(file, variable.assignments.first.location)}"';
         case TemplateArgumentKind.scalar:
           _scalar(rule, argument.attribute, variable);
       }
@@ -790,7 +797,11 @@ final class _Emitter {
         propagatedFlags: propagated,
       );
     }
-    _checkPropagatedFlags(target, propagated);
+    // Nothing depends on a binary: what its public_deps would hand on goes
+    // nowhere, and GN's own check only concerns dependents.
+    if (kind == 'cc_library' || shared) {
+      _checkPropagatedFlags(target, propagated);
+    }
 
     // GN applies a dependency's all_dependent_configs to this target and to
     // everything that depends on it, through private dependencies too;

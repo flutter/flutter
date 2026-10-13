@@ -1,0 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The prebuilt Dart SDK of DEPS (flutter/prebuilts/<host>/dart-sdk; GN's
+# host_prebuilt_dart_sdk), pinned to the same Dart revision as the tree. The
+# engine's GN build uses it to run the Dart tools it does not build itself;
+# what Bazel actions need of it so far: the AOT runtime and the frontend
+# server snapshot it runs (build/bazel/dart/kernel.bzl).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "dartaotruntime",
+    srcs = ["bin/dartaotruntime"],
+)
+
+filegroup(
+    name = "frontend_server",
+    srcs = ["bin/snapshots/frontend_server_aot.dart.snapshot"],
+)
+
+# The command-line SDK: `dart` and the libraries and snapshots it loads.
+filegroup(
+    name = "dart",
+    srcs = ["bin/dart"] + glob(
+        [
+            "bin/snapshots/**",
+            "lib/**",
+        ],
+        exclude = ["lib/dev_compiler/**"],
+    ),
+)

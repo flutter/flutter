@@ -176,6 +176,45 @@ core_snapshot = rule(
     },
 )
 
+def _aot_snapshot_impl(ctx):
+    # GN (testing.gni's dart_snapshot_aot): gen_snapshot --deterministic
+    # --snapshot_kind=app-aot-elf --loading_unit_manifest=<manifest>
+    # --elf=<elf> <kernel>. GN declares the ELF alone; the manifest, written
+    # next to it, is an output here so that the sandbox keeps it.
+    manifest = ctx.actions.declare_file("loading_unit_manifest.json", sibling = ctx.outputs.elf)
+    args = ctx.actions.args()
+    args.add("--deterministic")
+    args.add("--snapshot_kind=app-aot-elf")
+    args.add(manifest, format = "--loading_unit_manifest=%s")
+    args.add(ctx.outputs.elf, format = "--elf=%s")
+    args.add(ctx.file.kernel)
+    ctx.actions.run(
+        executable = ctx.executable._gen_snapshot,
+        arguments = [args],
+        inputs = [ctx.file.kernel],
+        outputs = [ctx.outputs.elf, manifest],
+        mnemonic = "GenAotSnapshot",
+        progress_message = "Generating the AOT snapshot %{label}",
+    )
+    return [DefaultInfo(files = depset([ctx.outputs.elf]))]
+
+aot_snapshot = rule(
+    implementation = _aot_snapshot_impl,
+    doc = "GN's dart_snapshot_aot (testing.gni): a kernel file to an AOT ELF snapshot.",
+    attrs = {
+        "kernel": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            doc = "The kernel file (GN's dart_kernel).",
+        ),
+        "elf": attr.output(
+            mandatory = True,
+            doc = "The ELF snapshot (GN's assets/<dart_elf_filename>).",
+        ),
+        "_gen_snapshot": _dart_tool("gen_snapshot"),
+    },
+)
+
 def _bin_to_assembly_impl(ctx):
     # GN: bin_to_assembly.py --input <bin> --output <S> --symbol_name <sym>
     # [--size_symbol_name <sym> --target_arch <cpu>] --target_os <os>

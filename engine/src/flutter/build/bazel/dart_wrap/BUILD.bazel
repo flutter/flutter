@@ -131,6 +131,17 @@ cc_library(
     ],
 )
 
+# //flutter/third_party/dart/runtime:libdart_aotruntime -- the VM for AOT
+# snapshots, which //flutter/runtime:libdart picks in the profile and
+# release runtime modes. Not exported by the wrapped build yet (a second
+# build of the VM's sources, DART_PRECOMPILED_RUNTIME, for modes the host
+# suites do not run in): a build in those modes fails on this target's
+# incompatibility rather than on a missing label.
+cc_library(
+    name = "libdart_aotruntime",
+    target_compatible_with = ["@platforms//:incompatible"],
+)
+
 # //flutter/third_party/dart/runtime/bin:libdart_builtin -- shared by the
 # dart:io glue and the ELF loader.
 cc_library(
