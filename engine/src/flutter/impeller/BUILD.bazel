@@ -24,7 +24,7 @@ cc_library(
         ],
         "//conditions:default": [],
     }),
-    includes = [".."],
+    deps = ["//engine/src/flutter:config"],
 )
 
 cc_library(
