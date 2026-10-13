@@ -258,7 +258,9 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       final FlutterMutatorView view = platformViewParent.valueAt(index);
       flutterView.addView(view);
     }
-    if (Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+    // Only engines running Hybrid Composition++ can route backdrop blurs through SurfaceFlinger,
+    // so only they pay for the carrier SurfaceView.
+    if (BackdropBlurCarrier.isSupported() && isHcppEnabled()) {
       backdropBlurCarrier.attachToView(flutterView);
     }
     // Notify platform views that they are now attached to a FlutterView.
@@ -862,8 +864,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     tx.setVisibility(overlaySurfaceControl, /*visible=*/ false);
   }
 
+  @VisibleForTesting
+  @NonNull
+  BackdropBlurCarrier getBackdropBlurCarrierForTest() {
+    return backdropBlurCarrier;
+  }
+
   public boolean isHcppEnabled() {
-    if (flutterJNI == null) {
+    if (flutterJNI == null || !flutterJNI.isAttached()) {
       return false;
     }
     return flutterJNI.IsSurfaceControlEnabled();
