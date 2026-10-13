@@ -173,6 +173,7 @@ class RangeSlider extends StatefulWidget {
       'This feature was deprecated after v3.30.0-0.1.pre.',
     )
     this.year2023,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(min <= max),
        assert(values.start <= values.end),
        assert(values.start >= min && values.start <= max),
@@ -422,6 +423,9 @@ class RangeSlider extends StatefulWidget {
   )
   final bool? year2023;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   // Touch width for the tap boundary of the slider thumbs.
   static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
@@ -504,25 +508,33 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    overlayController = AnimationController(duration: kRadialReactionDuration, vsync: this);
+    overlayController = AnimationController(
+      duration: kRadialReactionDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     valueIndicatorController = AnimationController(
       duration: valueIndicatorAnimationDuration,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
     enableController = AnimationController(
       duration: enableAnimationDuration,
       vsync: this,
       value: _enabled ? 1.0 : 0.0,
+      animationBehavior: widget.animationBehavior,
     );
     startPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
       value: _unlerp(widget.values.start),
+      animationBehavior: widget.animationBehavior,
     );
     endPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
       value: _unlerp(widget.values.end),
+      animationBehavior: widget.animationBehavior,
     );
   }
 

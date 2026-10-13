@@ -94,6 +94,7 @@ abstract class ButtonStyleButton extends StatefulWidget {
     )
     this.iconAlignment,
     this.tooltip,
+    this.animationBehavior = AnimationBehavior.normal,
     required this.child,
   });
 
@@ -184,6 +185,9 @@ abstract class ButtonStyleButton extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget? child;
+
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
 
   /// Returns a [ButtonStyle] that's based primarily on the [Theme]'s
   /// [ThemeData.textTheme] and [ThemeData.colorScheme], but has most values
@@ -518,12 +522,16 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
         resolvedElevation == 0) {
       if (controller?.duration != resolvedAnimationDuration) {
         controller?.dispose();
-        controller = AnimationController(duration: resolvedAnimationDuration, vsync: this)
-          ..addStatusListener((AnimationStatus status) {
-            if (status == AnimationStatus.completed) {
-              setState(() {}); // Rebuild with the final background color.
-            }
-          });
+        controller =
+            AnimationController(
+              duration: resolvedAnimationDuration,
+              vsync: this,
+              animationBehavior: widget.animationBehavior,
+            )..addStatusListener((AnimationStatus status) {
+              if (status == AnimationStatus.completed) {
+                setState(() {}); // Rebuild with the final background color.
+              }
+            });
       }
       resolvedBackgroundColor = backgroundColor; // Defer changing the background color.
       controller!.value = 0;

@@ -121,6 +121,7 @@ class MaterialBanner extends StatefulWidget {
     this.animation,
     this.onVisible,
     this.minActionBarHeight = 52.0,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(elevation == null || elevation >= 0.0);
 
   /// The content of the [MaterialBanner].
@@ -233,14 +234,21 @@ class MaterialBanner extends StatefulWidget {
   /// Called the first time that the material banner is visible within a [Scaffold] when presented by the [ScaffoldMessenger].
   final VoidCallback? onVisible;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   // API for ScaffoldMessengerState.showMaterialBanner():
 
   /// Creates an animation controller useful for driving a [MaterialBanner]'s entrance and exit animation.
-  static AnimationController createAnimationController({required TickerProvider vsync}) {
+  static AnimationController createAnimationController({
+    required TickerProvider vsync,
+    AnimationBehavior animationBehavior = AnimationBehavior.normal,
+  }) {
     return AnimationController(
       duration: _materialBannerTransitionDuration,
       debugLabel: 'MaterialBanner',
       vsync: vsync,
+      animationBehavior: animationBehavior,
     );
   }
 

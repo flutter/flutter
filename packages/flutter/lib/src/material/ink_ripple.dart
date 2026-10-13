@@ -135,6 +135,7 @@ class InkRipple extends InteractiveInkFeature {
     super.customBorder,
     double? radius,
     super.onRemoved,
+    AnimationBehavior animationBehavior = AnimationBehavior.normal,
   }) : _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
        _targetRadius =
@@ -142,14 +143,23 @@ class InkRipple extends InteractiveInkFeature {
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        super(controller: controller, color: color) {
     // Immediately begin fading-in the initial splash.
-    _fadeInController = AnimationController(duration: _kFadeInDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..forward();
+    _fadeInController =
+        AnimationController(
+            duration: _kFadeInDuration,
+            vsync: controller.vsync,
+            animationBehavior: animationBehavior,
+          )
+          ..addListener(controller.markNeedsPaint)
+          ..forward();
     _fadeIn = _fadeInController.drive(IntTween(begin: 0, end: color.alpha));
 
     // Controls the splash radius and its center. Starts upon confirm.
     _radiusController =
-        AnimationController(duration: _kUnconfirmedRippleDuration, vsync: controller.vsync)
+        AnimationController(
+            duration: _kUnconfirmedRippleDuration,
+            vsync: controller.vsync,
+            animationBehavior: animationBehavior,
+          )
           ..addListener(controller.markNeedsPaint)
           ..forward();
     // Initial splash diameter is 60% of the target diameter, final
@@ -160,9 +170,14 @@ class InkRipple extends InteractiveInkFeature {
 
     // Controls the splash radius and its center. Starts upon confirm however its
     // Interval delays changes until the radius expansion has completed.
-    _fadeOutController = AnimationController(duration: _kFadeOutDuration, vsync: controller.vsync)
-      ..addListener(controller.markNeedsPaint)
-      ..addStatusListener(_handleAlphaStatusChanged);
+    _fadeOutController =
+        AnimationController(
+            duration: _kFadeOutDuration,
+            vsync: controller.vsync,
+            animationBehavior: animationBehavior,
+          )
+          ..addListener(controller.markNeedsPaint)
+          ..addStatusListener(_handleAlphaStatusChanged);
     _fadeOut = _fadeOutController.drive(
       IntTween(begin: color.alpha, end: 0).chain(_fadeOutIntervalTween),
     );

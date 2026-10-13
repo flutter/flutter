@@ -115,6 +115,7 @@ class Dismissible extends StatefulWidget {
     this.crossAxisEndOffset = 0.0,
     this.dragStartBehavior = DragStartBehavior.start,
     this.behavior = HitTestBehavior.opaque,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(secondaryBackground == null || background != null);
 
   /// The widget below this widget in the tree.
@@ -219,6 +220,9 @@ class Dismissible extends StatefulWidget {
   /// depending on whether the dismiss threshold is currently reached.
   final DismissUpdateCallback? onUpdate;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   @override
   State<Dismissible> createState() => _DismissibleState();
 }
@@ -309,6 +313,7 @@ class _DismissibleState extends State<Dismissible>
   late final AnimationController _moveController = AnimationController(
     duration: widget.movementDuration,
     vsync: this,
+    animationBehavior: widget.animationBehavior,
   );
   late Animation<Offset> _moveAnimation;
 
@@ -583,9 +588,14 @@ class _DismissibleState extends State<Dismissible>
         widget.onDismissed!(direction);
       }
     } else {
-      _resizeController = AnimationController(duration: widget.resizeDuration, vsync: this)
-        ..addListener(_handleResizeProgressChanged)
-        ..addStatusListener((AnimationStatus status) => updateKeepAlive());
+      _resizeController =
+          AnimationController(
+              duration: widget.resizeDuration,
+              vsync: this,
+              animationBehavior: widget.animationBehavior,
+            )
+            ..addListener(_handleResizeProgressChanged)
+            ..addStatusListener((AnimationStatus status) => updateKeepAlive());
       _resizeController!.forward();
       setState(() {
         _sizePriorToCollapse = context.size;

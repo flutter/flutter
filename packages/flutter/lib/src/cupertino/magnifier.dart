@@ -45,6 +45,7 @@ class CupertinoTextMagnifier extends StatefulWidget {
     this.hideBelowThreshold = 48.0,
     this.horizontalScreenEdgePadding = 10.0,
     required this.magnifierInfo,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The curve used for the in / out animations.
@@ -81,6 +82,11 @@ class CupertinoTextMagnifier extends StatefulWidget {
   /// The duration that the magnifier drags behind its final position.
   static const Duration _kDragAnimationDuration = Duration(milliseconds: 45);
 
+  /// The behavior of the animation relative to the device's clock
+  ///
+  /// Defaults to [AnimationBehavior.normal]
+  final AnimationBehavior animationBehavior;
+
   @override
   State<CupertinoTextMagnifier> createState() => _CupertinoTextMagnifierState();
 }
@@ -103,6 +109,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
       value: 0,
       vsync: this,
       duration: CupertinoMagnifier._kInOutAnimationDuration,
+      animationBehavior: widget.animationBehavior,
     )..addListener(() => setState(() {}));
 
     widget.controller.animationController = _ioAnimationController;

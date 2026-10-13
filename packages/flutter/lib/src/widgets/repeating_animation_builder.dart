@@ -55,6 +55,7 @@ class RepeatingAnimationBuilder<T extends Object> extends StatefulWidget {
     this.paused = false,
     required this.builder,
     this.child,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The animatable to drive repeatedly.
@@ -118,6 +119,9 @@ class RepeatingAnimationBuilder<T extends Object> extends StatefulWidget {
   /// false, the animation resumes from that value. Defaults to false.
   final bool paused;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   @override
   State<RepeatingAnimationBuilder<T>> createState() {
     return _RepeatingAnimationBuilderState<T>();
@@ -132,7 +136,11 @@ class _RepeatingAnimationBuilderState<T extends Object> extends State<RepeatingA
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: widget.duration, vsync: this);
+    _controller = AnimationController(
+      duration: widget.duration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     _curvedAnimation = CurvedAnimation(parent: _controller, curve: widget.curve);
 
     if (!widget.paused) {

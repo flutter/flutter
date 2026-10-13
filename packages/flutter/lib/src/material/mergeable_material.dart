@@ -106,6 +106,7 @@ class MergeableMaterial extends StatefulWidget {
     this.hasDividers = false,
     this.children = const <MergeableMaterialItem>[],
     this.dividerColor,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The children of the [MergeableMaterial].
@@ -128,11 +129,21 @@ class MergeableMaterial extends StatefulWidget {
   /// is null, then [ThemeData.dividerColor] is used.
   final Color? dividerColor;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<Axis>('mainAxis', mainAxis));
     properties.add(DoubleProperty('elevation', elevation));
+    properties.add(
+      EnumProperty<AnimationBehavior>(
+        'animationBehavior',
+        animationBehavior,
+        defaultValue: AnimationBehavior.normal,
+      ),
+    );
   }
 
   @override
@@ -185,7 +196,11 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   void _initGap(MaterialGap gap) {
-    final controller = AnimationController(duration: kThemeAnimationDuration, vsync: this);
+    final controller = AnimationController(
+      duration: kThemeAnimationDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
 
     final startAnimation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);
     final endAnimation = CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn);

@@ -119,8 +119,14 @@ class NavigationBar extends StatelessWidget {
     this.labelTextStyle,
     this.labelPadding,
     this.maintainBottomViewPadding = false,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(destinations.length >= 2),
        assert(0 <= selectedIndex && selectedIndex < destinations.length);
+
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   /// Determines the transition time for each destination as it goes between
   /// selected and unselected.
@@ -307,6 +313,7 @@ class NavigationBar extends StatelessWidget {
                         child: _SelectableAnimatedBuilder(
                           duration: animationDuration ?? const Duration(milliseconds: 500),
                           isSelected: i == selectedIndex,
+                          animationBehavior: animationBehavior,
                           builder: (BuildContext context, Animation<double> animation) {
                             return _NavigationDestinationInfo(
                               index: i,
@@ -1207,6 +1214,7 @@ class _SelectableAnimatedBuilder extends StatefulWidget {
     this.duration = const Duration(milliseconds: 200),
     this.alwaysDoFullAnimation = false,
     required this.builder,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// When true, the widget will animate an animation controller from 0 to 1.
@@ -1237,6 +1245,7 @@ class _SelectableAnimatedBuilder extends StatefulWidget {
   /// animation will animate up to 1. When [isSelected] is updated to
   /// `false`, this will be called and the animation will animate down to 0.
   final Widget Function(BuildContext, Animation<double>) builder;
+  final AnimationBehavior animationBehavior;
 
   @override
   _SelectableAnimatedBuilderState createState() => _SelectableAnimatedBuilderState();
@@ -1251,7 +1260,7 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this);
+    _controller = AnimationController(vsync: this, animationBehavior: widget.animationBehavior);
     _controller.duration = widget.duration;
     _controller.value = widget.isSelected ? 1.0 : 0.0;
   }

@@ -85,6 +85,7 @@ class CupertinoScrollbar extends RawScrollbar {
     ScrollNotificationPredicate? notificationPredicate,
     super.scrollbarOrientation,
     super.mainAxisMargin = _kScrollbarMainAxisMargin,
+    super.animationBehavior,
   }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
        super(
@@ -150,6 +151,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     _thicknessAnimationController = AnimationController(
       vsync: this,
       duration: _kScrollbarResizeDuration,
+      animationBehavior: widget.animationBehavior,
     );
     _thicknessAnimationController.addListener(() {
       updateScrollbarPainter();

@@ -151,6 +151,7 @@ class CupertinoSwitch extends StatefulWidget {
     this.onFocusChange,
     this.autofocus = false,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(activeThumbImage != null || onActiveThumbImageError == null),
        assert(inactiveThumbImage != null || onInactiveThumbImageError == null),
        assert(activeTrackColor == null || activeColor == null),
@@ -465,6 +466,9 @@ class CupertinoSwitch extends StatefulWidget {
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@macro flutter.widgets.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   @override
   State<CupertinoSwitch> createState() => _CupertinoSwitchState();
 
@@ -495,6 +499,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
   // The transient value of the switch determined by _dragDelta during a
   // drag.
   bool? _dragValue;
+
+  @override
+  AnimationBehavior get animationBehavior => widget.animationBehavior;
 
   @override
   void initState() {

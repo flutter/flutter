@@ -101,6 +101,7 @@ class ChoiceChip extends StatelessWidget
     this.avatarBoxConstraints,
     this.chipAnimationStyle,
     this.mouseCursor,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.flat;
@@ -144,6 +145,7 @@ class ChoiceChip extends StatelessWidget
     this.avatarBoxConstraints,
     this.chipAnimationStyle,
     this.mouseCursor,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        _chipVariant = _ChipVariant.elevated;
@@ -211,6 +213,9 @@ class ChoiceChip extends StatelessWidget
   @override
   final MouseCursor? mouseCursor;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   @override
   bool get isEnabled => onSelected != null;
 
@@ -257,6 +262,7 @@ class ChoiceChip extends StatelessWidget
       avatarBoxConstraints: avatarBoxConstraints,
       chipAnimationStyle: chipAnimationStyle,
       mouseCursor: mouseCursor,
+      animationBehavior: animationBehavior,
     );
   }
 }

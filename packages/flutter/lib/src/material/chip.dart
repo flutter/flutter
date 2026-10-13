@@ -716,6 +716,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
     this.mouseCursor,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(elevation == null || elevation >= 0.0);
 
   @override
@@ -771,6 +772,9 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   @override
   final MouseCursor? mouseCursor;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -802,6 +806,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       deleteIconBoxConstraints: deleteIconBoxConstraints,
       chipAnimationStyle: chipAnimationStyle,
       mouseCursor: mouseCursor,
+      animationBehavior: animationBehavior,
     );
   }
 }
@@ -893,6 +898,7 @@ class RawChip extends StatefulWidget
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
     this.mouseCursor,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
        deleteIcon = deleteIcon ?? _kDefaultDeleteIcon;
@@ -981,6 +987,9 @@ class RawChip extends StatefulWidget
   @override
   final MouseCursor? mouseCursor;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
   ///
@@ -1035,6 +1044,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       reverseDuration: widget.chipAnimationStyle?.selectAnimation?.reverseDuration,
       value: widget.selected ? 1.0 : 0.0,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
     selectionFade = CurvedAnimation(parent: selectController, curve: Curves.fastOutSlowIn);
     avatarDrawerController = AnimationController(
@@ -1042,18 +1052,21 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       reverseDuration: widget.chipAnimationStyle?.avatarDrawerAnimation?.reverseDuration,
       value: hasAvatar || widget.selected ? 1.0 : 0.0,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
     deleteDrawerController = AnimationController(
       duration: widget.chipAnimationStyle?.deleteDrawerAnimation?.duration ?? _kDrawerDuration,
       reverseDuration: widget.chipAnimationStyle?.deleteDrawerAnimation?.reverseDuration,
       value: hasDeleteButton ? 1.0 : 0.0,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
     enableController = AnimationController(
       duration: widget.chipAnimationStyle?.enableAnimation?.duration ?? _kDisableDuration,
       reverseDuration: widget.chipAnimationStyle?.enableAnimation?.reverseDuration,
       value: widget.isEnabled ? 1.0 : 0.0,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
 
     // These will delay the start of some animations, and/or reduce their

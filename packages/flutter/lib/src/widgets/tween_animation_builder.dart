@@ -117,6 +117,7 @@ class TweenAnimationBuilder<T extends Object?> extends ImplicitlyAnimatedWidget 
     required this.builder,
     super.onEnd,
     this.child,
+    super.animationBehavior,
   });
 
   /// Defines the target value for the animation.

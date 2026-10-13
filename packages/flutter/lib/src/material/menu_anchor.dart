@@ -264,6 +264,7 @@ class MenuAnchor extends StatefulWidget {
     this.crossAxisUnconstrained = true,
     this.useRootOverlay = false,
     this.animated = false,
+    this.animationBehavior = AnimationBehavior.normal,
     this.onAnimationStatusChanged,
     required this.menuChildren,
     this.builder,
@@ -468,6 +469,9 @@ class MenuAnchor extends StatefulWidget {
   /// Defaults to EdgeInsets.all(8).
   final EdgeInsetsGeometry? reservedPadding;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   @override
   State<MenuAnchor> createState() => _MenuAnchorState();
 
@@ -494,7 +498,10 @@ class _MenuAnchorState extends State<MenuAnchor> with SingleTickerProviderStateM
   MenuController get _menuController => widget.controller ?? _internalMenuController!;
   MenuController? _internalMenuController;
   final FocusScopeNode _menuScopeNode = FocusScopeNode();
-  late final AnimationController _animationController = AnimationController(vsync: this);
+  late final AnimationController _animationController = AnimationController(
+    vsync: this,
+    animationBehavior: widget.animationBehavior,
+  );
   late final CurvedAnimation heightAnimation = CurvedAnimation(
     parent: _animationController,
     curve: _kMenuPanelHeightForwardCurve,

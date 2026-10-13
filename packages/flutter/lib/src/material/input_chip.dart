@@ -132,6 +132,7 @@ class InputChip extends StatelessWidget
     this.deleteIconBoxConstraints,
     this.chipAnimationStyle,
     this.mouseCursor,
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0);
 
@@ -212,6 +213,9 @@ class InputChip extends StatelessWidget
   @override
   final MouseCursor? mouseCursor;
 
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -260,6 +264,7 @@ class InputChip extends StatelessWidget
       deleteIconBoxConstraints: deleteIconBoxConstraints,
       chipAnimationStyle: chipAnimationStyle,
       mouseCursor: mouseCursor,
+      animationBehavior: animationBehavior,
     );
   }
 }

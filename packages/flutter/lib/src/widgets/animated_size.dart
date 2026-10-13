@@ -35,6 +35,7 @@ class AnimatedSize extends StatefulWidget {
     this.reverseDuration,
     this.clipBehavior = Clip.hardEdge,
     this.onEnd,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The widget below this widget in the tree.
@@ -88,6 +89,11 @@ class AnimatedSize extends StatefulWidget {
   /// at the end of the current animation.
   final VoidCallback? onEnd;
 
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
+
   @override
   State<AnimatedSize> createState() => _AnimatedSizeState();
 }
@@ -103,6 +109,7 @@ class _AnimatedSizeState extends State<AnimatedSize> with SingleTickerProviderSt
       vsync: this,
       clipBehavior: widget.clipBehavior,
       onEnd: widget.onEnd,
+      animationBehavior: widget.animationBehavior,
       child: widget.child,
     );
   }
@@ -118,6 +125,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
     required this.vsync,
     this.clipBehavior = Clip.hardEdge,
     this.onEnd,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   final AlignmentGeometry alignment;
@@ -131,6 +139,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
   final Clip clipBehavior;
 
   final VoidCallback? onEnd;
+  final AnimationBehavior animationBehavior;
 
   @override
   RenderAnimatedSize createRenderObject(BuildContext context) {
@@ -143,6 +152,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
       textDirection: Directionality.maybeOf(context),
       clipBehavior: clipBehavior,
       onEnd: onEnd,
+      behavior: animationBehavior,
     );
   }
 

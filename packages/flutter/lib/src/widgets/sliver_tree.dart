@@ -414,6 +414,7 @@ class TreeSliver<T> extends StatefulWidget {
     this.semanticIndexCallback = _kDefaultSemanticIndexCallback,
     this.semanticIndexOffset = 0,
     this.findChildIndexCallback,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The list of [TreeSliverNode]s that may be displayed in the [TreeSliver].
@@ -488,6 +489,11 @@ class TreeSliver<T> extends StatefulWidget {
 
   /// {@macro flutter.widgets.SliverChildBuilderDelegate.findChildIndexCallback}
   final int? Function(Key)? findChildIndexCallback;
+
+  /// The [AnimationBehavior] of the node expand and collapse animations.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   /// The default [AnimationStyle] used for node expand and collapse animations,
   /// when one has not been provided in [toggleAnimationStyle].
@@ -883,6 +889,7 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
                   vsync: this,
                   duration:
                       widget.toggleAnimationStyle?.duration ?? TreeSliver.defaultAnimationDuration,
+                  animationBehavior: widget.animationBehavior,
                 )
             ..addStatusListener((AnimationStatus status) {
               switch (status) {

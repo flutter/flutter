@@ -1133,6 +1133,7 @@ class _Dial extends StatefulWidget {
     required this.hourDialType,
     required this.onChanged,
     required this.onHourSelected,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   final TimeOfDay selectedTime;
@@ -1140,6 +1141,7 @@ class _Dial extends StatefulWidget {
   final _HourDialType hourDialType;
   final ValueChanged<TimeOfDay>? onChanged;
   final VoidCallback? onHourSelected;
+  final AnimationBehavior animationBehavior;
 
   @override
   _DialState createState() => _DialState();
@@ -1159,7 +1161,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(duration: _kDialAnimateDuration, vsync: this);
+    _animationController = AnimationController(
+      duration: _kDialAnimateDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    );
     _thetaTween = Tween<double>(begin: _getThetaForTime(widget.selectedTime));
     _radiusTween = Tween<double>(begin: _getRadiusForTime(widget.selectedTime));
     _theta = _animationController.drive(CurveTween(curve: standardEasing)).drive(_thetaTween)
@@ -2312,6 +2318,7 @@ class TimePickerDialog extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToTimerEntryModeIcon,
     this.emptyInitialInput = false,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The time initially selected when the dialog is shown.
@@ -2383,6 +2390,9 @@ class TimePickerDialog extends StatefulWidget {
   ///
   /// Has no effect in dial mode.
   final bool emptyInitialInput;
+
+  /// The [AnimationBehavior] of the internal [AnimationController]s.
+  final AnimationBehavior animationBehavior;
 
   @override
   State<TimePickerDialog> createState() => _TimePickerDialogState();
@@ -2723,6 +2733,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> with RestorationMix
                               switchToInputEntryModeIcon: widget.switchToInputEntryModeIcon,
                               switchToTimerEntryModeIcon: widget.switchToTimerEntryModeIcon,
                               emptyInitialInput: widget.emptyInitialInput,
+                              animationBehavior: widget.animationBehavior,
                             ),
                           );
                           if (_entryMode.value != TimePickerEntryMode.input &&
@@ -2768,6 +2779,7 @@ class _TimePicker extends StatefulWidget {
     this.switchToInputEntryModeIcon,
     this.switchToTimerEntryModeIcon,
     required this.emptyInitialInput,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// Optionally provide your own text for the help text at the top of the
@@ -2844,6 +2856,8 @@ class _TimePicker extends StatefulWidget {
 
   /// If true, input fields start empty in input mode.
   final bool emptyInitialInput;
+
+  final AnimationBehavior animationBehavior;
 
   @override
   State<_TimePicker> createState() => _TimePickerState();
@@ -3041,6 +3055,7 @@ class _TimePickerState extends State<_TimePicker> with RestorationMixin {
                   selectedTime: _selectedTime.value,
                   onChanged: _handleTimeChanged,
                   onHourSelected: _handleHourSelected,
+                  animationBehavior: widget.animationBehavior,
                 ),
               ),
             ),

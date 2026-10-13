@@ -337,6 +337,7 @@ class DrawerController extends StatefulWidget {
     this.edgeDragWidth,
     this.enableOpenDragGesture = true,
     this.drawerBarrierDismissible = true,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The widget below this widget in the tree.
@@ -413,6 +414,11 @@ class DrawerController extends StatefulWidget {
   /// application was killed.
   final bool isDrawerOpen;
 
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
+
   /// The closest instance of [DrawerController] that encloses the given
   /// context, or null if none is found.
   ///
@@ -485,6 +491,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       value: widget.isDrawerOpen ? 1.0 : 0.0,
       duration: _kBaseSettleDuration,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
     _controller
       ..addListener(_animationChanged)

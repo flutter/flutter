@@ -122,6 +122,7 @@ class AnimatedSwitcher extends StatefulWidget {
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
     this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   /// The current child widget to display. If there was a previous child, then
@@ -211,6 +212,9 @@ class AnimatedSwitcher extends StatefulWidget {
   ///    how a layout builder should function.
   final AnimatedSwitcherLayoutBuilder layoutBuilder;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   @override
   State<AnimatedSwitcher> createState() => _AnimatedSwitcherState();
 
@@ -249,6 +253,13 @@ class AnimatedSwitcher extends StatefulWidget {
         reverseDuration?.inMilliseconds,
         unit: 'ms',
         defaultValue: null,
+      ),
+    );
+    properties.add(
+      EnumProperty<AnimationBehavior>(
+        'animationBehavior',
+        animationBehavior,
+        defaultValue: AnimationBehavior.normal,
       ),
     );
   }
@@ -317,6 +328,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       duration: widget.duration,
       reverseDuration: widget.reverseDuration,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
     final animation = CurvedAnimation(
       parent: controller,

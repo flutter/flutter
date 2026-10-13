@@ -73,6 +73,7 @@ class _AccountDetails extends StatefulWidget {
     this.onTap,
     required this.isOpen,
     this.arrowColor,
+    this.animationBehavior = AnimationBehavior.normal,
   });
 
   final Widget? accountName;
@@ -80,6 +81,7 @@ class _AccountDetails extends StatefulWidget {
   final VoidCallback? onTap;
   final bool isOpen;
   final Color? arrowColor;
+  final AnimationBehavior animationBehavior;
 
   @override
   _AccountDetailsState createState() => _AccountDetailsState();
@@ -95,6 +97,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
       value: widget.isOpen ? 1.0 : 0.0,
       duration: const Duration(milliseconds: 200),
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     );
     _animation =
         CurvedAnimation(
@@ -299,7 +302,13 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     required this.accountEmail,
     this.onDetailsPressed,
     this.arrowColor = Colors.white,
+    this.animationBehavior = AnimationBehavior.normal,
   });
+
+  /// The behavior of the animation relative to the device's clock.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   /// The header's background. If decoration is null then a [BoxDecoration]
   /// with its background color set to the current theme's primaryColor is used.
@@ -386,6 +395,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                 isOpen: _isOpen,
                 onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
                 arrowColor: widget.arrowColor,
+                animationBehavior: widget.animationBehavior,
               ),
             ],
           ),

@@ -117,6 +117,7 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
     this.disabledTextColor,
     this.padding,
     this.disabledChildren = const <Never>{},
+    this.animationBehavior = AnimationBehavior.normal,
   }) : assert(children.length >= 2),
        assert(
          groupValue == null || children.keys.any((T child) => child == groupValue),
@@ -185,6 +186,13 @@ class CupertinoSegmentedControl<T extends Object> extends StatefulWidget {
   ///
   /// All segments are enabled by default.
   final Set<T> disabledChildren;
+
+  /// The animation behavior determines whether the segmented control uses the
+  /// default animation behavior (e.g., a bounce effect when scrolling past
+  /// the scroll limits) or not.
+  ///
+  /// The default value is [AnimationBehavior.normal].
+  final AnimationBehavior animationBehavior;
 
   @override
   State<CupertinoSegmentedControl<T>> createState() => _SegmentedControlState<T>();
@@ -288,7 +296,11 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSegmentedC
   Color? _disabledTextColor;
 
   AnimationController createAnimationController() {
-    return AnimationController(duration: _kFadeDuration, vsync: this)..addListener(() {
+    return AnimationController(
+      duration: _kFadeDuration,
+      vsync: this,
+      animationBehavior: widget.animationBehavior,
+    )..addListener(() {
       setState(() {
         // State of background/text colors has changed
       });

@@ -89,6 +89,7 @@ class FilledButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
+    super.animationBehavior,
     required super.child,
   }) : _variant = _FilledButtonVariant.filled,
        _addPadding = false;
@@ -114,6 +115,7 @@ class FilledButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
+    super.animationBehavior,
     Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,
@@ -147,6 +149,7 @@ class FilledButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
+    super.animationBehavior,
     required super.child,
   }) : _variant = _FilledButtonVariant.tonal,
        _addPadding = false;
@@ -169,6 +172,7 @@ class FilledButton extends ButtonStyleButton {
     super.autofocus = false,
     super.clipBehavior = Clip.none,
     super.statesController,
+    super.animationBehavior,
     Widget? icon,
     required Widget label,
     IconAlignment? iconAlignment,

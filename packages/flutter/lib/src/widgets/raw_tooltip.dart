@@ -36,10 +36,8 @@ const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
 /// and hide animation. This can be used to drive animations that sync up with
 /// the tooltip overlay child show/hide animation, for example to fade the
 /// tooltip in and out.
-typedef TooltipComponentBuilder = Widget Function(
-  BuildContext context,
-  Animation<double> animation,
-);
+typedef TooltipComponentBuilder =
+    Widget Function(BuildContext context, Animation<double> animation);
 
 /// Signature for computing the position of a tooltip.
 ///
@@ -256,6 +254,7 @@ class RawTooltip extends StatefulWidget {
     this.animationStyle = _kDefaultAnimationStyle,
     this.positionDelegate,
     this.ignorePointer = false,
+    this.animationBehavior = AnimationBehavior.normal,
     required this.child,
   });
 
@@ -479,6 +478,9 @@ class RawTooltip extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
+  /// {@macro flutter.animation.AnimationController.animationBehavior}
+  final AnimationBehavior animationBehavior;
+
   static final List<RawTooltipState> _openedTooltips = <RawTooltipState>[];
 
   /// {@template flutter.widgets.RawTooltip.dismissAllToolTips}
@@ -565,6 +567,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
       duration: _showDuration,
       reverseDuration: _hideDuration,
       vsync: this,
+      animationBehavior: widget.animationBehavior,
     )..addStatusListener(_handleStatusChanged);
   }
 

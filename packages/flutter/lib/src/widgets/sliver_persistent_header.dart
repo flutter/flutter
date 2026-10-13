@@ -8,9 +8,9 @@
 /// @docImport 'scroll_view.dart';
 library;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart' show TickerProvider;
 
 import 'framework.dart';
 import 'scroll_position.dart';
@@ -99,6 +99,11 @@ abstract class SliverPersistentHeaderDelegate {
   ///
   /// Defaults to null.
   PersistentHeaderShowOnScreenConfiguration? get showOnScreenConfiguration => null;
+
+  /// The [AnimationBehavior] to use when animating the scroll position.
+  ///
+  /// Defaults to [AnimationBehavior.normal].
+  AnimationBehavior get animationBehavior => AnimationBehavior.normal;
 
   /// Whether this delegate is meaningfully different from the old delegate.
   ///
@@ -453,6 +458,7 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
       snapConfiguration: delegate.snapConfiguration,
       stretchConfiguration: delegate.stretchConfiguration,
       showOnScreenConfiguration: delegate.showOnScreenConfiguration,
+      animationBehavior: delegate.animationBehavior,
     );
   }
 
@@ -465,6 +471,7 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
     renderObject.snapConfiguration = delegate.snapConfiguration;
     renderObject.stretchConfiguration = delegate.stretchConfiguration;
     renderObject.showOnScreenConfiguration = delegate.showOnScreenConfiguration;
+    renderObject.animationBehavior = delegate.animationBehavior;
   }
 }
 
@@ -476,6 +483,7 @@ class _RenderSliverFloatingPinnedPersistentHeaderForWidgets
     super.snapConfiguration,
     super.stretchConfiguration,
     super.showOnScreenConfiguration,
+    super.animationBehavior,
   });
 }
 
@@ -489,6 +497,7 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
       snapConfiguration: delegate.snapConfiguration,
       stretchConfiguration: delegate.stretchConfiguration,
       showOnScreenConfiguration: delegate.showOnScreenConfiguration,
+      animationBehavior: delegate.animationBehavior,
     );
   }
 
@@ -501,6 +510,7 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
     renderObject.snapConfiguration = delegate.snapConfiguration;
     renderObject.stretchConfiguration = delegate.stretchConfiguration;
     renderObject.showOnScreenConfiguration = delegate.showOnScreenConfiguration;
+    renderObject.animationBehavior = delegate.animationBehavior;
   }
 }
 
@@ -511,5 +521,6 @@ class _RenderSliverFloatingPersistentHeaderForWidgets extends RenderSliverFloati
     super.snapConfiguration,
     super.stretchConfiguration,
     super.showOnScreenConfiguration,
+    super.animationBehavior,
   });
 }

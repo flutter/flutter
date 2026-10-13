@@ -1415,6 +1415,7 @@ Future<T?> showCupertinoDialog<T>({
   RouteSettings? routeSettings,
   Offset? anchorPoint,
   bool? requestFocus,
+  AnimationBehavior animationBehavior = AnimationBehavior.normal,
 }) {
   return Navigator.of(context, rootNavigator: useRootNavigator).push<T>(
     CupertinoDialogRoute<T>(
@@ -1426,6 +1427,7 @@ Future<T?> showCupertinoDialog<T>({
       settings: routeSettings,
       anchorPoint: anchorPoint,
       requestFocus: requestFocus,
+      animationBehavior: animationBehavior,
     ),
   );
 }
@@ -1481,6 +1483,7 @@ class CupertinoDialogRoute<T> extends RawDialogRoute<T> {
     super.settings,
     super.requestFocus,
     super.anchorPoint,
+    super.animationBehavior,
   }) : super(
          pageBuilder:
              (
