@@ -17,8 +17,8 @@
 #include "flutter/fml/thread.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
-#include "flutter/shell/platform/android/surface/android_surface.h"
-#include "flutter/shell/platform/android/surface/android_surface_mock.h"
+#include "flutter/shell/platform/embedder/android/surface/android_surface.h"
+#include "flutter/shell/platform/embedder/android/surface/android_surface_mock.h"
 #include "flutter/testing/post_task_sync.h"
 #include "flutter/testing/testing.h"
 

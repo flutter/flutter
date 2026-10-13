@@ -24,13 +24,13 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
-#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
-#include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni_texture_source.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
+#include "flutter/shell/platform/embedder/android/android_rendering_selector.h"
+#include "flutter/shell/platform/embedder/android/context/android_context.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
 
 namespace flutter {

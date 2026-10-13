@@ -8,10 +8,10 @@
 #include <utility>
 
 #include "common/settings.h"
-#include "flutter/shell/platform/android/android_rendering_selector.h"
-#include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_wrapper.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/shell/platform/embedder/android/android_rendering_selector.h"
+#include "flutter/shell/platform/embedder/android/context/android_context.h"
 
 namespace flutter {
 

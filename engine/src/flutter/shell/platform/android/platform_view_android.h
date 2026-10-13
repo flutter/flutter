@@ -10,11 +10,11 @@
 #include <vector>
 
 #include "flutter/fml/platform/android/scoped_java_ref.h"
-#include "flutter/shell/platform/android/android_renderer.h"
-#include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/android/surface/android_native_window.h"
-#include "flutter/shell/platform/android/surface/android_surface.h"
+#include "flutter/shell/platform/embedder/android/android_renderer.h"
+#include "flutter/shell/platform/embedder/android/context/android_context.h"
+#include "flutter/shell/platform/embedder/android/surface/android_native_window.h"
+#include "flutter/shell/platform/embedder/android/surface/android_surface.h"
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
 namespace flutter {

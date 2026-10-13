@@ -7,7 +7,7 @@
 
 #include "flutter/fml/make_copyable.h"
 #include "flutter/shell/platform/android/jni/jni_mock.h"
-#include "flutter/shell/platform/android/surface/android_surface_mock.h"
+#include "flutter/shell/platform/embedder/android/surface/android_surface_mock.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "third_party/skia/include/gpu/ganesh/GrDirectContext.h"

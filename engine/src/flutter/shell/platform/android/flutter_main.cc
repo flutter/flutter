@@ -19,9 +19,9 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
-#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/flutter_main.h"
 #include "flutter/shell/platform/android/ndk/ndk_proc_table.h"
+#include "flutter/shell/platform/embedder/android/android_rendering_selector.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {

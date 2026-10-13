@@ -6,11 +6,11 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_WRAPPER_H_
 
 #include "flutter/common/task_runners.h"
-#include "flutter/shell/platform/android/context/android_context.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/android/surface/android_surface.h"
+#include "flutter/shell/platform/embedder/android/context/android_context.h"
+#include "flutter/shell/platform/embedder/android/surface/android_surface.h"
 
 namespace flutter {
 

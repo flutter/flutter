@@ -10,11 +10,11 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/thread.h"
-#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
+#include "flutter/shell/platform/embedder/android/android_rendering_selector.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {

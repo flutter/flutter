@@ -1,0 +1,107 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+import("//flutter/impeller/tools/impeller.gni")
+import("//flutter/shell/config.gni")
+import("//flutter/shell/gpu/gpu.gni")
+
+shell_gpu_configuration("native_window_gpu_configuration") {
+  enable_software = true
+  enable_gl = true
+  enable_vulkan = true
+  enable_metal = false
+}
+
+# Renders an engine into an Android ANativeWindow with OpenGL ES (Skia or
+# Impeller), Impeller on Vulkan, or software. Android only.
+source_set("native_window_renderer") {
+  sources = [
+    "android_context_dynamic_impeller.cc",
+    "android_context_dynamic_impeller.h",
+    "android_context_gl_impeller.cc",
+    "android_context_gl_impeller.h",
+    "android_context_vk_impeller.cc",
+    "android_context_vk_impeller.h",
+    "android_egl_surface.cc",
+    "android_egl_surface.h",
+    "android_environment_gl.cc",
+    "android_environment_gl.h",
+    "android_renderer.cc",
+    "android_renderer.h",
+    "android_surface_dynamic_impeller.cc",
+    "android_surface_dynamic_impeller.h",
+    "android_surface_gl_impeller.cc",
+    "android_surface_gl_impeller.h",
+    "android_surface_vk_impeller.cc",
+    "android_surface_vk_impeller.h",
+  ]
+
+  if (!slimpeller) {
+    sources += [
+      "android_context_gl_skia.cc",
+      "android_context_gl_skia.h",
+      "android_surface_gl_skia.cc",
+      "android_surface_gl_skia.h",
+      "android_surface_software.cc",
+      "android_surface_software.h",
+    ]
+  }
+
+  public_configs = [ "//flutter:config" ]
+
+  public_deps = [
+    ":native_window_gpu_configuration",
+    "context",
+    "surface",
+    "surface:native_window",
+  ]
+
+  deps = [
+    "//flutter/common",
+    "//flutter/common/graphics",
+    "//flutter/display_list",
+    "//flutter/flow",
+    "//flutter/fml",
+    "//flutter/impeller",
+    "//flutter/impeller/toolkit/android",
+    "//flutter/impeller/toolkit/egl",
+    "//flutter/impeller/toolkit/gles",
+    "//flutter/shell/common",
+    "//flutter/skia",
+    "//flutter/vulkan",
+  ]
+
+  libs = [
+    "android",
+    "EGL",
+    "GLESv2",
+  ]
+}
+
+# Device tests of the renderer, linked into flutter_shell_native_unittests.
+source_set("native_window_renderer_unittests") {
+  testonly = true
+
+  sources = [
+    "android_context_dynamic_impeller_unittests.cc",
+    "android_context_gl_impeller_unittests.cc",
+    "android_renderer_unittests.cc",
+  ]
+
+  if (!slimpeller) {
+    sources += [ "android_context_gl_unittests.cc" ]
+  }
+
+  public_configs = [ "//flutter:config" ]
+
+  deps = [
+    ":native_window_renderer",
+    "//flutter/fml",
+    "//flutter/shell/common",
+    "//flutter/skia",
+    "//flutter/third_party/googletest:gmock",
+    "//flutter/third_party/googletest:gtest",
+  ]
+}

@@ -14,11 +14,11 @@
       "enforce": "ratchet"
     },
     "embedder_internal_includes": {
-      "count": 2,
+      "count": 23,
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
-      "count": 39,
+      "count": 7,
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {
@@ -30,7 +30,7 @@
       "enforce": "zero"
     },
     "gn_internal_deps": {
-      "count": 14,
+      "count": 18,
       "enforce": "report"
     }
   },
@@ -70,6 +70,12 @@
       "from": 38,
       "to": 39,
       "reason": "android_renderer.cc includes impeller/renderer/backend/vulkan/context_vk.h for IsSurfaceControlEnabled, which PlatformViewAndroid reached through a transitive include; the file moves to shell/platform/embedder/android in the next step"
+    },
+    {
+      "metric": "embedder_internal_includes",
+      "from": 2,
+      "to": 23,
+      "reason": "The Android renderer, contexts and surfaces moved to shell/platform/embedder/android; the Android embedder still includes them directly (the platform view creates the renderer, hybrid composition creates overlay surfaces, the holder shares contexts with spawned engines, FlutterMain picks the rendering API). The next steps put the renderer behind embedder.h and drop these includes."
     }
   ]
 }

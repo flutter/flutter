@@ -42,10 +42,7 @@ executable("flutter_shell_native_unittests") {
   visibility = [ "*" ]
   testonly = true
   sources = [
-    "android_context_dynamic_impeller_unittests.cc",
-    "android_context_gl_impeller_unittests.cc",
     "android_image_generator_unittests.cc",
-    "android_renderer_unittests.cc",
     "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
@@ -54,9 +51,6 @@ executable("flutter_shell_native_unittests") {
     "platform_view_android_unittests.cc",
     "testing/looper_test_utils.h",
   ]
-  if (!slimpeller) {
-    sources += [ "android_context_gl_unittests.cc" ]
-  }
   public_configs = [ "//flutter:config" ]
   deps = [
     ":flutter_shell_native_src",
@@ -64,6 +58,7 @@ executable("flutter_shell_native_unittests") {
     "//flutter/shell/platform/android/jni:jni_mock",
     "//flutter/shell/platform/android/jni:mock_jni_env",
     "//flutter/shell/platform/embedder:embedder_test_utils",
+    "//flutter/shell/platform/embedder/android:native_window_renderer_unittests",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
   ]
@@ -89,28 +84,10 @@ source_set("flutter_shell_native_src") {
   visibility = [ ":*" ]
 
   sources = [
-    "android_context_dynamic_impeller.cc",
-    "android_context_dynamic_impeller.h",
-    "android_context_gl_impeller.cc",
-    "android_context_gl_impeller.h",
-    "android_context_vk_impeller.cc",
-    "android_context_vk_impeller.h",
     "android_display.cc",
     "android_display.h",
-    "android_egl_surface.cc",
-    "android_egl_surface.h",
-    "android_environment_gl.cc",
-    "android_environment_gl.h",
-    "android_renderer.cc",
-    "android_renderer.h",
     "android_shell_holder.cc",
     "android_shell_holder.h",
-    "android_surface_dynamic_impeller.cc",
-    "android_surface_dynamic_impeller.h",
-    "android_surface_gl_impeller.cc",
-    "android_surface_gl_impeller.h",
-    "android_surface_vk_impeller.cc",
-    "android_surface_vk_impeller.h",
     "apk_asset_provider.cc",
     "apk_asset_provider.h",
     "flutter_main.cc",
@@ -131,17 +108,6 @@ source_set("flutter_shell_native_src") {
     "vsync_waiter_android.cc",
     "vsync_waiter_android.h",
   ]
-
-  if (!slimpeller) {
-    sources += [
-      "android_context_gl_skia.cc",
-      "android_context_gl_skia.h",
-      "android_surface_gl_skia.cc",
-      "android_surface_gl_skia.h",
-      "android_surface_software.cc",
-      "android_surface_software.h",
-    ]
-  }
 
   # The ICU data (icudtl.dat.S from :icudtl_asm) comes from
   # //flutter/shell/platform/embedder:embedder_as_internal_library, which
@@ -166,13 +132,14 @@ source_set("flutter_shell_native_src") {
     "//flutter/runtime",
     "//flutter/runtime:libdart",
     "//flutter/shell/common",
-    "//flutter/shell/platform/android/context",
     "//flutter/shell/platform/android/external_view_embedder",
     "//flutter/shell/platform/android/jni",
     "//flutter/shell/platform/android/platform_view_android_delegate",
-    "//flutter/shell/platform/android/surface",
-    "//flutter/shell/platform/android/surface:native_window",
     "//flutter/shell/platform/embedder:embedder_as_internal_library",
+    "//flutter/shell/platform/embedder/android:native_window_renderer",
+    "//flutter/shell/platform/embedder/android/context",
+    "//flutter/shell/platform/embedder/android/surface",
+    "//flutter/shell/platform/embedder/android/surface:native_window",
     "//flutter/skia",
     "//flutter/txt",
     "//flutter/vulkan",

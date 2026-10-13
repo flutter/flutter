@@ -13,7 +13,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
-#include "flutter/shell/platform/android/android_rendering_selector.h"
+#include "flutter/shell/platform/embedder/android/android_rendering_selector.h"
 
 namespace flutter {
 

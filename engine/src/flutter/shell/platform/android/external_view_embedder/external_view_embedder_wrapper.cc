@@ -7,9 +7,9 @@
 #include <utility>
 
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
-#include "flutter/shell/platform/android/android_rendering_selector.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
 #include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
+#include "flutter/shell/platform/embedder/android/android_rendering_selector.h"
 
 namespace flutter {
 
