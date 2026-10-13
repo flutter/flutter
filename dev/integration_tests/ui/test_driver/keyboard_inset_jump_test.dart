@@ -14,9 +14,9 @@ import 'package:test/test.dart' hide isInstanceOf;
 /// 1. Connects to keyboard_inset_jump application on a live device/emulator.
 /// 2. Enables edgeToEdge system UI mode.
 /// 3. Focuses text field to trigger native soft keyboard opening animation.
-/// 4. Analyzes the sequence of per-frame deltas in viewInsets.bottom, verifying
-///    that the final transition to settled height does not exhibit a large jump
-///    (asserting delta < 20.0dp to catch the >= 24dp navigation bar jump from #190974).
+/// 4. Checks that viewInsets.bottom increases monotonically and that the final
+///    step is < 20.0dp (below the 24dp+ nav bar jump from #190974, with some
+///    room for dropped frames on CI).
 /// 5. Unfocuses text field and verifies smooth return to 0dp insets.
 ///
 /// Why it was added:
@@ -68,6 +68,11 @@ void main() {
       // Fetch frame-by-frame trajectory recorded during opening.
       final String rawHistory = await driver.requestData('get_history');
       final dynamic decoded = jsonDecode(rawHistory);
+      // #190974 causes a jump equal to the nav bar height (24dp for gesture nav,
+      // 48dp for 3-button) when onEnd fires. Since unchanged frames aren't
+      // recorded, deltas.last is the final onProgress step when there's no jump.
+      // 20dp is below the 24dp nav bar height while leaving room for a dropped
+      // frame near the end of the animation on CI (which can be 10-15dp).
       final Map<String, dynamic> history = decoded is Map<String, dynamic>
           ? decoded
           : <String, dynamic>{};
