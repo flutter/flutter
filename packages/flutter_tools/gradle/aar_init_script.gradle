@@ -24,8 +24,16 @@ void configureProject(Project project, String outputDir) {
         project.version = project.property("buildNumber")
     }
 
+    // AGP adds one software component for each `singleVariant` declaration and gives it the
+    // variant's name, and `afterProject` below declares one for every variant. Every variant gets a
+    // task, so when the requested task doesn't exist (for example, a misspelled `--flavor`), Gradle
+    // lists the `assembleAar<Variant>` tasks as candidates. Only requested variants get a
+    // publication.
+    project.components.each { component ->
+        registerAarTask(project, component.name)
+    }
     requestedAarComponents(project).each { component ->
-        addAarTask(project, component)
+        addAarPublication(project, component)
     }
 
     project.publishing {
@@ -88,26 +96,24 @@ static String aarTaskName(String variantName) {
     return "assembleAar${variantName.capitalize()}"
 }
 
-// Returns the components whose `assembleAar<Variant>` task the tool requested. AGP adds one
-// software component for each `singleVariant` declaration and gives it the variant's name, and
-// `afterProject` below declares one for every variant.
+// Returns the components whose `assembleAar<Variant>` task the tool requested.
 static Collection<SoftwareComponent> requestedAarComponents(Project project) {
     List<String> requestedTasks = project.gradle.startParameter.taskNames
     return project.components.findAll { requestedTasks.contains(aarTaskName(it.name)) }
 }
 
-// Registers the component's `assembleAar<Variant>` task and creates its Maven publication. The task
-// runs `publish`, which publishes every publication in the project, so only requested components
-// are passed here.
-void addAarTask(Project project, SoftwareComponent component) {
-    project.tasks.register(aarTaskName(component.name)) {
+void registerAarTask(Project project, String variantName) {
+    project.tasks.register(aarTaskName(variantName)) {
         // Generate the Maven artifacts.
         finalizedBy "publish"
     }
+}
 
+// `publish` publishes every publication in the project, so only requested components get one.
+void addAarPublication(Project project, SoftwareComponent component) {
     // Create a default MavenPublication for the variant.
-    // This runs outside the task's configuration action because maven-publish registers tasks for
-    // each publication, and Gradle doesn't allow registering tasks while it realizes a task.
+    // This doesn't run in the task's configuration action because maven-publish registers tasks
+    // for each publication, and Gradle doesn't allow registering tasks while it realizes a task.
     project.publishing.publications.create(component.name, MavenPublication) { pub ->
         groupId = "${pub.groupId}"
         artifactId = "${pub.artifactId}_${pub.name}"
