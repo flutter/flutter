@@ -10,6 +10,7 @@ import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/ui_web/src/ui_web.dart' as ui_web;
 
 void main() {
   internalBootstrapBrowserTest(() => testMain);
@@ -20,41 +21,90 @@ void testMain() {
     late SkwasmRenderer testRenderer;
 
     setUp(() {
-      testRenderer = SkwasmRenderer();
+      debugOverrideJsConfiguration(null);
+      testRenderer = SkwasmRenderer()..debugResetRasterizer();
+    });
+
+    tearDown(() {
+      testRenderer.rasterizer.dispose();
+      ui_web.browser.debugBrowserEngineOverride = null;
+      ui_web.browser.debugOperatingSystemOverride = null;
       debugOverrideJsConfiguration(null);
     });
 
-    test('defaults to OffscreenCanvasRasterizer', () {
-      testRenderer.debugResetRasterizer();
+    for (final ui_web.BrowserEngine engine in ui_web.BrowserEngine.values) {
+      test('selects the desktop default for $engine and the loaded thread mode', () {
+        ui_web.browser.debugBrowserEngineOverride = engine;
+        final bool expectHybrid = switch (engine) {
+          ui_web.BrowserEngine.blink => !testRenderer.isMultiThreaded,
+          ui_web.BrowserEngine.webkit || ui_web.BrowserEngine.firefox => true,
+        };
+        for (final os in <ui_web.OperatingSystem>[
+          ui_web.OperatingSystem.macOs,
+          ui_web.OperatingSystem.linux,
+          ui_web.OperatingSystem.windows,
+        ]) {
+          ui_web.browser.debugOperatingSystemOverride = os;
+          testRenderer.rasterizer.dispose();
+          testRenderer.debugResetRasterizer();
+          expect(
+            testRenderer.rasterizer,
+            expectHybrid && browserSupportsTransferControlToOffscreen
+                ? isA<HybridCanvasRasterizer>()
+                : isA<OffscreenCanvasRasterizer>(),
+            reason: '$os, multi-threaded: ${testRenderer.isMultiThreaded}',
+          );
+        }
+      });
 
-      expect(testRenderer.rasterizer, isA<OffscreenCanvasRasterizer>());
-    });
+      test('keeps mobile and unknown platforms opt-in for $engine', () {
+        ui_web.browser.debugBrowserEngineOverride = engine;
+        for (final os in <ui_web.OperatingSystem>[
+          ui_web.OperatingSystem.iOs,
+          ui_web.OperatingSystem.android,
+          ui_web.OperatingSystem.unknown,
+        ]) {
+          ui_web.browser.debugOperatingSystemOverride = os;
+          testRenderer.rasterizer.dispose();
+          testRenderer.debugResetRasterizer();
+          expect(testRenderer.rasterizer, isA<OffscreenCanvasRasterizer>(), reason: '$os');
+        }
+      });
+    }
 
-    test('can be configured to use MultiSurfaceRasterizer when the canvas can stay on the raster thread', () {
-      debugOverrideJsConfiguration(
-        <String, Object?>{'skwasmForceMultiSurfaceRasterizer': true}.jsify()
-            as JsFlutterConfiguration?,
-      );
-
-      testRenderer.debugResetRasterizer();
-
-      if (browserSupportsTransferControlToOffscreen || !testRenderer.isMultiThreaded) {
-        expect(testRenderer.rasterizer, isA<MultiSurfaceRasterizer>());
-      } else {
-        expect(testRenderer.rasterizer, isA<OffscreenCanvasRasterizer>());
-      }
-    });
+    for (final enabled in <bool>[true, false]) {
+      test('explicit hybrid $enabled overrides automatic selection', () {
+        debugOverrideJsConfiguration(
+          <String, Object?>{'skwasmUseHybridRasterizer': enabled}.jsify()
+              as JsFlutterConfiguration?,
+        );
+        for (final ui_web.BrowserEngine engine in ui_web.BrowserEngine.values) {
+          ui_web.browser.debugBrowserEngineOverride = engine;
+          for (final ui_web.OperatingSystem os in ui_web.OperatingSystem.values) {
+            ui_web.browser.debugOperatingSystemOverride = os;
+            testRenderer.rasterizer.dispose();
+            testRenderer.debugResetRasterizer();
+            expect(
+              testRenderer.rasterizer,
+              enabled && browserSupportsTransferControlToOffscreen
+                  ? isA<HybridCanvasRasterizer>()
+                  : isA<OffscreenCanvasRasterizer>(),
+              reason: '$engine on $os',
+            );
+          }
+        }
+      });
+    }
 
     test('uses an offscreen picture surface for PNG image export', () async {
       debugOverrideJsConfiguration(
-        <String, Object?>{'skwasmForceMultiSurfaceRasterizer': true}.jsify()
-            as JsFlutterConfiguration?,
+        <String, Object?>{'skwasmUseHybridRasterizer': true}.jsify() as JsFlutterConfiguration?,
       );
 
       final globalRenderer = renderer as SkwasmRenderer;
       globalRenderer.debugResetRasterizer();
 
-      if (globalRenderer.rasterizer is! MultiSurfaceRasterizer) {
+      if (globalRenderer.rasterizer is! HybridCanvasRasterizer) {
         return;
       }
       expect(globalRenderer.pictureToImageSurface, isA<OffscreenSurface>());
@@ -76,17 +126,17 @@ void testMain() {
 
     test('picture to image preserves rendered pixels', () async {
       final globalRenderer = renderer as SkwasmRenderer;
-      for (final forceMultiSurface in <bool>[false, true]) {
+      for (final mode in <String>['bitmap', 'hybrid']) {
         debugOverrideJsConfiguration(
-          <String, Object?>{'skwasmForceMultiSurfaceRasterizer': forceMultiSurface}.jsify()
+          <String, Object?>{'skwasmUseHybridRasterizer': mode == 'hybrid'}.jsify()
               as JsFlutterConfiguration?,
         );
         globalRenderer.debugResetRasterizer();
 
-        if (!forceMultiSurface) {
+        if (mode == 'bitmap') {
           expect(globalRenderer.rasterizer, isA<OffscreenCanvasRasterizer>());
-        } else if (browserSupportsTransferControlToOffscreen || !globalRenderer.isMultiThreaded) {
-          expect(globalRenderer.rasterizer, isA<MultiSurfaceRasterizer>());
+        } else if (browserSupportsTransferControlToOffscreen) {
+          expect(globalRenderer.rasterizer, isA<HybridCanvasRasterizer>());
         }
 
         final recorder = ui.PictureRecorder();

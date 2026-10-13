@@ -45,7 +45,7 @@ class MultiSurfaceRasterizer extends Rasterizer {
 
   @override
   void dispose() {
-    for (final MultiSurfaceViewRasterizer viewRasterizer in _viewRasterizers.values) {
+    for (final MultiSurfaceViewRasterizer viewRasterizer in _viewRasterizers.values.toList()) {
       viewRasterizer.dispose();
     }
     _viewRasterizers.clear();
@@ -70,6 +70,15 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
 
   final MultiSurfaceRasterizer rasterizer;
   final OnscreenSurfaceProvider surfaceProvider;
+
+  @override
+  void dispose() {
+    if (isDisposed) {
+      return;
+    }
+    super.dispose();
+    rasterizer._viewRasterizers.remove(view);
+  }
 
   @override
   late final DisplayCanvasFactory<OnscreenSurface> displayFactory =

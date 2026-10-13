@@ -435,6 +435,14 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
     final Profile localProfile = profile = Profile(name: name, useCustomWarmUp: useCustomWarmUp);
     final Widget widget = createWidget();
 
+    registerEngineBenchmarkValueListener('presentation_duration', (num value) {
+      localProfile.addDataPoint(
+        'presentation_duration',
+        Duration(microseconds: value.toInt()),
+        reported: true,
+      );
+    });
+
     registerEngineBenchmarkValueListener(kProfilePrerollFrame, (num value) {
       localProfile.addDataPoint(
         kProfilePrerollFrame,
@@ -456,6 +464,7 @@ abstract class WidgetRecorder extends Recorder implements FrameRecorder {
       await _runCompleter!.future;
       return localProfile;
     } finally {
+      stopListeningToEngineBenchmarkValues('presentation_duration');
       stopListeningToEngineBenchmarkValues(kProfilePrerollFrame);
       stopListeningToEngineBenchmarkValues(kProfileApplyFrame);
       _runCompleter = null;
@@ -1043,6 +1052,14 @@ class Profile {
       json['$key.outlierAverage'] = stats.outlierAverage;
       json['$key.outlierRatio'] = stats.outlierRatio;
       json['$key.noise'] = stats.noise;
+      json['$key.samples'] = <Map<String, Object>>[
+        for (final AnnotatedSample sample in stats.samples)
+          <String, Object>{
+            'valueUs': sample.magnitude,
+            'warmUp': sample.isWarmUpValue,
+            'outlier': sample.isOutlier,
+          },
+      ];
     }
 
     json.addAll(extraData);

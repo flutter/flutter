@@ -86,8 +86,8 @@ void testMain() {
       expect(defaultConfig.multiViewEnabled, isFalse);
     });
 
-    test('skwasmForceMultiSurfaceRasterizer', () {
-      expect(defaultConfig.skwasmForceMultiSurfaceRasterizer, isFalse);
+    test('hybrid presentation is selected by the renderer when unconfigured', () {
+      expect(defaultConfig.skwasmUseHybridRasterizer, isNull);
     });
   });
 
@@ -136,13 +136,15 @@ void testMain() {
       expect(config.multiViewEnabled, isTrue);
     });
 
-    test('skwasmForceMultiSurfaceRasterizer', () {
-      final config = FlutterConfiguration();
-      config.setUserConfiguration(
-        <String, Object?>{'skwasmForceMultiSurfaceRasterizer': true}.jsify()!
-            as JsFlutterConfiguration,
-      );
-      expect(config.skwasmForceMultiSurfaceRasterizer, isTrue);
-    });
+    for (final enabled in <bool>[true, false]) {
+      test('skwasmUseHybridRasterizer preserves explicit $enabled', () {
+        final config = FlutterConfiguration();
+        config.setUserConfiguration(
+          <String, Object?>{'skwasmUseHybridRasterizer': enabled}.jsify()!
+              as JsFlutterConfiguration,
+        );
+        expect(config.skwasmUseHybridRasterizer, enabled);
+      });
+    }
   });
 }

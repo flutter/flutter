@@ -165,6 +165,8 @@ extension type DomWindow._(JSObject _) implements DomEventTarget {
   double requestAnimationFrame(DomRequestAnimationFrameCallback callback) =>
       _requestAnimationFrame(_makeAnimationFrameCallbackZoned(callback));
 
+  external void cancelAnimationFrame(double handle);
+
   @JS('postMessage')
   external void _postMessage(JSAny message, String targetOrigin, [JSArray<JSAny?> messagePorts]);
   void postMessage(Object message, String targetOrigin, [List<DomMessagePort>? messagePorts]) {
@@ -993,9 +995,10 @@ void debugResetCanvasCount() {
   debugCanvasCount = 0;
 }
 
-DomHTMLCanvasElement createDomCanvasElement({int? width, int? height}) {
+DomHTMLCanvasElement createDomCanvasElement({int? width, int? height, DomDocument? ownerDocument}) {
   debugCanvasCount++;
-  final canvas = domWindow.document.createElement('canvas') as DomHTMLCanvasElement;
+  final canvas =
+      (ownerDocument ?? domWindow.document).createElement('canvas') as DomHTMLCanvasElement;
   if (width != null) {
     canvas.width = width.toDouble();
   }
@@ -2344,6 +2347,8 @@ extension type DomMessagePort._(JSObject _) implements DomEventTarget {
   void postMessage(Object? message) => _postMessage(message?.toJSAnyDeep);
 
   external void start();
+
+  external void close();
 }
 
 @JS('MessageChannel')

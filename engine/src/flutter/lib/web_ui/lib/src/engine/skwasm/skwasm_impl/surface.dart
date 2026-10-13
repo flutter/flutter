@@ -57,8 +57,19 @@ class SkwasmCallbackHandler {
     return completer.future;
   }
 
+  void unregisterCallback(int callbackId) {
+    _pendingCallbacks.remove(callbackId);
+  }
+
+  int get debugPendingCallbackCount => _pendingCallbacks.length;
+
   void handleCallback(WasmI32 callbackId, WasmI32 context, WasmExternRef? jsContext) {
-    final (Completer<JSAny>, Zone) record = _pendingCallbacks.remove(callbackId.toIntUnsigned())!;
+    final (Completer<JSAny>, Zone)? record = _pendingCallbacks.remove(callbackId.toIntUnsigned());
+    // A context-loss notification can already be queued when its surface is
+    // disposed and unregisters the callback.
+    if (record == null) {
+      return;
+    }
     final Completer<JSAny> completer = record.$1;
     final Zone zone = record.$2;
     zone.run(() {
@@ -90,30 +101,17 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
     return surface;
   }
 
-  factory SkwasmSurface.onscreen(
-    OnscreenCanvasProvider canvasProvider, {
-    required bool useTransferredCanvas,
-  }) {
+  factory SkwasmSurface.onscreen(OnscreenCanvasProvider canvasProvider) {
     final SurfaceHandle handle = withStackScope<SurfaceHandle>((StackScope scope) {
       return surfaceCreate();
     });
-    final surface = SkwasmSurface._fromHandle(
-      handle,
-      canvasProvider,
-      isOnscreen: true,
-      useTransferredCanvas: useTransferredCanvas,
-    );
+    final surface = SkwasmSurface._fromHandle(handle, canvasProvider, isOnscreen: true);
     return surface;
   }
 
-  SkwasmSurface._fromHandle(
-    this.handle,
-    this._canvasProvider, {
-    required bool isOnscreen,
-    bool useTransferredCanvas = false,
-  }) : _initializedCompleter = Completer<void>() {
+  SkwasmSurface._fromHandle(this.handle, this._canvasProvider, {required bool isOnscreen})
+    : _initializedCompleter = Completer<void>() {
     _isOnscreen = isOnscreen;
-    _useTransferredCanvas = useTransferredCanvas;
     surfaceSetCallbackHandler(handle, SkwasmCallbackHandler.instance.callbackPointer);
     _canvas = _canvasProvider.acquireCanvas(const BitmapSize(1, 1), onContextLost: onContextLost);
     _maybeAttachCanvasToDom();
@@ -127,17 +125,21 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
   late DomEventTarget _canvas;
   late SurfaceHandle handle;
   late final bool _isOnscreen;
-  late final bool _useTransferredCanvas;
   final DomElement _hostElement = createDomElement('flt-canvas-container');
   bool _isOverlay = false;
   double _currentDevicePixelRatio = -1;
   BitmapSize _currentSize = const BitmapSize(1, 1);
   Completer<void> _initializedCompleter;
   Completer<void>? _handledContextLostEvent;
+  bool _disposed = false;
+  int? _contextLostCallbackId;
 
   /// Handles the context lost event by acquiring a new canvas and recreating the
   /// context.
   void onContextLost() {
+    if (_disposed) {
+      return;
+    }
     if (!_initializedCompleter.isCompleted) {
       _initializedCompleter.complete();
     }
@@ -195,19 +197,19 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
       if (!_isOnscreen) {
         _canvasProvider.releaseCanvas(canvasForSkwasm);
       }
-      SkwasmCallbackHandler.instance
-          .registerCallback((contextLostCallbackId as JSNumber).toDartInt)
-          .then((_) {
-            onContextLost();
-          });
+      if (_disposed) {
+        return;
+      }
+      _contextLostCallbackId = (contextLostCallbackId as JSNumber).toDartInt;
+      SkwasmCallbackHandler.instance.registerCallback(_contextLostCallbackId!).then((_) {
+        _contextLostCallbackId = null;
+        onContextLost();
+      });
     });
   }
 
   DomEventTarget _canvasForSkwasm() {
     if (!_isOnscreen) {
-      return _canvas;
-    }
-    if (!_useTransferredCanvas) {
       return _canvas;
     }
     return (_canvas as DomHTMLCanvasElement).transferControlToOffscreen();
@@ -260,6 +262,14 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
 
   @override
   void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    if (_contextLostCallbackId != null) {
+      SkwasmCallbackHandler.instance.unregisterCallback(_contextLostCallbackId!);
+      _contextLostCallbackId = null;
+    }
     surfaceDestroy(handle);
     if (_isOnscreen) {
       _canvasProvider.releaseCanvas(_canvas);
@@ -312,13 +322,9 @@ class SkwasmSurface implements OffscreenSurface, OnscreenSurface {
     _currentSize = size;
     if (_isOnscreen) {
       final canvas = _canvas as DomHTMLCanvasElement;
-      if (_useTransferredCanvas) {
-        // Once control is transferred, the visible HTML canvas may only receive
-        // CSS/layout updates. Backing-store sizing is handled by surfaceSetSize.
-        (_canvasProvider as OnscreenCanvasProvider).resizeCanvasCss(canvas, size);
-      } else {
-        (_canvasProvider as OnscreenCanvasProvider).resizeCanvas(canvas, size);
-      }
+      // The visible placeholder only receives CSS updates. Backing-store
+      // resizing happens on the transferred canvas through surfaceSetSize.
+      (_canvasProvider as OnscreenCanvasProvider).resizeCanvasCss(canvas, size);
     }
     final int callbackId = surfaceSetSize(handle, size.width, size.height);
     await SkwasmCallbackHandler.instance.registerCallback(callbackId);

@@ -81,9 +81,13 @@ class OffscreenCanvasProvider extends CanvasProvider<DomOffscreenCanvas> {
 
 /// A [CanvasProvider] that manages [dom.DomHTMLCanvasElement] elements.
 class OnscreenCanvasProvider extends CanvasProvider<DomHTMLCanvasElement> {
+  OnscreenCanvasProvider({this.ownerDocument});
+
+  final DomDocument? ownerDocument;
+
   @override
   DomHTMLCanvasElement _createCanvas(BitmapSize size) {
-    final DomHTMLCanvasElement canvas = createDomCanvasElement();
+    final DomHTMLCanvasElement canvas = createDomCanvasElement(ownerDocument: ownerDocument);
     resizeCanvas(canvas, size);
     return canvas;
   }

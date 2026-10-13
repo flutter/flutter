@@ -23,18 +23,18 @@ class SkwasmRenderer extends Renderer {
 
   Surface? _pictureToImageSurface;
 
-  static Rasterizer _createRasterizer({required bool isMultiThreaded}) {
-    // HTMLCanvasElement cannot be posted to a worker. Multi-threaded Skwasm can
-    // use the onscreen path only when the visible canvas can transfer control to
-    // an OffscreenCanvas. Single-threaded Skwasm can use the HTMLCanvasElement
-    // directly.
-    if (configuration.skwasmForceMultiSurfaceRasterizer &&
-        (browserSupportsTransferControlToOffscreen || !isMultiThreaded)) {
-      return MultiSurfaceRasterizer(
-        (OnscreenCanvasProvider canvasProvider) =>
-            SkwasmSurface.onscreen(canvasProvider, useTransferredCanvas: isMultiThreaded),
-        offscreenSurfaceCreateFn: (OffscreenCanvasProvider canvasProvider) =>
-            SkwasmSurface(canvasProvider),
+  Rasterizer _createRasterizer() {
+    // Desktop WebKit/Firefox and single-threaded Chromium benefit from direct
+    // presentation. Multi-threaded Chromium can regress text-heavy scenes.
+    // Use the loaded runtime's mode, since worker support also affects it.
+    final bool useHybrid =
+        configuration.skwasmUseHybridRasterizer ??
+        (ui_web.browser.isDesktop &&
+            (ui_web.browser.browserEngine != ui_web.BrowserEngine.blink || !isMultiThreaded));
+    if (useHybrid && browserSupportsTransferControlToOffscreen) {
+      return HybridCanvasRasterizer(
+        (OnscreenCanvasProvider provider) => SkwasmSurface.onscreen(provider),
+        SkwasmSurface.new,
       );
     }
     return OffscreenCanvasRasterizer(
@@ -316,7 +316,7 @@ class SkwasmRenderer extends Renderer {
 
   @override
   FutureOr<void> initialize() {
-    rasterizer = _createRasterizer(isMultiThreaded: isMultiThreaded);
+    rasterizer = _createRasterizer();
     return super.initialize();
   }
 
@@ -432,7 +432,7 @@ class SkwasmRenderer extends Renderer {
 
   @override
   void debugResetRasterizer() {
-    rasterizer = _createRasterizer(isMultiThreaded: isMultiThreaded);
+    rasterizer = _createRasterizer();
     _pictureToImageSurface = null;
   }
 

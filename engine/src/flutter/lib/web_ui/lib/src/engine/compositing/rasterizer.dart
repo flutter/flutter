@@ -39,6 +39,9 @@ abstract class ViewRasterizer {
   /// The queue of render requests for this view.
   final RenderQueue queue = RenderQueue();
 
+  bool get isDisposed => _isDisposed;
+  bool _isDisposed = false;
+
   /// The size of the current frame being rasterized.
   BitmapSize currentFrameSize = BitmapSize.zero;
 
@@ -86,8 +89,15 @@ abstract class ViewRasterizer {
     compositorFrame.raster(layerTree, currentFrameSize, recorder);
     _lastRenderedLayerTree = layerTree;
 
+    final Stopwatch? presentationTimer = Profiler.isBenchmarkMode ? (Stopwatch()..start()) : null;
     await prepareToDraw();
     await viewEmbedder.submitFrame(recorder);
+    if (presentationTimer != null) {
+      Profiler.instance.benchmark(
+        'presentation_duration',
+        presentationTimer.elapsedMicroseconds.toDouble(),
+      );
+    }
   }
 
   /// Do some initialization to prepare to draw a frame.
@@ -105,6 +115,10 @@ abstract class ViewRasterizer {
     List<ui.Picture> pictures,
     FrameTimingRecorder? recorder,
   );
+
+  /// Publishes any staged canvas contents in the same task as the composition's
+  /// DOM update. Rasterizers that draw directly need no additional commit.
+  void commitFrame() {}
 
   /// Get a [DisplayCanvas] to use as an overlay.
   DisplayCanvas getOverlay() {
@@ -128,6 +142,10 @@ abstract class ViewRasterizer {
 
   /// Disposes this rasterizer.
   void dispose() {
+    if (_isDisposed) {
+      return;
+    }
+    _isDisposed = true;
     viewEmbedder.dispose();
   }
 
