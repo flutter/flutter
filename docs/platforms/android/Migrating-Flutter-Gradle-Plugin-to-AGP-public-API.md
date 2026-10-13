@@ -126,7 +126,7 @@ projects. That opt-out dies with AGP 10.
 | eager `applicationVariants.configureEach` task creation; mergeAssets/processResources hooks | `FlutterPlugin.kt`, `FlutterPluginUtils.kt` | consolidated `onVariants` block; `CopyFlutterAssetsTask` + `variant.sources.assets.addGeneratedSourceDirectory` | P5 |
 | `variant.outputs` + `packageApplicationProvider` + `doLast` APK copy; `versionCodeOverride` | `FlutterPluginUtils.kt` | `CopyFlutterApksTask` (`SingleArtifact.APK` + `BuiltArtifactsLoader`); `VariantOutput.versionCode` set from a `finalizeDsl` snapshot (`DslVersionCodes`) | P6 |
 | `libraryVariants.all` × host `applicationVariants.all` cross-wiring | `FlutterPlugin.kt` (add-to-app) | library-side `onVariants` with `Component.debuggable`; no host-project lookup | P7 |
-| `android.libraryVariants`; internal `publishing.singleVariants`; module-to-plugin `assembleAar<V>.dependsOn` | `aar_init_script.gradle` | `com.android.library` plugin check; per-variant `singleVariant` that keeps the build file's declaration; plugins publish from the task-name selector | P8 |
+| `android.libraryVariants`; internal `publishing.singleVariants`; module-to-plugin `assembleAar<V>.dependsOn` | `aar_init_script.gradle` | `com.android.library` plugin check; per-variant `singleVariant` that keeps the build file's declaration; the tool requests `assembleAar<V>` without a project path, so it runs in the module and in every plugin that has it (no `dependsOn`) | P8 |
 | `android.newDsl=false` template/migrator | templates, `disable_new_dsl_migration.dart` | drop from templates; `RemoveNewDslOptOutMigration` | P9 |
 | FULL `gradle` artifact dependency | `build.gradle.kts` | `gradle-api` artifact (compile-time proof of zero internal usage) | P10 |
 

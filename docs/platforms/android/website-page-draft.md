@@ -235,10 +235,10 @@ aliases:
   `android.publishing.singleVariant(...)` for a variant, Flutter uses that
   declaration for that variant and declares publishing (with sources and javadoc
   jars) for the other variants.
-- The variant you build must exist in the module and in each Android plugin
-  that it uses. If it doesn't, the build fails. Build a variant that all of them
-  declare: pass `--flavor` for a module with product flavors, and use plugins
-  that declare the same product flavors as the module.
+- `flutter build aar` builds one variant for each build mode, named from
+  `--flavor` and the build mode (for example, `demoRelease`). The module and
+  each Android plugin that it uses must have a variant with that name, or the
+  build fails. Pass `--flavor` for a module with product flavors.
 
 ## Escape hatch (temporary)
 
