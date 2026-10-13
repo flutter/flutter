@@ -16,6 +16,7 @@
 #include <gtk/gtk-a11y.h>
 #endif
 
+#include <cmath>
 #include <cstring>
 
 #include "flutter/common/constants.h"
@@ -53,9 +54,11 @@ static void fl_renderable_iface_init(FlRenderableInterface* iface);
 static void fl_view_plugin_registry_iface_init(
     FlPluginRegistryInterface* iface);
 static void handle_geometry_changed(FlView* self);
-static void handle_geometry_changed_with_size(FlView* self,
-                                              int width,
-                                              int height);
+static void handle_geometry_changed_with_size(
+    FlView* self,
+    int width,
+    int height,
+    bool update_content_scale = false);
 #if FLUTTER_LINUX_GTK4
 static gboolean retry_native_texture_cb(gpointer user_data);
 #endif
@@ -108,12 +111,21 @@ static gboolean redraw_cb(gpointer user_data) {
 #endif
   size_t frame_width, frame_height;
   fl_compositor_get_frame_size(self->compositor, &frame_width, &frame_height);
+#if FLUTTER_LINUX_GTK4
+  const gint logical_frame_width =
+      MAX(static_cast<gint>(ceil(frame_width / scale_factor)), 1);
+  const gint logical_frame_height =
+      MAX(static_cast<gint>(ceil(frame_height / scale_factor)), 1);
+#else
+  const gint logical_frame_width =
+      MAX(static_cast<gint>(frame_width / scale_factor), 1);
+  const gint logical_frame_height =
+      MAX(static_cast<gint>(frame_height / scale_factor), 1);
+#endif
   gboolean frame_size_matches = width == frame_width && height == frame_height;
   if (self->sized_to_content && !frame_size_matches) {
-    gtk_widget_set_size_request(
-        GTK_WIDGET(self->render_area),
-        MAX(static_cast<gint>(frame_width / scale_factor), 1),
-        MAX(static_cast<gint>(frame_height / scale_factor), 1));
+    gtk_widget_set_size_request(GTK_WIDGET(self->render_area),
+                                logical_frame_width, logical_frame_height);
 #if FLUTTER_LINUX_GTK4
     if (self->native_texture_retry_source_id == 0) {
       self->native_texture_retry_source_id =
@@ -122,10 +134,8 @@ static gboolean redraw_cb(gpointer user_data) {
     }
     GtkWidget* toplevel_window = fl_view_gtk4_get_toplevel_window(self);
     if (toplevel_window != nullptr) {
-      gtk_window_set_default_size(
-          GTK_WINDOW(toplevel_window),
-          MAX(static_cast<gint>(frame_width / scale_factor), 1),
-          MAX(static_cast<gint>(frame_height / scale_factor), 1));
+      gtk_window_set_default_size(GTK_WINDOW(toplevel_window),
+                                  logical_frame_width, logical_frame_height);
     }
 #else
     GtkWidget* toplevel =
@@ -265,9 +275,11 @@ static void setup_cursor(FlView* self) {
 // Updates the engine with the current window metrics.
 static void handle_geometry_changed_with_size(FlView* self,
                                               int width,
-                                              int height) {
-  // No updates required when size controlled by Flutter.
-  if (self->sized_to_content) {
+                                              int height,
+                                              bool update_content_scale) {
+  // Flutter controls content-sized dimensions; only realization and surface
+  // scale changes update their unbounded metrics.
+  if (self->sized_to_content && !update_content_scale) {
     return;
   }
 
@@ -313,16 +325,23 @@ static void handle_geometry_changed_with_size(FlView* self,
         fl_engine_get_display_monitor(self->engine), monitor);
   }
 #if FLUTTER_LINUX_GTK4
-  size_t min_width = fl_gtk_size_to_pixels(width, scale);
-  size_t min_height = fl_gtk_size_to_pixels(height, scale);
+  size_t min_width =
+      self->sized_to_content ? 1 : fl_gtk_size_to_pixels(width, scale);
+  size_t min_height =
+      self->sized_to_content ? 1 : fl_gtk_size_to_pixels(height, scale);
 #else
   size_t min_width =
       size_is_in_pixels ? width : fl_gtk_size_to_pixels(width, scale);
   size_t min_height =
       size_is_in_pixels ? height : fl_gtk_size_to_pixels(height, scale);
 #endif
+#if FLUTTER_LINUX_GTK4
+  size_t max_width = self->sized_to_content ? SIZE_MAX : min_width;
+  size_t max_height = self->sized_to_content ? SIZE_MAX : min_height;
+#else
   size_t max_width = min_width;
   size_t max_height = min_height;
+#endif
   fl_engine_send_window_metrics_event(self->engine, display_id, self->view_id,
                                       min_width, min_height, max_width,
                                       max_height, scale);
@@ -439,7 +458,9 @@ static void fl_view_plugin_registry_iface_init(
 static void surface_scale_changed_cb(FlView* self) {
   fl_view_gtk4_resize_subsurface(self, gtk_widget_get_width(self->render_area),
                                  gtk_widget_get_height(self->render_area));
-  handle_geometry_changed(self);
+  handle_geometry_changed_with_size(
+      self, gtk_widget_get_width(self->render_area),
+      gtk_widget_get_height(self->render_area), true);
   gtk_widget_queue_resize(self->render_area);
   fl_engine_schedule_frame(self->engine);
 }
@@ -478,7 +499,9 @@ static void realize_cb(FlView* self) {
     setup_cursor(self);
     // GTK4 does not emit a resize before a secondary window is mapped, so send
     // its allocated metrics here rather than waiting for a frame at 1x1.
-    handle_geometry_changed(self);
+    handle_geometry_changed_with_size(
+        self, gtk_widget_get_width(self->render_area),
+        gtk_widget_get_height(self->render_area), true);
     // A secondary view has no implicit window frame to drive its first
     // rendering pass. Its realized GTK surface and current metrics are now
     // available, so explicitly request that bootstrap frame.
