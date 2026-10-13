@@ -624,6 +624,166 @@ TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiActivation) {
   gtk_window_destroy(window);
 }
 
+// Keep a second native view alive while clients query the removed view.
+TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiLifetime) {
+  if (g_strcmp0(g_getenv("FLUTTER_TEST_ATSPI_LIFETIME"), "1") != 0) {
+    GTEST_SKIP() << "Requires the external AT-SPI lifetime client";
+  }
+  ASSERT_TRUE(fl_view_gtk4_accessibility_native_tree_is_enabled_for_testing());
+  g_autoptr(FlView) view = fl_view_new(project);
+  g_object_ref_sink(view);
+  FlEngine* engine = fl_view_get_engine(view);
+  StartEngine(engine);
+  g_autoptr(FlView) control = fl_view_new_for_engine(engine);
+  g_object_ref_sink(control);
+  const FlutterViewId target_id = fl_view_get_id(view);
+  const FlutterViewId control_id = fl_view_get_id(control);
+  ASSERT_NE(target_id, control_id);
+  FlutterSemanticsFlags flags = {};
+  flags.is_button = true;
+  flags.is_focused = kFlutterTristateTrue;
+  FlutterSemanticsNode2 root = {};
+  root.label = "Lifetime root";
+  root.rect = {0, 0, 300, 200};
+  int32_t root_children[] = {18};
+  root.child_count = 1;
+  root.children_in_traversal_order = root_children;
+  FlutterSemanticsNode2 parent = {};
+  parent.id = 18;
+  parent.label = "Lifetime old parent";
+  parent.rect = {10, 10, 210, 110};
+  int32_t child_id = 19;
+  parent.child_count = 1;
+  parent.children_in_traversal_order = &child_id;
+  FlutterSemanticsNode2 child = {};
+  child.id = 19;
+  child.label = "Lifetime child";
+  child.flags2 = &flags;
+  child.actions = kFlutterSemanticsActionTap;
+  child.rect = {20, 20, 100, 60};
+  FlutterSemanticsNode2* nodes[] = {&root, &parent, &child};
+  FlutterSemanticsUpdate2 update = {};
+  update.view_id = target_id;
+  update.node_count = 3;
+  update.nodes = nodes;
+  fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                           &update);
+  FlutterSemanticsFlags control_flags = {};
+  control_flags.is_button = true;
+  FlutterSemanticsNode2 controller = {};
+  controller.label = "Lifetime controller";
+  controller.flags2 = &control_flags;
+  controller.actions = kFlutterSemanticsActionTap;
+  controller.rect = {0, 0, 120, 80};
+  FlutterSemanticsNode2* control_nodes[] = {&controller};
+  FlutterSemanticsUpdate2 control_update = {};
+  control_update.view_id = control_id;
+  control_update.node_count = 1;
+  control_update.nodes = control_nodes;
+  fl_view_gtk4_accessibility_handle_update(control->accessibility_backend,
+                                           &control_update);
+  g_autoptr(GtkAccessible) retained_root =
+      fl_view_gtk4_accessibility_ref_native_root_for_testing(
+          view->accessibility_backend);
+  g_autoptr(GtkAccessible) retained_parent =
+      fl_gtk_runtime_accessible_get_first_accessible_child(retained_root);
+  g_autoptr(GtkAccessible) retained_child =
+      fl_gtk_runtime_accessible_get_first_accessible_child(retained_parent);
+  ASSERT_NE(retained_child, nullptr);
+  g_autoptr(GtkWidget) surface = GTK_WIDGET(g_object_ref(view->render_area));
+  g_autoptr(GtkWidget) control_surface =
+      GTK_WIDGET(g_object_ref(control->render_area));
+  g_signal_handlers_disconnect_by_data(surface, view);
+  g_signal_handlers_disconnect_by_data(control_surface, control);
+  gtk_box_remove(GTK_BOX(view), surface);
+  gtk_box_remove(GTK_BOX(control), control_surface);
+  g_autoptr(GtkWindow) window = GTK_WINDOW(gtk_window_new());
+  g_object_ref_sink(window);
+  g_autoptr(GtkWindow) control_window = GTK_WINDOW(gtk_window_new());
+  g_object_ref_sink(control_window);
+  gtk_window_set_title(window, "Lifetime target window");
+  gtk_window_set_child(window, surface);
+  gtk_window_set_child(control_window, control_surface);
+  gtk_window_present(window);
+  gtk_window_present(control_window);
+  ASSERT_TRUE(gtk_widget_get_realized(GTK_WIDGET(retained_child)));
+  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, FALSE);
+  size_t steps = 0;
+  size_t child_calls = 0;
+  bool destroyed = false;
+  fl_engine_get_embedder_api(engine)->SendSemanticsAction = MOCK_ENGINE_PROC(
+      SendSemanticsAction,
+      ([&](auto, const FlutterSendSemanticsActionInfo* info) {
+        EXPECT_EQ(info->action, kFlutterSemanticsActionTap);
+        if (info->view_id == target_id) {
+          EXPECT_EQ(info->node_id, 19u);
+          EXPECT_EQ(steps, 1u);
+          EXPECT_FALSE(destroyed);
+          child_calls++;
+          return kSuccess;
+        }
+        EXPECT_EQ(info->view_id, control_id);
+        EXPECT_EQ(info->node_id, 0u);
+        steps++;
+        if (steps == 1) {
+          // Root-only reparenting preserves the omitted child and removes its
+          // old parent while all proxies have native AT-SPI contexts.
+          root.children_in_traversal_order = &child_id;
+          update.node_count = 1;
+          fl_view_gtk4_accessibility_handle_update(view->accessibility_backend,
+                                                   &update);
+          g_autoptr(GtkAccessible) current =
+              fl_gtk_runtime_accessible_get_first_accessible_child(
+                  retained_root);
+          EXPECT_EQ(current, retained_child);
+          EXPECT_TRUE(gtk_widget_get_realized(GTK_WIDGET(retained_child)));
+        } else if (steps == 2) {
+          gtk_window_set_child(window, nullptr);
+          gtk_box_append(GTK_BOX(view), surface);
+          gtk_window_destroy(window);
+          g_object_run_dispose(G_OBJECT(view));
+          g_clear_object(&view);
+          destroyed = true;
+          EXPECT_FALSE(gtk_widget_get_realized(GTK_WIDGET(retained_child)));
+          EXPECT_FALSE(fl_view_gtk4_accessibility_get_native_bounds_for_testing(
+              retained_child, nullptr, nullptr, nullptr, nullptr));
+          gtk_widget_activate_action(GTK_WIDGET(retained_child), "flutter.tap",
+                                     nullptr);
+          EXPECT_EQ(child_calls, 1u);
+          controller.label = "Lifetime destroyed";
+          fl_view_gtk4_accessibility_handle_update(
+              control->accessibility_backend, &control_update);
+        } else {
+          EXPECT_EQ(steps, 3u);
+          EXPECT_EQ(child_calls, 1u);
+          g_main_loop_quit(loop);
+        }
+        return kSuccess;
+      }));
+  guint timeout = g_timeout_add_seconds(
+      20,
+      [](gpointer data) -> gboolean {
+        g_main_loop_quit(static_cast<GMainLoop*>(data));
+        return G_SOURCE_REMOVE;
+      },
+      loop);
+  g_main_loop_run(loop);
+  if (steps == 3) {
+    g_source_remove(timeout);
+  }
+  EXPECT_EQ(steps, 3u);
+  EXPECT_EQ(child_calls, 1u);
+  EXPECT_TRUE(destroyed);
+  gtk_window_set_child(control_window, nullptr);
+  gtk_box_append(GTK_BOX(control), control_surface);
+  gtk_window_destroy(control_window);
+  if (!destroyed) {
+    gtk_window_set_child(window, nullptr);
+    gtk_box_append(GTK_BOX(view), surface);
+    gtk_window_destroy(window);
+  }
+}
+
 // Check GTK's parent-relative geometry through an external AT-SPI client.
 TEST_F(FlViewGtk4AccessibilityTest, ExternalAtspiGeometry) {
   if (g_strcmp0(g_getenv("FLUTTER_TEST_ATSPI_GEOMETRY"), "1") != 0) {

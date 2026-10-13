@@ -173,6 +173,38 @@ Use a GTK runtime with those corrections to pass this gate; the Flutter bridge
 does not carry a workaround. The default geometry command continues to test bounds on stock GTK.
 Passing hit checks does not establish clipping or Flutter paint/hit-test order.
 
+## Native lifetime and multiple views
+
+```sh
+python3 engine/src/flutter/shell/platform/linux/testing/run_gtk4_atspi_lifetime_test.py \
+  engine/src/out/host_debug_unopt/flutter_linux_gtk4_unittests \
+  --output /tmp/flutter-gtk4-atspi-lifetime.json
+```
+
+The fixture realizes two views sharing an engine. The client retains a root,
+parent and focused child, and registers child/state/text event listeners. A
+native controller action reparents the omitted child using a root-only update
+and removes its old parent. The same native child must remain usable and route
+one tap to the original view/node. Another controller action destroys the target
+window and disposes its view while the control view stays alive.
+
+Retained remote objects must become defunct or reject queries as unregistered;
+timeouts and other transport errors fail the test. A stale child action must
+not reach Flutter. The final control action verifies routing counts, and the
+listener must observe a retained-object defunct notification. This uses real
+GTK/AT-SPI with a mock engine, private X11, and scale 1; it does not cover queued
+clipboard edits, ID reuse, arbitrary event ordering, or full screen-reader use.
+
+The local workspace helpers can run this gate with ordinary tests:
+`./run_gtk_tests.sh --gtk4 --native`. An explicit sanitizer build/test invocation
+is `./build.sh debug --asan --test`, which uses a separate
+`host_debug_unopt_asan` directory. `./build.sh all --test` runs the debug tests
+then normal profile/release builds. `all --asan` is rejected to keep sanitizer
+artifacts separate. `--dry-run` prints build commands without executing them.
+These root helper scripts are local workspace files, not tracked engine tooling.
+Native action/selection checks require a GTK 4.22+ runtime; using old headers
+for compilation does not meet that runtime requirement.
+
 ## Independent reading and hit-test order
 
 ```sh
