@@ -326,7 +326,7 @@ class Matrix4 {
     _m4storage[14] = 0.0;
   }
 
-  /// Returns the tranpose of this.
+  /// Returns the transpose of this.
   Matrix4 transposed() => clone()..transpose();
 
   void transpose() {

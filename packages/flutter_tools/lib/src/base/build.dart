@@ -90,11 +90,11 @@ class GenSnapshot {
 
 class AOTSnapshotter {
   AOTSnapshotter({
-    required Logger logger,
-    required this._fileSystem,
-    required this._xcode,
-    required ProcessManager processManager,
     required Artifacts artifacts,
+    required this._fileSystem,
+    required Logger logger,
+    required ProcessManager processManager,
+    this._xcode,
   }) : _logger = logger,
        _genSnapshot = GenSnapshot(
          artifacts: artifacts,
@@ -104,7 +104,7 @@ class AOTSnapshotter {
 
   final Logger _logger;
   final FileSystem _fileSystem;
-  final Xcode _xcode;
+  final Xcode? _xcode;
   final GenSnapshot _genSnapshot;
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
@@ -249,7 +249,11 @@ class AOTSnapshotter {
 
     if (targetingApplePlatform) {
       if (extractAppleDebugSymbols) {
-        final RunResult dsymResult = await _xcode.dsymutil(<String>[
+        final Xcode? xcode = _xcode;
+        if (xcode == null) {
+          throw StateError('Xcode must be provided when targeting Apple platforms.');
+        }
+        final RunResult dsymResult = await xcode.dsymutil(<String>[
           '-o',
           '$frameworkPath.dSYM',
           aotSharedLibrary,
@@ -263,7 +267,7 @@ class AOTSnapshotter {
 
         if (stripAfterBuild) {
           // See https://www.unix.com/man-page/osx/1/strip/ for arguments
-          final RunResult stripResult = await _xcode.strip(<String>[
+          final RunResult stripResult = await xcode.strip(<String>[
             '-x',
             aotSharedLibrary,
             '-o',

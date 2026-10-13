@@ -741,9 +741,9 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   late final _targetDevices = TargetDevices(
-    platform: _platform,
     deviceManager: globals.deviceManager!,
-    logger: _logger,
+    doctor: globals.doctor!,
+    toolContext: toolContext!,
     deviceConnectionInterface: deviceConnectionInterface,
   );
 
@@ -1520,7 +1520,7 @@ abstract class FlutterCommand extends Command<void> {
     DateTime endTime,
   ) {
     // Send command result.
-    final int? maxRss = getMaxRss(processInfo);
+    final int? maxRss = getMaxRss(processInfo, logger: _logger);
     _analytics.send(
       Event.flutterCommandResult(
         commandPath: commandPath,
