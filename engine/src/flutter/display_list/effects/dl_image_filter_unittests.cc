@@ -752,14 +752,20 @@ TEST(DisplayListImageFilter, ColorFilterModifiesTransparencyBounds) {
 }
 
 TEST(DisplayListImageFilter, LocalMatrixBounds) {
-  DlMatrix scale = DlMatrix::MakeTranslation({100, 50}) *
+  // Inner filter scales by 1.25 about center of 200x100 rect at origin
+  DlRect local_bounds = DlRect::MakeXYWH(0, 0, 200, 100);
+  DlPoint center = local_bounds.GetCenter();
+  DlMatrix scale = DlMatrix::MakeTranslation(center) *
                    DlMatrix::MakeScale({1.25, 1.25, 1.0}) *
-                   DlMatrix::MakeTranslation({-100, -50});
+                   DlMatrix::MakeTranslation(-center);
   DlMatrixImageFilter inner(scale, DlImageSampling::kLinear);
-  DlLocalMatrixImageFilter filter(DlMatrix::MakeTranslation({800, 1200}),
+  // Local matrix shifts inner filter space by offset: center is (900, 1250)
+  DlPoint offset = DlPoint(800, 1200);
+  DlLocalMatrixImageFilter filter(DlMatrix::MakeTranslation(offset),
                                   inner.shared());
-  DlRect input_bounds = DlRect::MakeLTRB(800, 1200, 1000, 1300);
-  DlRect expected_output_bounds = DlRect::MakeLTRB(775, 1187.5, 1025, 1312.5);
+  DlRect input_bounds = local_bounds.Shift(offset);
+  // 200x100 scaled by 1.25 about its center is 250x125
+  DlRect expected_output_bounds = input_bounds.Expand(25, 12.5);
   TestBounds(filter, input_bounds, expected_output_bounds);
 }
 
