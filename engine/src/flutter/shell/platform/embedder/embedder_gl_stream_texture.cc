@@ -22,6 +22,7 @@
 #endif  // defined(SHELL_ENABLE_GL)
 #if FML_OS_ANDROID && defined(SHELL_ENABLE_VULKAN)
 #include "flutter/impeller/renderer/backend/vulkan/context_vk.h"
+#include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
 #include "flutter/shell/platform/embedder/embedder_external_texture_gl_stream_vk.h"
 #endif  // FML_OS_ANDROID && defined(SHELL_ENABLE_VULKAN)
 #endif  // IMPELLER_SUPPORTS_RENDERING
@@ -83,14 +84,22 @@ EmbedderGLStreamTexture::CreateImplementation(PaintContext& context) {
 #if FML_OS_ANDROID && defined(SHELL_ENABLE_VULKAN)
       case impeller::Context::BackendType::kVulkan: {
         std::shared_ptr<impeller::Context> device =
-            device_context_ ? device_context_() : nullptr;
+            device_context_ ? device_context_() : impeller_context;
         if (!device || device->GetBackendType() !=
                            impeller::Context::BackendType::kVulkan) {
           return nullptr;
         }
+        // `AndroidSurfaceVKImpeller::GetImpellerContext()` and onscreen Vulkan
+        // surfaces return a `SurfaceContextVK` (whose `GetSubmissionTracker()`
+        // is null and whose `GetParent()` is the `ContextVK`), while
+        // `AndroidSurfaceDynamicImpeller::GetImpellerContext()` and offscreen
+        // contexts return the `ContextVK` directly.
+        std::shared_ptr<impeller::ContextVK> context_vk =
+            device->GetSubmissionTracker() != nullptr
+                ? std::static_pointer_cast<impeller::ContextVK>(device)
+                : impeller::SurfaceContextVK::Cast(*device).GetParent();
         return std::make_unique<EmbedderExternalTextureGLStreamVK>(
-            std::static_pointer_cast<impeller::ContextVK>(device), Id(),
-            stream_);
+            std::move(context_vk), Id(), stream_);
       }
 #endif  // FML_OS_ANDROID && defined(SHELL_ENABLE_VULKAN)
       default:
