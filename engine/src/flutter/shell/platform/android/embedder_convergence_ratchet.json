@@ -11,15 +11,15 @@
     },
     "embedder_engine_refs": {
       "count": 0,
-      "enforce": "ratchet"
+      "enforce": "zero"
     },
     "embedder_internal_includes": {
       "count": 0,
-      "enforce": "ratchet"
+      "enforce": "zero"
     },
     "engine_internal_includes": {
       "count": 0,
-      "enforce": "ratchet"
+      "enforce": "zero"
     },
     "jni_platform_view_calls": {
       "count": 0,
@@ -31,7 +31,7 @@
     },
     "gn_internal_deps": {
       "count": 0,
-      "enforce": "report"
+      "enforce": "zero"
     }
   },
   "history": [
