@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/windows/egl/manager.h"
 
+#include <charconv>
 #include <string_view>
 #include <vector>
 
@@ -55,6 +56,27 @@ void AppendMaxFeatureLevel(std::optional<D3DFeatureLevel> max_feature_level,
 }
 
 }  // namespace
+
+std::optional<D3DFeatureLevel> ParseD3DFeatureLevel(std::string_view value) {
+  const size_t separator = value.find('_');
+  if (separator == std::string_view::npos) {
+    return std::nullopt;
+  }
+  const char* major_begin = value.data();
+  const char* major_end = major_begin + separator;
+  const char* minor_begin = major_end + 1;
+  const char* minor_end = value.data() + value.size();
+
+  int major = 0;
+  int minor = 0;
+  auto major_result = std::from_chars(major_begin, major_end, major);
+  auto minor_result = std::from_chars(minor_begin, minor_end, minor);
+  if (major_result.ec != std::errc() || major_result.ptr != major_end ||
+      minor_result.ec != std::errc() || minor_result.ptr != minor_end) {
+    return std::nullopt;
+  }
+  return D3DFeatureLevel{major, minor};
+}
 
 int Manager::instance_count_ = 0;
 

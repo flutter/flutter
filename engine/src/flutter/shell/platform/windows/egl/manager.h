@@ -20,6 +20,7 @@
 #include <wrl/client.h>
 #include <memory>
 #include <optional>
+#include <string_view>
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/windows/egl/context.h"
@@ -40,6 +41,10 @@ struct D3DFeatureLevel {
   int major;
   int minor;
 };
+
+// Parses a feature level written as "<major>_<minor>", such as "10_0".
+// Returns nullopt if |value| is not in that form.
+std::optional<D3DFeatureLevel> ParseD3DFeatureLevel(std::string_view value);
 
 // A manager for initializing ANGLE correctly and using it to create and
 // destroy surfaces

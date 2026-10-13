@@ -46,5 +46,27 @@ TEST(EGLManagerTest, FeatureLevel10CapLimitsToOpenGLES2) {
   EXPECT_FALSE(CanCreateGLESContext(*capped, 3));
 }
 
+TEST(EGLManagerTest, ParseD3DFeatureLevel) {
+  std::optional<egl::D3DFeatureLevel> level = egl::ParseD3DFeatureLevel("10_0");
+  ASSERT_TRUE(level.has_value());
+  EXPECT_EQ(level->major, 10);
+  EXPECT_EQ(level->minor, 0);
+
+  level = egl::ParseD3DFeatureLevel("11_1");
+  ASSERT_TRUE(level.has_value());
+  EXPECT_EQ(level->major, 11);
+  EXPECT_EQ(level->minor, 1);
+}
+
+TEST(EGLManagerTest, ParseD3DFeatureLevelRejectsMalformed) {
+  EXPECT_EQ(egl::ParseD3DFeatureLevel(""), std::nullopt);
+  EXPECT_EQ(egl::ParseD3DFeatureLevel("10"), std::nullopt);
+  EXPECT_EQ(egl::ParseD3DFeatureLevel("10.0"), std::nullopt);
+  EXPECT_EQ(egl::ParseD3DFeatureLevel("10_"), std::nullopt);
+  EXPECT_EQ(egl::ParseD3DFeatureLevel("_0"), std::nullopt);
+  EXPECT_EQ(egl::ParseD3DFeatureLevel("10_0 "), std::nullopt);
+  EXPECT_EQ(egl::ParseD3DFeatureLevel("ten_zero"), std::nullopt);
+}
+
 }  // namespace testing
 }  // namespace flutter

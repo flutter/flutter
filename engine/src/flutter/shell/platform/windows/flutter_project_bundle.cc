@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/windows/flutter_project_bundle.h"
 
+#include <cstdlib>
 #include <filesystem>
 
 #include "flutter/fml/logging.h"
@@ -12,6 +13,32 @@
 #include "flutter/shell/platform/common/path_utils.h"
 
 namespace flutter {
+
+namespace {
+
+// Returns the D3D11 feature level cap from the environment, if set. The cap
+// lets tests emulate older GPUs, where ANGLE may only create OpenGL ES 2.0
+// contexts.
+std::optional<egl::D3DFeatureLevel> GetMaxD3DFeatureLevelFromEnvironment() {
+  // Like engine switches, only read the environment in debug and profile.
+#ifndef FLUTTER_RELEASE
+  constexpr char kKey[] = "FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL";
+  const char* value = std::getenv(kKey);
+  if (value == nullptr) {
+    return std::nullopt;
+  }
+  std::optional<egl::D3DFeatureLevel> level = egl::ParseD3DFeatureLevel(value);
+  if (!level.has_value()) {
+    FML_LOG(WARNING) << "Ignoring " << kKey << "=" << value
+                     << "; expected a feature level such as 10_0.";
+  }
+  return level;
+#else
+  return std::nullopt;
+#endif  // !FLUTTER_RELEASE
+}
+
+}  // namespace
 
 FlutterProjectBundle::FlutterProjectBundle(
     const FlutterDesktopEngineProperties& properties)
@@ -43,6 +70,8 @@ FlutterProjectBundle::FlutterProjectBundle(
       static_cast<FlutterImpellerSwitch>(properties.impeller_switch);
 
   enable_flutter_gpu_ = properties.enable_flutter_gpu;
+
+  max_d3d_feature_level_ = GetMaxD3DFeatureLevelFromEnvironment();
 
   // Resolve any relative paths.
   if (assets_path_.is_relative() || icu_path_.is_relative() ||

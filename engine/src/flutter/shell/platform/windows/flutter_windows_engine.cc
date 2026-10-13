@@ -214,7 +214,8 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   // framebuffer. The Skia path still expects OpenGL's bottom-left origin.
   egl_manager_ = egl::Manager::Create(
       static_cast<egl::GpuPreference>(project_->gpu_preference()),
-      /*allow_inverted_surface=*/enable_impeller_);
+      /*allow_inverted_surface=*/enable_impeller_,
+      project_->max_d3d_feature_level());
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
   display_manager_ = std::make_shared<DisplayManagerWin32>(this);
