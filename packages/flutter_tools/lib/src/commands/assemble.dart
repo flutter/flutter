@@ -99,11 +99,10 @@ class AssembleCommand extends FlutterCommand {
   AssembleCommand({
     required this._buildSystem,
     required this._featureFlags,
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     bool verboseHelp = false,
   }) : _toolContext = toolContext,
-       _verboseHelp = verboseHelp,
-       super(toolContext: toolContext) {
+       _verboseHelp = verboseHelp {
     requiresPubspecYaml();
     argParser.addMultiOption(
       'define',

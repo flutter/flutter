@@ -51,6 +51,14 @@ abstract interface class NativeDriver {
   /// Whether the device is an emulator.
   Future<bool> get isEmulator;
 
+  /// Waits until the first frame is displayed on the native surface/view.
+  ///
+  /// Unlike [FlutterDriver.waitUntilFirstFrameRasterized], which only completes
+  /// when the Flutter engine completes rasterization of the first frame, this
+  /// method completes when the native embedding/surface has actually presented
+  /// and displayed the first frame pixels.
+  Future<void> waitUntilFirstFrameDisplayed();
+
   /// Take a screenshot using a platform-specific mechanism.
   ///
   /// The image is returned as an opaque handle that can be used to retrieve

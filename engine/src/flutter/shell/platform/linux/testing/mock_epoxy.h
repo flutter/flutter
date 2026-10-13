@@ -125,6 +125,7 @@ class MockEpoxy {
   MOCK_METHOD(void,
               glViewport,
               (GLint x, GLint y, GLsizei width, GLsizei height));
+  MOCK_METHOD(void, eglSwapBuffers, ());
 
   // The size reported for EGL surfaces. Zero by default, so anything drawing
   // to a mock surface sees a size change on its first frame.

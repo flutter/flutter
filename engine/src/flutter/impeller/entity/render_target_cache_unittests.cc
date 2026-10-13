@@ -163,5 +163,25 @@ TEST_P(RenderTargetCacheTest, CreateWithEmptySize) {
   }
 }
 
+TEST_P(RenderTargetCacheTest, ClearDropsAllCachedTextures) {
+  auto render_target_cache = RenderTargetCache(
+      GetContext()->GetResourceAllocator(), /*keep_alive_frame_count=*/4);
+
+  render_target_cache.Start();
+  RenderTarget target1 =
+      render_target_cache.CreateOffscreen(*GetContext(), {100, 100}, 1);
+  RenderTarget target2 =
+      render_target_cache.CreateOffscreen(*GetContext(), {200, 200}, 1);
+  render_target_cache.End();
+
+  EXPECT_TRUE(target1.IsValid());
+  EXPECT_TRUE(target2.IsValid());
+  EXPECT_EQ(render_target_cache.CachedTextureCount(), 2u);
+
+  render_target_cache.Clear();
+
+  EXPECT_EQ(render_target_cache.CachedTextureCount(), 0u);
+}
+
 }  // namespace testing
 }  // namespace impeller

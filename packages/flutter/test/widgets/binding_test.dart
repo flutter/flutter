@@ -837,7 +837,7 @@ void main() {
     expect(errorDetails.exception, isAssertionError);
     const toMatch = '...     Normal element mounting (';
     expect(toMatch.allMatches(errorDetails.toString()).length, 1);
-  }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87875
+  }, skip: kIsWasm); // https://github.com/flutter/flutter/issues/87875
 
   group('WidgetsBindingObserver callbacks handle exceptions gracefully', () {
     testWidgets('didChangeAppLifecycleState', (WidgetTester tester) async {

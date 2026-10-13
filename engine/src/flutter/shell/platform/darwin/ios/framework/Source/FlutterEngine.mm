@@ -428,7 +428,15 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   if (!self.platformView) {
     return;
   }
+  auto vsync_waiter = _shell->GetVsyncWaiter().lock();
+  auto vsync_waiter_ios = std::static_pointer_cast<flutter::VsyncWaiterIOS>(vsync_waiter);
+  if (vsync_waiter_ios) {
+    vsync_waiter_ios->SetDispatchingEvent(true);
+  }
   self.platformView->DispatchPointerDataPacket(std::move(packet));
+  if (vsync_waiter_ios) {
+    vsync_waiter_ios->SetDispatchingEvent(false);
+  }
 }
 
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
@@ -840,22 +848,34 @@ NSString* const kFlutterApplicationRegistrarKey = @"io.flutter.flutter.applicati
   self.shell.RunEngine(std::move(configuration));
 }
 
-- (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
-    withVMServicePublication:(BOOL)doesVMServicePublication {
+/// Takes ownership of `shell` and initializes engine-owned objects whose lifetime is tied to shell
+/// lifetime.
+- (void)adoptShell:(std::unique_ptr<flutter::Shell>)shell {
+  FML_DCHECK(shell);
   _shell = std::move(shell);
   _platformTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
       initWithTaskRunner:_shell->GetTaskRunners().GetPlatformTaskRunner()];
   _rasterTaskRunnerWrapper = [[FlutterFMLTaskRunner alloc]
       initWithTaskRunner:_shell->GetTaskRunners().GetRasterTaskRunner()];
+}
 
+/// Configures the engine.
+///
+/// Wires up platform channels, pushes initial state to the framework and starts the VM service
+/// publisher.
+- (void)configureForRunningShellWithVMServicePublication:(BOOL)doesVMServicePublication {
   [self setUpChannels];
   [self onLocaleUpdated:nil];
   [self updateDisplays];
   self.publisher = [[FlutterDartVMServicePublisher alloc]
       initWithEnableVMServicePublication:doesVMServicePublication];
   [self maybeSetupPlatformViewChannels];
-  _shell->SetGpuAvailability(_isGpuDisabled ? flutter::GpuAvailability::kUnavailable
-                                            : flutter::GpuAvailability::kAvailable);
+}
+
+- (void)setUpShell:(std::unique_ptr<flutter::Shell>)shell
+    withVMServicePublication:(BOOL)doesVMServicePublication {
+  [self adoptShell:std::move(shell)];
+  [self configureForRunningShellWithVMServicePublication:doesVMServicePublication];
 }
 
 + (BOOL)isProfilerEnabled {
@@ -1204,6 +1224,11 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+       translateSelectedText:(NSString*)selectedText {
+  [self.platformPlugin showTranslateViewControllerForTerm:selectedText];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     performContextMenuCustomActionWithActionID:(NSString*)actionID
                                textInputClient:(int)client {
   [self.platformChannel invokeMethod:@"ContextMenu.onPerformCustomAction"
@@ -1312,6 +1337,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 
     [self.platformViewsChannel invokeMethod:@"viewFocused" arguments:@(platform_view_id)];
   });
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    didRestoreFirstResponderWithTextInputClient:(int)client
+                                         result:(FlutterResult)callback {
+  [self.textInputChannel invokeMethod:@"TextInputClient.onFocusReceived"
+                            arguments:@[ @(client) ]
+                               result:callback];
 }
 
 #pragma mark - Undo Manager Delegate
