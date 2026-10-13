@@ -1,0 +1,28 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The root target of the Bazel-wrapped GN build of the GPU test backends:
+# ANGLE (GL on Vulkan) and SwiftShader (Vulkan on the CPU), with the Vulkan
+# loader ANGLE opens (see BUILD.bazel next to this file). Not part of the
+# engine's own GN build, which never references this directory: gn_build
+# runs GN with `--root-target=//flutter/build/bazel/gl_wrap`, so that only
+# this file, the targets below and their dependencies are loaded.
+
+group("gl_wrap") {
+  testonly = true
+  deps = [
+    ":angle",
+    "//flutter/third_party/swiftshader",
+    "//flutter/third_party/vulkan-deps/vulkan-loader/src:libvulkan",
+  ]
+}
+
+# The objects of this group's closure, minus the archive boundaries, make
+# the libangle.a archive.
+group("angle") {
+  deps = [
+    "//flutter/third_party/angle:libEGL_static",
+    "//flutter/third_party/angle:libGLESv2_static",
+  ]
+}

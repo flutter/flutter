@@ -79,6 +79,14 @@ filegroup(
 # The script GN's bin_to_assembly template runs (//flutter/build/bin_to_obj.gni).
 exports_files(["runtime/tools/bin_to_assembly.py"])
 
+# ANGLE's gni imports this one file of the Dart tree (through
+# build_overrides/angle.gni's angle_has_build); for the wrapped GN build of
+# the GPU test backends.
+filegroup(
+    name = "gclient_args",
+    srcs = ["build/config/gclient_args.gni"],
+)
+
 # Everything the engine's GN build of the Dart SDK targets reads, as measured
 # on the build graph of those targets (GN's own inputs, the compiler's
 # dependency output and the Dart compilers' depfiles): about 12k of the
