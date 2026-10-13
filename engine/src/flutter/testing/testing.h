@@ -6,6 +6,7 @@
 #define FLUTTER_TESTING_TESTING_H_
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "flutter/fml/file.h"
@@ -53,6 +54,23 @@ const char* GetFixturesPath();
 const char* GetTestingAssetsPath();
 
 //------------------------------------------------------------------------------
+/// @brief      Returns the URI the Dart compiler recorded for a source file of
+///             the tree, for `Dart_LookupLibrary` and the like: the build's
+///             source root URI prefix followed by `relative_path`, a path
+///             relative to the source root (`flutter/runtime/fixtures/...`).
+///             A GN build compiles sources as `file://` plus their absolute
+///             paths; other builds may compile under a virtual root scheme.
+///
+///             Setting the `FLUTTER_TEST_SOURCE_URI_PREFIX` environment
+///             variable overrides the compiled-in prefix.
+///
+/// @param[in]  relative_path  The path relative to the source root.
+///
+/// @return     The URI.
+///
+std::string GetSourceUri(std::string_view relative_path);
+
+//------------------------------------------------------------------------------
 /// @name       Compiled-in default locations.
 ///
 ///             These are not implemented in this library. The build system
@@ -66,6 +84,7 @@ const char* GetTestingAssetsPath();
 const char* GetCompiledInSourcePath();
 const char* GetCompiledInFixturesPath();
 const char* GetCompiledInTestingAssetsPath();
+const char* GetCompiledInSourceUriPrefix();
 /// @}
 
 //------------------------------------------------------------------------------

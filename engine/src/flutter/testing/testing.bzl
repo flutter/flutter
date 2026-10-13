@@ -9,9 +9,16 @@ load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 # Where tests run from: the runfiles directory of the main repository. Paths
-# below are relative to it, so nothing absolute is compiled into a test.
-_SOURCE_DIR = "engine/src"
+# below are relative to it, so nothing absolute is compiled into a test. The
+# source directory has GN's trailing slash (rebase_path("//") ends in one).
+_SOURCE_DIR = "engine/src/"
 _TESTING_ASSETS_DIR = "engine/src/flutter/testing/assets"
+
+# The URI the Dart compiler records for a source file of the tree, which a
+# test looks a library up by (GetSourceUri): Dart sources are compiled under
+# a virtual root scheme over the execution root, so the URI is
+# machine-independent and the same in every sandbox.
+_SOURCE_URI_PREFIX = "org-dartlang-root:///" + _SOURCE_DIR
 
 def _quoted_define(name, value):
     return '%s=\\"%s\\"' % (name, value)
@@ -61,6 +68,7 @@ def flutter_test_fixtures(name, fixtures = [], visibility = None, **kwargs):
             _quoted_define("FLUTTER_TEST_SOURCE_DIR_DEFAULT", _SOURCE_DIR),
             _quoted_define("FLUTTER_TEST_FIXTURES_DIR_DEFAULT", fixtures_dir),
             _quoted_define("FLUTTER_TEST_TESTING_ASSETS_DIR_DEFAULT", _TESTING_ASSETS_DIR),
+            _quoted_define("FLUTTER_TEST_SOURCE_URI_PREFIX_DEFAULT", _SOURCE_URI_PREFIX),
         ],
         data = copies,
         # The functions are referenced from testing.cc, which sits in an
