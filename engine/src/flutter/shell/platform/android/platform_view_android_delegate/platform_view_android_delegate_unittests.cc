@@ -37,6 +37,7 @@ EncodedSemantics Encode(
         encoded.string_attribute_args = std::move(args);
       });
   EXPECT_CALL(*jni_mock, FlutterViewUpdateCustomAccessibilityActions)
+      .Times(::testing::AtMost(1))
       .WillOnce([&encoded](std::vector<uint8_t> actions_buffer,
                            std::vector<std::string> strings) {
         encoded.actions_buffer = std::move(actions_buffer);
@@ -45,6 +46,17 @@ EncodedSemantics Encode(
   PlatformViewAndroidDelegate delegate(jni_mock);
   update(delegate);
   return encoded;
+}
+
+// Sends engine semantics types through the C types that the engine hands to
+// update_semantics_callback2.
+void UpdateSemanticsThroughEmbedderApi(
+    PlatformViewAndroidDelegate& delegate,
+    const SemanticsNodeUpdates& update,
+    const CustomAccessibilityActionUpdates& actions) {
+  // The embedder update points into `update` and `actions`.
+  EmbedderSemanticsUpdate2 embedder_update(/*view_id=*/0, update, actions);
+  delegate.UpdateSemantics(*embedder_update.get());
 }
 
 StringAttributes BothAttributeKinds(const std::string& locale) {
@@ -138,42 +150,58 @@ SemanticsNode NodeWithEveryField(int32_t id,
 }  // namespace
 
 TEST(PlatformViewShell,
-     UpdateSemanticsFromEmbedderUpdateEncodesLikeEngineUpdate) {
+     UpdateSemanticsEncodesFieldsNewToFlutterSemanticsNode2) {
   SemanticsNodeUpdates nodes;
-  nodes[1] = NodeWithEveryField(1, SemanticsTristate::kTrue,
-                                SemanticsCheckState::kTrue);
-  nodes[2] = NodeWithEveryField(2, SemanticsTristate::kFalse,
-                                SemanticsCheckState::kMixed);
-  nodes[3] = NodeWithEveryField(3, SemanticsTristate::kNone,
-                                SemanticsCheckState::kNone);
-  CustomAccessibilityActionUpdates actions;
-  for (int32_t id : {101, 102}) {
-    CustomAccessibilityAction action;
-    action.id = id;
-    action.overrideId = id % 2 == 0 ? 0 : 1 << 4;
-    action.label = "action" + std::to_string(id);
-    action.hint = "hint" + std::to_string(id);
-    actions[id] = action;
+  const SemanticsNode node = NodeWithEveryField(1, SemanticsTristate::kTrue,
+                                                SemanticsCheckState::kMixed);
+  nodes[node.id] = node;
+
+  EncodedSemantics encoded = Encode([&](PlatformViewAndroidDelegate& delegate) {
+    UpdateSemanticsThroughEmbedderApi(delegate, nodes, {});
+  });
+
+  // Fixed positions at the start of a node, in int32 slots.
+  constexpr size_t kMaxValueLengthSlot = 4;
+  constexpr size_t kCurrentValueLengthSlot = 5;
+  constexpr size_t kTraversalParentSlot = 11;
+  constexpr size_t kRoleSlot = 15;
+  const auto* slots = reinterpret_cast<const int32_t*>(encoded.buffer.data());
+  const auto* floats = reinterpret_cast<const float*>(encoded.buffer.data());
+  const size_t slot_count = encoded.buffer.size() / sizeof(int32_t);
+  EXPECT_EQ(slots[kMaxValueLengthSlot], node.maxValueLength);
+  EXPECT_EQ(slots[kCurrentValueLengthSlot], node.currentValueLength);
+  EXPECT_EQ(slots[kTraversalParentSlot], node.traversalParent);
+  EXPECT_EQ(slots[kRoleSlot], static_cast<int32_t>(node.role));
+  for (const std::string& expected :
+       {node.linkUrl, node.locale, node.minValue, node.maxValue}) {
+    EXPECT_THAT(encoded.strings, ::testing::Contains(expected));
   }
 
-  EncodedSemantics from_engine =
-      Encode([&](PlatformViewAndroidDelegate& delegate) {
-        delegate.UpdateSemantics(nodes, actions);
-      });
-  // The embedder update points into `nodes` and `actions`, which outlive it.
-  EmbedderSemanticsUpdate2 embedder_update(/*view_id=*/0, nodes, actions);
-  EncodedSemantics from_embedder =
-      Encode([&](PlatformViewAndroidDelegate& delegate) {
-        delegate.UpdateSemantics(*embedder_update.get());
-      });
-
-  ASSERT_FALSE(from_engine.buffer.empty());
-  EXPECT_EQ(from_embedder.buffer, from_engine.buffer);
-  EXPECT_EQ(from_embedder.strings, from_engine.strings);
-  EXPECT_EQ(from_embedder.string_attribute_args,
-            from_engine.string_attribute_args);
-  EXPECT_EQ(from_embedder.actions_buffer, from_engine.actions_buffer);
-  EXPECT_EQ(from_embedder.action_strings, from_engine.action_strings);
+  // The node ends with: rect (4), transform (16), hit test transform (16),
+  // then the traversal, hit test and custom action lists, each prefixed
+  // with its length.
+  size_t slot = slot_count;
+  slot -= node.customAccessibilityActions.size();
+  EXPECT_EQ(slots[--slot], 1);
+  slot -= node.childrenInHitTestOrder.size();
+  ASSERT_EQ(slots[--slot], 3);
+  EXPECT_EQ(slots[slot + 1], node.childrenInHitTestOrder[0]);
+  EXPECT_EQ(slots[slot + 3], node.childrenInHitTestOrder[2]);
+  slot -= node.childrenInTraversalOrder.size();
+  ASSERT_EQ(slots[--slot], 2);
+  constexpr size_t kMatrixSlots = 16;
+  SkScalar hit_test[kMatrixSlots];
+  node.hitTestTransform.getColMajor(hit_test);
+  SkScalar transform[kMatrixSlots];
+  node.transform.getColMajor(transform);
+  slot -= kMatrixSlots;
+  for (size_t i = 0; i < kMatrixSlots; ++i) {
+    EXPECT_FLOAT_EQ(floats[slot + i], hit_test[i]) << "hit test " << i;
+  }
+  slot -= kMatrixSlots;
+  for (size_t i = 0; i < kMatrixSlots; ++i) {
+    EXPECT_FLOAT_EQ(floats[slot + i], transform[i]) << "transform " << i;
+  }
 }
 
 TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
@@ -247,7 +275,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesFlutterViewUpdateSemantics) {
                                          expected_string_attribute_args));
   // Creates empty custom actions.
   flutter::CustomAccessibilityActionUpdates actions;
-  delegate->UpdateSemantics(update, actions);
+  UpdateSemanticsThroughEmbedderApi(*delegate, update, actions);
 }
 
 TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLinkUrl) {
@@ -321,7 +349,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLinkUrl) {
                                          expected_string_attribute_args));
   // Creates empty custom actions.
   flutter::CustomAccessibilityActionUpdates actions;
-  delegate->UpdateSemantics(update, actions);
+  UpdateSemanticsThroughEmbedderApi(*delegate, update, actions);
 }
 
 TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLocale) {
@@ -396,7 +424,7 @@ TEST(PlatformViewShell, UpdateSemanticsDoesUpdateLocale) {
                                          expected_string_attribute_args));
   // Creates empty custom actions.
   flutter::CustomAccessibilityActionUpdates actions;
-  delegate->UpdateSemantics(update, actions);
+  UpdateSemanticsThroughEmbedderApi(*delegate, update, actions);
 }
 
 TEST(PlatformViewShell,
@@ -497,7 +525,7 @@ TEST(PlatformViewShell,
                                          expected_string_attribute_args));
   // Creates empty custom actions.
   flutter::CustomAccessibilityActionUpdates actions;
-  delegate->UpdateSemantics(update, actions);
+  UpdateSemanticsThroughEmbedderApi(*delegate, update, actions);
 }
 
 TEST(PlatformViewShell,
@@ -529,7 +557,7 @@ TEST(PlatformViewShell,
                              expected_actions_buffer, expected_action_strings));
   // Creates empty update.
   flutter::SemanticsNodeUpdates update;
-  delegate->UpdateSemantics(update, actions);
+  UpdateSemanticsThroughEmbedderApi(*delegate, update, actions);
 }
 
 TEST(PlatformViewShell, UpdateSemanticsEmptyDoesNotCrash) {
@@ -545,7 +573,7 @@ TEST(PlatformViewShell, UpdateSemanticsEmptyDoesNotCrash) {
 
   flutter::SemanticsNodeUpdates update;
   flutter::CustomAccessibilityActionUpdates actions;
-  delegate->UpdateSemantics(update, actions);
+  UpdateSemanticsThroughEmbedderApi(*delegate, update, actions);
 }
 
 }  // namespace testing

@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 
-#include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -18,7 +17,7 @@ namespace flutter {
 class PlatformViewAndroidDelegate {
  public:
   static constexpr size_t kBytesPerNode =
-      73 * sizeof(int32_t);  // The # fields in SemanticsNode
+      73 * sizeof(int32_t);  // The # fields of each encoded node
   static constexpr size_t kBytesPerChild = sizeof(int32_t);
   static constexpr size_t kBytesPerCustomAction = sizeof(int32_t);
   static constexpr size_t kBytesPerAction = 4 * sizeof(int32_t);
@@ -26,14 +25,10 @@ class PlatformViewAndroidDelegate {
   static constexpr int kEmptyStringIndex = -1;
   explicit PlatformViewAndroidDelegate(
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade);
-  void UpdateSemantics(
-      const flutter::SemanticsNodeUpdates& update,
-      const flutter::CustomAccessibilityActionUpdates& actions);
 
   //----------------------------------------------------------------------------
   /// @brief      Encodes `update` for AccessibilityBridge.java and sends it
-  ///             through the JNI facade. The encoding is the same as for
-  ///             engine semantics updates.
+  ///             through the JNI facade.
   ///
   void UpdateSemantics(const FlutterSemanticsUpdate2& update);
 

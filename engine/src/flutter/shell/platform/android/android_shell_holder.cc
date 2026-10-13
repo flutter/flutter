@@ -520,6 +520,12 @@ FlutterProjectArgs MakeProjectArgs() {
     static_cast<AndroidEngineCallbacks*>(user_data)->vsync_waiter->AwaitVSync(
         baton);
   };
+  args.update_semantics_callback2 = [](const FlutterSemanticsUpdate2* update,
+                                       void* user_data) {
+    PlatformViewAndroidDelegate(
+        static_cast<AndroidEngineCallbacks*>(user_data)->jni_facade)
+        .UpdateSemantics(*update);
+  };
   args.compute_platform_resolved_locale_callback2 =
       [](const FlutterLocale** supported_locales, size_t locale_count,
          void* user_data) -> const FlutterLocale* {
@@ -555,21 +561,13 @@ FlutterProjectArgs MakeProjectArgs() {
 }
 
 // The dispatch table of a PlatformViewAndroid: the FlutterProjectArgs
-// callbacks, translated the way FlutterEngineInitialize translates them,
-// plus semantics, which still arrive in engine types.
+// callbacks, translated the way FlutterEngineInitialize translates them.
 PlatformViewAndroid::PlatformDispatchTable MakePlatformDispatchTable(
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
     AndroidEngineCallbacks* callbacks) {
   const FlutterProjectArgs args = MakeProjectArgs();
   fml::StatusOr<PlatformViewAndroid::PlatformDispatchTable> table =
       PlatformDispatchTableFromProjectArgs(&args, callbacks);
   FML_CHECK(table.ok()) << table.status().message();
-  table.value().update_semantics_callback =
-      [jni_facade](int64_t view_id, const flutter::SemanticsNodeUpdates& update,
-                   const flutter::CustomAccessibilityActionUpdates& actions) {
-        PlatformViewAndroidDelegate(jni_facade)
-            .UpdateSemantics(update, actions);
-      };
   return std::move(table.value());
 }
 
@@ -670,12 +668,11 @@ AndroidShellHolder::AndroidShellHolder(
         vsync_waiter = std::make_shared<VsyncWaiterAndroid>(runners);
         callbacks->vsync_waiter = vsync_waiter;
         auto platform_view_android = std::make_unique<PlatformViewAndroid>(
-            delegate,       // delegate
-            runners,        // task runners
-            jni_facade,     // JNI interop
-            rendering_api,  // rendering API
-            MakePlatformDispatchTable(jni_facade,
-                                      callbacks)  // embedder callbacks
+            delegate,                             // delegate
+            runners,                              // task runners
+            jni_facade,                           // JNI interop
+            rendering_api,                        // rendering API
+            MakePlatformDispatchTable(callbacks)  // embedder callbacks
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
@@ -878,12 +875,11 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
         vsync_waiter = std::make_shared<VsyncWaiterAndroid>(runners);
         callbacks->vsync_waiter = vsync_waiter;
         auto platform_view_android = std::make_unique<PlatformViewAndroid>(
-            delegate,         // delegate
-            runners,          // task runners
-            jni_facade,       // JNI interop
-            android_context,  // Android context
-            MakePlatformDispatchTable(jni_facade,
-                                      callbacks)  // embedder callbacks
+            delegate,                             // delegate
+            runners,                              // task runners
+            jni_facade,                           // JNI interop
+            android_context,                      // Android context
+            MakePlatformDispatchTable(callbacks)  // embedder callbacks
         );
         weak_platform_view = platform_view_android->GetWeakPtr();
         return platform_view_android;
