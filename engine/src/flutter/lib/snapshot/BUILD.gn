@@ -258,6 +258,12 @@ if (host_os == "mac" &&
   }
 }
 
+# The symbols the linkable snapshots define, for code that references them
+# without depending on their generation (//flutter/runtime).
+source_set("snapshot_headers") {
+  sources = [ "snapshot.h" ]
+}
+
 source_set("snapshot") {
   deps = [
     ":isolate_snapshot_data_linkable",
@@ -268,6 +274,8 @@ source_set("snapshot") {
   sources = get_target_outputs(":isolate_snapshot_data_linkable") +
             get_target_outputs(":isolate_snapshot_instructions_linkable") +
             get_target_outputs(":platform_strong_dill_linkable")
+
+  public_deps = [ ":snapshot_headers" ]
 }
 
 # Compiles the Dart/Flutter core libraries to kernel bytecode.
