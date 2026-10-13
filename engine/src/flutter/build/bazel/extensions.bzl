@@ -253,6 +253,13 @@ _TOOL_REPOSITORIES = {
         path = "engine/src/flutter/buildtools/linux-x64/clang",
         build_file = _OVERLAYS + ":clang/BUILD.clang.bazel",
     ),
+    # The prebuilt Dart SDK (GN's host_prebuilt_dart_sdk): the runtime and
+    # snapshots of the Dart tools the engine runs but does not build, the
+    # frontend server first (build/bazel/dart/kernel.bzl).
+    "dart_sdk_linux_x64": struct(
+        path = "engine/src/flutter/prebuilts/linux-x64/dart-sdk",
+        build_file = _OVERLAYS + ":dart_sdk/BUILD.dart_sdk.bazel",
+    ),
     "gn": struct(
         path = "engine/src/flutter/third_party/gn",
         build_file = _OVERLAYS + ":gn/BUILD.gn_tool.bazel",

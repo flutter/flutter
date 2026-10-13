@@ -17,3 +17,38 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = ["//engine/src:include_root"],
 )
+
+# The engine's Dart package configuration, which `gclient sync` writes (the
+# pub_get_offline hook) and GN's Dart compiles read (--packages). What the
+# frontend server resolves `package:` imports through; the fixtures compiled
+# so far import none, so nothing it points at is declared.
+filegroup(
+    name = "package_config",
+    srcs = [".dart_tool/package_config.json"],
+    visibility = ["//visibility:public"],
+)
+
+# config("export_dynamic_symbols") in BUILD.gn: the symbols a test binary
+# keeps in its dynamic symbol table, for the Dart VM to resolve at runtime
+# (the snapshot symbols, dart:ffi's lookups). GNU --dynamic-list on ELF, the
+# macOS linker's exported symbols list on a Mac; the files are
+# //flutter/common's.
+cc_library(
+    name = "export_dynamic_symbols",
+    additional_linker_inputs = select({
+        "@platforms//os:macos": ["//engine/src/flutter/common:exported_symbols_mac.sym"],
+        "//conditions:default": ["//engine/src/flutter/common:exported_symbols.sym"],
+    }),
+    linkopts = select({
+        "@platforms//os:macos": [
+            "-Xlinker",
+            "-exported_symbols_list",
+            "-Xlinker",
+            "$(execpath //engine/src/flutter/common:exported_symbols_mac.sym)",
+        ],
+        "//conditions:default": [
+            "-Wl,--dynamic-list=$(execpath //engine/src/flutter/common:exported_symbols.sym)",
+        ],
+    }),
+    visibility = ["//visibility:public"],
+)

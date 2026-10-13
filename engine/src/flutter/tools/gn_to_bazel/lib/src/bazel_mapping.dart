@@ -112,6 +112,8 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/dart/runtime:dart_api': '@dart//:dart_api_headers',
   '//flutter/third_party/dart/runtime:libdart_jit':
       '//engine/src/flutter/build/bazel/dart_wrap:libdart_jit',
+  '//flutter/third_party/dart/runtime:libdart_aotruntime':
+      '//engine/src/flutter/build/bazel/dart_wrap:libdart_aotruntime',
   '//flutter/third_party/dart/runtime/bin:common_embedder_dart_io':
       '//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io',
   '//flutter/third_party/dart/runtime/bin:elf_loader':
@@ -248,6 +250,8 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/flow:flow': _vulkanHeadersCopts,
   '//flutter/lib/ui:ui': _vulkanHeadersCopts,
   '//flutter/runtime:runtime': _vulkanHeadersCopts,
+  '//flutter/testing:dart': _vulkanHeadersCopts,
+  '//flutter/testing:fixture_test': _vulkanHeadersCopts,
   '//flutter/shell/gpu:gpu_surface_software': _vulkanHeadersCopts,
   '//flutter/flutter_vma:flutter_vma': _vulkanCopts,
   '//flutter/flutter_vma:flutter_skia_vma': _vulkanCopts,
@@ -526,6 +530,9 @@ final class ConfigWarningSet extends ConfigEffect {
 /// The configs the engine's build files mention, outside their own package.
 const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   '//flutter:config': ConfigDependency('//engine/src/flutter:config'),
+  '//flutter:export_dynamic_symbols': ConfigDependency(
+    '//engine/src/flutter:export_dynamic_symbols',
+  ),
   '//flutter/common:flutter_config': ConfigDependency('//engine/src/flutter/common:flutter_config'),
   '//flutter/impeller:impeller_public_config': ConfigDependency(
     '//engine/src/flutter/impeller:impeller_public_config',
@@ -731,6 +738,9 @@ enum TemplateArgumentKind {
   /// Files of the package (`fixtures`, `flatbuffers`).
   files,
 
+  /// One file (`dart_main`).
+  file,
+
   /// Labels (`deps`).
   labels,
 
@@ -794,7 +804,32 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
     'flutter_test_fixtures',
     <String, TemplateArgument>{
       'fixtures': TemplateArgument('fixtures', TemplateArgumentKind.files),
+      'dart_main': TemplateArgument('dart_main', TemplateArgumentKind.file),
+      'use_target_as_artifact_prefix': TemplateArgument(
+        'use_target_as_artifact_prefix',
+        TemplateArgumentKind.scalar,
+      ),
       'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+    },
+  ),
+  // testing.gni's dart_snapshot_kernel and dart_snapshot_aot: a Dart entry
+  // point to kernel with the test modes' arguments, and a kernel to an AOT
+  // ELF snapshot.
+  'dart_snapshot_kernel': TemplateMapping(
+    '//engine/src/flutter/testing:testing.bzl',
+    'flutter_dart_snapshot_kernel',
+    <String, TemplateArgument>{
+      'dart_main': TemplateArgument('dart_main', TemplateArgumentKind.file),
+      'dart_kernel': TemplateArgument('dart_kernel', TemplateArgumentKind.file),
+    },
+  ),
+  'dart_snapshot_aot': TemplateMapping(
+    '//engine/src/flutter/testing:testing.bzl',
+    'flutter_dart_snapshot_aot',
+    <String, TemplateArgument>{
+      'dart_kernel': TemplateArgument('dart_kernel', TemplateArgumentKind.file),
+      'dart_elf_filename': TemplateArgument('dart_elf_filename', TemplateArgumentKind.scalar),
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
     },
   ),
   // build/secondary/flutter/third_party/flatbuffers/flatbuffers.gni: flatc
