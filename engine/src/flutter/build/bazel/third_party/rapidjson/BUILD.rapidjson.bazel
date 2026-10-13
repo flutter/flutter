@@ -16,21 +16,36 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 
 package(default_visibility = ["//visibility:public"])
 
+_DEFINES = [
+    "RAPIDJSON_HAS_STDSTRING",
+    "RAPIDJSON_HAS_CXX11_RANGE_FOR",
+    "RAPIDJSON_HAS_CXX11_RVALUE_REFS",
+    "RAPIDJSON_HAS_CXX11_TYPETRAITS",
+    "RAPIDJSON_HAS_CXX11_NOEXCEPT",
+]
+
 cc_library(
     name = "rapidjson",
     hdrs = glob(["include/rapidjson/**/*.h"]),
     # config("rapidjson_config"): rapidjson needs these defines to support
     # C++11 features. These features are intentionally not autodetected by
     # rapidjson.
-    defines = [
-        "RAPIDJSON_HAS_STDSTRING",
-        "RAPIDJSON_HAS_CXX11_RANGE_FOR",
-        "RAPIDJSON_HAS_CXX11_RVALUE_REFS",
-        "RAPIDJSON_HAS_CXX11_TYPETRAITS",
-        "RAPIDJSON_HAS_CXX11_NOEXCEPT",
-    ],
+    defines = _DEFINES,
     includes = [
         ".",
         "include",
     ],
+    deps = [":flutter_root_headers"],
+)
+
+# The same headers under the path engine code spells from //flutter
+# ("third_party/rapidjson/include/rapidjson/writer.h" in shell_unittests.cc,
+# the Fuchsia and Windows embedders), which GN's `-I//flutter` resolves and
+# which here, with the tree in a repository of its own, an include_prefix
+# provides.
+cc_library(
+    name = "flutter_root_headers",
+    hdrs = glob(["include/rapidjson/**/*.h"]),
+    defines = _DEFINES,
+    include_prefix = "third_party/rapidjson",
 )
