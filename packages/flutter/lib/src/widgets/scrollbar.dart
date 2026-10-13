@@ -2333,8 +2333,10 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     assert(_cachedController != null);
     final ScrollPosition position = _cachedController!.position;
     final ScrollContext scrollContext = position.context;
+    // Do not register an inherited dependency during a pointer event.
     final ScrollBehavior? scrollableBehavior = scrollContext is ScrollableState
-        ? scrollContext.widget.scrollBehavior
+        ? scrollContext.widget.scrollBehavior ??
+              scrollContext.context.getInheritedWidgetOfExactType<ScrollConfiguration>()?.behavior
         : null;
     final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
     final bool flipAxes =

@@ -2888,7 +2888,16 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     final scrollController = ScrollController();
     addTearDown(scrollController.dispose);
 
-    Widget buildFrame({ScrollBehavior? scrollableBehavior}) {
+    Widget buildFrame({ScrollBehavior? scrollableBehavior, ScrollBehavior? inheritedBehavior}) {
+      Widget scrollable = CustomScrollView(
+        controller: scrollController,
+        scrollDirection: Axis.horizontal,
+        scrollBehavior: scrollableBehavior,
+        slivers: const <Widget>[SliverToBoxAdapter(child: SizedBox(width: 1200.0, height: 600.0))],
+      );
+      if (inheritedBehavior != null) {
+        scrollable = ScrollConfiguration(behavior: inheritedBehavior, child: scrollable);
+      }
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
@@ -2901,14 +2910,7 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
               thumbVisibility: true,
               thickness: 24.0,
               controller: scrollController,
-              child: CustomScrollView(
-                controller: scrollController,
-                scrollDirection: Axis.horizontal,
-                scrollBehavior: scrollableBehavior,
-                slivers: const <Widget>[
-                  SliverToBoxAdapter(child: SizedBox(width: 1200.0, height: 600.0)),
-                ],
-              ),
+              child: scrollable,
             ),
           ),
         ),
@@ -2946,6 +2948,20 @@ The provided ScrollController cannot be shared by multiple ScrollView widgets.''
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
     addTearDown(() => tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
+    await tester.pumpAndSettle();
+    expect(scrollController.offset, 30.0);
+
+    scrollController.jumpTo(0.0);
+    await tester.pumpWidget(
+      buildFrame(
+        inheritedBehavior: const ScrollBehavior().copyWith(
+          pointerAxisModifiers: <LogicalKeyboardKey>{LogicalKeyboardKey.altLeft},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
     await tester.sendEventToBinding(pointer.scroll(const Offset(0.0, 30.0)));
     await tester.pumpAndSettle();
     expect(scrollController.offset, 30.0);
