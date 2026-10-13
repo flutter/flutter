@@ -96,9 +96,12 @@ gn_build(
         "//third_party/zlib",
     ],
     # ANGLE: libEGL_static and libGLESv2_static and everything they are made
-    # of, in one archive (BUILD.gn's `angle` group).
+    # of, in one archive (BUILD.gn's `angle` group); and SwiftShader's driver
+    # as a static library, for the suite that links it rather than opening
+    # the shared one.
     archives = {
         "libangle.a": "//flutter/build/bazel/gl_wrap:angle",
+        "libvk_swiftshader_static.a": "//flutter/build/bazel/gl_wrap:swiftshader_static",
     },
     build_file = "BUILD.gn",
     # ANGLE's commit id (its version string), from the DEPS pin: the tree
@@ -173,6 +176,23 @@ cc_library(
 cc_library(
     name = "swiftshader",
     data = [":runtime_files"],
+)
+
+# //flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static:
+# the driver linked into the binary (gpu_surface_vulkan_unittests calls
+# vkGetInstanceProcAddr directly). Self-contained but for the C++ runtime
+# and the system libraries: SwiftShader's own SPIRV-Tools, marl and Subzero
+# are inside, which a binary can hold as long as it links no other copy of
+# SPIRV-Tools (the Vulkan surface's suite does not).
+# buildifier: disable=no-hdrs-no-alwayslink
+cc_library(
+    name = "swiftshader_static",
+    srcs = [":libvk_swiftshader_static.a"],
+    linkopts = [
+        "-ldl",
+        "-lpthread",
+    ],
+    deps = ["@vulkan-headers//:vulkan_headers"],
 )
 
 # The files a GPU test suite needs next to its binary.
