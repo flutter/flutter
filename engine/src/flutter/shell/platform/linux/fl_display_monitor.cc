@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/linux/fl_display_monitor.h"
 
 #include "flutter/shell/platform/linux/fl_engine_private.h"
+#include "flutter/shell/platform/linux/fl_gtk.h"
 
 struct _FlDisplayMonitor {
   GObject parent_instance;
@@ -67,9 +68,11 @@ static void notify_display_update(FlDisplayMonitor* self) {
     display->display_id = display_id;
     display->single_display = false;
     display->refresh_rate = gdk_monitor_get_refresh_rate(monitor) / 1000.0;
-    display->width = geometry.width;
-    display->height = geometry.height;
     display->device_pixel_ratio = gdk_monitor_get_scale_factor(monitor);
+    display->width =
+        fl_gtk_size_to_pixels(geometry.width, display->device_pixel_ratio);
+    display->height =
+        fl_gtk_size_to_pixels(geometry.height, display->device_pixel_ratio);
 #if FLUTTER_LINUX_GTK4
     g_object_unref(monitor);
 #endif

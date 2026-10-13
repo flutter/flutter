@@ -35,6 +35,12 @@ static MockGtk* mock = nullptr;
 MockGtk::MockGtk() {
   thread = g_thread_self();
   mock = this;
+  ON_CALL(*this, gdk_monitor_get_scale_factor(::testing::_))
+      .WillByDefault(::testing::Return(1));
+  ON_CALL(*this, gdk_monitor_get_geometry(::testing::_, ::testing::_))
+      .WillByDefault([](GdkMonitor*, GdkRectangle* geometry) {
+        *geometry = {0, 0, 1920, 1080};
+      });
   ON_CALL(*this, gdk_event_get_axis(::testing::_, ::testing::_, ::testing::_))
       .WillByDefault(
           [](const GdkEvent* event, GdkAxisUse axis, gdouble* value) {
@@ -154,6 +160,11 @@ GdkMonitor* gdk_display_get_monitor_at_window(GdkDisplay* display,
 
 void gdk_monitor_get_geometry(GdkMonitor* monitor, GdkRectangle* geometry) {
   check_thread();
+  if (mock != nullptr) {
+    mock->gdk_monitor_get_geometry(monitor, geometry);
+  } else {
+    *geometry = {0, 0, 1920, 1080};
+  }
 }
 
 int gdk_monitor_get_refresh_rate(GdkMonitor* monitor) {
@@ -163,7 +174,7 @@ int gdk_monitor_get_refresh_rate(GdkMonitor* monitor) {
 
 int gdk_monitor_get_scale_factor(GdkMonitor* monitor) {
   check_thread();
-  return 1;
+  return mock != nullptr ? mock->gdk_monitor_get_scale_factor(monitor) : 1;
 }
 
 GdkCursor* gdk_cursor_new_from_name(GdkDisplay* display, const gchar* name) {
