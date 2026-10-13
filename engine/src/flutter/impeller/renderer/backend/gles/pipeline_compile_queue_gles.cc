@@ -137,14 +137,18 @@ void PipelineCompileQueueGLES::Run() {
     Lock lock(mutex_);
     if (ActiveJobMap::iterator awaited_job = FindAwaitedActiveJob();
         awaited_job != active_jobs_.end()) {
+      // A thread is blocked waiting on this job, so finish it first.
       active_job = awaited_job;
     } else if (active_jobs_.size() < max_active_jobs_ &&
                !inactive_jobs_.empty()) {
+      // There is capacity for another active job, so start the oldest one.
       active_job = ActivateOldestInactiveJob();
       should_start = true;
     } else if (!active_jobs_.empty()) {
+      // At capacity or nothing left to start, so finish an active job.
       active_job = active_jobs_.begin();
     } else {
+      // No work remains; stop processing until a new job is posted.
       is_processing_ = false;
       return;
     }
