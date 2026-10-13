@@ -14,6 +14,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeToolContext;
 
 void main() {
   group('IOSDeviceSupport', () {
@@ -23,10 +24,8 @@ void main() {
       final processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
       final deviceSupport = IOSDeviceSupport(
-        logger: logger,
-        processUtils: processUtils,
+        toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
         xcode: FakeXcode(),
-        homeDirectory: null,
         modelCode: null,
         operatingSystemVersion: null,
         cpuArchitectureString: null,
@@ -47,10 +46,8 @@ void main() {
       final processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
       final deviceSupport = IOSDeviceSupport(
-        logger: logger,
-        processUtils: processUtils,
+        toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
         xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
-        homeDirectory: null,
         modelCode: null,
         operatingSystemVersion: null,
         cpuArchitectureString: null,
@@ -83,8 +80,7 @@ void main() {
       final processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
       final deviceSupport = IOSDeviceSupport(
-        logger: logger,
-        processUtils: processUtils,
+        toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
         xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
         homeDirectory: homeDir,
         modelCode: 'iPhone15,2',
@@ -122,10 +118,8 @@ void main() {
         );
 
         final deviceSupport = IOSDeviceSupport(
-          logger: logger,
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-          homeDirectory: null,
           modelCode: null,
           operatingSystemVersion: null,
           cpuArchitectureString: null,
@@ -160,10 +154,8 @@ void main() {
       );
 
       final deviceSupport = IOSDeviceSupport(
-        logger: logger,
-        processUtils: processUtils,
+        toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
         xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-        homeDirectory: null,
         modelCode: null,
         operatingSystemVersion: null,
         cpuArchitectureString: null,
@@ -208,10 +200,8 @@ void main() {
       );
 
       final deviceSupport = IOSDeviceSupport(
-        logger: logger,
-        processUtils: processUtils,
+        toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
         xcode: FakeXcode(currentVersion: Version(17, 0, 0)),
-        homeDirectory: null,
         modelCode: null,
         operatingSystemVersion: null,
         cpuArchitectureString: null,
@@ -246,10 +236,8 @@ void main() {
           );
 
           final deviceSupport = IOSDeviceSupport(
-            logger: logger,
-            processUtils: processUtils,
+            toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-            homeDirectory: null,
             modelCode: null,
             operatingSystemVersion: null,
             cpuArchitectureString: null,
@@ -295,10 +283,8 @@ void main() {
         );
 
         final deviceSupport = IOSDeviceSupport(
-          logger: logger,
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-          homeDirectory: null,
           modelCode: null,
           operatingSystemVersion: null,
           cpuArchitectureString: null,
@@ -317,13 +303,8 @@ void main() {
       group('Xcode < 16.3', () {
         testWithoutContext('returns unable to find warning when supportDir is null', () {
           final deviceSupport = IOSDeviceSupport(
-            logger: BufferLogger.test(),
-            processUtils: ProcessUtils(
-              processManager: FakeProcessManager.empty(),
-              logger: BufferLogger.test(),
-            ),
+            toolContext: FakeToolContext(),
             xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
-            homeDirectory: null,
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
@@ -346,11 +327,7 @@ void main() {
           final FileSystem fileSystem = MemoryFileSystem.test();
           final Directory homeDir = fileSystem.directory('/Users/username');
           final deviceSupport = IOSDeviceSupport(
-            logger: BufferLogger.test(),
-            processUtils: ProcessUtils(
-              processManager: FakeProcessManager.empty(),
-              logger: BufferLogger.test(),
-            ),
+            toolContext: FakeToolContext(),
             xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
             homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
@@ -383,11 +360,7 @@ void main() {
           supportDir.childDirectory('iPhone15,2 17.0').createSync(recursive: true);
 
           final deviceSupport = IOSDeviceSupport(
-            logger: BufferLogger.test(),
-            processUtils: ProcessUtils(
-              processManager: FakeProcessManager.empty(),
-              logger: BufferLogger.test(),
-            ),
+            toolContext: FakeToolContext(),
             xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
             homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
@@ -424,11 +397,7 @@ void main() {
               .createSync(recursive: true);
 
           final deviceSupport = IOSDeviceSupport(
-            logger: BufferLogger.test(),
-            processUtils: ProcessUtils(
-              processManager: FakeProcessManager.empty(),
-              logger: BufferLogger.test(),
-            ),
+            toolContext: FakeToolContext(),
             xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
             homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
@@ -455,11 +424,7 @@ void main() {
               .createSync(recursive: true);
 
           final deviceSupport = IOSDeviceSupport(
-            logger: BufferLogger.test(),
-            processUtils: ProcessUtils(
-              processManager: FakeProcessManager.empty(),
-              logger: BufferLogger.test(),
-            ),
+            toolContext: FakeToolContext(),
             xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
             homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
@@ -487,11 +452,7 @@ void main() {
                 .createSync(recursive: true);
 
             final deviceSupport = IOSDeviceSupport(
-              logger: BufferLogger.test(),
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: BufferLogger.test(),
-              ),
+              toolContext: FakeToolContext(),
               xcode: FakeXcode(currentVersion: Version(16, 2, 0)),
               homeDirectory: homeDir,
               modelCode: 'iPhone15,2',
@@ -518,13 +479,8 @@ void main() {
       group('Xcode 16.3+', () {
         testWithoutContext('returns unable to find warning when supportDir is null', () {
           final deviceSupport = IOSDeviceSupport(
-            logger: BufferLogger.test(),
-            processUtils: ProcessUtils(
-              processManager: FakeProcessManager.empty(),
-              logger: BufferLogger.test(),
-            ),
+            toolContext: FakeToolContext(),
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
-            homeDirectory: null,
             modelCode: 'iPhone15,2',
             operatingSystemVersion: '17.0',
             cpuArchitectureString: 'arm64e',
@@ -547,11 +503,7 @@ void main() {
           final FileSystem fileSystem = MemoryFileSystem.test();
           final Directory homeDir = fileSystem.directory('/Users/username');
           final deviceSupport = IOSDeviceSupport(
-            logger: BufferLogger.test(),
-            processUtils: ProcessUtils(
-              processManager: FakeProcessManager.empty(),
-              logger: BufferLogger.test(),
-            ),
+            toolContext: FakeToolContext(),
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
             homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
@@ -584,11 +536,7 @@ void main() {
           supportDir.childDirectory('iPhone15,2 17.0').createSync(recursive: true);
 
           final deviceSupport = IOSDeviceSupport(
-            logger: BufferLogger.test(),
-            processUtils: ProcessUtils(
-              processManager: FakeProcessManager.empty(),
-              logger: BufferLogger.test(),
-            ),
+            toolContext: FakeToolContext(),
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
             homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
@@ -625,11 +573,7 @@ void main() {
               .createSync(recursive: true);
 
           final deviceSupport = IOSDeviceSupport(
-            logger: BufferLogger.test(),
-            processUtils: ProcessUtils(
-              processManager: FakeProcessManager.empty(),
-              logger: BufferLogger.test(),
-            ),
+            toolContext: FakeToolContext(),
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
             homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
@@ -656,11 +600,7 @@ void main() {
               .createSync(recursive: true);
 
           final deviceSupport = IOSDeviceSupport(
-            logger: BufferLogger.test(),
-            processUtils: ProcessUtils(
-              processManager: FakeProcessManager.empty(),
-              logger: BufferLogger.test(),
-            ),
+            toolContext: FakeToolContext(),
             xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
             homeDirectory: homeDir,
             modelCode: 'iPhone15,2',
@@ -688,11 +628,7 @@ void main() {
                 .createSync(recursive: true);
 
             final deviceSupport = IOSDeviceSupport(
-              logger: BufferLogger.test(),
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: BufferLogger.test(),
-              ),
+              toolContext: FakeToolContext(),
               xcode: FakeXcode(currentVersion: Version(16, 3, 0)),
               homeDirectory: homeDir,
               modelCode: 'iPhone15,2',
@@ -721,11 +657,7 @@ void main() {
         final FileSystem fileSystem = MemoryFileSystem.test();
         final Directory homeDir = fileSystem.directory('/Users/username');
         final deviceSupport = IOSDeviceSupport(
-          logger: BufferLogger.test(),
-          processUtils: ProcessUtils(
-            processManager: FakeProcessManager.empty(),
-            logger: BufferLogger.test(),
-          ),
+          toolContext: FakeToolContext(),
           xcode: FakeXcode(),
           homeDirectory: homeDir,
           modelCode: 'iPhone15,2',
@@ -740,11 +672,7 @@ void main() {
         final FileSystem fileSystem = MemoryFileSystem.test();
         final Directory homeDir = fileSystem.directory('/Users/username');
         final deviceSupport = IOSDeviceSupport(
-          logger: BufferLogger.test(),
-          processUtils: ProcessUtils(
-            processManager: FakeProcessManager.empty(),
-            logger: BufferLogger.test(),
-          ),
+          toolContext: FakeToolContext(),
           xcode: FakeXcode(),
           homeDirectory: homeDir,
           modelCode: 'iPhone15,2',
@@ -780,11 +708,7 @@ void main() {
               ..createSync(recursive: true);
 
         final deviceSupport = IOSDeviceSupport(
-          logger: BufferLogger.test(),
-          processUtils: ProcessUtils(
-            processManager: FakeProcessManager.empty(),
-            logger: BufferLogger.test(),
-          ),
+          toolContext: FakeToolContext(),
           xcode: FakeXcode(),
           homeDirectory: homeDir,
           modelCode: 'iPhone15,2',
@@ -815,11 +739,7 @@ void main() {
               ..createSync(recursive: true);
 
         final deviceSupport = IOSDeviceSupport(
-          logger: BufferLogger.test(),
-          processUtils: ProcessUtils(
-            processManager: FakeProcessManager.empty(),
-            logger: BufferLogger.test(),
-          ),
+          toolContext: FakeToolContext(),
           xcode: FakeXcode(),
           homeDirectory: homeDir,
           modelCode: 'iPhone15,2',

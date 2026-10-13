@@ -539,12 +539,9 @@ class ToolDependencies {
         emulatorManager ??
         EmulatorManager(
           androidWorkflow: finalAndroidWorkflow,
-          fileSystem: finalFS,
           iosWorkflow: finalIOSWorkflow,
           java: finalJava,
-          logger: finalLogger,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
+          toolContext: toolContext,
           xcode: finalXcode,
           androidSdk: finalAndroidSdk,
         );

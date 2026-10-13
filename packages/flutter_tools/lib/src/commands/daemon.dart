@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:uuid/uuid.dart';
 
@@ -280,11 +279,7 @@ class Daemon {
   }) : _logger = notifyingLogger ?? toolContext.logger,
        _fs = toolContext.fs,
        _stdio = toolContext.stdio {
-    final ToolContext(
-      :Platform platform,
-      :ProcessManager processManager,
-      :FlutterProjectFactory projectFactory,
-    ) = toolContext;
+    final ToolContext(:Platform platform, :FlutterProjectFactory projectFactory) = toolContext;
     final AndroidWorkflow workflow =
         androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: featureFlags);
     final IOSWorkflow? iosWorkflow = xcode == null
@@ -325,11 +320,8 @@ class Daemon {
       emulatorDomain = EmulatorDomain(
         this,
         androidWorkflow: workflow,
-        fileSystem: _fs,
         iosWorkflow: iosWorkflow,
-        logger: _logger,
-        platform: platform,
-        processManager: processManager,
+        toolContext: toolContext,
         xcode: xcode,
         androidSdk: androidSdk,
         java: java,
@@ -1886,11 +1878,8 @@ class EmulatorDomain extends Domain {
   EmulatorDomain(
     Daemon daemon, {
     required AndroidWorkflow androidWorkflow,
-    required FileSystem fileSystem,
     required IOSWorkflow? iosWorkflow,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
+    required ToolContext toolContext,
     required Xcode? xcode,
     AndroidSdk? androidSdk,
     EmulatorManager? emulatorManager,
@@ -1899,12 +1888,9 @@ class EmulatorDomain extends Domain {
            emulatorManager ??
            EmulatorManager(
              androidWorkflow: androidWorkflow,
-             fileSystem: fileSystem,
              iosWorkflow: iosWorkflow,
              java: java,
-             logger: logger,
-             platform: platform,
-             processManager: processManager,
+             toolContext: toolContext,
              xcode: xcode,
              androidSdk: androidSdk,
            ),

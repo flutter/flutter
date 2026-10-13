@@ -4,8 +4,8 @@
 
 import '../base/common.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../macos/xcode.dart';
@@ -13,44 +13,31 @@ import 'ios_workflow.dart';
 import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
-  IOSEmulators({
-    required this._iosWorkflow,
-    required this._logger,
-    required this._platform,
-    required this._processUtils,
-    required this._xcode,
-  });
+  IOSEmulators({required this._iosWorkflow, required this._toolContext, required this._xcode});
 
   final IOSWorkflow _iosWorkflow;
-  final Logger _logger;
-  final Platform _platform;
-  final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
   final Xcode _xcode;
 
   @override
-  bool get supportsPlatform => _platform.isMacOS;
+  bool get supportsPlatform => _toolContext.platform.isMacOS;
 
   @override
   bool get canListAnything => _iosWorkflow.canListEmulators;
 
   @override
   Future<List<Emulator>> get emulators async =>
-      getEmulators(logger: _logger, processUtils: _processUtils, xcode: _xcode);
+      getEmulators(toolContext: _toolContext, xcode: _xcode);
 
   @override
   bool get canLaunchAnything => canListAnything;
 }
 
 class IOSEmulator extends Emulator {
-  const IOSEmulator(
-    String id, {
-    required this._logger,
-    required this._processUtils,
-    required this._xcode,
-  }) : super(id, true);
+  const IOSEmulator(String id, {required this._toolContext, required this._xcode})
+    : super(id, true);
 
-  final Logger _logger;
-  final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
   final Xcode _xcode;
 
   @override
@@ -71,12 +58,13 @@ class IOSEmulator extends Emulator {
     if (simulatorPath == null) {
       throwToolExit('Could not find Simulator app');
     }
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
     Future<bool> launchSimulator(List<String> additionalArgs) async {
       final args = <String>['open', ...additionalArgs, '-a', simulatorPath];
 
-      final RunResult launchResult = await _processUtils.run(args);
+      final RunResult launchResult = await processUtils.run(args);
       if (launchResult.exitCode != 0) {
-        _logger.printError('$launchResult');
+        logger.printError('$launchResult');
         return false;
       }
       return true;
@@ -94,17 +82,11 @@ class IOSEmulator extends Emulator {
 }
 
 /// Return the list of iOS Simulators (there can only be zero or one).
-List<IOSEmulator> getEmulators({
-  required Logger logger,
-  required ProcessUtils processUtils,
-  required Xcode xcode,
-}) {
+List<IOSEmulator> getEmulators({required ToolContext toolContext, required Xcode xcode}) {
   final String? simulatorPath = xcode.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[
-    IOSEmulator(iosSimulatorId, logger: logger, processUtils: processUtils, xcode: xcode),
-  ];
+  return <IOSEmulator>[IOSEmulator(iosSimulatorId, toolContext: toolContext, xcode: xcode)];
 }

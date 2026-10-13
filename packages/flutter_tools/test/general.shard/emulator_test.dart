@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
@@ -16,7 +15,6 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:test/fake.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fakes.dart';
 
@@ -59,18 +57,22 @@ void main() {
   });
 
   group('EmulatorManager', () {
-    // iOS discovery uses context.
-    testUsingContext('getEmulators', () async {
+    testWithoutContext('getEmulators', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw.
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
-        fileSystem: MemoryFileSystem.test(),
         iosWorkflow: FakeIOSWorkflow(),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
-        ]),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['emulator', '-list-avds'],
+              stdout: 'existing-avd-1',
+            ),
+          ]),
+        ),
         xcode: xcode,
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
@@ -79,25 +81,27 @@ void main() {
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(), returnsNormally);
     });
 
-    testUsingContext(
+    testWithoutContext(
       'getEmulators ignores info and warning messages in android emulator output',
       () async {
         final emulatorManager = EmulatorManager(
           java: FakeJava(),
-          fileSystem: MemoryFileSystem.test(),
           iosWorkflow: FakeIOSWorkflow(),
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(
-              command: <String>['emulator', '-list-avds'],
-              stdout:
-                  'INFO    | Storing crashdata in: /tmp/some.db, detection is enabled for process: 95538\n'
-                  'WARNING | Crash annotation is very large (16415), only 16384 bytes will be recorded, 31 bytes are lost.\n'
-                  'Emulator_API_33\n'
-                  'pixel-4.api-30',
-            ),
-          ]),
+          toolContext: FakeToolContext(
+            fs: MemoryFileSystem.test(),
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.list(<FakeCommand>[
+              const FakeCommand(
+                command: <String>['emulator', '-list-avds'],
+                stdout:
+                    'INFO    | Storing crashdata in: /tmp/some.db, detection is enabled for process: 95538\n'
+                    'WARNING | Crash annotation is very large (16415), only 16384 bytes will be recorded, 31 bytes are lost.\n'
+                    'Emulator_API_33\n'
+                    'pixel-4.api-30',
+              ),
+            ]),
+          ),
           xcode: xcode,
           androidSdk: sdk,
           androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
@@ -108,14 +112,13 @@ void main() {
         expect(emulators.first.id, 'Emulator_API_33');
         expect(emulators.last.id, 'pixel-4.api-30');
       },
-      // Exclude the iOS emulator discovery.
-      overrides: <Type, Generator>{Platform: () => FakePlatform()},
     );
 
-    testUsingContext('printEmulators prints the emulators information with header', () {
-      Emulator.printEmulators(emulators, testLogger);
+    testWithoutContext('printEmulators prints the emulators information with header', () {
+      final logger = BufferLogger.test();
+      Emulator.printEmulators(emulators, logger);
 
-      expect(testLogger.statusText, '''
+      expect(logger.statusText, '''
 Id                  • Name          • Manufacturer • Platform
 
 Nexus_5             • Nexus 5       • Google       • android
@@ -124,17 +127,22 @@ iOS Simulator       • iOS Simulator • Apple        • android
 ''');
     });
 
-    testUsingContext('getEmulators with no Android SDK', () async {
+    testWithoutContext('getEmulators with no Android SDK', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
-        fileSystem: MemoryFileSystem.test(),
         iosWorkflow: FakeIOSWorkflow(),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
-        ]),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['emulator', '-list-avds'],
+              stdout: 'existing-avd-1',
+            ),
+          ]),
+        ),
         xcode: xcode,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
       );
@@ -146,12 +154,14 @@ iOS Simulator       • iOS Simulator • Apple        • android
       final testEmulatorManager = TestEmulatorManager(
         emulators,
         java: FakeJava(),
-        logger: BufferLogger.test(),
-        processManager: fakeProcessManager,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
-        fileSystem: fileSystem,
         iosWorkflow: FakeIOSWorkflow(),
-        platform: FakePlatform(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: fakeProcessManager,
+        ),
         xcode: xcode,
       );
 
@@ -170,17 +180,22 @@ iOS Simulator       • iOS Simulator • Apple        • android
       expect(await testEmulatorManager.getEmulatorsMatching('ios'), <Emulator>[emulator3]);
     });
 
-    testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
+    testWithoutContext('create emulator with a missing avdmanager does not crash.', () async {
       sdk.avdManagerPath = null;
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
-        fileSystem: MemoryFileSystem.test(),
         iosWorkflow: FakeIOSWorkflow(),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
-        ]),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['emulator', '-list-avds'],
+              stdout: 'existing-avd-1',
+            ),
+          ]),
+        ),
         xcode: xcode,
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
@@ -191,35 +206,39 @@ iOS Simulator       • iOS Simulator • Apple        • android
       expect(result.error, contains('avdmanager is missing from the Android SDK'));
     });
 
-    // iOS discovery uses context.
-    testUsingContext('create emulator with an empty name does not fail', () async {
+    testWithoutContext('create emulator with an empty name does not fail', () async {
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
-        fileSystem: MemoryFileSystem.test(),
         iosWorkflow: FakeIOSWorkflow(),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
-          const FakeCommand(
-            command: <String>['avdmanager', 'list', 'device', '-c'],
-            stdout: 'test\ntest2\npixel\npixel-xl\n',
-          ),
-          kListEmulatorsCommand,
-          const FakeCommand(
-            command: <String>[
-              'avdmanager',
-              'create',
-              'avd',
-              '-n',
-              'flutter_emulator',
-              '-k',
-              'system-images;android-27;google_apis_playstore;x86',
-              '-d',
-              'pixel',
-            ],
-          ),
-        ]),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['emulator', '-list-avds'],
+              stdout: 'existing-avd-1',
+            ),
+            const FakeCommand(
+              command: <String>['avdmanager', 'list', 'device', '-c'],
+              stdout: 'test\ntest2\npixel\npixel-xl\n',
+            ),
+            kListEmulatorsCommand,
+            const FakeCommand(
+              command: <String>[
+                'avdmanager',
+                'create',
+                'avd',
+                '-n',
+                'flutter_emulator',
+                '-k',
+                'system-images;android-27;google_apis_playstore;x86',
+                '-d',
+                'pixel',
+              ],
+            ),
+          ]),
+        ),
         xcode: xcode,
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
@@ -232,31 +251,33 @@ iOS Simulator       • iOS Simulator • Apple        • android
     testWithoutContext('create emulator with a unique name does not throw', () async {
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
-        fileSystem: MemoryFileSystem.test(),
         iosWorkflow: FakeIOSWorkflow(),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['avdmanager', 'list', 'device', '-c'],
-            stdout: 'test\ntest2\npixel\npixel-xl\n',
-          ),
-          kListEmulatorsCommand,
-          const FakeCommand(
-            command: <String>[
-              'avdmanager',
-              'create',
-              'avd',
-              // The specified name is given with the -n flag.
-              '-n',
-              'test',
-              '-k',
-              'system-images;android-27;google_apis_playstore;x86',
-              '-d',
-              'pixel',
-            ],
-          ),
-        ]),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['avdmanager', 'list', 'device', '-c'],
+              stdout: 'test\ntest2\npixel\npixel-xl\n',
+            ),
+            kListEmulatorsCommand,
+            const FakeCommand(
+              command: <String>[
+                'avdmanager',
+                'create',
+                'avd',
+                // The specified name is given with the -n flag.
+                '-n',
+                'test',
+                '-k',
+                'system-images;android-27;google_apis_playstore;x86',
+                '-d',
+                'pixel',
+              ],
+            ),
+          ]),
+        ),
         xcode: xcode,
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
@@ -269,34 +290,36 @@ iOS Simulator       • iOS Simulator • Apple        • android
     testWithoutContext('create emulator with an existing name errors', () async {
       final emulatorManager = EmulatorManager(
         java: FakeJava(),
-        fileSystem: MemoryFileSystem.test(),
         iosWorkflow: FakeIOSWorkflow(),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processManager: FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(
-            command: <String>['avdmanager', 'list', 'device', '-c'],
-            stdout: 'test\ntest2\npixel\npixel-xl\n',
-          ),
-          kListEmulatorsCommand,
-          const FakeCommand(
-            command: <String>[
-              'avdmanager',
-              'create',
-              'avd',
-              '-n',
-              'existing-avd-1',
-              '-k',
-              'system-images;android-27;google_apis_playstore;x86',
-              '-d',
-              'pixel',
-            ],
-            exitCode: 1,
-            stderr:
-                "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
-                'Use --force if you want to replace it.',
-          ),
-        ]),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(
+              command: <String>['avdmanager', 'list', 'device', '-c'],
+              stdout: 'test\ntest2\npixel\npixel-xl\n',
+            ),
+            kListEmulatorsCommand,
+            const FakeCommand(
+              command: <String>[
+                'avdmanager',
+                'create',
+                'avd',
+                '-n',
+                'existing-avd-1',
+                '-k',
+                'system-images;android-27;google_apis_playstore;x86',
+                '-d',
+                'pixel',
+              ],
+              exitCode: 1,
+              stderr:
+                  "Error: Android Virtual Device 'existing-avd-1' already exists.\n"
+                  'Use --force if you want to replace it.',
+            ),
+          ]),
+        ),
         xcode: xcode,
         androidSdk: sdk,
         androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
@@ -308,41 +331,42 @@ iOS Simulator       • iOS Simulator • Apple        • android
       expect(result.success, false);
     });
 
-    // iOS discovery uses context.
-    testUsingContext(
+    testWithoutContext(
       'create emulator without a name but when default exists adds a suffix',
       () async {
         final emulatorManager = EmulatorManager(
           java: FakeJava(),
-          fileSystem: MemoryFileSystem.test(),
           iosWorkflow: FakeIOSWorkflow(),
-          logger: BufferLogger.test(),
-          platform: FakePlatform(),
-          processManager: FakeProcessManager.list(<FakeCommand>[
-            const FakeCommand(
-              command: <String>['emulator', '-list-avds'],
-              stdout: 'existing-avd-1\nflutter_emulator',
-            ),
-            const FakeCommand(
-              command: <String>['avdmanager', 'list', 'device', '-c'],
-              stdout: 'test\ntest2\npixel\npixel-xl\n',
-            ),
-            kListEmulatorsCommand,
-            const FakeCommand(
-              command: <String>[
-                'avdmanager',
-                'create',
-                'avd',
-                // a "_2" suffix is added to disambiguate from the existing emulator.
-                '-n',
-                'flutter_emulator_2',
-                '-k',
-                'system-images;android-27;google_apis_playstore;x86',
-                '-d',
-                'pixel',
-              ],
-            ),
-          ]),
+          toolContext: FakeToolContext(
+            fs: MemoryFileSystem.test(),
+            logger: BufferLogger.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.list(<FakeCommand>[
+              const FakeCommand(
+                command: <String>['emulator', '-list-avds'],
+                stdout: 'existing-avd-1\nflutter_emulator',
+              ),
+              const FakeCommand(
+                command: <String>['avdmanager', 'list', 'device', '-c'],
+                stdout: 'test\ntest2\npixel\npixel-xl\n',
+              ),
+              kListEmulatorsCommand,
+              const FakeCommand(
+                command: <String>[
+                  'avdmanager',
+                  'create',
+                  'avd',
+                  // a "_2" suffix is added to disambiguate from the existing emulator.
+                  '-n',
+                  'flutter_emulator_2',
+                  '-k',
+                  'system-images;android-27;google_apis_playstore;x86',
+                  '-d',
+                  'pixel',
+                ],
+              ),
+            ]),
+          ),
           xcode: xcode,
           androidSdk: sdk,
           androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
@@ -386,8 +410,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
       final Emulator emulator = IOSEmulator(
         'ios',
         xcode: xcode,
-        logger: logger,
-        processUtils: ProcessUtils(logger: logger, processManager: fakeProcessManager),
+        toolContext: FakeToolContext(logger: logger, processManager: fakeProcessManager),
       );
       await emulator.launch();
       expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -399,12 +422,9 @@ class TestEmulatorManager extends EmulatorManager {
   TestEmulatorManager(
     this.allEmulators, {
     required super.java,
-    required super.logger,
-    required super.processManager,
     required super.androidWorkflow,
-    required super.fileSystem,
     required super.iosWorkflow,
-    required super.platform,
+    required super.toolContext,
     required super.xcode,
   });
 
