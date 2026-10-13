@@ -23,63 +23,65 @@
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/platform/android/android_image_generator.h"
 #include "flutter/shell/platform/android/android_shell_holder.h"
 #include "flutter/shell/platform/android/jni_texture_source.h"
 #include "flutter/shell/platform/android/platform_message_handler_android.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
 #include "flutter/shell/platform/android/platform_view_android_delegate/platform_view_android_delegate.h"
-#include "flutter/shell/platform/embedder/embedder_engine.h"
 
 namespace flutter {
 
-/// Inheriting ThreadConfigurer and use Android platform thread API to configure
-/// the thread priorities
-static void AndroidPlatformThreadConfigSetter(
-    const fml::Thread::ThreadConfig& config) {
-  // set thread name
-  fml::Thread::SetCurrentThreadName(config);
-  // set thread priority
-  switch (config.priority) {
-    case fml::Thread::ThreadPriority::kBackground: {
+// Configures CPU affinity and Linux process priority for the engine's managed
+// UI, raster, and IO threads through FlutterCustomTaskRunners.
+static void AndroidThreadPrioritySetter(FlutterThreadPriority priority) {
+  // Linux nice values used on Android for background (10), display (-1),
+  // primary raster (-5), fallback raster (-2), and normal (0) threads.
+  constexpr int kBackgroundThreadNice = 10;
+  constexpr int kDisplayThreadNice = -1;
+  constexpr int kRasterThreadPrimaryNice = -5;
+  constexpr int kRasterThreadFallbackNice = -2;
+  constexpr int kNormalThreadNice = 0;
+
+  switch (priority) {
+    case FlutterThreadPriority::kBackground: {
       fml::RequestAffinity(fml::CpuAffinity::kEfficiency);
-      if (::setpriority(PRIO_PROCESS, 0, 10) != 0) {
+      if (::setpriority(PRIO_PROCESS, 0, kBackgroundThreadNice) != 0) {
         FML_LOG(ERROR) << "Failed to set IO task runner priority";
       }
       break;
     }
-    case fml::Thread::ThreadPriority::kDisplay: {
+    case FlutterThreadPriority::kDisplay: {
       fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
-      if (::setpriority(PRIO_PROCESS, 0, -1) != 0) {
+      if (::setpriority(PRIO_PROCESS, 0, kDisplayThreadNice) != 0) {
         FML_LOG(ERROR) << "Failed to set UI task runner priority";
       }
       break;
     }
-    case fml::Thread::ThreadPriority::kRaster: {
+    case FlutterThreadPriority::kRaster: {
       fml::RequestAffinity(fml::CpuAffinity::kNotEfficiency);
       // Android describes -8 as "most important display threads, for
       // compositing the screen and retrieving input events". Conservatively
       // set the raster thread to slightly lower priority than it.
-      if (::setpriority(PRIO_PROCESS, 0, -5) != 0) {
+      if (::setpriority(PRIO_PROCESS, 0, kRasterThreadPrimaryNice) != 0) {
         // Defensive fallback. Depending on the OEM, it may not be possible
         // to set priority to -5.
-        if (::setpriority(PRIO_PROCESS, 0, -2) != 0) {
+        if (::setpriority(PRIO_PROCESS, 0, kRasterThreadFallbackNice) != 0) {
           FML_LOG(ERROR) << "Failed to set raster task runner priority";
         }
       }
       break;
     }
+    case FlutterThreadPriority::kNormal:
     default:
       fml::RequestAffinity(fml::CpuAffinity::kNotPerformance);
-      if (::setpriority(PRIO_PROCESS, 0, 0) != 0) {
+      if (::setpriority(PRIO_PROCESS, 0, kNormalThreadNice) != 0) {
         FML_LOG(ERROR) << "Failed to set priority";
       }
+      break;
   }
-}
-static PlatformData GetDefaultPlatformData() {
-  PlatformData platform_data;
-  platform_data.lifecycle_state = "AppLifecycleState.detached";
-  return platform_data;
 }
 
 // The state behind the FlutterProjectArgs callbacks of one engine. The engine
@@ -88,9 +90,11 @@ static PlatformData GetDefaultPlatformData() {
 class AndroidEngineCallbacks {
  public:
   explicit AndroidEngineCallbacks(
-      std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+      LogMessageCallback log_message_callback = nullptr)
       : jni_facade(std::move(jni_facade)),
-        platform_messages(this->jni_facade) {}
+        platform_messages(this->jni_facade),
+        log_message_callback(std::move(log_message_callback)) {}
 
   // Asks Java which of the supported locales the platform would pick and
   // returns it in storage that stays valid until the next call, as
@@ -134,9 +138,11 @@ class AndroidEngineCallbacks {
   // Forwards the engine's platform messages to Java and Java's replies back.
   PlatformMessageHandlerAndroid platform_messages;
 
-  // Set on the platform thread when the Shell creates the platform view,
-  // before the engine can ask for a vsync.
+  // Set before the engine is initialized so vsync_callback can forward batons.
   std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
+
+  // Optional Dart print log message callback from Settings.
+  LogMessageCallback log_message_callback;
 
  private:
   // Language, country and script code, the order Java uses for locales.
@@ -457,13 +463,206 @@ FlutterEngineProcTable LoadEmbedderApi() {
   return embedder_api;
 }
 
-// The embedder API callbacks of the PlatformView overrides that
-// PlatformViewAndroid no longer has. They take the C types of embedder.h,
-// so they are the FlutterProjectArgs callbacks FlutterEngineInitialize
-// expects. The user_data of each is the engine's AndroidEngineCallbacks.
-FlutterProjectArgs MakeProjectArgs() {
+// Serializes a flutter::Settings struct into command-line arguments understood
+// by SettingsFromCommandLine inside FlutterEngineInitialize.
+struct ScopedCommandLineArgs {
+  std::vector<std::string> storage;
+  std::vector<const char*> argv;
+
+  explicit ScopedCommandLineArgs(const Settings& settings) {
+    storage.push_back(settings.executable_name.empty()
+                          ? "Flutter"
+                          : settings.executable_name);
+    if (!settings.enable_vm_service) {
+      storage.emplace_back("--disable-vm-service");
+    }
+    if (!settings.enable_vm_service_publication) {
+      storage.emplace_back("--disable-vm-service-publication");
+    }
+    if (!settings.vm_service_host.empty()) {
+      storage.push_back("--vm-service-host=" + settings.vm_service_host);
+    }
+    if (settings.vm_service_port != 0) {
+      storage.push_back("--vm-service-port=" +
+                        std::to_string(settings.vm_service_port));
+    }
+    if (!settings.may_insecurely_connect_to_all_domains) {
+      storage.emplace_back("--disallow-insecure-connections");
+    }
+    if (!settings.domain_network_policy.empty()) {
+      storage.push_back("--domain-network-policy=" +
+                        settings.domain_network_policy);
+    }
+    if (settings.disable_service_auth_codes) {
+      storage.emplace_back("--disable-service-auth-codes");
+    }
+    if (settings.disable_service_origin_check) {
+      storage.emplace_back("--disable-service-origin-checks");
+    }
+    if (settings.enable_service_port_fallback) {
+      storage.emplace_back("--enable-service-port-fallback");
+    }
+    if (settings.disable_dart_asserts) {
+      storage.emplace_back("--disable-dart-asserts");
+    }
+    if (settings.start_paused) {
+      storage.emplace_back("--start-paused");
+    }
+    if (settings.enable_checked_mode) {
+      storage.emplace_back("--enable-checked-mode");
+    }
+    if (settings.enable_dart_profiling) {
+      storage.emplace_back("--enable-dart-profiling");
+    }
+    if (settings.profile_startup) {
+      storage.emplace_back("--profile-startup");
+    }
+    if (settings.enable_software_rendering) {
+      storage.emplace_back("--enable-software-rendering");
+    }
+    if (settings.endless_trace_buffer) {
+      storage.emplace_back("--endless-trace-buffer");
+    }
+    if (settings.trace_startup) {
+      storage.emplace_back("--trace-startup");
+    }
+    if (settings.trace_systrace) {
+      storage.emplace_back("--trace-systrace");
+    }
+    if (!settings.trace_to_file.empty()) {
+      storage.push_back("--trace-to-file=" + settings.trace_to_file);
+    }
+    if (settings.profile_microtasks) {
+      storage.emplace_back("--profile-microtasks");
+    }
+    if (settings.skia_deterministic_rendering_on_cpu) {
+      storage.emplace_back("--skia-deterministic-rendering");
+    }
+    if (settings.verbose_logging) {
+      storage.emplace_back("--verbose-logging");
+    }
+    for (const std::string& lib : settings.application_library_paths) {
+      storage.push_back("--aot-shared-library-name=" + lib);
+    }
+    for (const std::string& lib : settings.vmservice_snapshot_library_path) {
+      storage.push_back("--aot-vmservice-shared-library-name=" + lib);
+    }
+    if (!settings.route.empty()) {
+      storage.push_back("--route=" + settings.route);
+    }
+    if (!settings.temp_directory_path.empty()) {
+      storage.push_back("--cache-dir-path=" + settings.temp_directory_path);
+    }
+    if (settings.icu_initialization_required && settings.icu_mapper) {
+      storage.emplace_back("--icu-symbol-prefix=_binary_icudtl_dat");
+    }
+    if (settings.use_test_fonts) {
+      storage.emplace_back("--use-test-fonts");
+    }
+    if (!settings.use_asset_fonts) {
+      storage.emplace_back("--disable-asset-fonts");
+    }
+    if (settings.requested_rendering_backend.has_value() &&
+        !settings.requested_rendering_backend->empty()) {
+      storage.push_back("--impeller-backend=" +
+                        *settings.requested_rendering_backend);
+    }
+    if (settings.enable_vulkan_validation) {
+      storage.emplace_back("--enable-vulkan-validation");
+    }
+    if (settings.enable_opengl_gpu_tracing) {
+      storage.emplace_back("--enable-opengl-gpu-tracing");
+    }
+    if (settings.enable_vulkan_gpu_tracing) {
+      storage.emplace_back("--enable-vulkan-gpu-tracing");
+    }
+    if (settings.enable_embedder_api) {
+      storage.emplace_back("--enable-embedder-api");
+    }
+    if (settings.prefetched_default_font_manager) {
+      storage.emplace_back("--prefetched-default-font-manager");
+    }
+    if (!settings.dart_flags.empty()) {
+      std::string joined;
+      for (size_t i = 0; i < settings.dart_flags.size(); ++i) {
+        if (i > 0) {
+          joined.push_back(',');
+        }
+        joined += settings.dart_flags[i];
+      }
+      storage.push_back("--dart-flags=" + joined);
+    }
+    if (settings.dump_skp_on_shader_compilation) {
+      storage.emplace_back("--dump-skp-on-shader-compilation");
+    }
+    if (settings.cache_sksl) {
+      storage.emplace_back("--cache-sksl");
+    }
+    if (settings.purge_persistent_cache) {
+      storage.emplace_back("--purge-persistent-cache");
+    }
+    if (settings.resource_cache_max_bytes_threshold != 0) {
+      storage.push_back(
+          "--resource-cache-max-bytes-threshold=" +
+          std::to_string(settings.resource_cache_max_bytes_threshold));
+    }
+    if (settings.enable_surface_control) {
+      storage.emplace_back("--enable-android-hcpp-and-surface-control=true");
+    }
+    switch (settings.merged_platform_ui_thread) {
+      case Settings::MergedPlatformUIThread::kEnabled:
+        storage.emplace_back("--merged-platform-ui-thread=enabled");
+        break;
+      case Settings::MergedPlatformUIThread::kDisabled:
+        storage.emplace_back("--merged-platform-ui-thread=disabled");
+        break;
+      case Settings::MergedPlatformUIThread::kMergeAfterLaunch:
+        storage.emplace_back("--merged-platform-ui-thread=mergeAfterLaunch");
+        break;
+    }
+    if (settings.enable_flutter_gpu) {
+      storage.emplace_back("--enable-flutter-gpu");
+    }
+    if (settings.impeller_enable_lazy_shader_mode) {
+      storage.emplace_back("--impeller-lazy-shader-mode");
+    }
+    if (settings.impeller_use_sdfs) {
+      storage.emplace_back("--impeller-use-sdfs");
+    }
+    if (settings.impeller_top_left_default_framebuffer_origin) {
+      storage.emplace_back("--impeller-top-left-default-framebuffer-origin");
+    }
+
+    argv.reserve(storage.size());
+    for (const std::string& arg : storage) {
+      argv.push_back(arg.c_str());
+    }
+  }
+};
+
+// Builds the FlutterProjectArgs callbacks for an Android engine. The user_data
+// passed to FlutterEngineInitialize or FlutterEngineSpawn is the engine's
+// AndroidEngineCallbacks.
+FlutterProjectArgs MakeProjectArgs(const Settings& settings) {
   FlutterProjectArgs args = {};
   args.struct_size = sizeof(FlutterProjectArgs);
+  args.icu_data_path =
+      settings.icu_data_path.empty() ? nullptr : settings.icu_data_path.c_str();
+  args.shutdown_dart_vm_when_done = !settings.leak_vm;
+  args.dart_old_gen_heap_size = settings.old_gen_heap_size;
+  args.log_tag = settings.log_tag.empty() ? nullptr : settings.log_tag.c_str();
+  if (settings.log_message_callback) {
+    args.log_message_callback = [](const char* tag, const char* message,
+                                   void* user_data) {
+      auto* callbacks = static_cast<AndroidEngineCallbacks*>(user_data);
+      if (callbacks != nullptr && callbacks->log_message_callback) {
+        callbacks->log_message_callback(tag ? tag : "", message ? message : "");
+      }
+    };
+  }
+  args.enable_wide_gamut = settings.enable_wide_gamut;
+  args.defer_root_isolate_launch = true;
+  args.initial_lifecycle_state = "AppLifecycleState.detached";
   args.vsync_callback = [](void* user_data, intptr_t baton) {
     static_cast<AndroidEngineCallbacks*>(user_data)->vsync_waiter->AwaitVSync(
         baton);
@@ -517,20 +716,24 @@ FlutterProjectArgs MakeProjectArgs() {
   return args;
 }
 
-// The dispatch table of a PlatformViewAndroid: the FlutterProjectArgs
-// callbacks, translated the way FlutterEngineInitialize translates them.
-PlatformViewAndroid::PlatformDispatchTable MakePlatformDispatchTable(
-    AndroidEngineCallbacks* callbacks) {
-  const FlutterProjectArgs args = MakeProjectArgs();
-  fml::StatusOr<PlatformViewAndroid::PlatformDispatchTable> table =
-      PlatformDispatchTableFromProjectArgs(&args, callbacks);
-  FML_CHECK(table.ok()) << table.status().message();
-  return std::move(table.value());
+FlutterRendererConfig MakeNativeWindowRendererConfig(
+    FlutterNativeWindowBackend rendering_api,
+    PlatformViewAndroidJNI* jni_facade,
+    const FlutterNativeWindowCompositor* compositor) {
+  FlutterRendererConfig config = {};
+  config.type = kNativeWindow;
+  config.native_window.struct_size = sizeof(FlutterNativeWindowRendererConfig);
+  config.native_window.backend = rendering_api;
+  config.native_window.transaction_callback = [](void* user_data) -> void* {
+    return static_cast<PlatformViewAndroidJNI*>(user_data)->createTransaction();
+  };
+  config.native_window.user_data = jni_facade;
+  config.native_window.compositor = compositor;
+  return config;
 }
 
 // Gives the vsync source the engine handle once the holder owns the engine,
-// or retires it when there is no engine. There is no source when the Shell
-// failed before it created the platform view.
+// or retires it when there is no engine.
 void AttachVsyncWaiter(VsyncWaiterAndroid* vsync_waiter,
                        FLUTTER_API_SYMBOL(FlutterEngine) engine,
                        const FlutterEngineProcTable* embedder_api) {
@@ -591,87 +794,59 @@ AndroidShellHolder::AndroidShellHolder(
     FlutterNativeWindowBackend android_rendering_api)
     : settings_(settings),
       jni_facade_(jni_facade),
-      engine_callbacks_(std::make_unique<AndroidEngineCallbacks>(jni_facade)),
+      engine_callbacks_(std::make_unique<AndroidEngineCallbacks>(
+          jni_facade,
+          settings.log_message_callback)),
       embedder_api_(LoadEmbedderApi()),
       holder_id_(NextHolderId()),
       android_rendering_api_(android_rendering_api) {
-  static size_t thread_host_count = 1;
-  auto thread_label = std::to_string(thread_host_count++);
+  TRACE_EVENT0("flutter", "AndroidShellHolder::AndroidShellHolder");
+  static std::atomic<size_t> thread_host_count{1};
+  const std::string thread_label =
+      std::to_string(thread_host_count.fetch_add(1, std::memory_order_relaxed));
 
-  thread_host_ = std::make_shared<ThreadHost>();
-  if (settings.merged_platform_ui_thread !=
-      Settings::MergedPlatformUIThread::kEnabled) {
-    thread_host_->ui_thread = std::make_unique<fml::Thread>(
-        AndroidPlatformThreadConfigSetter,
-        fml::Thread::ThreadConfig(thread_label + ".ui",
-                                  fml::Thread::ThreadPriority::kDisplay));
-  }
-  thread_host_->raster_thread = std::make_unique<fml::Thread>(
-      AndroidPlatformThreadConfigSetter,
-      fml::Thread::ThreadConfig(thread_label + ".raster",
-                                fml::Thread::ThreadPriority::kRaster));
-  thread_host_->io_thread = std::make_unique<fml::Thread>(
-      AndroidPlatformThreadConfigSetter,
-      fml::Thread::ThreadConfig(thread_label + ".io",
-                                fml::Thread::ThreadPriority::kNormal));
-
-  fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
-  std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
-  FlutterNativeWindowBackend rendering_api = android_rendering_api_;
-  auto on_create_platform_view =
-      [&jni_facade, &weak_platform_view, &vsync_waiter, rendering_api,
-       callbacks = engine_callbacks_.get()](PlatformView::Delegate& delegate,
-                                            const TaskRunners& runners) {
-        vsync_waiter = std::make_shared<VsyncWaiterAndroid>(runners);
-        callbacks->vsync_waiter = vsync_waiter;
-        auto platform_view_android = std::make_unique<PlatformViewAndroid>(
-            delegate,                             // delegate
-            runners,                              // task runners
-            jni_facade,                           // JNI interop
-            rendering_api,                        // rendering API
-            MakePlatformDispatchTable(callbacks)  // embedder callbacks
-        );
-        weak_platform_view = platform_view_android->GetWeakPtr();
-        return platform_view_android;
-      };
-
-  // The current thread will be used as the platform thread. Ensure that the
-  // message loop is initialized.
+  // The current thread is the platform thread. Ensure its message loop is
+  // initialized before constructing the vsync waiter or initializing the
+  // engine.
   fml::MessageLoop::EnsureInitializedForCurrentThread();
-  fml::RefPtr<fml::TaskRunner> raster_runner;
-  fml::RefPtr<fml::TaskRunner> ui_runner;
-  fml::RefPtr<fml::TaskRunner> io_runner;
   fml::RefPtr<fml::TaskRunner> platform_runner =
       fml::MessageLoop::GetCurrent().GetTaskRunner();
-  raster_runner = thread_host_->raster_thread->GetTaskRunner();
-  if (settings.merged_platform_ui_thread ==
-      Settings::MergedPlatformUIThread::kEnabled) {
-    ui_runner = platform_runner;
-  } else {
-    ui_runner = thread_host_->ui_thread->GetTaskRunner();
-  }
-  io_runner = thread_host_->io_thread->GetTaskRunner();
+  vsync_waiter_ = std::make_shared<VsyncWaiterAndroid>(platform_runner);
+  engine_callbacks_->vsync_waiter = vsync_waiter_;
 
-  flutter::TaskRunners task_runners(thread_label,     // label
-                                    platform_runner,  // platform
-                                    raster_runner,    // raster
-                                    ui_runner,        // ui
-                                    io_runner         // io
-  );
+  FlutterNativeWindowCompositor compositor =
+      PlatformViewAndroid::MakeNativeWindowCompositor(jni_facade_.get());
+  FlutterRendererConfig renderer_config = MakeNativeWindowRendererConfig(
+      android_rendering_api_, jni_facade_.get(), &compositor);
 
-  // The same Shell::Create that FlutterEngineInitialize ends in, minus what
-  // Android does itself: the holder owns the threads behind |task_runners|,
-  // and Launch() runs the root isolate once the APK assets are known.
-  auto engine = std::make_unique<EmbedderEngine>(
-      /*thread_host=*/nullptr, task_runners, settings_,
-      /*run_configuration=*/std::nullopt, on_create_platform_view,
-      /*external_texture_resolver=*/nullptr);
-  if (engine->LaunchShell(GetDefaultPlatformData())) {
-    if (weak_platform_view) {
-      engine->SetAndroidRenderer(weak_platform_view->GetRenderer());
+  FlutterCustomTaskRunners custom_task_runners = {};
+  custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
+  custom_task_runners.thread_priority_setter = &AndroidThreadPrioritySetter;
+  custom_task_runners.merged_platform_ui_thread =
+      (settings_.merged_platform_ui_thread ==
+       Settings::MergedPlatformUIThread::kEnabled);
+  custom_task_runners.thread_name_prefix = thread_label.c_str();
+
+  ScopedCommandLineArgs command_line(settings_);
+  FlutterProjectArgs project_args = MakeProjectArgs(settings_);
+  project_args.custom_task_runners = &custom_task_runners;
+  project_args.command_line_argc = static_cast<int>(command_line.argv.size());
+  project_args.command_line_argv = command_line.argv.data();
+
+  FLUTTER_API_SYMBOL(FlutterEngine) raw_engine = nullptr;
+  FlutterEngineResult init_result = embedder_api_.Initialize(
+      FLUTTER_ENGINE_VERSION, &renderer_config, &project_args,
+      engine_callbacks_.get(), &raw_engine);
+  if (init_result == kSuccess && raw_engine != nullptr) {
+    FlutterEngineResult launch_result = embedder_api_.LaunchShell(raw_engine);
+    if (launch_result == kSuccess) {
+      engine_.reset(raw_engine);
+    } else {
+      FML_LOG(ERROR) << "FlutterEngineLaunchShell failed: " << launch_result;
+      embedder_api_.Deinitialize(raw_engine);
     }
-    engine_.reset(
-        reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(engine.release()));
+  } else {
+    FML_LOG(ERROR) << "FlutterEngineInitialize failed: " << init_result;
   }
 
   if (engine_) {
@@ -680,49 +855,62 @@ AndroidShellHolder::AndroidShellHolder(
     // Concurrent worker threads are raw std::threads without an
     // fml::MessageLoop, whereas the dedicated IO thread (also tagged
     // kFlutterNativeThreadTypeWorker) always has an initialized
-    // fml::MessageLoop.
+    // fml::MessageLoop. Capture the IO thread's TaskRunner for the Android SDK
+    // image decoder while setting the worker threads' priority.
+    struct IOAndWorkerSetupState {
+      fml::RefPtr<fml::TaskRunner> io_task_runner;
+      fml::AutoResetWaitableEvent io_latch;
+    } setup_state;
     constexpr int kWorkerThreadPriority = 1;
     FlutterEngineResult priority_result =
         embedder_api_.PostCallbackOnAllNativeThreads(
             engine_.get(),
-            [](FlutterNativeThreadType type, void* /*baton*/) {
-              if (type == kFlutterNativeThreadTypeWorker &&
-                  !fml::MessageLoop::IsInitializedForCurrentThread()) {
-                if (::setpriority(PRIO_PROCESS, gettid(),
-                                  kWorkerThreadPriority) != 0) {
-                  FML_LOG(ERROR)
-                      << "Failed to set Workers task runner priority";
-                }
+            [](FlutterNativeThreadType type, void* baton) {
+              if (type != kFlutterNativeThreadTypeWorker) {
+                return;
+              }
+              if (fml::MessageLoop::IsInitializedForCurrentThread()) {
+                auto* state = static_cast<IOAndWorkerSetupState*>(baton);
+                state->io_task_runner =
+                    fml::MessageLoop::GetCurrent().GetTaskRunner();
+                state->io_latch.Signal();
+                return;
+              }
+              if (::setpriority(PRIO_PROCESS, gettid(),
+                                kWorkerThreadPriority) != 0) {
+                FML_LOG(ERROR) << "Failed to set Workers task runner priority";
               }
             },
-            nullptr);
+            &setup_state);
     if (priority_result != kSuccess) {
       FML_LOG(ERROR) << "FlutterEnginePostCallbackOnAllNativeThreads failed: "
                      << priority_result;
+    } else {
+      setup_state.io_latch.Wait();
     }
 
-    // Priority -1 runs after built-in Skia image decoders (which use priority
-    // 0).
-    constexpr int32_t kAndroidSdkImageDecoderPriority = -1;
-    FlutterImageGeneratorRegistrationInfo generator_info =
-        AndroidImageGenerator::MakeFlutterImageGeneratorRegistrationInfo(
-            task_runners.GetIOTaskRunner(), kAndroidSdkImageDecoderPriority);
-    FlutterEngineResult decoder_result =
-        embedder_api_.RegisterImageGenerator(engine_.get(), &generator_info);
-    if (decoder_result != kSuccess) {
-      if (generator_info.destruction_callback != nullptr) {
-        generator_info.destruction_callback(generator_info.user_data);
+    if (setup_state.io_task_runner) {
+      // Priority -1 runs after built-in Skia image decoders (which use priority
+      // 0).
+      constexpr int32_t kAndroidSdkImageDecoderPriority = -1;
+      FlutterImageGeneratorRegistrationInfo generator_info =
+          AndroidImageGenerator::MakeFlutterImageGeneratorRegistrationInfo(
+              setup_state.io_task_runner, kAndroidSdkImageDecoderPriority);
+      FlutterEngineResult decoder_result =
+          embedder_api_.RegisterImageGenerator(engine_.get(), &generator_info);
+      if (decoder_result != kSuccess) {
+        if (generator_info.destruction_callback != nullptr) {
+          generator_info.destruction_callback(generator_info.user_data);
+        }
+        FML_LOG(ERROR) << "FlutterEngineRegisterImageGenerator failed: "
+                       << decoder_result;
+      } else {
+        FML_DLOG(INFO)
+            << "Registered Android SDK image decoder (API level 28+)";
       }
-      FML_LOG(ERROR) << "FlutterEngineRegisterImageGenerator failed: "
-                     << decoder_result;
-    } else {
-      FML_DLOG(INFO) << "Registered Android SDK image decoder (API level 28+)";
     }
   }
 
-  platform_view_ = weak_platform_view;
-  FML_DCHECK(platform_view_);
-  vsync_waiter_ = std::move(vsync_waiter);
   AttachVsyncWaiter(vsync_waiter_.get(), engine_.get(), &embedder_api_);
   GetFirstFrameCallbackTable().Register(holder_id_, platform_runner,
                                         jni_facade_);
@@ -732,18 +920,14 @@ AndroidShellHolder::AndroidShellHolder(
 AndroidShellHolder::AndroidShellHolder(
     const Settings& settings,
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    const std::shared_ptr<ThreadHost>& thread_host,
     std::unique_ptr<AndroidEngineCallbacks> engine_callbacks,
     UniqueEngine engine,
     uint64_t holder_id,
     std::unique_ptr<APKAssetProvider> apk_asset_provider,
-    const fml::WeakPtr<PlatformViewAndroid>& platform_view,
     std::shared_ptr<VsyncWaiterAndroid> vsync_waiter,
     FlutterNativeWindowBackend rendering_api)
     : settings_(settings),
       jni_facade_(jni_facade),
-      platform_view_(platform_view),
-      thread_host_(thread_host),
       engine_callbacks_(std::move(engine_callbacks)),
       engine_(std::move(engine)),
       embedder_api_(LoadEmbedderApi()),
@@ -753,8 +937,6 @@ AndroidShellHolder::AndroidShellHolder(
       android_rendering_api_(rendering_api) {
   FML_DCHECK(jni_facade);
   FML_DCHECK(engine_);
-  FML_DCHECK(platform_view_);
-  FML_DCHECK(thread_host_);
   // Messages the spawned engine sent before this point carry copied payloads;
   // see PlatformMessageHandlerAndroid::Attach.
   engine_callbacks_->platform_messages.Attach(engine_.get(), &embedder_api_);
@@ -779,7 +961,6 @@ AndroidShellHolder::~AndroidShellHolder() {
       FML_LOG(ERROR) << "FlutterEngineShutdown failed: " << result;
     }
   }
-  thread_host_.reset();
   GetPendingResponseTable().RemoveForHolder(holder_id_);
 }
 
@@ -806,66 +987,45 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
     const std::string& initial_route,
     const std::vector<std::string>& entrypoint_args,
     int64_t engine_id) const {
+  TRACE_EVENT0("flutter", "AndroidShellHolder::Spawn");
   FML_DCHECK(IsValid()) << "A new Shell can only be spawned "
                            "if the current Shell is properly constructed";
 
-  // Pull out the new PlatformViewAndroid from the new Shell to feed to it to
-  // the new AndroidShellHolder.
-  //
-  // It's a weak pointer because it's owned by the Shell (which we're also)
-  // making below. And the AndroidShellHolder then owns the Shell.
-  fml::WeakPtr<PlatformViewAndroid> weak_platform_view;
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  fml::RefPtr<fml::TaskRunner> platform_runner =
+      fml::MessageLoop::GetCurrent().GetTaskRunner();
 
-  // Take out the old AndroidContext to reuse inside the PlatformViewAndroid
-  // of the new Shell.
-  PlatformViewAndroid* android_platform_view = platform_view_.get();
-  // There's some indirection with platform_view_ being a weak pointer but
-  // we just checked that the engine_ exists above and a valid shell is the
-  // owner of the platform view so this weak pointer always exists.
-  FML_DCHECK(android_platform_view);
-  std::shared_ptr<flutter::AndroidContext> android_context =
-      android_platform_view->GetAndroidContext();
-  FML_DCHECK(android_context);
+  auto spawned_callbacks = std::make_unique<AndroidEngineCallbacks>(
+      jni_facade, GetSettings().log_message_callback);
+  auto vsync_waiter = std::make_shared<VsyncWaiterAndroid>(platform_runner);
+  spawned_callbacks->vsync_waiter = vsync_waiter;
 
-  // This is a synchronous call, so the captures don't have race checks.
-  auto spawned_callbacks = std::make_unique<AndroidEngineCallbacks>(jni_facade);
-  std::shared_ptr<VsyncWaiterAndroid> vsync_waiter;
-  auto on_create_platform_view =
-      [&jni_facade, android_context, &weak_platform_view, &vsync_waiter,
-       callbacks = spawned_callbacks.get()](PlatformView::Delegate& delegate,
-                                            const TaskRunners& runners) {
-        vsync_waiter = std::make_shared<VsyncWaiterAndroid>(runners);
-        callbacks->vsync_waiter = vsync_waiter;
-        auto platform_view_android = std::make_unique<PlatformViewAndroid>(
-            delegate,                             // delegate
-            runners,                              // task runners
-            jni_facade,                           // JNI interop
-            android_context,                      // Android context
-            MakePlatformDispatchTable(callbacks)  // embedder callbacks
-        );
-        weak_platform_view = platform_view_android->GetWeakPtr();
-        return platform_view_android;
-      };
+  FlutterNativeWindowCompositor compositor =
+      PlatformViewAndroid::MakeNativeWindowCompositor(jni_facade.get());
+  FlutterRendererConfig renderer_config = MakeNativeWindowRendererConfig(
+      android_rendering_api_, jni_facade.get(), &compositor);
+  FlutterProjectArgs project_args = MakeProjectArgs(GetSettings());
 
   ScopedRunConfiguration run_config(GetSettings(), apk_asset_provider_.get(),
                                     entrypoint, libraryUrl, entrypoint_args,
                                     engine_id);
+  FlutterEngineSpawnInfo spawn_info = {};
+  spawn_info.struct_size = sizeof(FlutterEngineSpawnInfo);
+  spawn_info.renderer_config = &renderer_config;
+  spawn_info.project_args = &project_args;
+  spawn_info.user_data = spawned_callbacks.get();
+  spawn_info.run_configuration = &run_config.config;
+  spawn_info.initial_route =
+      initial_route.empty() ? nullptr : initial_route.c_str();
 
-  const uint64_t spawned_holder_id = NextHolderId();
-  // embedder.h has no spawn API yet.
-  auto spawned =
-      reinterpret_cast<EmbedderEngine*>(engine_.get())
-          ->Spawn(&run_config.config, initial_route, on_create_platform_view);
-  if (!spawned) {
-    // If Spawn failed, the kernel blob wasn't readable or the shell failed to
-    // spawn.
+  FLUTTER_API_SYMBOL(FlutterEngine) raw_spawned = nullptr;
+  FlutterEngineResult spawn_result =
+      embedder_api_.Spawn(engine_.get(), &spawn_info, &raw_spawned);
+  if (spawn_result != kSuccess || raw_spawned == nullptr) {
     return nullptr;
   }
-  if (weak_platform_view) {
-    spawned->SetAndroidRenderer(weak_platform_view->GetRenderer());
-  }
-  UniqueEngine engine(
-      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(spawned.release()));
+  UniqueEngine engine(raw_spawned);
+  const uint64_t spawned_holder_id = NextHolderId();
 
   FlutterNativeWindowRendererInfo renderer_info = {
       .struct_size = sizeof(FlutterNativeWindowRendererInfo),
@@ -877,10 +1037,10 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
           : android_rendering_api_;
 
   return std::unique_ptr<AndroidShellHolder>(new AndroidShellHolder(
-      GetSettings(), jni_facade, thread_host_, std::move(spawned_callbacks),
+      GetSettings(), jni_facade, std::move(spawned_callbacks),
       std::move(engine), spawned_holder_id,
       apk_asset_provider_ ? apk_asset_provider_->Clone() : nullptr,
-      weak_platform_view, std::move(vsync_waiter), spawned_backend));
+      std::move(vsync_waiter), spawned_backend));
 }
 
 void AndroidShellHolder::Launch(
@@ -955,11 +1115,6 @@ AndroidShellHolder::ScreenshotData AndroidShellHolder::Screenshot(
   return screenshot;
 }
 
-fml::WeakPtr<PlatformViewAndroid> AndroidShellHolder::GetPlatformView() {
-  FML_DCHECK(platform_view_);
-  return platform_view_;
-}
-
 void AndroidShellHolder::NotifyLowMemoryWarning() {
   FML_DCHECK(engine_);
   FlutterEngineResult result =
@@ -1027,8 +1182,9 @@ void AndroidShellHolder::ScheduleFrame() {
   }
 }
 
-void AndroidShellHolder::SetViewportMetrics(int64_t view_id,
-                                            const ViewportMetrics& metrics) {
+void AndroidShellHolder::SetViewportMetrics(
+    int64_t view_id,
+    const AndroidViewportMetrics& metrics) {
   if (metrics.device_pixel_ratio <= 0.0 || metrics.physical_width < 0.0 ||
       metrics.physical_height < 0.0 ||
       metrics.physical_min_width_constraint < 0.0 ||

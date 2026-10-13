@@ -12,8 +12,8 @@
 #include <mutex>
 #include <unordered_set>
 
-#include "flutter/common/task_runners.h"
 #include "flutter/fml/macros.h"
+#include "flutter/fml/task_runner.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
@@ -40,7 +40,8 @@ class VsyncWaiterAndroid final
  public:
   static bool Register(JNIEnv* env);
 
-  explicit VsyncWaiterAndroid(const flutter::TaskRunners& task_runners);
+  explicit VsyncWaiterAndroid(
+      fml::RefPtr<fml::TaskRunner> platform_task_runner);
 
   ~VsyncWaiterAndroid();
 
@@ -70,8 +71,9 @@ class VsyncWaiterAndroid final
  private:
   enum class State { kWaitingForEngine, kAttached, kDetached };
 
-  const flutter::TaskRunners task_runners_;
+  const fml::RefPtr<fml::TaskRunner> platform_task_runner_;
   std::mutex mutex_;
+  fml::RefPtr<fml::TaskRunner> ui_task_runner_;
   State state_ = State::kWaitingForEngine;
   FLUTTER_API_SYMBOL(FlutterEngine) engine_ = nullptr;
   const FlutterEngineProcTable* embedder_api_ = nullptr;

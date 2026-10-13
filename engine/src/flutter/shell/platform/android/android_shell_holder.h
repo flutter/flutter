@@ -5,11 +5,15 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SHELL_HOLDER_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SHELL_HOLDER_H_
 
+#include <cstddef>
+#include <cstdint>
 #include <memory>
+#include <string>
 #include <type_traits>
+#include <vector>
 
+#include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/thread.h"
 #include "flutter/shell/platform/android/apk_asset_provider.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/android/platform_view_android.h"
@@ -20,6 +24,39 @@
 namespace flutter {
 
 class AndroidEngineCallbacks;
+
+// Viewport and display feature metrics sent from Java's FlutterJNI
+// nativeSetViewportMetrics to AndroidShellHolder::SetViewportMetrics.
+struct AndroidViewportMetrics {
+  double device_pixel_ratio = 1.0;
+  double physical_width = 0.0;
+  double physical_height = 0.0;
+  double physical_min_width_constraint = 0.0;
+  double physical_max_width_constraint = 0.0;
+  double physical_min_height_constraint = 0.0;
+  double physical_max_height_constraint = 0.0;
+  double physical_padding_top = 0.0;
+  double physical_padding_right = 0.0;
+  double physical_padding_bottom = 0.0;
+  double physical_padding_left = 0.0;
+  double physical_view_inset_top = 0.0;
+  double physical_view_inset_right = 0.0;
+  double physical_view_inset_bottom = 0.0;
+  double physical_view_inset_left = 0.0;
+  double physical_system_gesture_inset_top = 0.0;
+  double physical_system_gesture_inset_right = 0.0;
+  double physical_system_gesture_inset_bottom = 0.0;
+  double physical_system_gesture_inset_left = 0.0;
+  double physical_touch_slop = -1.0;
+  std::vector<double> physical_display_features_bounds;
+  std::vector<int> physical_display_features_type;
+  std::vector<int> physical_display_features_state;
+  size_t display_id = 0;
+  double physical_display_corner_radius_top_left = -1.0;
+  double physical_display_corner_radius_top_right = -1.0;
+  double physical_display_corner_radius_bottom_right = -1.0;
+  double physical_display_corner_radius_bottom_left = -1.0;
+};
 
 //----------------------------------------------------------------------------
 /// @brief      This is the Android owner of the core engine Shell.
@@ -101,8 +138,6 @@ class AndroidShellHolder {
 
   const flutter::Settings& GetSettings() const;
 
-  fml::WeakPtr<PlatformViewAndroid> GetPlatformView();
-
   bool IsSurfaceControlEnabled();
 
   ScreenshotData Screenshot(FlutterScreenshotType type, bool base64_encode);
@@ -160,7 +195,8 @@ class AndroidShellHolder {
   //----------------------------------------------------------------------------
   /// @brief      Sends viewport metrics for a view through the embedder API.
   ///
-  void SetViewportMetrics(int64_t view_id, const ViewportMetrics& metrics);
+  void SetViewportMetrics(int64_t view_id,
+                          const AndroidViewportMetrics& metrics);
 
   //----------------------------------------------------------------------------
   /// @brief      Sends a binary platform message to the engine through the
@@ -284,18 +320,8 @@ class AndroidShellHolder {
       std::unique_ptr<std::remove_pointer_t<FLUTTER_API_SYMBOL(FlutterEngine)>,
                       EngineDeleter>;
 
-  // Owns the Android shell's dedicated UI, raster, and IO threads, shared
-  // across shells spawned via Spawn().
-  struct ThreadHost {
-    std::unique_ptr<fml::Thread> ui_thread;
-    std::unique_ptr<fml::Thread> raster_thread;
-    std::unique_ptr<fml::Thread> io_thread;
-  };
-
   const flutter::Settings settings_;
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
-  fml::WeakPtr<PlatformViewAndroid> platform_view_;
-  std::shared_ptr<ThreadHost> thread_host_;
   // The state behind the engine's FlutterProjectArgs callbacks. The engine
   // passes it back to them as user_data, so it must outlive the engine.
   std::unique_ptr<AndroidEngineCallbacks> engine_callbacks_;
@@ -329,12 +355,10 @@ class AndroidShellHolder {
   ///
   AndroidShellHolder(const flutter::Settings& settings,
                      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-                     const std::shared_ptr<ThreadHost>& thread_host,
                      std::unique_ptr<AndroidEngineCallbacks> engine_callbacks,
                      UniqueEngine engine,
                      uint64_t holder_id,
                      std::unique_ptr<APKAssetProvider> apk_asset_provider,
-                     const fml::WeakPtr<PlatformViewAndroid>& platform_view,
                      std::shared_ptr<VsyncWaiterAndroid> vsync_waiter,
                      FlutterNativeWindowBackend rendering_api);
   static void ThreadDestructCallback(void* value);

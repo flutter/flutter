@@ -256,7 +256,7 @@ void ExpectOneFrameOnUIThread(
   fml::RefPtr<fml::TaskRunner> ui_task_runner =
       GetShellForTesting(*holder)->GetTaskRunners().GetUITaskRunner();
   // Through the PlatformView base class, the way the shell calls it.
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   std::shared_ptr<VsyncWaiter> vsync_waiter = platform_view.CreateVSyncWaiter();
   auto recorder = std::make_shared<VsyncFrameRecorder>(ui_task_runner);
 
@@ -283,7 +283,7 @@ TEST(AndroidShellHolder, Create) {
       settings, jni, kFlutterNativeWindowBackendImpellerOpenGLES);
   EXPECT_NE(holder.get(), nullptr);
   EXPECT_TRUE(holder->IsValid());
-  EXPECT_NE(holder->GetPlatformView().get(), nullptr);
+  EXPECT_NE(GetShellForTesting(*holder)->GetPlatformView().get(), nullptr);
   auto window = fml::MakeRefCounted<AndroidNativeWindow>(
       nullptr, /*is_fake_window=*/true);
   holder->NotifySurfaceCreated(window);
@@ -329,7 +329,9 @@ void RecordForwardedMessages(MockPlatformViewAndroidJNI& jni,
 // The handler the Shell sends platform messages from Dart to.
 std::shared_ptr<PlatformMessageHandler> MessageHandlerOf(
     AndroidShellHolder& holder) {
-  return holder.GetPlatformView()->GetPlatformMessageHandler();
+  return GetShellForTesting(holder)
+      ->GetPlatformView()
+      ->GetPlatformMessageHandler();
 }
 
 }  // namespace
@@ -530,7 +532,7 @@ TEST(AndroidShellHolder, PendingVsyncIsDeliveredOnceAfterHolderIsDestroyed) {
   fml::RefPtr<fml::TaskRunner> ui_task_runner =
       GetShellForTesting(*holder)->GetTaskRunners().GetUITaskRunner();
   ASSERT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   // The test keeps the waiter alive. In an app the shell owns it and it dies
   // with the holder.
   std::shared_ptr<VsyncWaiter> vsync_waiter = platform_view.CreateVSyncWaiter();
@@ -586,7 +588,7 @@ TEST(AndroidShellHolder, VsyncBatonsReturnThroughFlutterEngineOnVsync) {
                              frame_target_time_nanos);
       }));
 
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   std::shared_ptr<VsyncWaiter> vsync_waiter = platform_view.CreateVSyncWaiter();
   auto recorder = std::make_shared<VsyncFrameRecorder>(ui_task_runner);
   vsync_waiter->AsyncWaitForVsync(recorder->Callback());
@@ -640,7 +642,7 @@ TEST(AndroidShellHolder, UpdateSemanticsForwardsToJni) {
                   ::testing::SizeIs(PlatformViewAndroidDelegate::kBytesPerNode),
                   ::testing::ElementsAre("Submit"), ::testing::IsEmpty()));
 
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   platform_view.UpdateSemantics(kImplicitViewId, std::move(updates),
                                 std::move(actions));
 }
@@ -657,7 +659,7 @@ TEST(AndroidShellHolder, ComputePlatformResolvedLocalesForwardsToJni) {
             std::initializer_list<std::string>{"fr", "FR", ""});
       });
 
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   std::unique_ptr<std::vector<std::string>> resolved =
       platform_view.ComputePlatformResolvedLocales(supported);
   ASSERT_NE(resolved, nullptr);
@@ -679,7 +681,7 @@ TEST(AndroidShellHolder, ComputePlatformResolvedLocalesKeepsJavaCodes) {
             std::initializer_list<std::string>{"iw", "IL", ""});
       });
 
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   std::unique_ptr<std::vector<std::string>> resolved =
       platform_view.ComputePlatformResolvedLocales(supported);
   ASSERT_NE(resolved, nullptr);
@@ -697,7 +699,7 @@ TEST(AndroidShellHolder, ComputePlatformResolvedLocalesWithoutAnswerIsEmpty) {
         return std::make_unique<std::vector<std::string>>();
       });
 
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   std::unique_ptr<std::vector<std::string>> resolved =
       platform_view.ComputePlatformResolvedLocales(supported);
   ASSERT_NE(resolved, nullptr);
@@ -711,7 +713,7 @@ TEST(AndroidShellHolder, OnPreEngineRestartForwardsToJni) {
   ASSERT_TRUE(holder->IsValid());
   EXPECT_CALL(*jni, FlutterViewOnPreEngineRestart());
 
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   platform_view.OnPreEngineRestart();
 }
 
@@ -780,7 +782,7 @@ TEST(AndroidShellHolder, SetApplicationLocaleForwardsToJni) {
   ASSERT_TRUE(holder->IsValid());
   EXPECT_CALL(*jni, FlutterViewSetApplicationLocale("es-MX"));
 
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   platform_view.SetApplicationLocale("es-MX");
 }
 
@@ -792,7 +794,7 @@ TEST(AndroidShellHolder, SetSemanticsTreeEnabledForwardsToJni) {
   EXPECT_CALL(*jni, FlutterViewSetSemanticsTreeEnabled(true));
   EXPECT_CALL(*jni, FlutterViewSetSemanticsTreeEnabled(false));
 
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   platform_view.SetSemanticsTreeEnabled(true);
   platform_view.SetSemanticsTreeEnabled(false);
 }
@@ -807,7 +809,7 @@ TEST(AndroidShellHolder, RequestDartDeferredLibraryForwardsToJni) {
   EXPECT_CALL(*jni, RequestDartDeferredLibrary(kTestLoadingUnitId))
       .WillOnce(::testing::Return(true));
 
-  PlatformView& platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
   platform_view.RequestDartDeferredLibrary(kTestLoadingUnitId);
 }
 
@@ -825,7 +827,8 @@ TEST(AndroidShellHolder, GetScaledFontSizeForwardsToJni) {
               FlutterViewGetScaledFontSize(kUnscaledFontSize, kConfigurationId))
       .WillOnce(::testing::Return(kExpectedScaledFontSize));
 
-  const PlatformView& platform_view = *holder->GetPlatformView();
+  const PlatformView& platform_view =
+      *GetShellForTesting(*holder)->GetPlatformView();
   EXPECT_DOUBLE_EQ(
       platform_view.GetScaledFontSize(kUnscaledFontSize, kConfigurationId),
       kExpectedScaledFontSize);
@@ -837,8 +840,9 @@ TEST(AndroidShellHolder,
       CreateHolderWithoutSurface(Settings::MergedPlatformUIThread::kEnabled);
   ASSERT_TRUE(holder->IsValid());
 
-  PlatformView& platform_view = *holder->GetPlatformView();
-  const PlatformView& const_platform_view = *holder->GetPlatformView();
+  PlatformView& platform_view = *GetShellForTesting(*holder)->GetPlatformView();
+  const PlatformView& const_platform_view =
+      *GetShellForTesting(*holder)->GetPlatformView();
 
   EXPECT_NE(const_platform_view.GetImpellerContext(), nullptr);
   EXPECT_NE(platform_view.CreateExternalViewEmbedder(), nullptr);
@@ -855,9 +859,28 @@ TEST(AndroidShellHolder, SpawnReturnsNullWhenKernelBlobUnreadable) {
   if (!holder->GetEmbedderApiForTesting().RunsAOTCompiledDartCode()) {
     // Sample engine ID (1) passed to Spawn when kernel_blob_path is unset.
     constexpr int64_t kSpawnedEngineId = 1;
+    bool spawn_proc_called = false;
+    FlutterEngineProcTable& embedder_api = holder->GetEmbedderApiForTesting();
+    FlutterEngineSpawnFnPtr real_spawn = embedder_api.Spawn;
+    embedder_api.Spawn = MOCK_ENGINE_PROC(
+        Spawn, ([&](FLUTTER_API_SYMBOL(FlutterEngine) parent_engine,
+                    const FlutterEngineSpawnInfo* spawn_info,
+                    FLUTTER_API_SYMBOL(FlutterEngine)* engine_out) {
+          spawn_proc_called = true;
+          EXPECT_EQ(parent_engine, holder->GetEngineForTesting());
+          EXPECT_NE(spawn_info, nullptr);
+          if (spawn_info != nullptr) {
+            EXPECT_NE(spawn_info->renderer_config, nullptr);
+            EXPECT_NE(spawn_info->project_args, nullptr);
+            EXPECT_NE(spawn_info->run_configuration, nullptr);
+            EXPECT_STREQ(spawn_info->initial_route, "/");
+          }
+          return real_spawn(parent_engine, spawn_info, engine_out);
+        }));
     std::unique_ptr<AndroidShellHolder> spawned = holder->Spawn(
         jni, /*entrypoint=*/"main", /*libraryUrl=*/"",
         /*initial_route=*/"/", /*entrypoint_args=*/{}, kSpawnedEngineId);
+    EXPECT_TRUE(spawn_proc_called);
     EXPECT_EQ(spawned, nullptr);
   }
 }

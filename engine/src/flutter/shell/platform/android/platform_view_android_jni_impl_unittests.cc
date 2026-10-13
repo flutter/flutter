@@ -1873,7 +1873,9 @@ TEST_F(PlatformViewAndroidJNIImplTest,
       settings, jni, kFlutterNativeWindowBackendImpellerOpenGLES);
   ASSERT_TRUE(holder->IsValid());
   std::shared_ptr<PlatformMessageHandler> handler =
-      holder->GetPlatformView()->GetPlatformMessageHandler();
+      GetShellForTesting(*holder)
+          ->GetPlatformView()
+          ->GetPlatformMessageHandler();
   ASSERT_NE(handler, nullptr);
   EXPECT_FALSE(handler->DoesHandlePlatformMessageOnPlatformThread());
 
@@ -1886,7 +1888,8 @@ TEST_F(PlatformViewAndroidJNIImplTest,
         EXPECT_GT(response_id, 0);
       });
 
-  PlatformView* platform_view = holder->GetPlatformView().get();
+  PlatformView* platform_view =
+      GetShellForTesting(*holder)->GetPlatformView().get();
   ASSERT_NE(platform_view, nullptr);
   platform_view->HandlePlatformMessage(
       std::make_unique<flutter::PlatformMessage>(
@@ -1920,7 +1923,9 @@ TEST_F(PlatformViewAndroidJNIImplTest,
           [&](const std::string& channel, UniquePlatformMessagePayload payload,
               int response_id) { response_ids.push_back(response_id); });
   std::shared_ptr<PlatformMessageHandler> handler =
-      holder->GetPlatformView()->GetPlatformMessageHandler();
+      GetShellForTesting(*holder)
+          ->GetPlatformView()
+          ->GetPlatformMessageHandler();
   handler->HandlePlatformMessage(
       std::make_unique<flutter::PlatformMessage>("first", nullptr));
   handler->HandlePlatformMessage(

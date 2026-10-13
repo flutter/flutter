@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#define FML_USED_ON_EMBEDDER
+
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 
 #include <atomic>
@@ -10,6 +12,7 @@
 #include <utility>
 
 #include "flutter/fml/logging.h"
+#include "flutter/fml/message_loop.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/fml/task_runner.h"
@@ -45,8 +48,9 @@ uint64_t ToEmbedderNanos(fml::TimePoint time) {
 
 }  // namespace
 
-VsyncWaiterAndroid::VsyncWaiterAndroid(const flutter::TaskRunners& task_runners)
-    : task_runners_(task_runners) {}
+VsyncWaiterAndroid::VsyncWaiterAndroid(
+    fml::RefPtr<fml::TaskRunner> platform_task_runner)
+    : platform_task_runner_(std::move(platform_task_runner)) {}
 
 VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;
 
@@ -87,6 +91,10 @@ void VsyncWaiterAndroid::AwaitVSync(intptr_t baton) {
                            "leaks.";
       return;
     }
+    if (!ui_task_runner_) {
+      fml::MessageLoop::EnsureInitializedForCurrentThread();
+      ui_task_runner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
+    }
     outstanding_batons_.insert(baton);
   }
   RequestFrame(baton);
@@ -95,9 +103,13 @@ void VsyncWaiterAndroid::AwaitVSync(intptr_t baton) {
 void VsyncWaiterAndroid::RequestFrame(intptr_t baton) {
   const static bool use_choreographer = Choreographer::IsAvailableOnPlatform();
   if (use_choreographer) {
+    fml::RefPtr<fml::TaskRunner> ui_task_runner;
+    {
+      std::scoped_lock lock(mutex_);
+      ui_task_runner = ui_task_runner_;
+    }
     fml::TaskRunner::RunNowOrPostTask(
-        task_runners_.GetUITaskRunner(),
-        [weak_this = weak_from_this(), baton]() {
+        ui_task_runner, [weak_this = weak_from_this(), baton]() {
           const auto& choreographer = Choreographer::GetInstance();
           bool posted =
               choreographer.PostFrameCallback([weak_this, baton](auto time) {
@@ -117,7 +129,7 @@ void VsyncWaiterAndroid::RequestFrame(intptr_t baton) {
     auto* request = new JavaVsyncRequest{weak_from_this(), baton};
     jlong java_baton = reinterpret_cast<jlong>(request);
     // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
-    task_runners_.GetPlatformTaskRunner()->PostTask([java_baton]() {
+    platform_task_runner_->PostTask([java_baton]() {
       JNIEnv* env = fml::jni::AttachCurrentThread();
       env->CallStaticVoidMethod(g_vsync_waiter_class->obj(),     //
                                 g_async_wait_for_vsync_method_,  //

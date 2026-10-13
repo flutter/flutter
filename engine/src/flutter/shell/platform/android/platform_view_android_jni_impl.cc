@@ -386,7 +386,7 @@ static void SetViewportMetrics(JNIEnv* env,
                            &displayFeaturesState[0]);
   }
 
-  const flutter::ViewportMetrics metrics{
+  const flutter::AndroidViewportMetrics metrics{
       static_cast<double>(devicePixelRatio),  // p_device_pixel_ratio
       static_cast<double>(physicalWidth),     // p_physical_width
       static_cast<double>(physicalHeight),    // p_physical_height
@@ -709,13 +709,16 @@ static void LoadDartDeferredLibrary(JNIEnv* env,
   fml::RefPtr<fml::NativeLibrary> native_lib =
       fml::NativeLibrary::CreateWithHandle(handle, false);
 
-  // Resolve symbols.
+  // Resolve standard Dart AOT isolate snapshot symbol names.
+  constexpr const char* kDartIsolateSnapshotDataSymbol = "kDartSnapshotData";
+  constexpr const char* kDartIsolateSnapshotInstructionsSymbol =
+      "kDartSnapshotText";
   std::unique_ptr<const fml::SymbolMapping> data_mapping =
       std::make_unique<const fml::SymbolMapping>(
-          native_lib, DartSnapshot::kIsolateDataSymbol);
+          native_lib, kDartIsolateSnapshotDataSymbol);
   std::unique_ptr<const fml::SymbolMapping> instructions_mapping =
       std::make_unique<const fml::SymbolMapping>(
-          native_lib, DartSnapshot::kIsolateInstructionsSymbol);
+          native_lib, kDartIsolateSnapshotInstructionsSymbol);
 
   ANDROID_SHELL_HOLDER->LoadDartDeferredLibrary(
       loading_unit_id, std::move(data_mapping),
@@ -1958,17 +1961,19 @@ PlatformViewAndroidJNIImpl::FlutterViewComputePlatformResolvedLocale(
 }
 
 double PlatformViewAndroidJNIImpl::GetDisplayRefreshRate() {
+  // Matches kUnknownDisplayRefreshRate (0) when no refresh rate is available.
+  constexpr double kUnknownRefreshRate = 0.0;
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
   auto java_object = java_object_.get(env);
   if (java_object.is_null()) {
-    return kUnknownDisplayRefreshRate;
+    return kUnknownRefreshRate;
   }
 
   fml::jni::ScopedJavaLocalRef<jclass> clazz(
       env, env->GetObjectClass(java_object.obj()));
   if (clazz.is_null()) {
-    return kUnknownDisplayRefreshRate;
+    return kUnknownRefreshRate;
   }
 
   jfieldID fid = env->GetStaticFieldID(clazz.obj(), "refreshRateFPS", "F");

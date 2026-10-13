@@ -10,11 +10,11 @@
       "enforce": "zero"
     },
     "embedder_engine_refs": {
-      "count": 2,
+      "count": 0,
       "enforce": "ratchet"
     },
     "embedder_internal_includes": {
-      "count": 3,
+      "count": 0,
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
