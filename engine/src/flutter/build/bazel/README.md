@@ -14,7 +14,7 @@ Nothing in this directory is used by the GN build.
 | `gn_build/` | The `gn_build` rule (`gn_build.bzl`, action script `gn_build.py`): a GN build of part of the tree as one Bazel action, for the subtrees that keep their GN rules during the migration. |
 | `gn_action/` | The `gn_action` rule: GN's `action()` -- one run of a Python script under the hermetic `@cpython3` -- as the generated `BUILD` files emit it, with the path tokens (`$(execpath ...)`, `$(src ...)`, `$(gen ...)`) the converter writes for `rebase_path()` results; `gn_copy` for `copy()`; `run_python` for other rules that run the engine's scripts. |
 | `flatbuffers/` | The engine's `flatbuffers()` GN template as a macro: `flatc` per schema, the generated headers as a library. |
-| `impeller/` | The engine's `impeller_shaders()` GN template as a macro over three rules (`impellerc_compile`, `shader_archive`, `embed_blob`); see below. |
+| `impeller/` | The engine's `impeller_shaders()` GN template as a macro over three rules (`impellerc_compile`, `shader_archive`, `embed_blob`), and `impellerc()` itself (the template the test fixtures invoke directly) over `impellerc_run`; see below. |
 | `dart_wrap/` | The Dart SDK, built with `gn_build`: `BUILD.gn` lists the GN targets, `BUILD.bazel` the args, the inputs and the `cc_library` facades; `tests/` starts the VM from the archive. |
 | `gl_wrap/` | The GPU test backends -- ANGLE, SwiftShader, the Vulkan loader -- built with `gn_build` the same way; `stubs/` holds the stand-in GN files for the engine directories ANGLE's GN reaches; `tests/` renders through both. See below. |
 | `dart/` | The engine's own Dart pipeline on the wrapped SDK's tools and the prebuilt SDK: `snapshot.bzl` (`compile_platform`, `core_snapshot`, `aot_snapshot`, `bin_to_assembly` -- `lib/snapshot/BUILD.gn`'s steps) and `kernel.bzl` (`dart_kernel`, GN's `flutter_frontend_server`); see below. |
@@ -301,6 +301,18 @@ The tools run in Bazel's exec configuration -- GN's `host_toolchain` for
 `bazel-out/*-exec-*`, where GN compiles it once because its default
 toolchain is the host's. That is the cost of a build that can also cross
 compile; a remote or disk cache absorbs it.
+
+The test fixtures invoke the inner template, `impellerc()`
+(impeller/tools/compiler.gni), directly: runtime stages (`--iplr`, one
+run per shader) and Flutter GPU shader bundles (`--shader-bundle`, one run
+over a JSON that names the shaders by path). The macro of the same name
+in `impeller/shaders.bzl` declares GN's outputs
+(`<intermediates_subdir>/<shader>.<sl_file_extension>`, or the bundle) and
+runs `impellerc_run`, which builds the command line as the template does;
+the bundle's paths, which GN wrote with `rebase_path`, are the converter's
+`$(src ...)` tokens (`gn_action.bzl`'s `expand_gn_paths`), so the JSON is
+the same text on every machine. GN's `mnemonic` becomes the action's,
+reduced to letters and digits (`IMPELLERC_IPLR` is not a Bazel mnemonic).
 
 ## Build speed: the cache and the sandbox
 
