@@ -8,7 +8,8 @@
 #include <GLES/gl.h>
 
 #include "flutter/common/graphics/texture.h"
-#include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
+#include "flutter/shell/platform/android/texture_source.h"
+#include "third_party/skia/include/core/SkM44.h"
 
 namespace flutter {
 
@@ -31,10 +32,11 @@ namespace flutter {
 ///
 class SurfaceTextureExternalTexture : public flutter::Texture {
  public:
-  SurfaceTextureExternalTexture(
-      int64_t id,
-      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a texture that draws the frames of `source`. The
+  ///             texture calls `source.destruction` when it is destroyed.
+  ///
+  SurfaceTextureExternalTexture(int64_t id, SurfaceTextureSource source);
 
   // |Texture|
   ~SurfaceTextureExternalTexture() override;
@@ -105,8 +107,7 @@ class SurfaceTextureExternalTexture : public flutter::Texture {
   ///
   enum class AttachmentState { kUninitialized, kAttached, kDetached };
 
-  std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
-  fml::jni::ScopedJavaGlobalRef<jobject> surface_texture_;
+  const SurfaceTextureSource source_;
   AttachmentState state_ = AttachmentState::kUninitialized;
   sk_sp<flutter::DlImage> dl_image_;
 

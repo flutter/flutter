@@ -17,10 +17,7 @@ namespace flutter {
 class SurfaceTextureExternalTextureGLSkia
     : public SurfaceTextureExternalTexture {
  public:
-  SurfaceTextureExternalTextureGLSkia(
-      int64_t id,
-      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+  SurfaceTextureExternalTextureGLSkia(int64_t id, SurfaceTextureSource source);
 
   // |SurfaceTextureExternalTexture|
   ~SurfaceTextureExternalTextureGLSkia() override;

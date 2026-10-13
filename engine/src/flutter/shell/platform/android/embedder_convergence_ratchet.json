@@ -18,7 +18,7 @@
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
-      "count": 71,
+      "count": 77,
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {
@@ -58,6 +58,12 @@
       "from": 1,
       "to": 2,
       "reason": "Wrap step, callbacks out: PlatformViewAndroid derives from PlatformViewEmbedder, so platform_view_android.h includes platform_view_embedder.h. Each deleted PlatformViewAndroid override then falls back to the embedder dispatch table."
+    },
+    {
+      "metric": "engine_internal_includes",
+      "from": 71,
+      "to": 77,
+      "reason": "Textures step 1: the texture classes stop including the JNI headers and include what they use themselves (display_list geometry conversions, Skia SkM44 and SkColorSpace, Impeller AiksContext), which those headers pulled in before. The classes move to shell/platform/embedder in the next two steps."
     }
   ]
 }

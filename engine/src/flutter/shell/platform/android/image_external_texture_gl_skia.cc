@@ -5,6 +5,7 @@
 #include "flutter/shell/platform/android/image_external_texture_gl_skia.h"
 
 #include "flutter/display_list/image/dl_image_skia.h"
+#include "flutter/third_party/skia/include/core/SkColorSpace.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/gl/GrGLBackendSurface.h"
@@ -14,10 +15,8 @@ namespace flutter {
 ImageExternalTextureGLSkia::ImageExternalTextureGLSkia(
     const std::shared_ptr<AndroidContextGLSkia>& context,
     int64_t id,
-    const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    ImageExternalTexture::ImageLifecycle lifecycle)
-    : ImageExternalTextureGL(id, image_texture_entry, jni_facade, lifecycle) {}
+    HardwareBufferSource source)
+    : ImageExternalTextureGL(id, source) {}
 
 void ImageExternalTextureGLSkia::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {

@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/android/surface_texture_external_texture.h"
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
+
 #include <GLES/glext.h>
 
 #include <utility>
@@ -14,14 +16,14 @@ namespace flutter {
 
 SurfaceTextureExternalTexture::SurfaceTextureExternalTexture(
     int64_t id,
-    const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
-    : Texture(id),
-      jni_facade_(jni_facade),
-      surface_texture_(surface_texture),
-      transform_(SkMatrix::I()) {}
+    SurfaceTextureSource source)
+    : Texture(id), source_(source), transform_(SkMatrix::I()) {}
 
-SurfaceTextureExternalTexture::~SurfaceTextureExternalTexture() {}
+SurfaceTextureExternalTexture::~SurfaceTextureExternalTexture() {
+  if (source_.destruction != nullptr) {
+    source_.destruction(source_.user_data);
+  }
+}
 
 void SurfaceTextureExternalTexture::OnGrContextCreated() {
   state_ = AttachmentState::kUninitialized;
@@ -111,27 +113,25 @@ void SurfaceTextureExternalTexture::OnGrContextDestroyed() {
 void SurfaceTextureExternalTexture::OnTextureUnregistered() {}
 
 void SurfaceTextureExternalTexture::Detach() {
-  jni_facade_->SurfaceTextureDetachFromGLContext(
-      fml::jni::ScopedJavaLocalRef<jobject>(surface_texture_));
+  source_.detach(source_.user_data);
   dl_image_.reset();
 }
 
 void SurfaceTextureExternalTexture::Attach(int gl_tex_id) {
-  jni_facade_->SurfaceTextureAttachToGLContext(
-      fml::jni::ScopedJavaLocalRef<jobject>(surface_texture_), gl_tex_id);
+  source_.attach(source_.user_data, static_cast<uint32_t>(gl_tex_id));
   state_ = AttachmentState::kAttached;
 }
 
 bool SurfaceTextureExternalTexture::ShouldUpdate() {
-  return jni_facade_->SurfaceTextureShouldUpdate(
-      fml::jni::ScopedJavaLocalRef<jobject>(surface_texture_));
+  return source_.has_pending_frame != nullptr &&
+         source_.has_pending_frame(source_.user_data);
 }
 
 void SurfaceTextureExternalTexture::Update() {
-  jni_facade_->SurfaceTextureUpdateTexImage(
-      fml::jni::ScopedJavaLocalRef<jobject>(surface_texture_));
-  transform_ = jni_facade_->SurfaceTextureGetTransformMatrix(
-      fml::jni::ScopedJavaLocalRef<jobject>(surface_texture_));
+  float transformation[16];
+  source_.update(source_.user_data, transformation);
+  static_assert(sizeof(SkScalar) == sizeof(float));
+  transform_ = SkM44::ColMajor(transformation);
 }
 
 const SkM44& SurfaceTextureExternalTexture::GetCurrentUVTransformation() const {

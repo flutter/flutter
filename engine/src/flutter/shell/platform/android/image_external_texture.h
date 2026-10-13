@@ -8,11 +8,11 @@
 #include "flutter/common/graphics/texture.h"
 #include "flutter/fml/logging.h"
 #include "flutter/shell/platform/android/image_lru.h"
-#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
-#include "flutter/shell/platform/android/platform_view_android_jni_impl.h"
+#include "flutter/shell/platform/android/texture_source.h"
 
 #include <android/hardware_buffer.h>
-#include <android/hardware_buffer_jni.h>
+
+#include <memory>
 
 namespace flutter {
 
@@ -38,11 +38,11 @@ class ImageExternalTexture : public flutter::Texture {
   /// Whether the last image should be reset when the context is destroyed.
   enum class ImageLifecycle { kReset, kKeepAlive };
 
-  explicit ImageExternalTexture(
-      int64_t id,
-      const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      ImageLifecycle lifecycle);
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a texture that draws the frames of `source`. The
+  ///             texture calls `source.destruction` when it is destroyed.
+  ///
+  ImageExternalTexture(int64_t id, HardwareBufferSource source);
 
   // |flutter::Texture|
   virtual ~ImageExternalTexture();
@@ -66,19 +66,32 @@ class ImageExternalTexture : public flutter::Texture {
 
   virtual void Detach() = 0;
 
-  JavaLocalRef AcquireLatestImage();
+  //----------------------------------------------------------------------------
+  /// @brief      A frame from the source. The source releases it when this
+  ///             object is destroyed.
+  ///
+  class AcquiredFrame {
+   public:
+    explicit AcquiredFrame(const HardwareBufferFrame& frame);
 
-  void CloseImage(const fml::jni::JavaRef<jobject>& image);
+    ~AcquiredFrame();
 
-  JavaLocalRef HardwareBufferFor(const fml::jni::JavaRef<jobject>& image);
+    /// The frame's buffer. May be null where the device cannot hand out
+    /// AHardwareBuffers.
+    AHardwareBuffer* buffer() const { return frame_.buffer; }
 
-  void CloseHardwareBuffer(const fml::jni::JavaRef<jobject>& hardware_buffer);
+   private:
+    const HardwareBufferFrame frame_;
 
-  AHardwareBuffer* AHardwareBufferFor(
-      const fml::jni::JavaRef<jobject>& hardware_buffer);
+    FML_DISALLOW_COPY_AND_ASSIGN(AcquiredFrame);
+  };
 
-  fml::jni::ScopedJavaGlobalRef<jobject> image_texture_entry_;
-  std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  //----------------------------------------------------------------------------
+  /// @return     The source's next frame, or null if it has none.
+  ///
+  std::unique_ptr<AcquiredFrame> AcquireFrame();
+
+  const HardwareBufferSource source_;
 
   enum class AttachmentState { kUninitialized, kAttached, kDetached };
   AttachmentState state_ = AttachmentState::kUninitialized;
@@ -104,7 +117,6 @@ class ImageExternalTexture : public flutter::Texture {
   // |flutter::ContextListener|
   void OnGrContextDestroyed() override;
 
-  const ImageLifecycle texture_lifecycle_;
   FML_DISALLOW_COPY_AND_ASSIGN(ImageExternalTexture);
 };
 

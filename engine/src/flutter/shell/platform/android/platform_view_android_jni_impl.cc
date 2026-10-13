@@ -1612,19 +1612,27 @@ void PlatformViewAndroidJNIImpl::SurfaceTextureUpdateTexImage(
   FML_CHECK(fml::jni::CheckException(env));
 }
 
-SkM44 PlatformViewAndroidJNIImpl::SurfaceTextureGetTransformMatrix(
+std::array<float, 16>
+PlatformViewAndroidJNIImpl::SurfaceTextureGetTransformMatrix(
     JavaLocalRef surface_texture) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
+  // Column-major identity, what a default SkM44 used to stand for here.
+  constexpr std::array<float, 16> kIdentity = {
+      1, 0, 0, 0,  //
+      0, 1, 0, 0,  //
+      0, 0, 1, 0,  //
+      0, 0, 0, 1,  //
+  };
   if (surface_texture.is_null()) {
-    return {};
+    return kIdentity;
   }
 
   fml::jni::ScopedJavaLocalRef<jobject> surface_texture_local_ref(
       env, env->CallObjectMethod(surface_texture.obj(),
                                  g_java_weak_reference_get_method));
   if (surface_texture_local_ref.is_null()) {
-    return {};
+    return kIdentity;
   }
 
   fml::jni::ScopedJavaLocalRef<jfloatArray> transformMatrix(
@@ -1634,12 +1642,11 @@ SkM44 PlatformViewAndroidJNIImpl::SurfaceTextureGetTransformMatrix(
                       g_get_transform_matrix_method, transformMatrix.obj());
   FML_CHECK(fml::jni::CheckException(env));
 
-  float* m = env->GetFloatArrayElements(transformMatrix.obj(), nullptr);
-
-  static_assert(sizeof(SkScalar) == sizeof(float));
-  const auto transform = SkM44::ColMajor(m);
-
-  env->ReleaseFloatArrayElements(transformMatrix.obj(), m, JNI_ABORT);
+  // SurfaceTexture.getTransformMatrix writes a column-major matrix.
+  std::array<float, 16> transform;
+  env->GetFloatArrayRegion(transformMatrix.obj(), 0, transform.size(),
+                           transform.data());
+  FML_CHECK(fml::jni::CheckException(env));
 
   return transform;
 }

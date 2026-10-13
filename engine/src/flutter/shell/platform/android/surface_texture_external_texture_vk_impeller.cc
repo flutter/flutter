@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/android/surface_texture_external_texture_vk_impeller.h"
 
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
+
 #include <chrono>
 
 #include <GLES2/gl2.h>
@@ -11,6 +13,7 @@
 #include <GLES2/gl2ext.h>
 
 #include "flutter/fml/trace_event.h"
+#include "flutter/impeller/display_list/aiks_context.h"
 #include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/backend/vulkan/command_buffer_vk.h"
 #include "flutter/impeller/renderer/backend/vulkan/surface_context_vk.h"
@@ -24,9 +27,8 @@ SurfaceTextureExternalTextureVKImpeller::
     SurfaceTextureExternalTextureVKImpeller(
         std::shared_ptr<impeller::ContextVK> context,
         int64_t id,
-        const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-        const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
-    : SurfaceTextureExternalTexture(id, surface_texture, jni_facade),
+        SurfaceTextureSource source)
+    : SurfaceTextureExternalTexture(id, source),
       context_(std::move(context)),
       trampoline_(std::make_shared<glvk::Trampoline>()) {
   is_valid_ = trampoline_->IsValid();

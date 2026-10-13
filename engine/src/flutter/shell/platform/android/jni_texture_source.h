@@ -1,0 +1,39 @@
+// Copyright 2013 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_TEXTURE_SOURCE_H_
+#define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_TEXTURE_SOURCE_H_
+
+#include <memory>
+
+#include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/shell/platform/android/texture_source.h"
+
+namespace flutter {
+
+//------------------------------------------------------------------------------
+/// @brief      Makes the source of an external texture fed by a Java
+///             SurfaceTextureWrapper. `surface_texture` is the WeakReference
+///             to it that FlutterJNI registers.
+///
+SurfaceTextureSource MakeJavaSurfaceTextureSource(
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture);
+
+//------------------------------------------------------------------------------
+/// @brief      Makes the source of an external texture fed by a Java
+///             ImageTextureEntry. `image_texture_entry` is the WeakReference
+///             to it that FlutterJNI registers. Each frame is the hardware
+///             buffer of the entry's latest image; releasing the frame closes
+///             the Java HardwareBuffer.
+///
+HardwareBufferSource MakeJavaImageTextureSource(
+    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
+    bool drop_frames_on_context_destroyed);
+
+}  // namespace flutter
+
+#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_JNI_TEXTURE_SOURCE_H_

@@ -4,28 +4,21 @@
 
 #include "flutter/shell/platform/android/image_external_texture.h"
 
-#include <android/hardware_buffer_jni.h>
-#include <android/sensor.h>
+#include "flutter/display_list/geometry/dl_geometry_conversions.h"
 
-#include "flutter/fml/platform/android/jni_util.h"
-#include "flutter/impeller/toolkit/android/proc_table.h"
-#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/fml/trace_event.h"
 
 namespace flutter {
 
-ImageExternalTexture::ImageExternalTexture(
-    int64_t id,
-    const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    ImageLifecycle lifecycle)
-    : Texture(id),
-      image_texture_entry_(image_texture_entry),
-      jni_facade_(jni_facade),
-      texture_lifecycle_(lifecycle) {}
+ImageExternalTexture::ImageExternalTexture(int64_t id,
+                                           HardwareBufferSource source)
+    : Texture(id), source_(source) {}
 
-ImageExternalTexture::~ImageExternalTexture() = default;
-
-// Implementing flutter::Texture.
+ImageExternalTexture::~ImageExternalTexture() {
+  if (source_.destruction != nullptr) {
+    source_.destruction(source_.user_data);
+  }
+}
 void ImageExternalTexture::Paint(PaintContext& context,
                                  const DlRect& bounds,
                                  bool freeze,
@@ -68,66 +61,38 @@ void ImageExternalTexture::OnGrContextCreated() {
 // Implementing flutter::ContextListener.
 void ImageExternalTexture::OnGrContextDestroyed() {
   if (state_ == AttachmentState::kAttached) {
-    switch (texture_lifecycle_) {
-      case ImageLifecycle::kReset: {
-        dl_image_.reset();
-        image_lru_.Clear();
-      } break;
-      case ImageLifecycle::kKeepAlive:
-        // Intentionally do nothing.
-        ///
-        // If we reset the image, we are not able to re-acquire it, but the
-        // producer of the image will not know to reproduce it, resulting in a
-        // blank image. See https://github.com/flutter/flutter/issues/163561.
-        break;
+    if (source_.drop_frames_on_context_destroyed) {
+      dl_image_.reset();
+      image_lru_.Clear();
     }
+    // Otherwise intentionally do nothing.
+    //
+    // If we reset the image, we are not able to re-acquire it, but the
+    // producer of the image will not know to reproduce it, resulting in a
+    // blank image. See https://github.com/flutter/flutter/issues/163561.
     Detach();
   }
   state_ = AttachmentState::kDetached;
 }
 
-JavaLocalRef ImageExternalTexture::AcquireLatestImage() {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  FML_CHECK(env != nullptr);
+ImageExternalTexture::AcquiredFrame::AcquiredFrame(
+    const HardwareBufferFrame& frame)
+    : frame_(frame) {}
 
-  // ImageTextureEntry.acquireLatestImage.
-  JavaLocalRef image_java =
-      jni_facade_->ImageProducerTextureEntryAcquireLatestImage(
-          JavaLocalRef(image_texture_entry_));
-  return image_java;
-}
-
-void ImageExternalTexture::CloseImage(const fml::jni::JavaRef<jobject>& image) {
-  if (image.obj() == nullptr) {
-    return;
+ImageExternalTexture::AcquiredFrame::~AcquiredFrame() {
+  if (frame_.release != nullptr) {
+    frame_.release(frame_.release_user_data);
   }
-  jni_facade_->ImageClose(JavaLocalRef(image));
 }
 
-void ImageExternalTexture::CloseHardwareBuffer(
-    const fml::jni::JavaRef<jobject>& hardware_buffer) {
-  if (hardware_buffer.obj() == nullptr) {
-    return;
+std::unique_ptr<ImageExternalTexture::AcquiredFrame>
+ImageExternalTexture::AcquireFrame() {
+  TRACE_EVENT0("flutter", "ImageExternalTexture::AcquireFrame");
+  HardwareBufferFrame frame;
+  if (!source_.acquire_frame(source_.user_data, &frame)) {
+    return nullptr;
   }
-  jni_facade_->HardwareBufferClose(JavaLocalRef(hardware_buffer));
-}
-
-JavaLocalRef ImageExternalTexture::HardwareBufferFor(
-    const fml::jni::JavaRef<jobject>& image) {
-  if (image.obj() == nullptr) {
-    return JavaLocalRef();
-  }
-  // Image.getHardwareBuffer.
-  return jni_facade_->ImageGetHardwareBuffer(JavaLocalRef(image));
-}
-
-AHardwareBuffer* ImageExternalTexture::AHardwareBufferFor(
-    const fml::jni::JavaRef<jobject>& hardware_buffer) {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  FML_CHECK(env != nullptr);
-  const auto& proc =
-      impeller::android::GetProcTable().AHardwareBuffer_fromHardwareBuffer;
-  return proc ? proc(env, hardware_buffer.obj()) : nullptr;
+  return std::make_unique<AcquiredFrame>(frame);
 }
 
 }  // namespace flutter

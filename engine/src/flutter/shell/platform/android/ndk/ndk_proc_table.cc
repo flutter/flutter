@@ -31,6 +31,8 @@ NDKProcTable::NDKProcTable(const fml::RefPtr<fml::NativeLibrary>& library)
           AChoreographer_postFrameCallback);
   Resolve(library_, "AChoreographer_postFrameCallback64",
           AChoreographer_postFrameCallback64);
+  Resolve(library_, "AHardwareBuffer_fromHardwareBuffer",
+          AHardwareBuffer_fromHardwareBuffer);
   Resolve(library_, "ASurfaceTransaction_fromJava",
           ASurfaceTransaction_fromJava);
   Resolve(library_, "ATrace_isEnabled", ATrace_isEnabled);

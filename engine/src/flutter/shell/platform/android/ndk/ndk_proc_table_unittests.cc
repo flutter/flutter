@@ -19,6 +19,7 @@ namespace {
 // API levels that introduced the functions in NDKProcTable.
 constexpr int kATraceApiLevel = 23;
 constexpr int kChoreographerApiLevel = 24;
+constexpr int kHardwareBufferFromJavaApiLevel = 26;
 constexpr int kPostFrameCallback64ApiLevel = 29;
 constexpr int kSurfaceTransactionFromJavaApiLevel = 34;
 
@@ -37,6 +38,8 @@ TEST(NDKProcTableTest, ResolvesFunctionsForThisApiLevel) {
             api_level >= kChoreographerApiLevel);
   EXPECT_EQ(table.AChoreographer_postFrameCallback64 != nullptr,
             api_level >= kPostFrameCallback64ApiLevel);
+  EXPECT_EQ(table.AHardwareBuffer_fromHardwareBuffer != nullptr,
+            api_level >= kHardwareBufferFromJavaApiLevel);
   EXPECT_EQ(table.ASurfaceTransaction_fromJava != nullptr,
             api_level >= kSurfaceTransactionFromJavaApiLevel);
 }
@@ -59,6 +62,7 @@ TEST(NDKProcTableTest, WithoutLibraryEveryFunctionIsNull) {
   EXPECT_EQ(table.AChoreographer_getInstance, nullptr);
   EXPECT_EQ(table.AChoreographer_postFrameCallback, nullptr);
   EXPECT_EQ(table.AChoreographer_postFrameCallback64, nullptr);
+  EXPECT_EQ(table.AHardwareBuffer_fromHardwareBuffer, nullptr);
   EXPECT_EQ(table.ASurfaceTransaction_fromJava, nullptr);
   EXPECT_EQ(table.ATrace_isEnabled, nullptr);
   EXPECT_FALSE(table.TraceIsEnabled());

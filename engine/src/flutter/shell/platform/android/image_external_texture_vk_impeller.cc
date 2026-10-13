@@ -15,11 +15,8 @@ namespace flutter {
 ImageExternalTextureVKImpeller::ImageExternalTextureVKImpeller(
     const std::shared_ptr<impeller::ContextVK>& impeller_context,
     int64_t id,
-    const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    ImageExternalTexture::ImageLifecycle lifecycle)
-    : ImageExternalTexture(id, image_texture_entry, jni_facade, lifecycle),
-      impeller_context_(impeller_context) {}
+    HardwareBufferSource source)
+    : ImageExternalTexture(id, source), impeller_context_(impeller_context) {}
 
 ImageExternalTextureVKImpeller::~ImageExternalTextureVKImpeller() {}
 
@@ -34,15 +31,12 @@ void ImageExternalTextureVKImpeller::Detach() {}
 
 void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
                                                   const SkRect& bounds) {
-  JavaLocalRef image = AcquireLatestImage();
-  if (image.is_null()) {
+  // Releases the buffer when this function returns.
+  std::unique_ptr<AcquiredFrame> frame = AcquireFrame();
+  if (!frame) {
     return;
   }
-  JavaLocalRef hardware_buffer = HardwareBufferFor(image);
-  if (hardware_buffer.is_null()) {
-    return;
-  }
-  AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
+  AHardwareBuffer* latest_hardware_buffer = frame->buffer();
 
   auto hb_desc =
       impeller::android::HardwareBuffer::Describe(latest_hardware_buffer);
@@ -52,15 +46,12 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
   auto existing_image = image_lru_.FindImage(key);
   if (existing_image != nullptr || !hb_desc.has_value()) {
     dl_image_ = existing_image;
-
-    CloseHardwareBuffer(hardware_buffer);
     return;
   }
 
   auto texture_source = std::make_shared<impeller::AHBTextureSourceVK>(
       impeller_context_, latest_hardware_buffer, hb_desc.value());
   if (!texture_source->IsValid()) {
-    CloseHardwareBuffer(hardware_buffer);
     return;
   }
 
@@ -96,7 +87,6 @@ void ImageExternalTextureVKImpeller::ProcessFrame(PaintContext& context,
   if (key.has_value()) {
     image_lru_.AddImage(dl_image_, key.value());
   }
-  CloseHardwareBuffer(hardware_buffer);
 }
 
 }  // namespace flutter

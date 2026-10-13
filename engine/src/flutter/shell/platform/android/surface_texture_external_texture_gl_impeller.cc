@@ -12,10 +12,8 @@ SurfaceTextureExternalTextureGLImpeller::
     SurfaceTextureExternalTextureGLImpeller(
         const std::shared_ptr<impeller::ContextGLES>& context,
         int64_t id,
-        const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-        const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
-    : SurfaceTextureExternalTexture(id, surface_texture, jni_facade),
-      impeller_context_(context) {}
+        SurfaceTextureSource source)
+    : SurfaceTextureExternalTexture(id, source), impeller_context_(context) {}
 
 SurfaceTextureExternalTextureGLImpeller::
     ~SurfaceTextureExternalTextureGLImpeller() = default;

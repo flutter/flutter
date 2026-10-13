@@ -9,6 +9,7 @@
 #include <GLES2/gl2ext.h>
 
 #include "flutter/display_list/image/dl_image_skia.h"
+#include "flutter/third_party/skia/include/core/SkColorSpace.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/GrBackendSurface.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/GrDirectContext.h"
 #include "flutter/third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
@@ -18,9 +19,8 @@ namespace flutter {
 
 SurfaceTextureExternalTextureGLSkia::SurfaceTextureExternalTextureGLSkia(
     int64_t id,
-    const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade)
-    : SurfaceTextureExternalTexture(id, surface_texture, jni_facade) {}
+    SurfaceTextureSource source)
+    : SurfaceTextureExternalTexture(id, source) {}
 
 SurfaceTextureExternalTextureGLSkia::~SurfaceTextureExternalTextureGLSkia() {
   if (texture_name_ != 0) {

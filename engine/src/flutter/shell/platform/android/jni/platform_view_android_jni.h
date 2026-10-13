@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 #define FLUTTER_SHELL_PLATFORM_ANDROID_JNI_PLATFORM_VIEW_ANDROID_JNI_H_
 
+#include <array>
 #include <memory>
 #include <string>
 #include <utility>
@@ -141,7 +142,10 @@ class PlatformViewAndroidJNI {
   ///             Then, it updates the `transform` matrix, so it fill the canvas
   ///             and preserve the aspect ratio.
   ///
-  virtual SkM44 SurfaceTextureGetTransformMatrix(
+  /// @return     The UV transform as a column-major 4x4 matrix, or the
+  ///             identity if the SurfaceTexture is gone.
+  ///
+  virtual std::array<float, 16> SurfaceTextureGetTransformMatrix(
       JavaLocalRef surface_texture) = 0;
 
   //----------------------------------------------------------------------------

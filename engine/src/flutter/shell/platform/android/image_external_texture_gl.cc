@@ -11,12 +11,9 @@
 
 namespace flutter {
 
-ImageExternalTextureGL::ImageExternalTextureGL(
-    int64_t id,
-    const fml::jni::ScopedJavaGlobalRef<jobject>& image_texture_entry,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-    ImageExternalTexture::ImageLifecycle lifecycle)
-    : ImageExternalTexture(id, image_texture_entry, jni_facade, lifecycle) {}
+ImageExternalTextureGL::ImageExternalTextureGL(int64_t id,
+                                               HardwareBufferSource source)
+    : ImageExternalTexture(id, source) {}
 
 void ImageExternalTextureGL::Attach(PaintContext& context) {
   if (state_ == AttachmentState::kUninitialized) {
@@ -31,10 +28,10 @@ void ImageExternalTextureGL::Attach(PaintContext& context) {
   }
 }
 
-void ImageExternalTextureGL::UpdateImage(JavaLocalRef& hardware_buffer,
-                                         const SkRect& bounds,
-                                         PaintContext& context) {
-  AHardwareBuffer* latest_hardware_buffer = AHardwareBufferFor(hardware_buffer);
+void ImageExternalTextureGL::UpdateImage(
+    AHardwareBuffer* latest_hardware_buffer,
+    const SkRect& bounds,
+    PaintContext& context) {
   std::optional<HardwareBufferKey> key =
       impeller::android::HardwareBuffer::GetSystemUniqueID(
           latest_hardware_buffer);
@@ -57,16 +54,12 @@ void ImageExternalTextureGL::UpdateImage(JavaLocalRef& hardware_buffer,
 
 void ImageExternalTextureGL::ProcessFrame(PaintContext& context,
                                           const SkRect& bounds) {
-  JavaLocalRef image = AcquireLatestImage();
-  if (image.is_null()) {
+  std::unique_ptr<AcquiredFrame> frame = AcquireFrame();
+  if (!frame) {
     return;
   }
-  JavaLocalRef hardware_buffer = HardwareBufferFor(image);
-  if (hardware_buffer.is_null()) {
-    return;
-  }
-  UpdateImage(hardware_buffer, bounds, context);
-  CloseHardwareBuffer(hardware_buffer);
+  UpdateImage(frame->buffer(), bounds, context);
+  // `frame` releases the buffer here.
 }
 
 void ImageExternalTextureGL::Detach() {

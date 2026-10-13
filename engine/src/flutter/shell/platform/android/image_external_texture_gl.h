@@ -17,11 +17,7 @@ namespace flutter {
 
 class ImageExternalTextureGL : public ImageExternalTexture {
  public:
-  ImageExternalTextureGL(
-      int64_t id,
-      const fml::jni::ScopedJavaGlobalRef<jobject>& image_textury_entry,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
-      ImageExternalTexture::ImageLifecycle lifecycle);
+  ImageExternalTextureGL(int64_t id, HardwareBufferSource source);
 
  protected:
   // |ImageExternalTexture|
@@ -39,7 +35,7 @@ class ImageExternalTextureGL : public ImageExternalTexture {
       std::optional<HardwareBufferKey> id,
       impeller::UniqueEGLImageKHR&& egl_image) = 0;
 
-  void UpdateImage(JavaLocalRef& hardware_buffer,
+  void UpdateImage(AHardwareBuffer* latest_hardware_buffer,
                    const SkRect& bounds,
                    PaintContext& context);
 

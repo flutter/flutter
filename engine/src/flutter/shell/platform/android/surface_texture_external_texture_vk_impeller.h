@@ -38,8 +38,7 @@ class SurfaceTextureExternalTextureVKImpeller final
   SurfaceTextureExternalTextureVKImpeller(
       std::shared_ptr<impeller::ContextVK> context,
       int64_t id,
-      const fml::jni::ScopedJavaGlobalRef<jobject>& surface_texture,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+      SurfaceTextureSource source);
 
   ~SurfaceTextureExternalTextureVKImpeller() override;
 
