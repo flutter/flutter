@@ -41,6 +41,8 @@ struct _FlView {
 #if FLUTTER_LINUX_GTK4
   GdkSurface* scale_surface;
   gulong scale_changed_id;
+  gulong enter_monitor_id;
+  gulong leave_monitor_id;
 #endif
   FlWindowStateMonitor* window_state_monitor;
   FlScrollingManager* scrolling_manager;

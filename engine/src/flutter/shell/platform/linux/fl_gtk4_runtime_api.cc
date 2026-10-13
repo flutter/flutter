@@ -48,6 +48,11 @@ const FlGtkRuntimeApi* fl_gtk_runtime_api_get() {
           lookup_symbol<decltype(result.gdk_surface_get_scale)>(
               "gdk_surface_get_scale");
     }
+    if (gtk_runtime_at_least(4, 14, 0)) {
+      result.gdk_monitor_get_scale =
+          lookup_symbol<decltype(result.gdk_monitor_get_scale)>(
+              "gdk_monitor_get_scale");
+    }
     result.gtk_at_least_4_10 = gtk_runtime_at_least(4, 10, 0);
     result.gtk_at_least_4_14 = gtk_runtime_at_least(4, 14, 0);
     result.gtk_at_least_4_18 = gtk_runtime_at_least(4, 18, 0);

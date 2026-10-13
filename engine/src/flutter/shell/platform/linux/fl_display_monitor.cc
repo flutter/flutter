@@ -30,6 +30,12 @@ struct _FlDisplayMonitor {
 
 G_DEFINE_TYPE(FlDisplayMonitor, fl_display_monitor, G_TYPE_OBJECT)
 
+#if FLUTTER_LINUX_GTK4
+static void monitor_properties_changed_cb(FlDisplayMonitor* self,
+                                          GParamSpec* pspec,
+                                          GdkMonitor* monitor);
+#endif
+
 // Send the current monitor state to the engine.
 static void notify_display_update(FlDisplayMonitor* self) {
   g_autoptr(FlEngine) engine = FL_ENGINE(g_weak_ref_get(&self->engine));
@@ -59,6 +65,11 @@ static void notify_display_update(FlDisplayMonitor* self) {
       g_hash_table_insert(self->display_ids_by_monitor, g_object_ref(monitor),
                           GINT_TO_POINTER(display_id));
       self->next_display_id++;
+#if FLUTTER_LINUX_GTK4
+      g_signal_connect_object(monitor, "notify",
+                              G_CALLBACK(monitor_properties_changed_cb), self,
+                              G_CONNECT_SWAPPED);
+#endif
     }
 
     GdkRectangle geometry;
@@ -68,7 +79,11 @@ static void notify_display_update(FlDisplayMonitor* self) {
     display->display_id = display_id;
     display->single_display = false;
     display->refresh_rate = gdk_monitor_get_refresh_rate(monitor) / 1000.0;
+#if FLUTTER_LINUX_GTK4
+    display->device_pixel_ratio = fl_gtk_monitor_get_scale(monitor);
+#else
     display->device_pixel_ratio = gdk_monitor_get_scale_factor(monitor);
+#endif
     display->width =
         fl_gtk_size_to_pixels(geometry.width, display->device_pixel_ratio);
     display->height =
@@ -80,6 +95,19 @@ static void notify_display_update(FlDisplayMonitor* self) {
 
   fl_engine_notify_display_update(engine, displays, n_monitors);
 }
+
+#if FLUTTER_LINUX_GTK4
+static void monitor_properties_changed_cb(FlDisplayMonitor* self,
+                                          GParamSpec* pspec,
+                                          GdkMonitor* monitor) {
+  if (g_str_equal(pspec->name, "scale") ||
+      g_str_equal(pspec->name, "scale-factor") ||
+      g_str_equal(pspec->name, "geometry") ||
+      g_str_equal(pspec->name, "refresh-rate")) {
+    notify_display_update(self);
+  }
+}
+#endif
 
 #if !FLUTTER_LINUX_GTK4
 static void monitor_added_cb(FlDisplayMonitor* self, GdkMonitor* monitor) {
@@ -103,6 +131,13 @@ static void monitors_changed_cb(FlDisplayMonitor* self,
   (void)added;
   (void)monitors;
 
+  GHashTableIter iter;
+  gpointer key;
+  g_hash_table_iter_init(&iter, self->display_ids_by_monitor);
+  while (g_hash_table_iter_next(&iter, &key, nullptr)) {
+    g_signal_handlers_disconnect_by_func(
+        key, reinterpret_cast<gpointer>(monitor_properties_changed_cb), self);
+  }
   g_hash_table_remove_all(self->display_ids_by_monitor);
   self->next_display_id = 1;
   notify_display_update(self);

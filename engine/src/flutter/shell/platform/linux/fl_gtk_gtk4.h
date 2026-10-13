@@ -35,6 +35,18 @@ static inline double fl_gtk_surface_get_scale(FlGdkSurface* surface) {
   return fl_gtk_surface_get_scale_with_api(surface, fl_gtk_runtime_api_get());
 }
 
+static inline double fl_gtk_monitor_get_scale_with_api(
+    GdkMonitor* monitor,
+    const FlGtkRuntimeApi* api) {
+  return api->gdk_monitor_get_scale != nullptr
+             ? api->gdk_monitor_get_scale(monitor)
+             : static_cast<double>(gdk_monitor_get_scale_factor(monitor));
+}
+
+static inline double fl_gtk_monitor_get_scale(GdkMonitor* monitor) {
+  return fl_gtk_monitor_get_scale_with_api(monitor, fl_gtk_runtime_api_get());
+}
+
 static inline gint fl_gtk_surface_get_width(FlGdkSurface* surface) {
   return gdk_surface_get_width(surface);
 }

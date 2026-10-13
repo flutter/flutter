@@ -303,10 +303,8 @@ static void handle_geometry_changed_with_size(FlView* self,
     }
   }
 
-  // Note we can't detect if a window is moved between monitors - this
-  // information is provided by Wayland but GTK only notifies us if the scale
-  // has changed, so moving between two monitors of the same scale doesn't
-  // provide any information.
+  // GTK4 surface monitor signals update the display ID even when the scale
+  // is unchanged. GTK3 only reaches this path through size/scale notifications.
 
   FlGdkSurface* surface = fl_gtk_widget_get_surface(GTK_WIDGET(self));
   // NOTE(robert-ancell) If we haven't got a window we default to display 0.
@@ -465,10 +463,26 @@ static void surface_scale_changed_cb(FlView* self) {
   fl_engine_schedule_frame(self->engine);
 }
 
+static void surface_monitor_changed_cb(FlView* self,
+                                       GdkMonitor* monitor,
+                                       GdkSurface* surface) {
+  handle_geometry_changed_with_size(
+      self, gtk_widget_get_width(self->render_area),
+      gtk_widget_get_height(self->render_area), true);
+}
+
 static void disconnect_scale_surface(FlView* self) {
   if (self->scale_surface != nullptr && self->scale_changed_id != 0) {
     g_signal_handler_disconnect(self->scale_surface, self->scale_changed_id);
     self->scale_changed_id = 0;
+  }
+  if (self->scale_surface != nullptr && self->enter_monitor_id != 0) {
+    g_signal_handler_disconnect(self->scale_surface, self->enter_monitor_id);
+    self->enter_monitor_id = 0;
+  }
+  if (self->scale_surface != nullptr && self->leave_monitor_id != 0) {
+    g_signal_handler_disconnect(self->scale_surface, self->leave_monitor_id);
+    self->leave_monitor_id = 0;
   }
   g_clear_object(&self->scale_surface);
 }
@@ -492,6 +506,12 @@ static void realize_cb(FlView* self) {
     self->scale_changed_id =
         g_signal_connect_swapped(self->scale_surface, property,
                                  G_CALLBACK(surface_scale_changed_cb), self);
+    self->enter_monitor_id =
+        g_signal_connect_swapped(self->scale_surface, "enter-monitor",
+                                 G_CALLBACK(surface_monitor_changed_cb), self);
+    self->leave_monitor_id =
+        g_signal_connect_swapped(self->scale_surface, "leave-monitor",
+                                 G_CALLBACK(surface_monitor_changed_cb), self);
   }
   fl_view_gtk4_setup_rendering(self);
 
