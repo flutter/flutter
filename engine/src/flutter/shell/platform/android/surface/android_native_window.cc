@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/embedder/android/surface/android_native_window.h"
+#include "flutter/shell/platform/android/surface/android_native_window.h"
 
 namespace flutter {
 
@@ -29,13 +29,19 @@ AndroidNativeWindow::Handle AndroidNativeWindow::handle() const {
   return window_;
 }
 
-DlISize AndroidNativeWindow::GetSize() const {
+int32_t AndroidNativeWindow::GetWidth() const {
 #if FML_OS_ANDROID
-  return window_ == nullptr ? DlISize()
-                            : DlISize(ANativeWindow_getWidth(window_),
-                                      ANativeWindow_getHeight(window_));
+  return window_ == nullptr ? 0 : ANativeWindow_getWidth(window_);
 #else   // FML_OS_ANDROID
-  return DlISize();
+  return 0;
+#endif  // FML_OS_ANDROID
+}
+
+int32_t AndroidNativeWindow::GetHeight() const {
+#if FML_OS_ANDROID
+  return window_ == nullptr ? 0 : ANativeWindow_getHeight(window_);
+#else   // FML_OS_ANDROID
+  return 0;
 #endif  // FML_OS_ANDROID
 }
 

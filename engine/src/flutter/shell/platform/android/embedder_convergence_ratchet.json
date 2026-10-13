@@ -14,7 +14,7 @@
       "enforce": "ratchet"
     },
     "embedder_internal_includes": {
-      "count": 14,
+      "count": 12,
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
@@ -30,7 +30,7 @@
       "enforce": "zero"
     },
     "gn_internal_deps": {
-      "count": 18,
+      "count": 17,
       "enforce": "report"
     }
   },

@@ -25,18 +25,11 @@ source_set("surface") {
 }
 
 source_set("native_window") {
-  sources = [
-    "android_native_window.cc",
-    "android_native_window.h",
-  ]
+  sources = [ "android_native_window.h" ]
 
   public_configs = [ "//flutter:config" ]
 
-  deps = [
-    "//flutter/display_list",
-    "//flutter/fml",
-    "//flutter/skia",
-  ]
+  public_deps = [ "//flutter/shell/platform/android/surface:native_window" ]
 }
 
 source_set("surface_mock") {

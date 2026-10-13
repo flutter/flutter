@@ -2364,6 +2364,45 @@ typedef struct {
 } FlutterVulkanBackingStore;
 
 typedef enum {
+  kFlutterPathVerbMove,
+  kFlutterPathVerbLine,
+  kFlutterPathVerbQuad,
+  kFlutterPathVerbConic,
+  kFlutterPathVerbCubic,
+  kFlutterPathVerbClose,
+} FlutterPathVerb;
+
+typedef enum {
+  kFlutterPathFillTypeNonZero,
+  kFlutterPathFillTypeEvenOdd,
+} FlutterPathFillType;
+
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterPath).
+  size_t struct_size;
+  /// The fill rule used to determine the interior of the path.
+  FlutterPathFillType fill_type;
+  /// The number of verbs in `verbs`.
+  size_t verbs_count;
+  /// The verbs that describe the path segments.
+  const FlutterPathVerb* verbs;
+  /// The number of points in `points`.
+  size_t points_count;
+  /// The control and endpoint coordinates consumed by `verbs` in order:
+  /// - `kFlutterPathVerbMove`: 1 point (p2)
+  /// - `kFlutterPathVerbLine`: 1 point (p2)
+  /// - `kFlutterPathVerbQuad`: 2 points (cp, p2)
+  /// - `kFlutterPathVerbConic`: 2 points (cp, p2)
+  /// - `kFlutterPathVerbCubic`: 3 points (cp1, cp2, p2)
+  /// - `kFlutterPathVerbClose`: 0 points
+  const FlutterPoint* points;
+  /// The number of conic weights in `conic_weights`.
+  size_t conic_weights_count;
+  /// One weight per `kFlutterPathVerbConic` verb in `verbs`.
+  const double* conic_weights;
+} FlutterPath;
+
+typedef enum {
   /// Indicates that the Flutter application requested that an opacity be
   /// applied to the platform view.
   kFlutterPlatformViewMutationTypeOpacity,
@@ -2376,6 +2415,9 @@ typedef enum {
   /// Indicates that the Flutter application requested that the platform view be
   /// transformed before composition.
   kFlutterPlatformViewMutationTypeTransformation,
+  /// Indicates that the Flutter application requested that the platform view be
+  /// clipped using an arbitrary path.
+  kFlutterPlatformViewMutationTypeClipPath,
 } FlutterPlatformViewMutationType;
 
 typedef struct {
@@ -2386,6 +2428,7 @@ typedef struct {
     FlutterRect clip_rect;
     FlutterRoundedRect clip_rounded_rect;
     FlutterTransformation transformation;
+    const FlutterPath* clip_path;
   };
 } FlutterPlatformViewMutation;
 
@@ -2412,6 +2455,9 @@ typedef struct {
   /// will be a transformation mutation to make sure subsequent mutations are in
   /// the correct coordinate space.
   const FlutterPlatformViewMutation** mutations;
+  /// The bounding rectangle of the platform view in physical pixels after
+  /// applying its mutations and the root surface transformation.
+  FlutterRect transformed_bounds;
 } FlutterPlatformView;
 
 typedef enum {

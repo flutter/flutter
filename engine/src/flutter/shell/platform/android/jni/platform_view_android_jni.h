@@ -13,7 +13,7 @@
 #include "flutter/fml/mapping.h"
 
 #include "flutter/flow/embedded_views.h"
-#include "flutter/shell/platform/embedder/android/surface/android_native_window.h"
+#include "flutter/shell/platform/android/surface/android_native_window.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 
 #if FML_OS_ANDROID

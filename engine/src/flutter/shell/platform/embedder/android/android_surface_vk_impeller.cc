@@ -78,7 +78,8 @@ bool AndroidSurfaceVKImpeller::ResourceContextClearCurrent() {
 bool AndroidSurfaceVKImpeller::SetNativeWindow(
     fml::RefPtr<AndroidNativeWindow> window) {
   if (window && (native_window_ == window)) {
-    return OnScreenSurfaceResize(window->GetSize());
+    return OnScreenSurfaceResize(
+        DlISize(window->GetWidth(), window->GetHeight()));
   }
 
   native_window_ = nullptr;

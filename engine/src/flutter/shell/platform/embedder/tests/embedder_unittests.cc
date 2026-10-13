@@ -12,6 +12,7 @@
 #include "embedder.h"
 #include "embedder_engine.h"
 #include "flutter/common/constants.h"
+#include "flutter/display_list/geometry/dl_path_builder.h"
 #include "flutter/flow/raster_cache.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/make_copyable.h"
@@ -27,6 +28,7 @@
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/embedder_asset_resolver.h"
 #include "flutter/shell/platform/embedder/embedder_image_generator.h"
+#include "flutter/shell/platform/embedder/embedder_layers.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
@@ -6872,6 +6874,125 @@ TEST_F(EmbedderTest, NativeWindowRendererValidationAndProcTable) {
 #endif  // !FML_OS_ANDROID
 
   engine.reset();
+}
+
+TEST_F(EmbedderTest,
+       EmbedderLayersConvertsClipPathMutationAndTransformedBounds) {
+  constexpr FlutterViewId kPlatformViewId = 42;
+  constexpr double kDevicePixelRatio = 1.0;
+  constexpr int32_t kFrameWidth = 800;
+  constexpr int32_t kFrameHeight = 600;
+  constexpr double kTranslateX = 10.0;
+  constexpr double kTranslateY = 20.0;
+  constexpr double kViewWidth = 100.0;
+  constexpr double kViewHeight = 50.0;
+  constexpr double kLineX = 30.0;
+  constexpr double kLineY = 40.0;
+  constexpr double kQuadControlX = 50.0;
+  constexpr double kQuadControlY = 10.0;
+  constexpr double kQuadEndX = 60.0;
+  constexpr double kQuadEndY = 40.0;
+  constexpr double kConicControlX = 70.0;
+  constexpr double kConicControlY = 10.0;
+  constexpr double kConicEndX = 80.0;
+  constexpr double kConicEndY = 40.0;
+  constexpr float kConicWeight = 0.75f;
+  constexpr double kCubicControl1X = 85.0;
+  constexpr double kCubicControl1Y = 15.0;
+  constexpr double kCubicControl2X = 90.0;
+  constexpr double kCubicControl2Y = 35.0;
+  constexpr double kCubicEndX = 95.0;
+  constexpr double kCubicEndY = 40.0;
+
+  DlPathBuilder path_builder;
+  path_builder.SetFillType(DlPathFillType::kOdd);
+  path_builder.MoveTo(DlPoint(kTranslateX, kTranslateY));
+  path_builder.LineTo(DlPoint(kLineX, kLineY));
+  path_builder.QuadraticCurveTo(DlPoint(kQuadControlX, kQuadControlY),
+                                DlPoint(kQuadEndX, kQuadEndY));
+  path_builder.ConicCurveTo(DlPoint(kConicControlX, kConicControlY),
+                            DlPoint(kConicEndX, kConicEndY), kConicWeight);
+  path_builder.CubicCurveTo(DlPoint(kCubicControl1X, kCubicControl1Y),
+                            DlPoint(kCubicControl2X, kCubicControl2Y),
+                            DlPoint(kCubicEndX, kCubicEndY));
+  path_builder.Close();
+  DlPath clip_path = path_builder.TakePath();
+
+  MutatorsStack stack;
+  stack.PushTransform(DlMatrix::MakeTranslation({kTranslateX, kTranslateY}));
+  stack.PushClipPath(clip_path);
+
+  EmbeddedViewParams params(
+      DlMatrix::MakeTranslation({kTranslateX, kTranslateY}),
+      DlSize(kViewWidth, kViewHeight), stack);
+
+  EmbedderLayers layers(DlISize(kFrameWidth, kFrameHeight), kDevicePixelRatio,
+                        DlMatrix(), 0);
+  layers.PushPlatformViewLayer(kPlatformViewId, params);
+
+  bool invoked = false;
+  layers.InvokePresentCallback(
+      kFlutterImplicitViewId,
+      [&](FlutterViewId view_id,
+          const std::vector<const FlutterLayer*>& presented) -> bool {
+        invoked = true;
+        EXPECT_EQ(view_id, kFlutterImplicitViewId);
+        if (presented.size() != 1u) {
+          return false;
+        }
+        const FlutterLayer* layer = presented[0];
+        EXPECT_EQ(layer->type, kFlutterLayerContentTypePlatformView);
+        if (layer->platform_view == nullptr) {
+          return false;
+        }
+        const FlutterPlatformView* pv = layer->platform_view;
+        EXPECT_EQ(pv->identifier, kPlatformViewId);
+        EXPECT_DOUBLE_EQ(pv->transformed_bounds.left, kTranslateX);
+        EXPECT_DOUBLE_EQ(pv->transformed_bounds.top, kTranslateY);
+        EXPECT_DOUBLE_EQ(pv->transformed_bounds.right,
+                         kTranslateX + kViewWidth);
+        EXPECT_DOUBLE_EQ(pv->transformed_bounds.bottom,
+                         kTranslateY + kViewHeight);
+        // 2 mutations: the transform and the clip path (stored in reverse order
+        // by EmbedderLayers::PushPlatformViewLayer).
+        EXPECT_EQ(pv->mutations_count, 2u);
+        const FlutterPlatformViewMutation* clip_mutation = nullptr;
+        for (size_t i = 0; i < pv->mutations_count; ++i) {
+          if (pv->mutations[i]->type ==
+              kFlutterPlatformViewMutationTypeClipPath) {
+            clip_mutation = pv->mutations[i];
+          }
+        }
+        if (clip_mutation == nullptr || clip_mutation->clip_path == nullptr) {
+          return false;
+        }
+        const FlutterPath& path = *clip_mutation->clip_path;
+        EXPECT_EQ(path.struct_size, sizeof(FlutterPath));
+        EXPECT_EQ(path.fill_type, kFlutterPathFillTypeEvenOdd);
+        if (path.verbs_count != 6u) {
+          return false;
+        }
+        EXPECT_EQ(path.verbs[0], kFlutterPathVerbMove);
+        EXPECT_EQ(path.verbs[1], kFlutterPathVerbLine);
+        EXPECT_EQ(path.verbs[2], kFlutterPathVerbQuad);
+        EXPECT_EQ(path.verbs[3], kFlutterPathVerbConic);
+        EXPECT_EQ(path.verbs[4], kFlutterPathVerbCubic);
+        EXPECT_EQ(path.verbs[5], kFlutterPathVerbClose);
+        // Points: Move(1) + Line(1) + Quad(2) + Conic(2) + Cubic(3) = 9 points.
+        if (path.points_count != 9u) {
+          return false;
+        }
+        EXPECT_DOUBLE_EQ(path.points[0].x, kTranslateX);
+        EXPECT_DOUBLE_EQ(path.points[0].y, kTranslateY);
+        EXPECT_DOUBLE_EQ(path.points[1].x, kLineX);
+        EXPECT_DOUBLE_EQ(path.points[1].y, kLineY);
+        if (path.conic_weights_count != 1u) {
+          return false;
+        }
+        EXPECT_NEAR(path.conic_weights[0], kConicWeight, 1e-6);
+        return true;
+      });
+  EXPECT_TRUE(invoked);
 }
 
 }  // namespace testing
