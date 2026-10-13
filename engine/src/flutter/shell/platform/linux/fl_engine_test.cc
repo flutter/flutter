@@ -72,6 +72,22 @@ TEST_F(FlEngineTest, NotifyDisplayUpdate) {
   EXPECT_TRUE(called);
 }
 
+// Checks asking the engine to render a frame works.
+TEST_F(FlEngineTest, ScheduleFrame) {
+  StartEngine();
+
+  bool called = false;
+  fl_engine_get_embedder_api(engine)->ScheduleFrame =
+      MOCK_ENGINE_PROC(ScheduleFrame, ([&called](auto engine) {
+                         called = true;
+                         return kSuccess;
+                       }));
+
+  fl_engine_schedule_frame(engine);
+
+  EXPECT_TRUE(called);
+}
+
 // Checks sending window metrics events works.
 TEST_F(FlEngineTest, WindowMetrics) {
   StartEngine();
