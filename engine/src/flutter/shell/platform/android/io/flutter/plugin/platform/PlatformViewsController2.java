@@ -807,6 +807,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       tx.apply();
       overlayerSurface = new Surface(surfaceControl);
       overlaySurfaceControl = surfaceControl;
+      overlayParentedToCarrier = false;
+      if (blurCarrierView != null) {
+        reparentOverlayToCarrier();
+      }
     }
 
     return new FlutterOverlaySurface(0, overlayerSurface);
@@ -817,8 +821,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       overlayerSurface.release();
       overlayerSurface = null;
       overlaySurfaceControl = null;
+      overlayHasBlurRegions = false;
     }
     releaseBackdropBlurLayers();
+    releaseBlurCarrierView();
   }
 
   // ----- PROTOTYPE: native backdrop blur for HCPP platform views -----
@@ -852,6 +858,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
   public void onBackdropBlurs(@NonNull float[] blurs) {
+    if (!"layers".equals(readSystemProperty("debug.flutter.blur_mode"))) {
+      if ("regions".equals(readSystemProperty("debug.flutter.blur_mode"))) {
+        onBackdropBlursAsRegions(blurs);
+      } else {
+        onBackdropBlursViaCarrierSurfaceView(blurs);
+      }
+      return;
+    }
     int count = blurs.length / BLUR_FIELDS;
     if (count > 0 && !isBackdropBlurAvailable()) {
       count = 0;
@@ -886,6 +900,237 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       tx.setVisibility(backdropBlurLayers.get(i), false);
     }
     visibleBackdropBlurLayers = applied;
+  }
+
+  // Hidden SurfaceControl.Transaction#setBlurRegions(SurfaceControl, float[][]). Each row is
+  // [blurRadius, alpha, left, top, right, bottom, cornerTL, cornerTR, cornerBL, cornerBR] in the
+  // layer's coordinate space (see nativeSetBlurRegions in android_view_SurfaceControl.cpp). This is
+  // what the public SurfaceView#setBlurRegions(Collection<BlurRegion>) uses under the hood.
+  private Method setBlurRegionsMethod;
+  private boolean blurRegionsReflectionResolved = false;
+  private boolean overlayHasBlurRegions = false;
+
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private void onBackdropBlursAsRegions(@NonNull float[] blurs) {
+    if (!blurRegionsReflectionResolved) {
+      blurRegionsReflectionResolved = true;
+      try {
+        setBlurRegionsMethod =
+            SurfaceControl.Transaction.class.getMethod(
+                "setBlurRegions", SurfaceControl.class, float[][].class);
+      } catch (Exception e) {
+        Log.w(BLUR_TAG, "SurfaceControl.Transaction#setBlurRegions unavailable: " + e);
+      }
+    }
+    // The pooled layers from the other mode must not linger.
+    if (visibleBackdropBlurLayers > 0) {
+      final SurfaceControl.Transaction tx = platformTransaction();
+      for (int i = 0; i < visibleBackdropBlurLayers && i < backdropBlurLayers.size(); i++) {
+        tx.setVisibility(backdropBlurLayers.get(i), false);
+      }
+      visibleBackdropBlurLayers = 0;
+    }
+    int count = blurs.length / BLUR_FIELDS;
+    if (setBlurRegionsMethod == null || overlaySurfaceControl == null) {
+      return;
+    }
+    if (count == 0 && !overlayHasBlurRegions) {
+      return;
+    }
+    final float[][] regions = new float[count][];
+    for (int i = 0; i < count; i++) {
+      final int base = i * BLUR_FIELDS;
+      final float corner = blurs[base + 5];
+      regions[i] =
+          new float[] {
+            sigmaToBlurRadius(blurs[base + 4]),
+            1.0f,
+            blurs[base],
+            blurs[base + 1],
+            blurs[base + 2],
+            blurs[base + 3],
+            corner,
+            corner,
+            corner,
+            corner
+          };
+    }
+    try {
+      setBlurRegionsMethod.invoke(platformTransaction(), overlaySurfaceControl, (Object) regions);
+      overlayHasBlurRegions = count > 0;
+    } catch (Exception e) {
+      Log.w(BLUR_TAG, "Failed to invoke setBlurRegions: " + e);
+    }
+  }
+
+  @Nullable
+  private static String readSystemProperty(String key) {
+    try {
+      final Class<?> props = Class.forName("android.os.SystemProperties");
+      return (String) props.getMethod("get", String.class).invoke(null, key);
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  // ----- PROTOTYPE (public API only): blur carrier SurfaceView -----
+  //
+  // SurfaceView#setBlurRegions(Collection<BlurRegion>) is public since API 37. The blur does not
+  // have to live on the Flutter overlay: it only has to sit above the platform views and below the
+  // overlay. So we add one full-size, transparent, buffer-less SurfaceView to the FlutterView with
+  // setZOrderOnTop(true) (layer 1 under the window: above the main window content at 0 and the
+  // base FlutterSurfaceView at -2, below the overlay at 1000) and hand it this frame's blur rects.
+  // SurfaceView applies the regions from a RenderThread position listener that is merged into the
+  // same frame as the View draw, which is also the frame applyTransactionOnDraw targets.
+
+  private SurfaceView blurCarrierView;
+  private boolean carrierHasBlurRegions = false;
+  private boolean loggedCarrierUnavailable = false;
+
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  private void onBackdropBlursViaCarrierSurfaceView(@NonNull float[] blurs) {
+    // The pooled layers / overlay regions from the other modes must not linger.
+    if (visibleBackdropBlurLayers > 0) {
+      final SurfaceControl.Transaction tx = platformTransaction();
+      for (int i = 0; i < visibleBackdropBlurLayers && i < backdropBlurLayers.size(); i++) {
+        tx.setVisibility(backdropBlurLayers.get(i), false);
+      }
+      visibleBackdropBlurLayers = 0;
+    }
+    final int count = blurs.length / BLUR_FIELDS;
+    if (count == 0 && !carrierHasBlurRegions) {
+      return;
+    }
+    if (Build.VERSION.SDK_INT < API_LEVELS.API_37 || flutterView == null) {
+      if (!loggedCarrierUnavailable && count > 0) {
+        Log.w(BLUR_TAG, "SurfaceView#setBlurRegions needs API 37; platform view not blurred.");
+        loggedCarrierUnavailable = true;
+      }
+      return;
+    }
+    if (count > 0 && !isCrossWindowBlurEnabled()) {
+      if (!loggedCarrierUnavailable) {
+        Log.w(BLUR_TAG, "Cross-window blur is disabled on this device; platform view not blurred.");
+        loggedCarrierUnavailable = true;
+      }
+      return;
+    }
+    applyCarrierBlurRegions(blurs, count);
+  }
+
+  @RequiresApi(API_LEVELS.API_37)
+  private void applyCarrierBlurRegions(@NonNull float[] blurs, int count) {
+    if (blurCarrierView == null) {
+      final SurfaceView carrier = new SurfaceView(flutterView.getContext());
+      carrier.setZOrderOnTop(true);
+      carrier.getHolder().setFormat(PixelFormat.TRANSLUCENT);
+      carrier.setSurfaceLifecycle(SurfaceView.SURFACE_LIFECYCLE_FOLLOWS_ATTACHMENT);
+      carrier.setClickable(false);
+      carrier.setFocusable(false);
+      carrier.setFocusableInTouchMode(false);
+      carrier.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+      carrier.setContentDescription(null);
+      // setZOrderOnTop puts the carrier at z=1 *relative to the ViewRootImpl layer*, which draws
+      // after the whole bounds-layer subtree, i.e. above our overlay (a child of the bounds layer
+      // at z=1000). Transaction#setLayer (public) resets the relative layer and makes it a plain
+      // child of the bounds layer, so z=999 lands between the window content and the overlay.
+      carrier
+          .getHolder()
+          .addCallback(
+              new SurfaceHolder.Callback() {
+                @Override
+                public void surfaceCreated(@NonNull SurfaceHolder holder) {
+                  // SurfaceView keeps re-asserting its relative z (onTop => above the whole
+                  // window subtree, including our overlay). Instead of fighting it, hang the
+                  // overlay off the carrier: children with z >= 0 draw above the parent, and the
+                  // parent's blur samples what is behind it (including the BLAST child at -1).
+                  carrier.post(() -> reparentOverlayToCarrier());
+                }
+
+                @Override
+                public void surfaceChanged(
+                    @NonNull SurfaceHolder holder, int format, int width, int height) {}
+
+                @Override
+                public void surfaceDestroyed(@NonNull SurfaceHolder holder) {}
+              });
+      flutterView.addView(
+          carrier,
+          new FrameLayout.LayoutParams(
+              ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+      blurCarrierView = carrier;
+      Log.i(BLUR_TAG, "Created blur carrier SurfaceView");
+    }
+    final ArrayList<android.view.BlurRegion> regions = new ArrayList<>(count);
+    for (int i = 0; i < count; i++) {
+      final int base = i * BLUR_FIELDS;
+      final float corner = blurs[base + 5];
+      // Constructor order is (bounds, cornerRadii, alpha, blurRadius).
+      regions.add(
+          new android.view.RoundedRectBlurRegion(
+              new RectF(blurs[base], blurs[base + 1], blurs[base + 2], blurs[base + 3]),
+              new float[] {corner, corner, corner, corner, corner, corner, corner, corner},
+              1.0f,
+              sigmaToBlurRadius(blurs[base + 4])));
+    }
+    blurCarrierView.setBlurRegions(regions);
+    carrierHasBlurRegions = count > 0;
+    if (!overlayParentedToCarrier) {
+      reparentOverlayToCarrier();
+    }
+  }
+
+  /** Makes the Flutter overlay a child of the blur carrier's SurfaceControl (public API only). */
+  @RequiresApi(API_LEVELS.API_34)
+  private void reparentOverlayToCarrier() {
+    if (blurCarrierView == null || overlaySurfaceControl == null) {
+      return;
+    }
+    final SurfaceControl carrierSc = blurCarrierView.getSurfaceControl();
+    if (carrierSc == null || !carrierSc.isValid() || !overlaySurfaceControl.isValid()) {
+      return;
+    }
+    final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+    tx.reparent(overlaySurfaceControl, carrierSc).setLayer(overlaySurfaceControl, 1000).apply();
+    overlayParentedToCarrier = true;
+    Log.i(BLUR_TAG, "Overlay reparented under blur carrier");
+  }
+
+  private boolean overlayParentedToCarrier = false;
+
+  @RequiresApi(API_LEVELS.API_34)
+  private boolean isCrossWindowBlurEnabled() {
+    if (flutterView == null) {
+      return false;
+    }
+    final WindowManager wm = flutterView.getContext().getSystemService(WindowManager.class);
+    return wm != null && wm.isCrossWindowBlurEnabled();
+  }
+
+  private void releaseBlurCarrierView() {
+    if (blurCarrierView != null) {
+      if (overlayParentedToCarrier
+          && overlaySurfaceControl != null
+          && overlaySurfaceControl.isValid()
+          && flutterView != null
+          && flutterView.getRootSurfaceControl() != null
+          && Build.VERSION.SDK_INT >= API_LEVELS.API_34) {
+        final SurfaceControl.Transaction tx =
+            flutterView.getRootSurfaceControl().buildReparentTransaction(overlaySurfaceControl);
+        if (tx != null) {
+          tx.setLayer(overlaySurfaceControl, 1000).apply();
+        }
+      }
+      overlayParentedToCarrier = false;
+      final ViewGroup parent = (ViewGroup) blurCarrierView.getParent();
+      if (parent != null) {
+        parent.removeView(blurCarrierView);
+      }
+      blurCarrierView = null;
+      carrierHasBlurRegions = false;
+    }
   }
 
   /**
