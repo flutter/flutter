@@ -3,11 +3,10 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/runtime/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: runtime_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -140,6 +139,58 @@ cc_library(
 flutter_test_fixtures(
     name = "runtime_fixtures",
     dart_main = "fixtures/runtime_test.dart",
+)
+
+# SwiftShader, its ICD manifest and the Vulkan loader, next to the
+# suites below (GN: data_deps of //flutter/third_party/swiftshader and
+# ANGLE).
+flutter_gpu_test_backends(
+    name = "gpu_test_backends",
+)
+
+cc_test(
+    name = "runtime_unittests",
+    size = "small",
+    srcs = [
+        "dart_isolate_unittests.cc",
+        "dart_lifecycle_unittests.cc",
+        "dart_service_isolate_unittests.cc",
+        "dart_timestamp_provider_unittests.cc",
+        "dart_vm_unittests.cc",
+        "platform_isolate_manager_unittests.cc",
+        "runtime_controller_unittests.cc",
+        "type_conversions_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :runtime
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/common:shell_test_fixture_sources
+        "-Wno-deprecated-copy",  # from //flutter/shell/common:shell_test_fixture_sources
+        "-Wno-implicit-fallthrough",  # from //flutter/shell/common:shell_test_fixture_sources
+        "-Wno-nullability-completeness",  # from //flutter/shell/common:shell_test_fixture_sources
+        "-Wno-suggest-destructor-override",  # from //flutter/shell/common:shell_test_fixture_sources
+        "-Wno-suggest-override",  # from //flutter/shell/common:shell_test_fixture_sources
+        "-Wno-unused-private-field",  # from //flutter/shell/common:shell_test_fixture_sources
+        "-Wno-unused-variable",  # from //flutter/shell/common:shell_test_fixture_sources
+    ],
+    data = [":gpu_test_backends"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":libdart",
+        ":runtime",
+        ":runtime_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/build/bazel/dart_wrap:elf_loader",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/shell/common:shell_test_fixture_sources",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:fixture_test",
+        "//engine/src/flutter/third_party/tonic",
+        "@skia",
+    ],
 )
 
 flutter_test_fixtures(
