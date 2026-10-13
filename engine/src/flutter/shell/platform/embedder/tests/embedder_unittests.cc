@@ -7085,6 +7085,99 @@ TEST_F(EmbedderTest, DeferredRootIsolateLaunchAndLaunchShell) {
   }
 }
 
+TEST_F(EmbedderTest, FlutterEngineSpawnCAPI) {
+  FlutterEngineProcTable table = {};
+  table.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&table), kSuccess);
+  EXPECT_EQ(table.Spawn, &FlutterEngineSpawn);
+
+  constexpr int32_t kTestSurfaceDim = 1;
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+
+  static fml::AutoResetWaitableEvent latch;
+  auto entrypoint = []() { latch.Signal(); };
+  context.AddFfiNativeCallback("SayHiFromCustomEntrypoint",
+                               reinterpret_cast<void*>(+entrypoint));
+
+  EmbedderConfigBuilder parent_builder(context);
+  parent_builder.SetSurface(DlISize(kTestSurfaceDim, kTestSurfaceDim));
+  auto parent_engine = parent_builder.LaunchEngine();
+  ASSERT_TRUE(parent_engine.is_valid());
+
+  EmbedderConfigBuilder child_builder(
+      context, EmbedderConfigBuilder::InitializationPreference::kNoInitialize);
+  child_builder.SetSurface(DlISize(kTestSurfaceDim, kTestSurfaceDim));
+
+  std::string kernel_path =
+      fml::paths::JoinPaths({context.GetAssetsPath(), "kernel_blob.bin"});
+  FlutterEngineRunConfiguration run_config = {};
+  run_config.struct_size = sizeof(FlutterEngineRunConfiguration);
+  run_config.kernel_blob_path = kernel_path.c_str();
+  run_config.custom_dart_entrypoint = "customEntrypoint";
+  constexpr int64_t kSpawnedEngineId = 77;
+  run_config.engine_id = kSpawnedEngineId;
+
+  FlutterEngineSpawnInfo spawn_info = {};
+  spawn_info.struct_size = sizeof(FlutterEngineSpawnInfo);
+  spawn_info.renderer_config = &context.GetRendererConfig();
+  spawn_info.project_args = &child_builder.GetProjectArgs();
+  spawn_info.run_configuration = &run_config;
+  spawn_info.initial_route = "/spawned";
+  spawn_info.user_data = &context;
+
+  // Verify validation failure cleans up any caller-supplied asset resolver.
+  bool resolver_destroyed = false;
+  FlutterAssetResolver resolver = {};
+  resolver.struct_size = sizeof(FlutterAssetResolver);
+  resolver.user_data = &resolver_destroyed;
+  resolver.find_asset_callback = [](void*, const char*, FlutterAsset*) -> bool {
+    return false;
+  };
+  resolver.destruction_callback = [](void* data) {
+    *static_cast<bool*>(data) = true;
+  };
+  FlutterEngineRunConfiguration invalid_run_config = run_config;
+  invalid_run_config.asset_resolver = &resolver;
+  FlutterEngineSpawnInfo invalid_spawn_info = spawn_info;
+  invalid_spawn_info.run_configuration = &invalid_run_config;
+
+  FLUTTER_API_SYMBOL(FlutterEngine) raw_spawned = nullptr;
+  EXPECT_EQ(FlutterEngineSpawn(nullptr, &invalid_spawn_info, &raw_spawned),
+            kInvalidArguments);
+  EXPECT_TRUE(resolver_destroyed);
+  EXPECT_EQ(FlutterEngineSpawn(parent_engine.get(), nullptr, &raw_spawned),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineSpawn(parent_engine.get(), &spawn_info, nullptr),
+            kInvalidArguments);
+
+  ASSERT_EQ(FlutterEngineSpawn(parent_engine.get(), &spawn_info, &raw_spawned),
+            kSuccess);
+  ASSERT_NE(raw_spawned, nullptr);
+  UniqueEngine child_engine(raw_spawned);
+
+  latch.Wait();
+
+  EmbedderEngine* raw_parent = ToEmbedderEngine(parent_engine.get());
+  EmbedderEngine* raw_child = ToEmbedderEngine(child_engine.get());
+  EXPECT_EQ(raw_parent->GetTaskRunners().GetUITaskRunner(),
+            raw_child->GetTaskRunners().GetUITaskRunner());
+  EXPECT_EQ(raw_parent->GetTaskRunners().GetRasterTaskRunner(),
+            raw_child->GetTaskRunners().GetRasterTaskRunner());
+  EXPECT_EQ(raw_parent->GetTaskRunners().GetIOTaskRunner(),
+            raw_child->GetTaskRunners().GetIOTaskRunner());
+
+  // Shut down the parent engine first; the shared thread host must keep the
+  // threads alive until the child engine shuts down.
+  parent_engine.reset();
+
+  fml::AutoResetWaitableEvent ui_alive_latch;
+  raw_child->GetTaskRunners().GetUITaskRunner()->PostTask(
+      [&ui_alive_latch]() { ui_alive_latch.Signal(); });
+  ui_alive_latch.Wait();
+
+  child_engine.reset();
+}
+
 }  // namespace testing
 }  // namespace flutter
 

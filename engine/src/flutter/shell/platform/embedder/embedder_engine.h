@@ -113,9 +113,21 @@ class EmbedderEngine {
   std::unique_ptr<EmbedderEngine> Spawn(
       const FlutterEngineRunConfiguration* run_configuration,
       const std::string& initial_route,
+      const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+      const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+      std::unique_ptr<EmbedderExternalTextureResolver>
+          external_texture_resolver = nullptr,
+      std::string* error_out = nullptr) const;
+
+  std::unique_ptr<EmbedderEngine> Spawn(
+      const FlutterEngineRunConfiguration* run_configuration,
+      const std::string& initial_route,
       const PlatformViewFactory& on_create_platform_view,
       std::unique_ptr<EmbedderExternalTextureResolver>
           external_texture_resolver = nullptr) const;
+
+  static void DestroyAssetResolverIfNeeded(
+      const FlutterEngineRunConfiguration* run_configuration);
 
   static std::optional<RunConfiguration> BuildRunConfiguration(
       const FlutterEngineRunConfiguration* config,
@@ -234,12 +246,13 @@ class EmbedderEngine {
 
  private:
   // Adopts |spawned_shell|, a running shell returned by Shell::Spawn.
-  EmbedderEngine(const TaskRunners& task_runners,
+  EmbedderEngine(std::shared_ptr<EmbedderThreadHost> thread_host,
+                 const TaskRunners& task_runners,
                  std::unique_ptr<Shell> spawned_shell,
                  std::unique_ptr<EmbedderExternalTextureResolver>
                      external_texture_resolver);
 
-  std::unique_ptr<EmbedderThreadHost> thread_host_;
+  std::shared_ptr<EmbedderThreadHost> thread_host_;
   TaskRunners task_runners_;
   std::optional<RunConfiguration> run_configuration_;
   std::unique_ptr<ShellArgs> shell_args_;

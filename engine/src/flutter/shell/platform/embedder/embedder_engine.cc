@@ -17,9 +17,7 @@
 
 namespace flutter {
 
-namespace {
-
-void DestroyAssetResolverIfNeeded(
+void EmbedderEngine::DestroyAssetResolverIfNeeded(
     const FlutterEngineRunConfiguration* run_configuration) {
   if (run_configuration == nullptr ||
       SAFE_ACCESS(run_configuration, struct_size, 0) <
@@ -34,8 +32,6 @@ void DestroyAssetResolverIfNeeded(
     c_resolver->destruction_callback(c_resolver->user_data);
   }
 }
-
-}  // namespace
 
 struct ShellArgs {
   Settings settings;
@@ -95,10 +91,12 @@ EmbedderEngine::EmbedderEngine(
           platform_data) {}
 
 EmbedderEngine::EmbedderEngine(
+    std::shared_ptr<EmbedderThreadHost> thread_host,
     const TaskRunners& task_runners,
     std::unique_ptr<Shell> spawned_shell,
     std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
-    : task_runners_(task_runners),
+    : thread_host_(std::move(thread_host)),
+      task_runners_(task_runners),
       shell_(std::move(spawned_shell)),
       external_texture_resolver_(std::move(external_texture_resolver)) {}
 
@@ -159,7 +157,7 @@ std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
   const TaskRunners task_runners = spawned_shell->GetTaskRunners();
   // std::make_unique cannot reach the private constructor.
   return std::unique_ptr<EmbedderEngine>(
-      new EmbedderEngine(task_runners, std::move(spawned_shell),
+      new EmbedderEngine(thread_host_, task_runners, std::move(spawned_shell),
                          std::move(external_texture_resolver)));
 }
 
@@ -181,21 +179,45 @@ std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
 std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
     const FlutterEngineRunConfiguration* run_configuration,
     const std::string& initial_route,
-    const PlatformViewFactory& on_create_platform_view,
-    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
-    const {
+    const Shell::CreateCallback<PlatformView>& on_create_platform_view,
+    const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
+    std::string* error_out) const {
   if (!IsValid()) {
     DestroyAssetResolverIfNeeded(run_configuration);
+    if (error_out != nullptr) {
+      *error_out = "Parent engine is not in a valid running state.";
+    }
     return nullptr;
   }
   std::optional<RunConfiguration> config =
-      BuildRunConfiguration(run_configuration);
+      BuildRunConfiguration(run_configuration, error_out);
   if (!config.has_value()) {
     DestroyAssetResolverIfNeeded(run_configuration);
     return nullptr;
   }
-  return Spawn(std::move(config.value()), initial_route,
-               on_create_platform_view, std::move(external_texture_resolver));
+  auto spawned =
+      Spawn(std::move(config.value()), initial_route, on_create_platform_view,
+            on_create_rasterizer, std::move(external_texture_resolver));
+  if (!spawned && error_out != nullptr && error_out->empty()) {
+    *error_out = "Could not spawn engine shell.";
+  }
+  return spawned;
+}
+
+std::unique_ptr<EmbedderEngine> EmbedderEngine::Spawn(
+    const FlutterEngineRunConfiguration* run_configuration,
+    const std::string& initial_route,
+    const PlatformViewFactory& on_create_platform_view,
+    std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver)
+    const {
+  return Spawn(
+      run_configuration, initial_route,
+      [on_create_platform_view](Shell& shell) {
+        return on_create_platform_view(shell, shell.GetTaskRunners());
+      },
+      [](Shell& shell) { return std::make_unique<Rasterizer>(shell); },
+      std::move(external_texture_resolver));
 }
 
 std::optional<RunConfiguration> EmbedderEngine::BuildRunConfiguration(
@@ -305,37 +327,40 @@ void EmbedderEngine::CollectThreadHost() {
     return;
   }
 
-  // Once the collected, EmbedderThreadHost::RunnerIsValid will return false for
-  // all runners belonging to this thread host. This must be done with UI task
-  // runner blocked to prevent possible raciness that could happen when
-  // destroying the thread host in the middle of UI task runner execution. This
-  // is not an issue for other runners, because raster task runner should not
-  // have anything scheduled after engine shutdown and platform task runner is
-  // where this method is called from.
-  if (thread_host_->GetTaskRunners().GetUITaskRunner() &&
-      !thread_host_->GetTaskRunners()
-           .GetUITaskRunner()
-           ->RunsTasksOnCurrentThread()) {
-    fml::AutoResetWaitableEvent ui_thread_running;
-    fml::AutoResetWaitableEvent ui_thread_block;
-    fml::AutoResetWaitableEvent ui_thread_finished;
+  // Once the last engine sharing this thread host is collected,
+  // EmbedderThreadHost::RunnerIsValid will return false for all runners
+  // belonging to this thread host. This must be done with UI task runner
+  // blocked to prevent possible raciness that could happen when destroying the
+  // thread host in the middle of UI task runner execution. This is not an issue
+  // for other runners, because raster task runner should not have anything
+  // scheduled after engine shutdown and platform task runner is where this
+  // method is called from.
+  if (thread_host_.use_count() == 1) {
+    if (thread_host_->GetTaskRunners().GetUITaskRunner() &&
+        !thread_host_->GetTaskRunners()
+             .GetUITaskRunner()
+             ->RunsTasksOnCurrentThread()) {
+      fml::AutoResetWaitableEvent ui_thread_running;
+      fml::AutoResetWaitableEvent ui_thread_block;
+      fml::AutoResetWaitableEvent ui_thread_finished;
 
-    thread_host_->GetTaskRunners().GetUITaskRunner()->PostTask([&] {
-      ui_thread_running.Signal();
-      ui_thread_block.Wait();
-      ui_thread_finished.Signal();
-    });
+      thread_host_->GetTaskRunners().GetUITaskRunner()->PostTask([&] {
+        ui_thread_running.Signal();
+        ui_thread_block.Wait();
+        ui_thread_finished.Signal();
+      });
 
-    // Wait until the task is running on the UI thread.
-    ui_thread_running.Wait();
-    thread_host_->InvalidateActiveRunners();
-    ui_thread_block.Signal();
+      // Wait until the task is running on the UI thread.
+      ui_thread_running.Wait();
+      thread_host_->InvalidateActiveRunners();
+      ui_thread_block.Signal();
 
-    // Needed to keep ui_thread_block in scope until the UI thread execution
-    // finishes.
-    ui_thread_finished.Wait();
-  } else {
-    thread_host_->InvalidateActiveRunners();
+      // Needed to keep ui_thread_block in scope until the UI thread execution
+      // finishes.
+      ui_thread_finished.Wait();
+    } else {
+      thread_host_->InvalidateActiveRunners();
+    }
   }
   thread_host_.reset();
 }

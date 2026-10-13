@@ -4072,6 +4072,27 @@ typedef struct {
   bool surface_control_enabled;
 } FlutterNativeWindowRendererInfo;
 
+/// Describes the configuration for spawning a new `FlutterEngine` instance
+/// from an existing running parent engine via `FlutterEngineSpawn`.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterEngineSpawnInfo).
+  size_t struct_size;
+  /// The Dart isolate run configuration for the spawned engine. Required.
+  const FlutterEngineRunConfiguration* run_configuration;
+  /// Optional null-terminated initial route string for the spawned engine's
+  /// navigation state.
+  const char* initial_route;
+  /// The renderer configuration for the spawned engine. Required.
+  const FlutterRendererConfig* renderer_config;
+  /// Project arguments supplying platform callbacks (`vsync_callback`,
+  /// `platform_message_callback`, semantics callbacks, etc.) and optional
+  /// `compositor` for the spawned engine. Required.
+  const FlutterProjectArgs* project_args;
+  /// User data baton passed back to the callbacks in `renderer_config` and
+  /// `project_args` for the spawned engine.
+  void* user_data;
+} FlutterEngineSpawnInfo;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -5237,6 +5258,28 @@ FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineLaunchShell(FLUTTER_API_SYMBOL(FlutterEngine)
                                                  engine);
 
+//------------------------------------------------------------------------------
+/// @brief      Spawns a new running `FlutterEngine` instance that shares the
+///             thread host, task runners, Dart VM, and GPU context group of
+///             `parent_engine`.
+///
+///             Must be called on the platform thread. When this returns
+///             `kSuccess`, the spawned engine's shell and root Dart isolate
+///             are already running.
+///
+/// @param[in]  parent_engine  A running engine instance to spawn from.
+/// @param[in]  spawn_info     The spawn configuration.
+/// @param[out] engine_out     Receives the spawned engine handle on success.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
+                                           parent_engine,
+                                       const FlutterEngineSpawnInfo* spawn_info,
+                                       FLUTTER_API_SYMBOL(FlutterEngine) *
+                                           engine_out);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -5432,6 +5475,10 @@ typedef FlutterEngineResult (*FlutterEngineGetNativeWindowRendererInfoFnPtr)(
     FlutterNativeWindowRendererInfo* info_out);
 typedef FlutterEngineResult (*FlutterEngineLaunchShellFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine);
+typedef FlutterEngineResult (*FlutterEngineSpawnFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) parent_engine,
+    const FlutterEngineSpawnInfo* spawn_info,
+    FLUTTER_API_SYMBOL(FlutterEngine) * engine_out);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -5507,6 +5554,7 @@ typedef struct {
   FlutterEngineResizeNativeWindowFnPtr ResizeNativeWindow;
   FlutterEngineGetNativeWindowRendererInfoFnPtr GetNativeWindowRendererInfo;
   FlutterEngineLaunchShellFnPtr LaunchShell;
+  FlutterEngineSpawnFnPtr Spawn;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

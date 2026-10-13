@@ -917,7 +917,8 @@ InferNativeWindowPlatformViewCreationCallback(
 #if FML_OS_ANDROID
     ,
     std::shared_ptr<std::shared_ptr<flutter::AndroidRenderer>>
-        android_renderer_slot
+        android_renderer_slot,
+    std::shared_ptr<flutter::AndroidContext> shared_android_context = nullptr
 #endif  // FML_OS_ANDROID
 ) {
   if (config->type != kNativeWindow) {
@@ -959,13 +960,21 @@ InferNativeWindowPlatformViewCreationCallback(
       [rendering_api = rendering_api.value(), create_transaction,
        compositor_delegate = std::move(compositor_delegate),
        platform_dispatch_table, view_embedder,
-       android_renderer_slot =
-           std::move(android_renderer_slot)](flutter::Shell& shell) mutable {
+       android_renderer_slot = std::move(android_renderer_slot),
+       shared_android_context =
+           std::move(shared_android_context)](flutter::Shell& shell) mutable {
         flutter::PlatformView::Delegate& delegate = shell;
-        auto renderer = std::make_shared<flutter::AndroidRenderer>(
-            shell.GetTaskRunners(), delegate.OnPlatformViewGetSettings(),
-            rendering_api, delegate.OnPlatformViewGetShutdownSafeIOTaskRunner(),
-            create_transaction);
+        auto renderer =
+            shared_android_context
+                ? std::make_shared<flutter::AndroidRenderer>(
+                      shell.GetTaskRunners(),
+                      delegate.OnPlatformViewGetSettings(),
+                      shared_android_context, create_transaction)
+                : std::make_shared<flutter::AndroidRenderer>(
+                      shell.GetTaskRunners(),
+                      delegate.OnPlatformViewGetSettings(), rendering_api,
+                      delegate.OnPlatformViewGetShutdownSafeIOTaskRunner(),
+                      create_transaction);
         if (compositor_delegate) {
           renderer->SetExternalViewEmbedderDelegate(compositor_delegate);
         }
@@ -1021,7 +1030,8 @@ InferPlatformViewCreationCallback(
 #if FML_OS_ANDROID
     ,
     std::shared_ptr<std::shared_ptr<flutter::AndroidRenderer>>
-        android_renderer_slot = nullptr
+        android_renderer_slot = nullptr,
+    std::shared_ptr<flutter::AndroidContext> shared_android_context = nullptr
 #endif  // FML_OS_ANDROID
 ) {
   if (config == nullptr) {
@@ -1051,7 +1061,7 @@ InferPlatformViewCreationCallback(
           std::move(external_view_embedder)
 #if FML_OS_ANDROID
               ,
-          std::move(android_renderer_slot)
+          std::move(android_renderer_slot), std::move(shared_android_context)
 #endif  // FML_OS_ANDROID
       );
     default:
@@ -2566,6 +2576,86 @@ PlatformDispatchTableFromProjectArgs(const FlutterProjectArgs* args,
   return table;
 }
 
+std::unique_ptr<EmbedderExternalTextureResolver> CreateExternalTextureResolver(
+    const FlutterRendererConfig* config,
+    void* user_data) {
+  auto external_texture_resolver =
+      std::make_unique<EmbedderExternalTextureResolver>();
+
+#ifdef SHELL_ENABLE_GL
+  if (config->type == kOpenGL) {
+    const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
+    if (SAFE_ACCESS(open_gl_config, gl_external_texture_frame_callback,
+                    nullptr) != nullptr) {
+      EmbedderExternalTextureGL::ExternalTextureCallback
+          external_texture_callback =
+              [ptr = open_gl_config->gl_external_texture_frame_callback,
+               user_data](
+                  int64_t texture_identifier, size_t width,
+                  size_t height) -> std::unique_ptr<FlutterOpenGLTexture> {
+        std::unique_ptr<FlutterOpenGLTexture> texture =
+            std::make_unique<FlutterOpenGLTexture>();
+        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver =
+          std::make_unique<EmbedderExternalTextureResolver>(
+              external_texture_callback);
+    }
+  }
+#endif
+#ifdef SHELL_ENABLE_METAL
+  if (config->type == kMetal) {
+    const FlutterMetalRendererConfig* metal_config = &config->metal;
+    if (SAFE_ACCESS(metal_config, external_texture_frame_callback, nullptr)) {
+      EmbedderExternalTextureMetal::ExternalTextureCallback
+          external_texture_metal_callback =
+              [ptr = metal_config->external_texture_frame_callback, user_data](
+                  int64_t texture_identifier, size_t width, size_t height)
+          -> std::unique_ptr<FlutterMetalExternalTexture> {
+        std::unique_ptr<FlutterMetalExternalTexture> texture =
+            std::make_unique<FlutterMetalExternalTexture>();
+        texture->struct_size = sizeof(FlutterMetalExternalTexture);
+        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver =
+          std::make_unique<EmbedderExternalTextureResolver>(
+              external_texture_metal_callback);
+    }
+  }
+#endif
+#ifdef SHELL_ENABLE_VULKAN
+  if (config->type == kVulkan) {
+    const FlutterVulkanRendererConfig* vulkan_config = &config->vulkan;
+    if (auto callback = SAFE_ACCESS(vulkan_config,
+                                    external_texture_frame_callback, nullptr)) {
+      auto external_texture_vulkan_callback =
+          [frame_callback = callback, user_data](
+              int64_t texture_identifier, size_t width,
+              size_t height) -> std::unique_ptr<FlutterVulkanExternalTexture> {
+        std::unique_ptr<FlutterVulkanExternalTexture> texture =
+            std::make_unique<FlutterVulkanExternalTexture>();
+        texture->struct_size = sizeof(FlutterVulkanExternalTexture);
+        if (!frame_callback(user_data, texture_identifier, width, height,
+                            texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver =
+          std::make_unique<EmbedderExternalTextureResolver>(
+              external_texture_vulkan_callback);
+    }
+  }
+#endif
+  return external_texture_resolver;
+}
+
 }  // namespace flutter
 
 FlutterEngineResult FlutterEngineRun(size_t version,
@@ -2809,79 +2899,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         return std::make_unique<flutter::Rasterizer>(shell);
       };
 
-  using ExternalTextureResolver = flutter::EmbedderExternalTextureResolver;
-  std::unique_ptr<ExternalTextureResolver> external_texture_resolver;
-  external_texture_resolver = std::make_unique<ExternalTextureResolver>();
-
-#ifdef SHELL_ENABLE_GL
-  flutter::EmbedderExternalTextureGL::ExternalTextureCallback
-      external_texture_callback;
-  if (config->type == kOpenGL) {
-    const FlutterOpenGLRendererConfig* open_gl_config = &config->open_gl;
-    if (SAFE_ACCESS(open_gl_config, gl_external_texture_frame_callback,
-                    nullptr) != nullptr) {
-      external_texture_callback =
-          [ptr = open_gl_config->gl_external_texture_frame_callback, user_data](
-              int64_t texture_identifier, size_t width,
-              size_t height) -> std::unique_ptr<FlutterOpenGLTexture> {
-        std::unique_ptr<FlutterOpenGLTexture> texture =
-            std::make_unique<FlutterOpenGLTexture>();
-        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
-          return nullptr;
-        }
-        return texture;
-      };
-      external_texture_resolver =
-          std::make_unique<ExternalTextureResolver>(external_texture_callback);
-    }
-  }
-#endif
-#ifdef SHELL_ENABLE_METAL
-  flutter::EmbedderExternalTextureMetal::ExternalTextureCallback
-      external_texture_metal_callback;
-  if (config->type == kMetal) {
-    const FlutterMetalRendererConfig* metal_config = &config->metal;
-    if (SAFE_ACCESS(metal_config, external_texture_frame_callback, nullptr)) {
-      external_texture_metal_callback =
-          [ptr = metal_config->external_texture_frame_callback, user_data](
-              int64_t texture_identifier, size_t width,
-              size_t height) -> std::unique_ptr<FlutterMetalExternalTexture> {
-        std::unique_ptr<FlutterMetalExternalTexture> texture =
-            std::make_unique<FlutterMetalExternalTexture>();
-        texture->struct_size = sizeof(FlutterMetalExternalTexture);
-        if (!ptr(user_data, texture_identifier, width, height, texture.get())) {
-          return nullptr;
-        }
-        return texture;
-      };
-      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
-          external_texture_metal_callback);
-    }
-  }
-#endif
-#ifdef SHELL_ENABLE_VULKAN
-  if (config->type == kVulkan) {
-    const FlutterVulkanRendererConfig* vulkan_config = &config->vulkan;
-    if (auto callback = SAFE_ACCESS(vulkan_config,
-                                    external_texture_frame_callback, nullptr)) {
-      auto external_texture_vulkan_callback =
-          [frame_callback = callback, user_data](
-              int64_t texture_identifier, size_t width,
-              size_t height) -> std::unique_ptr<FlutterVulkanExternalTexture> {
-        std::unique_ptr<FlutterVulkanExternalTexture> texture =
-            std::make_unique<FlutterVulkanExternalTexture>();
-        texture->struct_size = sizeof(FlutterVulkanExternalTexture);
-        if (!frame_callback(user_data, texture_identifier, width, height,
-                            texture.get())) {
-          return nullptr;
-        }
-        return texture;
-      };
-      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
-          external_texture_vulkan_callback);
-    }
-  }
-#endif
+  auto external_texture_resolver =
+      flutter::CreateExternalTextureResolver(config, user_data);
   auto custom_task_runners = SAFE_ACCESS(args, custom_task_runners, nullptr);
   if (custom_task_runners != nullptr) {
     if (SAFE_ACCESS(custom_task_runners, merged_platform_ui_thread, false)) {
@@ -5093,6 +5112,148 @@ FlutterEngineResult FlutterEngineLaunchShell(FLUTTER_API_SYMBOL(FlutterEngine)
   return kSuccess;
 }
 
+FlutterEngineResult FlutterEngineSpawn(FLUTTER_API_SYMBOL(FlutterEngine)
+                                           parent_engine,
+                                       const FlutterEngineSpawnInfo* spawn_info,
+                                       FLUTTER_API_SYMBOL(FlutterEngine) *
+                                           engine_out) {
+  const FlutterEngineRunConfiguration* run_configuration =
+      spawn_info ? SAFE_ACCESS(spawn_info, run_configuration, nullptr)
+                 : nullptr;
+  fml::ScopedCleanupClosure cleanup_asset_resolver([run_configuration]() {
+    flutter::EmbedderEngine::DestroyAssetResolverIfNeeded(run_configuration);
+  });
+
+  if (!parent_engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Parent engine handle was invalid.");
+  }
+
+  if (!spawn_info) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Engine spawn info was missing.");
+  }
+
+  if (spawn_info->struct_size < sizeof(FlutterEngineSpawnInfo)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "FlutterEngineSpawnInfo.struct_size is invalid.");
+  }
+
+  if (!engine_out) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The engine out parameter was missing.");
+  }
+
+  const FlutterRendererConfig* config =
+      SAFE_ACCESS(spawn_info, renderer_config, nullptr);
+  if (!IsRendererValid(config)) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The renderer configuration was invalid.");
+  }
+
+  const FlutterProjectArgs* args =
+      SAFE_ACCESS(spawn_info, project_args, nullptr);
+  if (!args) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "The Flutter project arguments were missing.");
+  }
+
+  auto* parent = reinterpret_cast<flutter::EmbedderEngine*>(parent_engine);
+  if (!parent->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Parent engine is not in a valid running state.");
+  }
+
+  void* user_data = SAFE_ACCESS(spawn_info, user_data, nullptr);
+
+  fml::StatusOr<flutter::PlatformViewEmbedder::PlatformDispatchTable>
+      platform_dispatch_table_result =
+          flutter::PlatformDispatchTableFromProjectArgs(args, user_data);
+  if (!platform_dispatch_table_result.ok()) {
+    return LOG_EMBEDDER_ERROR(
+        kInvalidArguments,
+        std::string(platform_dispatch_table_result.status().message()).c_str());
+  }
+
+  const flutter::Settings& parent_settings = parent->GetShell().GetSettings();
+
+  auto external_view_embedder_result = InferExternalViewEmbedderFromArgs(
+      SAFE_ACCESS(args, compositor, nullptr), parent_settings.enable_impeller);
+  if (!external_view_embedder_result.ok()) {
+    FML_LOG(ERROR) << external_view_embedder_result.status().message();
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Compositor arguments were invalid.");
+  }
+
+  flutter::PlatformViewEmbedder::PlatformDispatchTable platform_dispatch_table =
+      std::move(platform_dispatch_table_result.value());
+
+  impeller::Flags impeller_flags;
+  impeller_flags.use_sdfs = parent_settings.impeller_use_sdfs;
+  impeller_flags.top_left_default_framebuffer_origin =
+      parent_settings.impeller_top_left_default_framebuffer_origin;
+
+#if FML_OS_ANDROID
+  auto android_renderer_slot =
+      std::make_shared<std::shared_ptr<flutter::AndroidRenderer>>();
+  std::shared_ptr<flutter::AndroidContext> shared_android_context;
+  if (parent->GetAndroidRenderer()) {
+    shared_android_context = parent->GetAndroidRenderer()->GetAndroidContext();
+  }
+#endif  // FML_OS_ANDROID
+
+  auto on_create_platform_view = InferPlatformViewCreationCallback(
+      config, user_data, platform_dispatch_table,
+      std::move(external_view_embedder_result.value()),
+      parent_settings.enable_impeller, impeller_flags
+#if FML_OS_ANDROID
+      ,
+      android_renderer_slot, std::move(shared_android_context)
+#endif  // FML_OS_ANDROID
+  );
+
+  if (!on_create_platform_view) {
+    return LOG_EMBEDDER_ERROR(
+        kInternalInconsistency,
+        "Could not infer platform view creation callback.");
+  }
+
+  flutter::Shell::CreateCallback<flutter::Rasterizer> on_create_rasterizer =
+      [](flutter::Shell& shell) {
+        return std::make_unique<flutter::Rasterizer>(shell);
+      };
+
+  auto external_texture_resolver =
+      flutter::CreateExternalTextureResolver(config, user_data);
+
+  std::string initial_route;
+  if (SAFE_ACCESS(spawn_info, initial_route, nullptr) != nullptr) {
+    initial_route = SAFE_ACCESS(spawn_info, initial_route, nullptr);
+  }
+
+  // EmbedderEngine::Spawn takes ownership of cleaning up or transferring any
+  // asset_resolver in run_configuration.
+  cleanup_asset_resolver.Release();
+
+  std::string error;
+  auto spawned = parent->Spawn(run_configuration, initial_route,
+                               on_create_platform_view, on_create_rasterizer,
+                               std::move(external_texture_resolver), &error);
+  if (!spawned) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, error.empty()
+                                                     ? "Could not spawn engine."
+                                                     : error.c_str());
+  }
+
+#if FML_OS_ANDROID
+  spawned->SetAndroidRendererSlot(std::move(android_renderer_slot));
+#endif  // FML_OS_ANDROID
+
+  *engine_out =
+      reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(spawned.release());
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -5176,6 +5337,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(GetNativeWindowRendererInfo,
            FlutterEngineGetNativeWindowRendererInfo);
   SET_PROC(LaunchShell, FlutterEngineLaunchShell);
+  SET_PROC(Spawn, FlutterEngineSpawn);
 #undef SET_PROC
 
   return kSuccess;
