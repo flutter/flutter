@@ -97,6 +97,11 @@ class PlatformViewEmbedder : public PlatformView {
         release_resource_context_callback;                         // optional
     GetImpellerContextCallback get_impeller_context_callback;      // optional
     SetupImpellerContextCallback setup_impeller_context_callback;  // optional
+    // If true, `platform_message_response_callback` runs on the thread that
+    // sends each message (the UI thread or a background isolate's thread)
+    // instead of on the platform thread. See
+    // `FlutterProjectArgs.platform_message_callback_on_sending_thread`.
+    bool platform_message_callback_on_sending_thread = false;
   };
 
   // Create a platform view that sets up a software rasterizer.
@@ -180,10 +185,23 @@ class PlatformViewEmbedder : public PlatformView {
 
  private:
   class EmbedderPlatformMessageHandler;
+  class SendingThreadPlatformMessageHandler;
   std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
   std::unique_ptr<EmbedderSurface> embedder_surface_;
+  // Set when the dispatch table asks for messages on the sending thread. The
+  // same object as `platform_message_handler_`; kept typed so that the
+  // destructor can detach it.
+  std::shared_ptr<SendingThreadPlatformMessageHandler>
+      sending_thread_message_handler_;
   std::shared_ptr<PlatformMessageHandler> platform_message_handler_;
   PlatformDispatchTable platform_dispatch_table_;
+
+  // Creates the handler that delivers platform messages according to
+  // `platform_dispatch_table`, and sets `sending_thread_message_handler_` if
+  // it delivers them on the sending thread.
+  std::shared_ptr<PlatformMessageHandler> CreatePlatformMessageHandler(
+      const PlatformDispatchTable& platform_dispatch_table,
+      const flutter::TaskRunners& task_runners);
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;

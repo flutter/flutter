@@ -830,6 +830,115 @@ TEST_F(EmbedderTest,
 }
 
 //------------------------------------------------------------------------------
+/// With `platform_message_callback_on_sending_thread`, the engine calls the
+/// platform message callback on the thread that sent each message: the UI
+/// thread for the root isolate, and the background isolate's own thread.
+///
+TEST_F(EmbedderTest, PlatformMessageCallbackRunsOnSendingThreadsWhenRequested) {
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  auto ui_thread = std::make_unique<fml::Thread>("test_ui_thread");
+  auto ui_task_runner = ui_thread->GetTaskRunner();
+  std::mutex ui_task_runner_mutex;
+  bool ui_task_runner_destroyed = false;
+  auto platform_thread = std::make_unique<fml::Thread>("test_platform_thread");
+  auto platform_task_runner = platform_thread->GetTaskRunner();
+  UniqueEngine engine;
+
+  EmbedderTestTaskRunner test_ui_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(ui_task_runner)
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            std::scoped_lock lock(ui_task_runner_mutex);
+            if (ui_task_runner_destroyed) {
+              return;
+            }
+            FlutterEngineRunTask(engine.get(), &task);
+          })
+          .SetDestructionCallback([&]() {
+            std::scoped_lock lock(ui_task_runner_mutex);
+            ui_task_runner_destroyed = true;
+          })
+          .Build();
+  EmbedderTestTaskRunner test_platform_task_runner =
+      EmbedderTestTaskRunnerBuilder()
+          .SetRealTaskRunner(platform_task_runner)
+          .SetTaskExpiryCallback([&](FlutterTask task) {
+            if (!engine.is_valid()) {
+              return;
+            }
+            FlutterEngineRunTask(engine.get(), &task);
+          })
+          .Build();
+
+  std::mutex threads_mutex;
+  std::thread::id root_isolate_thread;
+  std::thread::id background_isolate_thread;
+  std::map<std::string, std::thread::id> callback_threads;
+  fml::AutoResetWaitableEvent root_message_received;
+  fml::AutoResetWaitableEvent background_message_received;
+
+  context.AddFfiNativeCallback(
+      "RecordRootIsolateThread", CREATE_FFI_LAMBDA([&]() {
+        EXPECT_TRUE(ui_task_runner->RunsTasksOnCurrentThread());
+        std::scoped_lock lock(threads_mutex);
+        root_isolate_thread = std::this_thread::get_id();
+      }));
+  context.AddFfiNativeCallback(
+      "RecordBackgroundIsolateThread", CREATE_FFI_LAMBDA([&]() {
+        std::scoped_lock lock(threads_mutex);
+        background_isolate_thread = std::this_thread::get_id();
+      }));
+
+  platform_task_runner->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto ui_task_runner_description =
+        test_ui_task_runner.GetFlutterTaskRunnerDescription();
+    const auto platform_task_runner_description =
+        test_platform_task_runner.GetFlutterTaskRunnerDescription();
+    builder.SetSurface(DlISize(1, 1));
+    builder.SetUITaskRunner(&ui_task_runner_description);
+    builder.SetPlatformTaskRunner(&platform_task_runner_description);
+    builder.SetDartEntrypoint(
+        "platform_messages_from_root_and_background_isolates");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          const std::string channel = message->channel;
+          {
+            std::scoped_lock lock(threads_mutex);
+            callback_threads[channel] = std::this_thread::get_id();
+          }
+          FlutterEngineSendPlatformMessageResponse(
+              engine.get(), message->response_handle, nullptr, 0);
+          if (channel == "root") {
+            root_message_received.Signal();
+          } else if (channel == "background") {
+            background_message_received.Signal();
+          }
+        });
+    builder.GetProjectArgs().platform_message_callback_on_sending_thread = true;
+    engine = builder.InitializeEngine();
+    ASSERT_EQ(FlutterEngineRunInitialized(engine.get()), kSuccess);
+    ASSERT_TRUE(engine.is_valid());
+  });
+  root_message_received.Wait();
+  background_message_received.Wait();
+
+  {
+    std::scoped_lock lock(threads_mutex);
+    EXPECT_EQ(callback_threads["root"], root_isolate_thread);
+    EXPECT_EQ(callback_threads["background"], background_isolate_thread);
+    EXPECT_NE(background_isolate_thread, root_isolate_thread);
+  }
+
+  fml::AutoResetWaitableEvent kill_latch;
+  platform_task_runner->PostTask([&] {
+    engine.reset();
+    platform_task_runner->PostTask([&kill_latch] { kill_latch.Signal(); });
+  });
+  kill_latch.Wait();
+}
+
+//------------------------------------------------------------------------------
 /// Tests that a null platform message cannot be send if the message_size
 /// isn't equals to 0.
 ///

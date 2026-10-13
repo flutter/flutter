@@ -3318,8 +3318,9 @@ typedef struct {
   /// The callback invoked by the engine in order to give the embedder the
   /// chance to respond to platform messages from the Dart application.
   /// The callback will be invoked on the thread on which the `FlutterEngineRun`
-  /// call is made. The second parameter, `user_data`, is supplied when
-  /// `FlutterEngineRun` or `FlutterEngineInitialize` is called.
+  /// call is made, unless `platform_message_callback_on_sending_thread` is set.
+  /// The second parameter, `user_data`, is supplied when `FlutterEngineRun` or
+  /// `FlutterEngineInitialize` is called.
   FlutterPlatformMessageCallback platform_message_callback;
   /// The VM snapshot data buffer used in AOT operation. This buffer must be
   /// mapped in as read-only. For more information refer to the documentation on
@@ -3628,6 +3629,15 @@ typedef struct {
   /// does. See `FlutterGetScaledFontSizeCallback`. Embedders that send a
   /// `configurationId` in the platform settings message must set it.
   FlutterGetScaledFontSizeCallback get_scaled_font_size_callback;
+
+  /// If true, the engine calls `platform_message_callback` synchronously on
+  /// the thread that sent the message instead of posting it to the platform
+  /// thread: the UI thread for messages from the root isolate, or the thread
+  /// of a background isolate that called
+  /// `PlatformDispatcher.registerBackgroundIsolate`. The callback must then be
+  /// thread safe. The engine stops calling it before `FlutterEngineShutdown`
+  /// returns. Responses may be sent from any thread.
+  bool platform_message_callback_on_sending_thread;
 } FlutterProjectArgs;
 
 typedef struct {

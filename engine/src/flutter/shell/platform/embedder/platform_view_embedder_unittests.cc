@@ -5,15 +5,20 @@
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
 #include "flutter/flow/frame_timings.h"
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/time/time_delta.h"
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/testing/post_task_sync.h"
 #include "flutter/testing/testing.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include <atomic>
+#include <chrono>
 #include <cstring>
+#include <thread>
 
 namespace flutter {
 namespace testing {
@@ -771,6 +776,165 @@ TEST(PlatformViewEmbedderTest,
   EXPECT_EQ(GetPlatformCallbackRecord().resolved_locale_user_data, &user_data);
   ASSERT_TRUE(resolved);
   EXPECT_EQ(resolved->front(), "iw");
+}
+
+TEST(PlatformViewEmbedderTest,
+     DispatchTableFromProjectArgsCarriesSendingThreadFlag) {
+  FlutterProjectArgs args = {};
+  args.struct_size = sizeof(FlutterProjectArgs);
+  args.platform_message_callback_on_sending_thread = true;
+
+  fml::StatusOr<PlatformViewEmbedder::PlatformDispatchTable> result =
+      PlatformDispatchTableFromProjectArgs(&args, nullptr);
+
+  ASSERT_TRUE(result.ok());
+  EXPECT_TRUE(result.value().platform_message_callback_on_sending_thread);
+}
+
+namespace {
+
+// Owns a platform thread and a surfaceless platform view created on it, with
+// `table` as its dispatch table, and destroys the view on that thread.
+class SendingThreadHandlerFixture {
+ public:
+  explicit SendingThreadHandlerFixture(
+      PlatformViewEmbedder::PlatformDispatchTable table)
+      : thread_host_("io.flutter.test." + GetCurrentTestName() + ".",
+                     ThreadHost::Type::kPlatform),
+        task_runners_(GetCurrentTestName(),
+                      thread_host_.platform_thread->GetTaskRunner(),
+                      nullptr,
+                      nullptr,
+                      nullptr) {
+    table.platform_message_callback_on_sending_thread = true;
+    PostTaskSync(task_runners_.GetPlatformTaskRunner(), [&] {
+      embedder_ = std::make_unique<SurfacelessPlatformViewEmbedder>(
+          delegate_, task_runners_, std::move(table));
+    });
+  }
+
+  ~SendingThreadHandlerFixture() { DestroyPlatformView(); }
+
+  std::shared_ptr<PlatformMessageHandler> handler() const {
+    return embedder_->GetPlatformMessageHandler();
+  }
+
+  fml::RefPtr<fml::TaskRunner> platform_task_runner() const {
+    return task_runners_.GetPlatformTaskRunner();
+  }
+
+  void DestroyPlatformView() {
+    PostTaskSync(task_runners_.GetPlatformTaskRunner(),
+                 [&] { embedder_.reset(); });
+  }
+
+  // Hands the platform view to the caller, which must destroy it on the
+  // platform thread.
+  std::unique_ptr<PlatformViewEmbedder> ReleasePlatformView() {
+    return std::move(embedder_);
+  }
+
+ private:
+  ThreadHost thread_host_;
+  TaskRunners task_runners_;
+  MockDelegate delegate_;
+  std::unique_ptr<PlatformViewEmbedder> embedder_;
+};
+
+}  // namespace
+
+TEST(PlatformViewEmbedderTest,
+     SendingThreadHandlerCallsCallbackOnTheSendingThread) {
+  std::thread::id callback_thread;
+  PlatformViewEmbedder::PlatformDispatchTable table;
+  table.platform_message_response_callback =
+      [&callback_thread](std::unique_ptr<PlatformMessage> message) {
+        callback_thread = std::this_thread::get_id();
+      };
+  SendingThreadHandlerFixture fixture(std::move(table));
+  std::shared_ptr<PlatformMessageHandler> handler = fixture.handler();
+  ASSERT_TRUE(handler);
+  EXPECT_FALSE(handler->DoesHandlePlatformMessageOnPlatformThread());
+
+  handler->HandlePlatformMessage(std::make_unique<PlatformMessage>(
+      "foo", fml::MakeRefCounted<MockResponse>()));
+
+  // The callback ran before HandlePlatformMessage returned, on this thread,
+  // which is not the platform thread.
+  EXPECT_EQ(callback_thread, std::this_thread::get_id());
+}
+
+TEST(PlatformViewEmbedderTest,
+     SendingThreadHandlerCompletesEmptyWithoutCallback) {
+  SendingThreadHandlerFixture fixture({});
+  auto response = fml::MakeRefCounted<MockResponse>();
+  EXPECT_CALL(*response, CompleteEmpty()).Times(1);
+
+  fixture.handler()->HandlePlatformMessage(
+      std::make_unique<PlatformMessage>("foo", response));
+}
+
+TEST(PlatformViewEmbedderTest,
+     SendingThreadHandlerDropsMessagesAfterPlatformViewIsDestroyed) {
+  int callback_calls = 0;
+  PlatformViewEmbedder::PlatformDispatchTable table;
+  table.platform_message_response_callback =
+      [&callback_calls](std::unique_ptr<PlatformMessage> message) {
+        ++callback_calls;
+      };
+  SendingThreadHandlerFixture fixture(std::move(table));
+  // A background isolate can keep the handler after the view is gone.
+  std::shared_ptr<PlatformMessageHandler> handler = fixture.handler();
+  fixture.DestroyPlatformView();
+  auto response = fml::MakeRefCounted<MockResponse>();
+  EXPECT_CALL(*response, Complete(::testing::_)).Times(0);
+  EXPECT_CALL(*response, CompleteEmpty()).Times(0);
+
+  handler->HandlePlatformMessage(
+      std::make_unique<PlatformMessage>("foo", response));
+
+  EXPECT_EQ(callback_calls, 0);
+}
+
+TEST(PlatformViewEmbedderTest,
+     DestroyingPlatformViewWaitsForSendingThreadCallbackInProgress) {
+  // Long enough for the platform thread to reach the platform view's
+  // destructor while the callback is still blocked, so that a destructor
+  // that does not wait finishes before the callback returns.
+  constexpr std::chrono::milliseconds kTimeForDestructorToRun(100);
+  fml::AutoResetWaitableEvent callback_entered;
+  fml::AutoResetWaitableEvent release_callback;
+  std::atomic<bool> callback_returned = false;
+  PlatformViewEmbedder::PlatformDispatchTable table;
+  table.platform_message_response_callback =
+      [&](std::unique_ptr<PlatformMessage> message) {
+        callback_entered.Signal();
+        release_callback.Wait();
+        callback_returned = true;
+      };
+  SendingThreadHandlerFixture fixture(std::move(table));
+  std::shared_ptr<PlatformMessageHandler> handler = fixture.handler();
+  std::thread sender([&handler] {
+    handler->HandlePlatformMessage(std::make_unique<PlatformMessage>(
+        "foo", fml::MakeRefCounted<MockResponse>()));
+  });
+  callback_entered.Wait();
+
+  std::unique_ptr<PlatformViewEmbedder> embedder =
+      fixture.ReleasePlatformView();
+  bool callback_returned_before_destruction_finished = false;
+  fml::AutoResetWaitableEvent destroyed;
+  fixture.platform_task_runner()->PostTask([&] {
+    embedder.reset();
+    callback_returned_before_destruction_finished = callback_returned;
+    destroyed.Signal();
+  });
+  std::this_thread::sleep_for(kTimeForDestructorToRun);
+  release_callback.Signal();
+  destroyed.Wait();
+  sender.join();
+
+  EXPECT_TRUE(callback_returned_before_destruction_finished);
 }
 
 }  // namespace testing

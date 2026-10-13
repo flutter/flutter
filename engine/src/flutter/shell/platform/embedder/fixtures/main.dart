@@ -457,6 +457,37 @@ void null_platform_messages() {
   signalNativeTest();
 }
 
+@ffi.Native<ffi.Void Function()>(symbol: 'RecordRootIsolateThread')
+external void recordRootIsolateThread();
+@ffi.Native<ffi.Void Function()>(symbol: 'RecordBackgroundIsolateThread')
+external void recordBackgroundIsolateThread();
+
+/// Sends a platform message on channel 'root' from the root isolate, then one
+/// on channel 'background' from a background isolate. Each sender first calls
+/// a native function, so the test knows which thread sent the message.
+@pragma('vm:entry-point')
+// ignore: non_constant_identifier_names
+Future<void> platform_messages_from_root_and_background_isolates() async {
+  final RootIsolateToken token = RootIsolateToken.instance!;
+  recordRootIsolateThread();
+  PlatformDispatcher.instance.sendPlatformMessage('root', null, null);
+  final done = ReceivePort();
+  await Isolate.spawn(_sendPlatformMessageFromBackgroundIsolate, <Object>[token, done.sendPort]);
+  await done.first;
+  done.close();
+}
+
+void _sendPlatformMessageFromBackgroundIsolate(List<Object> args) {
+  final token = args[0] as RootIsolateToken;
+  final done = args[1] as SendPort;
+  PlatformDispatcher.instance.registerBackgroundIsolate(token);
+  recordBackgroundIsolateThread();
+  final replies = ReceivePort();
+  PlatformDispatcher.instance.sendPortPlatformMessage('background', null, 1, replies.sendPort);
+  replies.close();
+  done.send(null);
+}
+
 Picture createSimplePicture() {
   final blackPaint = Paint();
   final whitePaint = Paint()..color = const Color.fromARGB(255, 255, 255, 255);

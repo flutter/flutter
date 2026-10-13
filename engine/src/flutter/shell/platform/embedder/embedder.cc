@@ -2325,7 +2325,7 @@ PlatformDispatchTableFromProjectArgs(const FlutterProjectArgs* args,
     };
   }
 
-  return flutter::PlatformViewEmbedder::PlatformDispatchTable{
+  flutter::PlatformViewEmbedder::PlatformDispatchTable table{
       update_semantics_callback,                  //
       platform_message_response_callback,         //
       vsync_callback,                             //
@@ -2338,6 +2338,9 @@ PlatformDispatchTableFromProjectArgs(const FlutterProjectArgs* args,
       request_dart_deferred_library_callback,     //
       get_scaled_font_size_callback,              //
   };
+  table.platform_message_callback_on_sending_thread =
+      SAFE_ACCESS(args, platform_message_callback_on_sending_thread, false);
+  return table;
 }
 
 }  // namespace flutter

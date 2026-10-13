@@ -4,6 +4,8 @@
 
 #include "flutter/shell/platform/embedder/platform_view_embedder.h"
 
+#include <mutex>
+#include <shared_mutex>
 #include <utility>
 
 #include "flutter/fml/make_copyable.h"
@@ -50,6 +52,78 @@ class PlatformViewEmbedder::EmbedderPlatformMessageHandler
   fml::RefPtr<fml::TaskRunner> platform_task_runner_;
 };
 
+// Calls the platform message callback on the thread that sends each message:
+// the UI thread for the root isolate, or a background isolate's thread. A
+// background isolate can hold this handler after the platform view is gone,
+// so the platform view detaches it on destruction; detaching waits for calls
+// in progress, and later messages are dropped.
+class PlatformViewEmbedder::SendingThreadPlatformMessageHandler
+    : public PlatformMessageHandler {
+ public:
+  explicit SendingThreadPlatformMessageHandler(
+      PlatformMessageResponseCallback callback)
+      : callback_(std::move(callback)) {}
+
+  // |PlatformMessageHandler|
+  void HandlePlatformMessage(
+      std::unique_ptr<PlatformMessage> message) override {
+    std::shared_lock lock(mutex_);
+    if (detached_) {
+      FML_DLOG(WARNING) << "Deleted engine dropping message on channel "
+                        << message->channel();
+      return;
+    }
+    if (!callback_) {
+      if (message->response()) {
+        message->response()->CompleteEmpty();
+      }
+      return;
+    }
+    callback_(std::move(message));
+  }
+
+  // |PlatformMessageHandler|
+  bool DoesHandlePlatformMessageOnPlatformThread() const override {
+    return false;
+  }
+
+  // |PlatformMessageHandler|
+  void InvokePlatformMessageResponseCallback(
+      int response_id,
+      std::unique_ptr<fml::Mapping> mapping) override {}
+
+  // |PlatformMessageHandler|
+  void InvokePlatformMessageEmptyResponseCallback(int response_id) override {}
+
+  // Waits for calls in progress and stops later ones from reaching the
+  // callback.
+  void Detach() {
+    std::unique_lock lock(mutex_);
+    detached_ = true;
+    callback_ = nullptr;
+  }
+
+ private:
+  // Held shared while the callback runs and exclusively by Detach.
+  std::shared_mutex mutex_;
+  bool detached_ = false;
+  PlatformMessageResponseCallback callback_;
+};
+
+std::shared_ptr<PlatformMessageHandler>
+PlatformViewEmbedder::CreatePlatformMessageHandler(
+    const PlatformDispatchTable& platform_dispatch_table,
+    const flutter::TaskRunners& task_runners) {
+  if (platform_dispatch_table.platform_message_callback_on_sending_thread) {
+    sending_thread_message_handler_ =
+        std::make_shared<SendingThreadPlatformMessageHandler>(
+            platform_dispatch_table.platform_message_response_callback);
+    return sending_thread_message_handler_;
+  }
+  return std::make_shared<EmbedderPlatformMessageHandler>(
+      GetWeakPtr(), task_runners.GetPlatformTaskRunner());
+}
+
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
@@ -62,9 +136,8 @@ PlatformViewEmbedder::PlatformViewEmbedder(
       embedder_surface_(
           std::make_unique<EmbedderSurfaceSoftware>(software_dispatch_table,
                                                     external_view_embedder_)),
-      platform_message_handler_(new EmbedderPlatformMessageHandler(
-          GetWeakPtr(),
-          task_runners.GetPlatformTaskRunner())),
+      platform_message_handler_(
+          CreatePlatformMessageHandler(platform_dispatch_table, task_runners)),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 
 #ifdef SHELL_ENABLE_GL
@@ -77,9 +150,8 @@ PlatformViewEmbedder::PlatformViewEmbedder(
     : PlatformView(delegate, task_runners),
       external_view_embedder_(std::move(external_view_embedder)),
       embedder_surface_(std::move(embedder_surface)),
-      platform_message_handler_(new EmbedderPlatformMessageHandler(
-          GetWeakPtr(),
-          task_runners.GetPlatformTaskRunner())),
+      platform_message_handler_(
+          CreatePlatformMessageHandler(platform_dispatch_table, task_runners)),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 #endif
 
@@ -93,9 +165,8 @@ PlatformViewEmbedder::PlatformViewEmbedder(
     : PlatformView(delegate, task_runners),
       external_view_embedder_(std::move(external_view_embedder)),
       embedder_surface_(std::move(embedder_surface)),
-      platform_message_handler_(new EmbedderPlatformMessageHandler(
-          GetWeakPtr(),
-          task_runners.GetPlatformTaskRunner())),
+      platform_message_handler_(
+          CreatePlatformMessageHandler(platform_dispatch_table, task_runners)),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 #endif
 
@@ -109,9 +180,8 @@ PlatformViewEmbedder::PlatformViewEmbedder(
     : PlatformView(delegate, task_runners),
       external_view_embedder_(std::move(external_view_embedder)),
       embedder_surface_(std::move(embedder_surface)),
-      platform_message_handler_(new EmbedderPlatformMessageHandler(
-          GetWeakPtr(),
-          task_runners.GetPlatformTaskRunner())),
+      platform_message_handler_(
+          CreatePlatformMessageHandler(platform_dispatch_table, task_runners)),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 #endif
 
@@ -124,12 +194,15 @@ PlatformViewEmbedder::PlatformViewEmbedder(
       platform_message_handler_(
           platform_message_handler
               ? std::move(platform_message_handler)
-              : std::make_shared<EmbedderPlatformMessageHandler>(
-                    GetWeakPtr(),
-                    task_runners.GetPlatformTaskRunner())),
+              : CreatePlatformMessageHandler(platform_dispatch_table,
+                                             task_runners)),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}
 
-PlatformViewEmbedder::~PlatformViewEmbedder() = default;
+PlatformViewEmbedder::~PlatformViewEmbedder() {
+  if (sending_thread_message_handler_) {
+    sending_thread_message_handler_->Detach();
+  }
+}
 
 void PlatformViewEmbedder::UpdateSemantics(
     int64_t view_id,
