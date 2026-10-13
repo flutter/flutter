@@ -129,6 +129,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         fileSystem: globals.fs,
         androidSdk: globals.androidSdk,
         config: globals.config,
+        operatingSystemUtils: globals.os,
+        platform: globals.platform,
       ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,

@@ -78,8 +78,10 @@ static jfieldID g_jni_shell_holder_field = nullptr;
   V(g_on_begin_frame_method, onBeginFrame, "()V")                             \
   V(g_on_end_frame_method, onEndFrame, "()V")                                 \
   V(g_on_display_overlay_surface_method, onDisplayOverlaySurface, "(IIIII)V") \
-  V(g_create_transaction_method, createTransaction,                           \
+  V(g_create_unpublished_transaction_method, createUnpublishedTransaction,    \
     "()Landroid/view/SurfaceControl$Transaction;")                            \
+  V(g_publish_transaction_method, publishTransaction,                         \
+    "(Landroid/view/SurfaceControl$Transaction;)V")                           \
   V(g_swap_transaction_method, swapTransactions, "()V")                       \
   V(g_create_overlay_surface2_method, createOverlaySurface2,                  \
     "()Lio/flutter/embedding/engine/FlutterOverlaySurface;")                  \
@@ -2065,24 +2067,66 @@ bool PlatformViewAndroidJNIImpl::RequestDartDeferredLibrary(
 
 // New Platform View Support.
 
-ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction() {
+ASurfaceTransaction* PlatformViewAndroidJNIImpl::createTransaction(
+    std::function<void()>& out_publish_callback) {
   JNIEnv* env = fml::jni::AttachCurrentThread();
 
-  auto java_object = java_object_.get(env);
+  fml::jni::ScopedJavaLocalRef<jobject> java_object = java_object_.get(env);
   if (java_object.is_null()) {
     return nullptr;
   }
 
   fml::jni::ScopedJavaLocalRef<jobject> transaction(
-      env,
-      env->CallObjectMethod(java_object.obj(), g_create_transaction_method));
-  if (transaction.is_null()) {
+      env, env->CallObjectMethod(java_object.obj(),
+                                 g_create_unpublished_transaction_method));
+  // Check (and clear) any exception before looking at the result, so a failure
+  // here falls back to a natively owned transaction instead of leaving an
+  // exception pending on the raster thread.
+  if (!fml::jni::CheckException(env) || transaction.is_null()) {
     return nullptr;
   }
-  FML_CHECK(fml::jni::CheckException(env));
 
-  return impeller::android::GetProcTable().ASurfaceTransaction_fromJava(
-      env, transaction.obj());
+  ASurfaceTransaction* native_tx =
+      impeller::android::GetProcTable().ASurfaceTransaction_fromJava(
+          env, transaction.obj());
+  if (native_tx == nullptr) {
+    return nullptr;
+  }
+
+  // `ASurfaceTransaction_fromJava` does not take a reference on the Java
+  // object, and the transaction is not yet reachable from any Java collection,
+  // so without a global ref here it could be collected while the raster thread
+  // is still writing into the native handle.
+  std::shared_ptr<fml::jni::ScopedJavaGlobalRef<jobject>> global_tx =
+      std::make_shared<fml::jni::ScopedJavaGlobalRef<jobject>>(
+          env, transaction.obj());
+  fml::jni::JavaObjectWeakGlobalRef weak_java_object = java_object_;
+
+  out_publish_callback = [weak_java_object, global_tx, native_tx]() {
+    if (global_tx->is_null()) {
+      // Already handed off; the transaction may now be owned by Java.
+      return;
+    }
+    JNIEnv* cb_env = fml::jni::AttachCurrentThread();
+    fml::jni::ScopedJavaLocalRef<jobject> cb_java_obj =
+        weak_java_object.get(cb_env);
+    bool published = false;
+    if (!cb_java_obj.is_null()) {
+      cb_env->CallVoidMethod(cb_java_obj.obj(), g_publish_transaction_method,
+                             global_tx->obj());
+      published = fml::jni::CheckException(cb_env);
+    }
+    if (!published) {
+      // The platform thread will never see this transaction, so apply it here.
+      // This keeps the completion callback registered by
+      // `SurfaceTransaction::Apply` from being dropped, which would leak the
+      // buffer it holds. The global ref keeps `native_tx` valid until Reset.
+      impeller::android::GetProcTable().ASurfaceTransaction_apply(native_tx);
+    }
+    global_tx->Reset();
+  };
+
+  return native_tx;
 }
 
 void PlatformViewAndroidJNIImpl::swapTransaction() {

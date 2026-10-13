@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart' hide defaultManifestPath;
@@ -168,6 +169,7 @@ void main() {
         logger: BufferLogger.test(),
         projectDir: fileSystem.currentDirectory,
         buildMode: BuildMode.debug,
+        platform: FakePlatform(),
       );
 
       final File outputAssetFile = fileSystem.file('build/flutter_assets/my-asset.txt');

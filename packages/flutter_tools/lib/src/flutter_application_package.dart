@@ -10,10 +10,11 @@ import 'application_package.dart';
 import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/os.dart';
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
-import 'globals.dart' as globals;
 import 'ios/application_package.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
@@ -31,6 +32,8 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     required this._userMessages,
     required this._fileSystem,
     required this._config,
+    required this._operatingSystemUtils,
+    required this._platform,
   }) : _processManager = processManager,
        _logger = logger,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
@@ -42,6 +45,8 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   final UserMessages _userMessages;
   final FileSystem _fileSystem;
   final Config _config;
+  final OperatingSystemUtils _operatingSystemUtils;
+  final Platform _platform;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -77,7 +82,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
             ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case .tester:
-        return FlutterTesterApp.fromCurrentDirectory(globals.fs);
+        return FlutterTesterApp.fromCurrentDirectory(_fileSystem);
       case .macos:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
@@ -89,7 +94,12 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         return WebApplicationPackage(FlutterProject.current());
       case .linux:
         return applicationBinary == null
-            ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
+            ? LinuxApp.fromLinuxProject(
+                FlutterProject.current().linux,
+                config: _config,
+                operatingSystemUtils: _operatingSystemUtils,
+                platform: _platform,
+              )
             : LinuxApp.fromPrebuiltApp(applicationBinary);
       case .windows:
         return applicationBinary == null
