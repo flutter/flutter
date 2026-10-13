@@ -2280,6 +2280,14 @@ typedef struct {
   /// This may be same as platform_task_runner, in which case the Flutter engine
   /// will run the UI isolate on platform thread.
   const FlutterTaskRunnerDescription* ui_task_runner;
+  /// If true and `ui_task_runner` is null, the engine runs the UI isolate on
+  /// the platform task runner instead of creating a dedicated UI thread.
+  bool merged_platform_ui_thread;
+  /// Optional null-terminated thread name prefix used for engine-managed
+  /// threads (e.g. `<prefix>.ui`, `<prefix>.raster`, `<prefix>.io`) and the
+  /// engine's `TaskRunners` label. If null or empty, defaults to
+  /// `"io.flutter"`.
+  const char* thread_name_prefix;
 } FlutterCustomTaskRunners;
 
 typedef struct {
@@ -3826,6 +3834,17 @@ typedef struct {
   /// thread safe. The engine stops calling it before `FlutterEngineShutdown`
   /// returns. Responses may be sent from any thread.
   bool platform_message_callback_on_sending_thread;
+
+  /// If true, `FlutterEngineInitialize` does not require `assets_path` or a
+  /// valid initial Dart isolate configuration, and the engine is intended to
+  /// launch its shell via `FlutterEngineLaunchShell` and later start its root
+  /// isolate via `FlutterEngineLaunchEngine`.
+  bool defer_root_isolate_launch;
+
+  /// Optional null-terminated initial lifecycle state string (for example,
+  /// `"AppLifecycleState.detached"`) applied to `PlatformData::lifecycle_state`
+  /// when the shell is launched.
+  const char* initial_lifecycle_state;
 } FlutterProjectArgs;
 
 typedef struct {
@@ -5199,6 +5218,25 @@ FlutterEngineResult FlutterEngineGetNativeWindowRendererInfo(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterNativeWindowRendererInfo* info_out);
 
+//------------------------------------------------------------------------------
+/// @brief      Launches the shell of an engine initialized with
+///             `FlutterEngineInitialize` without notifying the platform view of
+///             surface creation or starting the root Dart isolate.
+///
+///             Use this with `FlutterProjectArgs::defer_root_isolate_launch`
+///             when the embedder needs a running shell before a surface or Dart
+///             entrypoint is ready, and later calls `FlutterEngineLaunchEngine`
+///             to start the root isolate.
+///
+/// @param[in]  engine  An initialized engine instance whose shell has not yet
+///                     been launched.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineLaunchShell(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                 engine);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -5392,6 +5430,8 @@ typedef FlutterEngineResult (*FlutterEngineResizeNativeWindowFnPtr)(
 typedef FlutterEngineResult (*FlutterEngineGetNativeWindowRendererInfoFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterNativeWindowRendererInfo* info_out);
+typedef FlutterEngineResult (*FlutterEngineLaunchShellFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -5466,6 +5506,7 @@ typedef struct {
   FlutterEngineSetNativeWindowFnPtr SetNativeWindow;
   FlutterEngineResizeNativeWindowFnPtr ResizeNativeWindow;
   FlutterEngineGetNativeWindowRendererInfoFnPtr GetNativeWindowRendererInfo;
+  FlutterEngineLaunchShellFnPtr LaunchShell;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

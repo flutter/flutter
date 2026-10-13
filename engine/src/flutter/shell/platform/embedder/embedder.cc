@@ -2611,8 +2611,11 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   bool has_custom_asset_resolvers =
       SAFE_ACCESS(args, asset_resolvers, nullptr) != nullptr &&
       SAFE_ACCESS(args, asset_resolvers_count, 0) > 0;
+  bool defer_root_isolate_launch =
+      SAFE_ACCESS(args, defer_root_isolate_launch, false);
 
-  if (SAFE_ACCESS(args, assets_path, nullptr) == nullptr &&
+  if (!defer_root_isolate_launch &&
+      SAFE_ACCESS(args, assets_path, nullptr) == nullptr &&
       !has_custom_asset_resolvers) {
     return LOG_EMBEDDER_ERROR(
         kInvalidArguments,
@@ -2672,6 +2675,13 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
         backend == kFlutterNativeWindowBackendImpellerOpenGLES;
     settings.enable_software_rendering =
         backend == kFlutterNativeWindowBackendSoftware;
+    settings.warn_on_impeller_opt_out = true;
+    settings.enable_platform_isolates = true;
+#if FLUTTER_RELEASE
+    // On Android, enable the timeline event handler in release mode when
+    // systrace is enabled.
+    settings.enable_timeline_event_handler = settings.trace_systrace;
+#endif  // FLUTTER_RELEASE
   }
 
   if (SAFE_ACCESS(args, aot_data, nullptr)) {
@@ -2711,8 +2721,10 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
             kInvalidArguments,
             "Not running in AOT mode but could not resolve the kernel binary.");
       }
+      settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
+    } else if (!defer_root_isolate_launch || has_custom_asset_resolvers) {
+      settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
     }
-    settings.application_kernel_asset = kApplicationKernelSnapshotFileName;
   }
 
   if (SAFE_ACCESS(args, root_isolate_create_callback, nullptr) != nullptr) {
@@ -2871,29 +2883,43 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   }
 #endif
   auto custom_task_runners = SAFE_ACCESS(args, custom_task_runners, nullptr);
-  auto thread_config_callback = [&custom_task_runners](
-                                    const fml::Thread::ThreadConfig& config) {
-    fml::Thread::SetCurrentThreadName(config);
-    if (!custom_task_runners || !custom_task_runners->thread_priority_setter) {
-      return;
+  if (custom_task_runners != nullptr) {
+    if (SAFE_ACCESS(custom_task_runners, merged_platform_ui_thread, false)) {
+      settings.merged_platform_ui_thread =
+          flutter::Settings::MergedPlatformUIThread::kEnabled;
+    } else if (settings.merged_platform_ui_thread !=
+               flutter::Settings::MergedPlatformUIThread::kMergeAfterLaunch) {
+      settings.merged_platform_ui_thread =
+          flutter::Settings::MergedPlatformUIThread::kDisabled;
     }
-    FlutterThreadPriority priority = FlutterThreadPriority::kNormal;
-    switch (config.priority) {
-      case fml::Thread::ThreadPriority::kBackground:
-        priority = FlutterThreadPriority::kBackground;
-        break;
-      case fml::Thread::ThreadPriority::kNormal:
-        priority = FlutterThreadPriority::kNormal;
-        break;
-      case fml::Thread::ThreadPriority::kDisplay:
-        priority = FlutterThreadPriority::kDisplay;
-        break;
-      case fml::Thread::ThreadPriority::kRaster:
-        priority = FlutterThreadPriority::kRaster;
-        break;
-    }
-    custom_task_runners->thread_priority_setter(priority);
-  };
+  }
+  auto priority_setter =
+      custom_task_runners
+          ? SAFE_ACCESS(custom_task_runners, thread_priority_setter, nullptr)
+          : nullptr;
+  auto thread_config_callback =
+      [priority_setter](const fml::Thread::ThreadConfig& config) {
+        fml::Thread::SetCurrentThreadName(config);
+        if (!priority_setter) {
+          return;
+        }
+        FlutterThreadPriority priority = FlutterThreadPriority::kNormal;
+        switch (config.priority) {
+          case fml::Thread::ThreadPriority::kBackground:
+            priority = FlutterThreadPriority::kBackground;
+            break;
+          case fml::Thread::ThreadPriority::kNormal:
+            priority = FlutterThreadPriority::kNormal;
+            break;
+          case fml::Thread::ThreadPriority::kDisplay:
+            priority = FlutterThreadPriority::kDisplay;
+            break;
+          case fml::Thread::ThreadPriority::kRaster:
+            priority = FlutterThreadPriority::kRaster;
+            break;
+        }
+        priority_setter(priority);
+      };
   auto thread_host =
       flutter::EmbedderThreadHost::CreateEmbedderOrEngineManagedThreadHost(
           custom_task_runners, thread_config_callback);
@@ -2920,14 +2946,18 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
   settings.task_observer_add = [has_ui_thread_message_loop](
                                    intptr_t key, const fml::closure& callback) {
     if (has_ui_thread_message_loop) {
-      fml::MessageLoop::GetCurrent().AddTaskObserver(key, callback);
+      fml::TaskQueueId queue_id = fml::MessageLoop::GetCurrentTaskQueueId();
+      fml::MessageLoopTaskQueues::GetInstance()->AddTaskObserver(queue_id, key,
+                                                                 callback);
+      return queue_id;
     }
     return fml::TaskQueueId::Invalid();
   };
   settings.task_observer_remove = [has_ui_thread_message_loop](
                                       fml::TaskQueueId queue_id, intptr_t key) {
     if (has_ui_thread_message_loop) {
-      fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
+      fml::MessageLoopTaskQueues::GetInstance()->RemoveTaskObserver(queue_id,
+                                                                    key);
     }
   };
 
@@ -2967,33 +2997,45 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     }
   }
 
-  flutter::RunConfiguration run_configuration(
-      flutter::IsolateConfiguration::InferFromSettings(settings, asset_manager),
-      asset_manager);
+  std::optional<flutter::RunConfiguration> optional_run_configuration;
+  if (!defer_root_isolate_launch) {
+    flutter::RunConfiguration run_configuration(
+        flutter::IsolateConfiguration::InferFromSettings(settings,
+                                                         asset_manager),
+        asset_manager);
 
-  if (SAFE_ACCESS(args, custom_dart_entrypoint, nullptr) != nullptr) {
-    auto dart_entrypoint = std::string{args->custom_dart_entrypoint};
-    if (!dart_entrypoint.empty()) {
-      run_configuration.SetEntrypoint(std::move(dart_entrypoint));
+    if (SAFE_ACCESS(args, custom_dart_entrypoint, nullptr) != nullptr) {
+      auto dart_entrypoint = std::string{args->custom_dart_entrypoint};
+      if (!dart_entrypoint.empty()) {
+        run_configuration.SetEntrypoint(std::move(dart_entrypoint));
+      }
     }
-  }
 
-  if (SAFE_ACCESS(args, dart_entrypoint_argc, 0) > 0) {
-    if (SAFE_ACCESS(args, dart_entrypoint_argv, nullptr) == nullptr) {
-      return LOG_EMBEDDER_ERROR(kInvalidArguments,
-                                "Could not determine Dart entrypoint arguments "
-                                "as dart_entrypoint_argc "
-                                "was set, but dart_entrypoint_argv was null.");
+    if (SAFE_ACCESS(args, dart_entrypoint_argc, 0) > 0) {
+      if (SAFE_ACCESS(args, dart_entrypoint_argv, nullptr) == nullptr) {
+        return LOG_EMBEDDER_ERROR(
+            kInvalidArguments,
+            "Could not determine Dart entrypoint arguments "
+            "as dart_entrypoint_argc "
+            "was set, but dart_entrypoint_argv was null.");
+      }
+      std::vector<std::string> arguments(args->dart_entrypoint_argc);
+      for (int i = 0; i < args->dart_entrypoint_argc; ++i) {
+        arguments[i] = std::string{args->dart_entrypoint_argv[i]};
+      }
+      run_configuration.SetEntrypointArgs(std::move(arguments));
     }
-    std::vector<std::string> arguments(args->dart_entrypoint_argc);
-    for (int i = 0; i < args->dart_entrypoint_argc; ++i) {
-      arguments[i] = std::string{args->dart_entrypoint_argv[i]};
-    }
-    run_configuration.SetEntrypointArgs(std::move(arguments));
-  }
 
-  if (SAFE_ACCESS(args, engine_id, 0) != 0) {
-    run_configuration.SetEngineId(args->engine_id);
+    if (SAFE_ACCESS(args, engine_id, 0) != 0) {
+      run_configuration.SetEngineId(args->engine_id);
+    }
+
+    if (!run_configuration.IsValid()) {
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "Could not infer the Flutter project to run from given arguments.");
+    }
+    optional_run_configuration.emplace(std::move(run_configuration));
   }
 
   std::vector<flutter::ImageGeneratorFactoryRegistration> image_generators;
@@ -3025,22 +3067,24 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
     }
   }
 
-  if (!run_configuration.IsValid()) {
-    return LOG_EMBEDDER_ERROR(
-        kInvalidArguments,
-        "Could not infer the Flutter project to run from given arguments.");
+  flutter::PlatformData platform_data;
+  const char* initial_lifecycle_state =
+      SAFE_ACCESS(args, initial_lifecycle_state, nullptr);
+  if (initial_lifecycle_state != nullptr) {
+    platform_data.lifecycle_state = initial_lifecycle_state;
   }
 
   // Create the engine but don't launch the shell or run the root isolate.
   auto embedder_engine = std::make_unique<flutter::EmbedderEngine>(
-      std::move(thread_host),                //
-      std::move(task_runners),               //
-      std::move(settings),                   //
-      std::move(run_configuration),          //
-      on_create_platform_view,               //
-      on_create_rasterizer,                  //
-      std::move(external_texture_resolver),  //
-      std::move(image_generators)            //
+      std::move(thread_host),                 //
+      std::move(task_runners),                //
+      std::move(settings),                    //
+      std::move(optional_run_configuration),  //
+      on_create_platform_view,                //
+      on_create_rasterizer,                   //
+      std::move(external_texture_resolver),   //
+      std::move(image_generators),            //
+      platform_data                           //
   );
 #if FML_OS_ANDROID
   embedder_engine->SetAndroidRendererSlot(std::move(android_renderer_slot));
@@ -5028,6 +5072,27 @@ FlutterEngineResult FlutterEngineGetNativeWindowRendererInfo(
 #endif  // FML_OS_ANDROID
 }
 
+FlutterEngineResult FlutterEngineLaunchShell(FLUTTER_API_SYMBOL(FlutterEngine)
+                                                 engine) {
+  if (!engine) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine handle was invalid.");
+  }
+
+  auto* embedder_engine = reinterpret_cast<flutter::EmbedderEngine*>(engine);
+  if (embedder_engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Engine shell was already launched.");
+  }
+
+  if (!embedder_engine->LaunchShell()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                              "Could not launch the engine shell using "
+                              "supplied initialization arguments.");
+  }
+
+  return kSuccess;
+}
+
 FlutterEngineResult FlutterEngineGetProcAddresses(
     FlutterEngineProcTable* table) {
   if (!table) {
@@ -5110,6 +5175,7 @@ FlutterEngineResult FlutterEngineGetProcAddresses(
   SET_PROC(ResizeNativeWindow, FlutterEngineResizeNativeWindow);
   SET_PROC(GetNativeWindowRendererInfo,
            FlutterEngineGetNativeWindowRendererInfo);
+  SET_PROC(LaunchShell, FlutterEngineLaunchShell);
 #undef SET_PROC
 
   return kSuccess;

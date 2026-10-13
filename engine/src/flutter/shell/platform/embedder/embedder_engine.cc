@@ -41,12 +41,15 @@ struct ShellArgs {
   Settings settings;
   Shell::CreateCallback<PlatformView> on_create_platform_view;
   Shell::CreateCallback<Rasterizer> on_create_rasterizer;
+  PlatformData platform_data;
   ShellArgs(const Settings& p_settings,
             Shell::CreateCallback<PlatformView> p_on_create_platform_view,
-            Shell::CreateCallback<Rasterizer> p_on_create_rasterizer)
+            Shell::CreateCallback<Rasterizer> p_on_create_rasterizer,
+            const PlatformData& p_platform_data)
       : settings(p_settings),
         on_create_platform_view(std::move(p_on_create_platform_view)),
-        on_create_rasterizer(std::move(p_on_create_rasterizer)) {}
+        on_create_rasterizer(std::move(p_on_create_rasterizer)),
+        platform_data(p_platform_data) {}
 };
 
 EmbedderEngine::EmbedderEngine(
@@ -57,13 +60,15 @@ EmbedderEngine::EmbedderEngine(
     const Shell::CreateCallback<PlatformView>& on_create_platform_view,
     const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
     std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
-    std::vector<ImageGeneratorFactoryRegistration> image_generators)
+    std::vector<ImageGeneratorFactoryRegistration> image_generators,
+    const PlatformData& platform_data)
     : thread_host_(std::move(thread_host)),
       task_runners_(task_runners),
       run_configuration_(std::move(run_configuration)),
       shell_args_(std::make_unique<ShellArgs>(settings,
                                               on_create_platform_view,
-                                              on_create_rasterizer)),
+                                              on_create_rasterizer,
+                                              platform_data)),
       external_texture_resolver_(std::move(external_texture_resolver)),
       image_generators_(std::move(image_generators)) {}
 
@@ -74,7 +79,8 @@ EmbedderEngine::EmbedderEngine(
     std::optional<RunConfiguration> run_configuration,
     const PlatformViewFactory& on_create_platform_view,
     std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver,
-    std::vector<ImageGeneratorFactoryRegistration> image_generators)
+    std::vector<ImageGeneratorFactoryRegistration> image_generators,
+    const PlatformData& platform_data)
     : EmbedderEngine(
           std::move(thread_host),
           task_runners,
@@ -85,7 +91,8 @@ EmbedderEngine::EmbedderEngine(
           },
           [](Shell& shell) { return std::make_unique<Rasterizer>(shell); },
           std::move(external_texture_resolver),
-          std::move(image_generators)) {}
+          std::move(image_generators),
+          platform_data) {}
 
 EmbedderEngine::EmbedderEngine(
     const TaskRunners& task_runners,
@@ -98,7 +105,12 @@ EmbedderEngine::EmbedderEngine(
 EmbedderEngine::~EmbedderEngine() = default;
 
 bool EmbedderEngine::LaunchShell() {
-  return LaunchShell(flutter::PlatformData());
+  if (!shell_args_) {
+    FML_DLOG(ERROR) << "Invalid shell arguments.";
+    return false;
+  }
+  PlatformData platform_data = shell_args_->platform_data;
+  return LaunchShell(platform_data);
 }
 
 bool EmbedderEngine::LaunchShell(const PlatformData& platform_data) {

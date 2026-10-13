@@ -6995,6 +6995,96 @@ TEST_F(EmbedderTest,
   EXPECT_TRUE(invoked);
 }
 
+TEST_F(EmbedderTest, DeferredRootIsolateLaunchAndLaunchShell) {
+  FlutterEngineProcTable table = {};
+  table.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&table), kSuccess);
+  EXPECT_EQ(table.LaunchShell, &FlutterEngineLaunchShell);
+  EXPECT_EQ(FlutterEngineLaunchShell(nullptr), kInvalidArguments);
+
+  constexpr int32_t kTestSurfaceDim = 1;
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+
+  // 1. Verify merged_platform_ui_thread and custom thread_name_prefix with
+  // deferred root isolate launch and no assets_path.
+  {
+    EmbedderConfigBuilder builder(context);
+    builder.SetSurface(DlISize(kTestSurfaceDim, kTestSurfaceDim));
+
+    FlutterCustomTaskRunners merged_runners = {};
+    merged_runners.struct_size = sizeof(FlutterCustomTaskRunners);
+    merged_runners.merged_platform_ui_thread = true;
+    merged_runners.thread_name_prefix = "custom.merged";
+
+    builder.GetProjectArgs().assets_path = nullptr;
+    builder.GetProjectArgs().defer_root_isolate_launch = true;
+    builder.GetProjectArgs().initial_lifecycle_state =
+        "AppLifecycleState.detached";
+    builder.GetProjectArgs().custom_task_runners = &merged_runners;
+
+    auto merged_engine = builder.InitializeEngine();
+    ASSERT_TRUE(merged_engine.is_valid());
+    ASSERT_EQ(FlutterEngineLaunchShell(merged_engine.get()), kSuccess);
+    EXPECT_EQ(FlutterEngineLaunchShell(merged_engine.get()), kInvalidArguments);
+
+    EmbedderEngine* raw_merged = ToEmbedderEngine(merged_engine.get());
+    ASSERT_TRUE(raw_merged->IsValid());
+    EXPECT_EQ(raw_merged->GetTaskRunners().GetLabel(), "custom.merged");
+    EXPECT_EQ(raw_merged->GetTaskRunners().GetUITaskRunner(),
+              raw_merged->GetTaskRunners().GetPlatformTaskRunner());
+    EXPECT_FALSE(raw_merged->IsSurfaceCreated());
+
+    merged_engine.reset();
+  }
+
+  // 2. Verify deferred root isolate launch followed by FlutterEngineLaunchShell
+  // and FlutterEngineLaunchEngine on an unmerged UI thread.
+  {
+    static fml::AutoResetWaitableEvent latch;
+    auto entrypoint = []() { latch.Signal(); };
+    context.AddFfiNativeCallback("SayHiFromCustomEntrypoint",
+                                 reinterpret_cast<void*>(+entrypoint));
+
+    EmbedderConfigBuilder builder(context);
+    builder.SetSurface(DlISize(kTestSurfaceDim, kTestSurfaceDim));
+
+    FlutterCustomTaskRunners unmerged_runners = {};
+    unmerged_runners.struct_size = sizeof(FlutterCustomTaskRunners);
+    unmerged_runners.merged_platform_ui_thread = false;
+    unmerged_runners.thread_name_prefix = "custom.unmerged";
+
+    builder.GetProjectArgs().assets_path = nullptr;
+    builder.GetProjectArgs().defer_root_isolate_launch = true;
+    builder.GetProjectArgs().initial_lifecycle_state =
+        "AppLifecycleState.detached";
+    builder.GetProjectArgs().custom_task_runners = &unmerged_runners;
+
+    auto engine = builder.InitializeEngine();
+    ASSERT_TRUE(engine.is_valid());
+    ASSERT_EQ(FlutterEngineLaunchShell(engine.get()), kSuccess);
+
+    EmbedderEngine* raw_engine = ToEmbedderEngine(engine.get());
+    ASSERT_TRUE(raw_engine->IsValid());
+    EXPECT_EQ(raw_engine->GetTaskRunners().GetLabel(), "custom.unmerged");
+    EXPECT_NE(raw_engine->GetTaskRunners().GetUITaskRunner(),
+              raw_engine->GetTaskRunners().GetPlatformTaskRunner());
+
+    ASSERT_EQ(FlutterEngineNotifyCreated(engine.get()), kSuccess);
+
+    std::string kernel_path =
+        fml::paths::JoinPaths({context.GetAssetsPath(), "kernel_blob.bin"});
+    FlutterEngineRunConfiguration run_config = {};
+    run_config.struct_size = sizeof(FlutterEngineRunConfiguration);
+    run_config.kernel_blob_path = kernel_path.c_str();
+    run_config.custom_dart_entrypoint = "customEntrypoint";
+
+    ASSERT_EQ(FlutterEngineLaunchEngine(engine.get(), &run_config), kSuccess);
+    latch.Wait();
+
+    engine.reset();
+  }
+}
+
 }  // namespace testing
 }  // namespace flutter
 

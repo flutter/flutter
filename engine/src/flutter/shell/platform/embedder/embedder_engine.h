@@ -56,7 +56,8 @@ class EmbedderEngine {
       const Shell::CreateCallback<Rasterizer>& on_create_rasterizer,
       std::unique_ptr<EmbedderExternalTextureResolver>
           external_texture_resolver,
-      std::vector<ImageGeneratorFactoryRegistration> image_generators = {});
+      std::vector<ImageGeneratorFactoryRegistration> image_generators = {},
+      const PlatformData& platform_data = PlatformData());
 
   EmbedderEngine(
       std::unique_ptr<EmbedderThreadHost> thread_host,
@@ -66,7 +67,8 @@ class EmbedderEngine {
       const PlatformViewFactory& on_create_platform_view,
       std::unique_ptr<EmbedderExternalTextureResolver>
           external_texture_resolver,
-      std::vector<ImageGeneratorFactoryRegistration> image_generators = {});
+      std::vector<ImageGeneratorFactoryRegistration> image_generators = {},
+      const PlatformData& platform_data = PlatformData());
 
   ~EmbedderEngine();
 
