@@ -10,6 +10,7 @@ import 'asset.dart' hide defaultManifestPath;
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
@@ -140,6 +141,7 @@ Future<void> writeBundle(
   required Logger logger,
   required Directory projectDir,
   required BuildMode buildMode,
+  required Platform platform,
 }) async {
   if (bundleDir.existsSync()) {
     try {
@@ -158,6 +160,7 @@ Future<void> writeBundle(
     logger: logger,
     fileSystem: fileSystem,
     artifacts: artifacts,
+    platform: platform,
   );
 
   final assetTransformer = AssetTransformer(
