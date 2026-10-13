@@ -111,6 +111,22 @@ const Set<String> gpuBackendTests = <String>{
 /// in a package with suites of [gpuBackendTests].
 const String gpuBackendsTargetName = 'gpu_test_backends';
 
+/// Attributes the generated macro calls get besides what the GN invocation
+/// says, by GN label (`//dir:name`) and attribute, as Starlark text: what
+/// GN discovers after the fact and Bazel must declare. The one case so far
+/// is a fixture's Dart entry point importing another package's sources
+/// (the frontend server's depfile tells GN; the kernel rule needs them as
+/// inputs).
+const Map<String, Map<String, String>> templateAttributeOverrides = <String, Map<String, String>>{
+  // dart_tests.dart imports ../../lib/gpu/lib/gpu.dart, which imports
+  // package:vector_math (a synced tree, @vector_math).
+  '//flutter/impeller/fixtures:flutter_gpu_fixtures': <String, String>{
+    'dart_srcs': 'glob(["*.dart"]) + ["//engine/src/flutter/lib/gpu:dart_sources"]',
+    'dart_packages':
+        '{"@vector_math//:dart_sources": "engine/src/flutter/third_party/pkg/vector_math"}',
+  },
+};
+
 /// GN labels with a Bazel home that is not the mechanical translation.
 ///
 /// Keys are GN labels as written (without the implicit `:name` for
@@ -190,6 +206,8 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/angle:libEGL_static': '//engine/src/flutter/build/bazel/gl_wrap:angle',
   '//flutter/third_party/angle:libGLESv2_static': '//engine/src/flutter/build/bazel/gl_wrap:angle',
   '//flutter/third_party/swiftshader': '//engine/src/flutter/build/bazel/gl_wrap:swiftshader',
+  '//flutter/third_party/swiftshader/src/Vulkan:swiftshader_libvulkan_static':
+      '//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static',
 };
 
 /// Label prefixes that map to external repositories: `//third_party/abseil-cpp/absl/x:y`
@@ -817,7 +835,9 @@ const Map<String, ReferenceConstant> referenceConstants = <String, ReferenceCons
 
 /// How a template argument translates to a macro attribute.
 enum TemplateArgumentKind {
-  /// Files of the package (`fixtures`, `flatbuffers`).
+  /// Files of the package (`fixtures`, `flatbuffers`), and the outputs of
+  /// other targets (`get_target_outputs`), which become the macro's
+  /// `<attribute>_targets` dictionary of label to patterns.
   files,
 
   /// One file (`dart_main`).
@@ -831,6 +851,17 @@ enum TemplateArgumentKind {
 
   /// A scalar (`testonly`).
   scalar,
+
+  /// Plain strings (`shader_target_flags`).
+  strings,
+
+  /// One string holding `rebase_path()` results (a shader bundle's JSON),
+  /// which become the path tokens of build/bazel/gn_action.
+  pathString,
+
+  /// A helper variable of the invocation the template never reads
+  /// (`fixtures = rebase_path(...)` feeding a string of the same block).
+  ignored,
 }
 
 /// One argument of a known template: the macro attribute it becomes and how.
@@ -891,6 +922,41 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
         'use_target_as_artifact_prefix',
         TemplateArgumentKind.scalar,
       ),
+      // The copy's ordering dependencies (the targets whose outputs are
+      // among the fixtures); runfiles of the library here.
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+    },
+  ),
+  // impeller/tools/compiler.gni's impellerc, invoked directly by the test
+  // fixtures: runtime stages and shader bundles.
+  'impellerc': TemplateMapping(
+    '//engine/src/flutter/build/bazel/impeller:shaders.bzl',
+    'impellerc',
+    <String, TemplateArgument>{
+      'shaders': TemplateArgument('shaders', TemplateArgumentKind.files),
+      'shader_target_flags': TemplateArgument('shader_target_flags', TemplateArgumentKind.strings),
+      'sl_file_extension': TemplateArgument('sl_file_extension', TemplateArgumentKind.scalar),
+      'intermediates_subdir': TemplateArgument('intermediates_subdir', TemplateArgumentKind.scalar),
+      'iplr': TemplateArgument('iplr', TemplateArgumentKind.scalar),
+      'json': TemplateArgument('json', TemplateArgumentKind.scalar),
+      'shader_bundle': TemplateArgument('shader_bundle', TemplateArgumentKind.pathString),
+      'shader_bundle_output': TemplateArgument('shader_bundle_output', TemplateArgumentKind.scalar),
+      'gles_language_version': TemplateArgument(
+        'gles_language_version',
+        TemplateArgumentKind.scalar,
+      ),
+      'metal_version': TemplateArgument('metal_version', TemplateArgumentKind.scalar),
+      'use_half_textures': TemplateArgument('use_half_textures', TemplateArgumentKind.scalar),
+      'require_framebuffer_fetch': TemplateArgument(
+        'require_framebuffer_fetch',
+        TemplateArgumentKind.scalar,
+      ),
+      'entry_point_prefix': TemplateArgument('entry_point_prefix', TemplateArgumentKind.scalar),
+      'defines': TemplateArgument('defines', TemplateArgumentKind.strings),
+      'mnemonic': TemplateArgument('mnemonic', TemplateArgumentKind.scalar),
+      // The invocations' helper for the bundle's paths.
+      'fixtures': TemplateArgument('fixtures', TemplateArgumentKind.ignored),
       'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
     },
   ),
