@@ -33,15 +33,9 @@ class DartIsolateTest : public FixtureTest {
   }
 
   void SetUp() override {
-    std::string source_path = GetSourcePath();
-    if (source_path[0] != '/') {
-      // On windows we need an extra '/' prefix.
-      source_path = "/" + source_path;
-    }
-    std::string registrant_uri = std::string("file://") + source_path +
-                                 "flutter/runtime/fixtures/dart_tool/"
-                                 "flutter_build/dart_plugin_registrant.dart";
-    OverrideDartPluginRegistrant(registrant_uri);
+    OverrideDartPluginRegistrant(GetSourceUri(
+        "flutter/runtime/fixtures/dart_tool/flutter_build/"
+        "dart_plugin_registrant.dart"));
   }
 
   void TearDown() override {
