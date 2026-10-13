@@ -47,6 +47,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
          strutStyle,
          ellipsis,
          locale,
+         hyphens,
        ),
        _textAlign = textAlign,
        _textDirection = textDirection,
@@ -78,13 +79,6 @@ class CkParagraphStyle implements ui.ParagraphStyle {
   final ui.StrutStyle? _strutStyle;
   final String? _ellipsis;
   final ui.Locale? _locale;
-  // TODO(dbebawy): hyphens is accepted and stored but not honored here yet.
-  // Neither Hyphens.manual nor Hyphens.hidden takes effect on CanvasKit until a
-  // renderSoftHyphens setter is exposed on the CanvasKit ParagraphStyle binding
-  // (the native engine wires this via SkParagraph::setRenderSoftHyphens).
-  // https://github.com/flutter/flutter/issues/193506
-  // Customizing the hyphen string is separate future work:
-  // https://github.com/flutter/flutter/issues/189617
   final ui.Hyphens? _hyphens;
 
   static SkTextStyleProperties toSkTextStyleProperties(
@@ -178,6 +172,7 @@ class CkParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    ui.Hyphens? hyphens,
   ) {
     final properties = SkParagraphStyleProperties();
 
@@ -218,6 +213,8 @@ class CkParagraphStyle implements ui.ParagraphStyle {
       fontStyle,
     );
     properties.applyRoundingHack = false;
+    // Like the native engine, render soft hyphens unless they are hidden.
+    properties.renderSoftHyphens = hyphens != ui.Hyphens.hidden;
 
     return canvasKit.ParagraphStyle(properties);
   }
