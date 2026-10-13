@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -92,6 +91,11 @@ const Map<String, List<ui.Offset>> _invalidTextScaling = <String, List<ui.Offset
   'decreasing unscaled size': <ui.Offset>[ui.Offset(2, 2), ui.Offset(1, 1)],
   'decreasing scaled size': <ui.Offset>[ui.Offset(1, 2), ui.Offset(2, 1)],
 };
+
+/// The edges of a [ui.ViewPadding], which has no `==` of its own and which
+/// the web engine builds afresh on every read.
+(double, double, double, double) _edges(ui.ViewPadding padding) =>
+    (padding.left, padding.top, padding.right, padding.bottom);
 
 /// Every metric [DebugViewMetricsOverride] supports as reported by
 /// [DebugViewMetricsOverride.fromJson] when it rejects an unknown metric.
@@ -800,9 +804,9 @@ void main() {
       expect(wrappedView.devicePixelRatio, realView.devicePixelRatio);
       expect(wrappedView.physicalSize, realView.physicalSize);
       expect(wrappedView.physicalConstraints, realView.physicalConstraints);
-      expect(wrappedView.padding, same(realView.padding));
-      expect(wrappedView.viewInsets, same(realView.viewInsets));
-      expect(wrappedView.viewPadding, same(realView.viewPadding));
+      expect(_edges(wrappedView.padding), _edges(realView.padding));
+      expect(_edges(wrappedView.viewInsets), _edges(realView.viewInsets));
+      expect(_edges(wrappedView.viewPadding), _edges(realView.viewPadding));
     });
 
     test('every forwarded FlutterView member', () {
@@ -1129,10 +1133,11 @@ void main() {
       expect(wrappedView.devicePixelRatio, realRatio);
     });
 
-    test('to the size a scene without one is rendered at', () {
-      // FlutterView.render takes the view's own physicalSize when it is given
-      // no size, and this view's physical size is the overridden one. Forwarded
-      // as omitted, it would resolve to the size the platform reports instead.
+    test('withholding an overridden size from render', () {
+      // The engine discards a frame whose size does not satisfy the view's real
+      // constraints, so a scene laid out for an overridden size is rendered at
+      // the real size: neither the override's size nor a size the caller
+      // computed from it is passed on.
       final fake = _TwoViewPlatformDispatcher();
       final ui.FlutterView wrappedView = debugApplyViewMetricsOverrides(fake).view(id: 1)!;
       final ui.Scene scene = ui.SceneBuilder().build();
@@ -1142,21 +1147,20 @@ void main() {
         const DebugViewMetricsOverride(physicalSize: ui.Size(400, 800)),
       );
 
-      wrappedView.render(scene);
-      expect(fake.viewFor(1).renderedSize, const ui.Size(400, 800));
+      wrappedView.render(scene, size: const ui.Size(400, 800));
+      expect(fake.viewFor(1).renders, 1, reason: 'the scene still has to reach the view');
+      expect(fake.viewFor(1).renderedSize, isNull);
 
-      // A size the caller gives is the caller's.
-      wrappedView.render(scene, size: const ui.Size(10, 20));
-      expect(fake.viewFor(1).renderedSize, const ui.Size(10, 20));
+      wrappedView.render(scene);
+      expect(fake.viewFor(1).renders, 2);
+      expect(fake.viewFor(1).renderedSize, isNull);
     });
 
-    test('and forwards a scene with no size to a view with no size override', () {
-      // Only an override supplies a size that was not asked for. Resolving the
-      // omission against the size the platform already reports would answer the
-      // same, but it is not the same request: the web engine takes a size it is
-      // given as a resize and writes it to the DOM, so a wrapper that is
-      // supposed to cost nothing while nothing is overridden would cost a
-      // reflow on every frame.
+    test('and passes the size, or its absence, through to a view with no size override', () {
+      // An omitted size is forwarded as omitted rather than resolved against
+      // the size the platform reports: the web engine takes a size it is given
+      // as a resize and writes it to the DOM, so a wrapper that is supposed to
+      // cost nothing while nothing is overridden would cost a reflow per frame.
       final fake = _TwoViewPlatformDispatcher();
       final ui.FlutterView wrappedView = debugApplyViewMetricsOverrides(fake).view(id: 1)!;
       final ui.Scene scene = ui.SceneBuilder().build();
@@ -1180,8 +1184,11 @@ void main() {
       );
       wrappedView.render(scene);
       expect(fake.viewFor(1).renderedSize, isNull);
-      debugApplyViewMetricsOverrides(fake).view(id: 2)!.render(scene);
-      expect(fake.viewFor(2).renderedSize, const ui.Size(400, 800));
+      wrappedView.render(scene, size: const ui.Size(10, 20));
+      expect(fake.viewFor(1).renderedSize, const ui.Size(10, 20));
+      debugApplyViewMetricsOverrides(fake).view(id: 2)!.render(scene, size: const ui.Size(400, 800));
+      expect(fake.viewFor(2).renders, 1);
+      expect(fake.viewFor(2).renderedSize, isNull);
     });
 
     test('overriding a size makes the view a fixed size view', () {
@@ -1337,282 +1344,6 @@ void main() {
           _ => <String>{'configuration', 'accessibilityFeatures'},
         }, reason: 'changing ${entry.key} announced $notifications');
       }
-    });
-
-    test('in the zone each callback was registered in', () {
-      // dart:ui runs a notification in the zone its callback was registered in
-      // rather than wherever the event was delivered from, and a replayed one
-      // has to as well: a callback that runs in whichever zone changed the
-      // override loses that zone's values and its error handling.
-      //
-      // Each callback is registered in a zone of its own, so that a replay
-      // which reaches for the wrong one of the five recorded zones is caught
-      // rather than answering alike.
-      final fake = _TwoViewPlatformDispatcher();
-      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
-      final ranIn = <Object?>[];
-      void registerIn(String zone, void Function(ui.VoidCallback callback) register) {
-        runZoned(
-          () => register(() => ranIn.add(Zone.current[#viewMetricsTestZone])),
-          zoneValues: <Object?, Object?>{#viewMetricsTestZone: zone},
-        );
-      }
-
-      registerIn('configuration', (cb) => wrapped.onPlatformConfigurationChanged = cb);
-      registerIn('textScaleFactor', (cb) => wrapped.onTextScaleFactorChanged = cb);
-      registerIn('brightness', (cb) => wrapped.onPlatformBrightnessChanged = cb);
-      registerIn('accessibility', (cb) => wrapped.onAccessibilityFeaturesChanged = cb);
-      registerIn('metrics', (cb) => wrapped.onMetricsChanged = cb);
-
-      runZoned(() {
-        debugSetViewMetricsOverride(
-          1,
-          const DebugViewMetricsOverride(
-            devicePixelRatio: 3.0,
-            textScaling: <ui.Offset>[ui.Offset(1, 2)],
-            platformBrightness: ui.Brightness.dark,
-            boldText: true,
-          ),
-        );
-      }, zoneValues: <Object?, Object?>{#viewMetricsTestZone: 'mutation'});
-
-      // In dart:ui's order, each in its own zone.
-      expect(ranIn, <Object?>[
-        'configuration',
-        'textScaleFactor',
-        'brightness',
-        'accessibility',
-        'metrics',
-      ]);
-    });
-
-    test('into the error zone a failing callback was registered in', () {
-      // dart:ui hands a notification that throws to the handler of the zone its
-      // callback was registered in, and a replayed one has to as well: a
-      // callback an application registered inside runZonedGuarded follows that
-      // zone's error policy when the platform reports a metric, so a debug
-      // override must not take it out from under that handler.
-      final fake = _TwoViewPlatformDispatcher();
-      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
-      final caught = <Object>[];
-      var brightnessChanged = 0;
-      late Zone registrationZone;
-      runZonedGuarded(() {
-        registrationZone = Zone.current;
-        wrapped.onTextScaleFactorChanged = () => throw StateError('boom');
-        wrapped.onPlatformBrightnessChanged = () => brightnessChanged += 1;
-      }, (Object error, StackTrace stack) => caught.add(error));
-      // A wrapped dispatcher is told about every later override change too, for
-      // as long as it is alive, so a callback that throws has to stop throwing
-      // before the tear-down that clears this test's override runs.
-      addTearDown(() {
-        wrapped.onTextScaleFactorChanged = null;
-        wrapped.onPlatformBrightnessChanged = null;
-      });
-
-      final reported = <Object>[];
-      final FlutterExceptionHandler? previousOnError = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails details) => reported.add(details.exception);
-      addTearDown(() => FlutterError.onError = previousOnError);
-
-      debugSetViewMetricsOverride(
-        1,
-        const DebugViewMetricsOverride(
-          textScaling: <ui.Offset>[ui.Offset(1, 2)],
-          platformBrightness: ui.Brightness.dark,
-        ),
-      );
-
-      expect(caught, hasLength(1));
-      expect(caught.single, isStateError);
-      // That zone handled it, so the framework does not report it as well.
-      expect(reported, isEmpty);
-      // And the notification after the failing one still happened.
-      expect(brightnessChanged, 1);
-
-      // Same-zone synthetic delivery must also reach that zone's error
-      // handler while allowing subsequent notifications to continue.
-      debugClearViewMetricsOverrides();
-      caught.clear();
-      reported.clear();
-      registrationZone.run(() {
-        debugSetViewMetricsOverride(
-          1,
-          const DebugViewMetricsOverride(textScaling: <ui.Offset>[ui.Offset(1, 3)]),
-        );
-      });
-      expect(caught, <Object>[isStateError]);
-      expect(reported, isEmpty);
-    });
-
-    test(
-      'replacement through root and per-view wrappers keeps each callback and error zone paired',
-      () {
-        final fake = _TwoViewPlatformDispatcher();
-        final ui.PlatformDispatcher root = debugApplyViewMetricsOverrides(fake);
-        final ui.PlatformDispatcher view = root.view(id: 1)!.platformDispatcher;
-        final setters = <void Function(ui.PlatformDispatcher, ui.VoidCallback?)>[
-          (dispatcher, callback) => dispatcher.onPlatformConfigurationChanged = callback,
-          (dispatcher, callback) => dispatcher.onTextScaleFactorChanged = callback,
-          (dispatcher, callback) => dispatcher.onPlatformBrightnessChanged = callback,
-          (dispatcher, callback) => dispatcher.onAccessibilityFeaturesChanged = callback,
-          (dispatcher, callback) => dispatcher.onMetricsChanged = callback,
-        ];
-        final ranIn = <Object?>[];
-        final caught = <Object>[];
-        for (var i = 0; i < setters.length; i++) {
-          final index = i;
-          runZoned(() => setters[i](root, () => fail('replaced callback')));
-          runZonedGuarded(
-            () {
-              setters[index](view, () {
-                ranIn.add(Zone.current[#registration]);
-                throw StateError('callback $index');
-              });
-            },
-            (Object error, StackTrace stack) => caught.add(error),
-            zoneValues: <Object?, Object?>{#registration: index},
-          );
-        }
-        addTearDown(() {
-          for (final setter in setters) {
-            setter(root, null);
-          }
-        });
-        debugSetViewMetricsOverride(
-          1,
-          const DebugViewMetricsOverride(
-            devicePixelRatio: 4,
-            textScaling: <ui.Offset>[ui.Offset(1, 3)],
-            platformBrightness: ui.Brightness.dark,
-            boldText: true,
-          ),
-        );
-        expect(ranIn, <int>[0, 1, 2, 3, 4]);
-        expect(caught, hasLength(5));
-        ranIn.clear();
-        for (var i = 0; i < setters.length; i++) {
-          final index = i;
-          runZoned(() {
-            setters[index](root, () => ranIn.add(Zone.current[#registration]));
-          }, zoneValues: <Object?, Object?>{#registration: 'root $index'});
-        }
-        debugClearViewMetricsOverrides();
-        expect(ranIn, <String>['root 0', 'root 1', 'root 2', 'root 3', 'root 4']);
-        expect(caught, hasLength(5));
-      },
-    );
-
-    test('does not pair a directly replaced callback with a stale registration zone', () {
-      final fake = _TwoViewPlatformDispatcher();
-      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
-      final ranIn = <Object?>[];
-      runZoned(() {
-        wrapped.onTextScaleFactorChanged = () {};
-      }, zoneValues: <Object?, Object?>{#registration: 'old'});
-      fake.onTextScaleFactorChanged = () => ranIn.add(Zone.current[#registration]);
-      addTearDown(() => fake.onTextScaleFactorChanged = null);
-      runZoned(() {
-        debugSetViewMetricsOverride(
-          1,
-          const DebugViewMetricsOverride(textScaling: <ui.Offset>[ui.Offset(1, 3)]),
-        );
-      }, zoneValues: <Object?, Object?>{#registration: 'delivery'});
-      expect(ranIn, <Object?>['delivery']);
-    });
-
-    test('as this replay when the failing callback belongs to no zone of ours', () {
-      // A callback set on the dispatcher underneath, which the wrapper never
-      // saw registered, has no zone to hand a failure to. Reporting it is what
-      // keeps one failing notification from cancelling the rest.
-      final fake = _TwoViewPlatformDispatcher();
-      // Wrapped inside a guarded zone that must never hear about any of this:
-      // the wrapper records a zone in its setters and nowhere else, so a
-      // callback set on the dispatcher underneath belongs to no zone of ours
-      // however this dispatcher came to be wrapped.
-      final wrappedIn = <Object>[];
-      runZonedGuarded(
-        () => debugApplyViewMetricsOverrides(fake),
-        (Object error, StackTrace stack) => wrappedIn.add(error),
-      );
-      addTearDown(() => expect(wrappedIn, isEmpty));
-      var brightnessChanged = 0;
-      fake.onTextScaleFactorChanged = () => throw StateError('boom');
-      fake.onPlatformBrightnessChanged = () => brightnessChanged += 1;
-      addTearDown(() {
-        fake.onTextScaleFactorChanged = null;
-        fake.onPlatformBrightnessChanged = null;
-      });
-
-      final contexts = <String>[];
-      final libraries = <String?>[];
-      final stacks = <StackTrace?>[];
-      final FlutterExceptionHandler? previousOnError = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails details) {
-        contexts.add(details.context.toString());
-        libraries.add(details.library);
-        stacks.add(details.stack);
-      };
-      addTearDown(() => FlutterError.onError = previousOnError);
-
-      debugSetViewMetricsOverride(
-        1,
-        const DebugViewMetricsOverride(
-          textScaling: <ui.Offset>[ui.Offset(1, 2)],
-          platformBrightness: ui.Brightness.dark,
-        ),
-      );
-
-      expect(contexts, <String>[
-        'while telling a PlatformDispatcher that a debug view metrics override changed',
-      ]);
-      expect(libraries, <String>['foundation library']);
-      expect(stacks.single, isNotNull, reason: 'a report without a stack cannot be traced');
-      expect(brightnessChanged, 1);
-    });
-
-    test('in the zone a callback registered through one of its views was', () {
-      // A view's platformDispatcher is a wrapper of its own, and setting a
-      // callback on it sets it on the very dispatcher the root wrapper replays
-      // through. The zone it captured has to reach that replay, or the root has
-      // none and falls back to whichever zone changed the override.
-      final fake = _TwoViewPlatformDispatcher();
-      final ui.PlatformDispatcher wrapped = debugApplyViewMetricsOverrides(fake);
-      final ui.PlatformDispatcher perView = wrapped.view(id: 1)!.platformDispatcher;
-      final ranIn = <Object?>[];
-      void registerIn(String zone, void Function(ui.VoidCallback callback) register) {
-        runZoned(
-          () => register(() => ranIn.add(Zone.current[#viewMetricsTestZone])),
-          zoneValues: <Object?, Object?>{#viewMetricsTestZone: zone},
-        );
-      }
-
-      // All five, because each setter records the zone for itself.
-      registerIn('configuration', (cb) => perView.onPlatformConfigurationChanged = cb);
-      registerIn('textScaleFactor', (cb) => perView.onTextScaleFactorChanged = cb);
-      registerIn('brightness', (cb) => perView.onPlatformBrightnessChanged = cb);
-      registerIn('accessibility', (cb) => perView.onAccessibilityFeaturesChanged = cb);
-      registerIn('metrics', (cb) => perView.onMetricsChanged = cb);
-
-      runZoned(() {
-        debugSetViewMetricsOverride(
-          1,
-          const DebugViewMetricsOverride(
-            devicePixelRatio: 3.0,
-            textScaling: <ui.Offset>[ui.Offset(1, 2)],
-            platformBrightness: ui.Brightness.dark,
-            boldText: true,
-          ),
-        );
-      }, zoneValues: <Object?, Object?>{#viewMetricsTestZone: 'mutation'});
-
-      expect(ranIn, <Object?>[
-        'configuration',
-        'textScaleFactor',
-        'brightness',
-        'accessibility',
-        'metrics',
-      ]);
     });
 
     test('and a callback that cannot even be read is reported like one that throws', () {

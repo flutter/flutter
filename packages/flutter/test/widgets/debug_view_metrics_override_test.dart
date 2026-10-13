@@ -11,6 +11,13 @@ import 'package:flutter/src/widgets/_accessibility_evaluations.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+/// The brightness the test environment does not report, so that overriding to
+/// it is a visible change on every platform these tests run on.
+final ui.Brightness _otherBrightness = switch (ui.PlatformDispatcher.instance.platformBrightness) {
+  ui.Brightness.dark => ui.Brightness.light,
+  ui.Brightness.light => ui.Brightness.dark,
+};
+
 /// Every metric [DebugViewMetricsOverride] can set that [MediaQueryData]
 /// surfaces: an override that sets it, how to read it back, and the value
 /// [MediaQueryData] must then report.
@@ -59,9 +66,9 @@ _surfacedMetrics = <String, (DebugViewMetricsOverride, Object? Function(MediaQue
     30.0,
   ),
   'platformBrightness': (
-    const DebugViewMetricsOverride(platformBrightness: ui.Brightness.dark),
+    DebugViewMetricsOverride(platformBrightness: _otherBrightness),
     (MediaQueryData data) => data.platformBrightness,
-    ui.Brightness.dark,
+    _otherBrightness,
   ),
   'alwaysUse24HourFormat': (
     const DebugViewMetricsOverride(alwaysUse24HourFormat: true),
@@ -159,6 +166,13 @@ class _NotificationRecorder with WidgetsBindingObserver {
   String toString() =>
       'metrics: $metrics, accessibilityFeatures: $accessibilityFeatures, '
       'textScaleFactor: $textScaleFactor, platformBrightness: $platformBrightness';
+}
+
+/// An observer that fails on one notification, to check that the ones after
+/// it are still delivered.
+class _ThrowingObserver with WidgetsBindingObserver {
+  @override
+  void didChangeTextScaleFactor() => throw StateError('observer failed');
 }
 
 /// Builds `child` under a [MediaQuery] derived from the view under test, and
@@ -474,9 +488,13 @@ void main() {
         expect(renderView.size, data.size, reason: when);
         expect(renderView.configuration.devicePixelRatio, data.devicePixelRatio, reason: when);
         renderView.compositeFrame();
+        // With a size override the scene is rendered at the view's real size,
+        // which an omitted size resolves to; otherwise the size laid out at.
         expect(
           (raw as _RenderableFakeView).lastRenderedSize,
-          data.size * data.devicePixelRatio,
+          debugViewMetricsOverrides[raw.viewId]?.physicalSize == null
+              ? data.size * data.devicePixelRatio
+              : isNull,
           reason: when,
         );
       }
@@ -817,7 +835,7 @@ void main() {
       // an override instead of inheriting is visible.
       final MediaQueryData parent = MediaQueryData.fromView(tester.view).copyWith(
         textScaler: const TextScaler.linear(9.0),
-        platformBrightness: ui.Brightness.light,
+        platformBrightness: ui.PlatformDispatcher.instance.platformBrightness,
         alwaysUse24HourFormat: false,
         accessibleNavigation: false,
         invertColors: false,
@@ -1223,6 +1241,39 @@ void main() {
       expect(recorder.textScaleFactor, 2, reason: '$recorder');
       expect(recorder.platformBrightness, 2, reason: '$recorder');
 
+      await tester.pump();
+    });
+
+    testWidgets('a failing observer does not cancel the notifications after it', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const SizedBox.expand());
+      final throwing = _ThrowingObserver();
+      final recorder = _NotificationRecorder();
+      tester.binding.addObserver(throwing);
+      tester.binding.addObserver(recorder);
+      addTearDown(() {
+        tester.binding.removeObserver(throwing);
+        tester.binding.removeObserver(recorder);
+      });
+
+      debugSetViewMetricsOverride(
+        tester.view.viewId,
+        const DebugViewMetricsOverride(
+          textScaling: <ui.Offset>[ui.Offset(1, 2)],
+          devicePixelRatio: 6.0,
+        ),
+      );
+      // Reported rather than thrown, and the metrics were still announced.
+      expect(tester.takeException(), isStateError);
+      expect(recorder.textScaleFactor, 1, reason: '$recorder');
+      expect(recorder.metrics, 1, reason: '$recorder');
+      await tester.pump();
+      expect(tester.getSize(find.byType(SizedBox)), const Size(400, 300));
+
+      debugClearViewMetricsOverrides();
+      expect(tester.takeException(), isStateError);
+      expect(recorder.metrics, 2, reason: '$recorder');
       await tester.pump();
     });
 
