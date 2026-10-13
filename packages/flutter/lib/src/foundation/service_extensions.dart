@@ -80,4 +80,49 @@ enum FoundationServiceExtensions {
   /// * [BindingBase.initServiceExtensions], where the service extension is
   ///   registered.
   brightnessOverride,
+
+  /// Name of service extension that, when called, reads or changes the view
+  /// metric overrides in [debugViewMetricsOverrides].
+  ///
+  /// The extension takes these parameters, all optional:
+  ///
+  ///  * `viewId`: the [FlutterView.viewId] to act on, as a non-negative integer
+  ///    string.
+  ///  * `overrides`: a JSON-encoded object, in the format
+  ///    [DebugViewMetricsOverride.fromJson] accepts.
+  ///  * `clearAll`: `'true'` to remove every override.
+  ///
+  /// Other parameters are ignored.
+  ///
+  /// A call does the first of these that applies:
+  ///
+  ///  * If `clearAll` is `'true'`, it removes every override and ignores the
+  ///    other parameters.
+  ///  * If `overrides` is present, it replaces the override registered for the
+  ///    view that `viewId` names, which is then required. An empty object
+  ///    (`{}`) removes that view's override.
+  ///  * Otherwise, it is a read, and changes nothing.
+  ///
+  /// A malformed `viewId` or `overrides` fails the call, and nothing changes.
+  ///
+  /// Every reply has one key, whatever the call was, so that a client can
+  /// resynchronize from any reply without remembering which call produced it:
+  ///
+  ///  * `overrides`: every override installed once the call is done, keyed by
+  ///    stringified view id (JSON object keys must be strings), each in the
+  ///    format [DebugViewMetricsOverride.toJson] produces. A view without an
+  ///    entry has no override.
+  ///
+  /// A call that changes an override also posts a
+  /// `Flutter.ServiceExtensionStateChanged` event whose `value` is that same
+  /// map, so that clients other than the caller learn about the change too. A
+  /// call that changes nothing posts no event.
+  ///
+  /// See also:
+  ///
+  ///  * [DebugViewMetricsOverride], the value this service extension exposes.
+  ///  * [debugViewMetricsOverrides], the map this service extension writes to.
+  ///  * [BindingBase.initServiceExtensions], where the service extension is
+  ///    registered.
+  viewMetricsOverride,
 }
