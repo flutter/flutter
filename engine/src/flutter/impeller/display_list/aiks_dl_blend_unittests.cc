@@ -748,6 +748,7 @@ TEST_P(AiksTest, ForegroundPipelineBlendAppliesTransformCorrectly) {
 TEST_P(AiksTest, DrawImageWithPorterDuffBlendColorFilters) {
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png"));
+  ASSERT_TRUE(image);
   // Every mode that ContentContext builds a PorterDuffBlend variant for and
   // that `GetPorterDuffPipeline` can be asked for (kScreen is gated out).
   constexpr std::array<DlBlendMode, 14> kModes = {

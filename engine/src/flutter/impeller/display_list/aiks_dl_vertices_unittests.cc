@@ -168,6 +168,7 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
 TEST_P(AiksTest, DrawVerticesImageSourceWithUpperAdvancedBlendModes) {
   auto image =
       DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
+  ASSERT_TRUE(image);
   ContentContext content_context(GetContext(), nullptr);
   auto size = image->GetImpellerTexture(content_context)->GetSize();
 
