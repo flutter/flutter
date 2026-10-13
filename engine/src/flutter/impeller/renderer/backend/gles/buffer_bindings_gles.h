@@ -12,13 +12,12 @@
 #include "impeller/renderer/backend/gles/gles.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
+#include "impeller/renderer/backend/gles/sampler_gles.h"
+#include "impeller/renderer/backend/gles/texture_gles.h"
 #include "impeller/renderer/command.h"
 #include "third_party/abseil-cpp/absl/container/flat_hash_map.h"
 
 namespace impeller {
-
-class SamplerGLES;
-class TextureGLES;
 
 namespace testing {
 FML_TEST_CLASS(BufferBindingsGLESTest, BindUniformData);
@@ -37,13 +36,23 @@ FML_TEST_CLASS(BufferBindingsGLESTest,
 /// @brief      Caches the sampler configuration state applied to GL texture
 ///             objects during a render pass.
 ///
-struct SamplerStateCache {
-  absl::flat_hash_map<HandleGLES, uint64_t, HandleGLES::Hash, HandleGLES::Equal>
-      configured_samplers;
+class SamplerStateCache {
+ public:
+  SamplerStateCache() = default;
+
+  ~SamplerStateCache() = default;
 
   bool ConfigureBoundTexture(const SamplerGLES& sampler,
                              const TextureGLES& texture,
                              const ProcTableGLES& gl);
+
+ private:
+  absl::flat_hash_map<HandleGLES, uint64_t, HandleGLES::Hash, HandleGLES::Equal>
+      configured_samplers_;
+
+  SamplerStateCache(const SamplerStateCache&) = delete;
+
+  SamplerStateCache& operator=(const SamplerStateCache&) = delete;
 };
 
 //------------------------------------------------------------------------------

@@ -271,14 +271,14 @@ bool SamplerStateCache::ConfigureBoundTexture(const SamplerGLES& sampler,
   const uint64_t sampler_key =
       SamplerDescriptor::ToKey(sampler.GetDescriptor());
   const HandleGLES& handle = texture.GetHandle();
-  auto it = configured_samplers.find(handle);
-  if (it != configured_samplers.end() && it->second == sampler_key) {
+  auto it = configured_samplers_.find(handle);
+  if (it != configured_samplers_.end() && it->second == sampler_key) {
     return true;
   }
   if (!sampler.ConfigureBoundTexture(texture, gl)) {
     return false;
   }
-  configured_samplers[handle] = sampler_key;
+  configured_samplers_[handle] = sampler_key;
   return true;
 }
 
