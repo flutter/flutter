@@ -30,6 +30,7 @@ import 'media_query.dart';
 import 'notification_listener.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_configuration.dart';
+import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
@@ -2331,7 +2332,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   double _pointerSignalEventDelta(PointerScrollEvent event) {
     assert(_cachedController != null);
     final ScrollPosition position = _cachedController!.position;
-    final scrollContext = position.context;
+    final ScrollContext scrollContext = position.context;
     final ScrollBehavior? scrollableBehavior = scrollContext is ScrollableState
         ? scrollContext.widget.scrollBehavior
         : null;
