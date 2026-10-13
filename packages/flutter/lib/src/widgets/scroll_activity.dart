@@ -134,8 +134,8 @@ abstract class ScrollActivity {
   /// Called when the scroll view that is performing this activity changes its metrics.
   void applyNewDimensions() {}
 
-  /// Called when the scroll offset has been changed by [correction] to
-  /// account for a change in the layout of the content.
+  /// Called when the scroll offset has been changed by [correction] during
+  /// layout.
   ///
   /// An activity that holds absolute scroll offsets, such as the target offset
   /// of an animation, must shift them by [correction] as well, otherwise its
@@ -144,15 +144,19 @@ abstract class ScrollActivity {
   /// method.
   ///
   /// The default implementation does nothing, which is correct for activities
-  /// that operate on relative offsets and for activities that restart from the
-  /// corrected position in [applyNewDimensions], which is called after any
-  /// correction, such as [BallisticScrollActivity].
+  /// that operate on relative offsets, and for activities such as
+  /// [BallisticScrollActivity] that restart from the corrected position in
+  /// [applyNewDimensions], which is also called after every correction, later
+  /// in the same layout and with the new scroll extents.
   ///
   /// See also:
   ///
   ///  * [ScrollPosition.correctBy], which calls this method.
   ///  * [SliverGeometry.scrollOffsetCorrection], the usual origin of such a
-  ///    correction.
+  ///    correction, which a sliver reports when content before the viewport
+  ///    has changed size.
+  ///  * [SingleChildScrollView], which corrects the scroll offset during layout
+  ///    when it is out of range for the new scroll extents.
   void correctBy(double correction) {}
 
   /// Whether the scroll view should ignore pointer events while performing this
@@ -706,7 +710,8 @@ class BallisticScrollActivity extends ScrollActivity {
 ///
 /// Unlike a [BallisticScrollActivity], if a [DrivenScrollActivity] is
 /// in progress when the scroll metrics change, the activity will continue
-/// with its original animation.
+/// with its original animation, only shifted by the scroll offset corrections
+/// it receives through [correctBy].
 ///
 /// See also:
 ///
@@ -785,6 +790,9 @@ class DrivenScrollActivity extends ScrollActivity {
   }
 
   /// Move the position to the given location.
+  ///
+  /// Called on every tick of the animation with the animation's current value
+  /// plus the corrections received through [correctBy], if any.
   ///
   /// If the new position was fully applied, returns true. If there was any
   /// overflow, returns false.
