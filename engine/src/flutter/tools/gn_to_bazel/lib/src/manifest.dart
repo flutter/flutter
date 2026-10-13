@@ -477,6 +477,18 @@ selects.config_setting_group(
     },
   ),
   ConvertedFile('//flutter/lib/io'),
+  ConvertedFile('//flutter/vulkan'),
+  // The GPU surfaces; the suite needs //flutter/testing:vulkan, SwiftShader
+  // and the Dart runtime, and its executable the Impeller fixtures.
+  ConvertedFile(
+    '//flutter/shell/gpu',
+    skip: <String, String>{
+      'gpu_surface_vulkan_unittests':
+          'needs //flutter/testing:vulkan, //flutter/third_party/swiftshader and the Dart runtime',
+      'gpu_surface_unittests':
+          'needs //flutter/impeller/fixtures and :gpu_surface_vulkan_unittests',
+    },
+  ),
   // The sampling profiler; GN links its suite into shell_unittests, which
   // waits on the Dart snapshot, so it runs on its own meanwhile.
   ConvertedFile(
@@ -929,6 +941,7 @@ const Set<String> handWrittenPackages = <String>{
   'engine/src/flutter',
   'engine/src/flutter/impeller/tools',
   'engine/src/flutter/lib/snapshot',
+  'engine/src/flutter/shell/platform/embedder',
   'engine/src/flutter/third_party',
 };
 
