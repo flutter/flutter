@@ -1,0 +1,14 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @vector_math: package:vector_math (a DEPS tree), which
+# lib/gpu's Dart library imports. The sources, for the kernel compiles of
+# the fixtures that reach it (dart_kernel's package_trees).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)
