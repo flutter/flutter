@@ -163,8 +163,7 @@ template <class RenderPipelineHandleT>
 RenderPipelineHandleT* CreateIfNeeded(
     const ContentContext* context,
     Variants<RenderPipelineHandleT>& container,
-    ContentContextOptions opts,
-    PipelineCompileQueue* compile_queue) {
+    ContentContextOptions opts) {
   if (!context->IsValid()) {
     return nullptr;
   }
@@ -185,7 +184,7 @@ RenderPipelineHandleT* CreateIfNeeded(
   FML_CHECK(default_handle != nullptr);
 
   const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline =
-      default_handle->WaitAndGet(compile_queue);
+      default_handle->WaitAndGet();
   if (!pipeline) {
     return nullptr;
   }
@@ -206,14 +205,11 @@ template <class TypedPipeline>
 PipelineRef GetPipeline(const ContentContext* context,
                         Variants<TypedPipeline>& container,
                         ContentContextOptions opts) {
-  auto compile_queue =
-      context->GetContext()->GetPipelineLibrary()->GetPipelineCompileQueue();
-  TypedPipeline* pipeline =
-      CreateIfNeeded(context, container, opts, compile_queue);
+  TypedPipeline* pipeline = CreateIfNeeded(context, container, opts);
   if (!pipeline) {
     return raw_ptr<Pipeline<PipelineDescriptor>>();
   }
-  return raw_ptr(pipeline->WaitAndGet(compile_queue));
+  return raw_ptr(pipeline->WaitAndGet());
 }
 
 }  // namespace
