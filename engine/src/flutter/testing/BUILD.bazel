@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/testing/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: vulkan, test_swiftshader_utils, test_swangle_utils, opengl.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
@@ -197,8 +196,116 @@ cc_library(
     alwayslink = True,
 )
 
+cc_library(
+    name = "vulkan",
+    testonly = True,
+    srcs = [
+        "test_vulkan_context.cc",
+        "test_vulkan_image.cc",
+        "test_vulkan_surface.cc",
+    ],
+    hdrs = [
+        "test_vulkan_context.h",
+        "test_vulkan_image.h",
+        "test_vulkan_surface.h",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-shadow",  # from //flutter/third_party/swiftshader:swiftshader_config
+    ] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": [],
+        "//conditions:default": [
+            "-Os",  # from //flutter/third_party/swiftshader:swiftshader_config
+        ],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES + ["TEST_VULKAN_PROCS"],
+    deps = [
+        ":skia",
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",  # !is_fuchsia
+        "//engine/src/flutter/flutter_vma:flutter_skia_vma",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/vulkan",
+        "//engine/src/flutter/vulkan/procs",
+    ],
+    alwayslink = True,
+)
+
 flutter_test_fixtures(
     name = "testing_fixtures",
+)
+
+cc_library(
+    name = "test_swiftshader_utils",
+    srcs = ["test_swiftshader_utils.cc"],
+    hdrs = ["test_swiftshader_utils.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-shadow",  # from //flutter/third_party/swiftshader:swiftshader_config
+    ] + select({
+        "//engine/src/flutter/build/bazel:unoptimized": [],
+        "//conditions:default": [
+            "-Os",  # from //flutter/third_party/swiftshader:swiftshader_config
+        ],
+    }),
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "test_swangle_utils",
+    srcs = ["test_swangle_utils.cc"],
+    hdrs = ["test_swangle_utils.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/gl_wrap:angle",
+        "//engine/src/flutter/fml",
+        "@angle//:headers",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "opengl",
+    testonly = True,
+    srcs = [
+        "test_gl_context.cc",
+        "test_gl_surface.cc",
+        "test_gl_utils.cc",
+    ],
+    hdrs = [
+        "test_gl_context.h",
+        "test_gl_surface.h",
+        "test_gl_utils.h",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-string-conversion",  # configs -= //build/config/clang:extra_warnings
+        "-Wno-newline-eof",  # configs -= //build/config/clang:extra_warnings
+    ],
+    implementation_deps = ["@angle//:gl_prototypes"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":skia",
+        ":test_swangle_utils",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
 )
 
 cc_test(
