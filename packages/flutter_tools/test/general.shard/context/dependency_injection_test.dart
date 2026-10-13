@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/java.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -174,6 +175,31 @@ void main() {
       );
 
       expect(dependencies.featureFlags, same(mockFeatureFlags));
+    });
+
+    testUsingContext('resolves DeferredArtifacts to local engine artifacts', () async {
+      final ToolDependencies dependencies = await ToolDependencies.bootstrap(
+        fs: fs,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      );
+
+      if (dependencies.toolContext.artifacts case final DeferredArtifacts artifacts) {
+        expect(artifacts.usesLocalArtifacts, isFalse);
+
+        final localArtifacts = Artifacts.testLocalEngine(
+          localEngine: 'out/host_debug',
+          localEngineHost: 'out/host_debug',
+        );
+        artifacts.resolve(localArtifacts);
+
+        expect(artifacts.usesLocalArtifacts, isTrue);
+        expect(artifacts.localEngineInfo, isNotNull);
+        expect(artifacts.localEngineInfo?.localTargetName, 'host_debug');
+      } else {
+        fail('Expected dependencies.toolContext.artifacts to be DeferredArtifacts');
+      }
     });
 
     testUsingContext(

@@ -100,6 +100,8 @@ class WebDriverService extends DriverService {
       webDefines: webDefines,
       flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
       analytics: _analytics,
+      buildSystem: buildSystem,
+      buildTargets: buildTargets,
       toolContext: _toolContext,
     );
     final appStartedCompleter = Completer<void>.sync();
@@ -164,7 +166,7 @@ class WebDriverService extends DriverService {
     final isAndroidChrome = browser == Browser.androidChrome;
     late int width;
     late int height;
-    Map<String, dynamic>? mobileEmulation;
+    Map<String, Object?>? mobileEmulation;
 
     // Do not resize Android Chrome browser.
     // For PC Chrome use mobileEmulation if dpr is provided.
@@ -177,8 +179,8 @@ class WebDriverService extends DriverService {
         width = int.parse(browserDimension[0]);
         height = int.parse(browserDimension[1]);
         if (len == 3) {
-          mobileEmulation = <String, dynamic>{
-            'deviceMetrics': <String, dynamic>{
+          mobileEmulation = <String, Object?>{
+            'deviceMetrics': <String, Object?>{
               'width': width,
               'height': height,
               'pixelRatio': double.parse(browserDimension[2]),
@@ -316,22 +318,22 @@ enum Browser implements CliEnum {
 /// Returns desired capabilities for given [browser], [headless], [chromeBinary]
 /// and [webBrowserFlags].
 @visibleForTesting
-Map<String, dynamic> getDesiredCapabilities(
+Map<String, Object?> getDesiredCapabilities(
   Browser browser,
   bool? headless, {
   required Platform platform,
   String? chromeBinary,
-  Map<String, dynamic>? mobileEmulation,
+  Map<String, Object?>? mobileEmulation,
   List<String> webBrowserFlags = const <String>[],
 }) => switch (browser) {
-  Browser.chrome => <String, dynamic>{
+  Browser.chrome => <String, Object?>{
     'acceptInsecureCerts': true,
     'browserName': 'chrome',
     'goog:loggingPrefs': <String, String>{
       async_io.LogType.browser: 'INFO',
       async_io.LogType.performance: 'ALL',
     },
-    'goog:chromeOptions': <String, dynamic>{
+    'goog:chromeOptions': <String, Object?>{
       'w3c': true,
       'args': <String>[
         '--bwsi',
@@ -373,12 +375,12 @@ Map<String, dynamic> getDesiredCapabilities(
       'mobileEmulation': ?mobileEmulation,
     },
   },
-  Browser.firefox => <String, dynamic>{
+  Browser.firefox => <String, Object?>{
     'acceptInsecureCerts': true,
     'browserName': 'firefox',
-    'moz:firefoxOptions': <String, dynamic>{
+    'moz:firefoxOptions': <String, Object?>{
       'args': <String>[if (headless!) '-headless', ...webBrowserFlags],
-      'prefs': <String, dynamic>{
+      'prefs': <String, Object?>{
         'dom.file.createInChild': true,
         'dom.timeout.background_throttling_max_budget': -1,
         'media.autoplay.default': 0,
@@ -391,17 +393,17 @@ Map<String, dynamic> getDesiredCapabilities(
       'log': <String, String>{'level': 'trace'},
     },
   },
-  Browser.edge => <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'},
-  Browser.safari => <String, dynamic>{'browserName': 'safari'},
-  Browser.iosSafari => <String, dynamic>{
+  Browser.edge => <String, Object?>{'acceptInsecureCerts': true, 'browserName': 'edge'},
+  Browser.safari => <String, Object?>{'browserName': 'safari'},
+  Browser.iosSafari => <String, Object?>{
     'platformName': 'ios',
     'browserName': 'safari',
     'safari:useSimulator': true,
   },
-  Browser.androidChrome => <String, dynamic>{
+  Browser.androidChrome => <String, Object?>{
     'browserName': 'chrome',
     'platformName': 'android',
-    'goog:chromeOptions': <String, dynamic>{
+    'goog:chromeOptions': <String, Object?>{
       'androidPackage': 'com.android.chrome',
       'args': <String>['--disable-fullscreen', ...webBrowserFlags],
     },

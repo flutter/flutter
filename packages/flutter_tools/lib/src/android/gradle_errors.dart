@@ -717,12 +717,15 @@ To resolve this, migrate to built-in Kotlin.
 /// Handler when using the new AGP DSL interfaces. Starting AGP 9+, only the new
 /// DSL interfaces are used. This results in a failure because we still depend
 /// on old DSL types.
+///
+/// This only matches the `NullPointerException` line. Gradle prints
+/// `> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'` for every
+/// exception thrown while applying the Flutter Gradle plugin (for example,
+/// unsupported dependency version errors), so matching that line would show
+/// this box for unrelated failures.
 @visibleForTesting
 final useNewAgpDslErrorHandler = GradleHandledError(
-  test: _lineMatcher(const <String>[
-    "> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'",
-    '> java.lang.NullPointerException (no error message)',
-  ]),
+  test: _lineMatcher(const <String>['> java.lang.NullPointerException (no error message)']),
   handler:
       ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
         final File appGradleFile = project.android.appGradleFile;
