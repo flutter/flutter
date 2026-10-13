@@ -1,0 +1,186 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The GPU backends of the engine's test suites, built by their own GN rules
+# inside one Bazel action (see ../gn_build/gn_build.bzl), as the Dart SDK is
+# in ../dart_wrap: ANGLE's libEGL_static and libGLESv2_static (OpenGL ES on
+# Vulkan, for //flutter/testing:opengl), SwiftShader's Vulkan driver
+# (libvk_swiftshader.so and its ICD manifest, for //flutter/testing:vulkan
+# and for ANGLE), and the Khronos Vulkan loader ANGLE opens (libvulkan.so.1).
+# ANGLE's BUILD.gn is 2,000 lines over a dozen trees and SwiftShader's build
+# is a JIT compiler's; converting them is a later phase, and the test
+# backends are what blocks the GPU suites now.
+#
+# Host linux-x64 only for now, like dart_wrap.
+#
+# At run time, the three files must sit next to the test binary: ANGLE
+# dlopens the loader from, and points the loader at the ICD manifest in, the
+# directory of its own module (the executable, with ANGLE linked
+# statically), and the engine's test utilities look next to the executable
+# as well -- GN's data_deps put them in the build directory. A suite gets
+# them from flutter_gpu_test_backends (//flutter/testing:testing.bzl), a
+# copy in its own package carried as `data`.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:deps.lock.bzl", "GIT_DEPS")
+load("//engine/src/flutter/build/bazel/gn_build:gn_build.bzl", "gn_build")
+
+package(default_visibility = ["//visibility:public"])
+
+_ANGLE_REVISION = GIT_DEPS["engine/src/flutter/third_party/angle"]["revision"]
+
+# What tools/gn writes to args.gn for a host build, restricted to the
+# arguments the pruned GN graph declares (gn gen runs with
+# --fail-on-unused-args): the toolchain, and tools/gn's ANGLE arguments for a
+# host build (no commit id, nothing beyond the libraries, no X11 or Wayland,
+# no validation layers, the Vulkan trees of vulkan-deps). angle_build_tests
+# is off so that ANGLE's test tree stays out of the loaded graph.
+_GN_ARGS = {
+    "angle_build_all": "false",
+    "angle_build_tests": "false",
+    "angle_enable_commit_id": "false",
+    "angle_enable_libdrm": "false",
+    "angle_enable_vulkan_validation_layers": "false",
+    "angle_has_astc_encoder": "false",
+    "angle_lunarg_vulkantools_dir": '"//flutter/third_party/vulkan-deps/lunarg-vulkantools/src"',
+    "angle_use_wayland": "false",
+    "angle_use_x11": "false",
+    "angle_vulkan_headers_dir": '"//flutter/third_party/vulkan-deps/vulkan-headers/src"',
+    "angle_vulkan_loader_dir": '"//flutter/third_party/vulkan-deps/vulkan-loader/src"',
+    "angle_vulkan_tools_dir": '"//flutter/third_party/vulkan-deps/vulkan-tools/src"',
+    "buildtools_path": '"//flutter/buildtools"',
+    "host_cpu": '"x64"',
+    "host_os": '"linux"',
+    "is_clang": "true",
+    # No system libraries: keeps //build/config/linux from probing the
+    # sysroot with the host's pkg-config (nothing in this graph uses them).
+    "is_minimal_linux": "true",
+    "is_official_build": "true",
+    "stripped_symbols": "true",
+    "target_cpu": '"x64"',
+    "target_os": '"linux"',
+} | select({
+    # As in dart_wrap: -c opt is tools/gn without --unoptimized.
+    "//engine/src/flutter/build/bazel:optimized": {
+        "enable_lto": "true",
+        "is_debug": "false",
+    },
+    "//conditions:default": {
+        "enable_lto": "false",
+        "is_debug": "true",
+    },
+})
+
+gn_build(
+    name = "gl_backends",
+    # The driver, its manifest and the loader, in the GN root build
+    # directory.
+    outs = [
+        "libvk_swiftshader.so",
+        "libvulkan.so.1",
+        "vk_swiftshader_icd.json",
+    ],
+    ar = "@clang_linux_x64//:bin/llvm-ar",
+    # Dependencies the Bazel side builds itself (the facade depends on them):
+    # abseil, zlib and SPIRV-Tools -- which Impeller links too, so a second
+    # copy of their objects would collide in a test binary -- and the C++
+    # runtime.
+    archive_boundaries = [
+        "//flutter/third_party/libcxx",
+        "//flutter/third_party/libcxxabi",
+        "//flutter/third_party/llvm_libc",
+        "//flutter/third_party/vulkan-deps/spirv-tools/src",
+        "//flutter/third_party/zlib",
+        "//third_party/abseil-cpp",
+        "//third_party/zlib",
+    ],
+    # ANGLE: libEGL_static and libGLESv2_static and everything they are made
+    # of, in one archive (BUILD.gn's `angle` group).
+    archives = {
+        "libangle.a": "//flutter/build/bazel/gl_wrap:angle",
+    },
+    build_file = "BUILD.gn",
+    # ANGLE's commit id (its version string), from the DEPS pin: the tree
+    # holds no git state, as with dart_wrap's SDK hash.
+    env = {"ANGLE_UPSTREAM_HASH": _ANGLE_REVISION[:12]},
+    gn_args = _GN_ARGS,
+    ninja_target = "gl_wrap",
+    root_target_dir = "flutter/build/bazel/gl_wrap",
+    # The GN source root: the engine's build configuration, the trees GN
+    # reads, the toolchain, and the stand-ins (stubs/) for the engine
+    # directories ANGLE's GN reaches -- each at the path the GN files expect.
+    tree = {
+        "//engine/src:gn_root_files": "",
+        "//engine/src/flutter/build/bazel/gl_wrap/stubs": "",
+        "//engine/src/build:gn_files": "build",
+        "@sysroot_linux_x64//:build_tree": "build/linux/debian_bullseye_amd64-sysroot",
+        "//engine/src/flutter/build:gn_files": "flutter/build",
+        "@clang_linux_x64//:all_files": "flutter/buildtools/linux-x64/clang",
+        "@cpython3//:runtime": "flutter/buildtools/linux-x64/cpython3",
+        "@angle//:build_tree": "flutter/third_party/angle",
+        # ANGLE's gni imports one file of the Dart tree.
+        "@dart//:gclient_args": "flutter/third_party/dart",
+        "@libcxx//:build_tree": "flutter/third_party/libcxx",
+        "@libcxxabi//:build_tree": "flutter/third_party/libcxxabi",
+        "@llvm_libc//:build_tree": "flutter/third_party/llvm_libc",
+        "@swiftshader//:build_tree": "flutter/third_party/swiftshader",
+        "@vulkan_deps_tree//:build_tree": "flutter/third_party/vulkan-deps",
+        "@vulkan_memory_allocator_tree//:build_tree": "flutter/third_party/vulkan_memory_allocator",
+        "@zlib//:build_tree": "flutter/third_party/zlib",
+        "@abseil_cpp_tree//:build_tree": "third_party/abseil-cpp",
+    },
+)
+
+# ---------------------------------------------------------------------------
+# Facades
+# ---------------------------------------------------------------------------
+
+# //flutter/third_party/angle:libEGL_static and :libGLESv2_static (one
+# archive stands for both, as GN links both into every user). Its
+# dependencies outside the archive, in GN's terms: the engine's
+# flutter_vma (ANGLE's VulkanMemoryAllocator, through
+# build_overrides/angle.gni, whose implementation the engine compiles),
+# abseil's hash containers, zlib and its gzip helpers (ANGLE's shader
+# cache), SPIRV-Tools' validator, and the system libraries. The headers are
+# the ones GN's external_config exposes.
+cc_library(
+    name = "angle",
+    srcs = [":libangle.a"],
+    linkopts = [
+        "-ldl",
+        "-lpthread",
+    ],
+    deps = [
+        "//engine/src/flutter/flutter_vma",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/container:flat_hash_set",
+        "@abseil-cpp//absl/container:inlined_vector",
+        "@abseil-cpp//absl/hash",
+        "@angle//:headers",
+        "@spirv-tools//:spvtools",
+        "@spirv-tools//:spvtools_val",
+        "@zlib",
+        "@zlib//:compression_utils_portable",
+    ],
+)
+
+# //flutter/third_party/swiftshader: GN's group whose data_deps are the
+# driver and its ICD manifest; the loader rides along, as ANGLE's own
+# data_deps add it in GN. Nothing to link: a library with the files as
+# runfiles (under this package's directory in the runfiles tree -- see the
+# file comment for how a suite gets them next to its binary).
+cc_library(
+    name = "swiftshader",
+    data = [":runtime_files"],
+)
+
+# The files a GPU test suite needs next to its binary.
+filegroup(
+    name = "runtime_files",
+    srcs = [
+        ":libvk_swiftshader.so",
+        ":libvulkan.so.1",
+        ":vk_swiftshader_icd.json",
+    ],
+)

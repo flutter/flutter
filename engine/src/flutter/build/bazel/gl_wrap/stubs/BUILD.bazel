@@ -1,0 +1,14 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The stand-in GN files of the wrapped build of the GPU test backends
+# (../BUILD.bazel), laid out as they sit under the GN source root: a
+# package of its own so that the files are relative to this directory and
+# the wrap can map it onto the root.
+
+filegroup(
+    name = "stubs",
+    srcs = glob(["**/BUILD.gn"]),
+    visibility = ["//engine/src/flutter/build/bazel/gl_wrap:__pkg__"],
+)

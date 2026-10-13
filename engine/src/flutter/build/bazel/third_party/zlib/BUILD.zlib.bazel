@@ -175,7 +175,23 @@ cc_library(
     ],
 )
 
-# What the GN build of this tree reads, for rules that wrap a GN build.
+# static_library("compression_utils_portable") in google/BUILD.gn: the
+# gzip helpers over zlib that ANGLE's shader cache uses. The secondary tree's
+# //third_party/zlib/google:compression_utils_portable, through which ANGLE
+# names it, adds google/ as an include directory.
+cc_library(
+    name = "compression_utils_portable",
+    srcs = ["google/compression_utils_portable.cc"],
+    hdrs = ["google/compression_utils_portable.h"],
+    copts = FLUTTER_THIRD_PARTY_COPTS,
+    includes = ["google"],
+    linkstatic = True,
+    deps = [":zlib"],
+)
+
+# What the GN build of this tree reads, for rules that wrap a GN build (the
+# Dart SDK's uses zlib; the GPU test backends' uses zlib and
+# google:compression_utils_portable).
 filegroup(
     name = "build_tree",
     srcs = glob(
@@ -187,8 +203,7 @@ filegroup(
             "*.bzl",
             "contrib/tests/**",
             "examples/**",
-            # Chromium's compression utilities, built by other targets.
-            "google/**",
+            "google/test/**",
             "patches/**",
             "test/**",
         ],
