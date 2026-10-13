@@ -435,25 +435,12 @@ void main() {
         'Info.plist',
       );
       plistUtils.fileContents[randomLocation2PlistPath] = macStudioInfoPlist4_1;
-      final String javaBin = fileSystem.path.join('jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
 
       // Spotlight finds the one known and two random installations.
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: const <String>['sh', '-c', kSpotlightMdfindCommand],
           stdout: '$randomLocation1\n$randomLocation2\n$studioInApplication',
-        ),
-        FakeCommand(
-          command: <String>[fileSystem.path.join(randomLocation1, 'Contents', javaBin), '-version'],
-        ),
-        FakeCommand(
-          command: <String>[fileSystem.path.join(randomLocation2, 'Contents', javaBin), '-version'],
-        ),
-        FakeCommand(
-          command: <String>[
-            fileSystem.path.join(studioInApplicationPlistFolder, javaBin),
-            '-version',
-          ],
         ),
       ]);
 
@@ -781,22 +768,11 @@ void main() {
       );
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2022_1;
 
-      final String studioInApplicationJavaBinary = fileSystem.path.join(
-        extractedDownloadZip,
-        'Contents',
-        'jbr',
-        'Contents',
-        'Home',
-        'bin',
-        'java',
-      );
-
       processManager.addCommands(<FakeCommand>[
         FakeCommand(
           command: const <String>['sh', '-c', kSpotlightMdfindCommand],
           stdout: extractedDownloadZip,
         ),
-        FakeCommand(command: <String>[studioInApplicationJavaBinary, '-version']),
       ]);
 
       final AndroidStudio studio = AndroidStudio.allInstalled(
@@ -1542,18 +1518,6 @@ void main() {
             .createSync(recursive: true);
       }
 
-      const validJavaPaths = <String>[
-        r'C:\Program Files\AndroidStudio4.0\jre\bin\java',
-        r'C:\Program Files\AndroidStudio2.0\jre\bin\java',
-        r'C:\Program Files\AndroidStudio3.1\jre\bin\java',
-      ];
-
-      for (final javaPath in validJavaPaths) {
-        processManager.addCommand(
-          FakeCommand(command: <String>[fileSystem.path.join(javaPath), '-version']),
-        );
-      }
-
       expect(
         AndroidStudio.allInstalled(
           toolContext: FakeToolContext(
@@ -1567,12 +1531,6 @@ void main() {
         4,
       );
 
-      for (final javaPath in validJavaPaths) {
-        processManager.addCommand(
-          FakeCommand(command: <String>[fileSystem.path.join(javaPath), '-version']),
-        );
-      }
-
       final AndroidStudio chosenInstall = AndroidStudio.latestValid(
         toolContext: FakeToolContext(
           config: config,
@@ -1584,6 +1542,7 @@ void main() {
       )!;
       expect(chosenInstall.directory, configuredAndroidStudioDir);
       expect(chosenInstall.isValid, false);
+      expect(processManager, hasNoRemainingExpectations);
     });
 
     testWithoutContext(
@@ -1633,6 +1592,179 @@ void main() {
         ),
       );
     });
+
+    testWithoutContext('does not execute validation during constructor instantiation', () {
+      final processManager = FakeProcessManager.empty();
+      final studio = AndroidStudio(
+        r'C:\Program Files\AndroidStudio',
+        toolContext: FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        ),
+      );
+
+      // Constructor did not run validation or touch process manager.
+      expect(processManager, hasNoRemainingExpectations);
+      expect(studio.directory, r'C:\Program Files\AndroidStudio');
+    });
+
+    testWithoutContext(
+      'evaluates isValid, javaPath, and validationMessages lazily on first access',
+      () {
+        final processManager = FakeProcessManager.empty();
+        const studioDir = r'C:\Program Files\AndroidStudio4.0';
+        fileSystem.directory(studioDir).createSync(recursive: true);
+        final String javaBinary = fileSystem.path.join(studioDir, 'jre', 'bin', 'java');
+        fileSystem.file(javaBinary).createSync(recursive: true);
+
+        final toolContext = FakeToolContext(
+          config: config,
+          fs: fileSystem,
+          logger: logger,
+          platform: platform,
+          processManager: processManager,
+        );
+
+        // Accessing isValid triggers validation.
+        final studio1 = AndroidStudio(
+          studioDir,
+          toolContext: toolContext,
+          version: Version(4, 0, 0),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+        processManager.addCommand(
+          FakeCommand(command: <String>[fileSystem.path.join(javaBinary), '-version']),
+        );
+        expect(studio1.isValid, true);
+        expect(processManager, hasNoRemainingExpectations);
+
+        // Accessing javaPath triggers validation.
+        final studio2 = AndroidStudio(
+          studioDir,
+          toolContext: toolContext,
+          version: Version(4, 0, 0),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+        processManager.addCommand(
+          FakeCommand(command: <String>[fileSystem.path.join(javaBinary), '-version']),
+        );
+        expect(studio2.javaPath, fileSystem.path.join(studioDir, 'jre'));
+        expect(processManager, hasNoRemainingExpectations);
+
+        // Accessing validationMessages triggers validation.
+        final studio3 = AndroidStudio(
+          studioDir,
+          toolContext: toolContext,
+          version: Version(4, 0, 0),
+        );
+        expect(processManager, hasNoRemainingExpectations);
+        processManager.addCommand(
+          FakeCommand(command: <String>[fileSystem.path.join(javaBinary), '-version']),
+        );
+        expect(studio3.validationMessages, contains(contains('Java version')));
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'latestValid short-circuits candidate validation once a valid install is found',
+      () {
+        final processManager = FakeProcessManager.empty();
+        // Create 2 candidate installs: 4.0 and 3.0.
+        const versions = <String>['4.0', '3.0'];
+        for (final version in versions) {
+          fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+          fileSystem
+              .directory('C:\\Program Files\\AndroidStudio$version')
+              .createSync(recursive: true);
+          fileSystem
+              .file('C:\\Program Files\\AndroidStudio$version\\jre\\bin\\java')
+              .createSync(recursive: true);
+        }
+
+        // Only add command for the newer (4.0) installation. The older (3.0)
+        // should never be validated because latestValid stops at the first valid one.
+        processManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              fileSystem.path.join(r'C:\Program Files\AndroidStudio4.0', 'jre', 'bin', 'java'),
+              '-version',
+            ],
+          ),
+        );
+
+        final AndroidStudio? latest = AndroidStudio.latestValid(
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
+          ),
+        );
+
+        expect(latest, isNotNull);
+        expect(latest!.version, Version(4, 0, 0));
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'latestValid falls back to older candidate when newer install is invalid',
+      () {
+        final processManager = FakeProcessManager.empty();
+        // Create 2 candidate installs: 4.0 and 3.0.
+        const versions = <String>['4.0', '3.0'];
+        for (final version in versions) {
+          fileSystem.file('C:\\Users\\Dash\\AppData\\Local\\Google\\AndroidStudio$version\\.home')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
+          fileSystem
+              .directory('C:\\Program Files\\AndroidStudio$version')
+              .createSync(recursive: true);
+          fileSystem
+              .file('C:\\Program Files\\AndroidStudio$version\\jre\\bin\\java')
+              .createSync(recursive: true);
+        }
+
+        // 4.0 fails java validation (exit code 1).
+        // 3.0 succeeds.
+        processManager.addCommands(<FakeCommand>[
+          FakeCommand(
+            command: <String>[
+              fileSystem.path.join(r'C:\Program Files\AndroidStudio4.0', 'jre', 'bin', 'java'),
+              '-version',
+            ],
+            exitCode: 1,
+          ),
+          FakeCommand(
+            command: <String>[
+              fileSystem.path.join(r'C:\Program Files\AndroidStudio3.0', 'jre', 'bin', 'java'),
+              '-version',
+            ],
+          ),
+        ]);
+
+        final AndroidStudio? latest = AndroidStudio.latestValid(
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: platform,
+            processManager: processManager,
+          ),
+        );
+
+        expect(latest, isNotNull);
+        expect(latest!.version, Version(3, 0, 0));
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
   });
 }
 

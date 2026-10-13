@@ -29,18 +29,25 @@ class AndroidDevices extends PollingDeviceDiscovery {
     required this._androidWorkflow,
     required ProcessManager processManager,
     required Logger logger,
-    this._androidSdk,
     required this._fileSystem,
     required this._platform,
     required this._userMessages,
-  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+    AndroidSdk? androidSdk,
+    AndroidSdk? Function()? androidSdkBuilder,
+  }) : assert(
+         androidSdk == null || androidSdkBuilder == null,
+         'Cannot provide both androidSdk and androidSdkBuilder to AndroidDevices.',
+       ),
+       _androidSdkBuilder = androidSdkBuilder ?? (() => androidSdk),
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _processManager = processManager,
        _logger = logger,
        super('Android devices');
 
   final AndroidWorkflow _androidWorkflow;
   final ProcessUtils _processUtils;
-  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function() _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder();
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fileSystem;

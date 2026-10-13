@@ -218,7 +218,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         osUtils: globals.os,
       ),
       AndroidWorkflow: () =>
-          AndroidWorkflow(androidSdk: globals.androidSdk, featureFlags: featureFlags),
+          AndroidWorkflow(androidSdkBuilder: () => globals.androidSdk, featureFlags: featureFlags),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         userMessages: globals.userMessages,
         processManager: globals.processManager,
@@ -287,8 +287,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
-        java: globals.java,
-        androidSdk: globals.androidSdk,
+        javaBuilder: () => globals.java,
+        androidSdkBuilder: () => globals.androidSdk,
         processManager: globals.processManager,
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -332,10 +332,10 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       Java: () => Java.find(
+        androidStudioBuilder: () => globals.androidStudio,
         config: globals.config,
-        androidStudio: globals.androidStudio,
-        logger: globals.logger,
         fileSystem: globals.fs,
+        logger: globals.logger,
         platform: globals.platform,
         processManager: globals.processManager,
       ),

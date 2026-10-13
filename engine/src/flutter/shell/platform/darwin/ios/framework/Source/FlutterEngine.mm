@@ -1339,6 +1339,14 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   });
 }
 
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    didRestoreFirstResponderWithTextInputClient:(int)client
+                                         result:(FlutterResult)callback {
+  [self.textInputChannel invokeMethod:@"TextInputClient.onFocusReceived"
+                            arguments:@[ @(client) ]
+                               result:callback];
+}
+
 #pragma mark - Undo Manager Delegate
 
 - (void)handleUndoWithDirection:(FlutterUndoRedoDirection)direction {
