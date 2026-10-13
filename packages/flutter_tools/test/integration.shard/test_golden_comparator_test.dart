@@ -67,7 +67,7 @@ void main() {
         packageConfigPath: packageConfig.path,
       ),
       project,
-      toolContext: DelegatingToolContext(),
+      toolContext: const DelegatingToolContext(),
     );
     return TestGoldenComparator(
       compilerFactory: () => compiler,

@@ -425,8 +425,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'success',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -449,8 +450,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'warning',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -472,8 +474,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'fail',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -578,8 +581,9 @@ void main() {
               Event.flutterCommandResult(
                 commandPath: 'dummy',
                 result: 'killed',
-                maxRss: 10,
                 commandHasTerminal: false,
+                hostArch: globals.os.hostPlatform.cliName,
+                maxRss: 10,
               ),
             ),
           );
@@ -778,6 +782,26 @@ void main() {
           defaultBuildInfo.toGradleConfig(),
           isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
         );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'reports --[no-]deprecated-js-interop in BuildInfo only when passed',
+      () async {
+        Future<bool?> deprecatedJsInteropFor(List<String> args) async {
+          final command = DummyDeprecatedJsInteropFlutterCommand();
+          await createTestCommandRunner(command).run(<String>['dummy', ...args]);
+          final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+          return buildInfo.deprecatedJsInterop;
+        }
+
+        expect(await deprecatedJsInteropFor(<String>['--deprecated-js-interop']), isTrue);
+        expect(await deprecatedJsInteropFor(<String>['--no-deprecated-js-interop']), isFalse);
+        expect(await deprecatedJsInteropFor(<String>[]), isNull);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -1035,14 +1059,14 @@ void main() {
       final device2 = FakeDevice('device2', 'device2');
 
       testUsingContext('no device found', () async {
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
       });
 
       testUsingContext('finds single device', () async {
         testDeviceManager.addAttachedDevice(device1);
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, device1);
       });
@@ -1051,7 +1075,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
         testDeviceManager.specifiedDeviceId = 'all';
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
         expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
@@ -1071,7 +1095,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
 
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final List<Device>? devices = await flutterCommand.findAllTargetDevices();
 
         // Should prompt the user and print prompt options (so status contains "Connected devices")
@@ -1117,7 +1141,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
 
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: false);
 
         // Should NOT prompt the user even if machine mode is false.
@@ -2404,6 +2428,12 @@ class DummyMachineFlutterCommand extends DummyFlutterCommand {
 class DummyHcppFlutterCommand extends DummyFlutterCommand {
   DummyHcppFlutterCommand() : super(name: 'dummy') {
     addEnableHcppFlag(verboseHelp: false);
+  }
+}
+
+class DummyDeprecatedJsInteropFlutterCommand extends DummyFlutterCommand {
+  DummyDeprecatedJsInteropFlutterCommand() : super(name: 'dummy') {
+    usesDeprecatedJsInteropFlag(verboseHelp: false);
   }
 }
 
