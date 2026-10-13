@@ -2,24 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <string_view>
-
-#include "flutter/common/settings.h"
-#include "flutter/fml/command_line.h"
-#include "flutter/shell/common/switch_defs.h"
-
 #ifndef FLUTTER_SHELL_COMMON_SWITCHES_H_
 #define FLUTTER_SHELL_COMMON_SWITCHES_H_
 
+#include <string>
+
+// The switches and SettingsFromCommandLine live in //flutter/common, so that
+// embedders can build Settings without depending on //flutter/shell/common.
+#include "flutter/common/switches.h"
+
 namespace flutter {
 
+//------------------------------------------------------------------------------
+/// @brief      Prints the executable name, the engine, Skia and Dart versions,
+///             and every engine flag with its help text to stderr.
+///
 void PrintUsage(const std::string& executable_name);
-
-const std::string_view FlagForSwitch(Switch swtch);
-
-Settings SettingsFromCommandLine(
-    const fml::CommandLine& command_line,
-    bool require_merged_platform_ui_thread = false);
 
 }  // namespace flutter
 

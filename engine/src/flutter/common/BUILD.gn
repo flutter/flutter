@@ -13,6 +13,9 @@ source_set("common") {
     "macros.h",
     "settings.cc",
     "settings.h",
+    "switch_defs.h",
+    "switches.cc",
+    "switches.h",
     "task_runners.cc",
     "task_runners.h",
   ]
