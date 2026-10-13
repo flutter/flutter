@@ -3074,6 +3074,98 @@ class _TestWidgetInspectorService extends TestWidgetInspectorService {
                 testWidgetInspectorScopes(rootJson);
               },
             );
+
+            testWidgets(
+              'tree without full details and with creation locations using ext.flutter.inspector.getRootWidgetTree',
+              (WidgetTester tester) async {
+                const group = 'test-group';
+
+                await pumpWidgetTreeWithABC(tester);
+                final Element elementA = findElementABC('a');
+                final Map<String, dynamic> jsonA = await selectedWidgetResponseForElement(elementA);
+
+                final Map<String, Object?> creationLocationA = verifyAndReturnCreationLocation(
+                  jsonA,
+                );
+                final String testFile = verifyAndReturnTestFile(creationLocationA);
+                addPubRootDirectoryFor(testFile);
+
+                final rootJson =
+                    (await service.testExtension(
+                          WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+                          <String, String>{
+                            'groupName': group,
+                            'isSummaryTree': 'true',
+                            'withPreviews': 'true',
+                            'fullDetails': 'false',
+                            'withCreationLocations': 'true',
+                          },
+                        ))!
+                        as Map<String, Object?>;
+
+                expect(allChildrenSatisfyCondition(rootJson, condition: isMissingType), isTrue);
+                expect(
+                  oneChildSatisfiesCondition(
+                    rootJson,
+                    condition: (Map<String, Object?> child) {
+                      final creationLocation = child['creationLocation'] as Map<String, Object?>?;
+                      return hasDescription(child, description: 'Text') &&
+                          hasTextPreview(child, preview: 'a') &&
+                          creationLocation != null &&
+                          creationLocation['file'] == creationLocationA['file'] &&
+                          creationLocation['line'] == creationLocationA['line'] &&
+                          creationLocation['column'] == creationLocationA['column'];
+                    },
+                  ),
+                  isTrue,
+                );
+                expect(
+                  allChildrenSatisfyCondition(
+                    rootJson,
+                    condition: (Map<String, Object?> child) => child['locationId'] == null,
+                  ),
+                  isTrue,
+                );
+                testWidgetInspectorScopes(rootJson);
+              },
+            );
+
+            testWidgets(
+              'tree without full details omits creation locations by default using ext.flutter.inspector.getRootWidgetTree',
+              (WidgetTester tester) async {
+                const group = 'test-group';
+
+                await pumpWidgetTreeWithABC(tester);
+                final Element elementA = findElementABC('a');
+                final Map<String, dynamic> jsonA = await selectedWidgetResponseForElement(elementA);
+
+                final Map<String, Object?> creationLocation = verifyAndReturnCreationLocation(
+                  jsonA,
+                );
+                final String testFile = verifyAndReturnTestFile(creationLocation);
+                addPubRootDirectoryFor(testFile);
+
+                final rootJson =
+                    (await service.testExtension(
+                          WidgetInspectorServiceExtensions.getRootWidgetTree.name,
+                          <String, String>{
+                            'groupName': group,
+                            'isSummaryTree': 'true',
+                            'withPreviews': 'false',
+                            'fullDetails': 'false',
+                          },
+                        ))!
+                        as Map<String, Object?>;
+
+                expect(
+                  allChildrenSatisfyCondition(
+                    rootJson,
+                    condition: (Map<String, Object?> child) => child['creationLocation'] == null,
+                  ),
+                  isTrue,
+                );
+              },
+            );
           });
 
           testWidgets('ext.flutter.inspector.getSelectedSummaryWidget', (
