@@ -702,12 +702,11 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
   if (_embedderAPI.RunsAOTCompiledDartCode()) {
     constexpr const char* kAotVmServiceSwitchPrefix = "--aot-vmservice-shared-library-name=";
     bool hasVmServiceLibrarySwitch = std::any_of(
-        switches.begin(), switches.end(), [](const std::string& sw) {
-          return sw.rfind(kAotVmServiceSwitchPrefix, 0) == 0;
-        });
+        switches.begin(), switches.end(),
+        [](const std::string& sw) { return sw.rfind(kAotVmServiceSwitchPrefix, 0) == 0; });
     if (!hasVmServiceLibrarySwitch) {
-      NSURL* vmServiceFrameworkURL =
-          [NSBundle.mainBundle.privateFrameworksURL URLByAppendingPathComponent:@"VMService.framework"];
+      NSURL* vmServiceFrameworkURL = [NSBundle.mainBundle.privateFrameworksURL
+          URLByAppendingPathComponent:@"VMService.framework"];
       if (vmServiceFrameworkURL != nil) {
         NSString* vmServiceExecutablePath =
             [NSBundle bundleWithURL:vmServiceFrameworkURL].executablePath;

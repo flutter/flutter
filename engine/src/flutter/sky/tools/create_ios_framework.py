@@ -95,9 +95,7 @@ def main():
     sky_utils.copy_binary(gen_snapshot, os.path.join(dst, 'gen_snapshot_arm64'))
     arm64_vmservice = os.path.join(arm64_out_dir, 'libvmservice_snapshot.dylib')
     if os.path.exists(arm64_vmservice):
-      sky_utils.copy_binary(
-          arm64_vmservice, os.path.join(dst, 'libvmservice_snapshot.dylib')
-      )
+      sky_utils.copy_binary(arm64_vmservice, os.path.join(dst, 'libvmservice_snapshot.dylib'))
   if x64_out_dir:
     gen_snapshot = os.path.join(x64_out_dir, 'universal', 'gen_snapshot_x64')
     sky_utils.copy_binary(gen_snapshot, os.path.join(dst, 'gen_snapshot_x64'))
