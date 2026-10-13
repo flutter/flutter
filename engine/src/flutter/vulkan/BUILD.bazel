@@ -25,6 +25,7 @@ cc_library(
         "vulkan_utilities.cc",
     ],
     hdrs = [
+        "swiftshader_path.h",
         "vulkan_application.h",
         "vulkan_backbuffer.h",
         "vulkan_command_buffer.h",
