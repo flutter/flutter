@@ -566,6 +566,11 @@ class ToolDependencies {
           windowsWorkflow: finalWindowsWorkflow,
           customDevicesConfig: finalCustomDevicesConfig,
           nativeAssetsBuilder: finalNativeAssetsBuilder,
+          analytics: finalAnalytics,
+          buildSystem: finalBuildSystem,
+          buildTargets: finalBuildTargets,
+          cache: finalCache,
+          config: finalConfig,
           extensionManager: extensionManager,
         );
 

@@ -5,16 +5,21 @@
 import 'dart:async';
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
+import '../cache.dart';
 import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -51,6 +56,11 @@ class FlutterTesterDevice extends Device {
     required this._fileSystem,
     required this._artifacts,
     required this._platform,
+    required this._analytics,
+    required this._buildSystem,
+    required this._buildTargets,
+    required this._cache,
+    required this._config,
     this._nativeAssetsBuilder,
   }) : _logger = logger,
        super(platformType: null, category: null, ephemeral: false);
@@ -61,6 +71,11 @@ class FlutterTesterDevice extends Device {
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
   final Platform _platform;
+  final Analytics _analytics;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
+  final Cache _cache;
+  final Config _config;
   final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   Process? _process;
@@ -145,16 +160,16 @@ class FlutterTesterDevice extends Device {
     // Build assets and perform initial compilation.
     final FlutterProject project = FlutterProject.current();
     await BundleBuilder(
-      analytics: globals.analytics,
+      analytics: _analytics,
       artifacts: _artifacts,
-      buildSystem: globals.buildSystem,
-      buildTargets: globals.buildTargets,
-      cache: globals.cache,
-      config: globals.config,
+      buildSystem: _buildSystem,
+      buildTargets: _buildTargets,
+      cache: _cache,
+      config: _config,
       fileSystem: _fileSystem,
       flutterVersion: _flutterVersion,
       logger: _logger,
-      platform: globals.platform,
+      platform: _platform,
       processManager: _processManager,
     ).build(
       project: project,
@@ -254,6 +269,11 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
     required Logger logger,
     required FlutterVersion flutterVersion,
     required Platform platform,
+    required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
+    required Cache cache,
+    required Config config,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _testerDevice = FlutterTesterDevice(
          kTesterDeviceId,
@@ -263,6 +283,11 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
          logger: logger,
          flutterVersion: flutterVersion,
          platform: platform,
+         analytics: analytics,
+         buildSystem: buildSystem,
+         buildTargets: buildTargets,
+         cache: cache,
+         config: config,
          nativeAssetsBuilder: nativeAssetsBuilder,
        ),
        super('Flutter tester');

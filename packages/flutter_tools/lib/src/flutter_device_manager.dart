@@ -3,15 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
+import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
+import 'build_system/build_system.dart';
+import 'build_system/build_targets.dart';
+import 'cache.dart';
 import 'custom_devices/custom_device.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
@@ -54,6 +59,11 @@ class FlutterDeviceManager extends DeviceManager {
     required WindowsWorkflow windowsWorkflow,
     required CustomDevicesConfig customDevicesConfig,
     required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets? buildTargets,
+    required Cache cache,
+    required Config config,
     ExtensionManager? extensionManager,
   }) : deviceDiscoverers = <DeviceDiscovery>[
          AndroidDevices(
@@ -72,15 +82,23 @@ class FlutterDeviceManager extends DeviceManager {
            logger: logger,
          ),
          IOSSimulators(iosSimulatorUtils: iosSimulatorUtils),
-         FlutterTesterDevices(
-           fileSystem: fileSystem,
-           flutterVersion: flutterVersion,
-           processManager: processManager,
-           logger: logger,
-           artifacts: artifacts,
-           platform: platform,
-           nativeAssetsBuilder: nativeAssetsBuilder,
-         ),
+         // The flutter-tester device builds the asset bundle before launching,
+         // which requires build targets.
+         if (buildTargets != null)
+           FlutterTesterDevices(
+             fileSystem: fileSystem,
+             flutterVersion: flutterVersion,
+             processManager: processManager,
+             logger: logger,
+             artifacts: artifacts,
+             platform: platform,
+             analytics: analytics,
+             buildSystem: buildSystem,
+             buildTargets: buildTargets,
+             cache: cache,
+             config: config,
+             nativeAssetsBuilder: nativeAssetsBuilder,
+           ),
          MacOSDevices(
            processManager: processManager,
            macOSWorkflow: macOSWorkflow,
