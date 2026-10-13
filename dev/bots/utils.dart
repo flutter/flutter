@@ -82,7 +82,7 @@ final List<String> flutterTestArgs = <String>[];
 
 /// Whether execution should be simulated for debugging purposes.
 ///
-/// When `true`, calls to [runCommand] print to [io.stdout] instead of running
+/// When `true`, calls to [runCommand] print to [stdout] instead of running
 /// the process. This is useful for determining what an invocation of `test.dart`
 /// _might_ due if not invoked with `--dry-run`, or otherwise determine what the
 /// different test shards and sub-shards are configured as.

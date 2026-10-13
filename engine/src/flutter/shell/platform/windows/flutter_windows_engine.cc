@@ -210,8 +210,11 @@ FlutterWindowsEngine::FlutterWindowsEngine(
   }
   enable_impeller_ = enable_impeller;
 
+  // Only Impeller knows how to render into a top-left origin default
+  // framebuffer. The Skia path still expects OpenGL's bottom-left origin.
   egl_manager_ = egl::Manager::Create(
-      static_cast<egl::GpuPreference>(project_->gpu_preference()));
+      static_cast<egl::GpuPreference>(project_->gpu_preference()),
+      /*allow_inverted_surface=*/enable_impeller_);
   window_proc_delegate_manager_ = std::make_unique<WindowProcDelegateManager>();
 
   display_manager_ = std::make_shared<DisplayManagerWin32>(this);
@@ -317,6 +320,13 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
       // Impeller was enabled programmatically, so forward the switch to the
       // engine.
       switches.push_back("--enable-impeller");
+    }
+    if (egl_manager_ && egl_manager_->surface_origin_is_top_left()) {
+      // ANGLE gave us a window surface with an inverted Y axis, so the default
+      // framebuffer is top-down. Tell Impeller so that it stores backing store
+      // contents in the same orientation and the presenting blit stays a
+      // straight copy.
+      switches.push_back("--impeller-top-left-default-framebuffer-origin");
     }
   } else if (project_->impeller_switch() == FlutterImpellerSwitch::Disabled) {
     if (std::find(switches.begin(), switches.end(),
@@ -573,7 +583,12 @@ std::unique_ptr<FlutterWindowsView> FlutterWindowsEngine::CreateView(
     std::unique_ptr<WindowBindingHandler> window,
     bool is_sized_to_content,
     const BoxConstraints& box_constraints,
+    bool allow_implicit_view,
     FlutterWindowsViewSizingDelegate* sizing_delegate) {
+  if (!allow_implicit_view && next_view_id_ == kImplicitViewId) {
+    ++next_view_id_;
+  }
+
   auto view_id = next_view_id_;
   auto view = std::make_unique<FlutterWindowsView>(
       view_id, this, std::move(window), is_sized_to_content, box_constraints,
@@ -1055,6 +1070,7 @@ void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
 void FlutterWindowsEngine::OnPreEngineRestart() {
   // Reset the keyboard's state on hot restart.
   InitializeKeyboard();
+  window_manager_->OnPreEngineRestart();
 }
 
 std::string FlutterWindowsEngine::GetExecutableName() const {
