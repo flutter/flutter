@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Hand-written until shell/platform/embedder/BUILD.gn converts: that file is
+# the embedder API's library, its shared library and its tests, which link
+# the Dart snapshot (a later phase). What the libraries converted so far need
+# of it is GN's source_set("embedder_headers") -- the API header, which the
+# GPU surfaces (//flutter/shell/gpu) and the embeddings include -- and that
+# is all this file has.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "embedder_headers",
+    hdrs = ["embedder.h"],
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+    ],
+)
