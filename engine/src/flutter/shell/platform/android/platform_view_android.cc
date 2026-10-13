@@ -8,12 +8,102 @@
 #include <utility>
 
 #include "common/settings.h"
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_wrapper.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 
 namespace flutter {
 
 namespace {
+
+class JNIExternalViewEmbedderDelegate final
+    : public AndroidExternalViewEmbedderDelegate {
+ public:
+  explicit JNIExternalViewEmbedderDelegate(
+      std::shared_ptr<PlatformViewAndroidJNI> jni_facade)
+      : jni_facade_(std::move(jni_facade)) {}
+
+  void FlutterViewBeginFrame() override {
+    jni_facade_->FlutterViewBeginFrame();
+  }
+
+  void FlutterViewOnDisplayPlatformView(int view_id,
+                                        int x,
+                                        int y,
+                                        int width,
+                                        int height,
+                                        int viewWidth,
+                                        int viewHeight,
+                                        MutatorsStack mutators_stack) override {
+    jni_facade_->FlutterViewOnDisplayPlatformView(view_id, x, y, width, height,
+                                                  viewWidth, viewHeight,
+                                                  std::move(mutators_stack));
+  }
+
+  void FlutterViewDisplayOverlaySurface(int surface_id,
+                                        int x,
+                                        int y,
+                                        int width,
+                                        int height) override {
+    jni_facade_->FlutterViewDisplayOverlaySurface(surface_id, x, y, width,
+                                                  height);
+  }
+
+  void FlutterViewEndFrame() override { jni_facade_->FlutterViewEndFrame(); }
+
+  std::unique_ptr<OverlayMetadata> FlutterViewCreateOverlaySurface() override {
+    auto meta = jni_facade_->FlutterViewCreateOverlaySurface();
+    if (!meta) {
+      return nullptr;
+    }
+    return std::make_unique<OverlayMetadata>(meta->id, meta->window);
+  }
+
+  void FlutterViewDestroyOverlaySurfaces() override {
+    jni_facade_->FlutterViewDestroyOverlaySurfaces();
+  }
+
+  void swapTransaction() override { jni_facade_->swapTransaction(); }
+
+  std::unique_ptr<OverlayMetadata> createOverlaySurface2() override {
+    auto meta = jni_facade_->createOverlaySurface2();
+    if (!meta) {
+      return nullptr;
+    }
+    return std::make_unique<OverlayMetadata>(meta->id, meta->window);
+  }
+
+  void destroyOverlaySurface2() override {
+    jni_facade_->destroyOverlaySurface2();
+  }
+
+  void onEndFrame2() override { jni_facade_->onEndFrame2(); }
+
+  void showOverlaySurface2() override { jni_facade_->showOverlaySurface2(); }
+
+  void hideOverlaySurface2() override { jni_facade_->hideOverlaySurface2(); }
+
+  void onDisplayPlatformView2(int32_t view_id,
+                              int32_t x,
+                              int32_t y,
+                              int32_t width,
+                              int32_t height,
+                              int32_t viewWidth,
+                              int32_t viewHeight,
+                              MutatorsStack mutators_stack) override {
+    jni_facade_->onDisplayPlatformView2(view_id, x, y, width, height, viewWidth,
+                                        viewHeight, std::move(mutators_stack));
+  }
+
+  void hidePlatformView2(int32_t view_id) override {
+    jni_facade_->hidePlatformView2(view_id);
+  }
+
+  void MaybeResizeSurfaceView(int32_t width, int32_t height) const override {
+    jni_facade_->MaybeResizeSurfaceView(width, height);
+  }
+
+ private:
+  const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+};
 
 AndroidRenderingAPI ToAndroidRenderingAPI(FlutterNativeWindowBackend backend) {
   switch (backend) {
@@ -57,7 +147,12 @@ PlatformViewAndroid::PlatformViewAndroid(
           delegate.OnPlatformViewGetSettings(),
           ToAndroidRenderingAPI(rendering_backend),
           delegate.OnPlatformViewGetShutdownSafeIOTaskRunner(),
-          MakeCreateSurfaceTransaction(jni_facade))) {}
+          MakeCreateSurfaceTransaction(jni_facade))) {
+  if (jni_facade_) {
+    renderer_->SetExternalViewEmbedderDelegate(
+        std::make_shared<JNIExternalViewEmbedderDelegate>(jni_facade_));
+  }
+}
 
 PlatformViewEmbedder::PlatformDispatchTable
 PlatformViewAndroid::WithAndroidCallbacks(
@@ -70,7 +165,7 @@ PlatformViewAndroid::WithAndroidCallbacks(
   }
   if (!platform_dispatch_table.create_external_view_embedder_callback) {
     platform_dispatch_table.create_external_view_embedder_callback = [self]() {
-      return self->CreateAndroidExternalViewEmbedder();
+      return self->renderer_->CreateExternalViewEmbedder();
     };
   }
   if (!platform_dispatch_table.create_snapshot_surface_producer_callback) {
@@ -116,16 +211,14 @@ PlatformViewAndroid::PlatformViewAndroid(
           task_runners,
           delegate.OnPlatformViewGetSettings(),
           android_context,
-          MakeCreateSurfaceTransaction(jni_facade))) {}
+          MakeCreateSurfaceTransaction(jni_facade))) {
+  if (jni_facade_) {
+    renderer_->SetExternalViewEmbedderDelegate(
+        std::make_shared<JNIExternalViewEmbedderDelegate>(jni_facade_));
+  }
+}
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
-
-std::shared_ptr<ExternalViewEmbedder>
-PlatformViewAndroid::CreateAndroidExternalViewEmbedder() {
-  return std::make_shared<AndroidExternalViewEmbedderWrapper>(
-      renderer_->MeetsHCPPCriteria(), *renderer_->GetAndroidContext(),
-      jni_facade_, renderer_->GetSurfaceFactory(), task_runners_);
-}
 
 CreateSurfaceTransaction PlatformViewAndroid::MakeCreateSurfaceTransaction(
     const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {

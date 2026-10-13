@@ -6,8 +6,8 @@
 
 #include <memory>
 
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder.h"
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/external_view_embedder.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/external_view_embedder_2.h"
 
 #include "flutter/flow/embedded_views.h"
 #include "flutter/flow/surface.h"
@@ -16,7 +16,7 @@
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/fml/thread.h"
 #include "flutter/shell/common/thread_host.h"
-#include "flutter/shell/platform/android/jni/jni_mock.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/external_view_embedder_delegate_mock.h"
 #include "flutter/shell/platform/embedder/android/surface/android_surface.h"
 #include "flutter/shell/platform/embedder/android/surface/android_surface_mock.h"
 #include "flutter/testing/post_task_sync.h"
@@ -30,6 +30,8 @@
 namespace flutter {
 namespace testing {
 
+using JNIMock = ExternalViewEmbedderDelegateMock;
+using PlatformViewAndroidJNI = AndroidExternalViewEmbedderDelegate;
 using ::testing::_;
 using ::testing::ByMove;
 using ::testing::Return;

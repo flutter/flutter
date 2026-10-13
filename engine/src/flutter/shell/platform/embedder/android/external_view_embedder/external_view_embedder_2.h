@@ -2,16 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_
 
+#include <atomic>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/embedded_views.h"
-#include "flutter/shell/platform/android/external_view_embedder/surface_pool.h"
-#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
 #include "flutter/shell/platform/embedder/android/context/android_context.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/surface_pool.h"
 #include "flutter/shell/platform/embedder/android/surface/android_surface.h"
 
 namespace flutter {
@@ -19,18 +20,22 @@ namespace flutter {
 //------------------------------------------------------------------------------
 /// Allows to embed Android views into a Flutter application.
 ///
-/// This class calls Java methods via |PlatformViewAndroidJNI| to manage the
-/// lifecycle of the Android view corresponding to |flutter::PlatformViewLayer|.
+/// This class calls platform methods via |AndroidExternalViewEmbedderDelegate|
+/// to manage the lifecycle of the Android view corresponding to
+/// |flutter::PlatformViewLayer|.
 ///
 /// It also orchestrates overlay surfaces. These are Android views
 /// that render above (by Z order) the Android view corresponding to
 /// |flutter::PlatformViewLayer|.
 ///
-class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
+/// This implementation of the external view embedder is designed only to use
+/// HC++ mode. Mixing old HC modes is not supported, but either of the texture
+/// composition based platform views can be used with either mode.
+class AndroidExternalViewEmbedder2 final : public ExternalViewEmbedder {
  public:
-  AndroidExternalViewEmbedder(
+  AndroidExternalViewEmbedder2(
       const AndroidContext& android_context,
-      std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+      std::shared_ptr<AndroidExternalViewEmbedderDelegate> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
       const TaskRunners& task_runners);
 
@@ -82,7 +87,9 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // Gets the rect based on the device pixel ratio of a platform view displayed
   // on the screen.
-  DlRect GetViewRect(int64_t view_id) const;
+  static DlRect GetViewRect(
+      int64_t view_id,
+      const std::unordered_map<int64_t, EmbeddedViewParams>& view_params);
 
  private:
   // The number of frames the rasterizer task runner will continue
@@ -95,8 +102,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // Provides metadata to the Android surfaces.
   const AndroidContext& android_context_;
 
-  // Allows to call methods in Java.
-  const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
+  // Allows to call methods in the platform embedding.
+  const std::shared_ptr<AndroidExternalViewEmbedderDelegate> jni_facade_;
 
   // Allows to create surfaces.
   const std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
@@ -106,6 +113,9 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
 
   // The task runners.
   const TaskRunners task_runners_;
+
+  // If the overlay layer is currently shown.
+  std::atomic_bool overlay_layer_is_shown_{false};
 
   // The size of the root canvas.
   DlISize frame_size_;
@@ -127,8 +137,8 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // mutation stack.
   std::unordered_map<int64_t, EmbeddedViewParams> view_params_;
 
-  // The number of platform views in the previous frame.
-  int64_t previous_frame_view_count_;
+  // The set of platform views that were visible in the last frame.
+  std::unordered_set<int64_t> views_visible_last_frame_;
 
   // Destroys the surfaces created from the surface factory.
   // This method schedules a task on the platform thread, and waits for
@@ -141,14 +151,14 @@ class AndroidExternalViewEmbedder final : public ExternalViewEmbedder {
   // Whether the layer tree in the current frame has platform layers.
   bool FrameHasPlatformLayers();
 
-  // Creates a Surface when needed or recycles an existing one.
-  // Finally, draws the picture on the frame's canvas.
-  std::unique_ptr<SurfaceFrame> CreateSurfaceIfNeeded(GrDirectContext* context,
-                                                      int64_t view_id,
-                                                      EmbedderViewSlice* slice,
-                                                      const DlRect& rect);
+  // Shows the overlay layer if it has content and the previous frame did not.
+  void ShowOverlayLayerIfNeeded();
+
+  // Hides the overlay layer if it does not have content and the previous
+  // frame did have content.
+  void HideOverlayLayerIfNeeded();
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_ANDROID_EXTERNAL_VIEW_EMBEDDER_EXTERNAL_VIEW_EMBEDDER_2_H_

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/external_view_embedder/surface_pool.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/surface_pool.h"
 
 #include <utility>
 
@@ -25,7 +25,7 @@ SurfacePool::~SurfacePool() = default;
 std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
     GrDirectContext* gr_context,
     const AndroidContext& android_context,
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+    const std::shared_ptr<AndroidExternalViewEmbedderDelegate>& jni_facade,
     const std::shared_ptr<AndroidSurfaceFactory>& surface_factory) {
   std::lock_guard lock(mutex_);
   if (requested_frame_size_ != current_frame_size_) {
@@ -51,10 +51,10 @@ std::shared_ptr<OverlayLayer> SurfacePool::GetLayer(
         << "Could not create an OpenGL, Vulkan or Software surface to set up "
            "rendering.";
 
-    std::unique_ptr<PlatformViewAndroidJNI::OverlayMetadata> java_metadata =
-        use_new_surface_methods_
-            ? jni_facade->createOverlaySurface2()
-            : jni_facade->FlutterViewCreateOverlaySurface();
+    std::unique_ptr<AndroidExternalViewEmbedderDelegate::OverlayMetadata>
+        java_metadata = use_new_surface_methods_
+                            ? jni_facade->createOverlaySurface2()
+                            : jni_facade->FlutterViewCreateOverlaySurface();
 
     FML_CHECK(java_metadata->window);
     android_surface->SetNativeWindow(java_metadata->window);
@@ -99,13 +99,13 @@ bool SurfacePool::HasLayers() {
 }
 
 void SurfacePool::DestroyLayers(
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+    const std::shared_ptr<AndroidExternalViewEmbedderDelegate>& jni_facade) {
   std::lock_guard lock(mutex_);
   DestroyLayersLocked(jni_facade);
 }
 
 void SurfacePool::DestroyLayersLocked(
-    const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade) {
+    const std::shared_ptr<AndroidExternalViewEmbedderDelegate>& jni_facade) {
   if (layers_.empty()) {
     return;
   }

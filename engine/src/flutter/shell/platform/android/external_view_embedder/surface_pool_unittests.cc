@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 #include <memory>
-#include "flutter/shell/platform/android/external_view_embedder/surface_pool.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/surface_pool.h"
 
 #include "flutter/fml/make_copyable.h"
-#include "flutter/shell/platform/android/jni/jni_mock.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/external_view_embedder_delegate_mock.h"
 #include "flutter/shell/platform/embedder/android/surface/android_surface_mock.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -15,6 +15,8 @@
 namespace flutter {
 namespace testing {
 
+using JNIMock = ExternalViewEmbedderDelegateMock;
+using PlatformViewAndroidJNI = AndroidExternalViewEmbedderDelegate;
 using ::testing::_;
 using ::testing::ByMove;
 using ::testing::Return;

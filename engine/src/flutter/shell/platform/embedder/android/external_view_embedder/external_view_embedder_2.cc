@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/android/external_view_embedder/external_view_embedder_2.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/external_view_embedder_2.h"
 
 #include <cmath>
 
@@ -36,7 +36,7 @@ int32_t ToPhysicalPixels(DlScalar size_points, double device_pixel_ratio) {
 
 AndroidExternalViewEmbedder2::AndroidExternalViewEmbedder2(
     const AndroidContext& android_context,
-    std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
+    std::shared_ptr<AndroidExternalViewEmbedderDelegate> jni_facade,
     std::shared_ptr<AndroidSurfaceFactory> surface_factory,
     const TaskRunners& task_runners)
     : ExternalViewEmbedder(),

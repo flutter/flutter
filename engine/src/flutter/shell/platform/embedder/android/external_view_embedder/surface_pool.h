@@ -2,16 +2,97 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_SURFACE_POOL_H_
-#define FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_SURFACE_POOL_H_
+#ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_ANDROID_EXTERNAL_VIEW_EMBEDDER_SURFACE_POOL_H_
+#define FLUTTER_SHELL_PLATFORM_EMBEDDER_ANDROID_EXTERNAL_VIEW_EMBEDDER_SURFACE_POOL_H_
 
+#include <memory>
 #include <mutex>
+#include <utility>
+#include <vector>
 
-#include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/flow/embedded_views.h"
 #include "flutter/shell/platform/embedder/android/context/android_context.h"
+#include "flutter/shell/platform/embedder/android/surface/android_native_window.h"
 #include "flutter/shell/platform/embedder/android/surface/android_surface.h"
 
 namespace flutter {
+
+//------------------------------------------------------------------------------
+/// Platform callbacks used by `AndroidExternalViewEmbedder`,
+/// `AndroidExternalViewEmbedder2`, and `SurfacePool` to manage overlay
+/// surfaces and position Android platform views.
+///
+class AndroidExternalViewEmbedderDelegate {
+ public:
+  //----------------------------------------------------------------------------
+  /// The metadata for an overlay surface created by the platform, converted
+  /// into an |OverlayLayer| by |SurfacePool|.
+  ///
+  struct OverlayMetadata {
+    OverlayMetadata(int id, fml::RefPtr<AndroidNativeWindow> window)
+        : id(id), window(std::move(window)) {}
+
+    ~OverlayMetadata() = default;
+
+    // A unique id to identify the overlay when it gets recycled.
+    const int id;
+
+    // Holds a reference to the native window (`ANativeWindow`).
+    const fml::RefPtr<AndroidNativeWindow> window;
+  };
+
+  virtual ~AndroidExternalViewEmbedderDelegate() = default;
+
+  virtual void FlutterViewOnDisplayPlatformView(
+      int view_id,
+      int x,
+      int y,
+      int width,
+      int height,
+      int viewWidth,
+      int viewHeight,
+      MutatorsStack mutators_stack) = 0;
+
+  virtual void FlutterViewDisplayOverlaySurface(int surface_id,
+                                                int x,
+                                                int y,
+                                                int width,
+                                                int height) = 0;
+
+  virtual void FlutterViewBeginFrame() = 0;
+
+  virtual void FlutterViewEndFrame() = 0;
+
+  virtual std::unique_ptr<OverlayMetadata>
+  FlutterViewCreateOverlaySurface() = 0;
+
+  virtual void FlutterViewDestroyOverlaySurfaces() = 0;
+
+  virtual void swapTransaction() = 0;
+
+  virtual std::unique_ptr<OverlayMetadata> createOverlaySurface2() = 0;
+
+  virtual void destroyOverlaySurface2() = 0;
+
+  virtual void onEndFrame2() = 0;
+
+  virtual void onDisplayPlatformView2(int32_t view_id,
+                                      int32_t x,
+                                      int32_t y,
+                                      int32_t width,
+                                      int32_t height,
+                                      int32_t viewWidth,
+                                      int32_t viewHeight,
+                                      MutatorsStack mutators_stack) = 0;
+
+  virtual void hidePlatformView2(int32_t view_id) = 0;
+
+  virtual void showOverlaySurface2() = 0;
+
+  virtual void hideOverlaySurface2() = 0;
+
+  virtual void MaybeResizeSurfaceView(int32_t width, int32_t height) const = 0;
+};
 
 //------------------------------------------------------------------------------
 /// An Overlay layer represents an `android.view.View` in the C side.
@@ -55,7 +136,7 @@ class SurfacePool {
   std::shared_ptr<OverlayLayer> GetLayer(
       GrDirectContext* gr_context,
       const AndroidContext& android_context,
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade,
+      const std::shared_ptr<AndroidExternalViewEmbedderDelegate>& jni_facade,
       const std::shared_ptr<AndroidSurfaceFactory>& surface_factory);
 
   // Gets the layers in the pool that aren't currently used.
@@ -66,7 +147,8 @@ class SurfacePool {
   void RecycleLayers();
 
   // Destroys all the layers in the pool.
-  void DestroyLayers(const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+  void DestroyLayers(
+      const std::shared_ptr<AndroidExternalViewEmbedderDelegate>& jni_facade);
 
   // Sets the frame size used by the layers in the pool.
   // If the current layers in the pool have a different frame size,
@@ -110,9 +192,9 @@ class SurfacePool {
   bool use_new_surface_methods_ = false;
 
   void DestroyLayersLocked(
-      const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
+      const std::shared_ptr<AndroidExternalViewEmbedderDelegate>& jni_facade);
 };
 
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_PLATFORM_ANDROID_EXTERNAL_VIEW_EMBEDDER_SURFACE_POOL_H_
+#endif  // FLUTTER_SHELL_PLATFORM_EMBEDDER_ANDROID_EXTERNAL_VIEW_EMBEDDER_SURFACE_POOL_H_

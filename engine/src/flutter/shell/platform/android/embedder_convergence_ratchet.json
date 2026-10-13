@@ -14,11 +14,11 @@
       "enforce": "ratchet"
     },
     "embedder_internal_includes": {
-      "count": 12,
+      "count": 3,
       "enforce": "ratchet"
     },
     "engine_internal_includes": {
-      "count": 7,
+      "count": 2,
       "enforce": "ratchet"
     },
     "jni_platform_view_calls": {

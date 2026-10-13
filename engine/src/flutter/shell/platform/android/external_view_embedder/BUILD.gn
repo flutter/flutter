@@ -6,31 +6,10 @@ import("//flutter/common/config.gni")
 import("//flutter/testing/testing.gni")
 
 source_set("external_view_embedder") {
-  sources = [
-    "external_view_embedder.cc",
-    "external_view_embedder.h",
-    "external_view_embedder_2.cc",
-    "external_view_embedder_2.h",
-    "external_view_embedder_wrapper.cc",
-    "external_view_embedder_wrapper.h",
-    "surface_pool.cc",
-    "surface_pool.h",
-  ]
-
   public_configs = [ "//flutter:config" ]
 
-  deps = [
-    "//flutter/common",
-    "//flutter/flow",
-    "//flutter/fml",
-    "//flutter/impeller/renderer/backend/vulkan",
-    "//flutter/shell/platform/android/jni",
-    "//flutter/shell/platform/embedder/android/context",
-    "//flutter/shell/platform/embedder/android/surface",
-    "//flutter/skia",
-  ]
-
-  public_deps = [ "//third_party/abseil-cpp/absl/container:flat_hash_set" ]
+  public_deps =
+      [ "//flutter/shell/platform/embedder/android/external_view_embedder" ]
 }
 
 test_fixtures("external_view_embedder_fixtures") {
@@ -50,7 +29,7 @@ executable("android_external_view_embedder_unittests") {
     ":external_view_embedder_fixtures",
     "//flutter/flow",
     "//flutter/shell/gpu:gpu_surface_gl",
-    "//flutter/shell/platform/android/jni:jni_mock",
+    "//flutter/shell/platform/embedder/android/external_view_embedder:external_view_embedder_delegate_mock",
     "//flutter/shell/platform/embedder/android/surface",
     "//flutter/shell/platform/embedder/android/surface:surface_mock",
     "//flutter/testing",

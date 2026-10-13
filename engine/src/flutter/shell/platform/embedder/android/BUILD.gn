@@ -54,6 +54,7 @@ source_set("native_window_renderer") {
   public_deps = [
     ":native_window_gpu_configuration",
     "context",
+    "external_view_embedder",
     "surface",
     "surface:native_window",
   ]
@@ -98,6 +99,7 @@ source_set("native_window_renderer_unittests") {
 
   deps = [
     ":native_window_renderer",
+    "external_view_embedder:external_view_embedder_delegate_mock",
     "//flutter/fml",
     "//flutter/shell/common",
     "//flutter/skia",

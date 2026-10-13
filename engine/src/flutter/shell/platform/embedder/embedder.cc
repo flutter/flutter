@@ -984,6 +984,11 @@ InferNativeWindowPlatformViewCreationCallback(
         table.setup_impeller_context_callback = [raw_renderer]() {
           raw_renderer->SetupImpellerContext();
         };
+        if (!table.create_external_view_embedder_callback && !view_embedder) {
+          table.create_external_view_embedder_callback = [raw_renderer]() {
+            return raw_renderer->CreateExternalViewEmbedder();
+          };
+        }
         return std::make_unique<flutter::PlatformViewEmbedder>(
             shell, shell.GetTaskRunners(), std::move(table),
             std::move(view_embedder));

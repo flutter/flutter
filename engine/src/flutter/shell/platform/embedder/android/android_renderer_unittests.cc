@@ -12,6 +12,7 @@
 
 #include "flutter/fml/task_runner.h"
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/external_view_embedder_delegate_mock.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -101,6 +102,16 @@ TEST_F(AndroidRendererTest, HCPPNeedsSurfaceControlAndImpeller) {
 
   EXPECT_FALSE(
       MakeImpellerGLESRenderer(without_surface_control)->MeetsHCPPCriteria());
+}
+
+TEST_F(AndroidRendererTest, CreatesExternalViewEmbedderWhenDelegateIsSet) {
+  std::unique_ptr<AndroidRenderer> renderer =
+      MakeImpellerGLESRenderer(ImpellerSettings());
+  EXPECT_EQ(renderer->CreateExternalViewEmbedder(), nullptr);
+
+  auto delegate = std::make_shared<ExternalViewEmbedderDelegateMock>();
+  renderer->SetExternalViewEmbedderDelegate(delegate);
+  EXPECT_NE(renderer->CreateExternalViewEmbedder(), nullptr);
 }
 
 }  // namespace testing

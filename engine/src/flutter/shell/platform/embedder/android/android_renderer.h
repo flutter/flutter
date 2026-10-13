@@ -11,11 +11,14 @@
 #include "flutter/common/task_runners.h"
 #include "flutter/fml/macros.h"
 #include "flutter/shell/platform/embedder/android/context/android_context.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/surface_pool.h"
 #include "flutter/shell/platform/embedder/android/surface/android_native_window.h"
 #include "flutter/shell/platform/embedder/android/surface/android_surface.h"
 #include "flutter/shell/platform/embedder/android/surface/snapshot_surface_producer.h"
 
 namespace flutter {
+
+class ExternalViewEmbedder;
 
 class AndroidSurfaceFactoryImpl : public AndroidSurfaceFactory {
  public:
@@ -99,6 +102,20 @@ class AndroidRenderer {
 
   void SetupImpellerContext();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Sets the platform-view delegate that
+  ///             `CreateExternalViewEmbedder` forwards to the hybrid
+  ///             composition embedder.
+  ///
+  void SetExternalViewEmbedderDelegate(
+      std::shared_ptr<AndroidExternalViewEmbedderDelegate> delegate);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Creates the Android external-view embedder for this renderer
+  ///             if a delegate has been set, or returns null otherwise.
+  ///
+  std::shared_ptr<ExternalViewEmbedder> CreateExternalViewEmbedder() const;
+
   const std::shared_ptr<AndroidContext>& GetAndroidContext() const {
     return android_context_;
   }
@@ -124,6 +141,8 @@ class AndroidRenderer {
   std::shared_ptr<AndroidContext> android_context_;
   std::shared_ptr<AndroidSurfaceFactoryImpl> surface_factory_;
   std::unique_ptr<AndroidSurface> android_surface_;
+  std::shared_ptr<AndroidExternalViewEmbedderDelegate>
+      external_view_embedder_delegate_;
   bool android_meets_hcpp_criteria_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(AndroidRenderer);

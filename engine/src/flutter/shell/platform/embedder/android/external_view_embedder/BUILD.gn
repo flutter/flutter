@@ -1,0 +1,46 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+
+source_set("external_view_embedder") {
+  sources = [
+    "external_view_embedder.cc",
+    "external_view_embedder.h",
+    "external_view_embedder_2.cc",
+    "external_view_embedder_2.h",
+    "external_view_embedder_wrapper.cc",
+    "external_view_embedder_wrapper.h",
+    "surface_pool.cc",
+    "surface_pool.h",
+  ]
+
+  public_configs = [ "//flutter:config" ]
+
+  deps = [
+    "//flutter/common",
+    "//flutter/flow",
+    "//flutter/fml",
+    "//flutter/impeller/renderer/backend/vulkan",
+    "//flutter/shell/platform/embedder/android/context",
+    "//flutter/shell/platform/embedder/android/surface",
+    "//flutter/shell/platform/embedder/android/surface:native_window",
+    "//flutter/skia",
+  ]
+
+  public_deps = [ "//third_party/abseil-cpp/absl/container:flat_hash_set" ]
+}
+
+source_set("external_view_embedder_delegate_mock") {
+  testonly = true
+
+  sources = [ "external_view_embedder_delegate_mock.h" ]
+
+  public_configs = [ "//flutter:config" ]
+
+  deps = [
+    ":external_view_embedder",
+    "//flutter/third_party/googletest:gmock",
+  ]
+}

@@ -64,8 +64,6 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   const std::shared_ptr<AndroidRenderer> renderer_;
 
-  std::shared_ptr<ExternalViewEmbedder> CreateAndroidExternalViewEmbedder();
-
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };
 }  // namespace flutter

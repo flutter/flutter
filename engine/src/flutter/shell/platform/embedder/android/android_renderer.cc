@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/embedder/android/android_context_vk_impeller.h"
 #include "flutter/shell/platform/embedder/android/android_surface_dynamic_impeller.h"
 #include "flutter/shell/platform/embedder/android/android_surface_gl_impeller.h"
+#include "flutter/shell/platform/embedder/android/external_view_embedder/external_view_embedder_wrapper.h"
 
 #if !SLIMPELLER
 #include "flutter/shell/platform/embedder/android/android_context_gl_skia.h"
@@ -262,6 +263,21 @@ bool AndroidRenderer::IsSurfaceControlEnabled() const {
 void AndroidRenderer::SetupImpellerContext() {
   android_context_->SetupImpellerContext();
   android_surface_->SetupImpellerSurface();
+}
+
+void AndroidRenderer::SetExternalViewEmbedderDelegate(
+    std::shared_ptr<AndroidExternalViewEmbedderDelegate> delegate) {
+  external_view_embedder_delegate_ = std::move(delegate);
+}
+
+std::shared_ptr<ExternalViewEmbedder>
+AndroidRenderer::CreateExternalViewEmbedder() const {
+  if (!android_context_ || !external_view_embedder_delegate_) {
+    return nullptr;
+  }
+  return std::make_shared<AndroidExternalViewEmbedderWrapper>(
+      android_meets_hcpp_criteria_, *android_context_,
+      external_view_embedder_delegate_, surface_factory_, task_runners_);
 }
 
 }  // namespace flutter
