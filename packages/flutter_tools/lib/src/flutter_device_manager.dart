@@ -42,7 +42,7 @@ class FlutterDeviceManager extends DeviceManager {
     required Platform platform,
     required ProcessManager processManager,
     required FileSystem fileSystem,
-    required AndroidSdk? androidSdk,
+    required AndroidSdk? Function() androidSdkBuilder,
     required AppleContext appleContext,
     required FeatureFlags featureFlags,
     required IOSSimulatorUtils iosSimulatorUtils,
@@ -62,7 +62,7 @@ class FlutterDeviceManager extends DeviceManager {
   }) : deviceDiscoverers = <DeviceDiscovery>[
          AndroidDevices(
            logger: logger,
-           androidSdk: androidSdk,
+           androidSdkBuilder: androidSdkBuilder,
            androidWorkflow: androidWorkflow,
            processManager: processManager,
            fileSystem: fileSystem,
@@ -82,6 +82,7 @@ class FlutterDeviceManager extends DeviceManager {
            processManager: processManager,
            logger: logger,
            artifacts: artifacts,
+           platform: platform,
            nativeAssetsBuilder: nativeAssetsBuilder,
          ),
          MacOSDevices(

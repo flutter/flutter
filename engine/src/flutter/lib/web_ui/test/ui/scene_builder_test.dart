@@ -641,7 +641,7 @@ Future<void> testMain() async {
       );
     });
 
-    test('push pop balance enfocement is consistent', () async {
+    test('push pop balance enforcement is consistent', () async {
       final sceneBuilder = ui.SceneBuilder();
       // Normally pop() must follow a previously non-popped layer push. However,
       // the Flutter engine chooses to be lenient and allows calling pop() with
