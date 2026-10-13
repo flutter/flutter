@@ -147,9 +147,8 @@ class AboutListTile extends StatelessWidget {
       title:
           child ??
           Text(
-            MaterialLocalizations.of(
-              context,
-            ).aboutListTileTitle(applicationName ?? _defaultApplicationName(context)),
+            MaterialLocalizations.of(context)
+                .aboutListTileTitle(applicationName ?? _defaultApplicationName(context)),
           ),
       dense: dense,
       onTap: () {
@@ -1222,8 +1221,11 @@ typedef _MasterViewBuilder = Widget Function(BuildContext context, bool isLatera
 ///
 /// scrollController is provided when the page destination is the draggable
 /// sheet in the lateral UI. Otherwise, it is null.
-typedef _DetailPageBuilder =
-    Widget Function(BuildContext context, Object? arguments, ScrollController? scrollController);
+typedef _DetailPageBuilder = Widget Function(
+  BuildContext context,
+  Object? arguments,
+  ScrollController? scrollController,
+);
 
 /// Signature for the builder callback used by [_MasterDetailScaffold.actionBuilder].
 ///
@@ -1651,9 +1653,7 @@ class _MasterDetailScaffoldState extends State<_MasterDetailScaffold> implements
 }
 
 class _DetailView extends StatelessWidget {
-  const _DetailView({required _DetailPageBuilder builder, Object? arguments})
-    : _builder = builder,
-      _arguments = arguments;
+  const _DetailView({required this._builder, this._arguments});
 
   final _DetailPageBuilder _builder;
   final Object? _arguments;

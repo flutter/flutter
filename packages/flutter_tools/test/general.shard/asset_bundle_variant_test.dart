@@ -60,53 +60,50 @@ ${assets.map((String entry) => '    - $entry').join('\n')}
 ''');
     }
 
-    testWithoutContext(
-      'Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images',
-      () async {
-        createPubspec(assets: <String>['assets/', 'assets/notAVariant/']);
+    testWithoutContext('Only images in folders named with device pixel ratios (e.g. 2x, 3.0x) should be considered as variants of other images', () async {
+      createPubspec(assets: <String>['assets/', 'assets/notAVariant/']);
 
-        const image = 'assets/image.jpg';
-        const image2xVariant = 'assets/2x/image.jpg';
-        const imageNonVariant = 'assets/notAVariant/image.jpg';
+      const image = 'assets/image.jpg';
+      const image2xVariant = 'assets/2x/image.jpg';
+      const imageNonVariant = 'assets/notAVariant/image.jpg';
 
-        final assets = <String>[image, image2xVariant, imageNonVariant];
+      final assets = <String>[image, image2xVariant, imageNonVariant];
 
-        for (final asset in assets) {
-          final File assetFile = fs.file(asset);
-          assetFile.createSync(recursive: true);
-          assetFile.writeAsStringSync(asset);
-        }
+      for (final asset in assets) {
+        final File assetFile = fs.file(asset);
+        assetFile.createSync(recursive: true);
+        assetFile.writeAsStringSync(asset);
+      }
 
-        final bundle = ManifestAssetBundle(
-          logger: BufferLogger.test(),
-          fileSystem: fs,
-          platform: platform,
-          flutterRoot: flutterRoot,
-        );
+      final bundle = ManifestAssetBundle(
+        logger: BufferLogger.test(),
+        fileSystem: fs,
+        platform: platform,
+        flutterRoot: flutterRoot,
+      );
 
-        await bundle.build(
-          packageConfigPath: '.dart_tool/package_config.json',
-          flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
-          targetPlatform: TargetPlatform.tester,
-        );
+      await bundle.build(
+        packageConfigPath: '.dart_tool/package_config.json',
+        flutterProject: FlutterProject.fromDirectoryTest(fs.currentDirectory),
+        targetPlatform: TargetPlatform.tester,
+      );
 
-        final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(
-          bundle,
-        );
+      final Map<Object?, Object?> smcBinManifest = await extractAssetManifestSmcBinFromBundle(
+        bundle,
+      );
 
-        final expectedAssetManifest = <String, List<Map<String, Object>>>{
-          image: <Map<String, Object>>[
-            <String, String>{'asset': image},
-            <String, Object>{'asset': image2xVariant, 'dpr': 2.0},
-          ],
-          imageNonVariant: <Map<String, String>>[
-            <String, String>{'asset': imageNonVariant},
-          ],
-        };
+      final expectedAssetManifest = <String, List<Map<String, Object>>>{
+        image: <Map<String, Object>>[
+          <String, String>{'asset': image},
+          <String, Object>{'asset': image2xVariant, 'dpr': 2.0},
+        ],
+        imageNonVariant: <Map<String, String>>[
+          <String, String>{'asset': imageNonVariant},
+        ],
+      };
 
-        expect(smcBinManifest, equals(expectedAssetManifest));
-      },
-    );
+      expect(smcBinManifest, equals(expectedAssetManifest));
+    });
 
     testWithoutContext(
       'Asset directories have their subdirectories searched for asset variants',

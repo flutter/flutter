@@ -54,12 +54,11 @@ typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset p
 
 /// Signature used by [TwoDimensionalScrollable] to build the viewport through
 /// which the scrollable content is displayed.
-typedef TwoDimensionalViewportBuilder =
-    Widget Function(
-      BuildContext context,
-      ViewportOffset verticalPosition,
-      ViewportOffset horizontalPosition,
-    );
+typedef TwoDimensionalViewportBuilder = Widget Function(
+  BuildContext context,
+  ViewportOffset verticalPosition,
+  ViewportOffset horizontalPosition,
+);
 
 // The return type of _performEnsureVisible.
 //
@@ -1171,9 +1170,8 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
 /// date with the scroll position when it sends the drag update event to a
 /// selectable.
 class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _ScrollableSelectionContainerDelegate({required this.state, required ScrollPosition position})
-    : _position = position,
-      _autoScroller = EdgeDraggingAutoScroller(
+  _ScrollableSelectionContainerDelegate({required this.state, required this._position})
+    : _autoScroller = EdgeDraggingAutoScroller(
         state,
         velocityScalar: _kDefaultSelectToScrollVelocityScalar,
       ) {
@@ -1301,6 +1299,12 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       return result;
     }
     if (_selectionStartsInScrollable) {
+      // Paged scrollables (like PageView) disallow this; edge scrolling there
+      // flips to an adjacent page instead of revealing more content.
+      if (!(state.resolvedPhysics?.allowSelectionEdgeScrolling ?? true)) {
+        _autoScroller.stopAutoScroll();
+        return result;
+      }
       _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
       if (_autoScroller.scrolling) {
         return SelectionResult.pending;
@@ -1649,13 +1653,11 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
 class _RenderScrollSemantics extends RenderProxyBox {
   _RenderScrollSemantics({
     required ScrollPosition position,
-    required bool allowImplicitScrolling,
+    required this._allowImplicitScrolling,
     required this.axis,
-    required int? semanticChildCount,
+    required this._semanticChildCount,
     RenderBox? child,
   }) : _position = position,
-       _allowImplicitScrolling = allowImplicitScrolling,
-       _semanticChildCount = semanticChildCount,
        super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }

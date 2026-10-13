@@ -45,9 +45,8 @@ class CategoryMenuPage extends StatelessWidget {
 
     final String categoryString = category.name(context);
 
-    final TextStyle selectedCategoryTextStyle = Theme.of(
-      context,
-    ).textTheme.bodyLarge!.copyWith(fontSize: isDesktop ? 17 : 19);
+    final TextStyle selectedCategoryTextStyle = Theme.of(context).textTheme.bodyLarge!
+        .copyWith(fontSize: isDesktop ? 17 : 19);
 
     final TextStyle unselectedCategoryTextStyle = selectedCategoryTextStyle.copyWith(
       color: shrineBrown900.withOpacity(0.6),
@@ -87,10 +86,8 @@ class CategoryMenuPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDesktop = isDisplayDesktop(context);
 
-    final TextStyle logoutTextStyle = Theme.of(context).textTheme.bodyLarge!.copyWith(
-      fontSize: isDesktop ? 17 : 19,
-      color: shrineBrown900.withOpacity(0.6),
-    );
+    final TextStyle logoutTextStyle = Theme.of(context).textTheme.bodyLarge!
+        .copyWith(fontSize: isDesktop ? 17 : 19, color: shrineBrown900.withOpacity(0.6));
 
     if (isDesktop) {
       return AnimatedBuilder(

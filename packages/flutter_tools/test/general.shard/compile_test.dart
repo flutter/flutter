@@ -278,78 +278,172 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    '--include-unsupported-platform-library-stubs when includeUnsupportedPlatformLibraryStubs is set',
-    () async {
-      final completer = Completer<void>();
-      final processManager = FakeProcessManager.list([
-        FakeCommand(
-          command: const <String>[
-            'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-            'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
-            '--sdk-root',
-            'sdkroot/',
-            '--incremental',
-            '--target=dartdevc',
-            '--experimental-emit-debug-metadata',
-            '--output-dill',
-            'foo.dill',
-            '--packages',
-            '.dart_tool/package_config.json',
-            '-Ddart.vm.profile=false',
-            '-Ddart.vm.product=false',
-            '--enable-asserts',
-            '--track-creation-locations',
-            '--include-unsupported-platform-library-stubs',
-            '--initialize-from-dill',
-            'build/d484347ee69722eb276c222b372bed02.cache.dill.track.dill',
-            '--verbosity=error',
-            '--extra-flag',
-          ],
-          onRun: (_) => completer.complete(),
-        ),
-      ]);
-      final compiler = DefaultResidentCompiler(
-        'sdkroot',
-        buildInfo: BuildInfo.debug.copyWith(
-          // Explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's included in the
-          // argument list.
-          includeUnsupportedPlatformLibraryStubs: true,
-          extraFrontEndOptions: [
-            // Include a random extra flag to ensure not all extra options are stripped.
-            '--extra-flag',
-          ],
+  testWithoutContext('--include-unsupported-platform-library-stubs when includeUnsupportedPlatformLibraryStubs is set', () async {
+    final completer = Completer<void>();
+    final processManager = FakeProcessManager.list([
+      FakeCommand(
+        command: const <String>[
+          'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
+          'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
+          '--sdk-root',
+          'sdkroot/',
+          '--incremental',
+          '--target=dartdevc',
+          '--experimental-emit-debug-metadata',
+          '--output-dill',
+          'foo.dill',
+          '--packages',
+          '.dart_tool/package_config.json',
+          '-Ddart.vm.profile=false',
+          '-Ddart.vm.product=false',
+          '--enable-asserts',
+          '--track-creation-locations',
+          '--include-unsupported-platform-library-stubs',
+          '--initialize-from-dill',
+          'build/d484347ee69722eb276c222b372bed02.cache.dill.track.dill',
+          '--verbosity=error',
+          '--extra-flag',
+        ],
+        onRun: (_) => completer.complete(),
+      ),
+    ]);
+    final compiler = DefaultResidentCompiler(
+      'sdkroot',
+      buildInfo: BuildInfo.debug.copyWith(
+        // Explicitly enable includeUnsupportedPlatformLibraryStubs to ensure it's included in the
+        // argument list.
+        includeUnsupportedPlatformLibraryStubs: true,
+        extraFrontEndOptions: [
+          // Include a random extra flag to ensure not all extra options are stripped.
+          '--extra-flag',
+        ],
+      ),
+      logger: BufferLogger.test(),
+      processManager: processManager,
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      shutdownHooks: FakeShutdownHooks(),
+      targetModel: TargetModel.dartdevc,
+      config: Config.test(),
+    );
+
+    await runZonedGuarded(
+      () {
+        // This throws ToolExit as the FakeProcess immediately closes stdout and stderr.
+        compiler.recompile(
+          Uri.file('foo.dart'),
+          [],
+          outputPath: 'foo.dill',
+          packageConfig: PackageConfig.empty,
+        );
+      },
+      (e, st) {
+        if (e is! ToolExit) {
+          completer.completeError(e, st);
+        }
+      },
+    );
+
+    // Fail if the command isn't run. This can happen when the commands actual arguments don't
+    // match.
+    await completer.future.timeout(const Duration(seconds: 5));
+  });
+
+  testWithoutContext('ResidentCompilerFactory configures DDC library bundle flags', () {
+    final compiler = const ResidentCompilerFactory().create(
+      targetPlatform: .web_javascript,
+      buildInfo: const BuildInfo(
+        BuildMode.debug,
+        null,
+        treeShakeIcons: false,
+        packageConfigPath: '.dart_tool/package_config.json',
+        webEnableHotReload: true,
+      ),
+      logger: BufferLogger.test(),
+      processManager: FakeProcessManager.any(),
+      artifacts: Artifacts.test(),
+      platform: FakePlatform(),
+      fileSystem: MemoryFileSystem.test(),
+      shutdownHooks: FakeShutdownHooks(),
+      config: Config.test(),
+    ) as DefaultResidentCompiler;
+
+    expect(compiler.extraFrontEndOptions, containsAll(kDdcLibraryBundleFlags));
+  });
+
+  group('ResidentCompilerFactory deprecated JS interop', () {
+    DefaultResidentCompiler createCompiler({
+      required TargetPlatform targetPlatform,
+      bool? deprecatedJsInterop,
+    }) {
+      return const ResidentCompilerFactory().create(
+        targetPlatform: targetPlatform,
+        buildInfo: BuildInfo(
+          BuildMode.debug,
+          null,
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+          webEnableHotReload: true,
+          deprecatedJsInterop: deprecatedJsInterop,
         ),
         logger: BufferLogger.test(),
-        processManager: processManager,
+        processManager: FakeProcessManager.any(),
         artifacts: Artifacts.test(),
         platform: FakePlatform(),
         fileSystem: MemoryFileSystem.test(),
         shutdownHooks: FakeShutdownHooks(),
-        targetModel: TargetModel.dartdevc,
         config: Config.test(),
+      ) as DefaultResidentCompiler;
+    }
+
+    const deprecatedJsInteropFlags = <String>[
+      '--deprecated-js-interop',
+      '--no-deprecated-js-interop',
+    ];
+
+    testWithoutContext('passes no flag to DDC by default', () {
+      final DefaultResidentCompiler compiler = createCompiler(targetPlatform: .web_javascript);
+
+      expect(compiler.extraFrontEndOptions, isNot(anyElement(isIn(deprecatedJsInteropFlags))));
+    });
+
+    testWithoutContext('forwards the flag to DDC', () {
+      expect(
+        createCompiler(
+          targetPlatform: .web_javascript,
+          deprecatedJsInterop: false,
+        ).extraFrontEndOptions,
+        contains('--no-deprecated-js-interop'),
+      );
+      expect(
+        createCompiler(
+          targetPlatform: .web_javascript,
+          deprecatedJsInterop: true,
+        ).extraFrontEndOptions,
+        contains('--deprecated-js-interop'),
+      );
+    });
+
+    testWithoutContext('does not forward the flag to non-web targets', () {
+      final DefaultResidentCompiler compiler = createCompiler(
+        targetPlatform: .android_arm64,
+        deprecatedJsInterop: false,
       );
 
-      await runZonedGuarded(
-        () {
-          // This throws ToolExit as the FakeProcess immediately closes stdout and stderr.
-          compiler.recompile(
-            Uri.file('foo.dart'),
-            [],
-            outputPath: 'foo.dill',
-            packageConfig: PackageConfig.empty,
-          );
-        },
-        (e, st) {
-          if (e is! ToolExit) {
-            completer.completeError(e, st);
-          }
-        },
-      );
+      expect(compiler.extraFrontEndOptions, isNot(anyElement(isIn(deprecatedJsInteropFlags))));
+    });
 
-      // Fail if the command isn't run. This can happen when the commands actual arguments don't
-      // match.
-      await completer.future.timeout(const Duration(seconds: 5));
-    },
-  );
+    testWithoutContext('uses a different cached kernel for each flag value', () {
+      final initializeFromDillPaths = <String?>{
+        for (final bool? value in <bool?>[null, true, false])
+          createCompiler(
+            targetPlatform: .web_javascript,
+            deprecatedJsInterop: value,
+          ).initializeFromDill,
+      };
+
+      expect(initializeFromDillPaths, hasLength(3));
+    });
+  });
 }

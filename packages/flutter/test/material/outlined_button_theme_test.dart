@@ -156,9 +156,8 @@ void main() {
         },
       );
       return MaterialApp(
-        theme: ThemeData.from(
-          colorScheme: const ColorScheme.light(),
-        ).copyWith(outlinedButtonTheme: OutlinedButtonThemeData(style: overallStyle)),
+        theme: ThemeData.from(colorScheme: const ColorScheme.light())
+            .copyWith(outlinedButtonTheme: OutlinedButtonThemeData(style: overallStyle)),
         home: Scaffold(
           body: Center(
             // If the OutlinedButtonTheme widget is present, it's used

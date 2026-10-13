@@ -147,16 +147,13 @@ enum HostArtifact {
   /// The summary dill for the dart2js target.
   webPlatformDart2JSKernelDill('dart2js_platform.dill'),
 
-  /// The precompiled SDKs and sourcemaps for web debug builds with the AMD module system.
-  // TODO(markzipan): delete these when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-  webPrecompiledAmdCanvaskitSdk('dart_sdk.js'),
-  webPrecompiledAmdCanvaskitSdkSourcemaps('dart_sdk.js.map'),
+  /// The precompiled SDKs and sourcemaps for web debug builds with the stable DDC.
+  webPrecompiledDDCStableSdk('dart_sdk.js'),
+  webPrecompiledDDCStableSdkSourcemaps('dart_sdk.js.map'),
 
-  /// The precompiled SDKs and sourcemaps for web debug builds with the DDC
-  /// library bundle module system. Only SDKs built with sound null-safety are
-  /// provided here.
-  webPrecompiledDdcLibraryBundleCanvaskitSdk('dart_sdk.js'),
-  webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps('dart_sdk.js.map'),
+  /// The precompiled SDKs and sourcemaps for web debug builds with the canary DDC.
+  webPrecompiledDDCCanarySdk('dart_sdk.js'),
+  webPrecompiledDDCCanarySdkSourcemaps('dart_sdk.js.map'),
 
   iosDeploy('ios-deploy'),
   idevicesyslog('idevicesyslog'),
@@ -297,22 +294,29 @@ abstract class Artifacts {
     return _TestLocalEngine(localEngine, localEngineHost, fileSystem ?? MemoryFileSystem.test());
   }
 
-  static Artifacts getLocalEngine(EngineBuildPaths engineBuildPaths) {
+  static Artifacts getLocalEngine(
+    EngineBuildPaths engineBuildPaths, {
+    required Cache cache,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessManager processManager,
+  }) {
     Artifacts artifacts = CachedArtifacts(
-      fileSystem: globals.fs,
-      platform: globals.platform,
-      cache: globals.cache,
-      operatingSystemUtils: globals.os,
+      fileSystem: fileSystem,
+      platform: platform,
+      cache: cache,
+      operatingSystemUtils: operatingSystemUtils,
     );
     if (engineBuildPaths.hostEngine != null && engineBuildPaths.targetEngine != null) {
       artifacts = CachedLocalEngineArtifacts(
         engineBuildPaths.hostEngine!,
         engineOutPath: engineBuildPaths.targetEngine!,
-        cache: globals.cache,
-        fileSystem: globals.fs,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        operatingSystemUtils: globals.os,
+        cache: cache,
+        fileSystem: fileSystem,
+        processManager: processManager,
+        platform: platform,
+        operatingSystemUtils: operatingSystemUtils,
         parent: artifacts,
       );
     }
@@ -320,9 +324,9 @@ abstract class Artifacts {
       artifacts = CachedLocalWebSdkArtifacts(
         parent: artifacts,
         webSdkPath: engineBuildPaths.webSdk!,
-        fileSystem: globals.fs,
-        platform: globals.platform,
-        operatingSystemUtils: globals.os,
+        fileSystem: fileSystem,
+        platform: platform,
+        operatingSystemUtils: operatingSystemUtils,
       );
     }
     return artifacts;
@@ -353,17 +357,67 @@ abstract class Artifacts {
   LocalEngineInfo? get localEngineInfo;
 }
 
+/// Artifacts that can be changed after they are created.
+///
+/// Commands are created when the tool starts up, before the command line has
+/// been parsed, so the artifacts they need to build against are not yet known.
+/// A [DeferredArtifacts] can be used in their place, then [resolve]d once the
+/// required artifacts are known.
+///
+/// Paths read before [resolve] is called are out of date, so must not be
+/// cached.
+class DeferredArtifacts implements Artifacts {
+  DeferredArtifacts(this._artifacts);
+
+  Artifacts _artifacts;
+  var _isResolved = false;
+
+  /// Uses [artifacts] from here on.
+  ///
+  /// Called before any command runs, and only once.
+  void resolve(Artifacts artifacts) {
+    assert(!_isResolved, 'The artifacts to build against have already been resolved.');
+    _isResolved = true;
+    _artifacts = artifacts;
+  }
+
+  @override
+  String getArtifactPath(
+    Artifact artifact, {
+    TargetPlatform? platform,
+    BuildMode? mode,
+    EnvironmentType? environmentType,
+  }) {
+    return _artifacts.getArtifactPath(
+      artifact,
+      platform: platform,
+      mode: mode,
+      environmentType: environmentType,
+    );
+  }
+
+  @override
+  FileSystemEntity getHostArtifact(HostArtifact artifact) => _artifacts.getHostArtifact(artifact);
+
+  @override
+  String getEngineType(TargetPlatform platform, [BuildMode? mode]) =>
+      _artifacts.getEngineType(platform, mode);
+
+  @override
+  bool get usesLocalArtifacts => _artifacts.usesLocalArtifacts;
+
+  @override
+  LocalEngineInfo? get localEngineInfo => _artifacts.localEngineInfo;
+}
+
 /// Manages the engine artifacts downloaded to the local cache.
 class CachedArtifacts implements Artifacts {
   CachedArtifacts({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Cache cache,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _fileSystem = fileSystem,
-       _platform = platform,
-       _cache = cache,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._fileSystem,
+    required this._platform,
+    required this._cache,
+    required this._operatingSystemUtils,
+  });
 
   final FileSystem _fileSystem;
   final Platform _platform;
@@ -382,10 +436,10 @@ class CachedArtifacts implements Artifacts {
       case HostArtifact.webPlatformKernelFolder:
       case HostArtifact.webPlatformDDCKernelDill:
       case HostArtifact.webPlatformDart2JSKernelDill:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdk:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCStableSdk:
+      case HostArtifact.webPrecompiledDDCStableSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCCanarySdk:
+      case HostArtifact.webPrecompiledDDCCanarySdkSourcemaps:
         return _resolveWebArtifact(artifact, _getFlutterWebSdkPath(), _fileSystem, _platform);
       case HostArtifact.idevicesyslog:
       case HostArtifact.idevicescreenshot:
@@ -422,34 +476,23 @@ class CachedArtifacts implements Artifacts {
     EnvironmentType? environmentType,
   }) {
     platform = _mapTargetPlatform(platform);
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
+    switch (platform?.os) {
+      case .android:
         assert(platform != TargetPlatform.android);
         return _getAndroidArtifactPath(artifact, platform!, mode!);
-      case TargetPlatform.ios:
+      case .ios:
         return _getIosArtifactPath(artifact, platform!, mode, environmentType);
-      case TargetPlatform.darwin:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
+      case .macos || .linux || .windows:
         return _getDesktopArtifactPath(artifact, platform!, mode);
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
+      case .fuchsia:
         return _getFuchsiaArtifactPath(artifact, platform!, mode!);
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
-      case null:
+      case .tester || .web || null:
         return _getHostArtifactPath(
           artifact,
           platform ?? _currentHostPlatform(_platform, _operatingSystemUtils),
           mode,
         );
-      case TargetPlatform.unsupported:
+      case .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
   }
@@ -780,13 +823,12 @@ class CachedArtifacts implements Artifacts {
   String? _getEngineArtifactsPath(TargetPlatform platform, [BuildMode? mode]) {
     final String engineDir = _cache.getArtifactDirectory('engine').path;
     final String platformName = _enginePlatformDirectoryName(platform);
-    switch (platform) {
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.linux_arm64:
-      case TargetPlatform.linux_riscv64:
-      case TargetPlatform.darwin:
-      case TargetPlatform.windows_x64:
-      case TargetPlatform.windows_arm64:
+    if (platform == TargetPlatform.android) {
+      assert(false, 'cannot use TargetPlatform.android to look up artifacts');
+      return null;
+    }
+    switch (platform.os) {
+      case .linux || .macos || .windows:
         // TODO(zanderso): remove once debug desktop artifacts are uploaded
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
@@ -795,23 +837,14 @@ class CachedArtifacts implements Artifacts {
         }
         final suffix = mode != BuildMode.debug ? '-${kebabCase(mode.cliName)}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
-      case TargetPlatform.fuchsia_arm64:
-      case TargetPlatform.fuchsia_x64:
-      case TargetPlatform.tester:
-      case TargetPlatform.web_javascript:
+      case .fuchsia || .tester || .web:
         assert(mode == null, 'Platform $platform does not support different build modes.');
         return _fileSystem.path.join(engineDir, platformName);
-      case TargetPlatform.ios:
-      case TargetPlatform.android_arm:
-      case TargetPlatform.android_arm64:
-      case TargetPlatform.android_x64:
+      case .ios || .android:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
         final suffix = mode != BuildMode.debug ? '-${kebabCase(mode!.cliName)}' : '';
         return _fileSystem.path.join(engineDir, platformName + suffix);
-      case TargetPlatform.android:
-        assert(false, 'cannot use TargetPlatform.android to look up artifacts');
-        return null;
-      case TargetPlatform.unsupported:
+      case .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }
   }
@@ -985,7 +1018,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
     required String engineOutPath,
     required FileSystem fileSystem,
     required Cache cache,
-    required ProcessManager processManager,
+    required this._processManager,
     required Platform platform,
     required OperatingSystemUtils operatingSystemUtils,
     Artifacts? parent,
@@ -994,7 +1027,6 @@ class CachedLocalEngineArtifacts implements Artifacts {
          targetOutPath: engineOutPath,
          hostOutPath: _hostEngineOutPath,
        ),
-       _processManager = processManager,
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils,
        _backupCache =
@@ -1035,10 +1067,10 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case HostArtifact.webPlatformKernelFolder:
       case HostArtifact.webPlatformDDCKernelDill:
       case HostArtifact.webPlatformDart2JSKernelDill:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdk:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCStableSdk:
+      case HostArtifact.webPrecompiledDDCStableSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCCanarySdk:
+      case HostArtifact.webPrecompiledDDCCanarySdkSourcemaps:
       case HostArtifact.idevicesyslog:
       case HostArtifact.idevicescreenshot:
       case HostArtifact.skyEnginePath:
@@ -1084,7 +1116,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.flutterMacOSXcframework:
         return _fileSystem.path.join(localEngineInfo.targetOutPath, artifactFileName);
       case Artifact.platformKernelDill:
-        if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
+        if (platform?.os == .fuchsia) {
           return _fileSystem.path.join(
             localEngineInfo.targetOutPath,
             'flutter_runner_patched_sdk',
@@ -1117,7 +1149,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
         // what was specified in [mode] argument because local engine will
         // have only one flutter_patched_sdk in standard location, that
         // is happen to be what debug(non-release) mode is using.
-        if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
+        if (platform?.os == .fuchsia) {
           return _fileSystem.path.join(localEngineInfo.targetOutPath, 'flutter_runner_patched_sdk');
         }
         return _getFlutterPatchedSdkPath(BuildMode.debug);
@@ -1229,16 +1261,12 @@ class CachedLocalEngineArtifacts implements Artifacts {
 
 class CachedLocalWebSdkArtifacts implements Artifacts {
   CachedLocalWebSdkArtifacts({
-    required Artifacts parent,
-    required String webSdkPath,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required OperatingSystemUtils operatingSystemUtils,
-  }) : _parent = parent,
-       _webSdkPath = webSdkPath,
-       _fileSystem = fileSystem,
-       _platform = platform,
-       _operatingSystemUtils = operatingSystemUtils;
+    required this._parent,
+    required this._webSdkPath,
+    required this._fileSystem,
+    required this._platform,
+    required this._operatingSystemUtils,
+  });
 
   final Artifacts _parent;
   final String _webSdkPath;
@@ -1321,10 +1349,10 @@ class CachedLocalWebSdkArtifacts implements Artifacts {
       case HostArtifact.webPlatformKernelFolder:
       case HostArtifact.webPlatformDDCKernelDill:
       case HostArtifact.webPlatformDart2JSKernelDill:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdk:
-      case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
-      case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCStableSdk:
+      case HostArtifact.webPrecompiledDDCStableSdkSourcemaps:
+      case HostArtifact.webPrecompiledDDCCanarySdk:
+      case HostArtifact.webPrecompiledDDCCanarySdkSourcemaps:
         return _resolveWebArtifact(artifact, _getFlutterWebSdkPath(), _fileSystem, _platform);
       case HostArtifact.iosDeploy:
       case HostArtifact.idevicesyslog:
@@ -1471,20 +1499,15 @@ FileSystemEntity _resolveWebArtifact(
       return fileSystem.file(
         fileSystem.path.join(webSdkPath, 'kernel', artifact.getFileName(platform)),
       );
-    case HostArtifact.webPrecompiledAmdCanvaskitSdk:
-    case HostArtifact.webPrecompiledAmdCanvaskitSdkSourcemaps:
+    case HostArtifact.webPrecompiledDDCStableSdk:
+    case HostArtifact.webPrecompiledDDCStableSdkSourcemaps:
       return fileSystem.file(
-        fileSystem.path.join(webSdkPath, 'kernel', 'amd-canvaskit', artifact.getFileName(platform)),
+        fileSystem.path.join(webSdkPath, 'kernel', 'ddc', 'stable', artifact.getFileName(platform)),
       );
-    case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdk:
-    case HostArtifact.webPrecompiledDdcLibraryBundleCanvaskitSdkSourcemaps:
+    case HostArtifact.webPrecompiledDDCCanarySdk:
+    case HostArtifact.webPrecompiledDDCCanarySdkSourcemaps:
       return fileSystem.file(
-        fileSystem.path.join(
-          webSdkPath,
-          'kernel',
-          'ddcLibraryBundle-canvaskit',
-          artifact.getFileName(platform),
-        ),
+        fileSystem.path.join(webSdkPath, 'kernel', 'ddc', 'canary', artifact.getFileName(platform)),
       );
     case HostArtifact.iosDeploy:
     case HostArtifact.idevicesyslog:

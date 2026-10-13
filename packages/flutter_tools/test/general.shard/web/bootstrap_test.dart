@@ -42,6 +42,7 @@ void main() {
     );
     expect(result, isNot(contains('"flutter-loader"')));
     expect(result, isNot(contains('"indeterminate"')));
+    expect(result, isNot(contains('_removeFlutterLoader')));
   });
 
   // https://github.com/flutter/flutter/issues/107742
@@ -56,6 +57,17 @@ void main() {
     final regex = RegExp(r'(?:\.flutter-loader\s*\{)[^}]+(?:overflow\:\s*hidden;)[^}]+}');
 
     expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
+  });
+
+  test('generateBootstrapScript defines window._removeFlutterLoader and '
+      'does not listen to dart-app-ready', () {
+    final String result = generateBootstrapScript(
+      requireUrl: 'require.js',
+      mapperUrl: 'mapper.js',
+      generateLoadingIndicator: true,
+    );
+    expect(result, contains(r'window._removeFlutterLoader = function()'));
+    expect(result, isNot(contains('dart-app-ready')));
   });
 
   // https://github.com/flutter/flutter/issues/82524
@@ -156,6 +168,15 @@ void main() {
     expect(result, contains('''window.\$dartLoader.rootDirectories = ["$root"];'''));
   });
 
+  test('generateMainModule invokes window._removeFlutterLoader', () {
+    final String result = generateMainModule(
+      entrypoint: 'foo/bar/main.js',
+      nativeNullAssertions: false,
+    );
+    expect(result, contains(r'if (window._removeFlutterLoader)'));
+    expect(result, contains(r'window._removeFlutterLoader();'));
+  });
+
   test('generateTestEntrypoint generates proper imports and mappings for tests', () {
     final String result = generateTestEntrypoint(
       testInfos: <WebTestInfo>[
@@ -231,6 +252,7 @@ void main() {
       );
       expect(result, isNot(contains('"flutter-loader"')));
       expect(result, isNot(contains('"indeterminate"')));
+      expect(result, isNot(contains('_removeFlutterLoader')));
     });
 
     // https://github.com/flutter/flutter/issues/107742
@@ -249,6 +271,19 @@ void main() {
       expect(result, matches(regex), reason: '.flutter-loader must have overflow: hidden');
     });
 
+    test('bootstrap script defines window._removeFlutterLoader and '
+        'does not listen to dart-app-ready', () {
+      final String result = generateDDCLibraryBundleBootstrapScript(
+        entrypoint: 'foo/bar/main.js',
+        ddcModuleLoaderUrl: 'ddc_module_loader.js',
+        mapperUrl: 'mapper.js',
+        generateLoadingIndicator: true,
+        isWindows: false,
+      );
+      expect(result, contains(r'window._removeFlutterLoader = function()'));
+      expect(result, isNot(contains('dart-app-ready')));
+    });
+
     test('generateDDCLibraryBundleMainModule embeds the entrypoint correctly', () {
       final String result = generateDDCLibraryBundleMainModule(
         entrypoint: 'main.js',
@@ -259,6 +294,17 @@ void main() {
       // bootstrap main module has correct defined module.
       expect(result, contains('const appName = "org-dartlang-app:///main.js";'));
       expect(result, contains('dartDevEmbedder.runMain(appName, sdkOptions);'));
+    });
+
+    test('generateDDCLibraryBundleMainModule invokes window._removeFlutterLoader', () {
+      final String result = generateDDCLibraryBundleMainModule(
+        entrypoint: 'main.js',
+        nativeNullAssertions: false,
+        onLoadEndBootstrap: 'on_load_end_bootstrap.js',
+        isCi: true,
+      );
+      expect(result, contains(r'if (window._removeFlutterLoader)'));
+      expect(result, contains(r'window._removeFlutterLoader();'));
     });
 
     test('generateDDCLibraryBundleMainModule includes null safety switches', () {

@@ -442,9 +442,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final value =
-          PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
-      if (value != null) {
+      final Object? value = PageStorage.maybeOf(context.storageContext)
+          ?.readState(context.storageContext);
+      // The slot is identified only by the PageStorageKeys above the context,
+      // so another widget under the same keys may have saved a value of a
+      // different type here.
+      if (value is double) {
         _pageToUseOnStartup = value;
       }
     }
@@ -580,6 +583,11 @@ class PageScrollPhysics extends ScrollPhysics {
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return PageScrollPhysics(parent: buildParent(ancestor));
   }
+
+  // Selection gestures such as dragging to select text must not scroll a
+  // PageView to an adjacent page, so edge scrolling is disallowed here.
+  @override
+  bool get allowSelectionEdgeScrolling => false;
 
   double _getPage(ScrollMetrics position) {
     if (position is _PagePosition) {
