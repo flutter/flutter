@@ -213,7 +213,7 @@ void main() {
     // widget_inspector_test.dart for tests of the ext.flutter.inspector service
     // extensions) or accessibility inspector (see accessibility_inspector_test.dart).
     // Any test counted here must be tested in this file!
-    const serviceExtensionCount = 31;
+    const serviceExtensionCount = 32;
 
     // The tests are in the widgets/accessibility_evaluations_service_extension_test.dart
     // They can't be moved here because they need to run in a WidgetTester environment.
@@ -1431,6 +1431,209 @@ void main() {
     expect(brightnessValue, 'Brightness.light');
 
     testedExtensions.add(FoundationServiceExtensions.brightnessOverride.name);
+  });
+
+  test('Service extensions - viewMetricsOverride', () async {
+    final int viewId = binding.platformDispatcher.views.single.viewId;
+    addTearDown(debugClearViewMetricsOverrides);
+    // Every client listening for extension state changes has to learn about an
+    // override, not just the one that asked for it.
+    final Iterable<Map<String, dynamic>> extensionChangedEvents = binding
+        .getServiceExtensionStateChangedEvents(
+          'ext.flutter.${FoundationServiceExtensions.viewMetricsOverride.name}',
+        );
+    // The service extension machinery encodes the reply and the event as JSON
+    // before a client sees them, so the assertions below are on that form.
+    Object? encoded(Object? value) => json.decode(json.encode(value));
+    Future<Object?> call(Map<String, String> parameters) async {
+      return encoded(
+        await binding.testExtension(
+          FoundationServiceExtensions.viewMetricsOverride.name,
+          parameters,
+        ),
+      );
+    }
+
+    Object? lastEventValue() => encoded(extensionChangedEvents.last['value']);
+
+    const firstOverride = <String, Object?>{'devicePixelRatio': 3.5, 'boldText': true};
+    const firstOverrideJson = '{"boldText": true, "devicePixelRatio": 3.5}';
+    const secondOverride = <String, Object?>{
+      'textScaling': <Object?>[
+        <Object?>[1.0, 2.0],
+      ],
+    };
+    final firstOverrideReply = <String, Object?>{
+      'overrides': <String, Object?>{'$viewId': firstOverride},
+    };
+
+    // Reading with no override installed, with and without a viewId.
+    expect(await call(<String, String>{'viewId': '$viewId'}), <String, Object?>{
+      'overrides': <String, Object?>{},
+    });
+    expect(await call(<String, String>{}), <String, Object?>{'overrides': <String, Object?>{}});
+    expect(extensionChangedEvents, isEmpty);
+
+    // Installing an override. The reply and the event both carry the whole
+    // registry, whatever the call was.
+    expect(
+      await call(<String, String>{'viewId': '$viewId', 'overrides': firstOverrideJson}),
+      firstOverrideReply,
+    );
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
+    );
+    expect(extensionChangedEvents.length, 1);
+    expect(lastEventValue(), <String, Object?>{'$viewId': firstOverride});
+
+    // Installing the same override again changes nothing, and says nothing.
+    expect(
+      await call(<String, String>{'viewId': '$viewId', 'overrides': firstOverrideJson}),
+      firstOverrideReply,
+    );
+    expect(extensionChangedEvents.length, 1);
+
+    // A second view's override: the event reports the whole registry, so that a
+    // client that missed the earlier ones is not left with half of it.
+    await call(<String, String>{
+      'viewId': '${viewId + 1}',
+      'overrides': '{"textScaling": [[1, 2]]}',
+    });
+    expect(extensionChangedEvents.length, 2);
+    expect(lastEventValue(), <String, Object?>{
+      '$viewId': firstOverride,
+      '${viewId + 1}': secondOverride,
+    });
+
+    // A parameterless read returns the whole registry.
+    expect(await call(<String, String>{}), <String, Object?>{
+      'overrides': <String, Object?>{'$viewId': firstOverride, '${viewId + 1}': secondOverride},
+    });
+    expect(extensionChangedEvents.length, 2);
+
+    await call(<String, String>{'viewId': '${viewId + 1}', 'overrides': '{}'});
+    expect(extensionChangedEvents.length, 3);
+
+    // Reading it back.
+    expect(await call(<String, String>{'viewId': '$viewId'}), firstOverrideReply);
+    expect(extensionChangedEvents.length, 3);
+
+    // Setting partial padding and systemGestureInsets works and defaults omitted edges to 0.
+    expect(
+      await call(<String, String>{
+        'viewId': '$viewId',
+        'overrides': '{"padding": {"top": 48}, "systemGestureInsets": {"left": 20, "right": 20}}',
+      }),
+      <String, Object?>{
+        'overrides': <String, Object?>{
+          '$viewId': <String, Object?>{
+            'padding': <String, Object?>{'left': 0.0, 'top': 48.0, 'right': 0.0, 'bottom': 0.0},
+            'systemGestureInsets': <String, Object?>{
+              'left': 20.0,
+              'top': 0.0,
+              'right': 20.0,
+              'bottom': 0.0,
+            },
+          },
+        },
+      },
+    );
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(
+        padding: FakeViewPadding(top: 48),
+        systemGestureInsets: FakeViewPadding(left: 20, right: 20),
+      ),
+    );
+    expect(extensionChangedEvents.length, 4);
+
+    // Restore for subsequent checks.
+    await call(<String, String>{'viewId': '$viewId', 'overrides': firstOverrideJson});
+    expect(extensionChangedEvents.length, 5);
+
+    // A malformed payload is rejected and leaves the installed override alone.
+    await expectLater(
+      call(<String, String>{'viewId': '$viewId', 'overrides': '{"devicePixelRatio": 0}'}),
+      throwsA(isA<FormatException>()),
+    );
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
+    );
+
+    // An unparsable viewId is rejected.
+    await expectLater(
+      call(<String, String>{'viewId': 'not-a-number'}),
+      throwsA(isA<FormatException>()),
+    );
+
+    // A negative viewId is rejected.
+    await expectLater(call(<String, String>{'viewId': '-1'}), throwsA(isA<FormatException>()));
+
+    // A missing viewId is rejected when overrides is provided.
+    await expectLater(call(<String, String>{'overrides': '{}'}), throwsA(isA<FormatException>()));
+
+    // An overrides parameter that is not a JSON object, including null, is
+    // rejected and leaves the installed override alone.
+    for (final overrides in <String>['123', 'null']) {
+      await expectLater(
+        call(<String, String>{'viewId': '$viewId', 'overrides': overrides}),
+        throwsA(isA<FormatException>()),
+      );
+    }
+    expect(
+      debugViewMetricsOverrides[viewId],
+      const DebugViewMetricsOverride(devicePixelRatio: 3.5, boldText: true),
+    );
+
+    // Parameters the extension does not use, such as the isolateId that every
+    // service extension call carries, are ignored.
+    expect(
+      await call(<String, String>{'viewId': '$viewId', 'isolateId': 'isolates/123'}),
+      firstOverrideReply,
+    );
+
+    // Only a clearAll of 'true' clears.
+    expect(
+      await call(<String, String>{'viewId': '$viewId', 'clearAll': 'false'}),
+      firstOverrideReply,
+    );
+    expect(extensionChangedEvents.length, 5);
+
+    // Setting overrides to an empty object removes the entry.
+    expect(await call(<String, String>{'viewId': '$viewId', 'overrides': '{}'}), <String, Object?>{
+      'overrides': <String, Object?>{},
+    });
+    expect(debugViewMetricsOverrides, isEmpty);
+    expect(extensionChangedEvents.length, 6);
+    expect(lastEventValue(), <String, Object?>{});
+
+    // Re-installing for the clearAll test below.
+    await call(<String, String>{'viewId': '$viewId', 'overrides': firstOverrideJson});
+    expect(extensionChangedEvents.length, 7);
+
+    // Clearing everything ignores the other parameters.
+    expect(
+      await call(<String, String>{
+        'clearAll': 'true',
+        'viewId': '$viewId',
+        'overrides': '{"boldText": true}',
+      }),
+      <String, Object?>{'overrides': <String, Object?>{}},
+    );
+    expect(debugViewMetricsOverrides, isEmpty);
+    expect(extensionChangedEvents.length, 8);
+    expect(lastEventValue(), <String, Object?>{});
+
+    // Clearing again removes nothing, and says nothing.
+    await call(<String, String>{'clearAll': 'true'});
+    expect(extensionChangedEvents.length, 8);
+    if (binding.frameScheduled) {
+      await binding.doFrame();
+    }
+
+    testedExtensions.add(FoundationServiceExtensions.viewMetricsOverride.name);
   });
 
   test('Service extensions - activeDevToolsServerAddress', () async {
