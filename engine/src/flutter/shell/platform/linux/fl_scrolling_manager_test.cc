@@ -207,13 +207,13 @@ TEST_F(FlScrollingManagerTest, Zooming) {
   g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
 
   size_t time_start = g_get_real_time();
-  fl_scrolling_manager_handle_zoom_begin(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_zoom_begin(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 1u);
   EXPECT_EQ(pointer_events[0].x, 4.0);
   EXPECT_EQ(pointer_events[0].y, 8.0);
   EXPECT_EQ(pointer_events[0].phase, kPanZoomStart);
   EXPECT_GE(pointer_events[0].timestamp, time_start);
-  fl_scrolling_manager_handle_zoom_update(manager, TRUE, 4.0, 8.0, 1.1);
+  fl_scrolling_manager_handle_zoom_update(manager, 4.0, 8.0, 1.1);
   EXPECT_EQ(pointer_events.size(), 2u);
   EXPECT_EQ(pointer_events[1].x, 4.0);
   EXPECT_EQ(pointer_events[1].y, 8.0);
@@ -223,7 +223,7 @@ TEST_F(FlScrollingManagerTest, Zooming) {
   EXPECT_EQ(pointer_events[1].pan_y, 0);
   EXPECT_EQ(pointer_events[1].scale, 1.1);
   EXPECT_EQ(pointer_events[1].rotation, 0);
-  fl_scrolling_manager_handle_zoom_end(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_zoom_end(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 3u);
   EXPECT_EQ(pointer_events[2].x, 4.0);
   EXPECT_EQ(pointer_events[2].y, 8.0);
@@ -249,13 +249,13 @@ TEST_F(FlScrollingManagerTest, Rotating) {
   g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
 
   size_t time_start = g_get_real_time();
-  fl_scrolling_manager_handle_rotation_begin(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_rotation_begin(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 1u);
   EXPECT_EQ(pointer_events[0].x, 4.0);
   EXPECT_EQ(pointer_events[0].y, 8.0);
   EXPECT_EQ(pointer_events[0].phase, kPanZoomStart);
   EXPECT_GE(pointer_events[0].timestamp, time_start);
-  fl_scrolling_manager_handle_rotation_update(manager, TRUE, 4.0, 8.0, 0.5);
+  fl_scrolling_manager_handle_rotation_update(manager, 4.0, 8.0, 0.5);
   EXPECT_EQ(pointer_events.size(), 2u);
   EXPECT_EQ(pointer_events[1].x, 4.0);
   EXPECT_EQ(pointer_events[1].y, 8.0);
@@ -265,7 +265,7 @@ TEST_F(FlScrollingManagerTest, Rotating) {
   EXPECT_EQ(pointer_events[1].pan_y, 0);
   EXPECT_EQ(pointer_events[1].scale, 1.0);
   EXPECT_EQ(pointer_events[1].rotation, 0.5);
-  fl_scrolling_manager_handle_rotation_end(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_rotation_end(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 3u);
   EXPECT_EQ(pointer_events[2].x, 4.0);
   EXPECT_EQ(pointer_events[2].y, 8.0);
@@ -291,13 +291,13 @@ TEST_F(FlScrollingManagerTest, SynchronizedZoomingAndRotating) {
   g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
 
   size_t time_start = g_get_real_time();
-  fl_scrolling_manager_handle_zoom_begin(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_zoom_begin(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 1u);
   EXPECT_EQ(pointer_events[0].x, 4.0);
   EXPECT_EQ(pointer_events[0].y, 8.0);
   EXPECT_EQ(pointer_events[0].phase, kPanZoomStart);
   EXPECT_GE(pointer_events[0].timestamp, time_start);
-  fl_scrolling_manager_handle_zoom_update(manager, TRUE, 4.0, 8.0, 1.1);
+  fl_scrolling_manager_handle_zoom_update(manager, 4.0, 8.0, 1.1);
   EXPECT_EQ(pointer_events.size(), 2u);
   EXPECT_EQ(pointer_events[1].x, 4.0);
   EXPECT_EQ(pointer_events[1].y, 8.0);
@@ -307,9 +307,9 @@ TEST_F(FlScrollingManagerTest, SynchronizedZoomingAndRotating) {
   EXPECT_EQ(pointer_events[1].pan_y, 0);
   EXPECT_EQ(pointer_events[1].scale, 1.1);
   EXPECT_EQ(pointer_events[1].rotation, 0);
-  fl_scrolling_manager_handle_rotation_begin(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_rotation_begin(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 2u);
-  fl_scrolling_manager_handle_rotation_update(manager, TRUE, 4.0, 8.0, 0.5);
+  fl_scrolling_manager_handle_rotation_update(manager, 4.0, 8.0, 0.5);
   EXPECT_EQ(pointer_events.size(), 3u);
   EXPECT_EQ(pointer_events[2].x, 4.0);
   EXPECT_EQ(pointer_events[2].y, 8.0);
@@ -319,10 +319,10 @@ TEST_F(FlScrollingManagerTest, SynchronizedZoomingAndRotating) {
   EXPECT_EQ(pointer_events[2].pan_y, 0);
   EXPECT_EQ(pointer_events[2].scale, 1.1);
   EXPECT_EQ(pointer_events[2].rotation, 0.5);
-  fl_scrolling_manager_handle_zoom_end(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_zoom_end(manager, 4.0, 8.0);
   // End event should only be sent after both zoom and rotate complete.
   EXPECT_EQ(pointer_events.size(), 3u);
-  fl_scrolling_manager_handle_rotation_end(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_rotation_end(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 4u);
   EXPECT_EQ(pointer_events[3].x, 4.0);
   EXPECT_EQ(pointer_events[3].y, 8.0);
@@ -350,13 +350,13 @@ TEST_F(FlScrollingManagerTest, UnsynchronizedZoomingAndRotating) {
   g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
 
   size_t time_start = g_get_real_time();
-  fl_scrolling_manager_handle_zoom_begin(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_zoom_begin(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 1u);
   EXPECT_EQ(pointer_events[0].x, 4.0);
   EXPECT_EQ(pointer_events[0].y, 8.0);
   EXPECT_EQ(pointer_events[0].phase, kPanZoomStart);
   EXPECT_GE(pointer_events[0].timestamp, time_start);
-  fl_scrolling_manager_handle_zoom_update(manager, TRUE, 4.0, 8.0, 1.1);
+  fl_scrolling_manager_handle_zoom_update(manager, 4.0, 8.0, 1.1);
   EXPECT_EQ(pointer_events.size(), 2u);
   EXPECT_EQ(pointer_events[1].x, 4.0);
   EXPECT_EQ(pointer_events[1].y, 8.0);
@@ -366,9 +366,9 @@ TEST_F(FlScrollingManagerTest, UnsynchronizedZoomingAndRotating) {
   EXPECT_EQ(pointer_events[1].pan_y, 0);
   EXPECT_EQ(pointer_events[1].scale, 1.1);
   EXPECT_EQ(pointer_events[1].rotation, 0);
-  fl_scrolling_manager_handle_rotation_begin(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_rotation_begin(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 2u);
-  fl_scrolling_manager_handle_rotation_update(manager, TRUE, 4.0, 8.0, 0.5);
+  fl_scrolling_manager_handle_rotation_update(manager, 4.0, 8.0, 0.5);
   EXPECT_EQ(pointer_events.size(), 3u);
   EXPECT_EQ(pointer_events[2].x, 4.0);
   EXPECT_EQ(pointer_events[2].y, 8.0);
@@ -378,9 +378,9 @@ TEST_F(FlScrollingManagerTest, UnsynchronizedZoomingAndRotating) {
   EXPECT_EQ(pointer_events[2].pan_y, 0);
   EXPECT_EQ(pointer_events[2].scale, 1.1);
   EXPECT_EQ(pointer_events[2].rotation, 0.5);
-  fl_scrolling_manager_handle_zoom_end(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_zoom_end(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 3u);
-  fl_scrolling_manager_handle_rotation_update(manager, TRUE, 4.0, 8.0, 1.0);
+  fl_scrolling_manager_handle_rotation_update(manager, 4.0, 8.0, 1.0);
   EXPECT_EQ(pointer_events.size(), 4u);
   EXPECT_EQ(pointer_events[3].x, 4.0);
   EXPECT_EQ(pointer_events[3].y, 8.0);
@@ -390,7 +390,7 @@ TEST_F(FlScrollingManagerTest, UnsynchronizedZoomingAndRotating) {
   EXPECT_EQ(pointer_events[3].pan_y, 0);
   EXPECT_EQ(pointer_events[3].scale, 1.1);
   EXPECT_EQ(pointer_events[3].rotation, 1.0);
-  fl_scrolling_manager_handle_rotation_end(manager, TRUE, 4.0, 8.0);
+  fl_scrolling_manager_handle_rotation_end(manager, 4.0, 8.0);
   EXPECT_EQ(pointer_events.size(), 5u);
   EXPECT_EQ(pointer_events[4].x, 4.0);
   EXPECT_EQ(pointer_events[4].y, 8.0);
@@ -400,13 +400,13 @@ TEST_F(FlScrollingManagerTest, UnsynchronizedZoomingAndRotating) {
 
 // A pan/zoom gesture must be reported at the position of the gesture itself.
 //
-// Regression test: the scrolling manager used to send pan/zoom events at
-// last_x/last_y, which are zero-initialised and were only ever updated by a
-// mouse button press/release. A pinch as the first interaction with a window
-// was therefore delivered to Flutter at (0, 0); the framework hit-tests a
-// pan/zoom gesture at that position, so it landed on the window's top-left
-// corner instead of the content under the user's fingers. This test fails if
-// the gesture position is ignored.
+// Regression test: the scrolling manager used to report pan/zoom events at a
+// position cached from pointer activity (last_x/last_y), which stays
+// zero-initialised until pointer activity updates it. A pinch as the first
+// interaction with a window was therefore delivered to Flutter at (0, 0);
+// the framework hit-tests a pan/zoom gesture at that position, so it landed on
+// the window's top-left corner instead of the content under the user's fingers.
+// This test fails if the gesture position is ignored.
 TEST_F(FlScrollingManagerTest, FirstGestureUsesGesturePosition) {
   StartEngine();
 
@@ -424,21 +424,21 @@ TEST_F(FlScrollingManagerTest, FirstGestureUsesGesturePosition) {
 
   g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
 
-  // No pointer position has been reported yet, so the stored position is still
-  // the zero-initialised one. The gesture position must win.
-  fl_scrolling_manager_handle_zoom_begin(manager, TRUE, 12.0, 34.0);
+  // No pointer position has ever been reported, so the gesture position must be
+  // used.
+  fl_scrolling_manager_handle_zoom_begin(manager, 12.0, 34.0);
   EXPECT_EQ(pointer_events.size(), 1u);
   EXPECT_EQ(pointer_events[0].phase, kPanZoomStart);
   EXPECT_EQ(pointer_events[0].x, 12.0);
   EXPECT_EQ(pointer_events[0].y, 34.0);
 
-  fl_scrolling_manager_handle_zoom_update(manager, TRUE, 12.0, 34.0, 1.5);
+  fl_scrolling_manager_handle_zoom_update(manager, 12.0, 34.0, 1.5);
   EXPECT_EQ(pointer_events.size(), 2u);
   EXPECT_EQ(pointer_events[1].x, 12.0);
   EXPECT_EQ(pointer_events[1].y, 34.0);
   EXPECT_EQ(pointer_events[1].scale, 1.5);
 
-  fl_scrolling_manager_handle_zoom_end(manager, TRUE, 12.0, 34.0);
+  fl_scrolling_manager_handle_zoom_end(manager, 12.0, 34.0);
   EXPECT_EQ(pointer_events.size(), 3u);
   EXPECT_EQ(pointer_events[2].phase, kPanZoomEnd);
   EXPECT_EQ(pointer_events[2].x, 12.0);
@@ -463,41 +463,12 @@ TEST_F(FlScrollingManagerTest, RotationUsesGesturePosition) {
 
   g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
 
-  fl_scrolling_manager_handle_rotation_begin(manager, TRUE, 12.0, 34.0);
-  fl_scrolling_manager_handle_rotation_update(manager, TRUE, 12.0, 34.0, 0.5);
-  fl_scrolling_manager_handle_rotation_end(manager, TRUE, 12.0, 34.0);
+  fl_scrolling_manager_handle_rotation_begin(manager, 12.0, 34.0);
+  fl_scrolling_manager_handle_rotation_update(manager, 12.0, 34.0, 0.5);
+  fl_scrolling_manager_handle_rotation_end(manager, 12.0, 34.0);
   EXPECT_EQ(pointer_events.size(), 3u);
   for (size_t i = 0; i < pointer_events.size(); i++) {
     EXPECT_EQ(pointer_events[i].x, 12.0);
     EXPECT_EQ(pointer_events[i].y, 34.0);
   }
-}
-
-// When a gesture cannot supply a position (for example a touchscreen pinch) the
-// last reported pointer position is used, which is the previous behaviour.
-TEST_F(FlScrollingManagerTest, GestureWithoutPositionUsesLastPointerPosition) {
-  StartEngine();
-
-  std::vector<FlutterPointerEvent> pointer_events;
-  fl_engine_get_embedder_api(engine)->SendPointerEvent = MOCK_ENGINE_PROC(
-      SendPointerEvent,
-      ([&pointer_events](auto engine, const FlutterPointerEvent* events,
-                         size_t events_count) {
-        for (size_t i = 0; i < events_count; i++) {
-          pointer_events.push_back(events[i]);
-        }
-
-        return kSuccess;
-      }));
-
-  g_autoptr(FlScrollingManager) manager = fl_scrolling_manager_new(engine, 0);
-
-  fl_scrolling_manager_set_last_mouse_position(manager, 5.0, 6.0);
-  fl_scrolling_manager_handle_zoom_begin(manager, FALSE, 0.0, 0.0);
-  fl_scrolling_manager_handle_zoom_end(manager, FALSE, 0.0, 0.0);
-  EXPECT_EQ(pointer_events.size(), 2u);
-  EXPECT_EQ(pointer_events[0].x, 5.0);
-  EXPECT_EQ(pointer_events[0].y, 6.0);
-  EXPECT_EQ(pointer_events[1].x, 5.0);
-  EXPECT_EQ(pointer_events[1].y, 6.0);
 }
