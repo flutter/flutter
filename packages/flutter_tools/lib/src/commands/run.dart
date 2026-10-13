@@ -665,7 +665,10 @@ class RunCommand extends RunCommandBase {
         analytics: globals.analytics,
         nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
         dartBuilder: hookRunner,
-        logger: globals.logger,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext: toolContext!,
+        xcode: globals.xcode,
       );
     } else if (webMode) {
       return webRunnerFactory!.createWebRunner(
@@ -675,6 +678,8 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: debuggingOptions,
         stayResident: stayResident,
         analytics: globals.analytics,
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
         toolContext: toolContext!,
         webDefines: extractWebDefines(),
       );
@@ -690,6 +695,11 @@ class RunCommand extends RunCommandBase {
           : globals.fs.file(applicationBinaryPath),
       stayResident: stayResident,
       dartBuilder: hookRunner,
+      analytics: globals.analytics,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
+      toolContext: toolContext!,
+      xcode: globals.xcode,
     );
   }
 
@@ -699,10 +709,13 @@ class RunCommand extends RunCommandBase {
       analytics: globals.analytics,
       androidSdk: globals.androidSdk,
       androidWorkflow: android_workflow.androidWorkflow,
+      buildSystem: globals.buildSystem,
+      buildTargets: globals.buildTargets,
       deviceManager: globals.deviceManager,
       featureFlags: featureFlags,
       java: globals.java,
       toolContext: toolContext!,
+      xcode: globals.xcode,
     );
   }
 

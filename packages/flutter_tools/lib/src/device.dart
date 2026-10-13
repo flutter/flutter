@@ -339,11 +339,10 @@ class DeviceDiscoverySupportFilter {
   /// runner instance. Both web and fuchsia require differently configured
   /// compilers, and web requires an entirely different resident runner.
   Future<bool> isDeviceSupportedForAll(Device device) async {
-    final TargetPlatform devicePlatform = await device.targetPlatform;
+    final TargetOperatingSystem deviceOS = (await device.targetPlatform).os;
     return await device.isSupported() &&
-        devicePlatform != TargetPlatform.fuchsia_arm64 &&
-        devicePlatform != TargetPlatform.fuchsia_x64 &&
-        devicePlatform != TargetPlatform.web_javascript &&
+        deviceOS != .fuchsia &&
+        deviceOS != .web &&
         await isDeviceSupportedForProject(device);
   }
 
