@@ -290,10 +290,9 @@ void main() {
         );
 
         final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
-        final List<ExtensionTarget> prototypeTargets = LinuxBuildService().targets;
         expect(
           targets.map((ExtensionBuildTarget t) => t.name),
-          equals(prototypeTargets.map((ExtensionTarget t) => t.name)),
+          equals(<String>['custom-linux-build', 'custom-linux-assemble-only-debug']),
         );
         expect(buildManager.cachedTargets, equals(targets));
 

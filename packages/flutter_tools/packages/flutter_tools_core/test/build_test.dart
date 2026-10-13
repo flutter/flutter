@@ -118,6 +118,7 @@ void main() {
       expect(parsed, equals(target));
       expect(parsed.hashCode, equals(target.hashCode));
       expect(parsed.toString(), contains('custom-linux-build'));
+      expect(parsed.toString(), contains('outputDir: {PROJECT_DIR}/build/linux'));
     });
 
     test('deserializes with defaults when fields are missing', () {

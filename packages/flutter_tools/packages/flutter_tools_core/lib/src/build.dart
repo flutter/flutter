@@ -196,7 +196,12 @@ class ExtensionBuildTarget {
   /// The name of this build target (e.g. `'custom-apk'`).
   final String name;
 
-  /// The target platform string (e.g. `'linux-x64'`, `'android-arm64'`).
+  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`).
+  ///
+  /// This is an open [String] rather than an enum so that extensions for custom
+  /// embedders can declare platform identifiers that are not built into Flutter.
+  /// Used to substitute [kTargetPlatformPlaceholder] in [outputDir], and as the
+  /// default artifact platform when it matches a built-in Flutter target platform.
   final String targetPlatform;
 
   /// Whether this target is a top-level target invokable through `flutter build`.
@@ -211,7 +216,8 @@ class ExtensionBuildTarget {
   /// Output file patterns.
   final List<ExtensionSource> outputs;
 
-  /// The output directory pattern.
+  /// The output directory pattern (for example,
+  /// `'{PROJECT_DIR}/build/custom/{TARGET_PLATFORM}/{BUILD_MODE}'`).
   final String outputDir;
 
   /// Serializes the build target to a JSON-serializable map.
@@ -228,7 +234,10 @@ class ExtensionBuildTarget {
 
   @override
   String toString() =>
-      'ExtensionBuildTarget(name: $name, targetPlatform: $targetPlatform, description: $description)';
+      'ExtensionBuildTarget(name: $name, targetPlatform: $targetPlatform, '
+      'description: $description, isTopLevel: $isTopLevel, '
+      'dependencies: $dependencies, inputs: $inputs, outputs: $outputs, '
+      'outputDir: $outputDir)';
 
   @override
   bool operator ==(Object other) {

@@ -54,7 +54,8 @@ sealed class ExtensionSource {
   const ExtensionSource();
 
   /// A file pattern that must begin with a directory placeholder such as
-  /// [kProjectDirPlaceholder], [kBuildDirPlaceholder], or [kOutputDirPlaceholder].
+  /// [kProjectDirPlaceholder], [kBuildDirPlaceholder], or [kOutputDirPlaceholder]
+  /// (for example, `'{PROJECT_DIR}/pubspec.yaml'`).
   const factory ExtensionSource.pattern(String pattern, {bool optional}) = ExtensionPatternSource;
 
   /// A source provided by an [ExtensionArtifact].

@@ -72,7 +72,12 @@ class ExtensionAssembleTarget extends Target {
     );
 
     if (!result.success) {
-      throwToolExit(result.errorMessage ?? 'Extension build target ${buildTarget.name} failed.');
+      final String? errorMessage = result.errorMessage;
+      throwToolExit(
+        errorMessage != null && errorMessage.isNotEmpty
+            ? 'Extension build target "${buildTarget.name}" failed: $errorMessage'
+            : 'Extension build target "${buildTarget.name}" failed.',
+      );
     }
   }
 }

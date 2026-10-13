@@ -61,7 +61,12 @@ abstract class ExtensionTarget {
   /// Description of what this target builds.
   final String description;
 
-  /// The target platform string (e.g. `'linux-x64'`, `'android-arm64'`).
+  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`).
+  ///
+  /// This is an open [String] rather than an enum so that extensions for custom
+  /// embedders can declare platform identifiers that are not built into Flutter.
+  /// Used to substitute [kTargetPlatformPlaceholder] in [outputDir], and as the
+  /// default artifact platform when it matches a built-in Flutter target platform.
   final String targetPlatform;
 
   /// Whether this target is a top-level target invokable through `flutter build`.

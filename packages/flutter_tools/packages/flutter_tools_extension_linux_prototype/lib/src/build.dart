@@ -26,6 +26,7 @@ const String _kKernelBlob = 'kernel_blob.bin';
 const String _kAppDill = 'app.dill';
 const String _kGeneratedConfigCmake = 'generated_config.cmake';
 
+/// Top-level Linux build target contributed by the prototype extension.
 class CustomLinuxBuildTarget extends ExtensionTarget {
   const CustomLinuxBuildTarget()
     : super(
@@ -144,6 +145,7 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
   }
 }
 
+/// Assemble-only Linux debug bundle target contributed by the prototype extension.
 class CustomLinuxAssembleOnlyDebug extends ExtensionTarget {
   const CustomLinuxAssembleOnlyDebug()
     : super(

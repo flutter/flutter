@@ -15,8 +15,6 @@ import 'package:flutter_tools/src/build_system/targets/extension.dart';
 import 'package:flutter_tools/src/experimental/extension_build_manager.dart';
 import 'package:flutter_tools/src/experimental/extension_manager.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
-import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart'
-    show LinuxArtifacts;
 import 'package:test/fake.dart';
 
 import '../../../src/common.dart';
@@ -186,7 +184,27 @@ void main() {
 
     await expectLater(
       () => target.build(environment),
-      throwsToolExit(message: 'Build failed error'),
+      throwsToolExit(message: 'Extension build target "custom-target" failed: Build failed error'),
+    );
+
+    final ExtensionAssembleTarget emptyMessageTarget = _createTarget(
+      buildManager: FakeExtensionBuildManager(
+        buildResult: const ExtensionBuildResult(success: false, errorMessage: ''),
+      ),
+    );
+    await expectLater(
+      () => emptyMessageTarget.build(environment),
+      throwsToolExit(message: 'Extension build target "custom-target" failed.'),
+    );
+
+    final ExtensionAssembleTarget nullMessageTarget = _createTarget(
+      buildManager: FakeExtensionBuildManager(
+        buildResult: const ExtensionBuildResult(success: false),
+      ),
+    );
+    await expectLater(
+      () => nullMessageTarget.build(environment),
+      throwsToolExit(message: 'Extension build target "custom-target" failed.'),
     );
   });
 
@@ -343,7 +361,7 @@ void main() {
     }
   });
 
-  testWithoutContext('BuiltInArtifacts, BuiltInHostArtifacts, LinuxArtifacts, and BuiltInTargets match host definitions', () {
+  testWithoutContext('BuiltInArtifacts, BuiltInHostArtifacts, Linux artifacts, and BuiltInTargets match host definitions', () {
     const target = ExtensionBuildTarget(
       description: 'Contract check target',
       name: 'contract-target',
@@ -352,8 +370,8 @@ void main() {
         ExtensionSource.artifact(BuiltInArtifacts.flutterPatchedSdkPath),
         ExtensionSource.artifact(BuiltInArtifacts.genSnapshot),
         ExtensionSource.artifact(BuiltInArtifacts.icuData),
-        ExtensionSource.artifact(LinuxArtifacts.linuxDesktopPath),
-        ExtensionSource.artifact(LinuxArtifacts.linuxHeaders),
+        ExtensionSource.artifact(ExtensionArtifact('linuxDesktopPath')),
+        ExtensionSource.artifact(ExtensionArtifact('linuxHeaders')),
         ExtensionSource.hostArtifact(BuiltInHostArtifacts.impellerc),
         ExtensionSource.hostArtifact(BuiltInHostArtifacts.libtessellator),
       ],
@@ -370,8 +388,8 @@ void main() {
         BuiltInArtifacts.flutterPatchedSdkPath.name,
         BuiltInArtifacts.genSnapshot.name,
         BuiltInArtifacts.icuData.name,
-        LinuxArtifacts.linuxDesktopPath.name,
-        LinuxArtifacts.linuxHeaders.name,
+        'linuxDesktopPath',
+        'linuxHeaders',
         BuiltInHostArtifacts.impellerc.name,
         BuiltInHostArtifacts.libtessellator.name,
       ]),
