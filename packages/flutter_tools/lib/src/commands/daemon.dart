@@ -281,7 +281,8 @@ class Daemon {
        _stdio = toolContext.stdio {
     final ToolContext(:Platform platform, :FlutterProjectFactory projectFactory) = toolContext;
     final AndroidWorkflow workflow =
-        androidWorkflow ?? AndroidWorkflow(androidSdk: androidSdk, featureFlags: featureFlags);
+        androidWorkflow ??
+        AndroidWorkflow(androidSdkBuilder: () => androidSdk, featureFlags: featureFlags);
     final IOSWorkflow? iosWorkflow = xcode == null
         ? null
         : IOSWorkflow(featureFlags: featureFlags, xcode: xcode, platform: platform);
@@ -1889,10 +1890,10 @@ class EmulatorDomain extends Domain {
            EmulatorManager(
              androidWorkflow: androidWorkflow,
              iosWorkflow: iosWorkflow,
-             java: java,
+             javaBuilder: () => java,
              toolContext: toolContext,
              xcode: xcode,
-             androidSdk: androidSdk,
+             androidSdkBuilder: () => androidSdk,
            ),
        super(daemon, 'emulator') {
     registerHandler('getEmulators', getEmulators);

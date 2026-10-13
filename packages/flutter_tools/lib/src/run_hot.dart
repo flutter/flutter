@@ -1114,8 +1114,7 @@ class HotRunner extends ResidentRunner {
             viewId: view.id,
             windows:
                 (device.targetPlatform == TargetPlatform.tester && platform.isWindows) ||
-                device.targetPlatform == TargetPlatform.windows_x64 ||
-                device.targetPlatform == TargetPlatform.windows_arm64,
+                device.targetPlatform.os == .windows,
           ),
         ),
       );

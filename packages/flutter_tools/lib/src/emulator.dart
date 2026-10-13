@@ -28,19 +28,19 @@ class EmulatorManager {
   EmulatorManager({
     required AndroidWorkflow androidWorkflow,
     required IOSWorkflow? iosWorkflow,
-    required this._java,
+    required this._javaBuilder,
     required this._toolContext,
     required Xcode? xcode,
-    AndroidSdk? androidSdk,
-  }) : _androidSdk = androidSdk {
+    this._androidSdkBuilder,
+  }) {
     final ToolContext(:FileSystem fs, :Logger logger, :ProcessManager processManager) =
         _toolContext;
     _androidEmulators = AndroidEmulators(
-      androidSdk: androidSdk,
+      androidSdkBuilder: _androidSdkBuilder,
+      androidWorkflow: androidWorkflow,
+      fileSystem: fs,
       logger: logger,
       processManager: processManager,
-      fileSystem: fs,
-      androidWorkflow: androidWorkflow,
     );
     if (iosWorkflow != null && xcode != null) {
       _emulatorDiscoverers.add(
@@ -50,8 +50,10 @@ class EmulatorManager {
     _emulatorDiscoverers.add(_androidEmulators);
   }
 
-  final Java? _java;
-  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function()? _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder?.call();
+  final Java? Function() _javaBuilder;
+  late final Java? _java = _javaBuilder();
   late final AndroidEmulators _androidEmulators;
   final ToolContext _toolContext;
 

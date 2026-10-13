@@ -880,7 +880,7 @@ void main() {
           iosApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          platformArgs: <String, dynamic>{},
+          platformArgs: <String, Object?>{},
         );
 
         expect(launchResult.started, true);
@@ -941,7 +941,7 @@ void main() {
           iosApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-          platformArgs: <String, dynamic>{},
+          platformArgs: <String, Object?>{},
         );
 
         expect(launchResult.started, true);
@@ -1340,8 +1340,7 @@ void main() {
         },
         // If mDNS is not the only method of discovery, it shouldn't throw on error.
         overrides: <Type, Generator>{
-          MDnsVmServiceDiscovery: () =>
-              FakeMDnsVmServiceDiscovery(allowthrowOnMissingLocalNetworkPermissionsError: false),
+          MDnsVmServiceDiscovery: () => FakeMDnsVmServiceDiscovery(allowThrowOnError: false),
         },
       );
 
@@ -1829,7 +1828,7 @@ void main() {
           iosApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-          platformArgs: <String, dynamic>{},
+          platformArgs: <String, Object?>{},
         );
 
         expect(launchResult.started, true);
@@ -2010,7 +2009,7 @@ void main() {
           iosApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
-          platformArgs: <String, dynamic>{},
+          platformArgs: <String, Object?>{},
         );
 
         expect(launchResult.started, true);
@@ -2109,12 +2108,12 @@ class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
 
 class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery {
   FakeMDnsVmServiceDiscovery({
+    this.allowThrowOnError = true,
     this.returnsNull = false,
-    this.allowthrowOnMissingLocalNetworkPermissionsError = true,
     this.waitToReturn,
   });
   bool returnsNull;
-  bool allowthrowOnMissingLocalNetworkPermissionsError;
+  bool allowThrowOnError;
 
   Completer<void> discoveryStarted = Completer<void>();
 
@@ -2123,22 +2122,19 @@ class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery 
   Future<Uri?> getVMServiceUriForLaunch(
     String applicationId,
     Device device, {
-    bool usesIpv6 = false,
-    int? hostVmservicePort,
     int? deviceVmservicePort,
-    bool useDeviceIPAsHost = false,
+    int? hostVmservicePort,
+    bool throwOnError = true,
     Duration timeout = Duration.zero,
-    bool throwOnMissingLocalNetworkPermissionsError = true,
+    bool useDeviceIPAsHost = false,
+    bool usesIpv6 = false,
   }) async {
     discoveryStarted.complete();
     await waitToReturn?.future;
     if (returnsNull) {
       return null;
     }
-    expect(
-      throwOnMissingLocalNetworkPermissionsError,
-      allowthrowOnMissingLocalNetworkPermissionsError,
-    );
+    expect(throwOnError, allowThrowOnError);
 
     return Uri.tryParse('http://0.0.0.0:1234');
   }

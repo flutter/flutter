@@ -60,7 +60,7 @@ void main() {
     testWithoutContext('getEmulators', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw.
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         iosWorkflow: FakeIOSWorkflow(),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -74,8 +74,11 @@ void main() {
           ]),
         ),
         xcode: xcode,
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
       );
 
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(), returnsNormally);
@@ -85,7 +88,7 @@ void main() {
       'getEmulators ignores info and warning messages in android emulator output',
       () async {
         final emulatorManager = EmulatorManager(
-          java: FakeJava(),
+          javaBuilder: FakeJava.new,
           iosWorkflow: FakeIOSWorkflow(),
           toolContext: FakeToolContext(
             fs: MemoryFileSystem.test(),
@@ -103,8 +106,11 @@ void main() {
             ]),
           ),
           xcode: xcode,
-          androidSdk: sdk,
-          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(
+            androidSdkBuilder: () => sdk,
+            featureFlags: TestFeatureFlags(),
+          ),
         );
 
         final List<Emulator> emulators = await emulatorManager.getAllAvailableEmulators();
@@ -130,7 +136,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     testWithoutContext('getEmulators with no Android SDK', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         iosWorkflow: FakeIOSWorkflow(),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -144,7 +150,10 @@ iOS Simulator       • iOS Simulator • Apple        • android
           ]),
         ),
         xcode: xcode,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
       );
 
       await expectLater(() async => emulatorManager.getAllAvailableEmulators(), returnsNormally);
@@ -153,8 +162,11 @@ iOS Simulator       • iOS Simulator • Apple        • android
     testWithoutContext('getEmulatorsById', () async {
       final testEmulatorManager = TestEmulatorManager(
         emulators,
-        java: FakeJava(),
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        javaBuilder: FakeJava.new,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
         iosWorkflow: FakeIOSWorkflow(),
         toolContext: FakeToolContext(
           fs: fileSystem,
@@ -183,7 +195,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     testWithoutContext('create emulator with a missing avdmanager does not crash.', () async {
       sdk.avdManagerPath = null;
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         iosWorkflow: FakeIOSWorkflow(),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -197,8 +209,11 @@ iOS Simulator       • iOS Simulator • Apple        • android
           ]),
         ),
         xcode: xcode,
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
@@ -208,7 +223,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     testWithoutContext('create emulator with an empty name does not fail', () async {
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         iosWorkflow: FakeIOSWorkflow(),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -240,8 +255,11 @@ iOS Simulator       • iOS Simulator • Apple        • android
           ]),
         ),
         xcode: xcode,
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
@@ -250,7 +268,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     testWithoutContext('create emulator with a unique name does not throw', () async {
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         iosWorkflow: FakeIOSWorkflow(),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -279,8 +297,11 @@ iOS Simulator       • iOS Simulator • Apple        • android
           ]),
         ),
         xcode: xcode,
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
 
@@ -289,7 +310,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     testWithoutContext('create emulator with an existing name errors', () async {
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         iosWorkflow: FakeIOSWorkflow(),
         toolContext: FakeToolContext(
           fs: MemoryFileSystem.test(),
@@ -321,8 +342,11 @@ iOS Simulator       • iOS Simulator • Apple        • android
           ]),
         ),
         xcode: xcode,
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(
         name: 'existing-avd-1',
@@ -335,7 +359,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
       'create emulator without a name but when default exists adds a suffix',
       () async {
         final emulatorManager = EmulatorManager(
-          java: FakeJava(),
+          javaBuilder: FakeJava.new,
           iosWorkflow: FakeIOSWorkflow(),
           toolContext: FakeToolContext(
             fs: MemoryFileSystem.test(),
@@ -368,8 +392,11 @@ iOS Simulator       • iOS Simulator • Apple        • android
             ]),
           ),
           xcode: xcode,
-          androidSdk: sdk,
-          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(
+            androidSdkBuilder: () => sdk,
+            featureFlags: TestFeatureFlags(),
+          ),
         );
         final CreateEmulatorResult result = await emulatorManager.createEmulator();
 
@@ -421,9 +448,9 @@ iOS Simulator       • iOS Simulator • Apple        • android
 class TestEmulatorManager extends EmulatorManager {
   TestEmulatorManager(
     this.allEmulators, {
-    required super.java,
     required super.androidWorkflow,
     required super.iosWorkflow,
+    required super.javaBuilder,
     required super.toolContext,
     required super.xcode,
   });
