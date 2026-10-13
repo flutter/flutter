@@ -9,6 +9,7 @@ import 'package:ui/ui.dart' as ui;
 
 import '../canvaskit/canvaskit_api.dart';
 import '../dom.dart';
+import '../view_embedder/style_manager.dart';
 import 'bidi.dart';
 import 'code_unit_flags.dart';
 import 'debug.dart';
@@ -944,7 +945,26 @@ class TextLayout {
     return ui.TextRange(start: start, end: end);
   }
 
-  ui.TextRange getLineBoundary(int codepointPosition) {
+  ui.TextRange getLineBoundary(ui.TextPosition position) {
+    final ui.TextRange line = _lineBoundaryAtOffset(position.offset);
+
+    // A line's end equals the next line's start at a soft wrap, so the lookup
+    // above cannot tell the two apart on its own and always answers with the
+    // earlier line, as if the affinity were upstream. A downstream position
+    // sitting exactly on that seam belongs to the next line instead. This
+    // mirrors the native implementation in `lib/ui/text.dart`.
+    final ui.TextRange nextLine = _lineBoundaryAtOffset(position.offset + 1);
+    if (nextLine.isValid &&
+        position.affinity == ui.TextAffinity.downstream &&
+        line != nextLine &&
+        position.offset == line.end &&
+        line.end == nextLine.start) {
+      return nextLine;
+    }
+    return line;
+  }
+
+  ui.TextRange _lineBoundaryAtOffset(int codepointPosition) {
     for (final TextLine line in lines) {
       // This is the condition that SkParagraph is using
       if (line.allLineTextRange.start <= codepointPosition &&
@@ -1174,12 +1194,14 @@ abstract class LineBlock {
     this.textRange,
     this.shiftFromLineStart,
   ) {
-    if (span.style.height == null) {
+    // When height is null or kTextHeightNone, disable the height multiplier
+    // and use the font's raw ascent and descent directly.
+    if (span.style.height == null || span.style.height == ui.kTextHeightNone) {
       _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent;
       _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent;
       return;
     }
-    final double fontSize = span.style.fontSize ?? 14.0;
+    final double fontSize = span.style.fontSize ?? StyleManager.defaultFontSize;
     final double runHeight = span.style.height! * fontSize;
     final double fontHeight = span.fontBoundingBoxAscent + span.fontBoundingBoxDescent;
     switch (span.style.leadingDistribution) {
@@ -1473,7 +1495,7 @@ class TextLine {
 
   void updateBoundingBox(LineBlock block) {
     if (block is TextBlock) {
-      // Line always counts multipled metrics.
+      // Line always counts multiplied metrics.
       fontBoundingBoxAscent = math.max(
         fontBoundingBoxAscent,
         block.multipliedFontBoundingBoxAscent,
