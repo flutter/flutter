@@ -52,6 +52,8 @@ const String defaultTestSize = 'small';
 const Map<String, String> testSizes = <String, String>{
   // 50 s on the host: the performance overlay goldens.
   'flow_unittests': 'medium',
+  // 40 s on the host (208 tests, the shell on ANGLE and SwiftShader).
+  'shell_unittests': 'medium',
 };
 
 /// How a suite is run: the arguments testing/run_tests.py passes it and the
@@ -292,6 +294,7 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/shell/gpu:gpu_surface_gl': _vulkanCopts,
   '//flutter/shell/gpu:gpu_surface_vulkan': _vulkanCopts,
   '//flutter/shell/common:shell_unittests_gpu_configuration': _vulkanCopts,
+  '//flutter/shell/common:shell_test_fixture_sources': _vulkanCopts,
 };
 
 /// inja_public_config's flags.
