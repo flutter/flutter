@@ -114,15 +114,15 @@ cc_library(
     copts = [
         "-Wthread-safety-analysis",  # is_clang
     ] + FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/third_party/vulkan_memory_allocator
-        "-Wno-deprecated-copy",  # from //flutter/third_party/vulkan_memory_allocator
-        "-Wno-implicit-fallthrough",  # from //flutter/third_party/vulkan_memory_allocator
-        "-Wno-nullability-completeness",  # from //flutter/third_party/vulkan_memory_allocator
-        "-Wno-suggest-destructor-override",  # from //flutter/third_party/vulkan_memory_allocator
-        "-Wno-suggest-override",  # from //flutter/third_party/vulkan_memory_allocator
-        "-Wno-unused-private-field",  # from //flutter/third_party/vulkan_memory_allocator
-        "-Wno-unused-variable",  # from //flutter/third_party/vulkan_memory_allocator
+        "-Wno-redundant-parens",  # from //flutter/flutter_vma
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma
+        "-Wno-deprecated-copy",  # from //flutter/flutter_vma
+        "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma
+        "-Wno-nullability-completeness",  # from //flutter/flutter_vma
+        "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma
+        "-Wno-suggest-override",  # from //flutter/flutter_vma
+        "-Wno-unused-private-field",  # from //flutter/flutter_vma
+        "-Wno-unused-variable",  # from //flutter/flutter_vma
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
