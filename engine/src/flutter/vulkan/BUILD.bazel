@@ -1,0 +1,62 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/vulkan/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "vulkan",
+    srcs = [
+        "vulkan_application.cc",
+        "vulkan_backbuffer.cc",
+        "vulkan_command_buffer.cc",
+        "vulkan_debug_report.cc",
+        "vulkan_device.cc",
+        "vulkan_image.cc",
+        "vulkan_native_surface.cc",
+        "vulkan_skia_proc_table.cc",
+        "vulkan_surface.cc",
+        "vulkan_swapchain_stub.cc",  # !(is_android)
+        "vulkan_utilities.cc",
+    ],
+    hdrs = [
+        "vulkan_application.h",
+        "vulkan_backbuffer.h",
+        "vulkan_command_buffer.h",
+        "vulkan_debug_report.h",
+        "vulkan_device.h",
+        "vulkan_image.h",
+        "vulkan_native_surface.h",
+        "vulkan_skia_proc_table.h",
+        "vulkan_surface.h",
+        "vulkan_swapchain.h",
+        "vulkan_utilities.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from procs
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-nullability-completeness",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-suggest-destructor-override",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-suggest-override",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-unused-private-field",  # from //flutter/flutter_vma:flutter_skia_vma
+        "-Wno-unused-variable",  # from //flutter/flutter_vma:flutter_skia_vma
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/flutter_vma:flutter_skia_vma",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/vulkan/procs",
+        "@skia",
+        "@vulkan-headers//:vulkan_headers",
+    ],
+    alwayslink = True,
+)
