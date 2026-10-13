@@ -11,6 +11,7 @@
 
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/android/jni/platform_view_android_jni.h"
+#include "flutter/shell/platform/embedder/embedder.h"
 
 namespace flutter {
 
@@ -28,6 +29,13 @@ class PlatformViewAndroidDelegate {
   void UpdateSemantics(
       const flutter::SemanticsNodeUpdates& update,
       const flutter::CustomAccessibilityActionUpdates& actions);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Encodes `update` for AccessibilityBridge.java and sends it
+  ///             through the JNI facade. The encoding is the same as for
+  ///             engine semantics updates.
+  ///
+  void UpdateSemantics(const FlutterSemanticsUpdate2& update);
 
  private:
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;

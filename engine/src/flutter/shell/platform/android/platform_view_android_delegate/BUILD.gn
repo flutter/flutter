@@ -19,6 +19,7 @@ source_set("platform_view_android_delegate") {
     "//flutter/lib/ui",
     "//flutter/shell/common",
     "//flutter/shell/platform/android/jni",
+    "//flutter/shell/platform/embedder:embedder_headers",
     "//flutter/skia",
   ]
 }
@@ -35,7 +36,9 @@ executable("platform_view_android_delegate_unittests") {
   deps = [
     ":platform_view_android_delegate",
     ":platform_view_android_delegate_fixtures",
+    "//flutter/lib/ui",
     "//flutter/shell/platform/android/jni:jni_mock",
+    "//flutter/shell/platform/embedder:embedder_as_internal_library",
     "//flutter/testing",
     "//flutter/testing:dart",
     "//flutter/txt",
