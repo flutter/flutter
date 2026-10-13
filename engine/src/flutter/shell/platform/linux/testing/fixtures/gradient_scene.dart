@@ -16,18 +16,21 @@ void main() {
   runApp(RepaintBoundary(key: boundaryKey, child: const GradientScene()));
   final output = Platform.environment['GRADIENT_PROBE_OUTPUT'];
   if (output != null) {
+    final physical = Platform.environment['GRADIENT_PROBE_PHYSICAL'] == '1';
+    final limit = physical ? 60 : 12;
     var busy = false;
     var index = 0;
     Timer.periodic(const Duration(seconds: 1), (timer) async {
-      if (busy || index >= 12) {
-        if (index >= 12) timer.cancel();
+      if (busy || index >= limit) {
+        if (index >= limit) timer.cancel();
         return;
       }
       final boundary = boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null || boundary.debugNeedsPaint) return;
       busy = true;
       try {
-        final image = await boundary.toImage(pixelRatio: 1);
+        final view = View.of(boundaryKey.currentContext!);
+        final image = await boundary.toImage(pixelRatio: physical ? view.devicePixelRatio : 1);
         final bytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
         if (bytes != null) {
           final path = '$output/frame-$index.rgba';
@@ -36,6 +39,13 @@ void main() {
           final meta = File('$output/latest.tmp');
           await meta.writeAsString(
             jsonEncode({
+              'dpr': view.devicePixelRatio,
+              'display_id': view.display.id,
+              'display_dpr': view.display.devicePixelRatio,
+              'display_width': view.display.size.width,
+              'display_height': view.display.size.height,
+              'physical_width': view.physicalSize.width,
+              'physical_height': view.physicalSize.height,
               'width': image.width,
               'height': image.height,
               'path': path,

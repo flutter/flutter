@@ -369,3 +369,54 @@ allocation, input conversion, native accessibility geometry, or moving a
 window between Wayland monitors. The X11 geometry and gradient probes still
 only support integer scales 1 and 2; passing these unit tests does not establish
 end-to-end fractional-scale support.
+
+## GTK4 fractional scaling on Wayland
+
+The opt-in Wayland driver runs a private headless Sway compositor with two
+outputs. It exercises 100%, 125%, 150%, 175%, upward/downward changes that retain
+integer scale 2, moves between differently scaled outputs, and odd-sized resize
+at 150% (including resize without a scale change), and monitor moves with the
+same DPR. The real GTK4 view verifies
+window metrics, display metadata/IDs, texture natural size, native accessible bounds, mouse-event
+coordinates, wheel-event coordinates/deltas, and scale-notification teardown.
+
+```sh
+python3 engine/src/flutter/shell/platform/linux/testing/run_gtk4_wayland_scale_test.py \
+  engine/src/out/host_debug_unopt/flutter_linux_gtk4_unittests \
+  --output=/tmp/gtk4-wayland-scale.json
+```
+
+Requires Sway/wlroots with headless and pixman support, `swaymsg`, `cc`,
+`wayland-scanner`, and Wayland client development libraries already installed.
+The test vendors the MIT-licensed virtual-pointer protocol from
+[swaywm/wlr-protocols](https://github.com/swaywm/wlr-protocols/blob/master/unstable/wlr-virtual-pointer-unstable-v1.xml).
+No protocol files or dependencies are downloaded by the driver. Add `--sized-to-content` to exercise secondary views with unbounded sizing
+constraints. Add `--atspi` to query the semantics label bounds through a private
+AT-SPI bus; this requires Python GI/Atspi and the local accessibility services.
+The local test helper exposes this gate as `./run_gtk_tests.sh --gtk4 --wayland-scale`.
+
+For real raster coverage, build the gradient fixture described above, with an
+undecorated runner window titled `Flutter fractional scale probe` and logical
+default size 1001 × 603. The Wayland rendering driver enables physical-pixel
+readback through `GRADIENT_PROBE_PHYSICAL=1` and checks Flutter DPR/physical size,
+readback dimensions, and gradient pixels throughout the same twelve phases:
+
+```sh
+python3 engine/src/flutter/shell/platform/linux/testing/run_gtk4_wayland_render_scale_test.py \
+  /tmp/gtk4_fractional_render_probe/build/linux-gtk4/x64/debug/bundle/gtk4_password_probe \
+  --engine-dir=engine/src/out/host_debug_unopt \
+  --output=/tmp/gtk4-wayland-render-scale.json
+```
+
+Use the actual fixture binary path; its filename depends on its project name.
+`--impeller=false` runs the same scene with Skia. `--gsk-renderer=gl` or
+`--gsk-renderer=vulkan` selects GTK presentation; reports record the observed
+renderer when the diagnostic runner emits `GRADIENT_GSK`. This driver additionally
+requires locally installed Pillow. It verifies the mapped engine hash rather
+than assuming `LD_LIBRARY_PATH` took effect.
+
+This is headless compositor coverage. It does not establish hardware-GPU text
+sharpness, physical touchscreen/touchpad behavior, AT-SPI event ordering,
+external-texture behavior, or every older GTK runtime. The optional direct
+subsurface path falls back to GTK texture presentation at fractional scales;
+its native Wayland buffer scale remains integer-only.
