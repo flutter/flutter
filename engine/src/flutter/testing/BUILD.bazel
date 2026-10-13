@@ -3,12 +3,12 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/testing/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: dart, vmservice_kernel, vmservice_snapshot, fixture_test, vulkan, test_swiftshader_utils, test_swangle_utils, opengl.
+# Not converted: vulkan, test_swiftshader_utils, test_swangle_utils, opengl.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_dart_snapshot_aot", "flutter_dart_snapshot_kernel", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -108,6 +108,36 @@ cc_library(
 )
 
 cc_library(
+    name = "dart",
+    testonly = True,
+    srcs = [
+        "dart_isolate_runner.cc",
+        "elf_loader.cc",
+        "test_dart_native_resolver.cc",
+    ],
+    hdrs = [
+        "dart_isolate_runner.h",
+        "elf_loader.h",
+        "test_dart_native_resolver.h",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/runtime
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":testing_lib",
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/dart_wrap:elf_loader",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/runtime:libdart",
+        "//engine/src/flutter/third_party/tonic",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
     name = "skia",
     testonly = True,
     srcs = ["assertions_skia.cc"],
@@ -122,6 +152,48 @@ cc_library(
         "//engine/src:include_root",
         "@skia",
     ],
+    alwayslink = True,
+)
+
+flutter_dart_snapshot_kernel(
+    name = "vmservice_kernel",
+    dart_kernel = "assets/vmservice_kernel.bin",
+    dart_main = "//engine/src/flutter/shell/vmservice:empty.dart",
+)
+
+flutter_dart_snapshot_aot(
+    name = "vmservice_snapshot",
+    dart_elf_filename = "libvmservice_snapshot.so",
+    dart_kernel = "assets/vmservice_kernel.bin",
+    deps = [":vmservice_kernel"],
+)
+
+cc_library(
+    name = "fixture_test",
+    testonly = True,
+    srcs = [
+        "dart_fixture.cc",
+        "fixture_test.cc",
+    ],
+    hdrs = [
+        "dart_fixture.h",
+        "fixture_test.h",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :dart
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":dart",
+        "//engine/src:include_root",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/runtime",
+    ] + select({
+        "//engine/src/flutter/common:runtime_mode_profile": [
+            ":vmservice_snapshot",  # flutter_runtime_mode == "profile"
+        ],
+        "//conditions:default": [],
+    }),
     alwayslink = True,
 )
 

@@ -92,6 +92,12 @@ config_setting(
     name = "slimpeller_enabled",
     flag_values = {":slimpeller": "True"},
 )
+
+# config("export_dynamic_symbols") in //flutter/BUILD.gn reads these.
+exports_files([
+    "exported_symbols.sym",
+    "exported_symbols_mac.sym",
+])
 ''',
   ),
   ConvertedFile(
@@ -101,10 +107,6 @@ config_setting(
   ConvertedFile(
     '//flutter/testing',
     skip: <String, String>{
-      'dart': 'needs //flutter/runtime',
-      'vmservice_kernel': 'dart_snapshot_kernel template',
-      'vmservice_snapshot': 'dart_snapshot_aot template',
-      'fixture_test': 'needs //flutter/runtime',
       'vulkan': 'needs //flutter/vulkan',
       'test_swiftshader_utils': 'needs //flutter/third_party/swiftshader',
       'test_swangle_utils': 'needs //flutter/third_party/angle',
@@ -394,13 +396,7 @@ cc_test(
   ConvertedFile(
     '//flutter/runtime',
     skip: <String, String>{
-      'libdart': 'needs //flutter/lib/snapshot',
-      'runtime_fixtures': 'Dart fixtures (dart_main) are not supported yet',
-      'runtime_unittests': 'needs :runtime',
-      'no_plugin_registrant': 'Dart fixtures (dart_main) are not supported yet',
-      'no_dart_plugin_registrant_unittests': 'needs //flutter/lib/snapshot',
-      'plugin_registrant': 'Dart fixtures (dart_main) are not supported yet',
-      'dart_plugin_registrant_unittests': 'needs //flutter/lib/snapshot',
+      'runtime_unittests': 'needs //flutter/shell/common:shell_test_fixture_sources',
     },
   ),
   ConvertedFile(
@@ -949,6 +945,7 @@ const Set<String> handWrittenPackages = <String>{
   'engine/src/flutter/impeller/tools',
   'engine/src/flutter/lib/snapshot',
   'engine/src/flutter/shell/platform/embedder',
+  'engine/src/flutter/shell/vmservice',
   'engine/src/flutter/third_party',
 };
 
