@@ -32,6 +32,7 @@ FlutterTristate ToFlutterTristate(flutter::SemanticsTristate state) {
 std::unique_ptr<FlutterSemanticsFlags> ConvertToFlutterSemanticsFlags(
     const flutter::SemanticsFlags& source) {
   return std::make_unique<FlutterSemanticsFlags>(FlutterSemanticsFlags{
+      .struct_size = sizeof(FlutterSemanticsFlags),
       .is_checked = ToFlutterCheckState(source.isChecked),
       .is_selected = ToFlutterTristate(source.isSelected),
       .is_enabled = ToFlutterTristate(source.isEnabled),
@@ -399,7 +400,7 @@ EmbedderSemanticsUpdate2::CreateStringAttributes(
         // All spell out attributes are identical and share a lazily created
         // instance.
         if (!spell_out_attribute_) {
-          auto spell_out_attribute_ =
+          spell_out_attribute_ =
               std::make_unique<FlutterSpellOutStringAttribute>();
           spell_out_attribute_->struct_size =
               sizeof(FlutterSpellOutStringAttribute);
