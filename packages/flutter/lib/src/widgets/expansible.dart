@@ -393,24 +393,9 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
   // The state is saved under an identifier of its own, built from the
   // PageStorageKeys above this widget, so it never shares a slot with other
   // widgets under the same keys, such as a Scrollable in the body.
-  //
-  // This collects the keys the same way as PageStorageBucket._allKeys and must
-  // be kept in sync with it.
   // TODO(omar-alshyokh): Remove this once PageStorageBucket supports namespaces, https://github.com/flutter/flutter/issues/193699
   Object? _computeStorageIdentifier() {
-    final keys = <PageStorageKey<dynamic>>[];
-    void addKey(Widget widget) {
-      final Key? key = widget.key;
-      if (key is PageStorageKey) {
-        keys.add(key);
-      }
-    }
-
-    addKey(widget);
-    context.visitAncestorElements((Element element) {
-      addKey(element.widget);
-      return element.widget is! PageStorage;
-    });
+    final List<PageStorageKey<dynamic>> keys = PageStorage.computeStorageKeys(context);
     return keys.isEmpty ? null : _ExpansibleStorageIdentifier(keys);
   }
 

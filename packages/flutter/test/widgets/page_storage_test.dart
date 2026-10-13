@@ -83,4 +83,38 @@ void main() {
       equals(storedValue),
     );
   });
+
+  testWidgets('PageStorage.computeStorageKeys returns the keys up to the closest PageStorage', (
+    WidgetTester tester,
+  ) async {
+    late BuildContext context;
+    await tester.pumpWidget(
+      KeyedSubtree(
+        key: const PageStorageKey<String>('outside'),
+        child: PageStorage(
+          key: const PageStorageKey<String>('storage'),
+          bucket: PageStorageBucket(),
+          child: KeyedSubtree(
+            key: const PageStorageKey<String>('outer'),
+            child: KeyedSubtree(
+              key: const ValueKey<String>('not a PageStorageKey'),
+              child: Builder(
+                key: const PageStorageKey<String>('inner'),
+                builder: (BuildContext builderContext) {
+                  context = builderContext;
+                  return const SizedBox();
+                },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(PageStorage.computeStorageKeys(context), const <PageStorageKey<String>>[
+      PageStorageKey<String>('inner'),
+      PageStorageKey<String>('outer'),
+      PageStorageKey<String>('storage'),
+    ]);
+  });
 }
