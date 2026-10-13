@@ -458,7 +458,14 @@ selects.config_setting_group(
   ConvertedFile('//flutter/flow'),
   // The Dart bindings library (engine-owned third_party), on the way to
   // lib/ui and runtime; its tests need the Dart snapshot and libdart.
-  ConvertedFile('//flutter/third_party/tonic'),
+  // tonic's suite lists one source of the parent package.
+  ConvertedFile(
+    '//flutter/third_party/tonic',
+    appendix: '''
+exports_files(["file_loader/file_loader_unittests.cc"])
+''',
+  ),
+  ConvertedFile('//flutter/third_party/tonic/tests'),
   // dart:ui's bindings as a library; its suites and benchmarks need the
   // Dart snapshot (//flutter/lib/snapshot), libdart and the shell's test
   // fixtures.

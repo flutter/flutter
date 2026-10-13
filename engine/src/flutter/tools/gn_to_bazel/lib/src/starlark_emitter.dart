@@ -1469,6 +1469,29 @@ final class _Emitter {
     return parsed.relativeTo(repository: package.repository, package: package.package);
   }
 
+  /// [gnPath] (`//dir/sub/../file`) with its `.` and `..` segments resolved,
+  /// as GN resolves them; `..` above the root is an error.
+  static String _normalized(String gnPath, GnLocation location) {
+    if (!gnPath.contains('/./') && !gnPath.contains('/../') && !gnPath.endsWith('/..')) {
+      return gnPath;
+    }
+    final segments = <String>[];
+    for (final String segment in gnPath.substring(2).split('/')) {
+      switch (segment) {
+        case '.':
+          break;
+        case '..':
+          if (segments.isEmpty) {
+            throw GnError(location, '$gnPath leaves the source root');
+          }
+          segments.removeLast();
+        default:
+          segments.add(segment);
+      }
+    }
+    return '//${segments.join('/')}';
+  }
+
   /// How a GN file path (a source, header or include directory) is written
   /// in the generated file: relative to the package when the package owns
   /// it, as a `//pkg:file` label when another package of the repository
@@ -1479,7 +1502,7 @@ final class _Emitter {
         ? gnFilePath
         : gnFilePath == '.'
         ? gnPackage
-        : '$gnPackage/$gnFilePath';
+        : _normalized('$gnPackage/$gnFilePath', location);
     // A generated directory (`$target_gen_dir`, `get_label_info(...,
     // "target_gen_dir")`) as an include directory: Bazel's `includes`
     // names the source directory and its twin in the output tree at once,
@@ -1563,7 +1586,8 @@ final class _Emitter {
   }
 
   /// A GN path as written in this file, as `//dir`.
-  String _gnPath(String path) => path.startsWith('//') ? path : '$gnPackage/$path';
+  String _gnPath(String path) =>
+      path.startsWith('//') ? path : _normalized('$gnPackage/$path', GnLocation(gnPackage, 0, 0));
 
   /// The dependency standing for a generated include directory of an
   /// ancestor package, or null when the directory is this package's or a
