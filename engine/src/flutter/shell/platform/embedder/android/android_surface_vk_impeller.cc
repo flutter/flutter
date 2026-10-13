@@ -35,6 +35,7 @@ bool AndroidSurfaceVKImpeller::IsValid() const {
 
 void AndroidSurfaceVKImpeller::TeardownOnScreenContext() {
   surface_context_vk_->TeardownSwapchain();
+  native_window_ = nullptr;
 }
 
 std::unique_ptr<Surface> AndroidSurfaceVKImpeller::CreateGPUSurface(
@@ -58,6 +59,9 @@ std::unique_ptr<Surface> AndroidSurfaceVKImpeller::CreateGPUSurface(
 }
 
 bool AndroidSurfaceVKImpeller::OnScreenSurfaceResize(const DlISize& size) {
+  if (!native_window_ || !native_window_->IsValid()) {
+    return false;
+  }
   surface_context_vk_->UpdateSurfaceSize(
       impeller::ISize{size.width, size.height});
   return true;

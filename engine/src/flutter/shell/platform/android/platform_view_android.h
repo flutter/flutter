@@ -59,6 +59,10 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
     return renderer_->GetAndroidContext();
   }
 
+  const std::shared_ptr<AndroidRenderer>& GetRenderer() const {
+    return renderer_;
+  }
+
   /// @brief Whether the SurfaceControl based swapchain is enabled and active.
   bool IsSurfaceControlEnabled() const;
 
@@ -71,7 +75,7 @@ class PlatformViewAndroid final : public PlatformViewEmbedder {
       const std::shared_ptr<PlatformViewAndroidJNI>& jni_facade);
 
   const std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
-  const std::unique_ptr<AndroidRenderer> renderer_;
+  const std::shared_ptr<AndroidRenderer> renderer_;
 
   std::shared_ptr<ExternalViewEmbedder> CreateAndroidExternalViewEmbedder();
 

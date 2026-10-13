@@ -86,6 +86,8 @@ typedef enum {
   /// macOS version >= 10.14
   kMetal,
   kVulkan,
+  /// Native window rendering is only supported on Android (`ANativeWindow*`).
+  kNativeWindow,
 } FlutterRendererType;
 
 /// Additional accessibility features that may be enabled by the platform.
@@ -1082,6 +1084,45 @@ typedef struct {
   SoftwareSurfacePresentCallback surface_present_callback;
 } FlutterSoftwareRendererConfig;
 
+/// An opaque handle to a platform native window (`ANativeWindow*` on Android).
+typedef void* FlutterNativeWindowHandle;
+
+/// The graphics backend used by the native window renderer (`kNativeWindow`).
+typedef enum {
+  /// Impeller with automatic backend selection (Vulkan with OpenGL ES
+  /// fallback).
+  kFlutterNativeWindowBackendImpellerAutoselect = 0,
+  /// Impeller with the Vulkan backend.
+  kFlutterNativeWindowBackendImpellerVulkan = 1,
+  /// Impeller with the OpenGL ES backend.
+  kFlutterNativeWindowBackendImpellerOpenGLES = 2,
+  /// Skia with the OpenGL ES backend.
+  kFlutterNativeWindowBackendSkiaOpenGLES = 3,
+  /// CPU software rendering into the native window buffer.
+  kFlutterNativeWindowBackendSoftware = 4,
+} FlutterNativeWindowBackend;
+
+/// Callback invoked on the raster thread when the native window swapchain
+/// needs a platform surface transaction (`ASurfaceTransaction*` on Android)
+/// whose lifetime and application are coordinated with the embedder's view
+/// hierarchy. Return null if the engine should create and apply its own
+/// transaction.
+typedef void* (*FlutterNativeWindowTransactionCallback)(void* /* user data */);
+
+typedef struct {
+  /// The size of this struct.
+  /// Must be sizeof(FlutterNativeWindowRendererConfig).
+  size_t struct_size;
+  /// The graphics backend to use for rendering into the native window.
+  FlutterNativeWindowBackend backend;
+  /// Optional callback returning a borrowed `ASurfaceTransaction*` for the
+  /// current frame, or null.
+  FlutterNativeWindowTransactionCallback transaction_callback;
+  /// Optional user data passed to `transaction_callback`. If null, the
+  /// `user_data` passed to `FlutterEngineInitialize` is used.
+  void* user_data;
+} FlutterNativeWindowRendererConfig;
+
 typedef struct {
   FlutterRendererType type;
   union {
@@ -1089,6 +1130,7 @@ typedef struct {
     FlutterSoftwareRendererConfig software;
     FlutterMetalRendererConfig metal;
     FlutterVulkanRendererConfig vulkan;
+    FlutterNativeWindowRendererConfig native_window;
   };
 } FlutterRendererConfig;
 
@@ -3854,6 +3896,45 @@ typedef struct {
   const FlutterAndroidHardwareBufferSource* android_hardware_buffer;
 } FlutterExternalTextureInfo;
 
+/// Describes a native window for `FlutterEngineSetNativeWindow`.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterNativeWindowInfo).
+  size_t struct_size;
+  /// The view to attach or detach the native window on.
+  FlutterViewId view_id;
+  /// The platform native window (`ANativeWindow*` on Android), or null to
+  /// detach the current window (unless `is_fake_window` is true). When
+  /// non-null, the engine acquires its own reference (`ANativeWindow_acquire`)
+  /// and releases it when replaced, detached, or shut down.
+  FlutterNativeWindowHandle window;
+  /// When true and `window` is null, attaches a fake window stub for unit
+  /// testing instead of detaching the surface.
+  bool is_fake_window;
+} FlutterNativeWindowInfo;
+
+/// Describes a native window size change for `FlutterEngineResizeNativeWindow`.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterNativeWindowResizeInfo).
+  size_t struct_size;
+  /// The view whose native window is being resized.
+  FlutterViewId view_id;
+  /// The new physical width in pixels.
+  size_t width;
+  /// The new physical height in pixels.
+  size_t height;
+} FlutterNativeWindowResizeInfo;
+
+/// Reports active properties of the native window renderer for
+/// `FlutterEngineGetNativeWindowRendererInfo`.
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterNativeWindowRendererInfo).
+  size_t struct_size;
+  /// The resolved graphics backend (after autoselect if applicable).
+  FlutterNativeWindowBackend backend;
+  /// Whether the SurfaceControl-based swapchain is enabled and active.
+  bool surface_control_enabled;
+} FlutterNativeWindowRendererInfo;
+
 #ifndef FLUTTER_ENGINE_NO_PROTOTYPES
 
 // NOLINTBEGIN(google-objc-function-naming)
@@ -4948,6 +5029,58 @@ FlutterEngineResult FlutterEngineLaunchEngine(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterEngineRunConfiguration* config);
 
+//------------------------------------------------------------------------------
+/// @brief      Attaches, replaces, or detaches the platform native window for
+///             an engine configured with `kNativeWindow`.
+///
+///             Must be called on the platform thread; blocks until the raster
+///             thread has applied the change.
+///
+/// @param[in]  engine  The running engine instance.
+/// @param[in]  info    The native window description.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineSetNativeWindow(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterNativeWindowInfo* info);
+
+//------------------------------------------------------------------------------
+/// @brief      Resizes the active onscreen surface of an engine configured with
+///             `kNativeWindow`.
+///
+///             Must be called on the platform thread; blocks until the raster
+///             thread has resized the surface.
+///
+/// @param[in]  engine  The running engine instance.
+/// @param[in]  info    The new physical dimensions.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineResizeNativeWindow(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterNativeWindowResizeInfo* info);
+
+//------------------------------------------------------------------------------
+/// @brief      Queries the resolved backend and SurfaceControl swapchain state
+///             of an engine configured with `kNativeWindow`.
+///
+///             Must not be called on the raster thread during initial context
+///             setup.
+///
+/// @param[in]  engine    The running engine instance.
+/// @param[out] info_out  Receives the renderer properties. `struct_size` must
+///                       be initialized by the caller.
+///
+/// @return     The result of the call.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineGetNativeWindowRendererInfo(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterNativeWindowRendererInfo* info_out);
+
 #endif  // !FLUTTER_ENGINE_NO_PROTOTYPES
 
 // Typedefs for the function pointers in FlutterEngineProcTable.
@@ -5132,6 +5265,15 @@ typedef FlutterEngineResult (
     *FlutterEngineRegisterExternalTextureWithInfoFnPtr)(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterExternalTextureInfo* info);
+typedef FlutterEngineResult (*FlutterEngineSetNativeWindowFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterNativeWindowInfo* info);
+typedef FlutterEngineResult (*FlutterEngineResizeNativeWindowFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    const FlutterNativeWindowResizeInfo* info);
+typedef FlutterEngineResult (*FlutterEngineGetNativeWindowRendererInfoFnPtr)(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterNativeWindowRendererInfo* info_out);
 
 /// Function-pointer-based versions of the APIs above.
 typedef struct {
@@ -5203,6 +5345,9 @@ typedef struct {
   FlutterEnginePlatformMessageTakePayloadFnPtr PlatformMessageTakePayload;
   FlutterEngineRegisterExternalTextureWithInfoFnPtr
       RegisterExternalTextureWithInfo;
+  FlutterEngineSetNativeWindowFnPtr SetNativeWindow;
+  FlutterEngineResizeNativeWindowFnPtr ResizeNativeWindow;
+  FlutterEngineGetNativeWindowRendererInfoFnPtr GetNativeWindowRendererInfo;
 } FlutterEngineProcTable;
 
 //------------------------------------------------------------------------------

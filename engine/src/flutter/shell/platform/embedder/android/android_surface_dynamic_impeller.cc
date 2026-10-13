@@ -24,6 +24,7 @@ bool AndroidSurfaceDynamicImpeller::IsValid() const {
 }
 
 void AndroidSurfaceDynamicImpeller::TeardownOnScreenContext() {
+  window_ = nullptr;
   if (vulkan_surface_) {
     vulkan_surface_->TeardownOnScreenContext();
   } else if (gl_surface_) {

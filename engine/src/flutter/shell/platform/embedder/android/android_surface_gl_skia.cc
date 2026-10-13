@@ -64,8 +64,9 @@ std::unique_ptr<Surface> AndroidSurfaceGLSkia::CreateGPUSurface(
 
 bool AndroidSurfaceGLSkia::OnScreenSurfaceResize(const DlISize& size) {
   FML_DCHECK(IsValid());
-  FML_DCHECK(onscreen_surface_);
-  FML_DCHECK(native_window_);
+  if (!onscreen_surface_ || !native_window_) {
+    return false;
+  }
 
   if (size == onscreen_surface_->GetSize()) {
     return true;
@@ -101,7 +102,11 @@ bool AndroidSurfaceGLSkia::ResourceContextClearCurrent() {
 bool AndroidSurfaceGLSkia::SetNativeWindow(
     fml::RefPtr<AndroidNativeWindow> window) {
   FML_DCHECK(IsValid());
-  FML_DCHECK(window);
+  if (!window) {
+    native_window_ = nullptr;
+    onscreen_surface_ = nullptr;
+    return false;
+  }
   native_window_ = window;
   // Ensure the destructor is called since it destroys the `EGLSurface` before
   // creating a new onscreen surface.

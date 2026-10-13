@@ -173,6 +173,7 @@ bool AndroidRenderer::SetNativeWindow(
       task_runners_.GetRasterTaskRunner(),
       [&latch, surface = android_surface_.get(),
        native_window = std::move(native_window)]() {
+        surface->TeardownOnScreenContext();
         surface->SetNativeWindow(native_window);
         latch.Signal();
       });
@@ -182,19 +183,7 @@ bool AndroidRenderer::SetNativeWindow(
 
 void AndroidRenderer::SwapNativeWindow(
     fml::RefPtr<AndroidNativeWindow> native_window) {
-  if (!android_surface_) {
-    return;
-  }
-  fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      task_runners_.GetRasterTaskRunner(),
-      [&latch, surface = android_surface_.get(),
-       native_window = std::move(native_window)]() {
-        surface->TeardownOnScreenContext();
-        surface->SetNativeWindow(native_window);
-        latch.Signal();
-      });
-  latch.Wait();
+  SetNativeWindow(std::move(native_window));
 }
 
 void AndroidRenderer::TeardownSurface() {

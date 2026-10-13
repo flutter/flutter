@@ -143,6 +143,19 @@ class PlatformViewEmbedder : public PlatformView {
       std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 #endif
 
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a platform view for an embedding that renders on its
+  ///             own (such as `kNativeWindow`). There is no `EmbedderSurface`;
+  ///             surface and rendering context callbacks come from
+  ///             `platform_dispatch_table`, and `external_view_embedder` is
+  ///             used when `create_external_view_embedder_callback` is unset.
+  ///
+  PlatformViewEmbedder(PlatformView::Delegate& delegate,
+                       const flutter::TaskRunners& task_runners,
+                       PlatformDispatchTable platform_dispatch_table,
+                       std::shared_ptr<EmbedderExternalViewEmbedder>
+                           external_view_embedder = nullptr);
+
   ~PlatformViewEmbedder() override;
 
   // |PlatformView|
@@ -168,18 +181,6 @@ class PlatformViewEmbedder : public PlatformView {
   void LoadDartDeferredLibraryError(intptr_t loading_unit_id,
                                     const std::string error_message,
                                     bool transient) override;
-
- protected:
-  //----------------------------------------------------------------------------
-  /// @brief      Creates a platform view for an embedding that renders on its
-  ///             own. There is no embedder surface and no external view
-  ///             embedder; everything comes from `platform_dispatch_table`,
-  ///             including any surface, external view embedder, and rendering
-  ///             context callbacks.
-  ///
-  PlatformViewEmbedder(PlatformView::Delegate& delegate,
-                       const flutter::TaskRunners& task_runners,
-                       PlatformDispatchTable platform_dispatch_table);
 
  private:
   class EmbedderPlatformMessageHandler;

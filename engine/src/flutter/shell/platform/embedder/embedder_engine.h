@@ -22,6 +22,7 @@
 namespace flutter {
 
 struct ShellArgs;
+class AndroidRenderer;
 
 struct ImageGeneratorFactoryRegistration {
   ImageGeneratorFactory factory;
@@ -213,6 +214,22 @@ class EmbedderEngine {
 
   Shell& GetShell();
 
+#if FML_OS_ANDROID
+  void SetAndroidRenderer(std::shared_ptr<AndroidRenderer> renderer);
+
+  const std::shared_ptr<AndroidRenderer>& GetAndroidRenderer() const;
+
+  const std::shared_ptr<std::shared_ptr<AndroidRenderer>>&
+  GetAndroidRendererSlot() const {
+    return android_renderer_slot_;
+  }
+
+  void SetAndroidRendererSlot(
+      std::shared_ptr<std::shared_ptr<AndroidRenderer>> slot) {
+    android_renderer_slot_ = std::move(slot);
+  }
+#endif  // FML_OS_ANDROID
+
  private:
   // Adopts |spawned_shell|, a running shell returned by Shell::Spawn.
   EmbedderEngine(const TaskRunners& task_runners,
@@ -227,6 +244,10 @@ class EmbedderEngine {
   std::unique_ptr<Shell> shell_;
   std::unique_ptr<EmbedderExternalTextureResolver> external_texture_resolver_;
   std::vector<ImageGeneratorFactoryRegistration> image_generators_;
+#if FML_OS_ANDROID
+  std::shared_ptr<std::shared_ptr<AndroidRenderer>> android_renderer_slot_ =
+      std::make_shared<std::shared_ptr<AndroidRenderer>>();
+#endif  // FML_OS_ANDROID
   bool is_surface_created_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderEngine);

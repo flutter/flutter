@@ -6797,6 +6797,83 @@ TEST_F(EmbedderTest, SpawnedEngineWithFlutterEngineRunConfiguration) {
   engine.reset();
 }
 
+TEST_F(EmbedderTest, NativeWindowRendererValidationAndProcTable) {
+  FlutterEngineProcTable table = {};
+  table.struct_size = sizeof(FlutterEngineProcTable);
+  ASSERT_EQ(FlutterEngineGetProcAddresses(&table), kSuccess);
+  EXPECT_EQ(table.SetNativeWindow, &FlutterEngineSetNativeWindow);
+  EXPECT_EQ(table.ResizeNativeWindow, &FlutterEngineResizeNativeWindow);
+  EXPECT_EQ(table.GetNativeWindowRendererInfo,
+            &FlutterEngineGetNativeWindowRendererInfo);
+
+  FlutterNativeWindowInfo window_info = {};
+  window_info.struct_size = sizeof(FlutterNativeWindowInfo);
+  EXPECT_EQ(FlutterEngineSetNativeWindow(nullptr, &window_info),
+            kInvalidArguments);
+
+  FlutterNativeWindowResizeInfo resize_info = {};
+  resize_info.struct_size = sizeof(FlutterNativeWindowResizeInfo);
+  EXPECT_EQ(FlutterEngineResizeNativeWindow(nullptr, &resize_info),
+            kInvalidArguments);
+
+  FlutterNativeWindowRendererInfo renderer_info = {};
+  renderer_info.struct_size = sizeof(FlutterNativeWindowRendererInfo);
+  EXPECT_EQ(FlutterEngineGetNativeWindowRendererInfo(nullptr, &renderer_info),
+            kInvalidArguments);
+
+  constexpr int32_t kTestSurfaceDim = 1;
+  auto& context = GetEmbedderContext<EmbedderTestContextSoftware>();
+  EmbedderConfigBuilder builder(context);
+  builder.SetSurface(DlISize(kTestSurfaceDim, kTestSurfaceDim));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  EXPECT_EQ(FlutterEngineSetNativeWindow(engine.get(), nullptr),
+            kInvalidArguments);
+  FlutterNativeWindowInfo bad_window_info = {};
+  bad_window_info.struct_size = 1;
+  EXPECT_EQ(FlutterEngineSetNativeWindow(engine.get(), &bad_window_info),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineSetNativeWindow(engine.get(), &window_info),
+            kInvalidArguments);
+
+  EXPECT_EQ(FlutterEngineResizeNativeWindow(engine.get(), nullptr),
+            kInvalidArguments);
+  FlutterNativeWindowResizeInfo bad_resize_info = {};
+  bad_resize_info.struct_size = 1;
+  EXPECT_EQ(FlutterEngineResizeNativeWindow(engine.get(), &bad_resize_info),
+            kInvalidArguments);
+  EXPECT_EQ(FlutterEngineResizeNativeWindow(engine.get(), &resize_info),
+            kInvalidArguments);
+
+  EXPECT_EQ(FlutterEngineGetNativeWindowRendererInfo(engine.get(), nullptr),
+            kInvalidArguments);
+  FlutterNativeWindowRendererInfo bad_renderer_info = {};
+  bad_renderer_info.struct_size = 1;
+  EXPECT_EQ(FlutterEngineGetNativeWindowRendererInfo(engine.get(),
+                                                     &bad_renderer_info),
+            kInvalidArguments);
+  EXPECT_EQ(
+      FlutterEngineGetNativeWindowRendererInfo(engine.get(), &renderer_info),
+      kInvalidArguments);
+
+#if !FML_OS_ANDROID
+  FlutterRendererConfig native_window_config = {};
+  native_window_config.type = kNativeWindow;
+  native_window_config.native_window.struct_size =
+      sizeof(FlutterNativeWindowRendererConfig);
+  native_window_config.native_window.backend =
+      kFlutterNativeWindowBackendImpellerAutoselect;
+  FLUTTER_API_SYMBOL(FlutterEngine) native_engine = nullptr;
+  EXPECT_EQ(FlutterEngineInitialize(
+                FLUTTER_ENGINE_VERSION, &native_window_config,
+                &builder.GetProjectArgs(), nullptr, &native_engine),
+            kInvalidArguments);
+#endif  // !FML_OS_ANDROID
+
+  engine.reset();
+}
+
 }  // namespace testing
 }  // namespace flutter
 

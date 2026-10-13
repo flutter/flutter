@@ -11,6 +11,10 @@
 #include "flutter/shell/platform/embedder/embedder_struct_macros.h"
 #include "flutter/shell/platform/embedder/vsync_waiter_embedder.h"
 
+#if FML_OS_ANDROID
+#include "flutter/shell/platform/embedder/android/android_renderer.h"  // nogncheck
+#endif  // FML_OS_ANDROID
+
 namespace flutter {
 
 namespace {
@@ -273,6 +277,14 @@ std::optional<RunConfiguration> EmbedderEngine::BuildRunConfiguration(
 
 bool EmbedderEngine::CollectShell() {
   shell_.reset();
+#if FML_OS_ANDROID
+  // Destroy the AndroidRenderer after the shell (and its platform view and
+  // rasterizer) has been collected, but before CollectThreadHost() stops the
+  // raster thread (which ~AndroidContextGLSkia posts TeardownContext onto).
+  if (android_renderer_slot_) {
+    android_renderer_slot_->reset();
+  }
+#endif  // FML_OS_ANDROID
   return IsValid();
 }
 
@@ -680,5 +692,22 @@ Shell& EmbedderEngine::GetShell() {
   FML_DCHECK(shell_);
   return *shell_.get();
 }
+
+#if FML_OS_ANDROID
+void EmbedderEngine::SetAndroidRenderer(
+    std::shared_ptr<AndroidRenderer> renderer) {
+  if (!android_renderer_slot_) {
+    android_renderer_slot_ =
+        std::make_shared<std::shared_ptr<AndroidRenderer>>();
+  }
+  *android_renderer_slot_ = std::move(renderer);
+}
+
+const std::shared_ptr<AndroidRenderer>& EmbedderEngine::GetAndroidRenderer()
+    const {
+  static const std::shared_ptr<AndroidRenderer> kNullRenderer;
+  return android_renderer_slot_ ? *android_renderer_slot_ : kNullRenderer;
+}
+#endif  // FML_OS_ANDROID
 
 }  // namespace flutter

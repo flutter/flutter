@@ -188,8 +188,10 @@ PlatformViewEmbedder::PlatformViewEmbedder(
 PlatformViewEmbedder::PlatformViewEmbedder(
     PlatformView::Delegate& delegate,
     const flutter::TaskRunners& task_runners,
-    PlatformDispatchTable platform_dispatch_table)
+    PlatformDispatchTable platform_dispatch_table,
+    std::shared_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : PlatformView(delegate, task_runners),
+      external_view_embedder_(std::move(external_view_embedder)),
       platform_message_handler_(
           CreatePlatformMessageHandler(platform_dispatch_table, task_runners)),
       platform_dispatch_table_(std::move(platform_dispatch_table)) {}

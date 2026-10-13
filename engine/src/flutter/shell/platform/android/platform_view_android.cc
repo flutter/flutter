@@ -26,7 +26,7 @@ PlatformViewAndroid::PlatformViewAndroid(
           task_runners,
           WithAndroidCallbacks(this, std::move(platform_dispatch_table))),
       jni_facade_(jni_facade),
-      renderer_(std::make_unique<AndroidRenderer>(
+      renderer_(std::make_shared<AndroidRenderer>(
           task_runners,
           delegate.OnPlatformViewGetSettings(),
           rendering_api,
@@ -86,7 +86,7 @@ PlatformViewAndroid::PlatformViewAndroid(
           task_runners,
           WithAndroidCallbacks(this, std::move(platform_dispatch_table))),
       jni_facade_(jni_facade),
-      renderer_(std::make_unique<AndroidRenderer>(
+      renderer_(std::make_shared<AndroidRenderer>(
           task_runners,
           delegate.OnPlatformViewGetSettings(),
           android_context,

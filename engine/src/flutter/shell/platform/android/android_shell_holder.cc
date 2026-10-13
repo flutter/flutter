@@ -669,6 +669,9 @@ AndroidShellHolder::AndroidShellHolder(
       /*run_configuration=*/std::nullopt, on_create_platform_view,
       /*external_texture_resolver=*/nullptr);
   if (engine->LaunchShell(GetDefaultPlatformData())) {
+    if (weak_platform_view) {
+      engine->SetAndroidRenderer(weak_platform_view->GetRenderer());
+    }
     engine_.reset(
         reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(engine.release()));
   }
@@ -859,6 +862,9 @@ std::unique_ptr<AndroidShellHolder> AndroidShellHolder::Spawn(
     // If Spawn failed, the kernel blob wasn't readable or the shell failed to
     // spawn.
     return nullptr;
+  }
+  if (weak_platform_view) {
+    spawned->SetAndroidRenderer(weak_platform_view->GetRenderer());
   }
   UniqueEngine engine(
       reinterpret_cast<FLUTTER_API_SYMBOL(FlutterEngine)>(spawned.release()));
