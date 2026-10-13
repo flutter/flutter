@@ -350,3 +350,22 @@ The principal assertion is engine-side image readback before GTK presentation.
 It proves gradient rasterization, scrolling and resize behavior on the tested
 engine; it does not assert exact final-screen pixels, GPU performance, arbitrary
 scales, external-texture behavior, or an unavailable Vulkan GTK backend.
+
+## GTK4 fractional-scale conversion and metrics
+
+`FlGtk4ScalingTest.*` is part of `flutter_linux_gtk4_unittests`. It verifies
+100%, 125%, 150%, 175%, and 200% backing dimensions, nearest-pixel rounding for
+odd logical sizes, and fractional DPR/constraints sent through the engine's
+window-metrics API. The scale-change sequence keeps logical size fixed and
+includes changes whose rounded-up integer scale remains 2.
+
+Run with the normal GTK4 unit-test environment and
+`--gtest_filter=FlGtk4ScalingTest.*`. The local `run_gtk_tests.sh --gtk4` helper
+includes this suite in its default filter.
+
+These are conversion and engine-boundary tests using the mock engine. They do
+not exercise GDK's scale discovery/notifications, physical render-target
+allocation, input conversion, native accessibility geometry, or moving a
+window between Wayland monitors. The X11 geometry and gradient probes still
+only support integer scales 1 and 2; passing these unit tests does not establish
+end-to-end fractional-scale support.
