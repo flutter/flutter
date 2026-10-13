@@ -117,11 +117,11 @@ TEST(FlutterProjectBundle, MaxD3DFeatureLevel) {
 
   FlutterProjectBundle project(properties);
 
+  _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", "");
+
   ASSERT_TRUE(project.max_d3d_feature_level().has_value());
   EXPECT_EQ(project.max_d3d_feature_level()->major, 10);
   EXPECT_EQ(project.max_d3d_feature_level()->minor, 0);
-
-  _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", "");
 }
 
 TEST(FlutterProjectBundle, MaxD3DFeatureLevelMalformed) {
@@ -133,9 +133,9 @@ TEST(FlutterProjectBundle, MaxD3DFeatureLevelMalformed) {
 
   FlutterProjectBundle project(properties);
 
-  EXPECT_EQ(project.max_d3d_feature_level(), std::nullopt);
-
   _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", "");
+
+  EXPECT_EQ(project.max_d3d_feature_level(), std::nullopt);
 }
 #endif  // !FLUTTER_RELEASE
 

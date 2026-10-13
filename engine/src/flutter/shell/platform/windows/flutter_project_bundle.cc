@@ -24,7 +24,7 @@ std::optional<egl::D3DFeatureLevel> GetMaxD3DFeatureLevelFromEnvironment() {
 #ifndef FLUTTER_RELEASE
   constexpr char kKey[] = "FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL";
   const char* value = std::getenv(kKey);
-  if (value == nullptr) {
+  if (value == nullptr || value[0] == '\0') {
     return std::nullopt;
   }
   std::optional<egl::D3DFeatureLevel> level = egl::ParseD3DFeatureLevel(value);
