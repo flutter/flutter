@@ -256,6 +256,7 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/impeller:impeller': _vulkanCopts,
   '//flutter/shell/gpu:gpu_surface_gl': _vulkanCopts,
   '//flutter/shell/gpu:gpu_surface_vulkan': _vulkanCopts,
+  '//flutter/shell/common:shell_unittests_gpu_configuration': _vulkanCopts,
 };
 
 /// inja_public_config's flags.
