@@ -16,15 +16,8 @@ source_set("platform_view_android_delegate") {
   deps = [
     "//flutter/common",
     "//flutter/fml",
-
-    # Only for the flow, lib/ui and Skia headers that
-    # jni/platform_view_android_jni.h includes; the delegate itself uses the
-    # embedder.h types.
-    "//flutter/lib/ui",
-    "//flutter/shell/common",
     "//flutter/shell/platform/android/jni",
     "//flutter/shell/platform/embedder:embedder_headers",
-    "//flutter/skia",
   ]
 }
 
