@@ -338,20 +338,21 @@ cc_test(
 )
 ''',
   ),
-  // The desktop embeddings' shared code, as far as it reaches today: the
-  // public headers, the input model, the isolate scope, the engine
-  // switches and the core (path utilities, windowing), with the core's
-  // tests -- the first converted test to link the Dart VM from the wrap.
+  // The desktop embeddings' shared code: the public headers, the input
+  // model, the isolate scope, the engine switches, the core (path
+  // utilities, windowing) with its tests -- the first converted test to
+  // link the Dart VM from the wrap -- and, on the embedder and the client
+  // wrapper, common_cpp (the JSON codecs, the message dispatcher) with its
+  // suite. The accessibility bridge waits for //flutter/third_party/
+  // accessibility (the Linux suite does not use it).
   ConvertedFile('//flutter/shell/geometry'),
   ConvertedFile(
     '//flutter/shell/platform/common',
-    skip: <String, String>{
-      'common_cpp_accessibility': 'needs //flutter/third_party/accessibility and the embedder',
-      'common_cpp': 'needs the embedder, the client wrapper and rapidjson',
-      'common_cpp_fixtures': 'with common_cpp_unittests',
-      'common_cpp_unittests': 'needs :common_cpp',
-    },
+    skip: <String, String>{'common_cpp_accessibility': 'needs //flutter/third_party/accessibility'},
   ),
+  // The C++ client wrapper (plugin API) the desktop embeddings build on,
+  // with its suite; its file lists come from core_wrapper_files.gni.
+  ConvertedFile('//flutter/shell/platform/common/client_wrapper'),
   // txt_unittests' embedded test font. The rest of the file is the Dart
   // runtime glue, which needs tonic, lib/snapshot and the shell.
   ConvertedFile('//flutter/runtime'),
