@@ -642,12 +642,12 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             trackWidgetCreation: true,
             // Don't try and download canvaskit from the CDN.
             useLocalCanvasKit: true,
-            webEnableHotReload: true,
             includeUnsupportedPlatformLibraryStubs: true,
           ),
-          webEnableExposeUrl: false,
-          webEnableExpressionEvaluation: true,
-          webRunHeadless: boolArg(kHeadless),
+          webConfig: WebDebugConfig(
+            enableExpressionEvaluation: true,
+            runHeadless: boolArg(kHeadless),
+          ),
           devToolsServerAddress: devToolsServerAddress,
         );
         final String target = widgetPreviewScaffoldProject.directory
