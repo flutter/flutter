@@ -6,11 +6,11 @@
 #define FLUTTER_IMPELLER_PLAYGROUND_YUV_TEST_TEXTURES_H_
 
 #include <memory>
-#include <optional>
 
 #include "impeller/core/texture.h"
 #include "impeller/geometry/color.h"
 #include "impeller/renderer/context.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace impeller {
 
@@ -25,9 +25,10 @@ struct TestYUVTextures {
 /// Creates and uploads Y and UV planes holding four solid horizontal bands
 /// (red, green, blue, white from top to bottom) encoded in `yuv_color_space`.
 ///
-/// Intended for exercising the YUV to RGB conversion filter. Returns
-/// `std::nullopt` if the textures could not be created or uploaded.
-std::optional<TestYUVTextures> CreateTestYUVTextures(
+/// Intended for exercising the YUV to RGB conversion filter. Returns an error
+/// describing the step that failed if the textures could not be created or
+/// uploaded.
+absl::StatusOr<TestYUVTextures> CreateTestYUVTextures(
     const Context& context,
     YUVColorSpace yuv_color_space);
 

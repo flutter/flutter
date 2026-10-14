@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <array>
 #include <memory>
 
 #include "display_list/display_list.h"
@@ -740,43 +739,53 @@ TEST_P(AiksTest, ForegroundPipelineBlendAppliesTransformCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
-// Draws an image through a DlBlendColorFilter for every Porter-Duff mode.
-// `Canvas::AttemptColorFilterOptimization` turns each draw into an
-// AtlasContents draw that selects the matching `PorterDuffBlend` pipeline
-// variant without inverting the mode, so each cell exercises one
-// specialization of that shader on every backend.
-TEST_P(AiksTest, DrawImageWithPorterDuffBlendColorFilters) {
-  auto image =
-      DlImageImpeller::Make(CreateTextureForFixture("blend_mode_dst.png"));
+// Draws an image through a DlBlendColorFilter with the given Porter-Duff mode.
+// `Canvas::AttemptColorFilterOptimization` turns the draw into an AtlasContents
+// draw that selects the matching `PorterDuffBlend` pipeline variant without
+// inverting the mode, so each test exercises one specialization of that shader
+// on every backend.
+static void DrawImageWithPorterDuffBlendColorFilter(AiksTest* test,
+                                                    DlBlendMode mode) {
+  auto image = DlImageImpeller::Make(
+      test->CreateTextureForFixture("blend_mode_dst.png"));
   ASSERT_TRUE(image);
-  // Every mode that ContentContext builds a PorterDuffBlend variant for and
-  // that `GetPorterDuffPipeline` can be asked for (kScreen is gated out).
-  constexpr std::array<DlBlendMode, 14> kModes = {
-      DlBlendMode::kClear,   DlBlendMode::kSrc,      DlBlendMode::kDst,
-      DlBlendMode::kSrcOver, DlBlendMode::kDstOver,  DlBlendMode::kSrcIn,
-      DlBlendMode::kDstIn,   DlBlendMode::kSrcOut,   DlBlendMode::kDstOut,
-      DlBlendMode::kSrcATop, DlBlendMode::kDstATop,  DlBlendMode::kXor,
-      DlBlendMode::kPlus,    DlBlendMode::kModulate,
-  };
 
   DisplayListBuilder builder;
-  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.Scale(test->GetContentScale().x, test->GetContentScale().y);
   builder.DrawColor(DlColor::kDarkGrey(), DlBlendMode::kSrc);
 
-  constexpr Scalar kCell = 180;
-  constexpr int kColumns = 5;
-  for (size_t i = 0; i < kModes.size(); i++) {
-    DlPaint paint;
-    paint.setColorFilter(DlColorFilter::MakeBlend(
-        DlColor::kOrange().withAlphaF(0.6f), kModes[i]));
-    DlRect dest = DlRect::MakeXYWH((i % kColumns) * kCell + 20,
-                                   (i / kColumns) * kCell + 20,  //
-                                   kCell - 40, kCell - 40);
-    builder.DrawImageRect(image, dest, DlImageSampling::kLinear, &paint);
+  DlPaint paint;
+  paint.setColorFilter(
+      DlColorFilter::MakeBlend(DlColor::kOrange().withAlphaF(0.6f), mode));
+  builder.DrawImageRect(image, DlRect::MakeXYWH(100, 100, 400, 400),
+                        DlImageSampling::kLinear, &paint);
+
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
+}
+
+// One test per Porter-Duff mode that ContentContext builds a PorterDuffBlend
+// variant for. kDst is left out because DlBlendColorFilter::Make folds it to no
+// filter at all, and kScreen because the atlas path never selects it.
+#define PORTER_DUFF_BLEND_COLOR_FILTER_TEST(mode)                        \
+  TEST_P(AiksTest, DrawImageWithPorterDuffBlendColorFilter##mode) {      \
+    DrawImageWithPorterDuffBlendColorFilter(this, DlBlendMode::k##mode); \
   }
 
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
-}
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(Clear)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(Src)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(SrcOver)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(DstOver)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(SrcIn)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(DstIn)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(SrcOut)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(DstOut)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(SrcATop)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(DstATop)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(Xor)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(Plus)
+PORTER_DUFF_BLEND_COLOR_FILTER_TEST(Modulate)
+
+#undef PORTER_DUFF_BLEND_COLOR_FILTER_TEST
 
 TEST_P(AiksTest, ForegroundAdvancedBlendAppliesTransformCorrectly) {
   auto texture = CreateTextureForFixture("airplane.jpg",

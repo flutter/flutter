@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <memory>
 #include <optional>
@@ -1692,17 +1693,19 @@ TEST_P(EntityTest, YUVToRGBFilter) {
     GTEST_SKIP() << "YUV to RGB filter is only supported on Metal backends.";
   }
 
+  constexpr std::array<YUVColorSpace, 2> kColorSpaces = {
+      YUVColorSpace::kBT601FullRange, YUVColorSpace::kBT601LimitedRange};
+  std::array<TestYUVTextures, kColorSpaces.size()> textures;
+  for (size_t i = 0; i < kColorSpaces.size(); i++) {
+    auto result = CreateTestYUVTextures(*GetContext(), kColorSpaces[i]);
+    ABSL_ASSERT_OK(result);
+    textures[i] = std::move(result).value();
+  }
+
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
-    YUVColorSpace yuv_color_space_array[2]{YUVColorSpace::kBT601FullRange,
-                                           YUVColorSpace::kBT601LimitedRange};
-    for (int i = 0; i < 2; i++) {
-      auto yuv_color_space = yuv_color_space_array[i];
-      auto textures = CreateTestYUVTextures(*GetContext(), yuv_color_space);
-      if (!textures.has_value()) {
-        return false;
-      }
+    for (size_t i = 0; i < kColorSpaces.size(); i++) {
       auto filter_contents = FilterContents::MakeYUVToRGBFilter(
-          textures->y, textures->uv, yuv_color_space);
+          textures[i].y, textures[i].uv, kColorSpaces[i]);
       Entity filter_entity;
       filter_entity.SetContents(filter_contents);
       auto snapshot =

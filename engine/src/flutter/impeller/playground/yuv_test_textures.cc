@@ -7,9 +7,11 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
-#include <string_view>
+#include <string>
+#include <utility>
 #include <vector>
 
+#include "flutter/fml/status.h"
 #include "impeller/core/allocator.h"
 #include "impeller/core/device_buffer.h"
 #include "impeller/core/formats.h"
@@ -19,6 +21,7 @@
 #include "impeller/renderer/blit_pass.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/command_queue.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace impeller {
 
@@ -42,37 +45,40 @@ Vector3 RGBToYUV(Vector3 rgb, YUVColorSpace yuv_color_space) {
 }
 
 /// Creates a host-visible texture and queues a copy of `data` into it on
-/// `blit_pass`. Returns nullptr on failure.
-std::shared_ptr<Texture> CreateTextureWithData(const Context& context,
-                                               BlitPass& blit_pass,
-                                               PixelFormat format,
-                                               ISize size,
-                                               const std::vector<uint8_t>& data,
-                                               std::string_view label) {
+/// `blit_pass`.
+absl::StatusOr<std::shared_ptr<Texture>> CreateTextureWithData(
+    const Context& context,
+    BlitPass& blit_pass,
+    PixelFormat format,
+    ISize size,
+    const std::vector<uint8_t>& data,
+    const std::string& label) {
   TextureDescriptor descriptor;
   descriptor.storage_mode = StorageMode::kHostVisible;
   descriptor.format = format;
   descriptor.size = size;
   auto texture = context.GetResourceAllocator()->CreateTexture(descriptor);
   if (!texture) {
-    return nullptr;
+    return absl::InternalError("Could not allocate the " + label + " texture.");
   }
   texture->SetLabel(label);
   auto buffer = context.GetResourceAllocator()->CreateBufferWithCopy(
       data.data(), data.size());
   if (!buffer) {
-    return nullptr;
+    return absl::InternalError("Could not create the staging buffer for the " +
+                               label + " texture.");
   }
   if (!blit_pass.AddCopy(DeviceBuffer::AsBufferView(std::move(buffer)),
                          texture)) {
-    return nullptr;
+    return absl::InternalError("Could not add the copy into the " + label +
+                               " texture to the blit pass.");
   }
   return texture;
 }
 
 }  // namespace
 
-std::optional<TestYUVTextures> CreateTestYUVTextures(
+absl::StatusOr<TestYUVTextures> CreateTestYUVTextures(
     const Context& context,
     YUVColorSpace yuv_color_space) {
   const Vector3 red = {244.0f / 255.0f, 67.0f / 255.0f, 54.0f / 255.0f};
@@ -106,28 +112,38 @@ std::optional<TestYUVTextures> CreateTestYUVTextures(
 
   auto cmd_buffer = context.CreateCommandBuffer();
   if (!cmd_buffer) {
-    return std::nullopt;
+    return absl::InternalError("Could not create a command buffer.");
   }
   auto blit_pass = cmd_buffer->CreateBlitPass();
   if (!blit_pass) {
-    return std::nullopt;
+    return absl::InternalError("Could not create a blit pass.");
+  }
+
+  auto y_texture =
+      CreateTextureWithData(context, *blit_pass, PixelFormat::kR8UNormInt,
+                            kYSize, y_data, "Test YUV Y plane");
+  if (!y_texture.ok()) {
+    return y_texture.status();
+  }
+  auto uv_texture =
+      CreateTextureWithData(context, *blit_pass, PixelFormat::kR8G8UNormInt,
+                            kUVSize, uv_data, "Test YUV UV plane");
+  if (!uv_texture.ok()) {
+    return uv_texture.status();
+  }
+
+  if (!blit_pass->EncodeCommands()) {
+    return absl::InternalError("Could not encode the YUV plane uploads.");
+  }
+  fml::Status submit_status = context.GetCommandQueue()->Submit({cmd_buffer});
+  if (!submit_status.ok()) {
+    return absl::InternalError("Could not submit the YUV plane uploads: " +
+                               std::string(submit_status.message()));
   }
 
   TestYUVTextures textures;
-  textures.y =
-      CreateTextureWithData(context, *blit_pass, PixelFormat::kR8UNormInt,
-                            kYSize, y_data, "Test YUV Y plane");
-  textures.uv =
-      CreateTextureWithData(context, *blit_pass, PixelFormat::kR8G8UNormInt,
-                            kUVSize, uv_data, "Test YUV UV plane");
-  if (!textures.y || !textures.uv) {
-    return std::nullopt;
-  }
-
-  if (!blit_pass->EncodeCommands() ||
-      !context.GetCommandQueue()->Submit({cmd_buffer}).ok()) {
-    return std::nullopt;
-  }
+  textures.y = std::move(y_texture).value();
+  textures.uv = std::move(uv_texture).value();
   return textures;
 }
 

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <array>
-
 #include "display_list/dl_sampling_options.h"
 #include "display_list/dl_tile_mode.h"
 #include "display_list/dl_vertices.h"
@@ -164,20 +162,13 @@ TEST_P(AiksTest, VerticesGeometryColorUVPositionDataAdvancedBlend) {
 
 // drawVertices with vertex colors, an image color source, and a blend mode
 // above kHardLight is drawn with the second "uber" vertices shader (see
-// ContentContext::GetDrawVerticesUberPipeline). One cell per such mode.
-TEST_P(AiksTest, DrawVerticesImageSourceWithUpperAdvancedBlendModes) {
-  auto image =
-      DlImageImpeller::Make(CreateTextureForFixture("table_mountain_nx.png"));
+// ContentContext::GetDrawVerticesUberPipeline).
+static void DrawVerticesImageSourceWithAdvancedBlend(AiksTest* test,
+                                                     DlBlendMode mode) {
+  auto image = DlImageImpeller::Make(
+      test->CreateTextureForFixture("table_mountain_nx.png"));
   ASSERT_TRUE(image);
-  ContentContext content_context(GetContext(), nullptr);
-  auto size = image->GetImpellerTexture(content_context)->GetSize();
-
-  constexpr std::array<DlBlendMode, 8> kModes = {
-      DlBlendMode::kSoftLight, DlBlendMode::kDifference,
-      DlBlendMode::kExclusion, DlBlendMode::kMultiply,
-      DlBlendMode::kHue,       DlBlendMode::kSaturation,
-      DlBlendMode::kColor,     DlBlendMode::kLuminosity,
-  };
+  DlISize size = image->GetSize();
 
   // A triangle strip over the four corners covers the whole image exactly once.
   std::vector<DlPoint> positions = {
@@ -199,19 +190,28 @@ TEST_P(AiksTest, DrawVerticesImageSourceWithUpperAdvancedBlendModes) {
   paint.setColorSource(
       DlColorSource::MakeImage(image, DlTileMode::kClamp, DlTileMode::kClamp));
 
-  constexpr int kColumns = 4;
-  constexpr Scalar kGap = 8;
   DisplayListBuilder builder;
   builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
-  for (size_t i = 0; i < kModes.size(); i++) {
-    builder.Save();
-    builder.Translate((i % kColumns) * (size.width + kGap),
-                      (i / kColumns) * (size.height + kGap));
-    builder.DrawVertices(vertices, kModes[i], paint);
-    builder.Restore();
-  }
-  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+  builder.DrawVertices(vertices, mode, paint);
+  ASSERT_TRUE(test->OpenPlaygroundHere(builder.Build()));
 }
+
+// One test per blend mode above kHardLight.
+#define VERTICES_ADVANCED_BLEND_TEST(mode)                                \
+  TEST_P(AiksTest, DrawVerticesImageSourceWithAdvancedBlend##mode) {      \
+    DrawVerticesImageSourceWithAdvancedBlend(this, DlBlendMode::k##mode); \
+  }
+
+VERTICES_ADVANCED_BLEND_TEST(SoftLight)
+VERTICES_ADVANCED_BLEND_TEST(Difference)
+VERTICES_ADVANCED_BLEND_TEST(Exclusion)
+VERTICES_ADVANCED_BLEND_TEST(Multiply)
+VERTICES_ADVANCED_BLEND_TEST(Hue)
+VERTICES_ADVANCED_BLEND_TEST(Saturation)
+VERTICES_ADVANCED_BLEND_TEST(Color)
+VERTICES_ADVANCED_BLEND_TEST(Luminosity)
+
+#undef VERTICES_ADVANCED_BLEND_TEST
 
 // Draw a hexagon using triangle fan
 TEST_P(AiksTest, CanConvertTriangleFanToTriangles) {

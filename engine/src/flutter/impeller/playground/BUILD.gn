@@ -61,6 +61,7 @@ impeller_component("playground") {
     "//flutter/testing:testing_lib",
     "//flutter/third_party/glfw",
     "//flutter/third_party/imgui:imgui_glfw",
+    "//third_party/abseil-cpp/absl/status:statusor",
   ]
 
   if (impeller_supports_rendering) {

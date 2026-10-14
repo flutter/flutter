@@ -33,6 +33,7 @@
 #include "impeller/playground/widgets.h"
 #include "impeller/playground/yuv_test_textures.h"
 #include "impeller/renderer/context.h"
+#include "third_party/abseil-cpp/absl/status/status_matchers.h"
 
 namespace impeller {
 namespace testing {
@@ -2849,7 +2850,7 @@ TEST_P(AiksTest, DrawImageFromYUVTextures) {
       YUVColorSpace::kBT601FullRange, YUVColorSpace::kBT601LimitedRange};
   for (size_t i = 0; i < kColorSpaces.size(); i++) {
     auto textures = CreateTestYUVTextures(*GetContext(), kColorSpaces[i]);
-    ASSERT_TRUE(textures.has_value());
+    ABSL_ASSERT_OK(textures);
     auto image = DlImageImpeller::MakeFromYUVTextures(
         &aiks_context, textures->y, textures->uv, kColorSpaces[i]);
     ASSERT_TRUE(image);
