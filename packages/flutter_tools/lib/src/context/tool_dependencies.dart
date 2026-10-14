@@ -91,13 +91,13 @@ class ToolDependencies {
     required this.androidContext,
     required this.appleContext,
     required this.buildSystem,
+    required this.buildTargets,
     required this.crashReporter,
     required this.deviceManager,
     required this.doctor,
     required this.emulatorManager,
     required this.featureFlags,
     required this.toolContext,
-    this.buildTargets,
     this.extensionBuildManager,
     this.extensionManager,
   });
@@ -115,7 +115,7 @@ class ToolDependencies {
   final BuildSystem buildSystem;
 
   /// Factory interface for constructing compile and bundle build targets.
-  final BuildTargets? buildTargets;
+  final BuildTargets buildTargets;
 
   /// Captures and submits unhandled tool crash reports and stack traces.
   final CrashReporter crashReporter;
@@ -417,7 +417,7 @@ class ToolDependencies {
         buildSystem ??
         FlutterBuildSystem(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
-    final finalBuildTargets = buildTargets;
+    final BuildTargets finalBuildTargets = buildTargets ?? const NoOpBuildTargets();
 
     final CrashReporter finalCrashReporter =
         crashReporter ??
@@ -664,6 +664,7 @@ class ToolDependencies {
       androidContext: finalAndroidContext,
       appleContext: appleContext,
       buildSystem: finalBuildSystem,
+      buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
       deviceManager: finalDeviceManager,
       doctor: finalDoctor,
@@ -672,7 +673,6 @@ class ToolDependencies {
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
       toolContext: toolContext,
-      buildTargets: finalBuildTargets,
     );
   }
 }
