@@ -3,10 +3,9 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/entity/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: entity_test_helpers, entity_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impeller_shaders")
 
 package(default_visibility = ["//visibility:public"])
@@ -261,6 +260,69 @@ cc_library(
         "//engine/src/flutter/impeller/typographer",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/hash",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "entity_test_helpers",
+    testonly = True,
+    srcs = ["contents/test/recording_render_pass.cc"],
+    hdrs = ["contents/test/recording_render_pass.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + CHROMIUM_CODE_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":entity",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "entity_unittests",
+    testonly = True,
+    srcs = [
+        "clip_stack_unittests.cc",
+        "contents/filters/blend_filter_contents_unittests.cc",
+        "contents/filters/gaussian_blur_filter_contents_unittests.cc",
+        "contents/filters/inputs/filter_input_unittests.cc",
+        "contents/filters/matrix_filter_contents_unittests.cc",
+        "contents/filters/morphology_filter_contents_unittests.cc",
+        "contents/host_buffer_unittests.cc",
+        "contents/text_contents_unittests.cc",
+        "contents/tiled_texture_contents_unittests.cc",
+        "contents/uber_sdf_contents_unittests.cc",
+        "contents/uber_sdf_parameters_unittests.cc",
+        "draw_order_resolver_unittests.cc",
+        "entity_pass_target_unittests.cc",
+        "entity_playground.cc",
+        "entity_unittests.cc",
+        "geometry/geometry_unittests.cc",
+        "geometry/shadow_path_geometry_unittests.cc",
+        "render_target_cache_unittests.cc",
+        "save_layer_utils_unittests.cc",
+    ],
+    hdrs = ["entity_playground.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":entity",
+        ":entity_test_helpers",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/geometry:geometry_asserts",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "//engine/src/flutter/testing:testing_lib",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status:status_matchers",
     ],
     alwayslink = True,
 )

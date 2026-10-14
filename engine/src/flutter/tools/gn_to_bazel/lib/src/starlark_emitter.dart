@@ -881,6 +881,18 @@ final class _Emitter {
     final rule = _Rule(display ? 'flutter_display_test' : kind, name, target.comments);
     if (kind == 'cc_test') {
       rule.scalars['size'] = '"${testSizes[target.name] ?? defaultTestSize}"';
+      final int? shards = testShardCounts[target.name];
+      if (shards != null) {
+        if (!display) {
+          throw GnError(
+            target.location,
+            '${target.name} is in testShardCounts but is not a display test: '
+            'only testing/xvfb_run.sh hands gtest the shard variables, so a '
+            'plain cc_test cannot be sharded',
+          );
+        }
+        rule.scalars['shard_count'] = '$shards';
+      }
       // How run_tests.py runs the suite (testRuns), which GN cannot say.
       final TestRun? run = testRuns['$gnPackage:${target.name}'];
       if (run != null) {
