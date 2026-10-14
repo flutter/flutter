@@ -217,13 +217,15 @@ public final class FlutterEngineFlags {
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   /**
-   * Enables Hybrid Composition++.
+   * Enables or disables Hybrid Composition++ and the SurfaceControl-backed swapchain.
+   *
+   * <p>Accepts {@code true} or {@code false}.
    *
    * <p>Allowed in release to opt-in to this platform views implementation in production. Settable
-   * via the manifest and the command line (via --enable-hcpp).
+   * via the manifest and the command line (via --[no-]enable-hcpp).
    */
   private static final Flag ENABLE_HCPP =
-      new Flag("--enable-hcpp-and-surface-control", "EnableHcpp", true);
+      new Flag("--enable-hcpp-and-surface-control=", "EnableHcpp", true);
 
   /**
    * Enables the Flutter GPU backend.
