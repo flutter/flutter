@@ -11,7 +11,13 @@ library;
 import 'dart:math' as math;
 import 'dart:ui'
     as ui
-    show Image, ImageFilter, SemanticsHitTestBehavior, SemanticsInputType, TextHeightBehavior;
+    show
+        Hyphens,
+        Image,
+        ImageFilter,
+        SemanticsHitTestBehavior,
+        SemanticsInputType,
+        TextHeightBehavior;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -6532,6 +6538,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
     this.textHeightBehavior,
+    this.hyphens = ui.Hyphens.manual,
     this.selectionRegistrar,
     this.selectionColor,
   }) : assert(maxLines == null || maxLines > 0),
@@ -6629,6 +6636,9 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro dart.ui.textHeightBehavior}
   final ui.TextHeightBehavior? textHeightBehavior;
 
+  /// {@macro flutter.painting.textPainter.hyphens}
+  final ui.Hyphens hyphens;
+
   /// The [SelectionRegistrar] this rich text is subscribed to.
   ///
   /// If this is set, [selectionColor] must be non-null.
@@ -6660,6 +6670,7 @@ class RichText extends MultiChildRenderObjectWidget {
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
       textHeightBehavior: textHeightBehavior,
+      hyphens: hyphens,
       locale: locale ?? Localizations.maybeLocaleOf(context),
       registrar: selectionRegistrar,
       selectionColor: selectionColor,
@@ -6681,6 +6692,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
       ..textHeightBehavior = textHeightBehavior
+      ..hyphens = hyphens
       ..locale = locale ?? Localizations.maybeLocaleOf(context)
       ..registrar = selectionRegistrar
       ..selectionColor = selectionColor
@@ -6725,6 +6737,7 @@ class RichText extends MultiChildRenderObjectWidget {
         defaultValue: null,
       ),
     );
+    properties.add(EnumProperty<Hyphens>('hyphens', hyphens, defaultValue: Hyphens.manual));
   }
 }
 
@@ -7612,6 +7625,19 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/ignore_pointer.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// The following sample shows an [IgnorePointer] and an [AbsorbPointer] side
+/// by side, each wrapping a box that partially covers a tappable target
+/// behind it in a stack. Tapping the overlapping region on the
+/// [IgnorePointer] side taps the target behind: the [IgnorePointer] is
+/// invisible to hit testing, so the pointer event goes through to the next
+/// target in the stack. Tapping the same region on the [AbsorbPointer] side
+/// does nothing: the [AbsorbPointer] absorbs the pointer events itself, so
+/// neither its child nor the target behind it receives the tap.
+///
+/// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
+/// {@end-tool}
+///
 /// ## Semantics
 ///
 /// Using this class may also affect how the semantics subtree underneath is
@@ -7622,27 +7648,6 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// the semantics subtree. Otherwise, the subtree remains untouched.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.IgnorePointer.ignoringSemantics}
-/// The usages of [ignoringSemantics] are deprecated and not recommended. This
-/// property was introduced to workaround the semantics behavior of the
-/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
-///
-/// Before that version, entire semantics subtree is dropped if [ignoring] is
-/// true. Developers can only use [ignoringSemantics] to preserver the semantics
-/// subtrees.
-///
-/// After that version, with [ignoring] set to true, it only prevents semantics
-/// user actions in the semantics subtree but leaves the other
-/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
-/// longer needed.
-///
-/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
-/// the subtree will be invisible to assistive technologies.
-///
-/// If [ignoringSemantics] is false, the semantics subtree is collected as
-/// usual.
-/// {@endtemplate}
-///
 /// See also:
 ///
 ///  * [AbsorbPointer], which also prevents its children from receiving pointer
@@ -7650,16 +7655,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 ///  * [SliverIgnorePointer], the sliver version of this widget.
 class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible to hit testing.
-  const IgnorePointer({
-    super.key,
-    this.ignoring = true,
-    @Deprecated(
-      'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    this.ignoringSemantics,
-    super.child,
-  });
+  const IgnorePointer({super.key, this.ignoring = true, super.child});
 
   /// Whether this widget is ignored during hit testing.
   ///
@@ -7671,37 +7667,20 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Defaults to true.
   final bool ignoring;
 
-  /// Whether the semantics of this widget is ignored when compiling the
-  /// semantics subtree.
-  ///
-  /// {@macro flutter.widgets.IgnorePointer.ignoringSemantics}
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
-  @Deprecated(
-    'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  final bool? ignoringSemantics;
-
   @override
   RenderIgnorePointer createRenderObject(BuildContext context) {
-    return RenderIgnorePointer(ignoring: ignoring, ignoringSemantics: ignoringSemantics);
+    return RenderIgnorePointer(ignoring: ignoring);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
-    renderObject
-      ..ignoring = ignoring
-      ..ignoringSemantics = ignoringSemantics;
+    renderObject.ignoring = ignoring;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
-    properties.add(
-      DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null),
-    );
   }
 }
 
@@ -7713,15 +7692,17 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// from being the target of located events, because it returns true from
 /// [RenderBox.hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
-/// the semantics layer (and thus e.g. accessibility tools).
-///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
 /// {@tool dartpad}
-/// The following sample has an [AbsorbPointer] widget wrapping the button on
-/// top of the stack, which absorbs pointer events, preventing its child button
-/// __and__ the button below it in the stack from receiving the pointer events.
+/// The following sample shows an [AbsorbPointer] and an [IgnorePointer] side
+/// by side, each wrapping a box that partially covers a tappable target
+/// behind it in a stack. Tapping the overlapping region on the
+/// [AbsorbPointer] side does nothing: the [AbsorbPointer] absorbs the pointer
+/// events itself, so neither its child nor the target behind it receives the
+/// tap. Tapping the same region on the [IgnorePointer] side taps the target
+/// behind: the [IgnorePointer] is invisible to hit testing, so the pointer
+/// event goes through to the next target in the stack.
 ///
 /// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
 /// {@end-tool}
@@ -7736,43 +7717,13 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// the semantics subtree. Otherwise, the subtree remains untouched.
 /// {@endtemplate}
 ///
-/// {@template flutter.widgets.AbsorbPointer.ignoringSemantics}
-/// The usages of [ignoringSemantics] are deprecated and not recommended. This
-/// property was introduced to workaround the semantics behavior of the
-/// [IgnorePointer] and its friends before v3.8.0-12.0.pre.
-///
-/// Before that version, entire semantics subtree is dropped if [absorbing] is
-/// true. Developers can only use [ignoringSemantics] to preserver the semantics
-/// subtrees.
-///
-/// After that version, with [absorbing] set to true, it only prevents semantics
-/// user actions in the semantics subtree but leaves the other
-/// [SemanticsProperties] intact. Therefore, the [ignoringSemantics] is no
-/// longer needed.
-///
-/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
-/// the subtree will be invisible to assistive technologies.
-///
-/// If [ignoringSemantics] is false, the semantics subtree is collected as
-/// usual.
-/// {@endtemplate}
-///
 /// See also:
 ///
 ///  * [IgnorePointer], which also prevents its children from receiving pointer
 ///    events but is itself invisible to hit testing.
 class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that absorbs pointers during hit testing.
-  const AbsorbPointer({
-    super.key,
-    this.absorbing = true,
-    @Deprecated(
-      'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
-      'This feature was deprecated after v3.8.0-12.0.pre.',
-    )
-    this.ignoringSemantics,
-    super.child,
-  });
+  const AbsorbPointer({super.key, this.absorbing = true, super.child});
 
   /// Whether this widget absorbs pointers during hit testing.
   ///
@@ -7785,37 +7736,20 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Defaults to true.
   final bool absorbing;
 
-  /// Whether the semantics of this render object is ignored when compiling the
-  /// semantics tree.
-  ///
-  /// {@macro flutter.widgets.AbsorbPointer.ignoringSemantics}
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
-  @Deprecated(
-    'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
-    'This feature was deprecated after v3.8.0-12.0.pre.',
-  )
-  final bool? ignoringSemantics;
-
   @override
   RenderAbsorbPointer createRenderObject(BuildContext context) {
-    return RenderAbsorbPointer(absorbing: absorbing, ignoringSemantics: ignoringSemantics);
+    return RenderAbsorbPointer(absorbing: absorbing);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderAbsorbPointer renderObject) {
-    renderObject
-      ..absorbing = absorbing
-      ..ignoringSemantics = ignoringSemantics;
+    renderObject.absorbing = absorbing;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('absorbing', absorbing));
-    properties.add(
-      DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null),
-    );
   }
 }
 
@@ -8456,10 +8390,8 @@ class ColoredBox extends SingleChildRenderObjectWidget {
 }
 
 class _RenderColoredBox extends RenderProxyBoxWithHitTestBehavior {
-  _RenderColoredBox({required Color color, required bool isAntiAlias})
-    : _color = color,
-      _isAntiAlias = isAntiAlias,
-      super(behavior: HitTestBehavior.opaque);
+  _RenderColoredBox({required this._color, required this._isAntiAlias})
+    : super(behavior: HitTestBehavior.opaque);
 
   /// The fill color for this render object.
   Color get color => _color;

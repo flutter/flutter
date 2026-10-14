@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:package_config/package_config.dart';
@@ -166,5 +167,81 @@ void main() {
         Uri.parse('package:member/bar.dart'),
       );
     });
+  });
+
+  group('loadPackageConfigWithLogging', () {
+    late FileSystem fileSystem;
+    late BufferLogger logger;
+
+    setUp(() {
+      fileSystem = MemoryFileSystem.test();
+      logger = BufferLogger.test();
+    });
+
+    testWithoutContext('loads valid package_config.json', () async {
+      final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion": 2, "packages": []}');
+
+      final PackageConfig config = await loadPackageConfigWithLogging(
+        packageConfigFile,
+        logger: logger,
+      );
+
+      expect(config.version, 2);
+      expect(config.packages, isEmpty);
+      expect(logger.errorText, isEmpty);
+    });
+
+    testWithoutContext('throws ToolExit with pub get suggestion when file is invalid', () async {
+      final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{invalid json}');
+
+      await expectLater(
+        () => loadPackageConfigWithLogging(packageConfigFile, logger: logger),
+        throwsToolExit(message: ''),
+      );
+
+      expect(
+        logger.errorText,
+        contains('The package configuration file .dart_tool/package_config.json is invalid'),
+      );
+      expect(logger.errorText, contains('Try running "flutter pub get" to regenerate it.'));
+    });
+
+    testWithoutContext(
+      'returns empty PackageConfig when file missing and throwOnError is false',
+      () async {
+        final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json');
+
+        final PackageConfig config = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+          throwOnError: false,
+        );
+
+        expect(config, PackageConfig.empty);
+        expect(logger.errorText, isEmpty);
+      },
+    );
+
+    testWithoutContext(
+      'returns empty PackageConfig when file is invalid and throwOnError is false',
+      () async {
+        final File packageConfigFile = fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{invalid json}');
+
+        final PackageConfig config = await loadPackageConfigWithLogging(
+          packageConfigFile,
+          logger: logger,
+          throwOnError: false,
+        );
+
+        expect(config, PackageConfig.empty);
+        expect(logger.errorText, isEmpty);
+      },
+    );
   });
 }

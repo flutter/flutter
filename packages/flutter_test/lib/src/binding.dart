@@ -165,12 +165,40 @@ class CapturedAccessibilityAnnouncement {
 class _TestFlutterView implements FlutterView {
   _TestFlutterView({
     required this.controller,
-    required TestPlatformDispatcher platformDispatcher,
+    required this._platformDispatcher,
     this.constraints,
     this.onRender,
-  }) : _platformDispatcher = platformDispatcher,
-       _viewId = _nextViewId++ {
-    platformDispatcher.addTestView(this);
+  }) : _viewId = _nextViewId++;
+
+  /// Registers a view for [controller] and returns the [TestFlutterView] that
+  /// wraps it, without reporting the metrics change.
+  ///
+  /// The caller reports it, with [TestPlatformDispatcher.notifyMetricsChanged],
+  /// once it has assigned the result to its `rootView`. That field is late
+  /// initialized, and a metrics change wakes every [WidgetsBindingObserver]
+  /// synchronously, so notifying from here would expose a controller that has
+  /// no view yet.
+  ///
+  /// The returned adapter wraps the backing view rather than the other way
+  /// round, so that values set explicitly on it keep their precedence over
+  /// whatever the backing view reports. Every controller exposes this same
+  /// object to [View], to [MediaQuery], and to callers that read `rootView`
+  /// directly.
+  static TestFlutterView register({
+    required BaseWindowController controller,
+    required TestPlatformDispatcher platformDispatcher,
+    BoxConstraints? constraints,
+    void Function(Size? size)? onRender,
+  }) {
+    return platformDispatcher.addTestView(
+      _TestFlutterView(
+        controller: controller,
+        platformDispatcher: platformDispatcher,
+        constraints: constraints,
+        onRender: onRender,
+      ),
+      notify: false,
+    );
   }
 
   static int _nextViewId = 1;
@@ -250,7 +278,7 @@ mixin _ChildWindowHierarchyMixin {
 
   /// Removes and destroys all child window controllers.
   void removeAllChildren() {
-    for (final BaseWindowController child in _children) {
+    for (final child in List<BaseWindowController>.of(_children)) {
       child.destroy();
     }
     _children.clear();
@@ -307,23 +335,25 @@ mixin _ChildWindowHierarchyMixin {
 
 class _TestWindowController extends WindowController with _ChildWindowHierarchyMixin {
   _TestWindowController({
-    required WindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     Size? size,
     BoxConstraints? constraints,
     String? title,
-  }) : _delegate = delegate,
-       _size = size ?? const Size(800, 600),
+  }) : _size = size ?? const Size(800, 600),
        _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
 
     // Automatically activate the window when created.
     activate();
@@ -423,10 +453,15 @@ class _TestWindowController extends WindowController with _ChildWindowHierarchyM
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+    );
   }
 }
 
@@ -464,27 +499,46 @@ void _removeChildFromParent(BaseWindowController? parent, BaseWindowController c
   }
 }
 
+void _destroyTestWindowController({
+  required BaseWindowController controller,
+  required VoidCallback onWindowDestroyed,
+  required _TestWindowingOwner windowingOwner,
+  BaseWindowController? parent,
+}) {
+  if (controller case final _ChildWindowHierarchyMixin hierarchy) {
+    hierarchy.removeAllChildren();
+  }
+  windowingOwner._platformDispatcher.removeTestView(controller.rootView);
+  if (parent != null) {
+    _removeChildFromParent(parent, controller);
+  }
+  windowingOwner.deactivateWindowController(controller);
+  onWindowDestroyed();
+}
+
 class _TestDialogWindowController extends DialogWindowController with _ChildWindowHierarchyMixin {
   _TestDialogWindowController({
-    required DialogWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     BaseWindowController? parent,
     Size? size,
     BoxConstraints? constraints,
     String? title,
-  }) : _delegate = delegate,
-       _parent = parent,
+  }) : _parent = parent,
        _size = size ?? const Size(800, 600),
        _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
 
     // Automatically activate the window when created.
@@ -565,30 +619,31 @@ class _TestDialogWindowController extends DialogWindowController with _ChildWind
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(_parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: _parent,
+    );
   }
 }
 
 class _TestTooltipWindowController extends TooltipWindowController with _ChildWindowHierarchyMixin {
   _TestTooltipWindowController({
-    required TooltipWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
-    required BoxConstraints constraints,
-    required ui.Rect anchorRect,
-    required WindowPositioner positioner,
+    required this._constraints,
+    required this._anchorRect,
+    required this._positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       _constraints = constraints,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
-       _parent = parent,
+  }) : _parent = parent,
        super.empty() {
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
@@ -601,6 +656,9 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
         }
       },
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
   }
 
@@ -636,30 +694,31 @@ class _TestTooltipWindowController extends TooltipWindowController with _ChildWi
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: parent,
+    );
   }
 }
 
 class _TestPopupWindowController extends PopupWindowController with _ChildWindowHierarchyMixin {
   _TestPopupWindowController({
-    required PopupWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
-    required BoxConstraints constraints,
-    required ui.Rect anchorRect,
-    required WindowPositioner positioner,
+    required this._constraints,
+    required this._anchorRect,
+    required this._positioner,
     required BaseWindowController parent,
-  }) : _delegate = delegate,
-       _constraints = constraints,
-       _anchorRect = anchorRect,
-       _positioner = positioner,
-       _parent = parent,
+  }) : _parent = parent,
        super.empty() {
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
@@ -672,6 +731,9 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
         }
       },
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
   }
 
@@ -707,11 +769,16 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: parent,
+    );
   }
 
   @override
@@ -721,31 +788,29 @@ class _TestPopupWindowController extends PopupWindowController with _ChildWindow
 class _TestSatelliteWindowController extends SatelliteWindowController
     with _ChildWindowHierarchyMixin {
   _TestSatelliteWindowController({
-    required SatelliteWindowControllerDelegate delegate,
+    required this._delegate,
     required TestPlatformDispatcher platformDispatcher,
     required this.windowingOwner,
     required BaseWindowController parent,
-    ui.Rect? anchorRect,
-    required WindowPositioner positioner,
+    this._anchorRect,
+    required this._positioner,
     Size? size,
     BoxConstraints? constraints,
     String? title,
-  }) : _delegate = delegate,
-       _parent = parent,
-       // ignore: unused_field
-       _anchorRect = anchorRect,
-       // ignore: unused_field
-       _positioner = positioner,
+  }) : _parent = parent,
        _size = size ?? const Size(800, 600),
        _constraints = constraints ?? BoxConstraints.loose(const Size(1920, 1080)),
        _title = title ?? 'Test Window',
        super.empty() {
     _constrainToBounds();
-    rootView = _TestFlutterView(
+    rootView = _TestFlutterView.register(
       controller: this,
       platformDispatcher: platformDispatcher,
       constraints: _constraints,
     );
+    // Reported only now that rootView is assigned; see
+    // _TestFlutterView.register.
+    platformDispatcher.notifyMetricsChanged();
     _addChildToParent(parent, this);
 
     // Automatically activate the window when created.
@@ -821,11 +886,16 @@ class _TestSatelliteWindowController extends SatelliteWindowController
 
   @override
   void destroy() {
+    if (_destroyed) {
+      return;
+    }
     _destroyed = true;
-    _delegate.onWindowDestroyed();
-    removeAllChildren();
-    windowingOwner.deactivateWindowController(this);
-    _removeChildFromParent(_parent, this);
+    _destroyTestWindowController(
+      controller: this,
+      onWindowDestroyed: _delegate.onWindowDestroyed,
+      windowingOwner: windowingOwner,
+      parent: _parent,
+    );
   }
 }
 
@@ -839,8 +909,7 @@ class _TestSatelliteWindowController extends SatelliteWindowController
 /// for tests.
 /// * [WindowingOwner], the base class.
 class _TestWindowingOwner extends WindowingOwner {
-  _TestWindowingOwner({required TestPlatformDispatcher platformDispatcher})
-    : _platformDispatcher = platformDispatcher;
+  _TestWindowingOwner({required this._platformDispatcher});
 
   final TestPlatformDispatcher _platformDispatcher;
   BaseWindowController? _activeWindowController;
@@ -882,7 +951,7 @@ class _TestWindowingOwner extends WindowingOwner {
   }
 
   bool _tryActivateParent(BaseWindowController? parent) {
-    if (parent == null) {
+    if (parent == null || parent.isDestroyed) {
       return false;
     }
 
@@ -1166,8 +1235,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     if (buildOwner == null) {
       return;
     }
-    buildOwner!.focusManager
-        .listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
+    buildOwner!.focusManager.listenToApplicationLifecycleChangesIfSupported(); // ignore: invalid_use_of_visible_for_testing_member
   }
 
   @override
@@ -1243,6 +1311,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// of the binding. Changing the value of this property risks very confusing
   /// behavior as the [WindowingOwner] may be inconsistently registered or
   /// unregistered.
+  ///
+  /// The binding reads this once, when it is created, and installs the fake
+  /// owner only if windowing is enabled at that point. A test file that enables
+  /// windowing itself therefore has to do so before the binding exists, that
+  /// is, before its first `testWidgets` is declared.
   @protected
   bool get registerTestWindowingOwner => true;
 
@@ -1314,10 +1387,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       binding.setupHttpOverrides();
     }
     _testTextInput = TestTextInput(onCleared: _resetFocusedEditable);
+  }
 
+  @override
+  WindowingOwner createWindowingOwner() {
     if (isWindowingEnabled && registerTestWindowingOwner) {
-      windowingOwner = _TestWindowingOwner(platformDispatcher: platformDispatcher);
+      return _TestWindowingOwner(platformDispatcher: platformDispatcher);
     }
+    return super.createWindowingOwner();
   }
 
   @override
@@ -1705,8 +1782,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Called by the [testWidgets] and [benchmarkWidgets] functions to
   /// run a test.
   ///
-  /// The `invariantTester` argument is called after the `testBody`'s [Future]
-  /// completes. If it throws, then the test is marked as failed.
+  /// The `invariantTester` argument is called inside this method immediately
+  /// after the `testBody` completes and the widget tree is unmounted (for
+  /// example, to verify that tickers and semantics handles were disposed).
+  ///
+  /// This should not be confused with framework-level invariant checks (such as
+  /// verifying that debug flags were reset and pending timers disposed) and
+  /// binding state cleanups, which are performed in [postTest] after the
+  /// [Future] returned by this method completes and after any per-test
+  /// `addTearDown` callbacks have executed.
   ///
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
@@ -1735,8 +1819,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // our main future completing.
       assert(Zone.current == _parentZone);
       if (_pendingExceptionDetails != null) {
-        debugPrint =
-            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(_pendingExceptionDetails!, testDescription);
         _pendingExceptionDetails = null;
       }
@@ -1794,13 +1877,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           );
     }
 
+    _currentTestDescription = description;
     _oldExceptionHandler = FlutterError.onError;
     _oldStackTraceDemangler = FlutterError.demangleStackTrace;
     var exceptionCount = 0; // number of un-taken exceptions
     FlutterError.onError = (FlutterErrorDetails details) {
       if (_pendingExceptionDetails != null) {
-        debugPrint =
-            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the errors!
         if (exceptionCount == 0) {
           exceptionCount = 2;
           FlutterError.dumpErrorToConsole(_pendingExceptionDetails!, forceReport: true);
@@ -1845,8 +1928,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         // However, if someone tries hard enough they could get in a state where this happens.
         // If we silently dropped these errors on the ground, nobody would ever know. So instead
         // we raise them and fail the test after it has already completed.
-        debugPrint =
-            debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+        debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
         reportTestException(
           FlutterErrorDetails(
             exception: exception,
@@ -1964,17 +2046,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(inTest);
     // So that we can assert that it remains the same after the test finishes.
     _beforeTestCheckIntrinsicSizes = debugCheckIntrinsicSizes;
+    _beforeTestAutoUpdateGoldens = autoUpdateGoldenFiles && !isBrowser;
+    _beforeTestReportTestException = reportTestException;
+    _beforeTestErrorWidgetBuilder = ErrorWidget.builder;
+    _beforeTestShouldPropagateDevicePointerEvents = shouldPropagateDevicePointerEvents;
+    _shouldVerifyInvariants = false;
 
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
     // Pretend that the first frame produced in the test body is the first frame
     // sent to the engine.
     resetFirstFrameSent();
-
-    final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles && !isBrowser;
-    final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
-    final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
-    final bool shouldPropagateDevicePointerEventsBeforeTest = shouldPropagateDevicePointerEvents;
 
     // run the test
     await testBody();
@@ -1994,19 +2076,60 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         _testTextInput.unregister();
       }
       invariantTester();
-      _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
-      _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
-      _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
-      _verifyShouldPropagateDevicePointerEventsUnset(shouldPropagateDevicePointerEventsBeforeTest);
-      _verifyInvariants();
+      _verifyPostPumpInvariants();
+      _shouldVerifyInvariants = true;
     }
 
     assert(inTest);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
   }
 
+  // The description of the currently running test, saved in [_runTest] so that
+  // [postTest] can include it when reporting invariant failures.
+  String _currentTestDescription = '';
+  bool _beforeTestAutoUpdateGoldens = false;
+  late TestExceptionReporter _beforeTestReportTestException;
+  late ErrorWidgetBuilder _beforeTestErrorWidgetBuilder;
+  bool _beforeTestShouldPropagateDevicePointerEvents = false;
   late bool _beforeTestCheckIntrinsicSizes;
 
+  // Whether post-test invariant verifications should run in [postTest].
+  //
+  // Set to true only if the test body completed without exceptions and the
+  // widget tree was unmounted. If the test encountered an exception, invariant
+  // checks are skipped to avoid spurious errors (e.g., active animations or
+  // unreset debug flags from aborted tests) from obscuring the real failure.
+  bool _shouldVerifyInvariants = false;
+
+  /// Verifies invariants that must hold immediately after the widget tree is
+  /// unmounted and pumped at the end of the test body, before teardowns run.
+  ///
+  /// This is an exceptional hook called inside `_runTestBody` right after
+  /// the widget tree is replaced with `_postTestMessage` and pumped. Almost all
+  /// invariant checks belong in `_verifyInvariants` instead of here.
+  ///
+  /// Use this method only for rare, specialized checks that strictly depend on
+  /// the immediate synchronous state of the test zone right after the final
+  /// pump (such as asserting that no unflushed microtasks remain in `FakeAsync`).
+  /// Checks placed here cannot be reset or cleaned up by user `addTearDown`
+  /// callbacks.
+  void _verifyPostPumpInvariants() {}
+
+  /// Verifies framework-level invariants after the test body and all user
+  /// `addTearDown` callbacks have finished executing.
+  ///
+  /// This method is called in [postTest] and is the default place for invariant
+  /// verifications. The vast majority of invariants belong here, including
+  /// persistent framework state, global debug flags (such as
+  /// [debugDefaultTargetPlatformOverride] or [timeDilation]), and resources
+  /// (such as pending [Timer]s or active animations). Running these checks in
+  /// [postTest] allows tests to cleanly reset state using `addTearDown`.
+  ///
+  /// See also:
+  ///
+  ///  * `_verifyPostPumpInvariants`, which is used in rare cases where an
+  ///    invariant strictly requires the immediate synchronous state following
+  ///    widget disposal (such as `FakeAsync.microtaskCount` being zero).
   void _verifyInvariants() {
     assert(
       debugAssertNoTransientCallbacks(
@@ -2157,8 +2280,52 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   }
 
   /// Called by the [testWidgets] function after a test is executed.
+  ///
+  /// Subclasses that override this method must call `super.postTest()` and must
+  /// not throw exceptions. This method will not throw errors; any invariant
+  /// failures detected during verification are reported via
+  /// [reportTestException].
+  @mustCallSuper
   void postTest() {
     assert(inTest);
+    FlutterErrorDetails? invariantError;
+    if (_shouldVerifyInvariants) {
+      _shouldVerifyInvariants = false;
+      try {
+        _verifyAutoUpdateGoldensUnset(_beforeTestAutoUpdateGoldens && !isBrowser);
+        _verifyReportTestExceptionUnset(_beforeTestReportTestException);
+        _verifyErrorWidgetBuilderUnset(_beforeTestErrorWidgetBuilder);
+        _verifyShouldPropagateDevicePointerEventsUnset(
+          _beforeTestShouldPropagateDevicePointerEvents,
+        );
+        _verifyInvariants();
+      } catch (error, stack) {
+        invariantError = FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          context: ErrorDescription('running invariant verifications after a test'),
+          library: 'Flutter test framework',
+        );
+      }
+      // Some invariant checks (such as debugAssertNoTransientCallbacks and the
+      // _verify*Unset helpers above) report failures through
+      // FlutterError.reportError instead of throwing. During the test,
+      // FlutterError.onError stores them in _pendingExceptionDetails, which is
+      // normally reported by the test completion handler. That handler has
+      // already run by the time postTest is called, so these errors must be
+      // picked up here or they would be silently dropped.
+      final FlutterErrorDetails? reportedError = _pendingExceptionDetails;
+      if (reportedError != null) {
+        if (invariantError == null) {
+          invariantError = reportedError;
+        } else {
+          debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+          FlutterError.dumpErrorToConsole(reportedError, forceReport: true);
+        }
+      }
+    }
+    final String testDescription = _currentTestDescription;
+    _currentTestDescription = '';
     FlutterError.onError = _oldExceptionHandler;
     FlutterError.demangleStackTrace = _oldStackTraceDemangler;
     _pendingExceptionDetails = null;
@@ -2194,6 +2361,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     assert(ServicesBinding.instance == WidgetsBinding.instance);
     // ignore: invalid_use_of_visible_for_testing_member
     ServicesBinding.instance.resetInternalState();
+
+    platformDispatcher.resetInternalState();
+
+    if (invariantError != null) {
+      debugPrint = debugPrintOverride; // just in case the test overrides it -- otherwise we won't see the error!
+      reportTestException(invariantError, testDescription);
+    }
   }
 }
 
@@ -2345,7 +2519,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
               },
             ),
           );
-          result.complete(null);
+          result.complete();
         });
       } catch (exception, stack) {
         FlutterError.reportError(
@@ -2359,7 +2533,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
             },
           ),
         );
-        result.complete(null);
+        result.complete();
       }
       result.future.whenComplete(() {
         _pendingAsyncTasks!.complete();
@@ -2549,6 +2723,12 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
+  void _verifyPostPumpInvariants() {
+    super._verifyPostPumpInvariants();
+    assert(_currentFakeAsync!.microtaskCount == 0); // Shouldn't be possible.
+  }
+
+  @override
   void _verifyInvariants() {
     super._verifyInvariants();
 
@@ -2569,7 +2749,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       timersPending = true;
     }
     assert(!timersPending, 'A Timer is still pending even after the widget tree was disposed.');
-    assert(_currentFakeAsync!.microtaskCount == 0); // Shouldn't be possible.
   }
 
   @override

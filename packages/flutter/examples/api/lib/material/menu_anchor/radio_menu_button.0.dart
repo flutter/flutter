@@ -37,16 +37,17 @@ class _MyRadioMenuState extends State<MyRadioMenu> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _entry = ShortcutRegistry.of(context).addAll(<
-      ShortcutActivator,
-      VoidCallbackIntent
-    >{
-      _redShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.red)),
-      _greenShortcut: VoidCallbackIntent(
-        () => _setBackgroundColor(Colors.green),
-      ),
-      _blueShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.blue)),
-    });
+    _entry = ShortcutRegistry.of(context).addAll(
+      <ShortcutActivator, VoidCallbackIntent>{
+        _redShortcut: VoidCallbackIntent(() => _setBackgroundColor(Colors.red)),
+        _greenShortcut: VoidCallbackIntent(
+          () => _setBackgroundColor(Colors.green),
+        ),
+        _blueShortcut: VoidCallbackIntent(
+          () => _setBackgroundColor(Colors.blue),
+        ),
+      },
+    );
   }
 
   @override

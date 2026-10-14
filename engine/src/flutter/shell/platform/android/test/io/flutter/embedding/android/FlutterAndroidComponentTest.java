@@ -39,6 +39,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.embedding.engine.systemchannels.LifecycleChannel;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.view.SensitiveContentPlugin;
+import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -298,6 +299,12 @@ public class FlutterAndroidComponentTest {
     @Override
     public Lifecycle getLifecycle() {
       return lifecycle;
+    }
+
+    @NonNull
+    @Override
+    public List<String> getFlutterEngineFlags() {
+      return Collections.emptyList();
     }
 
     @NonNull
