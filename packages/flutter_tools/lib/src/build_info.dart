@@ -16,6 +16,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
 
@@ -942,18 +943,20 @@ String getWebBuildDirectory({required Config config, required FileSystem fileSys
 /// different flavors can coexist on disk without overwriting each other.
 String getLinuxBuildDirectory(
   TargetPlatform? targetPlatform, {
-  required Config config,
-  required FileSystem fileSystem,
+  required ToolContext toolContext,
   String? flavor,
-  OperatingSystemUtils? operatingSystemUtils,
-  Platform? platform,
 }) {
-  final String arch = switch ((targetPlatform, operatingSystemUtils, platform)) {
-    (final TargetPlatform target, _, _) => target.simpleName,
-    (null, final OperatingSystemUtils osUtils, final Platform hostPlatform) =>
-      _getCurrentHostPlatformArchName(operatingSystemUtils: osUtils, platform: hostPlatform),
-    _ => throw ArgumentError(
-      'operatingSystemUtils and platform are required when targetPlatform is null.',
+  final ToolContext(
+    :Config config,
+    fs: FileSystem fileSystem,
+    os: OperatingSystemUtils operatingSystemUtils,
+    :Platform platform,
+  ) = toolContext;
+  final String arch = switch (targetPlatform) {
+    final TargetPlatform target => target.simpleName,
+    null => _getCurrentHostPlatformArchName(
+      operatingSystemUtils: operatingSystemUtils,
+      platform: platform,
     ),
   };
   final String subDirs = (flavor != null && flavor.isNotEmpty)

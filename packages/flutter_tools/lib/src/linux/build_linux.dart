@@ -86,9 +86,8 @@ Future<void> buildLinux(
       .childDirectory(
         getLinuxBuildDirectory(
           targetPlatform,
-          config: globals.config,
-          fileSystem: globals.fs,
           flavor: buildInfo.flavor,
+          toolContext: globals.toolContext,
         ),
       );
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
@@ -139,9 +138,8 @@ Future<void> buildLinux(
         globals.fs.path.join(
           getLinuxBuildDirectory(
             targetPlatform,
-            config: globals.config,
-            fileSystem: globals.fs,
             flavor: buildInfo.flavor,
+            toolContext: globals.toolContext,
           ),
           'release',
           'bundle',

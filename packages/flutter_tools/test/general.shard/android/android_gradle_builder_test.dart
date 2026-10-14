@@ -1943,17 +1943,19 @@ android {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        config: Config.test(),
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        processUtils: ProcessUtils(processManager: processManager, logger: logger),
-        userMessages: UserMessages(),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fileSystem,
+          logger: logger,
+          processManager: processManager,
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          userMessages: UserMessages(),
         ),
       );
 

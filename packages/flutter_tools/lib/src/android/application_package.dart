@@ -17,6 +17,7 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../project.dart';
 import 'android_sdk.dart';
 import 'gradle.dart';
@@ -108,14 +109,17 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   static Future<AndroidApk?> fromAndroidProject(
     AndroidProject androidProject, {
     required AndroidSdk? androidSdk,
-    required ProcessManager processManager,
-    required UserMessages userMessages,
-    required ProcessUtils processUtils,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Config config,
+    required ToolContext toolContext,
     BuildInfo? buildInfo,
   }) async {
+    final ToolContext(
+      :Config config,
+      fs: FileSystem fileSystem,
+      :Logger logger,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+      :UserMessages userMessages,
+    ) = toolContext;
     final File apkFile;
     final String filename;
     if (buildInfo == null) {

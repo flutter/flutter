@@ -3,30 +3,18 @@
 // found in the LICENSE file.
 
 import '../application_package.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
+import '../context/tool_context.dart';
 
 abstract class LinuxApp extends ApplicationPackage {
   LinuxApp({required String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new [LinuxApp] from a linux sub project.
-  factory LinuxApp.fromLinuxProject(
-    LinuxProject project, {
-    required Config config,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-  }) {
-    return BuildableLinuxApp(
-      project: project,
-      config: config,
-      operatingSystemUtils: operatingSystemUtils,
-      platform: platform,
-    );
+  factory LinuxApp.fromLinuxProject(LinuxProject project, {required ToolContext toolContext}) {
+    return BuildableLinuxApp(project: project, toolContext: toolContext);
   }
 
   /// Creates a new [LinuxApp] from an existing executable.
@@ -57,31 +45,18 @@ class PrebuiltLinuxApp extends LinuxApp {
 }
 
 class BuildableLinuxApp extends LinuxApp {
-  BuildableLinuxApp({
-    required this.project,
-    required this._config,
-    required this._operatingSystemUtils,
-    required this._platform,
-  }) : super(projectBundleId: project.parent.manifest.appName);
+  BuildableLinuxApp({required this.project, required this._toolContext})
+    : super(projectBundleId: project.parent.manifest.appName);
 
   final LinuxProject project;
-  final Config _config;
-  final OperatingSystemUtils _operatingSystemUtils;
-  final Platform _platform;
+  final ToolContext _toolContext;
 
   @override
   String executable(BuildMode buildMode, [String? flavor]) {
     final String? binaryName = getCmakeExecutableName(project);
     final FileSystem fileSystem = project.cmakeFile.fileSystem;
     return fileSystem.path.join(
-      getLinuxBuildDirectory(
-        null,
-        config: _config,
-        fileSystem: fileSystem,
-        flavor: flavor,
-        operatingSystemUtils: _operatingSystemUtils,
-        platform: _platform,
-      ),
+      getLinuxBuildDirectory(null, flavor: flavor, toolContext: _toolContext),
       buildMode.cliName,
       'bundle',
       binaryName,

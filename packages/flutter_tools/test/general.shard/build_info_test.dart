@@ -654,25 +654,22 @@ void main() {
       expect(
         getLinuxBuildDirectory(
           TargetPlatform.linux_arm64,
-          config: config,
-          fileSystem: fileSystem,
           flavor: 'prod',
+          toolContext: FakeToolContext(config: config, fs: fileSystem),
         ),
         fileSystem.path.join('custom_build_out', 'linux', 'arm64', 'prod'),
       );
       expect(
         getLinuxBuildDirectory(
           null,
-          config: config,
-          fileSystem: fileSystem,
-          operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
-          platform: FakePlatform(),
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fileSystem,
+            os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+            platform: FakePlatform(),
+          ),
         ),
         fileSystem.path.join('custom_build_out', 'linux', 'arm64'),
-      );
-      expect(
-        () => getLinuxBuildDirectory(null, config: config, fileSystem: fileSystem),
-        throwsArgumentError,
       );
       expect(
         getWindowsBuildDirectory(
