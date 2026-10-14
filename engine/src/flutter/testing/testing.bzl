@@ -39,11 +39,18 @@ _PRODUCT_MODES = [
 # The GPU test backends (build/bazel/gl_wrap): SwiftShader's Vulkan driver,
 # its ICD manifest and the Vulkan loader, which a suite needs in the
 # directory of its binary.
-_GPU_TEST_BACKEND_FILES = [
-    "libvk_swiftshader.so",
-    "libvulkan.so.1",
-    "vk_swiftshader_icd.json",
-]
+# Each as gl_wrap's product (by base name) and its path next to the binary:
+# GN's layout, which the manifests' library_path entries are relative to
+# (the layer's is ../libVkLayer_khronos_validation.so from vulkan-data/).
+_GPU_TEST_BACKEND_FILES = {
+    "libvk_swiftshader.so": "libvk_swiftshader.so",
+    "libvulkan.so.1": "libvulkan.so.1",
+    "vk_swiftshader_icd.json": "vk_swiftshader_icd.json",
+    # The Khronos validation layer and its manifest, for the Vulkan
+    # playground, which requires validation.
+    "libVkLayer_khronos_validation.so": "libVkLayer_khronos_validation.so",
+    "VkLayer_khronos_validation.json": "vulkan-data/VkLayer_khronos_validation.json",
+}
 
 _GPU_TEST_BACKENDS_PACKAGE = "//engine/src/flutter/build/bazel/gl_wrap"
 
@@ -375,10 +382,10 @@ def flutter_gpu_test_backends(name, visibility = None):
       visibility: visibility of the target.
     """
     copies = []
-    for file in _GPU_TEST_BACKEND_FILES:
+    for product, file in _GPU_TEST_BACKEND_FILES.items():
         copy_file(
-            name = "_gb_%s_%s" % (name, file),
-            src = "%s:%s" % (_GPU_TEST_BACKENDS_PACKAGE, file),
+            name = "_gb_%s_%s" % (name, product),
+            src = "%s:%s" % (_GPU_TEST_BACKENDS_PACKAGE, product),
             out = file,
             allow_symlink = True,
             testonly = True,
@@ -410,7 +417,20 @@ def _display_test_impl(ctx):
     runfiles = runfiles.merge(ctx.attr.binary[DefaultInfo].default_runfiles)
     for target in ctx.attr.data:
         runfiles = runfiles.merge(target[DefaultInfo].default_runfiles)
-    return [DefaultInfo(executable = launcher, runfiles = runfiles)]
+    env = dict(ctx.attr.env)
+    if ctx.attr.vulkan_validation:
+        # testing/run_tests.py's vulkan_validation_env: the loader finds
+        # SwiftShader's ICD manifest and the validation layer next to the
+        # binary (flutter_gpu_test_backends), by paths relative to the
+        # runfiles tree the test runs from.
+        package = ctx.label.package
+        env["VK_ICD_FILENAMES"] = package + "/vk_swiftshader_icd.json"
+        env["VK_LAYER_PATH"] = package + "/vulkan-data"
+        env["VK_INSTANCE_LAYERS"] = "VK_LAYER_KHRONOS_validation"
+    return [
+        DefaultInfo(executable = launcher, runfiles = runfiles),
+        RunEnvironmentInfo(environment = env),
+    ]
 
 _display_test = rule(
     implementation = _display_test_impl,
@@ -427,6 +447,13 @@ _display_test = rule(
             allow_files = True,
             doc = "Runfiles of the test, besides the binary's.",
         ),
+        "env": attr.string_dict(
+            doc = "Environment of the test.",
+        ),
+        "vulkan_validation": attr.bool(
+            doc = "Point the Vulkan loader at the GPU test backends copied into this package (SwiftShader's ICD " +
+                  "manifest, the Khronos validation layer), as testing/run_tests.py does for the Impeller suites.",
+        ),
         "_wrapper": attr.label(
             default = "//engine/src/flutter/testing:xvfb_run.sh",
             allow_single_file = True,
@@ -434,7 +461,7 @@ _display_test = rule(
     },
 )
 
-def flutter_display_test(name, size = None, timeout = None, args = [], data = [], tags = [], visibility = None, **kwargs):
+def flutter_display_test(name, size = None, timeout = None, args = [], data = [], env = {}, vulkan_validation = True, tags = [], visibility = None, **kwargs):
     """A test suite that opens a window: the Impeller playground's (GLFW on X11).
 
     testing/run_tests.py starts an Xvfb for the Linux suites; here the binary
@@ -449,6 +476,10 @@ def flutter_display_test(name, size = None, timeout = None, args = [], data = []
       timeout: the test's timeout.
       args: arguments of the binary.
       data: runfiles of the test.
+      env: environment of the test.
+      vulkan_validation: run_tests.py's vulkan_validation_env: SwiftShader as
+        the ICD and the Khronos validation layer, from the GPU test backends
+        copied into this package (the suite must list them as data).
       tags: tags of the test.
       visibility: visibility of the test.
       **kwargs: the binary's attributes (cc_test's: srcs, deps, copts, ...).
@@ -466,6 +497,8 @@ def flutter_display_test(name, size = None, timeout = None, args = [], data = []
         timeout = timeout,
         args = args,
         data = data,
+        env = env,
+        vulkan_validation = vulkan_validation,
         tags = tags,
         visibility = visibility,
     )
