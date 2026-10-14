@@ -170,25 +170,37 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final bool? iosProfileDebugger = wasParsed(DebuggingOptionDescriptors.iosProfileDebugger)
         ? getValue(DebuggingOptionDescriptors.iosProfileDebugger)
         : null;
+
+    final webConfig = WebDebugConfig(
+      enableExposeUrl: featureFlags.isWebEnabled && getValue(WebOptions.webAllowExposeUrl),
+      useSseForDebugProxy:
+          featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugProtocol) == 'sse',
+      useSseForDebugBackend:
+          featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugBackendProtocol) == 'sse',
+      useSseForInjectedClient:
+          featureFlags.isWebEnabled &&
+          getValue(WebOptions.webServerDebugInjectedClientProtocol) == 'sse',
+      runHeadless: featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
+      browserDebugPort: webBrowserDebugPort,
+      browserFlags: webBrowserFlags,
+      enableExpressionEvaluation:
+          !buildInfo.mode.isRelease &&
+          featureFlags.isWebEnabled &&
+          getValue(WebOptions.webEnableExpressionEvaluation),
+      launchUrl: !buildInfo.mode.isRelease && featureFlags.isWebEnabled
+          ? getValue(WebOptions.webLaunchUrl)
+          : null,
+      crossOriginIsolation: webCrossOriginIsolation,
+      renderer: webRenderer,
+      useWasm: useWasm,
+      devServerConfig: webDevServerConfig,
+    );
+
     if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         dartEntrypointArgs: getValue(DebuggingOptionDescriptors.dartEntrypointArgs),
-        webUseSseForDebugProxy:
-            featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugProtocol) == 'sse',
-        webUseSseForDebugBackend:
-            featureFlags.isWebEnabled &&
-            getValue(WebOptions.webServerDebugBackendProtocol) == 'sse',
-        webUseSseForInjectedClient:
-            featureFlags.isWebEnabled &&
-            getValue(WebOptions.webServerDebugInjectedClientProtocol) == 'sse',
-        webEnableExposeUrl: featureFlags.isWebEnabled && getValue(WebOptions.webAllowExposeUrl),
-        webRunHeadless: featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
-        webBrowserDebugPort: webBrowserDebugPort,
-        webBrowserFlags: webBrowserFlags,
-        webCrossOriginIsolation: webCrossOriginIsolation,
-        webRenderer: webRenderer,
-        webUseWasm: useWasm,
+        webConfig: webConfig,
         enableImpeller: enableImpeller,
         enableFlutterGpu: enableFlutterGpu,
         enableVulkanValidation: enableVulkanValidation,
@@ -197,7 +209,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         enableEmbedderApi: enableEmbedderApi,
         usingCISystem: usingCISystem,
         debugLogsDirectoryPath: debugLogsDirectoryPath,
-        webDevServerConfig: webDevServerConfig,
         enableHcpp: explicitEnableHcpp,
         testFlag: testFlag,
         iosProfileDebugger: iosProfileDebugger,
@@ -239,24 +250,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ddsPort: ddsPort,
         devToolsServerAddress: devToolsServerAddress,
         verboseSystemLogs: getValue(DebuggingOptionDescriptors.verboseSystemLogs),
-        webUseSseForDebugProxy:
-            featureFlags.isWebEnabled && getValue(WebOptions.webServerDebugProtocol) == 'sse',
-        webUseSseForDebugBackend:
-            featureFlags.isWebEnabled &&
-            getValue(WebOptions.webServerDebugBackendProtocol) == 'sse',
-        webUseSseForInjectedClient:
-            featureFlags.isWebEnabled &&
-            getValue(WebOptions.webServerDebugInjectedClientProtocol) == 'sse',
-        webEnableExposeUrl: featureFlags.isWebEnabled && getValue(WebOptions.webAllowExposeUrl),
-        webRunHeadless: featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
-        webBrowserDebugPort: webBrowserDebugPort,
-        webBrowserFlags: webBrowserFlags,
-        webEnableExpressionEvaluation:
-            featureFlags.isWebEnabled && getValue(WebOptions.webEnableExpressionEvaluation),
-        webLaunchUrl: featureFlags.isWebEnabled ? getValue(WebOptions.webLaunchUrl) : null,
-        webCrossOriginIsolation: webCrossOriginIsolation,
-        webRenderer: webRenderer,
-        webUseWasm: useWasm,
+        webConfig: webConfig,
         vmserviceOutFile: getValue(DebuggingOptionDescriptors.vmserviceOutFile),
         nativeNullAssertions: getValue(CommonOptions.nativeNullAssertions),
         enableImpeller: enableImpeller,
@@ -272,7 +266,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         ipv6: getValue(DebuggingOptionDescriptors.ipv6),
         printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
         enableHcpp: explicitEnableHcpp,
-        webDevServerConfig: webDevServerConfig,
         testFlag: testFlag,
         iosProfileDebugger: iosProfileDebugger,
       );

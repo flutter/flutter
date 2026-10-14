@@ -510,13 +510,50 @@ class ToolDependencies {
           xcode: finalXcode,
         );
 
+    final finalToolContext = ToolContext(
+      artifacts: finalArtifacts,
+      botDetector: finalBotDetector,
+      cache: finalCache,
+      config: finalConfig,
+      customDevicesConfig: finalCustomDevicesConfig,
+      flutterVersion: finalFlutterVersion,
+      fs: finalFS,
+      git: finalGit,
+      localEngineLocator: finalLocalEngineLocator,
+      logger: finalLogger,
+      nativeAssetsBuilder: finalNativeAssetsBuilder,
+      os: finalOS,
+      outputPreferences: finalOutputPreferences,
+      persistentToolState: finalPersistentToolState,
+      platform: finalPlatform,
+      preRunValidator: finalPreRunValidator,
+      processInfo: finalProcessInfo,
+      processManager: finalProcessManager,
+      processUtils: finalProcessUtils,
+      projectFactory: finalProjectFactory,
+      shutdownHooks: finalShutdownHooks,
+      signals: LocalSignals.instance,
+      stdio: finalStdio,
+      systemClock: finalSystemClock,
+      terminal: finalTerminal,
+      userMessages: finalUserMessages,
+    );
+
     // 12. AndroidContext Dependencies
     final AndroidSdk? Function() finalAndroidSdkBuilder =
-        androidSdkBuilder ?? (androidSdk != null ? () => androidSdk : AndroidSdk.locateAndroidSdk);
+        androidSdkBuilder ??
+        (androidSdk != null
+            ? () => androidSdk
+            : () => AndroidSdk.locateAndroidSdk(toolContext: finalToolContext));
 
     final AndroidStudio? Function() finalAndroidStudioBuilder =
         androidStudioBuilder ??
-        (androidStudio != null ? () => androidStudio : AndroidStudio.latestValid);
+        (androidStudio != null
+            ? () => androidStudio
+            : () => AndroidStudio.latestValid(
+                plistParser: finalPlistParser,
+                toolContext: finalToolContext,
+              ));
 
     late final AndroidContext finalAndroidContext;
 
@@ -580,35 +617,6 @@ class ToolDependencies {
         windowsWorkflow ??
         WindowsWorkflow(featureFlags: finalFeatureFlags, platform: finalPlatform);
 
-    final toolContext = ToolContext(
-      artifacts: finalArtifacts,
-      botDetector: finalBotDetector,
-      cache: finalCache,
-      config: finalConfig,
-      customDevicesConfig: finalCustomDevicesConfig,
-      flutterVersion: finalFlutterVersion,
-      fs: finalFS,
-      git: finalGit,
-      localEngineLocator: finalLocalEngineLocator,
-      logger: finalLogger,
-      nativeAssetsBuilder: finalNativeAssetsBuilder,
-      os: finalOS,
-      outputPreferences: finalOutputPreferences,
-      persistentToolState: finalPersistentToolState,
-      platform: finalPlatform,
-      preRunValidator: finalPreRunValidator,
-      processInfo: finalProcessInfo,
-      processManager: finalProcessManager,
-      processUtils: finalProcessUtils,
-      projectFactory: finalProjectFactory,
-      shutdownHooks: finalShutdownHooks,
-      signals: LocalSignals.instance,
-      stdio: finalStdio,
-      systemClock: finalSystemClock,
-      terminal: finalTerminal,
-      userMessages: finalUserMessages,
-    );
-
     final extensionManager = ExtensionManager(
       entryPoints: extensionEntryPoints,
       featureFlags: finalFeatureFlags,
@@ -655,7 +663,7 @@ class ToolDependencies {
           windowsWorkflow: finalWindowsWorkflow,
           customDevicesConfig: finalCustomDevicesConfig,
           nativeAssetsBuilder: finalNativeAssetsBuilder,
-          toolContext: toolContext,
+          toolContext: finalToolContext,
           extensionManager: extensionManager,
         );
 
@@ -672,7 +680,7 @@ class ToolDependencies {
       extensionBuildManager: extensionBuildManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
-      toolContext: toolContext,
+      toolContext: finalToolContext,
     );
   }
 }
