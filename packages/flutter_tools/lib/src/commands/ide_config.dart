@@ -252,7 +252,7 @@ class IdeConfigCommand extends FlutterCommand {
     final String flutterRoot = fs.path.absolute(toolContext.cache.flutterRoot);
     final String dirPath = fs.path.normalize(fs.directory(flutterRoot).absolute.path);
 
-    final String? error = _validateFlutterDir(dirPath, fileSystem: fs, flutterRoot: flutterRoot);
+    final String? error = _validateFlutterDir(dirPath, fileSystem: fs);
     if (error != null) {
       throwToolExit(error);
     }
@@ -290,7 +290,7 @@ class IdeConfigCommand extends FlutterCommand {
 
 /// Return null if the flutter root directory is a valid destination. Return a
 /// validation message if we should disallow the directory.
-String? _validateFlutterDir(String dirPath, {required FileSystem fileSystem, String? flutterRoot}) {
+String? _validateFlutterDir(String dirPath, {required FileSystem fileSystem}) {
   final FileSystemEntityType type = fileSystem.typeSync(dirPath);
 
   // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017
