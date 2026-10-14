@@ -25,7 +25,6 @@ filegroup(
             "**/tests/**",
             "**/docs/**",
             "spirv-cross/**",
-            "vulkan-validation-layers/**",
         ],
     ),
 )
