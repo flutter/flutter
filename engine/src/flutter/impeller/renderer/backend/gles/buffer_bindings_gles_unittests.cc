@@ -500,6 +500,89 @@ TEST(BufferBindingsGLESTest, RejectsTexturesBeyondTheCombinedLimit) {
       Range{0, fixture.bound_textures.size()}, Range{0, 0}));
 }
 
+TEST(BufferBindingsGLESTest, SkipsRedundantSamplerConfigurationOnSameTexture) {
+  auto impl = MakeSixteenUnitMockImpl();
+  auto* raw_impl = impl.get();
+  std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(impl));
+  BoundTexturesFixture fixture(
+      std::make_unique<ProcTableGLES>(kMockResolverGLES));
+  fixture.AddTextures(ShaderStage::kFragment, 1);
+  ASSERT_TRUE(fixture.reactor->React());
+
+  BufferBindingsGLES bindings;
+  bindings.SetUniformBindings(fixture.uniform_bindings);
+  BufferBindingsGLES other_bindings;
+  other_bindings.SetUniformBindings(std::move(fixture.uniform_bindings));
+  std::vector<BufferResource> bound_buffers;
+  SamplerStateCache sampler_cache;
+
+  auto expect_sampler_params = [&](int count) {
+    EXPECT_CALL(*raw_impl,
+                TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _))
+        .Times(count);
+    EXPECT_CALL(*raw_impl,
+                TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _))
+        .Times(count);
+    EXPECT_CALL(*raw_impl,
+                TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _))
+        .Times(count);
+    EXPECT_CALL(*raw_impl, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _))
+        .Times(count);
+    EXPECT_CALL(*raw_impl, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _))
+        .Times(count);
+  };
+
+  // First bind on ES 3.0 configures all 5 sampler parameters; subsequent binds
+  // with the same sampler descriptor (including across different
+  // BufferBindingsGLES instances sharing the pass cache) skip all
+  // TexParameteri calls.
+  expect_sampler_params(1);
+
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
+  EXPECT_TRUE(other_bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
+
+  // Changing the sampler descriptor must re-configure the texture once.
+  SamplerDescriptor linear_desc;
+  linear_desc.min_filter = MinMagFilter::kLinear;
+  linear_desc.mag_filter = MinMagFilter::kLinear;
+  fixture.bound_textures[0].sampler =
+      fixture.sampler_library->GetSampler(linear_desc);
+  expect_sampler_params(1);
+  EXPECT_TRUE(other_bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
+
+  // Wrapped external textures must bypass the sampler parameter cache and
+  // re-emit TexParameteri on every bind (2 consecutive binds with the same
+  // sampler descriptor configure each parameter twice).
+  TextureDescriptor wrapped_desc;
+  wrapped_desc.storage_mode = StorageMode::kDevicePrivate;
+  wrapped_desc.type = TextureType::kTexture2D;
+  wrapped_desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  wrapped_desc.size = {1, 1};
+  wrapped_desc.mip_count = 1u;
+  wrapped_desc.usage = TextureUsage::kShaderRead;
+  auto wrapped_texture = TextureGLES::WrapTexture(
+      fixture.reactor, wrapped_desc,
+      fixture.reactor->CreateHandle(HandleType::kTexture, 99u));
+  fixture.bound_textures[0].texture =
+      TextureResource(fixture.metadata[0].get(), std::move(wrapped_texture));
+  expect_sampler_params(2);
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, fixture.bound_textures.size()}, Range{0, 0}, &sampler_cache));
+}
+
 TEST(BufferBindingsGLESTest,
      DeduplicatesVertexAttributesAndDisablesUnusedAcrossDraws) {
   auto mock_gles_impl = std::make_unique<NiceMock<MockGLESImpl>>();
@@ -600,21 +683,21 @@ TEST(BufferBindingsGLESTest,
                                .input_rate = VertexInputRate::kInstance}}));
 
   VertexAttribStateCache state_cache;
-  state_cache.bound_array_buffer = 42u;
+  state_cache.SetBoundArrayBufferForTest(42u);
 
   // Draw 1: binds slots 0 and 1.
-  state_cache.current_draw_attribs_mask = 0;
+  state_cache.BeginDrawVertexAttributes();
   EXPECT_TRUE(bindings_a.BindVertexAttributes(gl, 0, 0, 0, &state_cache));
   state_cache.DisableUnusedAttribsBeforeDraw(gl);
 
   // Draw 2: identical VBO and layout on slots 0 and 1 -> all GL calls skipped.
-  state_cache.current_draw_attribs_mask = 0;
+  state_cache.BeginDrawVertexAttributes();
   EXPECT_TRUE(bindings_a.BindVertexAttributes(gl, 0, 0, 0, &state_cache));
   state_cache.DisableUnusedAttribsBeforeDraw(gl);
 
   // Draw 3: switches to bindings_b (slots 0 and 2) -> slot 0 is deduplicated,
   // slot 2 is configured with divisor 1, and unused slot 1 is disabled.
-  state_cache.current_draw_attribs_mask = 0;
+  state_cache.BeginDrawVertexAttributes();
   EXPECT_TRUE(bindings_b.BindVertexAttributes(gl, 0, 0, 0, &state_cache));
   EXPECT_TRUE(bindings_b.BindVertexAttributes(gl, 1, 0, 0, &state_cache));
   state_cache.DisableUnusedAttribsBeforeDraw(gl);
@@ -645,18 +728,19 @@ TEST(BufferBindingsGLESTest,
   BufferBindingsGLES bindings;
   bindings.SetUniformBindings(std::move(fixture.uniform_bindings));
   std::vector<BufferResource> bound_buffers;
-  VertexAttribStateCache state_cache;
+  SamplerStateCache sampler_cache;
+  VertexAttribStateCache attrib_cache;
 
   // First draw binds unit 0, texture, sampler parameters, and Uniform1i.
-  EXPECT_TRUE(bindings.BindUniformData(fixture.reactor->GetProcTable(),
-                                       fixture.bound_textures, bound_buffers,
-                                       Range{0, 1}, Range{0, 0}, &state_cache));
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, 1}, Range{0, 0}, &sampler_cache, &attrib_cache));
 
   // Second draw with the same texture and sampler skips ActiveTexture,
   // BindTexture, TexParameteri, and Uniform1i.
-  EXPECT_TRUE(bindings.BindUniformData(fixture.reactor->GetProcTable(),
-                                       fixture.bound_textures, bound_buffers,
-                                       Range{0, 1}, Range{0, 0}, &state_cache));
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, 1}, Range{0, 0}, &sampler_cache, &attrib_cache));
 }
 
 TEST(BufferBindingsGLESTest,

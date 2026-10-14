@@ -253,6 +253,7 @@ struct RenderPassStateCache {
   BlendStateCache blend;
   StencilStateCache stencil;
   DepthStateCache depth;
+  SamplerStateCache sampler;
   VertexAttribStateCache attrib;
   std::optional<HandleGLES> program;
   absl::flat_hash_map<HandleGLES, float, HandleGLES::Hash, HandleGLES::Equal>
@@ -426,21 +427,13 @@ static bool BindVertexBuffer(const ProcTableGLES& gl,
   const auto& vertex_buffer_gles = DeviceBufferGLES::Cast(*vertex_buffer);
   const bool use_es_cache =
       attrib_cache != nullptr && gl.GetCapabilities()->IsES();
-  bool already_bound = false;
   if (use_es_cache) {
-    if (auto handle = vertex_buffer_gles.GetHandle();
-        handle.has_value() && attrib_cache->bound_array_buffer == *handle) {
-      already_bound = true;
+    if (!attrib_cache->BindArrayBuffer(vertex_buffer_gles)) {
+      return false;
     }
-  }
-  if (!vertex_buffer_gles.BindAndUploadDataIfNecessary(
-          DeviceBufferGLES::BindingType::kArrayBuffer, already_bound)) {
+  } else if (!vertex_buffer_gles.BindAndUploadDataIfNecessary(
+                 DeviceBufferGLES::BindingType::kArrayBuffer)) {
     return false;
-  }
-  if (use_es_cache) {
-    if (auto handle = vertex_buffer_gles.GetHandle(); handle.has_value()) {
-      attrib_cache->bound_array_buffer = *handle;
-    }
   }
 
   //--------------------------------------------------------------------------
@@ -682,7 +675,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     ///       `RenderPass::ValidateIndexBuffer` here, as validation already runs
     ///       when the vertex/index buffers are set on the command.
     ///
-    state_cache.attrib.current_draw_attribs_mask = 0;
+    state_cache.attrib.BeginDrawVertexAttributes();
     for (size_t i = 0; i < command.vertex_buffers.length; i++) {
       if (!BindVertexBuffer(gl, vertex_desc_gles,
                             vertex_buffers[i + command.vertex_buffers.offset],
@@ -705,12 +698,13 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
     /// Bind uniform data.
     ///
     if (!vertex_desc_gles->BindUniformData(
-            gl,                                                    //
-            bound_textures,                                        //
-            bound_buffers,                                         //
-            /*texture_range=*/command.bound_textures,              //
-            /*buffer_range=*/command.bound_buffers,                //
-            /*state_cache=*/is_es ? &state_cache.attrib : nullptr  //
+            gl,                                                     //
+            bound_textures,                                         //
+            bound_buffers,                                          //
+            /*texture_range=*/command.bound_textures,               //
+            /*buffer_range=*/command.bound_buffers,                 //
+            &state_cache.sampler,                                   //
+            /*attrib_cache=*/is_es ? &state_cache.attrib : nullptr  //
             )) {
       return false;
     }
@@ -762,24 +756,13 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       auto index_buffer_view = command.index_buffer;
       const DeviceBuffer* index_buffer = index_buffer_view.GetBuffer();
       const auto& index_buffer_gles = DeviceBufferGLES::Cast(*index_buffer);
-      bool idx_already_bound = false;
       if (is_es) {
-        if (auto idx_handle = index_buffer_gles.GetHandle();
-            idx_handle.has_value() &&
-            state_cache.attrib.bound_element_array_buffer == *idx_handle) {
-          idx_already_bound = true;
+        if (!state_cache.attrib.BindElementArrayBuffer(index_buffer_gles)) {
+          return false;
         }
-      }
-      if (!index_buffer_gles.BindAndUploadDataIfNecessary(
-              DeviceBufferGLES::BindingType::kElementArrayBuffer,
-              idx_already_bound)) {
+      } else if (!index_buffer_gles.BindAndUploadDataIfNecessary(
+                     DeviceBufferGLES::BindingType::kElementArrayBuffer)) {
         return false;
-      }
-      if (is_es) {
-        if (auto idx_handle = index_buffer_gles.GetHandle();
-            idx_handle.has_value()) {
-          state_cache.attrib.bound_element_array_buffer = *idx_handle;
-        }
       }
       index_offset = reinterpret_cast<const GLvoid*>(
           static_cast<uintptr_t>(index_buffer_view.GetRange().offset));
@@ -805,7 +788,7 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
       // were already bound above for instance 0.
       for (size_t instance = 0; instance < command.instance_count; instance++) {
         if (instance > 0u) {
-          state_cache.attrib.current_draw_attribs_mask = 0;
+          state_cache.attrib.BeginDrawVertexAttributes();
           for (size_t i = 0; i < command.vertex_buffers.length; i++) {
             if (!BindVertexBuffer(
                     gl, vertex_desc_gles,

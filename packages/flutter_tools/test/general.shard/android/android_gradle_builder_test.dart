@@ -559,10 +559,18 @@ void main() {
               test: (String line) {
                 return line.contains('Some gradle message');
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                handlerCalled = true;
-                return GradleBuildStatus.exit;
-              },
+              handler:
+                  ({
+                    required GradleUtils gradleUtils,
+                    required String line,
+                    required FlutterProject project,
+                    required ToolContext toolContext,
+                    required bool usesAndroidX,
+                    Java? java,
+                  }) async {
+                    handlerCalled = true;
+                    return GradleBuildStatus.exit;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -746,9 +754,17 @@ void main() {
                 }
                 return false;
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                return GradleBuildStatus.retry;
-              },
+              handler:
+                  ({
+                    required GradleUtils gradleUtils,
+                    required String line,
+                    required FlutterProject project,
+                    required ToolContext toolContext,
+                    required bool usesAndroidX,
+                    Java? java,
+                  }) async {
+                    return GradleBuildStatus.retry;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -837,9 +853,17 @@ void main() {
             localGradleErrors: <GradleHandledError>[
               GradleHandledError(
                 test: (String line) => line.contains('Some gradle message'),
-                handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                  return GradleBuildStatus.retry;
-                },
+                handler:
+                    ({
+                      required GradleUtils gradleUtils,
+                      required String line,
+                      required FlutterProject project,
+                      required ToolContext toolContext,
+                      required bool usesAndroidX,
+                      Java? java,
+                    }) async {
+                      return GradleBuildStatus.retry;
+                    },
                 eventLabel: 'random-event-label',
               ),
             ],
@@ -936,10 +960,18 @@ void main() {
               test: (String line) {
                 return line.contains('Some gradle message');
               },
-              handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-                handlerCalled = true;
-                return GradleBuildStatus.exit;
-              },
+              handler:
+                  ({
+                    required GradleUtils gradleUtils,
+                    required String line,
+                    required FlutterProject project,
+                    required ToolContext toolContext,
+                    required bool usesAndroidX,
+                    Java? java,
+                  }) async {
+                    handlerCalled = true;
+                    return GradleBuildStatus.exit;
+                  },
               eventLabel: 'random-event-label',
             ),
           ],
@@ -1110,9 +1142,17 @@ void main() {
             test: (String line) {
               return line.contains('Some gradle message');
             },
-            handler: ({String? line, FlutterProject? project, bool? usesAndroidX}) async {
-              return GradleBuildStatus.retry;
-            },
+            handler:
+                ({
+                  required GradleUtils gradleUtils,
+                  required String line,
+                  required FlutterProject project,
+                  required ToolContext toolContext,
+                  required bool usesAndroidX,
+                  Java? java,
+                }) async {
+                  return GradleBuildStatus.retry;
+                },
             eventLabel: 'random-event-label',
           ),
         ],

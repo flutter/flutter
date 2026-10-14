@@ -198,12 +198,188 @@ bool BufferBindingsGLES::ReadUniformsBindingsV2(const ProcTableGLES& gl,
   return true;
 }
 
+bool VertexAttribStateCache::BindVertexAttribute(const ProcTableGLES& gl,
+                                                 GLuint index,
+                                                 GLint size,
+                                                 GLenum type,
+                                                 GLenum normalized,
+                                                 GLsizei stride,
+                                                 size_t attribute_offset,
+                                                 GLuint divisor) {
+  if (index >= kMaxVertexAttribs) {
+    return false;
+  }
+  const uint32_t bit = 1u << index;
+  current_draw_attribs_mask_ |= bit;
+  if ((enabled_attribs_mask_ & bit) == 0u) {
+    gl.EnableVertexAttribArray(index);
+    enabled_attribs_mask_ |= bit;
+  }
+
+  auto& slot = slots_[index];
+  const auto norm = static_cast<GLboolean>(normalized);
+  const auto ptr_offset = static_cast<uintptr_t>(attribute_offset);
+  if (!slot.valid || slot.vbo != bound_array_buffer_ || slot.size != size ||
+      slot.type != type || slot.normalized != norm || slot.stride != stride ||
+      slot.offset != ptr_offset) {
+    gl.VertexAttribPointer(index, size, type, norm, stride,
+                           reinterpret_cast<const GLvoid*>(ptr_offset));
+    slot.vbo = bound_array_buffer_;
+    slot.size = size;
+    slot.type = type;
+    slot.normalized = norm;
+    slot.stride = stride;
+    slot.offset = ptr_offset;
+  }
+
+  if (!slot.valid || slot.divisor != divisor) {
+    if (gl.VertexAttribDivisor.IsAvailable()) {
+      gl.VertexAttribDivisor(index, divisor);
+    } else if (gl.VertexAttribDivisorEXT.IsAvailable()) {
+      gl.VertexAttribDivisorEXT(index, divisor);
+    }
+    slot.divisor = divisor;
+    if (divisor != 0u) {
+      non_zero_divisor_mask_ |= bit;
+    } else {
+      non_zero_divisor_mask_ &= ~bit;
+    }
+  }
+  slot.valid = true;
+  return true;
+}
+
+void VertexAttribStateCache::DisableUnusedAttribsBeforeDraw(
+    const ProcTableGLES& gl) {
+  uint32_t to_disable = enabled_attribs_mask_ & ~current_draw_attribs_mask_;
+  while (to_disable != 0) {
+    uint32_t idx = __builtin_ctz(to_disable);
+    gl.DisableVertexAttribArray(idx);
+    enabled_attribs_mask_ &= ~(1u << idx);
+    to_disable &= (to_disable - 1);
+  }
+}
+
+void VertexAttribStateCache::ResetAtPassEnd(const ProcTableGLES& gl) {
+  uint32_t div_mask = non_zero_divisor_mask_;
+  while (div_mask != 0) {
+    uint32_t idx = __builtin_ctz(div_mask);
+    if (gl.VertexAttribDivisor.IsAvailable()) {
+      gl.VertexAttribDivisor(idx, 0u);
+    } else if (gl.VertexAttribDivisorEXT.IsAvailable()) {
+      gl.VertexAttribDivisorEXT(idx, 0u);
+    }
+    div_mask &= (div_mask - 1);
+  }
+  non_zero_divisor_mask_ = 0;
+
+  uint32_t en_mask = enabled_attribs_mask_;
+  while (en_mask != 0) {
+    uint32_t idx = __builtin_ctz(en_mask);
+    gl.DisableVertexAttribArray(idx);
+    en_mask &= (en_mask - 1);
+  }
+  enabled_attribs_mask_ = 0;
+}
+
+bool VertexAttribStateCache::BindArrayBuffer(const DeviceBufferGLES& buffer) {
+  bool already_bound = false;
+  if (auto handle = buffer.GetHandle();
+      handle.has_value() && bound_array_buffer_ == *handle) {
+    already_bound = true;
+  }
+  if (!buffer.BindAndUploadDataIfNecessary(
+          DeviceBufferGLES::BindingType::kArrayBuffer, already_bound)) {
+    return false;
+  }
+  if (auto handle = buffer.GetHandle(); handle.has_value()) {
+    bound_array_buffer_ = *handle;
+  }
+  return true;
+}
+
+bool VertexAttribStateCache::BindElementArrayBuffer(
+    const DeviceBufferGLES& buffer) {
+  bool already_bound = false;
+  if (auto handle = buffer.GetHandle();
+      handle.has_value() && bound_element_array_buffer_ == *handle) {
+    already_bound = true;
+  }
+  if (!buffer.BindAndUploadDataIfNecessary(
+          DeviceBufferGLES::BindingType::kElementArrayBuffer, already_bound)) {
+    return false;
+  }
+  if (auto handle = buffer.GetHandle(); handle.has_value()) {
+    bound_element_array_buffer_ = *handle;
+  }
+  return true;
+}
+
+bool VertexAttribStateCache::BindAndConfigureTexture(
+    const ProcTableGLES& gl,
+    size_t unit_index,
+    GLenum target_unit,
+    const TextureGLES& texture,
+    const SamplerGLES& sampler,
+    SamplerStateCache* sampler_cache) {
+  const bool can_cache_unit =
+      !texture.IsWrapped() && !texture.GetSyncFence().has_value() &&
+      texture.IsSliceInitialized(0) && unit_index < kMaxTextureUnits;
+  if (can_cache_unit) {
+    auto tex_handle = texture.GetGLHandle();
+    if (!tex_handle.has_value()) {
+      return false;
+    }
+    const bool texture_already_bound =
+        bound_textures_[unit_index] == *tex_handle;
+    const bool sampler_already_configured =
+        sampler_cache != nullptr &&
+        sampler_cache->IsTextureConfigured(sampler, texture);
+    if (texture_already_bound && sampler_already_configured) {
+      return true;
+    }
+    if (active_texture_unit_ != target_unit) {
+      gl.ActiveTexture(target_unit);
+      active_texture_unit_ = target_unit;
+    }
+    if (!texture_already_bound) {
+      if (!const_cast<TextureGLES&>(texture).Bind()) {
+        return false;
+      }
+      bound_textures_[unit_index] = *tex_handle;
+    }
+    return sampler_cache != nullptr
+               ? sampler_cache->ConfigureBoundTexture(sampler, texture, gl)
+               : sampler.ConfigureBoundTexture(texture, gl);
+  }
+
+  if (active_texture_unit_ != target_unit) {
+    gl.ActiveTexture(target_unit);
+    active_texture_unit_ = target_unit;
+  }
+  if (!const_cast<TextureGLES&>(texture).Bind()) {
+    return false;
+  }
+  const bool configured =
+      sampler_cache != nullptr
+          ? sampler_cache->ConfigureBoundTexture(sampler, texture, gl)
+          : sampler.ConfigureBoundTexture(texture, gl);
+  if (!configured) {
+    return false;
+  }
+  if (unit_index < kMaxTextureUnits) {
+    bound_textures_[unit_index] =
+        !texture.IsWrapped() ? texture.GetGLHandle() : std::nullopt;
+  }
+  return true;
+}
+
 bool BufferBindingsGLES::BindVertexAttributes(
     const ProcTableGLES& gl,
     size_t binding,
     size_t vertex_offset,
     size_t instance,
-    VertexAttribStateCache* state_cache) {
+    VertexAttribStateCache* attrib_cache) {
   if (binding >= vertex_attrib_arrays_.size()) {
     return false;
   }
@@ -220,11 +396,9 @@ bool BufferBindingsGLES::BindVertexAttributes(
       }
     }
     if (!has_instance_rate) {
-      if (state_cache != nullptr && gl.GetCapabilities()->IsES()) {
+      if (attrib_cache != nullptr && gl.GetCapabilities()->IsES()) {
         for (const auto& array : vertex_attrib_arrays_[binding]) {
-          if (array.index < VertexAttribStateCache::kMaxVertexAttribs) {
-            state_cache->current_draw_attribs_mask |= (1u << array.index);
-          }
+          attrib_cache->MarkAttributeUsed(array.index);
         }
       }
       return true;
@@ -237,7 +411,8 @@ bool BufferBindingsGLES::BindVertexAttributes(
     gl.BindVertexArray(vertex_array_object_);
   }
 
-  const bool use_cache = state_cache != nullptr && gl.GetCapabilities()->IsES();
+  const bool use_cache =
+      attrib_cache != nullptr && gl.GetCapabilities()->IsES();
 
   for (const auto& array : vertex_attrib_arrays_[binding]) {
     // For an emulated instanced draw, an instance-rate attribute is
@@ -249,46 +424,10 @@ bool BufferBindingsGLES::BindVertexAttributes(
       attribute_offset += instance * static_cast<size_t>(array.stride);
     }
 
-    if (use_cache && array.index < VertexAttribStateCache::kMaxVertexAttribs) {
-      const uint32_t bit = 1u << array.index;
-      state_cache->current_draw_attribs_mask |= bit;
-      if ((state_cache->enabled_attribs_mask & bit) == 0u) {
-        gl.EnableVertexAttribArray(array.index);
-        state_cache->enabled_attribs_mask |= bit;
-      }
-
-      auto& slot = state_cache->slots[array.index];
-      const auto norm = static_cast<GLboolean>(array.normalized);
-      const auto ptr_offset = static_cast<uintptr_t>(attribute_offset);
-      if (!slot.valid || slot.vbo != state_cache->bound_array_buffer ||
-          slot.size != array.size || slot.type != array.type ||
-          slot.normalized != norm || slot.stride != array.stride ||
-          slot.offset != ptr_offset) {
-        gl.VertexAttribPointer(array.index, array.size, array.type, norm,
-                               array.stride,
-                               reinterpret_cast<const GLvoid*>(ptr_offset));
-        slot.vbo = state_cache->bound_array_buffer;
-        slot.size = array.size;
-        slot.type = array.type;
-        slot.normalized = norm;
-        slot.stride = array.stride;
-        slot.offset = ptr_offset;
-      }
-
-      if (!slot.valid || slot.divisor != array.vertex_attrib_divisor) {
-        if (gl.VertexAttribDivisor.IsAvailable()) {
-          gl.VertexAttribDivisor(array.index, array.vertex_attrib_divisor);
-        } else if (gl.VertexAttribDivisorEXT.IsAvailable()) {
-          gl.VertexAttribDivisorEXT(array.index, array.vertex_attrib_divisor);
-        }
-        slot.divisor = array.vertex_attrib_divisor;
-        if (array.vertex_attrib_divisor != 0u) {
-          state_cache->non_zero_divisor_mask |= bit;
-        } else {
-          state_cache->non_zero_divisor_mask &= ~bit;
-        }
-      }
-      slot.valid = true;
+    if (use_cache &&
+        attrib_cache->BindVertexAttribute(
+            gl, array.index, array.size, array.type, array.normalized,
+            array.stride, attribute_offset, array.vertex_attrib_divisor)) {
       continue;
     }
 
@@ -317,25 +456,58 @@ bool BufferBindingsGLES::BindVertexAttributes(
   return true;
 }
 
+bool SamplerStateCache::IsTextureConfigured(const SamplerGLES& sampler,
+                                            const TextureGLES& texture) const {
+  if (texture.IsWrapped()) {
+    return false;
+  }
+  const uint64_t sampler_key =
+      SamplerDescriptor::ToKey(sampler.GetDescriptor());
+  auto it = configured_samplers_.find(texture.GetHandle());
+  return it != configured_samplers_.end() && it->second == sampler_key;
+}
+
+bool SamplerStateCache::ConfigureBoundTexture(const SamplerGLES& sampler,
+                                              const TextureGLES& texture,
+                                              const ProcTableGLES& gl) {
+  if (texture.IsWrapped()) {
+    return sampler.ConfigureBoundTexture(texture, gl);
+  }
+  const uint64_t sampler_key =
+      SamplerDescriptor::ToKey(sampler.GetDescriptor());
+  const HandleGLES& handle = texture.GetHandle();
+  auto it = configured_samplers_.find(handle);
+  if (it != configured_samplers_.end() && it->second == sampler_key) {
+    return true;
+  }
+  if (!sampler.ConfigureBoundTexture(texture, gl)) {
+    return false;
+  }
+  configured_samplers_[handle] = sampler_key;
+  return true;
+}
+
 bool BufferBindingsGLES::BindUniformData(
     const ProcTableGLES& gl,
     const std::vector<TextureAndSampler>& bound_textures,
     const std::vector<BufferResource>& bound_buffers,
     Range texture_range,
     Range buffer_range,
-    VertexAttribStateCache* state_cache) {
+    SamplerStateCache* sampler_cache,
+    VertexAttribStateCache* attrib_cache) {
   for (auto i = 0u; i < buffer_range.length; i++) {
     if (!BindUniformBuffer(gl, bound_buffers[buffer_range.offset + i])) {
       return false;
     }
   }
-  std::optional<size_t> next_unit_index = BindTextures(
-      gl, bound_textures, texture_range, ShaderStage::kVertex, 0, state_cache);
+  std::optional<size_t> next_unit_index =
+      BindTextures(gl, bound_textures, texture_range, ShaderStage::kVertex,
+                   /*unit_start_index=*/0, sampler_cache, attrib_cache);
   if (!next_unit_index.has_value()) {
     return false;
   }
   if (!BindTextures(gl, bound_textures, texture_range, ShaderStage::kFragment,
-                    *next_unit_index, state_cache)
+                    *next_unit_index, sampler_cache, attrib_cache)
            .has_value()) {
     return false;
   }
@@ -551,7 +723,8 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     Range texture_range,
     ShaderStage stage,
     size_t unit_start_index,
-    VertexAttribStateCache* state_cache) {
+    SamplerStateCache* sampler_cache,
+    VertexAttribStateCache* attrib_cache) {
   size_t active_index = unit_start_index;
   size_t stage_texture_count = 0;
   for (auto i = 0u; i < texture_range.length; i++) {
@@ -591,66 +764,40 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     }
 
     const GLenum target_unit = GL_TEXTURE0 + active_index;
-    const bool can_cache_unit =
-        state_cache != nullptr && !texture_gles.IsWrapped() &&
-        !texture_gles.GetSyncFence().has_value() &&
-        texture_gles.IsSliceInitialized(0) &&
-        active_index < VertexAttribStateCache::kMaxTextureUnits;
-    if (can_cache_unit) {
-      auto tex_handle = texture_gles.GetGLHandle();
-      if (!tex_handle.has_value()) {
+    const auto& sampler_gles = SamplerGLES::Cast(*data.sampler);
+    if (attrib_cache != nullptr) {
+      if (!attrib_cache->BindAndConfigureTexture(gl, active_index, target_unit,
+                                                 texture_gles, sampler_gles,
+                                                 sampler_cache)) {
         return std::nullopt;
       }
-      const bool texture_already_bound =
-          state_cache->bound_textures[active_index] == *tex_handle;
-      const auto& sampler_gles = SamplerGLES::Cast(*data.sampler);
-      const uint64_t sampler_key =
-          SamplerDescriptor::ToKey(sampler_gles.GetDescriptor());
-      const bool needs_sampler_config =
-          !texture_already_bound ||
-          state_cache->bound_sampler_keys[active_index] != sampler_key;
-      if (!texture_already_bound || needs_sampler_config) {
-        if (state_cache->active_texture_unit != target_unit) {
-          gl.ActiveTexture(target_unit);
-          state_cache->active_texture_unit = target_unit;
-        }
-        if (!texture_already_bound) {
-          if (!const_cast<TextureGLES&>(texture_gles).Bind()) {
-            return std::nullopt;
-          }
-          state_cache->bound_textures[active_index] = *tex_handle;
-        }
-        if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
-          return std::nullopt;
-        }
-        state_cache->bound_sampler_keys[active_index] = sampler_key;
-      }
     } else {
-      if (state_cache == nullptr ||
-          state_cache->active_texture_unit != target_unit) {
-        gl.ActiveTexture(target_unit);
-        if (state_cache != nullptr) {
-          state_cache->active_texture_unit = target_unit;
-        }
-      }
+      gl.ActiveTexture(target_unit);
+
+      //------------------------------------------------------------------------
+      /// Bind the texture.
+      ///
+      // The `texture_gles` reference is bound `const` because it is reached
+      // via a const view into the bound texture list, but `Bind()` mutates
+      // GLES-specific lazy-init bookkeeping (`slice_mip_initialized_`,
+      // `fence_`). The mutation is implementation detail of the GLES backend
+      // and is invisible to the higher abstraction; the `const_cast` is
+      // confined to this one call site.
       if (!const_cast<TextureGLES&>(texture_gles).Bind()) {
         return std::nullopt;
       }
-      const auto& sampler_gles = SamplerGLES::Cast(*data.sampler);
-      if (!sampler_gles.ConfigureBoundTexture(texture_gles, gl)) {
+
+      //------------------------------------------------------------------------
+      /// If there is a sampler for the texture at the same index, configure the
+      /// bound texture using that sampler.
+      ///
+      const bool configured =
+          sampler_cache != nullptr
+              ? sampler_cache->ConfigureBoundTexture(sampler_gles, texture_gles,
+                                                     gl)
+              : sampler_gles.ConfigureBoundTexture(texture_gles, gl);
+      if (!configured) {
         return std::nullopt;
-      }
-      if (state_cache != nullptr &&
-          active_index < VertexAttribStateCache::kMaxTextureUnits) {
-        if (auto tex_handle = texture_gles.GetGLHandle();
-            tex_handle.has_value()) {
-          state_cache->bound_textures[active_index] = *tex_handle;
-          state_cache->bound_sampler_keys[active_index] =
-              SamplerDescriptor::ToKey(sampler_gles.GetDescriptor());
-        } else {
-          state_cache->bound_textures[active_index] = std::nullopt;
-          state_cache->bound_sampler_keys[active_index] = std::nullopt;
-        }
       }
     }
 
