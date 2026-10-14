@@ -227,4 +227,34 @@ void main() {
     expect(horizontalBox.getMinIntrinsicHeight(800.0), 150.0);
     expect(horizontalBox.getMaxIntrinsicHeight(800.0), 150.0);
   });
+
+  testWidgets('Horizontal ListBody in IntrinsicHeight takes its tallest child height', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey intrinsic = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: IntrinsicHeight(
+              key: intrinsic,
+              child: ListBody(
+                mainAxis: Axis.horizontal,
+                children: const <Widget>[
+                  SizedBox(width: 10.0, height: 20.0),
+                  SizedBox(width: 10.0, height: 40.0),
+                  SizedBox(width: 10.0, height: 10.0),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byKey(intrinsic)), const Size(30.0, 40.0));
+  });
 }
