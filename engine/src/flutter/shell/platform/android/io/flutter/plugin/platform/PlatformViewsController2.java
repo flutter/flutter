@@ -769,17 +769,40 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return pendingPlatformTransaction;
   }
 
+  /**
+   * Allocates a transaction for the raster thread without making it visible to the platform thread.
+   *
+   * <p>The native caller continues to write into the transaction after this returns (setting the
+   * buffer and the completion callback). Publishing it here would let {@link #swapTransactions()}
+   * and {@link #onEndFrame()} merge and close it while those writes are in flight. The caller must
+   * call {@link #publishTransaction} once it is done writing.
+   *
+   * <p>This is only called when HCPP is active, which is gated on API 34+ in the engine (both
+   * {@code kMinAPILevelHCPP} and the AHB swapchain's {@code CreateTransactionCB} require API 34+,
+   * where {@code ASurfaceTransaction_fromJava} was introduced).
+   */
   // Called from the raster thread through FlutterJNI.
   @RequiresApi(API_LEVELS.API_34)
-  public SurfaceControl.Transaction createTransaction() {
-    final SurfaceControl.Transaction tx = newTransaction();
-    // This lock protects the list, not AHBSwapchainImplVK::Present's later native writes.
-    // Those can race merging or GC freeing the transaction. Fix both hazards by retaining it
-    // natively and publishing only after the writes finish.
+  public SurfaceControl.Transaction createUnpublishedTransaction() {
+    return newTransaction();
+  }
+
+  /**
+   * Publishes a transaction returned by {@link #createUnpublishedTransaction()} now that the caller
+   * has finished writing into it.
+   *
+   * <p>Like {@link #createUnpublishedTransaction()}, this is only reachable on API 34+ because HCPP
+   * and the native transaction callback are gated on API 34+.
+   */
+  // Called from the raster thread through FlutterJNI.
+  @RequiresApi(API_LEVELS.API_34)
+  public void publishTransaction(SurfaceControl.Transaction tx) {
+    if (tx == null) {
+      return;
+    }
     synchronized (transactionLock) {
       pendingRasterTransactions.add(tx);
     }
-    return tx;
   }
 
   /** Allocates a transaction so tests can spy on the instance retained by the controller. */

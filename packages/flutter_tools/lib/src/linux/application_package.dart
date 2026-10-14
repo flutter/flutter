@@ -7,7 +7,6 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
-import '../globals.dart' as globals;
 
 abstract class LinuxApp extends ApplicationPackage {
   LinuxApp({required String projectBundleId}) : super(id: projectBundleId);
@@ -54,7 +53,7 @@ class BuildableLinuxApp extends LinuxApp {
   String executable(BuildInfo buildInfo) {
     final String? binaryName = getCmakeExecutableName(project);
     final String linuxGtkVersion = buildInfo.linuxGtkVersion ?? 'gtk3';
-    return globals.fs.path.join(
+    return project.cmakeFile.fileSystem.path.join(
       getLinuxBuildDirectory(null, buildInfo.flavor, linuxGtkVersion),
       buildInfo.mode.cliName,
       'bundle',

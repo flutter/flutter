@@ -44,6 +44,14 @@ To try experimental windowing APIs:
 See: https://github.com/flutter/flutter/issues/30701.
 ''';
 
+FlutterView _flutterViewForId(int viewId) {
+  final FlutterView? view = WidgetsBinding.instance.platformDispatcher.view(id: viewId);
+  if (view == null) {
+    throw StateError('No FlutterView with viewId $viewId was found on the platform dispatcher.');
+  }
+  return view;
+}
+
 /// [WindowingOwner] implementation for Linux.
 ///
 /// If [Platform.isLinux] is false, then the constructor will throw an
@@ -709,9 +717,7 @@ class WindowControllerLinux extends WindowController
       }
     });
     final int viewId = createdWindow.viewId;
-    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    rootView = _flutterViewForId(viewId);
   }
 
   @override
@@ -839,9 +845,7 @@ class DialogWindowControllerLinux extends DialogWindowController
       }
     });
     final int viewId = createdWindow.viewId;
-    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    rootView = _flutterViewForId(viewId);
   }
 
   @override
@@ -910,9 +914,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController
     final engine = _FlEngine.current();
     _view = _FlView(engine, isSizedToContent: true);
     final int viewId = _view.getId();
-    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    rootView = _flutterViewForId(viewId);
 
     if (_LinuxWindowing.gtkMajorVersion >= 4) {
       _parentView = _owner.registrar._viewForViewId(_parent.rootView.viewId);
@@ -1142,9 +1144,7 @@ class PopupWindowControllerLinux extends PopupWindowController
     final engine = _FlEngine.current();
     _view = _FlView(engine, isSizedToContent: true);
     final int viewId = _view.getId();
-    rootView = WidgetsBinding.instance.platformDispatcher.views.firstWhere(
-      (FlutterView view) => view.viewId == viewId,
-    );
+    rootView = _flutterViewForId(viewId);
 
     if (_LinuxWindowing.gtkMajorVersion >= 4) {
       _parentView = _owner.registrar._viewForViewId(_parent.rootView.viewId);
