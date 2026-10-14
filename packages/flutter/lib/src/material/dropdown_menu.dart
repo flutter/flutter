@@ -171,6 +171,13 @@ enum DropdownMenuCloseBehavior {
 /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.0.dart **
 /// {@end-tool}
 ///
+/// {@tool dartpad}
+/// This sample demonstrates how to programmatically clear or reset the selection
+/// in a [DropdownMenu] using a [TextEditingController].
+///
+/// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.3.dart **
+/// {@end-tool}
+///
 /// See also:
 ///
 /// * [MenuAnchor], which is a widget used to mark the "anchor" for a set of submenus.
@@ -430,6 +437,27 @@ class DropdownMenu<T> extends StatefulWidget {
   /// Controls the text being edited or selected in the menu.
   ///
   /// If null, this widget will create its own [TextEditingController].
+  ///
+  /// A [TextEditingController] can be provided to programmatically clear or modify
+  /// the displayed selection. For example, calling [TextEditingController.clear]
+  /// clears the text displayed in the dropdown menu.
+  ///
+  /// When tracking the selected value in a state variable, calling
+  /// [TextEditingController.clear] alongside updating the state variable to null
+  /// is required to clear the displayed selection, as updating [initialSelection]
+  /// does not clear the text field.
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to programmatically clear the selection in a
+  /// [DropdownMenu] using a [TextEditingController].
+  ///
+  /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.3.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [initialSelection], which sets the initial selection when the widget is
+  ///    first created.
   final TextEditingController? controller;
 
   /// The value used for an initial selection.
@@ -438,12 +466,22 @@ class DropdownMenu<T> extends StatefulWidget {
   /// is first created. If the value matches one of the [dropdownMenuEntries],
   /// the corresponding label will be displayed in the text field.
   ///
-  /// Setting this to null does not clear the text field.
+  /// Setting this to null does not clear the text field because [initialSelection]
+  /// only specifies an initial selection and does not act as a reactive, controlled
+  /// selection property.
   ///
-  /// To programmatically clear the text field, use a [TextEditingController]
-  /// and call [TextEditingController.clear] on it.
+  /// To programmatically clear or reset the selection, provide a [controller]
+  /// and call [TextEditingController.clear] on it alongside resetting the state
+  /// variable to null.
   ///
   /// Defaults to null.
+  ///
+  /// {@tool dartpad}
+  /// This sample demonstrates how to programmatically clear the selection in a
+  /// [DropdownMenu] using a [TextEditingController].
+  ///
+  /// ** See code in examples/api/lib/material/dropdown_menu/dropdown_menu.3.dart **
+  /// {@end-tool}
   ///
   /// See also:
   ///
