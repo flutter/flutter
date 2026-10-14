@@ -1995,7 +1995,7 @@ dev_dependencies:
           '--platform=chrome',
           ...WebRendererMode.canvaskit.toCliDartDefines,
         ]);
-        expect(testRunner.lastDebuggingOptionsValue.webRenderer, WebRendererMode.canvaskit);
+        expect(testRunner.lastDebuggingOptionsValue.webConfig.renderer, WebRendererMode.canvaskit);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -2016,7 +2016,7 @@ dev_dependencies:
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub', '--platform=chrome', '--wasm']);
-        expect(testRunner.lastDebuggingOptionsValue.webRenderer, WebRendererMode.skwasm);
+        expect(testRunner.lastDebuggingOptionsValue.webConfig.renderer, WebRendererMode.skwasm);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fs,
