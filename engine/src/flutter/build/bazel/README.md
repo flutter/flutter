@@ -219,6 +219,20 @@ rules in `dart/`:
    under a second `--filesystem-root` of symlinks at that path and passes
    the package configuration under the virtual scheme, so that its relative
    package roots resolve the same way on every machine.
+   GN's `dest` (`lib/ui/fixtures/shaders/**`: five `test_fixtures` whose
+   compiled shaders land in `lib/ui`'s own assets directory, where
+   `run_tests.py` points `flutter_tester` for the Dart tests) names the
+   package: such a target copies nothing and declares its files
+   (`FixturesDestinationInfo`, with an empty `CcInfo` so that GN's groups,
+   `cc_library` targets here, can depend on it), and the destination's
+   `flutter_test_fixtures` pulls them into its `assets/` from below its
+   `deps` through an aspect -- Bazel cannot write into another package's
+   directory, and GN itself never links those targets' location libraries
+   (they hang off the copy's `deps`). `lib/ui/assets` ends up file for file
+   what GN's `gen/flutter/lib/ui/assets` holds. A `copy()` that renames its
+   one source (`no_uniforms_alt`, a literal output name) is a `gn_copy` with
+   `outs`, which produces the renamed file; other copies pass their sources
+   through as before.
 
 Two configuration choices are deliberate. The wrapped build's tools run from
 the *target* configuration (`cfg = "target"`), because GN builds `gen_snapshot`
