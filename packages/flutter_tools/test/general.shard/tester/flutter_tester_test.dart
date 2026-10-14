@@ -99,17 +99,19 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
       device = FlutterTesterDevice(
         'flutter-tester',
-        fileSystem: fileSystem,
-        processManager: fakeProcessManager,
-        artifacts: Artifacts.test(),
-        logger: BufferLogger.test(),
-        flutterVersion: FakeFlutterVersion(),
-        platform: FakePlatform(),
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          config: Config.test(),
+          flutterVersion: FakeFlutterVersion(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: fakeProcessManager,
+        ),
         analytics: const NoOpAnalytics(),
         buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
-        cache: Cache.test(processManager: FakeProcessManager.any()),
-        config: Config.test(),
       );
       logLines = <String>[];
       device.getLogReader().logLines.listen(logLines.add);
@@ -238,17 +240,19 @@ Hello!
 
 FlutterTesterDevices setUpFlutterTesterDevices() {
   return FlutterTesterDevices(
-    logger: BufferLogger.test(),
-    artifacts: Artifacts.test(),
-    processManager: FakeProcessManager.any(),
-    fileSystem: MemoryFileSystem.test(),
-    flutterVersion: FakeFlutterVersion(),
-    platform: FakePlatform(),
+    toolContext: FakeToolContext(
+      artifacts: Artifacts.test(),
+      cache: Cache.test(processManager: FakeProcessManager.any()),
+      config: Config.test(),
+      flutterVersion: FakeFlutterVersion(),
+      fs: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(),
+      processManager: FakeProcessManager.any(),
+    ),
     analytics: const NoOpAnalytics(),
     buildSystem: TestBuildSystem.all(BuildResult(success: true)),
     buildTargets: const BuildTargetsImpl(),
-    cache: Cache.test(processManager: FakeProcessManager.any()),
-    config: Config.test(),
   );
 }
 

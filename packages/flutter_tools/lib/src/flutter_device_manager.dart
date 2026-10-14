@@ -8,15 +8,13 @@ import 'package:unified_analytics/unified_analytics.dart';
 import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
-import 'artifacts.dart';
-import 'base/config.dart';
 import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
-import 'cache.dart';
+import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
@@ -33,7 +31,6 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcdevice.dart';
 import 'native_assets.dart';
 import 'tester/flutter_tester.dart';
-import 'version.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 import 'windows/windows_workflow.dart';
@@ -51,8 +48,6 @@ class FlutterDeviceManager extends DeviceManager {
     required XCDevice xcDevice,
     required AndroidWorkflow androidWorkflow,
     required IOSWorkflow iosWorkflow,
-    required FlutterVersion flutterVersion,
-    required Artifacts artifacts,
     required MacOSWorkflow macOSWorkflow,
     required UserMessages userMessages,
     required OperatingSystemUtils operatingSystemUtils,
@@ -62,8 +57,7 @@ class FlutterDeviceManager extends DeviceManager {
     required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
-    required Cache cache,
-    required Config config,
+    required ToolContext toolContext,
     ExtensionManager? extensionManager,
   }) : deviceDiscoverers = <DeviceDiscovery>[
          AndroidDevices(
@@ -83,17 +77,10 @@ class FlutterDeviceManager extends DeviceManager {
          ),
          IOSSimulators(iosSimulatorUtils: iosSimulatorUtils),
          FlutterTesterDevices(
-           fileSystem: fileSystem,
-           flutterVersion: flutterVersion,
-           processManager: processManager,
-           logger: logger,
-           artifacts: artifacts,
-           platform: platform,
+           toolContext: toolContext,
            analytics: analytics,
            buildSystem: buildSystem,
            buildTargets: buildTargets,
-           cache: cache,
-           config: config,
            nativeAssetsBuilder: nativeAssetsBuilder,
          ),
          MacOSDevices(

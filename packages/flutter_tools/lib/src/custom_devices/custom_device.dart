@@ -730,16 +730,9 @@ class CustomDevice extends Device {
 
       bundleBuilder ??= BundleBuilder(
         analytics: globals.analytics,
-        artifacts: artifacts,
         buildSystem: globals.buildSystem,
         buildTargets: globals.buildTargets,
-        cache: globals.cache,
-        config: globals.config,
-        fileSystem: globals.fs,
-        flutterVersion: globals.flutterVersion,
-        logger: _logger,
-        platform: globals.platform,
-        processManager: _processManager,
+        toolContext: globals.toolContext,
       );
 
       // this just builds the asset bundle, it's the same as `flutter build bundle`

@@ -9,7 +9,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -19,7 +18,7 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
-import '../cache.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -50,32 +49,18 @@ class FlutterTesterApp extends ApplicationPackage {
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(
     super.id, {
-    required this._processManager,
-    required this._flutterVersion,
-    required super.logger,
-    required this._fileSystem,
-    required this._artifacts,
-    required this._platform,
+    required ToolContext toolContext,
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
-    required this._cache,
-    required this._config,
     this._nativeAssetsBuilder,
-  }) : _logger = logger,
-       super(platformType: null, category: null, ephemeral: false);
+  }) : _toolContext = toolContext,
+       super(logger: toolContext.logger, platformType: null, category: null, ephemeral: false);
 
-  final ProcessManager _processManager;
-  final FlutterVersion _flutterVersion;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final Artifacts _artifacts;
-  final Platform _platform;
+  final ToolContext _toolContext;
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
-  final Cache _cache;
-  final Config _config;
   final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
   Process? _process;
@@ -95,7 +80,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
-    final FlutterVersion flutterVersion = _flutterVersion;
+    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
     return 'Flutter ${flutterVersion.frameworkRevisionShort}';
   }
 
@@ -143,17 +128,22 @@ class FlutterTesterDevice extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = _toolContext;
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {
-      _logger.printError('This device only supports debug mode.');
+      logger.printError('This device only supports debug mode.');
       return LaunchResult.failed();
     }
 
-    final Directory assetDirectory = _fileSystem.systemTempDirectory.createTempSync(
-      'flutter_tester.',
-    );
+    final Directory assetDirectory = fs.systemTempDirectory.createTempSync('flutter_tester.');
     final String applicationKernelFilePath = getKernelPathForTransformerOptions(
-      _fileSystem.path.join(assetDirectory.path, 'flutter-tester-app.dill'),
+      fs.path.join(assetDirectory.path, 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
 
@@ -161,16 +151,9 @@ class FlutterTesterDevice extends Device {
     final FlutterProject project = FlutterProject.current();
     await BundleBuilder(
       analytics: _analytics,
-      artifacts: _artifacts,
       buildSystem: _buildSystem,
       buildTargets: _buildTargets,
-      cache: _cache,
-      config: _config,
-      fileSystem: _fileSystem,
-      flutterVersion: _flutterVersion,
-      logger: _logger,
-      platform: _platform,
-      processManager: _processManager,
+      toolContext: _toolContext,
     ).build(
       project: project,
       buildInfo: buildInfo,
@@ -181,7 +164,7 @@ class FlutterTesterDevice extends Device {
     );
 
     final command = <String>[
-      _artifacts.getArtifactPath(Artifact.flutterTester),
+      artifacts.getArtifactPath(Artifact.flutterTester),
       '--run-forever',
       '--non-interactive',
       if (debuggingOptions.enableDartProfiling) '--enable-dart-profiling',
@@ -197,14 +180,14 @@ class FlutterTesterDevice extends Device {
 
     ProtocolDiscovery? vmServiceDiscovery;
     try {
-      _logger.printTrace(command.join(' '));
-      _process = await _processManager.start(
+      logger.printTrace(command.join(' '));
+      _process = await processManager.start(
         command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
-          if (_platform.isWindows && _nativeAssetsBuilder != null)
+          if (platform.isWindows && _nativeAssetsBuilder != null)
             'PATH':
-                '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${_platform.environment['PATH']}',
+                '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${platform.environment['PATH']}',
         },
       );
       if (!debuggingOptions.debuggingEnabled) {
@@ -217,19 +200,19 @@ class FlutterTesterDevice extends Device {
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: debuggingOptions.ipv6,
-        logger: _logger,
+        logger: logger,
       );
 
       final Uri? vmServiceUri = await vmServiceDiscovery.uri;
       if (vmServiceUri != null) {
         return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
-      _logger.printError(
+      logger.printError(
         'Failed to launch $package: '
         'The log reader failed unexpectedly.',
       );
     } on Exception catch (error) {
-      _logger.printError('Failed to launch $package: $error');
+      logger.printError('Failed to launch $package: $error');
     } finally {
       await vmServiceDiscovery?.cancel();
     }
@@ -251,7 +234,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
-    return LocalDevFSWriter(fileSystem: _fileSystem);
+    return LocalDevFSWriter(fileSystem: _toolContext.fs);
   }
 
   @override
@@ -263,31 +246,17 @@ class FlutterTesterDevice extends Device {
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
   FlutterTesterDevices({
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FlutterVersion flutterVersion,
-    required Platform platform,
+    required ToolContext toolContext,
     required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
-    required Cache cache,
-    required Config config,
     TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
   }) : _testerDevice = FlutterTesterDevice(
          kTesterDeviceId,
-         fileSystem: fileSystem,
-         artifacts: artifacts,
-         processManager: processManager,
-         logger: logger,
-         flutterVersion: flutterVersion,
-         platform: platform,
+         toolContext: toolContext,
          analytics: analytics,
          buildSystem: buildSystem,
          buildTargets: buildTargets,
-         cache: cache,
-         config: config,
          nativeAssetsBuilder: nativeAssetsBuilder,
        ),
        super('Flutter tester');

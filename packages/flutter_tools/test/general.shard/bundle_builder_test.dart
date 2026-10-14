@@ -42,21 +42,23 @@ BundleBuilder createBundleBuilder({
   final platform = FakePlatform();
   return BundleBuilder(
     analytics: const NoOpAnalytics(),
-    artifacts: artifacts ?? Artifacts.test(fileSystem: fileSystem),
     buildSystem: buildSystem,
     buildTargets: const BuildTargetsImpl(),
-    cache: Cache.test(
-      fileSystem: fileSystem,
+    toolContext: FakeToolContext(
+      artifacts: artifacts ?? Artifacts.test(fileSystem: fileSystem),
+      cache: Cache.test(
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
+      config: Config.test(),
+      flutterVersion: FakeFlutterVersion(),
+      fs: fileSystem,
       logger: logger,
       platform: platform,
       processManager: processManager,
     ),
-    config: Config.test(),
-    fileSystem: fileSystem,
-    flutterVersion: FakeFlutterVersion(),
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
   );
 }
 

@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -28,6 +29,8 @@ import 'package:package_config/package_config.dart';
 import 'package:process/process.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+
+import 'fakes.dart';
 
 /// Helper function to create a [WebDevFS] with sensible testbed defaults.
 WebDevFS createWebDevFS({
@@ -57,18 +60,17 @@ WebDevFS createWebDevFS({
   Logger? logger,
   Platform? platform,
   ProcessManager? processManager,
+  ToolContext? toolContext,
   bool testMode = true,
   Map<String, String> webDefines = const <String, String>{},
 }) {
   return WebDevFS(
-    artifacts: artifacts ?? globals.artifacts!,
     packagesFilePath: packagesFilePath,
     urlTunneller: urlTunneller,
     useSseForDebugProxy: useSseForDebugProxy,
     useSseForDebugBackend: useSseForDebugBackend,
     useSseForInjectedClient: useSseForInjectedClient,
     buildInfo: buildInfo,
-    config: config ?? globals.config,
     enableDwds: enableDwds,
     ddsConfig: ddsConfig,
     entrypoint: entrypoint ?? globals.fs.file('lib/main.dart').uri,
@@ -82,11 +84,17 @@ WebDevFS createWebDevFS({
     rootDirectory: rootDirectory ?? globals.fs.currentDirectory,
     useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     webCrossOriginIsolation: webCrossOriginIsolation,
-    fileSystem: fileSystem ?? globals.fs,
-    flutterVersion: flutterVersion ?? globals.flutterVersion,
-    logger: logger ?? globals.logger,
-    platform: platform ?? globals.platform,
-    processManager: processManager ?? globals.processManager,
+    toolContext:
+        toolContext ??
+        FakeToolContext(
+          artifacts: artifacts ?? globals.artifacts!,
+          config: config ?? globals.config,
+          fs: fileSystem ?? globals.fs,
+          flutterVersion: flutterVersion ?? globals.flutterVersion,
+          logger: logger ?? globals.logger,
+          platform: platform ?? globals.platform,
+          processManager: processManager ?? globals.processManager,
+        ),
     testMode: testMode,
     webDefines: webDefines,
   );

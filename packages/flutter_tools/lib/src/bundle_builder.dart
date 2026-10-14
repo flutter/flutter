@@ -21,6 +21,7 @@ import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'project.dart';
@@ -30,29 +31,15 @@ import 'version.dart';
 class BundleBuilder {
   BundleBuilder({
     required this._analytics,
-    required this._artifacts,
     required this._buildSystem,
     required this._buildTargets,
-    required this._cache,
-    required this._config,
-    required this._fileSystem,
-    required this._flutterVersion,
-    required this._logger,
-    required this._platform,
-    required this._processManager,
+    required this._toolContext,
   });
 
   final Analytics _analytics;
-  final Artifacts _artifacts;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
-  final Cache _cache;
-  final Config _config;
-  final FileSystem _fileSystem;
-  final FlutterVersion _flutterVersion;
-  final Logger _logger;
-  final Platform _platform;
-  final ProcessManager _processManager;
+  final ToolContext _toolContext;
 
   /// Builds the bundle for the given target platform.
   ///
@@ -69,21 +56,31 @@ class BundleBuilder {
     String? assetDirPath,
     BuildSystem? buildSystem,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
+      :FileSystem fs,
+      :FlutterVersion flutterVersion,
+      :Logger logger,
+      platform: Platform hostPlatform,
+      :ProcessManager processManager,
+    ) = _toolContext;
     project ??= FlutterProject.current();
-    mainPath ??= defaultMainPath(_fileSystem);
-    depfilePath ??= defaultDepfilePath(config: _config, fileSystem: _fileSystem);
-    assetDirPath ??= getAssetBuildDirectory(_config, _fileSystem);
+    mainPath ??= defaultMainPath(fs);
+    depfilePath ??= defaultDepfilePath(config: config, fileSystem: fs);
+    assetDirPath ??= getAssetBuildDirectory(config, fs);
     buildSystem ??= _buildSystem;
 
     // If the precompiled flag was not passed, force us into debug mode.
     final environment = Environment(
       projectDir: project.directory,
       packageConfigPath: buildInfo.packageConfigPath,
-      outputDir: _fileSystem.directory(assetDirPath),
+      outputDir: fs.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
-      cacheDir: _cache.getRoot(),
-      flutterRootDir: _fileSystem.directory(Cache.flutterRoot),
-      engineVersion: _artifacts.usesLocalArtifacts ? null : _flutterVersion.engineRevision,
+      cacheDir: cache.getRoot(),
+      flutterRootDir: fs.directory(Cache.flutterRoot),
+      engineVersion: artifacts.usesLocalArtifacts ? null : flutterVersion.engineRevision,
       defines: <String, String>{
         // used by the KernelSnapshot target
         kTargetPlatform: platform.getName(),
@@ -91,12 +88,12 @@ class BundleBuilder {
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
       },
-      artifacts: _artifacts,
-      fileSystem: _fileSystem,
-      logger: _logger,
-      processManager: _processManager,
+      artifacts: artifacts,
+      fileSystem: fs,
+      logger: logger,
+      processManager: processManager,
       analytics: _analytics,
-      platform: _platform,
+      platform: hostPlatform,
       generateDartPluginRegistry: true,
     );
     final Target target = buildInfo.mode == BuildMode.debug
@@ -106,7 +103,7 @@ class BundleBuilder {
 
     if (!result.success) {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        _logger.printError(
+        logger.printError(
           'Target ${measurement.target} failed: ${measurement.exception}',
           stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
               ? measurement.stackTrace
@@ -116,7 +113,7 @@ class BundleBuilder {
       throwToolExit('Failed to build bundle.');
     }
     final depfile = Depfile(result.inputFiles, result.outputFiles);
-    final File outputDepfile = _fileSystem.file(depfilePath);
+    final File outputDepfile = fs.file(depfilePath);
     if (!outputDepfile.parent.existsSync()) {
       outputDepfile.parent.createSync(recursive: true);
     }
@@ -124,7 +121,7 @@ class BundleBuilder {
 
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
-      final File outputDill = _fileSystem.directory(assetDirPath).childFile('kernel_blob.bin');
+      final File outputDill = fs.directory(assetDirPath).childFile('kernel_blob.bin');
       if (outputDill.existsSync()) {
         outputDill.copySync(applicationKernelFilePath);
       }

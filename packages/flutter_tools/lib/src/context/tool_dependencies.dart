@@ -635,8 +635,6 @@ class ToolDependencies {
           xcDevice: finalXCDevice,
           androidWorkflow: finalAndroidWorkflow,
           iosWorkflow: finalIOSWorkflow,
-          flutterVersion: finalFlutterVersion,
-          artifacts: finalArtifacts,
           macOSWorkflow: finalMacOSWorkflow,
           userMessages: finalUserMessages,
           operatingSystemUtils: finalOS,
@@ -646,8 +644,7 @@ class ToolDependencies {
           analytics: finalAnalytics,
           buildSystem: finalBuildSystem,
           buildTargets: finalBuildTargets,
-          cache: finalCache,
-          config: finalConfig,
+          toolContext: finalToolContext,
           extensionManager: extensionManager,
         );
 
