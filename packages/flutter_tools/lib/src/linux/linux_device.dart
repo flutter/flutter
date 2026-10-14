@@ -19,13 +19,9 @@ import 'linux_workflow.dart';
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
   LinuxDevice({required this._analytics, required super.toolContext})
-    : _operatingSystemUtils = toolContext.os,
-      _toolContext = toolContext,
-      super('linux', platformType: PlatformType.linux, ephemeral: false);
+    : super('linux', platformType: PlatformType.linux, ephemeral: false);
 
   final Analytics _analytics;
-  final OperatingSystemUtils _operatingSystemUtils;
-  final ToolContext _toolContext;
 
   @override
   Future<bool> isSupported() async => true;
@@ -38,16 +34,17 @@ class LinuxDevice extends DesktopDevice {
 
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
+    final HostPlatform hostPlatform = toolContext.os.hostPlatform;
+    if (hostPlatform == HostPlatform.linux_x64) {
       return TargetPlatform.linux_x64;
-    } else if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_riscv64) {
+    } else if (hostPlatform == HostPlatform.linux_riscv64) {
       return TargetPlatform.linux_riscv64;
     }
     return TargetPlatform.linux_arm64;
   }();
 
   @override
-  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(toolContext.os.hostPlatform);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -60,14 +57,14 @@ class LinuxDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     await buildLinux(
       projectFactory.fromDirectory(fs.currentDirectory).linux,
       buildInfo,
       analytics: _analytics,
       target: mainPath,
       targetPlatform: await targetPlatform,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
   }
 

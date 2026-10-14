@@ -20,10 +20,7 @@ import '../project.dart';
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
   MacOSDesignedForIPadDevice({required super.toolContext})
-    : _operatingSystemUtils = toolContext.os,
-      super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
-
-  final OperatingSystemUtils _operatingSystemUtils;
+    : super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
 
   @override
   String get name => 'Mac Designed for iPad';
@@ -36,8 +33,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   Future<CpuArch> get cpuArch async => CpuArch.arm64;
 
   @override
-  Future<bool> isSupported() async =>
-      _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
+  Future<bool> isSupported() async => toolContext.os.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
   bool get supportsFlavors => true;
@@ -45,7 +41,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync() &&
-        _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
+        toolContext.os.hostPlatform == HostPlatform.darwin_arm64;
   }
 
   @override

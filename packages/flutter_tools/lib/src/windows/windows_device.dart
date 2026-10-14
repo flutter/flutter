@@ -20,13 +20,9 @@ import 'windows_workflow.dart';
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
   WindowsDevice({required this._analytics, required super.toolContext})
-    : _operatingSystemUtils = toolContext.os,
-      _toolContext = toolContext,
-      super('windows', platformType: PlatformType.windows, ephemeral: false);
+    : super('windows', platformType: PlatformType.windows, ephemeral: false);
 
   final Analytics _analytics;
-  final OperatingSystemUtils _operatingSystemUtils;
-  final ToolContext _toolContext;
 
   @override
   Future<bool> isSupported() async => true;
@@ -40,13 +36,13 @@ class WindowsDevice extends DesktopDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
 
-  TargetPlatform get _targetPlatform => switch (_operatingSystemUtils.hostPlatform) {
+  TargetPlatform get _targetPlatform => switch (toolContext.os.hostPlatform) {
     HostPlatform.windows_arm64 => TargetPlatform.windows_arm64,
     _ => TargetPlatform.windows_x64,
   };
 
   @override
-  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(toolContext.os.hostPlatform);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -59,14 +55,14 @@ class WindowsDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     await buildWindows(
       projectFactory.fromDirectory(fs.currentDirectory).windows,
       buildInfo,
       _targetPlatform,
       analytics: _analytics,
       target: mainPath,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     );
   }
 

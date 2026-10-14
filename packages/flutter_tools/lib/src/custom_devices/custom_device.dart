@@ -424,52 +424,51 @@ class CustomDeviceAppSession {
 /// The exact actions are defined by the contents of the [CustomDeviceConfig]
 /// used to construct it.
 class CustomDevice extends Device {
-  CustomDevice({required CustomDeviceConfig config, required ToolContext toolContext})
-    : _config = config,
-      _logger = toolContext.logger,
-      _processManager = toolContext.processManager,
-      _processUtils = toolContext.processUtils,
-      _toolContext = toolContext,
-      _globalLogReader = CustomDeviceLogReader(config.label),
-      portForwarder = config.usesPortForwarding
-          ? CustomDevicePortForwarder(
-              deviceName: config.label,
-              forwardPortCommand: config.forwardPortCommand!,
-              forwardPortSuccessRegex: config.forwardPortSuccessRegex!,
-              processManager: toolContext.processManager,
-              logger: toolContext.logger,
-            )
-          : const NoOpDevicePortForwarder(),
+  CustomDevice({required this._config, required this._toolContext})
+    : _globalLogReader = CustomDeviceLogReader(_config.label),
       super(
-        config.id,
+        _config.id,
         category: Category.mobile,
         ephemeral: true,
-        logger: toolContext.logger,
+        logger: _toolContext.logger,
         platformType: PlatformType.custom,
       );
 
   final CustomDeviceConfig _config;
-  final Logger _logger;
-  final ProcessManager _processManager;
-  final ProcessUtils _processUtils;
   final ToolContext _toolContext;
   final _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
   Process? _globalLogReaderProcess;
 
   @override
-  final DevicePortForwarder portForwarder;
+  late final DevicePortForwarder portForwarder = _createPortForwarder();
+
+  DevicePortForwarder _createPortForwarder() {
+    if (!_config.usesPortForwarding) {
+      return const NoOpDevicePortForwarder();
+    }
+    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
+    return CustomDevicePortForwarder(
+      deviceName: _config.label,
+      forwardPortCommand: _config.forwardPortCommand!,
+      forwardPortSuccessRegex: _config.forwardPortSuccessRegex!,
+      processManager: processManager,
+      logger: logger,
+    );
+  }
 
   CustomDeviceAppSession _getOrCreateAppSession(ApplicationPackage app) {
     return _sessions.putIfAbsent(app, () {
+      final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
+
       /// create a new session and add its logging to the global log reader.
       /// (needed bc it's possible the infra requests a global log in [getLogReader]
       final session = CustomDeviceAppSession(
         name: name,
         device: this,
         appPackage: app,
-        logger: _logger,
-        processManager: _processManager,
+        logger: logger,
+        processManager: processManager,
       );
 
       _globalLogReader.listenToLinesStream(session.logReader.logLines);
@@ -495,12 +494,13 @@ class CustomDevice extends Device {
     Map<String, String> replacementValues = const <String, String>{},
   }) async {
     final List<String> interpolated = interpolateCommand(_config.pingCommand, replacementValues);
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
 
     final RunResult result;
     try {
-      result = await _processUtils.run(interpolated, timeout: timeout);
+      result = await processUtils.run(interpolated, timeout: timeout);
     } on ProcessException catch (e) {
-      _logger.printTrace('Error pinging custom device $id: $e');
+      logger.printTrace('Error pinging custom device $id: $e');
       return false;
     }
 
@@ -542,12 +542,13 @@ class CustomDevice extends Device {
       <String, String>{'appName': appName, 'localPath': localPath},
       additionalReplacementValues: additionalReplacementValues,
     );
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
 
     try {
-      await _processUtils.run(interpolated, throwOnError: true, timeout: timeout);
+      await processUtils.run(interpolated, throwOnError: true, timeout: timeout);
       return true;
     } on ProcessException catch (e) {
-      _logger.printError('Error executing postBuild command for custom device $id: $e');
+      logger.printError('Error executing postBuild command for custom device $id: $e');
       return false;
     }
   }
@@ -568,12 +569,13 @@ class CustomDevice extends Device {
     final List<String> interpolated = interpolateCommand(_config.uninstallCommand, <String, String>{
       'appName': appName,
     }, additionalReplacementValues: additionalReplacementValues);
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
 
     try {
-      await _processUtils.run(interpolated, throwOnError: true, timeout: timeout);
+      await processUtils.run(interpolated, throwOnError: true, timeout: timeout);
       return true;
     } on ProcessException catch (e) {
-      _logger.printError('Error executing uninstall command for custom device $id: $e');
+      logger.printError('Error executing uninstall command for custom device $id: $e');
       return false;
     }
   }
@@ -596,13 +598,14 @@ class CustomDevice extends Device {
       'localPath': localPath,
       'appName': appName,
     }, additionalReplacementValues: additionalReplacementValues);
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
 
     try {
-      await _processUtils.run(interpolated, throwOnError: true, timeout: timeout);
+      await processUtils.run(interpolated, throwOnError: true, timeout: timeout);
 
       return true;
     } on ProcessException catch (e) {
-      _logger.printError('Error executing install command for custom device $id: $e');
+      logger.printError('Error executing install command for custom device $id: $e');
       return false;
     }
   }
@@ -633,7 +636,7 @@ class CustomDevice extends Device {
 
     if (_config.supportsReadingLogs && _globalLogReaderProcess == null) {
       // launch the readLogs command
-      _globalLogReaderProcess = await _processUtils.start(_config.readLogsCommand!);
+      _globalLogReaderProcess = await _toolContext.processUtils.start(_config.readLogsCommand!);
       _globalLogReader.listenToProcessOutput(_globalLogReaderProcess!);
     }
 
@@ -683,7 +686,7 @@ class CustomDevice extends Device {
       <String, String>{},
     );
 
-    final RunResult result = await _processUtils.run(interpolated, throwOnError: true);
+    final RunResult result = await _toolContext.processUtils.run(interpolated, throwOnError: true);
     await outputFile.writeAsBytes(base64Decode(result.stdout));
   }
 
@@ -814,14 +817,11 @@ class CustomDevice extends Device {
 class CustomDevices extends PollingDeviceDiscovery {
   /// Create a custom device discovery that pings all enabled devices in the
   /// given [CustomDevicesConfig].
-  CustomDevices({required FeatureFlags featureFlags, required ToolContext toolContext})
-    : _config = toolContext.customDevicesConfig,
-      _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
-      _toolContext = toolContext,
+  CustomDevices({required FeatureFlags featureFlags, required this._toolContext})
+    : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
       super('custom devices');
 
   final CustomDeviceWorkflow _customDeviceWorkflow;
-  final CustomDevicesConfig _config;
   final ToolContext _toolContext;
 
   @override
@@ -830,10 +830,8 @@ class CustomDevices extends PollingDeviceDiscovery {
   @override
   bool get canListAnything => _customDeviceWorkflow.canListDevices;
 
-  CustomDevicesConfig get _customDevicesConfig => _config;
-
   List<CustomDevice> get _enabledCustomDevices {
-    return _customDevicesConfig
+    return _toolContext.customDevicesConfig
         .tryGetDevices()
         .where((CustomDeviceConfig element) => element.enabled)
         .map((CustomDeviceConfig config) => CustomDevice(config: config, toolContext: _toolContext))
