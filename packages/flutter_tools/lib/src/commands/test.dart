@@ -79,14 +79,21 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
        _testRunner = testRunner ?? FlutterTestRunner(toolContext: toolContext),
        super(toolContext: toolContext) {
     requiresPubspecYaml();
+    enableUsesPubOption();
     enableUsesFatalWarnings();
-    registerOptionBundles(optionBundles);
+    registerOptionBundles(const <OptionBundle>[
+      DdsAndDevToolsOptionsBundle(includeDevTools: false),
+    ]);
 
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.pub,
       BuildInfoOptions.frontendServerStarterPath,
       BuildInfoOptions.trackWidgetCreation,
       CommonOptions.enableExperiment,
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
       CommonOptions.deviceUser,
+      BuildInfoOptions.flavor,
       DebuggingOptionDescriptors.enableImpeller,
       CommonOptions.machine,
       DebuggingOptionDescriptors.enableFlutterGpu,
@@ -127,13 +134,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       _uninstall,
     ], verboseHelp: verboseHelp);
   }
-
-  List<OptionBundle> get optionBundles => const <OptionBundle>[
-    PubOptionBundle(),
-    DartDefinesOptionsBundle(),
-    FlavorOptionBundle(),
-    DdsAndDevToolsOptionsBundle(includeDevTools: false),
-  ];
 
   static const _experimentalFasterTesting = FlagOptionDescriptor(
     name: 'experimental-faster-testing',
@@ -1023,40 +1023,4 @@ bool _shouldRunAsIntegrationTests(String currentDirectory, List<String> testFile
     ' Use separate invocations of `flutter test` to run integration tests'
     ' and unit tests.',
   );
-}
-
-/// A bundle encapsulating the pub option (`--[no-]pub`).
-class PubOptionBundle extends OptionBundle {
-  const PubOptionBundle();
-
-  @override
-  void onRegister(FlutterCommand command) {
-    command.enableUsesPubOption();
-  }
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    CommonOptions.pub,
-  ];
-}
-
-/// A bundle encapsulating Dart defines options (`--dart-define` and `--dart-define-from-file`).
-class DartDefinesOptionsBundle extends OptionBundle {
-  const DartDefinesOptionsBundle();
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    CommonOptions.dartDefines,
-    CommonOptions.dartDefineFromFile,
-  ];
-}
-
-/// A bundle encapsulating the flavor option (`--flavor`).
-class FlavorOptionBundle extends OptionBundle {
-  const FlavorOptionBundle();
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    BuildInfoOptions.flavor,
-  ];
 }
