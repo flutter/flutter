@@ -370,7 +370,7 @@ class AnalyzeCommand extends FlutterCommand {
     } else if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults!,
-        runner!.getRepoPackages(fileSystem: fileSystem),
+        runner!.getRepoPackages(fileSystem: fs),
         artifacts: artifacts,
         cache: cache,
         fileSystem: fs,
@@ -384,7 +384,7 @@ class AnalyzeCommand extends FlutterCommand {
     } else {
       await AnalyzeOnce(
         argResults!,
-        runner!.getRepoPackages(fileSystem: fileSystem),
+        runner!.getRepoPackages(fileSystem: fs),
         artifacts: artifacts,
         cache: cache,
         fileSystem: fs,
