@@ -31,12 +31,14 @@ Switches MakeSwitchesDesktopGL(
 }
 
 TEST(SwitchesTest, DoesntMangleUnicodeIncludes) {
+  // A directory of the test's own: created in the fixtures directory, it
+  // would be left behind there.
+  fml::ScopedTemporaryDirectory temp_dir;
   const char* directory_name = "test_shader_include_Ã�";
-  fml::CreateDirectory(flutter::testing::OpenFixturesDirectory(),
-                       {directory_name}, fml::FilePermission::kRead);
+  fml::CreateDirectory(temp_dir.fd(), {directory_name},
+                       fml::FilePermission::kRead);
 
-  auto include_path =
-      std::string(flutter::testing::GetFixturesPath()) + "/" + directory_name;
+  auto include_path = temp_dir.path() + "/" + directory_name;
   auto include_option = "--include=" + include_path;
 
   Switches switches = MakeSwitchesDesktopGL({include_option.c_str()});
