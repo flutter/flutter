@@ -2806,6 +2806,79 @@ source_set("x") {
       );
     });
 
+    test("test_fixtures' dest names the package whose assets receive the files", () async {
+      // lib/ui's shader fixtures: `dest = "$root_gen_dir/flutter/lib/ui"`,
+      // the generated twin of a package the layout knows.
+      const layout = OutputLayout.main(
+        packages: <String>{'engine/src/flutter/lib/ui', 'engine/src/flutter/lib/ui/shaders'},
+      );
+      expect(
+        await convert(
+          r'''
+impellerc("stages") {
+  shaders = [ "a.frag" ]
+  shader_target_flags = [ "--sksl" ]
+  intermediates_subdir = "iplr"
+  sl_file_extension = "iplr"
+  iplr = true
+}
+test_fixtures("fixtures") {
+  deps = [ ":stages" ]
+  fixtures = get_target_outputs("//flutter/lib/ui/shaders:stages")
+  dest = "$root_gen_dir/flutter/lib/ui"
+}
+''',
+          gnPackage: '//flutter/lib/ui/shaders',
+          layout: layout,
+          templates: <String>{'test_fixtures', 'impellerc'},
+        ),
+        contains('''
+flutter_test_fixtures(
+    name = "fixtures",
+    dest = "//engine/src/flutter/lib/ui",
+    fixtures_targets = {":stages": []},
+    deps = [":stages"],
+)
+'''),
+      );
+      await expectLater(
+        convert(
+          r'''
+test_fixtures("fixtures") {
+  fixtures = [ "a.png" ]
+  dest = "$root_gen_dir/flutter/lib/ui/nowhere"
+}
+''',
+          gnPackage: '//flutter/lib/ui/shaders',
+          layout: layout,
+        ),
+        throwsGnError(line: 3, message: 'not a package the layout knows'),
+      );
+    });
+
+    test('a copy() that renames its file produces the copy under the new name', () async {
+      // general_shaders' no_uniforms_alt: a literal output (no {{source...}}
+      // expansion) under the target_gen_dir is the point of the copy.
+      expect(
+        await convert(r'''
+copy("alt") {
+  sources = [ "$root_gen_dir/flutter/example/iplr/a.frag.iplr" ]
+  outputs = [ "$root_gen_dir/flutter/example/iplr/alt.frag.iplr" ]
+  deps = [ ":compile" ]
+}
+'''),
+        contains(r'''
+gn_copy(
+    name = "alt",
+    srcs = ["iplr/a.frag.iplr"],
+    outs = ["iplr/alt.frag.iplr"],
+    outputs = ["$root_gen_dir/flutter/example/iplr/alt.frag.iplr"],
+    deps = [":compile"],
+)
+'''),
+      );
+    });
+
     test('a private config of another file is an implementation dependency', () async {
       // `../skia:skia_private` names a sibling directory's config; as a
       // private config its library applies to this target's compiles only.

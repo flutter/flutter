@@ -15,3 +15,10 @@ cc_library(
     includes = ["."],
     visibility = ["//engine/src/flutter:__subpackages__"],
 )
+
+# test_shaders/ is part of this repository (not a synced tree): the shaders
+# lib/ui's fixtures compile (`//flutter/third_party/test_shaders/selman/...`).
+exports_files(
+    glob(["test_shaders/**/*.frag"]),
+    visibility = ["//engine/src/flutter:__subpackages__"],
+)
