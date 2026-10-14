@@ -307,6 +307,19 @@ host linux-x64 only for now, and `--strategy=GnBuild=local` keeps a regular
 GN build directory under `bazel-bin/.../gl_wrap/gl_backends.gn/root/out/bazel`
 for iterating.
 
+The Impeller playground (`impeller/playground`, on `@glfw` and `@imgui` --
+the secondary tree's GN over the synced trees, converted at fetch time like
+re2's) opens a GLFW window on X11 even when a suite only skips, so the
+suites that link it (`impeller_dart_unittests`, `impeller_unittests`;
+`displayTests` in bazel_mapping.dart) are `flutter_display_test`
+(testing/testing.bzl): a `cc_binary` of the suite in its package, beside
+the GPU backends, run through `testing/xvfb_run.sh`, which uses the
+environment's `DISPLAY` or starts an Xvfb of its own inside the sandbox --
+what `run_tests.py` does once for the whole Linux batch. Xvfb is a host
+prerequisite for these suites, as it is for `run_tests.py`; the arguments
+are `run_tests.py`'s (`testRuns`), which on Linux keep
+`impeller_dart_unittests` to its Metal variants, all skipped.
+
 ## Impeller's shader pipeline
 
 Every Impeller library with shaders invokes `impeller_shaders()`
