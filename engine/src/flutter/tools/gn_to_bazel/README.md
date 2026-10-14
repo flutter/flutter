@@ -178,7 +178,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `target(type, name)`, scope values (`x.member`, `defined(x.member)`),
    `get_path_info(p, "abspath")`, short-circuit `&&`/`||` and integer
    comparisons are understood; `rebase_path()` and `exec_script()` yield
-   opaque values that are an error only if they reach the output.
+   opaque values that are an error only if they reach the output. `+=` and
+   `-=` on a variable of an enclosing scope (a template body appending to a
+   forwarded `public_configs`) modify a copy in the current scope and leave
+   the enclosing variable alone, as GN does; a `config`'s `_`-prefixed
+   variables are its locals and carry nothing.
 3. `starlark_emitter.dart` -- the mapping from GN targets to Bazel rules:
    `source_set`/`static_library` to `cc_library` (with headers in `hdrs`, or
    the `public` list when there is one; a `source_set` is `alwayslink`,
@@ -225,7 +229,13 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    reads `defines`, `copts` and `linkopts` with Make-variable substitution
    and shell tokenization where GN hands the compiler each string as it is,
    so those strings are escaped to survive the reading (`X="v"` is written
-   `X=\"v\"`; `$` is doubled). A file
+   `X=\"v\"`; `$` is doubled). A define that embeds a generated file's GN
+   path (`get_label_info(..., "target_gen_dir") + "/x.bin"`) is written
+   with the file's run-time path relative to the source root, which is what
+   a test joins to `GetSourcePath()`, and the file must reach the test as
+   `data` (`testRuns`); an `ldflags` entry naming a source file through
+   `rebase_path(..., root_build_dir)` (the embedder's version script) becomes
+   `$(execpath :file)` with the file in `additional_linker_inputs`. A file
    listed twice is emitted once. Every compiled target gets `FLUTTER_COPTS`
    (engine code: it lists `//flutter:config` or depends on engine code),
    `CHROMIUM_CODE_COPTS` (the third-party trees the engine describes with

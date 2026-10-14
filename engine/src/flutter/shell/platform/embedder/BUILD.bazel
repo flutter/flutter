@@ -2,22 +2,540 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# Hand-written until shell/platform/embedder/BUILD.gn converts: that file is
-# the embedder API's library, its shared library and its tests, which link
-# the Dart snapshot (a later phase). What the libraries converted so far need
-# of it is GN's source_set("embedder_headers") -- the API header, which the
-# GPU surfaces (//flutter/shell/gpu) and the embeddings include -- and that
-# is all this file has.
+# Generated from //flutter/shell/platform/embedder/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: copy_headers, flutter_engine, embedder-archive.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
-    name = "embedder_headers",
-    hdrs = ["embedder.h"],
+    name = "embedder_gpu_configuration",
     deps = [
+        "//engine/src/flutter/shell/gpu:gpu_surface_gl",  # invoker.enable_gl
+        "//engine/src/flutter/shell/gpu:gpu_surface_software",  # invoker.enable_software
+        "//engine/src/flutter/shell/gpu:gpu_surface_vulkan",  # invoker.enable_vulkan
+    ],
+)
+
+cc_library(
+    name = "embedder_gpu_configuration_config",
+    defines = [
+        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+        "SHELL_ENABLE_GL",  # invoker.enable_gl
+        "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+    ],
+)
+
+cc_library(
+    name = "embedder_header_config",
+    includes = ["."],
+)
+
+cc_library(
+    name = "embedder_jit_snapshot_setup",
+    # For testing JIT snapshot setup.
+    defines = [
+        "TEST_ISOLATE_SNAPSHOT_DATA=\\\"flutter/lib/snapshot/isolate_snapshot.bin\\\"",
+        "TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS=\\\"flutter/lib/snapshot/isolate_snapshot_instructions.bin\\\"",
+        "TEST_VM_SNAPSHOT_DATA=\\\"flutter/lib/snapshot/vm_isolate_snapshot.bin\\\"",
+        "TEST_VM_SNAPSHOT_INSTRUCTIONS=\\\"flutter/lib/snapshot/vm_snapshot_instructions.bin\\\"",
+    ],
+)
+
+cc_library(
+    name = "embedder",
+    srcs = [
+        "embedder.cc",
+        "embedder_engine.cc",
+        "embedder_external_texture_gl.cc",  # embedder_enable_gl
+        "embedder_external_texture_resolver.cc",
+        "embedder_external_texture_vulkan.cc",  # embedder_enable_vulkan
+        "embedder_external_view.cc",
+        "embedder_external_view_embedder.cc",
+        "embedder_include.c",
+        "embedder_include2.c",
+        "embedder_layers.cc",
+        "embedder_platform_message_response.cc",
+        "embedder_render_target.cc",
+        "embedder_render_target_cache.cc",
+        "embedder_render_target_impeller.cc",  # impeller_supports_rendering
+        "embedder_render_target_skia.cc",
+        "embedder_semantics_update.cc",
+        "embedder_surface.cc",
+        "embedder_surface_gl_impeller.cc",  # embedder_enable_gl && impeller_supports_rendering
+        "embedder_surface_gl_skia.cc",  # embedder_enable_gl
+        "embedder_surface_software.cc",
+        "embedder_surface_vulkan.cc",  # embedder_enable_vulkan
+        "embedder_surface_vulkan_impeller.cc",  # embedder_enable_vulkan && impeller_supports_rendering
+        "embedder_task_runner.cc",
+        "embedder_thread_host.cc",
+        "pixel_formats.cc",
+        "platform_view_embedder.cc",
+        "vsync_waiter_embedder.cc",
+    ],
+    hdrs = [
+        "embedder_engine.h",
+        "embedder_external_texture_gl.h",  # embedder_enable_gl
+        "embedder_external_texture_resolver.h",
+        "embedder_external_texture_vulkan.h",  # embedder_enable_vulkan
+        "embedder_external_view.h",
+        "embedder_external_view_embedder.h",
+        "embedder_layers.h",
+        "embedder_platform_message_response.h",
+        "embedder_render_target.h",
+        "embedder_render_target_cache.h",
+        "embedder_render_target_impeller.h",  # impeller_supports_rendering
+        "embedder_render_target_skia.h",
+        "embedder_semantics_update.h",
+        "embedder_struct_macros.h",
+        "embedder_surface.h",
+        "embedder_surface_gl_impeller.h",  # embedder_enable_gl && impeller_supports_rendering
+        "embedder_surface_gl_skia.h",  # embedder_enable_gl
+        "embedder_surface_software.h",
+        "embedder_surface_vulkan.h",  # embedder_enable_vulkan
+        "embedder_surface_vulkan_impeller.h",  # embedder_enable_vulkan && impeller_supports_rendering
+        "embedder_task_runner.h",
+        "embedder_thread_host.h",
+        "pixel_formats.h",
+        "platform_view_embedder.h",
+        "vsync_waiter_embedder.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+        "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+        "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+        "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+        "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+        "-Wno-suggest-override",  # from :embedder_gpu_configuration
+        "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+        "-Wno-unused-variable",  # from :embedder_gpu_configuration
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":embedder_gpu_configuration",
+        ":embedder_gpu_configuration_config",
+        ":embedder_header_config",
+        ":embedder_headers",
         "//engine/src:include_root",
         "//engine/src/flutter:config",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
+        "//engine/src/flutter/build/bazel/dart_wrap:elf_loader",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/flutter_vma:flutter_skia_vma",  # embedder_enable_vulkan
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",  # embedder_enable_vulkan && impeller_supports_rendering
+        "//engine/src/flutter/impeller/renderer",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/renderer/backend/gles",  # embedder_enable_gl && impeller_supports_rendering
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime:libdart",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/third_party/tonic",
+        "//engine/src/flutter/vulkan/procs",  # embedder_enable_vulkan
+        "@skia",
     ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "embedder_as_internal_library",
+    srcs = [
+        "embedder.cc",
+        "embedder_engine.cc",
+        "embedder_external_texture_gl.cc",  # embedder_enable_gl
+        "embedder_external_texture_resolver.cc",
+        "embedder_external_texture_vulkan.cc",  # embedder_enable_vulkan
+        "embedder_external_view.cc",
+        "embedder_external_view_embedder.cc",
+        "embedder_include.c",
+        "embedder_include2.c",
+        "embedder_layers.cc",
+        "embedder_platform_message_response.cc",
+        "embedder_render_target.cc",
+        "embedder_render_target_cache.cc",
+        "embedder_render_target_impeller.cc",  # impeller_supports_rendering
+        "embedder_render_target_skia.cc",
+        "embedder_semantics_update.cc",
+        "embedder_surface.cc",
+        "embedder_surface_gl_impeller.cc",  # embedder_enable_gl && impeller_supports_rendering
+        "embedder_surface_gl_skia.cc",  # embedder_enable_gl
+        "embedder_surface_software.cc",
+        "embedder_surface_vulkan.cc",  # embedder_enable_vulkan
+        "embedder_surface_vulkan_impeller.cc",  # embedder_enable_vulkan && impeller_supports_rendering
+        "embedder_task_runner.cc",
+        "embedder_thread_host.cc",
+        "pixel_formats.cc",
+        "platform_view_embedder.cc",
+        "vsync_waiter_embedder.cc",
+    ],
+    hdrs = [
+        "embedder_engine.h",
+        "embedder_external_texture_gl.h",  # embedder_enable_gl
+        "embedder_external_texture_resolver.h",
+        "embedder_external_texture_vulkan.h",  # embedder_enable_vulkan
+        "embedder_external_view.h",
+        "embedder_external_view_embedder.h",
+        "embedder_layers.h",
+        "embedder_platform_message_response.h",
+        "embedder_render_target.h",
+        "embedder_render_target_cache.h",
+        "embedder_render_target_impeller.h",  # impeller_supports_rendering
+        "embedder_render_target_skia.h",
+        "embedder_semantics_update.h",
+        "embedder_struct_macros.h",
+        "embedder_surface.h",
+        "embedder_surface_gl_impeller.h",  # embedder_enable_gl && impeller_supports_rendering
+        "embedder_surface_gl_skia.h",  # embedder_enable_gl
+        "embedder_surface_software.h",
+        "embedder_surface_vulkan.h",  # embedder_enable_vulkan
+        "embedder_surface_vulkan_impeller.h",  # embedder_enable_vulkan && impeller_supports_rendering
+        "embedder_task_runner.h",
+        "embedder_thread_host.h",
+        "pixel_formats.h",
+        "platform_view_embedder.h",
+        "vsync_waiter_embedder.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+        "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+        "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+        "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+        "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+        "-Wno-suggest-override",  # from :embedder_gpu_configuration
+        "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+        "-Wno-unused-variable",  # from :embedder_gpu_configuration
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":embedder_gpu_configuration",
+        ":embedder_gpu_configuration_config",
+        ":embedder_header_config",
+        ":embedder_headers",
+        ":embedder_internal_library_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
+        "//engine/src/flutter/build/bazel/dart_wrap:elf_loader",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/flutter_vma:flutter_skia_vma",  # embedder_enable_vulkan
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",  # embedder_enable_vulkan && impeller_supports_rendering
+        "//engine/src/flutter/impeller/renderer",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/renderer/backend/gles",  # embedder_enable_gl && impeller_supports_rendering
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime:libdart",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/third_party/tonic",
+        "//engine/src/flutter/vulkan/procs",  # embedder_enable_vulkan
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "embedder_headers",
+    hdrs = ["embedder.h"],
+    deps = ["//engine/src/flutter:config"],
+)
+
+cc_library(
+    name = "embedder_test_utils",
+    hdrs = [
+        "test_utils/key_codes.g.h",
+        "test_utils/proc_table_replacement.h",
+    ],
+    deps = [
+        ":embedder_headers",
+        "//engine/src/flutter:config",
+    ],
+)
+
+# For using the embedder API as internal implementation detail of an
+# embedding.
+cc_library(
+    name = "embedder_internal_library_config",
+    defines = [
+        # Use prefixed symbols to avoid collisions with higher level API.
+        "FLUTTER_API_SYMBOL_PREFIX=Embedder",
+        # Don't export the embedder.h API surface.
+        "FLUTTER_NO_EXPORT",
+    ],
+)
+
+flutter_test_fixtures(
+    name = "fixtures",
+    dart_main = "fixtures/main.dart",
+    fixtures = [
+        "fixtures/arc_end_caps.png",
+        "fixtures/compositor.png",
+        "fixtures/compositor_platform_layer_with_no_overlay.png",
+        "fixtures/compositor_root_surface_xformation.png",
+        "fixtures/compositor_software.png",
+        "fixtures/compositor_with_platform_layer_on_bottom.png",
+        "fixtures/compositor_with_root_layer_only.png",
+        "fixtures/dpr_noxform.png",
+        "fixtures/dpr_xform.png",
+        "fixtures/external_texture_impeller.png",
+        "fixtures/external_texture_metal.png",
+        "fixtures/external_texture_nv12.png",
+        "fixtures/gradient.png",
+        "fixtures/gradient_metal.png",
+        "fixtures/gradient_xform.png",
+        "fixtures/impeller_render_platform_view.png",
+        "fixtures/impeller_test.png",
+        "fixtures/impeller_text_test.png",
+        "fixtures/scene_without_custom_compositor.png",
+        "fixtures/scene_without_custom_compositor_with_xform.png",
+        "fixtures/snapshot_large_scene.png",
+        "fixtures/texture.nv12",
+        "fixtures/verifyb143464703.png",
+        "fixtures/verifyb143464703_soft_noxform.png",
+        "fixtures/vk_dpr_noxform.png",
+        "fixtures/vk_gradient.png",
+    ],
+)
+
+cc_library(
+    name = "embedder_unittests_library",
+    testonly = True,
+    srcs = [
+        "platform_view_embedder_unittests.cc",
+        "tests/embedder_config_builder.cc",
+        "tests/embedder_test.cc",
+        "tests/embedder_test_backingstore_producer.cc",
+        "tests/embedder_test_backingstore_producer_gl.cc",  # test_enable_gl
+        "tests/embedder_test_backingstore_producer_software.cc",
+        "tests/embedder_test_backingstore_producer_vulkan.cc",  # test_enable_vulkan
+        "tests/embedder_test_compositor.cc",
+        "tests/embedder_test_compositor_gl.cc",  # test_enable_gl
+        "tests/embedder_test_compositor_software.cc",
+        "tests/embedder_test_compositor_vulkan.cc",  # test_enable_vulkan
+        "tests/embedder_test_context.cc",
+        "tests/embedder_test_context_gl.cc",  # test_enable_gl
+        "tests/embedder_test_context_software.cc",
+        "tests/embedder_test_context_vulkan.cc",  # test_enable_vulkan
+        "tests/embedder_test_gl.cc",  # test_enable_gl
+        "tests/embedder_test_surface_gl_impeller.cc",  # test_enable_gl
+        "tests/embedder_test_vulkan.cc",  # test_enable_vulkan
+        "tests/embedder_unittests_util.cc",
+        "//engine/src/flutter/impeller/renderer/backend/gles:test/mock_gles.cc",  # test_enable_gl
+    ],
+    hdrs = [
+        "tests/embedder_assertions.h",
+        "tests/embedder_config_builder.h",
+        "tests/embedder_frozen.h",
+        "tests/embedder_test.h",
+        "tests/embedder_test_backingstore_producer.h",
+        "tests/embedder_test_backingstore_producer_gl.h",  # test_enable_gl
+        "tests/embedder_test_backingstore_producer_software.h",
+        "tests/embedder_test_backingstore_producer_vulkan.h",  # test_enable_vulkan
+        "tests/embedder_test_compositor.h",
+        "tests/embedder_test_compositor_gl.h",  # test_enable_gl
+        "tests/embedder_test_compositor_software.h",
+        "tests/embedder_test_compositor_vulkan.h",  # test_enable_vulkan
+        "tests/embedder_test_context.h",
+        "tests/embedder_test_context_gl.h",  # test_enable_gl
+        "tests/embedder_test_context_software.h",
+        "tests/embedder_test_context_vulkan.h",  # test_enable_vulkan
+        "tests/embedder_unittests_util.h",
+        "//engine/src/flutter/impeller/renderer/backend/gles:test/mock_gles.h",  # test_enable_gl
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+        "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+        "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+        "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+        "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+        "-Wno-suggest-override",  # from :embedder_gpu_configuration
+        "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+        "-Wno-unused-variable",  # from :embedder_gpu_configuration
+    ],
+    implementation_deps = ["//engine/src/flutter:export_dynamic_symbols"],
+    includes = ["."],
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+        "SHELL_ENABLE_GL",  # invoker.enable_gl
+        "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+    ],
+    deps = [
+        ":embedder",
+        ":embedder_gpu_configuration",
+        ":fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/build/bazel/dart_wrap:elf_loader",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/impeller/renderer/backend/gles",  # test_enable_gl
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:opengl",  # test_enable_gl
+        "//engine/src/flutter/testing:skia",
+        "//engine/src/flutter/testing:vulkan",  # test_enable_vulkan
+        "//engine/src/flutter/third_party/tonic",
+        "//engine/src/flutter/vulkan",  # test_enable_vulkan
+        "//engine/src/flutter/vulkan/procs",  # test_enable_vulkan
+        "@skia",
+        "@vulkan-headers//:vulkan_headers",  # test_enable_gl
+    ],
+    alwayslink = True,
+)
+
+# SwiftShader, its ICD manifest and the Vulkan loader, next to the
+# suites below (GN: data_deps of //flutter/third_party/swiftshader and
+# ANGLE).
+flutter_gpu_test_backends(
+    name = "gpu_test_backends",
+)
+
+cc_library(
+    name = "embedder_unittests_include_dirs",
+    includes = ["."],
+)
+
+cc_test(
+    name = "embedder_unittests",
+    size = "medium",
+    srcs = [
+        "tests/embedder_frozen_unittests.cc",
+        "tests/embedder_gl_unittests.cc",  # test_enable_gl
+        "tests/embedder_unittests.cc",
+        "tests/embedder_vk_unittests.cc",  # test_enable_vulkan
+    ],
+    copts = CHROMIUM_CODE_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :embedder_unittests_library
+        "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
+        "-Wno-deprecated-copy",  # from :embedder_unittests_library
+        "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
+        "-Wno-nullability-completeness",  # from :embedder_unittests_library
+        "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
+        "-Wno-suggest-override",  # from :embedder_unittests_library
+        "-Wno-unused-private-field",  # from :embedder_unittests_library
+        "-Wno-unused-variable",  # from :embedder_unittests_library
+    ],
+    data = [
+        ":gpu_test_backends",
+        "//engine/src/flutter/lib/snapshot:isolate_snapshot.bin",
+        "//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin",
+        "//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin",
+        "//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin",
+    ],
+    # For testing JIT snapshot setup.
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "TEST_ISOLATE_SNAPSHOT_DATA=\\\"flutter/lib/snapshot/isolate_snapshot.bin\\\"",
+        "TEST_ISOLATE_SNAPSHOT_INSTRUCTIONS=\\\"flutter/lib/snapshot/isolate_snapshot_instructions.bin\\\"",
+        "TEST_VM_SNAPSHOT_DATA=\\\"flutter/lib/snapshot/vm_isolate_snapshot.bin\\\"",
+        "TEST_VM_SNAPSHOT_INSTRUCTIONS=\\\"flutter/lib/snapshot/vm_snapshot_instructions.bin\\\"",
+        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+        "SHELL_ENABLE_GL",  # invoker.enable_gl
+        "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+    ],
+    deps = [
+        ":embedder_unittests_include_dirs",
+        ":embedder_unittests_library",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+    ],
+)
+
+cc_library(
+    name = "embedder_a11y_unittests_include_dirs",
+    includes = ["."],
+)
+
+cc_test(
+    name = "embedder_a11y_unittests",
+    size = "small",
+    srcs = ["tests/embedder_a11y_unittests.cc"],
+    copts = CHROMIUM_CODE_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :embedder_unittests_library
+        "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
+        "-Wno-deprecated-copy",  # from :embedder_unittests_library
+        "-Wno-implicit-fallthrough",  # from :embedder_unittests_library
+        "-Wno-nullability-completeness",  # from :embedder_unittests_library
+        "-Wno-suggest-destructor-override",  # from :embedder_unittests_library
+        "-Wno-suggest-override",  # from :embedder_unittests_library
+        "-Wno-unused-private-field",  # from :embedder_unittests_library
+        "-Wno-unused-variable",  # from :embedder_unittests_library
+    ],
+    data = [":gpu_test_backends"],
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+        "SHELL_ENABLE_GL",  # invoker.enable_gl
+        "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+    ],
+    deps = [
+        ":embedder_a11y_unittests_include_dirs",
+        ":embedder_unittests_library",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+    ],
+)
+
+# Tests that build in FLUTTER_ENGINE_NO_PROTOTYPES mode.
+cc_test(
+    name = "embedder_proctable_unittests",
+    size = "small",
+    srcs = ["tests/embedder_unittests_proctable.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :embedder_gpu_configuration
+        "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
+        "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
+        "-Wno-implicit-fallthrough",  # from :embedder_gpu_configuration
+        "-Wno-nullability-completeness",  # from :embedder_gpu_configuration
+        "-Wno-suggest-destructor-override",  # from :embedder_gpu_configuration
+        "-Wno-suggest-override",  # from :embedder_gpu_configuration
+        "-Wno-unused-private-field",  # from :embedder_gpu_configuration
+        "-Wno-unused-variable",  # from :embedder_gpu_configuration
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "FLUTTER_ENGINE_NO_PROTOTYPES",
+        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+        "SHELL_ENABLE_GL",  # invoker.enable_gl
+        "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+    ],
+    deps = [
+        ":embedder",
+        ":embedder_gpu_configuration",
+        ":fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/testing",
+    ],
+)
+
+cc_binary(
+    name = "libflutter_engine.so",
+    additional_linker_inputs = [":embedder_exports.lst"],
+    linkopts = [
+        "-Wl,--version-script=$(execpath :embedder_exports.lst)",  # is_linux
+    ],
+    linkshared = True,
+    deps = [
+        ":embedder",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+    ],
+)
+
+alias(
+    name = "flutter_engine_library",
+    actual = ":libflutter_engine.so",
 )
