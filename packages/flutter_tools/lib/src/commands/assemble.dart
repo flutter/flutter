@@ -107,7 +107,7 @@ class AssembleCommand extends FlutterCommand {
       _define,
       CommonOptions.dartDefines,
       CommonOptions.dartDefineFromFile,
-      _performanceMeasurementFile,
+      BuildInfoOptions.performanceMeasurementFile,
       _input,
       _depfile,
       _buildInputs,
@@ -128,11 +128,6 @@ class AssembleCommand extends FlutterCommand {
         'DEPRECATED. Use "--dart-define" or "-D" instead for consistency.\n'
         '\n'
         'Allows passing configuration to a target, as in "--define=target=key=value".',
-  );
-
-  static const _performanceMeasurementFile = StringOptionDescriptor(
-    name: 'performance-measurement-file',
-    help: 'Output individual target performance to a JSON file.',
   );
 
   static const _input = MultiOptionDescriptor(
@@ -418,8 +413,8 @@ class AssembleCommand extends FlutterCommand {
     if (wasParsed(_buildOutputs)) {
       writeListIfChanged(result.outputFiles, getValue(_buildOutputs)!, fs: fs);
     }
-    if (wasParsed(_performanceMeasurementFile)) {
-      final File outFile = fs.file(getValue(_performanceMeasurementFile));
+    if (wasParsed(BuildInfoOptions.performanceMeasurementFile)) {
+      final File outFile = fs.file(getValue(BuildInfoOptions.performanceMeasurementFile));
       writePerformanceData(result.performance.values, outFile);
     }
     if (wasParsed(_depfile)) {
