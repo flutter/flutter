@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/common/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: common_cpp_accessibility, common_cpp, common_cpp_fixtures, common_cpp_unittests.
+# Not converted: common_cpp_accessibility.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
@@ -112,6 +112,34 @@ cc_library(
     alwayslink = True,
 )
 
+cc_library(
+    name = "common_cpp",
+    # TODO: Refactor flutter_glfw.cc to move the implementations corresponding
+    # to the _public_headers above into this target.
+    srcs = [
+        "incoming_message_dispatcher.cc",
+        "json_message_codec.cc",
+        "json_method_codec.cc",
+    ],
+    hdrs = [
+        "incoming_message_dispatcher.h",
+        "json_message_codec.h",
+        "json_method_codec.h",
+    ],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["FLUTTER_DESKTOP_LIBRARY"],
+    deps = [
+        ":common_cpp_core",
+        ":common_cpp_library_headers",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/shell/platform/common/client_wrapper",
+        "//engine/src/flutter/shell/platform/embedder:embedder_as_internal_library",
+        "@rapidjson",
+    ],
+    alwayslink = True,
+)
+
 # The portion of common_cpp that has no dependencies on the public/
 # headers. This division should be revisited once the Linux GTK
 # embedding is further along and it's clearer how much, if any, shared
@@ -150,6 +178,38 @@ cc_test(
         "//engine/src:include_root",
         "//engine/src/flutter:config",
         "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/testing",
+    ],
+)
+
+flutter_test_fixtures(
+    name = "common_cpp_fixtures",
+)
+
+cc_test(
+    name = "common_cpp_unittests",
+    size = "small",
+    srcs = [
+        "engine_switches_unittests.cc",
+        "incoming_message_dispatcher_unittests.cc",
+        "json_message_codec_unittests.cc",
+        "json_method_codec_unittests.cc",
+        "text_editing_delta_unittests.cc",
+        "text_input_model_unittests.cc",
+        "text_range_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":common_cpp",
+        ":common_cpp_fixtures",
+        ":common_cpp_input",
+        ":common_cpp_switches",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml:string_conversion",
+        "//engine/src/flutter/shell/platform/common/client_wrapper",
+        "//engine/src/flutter/shell/platform/common/client_wrapper:client_wrapper_library_stubs",
         "//engine/src/flutter/testing",
     ],
 )
