@@ -163,6 +163,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     final List<String> webBrowserFlags = featureFlags.isWebEnabled
         ? getValue(WebOptions.webBrowserFlags)
         : const <String>[];
+    final bool webBrowserDefaultFlags = getValue(WebOptions.webBrowserDefaultFlags);
 
     final bool? webCrossOriginIsolation = wasParsed(WebOptions.crossOriginIsolation)
         ? getValue(WebOptions.crossOriginIsolation)
@@ -186,6 +187,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
+        webBrowserDefaultFlags: webBrowserDefaultFlags,
         webCrossOriginIsolation: webCrossOriginIsolation,
         webRenderer: webRenderer,
         webUseWasm: useWasm,
@@ -251,6 +253,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webRunHeadless: featureFlags.isWebEnabled && getValue(WebOptions.webRunHeadless),
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
+        webBrowserDefaultFlags: webBrowserDefaultFlags,
         webEnableExpressionEvaluation:
             featureFlags.isWebEnabled && getValue(WebOptions.webEnableExpressionEvaluation),
         webLaunchUrl: featureFlags.isWebEnabled ? getValue(WebOptions.webLaunchUrl) : null,

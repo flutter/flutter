@@ -51,6 +51,7 @@ class _RecordingChromiumLauncher extends ChromiumLauncher {
     bool skipCheck = false,
     Directory? cacheDir,
     List<String> webBrowserFlags = const <String>[],
+    bool webBrowserDefaultFlags = true,
   }) async {
     lastWebBrowserFlags = List<String>.from(webBrowserFlags);
     throw const _TestBrowserLaunchException();
