@@ -1061,10 +1061,7 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        artifacts: globals.artifacts!,
-        config: globals.config,
-        logger: globals.logger,
-        os: globals.os,
+        toolContext: globals.toolContext,
         targetOverride: bundle.defaultMainPath,
       );
     }
@@ -1272,10 +1269,7 @@ class MacOSProject extends XcodeBasedProject {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.dummy,
-        artifacts: globals.artifacts!,
-        config: globals.config,
-        logger: globals.logger,
-        os: globals.os,
+        toolContext: globals.toolContext,
         useMacOSConfig: true,
       );
     }

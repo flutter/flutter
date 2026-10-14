@@ -7,18 +7,16 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import '../artifacts.dart';
-import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../macos/xcode.dart';
@@ -215,9 +213,7 @@ class IOSCoreDeviceLauncher {
     required IOSApp package,
     required List<String> launchArguments,
     required TemplateRenderer templateRenderer,
-    required Artifacts artifacts,
-    required Config config,
-    required OperatingSystemUtils os,
+    required ToolContext toolContext,
     String? mainPath,
     @visibleForTesting Duration? discoveryTimeout,
   }) async {
@@ -253,9 +249,7 @@ class IOSCoreDeviceLauncher {
         project: project.parent,
         buildInfo: debuggingOptions.buildInfo,
         configurationBuildDir: bundle.parent.absolute.path,
-        artifacts: artifacts,
-        config: config,
-        os: os,
+        toolContext: toolContext,
       );
 
       debugProject = XcodeDebugProject(

@@ -41,8 +41,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     required this.templateRenderer,
     required ToolContext super.toolContext,
     required super.verboseHelp,
-  }) : _toolContext = toolContext,
-       super(logger: toolContext.logger) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundle(const DarwinAddToAppOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       debugMode,
@@ -117,7 +116,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
-  final ToolContext _toolContext;
 
   AppleContext get appleContext => _appleContext;
 
@@ -126,16 +124,16 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
 
   @protected
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @protected
-  Cache get cache => _toolContext.cache;
+  Cache get cache => toolContext.cache;
 
   @protected
-  Platform get platform => _toolContext.platform;
+  Platform get platform => toolContext.platform;
 
   @protected
-  FlutterVersion get flutterVersion => _toolContext.flutterVersion;
+  FlutterVersion get flutterVersion => toolContext.flutterVersion;
 
   Future<List<BuildInfo>> getBuildInfos() async {
     return <BuildInfo>[
@@ -301,7 +299,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
     Directory hostAppRoot,
     PlistParser plistParser,
   ) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
 
     final File projectFile = hostAppRoot
         .childDirectory('Pods')
@@ -531,7 +529,6 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
       :FileSystem fs,
       :Logger logger,
       :ProcessManager processManager,
-      :ProcessUtils processUtils,
     ) = toolContext;
 
     final String outputArgument =
@@ -612,11 +609,8 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           getIosBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
           cocoaPods: appleContext.cocoaPods,
-          config: config,
-          fileSystem: fs,
-          logger: logger,
-          processUtils: processUtils,
           templateRenderer: templateRenderer,
+          toolContext: toolContext,
           forceCocoaPodsOnly: true,
         );
         if (hasPlugins(project)) {

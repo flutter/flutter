@@ -363,10 +363,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
-    artifacts: globals.artifacts!,
-    config: globals.config,
-    logger: globals.logger,
-    os: globals.os,
+    toolContext: globals.toolContext,
     printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {
@@ -384,11 +381,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildDirectoryPath,
     buildInfo.mode,
     cocoaPods: globals.cocoaPods,
-    config: globals.config,
-    fileSystem: globals.fs,
-    logger: globals.logger,
-    processUtils: globals.processUtils,
     templateRenderer: globals.templateRenderer,
+    toolContext: globals.toolContext,
   );
   if (configOnly) {
     return XcodeBuildResult(success: true);

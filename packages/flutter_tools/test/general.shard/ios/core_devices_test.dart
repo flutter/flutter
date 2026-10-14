@@ -13,12 +13,12 @@ import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
@@ -768,9 +768,11 @@ void main() {
           package: package,
           launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
           templateRenderer: FakeTemplateRenderer(),
-          artifacts: Artifacts.test(),
-          config: Config.test(),
-          os: FakeOperatingSystemUtils(),
+          toolContext: DelegatingToolContext(
+            artifacts: Artifacts.test(),
+            config: Config.test(),
+            os: FakeOperatingSystemUtils(),
+          ),
         );
 
         expect(result, isTrue);
@@ -806,9 +808,11 @@ void main() {
           package: package,
           launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
           templateRenderer: FakeTemplateRenderer(),
-          artifacts: Artifacts.test(),
-          config: Config.test(),
-          os: FakeOperatingSystemUtils(),
+          toolContext: DelegatingToolContext(
+            artifacts: Artifacts.test(),
+            config: Config.test(),
+            os: FakeOperatingSystemUtils(),
+          ),
         );
 
         expect(result, isTrue);
@@ -844,9 +848,11 @@ void main() {
           package: package,
           launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
           templateRenderer: FakeTemplateRenderer(),
-          artifacts: Artifacts.test(),
-          config: Config.test(),
-          os: FakeOperatingSystemUtils(),
+          toolContext: DelegatingToolContext(
+            artifacts: Artifacts.test(),
+            config: Config.test(),
+            os: FakeOperatingSystemUtils(),
+          ),
         );
 
         expect(result, isFalse);
@@ -882,9 +888,11 @@ void main() {
           package: package,
           launchArguments: <String>['--enable-checked-mode', '--verify-entry-points'],
           templateRenderer: FakeTemplateRenderer(),
-          artifacts: Artifacts.test(),
-          config: Config.test(),
-          os: FakeOperatingSystemUtils(),
+          toolContext: DelegatingToolContext(
+            artifacts: Artifacts.test(),
+            config: Config.test(),
+            os: FakeOperatingSystemUtils(),
+          ),
         );
 
         expect(result, isFalse);
@@ -4326,9 +4334,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     required BuildInfo buildInfo,
     String? mainPath,
     required String configurationBuildDir,
-    required Artifacts artifacts,
-    required Config config,
-    required OperatingSystemUtils os,
+    required ToolContext toolContext,
   }) async {}
 }
 

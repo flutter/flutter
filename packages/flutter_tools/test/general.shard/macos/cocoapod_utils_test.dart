@@ -22,6 +22,7 @@ import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 
@@ -102,14 +103,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -134,14 +137,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -165,14 +170,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -195,14 +202,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -229,14 +238,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -260,14 +271,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -292,14 +305,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
               forceCocoaPodsOnly: true,
             );
             expect(cocoaPods.processedPods, isTrue);
@@ -333,14 +348,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
               forceSwiftPM: true,
             );
 
@@ -377,14 +394,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -409,14 +428,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -440,14 +461,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -470,14 +493,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -504,14 +529,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -535,14 +562,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -568,14 +597,16 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               cocoaPods: cocoaPods,
-              config: Config.test(),
-              fileSystem: fs,
-              logger: logger,
-              processUtils: ProcessUtils(
-                processManager: FakeProcessManager.empty(),
-                logger: logger,
-              ),
               templateRenderer: const MustacheTemplateRenderer(),
+              toolContext: DelegatingToolContext(
+                config: Config.test(),
+                fs: fs,
+                logger: logger,
+                processUtils: ProcessUtils(
+                  processManager: FakeProcessManager.empty(),
+                  logger: logger,
+                ),
+              ),
               forceCocoaPodsOnly: true,
             );
             expect(cocoaPods.processedPods, isTrue);

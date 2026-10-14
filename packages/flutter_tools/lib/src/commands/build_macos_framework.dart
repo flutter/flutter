@@ -67,7 +67,6 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
       :FileSystem fs,
       :Logger logger,
       :ProcessManager processManager,
-      :ProcessUtils processUtils,
     ) = toolContext;
 
     final String outputArgument =
@@ -137,11 +136,8 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
           getMacOSBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
           cocoaPods: appleContext.cocoaPods,
-          config: config,
-          fileSystem: fs,
-          logger: logger,
-          processUtils: processUtils,
           templateRenderer: templateRenderer,
+          toolContext: toolContext,
           forceCocoaPodsOnly: true,
         );
         if (hasPlugins(project)) {

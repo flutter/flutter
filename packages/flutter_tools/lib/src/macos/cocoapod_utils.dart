@@ -10,6 +10,7 @@ import '../base/process.dart';
 import '../base/template.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../flutter_plugins.dart';
 import '../plugins.dart';
@@ -24,14 +25,13 @@ Future<void> processPodsIfNeeded(
   String buildDirectory,
   BuildMode buildMode, {
   required CocoaPods? cocoaPods,
-  required Config config,
-  required FileSystem fileSystem,
-  required Logger logger,
-  required ProcessUtils processUtils,
   required TemplateRenderer templateRenderer,
+  required ToolContext toolContext,
   bool forceCocoaPodsOnly = false,
   bool forceSwiftPM = false,
 }) async {
+  final ToolContext(:Config config, :FileSystem fs, :Logger logger, :ProcessUtils processUtils) =
+      toolContext;
   final FlutterProject project = xcodeProject.parent;
 
   // When using Swift Package Manager, the Podfile may not exist so if there
@@ -71,7 +71,7 @@ Future<void> processPodsIfNeeded(
 
     // Generate an empty Swift Package Manager manifest to invalidate fingerprinter
     final swiftPackageManager = SwiftPackageManager(
-      fileSystem: fileSystem,
+      fileSystem: fs,
       templateRenderer: templateRenderer,
       processUtils: processUtils,
       config: config,
@@ -92,15 +92,15 @@ Future<void> processPodsIfNeeded(
   // If the Xcode project, Podfile, generated plugin Swift Package, or podhelper
   // have changed since last run, pods should be updated.
   final fingerprinter = Fingerprinter(
-    fingerprintPath: fileSystem.path.join(buildDirectory, 'pod_inputs.fingerprint'),
+    fingerprintPath: fs.path.join(buildDirectory, 'pod_inputs.fingerprint'),
     paths: <String>[
       xcodeProject.xcodeProjectInfoFile.path,
       xcodeProject.podfile.path,
       if (xcodeProject.flutterPluginSwiftPackageManifest.existsSync())
         xcodeProject.flutterPluginSwiftPackageManifest.path,
-      fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'),
+      fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'bin', 'podhelper.rb'),
     ],
-    fileSystem: fileSystem,
+    fileSystem: fs,
     logger: logger,
   );
 

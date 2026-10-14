@@ -13,27 +13,16 @@ import '../../../base/file_system.dart';
 import '../../../base/logger.dart';
 import '../../../base/platform.dart';
 import '../../../build_info.dart';
+import '../../../context/tool_context.dart';
 import '../../../native_assets.dart';
 import '../../../project.dart';
 import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
 class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBuilder {
-  const TestCompilerNativeAssetsBuilderImpl({
-    required this._config,
-    required this._fileSystem,
-    required this._logger,
-    required this._platform,
-    required this._processManager,
-    required this._projectFactory,
-  });
+  const TestCompilerNativeAssetsBuilderImpl({required this._toolContext});
 
-  final Config _config;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final FlutterProjectFactory _projectFactory;
+  final ToolContext _toolContext;
 
   @override
   Future<Uri?> build(BuildInfo buildInfo) async =>
@@ -41,35 +30,31 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 
   @override
   Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) =>
-      testCompilerBuildNativeAssets(
-        buildInfo,
-        config: _config,
-        fileSystem: _fileSystem,
-        logger: _logger,
-        platform: _platform,
-        processManager: _processManager,
-        projectFactory: _projectFactory,
-      );
+      testCompilerBuildNativeAssets(buildInfo, toolContext: _toolContext);
 
   @override
   String windowsBuildDirectory(FlutterProject project) {
-    final String buildDir = getBuildDirectory(_config, _fileSystem);
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    final String buildDir = getBuildDirectory(config, fs);
     return project.directory.uri.resolve('$buildDir/native_assets/windows/').toFilePath();
   }
 }
 
 Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   BuildInfo buildInfo, {
-  required Config config,
-  required FileSystem fileSystem,
-  required Logger logger,
-  required Platform platform,
-  required ProcessManager processManager,
-  required FlutterProjectFactory projectFactory,
+  required ToolContext toolContext,
 }) async {
   if (!buildInfo.buildNativeAssets) {
     return (nativeAssetsManifest: null, flutterHookResult: null);
   }
+  final ToolContext(
+    :Config config,
+    fs: FileSystem fileSystem,
+    :Logger logger,
+    :Platform platform,
+    :ProcessManager processManager,
+    :FlutterProjectFactory projectFactory,
+  ) = toolContext;
   final Uri projectUri = projectFactory.fromDirectory(fileSystem.currentDirectory).directory.uri;
   final String runPackageName = buildInfo.packageConfig.packages
       .firstWhere((Package p) => p.root == projectUri)

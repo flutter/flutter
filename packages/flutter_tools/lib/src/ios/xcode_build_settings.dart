@@ -10,6 +10,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../flutter_manifest.dart';
 import '../project.dart';
 import 'xcodeproj.dart';
@@ -24,27 +25,22 @@ import 'xcodeproj.dart';
 Future<void> updateGeneratedXcodeProperties({
   required FlutterProject project,
   required BuildInfo buildInfo,
+  required ToolContext toolContext,
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
   String? configurationBuildDir,
   bool printWarnings = false,
-  required Artifacts artifacts,
-  required Config config,
-  required Logger logger,
-  required OperatingSystemUtils os,
 }) async {
   final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
     project: project,
     buildInfo: buildInfo,
+    toolContext: toolContext,
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
     buildDirOverride: buildDirOverride,
     configurationBuildDir: configurationBuildDir,
     printWarnings: printWarnings,
-    artifacts: artifacts,
-    config: config,
-    logger: logger,
   );
 
   _updateGeneratedXcodePropertiesFile(
@@ -56,7 +52,7 @@ Future<void> updateGeneratedXcodeProperties({
   _updateGeneratedEnvironmentVariablesScript(
     project: project,
     xcodeBuildSettings: xcodeBuildSettings,
-    os: os,
+    os: toolContext.os,
     useMacOSConfig: useMacOSConfig,
   );
 }
@@ -167,15 +163,14 @@ String? parsedBuildNumber({
 Future<List<String>> _xcodeBuildSettingsLines({
   required FlutterProject project,
   required BuildInfo buildInfo,
+  required ToolContext toolContext,
   String? targetOverride,
   bool useMacOSConfig = false,
   String? buildDirOverride,
   String? configurationBuildDir,
   required bool printWarnings,
-  required Artifacts artifacts,
-  required Config config,
-  required Logger logger,
 }) async {
+  final ToolContext(:Artifacts artifacts, :Config config, :Logger logger) = toolContext;
   final xcodeBuildSettings = <String>[];
   final FileSystem fileSystem = project.directory.fileSystem;
 
