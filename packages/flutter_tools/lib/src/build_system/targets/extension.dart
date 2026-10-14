@@ -97,10 +97,10 @@ Directory resolveExtensionOutputDir({
   required ExtensionBuildTarget target,
 }) {
   String outputPath = target.outputDir
-      .replaceAll(kProjectDirPlaceholder, projectDir.path)
-      .replaceAll(kBuildDirPlaceholder, buildDir.path)
-      .replaceAll(kBuildModePlaceholder, buildMode.cliName)
-      .replaceAll(kTargetPlatformPlaceholder, target.targetPlatform);
+      .replaceAll(BuiltInPlaceholders.projectDir, projectDir.path)
+      .replaceAll(BuiltInPlaceholders.buildDir, buildDir.path)
+      .replaceAll(BuiltInPlaceholders.buildMode, buildMode.cliName)
+      .replaceAll(BuiltInPlaceholders.targetPlatform, target.targetPlatform);
   if (fileSystem.path.isRelative(outputPath)) {
     outputPath = fileSystem.path.join(projectDir.path, outputPath);
   }

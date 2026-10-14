@@ -92,7 +92,7 @@ class ExtensionBuildTarget {
     this.dependencies = const <String>[],
     this.inputs = const <ExtensionSource>[],
     this.isTopLevel = true,
-    this.outputDir = kBuildDirPlaceholder,
+    this.outputDir = BuiltInPlaceholders.buildDir,
     this.outputs = const <ExtensionSource>[],
   });
 
@@ -139,7 +139,7 @@ class ExtensionBuildTarget {
       },
       outputDir: switch (json[outputDirKey]) {
         final String value => value,
-        _ => kBuildDirPlaceholder,
+        _ => BuiltInPlaceholders.buildDir,
       },
       outputs: switch (json[outputsKey]) {
         final List<Object?> rawOutputs => <ExtensionSource>[
@@ -200,7 +200,7 @@ class ExtensionBuildTarget {
   ///
   /// This is an open [String] rather than an enum so that extensions for custom
   /// embedders can declare platform identifiers that are not built into Flutter.
-  /// Used to substitute [kTargetPlatformPlaceholder] in [outputDir], and as the
+  /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
   final String targetPlatform;
 
@@ -213,11 +213,17 @@ class ExtensionBuildTarget {
   /// Input file patterns and artifacts.
   final List<ExtensionSource> inputs;
 
-  /// Output file patterns.
+  /// Output file patterns produced by this target (for example,
+  /// `ExtensionSource.pattern('${BuiltInPlaceholders.outputDir}/app.bundle')`).
   final List<ExtensionSource> outputs;
 
-  /// The output directory pattern (for example,
-  /// `'{PROJECT_DIR}/build/custom/{TARGET_PLATFORM}/{BUILD_MODE}'`).
+  /// The directory pattern used by `flutter build` to determine this target's
+  /// output directory (`{OUTPUT_DIR}`), for example
+  /// `'${BuiltInPlaceholders.projectDir}/build/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
+  ///
+  /// Supports [BuiltInPlaceholders.projectDir], [BuiltInPlaceholders.buildDir],
+  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
+  /// When invoked via `flutter assemble -o <dir>`, the `-o` directory is used instead.
   final String outputDir;
 
   /// Serializes the build target to a JSON-serializable map.

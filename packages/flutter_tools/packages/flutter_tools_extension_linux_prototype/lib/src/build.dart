@@ -32,7 +32,8 @@ class CustomLinuxBuildTarget extends ExtensionTarget {
     : super(
         description: 'A custom Linux build target from prototype extension.',
         targetPlatform: _kLinuxX64Platform,
-        outputDir: '$kProjectDirPlaceholder/build/linux_extension/x64/$kBuildModePlaceholder',
+        outputDir:
+            '${BuiltInPlaceholders.projectDir}/build/linux_extension/x64/${BuiltInPlaceholders.buildMode}',
       );
 
   @override
@@ -40,9 +41,9 @@ class CustomLinuxBuildTarget extends ExtensionTarget {
 
   @override
   List<ExtensionSource> get inputs => const <ExtensionSource>[
-    ExtensionSource.pattern('$kProjectDirPlaceholder/pubspec.yaml'),
-    ExtensionSource.pattern('$kProjectDirPlaceholder/linux/CMakeLists.txt'),
-    ExtensionSource.pattern('$kProjectDirPlaceholder/lib/main.dart'),
+    ExtensionSource.pattern('${BuiltInPlaceholders.projectDir}/pubspec.yaml'),
+    ExtensionSource.pattern('${BuiltInPlaceholders.projectDir}/linux/CMakeLists.txt'),
+    ExtensionSource.pattern('${BuiltInPlaceholders.projectDir}/lib/main.dart'),
     ExtensionSource.artifact(LinuxArtifacts.linuxHeaders),
     ExtensionSource.artifact(LinuxArtifacts.linuxDesktopPath),
     ExtensionSource.artifact(BuiltInArtifacts.icuData),
@@ -50,7 +51,7 @@ class CustomLinuxBuildTarget extends ExtensionTarget {
 
   @override
   List<ExtensionSource> get outputs => const <ExtensionSource>[
-    ExtensionSource.pattern('$kOutputDirPlaceholder/bundle/*'),
+    ExtensionSource.pattern('${BuiltInPlaceholders.outputDir}/bundle/*'),
   ];
 
   @override
@@ -165,18 +166,20 @@ class CustomLinuxAssembleOnlyDebug extends ExtensionTarget {
 
   @override
   List<ExtensionSource> get inputs => const <ExtensionSource>[
-    ExtensionSource.pattern('$kBuildDirPlaceholder/$_kAppDill'),
+    ExtensionSource.pattern('${BuiltInPlaceholders.buildDir}/$_kAppDill'),
     ExtensionSource.artifact(LinuxArtifacts.linuxHeaders),
     ExtensionSource.artifact(LinuxArtifacts.linuxDesktopPath),
     ExtensionSource.artifact(BuiltInArtifacts.icuData),
-    ExtensionSource.pattern('$kProjectDirPlaceholder/pubspec.yaml'),
+    ExtensionSource.pattern('${BuiltInPlaceholders.projectDir}/pubspec.yaml'),
   ];
 
   @override
   List<ExtensionSource> get outputs => const <ExtensionSource>[
-    ExtensionSource.pattern('$kOutputDirPlaceholder/bundle/data/$_kFlutterAssets/$_kKernelBlob'),
-    ExtensionSource.pattern('$kOutputDirPlaceholder/bundle/lib/$_kLibFlutterLinuxGtk'),
-    ExtensionSource.pattern('$kOutputDirPlaceholder/bundle/data/$_kIcuData'),
+    ExtensionSource.pattern(
+      '${BuiltInPlaceholders.outputDir}/bundle/data/$_kFlutterAssets/$_kKernelBlob',
+    ),
+    ExtensionSource.pattern('${BuiltInPlaceholders.outputDir}/bundle/lib/$_kLibFlutterLinuxGtk'),
+    ExtensionSource.pattern('${BuiltInPlaceholders.outputDir}/bundle/data/$_kIcuData'),
   ];
 
   @override

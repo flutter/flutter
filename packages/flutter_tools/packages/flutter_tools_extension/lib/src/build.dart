@@ -52,7 +52,7 @@ abstract class ExtensionTarget {
     required this.description,
     required this.targetPlatform,
     this.isTopLevel = true,
-    this.outputDir = kBuildDirPlaceholder,
+    this.outputDir = BuiltInPlaceholders.buildDir,
   });
 
   /// The user-readable name of the target.
@@ -65,7 +65,7 @@ abstract class ExtensionTarget {
   ///
   /// This is an open [String] rather than an enum so that extensions for custom
   /// embedders can declare platform identifiers that are not built into Flutter.
-  /// Used to substitute [kTargetPlatformPlaceholder] in [outputDir], and as the
+  /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
   /// default artifact platform when it matches a built-in Flutter target platform.
   final String targetPlatform;
 
@@ -75,10 +75,13 @@ abstract class ExtensionTarget {
   /// and are not directly exposed to the user.
   final bool isTopLevel;
 
-  /// The output directory pattern for this target.
+  /// The directory pattern used by `flutter build` to determine this target's
+  /// output directory (`{OUTPUT_DIR}`), for example
+  /// `'${BuiltInPlaceholders.projectDir}/build/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
   ///
-  /// Can include placeholders like `{PROJECT_DIR}` or `{BUILD_MODE}` which
-  /// will be resolved by the host.
+  /// Supports [BuiltInPlaceholders.projectDir], [BuiltInPlaceholders.buildDir],
+  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
+  /// When invoked via `flutter assemble -o <dir>`, the `-o` directory is used instead.
   final String outputDir;
 
   /// The names of other targets that this target depends on.
@@ -87,7 +90,8 @@ abstract class ExtensionTarget {
   /// The input [ExtensionSource]s for this target.
   List<ExtensionSource> get inputs => const <ExtensionSource>[];
 
-  /// The output [ExtensionSource]s produced by this target.
+  /// Output file patterns produced by this target (for example,
+  /// `ExtensionSource.pattern('${BuiltInPlaceholders.outputDir}/app.bundle')`).
   List<ExtensionSource> get outputs => const <ExtensionSource>[];
 
   /// Performs the actual compilation/build steps in the extension process/isolate.

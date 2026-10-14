@@ -66,13 +66,15 @@ final class _SucceedingBuildService extends BuildService {
     _TestExtensionTarget(
       description: 'Hermetic custom build target.',
       name: 'custom-hermetic-build',
-      outputDir: '$kProjectDirPlaceholder/build/hermetic/$kBuildModePlaceholder',
+      outputDir:
+          '${BuiltInPlaceholders.projectDir}/build/hermetic/${BuiltInPlaceholders.buildMode}',
     ),
     _TestExtensionTarget(
       description: 'Hermetic assemble-only target.',
       name: 'custom-hermetic-assemble-only',
       isTopLevel: false,
-      outputDir: '$kProjectDirPlaceholder/build/hermetic/$kBuildModePlaceholder',
+      outputDir:
+          '${BuiltInPlaceholders.projectDir}/build/hermetic/${BuiltInPlaceholders.buildMode}',
     ),
   ];
 }

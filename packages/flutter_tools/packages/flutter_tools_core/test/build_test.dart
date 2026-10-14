@@ -130,7 +130,7 @@ void main() {
       expect(parsed.dependencies, isEmpty);
       expect(parsed.inputs, isEmpty);
       expect(parsed.outputs, isEmpty);
-      expect(parsed.outputDir, kBuildDirPlaceholder);
+      expect(parsed.outputDir, BuiltInPlaceholders.buildDir);
     });
 
     test('fromJson throws ArgumentError on malformed dependencies, inputs, or outputs', () {

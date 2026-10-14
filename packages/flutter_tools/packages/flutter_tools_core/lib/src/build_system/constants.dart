@@ -4,51 +4,55 @@
 
 import '../build.dart';
 
-/// Placeholder substituted with the Flutter project root directory.
-///
-/// Valid as the leading segment of an [ExtensionSource.pattern] or within
-/// [ExtensionBuildTarget.outputDir].
-const String kProjectDirPlaceholder = '{PROJECT_DIR}';
+/// Placeholders substituted by the host build system in [ExtensionSource.pattern]
+/// and [ExtensionBuildTarget.outputDir].
+abstract final class BuiltInPlaceholders {
+  /// Placeholder substituted with the Flutter project root directory.
+  ///
+  /// Valid as the leading segment of an [ExtensionSource.pattern] or within
+  /// [ExtensionBuildTarget.outputDir].
+  static const String projectDir = '{PROJECT_DIR}';
 
-/// Placeholder substituted with the workspace root directory containing
-/// `.dart_tool/package_config.json`.
-///
-/// Valid as the leading segment of an [ExtensionSource.pattern].
-const String kWorkspaceDirPlaceholder = '{WORKSPACE_DIR}';
+  /// Placeholder substituted with the workspace root directory containing
+  /// `.dart_tool/package_config.json`.
+  ///
+  /// Valid as the leading segment of an [ExtensionSource.pattern].
+  static const String workspaceDir = '{WORKSPACE_DIR}';
 
-/// Placeholder substituted with the intermediate build directory.
-///
-/// Valid as the leading segment of an [ExtensionSource.pattern] or within
-/// [ExtensionBuildTarget.outputDir].
-const String kBuildDirPlaceholder = '{BUILD_DIR}';
+  /// Placeholder substituted with the intermediate build directory.
+  ///
+  /// Valid as the leading segment of an [ExtensionSource.pattern] or within
+  /// [ExtensionBuildTarget.outputDir].
+  static const String buildDir = '{BUILD_DIR}';
 
-/// Placeholder substituted with the Flutter artifact cache directory.
-///
-/// Valid as the leading segment of an [ExtensionSource.pattern].
-const String kCacheDirPlaceholder = '{CACHE_DIR}';
+  /// Placeholder substituted with the Flutter artifact cache directory.
+  ///
+  /// Valid as the leading segment of an [ExtensionSource.pattern].
+  static const String cacheDir = '{CACHE_DIR}';
 
-/// Placeholder substituted with the Flutter SDK root directory.
-///
-/// Valid as the leading segment of an [ExtensionSource.pattern].
-const String kFlutterRootDirPlaceholder = '{FLUTTER_ROOT}';
+  /// Placeholder substituted with the Flutter SDK root directory.
+  ///
+  /// Valid as the leading segment of an [ExtensionSource.pattern].
+  static const String flutterRootDir = '{FLUTTER_ROOT}';
 
-/// Placeholder substituted with the target's output directory.
-///
-/// Valid as the leading segment of an [ExtensionSource.pattern].
-const String kOutputDirPlaceholder = '{OUTPUT_DIR}';
+  /// Placeholder substituted with the target's output directory.
+  ///
+  /// Valid as the leading segment of an [ExtensionSource.pattern].
+  static const String outputDir = '{OUTPUT_DIR}';
 
-/// Placeholder substituted with the CLI name of the active [BuildMode]
-/// (e.g. `'debug'`, `'profile'`, `'release'`).
-///
-/// Only substituted in [ExtensionBuildTarget.outputDir]; not supported in
-/// [ExtensionSource.pattern].
-const String kBuildModePlaceholder = '{BUILD_MODE}';
+  /// Placeholder substituted with the CLI name of the active [BuildMode]
+  /// (e.g. `'debug'`, `'profile'`, `'release'`).
+  ///
+  /// Only substituted in [ExtensionBuildTarget.outputDir]; not supported in
+  /// [ExtensionSource.pattern].
+  static const String buildMode = '{BUILD_MODE}';
 
-/// Placeholder substituted with the target platform name (e.g. `'linux-x64'`).
-///
-/// Only substituted in [ExtensionBuildTarget.outputDir]; not supported in
-/// [ExtensionSource.pattern].
-const String kTargetPlatformPlaceholder = '{TARGET_PLATFORM}';
+  /// Placeholder substituted with the target platform name (e.g. `'linux-x64'`).
+  ///
+  /// Only substituted in [ExtensionBuildTarget.outputDir]; not supported in
+  /// [ExtensionSource.pattern].
+  static const String targetPlatform = '{TARGET_PLATFORM}';
+}
 
 /// Commonly used [ExtensionArtifact] constants.
 abstract final class BuiltInArtifacts {

@@ -73,7 +73,7 @@ ExtensionAssembleTarget _createTarget({
   DependencyResolverCallback? dependencyResolver,
   List<ExtensionSource> inputs = const <ExtensionSource>[],
   String name = 'custom-target',
-  String outputDir = kBuildDirPlaceholder,
+  String outputDir = BuiltInPlaceholders.buildDir,
   List<ExtensionSource> outputs = const <ExtensionSource>[],
   String targetPlatform = 'linux-x64',
 }) {

@@ -10,6 +10,10 @@ import '../build.dart';
 ///
 /// Extensions can reference these artifacts in their target inputs/outputs,
 /// and the host will resolve them to physical paths on the host before build execution.
+///
+/// See also:
+///
+/// * [BuiltInArtifacts], commonly used artifacts.
 @immutable
 class ExtensionArtifact {
   const ExtensionArtifact(this.name);
@@ -31,6 +35,10 @@ class ExtensionArtifact {
 ///
 /// Extensions can reference these host-side artifacts in their target inputs/outputs,
 /// and the host will resolve them to physical paths on the host before build execution.
+///
+/// See also:
+///
+/// * [BuiltInHostArtifacts], commonly used host artifacts.
 @immutable
 class ExtensionHostArtifact {
   const ExtensionHostArtifact(this.name);
@@ -54,18 +62,36 @@ sealed class ExtensionSource {
   const ExtensionSource();
 
   /// A file pattern that must begin with a directory placeholder such as
-  /// [kProjectDirPlaceholder], [kBuildDirPlaceholder], or [kOutputDirPlaceholder]
-  /// (for example, `'{PROJECT_DIR}/pubspec.yaml'`).
+  /// [BuiltInPlaceholders.projectDir], [BuiltInPlaceholders.buildDir], or
+  /// [BuiltInPlaceholders.outputDir] (for example, `'{PROJECT_DIR}/pubspec.yaml'`).
+  ///
+  /// See also:
+  ///
+  /// * [BuiltInPlaceholders], the available directory placeholders.
   const factory ExtensionSource.pattern(String pattern, {bool optional}) = ExtensionPatternSource;
 
-  /// A source provided by an [ExtensionArtifact].
+  /// An [ExtensionSource] representing a target-platform or build-mode specific
+  /// engine artifact downloaded from the Flutter cache (for example, `icudtl.dat`
+  /// or `gen_snapshot`).
+  ///
+  /// See also:
+  ///
+  /// * [ExtensionArtifact], the identifier for an engine artifact.
+  /// * [BuiltInArtifacts], commonly used artifacts.
   const factory ExtensionSource.artifact(
     ExtensionArtifact artifact, {
     BuildMode? mode,
     String? platform,
   }) = ExtensionArtifactSource;
 
-  /// A source provided by an [ExtensionHostArtifact].
+  /// An [ExtensionSource] representing a host-platform tool or library from the
+  /// Flutter cache used by the build system (for example, `impellerc` or
+  /// `libtessellator`).
+  ///
+  /// See also:
+  ///
+  /// * [ExtensionHostArtifact], the identifier for a host artifact.
+  /// * [BuiltInHostArtifacts], commonly used host artifacts.
   const factory ExtensionSource.hostArtifact(ExtensionHostArtifact artifact) =
       ExtensionHostArtifactSource;
 
@@ -144,6 +170,10 @@ sealed class ExtensionSource {
 }
 
 /// An [ExtensionSource] defined by a file pattern with a leading directory placeholder.
+///
+/// See also:
+///
+/// * [BuiltInPlaceholders], the available directory placeholders.
 @immutable
 final class ExtensionPatternSource extends ExtensionSource {
   const ExtensionPatternSource(this.value, {this.optional = false});
@@ -173,7 +203,14 @@ final class ExtensionPatternSource extends ExtensionSource {
   int get hashCode => Object.hash(value, optional);
 }
 
-/// An [ExtensionSource] provided by an [ExtensionArtifact].
+/// An [ExtensionSource] representing a target-platform or build-mode specific
+/// engine artifact downloaded from the Flutter cache (for example, `icudtl.dat`
+/// or `gen_snapshot`).
+///
+/// See also:
+///
+/// * [ExtensionArtifact], the identifier for an engine artifact.
+/// * [BuiltInArtifacts], commonly used artifacts.
 @immutable
 final class ExtensionArtifactSource extends ExtensionSource {
   const ExtensionArtifactSource(this.artifact, {this.mode, this.platform});
@@ -210,7 +247,14 @@ final class ExtensionArtifactSource extends ExtensionSource {
   int get hashCode => Object.hash(artifact, platform, mode);
 }
 
-/// An [ExtensionSource] provided by an [ExtensionHostArtifact].
+/// An [ExtensionSource] representing a host-platform tool or library from the
+/// Flutter cache used by the build system (for example, `impellerc` or
+/// `libtessellator`).
+///
+/// See also:
+///
+/// * [ExtensionHostArtifact], the identifier for a host artifact.
+/// * [BuiltInHostArtifacts], commonly used host artifacts.
 @immutable
 final class ExtensionHostArtifactSource extends ExtensionSource {
   const ExtensionHostArtifactSource(this.artifact);
