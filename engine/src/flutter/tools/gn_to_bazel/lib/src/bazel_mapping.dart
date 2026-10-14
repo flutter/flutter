@@ -86,6 +86,24 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
       '//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf',
     ],
   ),
+  // run_tests.py: the Flutter GPU suite runs with Vulkan validation and,
+  // for now, the Metal variants alone (flutter/flutter#145036, #142642),
+  // which a Linux host skips.
+  '//flutter/impeller:impeller_dart_unittests': TestRun(
+    args: <String>['--enable_vulkan_validation', '--gtest_filter=*Metal'],
+    data: <String>[],
+  ),
+};
+
+/// The suites that open a window -- the Impeller playground's, GLFW on
+/// X11 -- by GN label. run_tests.py starts an Xvfb for the Linux suites;
+/// these become flutter_display_test (testing.bzl), which runs the binary
+/// under the environment's DISPLAY or an Xvfb of its own. As with
+/// gpuBackendTests, the converter cannot follow the dependency to the
+/// playground from one file, so the list is kept here.
+const Set<String> displayTests = <String>{
+  '//flutter/impeller:impeller_dart_unittests',
+  '//flutter/impeller:impeller_unittests',
 };
 
 /// The suites that render through the GPU test backends -- ANGLE on
@@ -196,6 +214,10 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/re2': '@re2',
   '//third_party/libtess2': '@libtess2',
   '//flutter/third_party/harfbuzz': '@harfbuzz',
+  // The Impeller playground's window and UI libraries (secondary tree).
+  '//flutter/third_party/glfw': '@glfw',
+  '//flutter/third_party/imgui': '@imgui',
+  '//flutter/third_party/imgui:imgui_glfw': '@imgui//:imgui_glfw',
   // The desktop embeddings' JSON (header-only; its own GN in the synced tree).
   '//flutter/third_party/rapidjson': '@rapidjson',
   // The Vulkan headers (header-only; the tree's own GN).
@@ -243,6 +265,8 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/re2/': '@re2//',
   '//flutter/third_party/libtess2/': '@libtess2//',
   '//flutter/third_party/harfbuzz/': '@harfbuzz//',
+  '//flutter/third_party/glfw/': '@glfw//',
+  '//flutter/third_party/imgui/': '@imgui//',
 };
 
 /// Generated include directories (`$root_gen_dir/flutter`) that are an

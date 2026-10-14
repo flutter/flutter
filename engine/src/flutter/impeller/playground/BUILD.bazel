@@ -1,0 +1,93 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/playground/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "playground",
+    testonly = True,
+    srcs = [
+        "backend/gles/playground_impl_gles.cc",  # impeller_enable_opengles
+        "backend/vulkan/playground_impl_vk.cc",  # impeller_enable_vulkan
+        "playground.cc",
+        "playground_impl.cc",
+        "switches.cc",
+        "widgets.cc",
+    ],
+    hdrs = [
+        "backend/gles/playground_impl_gles.h",  # impeller_enable_opengles
+        "backend/vulkan/playground_impl_vk.h",  # impeller_enable_vulkan
+        "playground.h",
+        "playground_impl.h",
+        "switches.h",
+        "widgets.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from ../renderer/backend
+        "-Wno-c++98-compat-extra-semi",  # from ../renderer/backend
+        "-Wno-deprecated-copy",  # from ../renderer/backend
+        "-Wno-implicit-fallthrough",  # from ../renderer/backend
+        "-Wno-nullability-completeness",  # from ../renderer/backend
+        "-Wno-suggest-destructor-override",  # from ../renderer/backend
+        "-Wno-suggest-override",  # from ../renderer/backend
+        "-Wno-unused-private-field",  # from ../renderer/backend
+        "-Wno-unused-variable",  # from ../renderer/backend
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/entity",
+        "//engine/src/flutter/impeller/entity:entity_shaders",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/entity:framebuffer_blend_entity_shaders",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/entity:modern_entity_shaders",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/fixtures:modern_shader_fixtures",
+        "//engine/src/flutter/impeller/fixtures:shader_fixtures",
+        "//engine/src/flutter/impeller/playground/image:image_skia_backend",
+        "//engine/src/flutter/impeller/playground/imgui:imgui_impeller_backend",
+        "//engine/src/flutter/impeller/renderer",
+        "//engine/src/flutter/impeller/renderer/backend",
+        "//engine/src/flutter/impeller/testing:golden_digest_manager",
+        "//engine/src/flutter/impeller/testing:screenshot",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "//engine/src/flutter/testing:test_swiftshader_utils",
+        "//engine/src/flutter/testing:testing_lib",
+        "@glfw",
+        "@imgui//:imgui_glfw",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "playground_test",
+    testonly = True,
+    srcs = [
+        "compute_playground_test.cc",
+        "playground_test.cc",
+    ],
+    hdrs = [
+        "compute_playground_test.h",
+        "playground_test.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":playground",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/testing:golden_digest_manager",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)

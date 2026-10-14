@@ -118,7 +118,11 @@ exports_files([
     appendix: '''
 load("@bazel_skylib//lib:selects.bzl", "selects")
 
-exports_files(["fixtures_location.cc"])
+exports_files([
+    "fixtures_location.cc",
+    # The display wrapper of flutter_display_test (testing.bzl).
+    "xvfb_run.sh",
+])
 
 selects.config_setting_group(
     name = "unittests_enabled",
@@ -141,9 +145,7 @@ filegroup(
   ConvertedFile(
     '//flutter/impeller',
     skip: <String, String>{
-      'impeller_unittesting': 'needs //flutter/impeller/testing',
-      'impeller_unittests': 'needs the Impeller test suites',
-      'impeller_dart_unittests': 'needs //flutter/impeller/renderer',
+      'impeller_unittests': 'needs the Impeller test suites (toolkit/interop, runtime_stage, tessellator, aiks, entity, typographer, the backends)',
     },
   ),
   ConvertedFile(
@@ -278,14 +280,20 @@ cc_test(
   ConvertedFile(
     '//flutter/impeller/renderer',
     skip: <String, String>{
-      'renderer_unittests': 'needs //flutter/impeller/playground',
-      'renderer_unittests_golden': 'needs //flutter/impeller/playground',
-      'renderer_dart_unittests': 'needs //flutter/lib/gpu',
+      'renderer_unittests': 'with impeller_unittests',
+      'renderer_unittests_golden': 'with impeller_unittests',
     },
   ),
   // The gmock doubles of the renderer's interfaces, which the core and
   // other suites test against.
   ConvertedFile('//flutter/impeller/renderer/testing'),
+  // The playground (a GLFW window, or none, over each backend; Dear ImGui
+  // widgets) and the test helpers on it; the screenshotter and golden
+  // digests beside it.
+  ConvertedFile('//flutter/impeller/testing'),
+  ConvertedFile('//flutter/impeller/playground/image'),
+  ConvertedFile('//flutter/impeller/playground/imgui'),
+  ConvertedFile('//flutter/impeller/playground'),
   // The test fixtures: two shader libraries, the runtime stages and shader
   // bundles (impellerc invoked directly) and the files, with the Dart entry
   // point of the Flutter GPU tests.
@@ -886,6 +894,55 @@ cc_library(
   // VulkanMemoryAllocator: one header, listed by the secondary tree's GN;
   // its config's include directory and defines ride the dependency.
   ConvertedFile('//flutter/third_party/vulkan_memory_allocator'),
+  // GLFW as the engine builds it (secondary tree): the platform sources
+  // include internal headers no list names (internal.h, platform.h,
+  // mappings.h, ...); the playground's GLES backend includes the public
+  // header by its path under //flutter ("third_party/glfw/include/GLFW/
+  // glfw3.h"), which rides the dependency as for libtess2.
+  ConvertedFile(
+    '//flutter/third_party/glfw',
+    implicitDeps: <String>['@glfw//:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["src/*.h"]),
+    deps = [":flutter_root_headers"],
+)
+
+cc_library(
+    name = "flutter_root_headers",
+    hdrs = glob(["include/GLFW/*.h"]),
+    include_prefix = "third_party/glfw",
+)
+''',
+  ),
+  // Dear ImGui as the engine builds it (secondary tree); the playground
+  // includes it by its path under //flutter ("third_party/imgui/imgui.h",
+  // "third_party/imgui/backends/imgui_impl_glfw.h"), and imgui.cpp includes
+  // imconfig.h, which no list names.
+  ConvertedFile(
+    '//flutter/third_party/imgui',
+    implicitDeps: <String>['@imgui//:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob([
+        "*.h",
+        "backends/imgui_impl_glfw.h",
+    ]),
+    deps = [":flutter_root_headers"],
+)
+
+cc_library(
+    name = "flutter_root_headers",
+    hdrs = glob([
+        "*.h",
+        "backends/imgui_impl_glfw.h",
+    ]),
+    include_prefix = "third_party/imgui",
+)
+''',
+  ),
 ];
 
 /// The manifest entry for a GN directory, from either list.
