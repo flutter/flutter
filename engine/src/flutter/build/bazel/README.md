@@ -77,6 +77,16 @@ flags, defines). `-c dbg` corresponds to GN's unoptimized builds (`-O0 -g2
 There is no component build: `.bazelrc` sets `--force_pic` and
 `--dynamic_mode=off`, as GN links everything statically with `-fPIC`.
 
+One ordering detail is load-bearing. GN puts a target's own `cflags`
+*before* the configs', so a target's `-march` loses to the compiler config's
+`-march=x86-64`: Skia's `ml3` opts ask for `-march=haswell` and are built
+for x86-64, and the engine's test goldens are renders of that raster
+pipeline (a build in which haswell wins differs from
+`verifyb143464703_soft_noxform.png` by three pixels). Bazel puts a
+toolchain's flags before `copts`, so the architecture flags alone are
+emitted after them (the `flutter_arch_flags` feature, behind an explicit
+`user_compile_flags`); `-m<feature>` flags are indifferent to the order.
+
 Two details keep warnings equivalent to GN's. GN's `default_warning_flags`
 (`-Werror` included) apply to every target, third-party code included, which
 is kept building with `-Wno-*` flags. The list lives in `copts.bzl`:
