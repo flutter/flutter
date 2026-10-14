@@ -1355,7 +1355,13 @@ final class _Evaluator {
     if (block == null) {
       throw GnError(call.location, '${call.name}() without a block');
     }
+    // GN fills the invocation block's scope as a target's (FillTargetBlockScope):
+    // `target_name` is defined there too, so `invoker.target_name` reads.
     final invokerScope = _Scope(scope);
+    invokerScope.variables['target_name'] = GnVariable('target_name', isList: false)
+      ..assignments.add(
+        GnAssignment(call.location, Condition.always, '=', <GnValue>[GnStringValue(name)]),
+      );
     _evaluateBlock(block, invokerScope, Condition.always, const <String>[], target: null);
     final bodyScope = _Scope(template.scope);
     bodyScope.variables['invoker'] = GnVariable('invoker', isList: false)
@@ -1391,9 +1397,10 @@ final class _Evaluator {
         : const <String>{};
     final GnNode what = call.args[1];
     if (what is GnLiteral && what.isString && what.stringValue == '*') {
-      // "*": everything set directly on the scope, clobbering.
+      // "*": everything set directly on the scope, clobbering -- except the
+      // invocation's `target_name`, which the body defines itself.
       for (final MapEntry<String, GnVariable> e in from.entries) {
-        if (!excluded.contains(e.key)) {
+        if (!excluded.contains(e.key) && e.key != 'target_name') {
           scope.variables[e.key] = _copy(e.value, forwarded: true);
         }
       }

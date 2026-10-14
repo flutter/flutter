@@ -1,0 +1,59 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/golden_tests/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "golden_playground_test",
+    testonly = True,
+    srcs = [
+        "golden_playground_test_stub.cc",  # !(is_mac)
+    ],
+    hdrs = ["golden_playground_test.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":digest",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/playground",
+        "//engine/src/flutter/impeller/testing:screenshot",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "digest",
+    testonly = True,
+    srcs = [
+        "golden_digest.cc",
+        "working_directory.cc",
+    ],
+    hdrs = [
+        "golden_digest.h",
+        "working_directory.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+    ],
+    alwayslink = True,
+)

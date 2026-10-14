@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: impeller_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
@@ -63,6 +62,36 @@ cc_library(
 # ANGLE).
 flutter_gpu_test_backends(
     name = "gpu_test_backends",
+)
+
+flutter_display_test(
+    name = "impeller_unittests",
+    size = "large",
+    data = [":gpu_test_backends"],
+    shard_count = 16,
+    deps = [
+        ":impeller_unittesting",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base:base_unittests",
+        "//engine/src/flutter/impeller/compiler:compiler_unittests",
+        "//engine/src/flutter/impeller/core:allocator_unittests",
+        "//engine/src/flutter/impeller/display_list:aiks_unittests",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/display_list:display_list_unittests",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/display_list:skia_conversions_unittests",
+        "//engine/src/flutter/impeller/entity:entity_unittests",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/fixtures",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/geometry:geometry_unittests",
+        "//engine/src/flutter/impeller/playground",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/renderer:renderer_unittests",  # impeller_supports_rendering
+        "//engine/src/flutter/impeller/renderer/backend/gles:gles_unittests",  # impeller_enable_opengles
+        "//engine/src/flutter/impeller/renderer/backend/vulkan:vulkan_unittests",  # impeller_enable_vulkan
+        "//engine/src/flutter/impeller/runtime_stage:runtime_stage_unittests",
+        "//engine/src/flutter/impeller/shader_archive:shader_archive_unittests",
+        "//engine/src/flutter/impeller/tessellator:tessellator_unittests",
+        "//engine/src/flutter/impeller/testing:impeller_unittest_suite",
+        "//engine/src/flutter/impeller/toolkit/interop:interop_unittests",
+        "//engine/src/flutter/impeller/typographer:typographer_unittests",  # impeller_supports_rendering
+    ],
 )
 
 flutter_display_test(

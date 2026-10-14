@@ -3,10 +3,9 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/typographer/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: typographer_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -50,6 +49,25 @@ cc_library(
         "//engine/src/flutter/impeller/renderer",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "typographer_unittests",
+    testonly = True,
+    srcs = ["typographer_unittests.cc"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+        "//engine/src/flutter/txt",
     ],
     alwayslink = True,
 )

@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/renderer/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: renderer_unittests, renderer_unittests_golden.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
@@ -101,6 +100,83 @@ cc_library(
         "//engine/src/flutter/impeller/tessellator",
         "@abseil-cpp//absl/container:linked_hash_map",
         "@abseil-cpp//absl/strings",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "renderer_unittests",
+    testonly = True,
+    srcs = [
+        "blit_pass_unittests.cc",
+        "capabilities_unittests.cc",
+        "command_buffer_scheduling_receipt_unittests.cc",
+        "command_queue_unittests.cc",
+        "compute_unittests.cc",
+        "device_buffer_unittests.cc",
+        "pipeline_compile_queue_unittests.cc",
+        "pipeline_descriptor_unittests.cc",
+        "pipeline_library_unittests.cc",
+        "pool_unittests.cc",
+        "renderer_golden_unittests.cc",
+        "renderer_unittests.cc",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":renderer",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/display_list:aiks_unittests",
+        "//engine/src/flutter/impeller/fixtures",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/impeller/tessellator:tessellator_libtess",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "renderer_unittests_golden",
+    testonly = True,
+    srcs = [
+        "blit_pass_unittests.cc",
+        "capabilities_unittests.cc",
+        "command_buffer_scheduling_receipt_unittests.cc",
+        "command_queue_unittests.cc",
+        "compute_unittests.cc",
+        "device_buffer_unittests.cc",
+        "pipeline_compile_queue_unittests.cc",
+        "pipeline_descriptor_unittests.cc",
+        "pipeline_library_unittests.cc",
+        "pool_unittests.cc",
+        "renderer_golden_unittests.cc",
+        "renderer_unittests.cc",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "IMPELLER_GOLDEN_TESTS",
+        "IMPELLER_ENABLE_VALIDATION=1",
+    ],
+    deps = [
+        ":renderer",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/display_list:aiks_unittests_golden",
+        "//engine/src/flutter/impeller/fixtures",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/impeller/tessellator:tessellator_libtess",
+        "//engine/src/flutter/testing:testing_lib",
     ],
     alwayslink = True,
 )
