@@ -294,7 +294,7 @@ void main() {
               'dev',
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
-              androidSkipBuildDependencyValidation: true,
+              androidGradleConfig: AndroidGradleConfig(skipBuildDependencyValidation: true),
             ),
           ),
           target: 'lib/main.dart',
@@ -2805,7 +2805,7 @@ Gradle Crashed
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              androidGradleDaemon: false,
+              androidGradleConfig: AndroidGradleConfig(gradleDaemon: false),
               packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
@@ -2866,7 +2866,7 @@ Gradle Crashed
               BuildMode.release,
               null,
               treeShakeIcons: false,
-              androidGradleProjectCacheDir: '/made/up/dir',
+              androidGradleConfig: AndroidGradleConfig(projectCacheDir: '/made/up/dir'),
               packageConfigPath: '.dart_tool/package_config.json',
             ),
           ),
@@ -3394,7 +3394,7 @@ Gradle Crashed
     );
 
     testUsingContext(
-      'skips Java and Gradle compatibility check when androidSkipBuildDependencyValidation is true',
+      'skips Java and Gradle compatibility check when skipBuildDependencyValidation is true',
       () async {
         final AndroidGradleBuilder builder = createBuilder(
           java: FakeJava(version: const Version.withText(21, 0, 0, '21.0.0')),
@@ -3466,7 +3466,7 @@ Gradle Crashed
               'dev',
               treeShakeIcons: false,
               packageConfigPath: '.dart_tool/package_config.json',
-              androidSkipBuildDependencyValidation: true, // Skip validation
+              androidGradleConfig: AndroidGradleConfig(skipBuildDependencyValidation: true),
             ),
           ),
           target: 'lib/main.dart',
