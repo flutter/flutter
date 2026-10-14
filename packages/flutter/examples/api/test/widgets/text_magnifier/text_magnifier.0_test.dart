@@ -7,11 +7,11 @@
 @Tags(<String>['reduced-test-set'])
 library;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_api_samples/widgets/text_magnifier/text_magnifier.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 List<TextSelectionPoint> _globalize(
   Iterable<TextSelectionPoint> points,
