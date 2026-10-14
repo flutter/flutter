@@ -484,7 +484,8 @@ class BuildModeOptionsBundle extends OptionBundle {
     this.defaultToRelease = true,
     this.excludeDebug = false,
     this.excludeRelease = false,
-  }) : assert(defaultToRelease || !excludeDebug);
+  }) : assert(defaultToRelease || !excludeDebug),
+       assert(!defaultToRelease || !excludeRelease);
 
   final bool defaultToRelease;
   final bool excludeDebug;

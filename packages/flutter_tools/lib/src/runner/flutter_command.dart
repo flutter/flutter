@@ -680,6 +680,7 @@ abstract class FlutterCommand extends Command<void> {
   }) {
     // A release build must be the default if a debug build is not possible.
     assert(defaultToRelease || !excludeDebug);
+    assert(!defaultToRelease || !excludeRelease);
     _excludeDebug = excludeDebug;
     _excludeRelease = excludeRelease;
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
