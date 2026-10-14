@@ -721,6 +721,7 @@ void main() {
           BuildInfoOptions.obfuscate,
           BuildInfoOptions.extraFrontEndOptions,
           BuildInfoOptions.extraGenSnapshotOptions,
+          DarwinAddToAppOptionsBundle.staticFrameworks,
           CommonOptions.dartDefines,
           CommonOptions.dartDefineFromFile,
           CommonOptions.enableExperiment,
@@ -776,6 +777,17 @@ void main() {
       expect(noDebugCommand.getBuildMode(), BuildMode.release);
       expect(noDebugCommand.argParser.options.keys, containsAll(<String>['profile', 'release']));
       expect(noDebugCommand.argParser.options, isNot(contains('debug')));
+
+      expect(
+        // ignore: prefer_const_constructors
+        () => BuildModeOptionsBundle(defaultToRelease: false, excludeDebug: true),
+        throwsAssertionError,
+      );
+      expect(
+        // ignore: prefer_const_constructors
+        () => BuildModeOptionsBundle(excludeRelease: true),
+        throwsAssertionError,
+      );
     });
 
     testUsingContext(
