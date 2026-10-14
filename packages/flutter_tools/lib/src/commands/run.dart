@@ -352,7 +352,7 @@ class RunCommand extends RunCommandBase {
       CommonOptions.machine,
       DebuggingOptionDescriptors.useTestFonts,
       _awaitFirstFrameWhenTracing,
-      _build,
+      DebuggingOptionDescriptors.build,
       DebuggingOptionDescriptors.projectRoot,
       _hot,
       _resident,
@@ -371,15 +371,6 @@ class RunCommand extends RunCommandBase {
         'is detected by looking for a Timeline event with the name '
         '"${Tracing.firstUsefulFrameEventName}". '
         "By default, the widgets library's binding takes care of sending this event.",
-  );
-
-  static const _build = FlagOptionDescriptor(
-    name: 'build',
-    defaultsTo: true,
-    verboseOnly: true,
-    help:
-        '(deprecated) If necessary, build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
-        'flag with an existing application artifact.',
   );
 
   static const _hot = FlagOptionDescriptor(
@@ -641,8 +632,8 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    if (wasParsed(_build)) {
-      if (getValue(_build)) {
+    if (wasParsed(DebuggingOptionDescriptors.build)) {
+      if (getValue(DebuggingOptionDescriptors.build)) {
         logger.printWarning(
           'The "--build" flag is deprecated and will be removed in a future release. '
           'Building is the default behavior, so this flag can be safely removed.',
