@@ -487,7 +487,7 @@ Future<ProcessResult> _resultOfGradleTask({
   );
 }
 
-/// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
+/// Returns `null` if target matches [expectedTarget], otherwise returns an error message.
 String? validateSnapshotDependency(FlutterProject project, String expectedTarget) {
   final snapshotBlob = File(
     path.join(
