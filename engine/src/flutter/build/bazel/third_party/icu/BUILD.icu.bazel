@@ -131,6 +131,13 @@ filegroup(
     srcs = ["common/icudtl.dat"],
 )
 
+# The two data files by name: the full one and the trimmed one Flutter ships
+# (flutter/icudtl.dat), which the interop toolkit embeds.
+exports_files([
+    "common/icudtl.dat",
+    "flutter/icudtl.dat",
+])
+
 # What the GN build of this tree reads (BUILD.gn, the sources it lists and
 # the data files its copy targets install), for rules that wrap a GN build.
 filegroup(
