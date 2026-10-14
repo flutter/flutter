@@ -752,6 +752,56 @@ public class PlatformViewsController2Test {
   }
 
   @Test
+  @Config(
+      shadows = {
+        ShadowFlutterJNI.class,
+        ShadowPlatformTaskQueue.class,
+        ShadowRecordingTransaction.class
+      })
+  public void swapTransactionsConsumesOneSealedRasterFrameAtATime() {
+    ShadowRecordingTransaction.reset();
+    PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    FlutterJNI jni = new FlutterJNI();
+    jni.setPlatformViewsController2(controller);
+    FlutterView flutterView = mock(FlutterView.class);
+    when(flutterView.getRootSurfaceControl()).thenReturn(mock(AttachedSurfaceControl.class));
+    controller.attachToView(flutterView);
+
+    // Frame 1 publishes its overlay and main transactions and seals the frame before posting its
+    // platform-thread task.
+    SurfaceControl.Transaction frame1OverlayTx = createAndPublishRasterTransaction(controller);
+    SurfaceControl.Transaction frame1MainTx = createAndPublishRasterTransaction(controller);
+    jni.sealFrameTransactions();
+
+    // Before frame 1's platform task runs swapTransactions(), the raster thread begins frame 2 and
+    // publishes its overlay transaction without sealing frame 2 yet.
+    SurfaceControl.Transaction frame2OverlayTx = createAndPublishRasterTransaction(controller);
+
+    controller.swapTransactions();
+    controller.onEndFrame();
+    assertEquals(Arrays.asList(frame1OverlayTx, frame1MainTx), ShadowRecordingTransaction.merged);
+
+    // Frame 2 finishes and seals, and frame 3 also finishes and seals before frame 2's platform
+    // task runs swapTransactions().
+    ShadowRecordingTransaction.reset();
+    SurfaceControl.Transaction frame2MainTx = createAndPublishRasterTransaction(controller);
+    jni.sealFrameTransactions();
+    SurfaceControl.Transaction frame3OverlayTx = createAndPublishRasterTransaction(controller);
+    SurfaceControl.Transaction frame3MainTx = createAndPublishRasterTransaction(controller);
+    jni.sealFrameTransactions();
+
+    controller.swapTransactions();
+    controller.onEndFrame();
+    assertEquals(Arrays.asList(frame2OverlayTx, frame2MainTx), ShadowRecordingTransaction.merged);
+
+    ShadowRecordingTransaction.reset();
+    controller.swapTransactions();
+    controller.onEndFrame();
+    assertEquals(Arrays.asList(frame3OverlayTx, frame3MainTx), ShadowRecordingTransaction.merged);
+  }
+
+  @Test
   @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
   public void swapTransactionsClosesDiscardedPlatformTransaction() {
     TransactionTrackingController controller = new TransactionTrackingController();
