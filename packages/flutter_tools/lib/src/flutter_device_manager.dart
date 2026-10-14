@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
@@ -42,6 +43,7 @@ class FlutterDeviceManager extends DeviceManager {
     required Platform platform,
     required ProcessManager processManager,
     required FileSystem fileSystem,
+    required Analytics analytics,
     required AndroidSdk? Function() androidSdkBuilder,
     required AppleContext appleContext,
     required FeatureFlags featureFlags,
@@ -86,6 +88,7 @@ class FlutterDeviceManager extends DeviceManager {
            nativeAssetsBuilder: nativeAssetsBuilder,
          ),
          MacOSDevices(
+           analytics: analytics,
            appleContext: appleContext,
            featureFlags: featureFlags,
            macOSWorkflow: macOSWorkflow,

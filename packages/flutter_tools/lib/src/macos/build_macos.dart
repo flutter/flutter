@@ -87,13 +87,13 @@ final _filteredOutput = RegExp(
 /// Builds the macOS project through xcodebuild.
 // TODO(zanderso): refactor to share code with the existing iOS code.
 Future<void> buildMacOS({
+  required Analytics analytics,
   required AppleContext appleContext,
   required BuildInfo buildInfo,
   required FeatureFlags featureFlags,
   required FlutterProject flutterProject,
   required ToolContext toolContext,
   required bool verboseLogging,
-  Analytics analytics = const NoOpAnalytics(),
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
   String? targetOverride,

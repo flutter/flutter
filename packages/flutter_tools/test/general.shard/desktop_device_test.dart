@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -661,6 +662,7 @@ class FakeMacOSDevice extends MacOSDevice {
     required OperatingSystemUtils operatingSystemUtils,
     required ProcessManager processManager,
   }) : super(
+         analytics: const NoOpAnalytics(),
          appleContext: FakeAppleContext(),
          featureFlags: TestFeatureFlags(),
          toolContext: FakeToolContext(

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -22,6 +23,7 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
+    required this._analytics,
     required this._appleContext,
     required this._featureFlags,
     required ToolContext toolContext,
@@ -39,6 +41,7 @@ class MacOSDevice extends DesktopDevice {
          ephemeral: false,
        );
 
+  final Analytics _analytics;
   final AppleContext _appleContext;
   final FeatureFlags _featureFlags;
   final Logger _logger;
@@ -82,6 +85,7 @@ class MacOSDevice extends DesktopDevice {
   }) async {
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
     await buildMacOS(
+      analytics: _analytics,
       appleContext: _appleContext,
       buildInfo: buildInfo,
       featureFlags: _featureFlags,
@@ -119,12 +123,14 @@ class MacOSDevice extends DesktopDevice {
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
+    required this._analytics,
     required this._appleContext,
     required this._featureFlags,
     required this._macOSWorkflow,
     required this._toolContext,
   }) : super('macOS devices');
 
+  final Analytics _analytics;
   final AppleContext _appleContext;
   final FeatureFlags _featureFlags;
   final MacOSWorkflow _macOSWorkflow;
@@ -146,6 +152,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     }
     return <Device>[
       MacOSDevice(
+        analytics: _analytics,
         appleContext: _appleContext,
         featureFlags: _featureFlags,
         toolContext: _toolContext,

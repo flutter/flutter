@@ -648,6 +648,7 @@ class ToolDependencies {
           platform: finalPlatform,
           processManager: finalProcessManager,
           fileSystem: finalFS,
+          analytics: finalAnalytics,
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
           appleContext: appleContext,
           featureFlags: finalFeatureFlags,
