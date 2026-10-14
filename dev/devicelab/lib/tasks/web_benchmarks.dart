@@ -958,7 +958,7 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
         filterPattern: filterPattern,
         verbose: verbose,
       );
-    } on Object catch (e) {
+    } catch (e) {
       printError('Benchmark run failed: $e');
       return 3;
     }
