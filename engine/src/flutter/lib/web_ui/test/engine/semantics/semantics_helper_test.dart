@@ -351,31 +351,29 @@ void testMain() {
         // the placeholder. Removing the drag's target right away could lose
         // its pointerup.
         // See https://github.com/flutter/flutter/issues/194104
-        final pointer = <String, Object>{'pointerId': 7};
-        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerdown', pointer));
-        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointermove', pointer));
+        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerdown'));
+        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointermove'));
 
         mobileSemanticsEnabler.retirePlaceholders();
         expect(placeholder!.isConnected, isTrue);
 
         expect(
-          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointermove', pointer)),
+          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointermove')),
           isTrue,
         );
         expect(placeholder!.isConnected, isTrue);
 
         expect(
-          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerup', pointer)),
+          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerup')),
           isTrue,
         );
         expect(placeholder!.isConnected, isFalse);
         expect(mobileSemanticsEnabler.placeholders, isEmpty);
       });
 
-      test('retiring removes the placeholder right away when no pointer is down', () {
-        final pointer = <String, Object>{'pointerId': 7};
-        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerdown', pointer));
-        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerup', pointer));
+      test('retiring removes the placeholder right away when no gesture is in progress', () {
+        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerdown'));
+        mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerup'));
 
         mobileSemanticsEnabler.retirePlaceholders();
         expect(placeholder!.isConnected, isFalse);
@@ -471,6 +469,9 @@ class FakeSemanticsEnabler extends SemanticsEnabler {
 
   @override
   DomElement? placeholderHostFor(DomElement viewRoot) => throw UnimplementedError();
+
+  @override
+  void retirePlaceholders() => throw UnimplementedError();
 
   int tryEnableSemanticsCallCount = 0;
 
