@@ -938,6 +938,81 @@ zero.average                                                      0.0       2.2 
     );
     expect(exitCode, 3);
   });
+
+  test('benchmarkRunner (TaskResult) integration, smoke-test, skwasm_st, and partial baseline pre-filtering', () async {
+    final outLines = <String>[];
+    final errLines = <String>[];
+    WebBenchmarkOptions? capturedOptions;
+    List<String>? capturedTargets;
+    bool? capturedVerbose;
+
+    final int exitCode = await runBenchmarkCli(
+      <String>[
+        '--smoke-test',
+        '--renderer=skwasm_st',
+        '--verbose',
+        '--baseline=baseline.json',
+        '--regression-threshold=10.0',
+      ],
+      benchmarkRunner:
+          (
+            WebBenchmarkOptions benchmarkOptions, {
+            bool? clean,
+            bool? noBuild,
+            String? localWebSdk,
+            String? localEngineSrcPath,
+            List<String>? targetBenchmarks,
+            String? filterPattern,
+            bool? verbose,
+          }) async {
+            capturedOptions = benchmarkOptions;
+            capturedTargets = targetBenchmarks;
+            capturedVerbose = verbose;
+            return TaskResult.success(<String, dynamic>{
+              'draw_rect.skwasm_st.totalUiFrame.average': 105.0,
+            });
+          },
+      readBaseline: (String path) => <String, dynamic>{
+        'draw_rect.skwasm_st.totalUiFrame.average': 100.0,
+        'other_benchmark.skwasm_st.totalUiFrame.average': 200.0,
+      },
+      out: outLines.add,
+      err: errLines.add,
+    );
+
+    expect(exitCode, 0);
+    expect(capturedOptions?.useWasm, isTrue);
+    expect(capturedOptions?.forceSingleThreadedSkwasm, isTrue);
+    expect(capturedTargets, <String>['draw_rect', 'bench_card_infinite_scroll']);
+    expect(capturedVerbose, isTrue);
+    expect(
+      outLines.any((String line) => line.contains('draw_rect.skwasm_st.totalUiFrame.average')),
+      isTrue,
+    );
+  });
+
+  test('benchmarkRunner TaskResult.failure exits with code 3', () async {
+    final errLines = <String>[];
+    final int exitCode = await runBenchmarkCli(
+      <String>[],
+      benchmarkRunner:
+          (
+            WebBenchmarkOptions benchmarkOptions, {
+            bool? clean,
+            bool? noBuild,
+            String? localWebSdk,
+            String? localEngineSrcPath,
+            List<String>? targetBenchmarks,
+            String? filterPattern,
+            bool? verbose,
+          }) async {
+            return TaskResult.failure('Unrecognized target benchmark');
+          },
+      err: errLines.add,
+    );
+    expect(exitCode, 3);
+    expect(errLines.any((String line) => line.contains('Unrecognized target benchmark')), isTrue);
+  });
 }
 
 /// Matches the exception thrown when target benchmarks and a filter pattern are

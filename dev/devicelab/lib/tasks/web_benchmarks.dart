@@ -62,6 +62,10 @@ Future<TaskResult> runWebBenchmark(
   List<String>? targetBenchmarks,
   String? filterPattern,
   bool? clean,
+  bool? noBuild,
+  String? localWebSdk,
+  String? localEngineSrcPath,
+  bool? verbose,
   Map<String, String>? environment,
 }) async {
   environment ??= io.Platform.environment;
@@ -77,10 +81,15 @@ Future<TaskResult> runWebBenchmark(
     return TaskResult.failure(e.toString());
   }
 
-  final bool effectiveClean = clean ?? environment['BENCHMARK_CLEAN']?.toLowerCase() != 'false';
+  final bool effectiveNoBuild = noBuild ?? false;
+  final bool effectiveVerbose = verbose ?? false;
+  final bool effectiveClean =
+      !effectiveNoBuild && (clean ?? environment['BENCHMARK_CLEAN']?.toLowerCase() != 'false');
 
-  // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
-  Logger.root.level = Level.INFO;
+  if (!effectiveVerbose) {
+    // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
+    Logger.root.level = Level.INFO;
+  }
   final String macrobenchmarksDirectory = path.join(
     flutterDirectory.path,
     'dev',
@@ -275,7 +284,7 @@ Future<TaskResult> runWebBenchmark(
         // Wait for the app to load in DDC's Chrome instance before trying to
         // connect the debugger.
         await ddcAppReady.future;
-      } else {
+      } else if (!effectiveNoBuild) {
         await evalFlutter(
           'build',
           options: <String>[
@@ -285,6 +294,8 @@ Future<TaskResult> runWebBenchmark(
             '--dart-define=FLUTTER_WEB_ENABLE_PROFILING=true',
             '--${benchmarkOptions.buildMode}',
             '--no-web-resources-cdn',
+            if (localWebSdk != null) '--local-web-sdk=$localWebSdk',
+            if (localEngineSrcPath != null) '--local-engine-src-path=$localEngineSrcPath',
             '-t',
             'lib/web_benchmarks.dart',
           ],
@@ -725,6 +736,17 @@ Future<TaskResult> runWebBenchmarkFromArgs(
   );
 }
 
+typedef BenchmarkRunner = Future<TaskResult> Function(
+  WebBenchmarkOptions benchmarkOptions, {
+  bool? clean,
+  bool? noBuild,
+  String? localWebSdk,
+  String? localEngineSrcPath,
+  List<String>? targetBenchmarks,
+  String? filterPattern,
+  bool? verbose,
+});
+
 ArgParser buildBenchmarkArgParser() {
   return ArgParser()
     ..addFlag('help', abbr: 'h', negatable: false, help: 'Print this help message.')
@@ -739,15 +761,50 @@ ArgParser buildBenchmarkArgParser() {
     ..addOption('results-file', help: 'Path to output JSON results file')
     ..addOption(
       'renderer',
-      allowed: ['skwasm', 'canvaskit'],
-      defaultsTo: 'skwasm',
+      abbr: 'r',
+      allowed: <String>['canvaskit', 'skwasm', 'skwasm_st'],
+      defaultsTo: 'canvaskit',
       help: 'Web renderer to use',
     )
     ..addOption('regression-threshold', help: 'Regression threshold percentage')
-    ..addFlag('clean', defaultsTo: true, help: 'Whether to run flutter clean before building')
+    ..addFlag(
+      'clean',
+      negatable: false,
+      help: 'Run flutter clean before compiling (defaults to false for fast local iteration).',
+    )
     ..addFlag('no-build', negatable: false, help: 'Do not build, use existing artifacts')
     ..addOption('local-engine-src-path', help: 'Path to local engine src directory')
-    ..addOption('local-web-sdk', help: 'Path to local web SDK directory');
+    ..addOption('local-web-sdk', help: 'Path to local web SDK directory')
+    ..addFlag(
+      'verbose',
+      abbr: 'v',
+      negatable: false,
+      help: 'Enable verbose logging and Chrome stdout.',
+    );
+}
+
+Map<String, dynamic> _flattenMetrics(Map<String, dynamic> source, {required String label}) {
+  if (source.containsKey('benchmarks')) {
+    final dynamic benchmarksObj = source['benchmarks'];
+    if (benchmarksObj != null && benchmarksObj is! Map) {
+      throw FormatException('benchmarks in $label must be a Map');
+    }
+    final Map<String, dynamic> benchmarksMap =
+        benchmarksObj as Map<String, dynamic>? ?? <String, dynamic>{};
+    final flat = <String, dynamic>{};
+    for (final MapEntry<String, dynamic> entry in benchmarksMap.entries) {
+      if (entry.value is Map) {
+        final map = entry.value as Map<dynamic, dynamic>;
+        for (final MapEntry<dynamic, dynamic> innerEntry in map.entries) {
+          flat['${entry.key}.${innerEntry.key}'] = innerEntry.value;
+        }
+      } else {
+        flat[entry.key] = entry.value;
+      }
+    }
+    return flat;
+  }
+  return Map<String, dynamic>.from(source);
 }
 
 Future<int> runBenchmarkCli(
@@ -763,6 +820,8 @@ Future<int> runBenchmarkCli(
     required String? localWebSdk,
   })?
   runner,
+  BenchmarkRunner? benchmarkRunner,
+  void Function(int code)? exitFn,
   void Function(String)? out,
   void Function(String)? err,
   Map<String, dynamic> Function(String)? readBaseline,
@@ -770,18 +829,47 @@ Future<int> runBenchmarkCli(
   bool Function(String, String)? checkArtifacts,
   String? flutterRootDir,
 }) async {
+  int finish(int code) {
+    exitFn?.call(code);
+    return code;
+  }
+
   final ArgParser parser = buildBenchmarkArgParser();
   out ??= print;
   err ??= (String s) => io.stderr.writeln(s);
-  readBaseline ??= (String path) {
-    final String content = io.File(path).readAsStringSync();
-    return json.decode(content) as Map<String, dynamic>;
+  readBaseline ??= (String filePath) {
+    final String content = io.File(filePath).readAsStringSync();
+    final dynamic decoded = json.decode(content);
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Baseline JSON must decode to a Map<String, dynamic>.');
+    }
+    return decoded;
   };
-  writeResults ??= (String path, String content) => io.File(path).writeAsStringSync(content);
+  writeResults ??= (String filePath, String content) {
+    final file = io.File(filePath);
+    file.parent.createSync(recursive: true);
+    file.writeAsStringSync(content);
+  };
+  final hasCustomLegacyRunner = runner != null;
   checkArtifacts ??= (String root, String renderer) {
-    // Basic check for artifacts, not fully required for default implementation if not provided
-    return true;
+    if (hasCustomLegacyRunner && flutterRootDir == null) {
+      return true;
+    }
+    final String buildWebDir = path.join(
+      root,
+      'dev',
+      'benchmarks',
+      'macrobenchmarks',
+      'build',
+      'web',
+    );
+    final artifact = (renderer == 'skwasm' || renderer == 'skwasm_st')
+        ? 'main.dart.wasm'
+        : 'main.dart.js';
+    return io.File(path.join(buildWebDir, artifact)).existsSync();
   };
+
+  final String initialCwd = io.Directory.current.path;
 
   ArgResults args;
   try {
@@ -789,12 +877,12 @@ Future<int> runBenchmarkCli(
   } on ArgParserException catch (e) {
     err(e.message.replaceAll('"--', '"').replaceAll('"invalid_renderer"', 'invalid_renderer'));
     out('Usage:\n${parser.usage}');
-    return 2;
+    return finish(2);
   }
 
   if (args['help'] as bool) {
     out('Usage:\n${parser.usage}');
-    return 0;
+    return finish(0);
   }
 
   final rawBenchmarks = args['benchmark'] as List<String>;
@@ -803,29 +891,47 @@ Future<int> runBenchmarkCli(
       .map((String s) => s.trim())
       .where((String s) => s.isNotEmpty)
       .toList();
+  if (args.wasParsed('benchmark') && benchmarks.isEmpty) {
+    err('--benchmark cannot be empty or whitespace-only.');
+    return finish(2);
+  }
+
   final smokeTest = args['smoke-test'] as bool;
   final filter = args['filter'] as String?;
+  if (filter != null) {
+    if (filter.trim().isEmpty) {
+      err('--filter cannot be empty or whitespace-only.');
+      return finish(2);
+    }
+    try {
+      RegExp(filter);
+    } on FormatException catch (e) {
+      err('Invalid regular expression for --filter: ${e.message}');
+      return finish(2);
+    }
+  }
 
   if (benchmarks.isNotEmpty && smokeTest) {
     err('Cannot use --benchmark and --smoke-test together.');
-    return 2;
+    return finish(2);
   }
   if (filter != null && smokeTest) {
     err('Cannot use --filter and --smoke-test together.');
-    return 2;
+    return finish(2);
   }
   if (benchmarks.isNotEmpty && filter != null) {
     err('Cannot use --benchmark and --filter together.');
-    return 2;
+    return finish(2);
   }
 
-  final baselinePath = args['baseline'] as String?;
-  final resultsPath = args['results-file'] as String?;
+  final rawBaselinePath = args['baseline'] as String?;
+  final rawResultsPath = args['results-file'] as String?;
 
-  if (baselinePath != null && resultsPath != null) {
-    if (path.canonicalize(baselinePath) == path.canonicalize(resultsPath)) {
+  if (rawBaselinePath != null && rawResultsPath != null) {
+    if (path.canonicalize(path.normalize(path.join(initialCwd, rawBaselinePath))) ==
+        path.canonicalize(path.normalize(path.join(initialCwd, rawResultsPath)))) {
       err('baseline and results-file cannot be the same');
-      return 2;
+      return finish(2);
     }
   }
 
@@ -833,147 +939,233 @@ Future<int> runBenchmarkCli(
   var clean = args['clean'] as bool;
   if (noBuild && args.wasParsed('clean') && clean) {
     err('Cannot use --clean and --no-build together.');
-    return 2;
+    return finish(2);
   }
   if (noBuild && !args.wasParsed('clean')) {
     clean = false;
   }
 
-  final localEngineSrcPath = args['local-engine-src-path'] as String?;
+  final rawLocalEngineSrcPath = args['local-engine-src-path'] as String?;
   final localWebSdk = args['local-web-sdk'] as String?;
-  if (localEngineSrcPath != null && localWebSdk == null) {
+  if (rawLocalEngineSrcPath != null && localWebSdk == null) {
     err('local-engine-src-path requires local-web-sdk');
-    return 2;
+    return finish(2);
   }
 
   final regressionThresholdStr = args['regression-threshold'] as String?;
   double? regressionThreshold;
   if (regressionThresholdStr != null) {
-    if (baselinePath == null) {
+    if (rawBaselinePath == null) {
       err('regression-threshold requires a baseline');
-      return 2;
+      return finish(2);
     }
     regressionThreshold = double.tryParse(regressionThresholdStr);
     if (regressionThreshold == null || regressionThreshold < 0 || !regressionThreshold.isFinite) {
       err('regression-threshold must be a positive number');
-      return 2;
+      return finish(2);
     }
   }
 
   Map<String, dynamic>? baseline;
-  if (baselinePath != null) {
+  if (rawBaselinePath != null) {
     try {
-      baseline = readBaseline(baselinePath);
+      baseline = readBaseline(rawBaselinePath);
     } catch (e) {
       err('Baseline file not found: $e');
-      return 2;
+      return finish(2);
     }
+  }
+
+  String resolvedFlutterRoot;
+  if (flutterRootDir != null) {
+    resolvedFlutterRoot = flutterRootDir;
+  } else if (io.Platform.environment['FLUTTER_ROOT'] != null &&
+      io.Platform.environment['FLUTTER_ROOT']!.isNotEmpty) {
+    resolvedFlutterRoot = io.Platform.environment['FLUTTER_ROOT']!;
+  } else if (io.Directory(path.join(initialCwd, 'dev', 'devicelab')).existsSync()) {
+    resolvedFlutterRoot = initialCwd;
+  } else {
+    resolvedFlutterRoot = flutterDirectory.path;
   }
 
   final renderer = args['renderer'] as String;
   if (noBuild) {
-    final String root = flutterRootDir ?? '../../';
-    if (!checkArtifacts(root, renderer)) {
+    if (!checkArtifacts(resolvedFlutterRoot, renderer)) {
       err('Artifacts for renderer $renderer not found');
-      return 2;
+      return finish(2);
     }
   }
 
-  runner ??=
-      ({
-        required List<String>? benchmark,
-        required bool smokeTest,
-        required String? filter,
-        required String renderer,
-        required bool clean,
-        required bool noBuild,
-        required String? localEngineSrcPath,
-        required String? localWebSdk,
-      }) async {
-        throw UnimplementedError('Default runner not fully implemented.');
-      };
+  final verbose = args['verbose'] as bool;
+  StreamSubscription<LogRecord>? logSub;
+  if (verbose) {
+    Logger.root.level = Level.ALL;
+    final void Function(String) outSink = out;
+    logSub = Logger.root.onRecord.listen((LogRecord record) {
+      outSink('[${record.level.name}] ${record.loggerName}: ${record.message}');
+    });
+  }
 
+  var switchedCwd = false;
   try {
-    final Map<String, dynamic> result = await runner(
-      benchmark: benchmarks,
-      smokeTest: smokeTest,
-      filter: filter,
-      renderer: renderer,
-      clean: clean,
-      noBuild: noBuild,
-      localEngineSrcPath: localEngineSrcPath,
-      localWebSdk: localWebSdk,
-    );
-
-    if (resultsPath != null) {
-      try {
-        writeResults(resultsPath, json.encode(result));
-      } catch (e) {
-        err('Failed to write results: $e');
-        return 2;
+    if (runner == null && benchmarkRunner == null) {
+      final String devicelabDir = path.join(resolvedFlutterRoot, 'dev', 'devicelab');
+      if (io.Directory(devicelabDir).existsSync() &&
+          path.canonicalize(initialCwd) != path.canonicalize(devicelabDir)) {
+        cd(devicelabDir);
+        switchedCwd = true;
       }
     }
 
-    if (baseline != null) {
-      final dynamic currentBenchmarksObj = result['benchmarks'];
-      if (currentBenchmarksObj != null && currentBenchmarksObj is! Map) {
-        err('benchmarks in current results must be a Map');
-        return 2;
-      }
-      final Map<String, dynamic> currentBenchmarks =
-          currentBenchmarksObj as Map<String, dynamic>? ?? <String, dynamic>{};
+    final String? effectiveResultsPath = (switchedCwd && rawResultsPath != null)
+        ? path.normalize(path.join(initialCwd, rawResultsPath))
+        : rawResultsPath;
+    final String? effectiveLocalEngineSrcPath = (switchedCwd && rawLocalEngineSrcPath != null)
+        ? path.normalize(path.join(initialCwd, rawLocalEngineSrcPath))
+        : rawLocalEngineSrcPath;
 
-      final dynamic baselineBenchmarksObj = baseline['benchmarks'];
-      if (baselineBenchmarksObj != null && baselineBenchmarksObj is! Map) {
-        err('benchmarks in baseline must be a Map');
-        return 2;
-      }
-      final Map<String, dynamic> baselineBenchmarks =
-          baselineBenchmarksObj as Map<String, dynamic>? ?? <String, dynamic>{};
-
-      final flatCurrent = <String, dynamic>{};
-      for (final MapEntry<String, dynamic> entry in currentBenchmarks.entries) {
-        if (entry.value is Map) {
-          final map = entry.value as Map;
-          for (final MapEntry<dynamic, dynamic> innerEntry in map.entries) {
-            flatCurrent['${entry.key}.${innerEntry.key}'] = innerEntry.value;
+    runner ??=
+        ({
+          required List<String>? benchmark,
+          required bool smokeTest,
+          required String? filter,
+          required String renderer,
+          required bool clean,
+          required bool noBuild,
+          required String? localEngineSrcPath,
+          required String? localWebSdk,
+        }) async {
+          final WebBenchmarkOptions options = (
+            useWasm: renderer == 'skwasm' || renderer == 'skwasm_st',
+            forceSingleThreadedSkwasm: renderer == 'skwasm_st',
+            useDdc: false,
+            withHotReload: false,
+            buildMode: 'profile',
+          );
+          final List<String>? targetBenchmarks;
+          if (smokeTest) {
+            targetBenchmarks = kSmokeTestBenchmarks;
+          } else if (benchmark != null && benchmark.isNotEmpty) {
+            targetBenchmarks = benchmark;
+          } else {
+            targetBenchmarks = null;
           }
-        }
-      }
-
-      final flatBaseline = <String, dynamic>{};
-      for (final MapEntry<String, dynamic> entry in baselineBenchmarks.entries) {
-        if (entry.value is Map) {
-          final map = entry.value as Map;
-          for (final MapEntry<dynamic, dynamic> innerEntry in map.entries) {
-            flatBaseline['${entry.key}.${innerEntry.key}'] = innerEntry.value;
+          final TaskResult taskResult = await (benchmarkRunner ?? runWebBenchmark)(
+            options,
+            clean: clean,
+            noBuild: noBuild,
+            localWebSdk: localWebSdk,
+            localEngineSrcPath: localEngineSrcPath,
+            targetBenchmarks: targetBenchmarks,
+            filterPattern: filter,
+            verbose: verbose,
+          );
+          if (!taskResult.succeeded) {
+            throw Exception(taskResult.message);
           }
-        }
-      }
+          final Map<String, dynamic>? data = taskResult.data;
+          if (data == null || data.isEmpty) {
+            throw Exception('Benchmark completed without returning any metric data.');
+          }
+          return data;
+        };
 
-      final BenchmarkComparison comparison = compareResults(
-        current: flatCurrent,
-        baseline: flatBaseline,
-        regressionThreshold: regressionThreshold,
+    final Map<String, dynamic> result;
+    try {
+      result = await runner(
+        benchmark: benchmarks,
+        smokeTest: smokeTest,
+        filter: filter,
+        renderer: renderer,
+        clean: clean,
+        noBuild: noBuild,
+        localEngineSrcPath: effectiveLocalEngineSrcPath,
+        localWebSdk: localWebSdk,
       );
+    } catch (e) {
+      err('Runner failed: $e');
+      return finish(3);
+    }
+
+    if (effectiveResultsPath != null) {
+      try {
+        writeResults(effectiveResultsPath, json.encode(result));
+      } catch (e) {
+        err('Failed to write results: $e');
+        return finish(2);
+      }
+    }
+
+    final Map<String, dynamic> flatCurrent;
+    try {
+      flatCurrent = _flattenMetrics(result, label: 'current results');
+    } on FormatException catch (e) {
+      err(e.message);
+      return finish(2);
+    }
+
+    if (baseline != null) {
+      final Map<String, dynamic> flatBaseline;
+      try {
+        flatBaseline = _flattenMetrics(baseline, label: 'baseline');
+      } on FormatException catch (e) {
+        err(e.message);
+        return finish(2);
+      }
+
+      // Pre-filter baseline in memory to retain only keys present in current results.
+      final filteredBaseline = <String, dynamic>{
+        for (final MapEntry<String, dynamic> entry in flatBaseline.entries)
+          if (flatCurrent.containsKey(entry.key)) entry.key: entry.value,
+      };
+
+      final BenchmarkComparison comparison;
+      try {
+        comparison = compareResults(
+          current: flatCurrent,
+          baseline: filteredBaseline,
+          regressionThreshold: regressionThreshold,
+          failOnMissingBaseline: false,
+        );
+      } on Object catch (e) {
+        err('Invalid metric values for comparison: $e');
+        return finish(2);
+      }
 
       final bool hasOverlap = comparison.metrics.any(
-        (m) => m.baseline != null && m.current != null,
+        (MetricComparison m) => m.baseline != null && m.current != null,
       );
       if (!hasOverlap) {
         err('No overlapping metrics');
-        return 2;
+        return finish(2);
       }
 
       out(formatAnsiSummaryTable(comparison));
       if (comparison.hasRegressions) {
-        return 1;
+        err(
+          'FAILED: 1 or more metrics exceeded the regression threshold of $regressionThreshold%.',
+        );
+        return finish(1);
+      }
+    } else {
+      final List<String> sortedKeys =
+          flatCurrent.keys
+              .where((String k) => k.endsWith('.average') && flatCurrent[k] is num)
+              .toList()
+            ..sort();
+      for (final key in sortedKeys) {
+        out('$key: ${flatCurrent[key]}');
       }
     }
 
-    return 0;
-  } catch (e) {
-    err('Runner failed: $e');
-    return 3;
+    return finish(0);
+  } finally {
+    if (switchedCwd) {
+      cd(initialCwd);
+    }
+    await logSub?.cancel();
+    if (verbose) {
+      Logger.root.level = Level.INFO;
+    }
   }
 }
