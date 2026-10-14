@@ -709,10 +709,10 @@ TEST(BufferBindingsGLESTest,
 TEST(BufferBindingsGLESTest,
      DeduplicatesActiveTextureBindTextureAndSamplerUniform) {
   auto impl = MakeSixteenUnitMockImpl();
-  EXPECT_CALL(*impl, ActiveTexture(GL_TEXTURE0)).Times(1);
-  EXPECT_CALL(*impl, BindTexture(GL_TEXTURE_2D, _)).Times(1);
-  EXPECT_CALL(*impl, TexParameteri(GL_TEXTURE_2D, _, _)).Times(5);
-  EXPECT_CALL(*impl, Uniform1i(100, 0)).Times(1);
+  EXPECT_CALL(*impl, ActiveTexture(GL_TEXTURE0)).Times(2);
+  EXPECT_CALL(*impl, BindTexture(GL_TEXTURE_2D, _)).Times(2);
+  EXPECT_CALL(*impl, TexParameteri(GL_TEXTURE_2D, _, _)).Times(10);
+  EXPECT_CALL(*impl, Uniform1i(100, 0)).Times(2);
 
   std::shared_ptr<MockGLES> mock_gl = MockGLES::Init(std::move(impl));
   BoundTexturesFixture fixture(
@@ -736,11 +736,20 @@ TEST(BufferBindingsGLESTest,
       fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
       Range{0, 1}, Range{0, 0}, &sampler_cache, &attrib_cache));
 
-  // Second draw with the same texture and sampler skips ActiveTexture,
-  // BindTexture, TexParameteri, and Uniform1i.
+  // Second draw in the same pass with the same texture and sampler skips
+  // ActiveTexture, BindTexture, TexParameteri, and Uniform1i.
   EXPECT_TRUE(bindings.BindUniformData(
       fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
       Range{0, 1}, Range{0, 0}, &sampler_cache, &attrib_cache));
+
+  // A subsequent render pass with fresh per-pass caches re-applies state once
+  // without retaining mutable state on BufferBindingsGLES.
+  SamplerStateCache next_pass_sampler_cache;
+  VertexAttribStateCache next_pass_attrib_cache;
+  EXPECT_TRUE(bindings.BindUniformData(
+      fixture.reactor->GetProcTable(), fixture.bound_textures, bound_buffers,
+      Range{0, 1}, Range{0, 0}, &next_pass_sampler_cache,
+      &next_pass_attrib_cache));
 }
 
 TEST(BufferBindingsGLESTest,

@@ -374,6 +374,20 @@ bool VertexAttribStateCache::BindAndConfigureTexture(
   return true;
 }
 
+void VertexAttribStateCache::BindSamplerUniform(const ProcTableGLES& gl,
+                                                GLuint program_handle,
+                                                GLint location,
+                                                size_t unit_index) {
+  const uint64_t key = (static_cast<uint64_t>(program_handle) << 32) |
+                       static_cast<uint32_t>(location);
+  const auto unit = static_cast<GLint>(unit_index);
+  auto [it, inserted] = configured_sampler_uniforms_.try_emplace(key, unit);
+  if (inserted || it->second != unit) {
+    gl.Uniform1i(location, unit);
+    it->second = unit;
+  }
+}
+
 bool BufferBindingsGLES::BindVertexAttributes(
     const ProcTableGLES& gl,
     size_t binding,
@@ -804,11 +818,11 @@ std::optional<size_t> BufferBindingsGLES::BindTextures(
     //--------------------------------------------------------------------------
     /// Set the texture uniform location.
     ///
-    auto uniform_it = configured_sampler_uniforms_.find(location);
-    if (uniform_it == configured_sampler_uniforms_.end() ||
-        uniform_it->second != static_cast<GLint>(active_index)) {
+    if (attrib_cache != nullptr) {
+      attrib_cache->BindSamplerUniform(gl, program_handle_, location,
+                                       active_index);
+    } else {
       gl.Uniform1i(location, active_index);
-      configured_sampler_uniforms_[location] = static_cast<GLint>(active_index);
     }
 
     //--------------------------------------------------------------------------

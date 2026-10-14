@@ -108,6 +108,11 @@ class VertexAttribStateCache {
                                              const SamplerGLES& sampler,
                                              SamplerStateCache* sampler_cache);
 
+  void BindSamplerUniform(const ProcTableGLES& gl,
+                          GLuint program_handle,
+                          GLint location,
+                          size_t unit_index);
+
   // For testing.
   void SetBoundArrayBufferForTest(GLuint vbo) { bound_array_buffer_ = vbo; }
 
@@ -131,6 +136,7 @@ class VertexAttribStateCache {
   std::array<AttribSlotState, kMaxVertexAttribs> slots_ = {};
   GLenum active_texture_unit_ = 0;
   std::array<std::optional<GLuint>, kMaxTextureUnits> bound_textures_ = {};
+  absl::flat_hash_map<uint64_t, GLint> configured_sampler_uniforms_ = {};
 
   VertexAttribStateCache(const VertexAttribStateCache&) = delete;
 
@@ -218,7 +224,6 @@ class BufferBindingsGLES {
 
   using BindingMap = absl::flat_hash_map<std::string, std::vector<GLint>>;
   BindingMap binding_map_ = {};
-  absl::flat_hash_map<GLint, GLint> configured_sampler_uniforms_ = {};
   GLuint vertex_array_object_ = 0;
   GLuint program_handle_ = GL_NONE;
   bool use_ubo_ = false;
