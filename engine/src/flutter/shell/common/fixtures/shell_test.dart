@@ -28,8 +28,6 @@ void mainNotifyNative() {
 external void nativeReportTimingsCallback(List<int> timings);
 @Native<Void Function(Int64)>(symbol: 'NativeOnBeginFrame')
 external void nativeOnBeginFrame(int microseconds);
-@Native<Void Function(Handle)>(symbol: 'NativeOnPointerDataPacket')
-external void nativeOnPointerDataPacket(List<int> sequences);
 
 @pragma('vm:entry-point')
 void onErrorA() {
@@ -97,18 +95,8 @@ void onBeginFrameMain() {
   PlatformDispatcher.instance.onBeginFrame = (Duration beginTime) {
     nativeOnBeginFrame(beginTime.inMicroseconds);
   };
+  notifyNative();
   PlatformDispatcher.instance.scheduleFrame();
-}
-
-@pragma('vm:entry-point')
-void onPointerDataPacketMain() {
-  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket packet) {
-    final sequence = <int>[];
-    for (final PointerData data in packet.data) {
-      sequence.add(PointerChange.values.indexOf(data.change));
-    }
-    nativeOnPointerDataPacket(sequence);
-  };
 }
 
 @pragma('vm:entry-point')
@@ -127,6 +115,7 @@ external void _reportMetrics(double devicePixelRatio, double width, double heigh
 @pragma('vm:entry-point')
 void dummyReportTimingsMain() {
   PlatformDispatcher.instance.onReportTimings = (List<FrameTiming> timings) {};
+  notifyNative();
 }
 
 @pragma('vm:entry-point')
@@ -624,6 +613,15 @@ void testPointerActions() {
 void testDispatchEvents() {
   PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket pointer) {
     notifyNative();
+  };
+}
+
+@pragma('vm:entry-point')
+void testDispatchEventsMicrotask() {
+  PlatformDispatcher.instance.onPointerDataPacket = (PointerDataPacket pointer) {
+    Future.microtask(() {
+      notifyNative();
+    });
   };
 }
 

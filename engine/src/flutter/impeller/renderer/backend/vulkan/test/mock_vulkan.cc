@@ -1314,8 +1314,7 @@ MockVulkanContextBuilder::MockVulkanContextBuilder()
         }
       }) {}
 
-std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
-  auto message_loop = fml::ConcurrentMessageLoop::Create();
+ContextVK::Settings MockVulkanContextBuilder::PrepareSettings() {
   ContextVK::Settings settings;
   settings.proc_address_callback = GetMockVulkanProcAddress;
   if (settings_callback_) {
@@ -1334,8 +1333,17 @@ std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
   g_mock_vulkan_state->compression_exhausted_create_image_failures =
       compression_exhausted_create_image_failures_;
   settings.embedder_data = embedder_data_;
-  std::shared_ptr<ContextVK> result = ContextVK::Create(std::move(settings));
-  return result;
+  return settings;
+}
+
+absl::StatusOr<ContextVK::DeviceSelection>
+MockVulkanContextBuilder::SelectDevice() {
+  return ContextVK::SelectDevice(PrepareSettings());
+}
+
+std::shared_ptr<ContextVK> MockVulkanContextBuilder::Build() {
+  auto message_loop = fml::ConcurrentMessageLoop::Create();
+  return ContextVK::Create(PrepareSettings());
 }
 
 std::shared_ptr<std::vector<std::string>> GetMockVulkanFunctions(
