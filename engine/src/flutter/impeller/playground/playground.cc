@@ -15,7 +15,7 @@
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/runtime_stage/runtime_stage.h"
-#include "third_party/googletest/googletest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
