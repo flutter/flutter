@@ -830,16 +830,25 @@ class FlutterFrameworkDependency {
     final Directory destination = cacheDirectory.childDirectory('temp_$mode');
     try {
       await _utils.cache.downloadFile('Preparing remote Flutter framework...', url, destination);
-      final ProcessResult checksumResult = await _utils.processManager.run([
-        'swift',
-        'package',
-        'compute-checksum',
-        artifactZip,
-      ], workingDirectory: destination.path);
-      if (checksumResult.exitCode != 0) {
-        throwToolExit('Failed to compute checksum for $artifactZip: ${checksumResult.stderr}');
+      try {
+        final ProcessResult checksumResult = await _utils.processManager.run([
+          ..._utils.xcode.xcrunCommand(),
+          'swift',
+          'package',
+          'compute-checksum',
+          artifactZip,
+        ], workingDirectory: destination.path);
+        if (checksumResult.exitCode != 0) {
+          throwToolExit('Failed to compute checksum for $artifactZip: ${checksumResult.stderr}');
+        }
+        return checksumResult.stdout.toString().trim();
+      } on ProcessException catch (e) {
+        throwToolExit(
+          'Failed to run "swift package compute-checksum". '
+          'Please ensure Xcode is installed.\n'
+          'Error: ${e.message}',
+        );
       }
-      return checksumResult.stdout.toString().trim();
     } finally {
       ErrorHandlingFileSystem.deleteIfExists(destination, recursive: true);
     }

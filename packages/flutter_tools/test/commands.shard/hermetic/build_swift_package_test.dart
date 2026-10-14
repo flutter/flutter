@@ -719,7 +719,7 @@ let package = Package(
 
         final processManager = FakeProcessManager.list([
           FakeCommand(
-            command: const ['swift', 'package', 'compute-checksum', 'artifacts.zip'],
+            command: const ['xcrun', 'swift', 'package', 'compute-checksum', 'artifacts.zip'],
             workingDirectory: tempDir.path,
             stdout: 'fake_checksum_12345\n',
           ),
