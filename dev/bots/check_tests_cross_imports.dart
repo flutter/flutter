@@ -285,7 +285,7 @@ class TestsCrossImportChecker {
           in LibraryCrossImportStatementType.values) {
         final Set<File> unknownImports = getUnknowns(
           _knownCrossImports,
-          entry.value[importStatement]!,
+          entry.value[importStatement] ?? <File>{},
           prefix: _flutterTestPrefix,
         );
 
