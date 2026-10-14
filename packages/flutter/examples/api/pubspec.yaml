@@ -20,8 +20,6 @@ dependencies:
   web: any
   test: any
 
-  material_ui: ^1.0.0
-  cupertino_ui: ^1.0.0
 dev_dependencies:
   integration_test:
     sdk: flutter
@@ -41,4 +39,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 1j9bq1
+# PUBSPEC CHECKSUM: 1vgq65

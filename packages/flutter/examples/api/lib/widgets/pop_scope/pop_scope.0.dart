@@ -5,7 +5,7 @@
 // This sample demonstrates showing a confirmation dialog before navigating
 // away from a page.
 
-import 'package:material_ui/material_ui.dart';
+import 'package:flutter/material.dart';
 
 void main() => runApp(const NavigatorPopHandlerApp());
 

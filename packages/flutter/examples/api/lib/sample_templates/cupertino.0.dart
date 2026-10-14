@@ -29,7 +29,7 @@
 // is referenced more than once, link back to the instance the example file is
 // named for.
 
-import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:flutter/cupertino.dart';
 
 /// Flutter code sample for [Placeholder].
 
