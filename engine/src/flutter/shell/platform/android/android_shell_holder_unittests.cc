@@ -1000,5 +1000,20 @@ TEST(AndroidShellHolder,
   EXPECT_EQ(renderer_info_calls, 1);
 }
 
+TEST(AndroidShellHolder, ForwardsSurfaceControlAndOriginCheckSettingsToShell) {
+  Settings settings;
+  settings.enable_software_rendering = false;
+  settings.enable_surface_control = true;
+  settings.disable_service_origin_check = true;
+  auto jni = std::make_shared<MockPlatformViewAndroidJNI>();
+  auto holder = std::make_unique<AndroidShellHolder>(
+      settings, jni, kFlutterNativeWindowBackendImpellerOpenGLES);
+  ASSERT_TRUE(holder->IsValid());
+
+  const Settings& shell_settings = GetShellForTesting(*holder)->GetSettings();
+  EXPECT_TRUE(shell_settings.enable_surface_control);
+  EXPECT_TRUE(shell_settings.disable_service_origin_check);
+}
+
 }  // namespace testing
 }  // namespace flutter

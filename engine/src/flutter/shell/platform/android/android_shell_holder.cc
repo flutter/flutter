@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "common/settings.h"
+#include "flutter/common/switches.h"
 #include "flutter/fml/cpu_affinity.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
@@ -469,118 +470,126 @@ struct ScopedCommandLineArgs {
   std::vector<std::string> storage;
   std::vector<const char*> argv;
 
+  void AddSwitch(Switch sw) {
+    storage.push_back("--" + std::string(FlagForSwitch(sw)));
+  }
+
+  void AddSwitchValue(Switch sw, const std::string& value) {
+    storage.push_back("--" + std::string(FlagForSwitch(sw)) + "=" + value);
+  }
+
   explicit ScopedCommandLineArgs(const Settings& settings) {
     storage.push_back(settings.executable_name.empty()
                           ? "Flutter"
                           : settings.executable_name);
     if (!settings.enable_vm_service) {
-      storage.emplace_back("--disable-vm-service");
+      AddSwitch(Switch::kDisableVmService);
     }
     if (!settings.enable_vm_service_publication) {
-      storage.emplace_back("--disable-vm-service-publication");
+      AddSwitch(Switch::kDisableVmServicePublication);
     }
     if (!settings.vm_service_host.empty()) {
-      storage.push_back("--vm-service-host=" + settings.vm_service_host);
+      AddSwitchValue(Switch::kDeviceVmServiceHost, settings.vm_service_host);
     }
     if (settings.vm_service_port != 0) {
-      storage.push_back("--vm-service-port=" +
-                        std::to_string(settings.vm_service_port));
+      AddSwitchValue(Switch::kDeviceVmServicePort,
+                     std::to_string(settings.vm_service_port));
     }
     if (!settings.may_insecurely_connect_to_all_domains) {
-      storage.emplace_back("--disallow-insecure-connections");
+      AddSwitch(Switch::kDisallowInsecureConnections);
     }
     if (!settings.domain_network_policy.empty()) {
-      storage.push_back("--domain-network-policy=" +
-                        settings.domain_network_policy);
+      AddSwitchValue(Switch::kDomainNetworkPolicy,
+                     settings.domain_network_policy);
     }
     if (settings.disable_service_auth_codes) {
-      storage.emplace_back("--disable-service-auth-codes");
+      AddSwitch(Switch::kDisableServiceAuthCodes);
     }
     if (settings.disable_service_origin_check) {
-      storage.emplace_back("--disable-service-origin-checks");
+      AddSwitch(Switch::kDisableServiceOriginCheck);
     }
     if (settings.enable_service_port_fallback) {
-      storage.emplace_back("--enable-service-port-fallback");
+      AddSwitch(Switch::kEnableServicePortFallback);
     }
     if (settings.disable_dart_asserts) {
-      storage.emplace_back("--disable-dart-asserts");
+      AddSwitch(Switch::kDisableDartAsserts);
     }
     if (settings.start_paused) {
-      storage.emplace_back("--start-paused");
+      AddSwitch(Switch::kStartPaused);
     }
     if (settings.enable_checked_mode) {
-      storage.emplace_back("--enable-checked-mode");
+      AddSwitch(Switch::kEnableCheckedMode);
     }
     if (settings.enable_dart_profiling) {
-      storage.emplace_back("--enable-dart-profiling");
+      AddSwitch(Switch::kEnableDartProfiling);
     }
     if (settings.profile_startup) {
-      storage.emplace_back("--profile-startup");
+      AddSwitch(Switch::kProfileStartup);
     }
     if (settings.enable_software_rendering) {
-      storage.emplace_back("--enable-software-rendering");
+      AddSwitch(Switch::kEnableSoftwareRendering);
     }
     if (settings.endless_trace_buffer) {
-      storage.emplace_back("--endless-trace-buffer");
+      AddSwitch(Switch::kEndlessTraceBuffer);
     }
     if (settings.trace_startup) {
-      storage.emplace_back("--trace-startup");
+      AddSwitch(Switch::kTraceStartup);
     }
     if (settings.trace_systrace) {
-      storage.emplace_back("--trace-systrace");
+      AddSwitch(Switch::kTraceSystrace);
     }
     if (!settings.trace_to_file.empty()) {
-      storage.push_back("--trace-to-file=" + settings.trace_to_file);
+      AddSwitchValue(Switch::kTraceToFile, settings.trace_to_file);
     }
     if (settings.profile_microtasks) {
-      storage.emplace_back("--profile-microtasks");
+      AddSwitch(Switch::kProfileMicrotasks);
     }
     if (settings.skia_deterministic_rendering_on_cpu) {
-      storage.emplace_back("--skia-deterministic-rendering");
+      AddSwitch(Switch::kSkiaDeterministicRendering);
     }
     if (settings.verbose_logging) {
-      storage.emplace_back("--verbose-logging");
+      AddSwitch(Switch::kVerboseLogging);
     }
     for (const std::string& lib : settings.application_library_paths) {
-      storage.push_back("--aot-shared-library-name=" + lib);
+      AddSwitchValue(Switch::kAotSharedLibraryName, lib);
     }
     for (const std::string& lib : settings.vmservice_snapshot_library_path) {
-      storage.push_back("--aot-vmservice-shared-library-name=" + lib);
+      AddSwitchValue(Switch::kAotVmServiceSharedLibraryName, lib);
     }
     if (!settings.route.empty()) {
-      storage.push_back("--route=" + settings.route);
+      AddSwitchValue(Switch::kRoute, settings.route);
     }
     if (!settings.temp_directory_path.empty()) {
-      storage.push_back("--cache-dir-path=" + settings.temp_directory_path);
+      AddSwitchValue(Switch::kCacheDirPath, settings.temp_directory_path);
     }
     if (settings.icu_initialization_required && settings.icu_mapper) {
-      storage.emplace_back("--icu-symbol-prefix=_binary_icudtl_dat");
+      AddSwitchValue(Switch::kIcuSymbolPrefix, "_binary_icudtl_dat");
     }
     if (settings.use_test_fonts) {
-      storage.emplace_back("--use-test-fonts");
+      AddSwitch(Switch::kUseTestFonts);
     }
     if (!settings.use_asset_fonts) {
-      storage.emplace_back("--disable-asset-fonts");
+      AddSwitch(Switch::kDisableAssetFonts);
     }
     if (settings.requested_rendering_backend.has_value() &&
         !settings.requested_rendering_backend->empty()) {
-      storage.push_back("--impeller-backend=" +
-                        *settings.requested_rendering_backend);
+      AddSwitchValue(Switch::kImpellerBackend,
+                     *settings.requested_rendering_backend);
     }
     if (settings.enable_vulkan_validation) {
-      storage.emplace_back("--enable-vulkan-validation");
+      AddSwitch(Switch::kEnableVulkanValidation);
     }
     if (settings.enable_opengl_gpu_tracing) {
-      storage.emplace_back("--enable-opengl-gpu-tracing");
+      AddSwitch(Switch::kEnableOpenGlgpuTracing);
     }
     if (settings.enable_vulkan_gpu_tracing) {
-      storage.emplace_back("--enable-vulkan-gpu-tracing");
+      AddSwitch(Switch::kEnableVulkanGpuTracing);
     }
     if (settings.enable_embedder_api) {
-      storage.emplace_back("--enable-embedder-api");
+      AddSwitch(Switch::kEnableEmbedderApi);
     }
     if (settings.prefetched_default_font_manager) {
-      storage.emplace_back("--prefetched-default-font-manager");
+      AddSwitch(Switch::kPrefetchedDefaultFontManager);
     }
     if (!settings.dart_flags.empty()) {
       std::string joined;
@@ -590,47 +599,47 @@ struct ScopedCommandLineArgs {
         }
         joined += settings.dart_flags[i];
       }
-      storage.push_back("--dart-flags=" + joined);
+      AddSwitchValue(Switch::kDartFlags, joined);
     }
     if (settings.dump_skp_on_shader_compilation) {
-      storage.emplace_back("--dump-skp-on-shader-compilation");
+      AddSwitch(Switch::kDumpSkpOnShaderCompilation);
     }
     if (settings.cache_sksl) {
-      storage.emplace_back("--cache-sksl");
+      AddSwitch(Switch::kCacheSkSl);
     }
     if (settings.purge_persistent_cache) {
-      storage.emplace_back("--purge-persistent-cache");
+      AddSwitch(Switch::kPurgePersistentCache);
     }
     if (settings.resource_cache_max_bytes_threshold != 0) {
-      storage.push_back(
-          "--resource-cache-max-bytes-threshold=" +
+      AddSwitchValue(
+          Switch::kResourceCacheMaxBytesThreshold,
           std::to_string(settings.resource_cache_max_bytes_threshold));
     }
     if (settings.enable_surface_control) {
-      storage.emplace_back("--enable-android-hcpp-and-surface-control=true");
+      AddSwitchValue(Switch::kEnableAndroidHcppAndSurfaceControl, "true");
     }
     switch (settings.merged_platform_ui_thread) {
       case Settings::MergedPlatformUIThread::kEnabled:
-        storage.emplace_back("--merged-platform-ui-thread=enabled");
+        AddSwitchValue(Switch::kMergedPlatformUiThread, "enabled");
         break;
       case Settings::MergedPlatformUIThread::kDisabled:
-        storage.emplace_back("--merged-platform-ui-thread=disabled");
+        AddSwitchValue(Switch::kMergedPlatformUiThread, "disabled");
         break;
       case Settings::MergedPlatformUIThread::kMergeAfterLaunch:
-        storage.emplace_back("--merged-platform-ui-thread=mergeAfterLaunch");
+        AddSwitchValue(Switch::kMergedPlatformUiThread, "mergeAfterLaunch");
         break;
     }
     if (settings.enable_flutter_gpu) {
-      storage.emplace_back("--enable-flutter-gpu");
+      AddSwitch(Switch::kEnableFlutterGpu);
     }
     if (settings.impeller_enable_lazy_shader_mode) {
-      storage.emplace_back("--impeller-lazy-shader-mode");
+      AddSwitch(Switch::kImpellerLazyShaderMode);
     }
     if (settings.impeller_use_sdfs) {
-      storage.emplace_back("--impeller-use-sdfs");
+      AddSwitch(Switch::kImpellerUseSdFs);
     }
     if (settings.impeller_top_left_default_framebuffer_origin) {
-      storage.emplace_back("--impeller-top-left-default-framebuffer-origin");
+      AddSwitch(Switch::kImpellerTopLeftDefaultFramebufferOrigin);
     }
 
     argv.reserve(storage.size());
