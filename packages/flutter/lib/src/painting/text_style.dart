@@ -848,8 +848,14 @@ class TextStyle with Diagnosticable {
   /// How visual text overflow should be handled.
   final TextOverflow? overflow;
 
-  /// Whether to fake missing font styles (such as synthetic bolding or
-  /// italicizing) when the font does not natively support them.
+  /// Whether the font engine should fake font styles that are not natively
+  /// supported by the font (such as synthetic bolding or italicizing).
+  ///
+  /// When a font lacks a specific weight or style, the text engine may
+  /// artificially thicken strokes ("fake bold") or slant the glyphs ("fake
+  /// italic") to match the requested style. While useful as a fallback,
+  /// synthetic styles can degrade readability, particularly for CJK (Chinese,
+  /// Japanese, Korean) characters. Set this to false to disable this behavior.
   ///
   /// Defaults to true.
   final bool? fakeMissingFontStyles;
