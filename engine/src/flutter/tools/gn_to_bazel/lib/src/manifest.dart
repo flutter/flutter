@@ -488,6 +488,18 @@ filegroup(
     '//flutter/shell/common',
     skip: <String, String>{'shell_benchmarks': 'needs //flutter/benchmarking'},
   ),
+  // The embedder API: its libraries, its shared library and its three suites.
+  // What stays out is the artifact side -- the header copied into the build
+  // root, the group and the zip bundle CI archives -- which is a later
+  // phase's (the Linux artifacts).
+  ConvertedFile(
+    '//flutter/shell/platform/embedder',
+    skip: <String, String>{
+      'copy_headers': 'the artifact copy into the build root, a later phase',
+      'flutter_engine': 'the artifact group, a later phase',
+      'embedder-archive': 'zip_bundle: artifact packaging, a later phase',
+    },
+  ),
 ];
 
 /// The files generated into `@skia` at fetch time: the engine's GN for Skia
@@ -957,7 +969,6 @@ const Set<String> handWrittenPackages = <String>{
   'engine/src/flutter',
   'engine/src/flutter/impeller/tools',
   'engine/src/flutter/lib/snapshot',
-  'engine/src/flutter/shell/platform/embedder',
   'engine/src/flutter/shell/vmservice',
   'engine/src/flutter/third_party',
 };
