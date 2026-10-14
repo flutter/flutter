@@ -9,13 +9,13 @@
 
 #include "fml/closure.h"
 #include "fml/time/time_point.h"
+#include "gtest/gtest.h"
 #include "impeller/core/host_buffer.h"
 #include "impeller/playground/image/backends/skia/compressed_image_skia.h"
 #include "impeller/playground/image/decompressed_image.h"
 #include "impeller/renderer/command_buffer.h"
 #include "impeller/renderer/render_target.h"
 #include "impeller/runtime_stage/runtime_stage.h"
-#include "gtest/gtest.h"
 
 #define GLFW_INCLUDE_NONE
 #include "third_party/glfw/include/GLFW/glfw3.h"
