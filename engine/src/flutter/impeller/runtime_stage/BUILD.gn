@@ -54,5 +54,6 @@ impeller_component("runtime_stage_unittests") {
     ":runtime_stage",
     "../playground:playground_test",
     "//flutter/testing:testing_lib",
+    "//third_party/abseil-cpp/absl/status:status_matchers",
   ]
 }
