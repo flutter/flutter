@@ -13,7 +13,6 @@
 #include "flutter/fml/logging.h"
 #include "impeller/base/thread_safety.h"
 #include "impeller/renderer/backend/vulkan/vk.h"  // IWYU pragma: keep.
-#include "third_party/swiftshader/include/vulkan/vulkan_core.h"
 #include "vulkan/vulkan.hpp"
 
 namespace impeller {
