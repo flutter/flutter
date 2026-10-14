@@ -1,0 +1,255 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/toolkit/interop/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: static_library, example_mtl, sdk.
+
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "embed_blob_library")
+
+package(default_visibility = ["//visibility:public"])
+
+embed_blob_library(
+    name = "embedded_icu_data",
+    blob = "@icu//:flutter/icudtl.dat",
+    cc = "embedded_icu_data.cc",
+    hdr = "embedded_icu_data.h",
+    symbol_name = "embedded_icu_data",
+)
+
+# The public C/C++ Impeller API.
+cc_library(
+    name = "interop_api",
+    srcs = [
+        "impeller_c.c",
+        "impeller_cc.cc",
+    ],
+    hdrs = [
+        "impeller.h",
+        "impeller.hpp",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+    ],
+    alwayslink = True,
+)
+
+# The common base used by all interop backends.
+cc_library(
+    name = "interop_base",
+    srcs = [
+        "color_filter.cc",
+        "color_source.cc",
+        "context.cc",
+        "dl.cc",
+        "dl_builder.cc",
+        "formats.cc",
+        "fragment_program.cc",
+        "glyph_info.cc",
+        "image_filter.cc",
+        "line_metrics.cc",
+        "mask_filter.cc",
+        "object.cc",
+        "paint.cc",
+        "paragraph.cc",
+        "paragraph_builder.cc",
+        "paragraph_style.cc",
+        "path.cc",
+        "path_builder.cc",
+        "surface.cc",
+        "texture.cc",
+        "typography_context.cc",
+    ],
+    hdrs = [
+        "color_filter.h",
+        "color_source.h",
+        "context.h",
+        "dl.h",
+        "dl_builder.h",
+        "formats.h",
+        "fragment_program.h",
+        "glyph_info.h",
+        "image_filter.h",
+        "line_metrics.h",
+        "mask_filter.h",
+        "object.h",
+        "paint.h",
+        "paragraph.h",
+        "paragraph_builder.h",
+        "paragraph_style.h",
+        "path.h",
+        "path_builder.h",
+        "surface.h",
+        "texture.h",
+        "typography_context.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from ../../renderer/backend
+        "-Wno-c++98-compat-extra-semi",  # from ../../renderer/backend
+        "-Wno-deprecated-copy",  # from ../../renderer/backend
+        "-Wno-implicit-fallthrough",  # from ../../renderer/backend
+        "-Wno-nullability-completeness",  # from ../../renderer/backend
+        "-Wno-suggest-destructor-override",  # from ../../renderer/backend
+        "-Wno-suggest-override",  # from ../../renderer/backend
+        "-Wno-unused-private-field",  # from ../../renderer/backend
+        "-Wno-unused-variable",  # from ../../renderer/backend
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":embedded_icu_data",
+        ":interop_api",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/base",
+        "//engine/src/flutter/impeller/display_list",
+        "//engine/src/flutter/impeller/entity",
+        "//engine/src/flutter/impeller/renderer/backend",
+        "//engine/src/flutter/txt",
+    ],
+    alwayslink = True,
+)
+
+# Wires up the public API entrypoints to the appropriate backends.
+cc_library(
+    name = "interop",
+    srcs = ["impeller.cc"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from :interop_base
+        "-Wno-c++98-compat-extra-semi",  # from :interop_base
+        "-Wno-deprecated-copy",  # from :interop_base
+        "-Wno-implicit-fallthrough",  # from :interop_base
+        "-Wno-nullability-completeness",  # from :interop_base
+        "-Wno-suggest-destructor-override",  # from :interop_base
+        "-Wno-suggest-override",  # from :interop_base
+        "-Wno-unused-private-field",  # from :interop_base
+        "-Wno-unused-variable",  # from :interop_base
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":interop_base",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/toolkit/interop/backend",
+    ],
+    alwayslink = True,
+)
+
+cc_binary(
+    name = "libimpeller.so",
+    linkshared = True,
+    deps = [
+        ":interop",
+        "//engine/src/flutter/build/bazel/toolchains:cxx_runtime",
+        "//engine/src/flutter/impeller:impeller_public_config",
+    ],
+)
+
+alias(
+    name = "shared_library",
+    actual = ":libimpeller.so",
+)
+
+cc_binary(
+    name = "example_gl",
+    srcs = ["example_gl.c"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + CHROMIUM_CODE_COPTS + [
+        "-Wno-redundant-parens",  # from :interop
+        "-Wno-c++98-compat-extra-semi",  # from :interop
+        "-Wno-deprecated-copy",  # from :interop
+        "-Wno-implicit-fallthrough",  # from :interop
+        "-Wno-nullability-completeness",  # from :interop
+        "-Wno-suggest-destructor-override",  # from :interop
+        "-Wno-suggest-override",  # from :interop
+        "-Wno-unused-private-field",  # from :interop
+        "-Wno-unused-variable",  # from :interop
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":interop",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "@glfw",
+    ],
+)
+
+cc_binary(
+    name = "example_vk",
+    srcs = ["example_vk.c"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + CHROMIUM_CODE_COPTS + [
+        "-Wno-redundant-parens",  # from :interop
+        "-Wno-c++98-compat-extra-semi",  # from :interop
+        "-Wno-deprecated-copy",  # from :interop
+        "-Wno-implicit-fallthrough",  # from :interop
+        "-Wno-nullability-completeness",  # from :interop
+        "-Wno-suggest-destructor-override",  # from :interop
+        "-Wno-suggest-override",  # from :interop
+        "-Wno-unused-private-field",  # from :interop
+        "-Wno-unused-variable",  # from :interop
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":interop",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "@glfw",
+    ],
+)
+
+cc_library(
+    name = "example",
+    deps = [
+        ":example_gl",  # impeller_enable_opengles
+        ":example_vk",  # impeller_enable_vulkan
+    ],
+)
+
+cc_library(
+    name = "interop_unittests",
+    testonly = True,
+    srcs = [
+        "impeller_unittests.cc",
+        "object_unittests.cc",
+        "playground_test.cc",
+    ],
+    hdrs = ["playground_test.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :interop
+        "-Wno-c++98-compat-extra-semi",  # from :interop
+        "-Wno-deprecated-copy",  # from :interop
+        "-Wno-implicit-fallthrough",  # from :interop
+        "-Wno-nullability-completeness",  # from :interop
+        "-Wno-suggest-destructor-override",  # from :interop
+        "-Wno-suggest-override",  # from :interop
+        "-Wno-unused-private-field",  # from :interop
+        "-Wno-unused-variable",  # from :interop
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":interop",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/fixtures",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)

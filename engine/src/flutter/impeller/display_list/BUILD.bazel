@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/display_list/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: display_list_unittests, display_list_unittests_golden, aiks_playground, aiks_unittests, aiks_unittests_golden.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
@@ -82,6 +81,114 @@ cc_library(
 )
 
 cc_library(
+    name = "display_list_unittests",
+    testonly = True,
+    srcs = [
+        "aiks_dl_atlas_unittests.cc",
+        "aiks_dl_basic_unittests.cc",
+        "aiks_dl_blend_unittests.cc",
+        "aiks_dl_blur_unittests.cc",
+        "aiks_dl_clip_unittests.cc",
+        "aiks_dl_gradient_unittests.cc",
+        "aiks_dl_opacity_unittests.cc",
+        "aiks_dl_path_unittests.cc",
+        "aiks_dl_primitive_shape_unittests.cc",
+        "aiks_dl_runtime_effect_unittests.cc",
+        "aiks_dl_shadow_unittests.cc",
+        "aiks_dl_text_unittests.cc",
+        "aiks_dl_unittests.cc",
+        "aiks_dl_vertices_unittests.cc",
+        "dl_golden_blur_unittests.cc",
+        "dl_golden_unittests.cc",
+        "dl_playground.cc",
+        "dl_unittests.cc",
+        "paint_unittests.cc",
+        "testing/render_text_in_canvas.cc",
+        "testing/rmse.cc",
+    ],
+    hdrs = [
+        "dl_golden_unittests.h",
+        "dl_playground.h",
+        "testing/render_text_in_canvas.h",
+        "testing/rmse.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["_USE_MATH_DEFINES"],
+    deps = [
+        ":aiks_unittests",
+        ":display_list",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/impeller/testing:screenshot",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status:status_matchers",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "display_list_unittests_golden",
+    testonly = True,
+    srcs = [
+        "aiks_dl_atlas_unittests.cc",
+        "aiks_dl_basic_unittests.cc",
+        "aiks_dl_blend_unittests.cc",
+        "aiks_dl_blur_unittests.cc",
+        "aiks_dl_clip_unittests.cc",
+        "aiks_dl_gradient_unittests.cc",
+        "aiks_dl_opacity_unittests.cc",
+        "aiks_dl_path_unittests.cc",
+        "aiks_dl_primitive_shape_unittests.cc",
+        "aiks_dl_runtime_effect_unittests.cc",
+        "aiks_dl_shadow_unittests.cc",
+        "aiks_dl_text_unittests.cc",
+        "aiks_dl_unittests.cc",
+        "aiks_dl_vertices_unittests.cc",
+        "dl_golden_blur_unittests.cc",
+        "dl_golden_unittests.cc",
+        "dl_playground.cc",
+        "dl_unittests.cc",
+        "paint_unittests.cc",
+        "testing/render_text_in_canvas.cc",
+        "testing/rmse.cc",
+    ],
+    hdrs = [
+        "dl_golden_unittests.h",
+        "dl_playground.h",
+        "testing/render_text_in_canvas.h",
+        "testing/rmse.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "IMPELLER_GOLDEN_TESTS",
+        "IMPELLER_ENABLE_VALIDATION=1",
+        "_USE_MATH_DEFINES",
+    ],
+    deps = [
+        ":aiks_unittests_golden",
+        ":display_list",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/impeller/testing:screenshot",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status:status_matchers",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
     name = "skia_conversions_unittests",
     testonly = True,
     srcs = ["skia_conversions_unittests.cc"],
@@ -94,6 +201,83 @@ cc_library(
         "//engine/src:include_root",
         "//engine/src/flutter/impeller:impeller_public_config",
         "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "aiks_playground",
+    testonly = True,
+    srcs = ["aiks_playground.cc"],
+    hdrs = ["aiks_playground.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":display_list",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "aiks_unittests",
+    testonly = True,
+    srcs = [
+        "aiks_unittests.cc",
+        "canvas_gles_unittests.cc",
+        "canvas_unittests.cc",
+    ],
+    hdrs = ["aiks_unittests.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + ["_USE_MATH_DEFINES"],
+    deps = [
+        ":aiks_playground",
+        ":display_list",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/geometry:geometry_asserts",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/impeller/renderer/backend/gles:mock_gles",  # impeller_enable_opengles
+        "//engine/src/flutter/testing:testing_lib",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status:status_matchers",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "aiks_unittests_golden",
+    testonly = True,
+    srcs = ["aiks_unittests.cc"],
+    hdrs = ["aiks_unittests.h"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "IMPELLER_GOLDEN_TESTS",
+        "IMPELLER_ENABLE_VALIDATION=1",
+        "_USE_MATH_DEFINES",
+    ],
+    deps = [
+        ":aiks_playground",
+        ":display_list",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/geometry:geometry_asserts",
+        "//engine/src/flutter/impeller/golden_tests:golden_playground_test",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+        "//engine/src/flutter/txt",
+        "@abseil-cpp//absl/status:status_matchers",
     ],
     alwayslink = True,
 )

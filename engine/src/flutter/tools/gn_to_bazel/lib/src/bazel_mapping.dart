@@ -56,6 +56,24 @@ const Map<String, String> testSizes = <String, String>{
   'shell_unittests': 'medium',
   // 11 s as a GN binary (85 tests; run_tests.py allows it 90 s).
   'ui_unittests': 'medium',
+  // 24 s alone (46 renders through the software and GPU backends); timed
+  // out at small's 60 s on a machine running the other suites.
+  'display_list_rendertests': 'medium',
+  // 4,795 tests (3,120 run, the Metal variants skipped), the playgrounds
+  // rendering through SwiftShader with validation on: 3,266 s serial on the
+  // host, sharded (testShardCounts).
+  'impeller_unittests': 'large',
+};
+
+/// Test targets (by GN name) split into shards (`shard_count`), with the
+/// count. testing/run_tests.py runs every suite through gtest-parallel, one
+/// process per core; a shard is Bazel's form of that parallelism, and the
+/// in-tree googletest shards by test index when the wrapper of a
+/// flutter_display_test hands it Bazel's shard variables (testing/xvfb_run.sh).
+/// Plain cc_test suites have no wrapper and cannot be listed here.
+const Map<String, int> testShardCounts = <String, int>{
+  // 3,266 s serial; sixteen shards of ~3.5 min on a 24-core host.
+  'impeller_unittests': 16,
 };
 
 /// How a suite is run: the arguments testing/run_tests.py passes it and the
@@ -93,6 +111,11 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
     args: <String>['--enable_vulkan_validation', '--gtest_filter=*Metal'],
     data: <String>[],
   ),
+  // run_tests.py --type impeller (Linux CI's host_debug_unopt_impeller_tests)
+  // runs impeller_unittests whole and with no arguments of its own: the
+  // Vulkan validation layer comes from the environment
+  // (vulkan_validation_env), which flutter_display_test sets. The ColorWheel
+  // playground run (--enable_playground, flutter/flutter#134852) is macOS's.
 };
 
 /// The suites that open a window -- the Impeller playground's, GLFW on
@@ -267,6 +290,8 @@ const Map<String, String> labelRepositoryPrefixes = <String, String>{
   '//flutter/third_party/harfbuzz/': '@harfbuzz//',
   '//flutter/third_party/glfw/': '@glfw//',
   '//flutter/third_party/imgui/': '@imgui//',
+  // ICU's data files (the interop toolkit embeds flutter/icudtl.dat).
+  '//flutter/third_party/icu/': '@icu//',
 };
 
 /// Generated include directories (`$root_gen_dir/flutter`) that are an
@@ -340,6 +365,12 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/shell/gpu:gpu_surface_vulkan': _vulkanCopts,
   '//flutter/shell/common:shell_unittests_gpu_configuration': _vulkanCopts,
   '//flutter/shell/common:shell_test_fixture_sources': _vulkanCopts,
+  // The interop toolkit publishes the renderer backends down its chain.
+  '//flutter/impeller/toolkit/interop:interop_base': _vulkanCopts,
+  '//flutter/impeller/toolkit/interop:interop': _vulkanCopts,
+  '//flutter/impeller/toolkit/interop/backend:backend': _vulkanCopts,
+  '//flutter/impeller/toolkit/interop/backend/gles:gles': _vulkanCopts,
+  '//flutter/impeller/toolkit/interop/backend/vulkan:vulkan': _vulkanCopts,
 };
 
 /// inja_public_config's flags.
@@ -962,6 +993,25 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
       'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
     },
   ),
+  // impeller/tools/embed_blob.gni's embed_blob, invoked directly (the
+  // interop toolkit's ICU data): a file's bytes as a C++ array behind a
+  // library.
+  'embed_blob': TemplateMapping(
+    '//engine/src/flutter/build/bazel/impeller:shaders.bzl',
+    'embed_blob_library',
+    <String, TemplateArgument>{
+      'symbol_name': TemplateArgument('symbol_name', TemplateArgumentKind.scalar),
+      'blob': TemplateArgument('blob', TemplateArgumentKind.file),
+      // Outputs under the target_gen_dir: the package's own files here.
+      'hdr': TemplateArgument('hdr', TemplateArgumentKind.file),
+      'cc': TemplateArgument('cc', TemplateArgumentKind.file),
+      'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+    },
+    // The template's xxd.py action, which the macro declares by the same
+    // name.
+    innerTargets: <String>['gen_blob_{name}'],
+  ),
   // impeller/tools/compiler.gni's impellerc, invoked directly by the test
   // fixtures: runtime stages and shader bundles.
   'impellerc': TemplateMapping(
@@ -1110,6 +1160,9 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // converted reads them (impeller/compiler imports it without use).
     '//flutter/shell/version/version.gni',
     '//flutter/testing/testing.gni',
+    // The zip_bundle template (artifact packaging); its one invocation in
+    // converted files, the interop toolkit's SDK bundle, is skipped.
+    '//flutter/build/zip_bundle.gni',
     // The compiled_action template, which lib/ui's shader fixture
     // directories import without invoking (impellerc() does).
     '//build/compiled_action.gni',

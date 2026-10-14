@@ -154,6 +154,9 @@ cc_library(
 
 cc_test(
     name = "impeller_compiler_unittests",
+    # 98 tests compiling shaders in process (the shader-bundle ones 12 s
+    # each alone); 245 s on a machine running the other suites.
+    size = "large",
     deps = [
         ":compiler_unittests",
         "//engine/src/flutter/impeller/fixtures:file_fixtures",

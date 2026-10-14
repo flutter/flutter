@@ -142,12 +142,9 @@ filegroup(
 )
 ''',
   ),
-  ConvertedFile(
-    '//flutter/impeller',
-    skip: <String, String>{
-      'impeller_unittests': 'needs the Impeller test suites (toolkit/interop, runtime_stage, tessellator, aiks, entity, typographer, the backends)',
-    },
-  ),
+  // Impeller's group, its own suite (impeller_unittests, which links every
+  // suite source_set below) and the Flutter GPU one.
+  ConvertedFile('//flutter/impeller'),
   ConvertedFile(
     '//flutter/impeller/base',
     // GN links base_unittests (a source_set of suites) into the one
@@ -225,10 +222,7 @@ cc_test(
 )
 ''',
   ),
-  ConvertedFile(
-    '//flutter/impeller/runtime_stage',
-    skip: <String, String>{'runtime_stage_unittests': 'needs //flutter/impeller/playground'},
-  ),
+  ConvertedFile('//flutter/impeller/runtime_stage'),
   ConvertedFile('//flutter/impeller/shader_bundle'),
   ConvertedFile(
     '//flutter/impeller/compiler',
@@ -241,6 +235,9 @@ load("@rules_cc//cc:defs.bzl", "cc_test")
 
 cc_test(
     name = "impeller_compiler_unittests",
+    # 98 tests compiling shaders in process (the shader-bundle ones 12 s
+    # each alone); 245 s on a machine running the other suites.
+    size = "large",
     deps = [
         ":compiler_unittests",
         "//engine/src/flutter/impeller/fixtures:file_fixtures",
@@ -273,17 +270,8 @@ cc_test(
 )
 ''',
   ),
-  ConvertedFile(
-    '//flutter/impeller/tessellator',
-    skip: <String, String>{'tessellator_unittests': 'needs //flutter/impeller/playground'},
-  ),
-  ConvertedFile(
-    '//flutter/impeller/renderer',
-    skip: <String, String>{
-      'renderer_unittests': 'with impeller_unittests',
-      'renderer_unittests_golden': 'with impeller_unittests',
-    },
-  ),
+  ConvertedFile('//flutter/impeller/tessellator'),
+  ConvertedFile('//flutter/impeller/renderer'),
   // The gmock doubles of the renderer's interfaces, which the core and
   // other suites test against.
   ConvertedFile('//flutter/impeller/renderer/testing'),
@@ -291,6 +279,23 @@ cc_test(
   // widgets) and the test helpers on it; the screenshotter and golden
   // digests beside it.
   ConvertedFile('//flutter/impeller/testing'),
+  // The golden-test helpers the renderer and display_list suites link (the
+  // Metal screenshotter and the golden binary are macOS-only).
+  ConvertedFile('//flutter/impeller/golden_tests'),
+  // The interop toolkit (the Impeller SDK's C API) and its suite; the SDK
+  // bundle is packaging, and the static library a GN artifact
+  // (complete_static_lib) Bazel's cc_library does not stand for.
+  ConvertedFile(
+    '//flutter/impeller/toolkit/interop',
+    skip: <String, String>{
+      'sdk': 'zip_bundle: artifact packaging',
+      'static_library': 'complete_static_lib: an artifact of the GN build',
+      'example_mtl': 'Objective-C and Metal: macOS',
+    },
+  ),
+  ConvertedFile('//flutter/impeller/toolkit/interop/backend'),
+  ConvertedFile('//flutter/impeller/toolkit/interop/backend/gles'),
+  ConvertedFile('//flutter/impeller/toolkit/interop/backend/vulkan'),
   ConvertedFile('//flutter/impeller/playground/image'),
   ConvertedFile('//flutter/impeller/playground/imgui'),
   ConvertedFile('//flutter/impeller/playground'),
@@ -309,29 +314,13 @@ exports_files(glob([
 ]))
 ''',
   ),
-  ConvertedFile(
-    '//flutter/impeller/typographer',
-    skip: <String, String>{'typographer_unittests': 'needs //flutter/impeller/playground'},
-  ),
-  ConvertedFile(
-    '//flutter/impeller/entity',
-    skip: <String, String>{
-      'entity_test_helpers': 'needs //flutter/impeller/playground',
-      'entity_unittests': 'needs //flutter/impeller/playground',
-    },
-  ),
+  ConvertedFile('//flutter/impeller/typographer'),
+  ConvertedFile('//flutter/impeller/entity'),
   // The display_list_unittests chain (research/08, step 5): the text stack
   // and Impeller's display list.
   ConvertedFile('//flutter/impeller/typographer/backends/skia'),
   ConvertedFile(
     '//flutter/impeller/display_list',
-    skip: <String, String>{
-      'display_list_unittests': 'needs //flutter/impeller/playground',
-      'display_list_unittests_golden': 'needs //flutter/impeller/playground',
-      'aiks_playground': 'needs //flutter/impeller/playground',
-      'aiks_unittests': 'needs //flutter/impeller/playground',
-      'aiks_unittests_golden': 'needs //flutter/impeller/playground',
-    },
     // The skia_conversions suite on its own, as for //flutter/impeller/base.
     appendix: '''
 load("@rules_cc//cc:defs.bzl", "cc_test")
@@ -406,21 +395,9 @@ selects.config_setting_group(
 ''',
   ),
   // Impeller's rendering backends (what //flutter/impeller's group and
-  // //flutter/flow need); their test suites wait on impeller/playground.
-  ConvertedFile(
-    '//flutter/impeller/renderer/backend/gles',
-    skip: <String, String>{
-      'mock_gles': 'with gles_unittests',
-      'gles_unittests': 'needs //flutter/impeller/playground:playground_test',
-    },
-  ),
-  ConvertedFile(
-    '//flutter/impeller/renderer/backend/vulkan',
-    skip: <String, String>{
-      'mock_vulkan': 'with vulkan_unittests (it includes a SwiftShader header the GN never names)',
-      'vulkan_unittests': 'needs //flutter/impeller/playground:playground_test',
-    },
-  ),
+  // //flutter/flow need) and their test suites, on the playground.
+  ConvertedFile('//flutter/impeller/renderer/backend/gles'),
+  ConvertedFile('//flutter/impeller/renderer/backend/vulkan'),
   ConvertedFile('//flutter/impeller/renderer/backend'),
   ConvertedFile('//flutter/flow'),
   // The Dart bindings library (engine-owned third_party), on the way to
@@ -554,6 +531,7 @@ cc_library(
     hdrs = [":headers"],
     include_prefix = "flutter/third_party/skia",
     visibility = ["@flutter//engine/src:__pkg__"],
+    deps = ["//modules/skparagraph:engine_root_headers"],
 )
 ''',
   ),
@@ -609,6 +587,16 @@ cc_library(
     name = "skparagraph_headers",
     hdrs = glob(["**/*.h"]),
     include_prefix = "third_party/skia/modules/skparagraph",
+)
+
+# The engine-root spelling (`flutter/third_party/skia/modules/skparagraph/
+# include/Paragraph.h`, the interop toolkit's), for the root's
+# engine_root_headers; the root's glob stops at this package.
+cc_library(
+    name = "engine_root_headers",
+    hdrs = glob(["include/*.h"]),
+    include_prefix = "flutter/third_party/skia/modules/skparagraph",
+    visibility = ["//:__pkg__"],
 )
 ''',
   ),
