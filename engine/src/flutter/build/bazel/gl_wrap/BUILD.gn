@@ -16,6 +16,12 @@ group("gl_wrap") {
     ":swiftshader_static",
     "//flutter/third_party/swiftshader",
     "//flutter/third_party/vulkan-deps/vulkan-loader/src:libvulkan",
+
+    # The Khronos validation layer and its manifest: the Vulkan playground
+    # requires validation (impeller/playground/playground_impl.cc), and
+    # testing/run_tests.py points the loader at them (vulkan_validation_env).
+    "//third_party/vulkan_validation_layers:VkLayer_khronos_validation",
+    "//third_party/vulkan_validation_layers:vulkan_gen_json_files",
   ]
 }
 

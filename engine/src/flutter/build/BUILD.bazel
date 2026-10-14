@@ -37,6 +37,7 @@ filegroup(
             "secondary/third_party/icu/**",
             "secondary/third_party/jsoncpp/**",
             "secondary/third_party/perfetto/**",
+            "secondary/third_party/vulkan_validation_layers/**",
             "secondary/third_party/zlib/**",
         ],
         exclude = [
