@@ -261,8 +261,8 @@ android {
   // Lab tooling does) configures Gradle without a Flutter compile task: the single
   // `assembleAndroidTest` CLI task makes `shouldConfigureFlutterTask` return false,
   // so `compileFlutterBuild<Variant>` is never registered. The jniLibs copy task
-  // wired via the variant API must tolerate that (absent) compile task rather than
-  // failing with "Task with name 'compileFlutterBuildDebug' not found".
+  // is registered only together with the compile task, so the build must not
+  // fail with "Task with name 'compileFlutterBuildDebug' not found".
   testWithoutContext('app:assembleAndroidTest builds when no Flutter compile task is configured', () async {
     final Directory appDir = _createApp(tempDir);
 

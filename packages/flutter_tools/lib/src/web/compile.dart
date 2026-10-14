@@ -17,6 +17,7 @@ import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../cache.dart';
+import '../compile.dart' show kDdcCanaryFeatures;
 import '../flutter_plugins.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -266,6 +267,16 @@ const kDDCCanarySdkArtifactMap = <WebRendererMode, HostArtifact>{
 const kDDCCanarySdkSourcemapsArtifactMap = <WebRendererMode, HostArtifact>{
   WebRendererMode.canvaskit: HostArtifact.webPrecompiledDDCCanarySdkSourcemaps,
 };
+
+/// The precompiled DDC SDK artifacts matching [kDdcCanaryFeatures].
+const Map<WebRendererMode, HostArtifact> kDDCSdkArtifactMap = kDdcCanaryFeatures
+    ? kDDCCanarySdkArtifactMap
+    : kDDCStableSdkArtifactMap;
+
+/// The precompiled DDC SDK source map artifacts matching [kDdcCanaryFeatures].
+const Map<WebRendererMode, HostArtifact> kDDCSdkSourcemapsArtifactMap = kDdcCanaryFeatures
+    ? kDDCCanarySdkSourcemapsArtifactMap
+    : kDDCStableSdkSourcemapsArtifactMap;
 
 String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) {
   final values = <String, Object>{};

@@ -46,6 +46,27 @@ TEST(DisplayListUtils, OverRestore) {
   helper.restore();
 }
 
+// Initial paint must match DlPaint::kDefault (see DlOpReceiver).
+// https://github.com/flutter/flutter/issues/193388.
+TEST(DisplayListUtils, InitialPaintMatchesDlPaintDefaults) {
+  MockDispatchHelper helper;
+  const SkPaint& sk_paint = helper.paint();
+  const DlPaint& defaults = DlPaint::kDefault;
+
+  EXPECT_EQ(sk_paint.isAntiAlias(), defaults.isAntiAlias());
+  EXPECT_EQ(sk_paint.getColor4f().toSkColor(), defaults.getColor().argb());
+  EXPECT_EQ(sk_paint.getStrokeWidth(), defaults.getStrokeWidth());
+  EXPECT_EQ(sk_paint.getStrokeMiter(), defaults.getStrokeMiter());
+  EXPECT_EQ(sk_paint.getStyle(), SkPaint::kFill_Style);
+  EXPECT_EQ(sk_paint.getStrokeCap(), SkPaint::kButt_Cap);
+  EXPECT_EQ(sk_paint.getStrokeJoin(), SkPaint::kMiter_Join);
+  EXPECT_EQ(sk_paint.asBlendMode(), SkBlendMode::kSrcOver);
+  EXPECT_EQ(sk_paint.getShader(), nullptr);
+  EXPECT_EQ(sk_paint.getColorFilter(), nullptr);
+  EXPECT_EQ(sk_paint.getImageFilter(), nullptr);
+  EXPECT_EQ(sk_paint.getMaskFilter(), nullptr);
+}
+
 // https://github.com/flutter/flutter/issues/132860.
 TEST(DisplayListUtils, SetColorSourceDithersIfGradient) {
   MockDispatchHelper helper;
