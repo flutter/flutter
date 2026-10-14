@@ -1815,6 +1815,10 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
       'Kotlin DSL android.applicationVariants.all': "  Line 3: android.applicationVariants.all { println(name) }\n                  ^ Unresolved reference 'applicationVariants'.",
       'Kotlin DSL android.libraryVariants.all':
           "e: file:///app/build.gradle.kts:3:9: Unresolved reference 'libraryVariants'.",
+      'Kotlin DSL android.testVariants.all':
+          "e: file:///app/build.gradle.kts:3:9: Unresolved reference 'testVariants'.",
+      'Kotlin DSL android.unitTestVariants.all':
+          "e: file:///app/build.gradle.kts:3:9: Unresolved reference 'unitTestVariants'.",
       'Kotlin DSL android { variantFilter {} }': "  Line 3: android { variantFilter { println(name) } }\n                    ^ Unresolved reference 'variantFilter'.",
     };
 

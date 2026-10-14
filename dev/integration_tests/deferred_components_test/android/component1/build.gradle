@@ -42,6 +42,7 @@ android {
 
 androidComponents {
     onVariants(selector().all()) { variant ->
+        // addStaticSourceDirectory takes a path, so the build directory is resolved here.
         def flutterIntermediates = project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}").get().asFile
         variant.sources.assets?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_assets").path)
         variant.sources.jniLibs?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_libs").path)

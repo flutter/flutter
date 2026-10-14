@@ -751,9 +751,14 @@ class AndroidProject extends FlutterProjectPlatform {
   /// - `id "org.jetbrains.kotlin.android"`
   /// - `id("org.jetbrains.kotlin.android")`
   /// - `id ( "org.jetbrains.kotlin.android" )`
+  /// - `kotlin("android")`
+  /// - `alias(libs.plugins.kotlin.android)`, a version catalog alias that the
+  ///   Flutter Gradle Plugin also detects
   static final _declarativeKotlinPluginPatterns = <RegExp>[
     RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
     RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
+    RegExp(r'^\s*kotlin\s*\(\s*"android"\s*\)\s*$'),
+    RegExp(r'^\s*alias\s*\(\s*libs\.plugins\.kotlin\.android\s*\)\s*$'),
   ];
 
   /// Pattern used to find the assignment of the "group" property in Gradle.

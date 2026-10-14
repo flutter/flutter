@@ -1010,6 +1010,62 @@ plugins {
       );
 
       testUsingContext(
+        'kotlin host app language with kotlin("android")',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    kotlin("android")
+}
+''';
+            },
+          );
+          expect(project.android.isKotlin, isTrue);
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
+        'kotlin host app language with alias(libs.plugins.kotlin.android)',
+        () async {
+          final FlutterProject project = await someProject();
+
+          addAndroidGradleFile(
+            project.directory,
+            kotlinDsl: true,
+            gradleFileContent: () {
+              return '''
+plugins {
+    id("com.android.application")
+    alias(libs.plugins.kotlin.android)
+}
+''';
+            },
+          );
+          expect(project.android.isKotlin, isTrue);
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
+          XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+          FlutterProjectFactory: () => flutterProjectFactory,
+        },
+      );
+
+      testUsingContext(
         'Gradle Groovy files are preferred to Gradle Kotlin files',
         () async {
           final FlutterProject project = await someProject();

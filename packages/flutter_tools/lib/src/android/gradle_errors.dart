@@ -766,7 +766,9 @@ final _legacyVariantApiPatterns = <RegExp>[
   // `sourceSets`, Gradle resolves `applicationVariants` as a new source set.
   RegExp(r'on source set application variants of type com\.android\.build\.'),
   // Kotlin DSL, for example `android.applicationVariants.all { ... }`.
-  RegExp(r"Unresolved reference '(applicationVariants|libraryVariants|variantFilter)'\."),
+  RegExp(
+    r"Unresolved reference '(applicationVariants|libraryVariants|testVariants|unitTestVariants|variantFilter)'\.",
+  ),
 ];
 
 /// Handler for a build script that uses a variant API that does not exist
