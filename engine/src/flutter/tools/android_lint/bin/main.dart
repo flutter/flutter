@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -75,12 +76,51 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
   <module name="FlutterEngine" android="true" library="true" compile-sdk-version="android-U">
   <manifest file="${path.join(androidDir.path, 'AndroidManifest.xml')}" />
 ''');
+  var hasIntentExtraError = false;
   for (final FileSystemEntity entity in androidDir.listSync(recursive: true)) {
     if (!entity.path.endsWith('.java')) {
       continue;
     }
+
     if (entity.path.endsWith('Test.java')) {
       continue;
+    }
+
+    print('Checking for unsafe Intent extra parsing in ${entity.path}... ');
+
+    // TODO(camsim99): Migrate all exempted files that can be safely migrated to use
+    // safe IntentUtils methods: https://github.com/flutter/flutter/issues/192076.
+    final exemptedFiles = <String>[
+      'FlutterActivity.java',
+      'FlutterFragmentActivity.java',
+      'FlutterEngineConnectionRegistry.java',
+      'FlutterEngineFlagsProviderImpl.java', // Exempted because it is the intentional boundary for engine flag intent inspection.
+      'FlutterShellArgs.java', // TODO(camsim99): Remove as part of https://github.com/flutter/flutter/issues/193256.
+      'ProcessTextPlugin.java', // Exempted because it safely parses the result of startActivityForResult.
+      'IntentUtils.java',
+    ];
+    var isExempt = false;
+    for (final exemptedFile in exemptedFiles) {
+      if (entity.path.endsWith(exemptedFile)) {
+        isExempt = true;
+        break;
+      }
+    }
+
+    if (!isExempt) {
+      final file = File(entity.path);
+      final List<String> lines = file.readAsLinesSync();
+      final intentExtraRegex = RegExp(
+        r'\.get((Boolean(Array)?|Bundle|Byte(Array)?|Char(Sequence)?(Array|ArrayList)?|Double(Array)?|Float(Array)?|Int(Array)?|IntegerArrayList|Long(Array)?|Parcelable(Array|ArrayList)?|Serializable|Short(Array)?|String(Array|ArrayList)?)Extra|Extras)\(',
+      );
+      for (var i = 0; i < lines.length; i++) {
+        if (intentExtraRegex.hasMatch(lines[i])) {
+          print(
+            '${entity.path}:${i + 1}: Error: Direct usage of `Intent.getExtra` methods is banned. Use `IntentUtils.safeGetExtra` methods instead.',
+          );
+          hasIntentExtraError = true;
+        }
+      }
     }
     projectXml.writeln('    <src file="${entity.path}" />');
   }
@@ -90,6 +130,11 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
 </project>
 ''');
   await projectXml.close();
+
+  if (hasIntentExtraError) {
+    print('Lint failed due to custom rules.');
+    return 1;
+  }
   print('Wrote project.xml, starting lint...');
   final lintArgs = <String>[
     path.join(androidSdkDir.path, 'cmdline-tools', 'latest', 'bin', 'lint'),
@@ -112,8 +157,8 @@ Future<int> runLint(ArgParser argParser, ArgResults argResults) async {
     lintArgs,
     environment: <String, String>{'JAVA_HOME': javahome},
   );
-  lintProcess.stdout.pipe(stdout);
-  lintProcess.stderr.pipe(stderr);
+  unawaited(lintProcess.stdout.pipe(stdout));
+  unawaited(lintProcess.stderr.pipe(stderr));
   return lintProcess.exitCode;
 }
 

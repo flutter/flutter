@@ -85,10 +85,6 @@ static void composite_layer(FlCompositorOpenGL* self,
 void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
                                            const FlutterLayer** layers,
                                            size_t layers_count) {
-  if (layers_count == 0) {
-    return;
-  }
-
   // Save bindings that are set by this function.  All bindings must be restored
   // to their original values because Skia expects that its bindings have not
   // been altered.
@@ -112,9 +108,11 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   glGetIntegerv(GL_BLEND_DST_RGB, &saved_dst_rgb);
   GLint saved_dst_alpha;
   glGetIntegerv(GL_BLEND_DST_ALPHA, &saved_dst_alpha);
+  GLfloat saved_clear_color[4] = {0.0, 0.0, 0.0, 0.0};
+  glGetFloatv(GL_COLOR_CLEAR_VALUE, saved_clear_color);
 
-  size_t width = layers[0]->size.width;
-  size_t height = layers[0]->size.height;
+  size_t width = layers_count > 0 ? layers[0]->size.width : 0;
+  size_t height = layers_count > 0 ? layers[0]->size.height : 0;
 
   // FIXME(robert-ancell): The vertex array is the same for all views, but
   // cannot be shared in OpenGL. Find a way to not generate this every time.
@@ -131,6 +129,9 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
   // Prevents regressions like: https://github.com/flutter/flutter/issues/140828
   // See OpenGL specification version 4.6, section 18.3.1.
   glDisable(GL_SCISSOR_TEST);
+
+  glClearColor(0.0, 0.0, 0.0, 0.0);
+  glClear(GL_COLOR_BUFFER_BIT);
 
   gboolean first_layer = TRUE;
   for (size_t i = 0; i < layers_count; ++i) {
@@ -178,6 +179,8 @@ void fl_compositor_opengl_composite_layers(FlCompositorOpenGL* self,
     glDisable(GL_SCISSOR_TEST);
   }
 
+  glClearColor(saved_clear_color[0], saved_clear_color[1], saved_clear_color[2],
+               saved_clear_color[3]);
   glBindTexture(GL_TEXTURE_2D, saved_texture_binding);
   glBindVertexArray(saved_vao_binding);
   glBindBuffer(GL_ARRAY_BUFFER, saved_array_buffer_binding);
