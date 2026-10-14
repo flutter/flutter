@@ -29,6 +29,7 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'dart/pub.dart';
 import 'devfs.dart';
@@ -99,6 +100,34 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         androidStudio: globals.androidStudio,
         androidSdk: globals.androidSdk,
+        toolContext: ToolContext(
+          artifacts: globals.artifacts!,
+          botDetector: globals.botDetector,
+          cache: globals.cache,
+          config: globals.config,
+          customDevicesConfig: globals.customDevicesConfig,
+          flutterVersion: globals.flutterVersion,
+          fs: globals.fs,
+          git: globals.git,
+          localEngineLocator: globals.localEngineLocator!,
+          logger: globals.logger,
+          nativeAssetsBuilder: globals.nativeAssetsBuilder,
+          os: globals.os,
+          outputPreferences: globals.outputPreferences,
+          persistentToolState: globals.persistentToolState!,
+          platform: globals.platform,
+          preRunValidator: globals.preRunValidator,
+          processInfo: globals.processInfo,
+          processManager: globals.processManager,
+          processUtils: globals.processUtils,
+          projectFactory: globals.projectFactory,
+          shutdownHooks: globals.shutdownHooks,
+          signals: globals.signals,
+          stdio: globals.stdio,
+          systemClock: globals.systemClock,
+          terminal: globals.terminal,
+          userMessages: globals.userMessages,
+        ),
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         platform: globals.platform,
@@ -121,7 +150,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         osUtils: globals.os,
       ),
       AndroidWorkflow: () =>
-          AndroidWorkflow(androidSdk: globals.androidSdk, featureFlags: featureFlags),
+          AndroidWorkflow(androidSdkBuilder: () => globals.androidSdk, featureFlags: featureFlags),
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         userMessages: globals.userMessages,
         processManager: globals.processManager,
@@ -190,8 +219,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(
-        java: globals.java,
-        androidSdk: globals.androidSdk,
+        javaBuilder: () => globals.java,
+        androidSdkBuilder: () => globals.androidSdk,
         processManager: globals.processManager,
         logger: globals.logger,
         fileSystem: globals.fs,
@@ -235,10 +264,10 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       Java: () => Java.find(
+        androidStudioBuilder: () => globals.androidStudio,
         config: globals.config,
-        androidStudio: globals.androidStudio,
-        logger: globals.logger,
         fileSystem: globals.fs,
+        logger: globals.logger,
         platform: globals.platform,
         processManager: globals.processManager,
       ),
