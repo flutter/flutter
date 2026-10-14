@@ -127,6 +127,9 @@ void main() {
             ],
           },
         );
+        expect(bundle.needsBuild(), isFalse);
+        dataAssetFile.deleteSync();
+        expect(bundle.needsBuild(), isTrue);
       },
       overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
