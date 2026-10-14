@@ -29,7 +29,6 @@ import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 import '../web/compile.dart';
-import '../web/web_constants.dart';
 import '../web/web_options.dart';
 
 /// The name of the directory where Integration Tests are placed.
