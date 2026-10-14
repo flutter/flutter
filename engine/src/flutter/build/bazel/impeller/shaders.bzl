@@ -673,3 +673,47 @@ def impellerc(
         mnemonic = "".join([c for c in (mnemonic or "Impellerc").elems() if c.isalnum()]),
         **kwargs
     )
+
+# ---------------------------------------------------------------------------
+# embed_blob(): the template invoked directly
+# ---------------------------------------------------------------------------
+
+def embed_blob_library(name, symbol_name, blob, hdr, cc, deps = [], **kwargs):
+    """GN's embed_blob() template (impeller/tools/embed_blob.gni), invoked directly.
+
+    A file's bytes as a C++ array (impeller/tools/xxd.py) behind a library
+    whose header is included by its path under //flutter
+    (`impeller/toolkit/interop/embedded_icu_data.h`): the template's
+    `embed_<name>` config puts the generated tree's `flutter/` on the include
+    path, which `//engine/src/flutter:config` is here.
+
+    Args:
+      name: the target name; the action is `gen_blob_<name>`, as in GN.
+      symbol_name: the array's name (`impeller_<symbol_name>_data`).
+      blob: the file to embed.
+      hdr: the header to write, relative to this package.
+      cc: the source to write, relative to this package.
+      deps: GN's `deps`: ordering only (the blob carries the file dependency).
+      **kwargs: `testonly`, `visibility`, `target_compatible_with`.
+    """
+    _unused = deps  # buildifier: disable=unused-variable
+    embed_blob(
+        name = "gen_blob_" + name,
+        blob = blob,
+        symbol_name = symbol_name,
+        header = hdr,
+        source = cc,
+        visibility = ["//visibility:private"],
+        testonly = kwargs.get("testonly", False),
+        target_compatible_with = kwargs.get("target_compatible_with", []),
+    )
+    cc_library(
+        name = name,
+        srcs = [cc],
+        hdrs = [hdr],
+        copts = CHROMIUM_CODE_COPTS,
+        local_defines = FLUTTER_LOCAL_DEFINES,
+        deps = ["//engine/src/flutter:config"],
+        alwayslink = True,
+        **kwargs
+    )
