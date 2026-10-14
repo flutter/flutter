@@ -10,6 +10,7 @@
 
 #include "flutter/fml/hash_combine.h"
 #include "flutter/fml/task_runner.h"
+#include "impeller/base/promise.h"
 #include "impeller/base/thread.h"
 #include "impeller/renderer/backend/gles/pipeline_compile_queue_gles.h"
 #include "impeller/renderer/backend/gles/reactor_gles.h"
@@ -198,8 +199,12 @@ class PipelineLibraryGLES final
       const PipelineDescriptor& desc,
       std::shared_ptr<UniqueHandleGLES> program_handle);
 
+  /// The reactor operations that fulfill the promise may be dropped without
+  /// running (e.g. if the reactor is collected at shutdown), so the promise
+  /// must fulfill itself when destroyed. Destroying an unfulfilled
+  /// `std::promise` aborts because exceptions are disabled.
   using PipelinePromise =
-      std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>;
+      NoExceptionPromise<std::shared_ptr<Pipeline<PipelineDescriptor>>>;
 
   //----------------------------------------------------------------------------
   /// @brief      The state of a pipeline being created, shared between

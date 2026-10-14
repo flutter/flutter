@@ -389,8 +389,7 @@ PipelineFuture<PipelineDescriptor> PipelineLibraryGLES::GetPipeline(
         RealizedFuture<std::shared_ptr<Pipeline<PipelineDescriptor>>>(nullptr)};
   }
 
-  auto promise = std::make_shared<
-      std::promise<std::shared_ptr<Pipeline<PipelineDescriptor>>>>();
+  auto promise = std::make_shared<PipelinePromise>();
   auto pipeline_future = PipelineFuture<PipelineDescriptor>{
       descriptor, promise->get_future(), weak_from_this()};
   pipelines_[descriptor] = pipeline_future;

@@ -115,8 +115,13 @@ class MockReactorWorker final : public ReactorGLES::Worker {
   // |ReactorGLES::Worker|
   bool CanReactorReactOnCurrentThreadNow(
       const ReactorGLES& reactor) const override {
-    return true;
+    return can_react_;
   }
+
+  void SetCanReact(bool can_react) { can_react_ = can_react; }
+
+ private:
+  bool can_react_ = true;
 };
 
 /// A task runner that captures posted tasks so tests can run them on demand.
@@ -245,6 +250,43 @@ TEST(PipelineLibraryGLESAsyncTest, PerformEagerlyCompilesAndWaitsImmediately) {
   // Nothing is left for the IO task runner to do.
   mock.io_task_runner->RunAll();
   EXPECT_EQ(*mock.link_status_queries, 1);
+}
+
+// Regression test for a crash when the reactor operations of a pipeline
+// creation are dropped without ever running, which happens at shutdown once
+// the IO thread can no longer react. The promise must still be fulfilled since
+// destroying an empty std::promise aborts when exceptions are disabled.
+TEST(PipelineLibraryGLESAsyncTest, FulfillsPromiseWhenReactorOpsAreDropped) {
+  using VS = SpecConstantVertexShader;
+  using FS = SpecConstantFragmentShader;
+  MockAsyncContext mock = CreateMockAsyncContext();
+  std::shared_ptr<Context> context = mock.context;
+  ASSERT_TRUE(context && context->IsValid());
+  std::optional<PipelineDescriptor> desc =
+      PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+
+  PipelineFuture<PipelineDescriptor> future =
+      context->GetPipelineLibrary()->GetPipeline(desc, /*async=*/true);
+  ASSERT_EQ(mock.io_task_runner->PendingTaskCount(), 1u);
+
+  // The IO thread can no longer react, so the job's reactor operations are
+  // queued but never run.
+  mock.worker->SetCanReact(false);
+  mock.io_task_runner->RunOne();
+  EXPECT_FALSE(IsReady(future));
+
+  // Collecting the context collects the library and the compile queue, which
+  // posts the started job to the IO task runner to be finished.
+  context.reset();
+  mock.context.reset();
+
+  // Finishing the job queues another operation that can't run. Dropping the
+  // job then collects the reactor along with its pending operations.
+  mock.io_task_runner->RunAll();
+
+  ASSERT_TRUE(IsReady(future));
+  EXPECT_EQ(future.Get(), nullptr);
 }
 // NOLINTEND(bugprone-unchecked-optional-access)
 
