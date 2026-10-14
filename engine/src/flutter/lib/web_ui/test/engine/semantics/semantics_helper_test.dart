@@ -293,6 +293,49 @@ void testMain() {
         expect(shouldForwardToFramework, isTrue);
       });
 
+      test('keeps the placeholder until the gesture that targets it ends', () {
+        // Giving up on semantics schedules the placeholder for removal. A drag
+        // that started on the placeholder is still in progress, and removing
+        // its target now could lose the drag's pointerup.
+        // See https://github.com/flutter/flutter/issues/194104
+        mobileSemanticsEnabler.semanticsActivationAttempts = kMaxSemanticsActivationAttempts - 1;
+        expect(
+          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointermove')),
+          isTrue,
+        );
+
+        expect(
+          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointermove')),
+          isTrue,
+        );
+        expect(placeholder!.isConnected, isTrue);
+        expect(mobileSemanticsEnabler.placeholders, <DomElement>[placeholder!]);
+
+        expect(
+          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointerup')),
+          isTrue,
+        );
+        expect(placeholder!.isConnected, isFalse);
+        expect(mobileSemanticsEnabler.placeholders, isEmpty);
+      });
+
+      for (final cancelType in <String>['pointercancel', 'touchcancel']) {
+        test('removes the placeholder when the gesture ends with $cancelType', () {
+          // A gesture the browser takes over, such as a page pan, ends with a
+          // cancel instead of a pointerup or touchend.
+          mobileSemanticsEnabler.semanticsActivationAttempts = kMaxSemanticsActivationAttempts - 1;
+          mobileSemanticsEnabler.tryEnableSemantics(createDomPointerEvent('pointermove'));
+          expect(placeholder!.isConnected, isTrue);
+
+          expect(
+            mobileSemanticsEnabler.tryEnableSemantics(createDomEvent('Event', cancelType)),
+            isTrue,
+          );
+          expect(placeholder!.isConnected, isFalse);
+          expect(mobileSemanticsEnabler.placeholders, isEmpty);
+        });
+      }
+
       test('Can update placeholder label', () {
         const testLabel = 'Test label for placeholder';
         mobileSemanticsEnabler.updatePlaceholderLabel(testLabel);

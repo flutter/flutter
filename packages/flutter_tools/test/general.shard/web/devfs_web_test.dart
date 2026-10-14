@@ -56,8 +56,6 @@ void main() {
   late Platform windows;
   late FakeHttpServer httpServer;
   late BufferLogger logger;
-  const usesDdcModuleSystem = true;
-  const canaryFeatures = true;
 
   setUpAll(() async {
     packages = PackageConfig(<Package>[
@@ -78,8 +76,6 @@ void main() {
           InternetAddress.loopbackIPv4,
           <String, String>{},
           <String, String>{},
-          usesDdcModuleSystem,
-          canaryFeatures,
           webRenderer: WebRendererMode.canvaskit,
           useLocalCanvasKit: false,
           fileSystem: globals.fs,
@@ -112,8 +108,6 @@ void main() {
       entrypoint: Uri.parse('org-dartlang-app:///main.dart'),
       logger: BufferLogger.test(),
       platform: FakePlatform(),
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     expect(() => webDevFS.assetPathsToEvict.clear(), returnsNormally);
@@ -341,8 +335,6 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
-      usesDdcModuleSystem,
-      canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
@@ -363,8 +355,6 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
-      usesDdcModuleSystem,
-      canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
@@ -387,8 +377,6 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
-        usesDdcModuleSystem,
-        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
@@ -410,8 +398,6 @@ void main() {
         InternetAddress.loopbackIPv4,
         <String, String>{},
         <String, String>{},
-        usesDdcModuleSystem,
-        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
@@ -473,8 +459,6 @@ void main() {
       InternetAddress.loopbackIPv4,
       <String, String>{},
       <String, String>{},
-      usesDdcModuleSystem,
-      canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: true,
       fileSystem: globals.fs,
@@ -853,8 +837,6 @@ void main() {
       ),
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -929,12 +911,7 @@ void main() {
 
     final residentCompiler = FakeResidentCompiler()..output = const CompilerOutput('a', 0, <Uri>[]);
 
-    final WebDevFS webDevFS = createWebDevFS(
-      logger: logger,
-      platform: linux,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
-    );
+    final WebDevFS webDevFS = createWebDevFS(logger: logger, platform: linux);
 
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -1014,12 +991,7 @@ void main() {
 
     final residentCompiler = FakeResidentCompiler()..output = const CompilerOutput('a', 0, <Uri>[]);
 
-    final WebDevFS webDevFS = createWebDevFS(
-      logger: logger,
-      platform: linux,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
-    );
+    final WebDevFS webDevFS = createWebDevFS(logger: logger, platform: linux);
 
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -1096,12 +1068,7 @@ void main() {
 
     final residentCompiler = FakeResidentCompiler()..output = const CompilerOutput('a', 0, <Uri>[]);
 
-    final WebDevFS webDevFS = createWebDevFS(
-      logger: logger,
-      platform: linux,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
-    );
+    final WebDevFS webDevFS = createWebDevFS(logger: logger, platform: linux);
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
     webDevFS.stackTraceMapper.createSync(recursive: true);
@@ -1170,12 +1137,7 @@ void main() {
 
     final residentCompiler = FakeResidentCompiler()..output = const CompilerOutput('a', 0, <Uri>[]);
 
-    final WebDevFS webDevFS = createWebDevFS(
-      logger: logger,
-      platform: linux,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
-    );
+    final WebDevFS webDevFS = createWebDevFS(logger: logger, platform: linux);
 
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -1271,8 +1233,6 @@ void main() {
       ),
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
     webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
     webDevFS.flutterJs.createSync(recursive: true);
@@ -1364,8 +1324,6 @@ void main() {
         enableDwds: true,
         ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
-        ddcModuleSystem: usesDdcModuleSystem,
-        canaryFeatures: canaryFeatures,
       );
       final firstConnection = FakeAppConnection();
       final secondConnection = FakeAppConnection();
@@ -1413,8 +1371,6 @@ void main() {
       useSseForInjectedClient: true,
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     final Uri uri = await webDevFS.create();
@@ -1441,8 +1397,6 @@ void main() {
       ),
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     await webDevFS.create();
@@ -1474,8 +1428,6 @@ void main() {
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
       webDevServerConfig: webDevServerConfig,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
     final Uri uri = await webDevFS.create();
 
@@ -1512,8 +1464,6 @@ void main() {
       logger: globals.logger,
       platform: globals.platform,
       crossOriginIsolation: false,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     expect(webAssetServer.defaultResponseHeaders['x-frame-options'], null);
@@ -1551,8 +1501,6 @@ void main() {
       logger: globals.logger,
       platform: globals.platform,
       crossOriginIsolation: false,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     expect(webAssetServer.defaultResponseHeaders[extraHeaderKey], <String>[extraHeaderValue]);
@@ -1640,8 +1588,6 @@ void main() {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
-      usesDdcModuleSystem,
-      canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
@@ -1673,8 +1619,6 @@ void main() {
       useSseForInjectedClient: true,
       ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
       entrypoint: Uri.base,
-      ddcModuleSystem: usesDdcModuleSystem,
-      canaryFeatures: canaryFeatures,
     );
 
     final Uri uri = await webDevFS.create();
@@ -1706,8 +1650,6 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
-        usesDdcModuleSystem,
-        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
@@ -1755,8 +1697,6 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
-        usesDdcModuleSystem,
-        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
@@ -1811,8 +1751,6 @@ void main() {
         InternetAddress.anyIPv4,
         <String, String>{},
         <String, String>{},
-        usesDdcModuleSystem,
-        canaryFeatures,
         webRenderer: WebRendererMode.canvaskit,
         useLocalCanvasKit: false,
         fileSystem: globals.fs,
@@ -1863,8 +1801,6 @@ const config = {
       InternetAddress.anyIPv4,
       <String, String>{},
       <String, String>{},
-      usesDdcModuleSystem,
-      canaryFeatures,
       webRenderer: WebRendererMode.canvaskit,
       useLocalCanvasKit: false,
       fileSystem: globals.fs,
@@ -1915,8 +1851,6 @@ const config = {
         ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
         webDevServerConfig: WebDevServerConfig(baseHref: baseHref),
-        ddcModuleSystem: usesDdcModuleSystem,
-        canaryFeatures: canaryFeatures,
       );
       webDevFS.ddcModuleLoaderJS.createSync(recursive: true);
       webDevFS.flutterJs.createSync(recursive: true);
