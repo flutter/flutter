@@ -170,7 +170,6 @@ abstract final class FlutterOptions {
   static const kWebBrowserFlag = 'web-browser-flag';
   static const kWebResourcesCdnFlag = 'web-resources-cdn';
   static const kWebWasmFlag = 'wasm';
-  static const kWebExperimentalHotReload = 'web-experimental-hot-reload';
   static const kEnableImpeller = 'enable-impeller';
   static const kCodesignIdentity = 'codesign-identity';
   static const kCodesign = 'codesign';
@@ -1015,9 +1014,6 @@ abstract class FlutterCommand extends Command<void> {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
-    // TODO(nshahan): Delete when fully migrated to new module system,
-    // https://github.com/flutter/flutter/issues/142060.
-    bool? forcedWebEnableHotReload,
   }) async {
     final bool trackWidgetCreation =
         hasOption(BuildInfoOptions.trackWidgetCreation) &&
@@ -1158,7 +1154,6 @@ abstract class FlutterCommand extends Command<void> {
       initializeFromDill: getValue(BuildInfoOptions.initializeFromDill),
       assumeInitializeFromDillUpToDate: getValue(BuildInfoOptions.assumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
-      webEnableHotReload: true,
       deprecatedJsInterop: getValue(WebOptions.deprecatedJsInterop),
     );
   }
