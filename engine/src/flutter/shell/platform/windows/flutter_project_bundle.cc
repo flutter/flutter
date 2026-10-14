@@ -13,18 +13,20 @@
 #include "flutter/fml/string_conversion.h"
 #include "flutter/shell/platform/common/engine_switches.h"  // nogncheck
 #include "flutter/shell/platform/common/path_utils.h"
+#include "third_party/abseil-cpp/absl/status/statusor.h"
 
 namespace flutter {
 
 namespace {
 
 // Parses a feature level written as "<major>_<minor>", such as "10_0".
-// Returns nullopt if |value| is not in that form.
-std::optional<egl::D3DFeatureLevel> ParseD3DFeatureLevel(
+absl::StatusOr<egl::D3DFeatureLevel> ParseD3DFeatureLevel(
     std::string_view value) {
+  const absl::Status invalid_status =
+      absl::InvalidArgumentError("expected a feature level such as 10_0");
   const size_t separator = value.find('_');
   if (separator == std::string_view::npos) {
-    return std::nullopt;
+    return invalid_status;
   }
   const char* major_begin = value.data();
   const char* major_end = major_begin + separator;
@@ -37,7 +39,7 @@ std::optional<egl::D3DFeatureLevel> ParseD3DFeatureLevel(
   auto minor_result = std::from_chars(minor_begin, minor_end, minor);
   if (major_result.ec != std::errc() || major_result.ptr != major_end ||
       minor_result.ec != std::errc() || minor_result.ptr != minor_end) {
-    return std::nullopt;
+    return invalid_status;
   }
   return egl::D3DFeatureLevel{major, minor};
 }
@@ -53,12 +55,13 @@ std::optional<egl::D3DFeatureLevel> GetMaxD3DFeatureLevelFromEnvironment() {
   if (value == nullptr || value[0] == '\0') {
     return std::nullopt;
   }
-  std::optional<egl::D3DFeatureLevel> level = ParseD3DFeatureLevel(value);
-  if (!level.has_value()) {
-    FML_LOG(WARNING) << "Ignoring " << kKey << "=" << value
-                     << "; expected a feature level such as 10_0.";
+  absl::StatusOr<egl::D3DFeatureLevel> level = ParseD3DFeatureLevel(value);
+  if (!level.ok()) {
+    FML_LOG(WARNING) << "Ignoring " << kKey << "=" << value << ": "
+                     << level.status().message();
+    return std::nullopt;
   }
-  return level;
+  return level.value();
 #else
   return std::nullopt;
 #endif  // !FLUTTER_RELEASE
