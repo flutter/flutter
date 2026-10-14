@@ -863,6 +863,29 @@ void main() {
         );
       },
     );
+
+    testUsingContext('OptionBundle.register supports verboseHelp and hideOverride overrides for FlutterCommand helpers', () async {
+      final command = _FakeCommand(name: 'helper-test', description: 'Helper delegation test');
+      command.usesFilesystemOptions(hide: false);
+      command.usesPortOptions(verboseHelp: true);
+      command.addBuildModeFlags(verboseHelp: true, defaultToRelease: false, excludeRelease: true);
+
+      expect(command.argParser.options['output-dill']!.hide, isFalse);
+      expect(command.argParser.options['vm-service-port']!.hide, isFalse);
+      expect(command.argParser.options, isNot(contains('ipv6')));
+      expect(command.getBuildMode(), BuildMode.debug);
+      expect(command.argParser.options.keys, containsAll(<String>['debug', 'profile']));
+      expect(command.argParser.options, isNot(contains('release')));
+
+      final hiddenCommand = _FakeCommand(name: 'hidden-test', description: 'Hidden override');
+      const FilesystemOptionsBundle().register(
+        hiddenCommand,
+        hiddenCommand.argParser,
+        verboseHelp: true,
+        hideOverride: true,
+      );
+      expect(hiddenCommand.argParser.options['output-dill']!.hide, isTrue);
+    });
   });
 }
 
