@@ -32,6 +32,7 @@ import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
@@ -77,6 +78,7 @@ XCDevice? get xcdevice => context.get<XCDevice>();
 Xcode? get xcode => context.get<Xcode>();
 IOSWorkflow? get iosWorkflow => context.get<IOSWorkflow>();
 LocalEngineLocator? get localEngineLocator => context.get<LocalEngineLocator>();
+ToolContext get toolContext => context.get<ToolContext>()!;
 
 PersistentToolState? get persistentToolState => PersistentToolState.instance;
 

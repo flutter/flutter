@@ -24,6 +24,7 @@ import 'base/time.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'dart/language_version.dart';
 import 'dart/package_map.dart';
@@ -360,13 +361,16 @@ const _kFlutterPluginsDevDependencyKey = 'dev_dependency';
 bool _writeFlutterPluginsList(
   FlutterProject project,
   List<Plugin> plugins, {
-  required FileSystemUtils fileSystemUtils,
-  required FlutterVersion flutterVersion,
-  required Logger logger,
   required bool swiftPackageManagerEnabledIos,
   required bool swiftPackageManagerEnabledMacos,
-  required SystemClock systemClock,
+  required ToolContext toolContext,
 }) {
+  final ToolContext(
+    :FileSystemUtils fileSystemUtils,
+    :FlutterVersion flutterVersion,
+    :Logger logger,
+    :SystemClock systemClock,
+  ) = toolContext;
   final File pluginsFile = project.flutterPluginsDependenciesFile;
   if (plugins.isEmpty) {
     return ErrorHandlingFileSystem.deleteIfExists(pluginsFile);
@@ -1432,12 +1436,7 @@ Future<void> refreshPluginsList(
   FlutterProject project, {
   required CocoaPods? cocoaPods,
   required FeatureFlags featureFlags,
-  required FileSystemUtils fileSystemUtils,
-  required FlutterVersion flutterVersion,
-  required Logger logger,
-  required OperatingSystemUtils os,
-  required Platform platform,
-  required SystemClock systemClock,
+  required ToolContext toolContext,
   bool iosPlatform = false,
   bool macOSPlatform = false,
   bool forceCocoaPodsOnly = false,
@@ -1446,6 +1445,7 @@ Future<void> refreshPluginsList(
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
 }) async {
+  final ToolContext(:Logger logger, :OperatingSystemUtils os, :Platform platform) = toolContext;
   final List<Plugin> plugins = await findPlugins(
     project,
     logger: logger,
@@ -1471,12 +1471,9 @@ Future<void> refreshPluginsList(
   final bool changed = _writeFlutterPluginsList(
     project,
     plugins,
-    fileSystemUtils: fileSystemUtils,
-    flutterVersion: flutterVersion,
-    logger: logger,
     swiftPackageManagerEnabledIos: swiftPackageManagerEnabledIos,
     swiftPackageManagerEnabledMacos: swiftPackageManagerEnabledMacos,
-    systemClock: systemClock,
+    toolContext: toolContext,
   );
   if (changed || forceCocoaPodsOnly) {
     createPluginSymlinks(
@@ -1552,13 +1549,10 @@ Future<void> injectPlugins(
   FlutterProject project, {
   required Analytics analytics,
   required CocoaPods? cocoaPods,
-  required Config config,
   required FeatureFlags featureFlags,
-  required FileSystem fileSystem,
-  required Logger logger,
-  required ProcessUtils processUtils,
   required bool releaseMode,
   required TemplateRenderer templateRenderer,
+  required ToolContext toolContext,
   bool androidPlatform = false,
   bool iosPlatform = false,
   bool linuxPlatform = false,
@@ -1569,6 +1563,8 @@ Future<void> injectPlugins(
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
 }) async {
+  final ToolContext(:Config config, :FileSystem fs, :Logger logger, :ProcessUtils processUtils) =
+      toolContext;
   final List<Plugin> plugins = await findPlugins(
     project,
     logger: logger,
@@ -1646,13 +1642,13 @@ Future<void> injectPlugins(
           project: project,
           cocoapods: cocoaPods,
           swiftPackageManager: SwiftPackageManager(
-            fileSystem: fileSystem,
+            fileSystem: fs,
             templateRenderer: templateRenderer,
             processUtils: processUtils,
             config: config,
             logger: logger,
           ),
-          fileSystem: fileSystem,
+          fileSystem: fs,
           featureFlags: featureFlags,
           analytics: analytics,
         );

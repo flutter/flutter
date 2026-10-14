@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -102,9 +103,21 @@ void main() {
     late NoOpAnalytics analytics;
     late Platform platform;
     late OperatingSystemUtils os;
-    late FileSystemUtils fileSystemUtils;
     late ProcessUtils processUtils;
     const TemplateRenderer templateRenderer = MustacheTemplateRenderer();
+
+    ToolContext createToolContext({FileSystem? fileSystem, Logger? logger}) {
+      return FakeToolContext(
+        config: config,
+        flutterVersion: flutterVersion,
+        fs: fileSystem ?? fs,
+        logger: logger ?? testLogger,
+        os: os,
+        platform: platform,
+        processUtils: processUtils,
+        systemClock: systemClock,
+      );
+    }
 
     // A Windows-style filesystem. This is not populated by default, so tests
     // using it instead of fs must re-run any necessary setup (e.g.,
@@ -199,7 +212,6 @@ void main() {
       analytics = const NoOpAnalytics();
       platform = FakePlatform();
       os = FakeOperatingSystemUtils('');
-      fileSystemUtils = FileSystemUtils(fileSystem: fs, platform: platform);
       processUtils = ProcessUtils(
         processManager: FakeProcessManager.any(),
         logger: BufferLogger.test(),
@@ -443,12 +455,7 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           expect(flutterProject.flutterPluginsDependenciesFile, isNot(exists));
@@ -469,12 +476,7 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           expect(flutterProject.flutterPluginsDependenciesFile, isNot(exists));
@@ -502,12 +504,7 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
@@ -557,12 +554,7 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
@@ -622,12 +614,7 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
           expect(flutterProject.flutterPluginsDependenciesFile, isNot(exists));
 
@@ -637,14 +624,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
           final FileStat stat1 = flutterProject.flutterPluginsDependenciesFile.statSync();
@@ -655,14 +637,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
           final FileStat stat2 = flutterProject.flutterPluginsDependenciesFile.statSync();
@@ -677,14 +654,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
           final FileStat stat3 = flutterProject.flutterPluginsDependenciesFile.statSync();
@@ -715,14 +687,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
           expect(
             cocoaPods.capturedInvocations,
@@ -745,14 +712,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
           expect(
             cocoaPods.capturedInvocations,
@@ -776,14 +738,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
           expect(
             cocoaPods.capturedInvocations,
@@ -797,14 +754,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
           expect(
             cocoaPods.capturedInvocations,
@@ -855,12 +807,7 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
@@ -952,14 +899,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
@@ -1011,13 +953,8 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             forceCocoaPodsOnly: true,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
@@ -1065,13 +1002,8 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             forceSwiftPM: true,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
@@ -1123,14 +1055,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
 
           expect(flutterProject.flutterPluginsDependenciesFile, exists);
@@ -1163,14 +1090,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
           expect(iosProject.podManifestLock, isNot(exists));
           expect(macosProject.podManifestLock, isNot(exists));
@@ -1199,14 +1121,9 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
+            toolContext: createToolContext(),
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
           );
           simulatePodInstallRun(iosProject);
           simulatePodInstallRun(macosProject);
@@ -1215,12 +1132,7 @@ dependencies:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
           expect(iosProject.podManifestLock, exists);
           expect(macosProject.podManifestLock, exists);
@@ -1252,11 +1164,8 @@ dependencies:
             analytics: analytics,
             androidPlatform: true,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1297,11 +1206,8 @@ dependencies:
                 analytics: analytics,
                 androidPlatform: true,
                 cocoaPods: cocoaPods,
-                config: config,
                 featureFlags: featureFlags,
-                fileSystem: fs,
-                logger: testLogger,
-                processUtils: processUtils,
+                toolContext: createToolContext(),
                 releaseMode: false,
                 templateRenderer: templateRenderer,
               );
@@ -1337,11 +1243,8 @@ dependencies:
             analytics: analytics,
             androidPlatform: true,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1379,11 +1282,8 @@ dependencies:
             analytics: analytics,
             androidPlatform: true,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1422,11 +1322,8 @@ dependencies:
             analytics: analytics,
             androidPlatform: true,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1464,11 +1361,8 @@ dependencies:
             analytics: analytics,
             androidPlatform: true,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1506,11 +1400,8 @@ dependencies:
             analytics: analytics,
             androidPlatform: true,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1545,11 +1436,8 @@ dependencies:
             analytics: analytics,
             androidPlatform: true,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1700,11 +1588,8 @@ flutter:
             analytics: analytics,
             androidPlatform: true,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1741,15 +1626,12 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             darwinDependencyManagement: dependencyManagement,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            iosPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
             releaseMode: false,
             templateRenderer: templateRenderer,
+            toolContext: createToolContext(),
+            iosPlatform: true,
           );
 
           final File registrantFile = iosProject.pluginRegistrantImplementation;
@@ -1773,12 +1655,9 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1792,12 +1671,9 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1830,15 +1706,12 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             darwinDependencyManagement: dependencyManagement,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            macOSPlatform: true,
-            processUtils: processUtils,
             releaseMode: false,
             templateRenderer: templateRenderer,
+            toolContext: createToolContext(),
+            macOSPlatform: true,
           );
 
           final File registrantFile = macosProject.managedDirectory.childFile(
@@ -1869,15 +1742,12 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             darwinDependencyManagement: dependencyManagement,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            macOSPlatform: true,
-            processUtils: processUtils,
             releaseMode: false,
             templateRenderer: templateRenderer,
+            toolContext: createToolContext(),
+            macOSPlatform: true,
           );
 
           final File registrantFile = macosProject.managedDirectory.childFile(
@@ -1902,12 +1772,9 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -1975,12 +1842,9 @@ dependencies:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -2058,12 +1922,9 @@ dependencies:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -2106,12 +1967,9 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -2142,12 +2000,9 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -2191,12 +2046,9 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -2240,12 +2092,9 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -2275,11 +2124,8 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
             windowsPlatform: true,
@@ -2320,11 +2166,8 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
             windowsPlatform: true,
@@ -2358,11 +2201,8 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
             windowsPlatform: true,
@@ -2407,11 +2247,8 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
             windowsPlatform: true,
@@ -2444,14 +2281,11 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fsWindows,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
             releaseMode: false,
             templateRenderer: templateRenderer,
+            toolContext: createToolContext(fileSystem: fsWindows),
             windowsPlatform: true,
           );
 
@@ -2478,16 +2312,13 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             darwinDependencyManagement: dependencyManagement,
             featureFlags: featureFlags,
-            fileSystem: fs,
             iosPlatform: true,
-            logger: testLogger,
             macOSPlatform: true,
-            processUtils: processUtils,
             releaseMode: false,
             templateRenderer: templateRenderer,
+            toolContext: createToolContext(),
           );
           expect(dependencyManagement.setupPlatforms, <FlutterDarwinPlatform>[
             FlutterDarwinPlatform.ios,
@@ -2509,14 +2340,11 @@ flutter:
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             darwinDependencyManagement: dependencyManagement,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
             releaseMode: false,
             templateRenderer: templateRenderer,
+            toolContext: createToolContext(),
           );
           expect(dependencyManagement.setupPlatforms, <FlutterDarwinPlatform>[]);
         },
@@ -2545,12 +2373,7 @@ flutter:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           expect(linuxProject.pluginSymlinkDirectory.childLink('some_plugin'), exists);
@@ -2572,12 +2395,7 @@ flutter:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           expect(windowsProject.pluginSymlinkDirectory.childLink('some_plugin'), exists);
@@ -2642,12 +2460,7 @@ flutter:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           for (final file in dummyFiles) {
@@ -2704,12 +2517,7 @@ flutter:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           final links = <Link>[
@@ -2747,12 +2555,7 @@ flutter:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           final links = <Link>[
@@ -2792,12 +2595,7 @@ flutter:
             flutterProject,
             cocoaPods: cocoaPods,
             featureFlags: featureFlags,
-            fileSystemUtils: fileSystemUtils,
-            flutterVersion: flutterVersion,
-            logger: testLogger,
-            os: os,
-            platform: platform,
-            systemClock: systemClock,
+            toolContext: createToolContext(),
           );
 
           final files = <File>[
@@ -3601,11 +3399,8 @@ iosPrefix: FLT
             analytics: analytics,
             androidPlatform: true,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -3620,11 +3415,8 @@ iosPrefix: FLT
             analytics: analytics,
             androidPlatform: true,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: true,
             templateRenderer: templateRenderer,
           );
@@ -3657,15 +3449,12 @@ iosPrefix: FLT
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             darwinDependencyManagement: dependencyManagement,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            iosPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
             releaseMode: false,
             templateRenderer: templateRenderer,
+            toolContext: createToolContext(),
+            iosPlatform: true,
           );
           final File generatedPluginRegistrantImpl =
               flutterProject.ios.pluginRegistrantImplementation;
@@ -3677,15 +3466,12 @@ iosPrefix: FLT
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             darwinDependencyManagement: dependencyManagement,
             featureFlags: featureFlags,
-            fileSystem: fs,
             iosPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
             releaseMode: true,
             templateRenderer: templateRenderer,
+            toolContext: createToolContext(),
           );
           expect(generatedPluginRegistrantImpl, exists);
           expect(generatedPluginRegistrantImpl.readAsStringSync(), contains(devDepImport));
@@ -3715,12 +3501,9 @@ iosPrefix: FLT
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
           );
@@ -3735,12 +3518,9 @@ iosPrefix: FLT
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
             linuxPlatform: true,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: true,
             templateRenderer: templateRenderer,
           );
@@ -3775,15 +3555,12 @@ iosPrefix: FLT
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             darwinDependencyManagement: dependencyManagement,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            macOSPlatform: true,
-            processUtils: processUtils,
             releaseMode: false,
             templateRenderer: templateRenderer,
+            toolContext: createToolContext(),
+            macOSPlatform: true,
           );
           final File generatedPluginRegistrant = flutterProject.macos.managedDirectory.childFile(
             'GeneratedPluginRegistrant.swift',
@@ -3799,15 +3576,12 @@ iosPrefix: FLT
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             darwinDependencyManagement: dependencyManagement,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
             macOSPlatform: true,
-            processUtils: processUtils,
             releaseMode: true,
             templateRenderer: templateRenderer,
+            toolContext: createToolContext(),
           );
           expect(generatedPluginRegistrant, exists);
           expect(
@@ -3846,11 +3620,8 @@ iosPrefix: FLT
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: false,
             templateRenderer: templateRenderer,
             windowsPlatform: true,
@@ -3868,11 +3639,8 @@ iosPrefix: FLT
             flutterProject,
             analytics: analytics,
             cocoaPods: cocoaPods,
-            config: config,
             featureFlags: featureFlags,
-            fileSystem: fs,
-            logger: testLogger,
-            processUtils: processUtils,
+            toolContext: createToolContext(),
             releaseMode: true,
             templateRenderer: templateRenderer,
             windowsPlatform: true,
