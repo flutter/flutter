@@ -530,8 +530,8 @@ class BenchmarkFilter {
     Map<String, String>? environment,
   }) {
     environment ??= const <String, String>{};
-    final List<String>? envTargets = environment['BENCHMARK_TARGETS']?.split(',');
-    final List<String>? effectiveTargets = targetBenchmarks ?? envTargets;
+    final List<String>? effectiveTargets =
+        targetBenchmarks ?? environment['BENCHMARK_TARGETS']?.split(',');
     final String? effectiveFilterPattern = filterPattern ?? environment['BENCHMARK_FILTER'];
 
     RegExp? compiledFilter;
@@ -552,6 +552,7 @@ class BenchmarkFilter {
   List<String> filter(List<String> allBenchmarks) {
     final Set<String> availableSet = allBenchmarks.toSet();
 
+    Iterable<String> filtered = allBenchmarks;
     // Strict validation: fail fast if ANY target benchmark is missing/misspelled
     if (targetBenchmarks != null && targetBenchmarks!.isNotEmpty) {
       final Set<String> targetSet = targetBenchmarks!.toSet();
@@ -562,12 +563,7 @@ class BenchmarkFilter {
           'Available benchmarks: [${allBenchmarks.join(', ')}]',
         );
       }
-    }
-
-    Iterable<String> filtered = allBenchmarks;
-    if (targetBenchmarks != null && targetBenchmarks!.isNotEmpty) {
-      final Set<String> targetSet = targetBenchmarks!.toSet();
-      filtered = filtered.where(targetSet.contains);
+      filtered = targetSet;
     }
     if (compiledFilter != null) {
       filtered = filtered.where(compiledFilter!.hasMatch);
@@ -654,10 +650,9 @@ Future<TaskResult> runWebBenchmarkFromArgs(
   final argParser = ArgParser()
     ..addMultiOption(
       'benchmark',
-      abbr: 'b',
       help: 'Target benchmark names to run (comma-separated or multiple flags)',
     )
-    ..addOption('filter', abbr: 'f', help: 'Regex pattern to filter benchmark names')
+    ..addOption('filter', help: 'Regex pattern to filter benchmark names')
     ..addFlag('clean', defaultsTo: true, help: 'Whether to run flutter clean before building');
 
   // Allow unrecognized runner options from Devicelab runners/wrappers without crashing.
@@ -665,7 +660,7 @@ Future<TaskResult> runWebBenchmarkFromArgs(
   try {
     args = argParser.parse(rawArgs);
   } on ArgParserException catch (e) {
-    return TaskResult.failure(e.message.replaceAll('"--', '"'));
+    return TaskResult.failure(e.message);
   }
 
   final rawBenchmarks = args['benchmark'] as List<String>?;

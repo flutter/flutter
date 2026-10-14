@@ -29,10 +29,10 @@ void main() {
     test('combines targetBenchmarks and filterPattern (intersection)', () {
       final filter = BenchmarkFilter.parse(
         targetBenchmarks: <String>['draw_rect', 'bench_card'],
-        filterPattern: r'^draw_',
+        filterPattern: r'^bench_',
       );
       final List<String> result = filter.filter(allBenchmarks);
-      expect(result, <String>['draw_rect']);
+      expect(result, <String>['bench_card']);
     });
 
     test('trimming whitespace in target benchmarks', () {
@@ -226,7 +226,7 @@ void main() {
     test('tolerance to unexpected runner arguments or parse exceptions', () async {
       final TaskResult result = await runWebBenchmarkFromArgs(options, <String>['--invalid-flag']);
       expect(result.succeeded, isFalse);
-      expect(result.message, contains('Could not find an option named "invalid-flag".'));
+      expect(result.message, contains('Could not find an option named "--invalid-flag".'));
     });
   });
 }
