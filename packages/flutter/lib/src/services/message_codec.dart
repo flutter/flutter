@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'message_codecs.dart';
+library;
+
 import 'package:flutter/foundation.dart';
 
 import 'platform_channel.dart';
@@ -126,8 +129,8 @@ class PlatformException implements Exception {
   ///
   /// The error details are supplied by the code that reports the error. The
   /// value must be supported by the [MethodCodec] used by the channel; for the
-  /// default `StandardMethodCodec`, the supported values are documented with
-  /// `StandardMessageCodec`.
+  /// default [StandardMethodCodec], the supported values are documented with
+  /// [StandardMessageCodec].
   ///
   /// This property is `dynamic`, which means type-checking is skipped when accessing
   /// this property. To minimize the risk of type errors at runtime, the value should
