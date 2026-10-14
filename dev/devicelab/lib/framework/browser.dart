@@ -160,10 +160,10 @@ class Chrome {
 
     WipConnection? debugConnection;
     if (withDebugging) {
-      final int port =
-          (options.debugPort == 0 ? remoteDebuggingPort : options.debugPort) ??
-          remoteDebuggingPort ??
-          0;
+      final int? port = options.debugPort == 0 ? remoteDebuggingPort : options.debugPort;
+      if (port == null || port == 0) {
+        throw StateError('Failed to determine Chrome remote debugging port.');
+      }
       debugConnection = await _connectToChromeDebugPort(port, options.url);
     }
 
