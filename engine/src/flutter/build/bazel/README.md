@@ -252,13 +252,29 @@ The host suites render through ANGLE (OpenGL ES on Vulkan) and SwiftShader
 (Vulkan on the CPU): `//flutter/testing:opengl` links ANGLE's
 `libEGL_static` and `libGLESv2_static`, `:vulkan` opens SwiftShader's
 `libvk_swiftshader.so`, and ANGLE itself opens the Khronos loader
-(`libvulkan.so.1`) and, through it, SwiftShader. `gl_wrap/` builds the three
+(`libvulkan.so.1`) and, through it, SwiftShader. `gl_wrap/` builds the three,
+and the Khronos validation layer (`libVkLayer_khronos_validation.so` and its
+manifest: `impeller_unittests`' data under `--use-glfw-swiftshader`, the
+configuration of CI's `host_debug_unopt_impeller_tests`, whose
+`run_tests.py --type impeller` run needs it for `--enable_vulkan_validation`),
 with their own GN rules in one `gn_build` action, as `dart_wrap/` builds the
-Dart SDK: ANGLE's `BUILD.gn` is 2,000 lines over a dozen trees and
-SwiftShader's build is a JIT compiler's, and the suites are what matters
-now. The pruned graph is about 1,100 compiles (ANGLE, SwiftShader with its
+Dart SDK:
+ANGLE's `BUILD.gn` is 2,000 lines over a dozen trees and SwiftShader's build
+is a JIT compiler's, and the suites are what matters now. The pruned graph
+is about 1,100 compiles without the layer (ANGLE, SwiftShader with its
 Subzero backend and its own SPIRV-Tools, the loader, abseil, zlib, libc++),
-four minutes on 24 cores.
+four minutes on 24 cores; the layer's generated validation code triples
+that (669 s against 224 s of `ninja`).
+
+The wrapped build takes `tools/gn`'s arguments for a host build, and one GN
+default among them matters at run time: `is_minimal_linux` stays `false`.
+`build_overrides/vulkan_headers.gni` derives `vulkan_use_x11` from it, and
+a loader built without `VK_USE_PLATFORM_XCB_KHR` strips `VK_KHR_xcb_surface`
+from the extensions SwiftShader reports, after which GLFW cannot create the
+playground's Vulkan window surface. The price is `//build/config/linux`
+probing the sysroot's pkg-config metadata (part of the sysroot repository's
+`build_tree`) with the host's `pkg-config` at `gn gen` time, as GN's own
+host build does.
 
 `libangle.a` holds the object closure of the two static libraries up to the
 `archive_boundaries` the Bazel side provides -- abseil (`@abseil-cpp`), zlib
@@ -280,7 +296,7 @@ measured on the build as the Dart SDK's were, and without any `.git`: ANGLE's
 commit id comes from the `DEPS` pin through `ANGLE_UPSTREAM_HASH` (the rule's
 `env`), not from the checkout's git state.
 
-At run time the three files must sit **next to the test binary**. ANGLE opens
+At run time the files must sit **next to the test binary**. ANGLE opens
 the loader from, and points it (`VK_ICD_FILENAMES`) at the ICD manifest in,
 the directory of its own module -- the executable, with ANGLE linked
 statically -- and the manifest names `./libvk_swiftshader.so`; the engine's
@@ -289,12 +305,13 @@ opens the driver by bare name, which GN's `-rpath=$ORIGIN` resolves (the
 toolchain gives every executable the same rpath). In GN the files land in
 the build directory through `data_deps`. Here a suite lists
 `flutter_gpu_test_backends` (testing/testing.bzl) as `data`: a copy of the
-three files in the suite's own package, which is where the binary is in the
-runfiles tree (`bazel test`), in `bazel-bin` and for `bazel run`. The
-converter declares the target in every package with a suite of
-`gpuBackendTests` (bazel_mapping.dart) -- the suites whose GN `runtime_deps`
-name `libvk_swiftshader.so`, kept as a list because the converter sees one
-file at a time.
+files in the suite's own package, in GN's layout (the layer's manifest under
+`vulkan-data/`, which its `library_path` is relative to), which is where the
+binary is in the runfiles tree (`bazel test`), in `bazel-bin` and for
+`bazel run`. The converter declares the target in every package with a
+suite of `gpuBackendTests` (bazel_mapping.dart) -- the suites whose GN
+`runtime_deps` name `libvk_swiftshader.so`, kept as a list because the
+converter sees one file at a time.
 
 ```
 bazelisk build //engine/src/flutter/build/bazel/gl_wrap:gl_backends
@@ -315,10 +332,33 @@ suites that link it (`impeller_dart_unittests`, `impeller_unittests`;
 (testing/testing.bzl): a `cc_binary` of the suite in its package, beside
 the GPU backends, run through `testing/xvfb_run.sh`, which uses the
 environment's `DISPLAY` or starts an Xvfb of its own inside the sandbox --
-what `run_tests.py` does once for the whole Linux batch. Xvfb is a host
+what `run_tests.py` does once for the whole Linux batch. The wrapper
+starts `Xvfb -displayfd` directly rather than `xvfb-run -a`: that option
+picks a display number by scanning `/tmp` for lock files, and sandboxes
+each have a `/tmp` of their own while sharing the machine's abstract
+socket namespace, so concurrent tests (the shards below) picked the same
+number and failed to open their display; `-displayfd` binds the first free
+number and reports it. The server's other arguments are `testing/xvfb.py`'s
+(`run_tests.py`'s server), MIT-SHM disabled among them: with the extension
+on, Mesa's unchecked shared-memory attach races a loaded server and killed
+six of sixteen shards. Xvfb is a host
 prerequisite for these suites, as it is for `run_tests.py`; the arguments
 are `run_tests.py`'s (`testRuns`), which on Linux keep
-`impeller_dart_unittests` to its Metal variants, all skipped.
+`impeller_dart_unittests` to its Metal variants, all skipped, and run
+`impeller_unittests` whole (`run_tests.py --type impeller`, the
+`host_debug_unopt_impeller_tests` builder: no arguments of its own). That
+suite is 4,795 tests and ~35 minutes serial under Bazel; `run_tests.py`
+runs it through gtest-parallel, and Bazel's form of that is `shard_count`
+(`testShardCounts` in bazel_mapping.dart: ten shards), which works because
+`xvfb_run.sh` hands Bazel's `TEST_TOTAL_SHARDS`/`TEST_SHARD_INDEX`/
+`TEST_SHARD_STATUS_FILE` to googletest under the `GTEST_*` names the
+in-tree copy reads -- a plain `cc_test` suite has no such wrapper, and the
+converter refuses to shard one. The test's environment is `run_tests.py`'s
+`vulkan_validation_env` as well (`vulkan_validation = True`): the loader is
+pointed at the copied SwiftShader manifest (`VK_ICD_FILENAMES`) and layer
+directory (`VK_LAYER_PATH`), with the Khronos layer enabled
+(`VK_INSTANCE_LAYERS`), by paths relative to the runfiles tree the test runs
+from.
 
 ## Impeller's shader pipeline
 
@@ -352,6 +392,13 @@ the bundle's paths, which GN wrote with `rebase_path`, are the converter's
 `$(src ...)` tokens (`gn_action.bzl`'s `expand_gn_paths`), so the JSON is
 the same text on every machine. GN's `mnemonic` becomes the action's,
 reduced to letters and digits (`IMPELLERC_IPLR` is not a Bazel mnemonic).
+
+`embed_blob()` (impeller/tools/embed_blob.gni) is invoked directly too, by
+`impeller/toolkit/interop` for the ICU data of the standalone library; the
+converter emits it as `embed_blob_library`, the `embed_blob` rule plus the
+`cc_library` the template declares around the generated pair. The blob is
+`@icu//:flutter/icudtl.dat`, the trimmed data file GN names, which the ICU
+overlay exports beside `common/icudtl.dat`.
 
 ## Build speed: the cache and the sandbox
 

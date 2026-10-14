@@ -3,12 +3,88 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/renderer/backend/vulkan/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: mock_vulkan, vulkan_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 
 package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "mock_vulkan",
+    testonly = True,
+    srcs = ["test/mock_vulkan.cc"],
+    hdrs = ["test/mock_vulkan.h"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :vulkan
+        "-Wno-c++98-compat-extra-semi",  # from :vulkan
+        "-Wno-deprecated-copy",  # from :vulkan
+        "-Wno-implicit-fallthrough",  # from :vulkan
+        "-Wno-nullability-completeness",  # from :vulkan
+        "-Wno-suggest-destructor-override",  # from :vulkan
+        "-Wno-suggest-override",  # from :vulkan
+        "-Wno-unused-private-field",  # from :vulkan
+        "-Wno-unused-variable",  # from :vulkan
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":vulkan",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "vulkan_unittests",
+    testonly = True,
+    srcs = [
+        "allocator_vk_unittests.cc",
+        "blit_pass_vk_unittests.cc",
+        "command_encoder_vk_unittests.cc",
+        "command_pool_vk_unittests.cc",
+        "command_queue_vk_unittests.cc",
+        "context_vk_unittests.cc",
+        "descriptor_pool_vk_unittests.cc",
+        "driver_info_vk_unittests.cc",
+        "fence_waiter_vk_unittests.cc",
+        "formats_vk_unittests.cc",
+        "pipeline_cache_data_vk_unittests.cc",
+        "render_pass_builder_vk_unittests.cc",
+        "render_pass_cache_unittests.cc",
+        "render_pass_vk_unittests.cc",
+        "resource_manager_vk_unittests.cc",
+        "surface_context_vk_unittests.cc",
+        "test/gpu_tracer_unittests.cc",
+        "test/mock_vulkan_unittests.cc",
+        "test/pipeline_compile_queue_vulkan_unittests.cc",
+        "test/sampler_library_vk_unittests.cc",
+        "test/swapchain_unittests.cc",
+        "texture_vk_unittests.cc",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :vulkan
+        "-Wno-c++98-compat-extra-semi",  # from :vulkan
+        "-Wno-deprecated-copy",  # from :vulkan
+        "-Wno-implicit-fallthrough",  # from :vulkan
+        "-Wno-nullability-completeness",  # from :vulkan
+        "-Wno-suggest-destructor-override",  # from :vulkan
+        "-Wno-suggest-override",  # from :vulkan
+        "-Wno-unused-private-field",  # from :vulkan
+        "-Wno-unused-variable",  # from :vulkan
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":mock_vulkan",
+        ":vulkan",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
 
 cc_library(
     name = "vulkan",

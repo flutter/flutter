@@ -3,10 +3,9 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/tessellator/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: tessellator_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -82,4 +81,27 @@ cc_binary(
 alias(
     name = "tessellator_shared",
     actual = ":libtessellator.so",
+)
+
+cc_library(
+    name = "tessellator_unittests",
+    testonly = True,
+    srcs = [
+        "path_tessellator_unittests.cc",
+        "tessellator_playground_unittests.cc",
+        "tessellator_unittests.cc",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":tessellator_libtess",
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/geometry:geometry_asserts",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
 )

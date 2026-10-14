@@ -1,0 +1,44 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/impeller/toolkit/interop/backend/gles/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "gles",
+    srcs = [
+        "context_gles.cc",
+        "reactor_worker_gles.cc",
+        "surface_gles.cc",
+    ],
+    hdrs = [
+        "context_gles.h",
+        "reactor_worker_gles.h",
+        "surface_gles.h",
+    ],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from ../../:interop_base
+        "-Wno-c++98-compat-extra-semi",  # from ../../:interop_base
+        "-Wno-deprecated-copy",  # from ../../:interop_base
+        "-Wno-implicit-fallthrough",  # from ../../:interop_base
+        "-Wno-nullability-completeness",  # from ../../:interop_base
+        "-Wno-suggest-destructor-override",  # from ../../:interop_base
+        "-Wno-suggest-override",  # from ../../:interop_base
+        "-Wno-unused-private-field",  # from ../../:interop_base
+        "-Wno-unused-variable",  # from ../../:interop_base
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/toolkit/interop:interop_base",
+    ],
+    alwayslink = True,
+)

@@ -1132,6 +1132,32 @@ my_other_lib("y") {
         expect(y.variables.containsKey('missing'), isFalse);
       });
 
+      test('defines target_name in the invocation block, as GN does', () {
+        // impeller/display_list's local templates read invoker.target_name
+        // (GN's FillTargetBlockScope sets it in the block's scope); the
+        // forwarded "*" leaves it out, the body having its own.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'a/BUILD.gn': '''
+template("suite") {
+  target_name = invoker.target_name
+  source_set(target_name) {
+    forward_variables_from(invoker, "*")
+    sources += [ "common.cc" ]
+  }
+}
+
+suite("x") {
+  sources = [ "x.cc" ]
+}
+''',
+        });
+        final GnFileEvaluation evaluation = evaluateIn(tree, '//a/BUILD.gn');
+        final GnTarget x = evaluation.targets.single;
+        expect(x.name, 'x');
+        expect(strings(x, 'sources'), <String>['x.cc', 'common.cc']);
+        expect(x.variables.containsKey('target_name'), isFalse);
+      });
+
       test('is strict about templates too', () {
         final GnSourceTree tree = sourceTree(<String, String>{
           'lib/templates.gni': '''
@@ -2253,6 +2279,37 @@ flutter_display_test(
 '''),
       );
       expect(output, isNot(contains('cc_test')));
+    });
+
+    test("a sharded suite gets shard_count; run_tests.py's Linux run has no arguments", () async {
+      // impeller_unittests (testShardCounts): the whole suite as Linux CI runs
+      // it, split into shards the display test's wrapper hands to gtest.
+      final GnFileEvaluation evaluation = await evaluate('''
+executable("impeller_unittests") {
+  testonly = true
+  deps = [
+    "base:base_unittests",
+    "//flutter/testing",
+  ]
+}
+''');
+      final String output = emitBuildFile(evaluation, gnPackage: '//flutter/impeller');
+      expect(
+        output,
+        contains('''
+flutter_display_test(
+    name = "impeller_unittests",
+    size = "large",
+    data = [":gpu_test_backends"],
+    shard_count = 16,
+    deps = [
+        "//engine/src/flutter/impeller/base:base_unittests",
+        "//engine/src/flutter/testing",
+    ],
+)
+'''),
+      );
+      expect(output, isNot(contains('args')));
     });
 
     test('all_dependent_configs cross private deps; engine code gets FLUTTER_COPTS', () async {
