@@ -3,9 +3,11 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: impeller_unittesting, impeller_unittests, impeller_dart_unittests.
+# Not converted: impeller_unittests.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_display_test", "flutter_gpu_test_backends")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -38,5 +40,42 @@ cc_library(
         "//engine/src/flutter/impeller/renderer/backend",  # impeller_supports_rendering
         "//engine/src/flutter/impeller/tessellator",
         "//engine/src/flutter/impeller/typographer/backends/skia:typographer_skia_backend",  # impeller_supports_rendering
+    ],
+)
+
+cc_library(
+    name = "impeller_unittesting",
+    testonly = True,
+    srcs = ["//engine/src/flutter/testing:run_all_unittests.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    # Informs run_all_unittests to perform impeller specific initialization
+    local_defines = FLUTTER_LOCAL_DEFINES + ["IMPELLER_UNITTEST_SUITE=1"],
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/impeller/testing:impeller_unittest_suite",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+# SwiftShader, its ICD manifest and the Vulkan loader, next to the
+# suites below (GN: data_deps of //flutter/third_party/swiftshader and
+# ANGLE).
+flutter_gpu_test_backends(
+    name = "gpu_test_backends",
+)
+
+flutter_display_test(
+    name = "impeller_dart_unittests",
+    size = "small",
+    args = [
+        "--enable_vulkan_validation",
+        "--gtest_filter=*Metal",
+    ],
+    data = [":gpu_test_backends"],
+    deps = [
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/renderer:renderer_dart_unittests",
+        "//engine/src/flutter/testing",
     ],
 )

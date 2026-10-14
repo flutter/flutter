@@ -164,6 +164,22 @@ _SOURCE_REPOSITORIES = {
         gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/re2/BUILD.gn"],
         gn_repository = "@re2=//flutter/third_party/re2",
     ),
+    # The Impeller playground's window and UI libraries: the secondary
+    # tree's GN over the synced trees (GLFW's imports glfw_args.gni beside
+    # it, which the secondary directory mirrors in).
+    "glfw": struct(
+        path = "engine/src/flutter/third_party/glfw",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/glfw/BUILD.gn"],
+        gn_repository = "@glfw=//flutter/third_party/glfw",
+        gn_secondary_dir = "engine/src/flutter/build/secondary/flutter/third_party/glfw",
+    ),
+    "imgui": struct(
+        path = "engine/src/flutter/third_party/imgui",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/imgui/BUILD.gn"],
+        gn_repository = "@imgui=//flutter/third_party/imgui",
+    ),
     # Skia as the engine builds it: //flutter/skia/BUILD.gn (the engine's
     # wrapper over Skia's gn/*.gni source lists), converted at fetch time so
     # that Skia rolls need no regeneration (research/07). Skia's own Bazel

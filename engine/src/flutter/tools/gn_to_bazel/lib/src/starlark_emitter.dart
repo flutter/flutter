@@ -867,11 +867,18 @@ final class _Emitter {
     required bool library,
     bool shared = false,
   }) {
-    _use('@rules_cc//cc:defs.bzl', kind);
+    // A suite that opens a window (displayTests) runs under a display:
+    // testing.bzl's macro, with cc_test's attributes.
+    final bool display = kind == 'cc_test' && displayTests.contains('$gnPackage:${target.name}');
+    if (display) {
+      _use('//engine/src/flutter/testing:testing.bzl', 'flutter_display_test');
+    } else {
+      _use('@rules_cc//cc:defs.bzl', kind);
+    }
     final String name = shared
         ? 'lib${_singleString(target.variables['output_name']) ?? target.name}.so'
         : target.name;
-    final rule = _Rule(kind, name, target.comments);
+    final rule = _Rule(display ? 'flutter_display_test' : kind, name, target.comments);
     if (kind == 'cc_test') {
       rule.scalars['size'] = '"${testSizes[target.name] ?? defaultTestSize}"';
       // How run_tests.py runs the suite (testRuns), which GN cannot say.

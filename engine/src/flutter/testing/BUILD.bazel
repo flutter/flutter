@@ -321,7 +321,11 @@ cc_test(
 # What GN has no words for; maintained in the converter's manifest
 # (tools/gn_to_bazel/lib/src/manifest.dart).
 
-exports_files(["fixtures_location.cc"])
+exports_files([
+    "fixtures_location.cc",
+    # The display wrapper of flutter_display_test (testing.bzl).
+    "xvfb_run.sh",
+])
 
 selects.config_setting_group(
     name = "unittests_enabled",
