@@ -174,6 +174,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
+    required this._toolContext,
     AndroidSdk? androidSdk,
   }) : _androidContext = AndroidContext(
          androidSdkBuilder: () => androidSdk,
@@ -194,7 +195,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _fileSystem = toolContext.fs,
        _logger = toolContext.logger,
        _fileSystemUtils = toolContext.fileSystemUtils,
-       _processUtils = toolContext.processUtils;
+       _processUtils = toolContext.processUtils,
+       _toolContext = toolContext;
 
   final Analytics _analytics;
   final AndroidContext _androidContext;
@@ -207,6 +209,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   late final AndroidSdk? _androidSdk = _androidContext.androidSdk;
   final FileSystemUtils _fileSystemUtils;
   final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -388,8 +391,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
         return exitCode;
       }
       final GradleBuildStatus status = await detectedGradleError!.handler(
+        gradleUtils: _gradleUtils,
+        java: _java,
         line: detectedGradleErrorLine!,
         project: project,
+        toolContext: _toolContext,
         usesAndroidX: usesAndroidX,
       );
 
