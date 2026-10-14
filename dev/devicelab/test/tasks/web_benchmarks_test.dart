@@ -30,13 +30,42 @@ void main() {
       },
     );
 
-    test('combines targetBenchmarks and filterPattern (intersection)', () {
-      final filter = BenchmarkFilter.parse(
-        targetBenchmarks: <String>['draw_rect', 'bench_card'],
-        filterPattern: r'^bench_',
+    test('rejects targetBenchmarks combined with compiledFilter', () {
+      expect(
+        () => BenchmarkFilter(
+          targetBenchmarks: <String>['draw_rect', 'bench_card'],
+          compiledFilter: RegExp(r'^bench_'),
+        ),
+        throwsA(isTargetsAndFilterConflict),
+      );
+    });
+
+    test('rejects targetBenchmarks combined with filterPattern arguments', () {
+      expect(
+        () => BenchmarkFilter.parse(
+          targetBenchmarks: <String>['draw_rect', 'bench_card'],
+          filterPattern: r'^bench_',
+        ),
+        throwsA(isTargetsAndFilterConflict),
+      );
+    });
+
+    test('allows compiledFilter when targetBenchmarks are only whitespace', () {
+      final filter = BenchmarkFilter(
+        targetBenchmarks: <String>['  ', ''],
+        compiledFilter: RegExp(r'^bench_'),
       );
       final List<String> result = filter.filter(allBenchmarks);
-      expect(result, <String>['bench_card']);
+      expect(result, <String>['bench_card', 'bench_card_infinite_scroll']);
+    });
+
+    test('allows targetBenchmarks with an empty filterPattern', () {
+      final filter = BenchmarkFilter.parse(
+        targetBenchmarks: <String>['draw_rect'],
+        filterPattern: '',
+      );
+      final List<String> result = filter.filter(allBenchmarks);
+      expect(result, <String>['draw_rect']);
     });
 
     test('trimming whitespace in target benchmarks', () {
@@ -120,6 +149,56 @@ void main() {
         () => BenchmarkFilter.parse(environment: <String, String>{'BENCHMARK_FILTER': '['}),
         throwsA(isA<Exception>()),
       );
+    });
+
+    test('rejects BENCHMARK_TARGETS combined with BENCHMARK_FILTER', () {
+      expect(
+        () => BenchmarkFilter.parse(
+          environment: <String, String>{
+            'BENCHMARK_TARGETS': 'draw_rect,bench_card',
+            'BENCHMARK_FILTER': r'^bench_',
+          },
+        ),
+        throwsA(isTargetsAndFilterConflict),
+      );
+    });
+
+    test('rejects targetBenchmarks argument combined with BENCHMARK_FILTER', () {
+      expect(
+        () => BenchmarkFilter.parse(
+          targetBenchmarks: <String>['draw_rect'],
+          environment: <String, String>{'BENCHMARK_FILTER': r'^bench_'},
+        ),
+        throwsA(isTargetsAndFilterConflict),
+      );
+    });
+
+    test('rejects filterPattern argument combined with BENCHMARK_TARGETS', () {
+      expect(
+        () => BenchmarkFilter.parse(
+          filterPattern: r'^bench_',
+          environment: <String, String>{'BENCHMARK_TARGETS': 'draw_rect'},
+        ),
+        throwsA(isTargetsAndFilterConflict),
+      );
+    });
+
+    test('rejects the conflict before validating the filter regex', () {
+      expect(
+        () => BenchmarkFilter.parse(
+          environment: <String, String>{'BENCHMARK_TARGETS': 'draw_rect', 'BENCHMARK_FILTER': '['},
+        ),
+        throwsA(isTargetsAndFilterConflict),
+      );
+    });
+
+    test('treats empty BENCHMARK_TARGETS as unset when a filter is provided', () {
+      final filter = BenchmarkFilter.parse(
+        filterPattern: r'^draw_',
+        environment: <String, String>{'BENCHMARK_TARGETS': ''},
+      );
+      expect(filter.targetBenchmarks, isNull);
+      expect(filter.compiledFilter?.pattern, r'^draw_');
     });
   });
 
@@ -233,5 +312,31 @@ void main() {
       expect(result.succeeded, isFalse);
       expect(result.message, contains('Could not find an option named "--invalid-flag".'));
     });
+
+    test('fails without building when target benchmarks and a filter are both given', () async {
+      final TaskResult result = await runWebBenchmark(
+        options,
+        targetBenchmarks: <String>['draw_rect'],
+        environment: <String, String>{'BENCHMARK_FILTER': r'^draw_'},
+      );
+      expect(result.succeeded, isFalse);
+      expect(result.message, contains('Cannot combine'));
+      expect(result.message, contains('BENCHMARK_TARGETS'));
+      expect(result.message, contains('BENCHMARK_FILTER'));
+    });
   });
 }
+
+/// Matches the exception thrown when target benchmarks and a filter pattern are
+/// both specified, and checks that the message names both options.
+final Matcher isTargetsAndFilterConflict = isA<Exception>().having(
+  (Exception e) => e.toString(),
+  'message',
+  allOf(
+    contains('Cannot combine'),
+    contains('--benchmark'),
+    contains('BENCHMARK_TARGETS'),
+    contains('--filter'),
+    contains('BENCHMARK_FILTER'),
+  ),
+);

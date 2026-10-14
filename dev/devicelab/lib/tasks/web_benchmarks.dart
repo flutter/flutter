@@ -514,28 +514,57 @@ Handler createBuildDirectoryHandler(String buildDirectoryPath) {
 ///
 /// If [targetBenchmarks] is provided, only the exact benchmarks listed will be run. If
 /// [targetBenchmarks] is null, all benchmarks are considered candidates (unless further filtered).
-/// If [filterPattern] is provided, it is parsed as a [RegExp] and only benchmarks matching
+/// If a filter pattern is provided, it is parsed as a [RegExp] and only benchmarks matching
 /// the pattern will be run.
+///
+/// Target benchmarks and a filter pattern are mutually exclusive. Specifying both (whether
+/// through arguments, environment variables, or a mix of the two) throws an [Exception]
+/// instead of combining them.
 ///
 /// Example target lists: `['scroll_perf', 'build_perf']`
 /// Example filter patterns: `skwasm` (matches any benchmark name containing 'skwasm'),
 /// `^scroll_` (matches names starting with 'scroll_').
 class BenchmarkFilter {
+  /// Creates a filter from already-parsed values.
+  ///
+  /// Throws an [Exception] if both [targetBenchmarks] (after trimming and dropping empty
+  /// entries) and [compiledFilter] are provided.
   BenchmarkFilter({List<String>? targetBenchmarks, this.compiledFilter})
-    : targetBenchmarks = _parseTargetBenchmarks(targetBenchmarks);
+    : targetBenchmarks = _parseTargetBenchmarks(targetBenchmarks) {
+    if (this.targetBenchmarks != null && compiledFilter != null) {
+      throw _targetsAndFilterConflict(this.targetBenchmarks!, compiledFilter!.pattern);
+    }
+  }
 
+  /// Creates a filter from raw arguments, falling back to the environment.
+  ///
+  /// [targetBenchmarks] falls back to the comma-separated `BENCHMARK_TARGETS` environment
+  /// variable, and [filterPattern] falls back to the `BENCHMARK_FILTER` environment variable.
+  /// Empty values are treated as unset.
+  ///
+  /// Throws an [Exception] if both target benchmarks and a filter pattern end up specified
+  /// (from arguments, environment variables, or one of each), or if the filter pattern is not
+  /// a valid regular expression.
   factory BenchmarkFilter.parse({
     List<String>? targetBenchmarks,
     String? filterPattern,
     Map<String, String>? environment,
   }) {
     environment ??= const <String, String>{};
-    final List<String>? effectiveTargets =
-        targetBenchmarks ?? environment['BENCHMARK_TARGETS']?.split(',');
-    final String? effectiveFilterPattern = filterPattern ?? environment['BENCHMARK_FILTER'];
+    final List<String>? effectiveTargets = _parseTargetBenchmarks(
+      targetBenchmarks ?? environment['BENCHMARK_TARGETS']?.split(','),
+    );
+    final String? rawFilterPattern = filterPattern ?? environment['BENCHMARK_FILTER'];
+    final String? effectiveFilterPattern = (rawFilterPattern?.isEmpty ?? true)
+        ? null
+        : rawFilterPattern;
+
+    if (effectiveTargets != null && effectiveFilterPattern != null) {
+      throw _targetsAndFilterConflict(effectiveTargets, effectiveFilterPattern);
+    }
 
     RegExp? compiledFilter;
-    if (effectiveFilterPattern != null && effectiveFilterPattern.isNotEmpty) {
+    if (effectiveFilterPattern != null) {
       try {
         compiledFilter = RegExp(effectiveFilterPattern);
       } on FormatException catch (e) {
@@ -548,6 +577,14 @@ class BenchmarkFilter {
 
   final List<String>? targetBenchmarks;
   final RegExp? compiledFilter;
+
+  static Exception _targetsAndFilterConflict(List<String> targets, String pattern) {
+    return Exception(
+      'Cannot combine target benchmarks with a filter pattern; specify only one.\n'
+      '  Target benchmarks (--benchmark / BENCHMARK_TARGETS): [${targets.join(', ')}]\n'
+      '  Filter pattern (--filter / BENCHMARK_FILTER): "$pattern"',
+    );
+  }
 
   List<String> filter(List<String> allBenchmarks) {
     final Set<String> availableSet = allBenchmarks.toSet();
@@ -564,8 +601,7 @@ class BenchmarkFilter {
         );
       }
       filtered = targetSet;
-    }
-    if (compiledFilter != null) {
+    } else if (compiledFilter != null) {
       filtered = filtered.where(compiledFilter!.hasMatch);
     }
 
@@ -653,9 +689,14 @@ Future<TaskResult> runWebBenchmarkFromArgs(
   final argParser = ArgParser()
     ..addMultiOption(
       'benchmark',
-      help: 'Target benchmark names to run (comma-separated or multiple flags)',
+      help:
+          'Target benchmark names to run (comma-separated or multiple flags). '
+          'Cannot be combined with --filter.',
     )
-    ..addOption('filter', help: 'Regex pattern to filter benchmark names')
+    ..addOption(
+      'filter',
+      help: 'Regex pattern to filter benchmark names. Cannot be combined with --benchmark.',
+    )
     ..addFlag('clean', defaultsTo: true, help: 'Whether to run flutter clean before building');
 
   // Allow unrecognized runner options from Devicelab runners/wrappers without crashing.
