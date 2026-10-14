@@ -1158,6 +1158,44 @@ suite("x") {
         expect(x.variables.containsKey('target_name'), isFalse);
       });
 
+      test("+= on an enclosing scope's variable modifies a copy, as GN does", () {
+        // The embedder's embedder_source_set forwards public_configs into
+        // template scope and the target block appends to it
+        // (Scope::GetValueForcedToCurrentScope); the template-scope value
+        // stays as it was for a second target.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'a/BUILD.gn': '''
+config("a_config") {
+  defines = [ "A" ]
+}
+
+config("b_config") {
+  defines = [ "B" ]
+}
+
+template("twice") {
+  forward_variables_from(invoker, "*")
+  source_set(target_name) {
+    sources = [ "x.cc" ]
+    public_configs += [ ":a_config" ]
+  }
+  source_set(target_name + "_plain") {
+    sources = [ "y.cc" ]
+  }
+}
+
+twice("x") {
+  public_configs = [ ":b_config" ]
+}
+''',
+        });
+        final GnFileEvaluation evaluation = evaluateIn(tree, '//a/BUILD.gn');
+        final GnTarget x = evaluation.targets.singleWhere((GnTarget t) => t.name == 'x');
+        expect(strings(x, 'public_configs'), <String>[':b_config', ':a_config']);
+        final GnTarget plain = evaluation.targets.singleWhere((GnTarget t) => t.name == 'x_plain');
+        expect(plain.variables.containsKey('public_configs'), isFalse);
+      });
+
       test('is strict about templates too', () {
         final GnSourceTree tree = sourceTree(<String, String>{
           'lib/templates.gni': '''
@@ -2630,7 +2668,8 @@ source_set("wuffs") {
           secondarySource: tree.secondarySource,
         ),
       );
-      expect(output, contains('includes = [\n        "release/c",\n        "config",\n    ],'));
+      // Sorted as buildifier sorts `includes`.
+      expect(output, contains('includes = [\n        "config",\n        "release/c",\n    ],'));
     });
 
     test("an executable's include_dirs ride a helper library", () async {
@@ -3194,6 +3233,79 @@ shared_library("w_shared") {
       expect(clash, contains('    linkstatic = True,\n'));
       expect(clash, contains('    name = "libw.so",\n'));
     });
+
+    test(
+      r'an ldflags entry naming a source file becomes $(execpath) with a linker input',
+      () async {
+        // The embedder's shared library and its version script.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/example/exports.lst': '',
+          'flutter/example/BUILD.gn': r'''
+shared_library("x") {
+  sources = [ "a.cc" ]
+  ldflags = [ "-Wl,--version-script=" + rebase_path("exports.lst", root_build_dir) ]
+}
+''',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(tree, '//flutter/example/BUILD.gn'),
+          gnPackage: '//flutter/example',
+          tree: tree,
+        );
+        expect(output, contains('    additional_linker_inputs = [":exports.lst"],\n'));
+        expect(
+          output,
+          contains('    linkopts = ["-Wl,--version-script=\$(execpath :exports.lst)"],\n'),
+        );
+      },
+    );
+
+    test(
+      "a config's locals carry nothing; a define names a generated file by its run-time path",
+      () async {
+        // The embedder's embedder_jit_snapshot_setup: four paths computed in
+        // `_`-prefixed locals from get_label_info(..., "target_gen_dir"), which
+        // the test joins with GetSourcePath() (Bazel's: engine/src/).
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/example/BUILD.gn': r'''
+config("jit") {
+  _label = "//flutter/lib/snapshot:vm_isolate_snapshot.bin"
+  _dir = get_label_info(_label, "target_gen_dir")
+  _data = "${_dir}/isolate_snapshot.bin"
+  defines = [ "TEST_DATA=\"${_data}\"" ]
+}
+
+executable("x_unittests") {
+  testonly = true
+  sources = [ "a.cc" ]
+  configs += [ ":jit" ]
+}
+''',
+        });
+        final String output = emitBuildFile(
+          evaluateIn(tree, '//flutter/example/BUILD.gn'),
+          gnPackage: '//flutter/example',
+          tree: tree,
+        );
+        expect(
+          output,
+          contains(r'''
+cc_library(
+    name = "jit",
+    defines = ["TEST_DATA=\\\"flutter/lib/snapshot/isolate_snapshot.bin\\\""],
+)
+'''),
+        );
+        expect(
+          output,
+          contains(
+            r'    local_defines = FLUTTER_LOCAL_DEFINES + ["TEST_DATA=\\\"flutter/lib/snapshot/isolate_snapshot.bin\\\""],'
+            '\n',
+          ),
+        );
+        expect(output, isNot(contains('_dir')));
+      },
+    );
   });
 
   group('round trip', () {
@@ -3229,6 +3341,8 @@ shared_library("w_shared") {
           skipTargets: file.skip.keys.toSet(),
           appendix: file.appendix,
           layout: mainRepositoryLayout,
+          implicitDeps: file.implicitDeps,
+          tree: tree,
         );
         expect(output, File(p.join(directory, 'BUILD.bazel')).readAsStringSync());
         // Every skip in the manifest names a target that exists.

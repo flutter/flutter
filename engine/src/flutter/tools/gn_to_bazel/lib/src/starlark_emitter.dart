@@ -964,7 +964,7 @@ final class _Emitter {
             _forwardedFlagsInto(propagated, variable);
           }
         case 'defines':
-          _stringsInto(rule.list('local_defines'), variable);
+          _stringsInto(rule.list('local_defines'), variable, defines: true);
         case 'include_dirs':
           _includeDirsInto(rule, variable, Condition.always);
         case 'configs':
@@ -1348,8 +1348,12 @@ final class _Emitter {
     final rule = _Rule('cc_library', target.name, target.comments);
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
+        case final String name when name.startsWith('_'):
+          // A local of the config block (GN exempts `_`-prefixed variables
+          // from its unused-variable rule): scratch for the values below.
+          break;
         case 'defines':
-          _stringsInto(rule.list('defines'), variable);
+          _stringsInto(rule.list('defines'), variable, defines: true);
         case 'include_dirs':
           _includeDirsInto(rule, variable, Condition.always);
         case 'libs':
@@ -1404,6 +1408,9 @@ final class _Emitter {
       }
       final String attribute;
       switch (variable.name) {
+        case final String name when name.startsWith('_'):
+          // A local of the config block (see _convertConfig).
+          continue;
         case 'defines':
           attribute = 'local_defines';
         case 'include_dirs':
@@ -1441,9 +1448,11 @@ final class _Emitter {
           continue;
       }
       _forEachItem(variable, into: rule.list(attribute), (_Element e) {
-        final String text = attribute == 'includes'
-            ? _filePath(_string(e), e.assignment.location)
-            : _tokenizerEscaped(_string(e));
+        final String text = switch (attribute) {
+          'includes' => _filePath(_string(e), e.assignment.location),
+          'local_defines' => _tokenizerEscaped(_defineText(_string(e), e)),
+          _ => _tokenizerEscaped(_string(e)),
+        };
         final item = _Item(text, comment: e.note, before: <String>[...e.comments.before]);
         rule.list(attribute).addUnique(use.condition.and(e.condition), item);
       });
@@ -1481,7 +1490,41 @@ final class _Emitter {
             ..add(e.condition, _Item(framework, comment: e.note));
         });
       case 'ldflags':
-        _stringsInto(linkopts, variable);
+        _forEachItem(variable, into: linkopts, (_Element e) {
+          if (e.value is! GnStringValue || !_rawString(e).contains(rebasedPathMarker)) {
+            linkopts.add(
+              e.condition,
+              e.value is GnStringValue ? _item(_tokenizerEscaped(_string(e)), e) : _flagItem(e),
+            );
+            return;
+          }
+          // A flag naming a source file through rebase_path(..., root_build_dir)
+          // (a linker version script): the file is a linker input, and the
+          // flag names it with $(execpath), which Bazel expands in linkopts.
+          final List<String> parts = _rawString(e).split(rebasedPathMarker);
+          if (parts.length.isEven) {
+            throw GnError(e.assignment.location, 'unbalanced rebased path in ldflags');
+          }
+          final out = StringBuffer();
+          for (var i = 0; i < parts.length; i++) {
+            if (i.isEven) {
+              out.write(_tokenizerEscaped(parts[i]));
+              continue;
+            }
+            final String path = parts[i];
+            if (path.startsWith('$genDirRoot/') || path.startsWith(buildDirRoot)) {
+              throw GnError(
+                e.assignment.location,
+                'only a source file can be named in ldflags; $path is generated',
+              );
+            }
+            final String file = _filePath(path, e.assignment.location);
+            final label = file.startsWith('//') || file.startsWith('@') ? file : ':$file';
+            rule.list('additional_linker_inputs').addUnique(Condition.always, _Item(label));
+            out.write('\$(execpath $label)');
+          }
+          linkopts.add(e.condition, _item(out.toString(), e));
+        });
     }
   }
 
@@ -1627,16 +1670,36 @@ final class _Emitter {
     return constant.symbol;
   }
 
-  void _stringsInto(_ListAttribute attribute, GnVariable variable) {
+  /// Strings into [attribute]; [defines] applies [_defineText].
+  void _stringsInto(_ListAttribute attribute, GnVariable variable, {bool defines = false}) {
     _forEachItem(variable, into: attribute, (_Element e) {
       // A `.gni` list the Bazel side keeps as a constant (config.gni's
       // feature_defines_list) stands as itself, like a flag list does; so
       // does a string around a reference (version.gni's arguments).
-      attribute.add(
-        e.condition,
-        e.value is GnStringValue ? _item(_tokenizerEscaped(_string(e)), e) : _flagItem(e),
-      );
+      if (e.value is! GnStringValue) {
+        attribute.add(e.condition, _flagItem(e));
+        return;
+      }
+      final String text = defines ? _defineText(_string(e), e) : _string(e);
+      attribute.add(e.condition, _item(_tokenizerEscaped(text), e));
     });
+  }
+
+  /// A define's value, with a generated file's GN path (`$target_gen_dir`,
+  /// `get_label_info(..., "target_gen_dir")`) as the file's path at run time
+  /// relative to the source directory the test helpers report: GN's
+  /// GetSourcePath() is the source root, under which the build directory
+  /// sits; Bazel's is `engine/src/` in the runfiles tree, under which the
+  /// generated files sit too (the embedder's JIT snapshot paths). A path in
+  /// the build directory proper has no such place.
+  String _defineText(String text, _Element e) {
+    if (text.contains(buildDirRoot)) {
+      throw GnError(
+        e.assignment.location,
+        'a build-directory path in a define has no run-time counterpart; convert by hand',
+      );
+    }
+    return text.replaceAll('$genDirRoot/', '');
   }
 
   void _labelsInto(_ListAttribute attribute, GnVariable variable, GnTarget target) {
@@ -2259,12 +2322,19 @@ final class _Emitter {
 
   /// Attributes whose order carries no meaning; the emitter sorts them the
   /// way buildifier would, so that GN's order and comments (which buildifier
-  /// does not sort across) do not leak into the result.
+  /// does not sort across) do not leak into the result. The names are from
+  /// buildifier's table of sortable list arguments (`fixtures` is not, but
+  /// GN's order of fixtures carries no meaning either).
   static const Set<String> _sortedAttributes = <String>{
     'srcs',
     'hdrs',
     'deps',
     'implementation_deps',
+    'data',
+    'includes',
+    'tags',
+    'tools',
+    'visibility',
     'fixtures',
   };
 

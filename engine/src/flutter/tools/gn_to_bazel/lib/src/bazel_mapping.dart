@@ -59,6 +59,9 @@ const Map<String, String> testSizes = <String, String>{
   // 24 s alone (46 renders through the software and GPU backends); timed
   // out at small's 60 s on a machine running the other suites.
   'display_list_rendertests': 'medium',
+  // 77 s alone (195 tests: the embedder on the software, GL and Vulkan
+  // surfaces, each a Dart VM).
+  'embedder_unittests': 'medium',
   // 4,795 tests (3,120 run, the Metal variants skipped), the playgrounds
   // rendering through SwiftShader with validation on: 3,266 s serial on the
   // host, sharded (testShardCounts).
@@ -110,6 +113,19 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
   '//flutter/impeller:impeller_dart_unittests': TestRun(
     args: <String>['--enable_vulkan_validation', '--gtest_filter=*Metal'],
     data: <String>[],
+  ),
+  // The embedder suite's JIT snapshot tests read the core snapshot's four
+  // files by the paths its embedder_jit_snapshot_setup config compiles in
+  // (relative to GetSourcePath(); see the emitter's _defineText); GN finds
+  // them in the build directory, Bazel needs them in the runfiles.
+  '//flutter/shell/platform/embedder:embedder_unittests': TestRun(
+    args: <String>[],
+    data: <String>[
+      '//engine/src/flutter/lib/snapshot:isolate_snapshot.bin',
+      '//engine/src/flutter/lib/snapshot:isolate_snapshot_instructions.bin',
+      '//engine/src/flutter/lib/snapshot:vm_isolate_snapshot.bin',
+      '//engine/src/flutter/lib/snapshot:vm_snapshot_instructions.bin',
+    ],
   ),
   // run_tests.py --type impeller (Linux CI's host_debug_unopt_impeller_tests)
   // runs impeller_unittests whole and with no arguments of its own: the
@@ -365,6 +381,10 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/shell/gpu:gpu_surface_vulkan': _vulkanCopts,
   '//flutter/shell/common:shell_unittests_gpu_configuration': _vulkanCopts,
   '//flutter/shell/common:shell_test_fixture_sources': _vulkanCopts,
+  // The embedder's GPU configuration group, and the embedder libraries that
+  // publish it (embedder_source_set's public_configs).
+  '//flutter/shell/platform/embedder:embedder_gpu_configuration': _vulkanCopts,
+  '//flutter/shell/platform/embedder:embedder_unittests_library': _vulkanCopts,
   // The interop toolkit publishes the renderer backends down its chain.
   '//flutter/impeller/toolkit/interop:interop_base': _vulkanCopts,
   '//flutter/impeller/toolkit/interop:interop': _vulkanCopts,
@@ -1141,6 +1161,9 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // and a config of SHELL_ENABLE_* defines, chosen by the invoker's
     // booleans.
     '//flutter/shell/gpu/gpu.gni',
+    // Declares embedder_for_target (false: the embedder's shared library is
+    // a host artifact), which the embedder's own file reads.
+    '//flutter/shell/platform/embedder/embedder.gni',
     '//flutter/third_party/glfw/glfw_args.gni',
     // The engine's answers to the Khronos trees' build_overrides (where
     // SPIRV-Headers and SPIRV-Tools are, build_with_chromium = false) and
@@ -1166,6 +1189,9 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // The compiled_action template, which lib/ui's shader fixture
     // directories import without invoking (impellerc() does).
     '//build/compiled_action.gni',
+    // Declares use_clang_type_profiler, enable_lto, enable_coverage and
+    // stripped_symbols; the embedder imports it and reads none of them.
+    '//build/toolchain/clang.gni',
     // Declares disable_vma_stl_shared_mutex (above).
     '//flutter/flutter_vma/config.gni',
     // Declares enable_vulkan_validation_layers; nothing converted reads it.

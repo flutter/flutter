@@ -436,7 +436,16 @@ int _compare(
       return result;
     }
 
-    check('defines', flattened('defines', (String s) => s), _strings(gnTarget['defines']).toSet());
+    // A define may embed a generated file's path (the embedder's JIT
+    // snapshot setup); GN's out-directory spelling of it is the converter's
+    // `//@gen` root, as for paths.
+    String defineText(String value) =>
+        value.replaceAll('$gnGenDir/', '${p.posix.normalize(genDirRoot)}/');
+    check(
+      'defines',
+      flattened('defines', (String s) => s),
+      _strings(gnTarget['defines']).map(defineText).toSet(),
+    );
     check(
       'include_dirs',
       flattened('include_dirs', path),
