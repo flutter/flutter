@@ -104,6 +104,11 @@ void main() {
               fs: fileSystem ?? globals.fs,
               artifacts: artifacts,
               platform: platform,
+              cache: Cache.test(
+                flutterRoot: '/',
+                fileSystem: fileSystem,
+                processManager: processManager ?? FakeProcessManager.any(),
+              ),
             ),
         androidContext:
             androidContext ??

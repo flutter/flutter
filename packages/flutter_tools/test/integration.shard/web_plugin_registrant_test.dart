@@ -296,6 +296,7 @@ Future<void> _createProject(Directory dir, List<String> createArgs) async {
       platform: globals.platform,
       processManager: globals.processManager,
       cache: Cache.test(
+        rootOverride: globals.fs.directory('../..'),
         flutterRoot: '../..',
         fileSystem: globals.fs,
         processManager: globals.processManager,
