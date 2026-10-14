@@ -34,7 +34,6 @@ import '../experimental/templates.dart';
 import '../features.dart';
 import '../flutter_manifest.dart';
 import '../flutter_project_metadata.dart';
-import '../globals.dart' as globals;
 import '../ios/code_signing.dart';
 import '../macos/swift_packages.dart';
 import '../project.dart';
@@ -788,7 +787,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         throwToolExit('Unsupported template type: ${template.cliName}');
     }
 
-    _generatePubspecLock(relativeDir);
+    _generatePubspecLock(relativeDir, flutterRoot: flutterRoot);
 
     if (shouldCallPubGet) {
       projectFactory.invalidate(relativeDir);
@@ -1643,20 +1642,15 @@ List<String>? _getBuildGradleConfigurationFilePaths(
 /// This ensures that a breaking change accidentally published to one of these
 /// packages that the Flutter SDK depends on cannot break the `flutter create`
 /// command.
-void _generatePubspecLock(Directory directory, {String? flutterRoot}) {
+void _generatePubspecLock(Directory directory, {required String flutterRoot}) {
   final FileSystem fs = directory.fileSystem;
-  final String effectiveFlutterRoot = flutterRoot ?? globals.cache.flutterRoot;
-  final flutterPubspecLock = loadYaml(
-    fs.file(fs.path.join(effectiveFlutterRoot, 'pubspec.lock')).readAsStringSync(),
-  ) as YamlMap;
+  final flutterPubspecLock =
+      loadYaml(fs.file(fs.path.join(flutterRoot, 'pubspec.lock')).readAsStringSync()) as YamlMap;
 
   final flutterPackages = flutterPubspecLock['packages'] as YamlMap;
 
   final packages = <String, Object?>{
-    for (final package in gatherSdkPackageDependencies(
-      directory,
-      flutterRoot: effectiveFlutterRoot,
-    ))
+    for (final package in gatherSdkPackageDependencies(directory, flutterRoot: flutterRoot))
       package: flutterPackages[package],
   };
 
@@ -1668,7 +1662,7 @@ void _generatePubspecLock(Directory directory, {String? flutterRoot}) {
 
 /// Find the package names of external dependencies from the SDK packages that
 /// the package in [directory] depends on.
-List<String> gatherSdkPackageDependencies(Directory directory, {String? flutterRoot}) {
+List<String> gatherSdkPackageDependencies(Directory directory, {required String flutterRoot}) {
   final sdkPackages = <String>[];
   final FileSystem fs = directory.fileSystem;
   final File pubspecFile = directory.childFile('pubspec.yaml');
@@ -1704,11 +1698,8 @@ List<String> gatherSdkPackageDependencies(Directory directory, {String? flutterR
   }
 
   final result = <String>{};
-  // Initialized by FlutterCommandRunner on startup.
-  // So it is safe to access it here.
-  final String effectiveFlutterRoot = flutterRoot ?? globals.cache.flutterRoot;
   for (final sdkPackage in sdkPackages) {
-    final Directory? packageDir = _resolveSdkPackageDir(fs, effectiveFlutterRoot, sdkPackage);
+    final Directory? packageDir = _resolveSdkPackageDir(fs, flutterRoot, sdkPackage);
     if (packageDir == null) {
       // This resolves the same locations as pub's FlutterSdk.packagePath, so a
       // package we cannot find here is one pub cannot find either, and the

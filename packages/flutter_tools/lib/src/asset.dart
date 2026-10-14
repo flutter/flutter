@@ -20,7 +20,6 @@ import 'convert.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
-import 'globals.dart' as globals;
 import 'license_collector.dart';
 import 'package_graph.dart';
 import 'project.dart';
@@ -135,9 +134,9 @@ abstract class AssetBundleFactory {
 
   static AssetBundleFactory defaultInstance({
     required FileSystem fileSystem,
+    required String flutterRoot,
     required Logger logger,
     required Platform platform,
-    String? flutterRoot,
     bool splitDeferredAssets = false,
   }) => _ManifestAssetBundleFactory(
     fileSystem: fileSystem,
@@ -204,16 +203,16 @@ abstract class AssetBundle {
 class _ManifestAssetBundleFactory implements AssetBundleFactory {
   _ManifestAssetBundleFactory({
     required this._fileSystem,
+    required this._flutterRoot,
     required this._logger,
     required this._platform,
-    this._flutterRoot,
     this._splitDeferredAssets = false,
   });
 
   final Logger _logger;
   final FileSystem _fileSystem;
   final Platform _platform;
-  final String? _flutterRoot;
+  final String _flutterRoot;
   final bool _splitDeferredAssets;
 
   @override
@@ -221,7 +220,7 @@ class _ManifestAssetBundleFactory implements AssetBundleFactory {
     logger: _logger,
     fileSystem: _fileSystem,
     platform: _platform,
-    flutterRoot: _flutterRoot ?? globals.cache.flutterRoot,
+    flutterRoot: _flutterRoot,
     splitDeferredAssets: _splitDeferredAssets,
   );
 }

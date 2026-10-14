@@ -1774,6 +1774,10 @@ void main() {
         cache!,
         java: FakeJava(),
         platform: FakePlatform(),
+        processUtils: ProcessUtils(
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.empty(),
+        ),
       );
       expect(mavenArtifacts.developmentArtifact, DevelopmentArtifact.androidMaven);
     });
@@ -1828,6 +1832,10 @@ void main() {
         cache!,
         java: FakeJava(),
         platform: FakePlatform(),
+        processUtils: ProcessUtils(
+          logger: BufferLogger.test(),
+          processManager: FakeProcessManager.empty(),
+        ),
       );
       expect(await mavenArtifacts.isUpToDate(memoryFileSystem!), isFalse);
 
