@@ -16,7 +16,7 @@ import 'package:shelf_static/shelf_static.dart';
 import '../framework/browser.dart';
 import '../framework/task_result.dart';
 import '../framework/utils.dart';
-import 'web_benchmarks_helpers.dart';
+import 'web_benchmarks_comparison.dart';
 
 /// The port at which the local benchmark server is served.
 const int benchmarkServerPort = 9999;
