@@ -447,29 +447,31 @@ void main() {
       ]);
     });
 
-    test('BenchmarkComparison asserts that metrics are sorted by metricKey', () {
-      expect(
-        () => BenchmarkComparison(
-          regressionThreshold: 10.0,
-          metrics: <MetricComparison>[
-            MetricComparison(
-              metricKey: 'b.average',
-              baseline: 100.0,
-              current: 100.0,
-              deltaPercent: 0.0,
-              isRegression: false,
-            ),
-            MetricComparison(
-              metricKey: 'a.average',
-              baseline: 100.0,
-              current: 100.0,
-              deltaPercent: 0.0,
-              isRegression: false,
-            ),
-          ],
-        ),
-        throwsA(isA<AssertionError>()),
+    test('BenchmarkComparison sorts metrics by metricKey without mutating the input', () {
+      MetricComparison metric(String key) => MetricComparison(
+        metricKey: key,
+        baseline: 100.0,
+        current: 100.0,
+        deltaPercent: 0.0,
+        isRegression: false,
       );
+      final input = <MetricComparison>[
+        metric('c.average'),
+        metric('a.average'),
+        metric('b.average'),
+      ];
+      final comp = BenchmarkComparison(regressionThreshold: 10.0, metrics: input);
+      expect(comp.metrics.map((MetricComparison m) => m.metricKey).toList(), <String>[
+        'a.average',
+        'b.average',
+        'c.average',
+      ]);
+      expect(input.map((MetricComparison m) => m.metricKey).toList(), <String>[
+        'c.average',
+        'a.average',
+        'b.average',
+      ]);
+      expect(() => comp.metrics.add(metric('d.average')), throwsUnsupportedError);
     });
 
     test('Zero baseline jump: baseline is 0.0 and current is positive', () {

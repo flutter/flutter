@@ -21,23 +21,33 @@ class MetricComparison {
 
 /// Aggregated comparison results across all evaluated metrics.
 ///
-/// [metrics] must be sorted alphabetically by [MetricComparison.metricKey].
+/// [metrics] is always sorted alphabetically by [MetricComparison.metricKey].
 class BenchmarkComparison {
-  BenchmarkComparison({
-    required this.metrics,
-    required this.regressionThreshold,
-    this.missingMetrics = const <String>[],
-  }) : assert(_isSortedByKey(metrics), 'metrics must be sorted alphabetically by metricKey.');
-
-  static bool _isSortedByKey(List<MetricComparison> metrics) {
-    for (var i = 1; i < metrics.length; i++) {
-      if (metrics[i - 1].metricKey.compareTo(metrics[i].metricKey) > 0) {
-        return false;
-      }
-    }
-    return true;
+  /// Creates a comparison from [metrics] in any order.
+  ///
+  /// The given [metrics] are copied and sorted alphabetically by
+  /// [MetricComparison.metricKey]; the input list is not modified.
+  factory BenchmarkComparison({
+    required List<MetricComparison> metrics,
+    required double? regressionThreshold,
+    List<String> missingMetrics = const <String>[],
+  }) {
+    final sortedMetrics = List<MetricComparison>.of(metrics)
+      ..sort((MetricComparison a, MetricComparison b) => a.metricKey.compareTo(b.metricKey));
+    return BenchmarkComparison._(
+      metrics: List<MetricComparison>.unmodifiable(sortedMetrics),
+      regressionThreshold: regressionThreshold,
+      missingMetrics: missingMetrics,
+    );
   }
 
+  BenchmarkComparison._({
+    required this.metrics,
+    required this.regressionThreshold,
+    required this.missingMetrics,
+  });
+
+  /// The evaluated metrics, sorted alphabetically by [MetricComparison.metricKey].
   final List<MetricComparison> metrics;
   final double? regressionThreshold;
   final List<String> missingMetrics;
@@ -182,8 +192,6 @@ BenchmarkComparison compareResults({
       );
     }
   }
-
-  metrics.sort((MetricComparison a, MetricComparison b) => a.metricKey.compareTo(b.metricKey));
 
   return BenchmarkComparison(
     metrics: metrics,
