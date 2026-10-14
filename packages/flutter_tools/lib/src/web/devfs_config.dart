@@ -10,7 +10,6 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart' as fs show File, FileSystem;
 import '../base/logger.dart' show Logger;
-import '../base/os.dart';
 import 'devfs_proxy.dart';
 
 const webDevServerConfigFilePath = 'web_dev_config.yaml';
@@ -257,11 +256,8 @@ HttpsConfig:
   }
 }
 
-/// Finds a free port or validates the provided port is within the valid range
-Future<int> resolvePort(int? port, OperatingSystemUtils os) async {
-  if (port == null) {
-    return os.findFreePort();
-  }
+/// Validates the provided port is within the valid TCP range (0 to 65535).
+int resolvePort(int port) {
   if (port < 0 || port > 65535) {
     throwToolExit('''
 Invalid port: $port

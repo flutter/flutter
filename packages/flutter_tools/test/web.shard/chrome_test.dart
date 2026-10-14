@@ -42,7 +42,7 @@ const kChromeArgs = <String>[
 
 const kCodeCache = <String>['Cache', 'Code Cache', 'GPUCache'];
 
-const kDevtoolsStderr = '\n\nDevTools listening\n\n';
+const kDevtoolsStderr = '\n\nDevTools listening on ws://127.0.0.1:12345/devtools/browser/rand\n\n';
 
 void main() {
   late FileExceptionHandler exceptionHandler;
@@ -88,7 +88,7 @@ void main() {
         command: <String>[
           'example_chrome',
           '--user-data-dir=$userDataDir',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           'example_url',
         ],
@@ -108,6 +108,63 @@ void main() {
       ),
     );
   });
+
+  testWithoutContext('launches Chrome with --remote-debugging-port=0 when debugPort is null and parses bound port from DevTools listening stderr', () async {
+    final chromiumLauncher = ChromiumLauncher(
+      fileSystem: fileSystem,
+      platform: platform,
+      processManager: processManager,
+      operatingSystemUtils: _FailOnFindFreePortOperatingSystemUtils(),
+      browserFinder: findChromeExecutable,
+      logger: testLogger,
+    );
+
+    processManager.addCommand(
+      const FakeCommand(
+        command: <String>[
+          'example_chrome',
+          '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+          '--remote-debugging-port=0',
+          ...kChromeArgs,
+          'example_url',
+        ],
+        stderr: '\nDevTools listening on ws://127.0.0.1:45678/devtools/browser/abc-123\n',
+      ),
+    );
+
+    final Chromium chrome = await chromiumLauncher.launch('example_url', skipCheck: true);
+    expect(chrome.debugPort, 45678);
+  });
+
+  testWithoutContext(
+    'launches Chrome and connects to IPv6 loopback when DevTools reports IPv6 address',
+    () async {
+      final chromiumLauncher = ChromiumLauncher(
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        operatingSystemUtils: _FailOnFindFreePortOperatingSystemUtils(),
+        browserFinder: findChromeExecutable,
+        logger: testLogger,
+      );
+
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            'example_chrome',
+            '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
+            '--remote-debugging-port=0',
+            ...kChromeArgs,
+            'example_url',
+          ],
+          stderr: '\nDevTools listening on ws://[::1]:54321/devtools/browser/ipv6-guid\n',
+        ),
+      );
+
+      final Chromium chrome = await chromiumLauncher.launch('example_url', skipCheck: true);
+      expect(chrome.debugPort, 54321);
+    },
+  );
 
   testWithoutContext('filters out Chromium D-Bus error lines from stderr logs', () async {
     final logger = BufferLogger.test();
@@ -132,7 +189,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           'example_url',
         ],
@@ -174,7 +231,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
       'Using Chromium 115\n'
       '[CHROME]: \n'
       '[CHROME]: \n'
-      '[CHROME]: DevTools listening\n'
+      '[CHROME]: DevTools listening on ws://127.0.0.1:12345/devtools/browser/rand\n'
       '[CHROME]:',
     );
   });
@@ -358,7 +415,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             'example_url',
           ],
@@ -405,7 +462,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             'example_url',
           ],
@@ -448,7 +505,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           'example_url',
         ],
@@ -479,7 +536,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             '--use-angle=metal',
             '--no-sandbox',
@@ -517,7 +574,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             'example_url',
           ],
@@ -549,7 +606,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgsLinux,
           'example_url',
         ],
@@ -584,7 +641,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           '--autoplay-policy=no-user-gesture-required',
           '--incognito',
@@ -614,7 +671,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           '--no-sandbox',
           '--headless',
@@ -640,7 +697,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             '--no-sandbox',
             '--headless',
@@ -686,7 +743,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: const <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             'example_url',
           ],
@@ -742,7 +799,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     final expectedArgs = <String>[
       'example_chrome',
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-      '--remote-debugging-port=12345',
+      '--remote-debugging-port=0',
       ...kChromeArgs.where((String arg) => arg != '--use-mock-keychain'),
       '--no-sandbox',
       '--headless',
@@ -779,7 +836,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     const args = <String>[
       'example_chrome',
       '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-      '--remote-debugging-port=12345',
+      '--remote-debugging-port=0',
       ...kChromeArgs,
       '--no-sandbox',
       '--headless',
@@ -816,7 +873,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
           command: <String>[
             'example_chrome',
             '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-            '--remote-debugging-port=12345',
+            '--remote-debugging-port=0',
             ...kChromeArgs,
             '--no-sandbox',
             '--headless',
@@ -869,17 +926,19 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
       final neverExits = Completer<void>();
       processManager.addCommand(
         FakeCommand(
-          command: headlessArgs(12345),
+          command: headlessArgs(0),
           stderr: devToolsServerFailureStderr,
           completer: neverExits,
         ),
       );
-      processManager.addCommand(FakeCommand(command: headlessArgs(12346), stderr: kDevtoolsStderr));
-
-      final ChromiumLauncher launcher = createLauncher(
-        _SequentialPortOperatingSystemUtils(12345),
-        BufferLogger.test(),
+      processManager.addCommand(
+        FakeCommand(
+          command: headlessArgs(0),
+          stderr: '\nDevTools listening on ws://127.0.0.1:12346/devtools/browser/rand\n',
+        ),
       );
+
+      final ChromiumLauncher launcher = createLauncher(operatingSystemUtils, BufferLogger.test());
       final Chromium chrome = await launcher.launch('example_url', skipCheck: true, headless: true);
 
       expect(chrome.debugPort, 12346);
@@ -914,7 +973,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
       final neverExits = Completer<void>();
       for (var i = 0; i < 4; i++) {
         processManager.addCommand(
-          FakeCommand(command: headlessArgs(12345), stderr: 'unrelated', completer: neverExits),
+          FakeCommand(command: headlessArgs(0), stderr: 'unrelated', completer: neverExits),
         );
       }
 
@@ -959,7 +1018,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=/.tmp_rand0/flutter_tools_chrome_device.rand0',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           'example_url',
         ],
@@ -1172,7 +1231,7 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
         command: <String>[
           'example_chrome',
           '--user-data-dir=$customUserDataDir',
-          '--remote-debugging-port=12345',
+          '--remote-debugging-port=0',
           ...kChromeArgs,
           'example_url',
         ],
@@ -1296,12 +1355,11 @@ class FakeWipConnection extends Fake implements WipConnection {
   }
 }
 
-/// Returns [_nextPort], [_nextPort] + 1, ... on successive [findFreePort] calls.
-class _SequentialPortOperatingSystemUtils extends FakeOperatingSystemUtils {
-  _SequentialPortOperatingSystemUtils(this._nextPort);
-
-  int _nextPort;
-
+class _FailOnFindFreePortOperatingSystemUtils extends FakeOperatingSystemUtils {
   @override
-  Future<int> findFreePort({bool ipv6 = false}) async => _nextPort++;
+  Future<int> findFreePort({bool ipv6 = false}) async {
+    throw StateError(
+      'OperatingSystemUtils.findFreePort should not be called when port-0 binding is used',
+    );
+  }
 }

@@ -20,10 +20,10 @@ import 'package:shelf_static/shelf_static.dart';
 /// request to "/test-result" containing result data as plain text body of the
 /// request. This function has no opinion about what that string contains.
 Future<String> evalTestAppInChrome({
-  required String appUrl,
   required String appDirectory,
-  int serverPort = 8080,
-  int browserDebugPort = 8081,
+  String? appUrl,
+  int serverPort = 0,
+  int browserDebugPort = 0,
 }) async {
   io.HttpServer? server;
   Chrome? chrome;
@@ -47,7 +47,7 @@ Future<String> evalTestAppInChrome({
       ChromeOptions(
         headless: true,
         debugPort: browserDebugPort,
-        url: appUrl,
+        url: appUrl ?? 'http://localhost:${server.port}/index.html',
         userDataDirectory: userDataDirectory.path,
         windowHeight: 500,
         windowWidth: 500,
@@ -67,11 +67,11 @@ class AppServer {
   AppServer._(this._server, this.chrome, this.onChromeError);
 
   static Future<AppServer> start({
-    required String appUrl,
     required String appDirectory,
     required String cacheControl,
-    int serverPort = 8080,
-    int browserDebugPort = 8081,
+    String? appUrl,
+    int serverPort = 0,
+    int browserDebugPort = 0,
     bool headless = true,
     List<Handler>? additionalRequestHandlers,
   }) async {
@@ -98,7 +98,7 @@ class AppServer {
       ChromeOptions(
         headless: headless,
         debugPort: browserDebugPort,
-        url: appUrl,
+        url: appUrl ?? 'http://localhost:${server.port}/index.html',
         userDataDirectory: userDataDirectory.path,
       ),
       onError: chromeErrorCompleter.complete,
@@ -109,6 +109,8 @@ class AppServer {
   final Future<String> onChromeError;
   final io.HttpServer _server;
   final Chrome chrome;
+
+  int get serverPort => _server.port;
 
   Future<void> stop() async {
     chrome.stop();
