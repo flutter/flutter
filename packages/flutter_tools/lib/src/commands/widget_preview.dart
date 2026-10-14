@@ -20,7 +20,8 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -55,6 +56,8 @@ typedef ResidentRunnerFactory = ResidentRunner Function(
 
 class WidgetPreviewCommand extends FlutterCommand {
   WidgetPreviewCommand({
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
@@ -63,6 +66,8 @@ class WidgetPreviewCommand extends FlutterCommand {
   }) {
     addSubcommand(
       WidgetPreviewStartCommand(
+        buildSystem: buildSystem,
+        buildTargets: buildTargets,
         toolContext: toolContext,
         analysisServerFactoryOverride: analysisServerFactoryOverride,
         dtdServicesOverride: dtdServicesOverride,
@@ -143,6 +148,8 @@ enum _PendingReload {
 
 final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with CreateBase {
   WidgetPreviewStartCommand({
+    required this._buildSystem,
+    required this._buildTargets,
     required super.toolContext,
     @visibleForTesting Future<AnalysisServer> Function()? analysisServerFactoryOverride,
     @visibleForTesting WidgetPreviewDtdServices? dtdServicesOverride,
@@ -224,6 +231,9 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   String get name => 'start';
 
   final bool verbose;
+
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
 
   @override
   WidgetPreviewMachineAwareLogger get logger =>
@@ -326,15 +336,6 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
   /// [_PendingReload.hotRestart] if a full restart is requested) without
   /// queueing duplicate tasks on [_reloadMutex].
   _PendingReload? _pendingReload;
-
-  /// The location of the widget_preview_scaffold for the current execution of the command.
-  ///
-  /// This is only meant for testing as there's no simple mapping from the target project to the
-  /// scaffold project.
-  // TODO(bkonyi): remove once https://github.com/flutter/flutter/issues/179036 is resolved.
-  @visibleForTesting
-  static late Directory widgetPreviewScaffold;
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     assert(toolContext.logger is WidgetPreviewMachineAwareLogger);
@@ -346,7 +347,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     await WidgetPreviewGitignoreMigration(rootProject, logger).migrate();
 
     final String? customPreviewScaffoldOutput = stringArg(kWidgetPreviewScaffoldOutputDir);
-    widgetPreviewScaffold = customPreviewScaffoldOutput != null
+    final Directory widgetPreviewScaffold = customPreviewScaffoldOutput != null
         ? fs.directory(customPreviewScaffoldOutput)
         : rootProject.widgetPreviewScaffold;
 
@@ -354,9 +355,7 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
     // generate one.
     final bool generateScaffoldProject =
         customPreviewScaffoldOutput != null || _previewManifest.shouldGenerateProject();
-    // TODO(bkonyi): can this be moved?
     widgetPreviewScaffold.createSync(recursive: true);
-    fs.currentDirectory = widgetPreviewScaffold;
 
     if (generateScaffoldProject) {
       // WARNING: this log message is used by test/integration.shard/widget_preview_test.dart
@@ -643,15 +642,19 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
             trackWidgetCreation: true,
             // Don't try and download canvaskit from the CDN.
             useLocalCanvasKit: true,
-            webEnableHotReload: true,
             includeUnsupportedPlatformLibraryStubs: true,
           ),
-          webEnableExposeUrl: false,
-          webEnableExpressionEvaluation: true,
-          webRunHeadless: boolArg(kHeadless),
+          webConfig: WebDebugConfig(
+            enableExpressionEvaluation: true,
+            runHeadless: boolArg(kHeadless),
+          ),
           devToolsServerAddress: devToolsServerAddress,
         );
-        final String target = bundle.defaultMainPath;
+        final String target = widgetPreviewScaffoldProject.directory
+            .childDirectory('lib')
+            .childFile('main.dart')
+            .absolute
+            .path;
         final FlutterDevice flutterDevice = await FlutterDevice.create(
           device,
           toolContext: toolContext,
@@ -672,16 +675,13 @@ final class WidgetPreviewStartCommand extends WidgetPreviewSubCommandBase with C
                 )
               : ResidentWebRunner(
                   flutterDevice,
+                  buildSystem: _buildSystem,
+                  buildTargets: _buildTargets,
+                  toolContext: toolContext,
                   target: target,
                   debuggingOptions: debuggingOptions,
                   analytics: analytics,
                   flutterProject: widgetPreviewScaffoldProject,
-                  fileSystem: fs,
-                  logger: logger,
-                  terminal: terminal,
-                  platform: platform,
-                  outputPreferences: toolContext.outputPreferences,
-                  systemClock: toolContext.systemClock,
                   // Explicitly provide the project root path rather than relying on the current directory
                   // as the current directory exists within $TMP. At least on MacOS, when setting the
                   // current directory to the widget_preview_scaffold project created under

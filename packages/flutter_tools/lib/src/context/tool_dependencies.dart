@@ -36,6 +36,7 @@ import '../custom_devices/custom_devices_config.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../emulator.dart';
+import '../experimental/extension_build_manager.dart';
 import '../experimental/extension_discovery.dart';
 import '../experimental/extension_manager.dart';
 import '../features.dart';
@@ -90,13 +91,14 @@ class ToolDependencies {
     required this.androidContext,
     required this.appleContext,
     required this.buildSystem,
+    required this.buildTargets,
     required this.crashReporter,
     required this.deviceManager,
     required this.doctor,
     required this.emulatorManager,
     required this.featureFlags,
     required this.toolContext,
-    this.buildTargets,
+    this.extensionBuildManager,
     this.extensionManager,
   });
 
@@ -113,7 +115,7 @@ class ToolDependencies {
   final BuildSystem buildSystem;
 
   /// Factory interface for constructing compile and bundle build targets.
-  final BuildTargets? buildTargets;
+  final BuildTargets buildTargets;
 
   /// Captures and submits unhandled tool crash reports and stack traces.
   final CrashReporter crashReporter;
@@ -126,6 +128,9 @@ class ToolDependencies {
 
   /// Manager for discovering, launching, and creating emulators.
   final EmulatorManager emulatorManager;
+
+  /// Manager for querying custom build targets and executing builds via tool extensions.
+  final ExtensionBuildManager? extensionBuildManager;
 
   /// Manager for discovering and communicating with active tool extensions.
   final ExtensionManager? extensionManager;
@@ -147,7 +152,9 @@ class ToolDependencies {
   static Future<ToolDependencies> bootstrap({
     Analytics? analytics,
     AndroidSdk? androidSdk,
+    AndroidSdk? Function()? androidSdkBuilder,
     AndroidStudio? androidStudio,
+    AndroidStudio? Function()? androidStudioBuilder,
     AndroidWorkflow? androidWorkflow,
     Artifacts? artifacts,
     BotDetector? botDetector,
@@ -168,9 +175,11 @@ class ToolDependencies {
     FileSystem? fs,
     Git? git,
     GradleUtils? gradleUtils,
+    GradleUtils Function()? gradleUtilsBuilder,
     IOSSimulatorUtils? iosSimulatorUtils,
     IOSWorkflow? iosWorkflow,
     Java? java,
+    Java? Function()? javaBuilder,
     LocalEngineLocator? localEngineLocator,
     Logger? logger,
     MacOSWorkflow? macOSWorkflow,
@@ -193,6 +202,23 @@ class ToolDependencies {
     Xcode? xcode,
     XcodeProjectInterpreter? xcodeProjectInterpreter,
   }) async {
+    assert(
+      androidSdk == null || androidSdkBuilder == null,
+      'Cannot provide both androidSdk and androidSdkBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      androidStudio == null || androidStudioBuilder == null,
+      'Cannot provide both androidStudio and androidStudioBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      gradleUtils == null || gradleUtilsBuilder == null,
+      'Cannot provide both gradleUtils and gradleUtilsBuilder to ToolDependencies.bootstrap.',
+    );
+    assert(
+      java == null || javaBuilder == null,
+      'Cannot provide both java and javaBuilder to ToolDependencies.bootstrap.',
+    );
+
     // 1. Core Platform Inputs
     final Platform finalPlatform = platform ?? const LocalPlatform();
     final SystemClock finalSystemClock = systemClock ?? const SystemClock();
@@ -339,7 +365,7 @@ class ToolDependencies {
         buildSystem ??
         FlutterBuildSystem(fileSystem: finalFS, logger: finalLogger, platform: finalPlatform);
 
-    final finalBuildTargets = buildTargets;
+    final BuildTargets finalBuildTargets = buildTargets ?? const NoOpBuildTargets();
 
     final CrashReporter finalCrashReporter =
         crashReporter ??
@@ -477,29 +503,45 @@ class ToolDependencies {
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
     // 12. AndroidContext Dependencies
-    final AndroidStudio? finalAndroidStudio = androidStudio ?? AndroidStudio.latestValid();
+    final AndroidSdk? Function() finalAndroidSdkBuilder =
+        androidSdkBuilder ?? (androidSdk != null ? () => androidSdk : AndroidSdk.locateAndroidSdk);
 
-    final AndroidSdk? finalAndroidSdk = androidSdk ?? AndroidSdk.locateAndroidSdk();
+    final AndroidStudio? Function() finalAndroidStudioBuilder =
+        androidStudioBuilder ??
+        (androidStudio != null ? () => androidStudio : AndroidStudio.latestValid);
 
-    final Java? finalJava =
-        java ??
-        Java.find(
-          config: finalConfig,
-          androidStudio: finalAndroidStudio,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-        );
+    late final AndroidContext finalAndroidContext;
 
-    final GradleUtils finalGradleUtils =
-        gradleUtils ??
-        GradleUtils(
-          platform: finalPlatform,
-          logger: finalLogger,
-          cache: finalCache,
-          operatingSystemUtils: finalOS,
-        );
+    final Java? Function() finalJavaBuilder =
+        javaBuilder ??
+        (java != null
+            ? () => java
+            : () => Java.find(
+                androidStudioBuilder: () => finalAndroidContext.androidStudio,
+                config: finalConfig,
+                fileSystem: finalFS,
+                logger: finalLogger,
+                platform: finalPlatform,
+                processManager: finalProcessManager,
+              ));
+
+    final GradleUtils Function() finalGradleUtilsBuilder =
+        gradleUtilsBuilder ??
+        (gradleUtils != null
+            ? () => gradleUtils
+            : () => GradleUtils(
+                platform: finalPlatform,
+                logger: finalLogger,
+                cache: finalCache,
+                operatingSystemUtils: finalOS,
+              ));
+
+    finalAndroidContext = AndroidContext(
+      androidSdkBuilder: finalAndroidSdkBuilder,
+      androidStudioBuilder: finalAndroidStudioBuilder,
+      gradleUtilsBuilder: finalGradleUtilsBuilder,
+      javaBuilder: finalJavaBuilder,
+    );
 
     // 13. Doctor, EmulatorManager, and DeviceManager Dependencies
     final Doctor finalDoctor =
@@ -507,17 +549,20 @@ class ToolDependencies {
 
     final AndroidWorkflow finalAndroidWorkflow =
         androidWorkflow ??
-        AndroidWorkflow(androidSdk: finalAndroidSdk, featureFlags: finalFeatureFlags);
+        AndroidWorkflow(
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
+          featureFlags: finalFeatureFlags,
+        );
 
     final EmulatorManager finalEmulatorManager =
         emulatorManager ??
         EmulatorManager(
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
           androidWorkflow: finalAndroidWorkflow,
           fileSystem: finalFS,
-          java: finalJava,
+          javaBuilder: () => finalAndroidContext.java,
           logger: finalLogger,
           processManager: finalProcessManager,
-          androidSdk: finalAndroidSdk,
         );
 
     final MacOSWorkflow finalMacOSWorkflow =
@@ -534,6 +579,12 @@ class ToolDependencies {
       logger: finalLogger,
     );
 
+    final extensionBuildManager = ExtensionBuildManager(
+      extensionManager: extensionManager,
+      featureFlags: finalFeatureFlags,
+      logger: finalLogger,
+    );
+
     final DeviceManager finalDeviceManager =
         deviceManager ??
         FlutterDeviceManager(
@@ -541,7 +592,7 @@ class ToolDependencies {
           platform: finalPlatform,
           processManager: finalProcessManager,
           fileSystem: finalFS,
-          androidSdk: finalAndroidSdk,
+          androidSdkBuilder: () => finalAndroidContext.androidSdk,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,
           xcDevice: finalXCDevice,
@@ -560,12 +611,7 @@ class ToolDependencies {
 
     return ToolDependencies(
       analytics: finalAnalytics,
-      androidContext: AndroidContext(
-        androidSdk: finalAndroidSdk,
-        androidStudio: finalAndroidStudio,
-        gradleUtils: finalGradleUtils,
-        java: finalJava,
-      ),
+      androidContext: finalAndroidContext,
       appleContext: AppleContext(
         cocoaPods: finalCocoaPods,
         cocoapodsValidator: finalCocoapodsValidator,
@@ -577,10 +623,12 @@ class ToolDependencies {
         xcodeProjectInterpreter: finalXcodeProjectInterpreter,
       ),
       buildSystem: finalBuildSystem,
+      buildTargets: finalBuildTargets,
       crashReporter: finalCrashReporter,
       deviceManager: finalDeviceManager,
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
+      extensionBuildManager: extensionBuildManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
       toolContext: ToolContext(
@@ -611,7 +659,6 @@ class ToolDependencies {
         terminal: finalTerminal,
         userMessages: finalUserMessages,
       ),
-      buildTargets: finalBuildTargets,
     );
   }
 }
