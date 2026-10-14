@@ -463,7 +463,14 @@ cc_test(
     '//flutter/lib/gpu',
     skip: <String, String>{
       'gpu_unittests_fixtures': 'with gpu_unittests',
-      'gpu_unittests': 'needs //flutter/testing:dart (the Dart runtime)',
+      // The suite converts and links (it did, once), and its GN binary
+      // and Bazel binary fail identically: FlutterGpuCommandBufferTest
+      // constructs a ref-counted CommandBuffer on the stack, which trips
+      // fml's adoption check in debug builds. testing/run_tests.py does
+      // not run it on any platform.
+      'gpu_unittests':
+          'crashes at this revision in debug builds '
+          '(FlutterGpuCommandBufferTest, fml adoption check); run_tests.py does not run it',
     },
     // The Flutter GPU Dart library, which impeller/fixtures' entry point
     // imports by relative path (templateAttributeOverrides).
