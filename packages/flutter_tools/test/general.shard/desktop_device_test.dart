@@ -660,6 +660,7 @@ class FakeMacOSDevice extends MacOSDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
+    super.flutterRoot = '',
   });
 
   @override

@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -103,7 +104,7 @@ environement:
       platform: FakePlatform(operatingSystem: 'macos'),
       xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
       analytics: fakeAnalytics,
-      flutterRoot: flutterRoot,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: flutterRoot),
     );
     fileSystem.file(
         fileSystem.path.join(
@@ -253,7 +254,7 @@ environement:
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(isInstalled: false),
         analytics: fakeAnalytics,
-        flutterRoot: 'flutter',
+        cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: 'flutter'),
       );
 
       final FlutterProject project = FlutterProject.fromDirectoryTest(
@@ -1219,7 +1220,7 @@ end''');
               ),
               analytics: fakeAnalytics,
               currentAbi: Abi.macosArm64,
-              flutterRoot: 'flutter',
+              cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: 'flutter'),
             );
 
             fakeProcessManager.addCommands(<FakeCommand>[
@@ -1277,7 +1278,7 @@ end''');
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
         analytics: fakeAnalytics,
         currentAbi: Abi.macosX64,
-        flutterRoot: 'flutter',
+        cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: 'flutter'),
       );
 
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1480,7 +1481,7 @@ end''');
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
         analytics: fakeAnalytics,
-        flutterRoot: 'flutter',
+        cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: 'flutter'),
       );
 
       final bool didInstall = await cocoaPods.processPods(

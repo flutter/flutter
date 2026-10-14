@@ -291,7 +291,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     )..createSync(recursive: true);
     final Directory pluginsDirectory = flutterIntegrationPackage.childDirectory(_kFlutterPlugins);
 
-    await project.regeneratePlatformSpecificTooling(releaseMode: false);
+    await project.regeneratePlatformSpecificTooling(cache: _cache, releaseMode: false);
 
     final List<BuildInfo> buildInfos = await _getBuildInfos();
     if (buildInfos.isEmpty) {
@@ -1581,6 +1581,7 @@ class CocoaPodPluginDependencies {
       xcodeProject,
       _targetPlatform.buildDirectory(),
       buildInfo.mode,
+      flutterRoot: _utils.flutterRoot,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
       // SwiftPM. Since "flutter build swift-package" builds Swift packages and CocoaPods
       // separately, we need to force SwiftPM to be enabled so that CocoaPods will skip processing

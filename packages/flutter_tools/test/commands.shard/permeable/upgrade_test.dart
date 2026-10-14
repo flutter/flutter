@@ -214,7 +214,7 @@ void main() {
         processManager.addCommands(<FakeCommand>[
           FakeCommand(
             command: <String>[
-              globals.fs.path.join(globals.cache.flutterRoot, 'bin', 'flutter'),
+              globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',
@@ -501,7 +501,7 @@ void main() {
           FakeCommand(
             command: <String>[
               globals.fs.path.join(
-                realCommandRunner.workingDirectory ?? globals.cache.flutterRoot,
+                realCommandRunner.workingDirectory ?? getFlutterRoot(),
                 'bin',
                 'flutter',
               ),
@@ -759,7 +759,7 @@ void main() {
         processManager.addCommand(
           FakeCommand(
             command: <String>[
-              globals.fs.path.join(globals.cache.flutterRoot, 'bin', 'flutter'),
+              globals.fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
               'upgrade',
               '--continue',
               '--continue-started-at',

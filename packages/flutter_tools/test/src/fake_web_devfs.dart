@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -24,6 +25,8 @@ import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
+
+import 'fake_process_manager.dart';
 
 /// Helper function to create a [WebDevFS] with sensible testbed defaults.
 WebDevFS createWebDevFS({
@@ -49,6 +52,7 @@ WebDevFS createWebDevFS({
   FileSystem? fileSystem,
   Logger? logger,
   Platform? platform,
+  Cache? cache,
   bool testMode = true,
   Map<String, String> webDefines = const <String, String>{},
 }) {
@@ -75,6 +79,7 @@ WebDevFS createWebDevFS({
     fileSystem: fileSystem ?? globals.fs,
     logger: logger ?? globals.logger,
     platform: platform ?? globals.platform,
+    cache: cache ?? Cache.test(processManager: FakeProcessManager.any()),
     testMode: testMode,
     webDefines: webDefines,
   );

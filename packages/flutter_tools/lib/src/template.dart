@@ -11,9 +11,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/template.dart';
-import 'cache.dart';
 import 'dart/package_map.dart';
-import 'globals.dart' as globals;
 
 /// The Kotlin keywords which are not Java keywords.
 /// They are escaped in Kotlin files.
@@ -23,20 +21,14 @@ const kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 
 /// Provides the path where templates used by flutter_tools are stored.
 class TemplatePathProvider {
-  const TemplatePathProvider({Cache? cache, String? flutterRoot})
-    : assert(cache != null || flutterRoot != null),
-      _cache = cache,
-      _flutterRoot = flutterRoot;
+  const TemplatePathProvider({required this._flutterRoot});
 
-  final Cache? _cache;
-  final String? _flutterRoot;
-
-  String get _flutterRootPath => (_flutterRoot ?? _cache?.flutterRoot)!;
+  final String _flutterRoot;
 
   /// Returns the directory containing the 'name' template directory.
   Directory directoryInPackage(String name, FileSystem fileSystem) {
     final String templatesDir = fileSystem.path.join(
-      _flutterRootPath,
+      _flutterRoot,
       'packages',
       'flutter_tools',
       'templates',
@@ -48,11 +40,7 @@ class TemplatePathProvider {
   /// flutter_template_images, to resolve image placeholder against.
   /// if 'name' is null, return the parent template directory.
   Future<Directory> imageDirectory(String? name, FileSystem fileSystem, Logger logger) async {
-    final String toolPackagePath = fileSystem.path.join(
-      _flutterRootPath,
-      'packages',
-      'flutter_tools',
-    );
+    final String toolPackagePath = fileSystem.path.join(_flutterRoot, 'packages', 'flutter_tools');
     final String packageFilePath = fileSystem.path.join(
       toolPackagePath,
       '.dart_tool',
@@ -71,8 +59,7 @@ class TemplatePathProvider {
   }
 }
 
-TemplatePathProvider get templatePathProvider =>
-    context.get<TemplatePathProvider>() ?? TemplatePathProvider(cache: globals.cache);
+TemplatePathProvider get templatePathProvider => context.get<TemplatePathProvider>()!;
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the `.tmpl` extension. All files

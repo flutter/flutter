@@ -24,12 +24,14 @@ class LinuxDevice extends DesktopDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
+    required this._flutterRoot,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _logger = logger,
        super('linux', platformType: PlatformType.linux, ephemeral: false);
 
   final OperatingSystemUtils _operatingSystemUtils;
   final Logger _logger;
+  final String _flutterRoot;
 
   @override
   Future<bool> isSupported() async => true;
@@ -67,6 +69,7 @@ class LinuxDevice extends DesktopDevice {
     await buildLinux(
       FlutterProject.current().linux,
       buildInfo,
+      flutterRoot: _flutterRoot,
       target: mainPath,
       targetPlatform: await targetPlatform,
       logger: _logger,
@@ -83,6 +86,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     required Platform platform,
     required FeatureFlags featureFlags,
+    required this._flutterRoot,
     required this._operatingSystemUtils,
     required this._fileSystem,
     required this._processManager,
@@ -93,6 +97,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
 
   final Platform _platform;
   final LinuxWorkflow _linuxWorkflow;
+  final String _flutterRoot;
   final ProcessManager _processManager;
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -114,6 +119,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
     }
     return <Device>[
       LinuxDevice(
+        flutterRoot: _flutterRoot,
         logger: _logger,
         processManager: _processManager,
         fileSystem: _fileSystem,

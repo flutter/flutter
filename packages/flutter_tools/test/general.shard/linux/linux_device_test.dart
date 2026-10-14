@@ -24,6 +24,7 @@ final windows = FakePlatform(operatingSystem: 'windows');
 void main() {
   testWithoutContext('LinuxDevice defaults', () async {
     final device = LinuxDevice(
+      flutterRoot: '',
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -48,6 +49,7 @@ void main() {
 
   testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
     final deviceArm64Host = LinuxDevice(
+      flutterRoot: '',
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -59,6 +61,7 @@ void main() {
   testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {
     expect(
       await LinuxDevices(
+        flutterRoot: '',
         fileSystem: MemoryFileSystem.test(),
         platform: windows,
         featureFlags: TestFeatureFlags(isLinuxEnabled: true),
@@ -73,6 +76,7 @@ void main() {
   testWithoutContext('LinuxDevice: no devices listed if Linux feature flag disabled', () async {
     expect(
       await LinuxDevices(
+        flutterRoot: '',
         fileSystem: MemoryFileSystem.test(),
         platform: linux,
         featureFlags: TestFeatureFlags(),
@@ -87,6 +91,7 @@ void main() {
   testWithoutContext('LinuxDevice: devices', () async {
     expect(
       await LinuxDevices(
+        flutterRoot: '',
         fileSystem: MemoryFileSystem.test(),
         platform: linux,
         featureFlags: TestFeatureFlags(isLinuxEnabled: true),
@@ -101,6 +106,7 @@ void main() {
   testWithoutContext('LinuxDevice has well known id "linux"', () async {
     expect(
       LinuxDevices(
+        flutterRoot: '',
         fileSystem: MemoryFileSystem.test(),
         platform: linux,
         featureFlags: TestFeatureFlags(isLinuxEnabled: true),
@@ -115,6 +121,7 @@ void main() {
   testWithoutContext('LinuxDevice: discoverDevices', () async {
     // Timeout ignored.
     final List<Device> devices = await LinuxDevices(
+      flutterRoot: '',
       fileSystem: MemoryFileSystem.test(),
       platform: linux,
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
@@ -133,6 +140,7 @@ void main() {
 
     expect(
       LinuxDevice(
+        flutterRoot: '',
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
@@ -149,6 +157,7 @@ void main() {
 
     expect(
       LinuxDevice(
+        flutterRoot: '',
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: fileSystem,
@@ -163,6 +172,7 @@ void main() {
     () async {
       final mockApp = FakeLinuxApp();
       final device = LinuxDevice(
+        flutterRoot: '',
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.any(),
         fileSystem: MemoryFileSystem.test(),

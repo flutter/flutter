@@ -52,7 +52,7 @@ class Xcode {
     required this._fileSystem,
     required this._xcodeProjectInterpreter,
     required UserMessages userMessages,
-    this._flutterRoot,
+    required this.flutterRoot,
   }) : _userMessage = userMessages,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _logger = logger;
@@ -67,7 +67,7 @@ class Xcode {
     XcodeProjectInterpreter? xcodeProjectInterpreter,
     Platform? platform,
     FileSystem? fileSystem,
-    String? flutterRoot,
+    String flutterRoot = '',
     Logger? logger,
   }) {
     platform ??= FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
@@ -89,7 +89,7 @@ class Xcode {
   final FileSystem _fileSystem;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final UserMessages _userMessage;
-  final String? _flutterRoot;
+  final String flutterRoot;
   final Logger _logger;
 
   bool get isInstalledAndMeetsVersionCheck =>
@@ -130,7 +130,6 @@ class Xcode {
   /// Path to script to automate debugging through Xcode. Used in xcode_debug.dart.
   /// Located in this file to make it easily overrideable in google3.
   String get xcodeAutomationScriptPath {
-    final String flutterRoot = _flutterRoot ?? '';
     final String flutterToolsAbsolutePath = _fileSystem.path.join(
       flutterRoot,
       'packages',

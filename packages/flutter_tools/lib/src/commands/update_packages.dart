@@ -14,6 +14,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/net.dart';
+import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
@@ -104,6 +105,9 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   final hidden = true;
 
+  @override
+  ToolContext get toolContext => super.toolContext!;
+
   // Lazy-initialize the net utilities with values from the context.
   late final _net = Net(
     httpClientFactory: context.get<HttpClientFactory>(),
@@ -120,7 +124,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       throwToolExit('Failed to fetch coverage data from $coverageUri');
     }
     final String coverageDir = globals.fs.path.join(
-      globals.cache.flutterRoot,
+      toolContext.cache.flutterRoot,
       'packages/flutter/coverage',
     );
     globals.fs.file(globals.fs.path.join(coverageDir, 'lcov.base.info'))
@@ -133,11 +137,10 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final ToolContext(:Cache cache, :FileSystem fs) = toolContext;
     // Add the root directory to the list of packages, to capture the workspace
     // `pubspec.yaml`.
-    final Directory rootDirectory = globals.fs.directory(
-      globals.fs.path.absolute(globals.cache.flutterRoot),
-    );
+    final Directory rootDirectory = fs.directory(fs.path.absolute(cache.flutterRoot));
 
     final bool forceUpgrade = boolArg(_keyForceUpgrade);
     final bool updateHashes = boolArg(_keyUpdateHashes);
@@ -281,13 +284,12 @@ class UpdatePackagesCommand extends FlutterCommand {
       for (final (:package, :version) in pinned ?? <PackageVersion>[]) package: version,
     });
 
-    final Directory tempDir = globals.fs.systemTempDirectory.createTempSync(
-      'flutter_upgrade_packages.',
-    );
+    final ToolContext(:Cache cache, :FileSystem fs) = toolContext;
+    final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_upgrade_packages.');
     final deps = <_ProjectDeps>[];
     for (final project in projects) {
       final Directory projectTempDir = tempDir.childDirectory(
-        globals.fs.path.relative(project.directory.path, from: globals.cache.flutterRoot),
+        fs.path.relative(project.directory.path, from: cache.flutterRoot),
       );
       final File tempPubspec = projectTempDir.childFile(project.pubspecFile.basename)
         ..createSync(recursive: true);

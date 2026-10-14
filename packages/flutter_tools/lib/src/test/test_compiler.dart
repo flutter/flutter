@@ -275,6 +275,7 @@ class TestCompiler {
             flutterProject!,
             buildInfo.packageConfig,
             mainFile,
+            flutterRoot: cache.flutterRoot,
           );
           invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
           _registrantLanguageVersion = languageVersion;

@@ -182,13 +182,9 @@ class BuildableIOSApp extends IOSApp {
       globals.fs.path.join('ios', 'Runner', 'Assets.xcassets', asset);
 
   // Template asset's Contents.json file is in flutter_tools, but the actual
-  String _templateImageAssetDirNameForContentsJson(String asset) => globals.fs.path.join(
-    globals.cache.flutterRoot,
-    'packages',
-    'flutter_tools',
-    'templates',
-    _templateImageAssetDirNameSuffix(asset),
-  );
+  String _templateImageAssetDirNameForContentsJson(String asset) => templatePathProvider
+      .directoryInPackage(_templateImageAssetDirNameSuffix(asset), project.hostAppRoot.fileSystem)
+      .path;
 
   // Template asset's images are in flutter_template_images package.
   Future<String> _templateImageAssetDirNameForImages(String asset) async {

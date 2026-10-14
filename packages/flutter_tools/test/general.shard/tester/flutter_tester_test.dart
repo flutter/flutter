@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
 import 'package:test/fake.dart';
@@ -99,6 +100,7 @@ void main() {
         fileSystem: fileSystem,
         processManager: fakeProcessManager,
         artifacts: Artifacts.test(),
+        cache: Cache.test(processManager: fakeProcessManager),
         logger: BufferLogger.test(),
         flutterVersion: FakeFlutterVersion(),
         platform: FakePlatform(),
@@ -229,10 +231,12 @@ Hello!
 }
 
 FlutterTesterDevices setUpFlutterTesterDevices() {
+  final processManager = FakeProcessManager.any();
   return FlutterTesterDevices(
     logger: BufferLogger.test(),
     artifacts: Artifacts.test(),
-    processManager: FakeProcessManager.any(),
+    cache: Cache.test(processManager: processManager),
+    processManager: processManager,
     fileSystem: MemoryFileSystem.test(),
     flutterVersion: FakeFlutterVersion(),
     platform: FakePlatform(),

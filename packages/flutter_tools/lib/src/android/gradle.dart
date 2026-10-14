@@ -27,6 +27,7 @@ import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -167,6 +168,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required this._analytics,
     required AndroidStudio? androidStudio,
     required this._artifacts,
+    required this._cache,
     required FileSystem fileSystem,
     required GradleUtils gradleUtils,
     required Java? java,
@@ -190,6 +192,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required this._androidContext,
     required ToolContext toolContext,
   }) : _artifacts = toolContext.artifacts,
+       _cache = toolContext.cache,
        _fileSystem = toolContext.fs,
        _logger = toolContext.logger,
        _fileSystemUtils = toolContext.fileSystemUtils,
@@ -197,6 +200,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
   final Analytics _analytics;
   final AndroidContext _androidContext;
+  final Cache _cache;
   late final Java? _java = _androidContext.java;
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -543,7 +547,7 @@ To fix this, you can either:
       analytics: _analytics,
       androidSdk: _androidSdk,
       buildInfo: androidBuildInfo.buildInfo,
-      cache: globals.cache,
+      cache: _cache,
       fileSystemUtils: _fileSystemUtils,
       logger: _logger,
     );
@@ -877,7 +881,7 @@ To fix this, you can either:
     final String aarTask = getAarTaskFor(buildInfo);
     final Status status = _logger.startProgress("Running Gradle task '$aarTask'...");
 
-    final String flutterRoot = _fileSystem.path.absolute(globals.cache.flutterRoot);
+    final String flutterRoot = _fileSystem.path.absolute(_cache.flutterRoot);
     final String initScript = _fileSystem.path.join(
       flutterRoot,
       'packages',

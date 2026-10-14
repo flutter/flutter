@@ -96,6 +96,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         fileSystem: globals.fs,
         artifacts: globals.artifacts!,
         analytics: globals.analytics,
+        cache: globals.cache,
         gradleUtils: globals.gradleUtils!,
         platform: globals.platform,
         androidStudio: globals.androidStudio,
@@ -191,8 +192,13 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
-      Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
-      DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
+      Doctor: () =>
+          Doctor(cache: globals.cache, logger: globals.logger, clock: globals.systemClock),
+      DoctorValidatorsProvider: () => DoctorValidatorsProvider.create(
+        cache: globals.cache,
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       EmulatorManager: () => EmulatorManager(
         javaBuilder: () => globals.java,
         androidSdkBuilder: () => globals.androidSdk,
@@ -301,7 +307,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      TemplatePathProvider: () => TemplatePathProvider(cache: globals.cache),
+      TemplatePathProvider: () => TemplatePathProvider(flutterRoot: globals.cache.flutterRoot),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,
@@ -321,6 +327,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         processManager: globals.processManager,
         platform: globals.platform,
         fileSystem: globals.fs,
+        flutterRoot: globals.cache.flutterRoot,
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
         userMessages: globals.userMessages,
       ),

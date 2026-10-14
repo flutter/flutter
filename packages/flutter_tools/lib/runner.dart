@@ -344,7 +344,7 @@ Future<int> _handleToolErrorImpl(
         verbose: true /* Capture flutter doctor -v */,
       );
 
-      final doctorText = DoctorText(logger);
+      final doctorText = DoctorText(logger, cache: globals.cache, clock: globals.systemClock);
 
       final details = CrashDetails(
         command: _crashCommand(args),

@@ -98,6 +98,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -121,6 +122,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -143,6 +145,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -164,6 +167,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -189,6 +193,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -211,6 +216,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -234,6 +240,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
               forceCocoaPodsOnly: true,
             );
             expect(cocoaPods.processedPods, isTrue);
@@ -266,6 +273,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
               forceSwiftPM: true,
             );
 
@@ -301,6 +309,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -324,6 +333,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -346,6 +356,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -367,6 +378,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -392,6 +404,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -414,6 +427,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -438,6 +452,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              flutterRoot: '',
               forceCocoaPodsOnly: true,
             );
             expect(cocoaPods.processedPods, isTrue);

@@ -1137,6 +1137,9 @@ class FakeCache extends Fake implements Cache {
   @override
   MapEntry<String, String> get dyLdLibEntry =>
       const MapEntry<String, String>('DYLD_LIBRARY_PATH', 'fake_path');
+
+  @override
+  bool isOlderThanToolsStamp(FileSystemEntity entity) => !entity.existsSync();
 }
 
 class FakeGit extends Fake implements Git {}

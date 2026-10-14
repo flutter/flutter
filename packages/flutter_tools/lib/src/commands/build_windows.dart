@@ -84,6 +84,7 @@ class BuildWindowsCommand extends BuildSubCommand {
       project.windows,
       buildInfo,
       targetPlatform,
+      flutterRoot: toolContext.cache.flutterRoot,
       target: targetFile,
       visualStudioOverride: _visualStudio,
       sizeAnalyzer: SizeAnalyzer(

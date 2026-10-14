@@ -328,7 +328,6 @@ class ToolDependencies {
         cache ??
         FlutterCache(
           fileSystem: finalFS,
-          flutterRoot: cache?.flutterRoot,
           logger: finalLogger,
           platform: finalPlatform,
           osUtils: finalOS,
@@ -412,6 +411,7 @@ class ToolDependencies {
           processManager: finalProcessManager,
           logger: finalLogger,
           fileSystem: finalFS,
+          flutterRoot: finalCache.flutterRoot,
           xcodeProjectInterpreter: finalXcodeProjectInterpreter,
           userMessages: finalUserMessages,
         );
@@ -544,7 +544,13 @@ class ToolDependencies {
 
     // 13. Doctor, EmulatorManager, and DeviceManager Dependencies
     final Doctor finalDoctor =
-        doctor ?? Doctor(clock: finalSystemClock, logger: finalLogger, analytics: finalAnalytics);
+        doctor ??
+        Doctor(
+          cache: finalCache,
+          clock: finalSystemClock,
+          logger: finalLogger,
+          analytics: finalAnalytics,
+        );
 
     final AndroidWorkflow finalAndroidWorkflow =
         androidWorkflow ??

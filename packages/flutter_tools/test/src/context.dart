@@ -322,7 +322,11 @@ class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidato
 }
 
 class _ContextFakeDoctor extends Doctor {
-  _ContextFakeDoctor(Logger logger, {super.clock = const SystemClock()}) : super(logger: logger);
+  _ContextFakeDoctor(Logger logger, {super.clock = const SystemClock()})
+    : super(
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        logger: logger,
+      );
 
   // True for testing.
   @override

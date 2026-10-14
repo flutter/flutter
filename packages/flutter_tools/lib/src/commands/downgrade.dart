@@ -40,8 +40,7 @@ String downgradePositionalArgumentErrorMessage(List<String> args) {
 /// Additionally, if they had switched channels to stable before trying to downgrade,
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
-  DowngradeCommand({required ToolContext super.toolContext, super.verboseHelp = false})
-    : _toolContext = toolContext {
+  DowngradeCommand({required ToolContext super.toolContext, super.verboseHelp = false}) {
     argParser.addOption(
       'working-directory',
       hide: !verboseHelp,
@@ -59,10 +58,8 @@ class DowngradeCommand extends FlutterCommand {
     );
   }
 
-  final ToolContext _toolContext;
-
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get description => 'Downgrade Flutter to the last active version for the current channel.';
@@ -87,8 +84,8 @@ class DowngradeCommand extends FlutterCommand {
       :PersistentToolState persistentToolState,
       :Stdio stdio,
       :Terminal terminal,
-    ) = _toolContext;
-    FlutterVersion flutterVersion = _toolContext.flutterVersion;
+    ) = toolContext;
+    FlutterVersion flutterVersion = toolContext.flutterVersion;
 
     // Commands do not necessarily have access to the correct zone injected
     // values when being created. Fields must be lazily instantiated in runCommand,
@@ -187,7 +184,7 @@ class DowngradeCommand extends FlutterCommand {
 
   // Formats an error message that lists the currently stored versions.
   Future<String> _createErrorMessage(String workingDirectory, Channel currentChannel) async {
-    final ToolContext(:Git git, :PersistentToolState persistentToolState) = _toolContext;
+    final ToolContext(:Git git, :PersistentToolState persistentToolState) = toolContext;
     final buffer = StringBuffer();
     for (final Channel channel in Channel.values) {
       if (channel == currentChannel) {

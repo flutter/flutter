@@ -33,7 +33,7 @@ void main() {
     });
 
     testWithoutContext(
-      'succeeds when packages/flutter_tools exists with parameter flutterRoot',
+      'succeeds when packages/flutter_tools exists with custom cache.flutterRoot',
       () {
         final String flutterRoot = fs.path.join('custom', 'flutter', 'root');
         final Directory toolsDir = fs.directory(
@@ -41,7 +41,16 @@ void main() {
         );
         toolsDir.createSync(recursive: true);
 
-        final validator = PreRunValidator(fileSystem: fs, flutterRoot: flutterRoot);
+        final validator = PreRunValidator(
+          fileSystem: fs,
+          cache: Cache.test(
+            fileSystem: fs,
+            processManager: FakeProcessManager.any(),
+            logger: logger,
+            platform: platform,
+            flutterRoot: flutterRoot,
+          ),
+        );
 
         expect(() => validator.validate(), returnsNormally);
       },

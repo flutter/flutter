@@ -20,6 +20,7 @@ import 'macos_workflow.dart';
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
   MacOSDevice({
+    required this._flutterRoot,
     required super.processManager,
     required super.logger,
     required super.fileSystem,
@@ -29,6 +30,7 @@ class MacOSDevice extends DesktopDevice {
        _operatingSystemUtils = operatingSystemUtils,
        super('macos', platformType: PlatformType.macos, ephemeral: false);
 
+  final String _flutterRoot;
   final ProcessManager _processManager;
   final Logger _logger;
   final OperatingSystemUtils _operatingSystemUtils;
@@ -70,6 +72,7 @@ class MacOSDevice extends DesktopDevice {
     await buildMacOS(
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
+      flutterRoot: _flutterRoot,
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
       usingCISystem: usingCISystem,
@@ -102,6 +105,7 @@ class MacOSDevice extends DesktopDevice {
 
 class MacOSDevices extends PollingDeviceDiscovery {
   MacOSDevices({
+    required this._flutterRoot,
     required this._platform,
     required this._macOSWorkflow,
     required this._processManager,
@@ -110,6 +114,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     required this._operatingSystemUtils,
   }) : super('macOS devices');
 
+  final String _flutterRoot;
   final MacOSWorkflow _macOSWorkflow;
   final Platform _platform;
   final ProcessManager _processManager;
@@ -133,6 +138,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     }
     return <Device>[
       MacOSDevice(
+        flutterRoot: _flutterRoot,
         processManager: _processManager,
         logger: _logger,
         fileSystem: _fileSystem,

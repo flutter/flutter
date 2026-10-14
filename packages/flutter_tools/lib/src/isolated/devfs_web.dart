@@ -20,6 +20,7 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/tools/asset_transformer.dart';
 import '../build_system/tools/shader_compiler.dart';
+import '../cache.dart';
 import '../compile.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
@@ -80,6 +81,7 @@ class WebDevFS implements DevFS {
     required this.fileSystem,
     required this.logger,
     required this.platform,
+    required this.cache,
     this.testMode = false,
     this._webDefines = const <String, String>{},
   }) {
@@ -118,6 +120,7 @@ class WebDevFS implements DevFS {
   final FileSystem fileSystem;
   final Logger logger;
   final Platform platform;
+  final Cache cache;
   final Map<String, String> _webDefines;
 
   late WebAssetServer webAssetServer;
@@ -220,6 +223,7 @@ class WebDevFS implements DevFS {
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
+      cache: cache,
       crossOriginIsolation: webCrossOriginIsolation,
       webDefines: _webDefines,
     );

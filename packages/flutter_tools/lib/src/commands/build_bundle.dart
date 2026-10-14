@@ -23,7 +23,7 @@ class BuildBundleCommand extends BuildSubCommand {
     required ToolContext toolContext,
     required super.verboseHelp,
     BundleBuilder? bundleBuilder,
-  }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(),
+  }) : _bundleBuilder = bundleBuilder ?? BundleBuilder(cache: toolContext.cache),
        super(
          logger: toolContext.logger,
          outputPreferences: toolContext.outputPreferences,

@@ -541,7 +541,11 @@ flutter:
       },
       overrides: <Type, Generator>{
         Pub: () => Pub(
-          cache: globals.cache,
+          cache: Cache.test(
+            flutterRoot: getFlutterRoot(),
+            fileSystem: globals.fs,
+            processManager: globals.processManager,
+          ),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -845,7 +849,6 @@ flutter:
     testUsingContext(
       'test without bot',
       () async {
-        globals.cache.flutterRoot = '';
         globals.fs.directory('/packages/flutter_tools').createSync(recursive: true);
         globals.fs.file('pubspec.yaml').createSync();
         processManager.addCommand(
@@ -869,13 +872,15 @@ flutter:
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        Cache: () =>
+            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         BotDetector: () => const FakeBotDetector(false),
         Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
+          flutterRoot: '',
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -889,7 +894,6 @@ flutter:
     testUsingContext(
       'test with bot',
       () async {
-        globals.cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         processManager.addCommand(
           const FakeCommand(
@@ -913,13 +917,15 @@ flutter:
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        Cache: () =>
+            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         BotDetector: () => const FakeBotDetector(true),
         Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
+          flutterRoot: '',
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -933,7 +939,6 @@ flutter:
     testUsingContext(
       'run pass arguments through to pub',
       () async {
-        globals.cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
@@ -959,12 +964,14 @@ flutter:
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        Cache: () =>
+            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
+          flutterRoot: '',
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -978,7 +985,6 @@ flutter:
     testUsingContext(
       'token pass arguments through to pub',
       () async {
-        globals.cache.flutterRoot = '';
         globals.fs.file('pubspec.yaml').createSync();
         final stdin = IOSink(StreamController<List<int>>().sink);
         processManager.addCommand(
@@ -1003,12 +1009,14 @@ flutter:
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        Cache: () =>
+            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
+          flutterRoot: '',
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -1022,7 +1030,6 @@ flutter:
     testUsingContext(
       'upgrade does not check for pubspec.yaml if -h/--help is passed',
       () async {
-        globals.cache.flutterRoot = '';
         processManager.addCommand(
           FakeCommand(
             command: const <String>[
@@ -1045,12 +1052,14 @@ flutter:
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{
+        Cache: () =>
+            Cache.test(flutterRoot: '', fileSystem: globals.fs, processManager: processManager),
         FileSystem: () => MemoryFileSystem.test(),
         Platform: () => FakePlatform(environment: <String, String>{}),
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
-          flutterRoot: getFlutterRoot(),
+          flutterRoot: '',
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,

@@ -156,8 +156,12 @@ class FlutterDevice {
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+    final ToolContext(
+      :FlutterVersion flutterVersion,
+      :FileSystem fs,
+      :Logger logger,
+      :FlutterProjectFactory projectFactory,
+    ) = _toolContext;
     this.vmServiceUri ??= Future<Uri>.value(vmServiceUri);
     // FYI, this message is used as a sentinel in tests.
     logger.printTrace('Connecting to service protocol: $vmServiceUri');
@@ -170,7 +174,11 @@ class FlutterDevice {
         // this may not be the case when scraping logcat for URIs. If this URI is
         // from an old application instance, we shouldn't try and start DDS.
         try {
-          service = await connectToVmService(vmServiceUri, logger: logger);
+          service = await connectToVmService(
+            vmServiceUri,
+            flutterVersion: flutterVersion,
+            logger: logger,
+          );
           await service.dispose();
           break;
         } on vm_service.RPCError catch (e) {
@@ -268,6 +276,7 @@ class FlutterDevice {
           restart: restart,
           compileExpression: compileExpression,
           flutterProject: projectFactory.fromDirectory(fs.currentDirectory),
+          flutterVersion: flutterVersion,
           printStructuredErrorLogMethod: printStructuredErrorLogMethod,
           device: device,
           logger: logger,

@@ -15,6 +15,7 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
+import '../cache.dart';
 import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -50,6 +51,7 @@ class FlutterTesterDevice extends Device {
     required super.logger,
     required this._fileSystem,
     required this._artifacts,
+    required this._cache,
     required this._platform,
     this._nativeAssetsBuilder,
   }) : _logger = logger,
@@ -60,6 +62,7 @@ class FlutterTesterDevice extends Device {
   final Logger _logger;
   final FileSystem _fileSystem;
   final Artifacts _artifacts;
+  final Cache _cache;
   final Platform _platform;
   final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
 
@@ -144,7 +147,7 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     final FlutterProject project = FlutterProject.current();
-    await BundleBuilder().build(
+    await BundleBuilder(cache: _cache).build(
       project: project,
       buildInfo: buildInfo,
       mainPath: mainPath,
@@ -238,6 +241,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   FlutterTesterDevices({
     required FileSystem fileSystem,
     required Artifacts artifacts,
+    required Cache cache,
     required ProcessManager processManager,
     required Logger logger,
     required FlutterVersion flutterVersion,
@@ -247,6 +251,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
          kTesterDeviceId,
          fileSystem: fileSystem,
          artifacts: artifacts,
+         cache: cache,
          processManager: processManager,
          logger: logger,
          flutterVersion: flutterVersion,

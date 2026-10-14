@@ -445,6 +445,7 @@ and ensure "Debug executable" is checked in the "Info" tab.
     await updateGeneratedXcodeProperties(
       project: project,
       buildInfo: buildInfo,
+      flutterRoot: _xcode.flutterRoot,
       targetOverride: mainPath,
       configurationBuildDir: configurationBuildDir,
     );
