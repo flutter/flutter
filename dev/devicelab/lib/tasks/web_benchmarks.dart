@@ -361,9 +361,9 @@ Future<TaskResult> runWebBenchmark(
             return Response.ok('', headers: requestHeaders);
           } else if (request.requestedUri.path.endsWith('/next-benchmark')) {
             if (benchmarks == null) {
-              final List<String> allBenchmarks = (json.decode(requestContents) as List<dynamic>)
-                  .cast<String>();
               try {
+                final List<String> allBenchmarks = (json.decode(requestContents) as List<dynamic>)
+                    .cast<String>();
                 benchmarks = benchmarkFilter.filter(allBenchmarks);
                 benchmarkIterator = benchmarks!.iterator;
               } catch (e, stackTrace) {
@@ -608,7 +608,8 @@ TaskResult processBenchmarkProfiles(
   final benchmarkScoreKeys = <String>[];
 
   for (final profile in profiles) {
-    final benchmarkName = profile['name'] as String?;
+    final Object? nameValue = profile['name'];
+    final String? benchmarkName = nameValue is String ? nameValue : null;
     if (benchmarkName == null || benchmarkName.isEmpty) {
       return TaskResult.failure('Benchmark name is empty');
     }
@@ -620,8 +621,10 @@ TaskResult processBenchmarkProfiles(
       webRendererName = 'canvaskit';
     }
     final namespace = '$benchmarkName.$webRendererName';
-    final List<String> scoreKeys =
-        (profile['scoreKeys'] as List<dynamic>?)?.whereType<String>().toList() ?? <String>[];
+    final Object? rawScoreKeys = profile['scoreKeys'];
+    final List<String> scoreKeys = rawScoreKeys is List<dynamic>
+        ? rawScoreKeys.whereType<String>().toList()
+        : <String>[];
     if (scoreKeys.isEmpty) {
       return TaskResult.failure('No metrics in benchmark "$benchmarkName"');
     }

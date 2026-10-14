@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
 import 'package:test/test.dart';
@@ -206,11 +210,12 @@ void main() {
           'name': 'draw_rect',
           'scoreKeys': <String>['frame_build_times'],
           'frame_build_times': 123.4,
-          // ignore: equal_keys_in_map
-          'name': 'another_name', // Should be ignored by the loop in processBenchmarkProfiles
         },
       ], options);
       expect(result.succeeded, isTrue);
+      expect(result.data!.containsKey('draw_rect.canvaskit.name'), isFalse);
+      expect(result.data!.containsKey('draw_rect.canvaskit.scoreKeys'), isFalse);
+      expect(result.data!['draw_rect.canvaskit.frame_build_times'], 123.4);
     });
   });
 
