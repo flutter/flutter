@@ -17,6 +17,7 @@ import 'src/base/template.dart';
 import 'src/base/terminal.dart';
 import 'src/build_system/build_targets.dart';
 import 'src/build_system/targets/hook_runner_native.dart' show FlutterHookRunnerNative;
+import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
@@ -106,15 +107,15 @@ Future<void> main(List<String> args) async {
       final ToolDependencies(
         :ExtensionManager? extensionManager,
         :FeatureFlags featureFlags,
-        toolContext: ToolContext(:FileSystem fs, :Logger logger),
+        toolContext: ToolContext(:Cache cache, :FileSystem fs, :Logger logger),
       ) = toolDependencies;
       final ExtensionManager manager = extensionManager!;
       final templateManager = ExtensionTemplateManager(
         extensionManager: manager,
         featureFlags: featureFlags,
         fileSystem: fs,
+        flutterRoot: cache.flutterRoot,
         logger: logger,
-        cache: toolDependencies.toolContext.cache,
       );
       return generateCommands(
         toolDependencies: toolDependencies,
