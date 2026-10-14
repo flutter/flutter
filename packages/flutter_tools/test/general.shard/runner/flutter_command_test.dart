@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -1059,14 +1060,14 @@ void main() {
       final device2 = FakeDevice('device2', 'device2');
 
       testUsingContext('no device found', () async {
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
       });
 
       testUsingContext('finds single device', () async {
         testDeviceManager.addAttachedDevice(device1);
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, device1);
       });
@@ -1075,7 +1076,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
         testDeviceManager.specifiedDeviceId = 'all';
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
         expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
@@ -1095,7 +1096,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
 
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final List<Device>? devices = await flutterCommand.findAllTargetDevices();
 
         // Should prompt the user and print prompt options (so status contains "Connected devices")
@@ -1141,7 +1142,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
 
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: false);
 
         // Should NOT prompt the user even if machine mode is false.
@@ -2290,6 +2291,23 @@ class FakeClock extends Fake implements SystemClock {
 }
 
 class _TestRunCommandThatOnlyValidates extends RunCommand {
+  _TestRunCommandThatOnlyValidates({ToolContext? toolContext})
+    : super(
+        appleContext: FakeAppleContext(),
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext:
+            toolContext ??
+            FakeToolContext(
+              fs: globals.fs,
+              logger: globals.logger,
+              platform: globals.platform,
+              processManager: globals.processManager,
+              artifacts: globals.artifacts,
+              cache: globals.cache,
+            ),
+      );
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();

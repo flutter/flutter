@@ -257,7 +257,7 @@ List<FlutterCommand> generateCommands({
   ),
   AttachCommand(
     buildSystem: toolDependencies.buildSystem,
-    buildTargets: const BuildTargetsImpl(),
+    buildTargets: toolDependencies.buildTargets,
     toolContext: toolDependencies.toolContext,
     xcode: toolDependencies.appleContext.xcode,
     verboseHelp: verboseHelp,
@@ -304,7 +304,7 @@ List<FlutterCommand> generateCommands({
     androidContext: toolDependencies.androidContext,
     androidWorkflow: android_workflow.androidWorkflow,
     buildSystem: toolDependencies.buildSystem,
-    buildTargets: const BuildTargetsImpl(),
+    buildTargets: toolDependencies.buildTargets,
     deviceManager: toolDependencies.deviceManager,
     hidden: !verboseHelp,
     toolContext: toolDependencies.toolContext,
@@ -318,17 +318,15 @@ List<FlutterCommand> generateCommands({
     verboseHelp: verboseHelp,
   ),
   DoctorCommand(
-    verbose: verbose,
-    toolContext: toolDependencies.toolContext,
-    // Provide the shared singleton from globals until dependent commands
-    // (e.g. DevicesCommand, EmulatorsCommand) are migrated to DI.
-    doctor: globals.doctor,
+    doctor: toolDependencies.doctor,
     extensionManager: toolDependencies.extensionManager,
+    toolContext: toolDependencies.toolContext,
+    verbose: verbose,
   ),
   DowngradeCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
   DriveCommand(
     buildSystem: toolDependencies.buildSystem,
-    buildTargets: const BuildTargetsImpl(),
+    buildTargets: toolDependencies.buildTargets,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),
@@ -354,7 +352,16 @@ List<FlutterCommand> generateCommands({
     platform: toolDependencies.toolContext.platform,
     featureFlags: featureFlags,
   ),
-  RunCommand(toolContext: toolDependencies.toolContext, verboseHelp: verboseHelp),
+  RunCommand(
+    appleContext: toolDependencies.appleContext,
+    buildSystem: toolDependencies.buildSystem,
+    buildTargets: toolDependencies.buildTargets,
+    toolContext: toolDependencies.toolContext,
+    androidContext: toolDependencies.androidContext,
+    androidWorkflow: android_workflow.androidWorkflow,
+    deviceManager: toolDependencies.deviceManager,
+    verboseHelp: verboseHelp,
+  ),
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
@@ -365,7 +372,7 @@ List<FlutterCommand> generateCommands({
   ),
   WidgetPreviewCommand(
     buildSystem: toolDependencies.buildSystem,
-    buildTargets: const BuildTargetsImpl(),
+    buildTargets: toolDependencies.buildTargets,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
   ),

@@ -18,7 +18,6 @@ import 'base/os.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
 import 'globals.dart' as globals;
-import 'runner/flutter_command.dart' show FlutterOptions;
 
 /// Whether icon font subsetting is enabled by default.
 const kIconTreeShakerEnabledDefault = true;
@@ -56,7 +55,6 @@ class BuildInfo {
     this.buildNativeAssets = true,
     this.useLocalCanvasKit = false,
     this.includeUnsupportedPlatformLibraryStubs = false,
-    this.webEnableHotReload = false,
     this.deprecatedJsInterop,
   }) : extraFrontEndOptions = extraFrontEndOptions ?? const <String>[],
        extraGenSnapshotOptions = extraGenSnapshotOptions ?? const <String>[],
@@ -105,7 +103,6 @@ class BuildInfo {
       useLocalCanvasKit: useLocalCanvasKit,
       includeUnsupportedPlatformLibraryStubs:
           includeUnsupportedPlatformLibraryStubs ?? this.includeUnsupportedPlatformLibraryStubs,
-      webEnableHotReload: webEnableHotReload,
       deprecatedJsInterop: deprecatedJsInterop,
       treeShakeIcons: treeShakeIcons,
     );
@@ -260,9 +257,6 @@ class BuildInfo {
   /// If set, web builds will use the locally built CanvasKit instead of using the CDN
   final bool useLocalCanvasKit;
 
-  /// If set, web builds with DDC will run with support for hot reload.
-  final bool webEnableHotReload;
-
   /// Whether the web compilers (dart2js and DDC) allow the deprecated JS
   /// interop libraries, such as `dart:html` and `dart:js`.
   ///
@@ -350,43 +344,6 @@ class BuildInfo {
   /// the flavor name in the output bundle files has the first character lower-cased,
   /// so the uncapitalized flavor name is used to compute the output file name
   String? get uncapitalizedFlavor => _uncapitalize(flavor);
-
-  /// The module system DDC is targeting, or null if not using DDC or the
-  /// associated flag isn't present.
-  // TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-  DdcModuleFormat get ddcModuleFormat {
-    final DdcModuleFormat moduleFormat = webEnableHotReload
-        ? DdcModuleFormat.ddc
-        : DdcModuleFormat.amd;
-    final DdcModuleFormat? parsedFormat = _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(
-      extraFrontEndOptions,
-    ).ddcModuleFormat;
-    if (parsedFormat != null && moduleFormat != parsedFormat) {
-      throw Exception(
-        'Unsupported option combination:\n'
-        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
-        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-module-format=${parsedFormat.name}',
-      );
-    }
-    return moduleFormat;
-  }
-
-  /// Whether to enable canary features when using DDC, or null if not using
-  /// DDC or the associated flag isn't present.
-  bool get canaryFeatures {
-    final bool canaryEnabled = webEnableHotReload;
-    final bool? parsedCanary = _ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(
-      extraFrontEndOptions,
-    ).canaryFeatures;
-    if (parsedCanary != null && canaryEnabled != parsedCanary) {
-      throw Exception(
-        'Unsupported option combination:\n'
-        '${FlutterOptions.kWebExperimentalHotReload}: $webEnableHotReload\n'
-        '${FlutterOptions.kExtraFrontEndOptions}: --dartdevc-canary=$parsedCanary',
-      );
-    }
-    return canaryEnabled;
-  }
 
   /// Convert to a structured string encoded structure appropriate for usage
   /// in build system [Environment.defines].
@@ -511,7 +468,7 @@ String? validatedBuildNumberForPlatform(
   if (buildNumber == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform.os case .ios || .macos) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
@@ -534,9 +491,7 @@ String? validatedBuildNumberForPlatform(
     }
     return tmpBuildNumber;
   }
-  if (targetPlatform == TargetPlatform.android_arm ||
-      targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64) {
+  if (targetPlatform.os == .android) {
     // See versionCode at https://developer.android.com/studio/publish/versioning
     final disallowed = RegExp(r'[^\d]');
     String tmpBuildNumberStr = buildNumber.replaceAll(disallowed, '');
@@ -564,7 +519,7 @@ String? validatedBuildNameForPlatform(
   if (buildName == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin) {
+  if (targetPlatform.os case .ios || .macos) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
@@ -587,10 +542,7 @@ String? validatedBuildNameForPlatform(
     }
     return tmpBuildName;
   }
-  if (targetPlatform == TargetPlatform.android ||
-      targetPlatform == TargetPlatform.android_arm ||
-      targetPlatform == TargetPlatform.android_arm64 ||
-      targetPlatform == TargetPlatform.android_x64) {
+  if (targetPlatform.os == .android) {
     // See versionName at https://developer.android.com/studio/publish/versioning
     return buildName;
   }
@@ -686,6 +638,31 @@ enum CpuArch {
   };
 }
 
+/// The operating system (or runtime environment) that a [TargetPlatform]
+/// targets, independent of CPU architecture.
+///
+/// Use [TargetPlatform.os] to obtain the operating system of a target platform.
+/// This is preferable to switching over [TargetPlatform] directly when the
+/// decision being made only depends on the operating system, since it avoids
+/// having to enumerate every architecture-specific variant.
+enum TargetOperatingSystem {
+  android,
+  ios,
+  macos,
+  linux,
+  windows,
+  fuchsia,
+
+  /// The web platform.
+  web,
+
+  /// The `flutter_tester` desktop embedder used by `flutter test`.
+  tester,
+
+  /// An unsupported target. See [TargetPlatform.unsupported].
+  unsupported,
+}
+
 enum TargetPlatform {
   android('android'),
   ios('ios'),
@@ -761,16 +738,30 @@ enum TargetPlatform {
     unsupported => throw UnsupportedError('Unexpected Fuchsia platform $this'),
   };
 
-  String get osName => switch (this) {
-    linux_x64 || linux_arm64 || linux_riscv64 => 'linux',
-    darwin => 'macos',
-    windows_x64 || windows_arm64 => 'windows',
-    android || android_arm || android_arm64 || android_x64 => 'android',
-    fuchsia_arm64 || fuchsia_x64 => 'fuchsia',
-    ios => 'ios',
-    tester => 'flutter-tester',
-    web_javascript => 'web',
-    unsupported => throw UnsupportedError('Unexpected target platform $this'),
+  /// The operating system this platform targets, independent of CPU
+  /// architecture.
+  TargetOperatingSystem get os => switch (this) {
+    android || android_arm || android_arm64 || android_x64 => .android,
+    ios => .ios,
+    darwin => .macos,
+    linux_x64 || linux_arm64 || linux_riscv64 => .linux,
+    windows_x64 || windows_arm64 => .windows,
+    fuchsia_arm64 || fuchsia_x64 => .fuchsia,
+    web_javascript => .web,
+    tester => .tester,
+    unsupported => .unsupported,
+  };
+
+  String get osName => switch (os) {
+    .linux => 'linux',
+    .macos => 'macos',
+    .windows => 'windows',
+    .android => 'android',
+    .fuchsia => 'fuchsia',
+    .ios => 'ios',
+    .tester => 'flutter-tester',
+    .web => 'web',
+    .unsupported => throw UnsupportedError('Unexpected target platform $this'),
   };
 
   String get simpleName => switch (this) {
@@ -1152,9 +1143,6 @@ List<String> decodeDartDefines(Map<String, String> environmentDefines, String ke
       .toList();
 }
 
-/// Indicates the module system DDC is targeting.
-enum DdcModuleFormat { amd, ddc }
-
 /// Returns the compiler flags that select whether the deprecated JS interop
 /// libraries (such as `dart:html` and `dart:js`) may be used.
 ///
@@ -1168,27 +1156,6 @@ List<String> deprecatedJsInteropCompilerFlags(bool? deprecatedJsInterop) =>
       true => const <String>['--deprecated-js-interop'],
       false => const <String>['--no-deprecated-js-interop'],
     };
-
-// TODO(markzipan): delete this when DDC's AMD module system is deprecated, https://github.com/flutter/flutter/issues/142060.
-({DdcModuleFormat? ddcModuleFormat, bool? canaryFeatures})
-_ddcModuleFormatAndCanaryFeaturesFromFrontEndArgs(List<String>? extraFrontEndArgs) {
-  DdcModuleFormat? ddcModuleFormat;
-  bool? canaryFeatures;
-  if (extraFrontEndArgs != null) {
-    const ddcModuleFormatArg = '--dartdevc-module-format=';
-    const canaryFeaturesArg = '--dartdevc-canary';
-    for (final String flag in extraFrontEndArgs) {
-      if (flag.startsWith(ddcModuleFormatArg)) {
-        final String moduleFormatString = flag.substring(ddcModuleFormatArg.length, flag.length);
-        assert(ddcModuleFormat == null);
-        ddcModuleFormat = DdcModuleFormat.values.byName(moduleFormatString);
-      } else if (flag == canaryFeaturesArg) {
-        canaryFeatures = true;
-      }
-    }
-  }
-  return (ddcModuleFormat: ddcModuleFormat, canaryFeatures: canaryFeatures);
-}
 
 String _getCurrentHostPlatformArchName() {
   final HostPlatform hostPlatform = getCurrentHostPlatform();
