@@ -1780,8 +1780,10 @@ void Canvas::Save(uint32_t total_content_depth) {
 
   auto entry = CanvasStackEntry{};
   entry.transform = transform_stack_.back().transform;
-  entry.clip_depth = std::min<uint32_t>(current_depth_ + total_content_depth,
-                                        transform_stack_.back().clip_depth);
+  entry.clip_depth = current_depth_ + total_content_depth;
+  FML_DCHECK(entry.clip_depth <= transform_stack_.back().clip_depth)
+      << entry.clip_depth << " <=? " << transform_stack_.back().clip_depth
+      << " after allocating " << total_content_depth;
   entry.distributed_opacity = transform_stack_.back().distributed_opacity;
   entry.clip_height = transform_stack_.back().clip_height;
   entry.rendering_mode = Entity::RenderingMode::kDirect;
@@ -2031,8 +2033,10 @@ void Canvas::SaveLayer(const Paint& paint,
 
   CanvasStackEntry entry;
   entry.transform = transform_stack_.back().transform;
-  entry.clip_depth = std::min<uint32_t>(current_depth_ + total_content_depth,
-                                        transform_stack_.back().clip_depth);
+  entry.clip_depth = current_depth_ + total_content_depth;
+  FML_DCHECK(entry.clip_depth <= transform_stack_.back().clip_depth)
+      << entry.clip_depth << " <=? " << transform_stack_.back().clip_depth
+      << " after allocating " << total_content_depth;
   entry.clip_height = transform_stack_.back().clip_height;
   entry.rendering_mode = Entity::RenderingMode::kSubpassAppendSnapshotTransform;
   entry.did_round_out = did_round_out;
