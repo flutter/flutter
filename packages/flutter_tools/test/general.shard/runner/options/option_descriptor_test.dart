@@ -721,6 +721,7 @@ void main() {
           BuildInfoOptions.obfuscate,
           BuildInfoOptions.extraFrontEndOptions,
           BuildInfoOptions.extraGenSnapshotOptions,
+          DarwinAddToAppOptionsBundle.staticFrameworks,
           CommonOptions.dartDefines,
           CommonOptions.dartDefineFromFile,
           CommonOptions.enableExperiment,

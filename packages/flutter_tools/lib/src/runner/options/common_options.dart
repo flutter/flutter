@@ -326,7 +326,15 @@ abstract final class BuildInfoOptions {
 
   static const performanceMeasurementFile = StringOptionDescriptor(
     name: FlutterOptions.kPerformanceMeasurementFile,
-    help: 'Output file name for performance measurement file.',
+    help: 'Output individual target performance to a JSON file.',
+  );
+
+  static const configOnly = FlagOptionDescriptor(
+    name: 'config-only',
+    help:
+        'Update the project configuration without performing a build. '
+        'This can be used in CI/CD process that create an archive to avoid '
+        'performing duplicate work.',
   );
 
   static const shrink = FlagOptionDescriptor(
@@ -679,6 +687,21 @@ class AndroidGradleOptionsBundle extends OptionBundle {
 class AndroidBuildOptionsBundle extends OptionBundle {
   const AndroidBuildOptionsBundle();
 
+  static const _kAndroidTargetPlatforms = <String>['android-arm', 'android-arm64', 'android-x64'];
+
+  static const targetPlatform = MultiOptionDescriptor(
+    name: 'target-platform',
+    allowed: _kAndroidTargetPlatforms,
+    help: 'The target platform for which the app is compiled.',
+  );
+
+  static const targetPlatformWithDefaults = MultiOptionDescriptor(
+    name: 'target-platform',
+    defaultsTo: _kAndroidTargetPlatforms,
+    allowed: _kAndroidTargetPlatforms,
+    help: 'The target platform for which the app is compiled.',
+  );
+
   @override
   List<OptionBundle> get subBundles => const [AndroidGradleOptionsBundle()];
 
@@ -703,13 +726,7 @@ class AndroidBuildOptionsBundle extends OptionBundle {
 class AppleBuildOptionsBundle extends OptionBundle {
   const AppleBuildOptionsBundle();
 
-  static const configOnly = FlagOptionDescriptor(
-    name: 'config-only',
-    help:
-        'Update the project configuration without performing a build. '
-        'This can be used in CI/CD process that create an archive to avoid '
-        'performing duplicate work.',
-  );
+  static const FlagOptionDescriptor configOnly = BuildInfoOptions.configOnly;
 
   @override
   List<OptionDescriptor<Object?>> get descriptors => const [
@@ -739,6 +756,13 @@ class DarwinCodeSignXCFrameworksOptionsBundle extends OptionBundle {
 class DarwinAddToAppOptionsBundle extends OptionBundle {
   const DarwinAddToAppOptionsBundle();
 
+  static const staticFrameworks = FlagOptionDescriptor(
+    name: 'static',
+    help:
+        'Build plugins as static frameworks. Link on, but do not embed these '
+        'frameworks in the existing Xcode project.',
+  );
+
   @override
   void onRegister(FlutterCommand command) {
     command.enableUsesTargetOption();
@@ -760,6 +784,7 @@ class DarwinAddToAppOptionsBundle extends OptionBundle {
     BuildInfoOptions.obfuscate,
     BuildInfoOptions.extraFrontEndOptions,
     BuildInfoOptions.extraGenSnapshotOptions,
+    staticFrameworks,
   ];
 }
 
@@ -767,10 +792,7 @@ class DarwinAddToAppOptionsBundle extends OptionBundle {
 class DesktopBuildOptionsBundle extends OptionBundle {
   const DesktopBuildOptionsBundle();
 
-  static const configOnly = FlagOptionDescriptor(
-    name: 'config-only',
-    help: 'Update the project configuration without performing a build.',
-  );
+  static const FlagOptionDescriptor configOnly = BuildInfoOptions.configOnly;
 
   @override
   List<OptionBundle> get subBundles => const <OptionBundle>[
@@ -1251,4 +1273,26 @@ abstract final class DebuggingOptionDescriptors {
     verboseOnly: true,
     help: 'Specify the project root directory.',
   );
+
+  static const build = FlagOptionDescriptor(
+    name: 'build',
+    defaultsTo: true,
+    verboseOnly: true,
+    help:
+        '(deprecated) If necessary, build the app before running. To use an existing app, '
+        'pass the "--${FlutterOptions.kUseApplicationBinary}" flag with an existing application artifact.',
+  );
+
+  static FlagOptionDescriptor buildOption({bool verboseOnly = true}) {
+    if (verboseOnly) {
+      return build;
+    }
+    return const FlagOptionDescriptor(
+      name: 'build',
+      defaultsTo: true,
+      help:
+          '(deprecated) If necessary, build the app before running. To use an existing app, '
+          'pass the "--${FlutterOptions.kUseApplicationBinary}" flag with an existing application artifact.',
+    );
+  }
 }
