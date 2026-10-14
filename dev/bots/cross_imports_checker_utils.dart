@@ -120,10 +120,6 @@ Map<CrossImportCheckedLibrary, CrossImportingFiles> getCrossImports(
                 contents.contains(importStatement.importString)) {
               cupertinoImports.add(file);
             }
-            if (!entry.key.canImport(importStatement) &&
-                contents.contains(importStatement.importString)) {
-              cupertinoImports.add(file);
-            }
           case .material || .materialUI:
             if (!entry.key.canImport(importStatement) &&
                 contents.contains(importStatement.importString)) {
