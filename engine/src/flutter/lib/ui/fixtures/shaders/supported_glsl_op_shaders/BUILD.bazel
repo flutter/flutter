@@ -1,0 +1,68 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/lib/ui/fixtures/shaders/supported_glsl_op_shaders/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impellerc")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "supported_glsl_op_shaders",
+    testonly = True,
+    deps = [":fixtures"],
+)
+
+impellerc(
+    name = "compile_supported_glsl_shaders",
+    intermediates_subdir = "iplr",
+    iplr = True,
+    mnemonic = "IMPELLERC_SKSL",
+    shader_target_flags = ["--sksl"],
+    shaders = [
+        "10_fract.frag",  # enable_unittests
+        "11_radians.frag",  # enable_unittests
+        "12_degrees.frag",  # enable_unittests
+        "13_sin.frag",  # enable_unittests
+        "14_cos.frag",  # enable_unittests
+        "15_tan.frag",  # enable_unittests
+        "16_asin.frag",  # enable_unittests
+        "17_acos.frag",  # enable_unittests
+        "18_atan.frag",  # enable_unittests
+        "25_atan2.frag",  # enable_unittests
+        "26_pow.frag",  # enable_unittests
+        "27_exp.frag",  # enable_unittests
+        "28_log.frag",  # enable_unittests
+        "29_exp2.frag",  # enable_unittests
+        "30_log2.frag",  # enable_unittests
+        "31_sqrt.frag",  # enable_unittests
+        "32_inversesqrt.frag",  # enable_unittests
+        "37_fmin.frag",  # enable_unittests
+        "40_fmax.frag",  # enable_unittests
+        "43_fclamp.frag",  # enable_unittests
+        "46_fmix.frag",  # enable_unittests
+        "48_step.frag",  # enable_unittests
+        "49_smoothstep.frag",  # enable_unittests
+        "4_abs.frag",  # enable_unittests
+        "66_length.frag",  # enable_unittests
+        "67_distance.frag",  # enable_unittests
+        "68_cross.frag",  # enable_unittests
+        "69_normalize.frag",  # enable_unittests
+        "6_sign.frag",  # enable_unittests
+        "70_faceforward.frag",  # enable_unittests
+        "71_reflect.frag",  # enable_unittests
+        "8_floor.frag",  # enable_unittests
+        "9_ceil.frag",  # enable_unittests
+    ],
+    sl_file_extension = "iplr",
+)
+
+flutter_test_fixtures(
+    name = "fixtures",
+    dest = "//engine/src/flutter/lib/ui",
+    fixtures_targets = {":compile_supported_glsl_shaders": []},
+    deps = [":compile_supported_glsl_shaders"],
+)
