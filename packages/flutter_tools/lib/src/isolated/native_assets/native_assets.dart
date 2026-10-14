@@ -549,7 +549,8 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     required this.includeDevDependencies,
     Cache? cache,
     String? flutterRoot,
-  }) : _flutterRoot = flutterRoot ?? cache?.flutterRoot;
+  }) : assert(cache != null || flutterRoot != null),
+       _flutterRoot = (flutterRoot ?? cache?.flutterRoot)!;
 
   final String pubspecPath;
   final String packageConfigPath;
@@ -561,7 +562,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
 
   /// Include the dev dependencies of [runPackageName].
   final bool includeDevDependencies;
-  final String? _flutterRoot;
+  final String _flutterRoot;
 
   late final _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {

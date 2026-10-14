@@ -156,6 +156,7 @@ void main() {
             fileSystem: fs,
             directory: dir,
             logger: BufferLogger.test(),
+            flutterRoot: '/flutter',
           ),
         ).devices(),
         <Device>[],
@@ -180,6 +181,7 @@ void main() {
             fileSystem: fs,
             directory: dir,
             logger: BufferLogger.test(),
+            flutterRoot: '/flutter',
           ),
         ).devices(),
         <Device>[],
@@ -204,6 +206,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: BufferLogger.test(),
+          flutterRoot: '/flutter',
         ),
       ).devices(),
       hasLength(1),
@@ -234,6 +237,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: BufferLogger.test(),
+          flutterRoot: '/flutter',
         ),
       );
 
@@ -266,6 +270,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: BufferLogger.test(),
+          flutterRoot: '/flutter',
         ),
       );
 
@@ -285,7 +290,12 @@ void main() {
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(command: testConfig.pingCommand),
       ]),
-      config: CustomDevicesConfig.test(fileSystem: fs, directory: dir, logger: BufferLogger.test()),
+      config: CustomDevicesConfig.test(
+        fileSystem: fs,
+        directory: dir,
+        logger: BufferLogger.test(),
+        flutterRoot: '/flutter',
+      ),
     );
 
     expect(await discovery.discoverDevices(), hasLength(0));
@@ -307,7 +317,12 @@ void main() {
           exception: const ProcessException('testping', <String>[], 'Process timed out'),
         ),
       ]),
-      config: CustomDevicesConfig.test(fileSystem: fs, directory: dir, logger: logger),
+      config: CustomDevicesConfig.test(
+        fileSystem: fs,
+        directory: dir,
+        logger: logger,
+        flutterRoot: '/flutter',
+      ),
     );
 
     expect(await discovery.discoverDevices(), hasLength(0));
@@ -538,6 +553,7 @@ void main() {
           fileSystem: fs,
           directory: configFileDir,
           logger: BufferLogger.test(),
+          flutterRoot: '/flutter',
         ),
       );
 

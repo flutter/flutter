@@ -393,6 +393,7 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          flutterRoot: linuxFlutterRoot,
         );
 
         expect(
@@ -485,6 +486,7 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          flutterRoot: linuxFlutterRoot,
         );
 
         expect(
@@ -576,6 +578,7 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          flutterRoot: linuxFlutterRoot,
         );
 
         expect(
@@ -672,6 +675,7 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          flutterRoot: linuxFlutterRoot,
         );
 
         expect(
@@ -751,6 +755,7 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          flutterRoot: linuxFlutterRoot,
         );
 
         expect(
@@ -810,6 +815,7 @@ void main() {
         fileSystem: fs,
         directory: fs.directory('/'),
         logger: BufferLogger.test(),
+        flutterRoot: linuxFlutterRoot,
       );
 
       config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid'));
@@ -844,6 +850,7 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          flutterRoot: linuxFlutterRoot,
         );
         config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2'));
         final Uint8List contentsBefore = fs.file('.flutter_custom_devices.json').readAsBytesSync();
@@ -917,7 +924,12 @@ void main() {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
 
-      CustomDevicesConfig.test(fileSystem: fs, directory: fs.directory('/'), logger: logger)
+      CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: logger,
+          flutterRoot: linuxFlutterRoot,
+        )
         ..add(
           CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', enabled: true),
         )
@@ -948,7 +960,12 @@ void main() {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
 
-      CustomDevicesConfig.test(fileSystem: fs, directory: fs.directory('/'), logger: logger)
+      CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: logger,
+          flutterRoot: linuxFlutterRoot,
+        )
         ..add(
           CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', enabled: true),
         )
@@ -1063,6 +1080,7 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          flutterRoot: windowsFlutterRoot,
         );
 
         expect(

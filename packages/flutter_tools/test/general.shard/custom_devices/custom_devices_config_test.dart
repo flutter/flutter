@@ -30,6 +30,7 @@ void main() {
         fileSystem: fileSystem,
         directory: directory,
         logger: logger,
+        flutterRoot: '/flutter',
       );
 
       expect(customDevicesConfig.devices, hasLength(0));
@@ -50,6 +51,7 @@ void main() {
         fileSystem: fileSystem,
         directory: directory,
         logger: logger,
+        flutterRoot: '/flutter',
       );
 
       const msg =
@@ -81,6 +83,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      flutterRoot: '/flutter',
     );
 
     final List<CustomDeviceConfig> devices = customDevicesConfig.devices;
@@ -105,6 +108,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      flutterRoot: '/flutter',
     );
 
     const msg = 'Could not load custom device from config index 0: Expected id to be a string.';
@@ -128,6 +132,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      flutterRoot: '/flutter',
     );
 
     const msg = 'Could not load custom device from config index 0: Expected id to be a string.';
@@ -151,6 +156,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      flutterRoot: '/flutter',
     );
 
     const msg = 'Could not load custom device from config index 0: Expected label to be a string.';
@@ -174,6 +180,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      flutterRoot: '/flutter',
     );
 
     expect(customDevicesConfig.devices, hasLength(1));
@@ -198,6 +205,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      flutterRoot: '/flutter',
     );
 
     final List<CustomDeviceConfig> devices = customDevicesConfig.devices;
@@ -222,6 +230,7 @@ void main() {
       fileSystem: fileSystem,
       directory: directory,
       logger: logger,
+      flutterRoot: '/flutter',
     );
 
     const msg =

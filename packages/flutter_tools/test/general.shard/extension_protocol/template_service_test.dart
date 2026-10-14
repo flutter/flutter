@@ -36,6 +36,7 @@ void main() {
         fileSystem: fs,
         logger: logger,
         featureFlags: TestFeatureFlags(),
+        flutterRoot: '/flutter',
       );
 
       final List<ProjectTemplate> templates = await templateManager.getProjectTemplates();
@@ -66,6 +67,7 @@ void main() {
         fileSystem: fs,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        flutterRoot: '/flutter',
       );
 
       final List<ProjectTemplate> templates = await templateManager.getProjectTemplates();
@@ -98,6 +100,7 @@ void main() {
         fileSystem: fs,
         logger: logger,
         featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        flutterRoot: '/flutter',
       );
 
       final inputParams = <String, Object?>{

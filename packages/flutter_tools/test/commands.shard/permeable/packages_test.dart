@@ -270,6 +270,7 @@ void main() {
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -298,6 +299,7 @@ void main() {
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -372,6 +374,7 @@ workspace:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -449,6 +452,7 @@ workspace:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -495,6 +499,7 @@ workspace:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -567,6 +572,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -603,6 +609,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -631,6 +638,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -662,6 +670,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -690,6 +699,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -717,6 +727,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -744,6 +755,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -777,6 +789,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -808,6 +821,7 @@ flutter:
       overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -861,6 +875,7 @@ flutter:
         Stdio: () => mockStdio,
         BotDetector: () => const FakeBotDetector(false),
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -904,6 +919,7 @@ flutter:
         Stdio: () => mockStdio,
         BotDetector: () => const FakeBotDetector(true),
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -948,6 +964,7 @@ flutter:
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -991,6 +1008,7 @@ flutter:
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,
@@ -1032,6 +1050,7 @@ flutter:
         ProcessManager: () => processManager,
         Stdio: () => mockStdio,
         Pub: () => Pub.test(
+          flutterRoot: getFlutterRoot(),
           fileSystem: globals.fs,
           logger: globals.logger,
           processManager: globals.processManager,

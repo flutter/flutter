@@ -107,7 +107,8 @@ class CocoaPods {
     this._cache,
     Abi? currentAbi,
     this._flutterRoot,
-  }) : _fileSystem = fileSystem,
+  }) : assert(_cache != null || _flutterRoot != null),
+       _fileSystem = fileSystem,
        _logger = logger,
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
@@ -129,7 +130,7 @@ class CocoaPods {
   final Cache? _cache;
   final String? _flutterRoot;
 
-  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
+  String get _flutterRootPath => (_flutterRoot ?? _cache?.flutterRoot)!;
 
   Future<String?>? _versionText;
 
