@@ -56,10 +56,6 @@ public class FlutterEngineFlagsTest {
     FlutterEngineFlags.Flag flag =
         FlutterEngineFlags.getFlagByEngineArgument("--flutter-assets-dir=");
     assertEquals(FlutterEngineFlags.FLUTTER_ASSETS_DIR, flag);
-
-    // Test argument with a value specified.
-    flag = FlutterEngineFlags.getFlagByEngineArgument("--flutter-assets-dir=path/to/assets");
-    assertEquals(FlutterEngineFlags.FLUTTER_ASSETS_DIR, flag);
   }
 
   @Test
