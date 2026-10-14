@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:package_config/package_config.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart';
 
 void main() {
   group('findPackageConfigFile', () {
@@ -81,9 +82,11 @@ void main() {
       packageConfig.writeAsStringSync('{"configVersion": 2, "packages": []}');
 
       final PackageConfig config = await currentPackageConfig(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: FakePlatform(script: Uri.parse('file:///ambient/bin/main.dart')),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(script: Uri.parse('file:///ambient/bin/main.dart')),
+        ),
       );
       expect(config.version, 2);
     });
@@ -103,9 +106,11 @@ void main() {
       packageConfig.writeAsStringSync('{"configVersion": 2, "packages": []}');
 
       final PackageConfig config = await currentPackageConfig(
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: FakePlatform(script: Uri.parse('file:///script_dir/bin/flutter_tools.dart')),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(script: Uri.parse('file:///script_dir/bin/flutter_tools.dart')),
+        ),
       );
       expect(config.version, 2);
     });
@@ -115,9 +120,11 @@ void main() {
 
       await expectLater(
         currentPackageConfig(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: FakePlatform(script: Uri.parse('file:///script_dir/bin/flutter_tools.dart')),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            platform: FakePlatform(script: Uri.parse('file:///script_dir/bin/flutter_tools.dart')),
+          ),
         ),
         throwsToolExit(message: 'Failed to resolve package configuration'),
       );

@@ -23,7 +23,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/time.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -183,13 +182,9 @@ class FlutterWebPlatform extends PlatformPlugin {
     bool updateGoldens = false,
   }) async {
     final shelf.Server server = await serverFactory();
-    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
+    final FileSystem fs = toolContext.fs;
     if (testPackageUri == null) {
-      final PackageConfig packageConfig = await currentPackageConfig(
-        fileSystem: fs,
-        logger: logger,
-        platform: platform,
-      );
+      final PackageConfig packageConfig = await currentPackageConfig(toolContext: toolContext);
       testPackageUri = packageConfig['test']!.packageUriRoot;
     }
     final File testDartJs = fs.file(fs.path.join(testPackageUri.toFilePath(), 'dart.js'));

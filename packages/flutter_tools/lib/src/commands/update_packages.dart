@@ -35,20 +35,11 @@ typedef _ProjectDeps = ({FlutterProject project, ResolvedDependencies deps});
 /// A command to update internal dependencies across Flutter packages.
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand({
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     required super.verboseHelp,
     @visibleForTesting this._httpClientFactory,
     @visibleForTesting Pub? pub,
-  }) : _pub =
-           pub ??
-           Pub(
-             botDetector: toolContext.botDetector,
-             fileSystem: toolContext.fs,
-             logger: toolContext.logger,
-             platform: toolContext.platform,
-             processManager: toolContext.processManager,
-           ),
-       super(toolContext: toolContext) {
+  }) : _injectedPub = pub {
     argParser
       ..addFlag(
         _keyForceUpgrade,
@@ -90,7 +81,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   final HttpClientFactory? _httpClientFactory;
-  final Pub _pub;
+  final Pub? _injectedPub;
 
   @override
   ToolContext get toolContext => super.toolContext!;
@@ -120,6 +111,16 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   @override
   final hidden = true;
+
+  late final Pub _pub =
+      _injectedPub ??
+      Pub(
+        botDetector: toolContext.botDetector,
+        fileSystem: toolContext.fs,
+        logger: toolContext.logger,
+        platform: toolContext.platform,
+        processManager: toolContext.processManager,
+      );
 
   late final _net = Net(
     httpClientFactory: _httpClientFactory,
