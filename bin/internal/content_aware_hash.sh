@@ -18,6 +18,10 @@ FLUTTER_ROOT="$(dirname "$(dirname "$(dirname "${BASH_SOURCE[0]}")")")"
 unset GIT_DIR
 unset GIT_INDEX_FILE
 unset GIT_WORK_TREE
+unset GIT_OBJECT_DIRECTORY
+unset GIT_ALTERNATE_OBJECT_DIRECTORIES
+unset GIT_QUARANTINE_PATH
+unset GIT_COMMON_DIR
 
 # Cannot use '*' for files in this command
 # DEPS: tracks third party dependencies related to building the engine

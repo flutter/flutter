@@ -38,6 +38,10 @@ use a cached on-disk snapshot. In other words, it will be significantly
 slower but you will not need to forget (remember?) to delete the cached
 snapshot.
 
+SDK Git commands ignore repository-context environment variables exported by Git
+hooks, while preserving other parent variables and caller-provided overrides.
+This isolation also applies to the bootstrap scripts' SDK revision queries.
+
 ### Running the analyzer
 
 To run the analyzer on Flutter Tools, in this directory run:
