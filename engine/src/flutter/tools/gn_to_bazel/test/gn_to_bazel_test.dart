@@ -2214,6 +2214,47 @@ executable("flow_unittests") {
       expect(output, contains('size = "medium"'));
     });
 
+    test('a suite that opens a window becomes a flutter_display_test', () async {
+      // impeller_dart_unittests (displayTests): cc_test's attributes, the GPU
+      // backends beside the binary and run_tests.py's arguments, on the
+      // macro that runs the binary under a display.
+      final GnFileEvaluation evaluation = await evaluate('''
+executable("impeller_dart_unittests") {
+  testonly = true
+  deps = [
+    "renderer:renderer_dart_unittests",
+    "//flutter/testing",
+  ]
+}
+''');
+      final String output = emitBuildFile(evaluation, gnPackage: '//flutter/impeller');
+      expect(
+        output,
+        contains(
+          'load("//engine/src/flutter/testing:testing.bzl", "flutter_display_test", "flutter_gpu_test_backends")',
+        ),
+      );
+      expect(
+        output,
+        contains('''
+flutter_display_test(
+    name = "impeller_dart_unittests",
+    size = "small",
+    args = [
+        "--enable_vulkan_validation",
+        "--gtest_filter=*Metal",
+    ],
+    data = [":gpu_test_backends"],
+    deps = [
+        "//engine/src/flutter/impeller/renderer:renderer_dart_unittests",
+        "//engine/src/flutter/testing",
+    ],
+)
+'''),
+      );
+      expect(output, isNot(contains('cc_test')));
+    });
+
     test('all_dependent_configs cross private deps; engine code gets FLUTTER_COPTS', () async {
       final String output = await convert('''
 config("vulkan_public") {

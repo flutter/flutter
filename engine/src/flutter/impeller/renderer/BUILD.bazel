@@ -3,10 +3,10 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/renderer/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: renderer_unittests, renderer_unittests_golden, renderer_dart_unittests.
+# Not converted: renderer_unittests, renderer_unittests_golden.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impeller_shaders")
 
 package(default_visibility = ["//visibility:public"])
@@ -101,6 +101,33 @@ cc_library(
         "//engine/src/flutter/impeller/tessellator",
         "@abseil-cpp//absl/container:linked_hash_map",
         "@abseil-cpp//absl/strings",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "renderer_dart_unittests",
+    testonly = True,
+    srcs = ["renderer_dart_unittests.cc"],
+    copts = [
+        "-Wthread-safety-analysis",  # is_clang
+    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/runtime
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":renderer",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/impeller:impeller_public_config",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_fixtures",
+        "//engine/src/flutter/impeller/fixtures:flutter_gpu_shaders",
+        "//engine/src/flutter/impeller/playground:playground_test",
+        "//engine/src/flutter/lib/gpu",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/runtime",
+        "//engine/src/flutter/testing:fixture_test",
+        "//engine/src/flutter/testing:testing_lib",
     ],
     alwayslink = True,
 )
