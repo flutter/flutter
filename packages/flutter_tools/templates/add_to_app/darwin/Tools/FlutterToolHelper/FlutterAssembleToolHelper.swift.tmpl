@@ -20,6 +20,7 @@ public class FlutterAssembleToolHelper {
   ///   - targetBuildMode: The build mode the app is being built for.
   ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - env: A dictionary of environment variables.
+  ///   - useRemoteFlutterFramework: Whether the Flutter framework is fetched from a remote URL.
   ///   - fileManager: The file manager to use for file operations.
   ///   - processManager: The process runner to use.
   /// - Throws: `XcodeErrorAndExit.error` on failure.
@@ -27,6 +28,7 @@ public class FlutterAssembleToolHelper {
     targetBuildMode: String,
     targetPlatform: FlutterPlatform,
     env: [String: String],
+    useRemoteFlutterFramework: Bool = FlutterToolHelper.useRemoteFlutterFramework,
     fileManager: FlutterToolsFileManager,
     processManager: FlutterProcessRunner
   ) throws {
@@ -47,6 +49,7 @@ public class FlutterAssembleToolHelper {
         targetBuildMode: targetBuildMode,
         targetPlatform: targetPlatform,
         env: env,
+        useRemoteFlutterFramework: useRemoteFlutterFramework,
         fileManager: fileManager
       )
       return
@@ -56,8 +59,18 @@ public class FlutterAssembleToolHelper {
       try FlutterToolHelper.updateSymlink(
         targetBuildMode: targetBuildMode,
         integrationPackagePath: packagePath,
+        useRemoteFlutterFramework: useRemoteFlutterFramework,
         fileManager: fileManager
       )
+      if useRemoteFlutterFramework {
+        try verifyFlutterFrameworkBuildMode(
+          packagePath: packagePath,
+          targetBuildMode: targetBuildMode,
+          targetPlatform: targetPlatform,
+          env: env,
+          fileManager: fileManager
+        )
+      }
       try assemble(
         appPath: appPath,
         targetPlatform: targetPlatform,
@@ -73,6 +86,7 @@ public class FlutterAssembleToolHelper {
       targetBuildMode: targetBuildMode,
       targetPlatform: targetPlatform,
       env: env,
+      useRemoteFlutterFramework: useRemoteFlutterFramework,
       fileManager: fileManager,
       processManager: processManager
     )
@@ -89,6 +103,7 @@ public class FlutterAssembleToolHelper {
   ///   - targetBuildMode: The build mode the app is being built for.
   ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - env: A dictionary of environment variables.
+  ///   - useRemoteFlutterFramework: Whether the Flutter framework is fetched from a remote URL.
   ///   - fileManager: The file manager to use for file operations.
   /// - Throws: `XcodeErrorAndExit.error` if build mode is incorrect.
   static func runInSandbox(
@@ -97,6 +112,7 @@ public class FlutterAssembleToolHelper {
     targetBuildMode: String,
     targetPlatform: FlutterPlatform,
     env: [String: String],
+    useRemoteFlutterFramework: Bool = FlutterToolHelper.useRemoteFlutterFramework,
     fileManager: FlutterToolsFileManager
   ) throws {
     if appPath != nil {
@@ -123,7 +139,7 @@ public class FlutterAssembleToolHelper {
         $0.range(of: "build mode does not match", options: .caseInsensitive)
           != nil
       })
-      if !mismatchError {
+      if !mismatchError || useRemoteFlutterFramework {
         throw XcodeErrorAndExit.error(errorMessages)
       }
       FlutterToolHelper.xcodeError(
@@ -137,6 +153,7 @@ public class FlutterAssembleToolHelper {
       try FlutterToolHelper.updateSymlink(
         targetBuildMode: targetBuildMode,
         integrationPackagePath: packagePath,
+        useRemoteFlutterFramework: useRemoteFlutterFramework,
         fileManager: fileManager
       )
       throw XcodeErrorAndExit.error(
@@ -145,7 +162,7 @@ public class FlutterAssembleToolHelper {
           "To avoid this error when switching build modes, you can set ENABLE_USER_SCRIPT_SANDBOXING=NO.",
           "Or you can complete one of the following actions before building:",
         ]
-          + pluginInstructions(
+          + FlutterToolHelper.pluginInstructions(
             targetBuildMode: targetBuildMode,
             packagePath: packagePath
           )
@@ -260,23 +277,12 @@ public class FlutterAssembleToolHelper {
           "Expected \(targetBuildMode) but found \(actualBuildMode) for \(frameworkInfoPlistURL.path).",
           "Please complete one of the following:",
         ]
-          + pluginInstructions(
+          + FlutterToolHelper.pluginInstructions(
             targetBuildMode: targetBuildMode,
             packagePath: packagePath
           )
       )
     }
-  }
-
-  private static func pluginInstructions(targetBuildMode: String, packagePath: String) -> [String] {
-    return [
-      "   1) Right click on FlutterNativeIntegration in Xcode's Project Navigator and select "
-        + "\"Switch to \(targetBuildMode) Mode\".",
-      "   or",
-      "   2) Run the following in a terminal:",
-      "       cd \(packagePath)",
-      "       swift package plugin --allow-writing-to-package-directory switch-to-\(targetBuildMode.lowercased())",
-    ]
   }
 
   /// Determines the path to the framework's Info.plist.
@@ -379,6 +385,7 @@ public class FlutterAssembleToolHelper {
   ///   - targetBuildMode: The build mode the app is being built for.
   ///   - targetPlatform: The platform (iOS or macOS) the app is being built for.
   ///   - env: A dictionary of environment variables.
+  ///   - useRemoteFlutterFramework: Whether the Flutter framework is fetched from a remote URL.
   ///   - fileManager: The file manager to use for file operations.
   ///   - processManager: The process runner to use.
   /// - Throws: `XcodeErrorAndExit.error` if the verification or update fails.
@@ -387,9 +394,20 @@ public class FlutterAssembleToolHelper {
     targetBuildMode: String,
     targetPlatform: FlutterPlatform,
     env: [String: String],
+    useRemoteFlutterFramework: Bool = FlutterToolHelper.useRemoteFlutterFramework,
     fileManager: FlutterToolsFileManager,
     processManager: FlutterProcessRunner
   ) throws {
+    if useRemoteFlutterFramework {
+      try verifyFlutterFrameworkBuildMode(
+        packagePath: packagePath,
+        targetBuildMode: targetBuildMode,
+        targetPlatform: targetPlatform,
+        env: env,
+        fileManager: fileManager
+      )
+      return
+    }
     var updated = false
     do {
       try verifyFlutterFrameworkBuildMode(
@@ -404,6 +422,7 @@ public class FlutterAssembleToolHelper {
       try FlutterToolHelper.updateSymlink(
         targetBuildMode: targetBuildMode,
         integrationPackagePath: packagePath,
+        useRemoteFlutterFramework: useRemoteFlutterFramework,
         fileManager: fileManager
       )
       // Copy and codesign

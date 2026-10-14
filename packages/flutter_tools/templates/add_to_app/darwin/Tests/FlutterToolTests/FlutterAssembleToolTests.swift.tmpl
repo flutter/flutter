@@ -125,6 +125,7 @@ func runWithAssemble(
       "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
       "FLUTTER_APPLICATION_PATH": flutterAppPath, "SRCROOT": xcodeAppPath,
     ],
+    useRemoteFlutterFramework: false,
     fileManager: fileManager,
     processManager: processManager
   )
@@ -216,6 +217,7 @@ func runWithAssemble(
       "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
       "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
     ],
+    useRemoteFlutterFramework: false,
     fileManager: fileManager,
     processManager: processManager
   )
@@ -224,6 +226,45 @@ func runWithAssemble(
     fileManager.symlinksCreated["\(flutterPackagePath)/FlutterPluginRegistrant"]
       == "./\(targetBuildMode)"
   )
+}
+
+@Test func runVerifyBuildModeThrowsWhenRemote() async throws {
+  let fileManager = MockFileManager()
+  let processManager = MockFlutterProcessManager()
+  let targetBuildMode = "Debug"
+  let currentBuildMode = "Release"
+  let targetPlatform = FlutterPlatform.ios
+  let buildDir = "/Build/Products/\(targetBuildMode)-iphoneos"
+  let frameworksDir = "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+
+  let plistContent = plistContentFor(buildMode: currentBuildMode)
+  fileManager.fileContents["\(buildDir)/Flutter.framework/Info.plist"] = [
+    Data(plistContent.utf8)
+  ]
+  fileManager.fileContents[
+    "\(buildDir)/\(frameworksDir)/Flutter.framework/Info.plist"
+  ] = [
+    Data(plistContent.utf8)
+  ]
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterAssembleToolHelper.run(
+      targetBuildMode: targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: [
+        "SDKROOT": "iphoneos26.2",
+        "BUILT_PRODUCTS_DIR": buildDir,
+        "TARGET_BUILD_DIR": buildDir,
+        "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+        "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
+        "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+      ],
+      useRemoteFlutterFramework: true,
+      fileManager: fileManager,
+      processManager: processManager
+    )
+  }
+  #expect(fileManager.symlinksCreated.count == 0)
 }
 
 @Test
@@ -263,6 +304,7 @@ func runInSandboxFailsWhenBuildModeWrong() async throws {
         "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
         "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
       ],
+      useRemoteFlutterFramework: false,
       fileManager: fileManager
     )
   }
@@ -271,6 +313,47 @@ func runInSandboxFailsWhenBuildModeWrong() async throws {
     fileManager.symlinksCreated["\(flutterPackagePath)/FlutterPluginRegistrant"]
       == "./\(targetBuildMode)"
   )
+}
+
+@Test
+func runInSandboxFailsWithoutUpdatingSymlinkWhenRemote() async throws {
+  let fileManager = MockFileManager()
+  let targetBuildMode = "Debug"
+  let currentBuildMode = "Release"
+  let targetPlatform = FlutterPlatform.ios
+  let buildDir = "/Build/Products/\(targetBuildMode)-iphoneos"
+  let frameworksDir = "MyApp.app/Frameworks"
+  let flutterPackagePath = "/path/to/SwiftPackages/FlutterNativeIntegration"
+
+  let plistContent = plistContentFor(buildMode: currentBuildMode)
+  fileManager.fileContents["\(buildDir)/Flutter.framework/Info.plist"] = [
+    Data(plistContent.utf8)
+  ]
+  fileManager.fileContents[
+    "\(buildDir)/\(frameworksDir)/Flutter.framework/Info.plist"
+  ] = [
+    Data(plistContent.utf8)
+  ]
+  fileManager.filesExist["\(flutterPackagePath)/./\(targetBuildMode)"] = true
+  #expect(throws: XcodeErrorAndExit.self) {
+    try FlutterAssembleToolHelper.runInSandbox(
+      appPath: nil,
+      packagePath: flutterPackagePath,
+      targetBuildMode: targetBuildMode,
+      targetPlatform: targetPlatform,
+      env: [
+        "SDKROOT": "iphoneos26.2",
+        "BUILT_PRODUCTS_DIR": buildDir,
+        "TARGET_BUILD_DIR": buildDir,
+        "FRAMEWORKS_FOLDER_PATH": frameworksDir,
+        "ENABLE_USER_SCRIPT_SANDBOXING": "YES",
+        "FLUTTER_NATIVE_INTEGRATION_PACKAGE_PATH": flutterPackagePath,
+      ],
+      useRemoteFlutterFramework: true,
+      fileManager: fileManager
+    )
+  }
+  #expect(fileManager.symlinksCreated.count == 0)
 }
 
 @Test(
