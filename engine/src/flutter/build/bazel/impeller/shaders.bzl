@@ -43,6 +43,7 @@ unless `impeller_malioc_path` is set.
 """
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "PYTHON_ATTRS", "expand_gn_paths", "run_python")
 
@@ -496,7 +497,10 @@ def _impellerc_run_impl(ctx):
             mnemonic = ctx.attr.mnemonic,
             progress_message = "impellerc %{output}",
         )
-        return [DefaultInfo(files = depset([out]))]
+
+        # The empty CcInfo keeps the edges GN has from libraries to the
+        # template's target (ordering), which the converter maps to deps.
+        return [DefaultInfo(files = depset([out])), CcInfo()]
 
     if len(ctx.outputs.outs) != len(shaders):
         fail("%s: one output per shader" % ctx.label)
@@ -536,7 +540,7 @@ def _impellerc_run_impl(ctx):
             mnemonic = ctx.attr.mnemonic,
             progress_message = "impellerc %{input}",
         )
-    return [DefaultInfo(files = depset(products))]
+    return [DefaultInfo(files = depset(products)), CcInfo()]
 
 impellerc_run = rule(
     implementation = _impellerc_run_impl,
