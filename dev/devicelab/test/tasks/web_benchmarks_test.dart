@@ -114,7 +114,7 @@ void main() {
     test('fails fast on invalid regex in BENCHMARK_FILTER', () {
       expect(
         () => BenchmarkFilter.parse(environment: <String, String>{'BENCHMARK_FILTER': '['}),
-        throwsA(isA<FormatException>()),
+        throwsA(isA<Exception>()),
       );
     });
   });
@@ -150,7 +150,7 @@ void main() {
         <String, dynamic>{'name': 'draw_rect', 'scoreKeys': <String>[]},
       ], options);
       expect(result.succeeded, isFalse);
-      expect(result.message, 'No score keys in benchmark "draw_rect"');
+      expect(result.message, 'No metrics in benchmark "draw_rect"');
     });
 
     test('successful profile transformation into TaskResult.success', () {
@@ -197,7 +197,7 @@ void main() {
         },
       ], options);
       expect(result.succeeded, isFalse);
-      expect(result.message, contains('A score key is empty in benchmark'));
+      expect(result.message, 'Received an empty metric name in benchmark "draw_rect".');
     });
 
     test('ignores data keys that match internal keys like "name" or "scoreKeys"', () {

@@ -72,8 +72,8 @@ Future<TaskResult> runWebBenchmark(
       filterPattern: filterPattern,
       environment: environment,
     );
-  } on FormatException catch (e) {
-    return TaskResult.failure(e.message);
+  } on Exception catch (e) {
+    return TaskResult.failure(e.toString());
   }
 
   final bool effectiveClean = clean ?? environment['BENCHMARK_CLEAN']?.toLowerCase() != 'false';

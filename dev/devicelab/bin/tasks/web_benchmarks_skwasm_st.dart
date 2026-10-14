@@ -8,7 +8,7 @@ import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
 const String buildMode = String.fromEnvironment('buildMode', defaultValue: 'profile');
 
 /// Runs all Web benchmarks using the Skwasm rendering backend.
-Future<void> main(List<String> rawArgs) async {
+Future<void> main(List<String> args) async {
   await task(() async {
     return runWebBenchmarkFromArgs((
       useWasm: true,
@@ -16,6 +16,6 @@ Future<void> main(List<String> rawArgs) async {
       useDdc: false,
       withHotReload: false,
       buildMode: buildMode,
-    ), rawArgs);
+    ), args);
   });
 }

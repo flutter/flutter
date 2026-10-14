@@ -6,7 +6,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
 
 /// Runs all Web benchmarks using DDC.
-Future<void> main(List<String> rawArgs) async {
+Future<void> main(List<String> args) async {
   await task(() async {
     return runWebBenchmarkFromArgs((
       useWasm: false,
@@ -14,6 +14,6 @@ Future<void> main(List<String> rawArgs) async {
       useDdc: true,
       withHotReload: true,
       buildMode: 'debug',
-    ), rawArgs);
+    ), args);
   });
 }
