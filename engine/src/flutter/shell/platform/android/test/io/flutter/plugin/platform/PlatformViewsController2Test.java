@@ -596,6 +596,7 @@ public class PlatformViewsController2Test {
     assertNotSame(platformTx, rasterTx2);
     assertNotSame(rasterTx1, rasterTx2);
 
+    controller.sealFrameTransactions();
     controller.swapTransactions();
     controller.onEndFrame();
 
@@ -656,6 +657,7 @@ public class PlatformViewsController2Test {
             () -> {
               try {
                 SurfaceControl.Transaction tx = createAndPublishRasterTransaction(controller);
+                controller.sealFrameTransactions();
                 published.countDown();
                 // Model native code retaining the borrowed transaction after publishing it.
                 if (!releaseProducer.await(10, TimeUnit.SECONDS)) {
@@ -706,6 +708,7 @@ public class PlatformViewsController2Test {
     controller.attachToView(flutterView);
 
     SurfaceControl.Transaction rasterTx = createAndPublishRasterTransaction(controller);
+    controller.sealFrameTransactions();
 
     controller.swapTransactions();
     controller.onEndFrame();
@@ -735,12 +738,14 @@ public class PlatformViewsController2Test {
     SurfaceControl.Transaction rasterTx = jni.createUnpublishedTransaction();
 
     // A frame that ends while those writes are in flight must not merge it.
+    jni.sealFrameTransactions();
     controller.swapTransactions();
     controller.onEndFrame();
     assertTrue(ShadowRecordingTransaction.merged.isEmpty());
 
     // Once the raster thread publishes it, the next frame merges it.
     jni.publishTransaction(rasterTx);
+    jni.sealFrameTransactions();
     controller.swapTransactions();
     controller.onEndFrame();
     assertEquals(Arrays.asList(rasterTx), ShadowRecordingTransaction.merged);
@@ -815,6 +820,7 @@ public class PlatformViewsController2Test {
                     for (int present = 0; present < presentsPerRound; present++) {
                       createAndPublishRasterTransaction(controller);
                     }
+                    controller.sealFrameTransactions();
                   }
                 } catch (TimeoutException e) {
                   harnessFailure.compareAndSet(null, e);
@@ -882,6 +888,7 @@ public class PlatformViewsController2Test {
 
     controller.attachToView(mockFlutterView);
     createAndPublishRasterTransaction(controller);
+    controller.sealFrameTransactions();
     controller.swapTransactions();
     controller.detachFromView();
 
@@ -905,6 +912,7 @@ public class PlatformViewsController2Test {
 
     controller.attachToView(mockFlutterView);
     createAndPublishRasterTransaction(controller);
+    controller.sealFrameTransactions();
     controller.swapTransactions();
 
     controller.onEndFrame();

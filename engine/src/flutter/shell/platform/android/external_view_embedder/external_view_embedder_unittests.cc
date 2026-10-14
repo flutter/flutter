@@ -1219,6 +1219,7 @@ TEST(AndroidExternalViewEmbedder2,
   {
     ::testing::InSequence sequence;
 
+    EXPECT_CALL(*jni_mock, sealFrameTransactions());
     EXPECT_CALL(*jni_mock, onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50,
                                                   mutators));
     EXPECT_CALL(*jni_mock, swapTransaction());
@@ -1316,6 +1317,7 @@ TEST(AndroidExternalViewEmbedder2, FrameSizeChangeDoesNotDestroySurfaces) {
   auto canvas1 = embedder->CompositeEmbeddedView(view_id);
   canvas1->DrawRect(DlRect::MakeXYWH(0, 0, 50, 50), rect_paint);
 
+  EXPECT_CALL(*jni_mock, sealFrameTransactions());
   EXPECT_CALL(*jni_mock,
               onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50, mutators));
   EXPECT_CALL(*jni_mock, swapTransaction());
@@ -1344,6 +1346,7 @@ TEST(AndroidExternalViewEmbedder2, FrameSizeChangeDoesNotDestroySurfaces) {
   auto canvas2 = embedder->CompositeEmbeddedView(view_id);
   canvas2->DrawRect(DlRect::MakeXYWH(0, 0, 100, 100), rect_paint);
 
+  EXPECT_CALL(*jni_mock, sealFrameTransactions());
   EXPECT_CALL(*jni_mock, onDisplayPlatformView2(view_id, 0, 0, 100, 100, 100,
                                                 100, mutators));
   EXPECT_CALL(*jni_mock, swapTransaction());
@@ -1436,6 +1439,7 @@ TEST(AndroidExternalViewEmbedder2, ResizeDoesNotBlockRasterOnPlatformThread) {
   auto canvas = embedder->CompositeEmbeddedView(view_id);
   canvas->DrawRect(DlRect::MakeXYWH(0, 0, 50, 50), rect_paint);
 
+  EXPECT_CALL(*jni_mock, sealFrameTransactions());
   EXPECT_CALL(*jni_mock,
               onDisplayPlatformView2(view_id, 0, 0, 50, 50, 50, 50, mutators));
   EXPECT_CALL(*jni_mock, swapTransaction());

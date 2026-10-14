@@ -44,6 +44,7 @@ import io.flutter.embedding.engine.systemchannels.PlatformViewTouch;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel2;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.view.AccessibilityBridge;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -76,8 +77,12 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private final SparseArray<FlutterMutatorView> platformViewParent;
   private final MotionEventTracker motionEventTracker;
 
-  // Guarded by transactionLock: the raster thread appends; the platform thread drains.
+  // Guarded by transactionLock: the raster thread appends to pendingRasterTransactions during a
+  // frame and seals the frame's batch into pendingRasterFrames; the platform thread pops one
+  // batch per swapTransactions() call.
   private final ArrayList<SurfaceControl.Transaction> pendingRasterTransactions;
+  private final ArrayDeque<ArrayList<SurfaceControl.Transaction>> pendingRasterFrames =
+      new ArrayDeque<>();
   private final Object transactionLock = new Object();
 
   // Platform-thread only: populated by swapTransactions(), drained by onEndFrame().
@@ -722,8 +727,11 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     // Do not close discarded raster inputs; native producers may still use them.
     activeRasterTransactions.clear();
     synchronized (transactionLock) {
-      activeRasterTransactions.addAll(pendingRasterTransactions);
-      pendingRasterTransactions.clear();
+      final ArrayList<SurfaceControl.Transaction> frameTransactions =
+          pendingRasterFrames.pollFirst();
+      if (frameTransactions != null) {
+        activeRasterTransactions.addAll(frameTransactions);
+      }
     }
 
     if (activePlatformTransaction != null) {
@@ -747,6 +755,7 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   private void dropTransactions() {
     activeRasterTransactions.clear();
     synchronized (transactionLock) {
+      pendingRasterFrames.clear();
       pendingRasterTransactions.clear();
     }
 
@@ -802,6 +811,23 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     synchronized (transactionLock) {
       pendingRasterTransactions.add(tx);
+    }
+  }
+
+  /**
+   * Seals the transactions published through {@link #publishTransaction} during the current raster
+   * frame into a single batch for the next {@link #swapTransactions()} call.
+   *
+   * <p>The raster thread may begin or complete the next frame before the platform thread runs the
+   * task posted by {@code SubmitFlutterView}. Queuing one batch per raster frame keeps {@link
+   * #swapTransactions()} from draining transactions that belong to a later frame.
+   */
+  // Called from the raster thread through FlutterJNI.
+  @RequiresApi(API_LEVELS.API_34)
+  public void sealFrameTransactions() {
+    synchronized (transactionLock) {
+      pendingRasterFrames.addLast(new ArrayList<>(pendingRasterTransactions));
+      pendingRasterTransactions.clear();
     }
   }
 

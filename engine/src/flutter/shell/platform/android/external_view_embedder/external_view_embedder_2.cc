@@ -95,6 +95,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
 
   if (!FrameHasPlatformLayers()) {
     frame->Submit();
+    jni_facade_->sealFrameTransactions();
     task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
         [this, jni_facade = jni_facade_,
          views_visible_last_frame = views_visible_last_frame_]() {
@@ -188,6 +189,7 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
   }
 
   frame->Submit();
+  jni_facade_->sealFrameTransactions();
   task_runners_.GetPlatformTaskRunner()->PostTask(fml::MakeCopyable(
       [&, composition_order = composition_order_, view_params = view_params_,
        jni_facade = jni_facade_, device_pixel_ratio = device_pixel_ratio_,
