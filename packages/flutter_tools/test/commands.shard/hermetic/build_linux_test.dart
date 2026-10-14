@@ -176,7 +176,7 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildLinuxCommand(
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: effectiveFeatureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -305,6 +305,44 @@ void main() {
       FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
       OperatingSystemUtils: () => FakeOperatingSystemUtils(),
       Analytics: () => fakeAnalytics,
+    },
+  );
+
+  testUsingContext(
+    'Linux build config-only writes CMake configuration with local engine options',
+    () async {
+      fileSystem
+          .directory('engine')
+          .childDirectory('src')
+          .childDirectory('out')
+          .childDirectory('host_debug')
+          .createSync(recursive: true);
+      final BuildCommand command = createBuildCommand();
+      setUpMockProjectFilesForBuild();
+      processManager.addCommands(<FakeCommand>[cmakeCommand('release')]);
+
+      await createTestCommandRunner(command).run(const <String>[
+        '--local-engine=host_debug',
+        '--local-engine-host=host_debug',
+        '--local-engine-src-path=./engine/src',
+        'build',
+        'linux',
+        '--config-only',
+        '--no-pub',
+      ]);
+      final File configFile = fileSystem.file('linux/flutter/ephemeral/generated_config.cmake');
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains(r'"LOCAL_ENGINE=host_debug"'));
+      expect(configContent, contains(r'"LOCAL_ENGINE_HOST=host_debug"'));
+      expect(configContent, contains(r'"FLUTTER_ENGINE=engine/src"'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => linuxPlatform,
+      FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
+      OperatingSystemUtils: () => FakeOperatingSystemUtils(),
     },
   );
 
@@ -908,8 +946,7 @@ set(BINARY_NAME "fizz_bar")
 }
 
 class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
-  CustomFakeOperatingSystemUtils({HostPlatform hostPlatform = HostPlatform.linux_x64})
-    : _hostPlatform = hostPlatform;
+  CustomFakeOperatingSystemUtils({this._hostPlatform = HostPlatform.linux_x64});
 
   final HostPlatform _hostPlatform;
 

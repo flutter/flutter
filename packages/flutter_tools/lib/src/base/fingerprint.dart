@@ -19,11 +19,9 @@ class Fingerprinter {
   Fingerprinter({
     required this.fingerprintPath,
     required Iterable<String> paths,
-    required FileSystem fileSystem,
-    required Logger logger,
-  }) : _paths = paths.toList(),
-       _logger = logger,
-       _fileSystem = fileSystem;
+    required this._fileSystem,
+    required this._logger,
+  }) : _paths = paths.toList();
 
   final String fingerprintPath;
   final List<String> _paths;

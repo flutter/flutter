@@ -71,14 +71,14 @@ abstract class FlutterVersion {
   /// Parses the Flutter version from currently available tags in the local
   /// repo.
   factory FlutterVersion({
-    SystemClock clock = const SystemClock(),
+    required String flutterRoot,
     required FileSystem fs,
     required Git git,
-    required String flutterRoot,
-    Platform? platform,
-    Logger? logger,
     Cache? cache,
+    SystemClock clock = const SystemClock(),
     @protected bool fetchTags = false,
+    Logger? logger,
+    Platform? platform,
   }) {
     final File versionFile = getVersionFile(fs, flutterRoot);
 
@@ -125,45 +125,41 @@ abstract class FlutterVersion {
         .trim();
 
     return FlutterVersion.fromRevision(
+      cache: cache,
       clock: clock,
+      fetchTags: fetchTags,
+      flutterRoot: flutterRoot,
       frameworkRevision: frameworkRevision,
       fs: fs,
-      flutterRoot: flutterRoot,
       git: git,
-      platform: platform,
       logger: logger,
-      cache: cache,
-      fetchTags: fetchTags,
+      platform: platform ?? globals.platform,
     );
   }
 
   FlutterVersion._({
-    required SystemClock clock,
-    required Git git,
+    required this._clock,
     required this.flutterRoot,
     required this.fs,
-    Platform? platform,
-    Logger? logger,
-    Cache? cache,
-  }) : _clock = clock,
-       _git = git,
-       _platform = platform,
-       _logger = logger,
-       _cache = cache;
+    required this._git,
+    this._cache,
+    this._logger,
+    this._platform,
+  });
 
   factory FlutterVersion.fromRevision({
-    SystemClock clock = const SystemClock(),
     required String flutterRoot,
     required String frameworkRevision,
     required FileSystem fs,
     required Git git,
-    Platform? platform,
-    Logger? logger,
+    required Platform platform,
     Cache? cache,
+    SystemClock clock = const SystemClock(),
     bool fetchTags = false,
+    Logger? logger,
   }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
-      platform ?? globals.platform,
+      platform,
       git: git,
       gitRef: frameworkRevision,
       workingDirectory: flutterRoot,
@@ -172,16 +168,16 @@ abstract class FlutterVersion {
     );
     final String frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
     final result = _FlutterVersionGit._(
+      cache: cache,
       clock: clock,
       flutterRoot: flutterRoot,
       frameworkRevision: frameworkRevision,
       frameworkVersion: frameworkVersion,
-      gitTagVersion: gitTagVersion,
       fs: fs,
       git: git,
-      platform: platform,
+      gitTagVersion: gitTagVersion,
       logger: logger,
-      cache: cache,
+      platform: platform,
     );
     if (fetchTags) {
       result.ensureVersionFile();

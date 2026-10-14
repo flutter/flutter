@@ -70,9 +70,8 @@ void main() {
       final String jsonEncoded = json.encode(<String, dynamic>{
         'initialSemanticsTreeCreation': semanticsTreeCreation.inMilliseconds,
       });
-      File(
-        p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json'),
-      ).writeAsStringSync(jsonEncoded);
+      File(p.join(testOutputsDirectory, 'complex_layout_semantics_perf.json'))
+          .writeAsStringSync(jsonEncoded);
     }, timeout: Timeout.none);
   });
 }

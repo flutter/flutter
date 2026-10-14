@@ -530,11 +530,11 @@ void HandleResponse(bool handled, void* user_data);
   NSAssert(guardedCallback.handled, @"The callback returned without being handled.");
   NSAssert(
       (_lastModifierFlagsOfInterest & ~kModifierFlagCapsLock) ==
-          ([self adjustModifiers:press] & (_modifierFlagOfInterestMask & ~kModifierFlagCapsLock)),
+          ([self adjustModifiers:press] & (_modifierFlagOfInterestMask& ~kModifierFlagCapsLock)),
       @"The modifier flags are not properly updated: recorded 0x%lx, event with mask 0x%lx",
       static_cast<unsigned long>(_lastModifierFlagsOfInterest & ~kModifierFlagCapsLock),
       static_cast<unsigned long>([self adjustModifiers:press] &
-                                 (_modifierFlagOfInterestMask & ~kModifierFlagCapsLock)));
+                                 (_modifierFlagOfInterestMask& ~kModifierFlagCapsLock)));
 }
 
 #pragma mark - Private

@@ -3,15 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:code_assets/code_assets.dart';
-import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../../base/file_system.dart';
 import '../../../build_info.dart';
 import '../macos/native_assets_host.dart';
 import '../native_assets.dart';
+import '../native_assets_manifest.dart';
 
 // TODO(dcharkes): Fetch minimum iOS version from somewhere. https://github.com/flutter/flutter/issues/145104
-const targetIOSVersion = 13;
+const targetIOSVersion = 15;
 
 IOSSdk getIOSSdk(EnvironmentType environmentType) {
   return switch (environmentType) {
@@ -34,59 +34,14 @@ Architecture getNativeIOSArchitecture(CpuArch cpuArch) {
 
 /// Groups native assets by their target framework path for iOS
 /// multi-architecture bundling.
-Map<KernelAssetPath, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(
+Map<Uri, List<FlutterCodeAsset>> fatAssetTargetLocationsIOS(List<FlutterCodeAsset> nativeAssets) {
+  return fatAssetTargetLocations(assetTargetLocationsIOS(nativeAssets));
+}
+
+Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocationsIOS(
   List<FlutterCodeAsset> nativeAssets,
 ) {
-  return fatAssetTargetLocations(
-    nativeAssets,
-    (FlutterCodeAsset asset, Set<String> alreadyTakenNames) =>
-        _targetLocationIOS(asset, alreadyTakenNames),
-  );
-}
-
-Map<FlutterCodeAsset, KernelAsset> assetTargetLocationsIOS(List<FlutterCodeAsset> nativeAssets) {
-  final alreadyTakenNames = <String>{};
-  final idToPath = <String, KernelAssetPath>{};
-  final result = <FlutterCodeAsset, KernelAsset>{};
-  for (final asset in nativeAssets) {
-    final String assetId = asset.codeAsset.id;
-    final KernelAssetPath path =
-        idToPath[assetId] ??
-        _targetLocationIOS(asset, alreadyTakenNames, useInstallName: true).path;
-    idToPath[assetId] = path;
-    result[asset] = KernelAsset(id: assetId, target: asset.target, path: path);
-  }
-  return result;
-}
-
-/// [useInstallName] gives the name the asset is loaded with at runtime rather
-/// than the location it is bundled at. The two are different for a framework,
-/// and the native assets manifest needs the former: see [frameworkInstallName].
-KernelAsset _targetLocationIOS(
-  FlutterCodeAsset asset,
-  Set<String> alreadyTakenNames, {
-  bool useInstallName = false,
-}) {
-  final LinkMode linkMode = asset.codeAsset.linkMode;
-  final KernelAssetPath kernelAssetPath;
-  switch (linkMode) {
-    case DynamicLoadingSystem _:
-      kernelAssetPath = KernelAssetSystemPath(linkMode.uri);
-    case LookupInExecutable _:
-      kernelAssetPath = KernelAssetInExecutable();
-    case LookupInProcess _:
-      kernelAssetPath = KernelAssetInProcess();
-    case DynamicLoadingBundled _:
-      final String fileName = asset.codeAsset.file!.pathSegments.last;
-      Uri uri = frameworkUri(fileName, alreadyTakenNames);
-      if (useInstallName) {
-        uri = Uri(path: frameworkInstallName(uri));
-      }
-      kernelAssetPath = KernelAssetAbsolutePath(uri);
-    default:
-      throw Exception('Unsupported asset link mode $linkMode in asset $asset');
-  }
-  return KernelAsset(id: asset.codeAsset.id, target: asset.target, path: kernelAssetPath);
+  return assetTargetLocationsApple(nativeAssets);
 }
 
 /// Copies native assets into a framework per dynamic library.
@@ -103,7 +58,7 @@ KernelAsset _targetLocationIOS(
 /// in xcode_backend.dart.
 Future<List<File>> copyNativeCodeAssetsIOS(
   Uri targetUri,
-  Map<KernelAssetPath, List<FlutterCodeAsset>> assetTargetLocations,
+  Map<Uri, List<FlutterCodeAsset>> assetTargetLocations,
   String? codesignIdentity,
   BuildMode buildMode,
   FileSystem fileSystem,
@@ -113,9 +68,8 @@ Future<List<File>> copyNativeCodeAssetsIOS(
   final oldToNewInstallNames = <String, String>{};
   final dylibs = <(File, String, Directory)>[];
 
-  for (final MapEntry<KernelAssetPath, List<FlutterCodeAsset>> assetMapping
-      in assetTargetLocations.entries) {
-    final Uri target = (assetMapping.key as KernelAssetAbsolutePath).uri;
+  for (final MapEntry<Uri, List<FlutterCodeAsset>> assetMapping in assetTargetLocations.entries) {
+    final Uri target = assetMapping.key;
     final sources = <File>[
       for (final FlutterCodeAsset source in assetMapping.value)
         fileSystem.file(source.codeAsset.file),

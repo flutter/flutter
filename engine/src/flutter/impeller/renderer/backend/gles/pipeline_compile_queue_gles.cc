@@ -6,7 +6,6 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
-#include "impeller/base/validation.h"
 
 namespace impeller {
 
@@ -23,50 +22,95 @@ PipelineCompileQueueGLES::PipelineCompileQueueGLES(
     std::shared_ptr<fml::BasicTaskRunner> worker_task_runner)
     : worker_task_runner_(std::move(worker_task_runner)) {}
 
-PipelineCompileQueueGLES::~PipelineCompileQueueGLES() = default;
+PipelineCompileQueueGLES::~PipelineCompileQueueGLES() {
+  // Flush any jobs still pending. Tasks already posted to the worker only hold
+  // a weak reference to the queue and become no-ops.
+  while (auto job = TakeNextJob()) {
+    job();
+  }
+}
 
-void PipelineCompileQueueGLES::OnJobAdded() {
-  // To prevent potential deadlocks and reduce lock contention, avoid calling
-  // external or virtual methods (such as DrainPendingJobs, which posts tasks
-  // to the task runner) while holding a mutex. Instead, minimize the scope of
-  // the lock by using a local boolean flag to trigger the draining process
-  // outside the lock block.
-  bool should_drain = false;
+bool PipelineCompileQueueGLES::PostJobForDescriptor(
+    const PipelineDescriptor& desc,
+    const fml::closure& job) {
+  if (!job) {
+    return false;
+  }
+
+  bool inserted = false;
+  bool should_schedule = false;
   {
-    Lock lock(processing_mutex_);
-    if (!is_processing_) {
+    Lock lock(mutex_);
+    inserted = pending_jobs_.insert({desc, job}).second;
+    should_schedule = inserted && !is_processing_;
+    if (should_schedule) {
       is_processing_ = true;
-      should_drain = true;
     }
   }
-  if (should_drain) {
-    DrainPendingJobs();
+
+  if (!inserted) {
+    // This bit is being extremely conservative. If insertion did not take
+    // place, someone gave the compile queue a job for the same descritor. This
+    // is highly unusual but technically not impossible. Just run the job
+    // eagerly.
+    FML_LOG(WARNING) << "Got multiple compile jobs for the same descriptor. "
+                        "Running eagerly.";
+    worker_task_runner_->PostTask(job);
+  } else if (should_schedule) {
+    ScheduleNextJob();
   }
+  return true;
 }
 
-void PipelineCompileQueueGLES::PostJob(const fml::closure& job) {
-  if (!job) {
-    return;
+void PipelineCompileQueueGLES::PerformJobEagerly(
+    const PipelineDescriptor& desc) {
+  fml::closure job;
+  {
+    Lock lock(mutex_);
+    auto found = pending_jobs_.find(desc);
+    if (found == pending_jobs_.end()) {
+      return;
+    }
+    // The pipeline compile job was somewhere in the task queue. However, a
+    // rendering operation needed the job to be done ASAP. Instead of waiting
+    // for the pipeline compile queue to eventually get to finishing job, the
+    // thread waiting on the job just decided to take the job from the queue and
+    // do it itself. If there were jobs ahead of this one, it means that they
+    // were mis-prioritized. This counter dumps the number of job
+    // re-prioritizations.
+    priorities_elevated_++;
+    FML_TRACE_COUNTER("impeller", "PipelineCompileQueue",
+                      reinterpret_cast<int64_t>(this),  // Trace Counter ID
+                      "PrioritiesElevated", priorities_elevated_);
+    job = std::move(found->second);
+    pending_jobs_.erase(found);
   }
-
-  worker_task_runner_->PostTask(job);
+  job();
 }
 
-void PipelineCompileQueueGLES::DrainPendingJobs() {
-  PostJob([weak_queue = weak_from_this()]() {
-    if (auto queue = std::static_pointer_cast<PipelineCompileQueueGLES>(
-            weak_queue.lock())) {
-      queue->DoOneJob();
-      {
-        Lock lock(queue->processing_mutex_);
-        if (!queue->HasPendingJobs()) {
-          queue->is_processing_ = false;
-          return;
-        }
-      }
-      queue->DrainPendingJobs();
+void PipelineCompileQueueGLES::ScheduleNextJob() {
+  worker_task_runner_->PostTask([weak_queue = weak_from_this()]() {
+    auto queue = weak_queue.lock();
+    if (!queue) {
+      return;
+    }
+    if (auto job = queue->TakeNextJob()) {
+      job();
+      queue->ScheduleNextJob();
     }
   });
+}
+
+fml::closure PipelineCompileQueueGLES::TakeNextJob() {
+  Lock lock(mutex_);
+  if (pending_jobs_.empty()) {
+    is_processing_ = false;
+    return nullptr;
+  }
+  auto job_iterator = pending_jobs_.begin();
+  auto job = std::move(job_iterator->second);
+  pending_jobs_.erase(job_iterator);
+  return job;
 }
 
 }  // namespace impeller

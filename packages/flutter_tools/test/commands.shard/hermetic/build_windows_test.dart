@@ -109,7 +109,7 @@ void main() {
       projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
     );
     return BuildWindowsCommand(
-            buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       featureFlags: effectiveFeatureFlags,
       toolContext: toolContext,
       verboseHelp: verboseHelp,
@@ -314,6 +314,40 @@ void main() {
       Platform: () => windowsPlatform,
       FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
       Analytics: () => fakeAnalytics,
+    },
+  );
+
+  testUsingContext(
+    'Windows build config-only writes CMake configuration with local engine options',
+    () async {
+      fileSystem.directory(r'C:\engine\src\out\host_debug').createSync(recursive: true);
+      final fakeVisualStudio = FakeVisualStudio();
+      setUpMockProjectFilesForBuild();
+      processManager = FakeProcessManager.list(<FakeCommand>[cmakeGenerationCommand()]);
+
+      final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
+      await createTestCommandRunner(command).run(const <String>[
+        r'--local-engine=host_debug',
+        r'--local-engine-host=host_debug',
+        r'--local-engine-src-path=C:\engine\src',
+        'windows',
+        '--config-only',
+        '--no-pub',
+      ]);
+      final File configFile = fileSystem.file(
+        r'C:\windows\flutter\ephemeral\generated_config.cmake',
+      );
+      expect(configFile, exists);
+      final String configContent = configFile.readAsStringSync();
+      expect(configContent, contains(r'"LOCAL_ENGINE=host_debug"'));
+      expect(configContent, contains(r'"LOCAL_ENGINE_HOST=host_debug"'));
+      expect(configContent, contains(r'"FLUTTER_ENGINE=C:\\engine\\src"'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => windowsPlatform,
+      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
     },
   );
 
@@ -653,6 +687,32 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       await createTestCommandRunner(command)
           .run(const <String>['windows', '--release', '--no-pub']);
       expect(testLogger.statusText, contains(r'✓ Built build\windows\x64\runner\Release'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => windowsPlatform,
+      FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+    },
+  );
+
+  testUsingContext(
+    'Windows release build does not copy AOT PDB into the output bundle',
+    () async {
+      final fakeVisualStudio = FakeVisualStudio();
+      setUpMockProjectFilesForBuild();
+      fileSystem.file(r'C:\build\windows\app.pdb').createSync(recursive: true);
+
+      processManager = FakeProcessManager.list(<FakeCommand>[
+        cmakeGenerationCommand(),
+        buildCommand('Release'),
+      ]);
+
+      final BuildWindowsCommand command = createCommand(visualStudio: fakeVisualStudio);
+      await createTestCommandRunner(command)
+          .run(const <String>['windows', '--release', '--no-pub']);
+
+      expect(fileSystem.file(r'C:\build\windows\x64\runner\Release\data\app.pdb'), isNot(exists));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
