@@ -68,12 +68,12 @@ class SemanticsHelper {
   }
 
   /// Stops waiting for the user to enable semantics and removes all
-  /// placeholders.
+  /// placeholders, as soon as that is safe to do.
   ///
   /// This is used when semantics is enabled programmatically and therefore the
   /// placeholders are no longer needed.
-  void dispose() {
-    _semanticsEnabler.dispose();
+  void retirePlaceholders() {
+    _semanticsEnabler.retirePlaceholders();
   }
 }
 
@@ -195,6 +195,15 @@ abstract class SemanticsEnabler {
       placeholder.remove();
     }
     _placeholderByViewRoot.clear();
+  }
+
+  /// Stops waiting for the user to enable semantics because semantics was
+  /// enabled some other way, for example by the app.
+  ///
+  /// Removes the placeholders right away, unless the form factor needs to wait
+  /// for a better moment.
+  void retirePlaceholders() {
+    removeAllPlaceholders();
   }
 
   DomElement _prepareAccessibilityPlaceholder();
@@ -365,6 +374,13 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
   /// See https://github.com/flutter/flutter/issues/194104
   bool _schedulePlaceholderRemoval = false;
 
+  /// The IDs of the pointers that went down and have not gone up or been
+  /// canceled yet.
+  ///
+  /// A pointer can leave a stale ID behind if the browser drops its pointerup.
+  /// That only makes [retirePlaceholders] wait for the next gesture to end.
+  final Set<double> _pointersDown = <double>{};
+
   /// Hosts the placeholder inside the view it belongs to.
   ///
   /// This placeholder fills its host so that touch exploration can find it
@@ -385,6 +401,8 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
     if (!isWaitingToEnableSemantics) {
       return true;
     }
+
+    _trackPointers(event);
 
     if (_schedulePlaceholderRemoval) {
       // The event type can also be click for VoiceOver.
@@ -531,6 +549,35 @@ class MobileSemanticsEnabler extends SemanticsEnabler {
       ..bottom = '0';
 
     return placeholder;
+  }
+
+  void _trackPointers(DomEvent event) {
+    switch (event.type) {
+      case 'pointerdown':
+        final double? pointerId = (event as DomPointerEvent).pointerId;
+        if (pointerId != null) {
+          _pointersDown.add(pointerId);
+        }
+      case 'pointerup' || 'pointercancel':
+        _pointersDown.remove((event as DomPointerEvent).pointerId);
+    }
+  }
+
+  /// Waits for the gesture in progress, if any, to end before removing the
+  /// placeholders.
+  ///
+  /// A placeholder can be the target of a drag that is still going on when the
+  /// app enables semantics. Removing it right away could lose the drag's
+  /// pointerup. See [_schedulePlaceholderRemoval].
+  @override
+  void retirePlaceholders() {
+    semanticsActivationTimer?.cancel();
+    semanticsActivationTimer = null;
+    if (_pointersDown.isEmpty) {
+      removeAllPlaceholders();
+    } else {
+      _schedulePlaceholderRemoval = true;
+    }
   }
 
   @override

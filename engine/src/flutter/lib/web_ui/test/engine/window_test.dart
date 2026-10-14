@@ -1080,6 +1080,9 @@ class _RecordingSemanticsEnabler implements SemanticsEnabler {
   void removeAllPlaceholders() {}
 
   @override
+  void retirePlaceholders() {}
+
+  @override
   bool get isWaitingToEnableSemantics => false;
 
   @override
