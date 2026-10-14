@@ -20,6 +20,9 @@ typedef struct _FlGtk4AccessibleNode FlGtk4AccessibleNode;
 typedef struct _FlGtk4AccessibleNodeClass FlGtk4AccessibleNodeClass;
 typedef struct _FlGtk4TextAccessibleNode FlGtk4TextAccessibleNode;
 typedef struct _FlGtk4TextAccessibleNodeClass FlGtk4TextAccessibleNodeClass;
+typedef struct _FlGtk4EditableAccessibleNode FlGtk4EditableAccessibleNode;
+typedef struct _FlGtk4EditableAccessibleNodeClass
+    FlGtk4EditableAccessibleNodeClass;
 typedef struct _FlViewGtk4Accessibility FlViewGtk4Accessibility;
 
 struct _FlViewGtk4Accessibility {
@@ -62,6 +65,7 @@ struct _FlGtk4AccessibleNode {
   uint64_t actions;
   gboolean actions_enabled;
   gboolean text_actions_enabled;
+  gboolean text_editable;
 
   gchar* text;
   // Protected text keeps only character-to-UTF-16 boundaries, never raw text.
@@ -93,6 +97,18 @@ struct _FlGtk4TextAccessibleNode {
 
 struct _FlGtk4TextAccessibleNodeClass {
   FlGtk4AccessibleNodeClass parent_class;
+};
+
+struct _FlGtk4EditableAccessibleNode {
+  FlGtk4TextAccessibleNode parent_instance;
+  gchar* pending_text;
+  guint pending_source;
+  guint pending_caret;
+  gboolean awaiting_semantics;
+};
+
+struct _FlGtk4EditableAccessibleNodeClass {
+  FlGtk4TextAccessibleNodeClass parent_class;
 };
 
 // Actions exposed without GTK parameters. Cursor movement encodes Flutter's
@@ -167,6 +183,9 @@ static void fl_gtk4_accessible_node_accessible_iface_init(
     GtkAccessibleInterface* iface);
 static void fl_gtk4_text_accessible_node_text_iface_init(
     FlGtkAccessibleTextInterface4_14* iface);
+static void fl_gtk4_editable_accessible_node_iface_init(
+    GtkEditableInterface* iface);
+static void fl_gtk4_editable_accessible_node_cancel(FlGtk4AccessibleNode* self);
 
 G_DEFINE_TYPE_WITH_CODE(
     FlGtk4AccessibleNode,
@@ -181,6 +200,13 @@ G_DEFINE_TYPE_WITH_CODE(
     FL_TYPE_GTK4_ACCESSIBLE_NODE,
     G_IMPLEMENT_INTERFACE(fl_gtk_runtime_accessible_text_get_type(),
                           fl_gtk4_text_accessible_node_text_iface_init))
+
+G_DEFINE_TYPE_WITH_CODE(
+    FlGtk4EditableAccessibleNode,
+    fl_gtk4_editable_accessible_node,
+    FL_TYPE_GTK4_TEXT_ACCESSIBLE_NODE,
+    G_IMPLEMENT_INTERFACE(GTK_TYPE_EDITABLE,
+                          fl_gtk4_editable_accessible_node_iface_init))
 
 static GtkAccessibleRole fl_view_gtk4_accessibility_get_role(
     const FlAccessibilitySemanticsNode* semantics) {
@@ -547,6 +573,7 @@ static void fl_gtk4_accessible_node_set_platform_states(
 }
 
 static void fl_gtk4_accessible_node_detach(FlGtk4AccessibleNode* self) {
+  fl_gtk4_editable_accessible_node_cancel(self);
   // End the proxy's GTK lifecycle before clearing semantics links. Removed
   // ancestors may already have released their AT contexts, so descendants must
   // not flush pending state notifications through that detached hierarchy.
@@ -560,6 +587,7 @@ static void fl_gtk4_accessible_node_detach(FlGtk4AccessibleNode* self) {
   self->has_bounds = FALSE;
   self->actions_enabled = FALSE;
   self->text_actions_enabled = FALSE;
+  self->text_editable = FALSE;
   self->actions = 0;
   // A client may retain a replaced text object when the new semantics become
   // protected. Detached objects must not keep readable contents or selection.
@@ -876,36 +904,37 @@ static void fl_gtk4_text_accessible_node_get_default_attributes(
   }
 }
 
-static gboolean fl_gtk4_text_accessible_node_set_selection(
-    GtkAccessible* accessible,
-    gsize index,
-    FlGtkAccessibleTextRange4_14* range) {
-  auto* self = FL_GTK4_ACCESSIBLE_NODE(accessible);
-  const guint length = fl_gtk4_text_accessible_node_get_text_length(self);
-  if (index != 0 || range == nullptr || self->view == nullptr ||
-      !self->actions_enabled || !self->text_actions_enabled ||
-      (self->actions & kFlutterSemanticsActionSetSelection) == 0 ||
-      range->start > length || range->length > length - range->start) {
+static gboolean fl_gtk4_text_accessible_node_dispatch_selection(
+    FlGtk4AccessibleNode* self,
+    const char* text,
+    gsize start,
+    gsize end) {
+  if (self->view == nullptr || !self->text_actions_enabled ||
+      (self->actions & kFlutterSemanticsActionSetSelection) == 0) {
     return FALSE;
   }
   // GTK offsets count characters; Flutter's selection action uses UTF-16 units.
   gint64 base = 0;
   gint64 extent = 0;
-  if (self->protected_text_offsets != nullptr) {
-    if (range->start + range->length >= self->protected_text_offsets->len) {
+  if (self->protected_text_offsets != nullptr && text == self->text) {
+    if (MAX(start, end) >= self->protected_text_offsets->len) {
       return FALSE;
     }
-    base = g_array_index(self->protected_text_offsets, guint, range->start);
-    extent = g_array_index(self->protected_text_offsets, guint,
-                           range->start + range->length);
+    base = g_array_index(self->protected_text_offsets, guint, start);
+    extent = g_array_index(self->protected_text_offsets, guint, end);
   } else {
-    const gchar* cursor = fl_gtk4_text_accessible_node_get_text(self);
-    for (gsize i = 0; i < range->start + range->length; i++) {
+    const gchar* cursor = text;
+    for (gsize i = 0; i < MAX(start, end); i++) {
+      if (*cursor == '\0') {
+        return FALSE;
+      }
       const int units = g_utf8_get_char(cursor) > 0xffff ? 2 : 1;
-      if (i < range->start) {
+      if (i < start) {
         base += units;
       }
-      extent += units;
+      if (i < end) {
+        extent += units;
+      }
       cursor = g_utf8_next_char(cursor);
     }
   }
@@ -915,12 +944,33 @@ static gboolean fl_gtk4_text_accessible_node_set_selection(
   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
   g_autoptr(GBytes) message =
       fl_message_codec_encode_message(FL_MESSAGE_CODEC(codec), value, nullptr);
+  if (message == nullptr) {
+    return FALSE;
+  }
   fl_engine_dispatch_semantics_action(
       fl_view_get_engine(self->view), self->view_id, self->semantics_id,
       kFlutterSemanticsActionSetSelection, message);
   // Flutter semantics remains authoritative; do not optimistically change
   // state.
   return TRUE;
+}
+
+static gboolean fl_gtk4_text_accessible_node_set_selection(
+    GtkAccessible* accessible,
+    gsize index,
+    FlGtkAccessibleTextRange4_14* range) {
+  auto* self = FL_GTK4_ACCESSIBLE_NODE(accessible);
+  const guint length = fl_gtk4_text_accessible_node_get_text_length(self);
+  if (index != 0 || range == nullptr || range->start > length ||
+      range->length > length - range->start ||
+      (GTK_IS_EDITABLE(self) &&
+       reinterpret_cast<FlGtk4EditableAccessibleNode*>(self)
+           ->awaiting_semantics)) {
+    return FALSE;
+  }
+  return fl_gtk4_text_accessible_node_dispatch_selection(
+      self, fl_gtk4_text_accessible_node_get_text(self), range->start,
+      range->start + range->length);
 }
 
 static gboolean fl_gtk4_text_accessible_node_set_caret_position(
@@ -986,6 +1036,12 @@ static void fl_gtk4_text_accessible_node_set_text(FlGtk4AccessibleNode* self,
   }
   const gchar* new_text = is_obscured ? masked_text : source_text;
   const gboolean text_changed = g_strcmp0(self->text, new_text) != 0;
+  if (GTK_IS_EDITABLE(self)) {
+    auto* editable = reinterpret_cast<FlGtk4EditableAccessibleNode*>(self);
+    if (editable->awaiting_semantics || text_changed || !self->text_editable) {
+      fl_gtk4_editable_accessible_node_cancel(self);
+    }
+  }
   guint change_start = 0;
   guint removed = 0;
   guint inserted = 0;
@@ -1058,6 +1114,245 @@ static void fl_gtk4_text_accessible_node_class_init(
 
 static void fl_gtk4_text_accessible_node_init(FlGtk4TextAccessibleNode*) {}
 
+static gboolean fl_gtk4_editable_accessible_node_can_edit(
+    GtkEditable* editable) {
+  auto* self = FL_GTK4_ACCESSIBLE_NODE(editable);
+  auto* node = reinterpret_cast<FlGtk4EditableAccessibleNode*>(editable);
+  return self->view != nullptr && self->text_editable &&
+         !node->awaiting_semantics;
+}
+
+static void fl_gtk4_editable_accessible_node_cancel(
+    FlGtk4AccessibleNode* self) {
+  if (!GTK_IS_EDITABLE(self)) {
+    return;
+  }
+  auto* node = reinterpret_cast<FlGtk4EditableAccessibleNode*>(self);
+  const guint source = node->pending_source;
+  node->pending_source = 0;
+  g_clear_pointer(&node->pending_text, g_free);
+  node->awaiting_semantics = FALSE;
+  if (source != 0) {
+    g_source_remove(source);
+  }
+}
+
+static gboolean fl_gtk4_editable_accessible_node_flush(gpointer data) {
+  auto* self = FL_GTK4_ACCESSIBLE_NODE(data);
+  auto* node = reinterpret_cast<FlGtk4EditableAccessibleNode*>(self);
+  node->pending_source = 0;
+  g_autofree gchar* text =
+      static_cast<gchar*>(g_steal_pointer(&node->pending_text));
+  if (text == nullptr ||
+      !fl_gtk4_editable_accessible_node_can_edit(GTK_EDITABLE(self))) {
+    return G_SOURCE_REMOVE;
+  }
+  const guint caret = node->pending_caret;
+  if (g_strcmp0(text, fl_gtk4_text_accessible_node_get_text(self)) == 0 &&
+      self->text_selection_base == caret &&
+      self->text_selection_extent == caret) {
+    return G_SOURCE_REMOVE;
+  }
+  g_autoptr(FlValue) value = fl_value_new_string(text);
+  g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
+  g_autoptr(GBytes) message =
+      fl_message_codec_encode_message(FL_MESSAGE_CODEC(codec), value, nullptr);
+  if (message == nullptr) {
+    return G_SOURCE_REMOVE;
+  }
+  // Serialize requests until Flutter publishes an authoritative semantics
+  // batch. Queries continue to return committed text while the request is in
+  // flight.
+  node->awaiting_semantics = TRUE;
+  const guint64 revision = self->semantics_revision;
+  fl_engine_dispatch_semantics_action(fl_view_get_engine(self->view),
+                                      self->view_id, self->semantics_id,
+                                      kFlutterSemanticsActionSetText, message);
+  // A synchronous semantics response may reject or format the requested text.
+  // Otherwise the ordered selection request applies to the replacement text.
+  if (self->semantics_revision == revision ||
+      g_strcmp0(text, fl_gtk4_text_accessible_node_get_text(self)) == 0) {
+    fl_gtk4_text_accessible_node_dispatch_selection(self, text, caret, caret);
+  }
+  return G_SOURCE_REMOVE;
+}
+
+static void fl_gtk4_editable_accessible_node_schedule(
+    FlGtk4EditableAccessibleNode* node) {
+  if (node->pending_source == 0) {
+    node->pending_source = g_idle_add_full(
+        G_PRIORITY_DEFAULT_IDLE, fl_gtk4_editable_accessible_node_flush,
+        g_object_ref(node), g_object_unref);
+  }
+}
+
+static const char* fl_gtk4_editable_accessible_node_get_text(
+    GtkEditable* editable) {
+  return fl_gtk4_text_accessible_node_get_text(
+      FL_GTK4_ACCESSIBLE_NODE(editable));
+}
+
+static void fl_gtk4_editable_accessible_node_insert(GtkEditable* editable,
+                                                    const char* text,
+                                                    int bytes,
+                                                    int* position) {
+  if (!fl_gtk4_editable_accessible_node_can_edit(editable) ||
+      !g_utf8_validate(text, bytes, nullptr)) {
+    return;
+  }
+  auto* node = reinterpret_cast<FlGtk4EditableAccessibleNode*>(editable);
+  const char* current =
+      node->pending_text != nullptr
+          ? node->pending_text
+          : fl_gtk4_editable_accessible_node_get_text(editable);
+  const glong length = g_utf8_strlen(current, -1);
+  const int start = *position == -1 ? length : *position;
+  if (start < 0 || start > length || bytes == 0) {
+    return;
+  }
+  const char* split = g_utf8_offset_to_pointer(current, start);
+  g_autofree gchar* prefix = g_strndup(current, split - current);
+  g_autofree gchar* inserted = g_strndup(text, bytes);
+  gchar* replacement = g_strconcat(prefix, inserted, split, nullptr);
+  const guint caret = start + g_utf8_strlen(inserted, -1);
+  g_free(node->pending_text);
+  node->pending_text = replacement;
+  node->pending_caret = caret;
+  *position = caret;
+  fl_gtk4_editable_accessible_node_schedule(node);
+}
+
+static void fl_gtk4_editable_accessible_node_delete(GtkEditable* editable,
+                                                    int start,
+                                                    int end) {
+  if (!fl_gtk4_editable_accessible_node_can_edit(editable)) {
+    return;
+  }
+  auto* node = reinterpret_cast<FlGtk4EditableAccessibleNode*>(editable);
+  const char* current =
+      node->pending_text != nullptr
+          ? node->pending_text
+          : fl_gtk4_editable_accessible_node_get_text(editable);
+  const glong length = g_utf8_strlen(current, -1);
+  if (end == -1) {
+    end = length;
+  }
+  if (start < 0 || end < start || end > length || start == end) {
+    return;
+  }
+  const char* first = g_utf8_offset_to_pointer(current, start);
+  const char* last = g_utf8_offset_to_pointer(current, end);
+  g_autofree gchar* prefix = g_strndup(current, first - current);
+  gchar* replacement = g_strconcat(prefix, last, nullptr);
+  g_free(node->pending_text);
+  node->pending_text = replacement;
+  node->pending_caret = start;
+  fl_gtk4_editable_accessible_node_schedule(node);
+}
+
+static gboolean fl_gtk4_editable_accessible_node_get_selection(
+    GtkEditable* editable,
+    int* start,
+    int* end) {
+  auto* self = FL_GTK4_ACCESSIBLE_NODE(editable);
+  *start = self->text_selection_base;
+  *end = self->text_selection_extent;
+  return *start != *end;
+}
+
+static void fl_gtk4_editable_accessible_node_select(GtkEditable* editable,
+                                                    int start,
+                                                    int end) {
+  auto* self = FL_GTK4_ACCESSIBLE_NODE(editable);
+  const guint length = fl_gtk4_text_accessible_node_get_text_length(self);
+  if (start == -1) {
+    start = length;
+  }
+  if (end == -1) {
+    end = length;
+  }
+  if (start < 0 || end < 0 || static_cast<guint>(start) > length ||
+      static_cast<guint>(end) > length ||
+      reinterpret_cast<FlGtk4EditableAccessibleNode*>(editable)
+          ->awaiting_semantics) {
+    return;
+  }
+  fl_gtk4_text_accessible_node_dispatch_selection(
+      self, fl_gtk4_text_accessible_node_get_text(self), start, end);
+}
+
+static void fl_gtk4_editable_accessible_node_get_property(GObject* object,
+                                                          guint property,
+                                                          GValue* value,
+                                                          GParamSpec* spec) {
+  auto* self = FL_GTK4_ACCESSIBLE_NODE(object);
+  if (property < LAST_GTK4_ACCESSIBLE_NODE_PROPERTY) {
+    G_OBJECT_CLASS(fl_gtk4_editable_accessible_node_parent_class)
+        ->get_property(object, property, value, spec);
+    return;
+  }
+  switch (property - LAST_GTK4_ACCESSIBLE_NODE_PROPERTY) {
+    case GTK_EDITABLE_PROP_TEXT:
+      g_value_set_string(value, fl_gtk4_text_accessible_node_get_text(self));
+      break;
+    case GTK_EDITABLE_PROP_CURSOR_POSITION:
+      g_value_set_int(value, self->text_selection_extent);
+      break;
+    case GTK_EDITABLE_PROP_SELECTION_BOUND:
+      g_value_set_int(value, self->text_selection_base);
+      break;
+    case GTK_EDITABLE_PROP_EDITABLE:
+      g_value_set_boolean(
+          value, fl_gtk4_editable_accessible_node_can_edit(GTK_EDITABLE(self)));
+      break;
+    default:
+      g_param_value_set_default(spec, value);
+      break;
+  }
+}
+
+static void fl_gtk4_editable_accessible_node_set_property(GObject* object,
+                                                          guint property,
+                                                          const GValue* value,
+                                                          GParamSpec* spec) {
+  if (property < LAST_GTK4_ACCESSIBLE_NODE_PROPERTY) {
+    G_OBJECT_CLASS(fl_gtk4_editable_accessible_node_parent_class)
+        ->set_property(object, property, value, spec);
+  } else if (property == LAST_GTK4_ACCESSIBLE_NODE_PROPERTY +
+                             static_cast<guint>(GTK_EDITABLE_PROP_TEXT)) {
+    gtk_editable_set_text(GTK_EDITABLE(object), g_value_get_string(value));
+  }
+  // Other editable properties are controlled by Flutter semantics or layout.
+}
+
+static void fl_gtk4_editable_accessible_node_dispose(GObject* object) {
+  fl_gtk4_editable_accessible_node_cancel(FL_GTK4_ACCESSIBLE_NODE(object));
+  G_OBJECT_CLASS(fl_gtk4_editable_accessible_node_parent_class)
+      ->dispose(object);
+}
+
+static void fl_gtk4_editable_accessible_node_class_init(
+    FlGtk4EditableAccessibleNodeClass* klass) {
+  GObjectClass* object_class = G_OBJECT_CLASS(klass);
+  object_class->get_property = fl_gtk4_editable_accessible_node_get_property;
+  object_class->set_property = fl_gtk4_editable_accessible_node_set_property;
+  object_class->dispose = fl_gtk4_editable_accessible_node_dispose;
+  gtk_editable_install_properties(object_class,
+                                  LAST_GTK4_ACCESSIBLE_NODE_PROPERTY);
+}
+
+static void fl_gtk4_editable_accessible_node_init(
+    FlGtk4EditableAccessibleNode*) {}
+
+static void fl_gtk4_editable_accessible_node_iface_init(
+    GtkEditableInterface* iface) {
+  iface->get_text = fl_gtk4_editable_accessible_node_get_text;
+  iface->do_insert_text = fl_gtk4_editable_accessible_node_insert;
+  iface->do_delete_text = fl_gtk4_editable_accessible_node_delete;
+  iface->get_selection_bounds = fl_gtk4_editable_accessible_node_get_selection;
+  iface->set_selection_bounds = fl_gtk4_editable_accessible_node_select;
+}
+
 static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
     FlView* view,
     FlutterViewId view_id,
@@ -1068,18 +1363,28 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   const gboolean supports_text =
       semantics->flags.is_text_field &&
       fl_gtk_runtime_supports_native_accessibility_text();
+  // Opt in while GTK's asynchronous EditableText.PasteText lifetime issue is
+  // tracked upstream. GtkEditable itself is a public GTK 4.0 interface.
+  const gboolean supports_editable =
+      supports_text && !semantics->flags.is_obscured &&
+      (semantics->actions & kFlutterSemanticsActionSetText) != 0 &&
+      g_strcmp0(g_getenv("FLUTTER_GTK4_ENABLE_EDITABLE_TEXT"), "1") == 0;
   // Do not evaluate the text-node type check unless GTK 4.14 is available:
   // evaluating its GType registers the dynamically resolved interface.
   // GTK roles are immutable after construction. Replace the native object,
   // retaining descendants through the semantics-ID cache below.
   if (self == nullptr || self->role != role ||
-      (supports_text && !FL_IS_GTK4_TEXT_ACCESSIBLE_NODE(self))) {
-    self = supports_text ? FL_GTK4_ACCESSIBLE_NODE(
-                               g_object_new(FL_TYPE_GTK4_TEXT_ACCESSIBLE_NODE,
-                                            "accessible-role", role, nullptr))
-                         : FL_GTK4_ACCESSIBLE_NODE(
-                               g_object_new(FL_TYPE_GTK4_ACCESSIBLE_NODE,
-                                            "accessible-role", role, nullptr));
+      (supports_text && !FL_IS_GTK4_TEXT_ACCESSIBLE_NODE(self)) ||
+      (supports_editable && !GTK_IS_EDITABLE(self))) {
+    self = supports_editable ? FL_GTK4_ACCESSIBLE_NODE(g_object_new(
+                                   fl_gtk4_editable_accessible_node_get_type(),
+                                   "accessible-role", role, nullptr))
+           : supports_text   ? FL_GTK4_ACCESSIBLE_NODE(
+                                   g_object_new(FL_TYPE_GTK4_TEXT_ACCESSIBLE_NODE,
+                                                "accessible-role", role, nullptr))
+                             : FL_GTK4_ACCESSIBLE_NODE(g_object_new(
+                                   FL_TYPE_GTK4_ACCESSIBLE_NODE,
+                                   "accessible-role", role, nullptr));
     g_object_ref_sink(self);
   }
   self->view = view;
@@ -1109,6 +1414,8 @@ static FlGtk4AccessibleNode* fl_gtk4_accessible_node_update(
   }
   self->actions_enabled = is_enabled && !is_hidden;
   self->text_actions_enabled = supports_text && self->actions_enabled;
+  self->text_editable =
+      supports_editable && self->actions_enabled && !is_read_only;
   for (const auto& action : kNativeActions) {
     gtk_widget_action_set_enabled(
         GTK_WIDGET(self), action.name,
