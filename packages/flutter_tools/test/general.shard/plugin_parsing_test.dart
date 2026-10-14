@@ -650,4 +650,28 @@ void main() {
       ),
     );
   });
+
+  testWithoutContext('Plugin parsing allows an empty web platform key', () {
+    final fileSystem = MemoryFileSystem.test();
+    const pluginYamlRaw =
+        'platforms:\n'
+        ' android:\n'
+        '  ffiPlugin: true\n'
+        ' web:\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    final plugin = Plugin.fromYaml(
+      _kTestPluginName,
+      _kTestPluginPath,
+      pluginYaml,
+      null,
+      const <String>[],
+      isDevDependency: false,
+      fileSystem: fileSystem,
+    );
+
+    expect(plugin.platforms.keys, contains(AndroidPlugin.kConfigKey));
+    expect(plugin.platforms.keys, isNot(contains(WebPlugin.kConfigKey)));
+    expect(Plugin.validatePluginYaml(pluginYaml), isEmpty);
+  });
 }

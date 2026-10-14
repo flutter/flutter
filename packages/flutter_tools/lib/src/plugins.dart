@@ -233,22 +233,18 @@ class Plugin {
       MacOSPlugin.kConfigKey,
       (YamlMap yaml) => MacOSPlugin.parseFromYaml(name, yaml),
     );
-    if (platformsYaml.containsKey(WebPlugin.kConfigKey)) {
-      final Object? yamlValue = platformsYaml[WebPlugin.kConfigKey];
-      if (yamlValue is! YamlMap) {
-        errors.add('Invalid "web" plugin specification.');
-      } else if (yamlValue.containsKey(kDefaultPackage)) {
-        if (yamlValue[kDefaultPackage] is! String) {
-          errors.add('Invalid "web" plugin specification.');
-        }
-      } else {
-        final (plugin: WebPlugin? webPlugin, errors: List<String> webErrors) =
-            WebPlugin.parseFromYaml(name, yamlValue);
-        if (webErrors.isNotEmpty) {
-          errors.addAll(webErrors);
-        } else if (webPlugin != null) {
-          platforms[WebPlugin.kConfigKey] = webPlugin;
-        }
+    // Unlike native/Dart platforms, an empty `web:` entry (where the value is
+    // null rather than a YamlMap) or a `web:` entry with `default_package` is
+    // ignored rather than rejected, as existing published packages use an empty
+    // `web:` key to declare web support without a WebPlugin registrant class.
+    if (platformsYaml[WebPlugin.kConfigKey] case final YamlMap yamlValue
+        when !yamlValue.containsKey(kDefaultPackage)) {
+      final (plugin: WebPlugin? webPlugin, errors: List<String> webErrors) =
+          WebPlugin.parseFromYaml(name, yamlValue);
+      if (webErrors.isNotEmpty) {
+        errors.addAll(webErrors);
+      } else if (webPlugin != null) {
+        platforms[WebPlugin.kConfigKey] = webPlugin;
       }
     }
     parseNativeOrDartPlatform(
