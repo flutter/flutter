@@ -66,6 +66,14 @@ _LINUX_COMPILE_FLAGS = [
     "-Wnewline-eof",
 ]
 
+# The architecture (//build/config/compiler:compiler). Separate, and placed
+# after a target's own flags (see `flutter_arch_flags` below): in GN the
+# compiler config's cflags follow the target's, so a target's own -march
+# loses to -march=x86-64 -- Skia's `ml3` opts ask for -march=haswell and
+# are built for x86-64, and the engine's test goldens are of that raster
+# pipeline; a build in which haswell won differs from them by a few pixels.
+# (-m<feature> flags such as skcms' -mavx2 are unaffected by the order:
+# clang applies them on top of whichever -march wins.)
 _LINUX_X64_COMPILE_FLAGS = [
     "-m64",
     "-march=x86-64",
@@ -193,7 +201,7 @@ def _impl(ctx):
         _flag_feature(
             "flutter_compile_flags",
             ALL_CC_COMPILE_ACTION_NAMES,
-            _LINUX_COMPILE_FLAGS + _LINUX_X64_COMPILE_FLAGS + _defines(_LINUX_DEFINES),
+            _LINUX_COMPILE_FLAGS + _defines(_LINUX_DEFINES),
         ),
         _flag_feature("flutter_c_flags", [ACTION_NAMES.c_compile], _LINUX_C_FLAGS),
         _flag_feature("flutter_cxx_flags", ALL_CPP_COMPILE_ACTION_NAMES, _LINUX_CXX_FLAGS + cxx_include_flags),
@@ -201,6 +209,28 @@ def _impl(ctx):
         _mode_feature("dbg", _DBG_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
         _mode_feature("fastbuild", _FASTBUILD_COMPILE_FLAGS + _defines(_DBG_DEFINES)),
         _mode_feature("opt", _OPT_COMPILE_FLAGS + _defines(_OPT_DEFINES), _OPT_LINK_FLAGS),
+        # A target's copts (Bazel's own `user_compile_flags` feature, defined
+        # here so that it sits before the next one: Bazel appends the legacy
+        # features it does not find to the end of this list), then the
+        # architecture flags, which GN's compiler config puts after a
+        # target's own cflags (see _LINUX_X64_COMPILE_FLAGS).
+        feature(
+            name = "user_compile_flags",
+            enabled = True,
+            flag_sets = [
+                flag_set(
+                    actions = ALL_CC_COMPILE_ACTION_NAMES,
+                    flag_groups = [
+                        flag_group(
+                            flags = ["%{user_compile_flags}"],
+                            iterate_over = "user_compile_flags",
+                            expand_if_available = "user_compile_flags",
+                        ),
+                    ],
+                ),
+            ],
+        ),
+        _flag_feature("flutter_arch_flags", ALL_CC_COMPILE_ACTION_NAMES, _LINUX_X64_COMPILE_FLAGS),
         # Link.
         _flag_feature("flutter_link_flags", ALL_CC_LINK_ACTION_NAMES, _LINUX_LINK_FLAGS + _LINUX_X64_LINK_FLAGS),
         _flag_feature("flutter_complete_link_flags", _COMPLETE_LINK_ACTION_NAMES, _LINUX_COMPLETE_LINK_FLAGS),
