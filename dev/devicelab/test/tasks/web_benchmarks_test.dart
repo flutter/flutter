@@ -447,6 +447,31 @@ void main() {
       ]);
     });
 
+    test('BenchmarkComparison asserts that metrics are sorted by metricKey', () {
+      expect(
+        () => BenchmarkComparison(
+          regressionThreshold: 10.0,
+          metrics: <MetricComparison>[
+            MetricComparison(
+              metricKey: 'b.average',
+              baseline: 100.0,
+              current: 100.0,
+              deltaPercent: 0.0,
+              isRegression: false,
+            ),
+            MetricComparison(
+              metricKey: 'a.average',
+              baseline: 100.0,
+              current: 100.0,
+              deltaPercent: 0.0,
+              isRegression: false,
+            ),
+          ],
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
     test('Zero baseline jump: baseline is 0.0 and current is positive', () {
       final BenchmarkComparison result = compareResults(
         baseline: {'a.average': 0.0},
@@ -576,18 +601,18 @@ void main() {
         regressionThreshold: 10.0,
         metrics: [
           MetricComparison(
-            metricKey: 'new.average',
-            baseline: null,
-            current: 150.0,
-            deltaPercent: 0.0,
-            isRegression: false,
-          ),
-          MetricComparison(
             metricKey: 'missing.average',
             baseline: 100.0,
             current: null,
             deltaPercent: double.infinity,
             isRegression: true,
+          ),
+          MetricComparison(
+            metricKey: 'new.average',
+            baseline: null,
+            current: 150.0,
+            deltaPercent: 0.0,
+            isRegression: false,
           ),
         ],
         missingMetrics: ['missing.average'],
@@ -622,32 +647,11 @@ void main() {
     );
 
     test('Row ordering: rows are printed alphabetically by metricKey', () {
-      final comp = BenchmarkComparison(
+      final BenchmarkComparison comp = compareResults(
+        baseline: <String, dynamic>{'z.average': 100.0, 'a.average': 100.0, 'm.average': 100.0},
+        current: <String, dynamic>{'z.average': 100.0, 'a.average': 100.0},
         regressionThreshold: 10.0,
-        metrics: [
-          MetricComparison(
-            metricKey: 'z.average',
-            baseline: 100.0,
-            current: 100.0,
-            deltaPercent: 0.0,
-            isRegression: false,
-          ),
-          MetricComparison(
-            metricKey: 'a.average',
-            baseline: 100.0,
-            current: 100.0,
-            deltaPercent: 0.0,
-            isRegression: false,
-          ),
-          MetricComparison(
-            metricKey: 'm.average',
-            baseline: 100.0,
-            current: null,
-            deltaPercent: double.infinity,
-            isRegression: false,
-          ),
-        ],
-        missingMetrics: ['m.average'],
+        failOnMissingBaseline: false,
       );
       final String table = formatAnsiSummaryTable(comp, enableAnsi: false);
       final int indexOfA = table.indexOf('a.average');

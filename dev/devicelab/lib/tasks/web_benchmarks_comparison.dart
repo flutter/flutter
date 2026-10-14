@@ -20,12 +20,23 @@ class MetricComparison {
 }
 
 /// Aggregated comparison results across all evaluated metrics.
+///
+/// [metrics] must be sorted alphabetically by [MetricComparison.metricKey].
 class BenchmarkComparison {
   BenchmarkComparison({
     required this.metrics,
     required this.regressionThreshold,
     this.missingMetrics = const <String>[],
-  });
+  }) : assert(_isSortedByKey(metrics), 'metrics must be sorted alphabetically by metricKey.');
+
+  static bool _isSortedByKey(List<MetricComparison> metrics) {
+    for (var i = 1; i < metrics.length; i++) {
+      if (metrics[i - 1].metricKey.compareTo(metrics[i].metricKey) > 0) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   final List<MetricComparison> metrics;
   final double? regressionThreshold;
@@ -197,9 +208,7 @@ BenchmarkComparison compareResults({
 /// or log redirects.
 String formatAnsiSummaryTable(BenchmarkComparison comparison, {bool enableAnsi = true}) {
   final buffer = StringBuffer();
-  final sortedMetrics = List<MetricComparison>.from(comparison.metrics)
-    ..sort((MetricComparison a, MetricComparison b) => a.metricKey.compareTo(b.metricKey));
-  for (final m in sortedMetrics) {
+  for (final MetricComparison m in comparison.metrics) {
     final String baselineStr = m.baseline?.toStringAsFixed(1) ?? 'N/A';
     final String currentStr = m.current?.toStringAsFixed(1) ?? 'N/A';
     final deltaStr = m.deltaPercent == double.infinity
