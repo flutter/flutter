@@ -16,7 +16,7 @@
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 #include "gmock/gmock.h"
-#include "googletest/googletest/include/gtest/gtest.h"
+#include "gtest/gtest.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "tonic/converter/dart_converter.h"
 
