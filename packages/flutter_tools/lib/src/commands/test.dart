@@ -129,8 +129,8 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       _fileReporter,
       _timeout,
       _ignoreTimeouts,
-      _wasm,
-      _crossOriginIsolation,
+      WebOptions.wasm,
+      WebOptions.crossOriginIsolation,
       _uninstall,
     ], verboseHelp: verboseHelp);
   }
@@ -365,23 +365,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'tests for a Flutter app).',
   );
 
-  static const _wasm = FlagOptionDescriptor(
-    name: FlutterOptions.kWebWasmFlag,
-    negatable: false,
-    help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
-  );
-
-  static const _crossOriginIsolation = FlagOptionDescriptor(
-    name: 'cross-origin-isolation',
-    verboseOnly: true,
-    help:
-        'Adds the Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy '
-        'headers to the web server. These headers are required for using APIs like '
-        'SharedArrayBuffer. This is on by default for the "skwasm" web renderer, '
-        'and this flag can be used to override the default. To disable this for the '
-        'skwasm renderer, use "--no-cross-origin-isolation".',
-  );
-
   static const _uninstall = FlagOptionDescriptor(
     name: 'uninstall',
     defaultsTo: true,
@@ -409,7 +392,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   final _testFileUris = <Uri>{};
 
   bool get isWeb => getValue(_platform) == 'chrome';
-  bool get useWasm => getValue(_wasm);
+  bool get useWasm => getValue(WebOptions.wasm);
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
@@ -571,9 +554,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webConfig: WebDebugConfig(
         renderer: webRenderer,
-        crossOriginIsolation: wasParsed(_crossOriginIsolation)
-            ? getValue(_crossOriginIsolation)
-            : null,
+        crossOriginIsolation: getValue(WebOptions.crossOriginIsolation),
         useWasm: useWasm,
       ),
       printDtd: getValue(CommonOptions.printDtd),
