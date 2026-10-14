@@ -644,6 +644,7 @@ void main() {
     late BufferLogger logger;
     late FakeOperatingSystemUtils os;
     late FakePlistParser testPlistParser;
+    late FakeToolContext toolContext;
 
     final overrides = <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -655,15 +656,19 @@ void main() {
       logger = BufferLogger.test();
       os = FakeOperatingSystemUtils();
       testPlistParser = FakePlistParser();
+      toolContext = FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        os: os,
+        platform: FakePlatform(operatingSystem: 'macos'),
+      );
     });
 
     testWithoutContext('Error on non-existing file', () {
       final iosApp = IOSApp.fromPrebuiltApp(
         fileSystem.file('not_existing.ipa'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: testPlistParser,
+        toolContext: toolContext,
       ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(
@@ -676,10 +681,8 @@ void main() {
       fileSystem.directory('regular_folder').createSync();
       final iosApp = IOSApp.fromPrebuiltApp(
         fileSystem.file('regular_folder'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: testPlistParser,
+        toolContext: toolContext,
       ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(logger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
@@ -689,10 +692,8 @@ void main() {
       fileSystem.directory('bundle.app').createSync();
       final iosApp = IOSApp.fromPrebuiltApp(
         fileSystem.file('bundle.app'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: testPlistParser,
+        toolContext: toolContext,
       ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(logger.errorText, 'Invalid prebuilt iOS app. Does not contain Info.plist.\n');
@@ -703,10 +704,8 @@ void main() {
       fileSystem.file('bundle.app/Info.plist').createSync();
       final iosApp = IOSApp.fromPrebuiltApp(
         fileSystem.file('bundle.app'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: testPlistParser,
+        toolContext: toolContext,
       ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(
@@ -722,10 +721,8 @@ void main() {
       final iosApp =
           IOSApp.fromPrebuiltApp(
                 fileSystem.file('bundle.app'),
-                fileSystem: fileSystem,
-                logger: logger,
-                operatingSystemUtils: os,
                 plistParser: testPlistParser,
+                toolContext: toolContext,
               )!
               as PrebuiltIOSApp;
       expect(logger.errorText, isEmpty);
@@ -739,10 +736,8 @@ void main() {
       fileSystem.file('app.ipa').createSync();
       final iosApp = IOSApp.fromPrebuiltApp(
         fileSystem.file('app.ipa'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: testPlistParser,
+        toolContext: toolContext,
       ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(
@@ -772,10 +767,8 @@ void main() {
       };
       final iosApp = IOSApp.fromPrebuiltApp(
         fileSystem.file('app.ipa'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: testPlistParser,
+        toolContext: toolContext,
       ) as PrebuiltIOSApp?;
       expect(iosApp, isNull);
       expect(logger.errorText, 'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n');
@@ -797,10 +790,8 @@ void main() {
       final iosApp =
           IOSApp.fromPrebuiltApp(
                 fileSystem.file('app.ipa'),
-                fileSystem: fileSystem,
-                logger: logger,
-                operatingSystemUtils: os,
                 plistParser: testPlistParser,
+                toolContext: toolContext,
               )!
               as PrebuiltIOSApp;
       expect(logger.errorText, isEmpty);
@@ -815,9 +806,7 @@ void main() {
       final iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'macos'),
+        toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
@@ -829,9 +818,7 @@ void main() {
       final iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'macos'),
+        toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
@@ -844,9 +831,7 @@ void main() {
       final iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'macos'),
+        toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
@@ -864,9 +849,7 @@ void main() {
       final iosApp = await IOSApp.fromIosProject(
         FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
         null,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: FakePlatform(operatingSystem: 'macos'),
+        toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);

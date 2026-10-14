@@ -8,6 +8,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../ios/plist_parser.dart';
 import '../xcode_project.dart';
 
@@ -21,19 +22,15 @@ abstract class MacOSApp extends ApplicationPackage {
   /// Creates a new [MacOSApp] from a macOS project directory.
   factory MacOSApp.fromMacOSProject(
     MacOSProject project, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required OperatingSystemUtils operatingSystemUtils,
     required PlistParser plistParser,
+    required ToolContext toolContext,
   }) {
     // projectBundleId is unused for macOS apps. Use a placeholder bundle ID.
     return BuildableMacOSApp(
       project,
       'com.example.placeholder',
-      fileSystem: fileSystem,
-      logger: logger,
-      operatingSystemUtils: operatingSystemUtils,
       plistParser: plistParser,
+      toolContext: toolContext,
     );
   }
 
@@ -46,17 +43,13 @@ abstract class MacOSApp extends ApplicationPackage {
   /// port over stdout.
   static MacOSApp? fromPrebuiltApp(
     FileSystemEntity applicationBinary, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required OperatingSystemUtils operatingSystemUtils,
     required PlistParser plistParser,
+    required ToolContext toolContext,
   }) {
     final _BundleInfo? bundleInfo = _executableFromBundle(
       applicationBinary,
-      fileSystem: fileSystem,
-      logger: logger,
-      operatingSystemUtils: operatingSystemUtils,
       plistParser: plistParser,
+      toolContext: toolContext,
     );
     if (bundleInfo == null) {
       return null;
@@ -74,29 +67,28 @@ abstract class MacOSApp extends ApplicationPackage {
   /// Look up the executable name for a macOS application bundle.
   static _BundleInfo? _executableFromBundle(
     FileSystemEntity applicationBundle, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required OperatingSystemUtils operatingSystemUtils,
     required PlistParser plistParser,
+    required ToolContext toolContext,
   }) {
-    final FileSystemEntityType entityType = fileSystem.typeSync(applicationBundle.path);
+    final ToolContext(:FileSystem fs, :Logger logger, :OperatingSystemUtils os) = toolContext;
+    final FileSystemEntityType entityType = fs.typeSync(applicationBundle.path);
     if (entityType == FileSystemEntityType.notFound) {
       logger.printError('File "${applicationBundle.path}" does not exist.');
       return null;
     }
     Directory uncompressedBundle;
     if (entityType == FileSystemEntityType.directory) {
-      final Directory directory = fileSystem.directory(applicationBundle);
+      final Directory directory = fs.directory(applicationBundle);
       if (!_isBundleDirectory(directory)) {
         logger.printError('Folder "${applicationBundle.path}" is not an app bundle.');
         return null;
       }
-      uncompressedBundle = fileSystem.directory(applicationBundle);
+      uncompressedBundle = fs.directory(applicationBundle);
     } else {
       // Try to unpack as a zip.
-      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_app.');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app.');
       try {
-        operatingSystemUtils.unzip(fileSystem.file(applicationBundle), tempDir);
+        os.unzip(fs.file(applicationBundle), tempDir);
       } on ProcessException {
         logger.printError('Invalid prebuilt macOS app. Unable to extract bundle from archive.');
         return null;
@@ -112,12 +104,8 @@ abstract class MacOSApp extends ApplicationPackage {
         return null;
       }
     }
-    final String plistPath = fileSystem.path.join(
-      uncompressedBundle.path,
-      'Contents',
-      'Info.plist',
-    );
-    if (!fileSystem.file(plistPath).existsSync()) {
+    final String plistPath = fs.path.join(uncompressedBundle.path, 'Contents', 'Info.plist');
+    if (!fs.file(plistPath).existsSync()) {
       logger.printError('Invalid prebuilt macOS app. Does not contain Info.plist.');
       return null;
     }
@@ -136,13 +124,13 @@ abstract class MacOSApp extends ApplicationPackage {
       );
       return null;
     }
-    final String executable = fileSystem.path.join(
+    final String executable = fs.path.join(
       uncompressedBundle.path,
       'Contents',
       'MacOS',
       executableName,
     );
-    if (!fileSystem.file(executable).existsSync()) {
+    if (!fs.file(executable).existsSync()) {
       logger.printError('Could not find macOS binary at $executable');
     }
     return _BundleInfo(executable, id, uncompressedBundle);
@@ -195,30 +183,27 @@ class BuildableMacOSApp extends MacOSApp {
   BuildableMacOSApp(
     this.project,
     String projectBundleId, {
-    required this._fileSystem,
-    required this._logger,
-    required this._operatingSystemUtils,
     required this._plistParser,
+    required this._toolContext,
   }) : super(projectBundleId: projectBundleId);
 
   final MacOSProject project;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final OperatingSystemUtils _operatingSystemUtils;
   final PlistParser _plistParser;
+  final ToolContext _toolContext;
 
   @override
   String get name => 'macOS';
 
   @override
   String? applicationBundle(BuildInfo buildInfo) {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final File appBundleNameFile = project.nameFile;
     if (!appBundleNameFile.existsSync()) {
-      _logger.printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
+      logger.printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
       return null;
     }
 
-    return _fileSystem.path.join(
+    return fs.path.join(
       project.parent.directory.path,
       getMacOSBuildDirectory(),
       'Build',
@@ -238,12 +223,11 @@ class BuildableMacOSApp extends MacOSApp {
     if (directory == null) {
       return null;
     }
+    final FileSystem fs = _toolContext.fs;
     final _BundleInfo? bundleInfo = MacOSApp._executableFromBundle(
-      _fileSystem.directory(directory),
-      fileSystem: _fileSystem,
-      logger: _logger,
-      operatingSystemUtils: _operatingSystemUtils,
+      fs.directory(directory),
       plistParser: _plistParser,
+      toolContext: _toolContext,
     );
     return bundleInfo?.executable;
   }

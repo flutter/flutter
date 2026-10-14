@@ -355,10 +355,8 @@ Future<void> buildMacOS({
   }
   final String? applicationBundle = MacOSApp.fromMacOSProject(
     flutterProject.macos,
-    fileSystem: globals.fs,
-    logger: globals.logger,
-    operatingSystemUtils: globals.os,
     plistParser: globals.plistParser,
+    toolContext: globals.toolContext,
   ).applicationBundle(buildInfo);
   if (applicationBundle != null) {
     final Directory outputDirectory = globals.fs.directory(applicationBundle);

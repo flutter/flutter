@@ -9,6 +9,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../template.dart';
 import '../xcode_project.dart';
 import 'plist_parser.dart';
@@ -23,12 +24,11 @@ abstract class IOSApp extends ApplicationPackage {
   /// Creates a new IOSApp from an existing app bundle or IPA.
   static IOSApp? fromPrebuiltApp(
     FileSystemEntity applicationBinary, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required OperatingSystemUtils operatingSystemUtils,
     required PlistParser plistParser,
+    required ToolContext toolContext,
   }) {
-    final FileSystemEntityType entityType = fileSystem.typeSync(applicationBinary.path);
+    final ToolContext(:FileSystem fs, :Logger logger, :OperatingSystemUtils os) = toolContext;
+    final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
       logger.printError(
         'File "${applicationBinary.path}" does not exist. Use an app bundle or an ipa.',
@@ -37,19 +37,17 @@ abstract class IOSApp extends ApplicationPackage {
     }
     Directory uncompressedBundle;
     if (entityType == FileSystemEntityType.directory) {
-      final Directory directory = fileSystem.directory(applicationBinary);
+      final Directory directory = fs.directory(applicationBinary);
       if (!_isBundleDirectory(directory)) {
         logger.printError('Folder "${applicationBinary.path}" is not an app bundle.');
         return null;
       }
-      uncompressedBundle = fileSystem.directory(applicationBinary);
+      uncompressedBundle = fs.directory(applicationBinary);
     } else {
       // Try to unpack as an ipa.
-      final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_app.');
-      operatingSystemUtils.unzip(fileSystem.file(applicationBinary), tempDir);
-      final Directory payloadDir = fileSystem.directory(
-        fileSystem.path.join(tempDir.path, 'Payload'),
-      );
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app.');
+      os.unzip(fs.file(applicationBinary), tempDir);
+      final Directory payloadDir = fs.directory(fs.path.join(tempDir.path, 'Payload'));
       if (!payloadDir.existsSync()) {
         logger.printError('Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
         return null;
@@ -63,8 +61,8 @@ abstract class IOSApp extends ApplicationPackage {
         return null;
       }
     }
-    final String plistPath = fileSystem.path.join(uncompressedBundle.path, 'Info.plist');
-    if (!fileSystem.file(plistPath).existsSync()) {
+    final String plistPath = fs.path.join(uncompressedBundle.path, 'Info.plist');
+    if (!fs.file(plistPath).existsSync()) {
       logger.printError('Invalid prebuilt iOS app. Does not contain Info.plist.');
       return null;
     }
@@ -79,7 +77,7 @@ abstract class IOSApp extends ApplicationPackage {
 
     return PrebuiltIOSApp(
       uncompressedBundle: uncompressedBundle,
-      bundleName: fileSystem.path.basename(uncompressedBundle.path),
+      bundleName: fs.path.basename(uncompressedBundle.path),
       projectBundleId: id,
       applicationPackage: applicationBinary,
     );
@@ -88,10 +86,9 @@ abstract class IOSApp extends ApplicationPackage {
   static Future<IOSApp?> fromIosProject(
     IosProject project,
     BuildInfo? buildInfo, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
+    required ToolContext toolContext,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
     if (!platform.isMacOS) {
       return null;
     }
@@ -108,7 +105,7 @@ abstract class IOSApp extends ApplicationPackage {
       logger.printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
-    return BuildableIOSApp.fromProject(project, buildInfo, fileSystem: fileSystem, logger: logger);
+    return BuildableIOSApp.fromProject(project, buildInfo, fileSystem: fs, logger: logger);
   }
 
   @override

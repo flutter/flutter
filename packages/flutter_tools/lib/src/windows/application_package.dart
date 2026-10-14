@@ -11,6 +11,7 @@ import '../base/os.dart';
 import '../build_info.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
+import '../context/tool_context.dart';
 
 abstract class WindowsApp extends ApplicationPackage {
   WindowsApp({required String projectBundleId}) : super(id: projectBundleId);
@@ -25,10 +26,9 @@ abstract class WindowsApp extends ApplicationPackage {
   /// `applicationBinary` is the path to the executable or the zipped archive.
   static WindowsApp? fromPrebuiltApp(
     FileSystemEntity applicationBinary, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required OperatingSystemUtils operatingSystemUtils,
+    required ToolContext toolContext,
   }) {
+    final ToolContext(:FileSystem fs, :Logger logger, :OperatingSystemUtils os) = toolContext;
     if (!applicationBinary.existsSync()) {
       logger.printError('File "${applicationBinary.path}" does not exist.');
       return null;
@@ -48,9 +48,9 @@ abstract class WindowsApp extends ApplicationPackage {
     }
 
     // Try to unpack as a zip.
-    final Directory tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_app.');
+    final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app.');
     try {
-      operatingSystemUtils.unzip(fileSystem.file(applicationBinary), tempDir);
+      os.unzip(fs.file(applicationBinary), tempDir);
     } on ArchiveException {
       logger.printError('Invalid prebuilt Windows app. Unable to extract from archive.');
       return null;

@@ -9,11 +9,10 @@ import 'android/application_package.dart';
 import 'application_package.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/os.dart';
-import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
+import 'context/tool_context.dart';
 import 'ios/application_package.dart';
 import 'ios/plist_parser.dart';
 import 'linux/application_package.dart';
@@ -27,24 +26,13 @@ import 'windows/application_package.dart';
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
     required this._androidSdk,
-    required this._fileSystem,
-    required this._logger,
-    required this._operatingSystemUtils,
-    required this._platform,
     required this._plistParser,
-    required this._processManager,
-    required this._userMessages,
-  }) : _processUtils = ProcessUtils(processManager: _processManager, logger: _logger);
+    required this._toolContext,
+  });
 
   final AndroidSdk? _androidSdk;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final OperatingSystemUtils _operatingSystemUtils;
-  final Platform _platform;
   final PlistParser _plistParser;
-  final ProcessManager _processManager;
-  final ProcessUtils _processUtils;
-  final UserMessages _userMessages;
+  final ToolContext _toolContext;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -52,61 +40,60 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     BuildInfo? buildInfo,
     File? applicationBinary,
   }) async {
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :ProcessManager processManager,
+      :ProcessUtils processUtils,
+      :UserMessages userMessages,
+    ) = _toolContext;
     switch (platform.os) {
       case .android:
         if (applicationBinary == null) {
           return AndroidApk.fromAndroidProject(
             FlutterProject.current().android,
-            processManager: _processManager,
-            processUtils: _processUtils,
-            logger: _logger,
+            processManager: processManager,
+            processUtils: processUtils,
+            logger: logger,
             androidSdk: _androidSdk,
-            userMessages: _userMessages,
-            fileSystem: _fileSystem,
+            userMessages: userMessages,
+            fileSystem: fs,
             buildInfo: buildInfo,
           );
         }
         return AndroidApk.fromApk(
           applicationBinary,
-          processManager: _processManager,
-          logger: _logger,
+          processManager: processManager,
+          logger: logger,
           androidSdk: _androidSdk!,
-          userMessages: _userMessages,
-          processUtils: _processUtils,
+          userMessages: userMessages,
+          processUtils: processUtils,
         );
       case .ios:
         return applicationBinary == null
             ? await IOSApp.fromIosProject(
                 FlutterProject.current().ios,
                 buildInfo,
-                fileSystem: _fileSystem,
-                logger: _logger,
-                platform: _platform,
+                toolContext: _toolContext,
               )
             : IOSApp.fromPrebuiltApp(
                 applicationBinary,
-                fileSystem: _fileSystem,
-                logger: _logger,
-                operatingSystemUtils: _operatingSystemUtils,
                 plistParser: _plistParser,
+                toolContext: _toolContext,
               );
       case .tester:
-        return FlutterTesterApp.fromCurrentDirectory(_fileSystem);
+        return FlutterTesterApp.fromCurrentDirectory(fs);
       case .macos:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(
                 FlutterProject.current().macos,
-                fileSystem: _fileSystem,
-                logger: _logger,
-                operatingSystemUtils: _operatingSystemUtils,
                 plistParser: _plistParser,
+                toolContext: _toolContext,
               )
             : MacOSApp.fromPrebuiltApp(
                 applicationBinary,
-                fileSystem: _fileSystem,
-                logger: _logger,
-                operatingSystemUtils: _operatingSystemUtils,
                 plistParser: _plistParser,
+                toolContext: _toolContext,
               );
       case .web:
         if (!FlutterProject.current().web.existsSync()) {
@@ -120,12 +107,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .windows:
         return applicationBinary == null
             ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
-            : WindowsApp.fromPrebuiltApp(
-                applicationBinary,
-                fileSystem: _fileSystem,
-                logger: _logger,
-                operatingSystemUtils: _operatingSystemUtils,
-              );
+            : WindowsApp.fromPrebuiltApp(applicationBinary, toolContext: _toolContext);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();
     }

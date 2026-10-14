@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart' show FakeToolContext;
 
 void main() {
   group('PrebuiltMacOSApp', () {
@@ -24,21 +25,21 @@ void main() {
     late FileSystem fileSystem;
     late BufferLogger logger;
     late FakePlistUtils plistParser;
+    late FakeToolContext toolContext;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       os = FakeOperatingSystemUtils();
       logger = BufferLogger.test();
       plistParser = FakePlistUtils(fileSystem);
+      toolContext = FakeToolContext(fs: fileSystem, logger: logger, os: os);
     });
 
     testWithoutContext('Error on non-existing file', () {
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('not_existing.app'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: plistParser,
+        toolContext: toolContext,
       ) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
@@ -49,10 +50,8 @@ void main() {
       fileSystem.directory('regular_folder').createSync();
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('regular_folder'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: plistParser,
+        toolContext: toolContext,
       ) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
@@ -63,10 +62,8 @@ void main() {
       fileSystem.directory('bundle.app').createSync();
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('bundle.app'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: plistParser,
+        toolContext: toolContext,
       ) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
@@ -84,10 +81,8 @@ void main() {
           .writeAsStringSync(badPlistData);
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('bundle.app'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: plistParser,
+        toolContext: toolContext,
       ) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
@@ -105,10 +100,8 @@ void main() {
           .writeAsStringSync(badPlistDataNoExecutable);
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('bundle.app'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: plistParser,
+        toolContext: toolContext,
       ) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
@@ -128,10 +121,8 @@ void main() {
       final macosApp =
           MacOSApp.fromPrebuiltApp(
                 fileSystem.file('bundle.app'),
-                fileSystem: fileSystem,
-                logger: logger,
-                operatingSystemUtils: os,
                 plistParser: plistParser,
+                toolContext: toolContext,
               )!
               as PrebuiltMacOSApp;
 
@@ -145,10 +136,8 @@ void main() {
       fileSystem.file('app.zip').createSync();
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('app.zip'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: plistParser,
+        toolContext: toolContext,
       ) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
@@ -168,10 +157,8 @@ void main() {
       };
       final macosApp = MacOSApp.fromPrebuiltApp(
         fileSystem.file('app.zip'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: plistParser,
+        toolContext: toolContext,
       ) as PrebuiltMacOSApp?;
 
       expect(macosApp, isNull);
@@ -199,10 +186,8 @@ void main() {
       final macosApp =
           MacOSApp.fromPrebuiltApp(
                 fileSystem.file('app.zip'),
-                fileSystem: fileSystem,
-                logger: logger,
-                operatingSystemUtils: os,
                 plistParser: plistParser,
+                toolContext: toolContext,
               )!
               as PrebuiltMacOSApp;
 
@@ -215,10 +200,8 @@ void main() {
     testWithoutContext('Success with project', () {
       final macosApp = MacOSApp.fromMacOSProject(
         FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).macos,
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: plistParser,
+        toolContext: toolContext,
       );
 
       expect(logger.errorText, isEmpty);
@@ -231,10 +214,8 @@ void main() {
           .macos;
       final macosApp = MacOSApp.fromMacOSProject(
         project,
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
         plistParser: plistParser,
+        toolContext: toolContext,
       ) as BuildableMacOSApp;
 
       const vanillaApp = BuildInfo(

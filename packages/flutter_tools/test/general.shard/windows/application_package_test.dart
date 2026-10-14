@@ -11,25 +11,26 @@ import 'package:flutter_tools/src/windows/application_package.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/fakes.dart' show FakeToolContext;
 
 void main() {
   group('PrebuiltWindowsApp', () {
     late FakeOperatingSystemUtils os;
     late FileSystem fileSystem;
     late BufferLogger logger;
+    late FakeToolContext toolContext;
 
     setUp(() {
       fileSystem = MemoryFileSystem.test();
       os = FakeOperatingSystemUtils();
       logger = BufferLogger.test();
+      toolContext = FakeToolContext(fs: fileSystem, logger: logger, os: os);
     });
 
     testWithoutContext('Error on non-existing exe file', () {
       final windowsApp = WindowsApp.fromPrebuiltApp(
         fileSystem.file('not_existing.exe'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
+        toolContext: toolContext,
       ) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
@@ -39,12 +40,7 @@ void main() {
     testWithoutContext('Success on exe file', () {
       fileSystem.file('file.exe').createSync();
       final windowsApp =
-          WindowsApp.fromPrebuiltApp(
-                fileSystem.file('file.exe'),
-                fileSystem: fileSystem,
-                logger: logger,
-                operatingSystemUtils: os,
-              )!
+          WindowsApp.fromPrebuiltApp(fileSystem.file('file.exe'), toolContext: toolContext)!
               as PrebuiltWindowsApp;
 
       expect(windowsApp.name, 'file.exe');
@@ -53,9 +49,7 @@ void main() {
     testWithoutContext('Error on non-existing zip file', () {
       final windowsApp = WindowsApp.fromPrebuiltApp(
         fileSystem.file('not_existing.zip'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
+        toolContext: toolContext,
       ) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
@@ -66,9 +60,7 @@ void main() {
       fileSystem.file('app.zip').createSync();
       final windowsApp = WindowsApp.fromPrebuiltApp(
         fileSystem.file('app.zip'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
+        toolContext: toolContext,
       ) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
@@ -88,9 +80,7 @@ void main() {
       };
       final windowsApp = WindowsApp.fromPrebuiltApp(
         fileSystem.file('app.zip'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
+        toolContext: toolContext,
       ) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
@@ -108,12 +98,7 @@ void main() {
         fileSystem.directory(exePath).createSync(recursive: true);
       };
       final windowsApp =
-          WindowsApp.fromPrebuiltApp(
-                fileSystem.file('app.zip'),
-                fileSystem: fileSystem,
-                logger: logger,
-                operatingSystemUtils: os,
-              )!
+          WindowsApp.fromPrebuiltApp(fileSystem.file('app.zip'), toolContext: toolContext)!
               as PrebuiltWindowsApp;
 
       expect(logger.errorText, isEmpty);
@@ -125,9 +110,7 @@ void main() {
       fileSystem.file('not_existing.app').createSync();
       final windowsApp = WindowsApp.fromPrebuiltApp(
         fileSystem.file('not_existing.app'),
-        fileSystem: fileSystem,
-        logger: logger,
-        operatingSystemUtils: os,
+        toolContext: toolContext,
       ) as PrebuiltWindowsApp?;
 
       expect(windowsApp, isNull);
