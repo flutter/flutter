@@ -77,6 +77,28 @@ Future<void> testMain() async {
     expect(scaled.ascent, isNot(closeTo(even.ascent, 1e-3)));
   });
 
+  test('TextStyle.leadingDistribution overrides TextHeightBehavior.leadingDistribution', () {
+    final ui.LineMetrics proportional = _singleLineMetrics(
+      _style(height: _heightMultiplier),
+      'Hello',
+    );
+    final builder = ui.ParagraphBuilder(
+      _style(
+        height: _heightMultiplier,
+        textHeightBehavior: const ui.TextHeightBehavior(
+          leadingDistribution: ui.TextLeadingDistribution.even,
+        ),
+      ),
+    );
+    builder.pushStyle(ui.TextStyle(leadingDistribution: ui.TextLeadingDistribution.proportional));
+    builder.addText('Hello');
+    final ui.Paragraph paragraph = builder.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+    final ui.LineMetrics overridden = paragraph.computeLineMetrics().single;
+    expect(overridden.ascent, closeTo(proportional.ascent, 1e-3));
+    expect(overridden.descent, closeTo(proportional.descent, 1e-3));
+  });
+
   test('Half-leading with a small height multiplier preserves negative descent', () {
     final ui.LineMetrics raw = _singleLineMetrics(_style(), 'Hello');
     const smallMultiplier = 0.1;
