@@ -309,14 +309,14 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 // Satellite window will only become key window when Flutter explicitely
 // request the view to be first responder.
 @interface FlutterSatelliteWindow : NSPanel {
-  BOOL canBecomeKeyWindow;
+  BOOL _canBecomeKeyWindow;
 }
 @end
 
 @implementation FlutterSatelliteWindow
 
 - (BOOL)canBecomeKeyWindow {
-  return canBecomeKeyWindow;
+  return _canBecomeKeyWindow;
 }
 
 - (BOOL)acceptsFirstResponder {
@@ -328,12 +328,12 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
 }
 
 - (BOOL)makeFirstResponder:(NSResponder*)responder {
-  canBecomeKeyWindow = YES;
+  _canBecomeKeyWindow = YES;
   return [super makeFirstResponder:responder];
 }
 
 - (void)resignKeyWindow {
-  canBecomeKeyWindow = NO;
+  _canBecomeKeyWindow = NO;
   [super resignKeyWindow];
 }
 
@@ -659,7 +659,7 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
     }
   }
 
-  NSAssert(parent != nil, @"Invalid parentId: %lli", parentViewId);
+  FML_CHECK(parent != nil);
   if (parent != window.parentWindow) {
     [window.parentWindow removeChildWindow:window];
     [parent addChildWindow:window ordered:NSWindowAbove];
