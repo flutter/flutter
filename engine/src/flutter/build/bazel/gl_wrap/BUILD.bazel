@@ -53,9 +53,14 @@ _GN_ARGS = {
     "host_cpu": '"x64"',
     "host_os": '"linux"',
     "is_clang": "true",
-    # No system libraries: keeps //build/config/linux from probing the
-    # sysroot with the host's pkg-config (nothing in this graph uses them).
-    "is_minimal_linux": "true",
+    # is_minimal_linux stays at GN's default (false), as in every host build
+    # tools/gn configures: build_overrides/vulkan_headers.gni derives
+    # vulkan_use_x11 from it, and a loader built without
+    # VK_USE_PLATFORM_XCB_KHR drops VK_KHR_xcb_surface from SwiftShader's
+    # extension list, after which GLFW cannot create a Vulkan window surface
+    # (the playground's Vulkan backend). The price is //build/config/linux
+    # probing the sysroot's pkg-config metadata with the host's pkg-config at
+    # gn gen time, as GN's own host build does.
     "is_official_build": "true",
     "stripped_symbols": "true",
     "target_cpu": '"x64"',
@@ -80,6 +85,11 @@ gn_build(
         "libvk_swiftshader.so",
         "libvulkan.so.1",
         "vk_swiftshader_icd.json",
+        # The Khronos validation layer and its manifest (from GN's
+        # vulkan-data/, a product by base name here; the suites' copies put
+        # it back under vulkan-data/, which its library_path is relative to).
+        "libVkLayer_khronos_validation.so",
+        "vulkan-data/VkLayer_khronos_validation.json",
     ],
     ar = "@clang_linux_x64//:bin/llvm-ar",
     # Dependencies the Bazel side builds itself (the facade depends on them):
@@ -199,6 +209,8 @@ cc_library(
 filegroup(
     name = "runtime_files",
     srcs = [
+        ":VkLayer_khronos_validation.json",
+        ":libVkLayer_khronos_validation.so",
         ":libvk_swiftshader.so",
         ":libvulkan.so.1",
         ":vk_swiftshader_icd.json",
