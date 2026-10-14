@@ -7,6 +7,7 @@
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//engine/src/flutter/build/bazel/dart:kernel.bzl", "SOURCE_URI_SCHEME", _dart_kernel = "dart_kernel")
 load("//engine/src/flutter/build/bazel/dart:snapshot.bzl", "aot_snapshot")
 
@@ -119,25 +120,103 @@ def _matches(basename, pattern):
         fail("fixture pattern %r: only `*.ext` and plain names are supported" % pattern)
     return basename == pattern
 
-def _fixture_target_copies_impl(ctx):
-    outputs = []
-    for target, patterns in ctx.attr.targets.items():
+def _selected_files(targets):
+    # The files of `targets` (a label_keyed_string_dict of target to patterns
+    # separated by spaces, none for every file) that the patterns keep.
+    files = []
+    for target, patterns in targets.items():
         wanted = patterns.split(" ") if patterns else []
         for f in target[DefaultInfo].files.to_list():
             if wanted and not [p for p in wanted if _matches(f.basename, p)]:
                 continue
-            out = ctx.actions.declare_file(paths.join(ctx.attr.dir, f.basename))
-            ctx.actions.symlink(output = out, target_file = f)
-            outputs.append(out)
+            files.append(f)
+    return files
+
+FixturesDestinationInfo = provider(
+    doc = "Fixtures that a test_fixtures() of one package places in the fixtures directory of " +
+          "another (GN's `dest`): the destination package's own test_fixtures copies them.",
+    fields = {
+        "package": "The destination package (`engine/src/flutter/lib/ui`).",
+        "files": "depset of the files.",
+    },
+)
+
+_CollectedFixturesInfo = provider(
+    doc = "What _collect_fixtures gathered below a target.",
+    fields = {
+        "by_package": "dict of destination package to list of depsets of files.",
+    },
+)
+
+def _collect_fixtures_impl(target, ctx):
+    by_package = {}
+    if FixturesDestinationInfo in target:
+        info = target[FixturesDestinationInfo]
+        by_package[info.package] = [info.files]
+    for dep in getattr(ctx.rule.attr, "deps", []):
+        if _CollectedFixturesInfo in dep:
+            for package, files in dep[_CollectedFixturesInfo].by_package.items():
+                by_package[package] = by_package.get(package, []) + files
+    return [_CollectedFixturesInfo(by_package = by_package)]
+
+# GN reaches a `dest` test_fixtures through groups (`deps = ["fixtures/shaders"]`,
+# a group of groups); here groups are cc_library targets, which forward no
+# provider of their own, so an aspect walks the `deps` chain instead.
+_collect_fixtures = aspect(
+    implementation = _collect_fixtures_impl,
+    attr_aspects = ["deps"],
+    doc = "Collects the FixturesDestinationInfo of a target and of everything below its `deps`.",
+)
+
+def _destined_fixtures_impl(ctx):
+    files = depset(ctx.files.fixtures + _selected_files(ctx.attr.fixtures_targets))
+    return [
+        DefaultInfo(files = files),
+        FixturesDestinationInfo(package = ctx.attr.package, files = files),
+        # Groups (cc_library targets) depend on it, as GN's do.
+        CcInfo(),
+    ]
+
+_destined_fixtures = rule(
+    implementation = _destined_fixtures_impl,
+    doc = "GN's test_fixtures() with a `dest` in another package: declares the fixtures for that " +
+          "package's test_fixtures to copy (nothing is copied here, and no location library is made, " +
+          "which matches GN: the one it writes is never linked, the copy's deps carrying no objects).",
+    attrs = {
+        "package": attr.string(mandatory = True, doc = "The destination package."),
+        "fixtures": attr.label_list(allow_files = True, doc = "The files."),
+        "fixtures_targets": attr.label_keyed_string_dict(
+            doc = "The targets whose files are fixtures, each with its patterns separated by spaces (none for every file).",
+        ),
+        "deps": attr.label_list(doc = "GN's deps: ordering only."),
+    },
+)
+
+def _fixture_copies_impl(ctx):
+    files = _selected_files(ctx.attr.targets)
+    for dep in ctx.attr.deps:
+        if _CollectedFixturesInfo in dep:
+            for destined in dep[_CollectedFixturesInfo].by_package.get(ctx.label.package, []):
+                files += destined.to_list()
+    outputs = []
+    for f in files:
+        out = ctx.actions.declare_file(paths.join(ctx.attr.dir, f.basename))
+        ctx.actions.symlink(output = out, target_file = f)
+        outputs.append(out)
     return [DefaultInfo(files = depset(outputs))]
 
-_fixture_target_copies = rule(
-    implementation = _fixture_target_copies_impl,
-    doc = "Copies (as symlinks) the files of other targets into the fixtures directory: GN's " +
-          "`fixtures = get_target_outputs(...)`, optionally through filter_include.",
+_fixture_copies = rule(
+    implementation = _fixture_copies_impl,
+    doc = "Copies (as symlinks) into the fixtures directory the files of other targets (GN's " +
+          "`fixtures = get_target_outputs(...)`, optionally through filter_include) and the fixtures " +
+          "that test_fixtures() targets below `deps` declare for this package (GN's `dest`).",
     attrs = {
         "targets": attr.label_keyed_string_dict(
             doc = "The targets, each with its patterns separated by spaces (none for every file).",
+        ),
+        "deps": attr.label_list(
+            aspects = [_collect_fixtures],
+            doc = "GN's deps of the template, searched for fixtures destined here.",
         ),
         "dir": attr.string(mandatory = True),
     },
@@ -152,6 +231,7 @@ def flutter_test_fixtures(
         dart_packages = {},
         use_target_as_artifact_prefix = False,
         deps = [],
+        dest = None,
         visibility = None,
         **kwargs):
     """Declares the fixtures of a test binary, like GN's test_fixtures template.
@@ -173,6 +253,12 @@ def flutter_test_fixtures(
     (`app_elf_snapshot.so`) is not produced yet: the host suites run in the
     debug mode.
 
+    With `dest` naming another package (GN's `dest = "$root_gen_dir/<path>"`,
+    the shader fixtures of lib/ui), the fixtures belong to that package's
+    directory: the target declares them (FixturesDestinationInfo), and the
+    test_fixtures of that package copies them into its `assets` when this
+    target is below its `deps`.
+
     Args:
       name: name of the library.
       fixtures: files to copy into the fixtures directory.
@@ -187,12 +273,31 @@ def flutter_test_fixtures(
       use_target_as_artifact_prefix: prefix the kernel's name with `name`.
       deps: GN's `deps` of the template, the copy's ordering dependencies
         (the targets producing fixtures); runfiles of the library here, so
-        that they are built with the test and present when it runs.
+        that they are built with the test and present when it runs, and
+        where fixtures destined for this package are looked for.
+      dest: the package whose fixtures directory receives the files
+        (`//engine/src/flutter/lib/ui`), when not this one; see above.
       visibility: visibility of the library.
       **kwargs: forwarded to the library (`tags`, ...).
     """
     package = native.package_name()
     fixtures_dir = paths.join(package, "assets")
+    targets = {target: " ".join(patterns) for target, patterns in fixtures_targets.items()}
+
+    if dest != None and dest.lstrip("/") != package:
+        if dart_main:
+            fail("flutter_test_fixtures(%s): dart_main with a dest in another package is not supported" % name)
+        _destined_fixtures(
+            name = name,
+            package = dest.lstrip("/"),
+            fixtures = fixtures,
+            fixtures_targets = targets,
+            deps = deps,
+            testonly = True,
+            visibility = visibility,
+            **kwargs
+        )
+        return
 
     copies = []
     for fixture in fixtures:
@@ -208,10 +313,11 @@ def flutter_test_fixtures(
         )
         copies.append(out)
 
-    if fixtures_targets:
-        _fixture_target_copies(
+    if fixtures_targets or deps:
+        _fixture_copies(
             name = "_ft_%s" % name,
-            targets = {target: " ".join(patterns) for target, patterns in fixtures_targets.items()},
+            targets = targets,
+            deps = deps,
             dir = "assets",
             testonly = True,
             visibility = ["//visibility:private"],

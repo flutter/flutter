@@ -646,7 +646,10 @@ def impellerc(
     else:
         if not sl_file_extension:
             fail("impellerc(%s): sl_file_extension is required without shader_bundle" % name)
-        outs = [prefix + shader.rsplit("/", 1)[-1] + "." + sl_file_extension for shader in shaders]
+
+        # GN's {{source_file_part}}: the file name, whether the shader is a
+        # path in this package or a label of another's.
+        outs = [prefix + shader.rsplit(":", 1)[-1].rsplit("/", 1)[-1] + "." + sl_file_extension for shader in shaders]
     impellerc_run(
         name = name,
         srcs = shaders,
