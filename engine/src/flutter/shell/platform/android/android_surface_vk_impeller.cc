@@ -97,11 +97,13 @@ bool AndroidSurfaceVKImpeller::SetNativeWindow(
         router->GetFrameRoute() == SurfaceTransactionRouter::Route::kDirect) {
       return impeller::android::SurfaceTransaction();
     }
-    ASurfaceTransaction* tx = jni_facade->createTransaction();
+    std::function<void()> publish_callback;
+    ASurfaceTransaction* tx = jni_facade->createTransaction(publish_callback);
     if (tx == nullptr) {
       return impeller::android::SurfaceTransaction();
     }
-    return impeller::android::SurfaceTransaction(tx);
+    return impeller::android::SurfaceTransaction(tx,
+                                                 std::move(publish_callback));
   };
 
   auto swapchain = impeller::SwapchainVK::Create(

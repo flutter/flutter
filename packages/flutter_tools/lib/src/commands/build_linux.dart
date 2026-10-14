@@ -12,53 +12,55 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
 import '../linux/build_linux.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart';
 import 'build.dart';
 
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
     required this.buildSystem,
-    required ToolContext toolContext,
-    required bool verboseHelp,
+    required ToolContext super.toolContext,
+    required super.verboseHelp,
     required this._featureFlags,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-         verboseHelp: verboseHelp,
-       ) {
-    addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
-    usesFlavorOption();
+  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
     final OperatingSystemUtils os = toolContext.os;
-    final String defaultTargetPlatform = switch (os.hostPlatform) {
-      HostPlatform.linux_arm64 => 'linux-arm64',
-      HostPlatform.linux_riscv64 => 'linux-riscv64',
-      _ => 'linux-x64',
+    final TargetPlatform defaultTargetPlatform = switch (os.hostPlatform) {
+      HostPlatform.linux_arm64 => TargetPlatform.linux_arm64,
+      HostPlatform.linux_riscv64 => TargetPlatform.linux_riscv64,
+      _ => TargetPlatform.linux_x64,
     };
-    argParser.addOption(
-      'target-platform',
+    _targetPlatformOption = DefaultedEnumOptionDescriptor<TargetPlatform>(
+      name: 'target-platform',
       defaultsTo: defaultTargetPlatform,
-      allowed: <String>['linux-arm64', 'linux-x64', 'linux-riscv64'],
+      values: const <TargetPlatform>[
+        TargetPlatform.linux_arm64,
+        TargetPlatform.linux_x64,
+        TargetPlatform.linux_riscv64,
+      ],
+      nameMapper: (TargetPlatform platform) => platform.getName(),
+      valueParser: TargetPlatform.fromName,
       help: 'The target platform for which the app is compiled.',
     );
-    argParser.addOption(
-      'target-sysroot',
-      defaultsTo: '/',
-      help:
-          'The root filesystem path of target platform for which '
-          'the app is compiled. This option is valid only '
-          'if the current host and target architectures are different.',
-    );
-    argParser.addFlag(
-      'config-only',
-      help: 'Update the project configuration without performing a build.',
-    );
+    registerOptionBundles(const <OptionBundle>[DesktopBuildOptionsBundle()]);
+    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      _targetPlatformOption,
+      _targetSysroot,
+    ], verboseHelp: verboseHelp);
   }
+
+  late final DefaultedEnumOptionDescriptor<TargetPlatform> _targetPlatformOption;
+
+  static const _targetSysroot = DefaultedStringOptionDescriptor(
+    name: 'target-sysroot',
+    defaultsTo: '/',
+    help:
+        'The root filesystem path of target platform for which '
+        'the app is compiled. This option is valid only '
+        'if the current host and target architectures are different.',
+  );
 
   final BuildSystem buildSystem;
   final FeatureFlags _featureFlags;
@@ -83,7 +85,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   @override
   String get description => 'Build a Linux desktop application.';
 
-  bool get configOnly => boolArg('config-only');
+  bool get configOnly => getValue(DesktopBuildOptionsBundle.configOnly);
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -93,7 +95,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     final Platform platform = toolContext.platform;
 
     final BuildInfo buildInfo = await getBuildInfo();
-    final targetPlatform = TargetPlatform.fromName(stringArg('target-platform')!);
+    final TargetPlatform targetPlatform = getValue(_targetPlatformOption);
     final needCrossBuild = os.hostPlatform.platformName != targetPlatform.simpleName;
 
     if (!_featureFlags.isLinuxEnabled) {
@@ -129,7 +131,7 @@ class BuildLinuxCommand extends BuildSubCommand {
       sizeAnalyzer: SizeAnalyzer(fileSystem: fs, logger: logger, analytics: analytics),
       needCrossBuild: needCrossBuild,
       targetPlatform: targetPlatform,
-      targetSysroot: stringArg('target-sysroot')!,
+      targetSysroot: getValue(_targetSysroot),
       logger: logger,
       configOnly: configOnly,
     );
