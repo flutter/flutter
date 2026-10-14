@@ -7,9 +7,13 @@ import 'dart:io' show Platform;
 import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 
-/// A typedef that contains a set of [File]s which import Cupertino,
-/// and a set of [File]s which import Material.
-typedef CrossImportingFiles = ({Set<File> cupertinoImports, Set<File> materialImports});
+/// A typedef that maps each [LibraryCrossImportStatementType] to the set of
+/// [File]s that contain a disallowed import of that type.
+///
+/// Every [LibraryCrossImportStatementType] has an entry, which may be empty.
+/// A file may appear in more than one set if it contains more than one kind of
+/// disallowed import.
+typedef CrossImportingFiles = Map<LibraryCrossImportStatementType, Set<File>>;
 
 /// A library that is checked for cross imports.
 abstract interface class CrossImportCheckedLibrary {
@@ -106,36 +110,34 @@ Map<CrossImportCheckedLibrary, CrossImportingFiles> getCrossImports(
   final Map<CrossImportCheckedLibrary, CrossImportingFiles> crossImports = {};
 
   for (final MapEntry<CrossImportCheckedLibrary, Set<File>> entry in libraries.entries) {
-    final Set<File> cupertinoImports = {};
-    final Set<File> materialImports = {};
+    final CrossImportingFiles importsByType = {
+      for (final LibraryCrossImportStatementType importStatement
+          in LibraryCrossImportStatementType.values)
+        importStatement: <File>{},
+    };
 
     for (final File file in entry.value) {
       final String contents = file.readAsStringSync();
 
       for (final LibraryCrossImportStatementType importStatement
           in LibraryCrossImportStatementType.values) {
-        switch (importStatement) {
-          case .cupertino || .cupertinoUI:
-            if (!entry.key.canImport(importStatement) &&
-                contents.contains(importStatement.importString)) {
-              cupertinoImports.add(file);
-            }
-          case .material || .materialUI:
-            if (!entry.key.canImport(importStatement) &&
-                contents.contains(importStatement.importString)) {
-              materialImports.add(file);
-            }
+        if (!entry.key.canImport(importStatement) &&
+            contents.contains(importStatement.importString)) {
+          importsByType[importStatement]!.add(file);
         }
       }
     }
 
-    crossImports[entry.key] = (
-      cupertinoImports: cupertinoImports,
-      materialImports: materialImports,
-    );
+    crossImports[entry.key] = importsByType;
   }
 
   return crossImports;
+}
+
+/// Returns every [File] in [crossImports] that has any disallowed import,
+/// regardless of the [LibraryCrossImportStatementType].
+Set<File> getAllCrossImportingFiles(CrossImportingFiles crossImports) {
+  return <File>{for (final Set<File> files in crossImports.values) ...files};
 }
 
 /// Returns the error message for the given [fixedPaths]

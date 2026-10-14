@@ -906,39 +906,27 @@ class ExamplesCrossImportChecker {
     // Find any cross imports that are not in the known list.
     for (final MapEntry<CrossImportCheckedLibrary, CrossImportingFiles> entry
         in crossImportsPerLibrary.entries) {
-      final Set<File> unknownCupertinoImports = getUnknowns(
-        knownExamplesCrossImports,
-        entry.value.cupertinoImports,
-        prefix: _examplesPrefix,
-      );
-      final Set<File> unknownMaterialImports = getUnknowns(
-        knownExamplesCrossImports,
-        entry.value.materialImports,
-        prefix: _examplesPrefix,
-      );
-
-      if (unknownMaterialImports.isNotEmpty) {
-        valid = false;
-        foundError(
-          getImportError(
-            flutterRoot: flutterRoot,
-            files: unknownMaterialImports,
-            checkedLibrary: entry.key,
-            importStatement: LibraryCrossImportStatementType.material,
-          ).split('\n'),
+      // Report each import type separately, so that the error names the
+      // library that was actually imported (e.g. MaterialUI vs. Material).
+      for (final LibraryCrossImportStatementType importStatement
+          in LibraryCrossImportStatementType.values) {
+        final Set<File> unknownImports = getUnknowns(
+          knownExamplesCrossImports,
+          entry.value[importStatement]!,
+          prefix: _examplesPrefix,
         );
-      }
 
-      if (unknownCupertinoImports.isNotEmpty) {
-        valid = false;
-        foundError(
-          getImportError(
-            flutterRoot: flutterRoot,
-            files: unknownCupertinoImports,
-            checkedLibrary: entry.key,
-            importStatement: LibraryCrossImportStatementType.cupertino,
-          ).split('\n'),
-        );
+        if (unknownImports.isNotEmpty) {
+          valid = false;
+          foundError(
+            getImportError(
+              flutterRoot: flutterRoot,
+              files: unknownImports,
+              checkedLibrary: entry.key,
+              importStatement: importStatement,
+            ).split('\n'),
+          );
+        }
       }
     }
 
@@ -958,9 +946,7 @@ class ExamplesCrossImportChecker {
         in crossImportsPerLibrary.entries) {
       final ownPrefix = '${entry.key.libraryName}/';
 
-      final Set<File> crossImportsForLibrary = entry.value.cupertinoImports.union(
-        entry.value.materialImports,
-      );
+      final Set<File> crossImportsForLibrary = getAllCrossImportingFiles(entry.value);
 
       final Set<String> knownCrossImportsForLibrary = {
         for (final String element in entry.key.knownCrossImports)

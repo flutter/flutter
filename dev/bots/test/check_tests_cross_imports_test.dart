@@ -329,7 +329,64 @@ void main() {
       },
       skip: isCupertino(libraryName), // [intended]: Cupertino can import itself
     );
+
+    test('unknown $libraryName cross import of MaterialUI', () async {
+      final testDartFile = '$libraryName/foo_test.dart';
+
+      final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
+        libraryName,
+        flutterSlashTestDirectory: checker.flutterSlashTestDirectory,
+        flutterTestLibraryDirectory: checker.flutterTestLibraryDirectory,
+      );
+
+      buildKnownCrossImportTestFiles();
+      writeImportInFiles(
+        <String>{testDartFile},
+        inDirectory: testFilesDirectory,
+        importString: "import 'package:material_ui/material_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following test in $libraryName has a disallowed import of MaterialUI. Refactor it or move it to MaterialUI.',
+        '║   $testDartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
   }
+
+  // Regression test: Material may import Material but not material_ui. This
+  // used to trip the assertion in getImportError, because the error was
+  // reported as an import of Material rather than MaterialUI.
+  test('Material test importing material_ui reports MaterialUI without asserting', () async {
+    const testDartFile = 'packages/flutter/test/material/foo_test.dart';
+
+    buildKnownCrossImportTestFiles();
+    writeImportInFiles(
+      <String>{testDartFile},
+      inDirectory: checker.flutterSlashTestDirectory.childDirectory('material'),
+      importString: "import 'package:material_ui/material_ui.dart';",
+    );
+
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    }, shouldHaveErrors: true);
+    final String lines = <String>[
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+      '║ The following test in packages/flutter/test/material has a disallowed import of MaterialUI. Refactor it or move it to MaterialUI.',
+      '║   $testDartFile',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+    ].join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
 }
 
 /// Returns whether the given [libraryName] matches the Cupertino library under `flutter/test`.
