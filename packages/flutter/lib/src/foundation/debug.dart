@@ -1150,11 +1150,7 @@ void _debugNotifyViewMetricsOverrideChanged(
     if (accessibilityFeatures) (ui.PlatformDispatcher d) => d.onAccessibilityFeaturesChanged,
     if (before._viewMetrics != after._viewMetrics) (ui.PlatformDispatcher d) => d.onMetricsChanged,
   ];
-  // Pruned here rather than as dispatchers are wrapped, and iterated over a
-  // copy, because a callback is free to wrap another dispatcher.
-  _debugWrappedDispatchers.removeWhere(
-    (WeakReference<_DebugViewMetricsPlatformDispatcher> reference) => reference.target == null,
-  );
+  // Iterated over a copy, because a callback is free to wrap another dispatcher.
   for (final WeakReference<_DebugViewMetricsPlatformDispatcher> reference
       in _debugWrappedDispatchers.toList()) {
     final ui.PlatformDispatcher? dispatcher = reference.target?._dispatcher;
@@ -1282,8 +1278,9 @@ class _ViewPadding implements ui.ViewPadding {
 
 // The wrapper of each wrapped dispatcher, keyed by the dispatcher so that the
 // wrapper cannot outlive it. An Expando cannot be enumerated, so the wrappers
-// are also kept in a list, weakly and pruned as they die, because every one of
-// them is told when an override changes.
+// are also kept in a list, weakly, because every one of them is told when an
+// override changes; dead references are pruned whenever one is added, which
+// bounds the list by the number of live wrappers plus the ones that died since.
 final Expando<_DebugViewMetricsPlatformDispatcher> _debugDispatcherWrappers =
     Expando<_DebugViewMetricsPlatformDispatcher>();
 final List<WeakReference<_DebugViewMetricsPlatformDispatcher>> _debugWrappedDispatchers =
@@ -1297,7 +1294,11 @@ _DebugViewMetricsPlatformDispatcher _debugWrapDispatcher(ui.PlatformDispatcher d
   if (wrapper == null) {
     wrapper = _DebugViewMetricsPlatformDispatcher(dispatcher);
     _debugDispatcherWrappers[dispatcher] = wrapper;
-    _debugWrappedDispatchers.add(WeakReference<_DebugViewMetricsPlatformDispatcher>(wrapper));
+    _debugWrappedDispatchers
+      ..removeWhere(
+        (WeakReference<_DebugViewMetricsPlatformDispatcher> reference) => reference.target == null,
+      )
+      ..add(WeakReference<_DebugViewMetricsPlatformDispatcher>(wrapper));
   }
   return wrapper;
 }
