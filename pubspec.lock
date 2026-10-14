@@ -174,10 +174,10 @@ packages:
     dependency: transitive
     description:
       name: code_builder
-      sha256: aa5932e94c6c39c2f9ec4e5e06dfdd11a9430a61f6c41b6ba75b28ce0c481baf
+      sha256: "811709c1badd02fc054039a13f66e0db1961865f9a314175f68c3eaeebec786f"
       url: "https://pub.dev"
     source: hosted
-    version: "4.12.0"
+    version: "4.13.0"
   collection:
     dependency: "direct main"
     description:
@@ -318,10 +318,10 @@ packages:
     dependency: transitive
     description:
       name: dwds
-      sha256: "20a0a43cb5ad9d88eced1c6266c0395a69904701466c0bc4a6c3de24be1567dc"
+      sha256: b23d026f3f27d8446d9978836356a7025f32e9e8102a53143b86af53b7dad76e
       url: "https://pub.dev"
     source: hosted
-    version: "27.1.4"
+    version: "27.2.0"
   extension_discovery:
     dependency: transitive
     description:
@@ -1412,5 +1412,5 @@ packages:
     source: hosted
     version: "2.2.4"
 sdks:
-  dart: ">=3.13.0 <4.0.0"
+  dart: ">=3.14.0-286.0.dev <4.0.0"
   flutter: ">=3.47.0"

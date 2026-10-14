@@ -100,6 +100,7 @@ class BuildCommand extends FlutterCommand {
         androidBuilder: effectiveAndroidBuilder,
         androidContext: androidContext,
         buildSystem: buildSystem,
+        templateRenderer: templateRenderer,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
       ),

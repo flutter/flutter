@@ -253,6 +253,7 @@ struct RenderPassStateCache {
   BlendStateCache blend;
   StencilStateCache stencil;
   DepthStateCache depth;
+  SamplerStateCache sampler;
   std::optional<HandleGLES> program;
   CullMode cull_mode = CullMode::kNone;
   WindingOrder winding_order = WindingOrder::kClockwise;
@@ -681,7 +682,8 @@ void RenderPassGLES::ResetGLState(const ProcTableGLES& gl) {
             bound_textures,                            //
             bound_buffers,                             //
             /*texture_range=*/command.bound_textures,  //
-            /*buffer_range=*/command.bound_buffers     //
+            /*buffer_range=*/command.bound_buffers,    //
+            &state_cache.sampler                       //
             )) {
       return false;
     }
