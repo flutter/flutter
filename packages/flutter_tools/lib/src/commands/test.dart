@@ -22,7 +22,6 @@ import '../device.dart';
 import '../native_assets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
@@ -31,6 +30,7 @@ import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 import '../web/compile.dart';
 import '../web/web_constants.dart';
+import '../web/web_options.dart';
 
 /// The name of the directory where Integration Tests are placed.
 ///
@@ -74,25 +74,25 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterTestRunner? testRunner,
     this.testWrapper = const TestWrapper(),
     this.verbose = false,
-    bool verboseHelp = false,
+    super.verboseHelp = false,
   }) : _toolContext = toolContext,
        _testRunner = testRunner ?? FlutterTestRunner(toolContext: toolContext),
        super(toolContext: toolContext) {
     requiresPubspecYaml();
-    usesPubOption();
-    usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addEnableExperimentation(hide: !verboseHelp);
-    usesDartDefineOption();
-    usesDeviceUserOption();
-    usesFlavorOption();
-    addEnableImpellerFlag(verboseHelp: verboseHelp);
-    addMachineOutputFlag(verboseHelp: verboseHelp);
-    addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
-    addEnableHcppFlag(verboseHelp: verboseHelp);
-    usesDeprecatedJsInteropFlag(verboseHelp: verboseHelp);
+    enableUsesFatalWarnings();
+    registerOptionBundles(optionBundles);
 
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      BuildInfoOptions.frontendServerStarterPath,
+      BuildInfoOptions.trackWidgetCreation,
+      CommonOptions.enableExperiment,
+      CommonOptions.deviceUser,
+      DebuggingOptionDescriptors.enableImpeller,
+      CommonOptions.machine,
+      DebuggingOptionDescriptors.enableFlutterGpu,
+      DebuggingOptionDescriptors.enableHcpp,
+      WebOptions.deprecatedJsInterop,
+      CommonOptions.fatalWarnings,
       _experimentalFasterTesting,
       _name,
       _plainName,
@@ -126,10 +126,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       _crossOriginIsolation,
       _uninstall,
     ], verboseHelp: verboseHelp);
-
-    addDdsOptions(verboseHelp: verboseHelp);
-    usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
+
+  List<OptionBundle> get optionBundles => const <OptionBundle>[
+    PubOptionBundle(),
+    DartDefinesOptionsBundle(),
+    FlavorOptionBundle(),
+    DdsAndDevToolsOptionsBundle(includeDevTools: false),
+  ];
 
   static const _experimentalFasterTesting = FlagOptionDescriptor(
     name: 'experimental-faster-testing',
@@ -572,7 +576,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             : null,
         useWasm: useWasm,
       ),
-      printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+      printDtd: getValue(CommonOptions.printDtd),
       enableHcpp: explicitEnableHcpp,
       uninstallApp: getValue(_uninstall),
     );
@@ -772,7 +776,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ignoreTimeouts: getValue(_ignoreTimeouts),
       failFast: getValue(_failFast),
       integrationTestDevice: integrationTestDevice,
-      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
+      integrationTestUserIdentifier: getValue(CommonOptions.deviceUser),
       testTimeRecorder: testTimeRecorder,
       nativeAssetsBuilder: nativeAssetsBuilder,
     );
@@ -1019,4 +1023,40 @@ bool _shouldRunAsIntegrationTests(String currentDirectory, List<String> testFile
     ' Use separate invocations of `flutter test` to run integration tests'
     ' and unit tests.',
   );
+}
+
+/// A bundle encapsulating the pub option (`--[no-]pub`).
+class PubOptionBundle extends OptionBundle {
+  const PubOptionBundle();
+
+  @override
+  void onRegister(FlutterCommand command) {
+    command.enableUsesPubOption();
+  }
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
+    CommonOptions.pub,
+  ];
+}
+
+/// A bundle encapsulating Dart defines options (`--dart-define` and `--dart-define-from-file`).
+class DartDefinesOptionsBundle extends OptionBundle {
+  const DartDefinesOptionsBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
+    CommonOptions.dartDefines,
+    CommonOptions.dartDefineFromFile,
+  ];
+}
+
+/// A bundle encapsulating the flavor option (`--flavor`).
+class FlavorOptionBundle extends OptionBundle {
+  const FlavorOptionBundle();
+
+  @override
+  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
+    BuildInfoOptions.flavor,
+  ];
 }
