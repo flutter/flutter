@@ -217,7 +217,7 @@ public final class FlutterEngineFlags {
       new Flag("--isolate-snapshot-data=", "IsolateSnapshotData", true);
 
   /**
-   * Enables or disables Hybrid Composition++ and the SurfaceControl-backed swapchain.
+   * Enables or disables Hybrid Composition++.
    *
    * <p>Accepts {@code true} or {@code false}.
    *
