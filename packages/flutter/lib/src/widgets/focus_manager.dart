@@ -468,14 +468,11 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     )
     this.onKey,
     this.onKeyEvent,
-    bool skipTraversal = false,
-    bool canRequestFocus = true,
-    bool descendantsAreFocusable = true,
-    bool descendantsAreTraversable = true,
-  }) : _skipTraversal = skipTraversal,
-       _canRequestFocus = canRequestFocus,
-       _descendantsAreFocusable = descendantsAreFocusable,
-       _descendantsAreTraversable = descendantsAreTraversable {
+    this._skipTraversal = false,
+    this._canRequestFocus = true,
+    this._descendantsAreFocusable = true,
+    this._descendantsAreTraversable = true,
+  }) {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
 

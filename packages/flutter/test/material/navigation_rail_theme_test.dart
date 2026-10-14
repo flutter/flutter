@@ -43,11 +43,9 @@ void main() {
       expect(find.byType(NavigationIndicator), findsWidgets);
       expect(_indicatorDecoration(tester)?.color, theme.colorScheme.secondaryContainer);
       expect(_indicatorDecoration(tester)?.shape, const StadiumBorder());
-      final inkResponse =
-          tester.allWidgets.firstWhere(
-                (Widget object) => object.runtimeType.toString() == '_IndicatorInkWell',
-              )
-              as InkResponse;
+      final inkResponse = tester.allWidgets.firstWhere(
+        (Widget object) => object.runtimeType.toString() == '_IndicatorInkWell',
+      ) as InkResponse;
       expect(inkResponse.customBorder, const StadiumBorder());
     },
   );
