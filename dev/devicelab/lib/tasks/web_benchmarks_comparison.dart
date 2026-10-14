@@ -202,6 +202,13 @@ BenchmarkComparison compareResults({
 
 /// Formats the comparison results into a clean ANSI/ASCII table.
 ///
+/// The table starts with a header row naming the columns (`Metric`,
+/// `Baseline`, `Current`, `Delta` and `Status`), followed by a separator line
+/// of `-` characters and one row per metric. Columns are separated by two
+/// spaces and padded to the width of their widest cell or header: `Metric` and
+/// `Status` are left-aligned, while the numeric `Baseline`, `Current` and
+/// `Delta` columns are right-aligned. Lines have no trailing whitespace.
+///
 /// Rows are ordered alphabetically by metricKey (inherited from [comparison.metrics]).
 ///
 /// Missing or null numeric values (such as `baseline == null` for new metrics,
@@ -213,25 +220,55 @@ BenchmarkComparison compareResults({
 ///
 /// [enableAnsi] controls whether ANSI color/style escape codes are emitted.
 /// Set to `false` for plain ASCII output suitable for headless CI environments (LUCI / Cocoon)
-/// or log redirects.
+/// or log redirects. When enabled, only the status label is wrapped in color
+/// codes, and those codes are not counted towards column widths.
+///
+/// An empty [comparison.metrics] list produces an empty string (no header).
 String formatAnsiSummaryTable(BenchmarkComparison comparison, {bool enableAnsi = true}) {
-  final buffer = StringBuffer();
-  for (final MetricComparison m in comparison.metrics) {
-    final String baselineStr = m.baseline?.toStringAsFixed(1) ?? 'N/A';
-    final String currentStr = m.current?.toStringAsFixed(1) ?? 'N/A';
-    final deltaStr = m.deltaPercent == double.infinity
-        ? 'N/A'
-        : '${m.deltaPercent.toStringAsFixed(1)}%';
+  if (comparison.metrics.isEmpty) {
+    return '';
+  }
+  const header = <String>['Metric', 'Baseline', 'Current', 'Delta', 'Status'];
+  final rows = <List<String>>[
+    for (final MetricComparison m in comparison.metrics)
+      <String>[
+        m.metricKey,
+        m.baseline?.toStringAsFixed(1) ?? 'N/A',
+        m.current?.toStringAsFixed(1) ?? 'N/A',
+        if (m.deltaPercent == double.infinity) 'N/A' else '${m.deltaPercent.toStringAsFixed(1)}%',
+        if (m.isRegression) 'FAIL' else 'PASS',
+      ],
+  ];
+  final widths = <int>[
+    for (var column = 0; column < header.length; column++)
+      rows.fold<int>(
+        header[column].length,
+        (int width, List<String> row) => row[column].length > width ? row[column].length : width,
+      ),
+  ];
 
-    final statusStr = m.isRegression ? 'FAIL' : 'PASS';
+  // Pads the Metric column on the right and the numeric columns on the left.
+  // The Status column is last, so it is left unpadded.
+  String formatCells(List<String> cells, String status) => <String>[
+    cells[0].padRight(widths[0]),
+    cells[1].padLeft(widths[1]),
+    cells[2].padLeft(widths[2]),
+    cells[3].padLeft(widths[3]),
+    status,
+  ].join('  ');
 
+  final buffer = StringBuffer()
+    ..writeln(formatCells(header, header[4]))
+    ..writeln(widths.map((int width) => '-' * width).join('  '));
+  for (var i = 0; i < rows.length; i++) {
+    final List<String> row = rows[i];
+    String status = row[4];
     if (enableAnsi) {
-      final color = m.isRegression ? '\x1B[31m' : '\x1B[32m';
+      final color = comparison.metrics[i].isRegression ? '\x1B[31m' : '\x1B[32m';
       const reset = '\x1B[0m';
-      buffer.writeln('${m.metricKey} $baselineStr $currentStr $deltaStr $color$statusStr$reset');
-    } else {
-      buffer.writeln('${m.metricKey} $baselineStr $currentStr $deltaStr $statusStr');
+      status = '$color$status$reset';
     }
+    buffer.writeln(formatCells(row, status));
   }
   return buffer.toString();
 }
