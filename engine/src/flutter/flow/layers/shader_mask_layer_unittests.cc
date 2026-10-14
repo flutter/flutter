@@ -84,6 +84,7 @@ TEST_F(ShaderMaskLayerTest, EmptyFilter) {
   EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
 
   DlPaint filter_paint;
+  filter_paint.setAntiAlias(false);
   filter_paint.setBlendMode(DlBlendMode::kSrc);
   filter_paint.setColorSource(nullptr);
 
@@ -129,6 +130,7 @@ TEST_F(ShaderMaskLayerTest, SimpleFilter) {
   EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
 
   DlPaint filter_paint;
+  filter_paint.setAntiAlias(false);
   filter_paint.setBlendMode(DlBlendMode::kSrc);
   filter_paint.setColorSource(dl_filter);
 
@@ -185,6 +187,7 @@ TEST_F(ShaderMaskLayerTest, MultipleChildren) {
   EXPECT_EQ(mock_layer2->parent_matrix(), initial_transform);
 
   DlPaint filter_paint;
+  filter_paint.setAntiAlias(false);
   filter_paint.setBlendMode(DlBlendMode::kSrc);
   filter_paint.setColorSource(dl_filter);
 
@@ -251,6 +254,8 @@ TEST_F(ShaderMaskLayerTest, Nested) {
   EXPECT_EQ(mock_layer2->parent_matrix(), initial_transform);
 
   DlPaint filter_paint1, filter_paint2;
+  filter_paint1.setAntiAlias(false);
+  filter_paint2.setAntiAlias(false);
   filter_paint1.setBlendMode(DlBlendMode::kSrc);
   filter_paint2.setBlendMode(DlBlendMode::kSrc);
   filter_paint1.setColorSource(dl_filter1);
@@ -401,8 +406,9 @@ TEST_F(ShaderMaskLayerTest, OpacityInheritance) {
             expected_builder.DrawPath(child_path, DlPaint());
           }
           expected_builder.Translate(mask_rect.GetLeft(), mask_rect.GetTop());
-          expected_builder.DrawRect(DlRect::MakeSize(mask_rect.GetSize()),
-                                    DlPaint().setBlendMode(DlBlendMode::kSrc));
+          expected_builder.DrawRect(
+              DlRect::MakeSize(mask_rect.GetSize()),
+              DlPaint().setAntiAlias(false).setBlendMode(DlBlendMode::kSrc));
         }
         expected_builder.Restore();
       }
@@ -432,6 +438,7 @@ TEST_F(ShaderMaskLayerTest, SimpleFilterWithRasterCacheLayerNotCached) {
   layer->Preroll(preroll_context());
 
   DlPaint filter_paint;
+  filter_paint.setAntiAlias(false);
   filter_paint.setBlendMode(DlBlendMode::kSrc);
   filter_paint.setColorSource(dl_filter);
 
