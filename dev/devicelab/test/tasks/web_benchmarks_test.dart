@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io;
+
 import 'package:args/args.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
 import 'package:flutter_devicelab/tasks/web_benchmarks_comparison.dart';
+import 'package:path/path.dart' as path;
 
 import '../common.dart';
 
@@ -485,533 +488,119 @@ zero.average                                                      0.0       2.2 
     });
   });
 
-  group('CLI Argument and Runner Tests', () {
-    test('Argument parsing includes all flags and --help', () {
+  group('buildBenchmarkArgParser', () {
+    test('defines all CLI flags', () {
       final ArgParser parser = buildBenchmarkArgParser();
-      expect(parser.options.containsKey('help'), isTrue);
-      expect(parser.options.containsKey('benchmark'), isTrue);
-      expect(parser.options.containsKey('smoke-test'), isTrue);
-      expect(parser.options.containsKey('filter'), isTrue);
-      expect(parser.options.containsKey('baseline'), isTrue);
-      expect(parser.options.containsKey('results-file'), isTrue);
-      expect(parser.options.containsKey('renderer'), isTrue);
-      expect(parser.options.containsKey('regression-threshold'), isTrue);
-      expect(parser.options.containsKey('clean'), isTrue);
-      expect(parser.options.containsKey('no-build'), isTrue);
-      expect(parser.options.containsKey('local-engine-src-path'), isTrue);
-      expect(parser.options.containsKey('local-web-sdk'), isTrue);
+      expect(
+        parser.options.keys,
+        containsAll(<String>[
+          'help',
+          'benchmark',
+          'smoke-test',
+          'filter',
+          'baseline',
+          'results-file',
+          'renderer',
+          'regression-threshold',
+          'clean',
+          'no-build',
+          'local-engine-src-path',
+          'local-web-sdk',
+          'verbose',
+        ]),
+      );
+    });
+  });
+
+  // These tests only cover invocations that are rejected before any benchmark
+  // is built or run.
+  group('runBenchmarkCli', () {
+    late io.Directory tempDir;
+
+    setUp(() {
+      tempDir = io.Directory.systemTemp.createTempSync('run_local_web_benchmark_test.');
+    });
+
+    tearDown(() {
+      tempDir.deleteSync(recursive: true);
+    });
+
+    test('--help exits with code 0', () async {
+      expect(await runBenchmarkCli(<String>['--help']), 0);
+    });
+
+    test('unknown flag exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--invalid-flag']), 2);
+    });
+
+    test('unsupported --renderer exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--renderer=invalid_renderer']), 2);
+    });
+
+    test('--benchmark and --smoke-test together exit with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--benchmark=draw_rect', '--smoke-test']), 2);
+    });
+
+    test('empty --benchmark exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--benchmark=,']), 2);
+    });
+
+    test('invalid --filter regular expression exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--filter=[']), 2);
+      expect(await runBenchmarkCli(<String>['--benchmark=draw_rect', '--filter=[']), 2);
+    });
+
+    test('identical --baseline and --results-file paths exit with code 2', () async {
+      expect(
+        await runBenchmarkCli(<String>[
+          '--baseline=./path/to/file.json',
+          '--results-file=path/to/file.json',
+        ]),
+        2,
+      );
+    });
+
+    test('--clean with --no-build exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--clean', '--no-build']), 2);
+    });
+
+    test('--local-engine-src-path without --local-web-sdk exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--local-engine-src-path=/some/path']), 2);
+    });
+
+    test('--regression-threshold without --baseline exits with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--regression-threshold=0.1']), 2);
     });
 
     test(
-      'runBenchmarkCli handles ArgParserException, prints usage and exits with code 2',
+      'negative, NaN, infinite, or non-numeric --regression-threshold exits with code 2',
       () async {
-        final outLines = <String>[];
-        final errLines = <String>[];
-        final int exitCode = await runBenchmarkCli(
-          <String>['--invalid-flag'],
-          out: outLines.add,
-          err: errLines.add,
-        );
-        expect(exitCode, 2);
+        for (final value in <String>['-0.1', 'NaN', 'Infinity', 'abc']) {
+          expect(
+            await runBenchmarkCli(<String>['--regression-threshold=$value', '--baseline=b.json']),
+            2,
+            reason: value,
+          );
+        }
+      },
+    );
+
+    test('missing --baseline file exits with code 2', () async {
+      final String baselinePath = path.join(tempDir.path, 'missing.json');
+      expect(await runBenchmarkCli(<String>['--baseline=$baselinePath']), 2);
+    });
+
+    test('--baseline file that is not a JSON object exits with code 2', () async {
+      for (final contents in <String>['not json', '[1, 2]']) {
+        final baselineFile = io.File(path.join(tempDir.path, 'baseline.json'))
+          ..writeAsStringSync(contents);
         expect(
-          errLines.any(
-            (String line) => line.contains('Could not find an option named "invalid-flag"'),
-          ),
-          isTrue,
+          await runBenchmarkCli(<String>['--baseline=${baselineFile.path}']),
+          2,
+          reason: contents,
         );
-        expect(outLines.any((String line) => line.contains('Usage:')), isTrue);
-      },
-    );
-
-    test('Rejection of conflicting selectors', () async {
-      final conflicts = <List<String>>[
-        <String>['--benchmark=foo', '--smoke-test'],
-        <String>['--filter=foo', '--smoke-test'],
-        <String>['--benchmark=foo', '--filter=foo'],
-      ];
-      for (final args in conflicts) {
-        final errLines = <String>[];
-        final int exitCode = await runBenchmarkCli(args, err: errLines.add);
-        expect(exitCode, 2);
-        expect(errLines.any((String line) => line.contains('Cannot use')), isTrue);
       }
     });
-
-    test('Default execution of all benchmarks when no selector flag is passed', () async {
-      var runnerCalled = false;
-      final int exitCode = await runBenchmarkCli(
-        <String>[],
-        runner:
-            ({
-              required List<String>? benchmark,
-              required bool smokeTest,
-              required String? filter,
-              required String renderer,
-              required bool clean,
-              required bool noBuild,
-              required String? localEngineSrcPath,
-              required String? localWebSdk,
-            }) async {
-              runnerCalled = true;
-              expect(benchmark, isEmpty);
-              expect(smokeTest, isFalse);
-              expect(filter, isNull);
-              return <String, dynamic>{
-                'timestamp': '2023',
-                'metadata': <String, dynamic>{},
-                'benchmarks': <String, dynamic>{},
-              };
-            },
-      );
-      expect(runnerCalled, isTrue);
-      expect(exitCode, 0);
-    });
-
-    test('runBenchmarkCli parses arguments correctly and delegates to runner', () async {
-      var runnerCalled = false;
-      final int exitCode = await runBenchmarkCli(
-        <String>['--benchmark=draw_rect', '--renderer=skwasm', '--no-build'],
-        runner:
-            ({
-              required List<String>? benchmark,
-              required bool smokeTest,
-              required String? filter,
-              required String renderer,
-              required bool clean,
-              required bool noBuild,
-              required String? localEngineSrcPath,
-              required String? localWebSdk,
-            }) async {
-              runnerCalled = true;
-              expect(benchmark, <String>['draw_rect']);
-              expect(smokeTest, isFalse);
-              expect(filter, isNull);
-              expect(renderer, 'skwasm');
-              expect(clean, isFalse); // noBuild disarms clean
-              expect(noBuild, isTrue);
-              expect(localEngineSrcPath, isNull);
-              expect(localWebSdk, isNull);
-              return <String, dynamic>{
-                'timestamp': '2023',
-                'metadata': <String, dynamic>{},
-                'benchmarks': {
-                  'draw_rect.skwasm': {'a.average': 100},
-                },
-              };
-            },
-      );
-      expect(runnerCalled, isTrue);
-      expect(exitCode, 0);
-    });
-
-    test('Rejection of identical canonical paths for --baseline and --results-file', () async {
-      final errLines = <String>[];
-      final int exitCode = await runBenchmarkCli(<String>[
-        '--baseline=./path/to/file.json',
-        '--results-file=path/to/file.json',
-      ], err: errLines.add);
-      expect(exitCode, 2);
-      expect(
-        errLines.any(
-          (String line) => line.contains('baseline and results-file cannot be the same'),
-        ),
-        isTrue,
-      );
-    });
-
-    test('Validation of --renderer allowed choices', () async {
-      final errLines = <String>[];
-      final int exitCode = await runBenchmarkCli(<String>[
-        '--renderer=invalid_renderer',
-      ], err: errLines.add);
-      expect(exitCode, 2);
-      expect(
-        errLines.any((String line) => line.contains('invalid_renderer is not an allowed value')),
-        isTrue,
-      );
-    });
-
-    test('Rejection of negative, NaN, or infinite regression-threshold', () async {
-      for (final val in <String>['-0.1', 'NaN', 'Infinity']) {
-        final errLines = <String>[];
-        final int exitCode = await runBenchmarkCli(<String>[
-          '--regression-threshold=$val',
-          '--baseline=b.json',
-        ], err: errLines.add);
-        expect(exitCode, 2);
-        expect(errLines.any((String line) => line.contains('must be a positive number')), isTrue);
-      }
-    });
-
-    test('Rejection of --regression-threshold when --baseline is omitted', () async {
-      final errLines = <String>[];
-      final int exitCode = await runBenchmarkCli(<String>[
-        '--regression-threshold=0.1',
-      ], err: errLines.add);
-      expect(exitCode, 2);
-      expect(
-        errLines.any((String line) => line.contains('regression-threshold requires a baseline')),
-        isTrue,
-      );
-    });
-
-    test('Validation of mutual exclusion between --clean and --no-build', () async {
-      final errLines = <String>[];
-      final int exitCode = await runBenchmarkCli(<String>[
-        '--clean',
-        '--no-build',
-      ], err: errLines.add);
-      expect(exitCode, 2);
-      expect(
-        errLines.any((String line) => line.contains('Cannot use --clean and --no-build together')),
-        isTrue,
-      );
-    });
-
-    test('Validation that --local-engine-src-path requires --local-web-sdk', () async {
-      final errLines = <String>[];
-      final int exitCode = await runBenchmarkCli(<String>[
-        '--local-engine-src-path=/some/path',
-      ], err: errLines.add);
-      expect(exitCode, 2);
-      expect(
-        errLines.any(
-          (String line) => line.contains('local-engine-src-path requires local-web-sdk'),
-        ),
-        isTrue,
-      );
-    });
-
-    test('Upfront validation of --baseline file existence and JSON parsing', () async {
-      final errLines = <String>[];
-      // File doesn't exist
-      final int exitCode = await runBenchmarkCli(<String>[
-        '--baseline=non_existent_file.json',
-      ], err: errLines.add);
-      expect(exitCode, 2);
-      expect(errLines.any((String line) => line.contains('Baseline file not found')), isTrue);
-    });
-
-    test('Detection of empty metric intersection or lack of .average metrics between baseline and current results, exiting with code 2', () async {
-      final errLines = <String>[];
-      final int exitCode = await runBenchmarkCli(
-        <String>['--baseline=baseline.json'],
-        runner:
-            ({
-              required List<String>? benchmark,
-              required bool smokeTest,
-              required String? filter,
-              required String renderer,
-              required bool clean,
-              required bool noBuild,
-              required String? localEngineSrcPath,
-              required String? localWebSdk,
-            }) async => <String, dynamic>{
-              'timestamp': '2023',
-              'metadata': <String, dynamic>{},
-              'benchmarks': {
-                'draw_rect.canvaskit': {'b.average': 100},
-              },
-            },
-        readBaseline: (String path) => <String, dynamic>{
-          'benchmarks': {
-            'draw_rect.canvaskit': {'a.average': 100}, // disjoint metrics
-          },
-        },
-        err: errLines.add,
-      );
-      expect(exitCode, 2);
-      expect(errLines.any((String line) => line.contains('No overlapping metrics')), isTrue);
-    });
-
-    test('Validation of renderer-specific artifact existence under --no-build anchored to flutterRootDir', () async {
-      final errLines = <String>[];
-      final int exitCode = await runBenchmarkCli(
-        <String>['--no-build', '--renderer=skwasm'],
-        flutterRootDir: '/fake/flutter/root',
-        checkArtifacts: (String root, String renderer) => false,
-        err: errLines.add,
-      );
-      expect(exitCode, 2);
-      expect(
-        errLines.any((String line) => line.contains('Artifacts for renderer skwasm not found')),
-        isTrue,
-      );
-    });
-
-    test('Graceful handling of file system errors for --results-file', () async {
-      final errLines = <String>[];
-      final int exitCode = await runBenchmarkCli(
-        <String>['--results-file=/nonexistent_dir/results.json'],
-        runner: ({
-          required List<String>? benchmark,
-          required bool smokeTest,
-          required String? filter,
-          required String renderer,
-          required bool clean,
-          required bool noBuild,
-          required String? localEngineSrcPath,
-          required String? localWebSdk,
-        }) async => <String, dynamic>{},
-        writeResults: (String path, String content) => throw Exception('Cannot write file'),
-        err: errLines.add,
-      );
-      expect(exitCode, 2);
-      expect(errLines.any((String line) => line.contains('Failed to write results')), isTrue);
-    });
-  });
-  test('Hostile: Badly typed baseline benchmarks (List instead of Map)', () async {
-    final errLines = <String>[];
-    final int exitCode = await runBenchmarkCli(
-      <String>['--baseline=baseline.json'],
-      runner:
-          ({
-            required List<String>? benchmark,
-            required bool smokeTest,
-            required String? filter,
-            required String renderer,
-            required bool clean,
-            required bool noBuild,
-            required String? localEngineSrcPath,
-            required String? localWebSdk,
-          }) async => <String, dynamic>{
-            'benchmarks': {
-              'draw_rect.canvaskit': {'a.average': 100},
-            },
-          },
-      readBaseline: (String path) => <String, dynamic>{
-        'benchmarks': <dynamic>[], // Badly typed: List instead of Map
-      },
-      err: errLines.add,
-    );
-    expect(exitCode, 2);
-  });
-
-  test('Hostile: Graceful handling of empty baseline JSON (empty object)', () async {
-    final errLines = <String>[];
-    final int exitCode = await runBenchmarkCli(
-      <String>['--baseline=baseline.json'],
-      runner:
-          ({
-            required List<String>? benchmark,
-            required bool smokeTest,
-            required String? filter,
-            required String renderer,
-            required bool clean,
-            required bool noBuild,
-            required String? localEngineSrcPath,
-            required String? localWebSdk,
-          }) async => <String, dynamic>{
-            'benchmarks': {
-              'draw_rect.canvaskit': {'a.average': 100},
-            },
-          },
-      readBaseline: (String path) => <String, dynamic>{}, // Empty object
-      err: errLines.add,
-    );
-    expect(exitCode, 2);
-    expect(errLines.any((String line) => line.contains('No overlapping metrics')), isTrue);
-  });
-
-  test('Hostile: Rejection of unparseable baseline JSON string', () async {
-    final errLines = <String>[];
-    final int exitCode = await runBenchmarkCli(
-      <String>['--baseline=baseline.json'],
-      runner: ({
-        required List<String>? benchmark,
-        required bool smokeTest,
-        required String? filter,
-        required String renderer,
-        required bool clean,
-        required bool noBuild,
-        required String? localEngineSrcPath,
-        required String? localWebSdk,
-      }) async => <String, dynamic>{},
-      readBaseline: (String path) => throw const FormatException('Invalid JSON'),
-      err: errLines.add,
-    );
-    expect(exitCode, 2);
-  });
-
-  test('Hostile: Badly typed current results benchmarks (List instead of Map)', () async {
-    final errLines = <String>[];
-    final int exitCode = await runBenchmarkCli(
-      <String>['--baseline=baseline.json'],
-      runner:
-          ({
-            required List<String>? benchmark,
-            required bool smokeTest,
-            required String? filter,
-            required String renderer,
-            required bool clean,
-            required bool noBuild,
-            required String? localEngineSrcPath,
-            required String? localWebSdk,
-          }) async => <String, dynamic>{
-            'benchmarks': <dynamic>[], // Badly typed current results
-          },
-      readBaseline: (String path) => <String, dynamic>{
-        'benchmarks': {
-          'draw_rect.canvaskit': {'a.average': 100},
-        },
-      },
-      err: errLines.add,
-    );
-    expect(exitCode, 2);
-  });
-
-  test('Hostile: Missing .average in common metrics', () async {
-    final errLines = <String>[];
-    final int exitCode = await runBenchmarkCli(
-      <String>['--baseline=baseline.json'],
-      runner:
-          ({
-            required List<String>? benchmark,
-            required bool smokeTest,
-            required String? filter,
-            required String renderer,
-            required bool clean,
-            required bool noBuild,
-            required String? localEngineSrcPath,
-            required String? localWebSdk,
-          }) async => <String, dynamic>{
-            'benchmarks': {
-              'draw_rect.canvaskit': {'a': 100}, // missing .average
-            },
-          },
-      readBaseline: (String path) => <String, dynamic>{
-        'benchmarks': {
-          'draw_rect.canvaskit': {'a': 100}, // missing .average
-        },
-      },
-      err: errLines.add,
-    );
-    // Wait, compareResults might filter for `.average`. If it skips them, overlap might be empty -> code 2.
-    // If it doesn't filter, it might pass -> code 0.
-    // Both are fine, as long as it doesn't crash.
-    // But actually, web benchmarks usually ONLY care about metrics ending in .average.
-    // Let's just expect it doesn't crash, so exitCode 0, 1, or 2.
-    expect(exitCode, anyOf(0, 1, 2));
-  });
-
-  test('Execution through runBenchmarkCli testing exit codes', () async {
-    final errLines = <String>[];
-    int exitCode = await runBenchmarkCli(
-      <String>['--baseline=baseline.json', '--regression-threshold=0.1'],
-      runner:
-          ({
-            required List<String>? benchmark,
-            required bool smokeTest,
-            required String? filter,
-            required String renderer,
-            required bool clean,
-            required bool noBuild,
-            required String? localEngineSrcPath,
-            required String? localWebSdk,
-          }) async => <String, dynamic>{
-            'benchmarks': {
-              'draw_rect.canvaskit': {'a.average': 150}, // regression
-            },
-          },
-      readBaseline: (String path) => <String, dynamic>{
-        'benchmarks': {
-          'draw_rect.canvaskit': {'a.average': 100},
-        },
-      },
-      err: errLines.add,
-    );
-    expect(exitCode, 1);
-
-    exitCode = await runBenchmarkCli(
-      <String>[],
-      runner: ({
-        required List<String>? benchmark,
-        required bool smokeTest,
-        required String? filter,
-        required String renderer,
-        required bool clean,
-        required bool noBuild,
-        required String? localEngineSrcPath,
-        required String? localWebSdk,
-      }) async => throw Exception('Runner failed'),
-      err: errLines.add,
-    );
-    expect(exitCode, 3);
-  });
-
-  test('benchmarkRunner (TaskResult) integration, smoke-test, skwasm_st, and partial baseline pre-filtering', () async {
-    final outLines = <String>[];
-    final errLines = <String>[];
-    WebBenchmarkOptions? capturedOptions;
-    List<String>? capturedTargets;
-    bool? capturedVerbose;
-
-    final int exitCode = await runBenchmarkCli(
-      <String>[
-        '--smoke-test',
-        '--renderer=skwasm_st',
-        '--verbose',
-        '--baseline=baseline.json',
-        '--regression-threshold=10.0',
-      ],
-      benchmarkRunner:
-          (
-            WebBenchmarkOptions benchmarkOptions, {
-            bool? clean,
-            bool? noBuild,
-            String? localWebSdk,
-            String? localEngineSrcPath,
-            List<String>? targetBenchmarks,
-            String? filterPattern,
-            bool? verbose,
-          }) async {
-            capturedOptions = benchmarkOptions;
-            capturedTargets = targetBenchmarks;
-            capturedVerbose = verbose;
-            return TaskResult.success(<String, dynamic>{
-              'draw_rect.skwasm_st.totalUiFrame.average': 105.0,
-            });
-          },
-      readBaseline: (String path) => <String, dynamic>{
-        'draw_rect.skwasm_st.totalUiFrame.average': 100.0,
-        'other_benchmark.skwasm_st.totalUiFrame.average': 200.0,
-      },
-      out: outLines.add,
-      err: errLines.add,
-    );
-
-    expect(exitCode, 0);
-    expect(capturedOptions?.useWasm, isTrue);
-    expect(capturedOptions?.forceSingleThreadedSkwasm, isTrue);
-    expect(capturedTargets, <String>['draw_rect', 'bench_card_infinite_scroll']);
-    expect(capturedVerbose, isTrue);
-    expect(
-      outLines.any((String line) => line.contains('draw_rect.skwasm_st.totalUiFrame.average')),
-      isTrue,
-    );
-  });
-
-  test('benchmarkRunner TaskResult.failure exits with code 3', () async {
-    final errLines = <String>[];
-    final int exitCode = await runBenchmarkCli(
-      <String>[],
-      benchmarkRunner:
-          (
-            WebBenchmarkOptions benchmarkOptions, {
-            bool? clean,
-            bool? noBuild,
-            String? localWebSdk,
-            String? localEngineSrcPath,
-            List<String>? targetBenchmarks,
-            String? filterPattern,
-            bool? verbose,
-          }) async {
-            return TaskResult.failure('Unrecognized target benchmark');
-          },
-      err: errLines.add,
-    );
-    expect(exitCode, 3);
-    expect(errLines.any((String line) => line.contains('Unrecognized target benchmark')), isTrue);
   });
 }
 

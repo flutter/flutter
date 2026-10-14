@@ -6,10 +6,6 @@ import 'dart:io' as io;
 
 import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
 
-export 'package:flutter_devicelab/tasks/web_benchmarks.dart'
-    show BenchmarkRunner, buildBenchmarkArgParser, runBenchmarkCli;
-
 Future<void> main(List<String> args) async {
-  final int exitCode = await runBenchmarkCli(args);
-  io.exit(exitCode);
+  io.exit(await runBenchmarkCli(args));
 }
