@@ -77,22 +77,20 @@ class WebDriverService extends DriverService {
       userIdentifier: userIdentifier,
     );
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
+    final webConfig = WebDebugConfig(
+      devServerConfig: debuggingOptions.webConfig.devServerConfig,
+      renderer: debuggingOptions.webConfig.renderer,
+      useWasm: debuggingOptions.webConfig.useWasm,
+    );
     _residentRunner = webRunnerFactory!.createWebRunner(
       flutterDevice,
       target: mainPath,
       debuggingOptions: buildInfo.isRelease
-          ? DebuggingOptions.disabled(
-              buildInfo,
-              webDevServerConfig: debuggingOptions.webDevServerConfig,
-              webRenderer: debuggingOptions.webRenderer,
-              webUseWasm: debuggingOptions.webUseWasm,
-            )
+          ? DebuggingOptions.disabled(buildInfo, webConfig: webConfig)
           : DebuggingOptions.enabled(
               buildInfo,
-              webDevServerConfig: debuggingOptions.webDevServerConfig,
               disablePortPublication: debuggingOptions.disablePortPublication,
-              webRenderer: debuggingOptions.webRenderer,
-              webUseWasm: debuggingOptions.webUseWasm,
+              webConfig: webConfig,
             ),
       platformArgs: platformArgs,
       stayResident: true,
@@ -136,9 +134,9 @@ class WebDriverService extends DriverService {
       throwToolExit('Unable to connect to the app. URL not available.');
     }
 
-    if (debuggingOptions.webLaunchUrl != null) {
+    if (debuggingOptions.webConfig.launchUrl case final String launchUrl) {
       // It should throw an error if the provided url is invalid so no tryParse
-      _webUri = Uri.parse(debuggingOptions.webLaunchUrl!);
+      _webUri = Uri.parse(launchUrl);
     } else {
       _webUri = _residentRunner.uri;
     }
