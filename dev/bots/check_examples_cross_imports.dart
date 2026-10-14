@@ -621,6 +621,8 @@ class ExamplesCrossImportChecker {
     'examples/multiple_windows/lib/app/dialog_window_edit_dialog.dart',
     'examples/multiple_windows/lib/app/tooltip_button.dart',
     'examples/multiple_windows/lib/app/tooltip_window_content.dart',
+    'examples/multiple_windows/lib/app/satellite_window_content.dart',
+    'examples/multiple_windows/lib/app/satellite_window_edit_dialog.dart',
     'examples/platform_channel/lib/main.dart',
     'examples/platform_channel_swift/lib/main.dart',
     'examples/platform_view/lib/main.dart',
