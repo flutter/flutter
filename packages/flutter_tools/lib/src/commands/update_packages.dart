@@ -35,20 +35,20 @@ typedef _ProjectDeps = ({FlutterProject project, ResolvedDependencies deps});
 /// A command to update internal dependencies across Flutter packages.
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand({
-    required this._toolContext,
+    required ToolContext toolContext,
     required super.verboseHelp,
     @visibleForTesting this._httpClientFactory,
     @visibleForTesting Pub? pub,
   }) : _pub =
            pub ??
            Pub(
-             botDetector: _toolContext.botDetector,
-             fileSystem: _toolContext.fs,
-             logger: _toolContext.logger,
-             platform: _toolContext.platform,
-             processManager: _toolContext.processManager,
+             botDetector: toolContext.botDetector,
+             fileSystem: toolContext.fs,
+             logger: toolContext.logger,
+             platform: toolContext.platform,
+             processManager: toolContext.processManager,
            ),
-       super(toolContext: _toolContext) {
+       super(toolContext: toolContext) {
     argParser
       ..addFlag(
         _keyForceUpgrade,
@@ -91,10 +91,9 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   final HttpClientFactory? _httpClientFactory;
   final Pub _pub;
-  final ToolContext _toolContext;
 
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   final _keyForceUpgrade = 'force-upgrade';
   final _keyUpdateHashes = 'update-hashes';
@@ -124,12 +123,12 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   late final _net = Net(
     httpClientFactory: _httpClientFactory,
-    logger: _toolContext.logger,
-    platform: _toolContext.platform,
+    logger: toolContext.logger,
+    platform: toolContext.platform,
   );
 
   Future<void> _downloadCoverageData() async {
-    final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
+    final ToolContext(:FileSystem fs, :Platform platform) = toolContext;
     final String urlBase =
         platform.environment[kFlutterStorageBaseUrl] ?? 'https://storage.googleapis.com';
     final Uri coverageUri = Uri.parse('$urlBase/flutter_infra_release/flutter/coverage/lcov.info');
@@ -149,7 +148,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+        toolContext;
     // Add the root directory to the list of packages, to capture the workspace
     // `pubspec.yaml`.
     final Directory rootDirectory = fs.directory(fs.path.absolute(Cache.flutterRoot!));
@@ -280,7 +279,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     List<PackageVersion>? pinned,
   }) async {
     final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+        toolContext;
     final Map<String, String> pinnedDeps;
     if (forceUpgrade) {
       logger.printStatus('Upgrading packages versions...');
@@ -461,7 +460,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   void _verifyPubspecs(List<Directory> packages) {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     logger.printStatus('Verifying pubspecs...');
     for (final directory in packages) {
       logger.printTrace('Reading pubspec.yaml from ${directory.path}');
@@ -532,7 +531,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 
   void _writeHashesToPubspecs(List<Directory> packages) {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     logger.printStatus('Writing hashes to pubspecs...');
     for (final directory in packages) {
       logger.printTrace('Reading pubspec.yaml from ${directory.path}');
