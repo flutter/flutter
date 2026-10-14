@@ -6,7 +6,7 @@
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//engine/src/flutter/build/bazel/dart:kernel.bzl", "SOURCE_URI_SCHEME", _dart_kernel = "dart_kernel")
 load("//engine/src/flutter/build/bazel/dart:snapshot.bzl", "aot_snapshot")
@@ -389,5 +389,83 @@ def flutter_gpu_test_backends(name, visibility = None):
         name = name,
         srcs = copies,
         testonly = True,
+        visibility = visibility,
+    )
+
+# ---------------------------------------------------------------------------
+# Suites that open a window
+# ---------------------------------------------------------------------------
+
+def _display_test_impl(ctx):
+    # The test's working directory is the runfiles tree's main repository,
+    # under `bazel test` and `bazel run` alike, so short paths resolve as
+    # they are.
+    launcher = ctx.actions.declare_file(ctx.label.name + ".sh")
+    ctx.actions.write(
+        output = launcher,
+        content = "#!/bin/bash\nexec \"%s\" \"%s\" \"$@\"\n" % (ctx.file._wrapper.short_path, ctx.executable.binary.short_path),
+        is_executable = True,
+    )
+    runfiles = ctx.runfiles(files = [ctx.file._wrapper, ctx.executable.binary] + ctx.files.data)
+    runfiles = runfiles.merge(ctx.attr.binary[DefaultInfo].default_runfiles)
+    for target in ctx.attr.data:
+        runfiles = runfiles.merge(target[DefaultInfo].default_runfiles)
+    return [DefaultInfo(executable = launcher, runfiles = runfiles)]
+
+_display_test = rule(
+    implementation = _display_test_impl,
+    test = True,
+    doc = "Runs a test binary under a display (testing/xvfb_run.sh): the suite's own Xvfb unless DISPLAY is set.",
+    attrs = {
+        "binary": attr.label(
+            mandatory = True,
+            executable = True,
+            cfg = "target",
+            doc = "The test binary.",
+        ),
+        "data": attr.label_list(
+            allow_files = True,
+            doc = "Runfiles of the test, besides the binary's.",
+        ),
+        "_wrapper": attr.label(
+            default = "//engine/src/flutter/testing:xvfb_run.sh",
+            allow_single_file = True,
+        ),
+    },
+)
+
+def flutter_display_test(name, size = None, timeout = None, args = [], data = [], tags = [], visibility = None, **kwargs):
+    """A test suite that opens a window: the Impeller playground's (GLFW on X11).
+
+    testing/run_tests.py starts an Xvfb for the Linux suites; here the binary
+    is a cc_binary (`<name>_binary`, in this package, so that the GPU test
+    backends copied beside it are found) and the test target runs it
+    through testing/xvfb_run.sh, which uses the environment's DISPLAY or
+    starts an Xvfb of its own.
+
+    Args:
+      name: name of the test; the binary is `<name>_binary`.
+      size: the test's size.
+      timeout: the test's timeout.
+      args: arguments of the binary.
+      data: runfiles of the test.
+      tags: tags of the test.
+      visibility: visibility of the test.
+      **kwargs: the binary's attributes (cc_test's: srcs, deps, copts, ...).
+    """
+    cc_binary(
+        name = name + "_binary",
+        testonly = True,
+        visibility = ["//visibility:private"],
+        **kwargs
+    )
+    _display_test(
+        name = name,
+        binary = ":" + name + "_binary",
+        size = size,
+        timeout = timeout,
+        args = args,
+        data = data,
+        tags = tags,
         visibility = visibility,
     )
