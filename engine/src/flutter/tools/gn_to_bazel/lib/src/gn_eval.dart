@@ -1606,6 +1606,22 @@ final class _Evaluator {
         if (args.length != 2 || _stringExpression(args[1], scope) != 'abspath') {
           throw GnError(node.location, 'only get_path_info(path, "abspath") is supported');
         }
+        // A list of paths gives the list of their results, as in GN.
+        final _Expression input = _expression(args[0], scope);
+        if (input.isList) {
+          return _Expression(<_Value>[
+            for (final _Value item in input.items)
+              if (item.value case GnStringValue(:final String value))
+                _Value(
+                  GnStringValue(_absolutePath(value, node)),
+                  item.comments,
+                  condition: item.condition,
+                  sourceConditions: item.sourceConditions,
+                )
+              else
+                throw GnError(node.location, 'get_path_info() of a list of ${item.value}'),
+          ], isList: true);
+        }
         return _Expression.scalar(
           GnStringValue(_absolutePath(_stringExpression(args[0], scope), node)),
         );

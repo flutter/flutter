@@ -176,7 +176,7 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    the targets it defines are ordinary targets (the first one named
    `target_name` takes the invocation's comments). `forward_variables_from`,
    `target(type, name)`, scope values (`x.member`, `defined(x.member)`),
-   `get_path_info(p, "abspath")`, short-circuit `&&`/`||` and integer
+   `get_path_info(p, "abspath")` (of a path or a list of them), short-circuit `&&`/`||` and integer
    comparisons are understood; `rebase_path()` and `exec_script()` yield
    opaque values that are an error only if they reach the output. `+=` and
    `-=` on a variable of an enclosing scope (a template body appending to a
