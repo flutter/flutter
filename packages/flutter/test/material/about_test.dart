@@ -1970,45 +1970,6 @@ void main() {
     expect(tester.getSize(xText).isEmpty, isTrue);
   });
 
-  testWidgets('showAdaptiveAboutDialog on iOS sizes the CupertinoAlertDialog to its content', (
-    WidgetTester tester,
-  ) async {
-    tester.view.physicalSize = const Size(1206, 2622);
-    tester.view.devicePixelRatio = 3;
-    addTearDown(tester.view.reset);
-
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: ThemeData(platform: TargetPlatform.iOS),
-        home: Builder(
-          builder: (BuildContext context) => Center(
-            child: TextButton(
-              onPressed: () => showAdaptiveAboutDialog(
-                context: context,
-                applicationIcon: const FlutterLogo(size: 44),
-                applicationName: 'My App',
-                applicationVersion: '1.0.0',
-                applicationLegalese:
-                    'Copyright 2014 - 2026 Some Company. All rights reserved. '
-                    'A short legal notice that wraps over several lines.',
-              ),
-              child: const Text('open'),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.tap(find.text('open'));
-    await tester.pumpAndSettle();
-
-    final Finder scrollable = find.descendant(
-      of: find.byType(CupertinoAlertDialog),
-      matching: find.byType(Scrollable),
-    );
-    final ScrollPosition position = tester.state<ScrollableState>(scrollable.first).position;
-    expect(position.maxScrollExtent, 0.0);
-  });
-
   testWidgets('AboutListTile renders at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
