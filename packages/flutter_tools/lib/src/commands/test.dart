@@ -514,7 +514,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     final BuildInfo buildInfo = await getBuildInfo(
       forcedBuildMode: BuildMode.debug,
       forcedUseLocalCanvasKit: true,
-      forcedWebEnableHotReload: true,
     );
 
     TestTimeRecorder? testTimeRecorder;
@@ -570,12 +569,14 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       enableImpeller: ImpellerStatus.fromBool(getValue(DebuggingOptionDescriptors.enableImpeller)),
       enableFlutterGpu: getValue(DebuggingOptionDescriptors.enableFlutterGpu) ?? false,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
-      webRenderer: webRenderer,
-      webCrossOriginIsolation: wasParsed(_crossOriginIsolation)
-          ? getValue(_crossOriginIsolation)
-          : null,
+      webConfig: WebDebugConfig(
+        renderer: webRenderer,
+        crossOriginIsolation: wasParsed(_crossOriginIsolation)
+            ? getValue(_crossOriginIsolation)
+            : null,
+        useWasm: useWasm,
+      ),
       printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
-      webUseWasm: useWasm,
       enableHcpp: explicitEnableHcpp,
       uninstallApp: getValue(_uninstall),
     );
