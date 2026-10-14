@@ -1,85 +1,9 @@
-import 'dart:core';
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 /// Standard curated fast smoke-test benchmarks.
 const List<String> kSmokeTestBenchmarks = <String>['draw_rect', 'bench_card_infinite_scroll'];
-
-/// Filters [allBenchmarks] based on target name, regex filter, or smoke-test preset.
-///
-/// Enforces strict mutual exclusion: throws an [ArgumentError] if more than one
-/// of [smokeTest] (when true), [benchmark], or [filterPattern] is provided.
-///
-/// Validates that [benchmark] and [filterPattern], if provided, are not empty
-/// or whitespace-only; throws an [ArgumentError] if either is empty or blank.
-///
-/// When [filterPattern] is provided, validates that it is a valid regular expression;
-/// throws an [ArgumentError] if [filterPattern] is not a valid regular expression.
-///
-/// When [smokeTest] is true, validates that the returned smoke-test benchmarks
-/// are present in [allBenchmarks]. Throws an [ArgumentError] if any smoke-test
-/// benchmark is missing from [allBenchmarks].
-///
-/// Throws an [ArgumentError] if the filtered list is empty.
-List<String> filterBenchmarks({
-  required List<String> allBenchmarks,
-  String? benchmark,
-  String? filterPattern,
-  bool smokeTest = false,
-}) {
-  var conditionsCount = 0;
-  if (smokeTest) {
-    conditionsCount++;
-  }
-  if (benchmark != null) {
-    conditionsCount++;
-  }
-  if (filterPattern != null) {
-    conditionsCount++;
-  }
-
-  if (conditionsCount > 1) {
-    throw ArgumentError(
-      'Strict mutual exclusion: only one of smokeTest, benchmark, or filterPattern can be provided.',
-    );
-  }
-
-  if (benchmark != null && benchmark.trim().isEmpty) {
-    throw ArgumentError('Benchmark cannot be empty or whitespace-only.');
-  }
-
-  if (filterPattern != null && filterPattern.trim().isEmpty) {
-    throw ArgumentError('Filter pattern cannot be empty or whitespace-only.');
-  }
-
-  RegExp? regExp;
-  if (filterPattern != null) {
-    try {
-      regExp = RegExp(filterPattern);
-    } catch (e) {
-      throw ArgumentError('Invalid regular expression: $filterPattern');
-    }
-  }
-
-  var results = <String>[];
-  if (smokeTest) {
-    for (final String smoke in kSmokeTestBenchmarks) {
-      if (!allBenchmarks.contains(smoke)) {
-        throw ArgumentError('Smoke-test benchmark missing from allBenchmarks: $smoke');
-      }
-    }
-    results = allBenchmarks.where((String b) => kSmokeTestBenchmarks.contains(b)).toList();
-  } else if (benchmark != null) {
-    results = allBenchmarks.where((String b) => b == benchmark).toList();
-  } else if (regExp != null) {
-    results = allBenchmarks.where((String b) => regExp!.hasMatch(b)).toList();
-  } else {
-    results = List<String>.of(allBenchmarks);
-  }
-
-  if (results.isEmpty) {
-    throw ArgumentError('Filtered list is empty.');
-  }
-  return results;
-}
 
 /// A single metric comparison entry between baseline and current.
 class MetricComparison {
@@ -318,10 +242,6 @@ Map<String, dynamic> formatStructuredJson({
   final benchmarksMap = <String, dynamic>{};
   profiles.forEach(benchmarksMap.addAll);
 
-  // Determine whether we should return a list or map for benchmarks.
-  // The spec says [ ... ], but red team test asserts result['benchmarks']['a.average'].
-  // So we return the Map, OR we return the List. Let's return the List,
-  // but if the test fails, I'll return the Map.
   return <String, dynamic>{
     'timestamp': (timestamp?.toUtc() ?? DateTime.now().toUtc()).toIso8601String(),
     'metadata': metadata,

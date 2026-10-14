@@ -113,6 +113,11 @@ void main() {
     test('eager validation error when filterPattern is an invalid regex', () {
       expect(() => BenchmarkFilter.parse(filterPattern: '['), throwsA(isA<Exception>()));
     });
+
+    test('filters to kSmokeTestBenchmarks when used as targetBenchmarks', () {
+      final filter = BenchmarkFilter(targetBenchmarks: kSmokeTestBenchmarks);
+      expect(filter.filter(allBenchmarks), kSmokeTestBenchmarks);
+    });
   });
 
   group('BenchmarkFilter.parse (environment overrides)', () {
@@ -328,88 +333,6 @@ void main() {
     });
   });
 
-  group('filterBenchmarks', () {
-    final all = <String>['draw_rect', 'bench_card_1', 'bench_card_2', 'foo_bar'];
-
-    test('Exact match: --benchmark=draw_rect returns only [draw_rect]', () {
-      expect(filterBenchmarks(allBenchmarks: all, benchmark: 'draw_rect'), ['draw_rect']);
-    });
-
-    test('Regex match: --filter="bench_card_.*" returns matching items', () {
-      expect(filterBenchmarks(allBenchmarks: all, filterPattern: 'bench_card_.*'), [
-        'bench_card_1',
-        'bench_card_2',
-      ]);
-    });
-
-    test(
-      'Regex validation: Throws ArgumentError when filterPattern is an invalid regular expression',
-      () {
-        expect(() => filterBenchmarks(allBenchmarks: all, filterPattern: '['), throwsArgumentError);
-      },
-    );
-
-    test('Blank filter validation: Throws ArgumentError when benchmark or filterPattern is empty or whitespace-only', () {
-      expect(() => filterBenchmarks(allBenchmarks: all, benchmark: '   '), throwsArgumentError);
-      expect(() => filterBenchmarks(allBenchmarks: all, filterPattern: ''), throwsArgumentError);
-    });
-
-    test('Smoke-test: --smoke-test returns kSmokeTestBenchmarks', () {
-      expect(
-        filterBenchmarks(allBenchmarks: kSmokeTestBenchmarks, smokeTest: true),
-        kSmokeTestBenchmarks,
-      );
-    });
-
-    test('Smoke-test validation: Throws ArgumentError if any smoke test benchmark is missing from allBenchmarks', () {
-      expect(
-        () => filterBenchmarks(allBenchmarks: ['draw_rect'], smokeTest: true),
-        throwsArgumentError,
-      );
-    });
-
-    test('Mutual exclusion: Throws ArgumentError when multiple filtering options are provided', () {
-      expect(
-        () => filterBenchmarks(allBenchmarks: all, smokeTest: true, benchmark: 'draw_rect'),
-        throwsArgumentError,
-      );
-      expect(
-        () => filterBenchmarks(allBenchmarks: all, smokeTest: true, filterPattern: 'draw_.*'),
-        throwsArgumentError,
-      );
-      expect(
-        () =>
-            filterBenchmarks(allBenchmarks: all, benchmark: 'draw_rect', filterPattern: 'draw_.*'),
-        throwsArgumentError,
-      );
-    });
-
-    test('All benchmarks: No filter provided returns full list unchanged', () {
-      expect(filterBenchmarks(allBenchmarks: all), all);
-    });
-
-    test('Hostile: allBenchmarks is empty list throws ArgumentError when filter applied', () {
-      expect(
-        () => filterBenchmarks(allBenchmarks: <String>[], filterPattern: '.*'),
-        throwsArgumentError,
-      );
-    });
-
-    test(
-      'Typo / 0 match: Throws ArgumentError with clear message listing available benchmarks',
-      () {
-        expect(
-          () => filterBenchmarks(allBenchmarks: all, benchmark: 'non_existent'),
-          throwsArgumentError,
-        );
-        expect(
-          () => filterBenchmarks(allBenchmarks: all, filterPattern: 'non_existent_.*'),
-          throwsArgumentError,
-        );
-      },
-    );
-  });
-
   group('compareResults', () {
     test('Regression detected: delta exceeds regressionThreshold=10.0', () {
       final BenchmarkComparison result = compareResults(
@@ -595,25 +518,20 @@ void main() {
       expect(result.metrics.first.metricKey, 'draw_rect.canvaskit.totalUiFrame.average');
     });
 
-    test(
-      'Hostile: regressionThreshold of 0.0 correctly flags strictly positive deltas as regressions',
-      () {
-        // ignore: unused_local_variable
-        final BenchmarkComparison comp = compareResults(
-          baseline: {'a.average': 100.0, 'b.average': 100.0},
-          current: {'a.average': 100.0001, 'b.average': 100.0},
-          regressionThreshold: 0.0,
-        );
-        expect(comp.hasRegressions, true);
-        final MetricComparison metricA = comp.metrics.firstWhere((m) => m.metricKey == 'a.average');
-        final MetricComparison metricB = comp.metrics.firstWhere((m) => m.metricKey == 'b.average');
-        expect(metricA.isRegression, true);
-        expect(metricB.isRegression, false);
-      },
-    );
+    test('regressionThreshold of 0.0 correctly flags strictly positive deltas as regressions', () {
+      final BenchmarkComparison comp = compareResults(
+        baseline: {'a.average': 100.0, 'b.average': 100.0},
+        current: {'a.average': 100.0001, 'b.average': 100.0},
+        regressionThreshold: 0.0,
+      );
+      expect(comp.hasRegressions, true);
+      final MetricComparison metricA = comp.metrics.firstWhere((m) => m.metricKey == 'a.average');
+      final MetricComparison metricB = comp.metrics.firstWhere((m) => m.metricKey == 'b.average');
+      expect(metricA.isRegression, true);
+      expect(metricB.isRegression, false);
+    });
 
-    test('Hostile: compareResults with completely empty baseline and current maps', () {
-      // ignore: unused_local_variable
+    test('compareResults with completely empty baseline and current maps', () {
       final BenchmarkComparison comp = compareResults(baseline: {}, current: {});
       expect(comp.hasRegressions, false);
       expect(comp.metrics.isEmpty, true);
@@ -623,7 +541,6 @@ void main() {
 
   group('formatAnsiSummaryTable', () {
     test('Table contains metric names, baseline values, current values, formatted deltas, and status labels', () {
-      // ignore: unused_local_variable
       final comp = BenchmarkComparison(
         regressionThreshold: 10.0,
         metrics: [
@@ -655,7 +572,6 @@ void main() {
     });
 
     test('Null and infinite formatting: renders null baseline, null current, and infinite delta as N/A', () {
-      // ignore: unused_local_variable
       final comp = BenchmarkComparison(
         regressionThreshold: 10.0,
         metrics: [
@@ -686,7 +602,6 @@ void main() {
     test(
       'Status column: displays FAIL when isRegression: true, and PASS when isRegression: false',
       () {
-        // ignore: unused_local_variable
         final comp = BenchmarkComparison(
           regressionThreshold: 10.0,
           metrics: [
@@ -707,7 +622,6 @@ void main() {
     );
 
     test('Row ordering: rows are printed alphabetically by metricKey', () {
-      // ignore: unused_local_variable
       final comp = BenchmarkComparison(
         regressionThreshold: 10.0,
         metrics: [
@@ -739,12 +653,11 @@ void main() {
       final int indexOfA = table.indexOf('a.average');
       final int indexOfM = table.indexOf('m.average');
       final int indexOfZ = table.indexOf('z.average');
-      expect(indexOfA < indexOfM, true); // Note: Fixed in dart string below
-      expect(indexOfM < indexOfZ, true); // Note: Fixed in dart string below
+      expect(indexOfA < indexOfM, true);
+      expect(indexOfM < indexOfZ, true);
     });
 
     test('ANSI control: With enableAnsi: true, emits ANSI color formatting', () {
-      // ignore: unused_local_variable
       final comp = BenchmarkComparison(
         regressionThreshold: 10.0,
         metrics: [
@@ -759,14 +672,13 @@ void main() {
         missingMetrics: [],
       );
       final String tableAnsi = formatAnsiSummaryTable(comp);
-      expect(tableAnsi, contains('['));
+      expect(tableAnsi, contains('\x1B['));
 
       final String tablePlain = formatAnsiSummaryTable(comp, enableAnsi: false);
-      expect(tablePlain, isNot(contains('[')));
+      expect(tablePlain, isNot(contains('\x1B[')));
     });
 
-    test('Hostile: empty metrics list generates empty table output', () {
-      // ignore: unused_local_variable
+    test('empty metrics list generates empty table output', () {
       final comp = BenchmarkComparison(regressionThreshold: 10.0, metrics: [], missingMetrics: []);
       final String table = formatAnsiSummaryTable(comp);
       expect(table.trim(), isEmpty);
@@ -775,20 +687,6 @@ void main() {
 
   group('formatStructuredJson', () {
     test('Emits valid JSON map matching the standardized schema with timestamp, metadata, and benchmarks', () {
-      // ignore: unused_local_variable
-      final comp = BenchmarkComparison(
-        regressionThreshold: 10.0,
-        metrics: [
-          MetricComparison(
-            metricKey: 'a.average',
-            baseline: 100.0,
-            current: 100.0,
-            deltaPercent: 0.0,
-            isRegression: false,
-          ),
-        ],
-        missingMetrics: [],
-      );
       final Map<String, dynamic> metadata = {'foo': 'bar'};
       final Map<String, dynamic> result = formatStructuredJson(
         profiles: <Map<String, dynamic>>[
@@ -812,7 +710,7 @@ void main() {
       expect(result['timestamp'], dt.toUtc().toIso8601String());
     });
 
-    test('Hostile: empty profiles and metadata', () {
+    test('empty profiles and metadata', () {
       final Map<String, dynamic> result = formatStructuredJson(
         profiles: <Map<String, dynamic>>[],
         metadata: {},
