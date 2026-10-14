@@ -689,6 +689,120 @@ void main() {
       final String table = formatAnsiSummaryTable(comp);
       expect(table.trim(), isEmpty);
     });
+
+    // Metric keys and values of differing widths, so that joining the cells
+    // with single spaces cannot line the columns up.
+    final mixedWidthComparison = BenchmarkComparison(
+      regressionThreshold: 10.0,
+      metrics: [
+        MetricComparison(
+          metricKey: 'a.average',
+          baseline: 4915.7,
+          current: 4596.2,
+          deltaPercent: -6.5,
+          isRegression: false,
+        ),
+        MetricComparison(
+          metricKey: 'bench_card_infinite_scroll.canvaskit.apply_frame.average',
+          baseline: 67.2,
+          current: 75.6,
+          deltaPercent: 12.5,
+          isRegression: true,
+        ),
+        MetricComparison(
+          metricKey: 'new.average',
+          baseline: null,
+          current: 2.2,
+          deltaPercent: double.infinity,
+          isRegression: false,
+        ),
+      ],
+      missingMetrics: [],
+    );
+    const columnTitles = <String>['Metric', 'Baseline', 'Current', 'Delta', 'Status'];
+    // Expected cells per metric key, in column order.
+    const expectedCells = <String, List<String>>{
+      'a.average': <String>['a.average', '4915.7', '4596.2', '-6.5%', 'PASS'],
+      'bench_card_infinite_scroll.canvaskit.apply_frame.average': <String>[
+        'bench_card_infinite_scroll.canvaskit.apply_frame.average',
+        '67.2',
+        '75.6',
+        '12.5%',
+        'FAIL',
+      ],
+      'new.average': <String>['new.average', 'N/A', '2.2', 'N/A', 'PASS'],
+    };
+
+    // Returns the non-blank lines of [table], dropping an optional separator
+    // line made only of `-` characters.
+    List<String> tableLines(String table) => table
+        .split('\n')
+        .where((String line) => line.trim().isNotEmpty && !RegExp(r'^[\s-]+$').hasMatch(line))
+        .toList();
+
+    // Asserts that [lines] form a table whose first line is the header and
+    // whose columns line up: Metric and Status start at the header's offset,
+    // and Baseline, Current and Delta end at the header's offset.
+    void expectAlignedTable(List<String> lines) {
+      expect(lines.first.trim().split(RegExp(r'\s{2,}')), columnTitles);
+      final List<RegExpMatch> header = RegExp(r'\S+').allMatches(lines.first).toList();
+      expect(header.map((RegExpMatch m) => m.group(0)), columnTitles);
+
+      final List<String> rows = lines.skip(1).toList();
+      expect(rows, hasLength(expectedCells.length));
+      for (final MapEntry<String, List<String>> entry in expectedCells.entries) {
+        final String row = rows.singleWhere(
+          (String line) => RegExp(r'\S+').firstMatch(line)?.group(0) == entry.key,
+        );
+        final List<RegExpMatch> cells = RegExp(r'\S+').allMatches(row).toList();
+        expect(cells.map((RegExpMatch m) => m.group(0)), entry.value, reason: row);
+        expect(cells[0].start, header[0].start, reason: 'Metric is left-aligned in: $row');
+        for (final column in <int>[1, 2, 3]) {
+          expect(
+            cells[column].end,
+            header[column].end,
+            reason: '${columnTitles[column]} is right-aligned in: $row',
+          );
+        }
+        expect(cells[4].start, header[4].start, reason: 'Status is left-aligned in: $row');
+        for (var i = 0; i < cells.length - 1; i++) {
+          expect(
+            cells[i + 1].start - cells[i].end,
+            greaterThanOrEqualTo(2),
+            reason: 'columns separated by at least two spaces in: $row',
+          );
+        }
+      }
+      // Rows keep the order of the comparison's metrics.
+      expect(
+        rows.map((String row) => RegExp(r'\S+').firstMatch(row)!.group(0)),
+        mixedWidthComparison.metrics.map((MetricComparison m) => m.metricKey),
+      );
+    }
+
+    test('first line is a header row naming the columns', () {
+      final List<String> lines = tableLines(
+        formatAnsiSummaryTable(mixedWidthComparison, enableAnsi: false),
+      );
+      expect(lines.first.trim().split(RegExp(r'\s{2,}')), columnTitles);
+      expect(lines.skip(1).where((String line) => line.contains('Metric')), isEmpty);
+    });
+
+    test('columns are aligned, with numeric columns right-aligned', () {
+      expectAlignedTable(
+        tableLines(formatAnsiSummaryTable(mixedWidthComparison, enableAnsi: false)),
+      );
+    });
+
+    test('ANSI colors wrap only the status and do not affect alignment', () {
+      final String plain = formatAnsiSummaryTable(mixedWidthComparison, enableAnsi: false);
+      final String ansi = formatAnsiSummaryTable(mixedWidthComparison);
+      expect(ansi, contains('\x1B[31mFAIL\x1B[0m'));
+      expect(ansi, contains('\x1B[32mPASS\x1B[0m'));
+      final String stripped = ansi.replaceAll(RegExp(r'\x1B\[[0-9;]*m'), '');
+      expect(stripped, plain);
+      expectAlignedTable(tableLines(stripped));
+    });
   });
 
   group('formatStructuredJson', () {
