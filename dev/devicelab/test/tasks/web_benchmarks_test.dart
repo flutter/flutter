@@ -742,15 +742,21 @@ void main() {
 
     // Asserts that [lines] form a table whose first line is the header and
     // whose columns line up: Metric and Status start at the header's offset,
-    // and Baseline, Current and Delta end at the header's offset.
-    void expectAlignedTable(List<String> lines) {
+    // and Baseline, Current and Delta end at the header's offset. [cells] gives
+    // the expected cells per metric key of [comparison].
+    void expectAlignedTable(
+      List<String> lines, {
+      BenchmarkComparison? comparison,
+      Map<String, List<String>> cells = expectedCells,
+    }) {
+      comparison ??= mixedWidthComparison;
       expect(lines.first.trim().split(RegExp(r'\s{2,}')), columnTitles);
       final List<RegExpMatch> header = RegExp(r'\S+').allMatches(lines.first).toList();
       expect(header.map((RegExpMatch m) => m.group(0)), columnTitles);
 
       final List<String> rows = lines.skip(1).toList();
-      expect(rows, hasLength(expectedCells.length));
-      for (final MapEntry<String, List<String>> entry in expectedCells.entries) {
+      expect(rows, hasLength(cells.length));
+      for (final MapEntry<String, List<String>> entry in cells.entries) {
         final String row = rows.singleWhere(
           (String line) => RegExp(r'\S+').firstMatch(line)?.group(0) == entry.key,
         );
@@ -776,7 +782,7 @@ void main() {
       // Rows keep the order of the comparison's metrics.
       expect(
         rows.map((String row) => RegExp(r'\S+').firstMatch(row)!.group(0)),
-        mixedWidthComparison.metrics.map((MetricComparison m) => m.metricKey),
+        comparison.metrics.map((MetricComparison m) => m.metricKey),
       );
     }
 
@@ -802,6 +808,108 @@ void main() {
       final String stripped = ansi.replaceAll(RegExp(r'\x1B\[[0-9;]*m'), '');
       expect(stripped, plain);
       expectAlignedTable(tableLines(stripped));
+    });
+
+    test('numeric cells wider than their column titles widen the column', () {
+      final comparison = BenchmarkComparison(
+        regressionThreshold: 10.0,
+        metrics: [
+          MetricComparison(
+            metricKey: 'huge.average',
+            baseline: 123456789.0,
+            current: 123457.0,
+            deltaPercent: -99.9,
+            isRegression: false,
+          ),
+          MetricComparison(
+            metricKey: 'jump.average',
+            baseline: 0.5,
+            current: 12345.6,
+            deltaPercent: 2469020.0,
+            isRegression: true,
+          ),
+          MetricComparison(
+            metricKey: 'missing.average',
+            baseline: 2.0,
+            current: null,
+            deltaPercent: double.infinity,
+            isRegression: true,
+          ),
+        ],
+        missingMetrics: ['missing.average'],
+      );
+      expectAlignedTable(
+        tableLines(formatAnsiSummaryTable(comparison, enableAnsi: false)),
+        comparison: comparison,
+        cells: const <String, List<String>>{
+          'huge.average': <String>['huge.average', '123456789.0', '123457.0', '-99.9%', 'PASS'],
+          'jump.average': <String>['jump.average', '0.5', '12345.6', '2469020.0%', 'FAIL'],
+          'missing.average': <String>['missing.average', '2.0', 'N/A', 'N/A', 'FAIL'],
+        },
+      );
+    });
+
+    test('metric keys narrower than the Metric title still align under it', () {
+      final comparison = BenchmarkComparison(
+        regressionThreshold: 10.0,
+        metrics: [
+          MetricComparison(
+            metricKey: 'a',
+            baseline: 1.0,
+            current: 1.0,
+            deltaPercent: 0.0,
+            isRegression: false,
+          ),
+        ],
+        missingMetrics: [],
+      );
+      expectAlignedTable(
+        tableLines(formatAnsiSummaryTable(comparison, enableAnsi: false)),
+        comparison: comparison,
+        cells: const <String, List<String>>{
+          'a': <String>['a', '1.0', '1.0', '0.0%', 'PASS'],
+        },
+      );
+    });
+
+    test('lines are header, separator, then rows, with columns two spaces apart', () {
+      for (final enableAnsi in <bool>[false, true]) {
+        final String table = formatAnsiSummaryTable(mixedWidthComparison, enableAnsi: enableAnsi);
+        final List<String> lines = table.split('\n');
+        if (lines.last.isEmpty) {
+          lines.removeLast();
+        }
+        expect(lines, hasLength(2 + mixedWidthComparison.metrics.length), reason: table);
+        expect(lines[0], isNot(contains('\x1B')), reason: 'header is not colored');
+        expect(lines[1], matches(RegExp(r'^-[- ]*$')), reason: 'second line is a separator');
+        for (final line in lines) {
+          expect(line, line.trimRight(), reason: 'no trailing whitespace in: "$line"');
+        }
+
+        // Each column spans from its leftmost cell start to its rightmost
+        // cell end; adjacent spans are exactly two spaces apart.
+        final List<List<RegExpMatch>> cellLines = <String>[lines[0], ...lines.skip(2)]
+            .map(
+              (String line) =>
+                  RegExp(r'\S+')
+                      .allMatches(line.replaceAll(RegExp(r'\x1B\[[0-9;]*m'), ''))
+                      .toList(),
+            )
+            .toList();
+        for (var column = 0; column < columnTitles.length - 1; column++) {
+          final int end = cellLines
+              .map((List<RegExpMatch> cells) => cells[column].end)
+              .reduce((int a, int b) => a > b ? a : b);
+          final int nextStart = cellLines
+              .map((List<RegExpMatch> cells) => cells[column + 1].start)
+              .reduce((int a, int b) => a < b ? a : b);
+          expect(
+            nextStart - end,
+            2,
+            reason: '${columnTitles[column]} and ${columnTitles[column + 1]} in:\n$table',
+          );
+        }
+      }
     });
   });
 
