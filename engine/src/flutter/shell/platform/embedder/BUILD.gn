@@ -286,6 +286,7 @@ if (enable_unittests) {
 
     sources = [
       "platform_view_embedder_unittests.cc",
+      "tests/embedder_assertions.h",
       "tests/embedder_config_builder.cc",
       "tests/embedder_config_builder.h",
       "tests/embedder_frozen.h",
@@ -304,6 +305,7 @@ if (enable_unittests) {
       "tests/embedder_test_context_software.cc",
       "tests/embedder_test_context_software.h",
       "tests/embedder_unittests_util.cc",
+      "tests/embedder_unittests_util.h",
     ]
 
     public_deps = [
