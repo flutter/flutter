@@ -137,9 +137,13 @@ void main() {
       device,
       DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
     );
-    final int testResult = await driverService.startTest('foo.test', <String>[
-      '--enable-experiment=non-nullable',
-    ], PackageConfig(<Package>[Package('test', Uri.base)]));
+    final int testResult = await driverService.startTest(
+      'foo.test',
+      DriveTestSpecification(
+        arguments: const <String>['--enable-experiment=non-nullable'],
+        packageConfig: PackageConfig(<Package>[Package('test', Uri.base)]),
+      ),
+    );
 
     expect(testResult, 23);
   });
@@ -176,9 +180,11 @@ void main() {
       );
       final int testResult = await driverService.startTest(
         'foo.test',
-        <String>['--enable-experiment=non-nullable'],
-        PackageConfig(<Package>[Package('test', Uri.base)]),
-        profileMemory: 'devtools_memory.json',
+        DriveTestSpecification(
+          arguments: const <String>['--enable-experiment=non-nullable'],
+          packageConfig: PackageConfig(<Package>[Package('test', Uri.base)]),
+          profileMemory: 'devtools_memory.json',
+        ),
       );
 
       expect(launcher.closed, true);
@@ -214,9 +220,13 @@ void main() {
         device,
         DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
       );
-      final int testResult = await driverService.startTest('foo.test', <String>[
-        '--enable-experiment=non-nullable',
-      ], PackageConfig.empty);
+      final int testResult = await driverService.startTest(
+        'foo.test',
+        const DriveTestSpecification(
+          arguments: <String>['--enable-experiment=non-nullable'],
+          packageConfig: PackageConfig.empty,
+        ),
+      );
 
       expect(testResult, 23);
     },
@@ -252,8 +262,7 @@ void main() {
 
       final int testResult = await driverService.startTest(
         'foo.test',
-        <String>[],
-        PackageConfig(<Package>[Package('test', Uri.base)]),
+        DriveTestSpecification(packageConfig: PackageConfig(<Package>[Package('test', Uri.base)])),
       );
 
       expect(testResult, 11);
@@ -453,6 +462,37 @@ void main() {
       expect(logReader.isListened, true);
     },
   );
+
+  group('DriveTestSpecification', () {
+    testWithoutContext('has expected defaults', () {
+      const spec = DriveTestSpecification(packageConfig: PackageConfig.empty);
+      expect(spec.arguments, isEmpty);
+      expect(spec.packageConfig, PackageConfig.empty);
+      expect(spec.headless, isNull);
+      expect(spec.chromeBinary, isNull);
+      expect(spec.browserName, isNull);
+      expect(spec.androidEmulator, isNull);
+      expect(spec.driverPort, isNull);
+      expect(spec.webBrowserFlags, isEmpty);
+      expect(spec.browserDimension, isNull);
+      expect(spec.profileMemory, isNull);
+    });
+
+    testWithoutContext('parseBrowserDimension splits width, height, and optional dpr', () {
+      expect(DriveTestSpecification.parseBrowserDimension(null), isNull);
+      expect(DriveTestSpecification.parseBrowserDimension('1600x1024'), <String>['1600', '1024']);
+      expect(DriveTestSpecification.parseBrowserDimension('1600x1024@2'), <String>[
+        '1600',
+        '1024',
+        '2',
+      ]);
+      expect(DriveTestSpecification.parseBrowserDimension('800,600@1.5'), <String>[
+        '800',
+        '600',
+        '1.5',
+      ]);
+    });
+  });
 }
 
 FlutterDriverService setUpDriverService({

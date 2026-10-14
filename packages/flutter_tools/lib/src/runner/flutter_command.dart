@@ -166,7 +166,6 @@ abstract final class FlutterOptions {
   static const kWebBrowserFlag = 'web-browser-flag';
   static const kWebResourcesCdnFlag = 'web-resources-cdn';
   static const kWebWasmFlag = 'wasm';
-  static const kWebExperimentalHotReload = 'web-experimental-hot-reload';
   static const kEnableImpeller = 'enable-impeller';
   static const kCodesignIdentity = 'codesign-identity';
   static const kCodesign = 'codesign';
@@ -1009,9 +1008,6 @@ abstract class FlutterCommand extends Command<void> {
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
     bool? forcedUseLocalCanvasKit,
-    // TODO(nshahan): Delete when fully migrated to new module system,
-    // https://github.com/flutter/flutter/issues/142060.
-    bool? forcedWebEnableHotReload,
   }) async {
     final bool trackWidgetCreation =
         hasOption(BuildInfoOptions.trackWidgetCreation) &&
@@ -1142,17 +1138,18 @@ abstract class FlutterCommand extends Command<void> {
       performanceMeasurementFile: performanceMeasurementFile,
       packageConfigPath: packagesPath ?? packageConfigFile.path,
       codeSizeDirectory: codeSizeDirectory,
-      androidGradleDaemon: androidGradleDaemon,
-      androidSkipBuildDependencyValidation: androidSkipBuildDependencyValidation,
-      androidEnableHcpp: enableHcpp,
-      explicitAndroidEnableHcpp: explicitEnableHcpp,
+      androidGradleConfig: AndroidGradleConfig(
+        gradleDaemon: androidGradleDaemon,
+        skipBuildDependencyValidation: androidSkipBuildDependencyValidation,
+        enableHcpp: enableHcpp,
+        explicitEnableHcpp: explicitEnableHcpp,
+        projectArgs: androidProjectArgs,
+        projectCacheDir: androidGradleProjectCacheDir,
+      ),
       packageConfig: packageConfig,
-      androidProjectArgs: androidProjectArgs,
-      androidGradleProjectCacheDir: androidGradleProjectCacheDir,
       initializeFromDill: getValue(BuildInfoOptions.initializeFromDill),
       assumeInitializeFromDillUpToDate: getValue(BuildInfoOptions.assumeInitializeFromDillUpToDate),
       useLocalCanvasKit: useLocalCanvasKit,
-      webEnableHotReload: true,
       deprecatedJsInterop: getValue(WebOptions.deprecatedJsInterop),
     );
   }
@@ -1520,7 +1517,7 @@ abstract class FlutterCommand extends Command<void> {
     DateTime endTime,
   ) {
     // Send command result.
-    final int? maxRss = getMaxRss(processInfo);
+    final int? maxRss = getMaxRss(processInfo, logger: _logger);
     _analytics.send(
       Event.flutterCommandResult(
         commandPath: commandPath,
