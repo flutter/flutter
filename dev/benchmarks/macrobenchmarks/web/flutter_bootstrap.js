@@ -3,7 +3,11 @@
 
 const searchParams = new URLSearchParams(window.location.search);
 const forceSt = searchParams.get('force_st');
-const extraConfig = forceSt ? {forceSingleThreadedSkwasm: true} : {};
+const webParagraph = searchParams.get('web_paragraph') === 'true';
+const extraConfig = {
+  ...(forceSt ? {forceSingleThreadedSkwasm: true} : {}),
+  ...(webParagraph ? {preferWebParagraph: true} : {}),
+};
 _flutter.loader.load({
   config: {
     // Use the local CanvasKit bundle instead of the CDN to reduce test flakiness.

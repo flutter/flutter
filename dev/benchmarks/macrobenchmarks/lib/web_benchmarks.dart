@@ -11,6 +11,7 @@ import 'dart:js_interop';
 import 'dart:math' as math;
 
 import 'package:args/args.dart';
+import 'package:flutter/foundation.dart' show kIsWasm;
 import 'package:web/web.dart' as web;
 
 import 'src/web/bench_build_image.dart';
@@ -36,6 +37,7 @@ import 'src/web/bench_platform_view_infinite_scroll.dart';
 import 'src/web/bench_simple_lazy_text_scroll.dart';
 import 'src/web/bench_text_layout.dart';
 import 'src/web/bench_text_out_of_picture_bounds.dart';
+import 'src/web/bench_web_paragraph.dart';
 import 'src/web/bench_wrapbox_scroll.dart';
 import 'src/web/recorder.dart';
 
@@ -86,8 +88,49 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchBuildColorsGrid.benchmarkName: () => BenchBuildColorsGrid(),
   BenchTextCachedLayout.benchmarkName: () => BenchTextCachedLayout(),
 
+  BenchTextParagraphSmall.skParagraphName: () => BenchTextParagraphSmall.skParagraph(),
+  BenchTextParagraphMedium.skParagraphName: () => BenchTextParagraphMedium.skParagraph(),
+  BenchTextParagraphLarge.skParagraphName: () => BenchTextParagraphLarge.skParagraph(),
+  BenchTextParagraphRich.skParagraphName: () => BenchTextParagraphRich.skParagraph(),
+  BenchTextParagraphBidi.skParagraphName: () => BenchTextParagraphBidi.skParagraph(),
+
+  if (!kIsWasm) ...<String, RecorderFactory>{
+    BenchTextParagraphSmall.webParagraphName: () => BenchTextParagraphSmall.webParagraph(),
+    BenchTextParagraphMedium.webParagraphName: () => BenchTextParagraphMedium.webParagraph(),
+    BenchTextParagraphLarge.webParagraphName: () => BenchTextParagraphLarge.webParagraph(),
+    BenchTextParagraphRich.webParagraphName: () => BenchTextParagraphRich.webParagraph(),
+    BenchTextParagraphBidi.webParagraphName: () => BenchTextParagraphBidi.webParagraph(),
+  },
+
   BenchImageDecoding.benchmarkName: () => BenchImageDecoding(),
 };
+
+const String _kPendingBenchmarkKey = 'pending_benchmark';
+const String _kPendingManualModeKey = 'pending_manual_mode';
+
+bool _requiresWebParagraph(String benchmarkName) {
+  return benchmarkName.startsWith('web_paragraph_');
+}
+
+bool _redirectForWebParagraphIfNeeded(String benchmarkName, {required bool isManualMode}) {
+  final bool needsWebParagraph = _requiresWebParagraph(benchmarkName);
+  final hasWebParagraph = Uri.base.queryParameters['web_paragraph'] == 'true';
+  if (needsWebParagraph == hasWebParagraph) {
+    return false;
+  }
+
+  web.window.sessionStorage.setItem(_kPendingBenchmarkKey, benchmarkName);
+  web.window.sessionStorage.setItem(_kPendingManualModeKey, isManualMode ? 'true' : 'false');
+
+  final url = web.URL(web.window.location.href);
+  if (needsWebParagraph) {
+    url.searchParams.set('web_paragraph', 'true');
+  } else {
+    url.searchParams.delete('web_paragraph');
+  }
+  web.window.location.replace(url.href);
+  return true;
+}
 
 late final LocalBenchmarkServerClient _client;
 
@@ -109,16 +152,35 @@ Future<void> main(List<String> args) async {
 
   _client = LocalBenchmarkServerClient(serverOrigin);
 
+  final String? pendingBenchmark = web.window.sessionStorage.getItem(_kPendingBenchmarkKey);
+  final String? pendingManualMode = web.window.sessionStorage.getItem(_kPendingManualModeKey);
+  if (pendingBenchmark != null) {
+    web.window.sessionStorage.removeItem(_kPendingBenchmarkKey);
+    web.window.sessionStorage.removeItem(_kPendingManualModeKey);
+  }
+
   // Check if the benchmark server wants us to run a specific benchmark.
-  final String nextBenchmark = await _client.requestNextBenchmark();
+  final String nextBenchmark;
+  if (pendingBenchmark != null) {
+    nextBenchmark = pendingBenchmark;
+    _client.isInManualMode = pendingManualMode == 'true';
+  } else {
+    nextBenchmark = await _client.requestNextBenchmark();
+  }
 
   if (nextBenchmark == LocalBenchmarkServerClient.kManualFallback) {
     _fallbackToManual('The server did not tell us which benchmark to run next.');
     return;
   }
 
+  if (_redirectForWebParagraphIfNeeded(nextBenchmark, isManualMode: _client.isInManualMode)) {
+    return;
+  }
+
   await _runBenchmark(nextBenchmark);
-  web.window.location.reload();
+  if (!_client.isInManualMode) {
+    web.window.location.reload();
+  }
 }
 
 Future<void> _runBenchmark(String benchmarkName) async {
@@ -201,6 +263,9 @@ void _fallbackToManual(String error) {
       (JSObject _) {
         final web.Element? manualPanel = web.document.querySelector('#manual-panel');
         manualPanel?.remove();
+        if (_redirectForWebParagraphIfNeeded(benchmarkName, isManualMode: true)) {
+          return;
+        }
         _runBenchmark(benchmarkName);
       }.toJS,
     );

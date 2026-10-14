@@ -127,6 +127,7 @@ class Chrome {
       ],
       if (withDebugging) '--remote-debugging-port=${options.debugPort}',
       '--window-size=${options.windowWidth},${options.windowHeight}',
+      '--enable-experimental-web-platform-features',
       '--disable-extensions',
       '--disable-popup-blocking',
       '--disable-background-timer-throttling',
