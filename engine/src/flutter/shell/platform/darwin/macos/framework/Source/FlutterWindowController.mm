@@ -244,7 +244,6 @@ static void FlipRect(NSRect& rect, const NSRect& globalScreenFrame) {
         FlutterWindowRect::fromNSRect(screenRect));
 
     if (position == nullptr) {
-      NSLog(@"Received NULL position from the positioner.");
       return;
     }
 
