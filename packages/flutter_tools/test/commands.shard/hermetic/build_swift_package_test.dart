@@ -3023,7 +3023,9 @@ import PackageDescription
 let package = Package(
     name: "FlutterNativeTools",
     products: [
-        .plugin(name: "FlutterBuildModePlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
+        .plugin(name: "FlutterBuildModeDebugPlugin", targets: ["Switch to Debug Mode"]),
+        .plugin(name: "FlutterBuildModeProfilePlugin", targets: ["Switch to Profile Mode"]),
+        .plugin(name: "FlutterBuildModeReleasePlugin", targets: ["Switch to Release Mode"]),
         .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"]),
         .executable(name: "flutter-prebuild-tool", targets: ["FlutterPrebuildTool"])
     ],
@@ -3265,7 +3267,9 @@ import PackageDescription
 let package = Package(
     name: "FlutterNativeTools",
     products: [
-        .plugin(name: "FlutterBuildModePlugin", targets: ["Switch to Debug Mode", "Switch to Profile Mode", "Switch to Release Mode"]),
+        .plugin(name: "FlutterBuildModeDebugPlugin", targets: ["Switch to Debug Mode"]),
+        .plugin(name: "FlutterBuildModeProfilePlugin", targets: ["Switch to Profile Mode"]),
+        .plugin(name: "FlutterBuildModeReleasePlugin", targets: ["Switch to Release Mode"]),
         .executable(name: "flutter-assemble-tool", targets: ["FlutterAssembleTool"]),
         .executable(name: "flutter-prebuild-tool", targets: ["FlutterPrebuildTool"])
     ],
