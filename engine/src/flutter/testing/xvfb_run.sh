@@ -34,6 +34,10 @@
 
 set -eu
 
+# Should the shell stop on a failing command, say which: a shard that fails
+# without a word from the binary is otherwise unreadable.
+trap 'echo "xvfb_run.sh: failed at line $LINENO: $BASH_COMMAND" >&2' ERR
+
 if [[ -n "${TEST_TOTAL_SHARDS:-}" ]]; then
   export GTEST_TOTAL_SHARDS="$TEST_TOTAL_SHARDS"
   export GTEST_SHARD_INDEX="$TEST_SHARD_INDEX"
@@ -90,9 +94,14 @@ if [[ ! -s "$scratch/display" ]]; then
 fi
 read -r display_number < "$scratch/display"
 export DISPLAY=":$display_number"
+echo "xvfb_run.sh: DISPLAY=$DISPLAY (Xvfb pid $xvfb_pid)" >&2
 
 set +e
+trap - ERR
 "$@"
 status=$?
 set -e
+if [[ "$status" -ne 0 ]]; then
+  echo "xvfb_run.sh: $1 exited with status $status" >&2
+fi
 exit "$status"
