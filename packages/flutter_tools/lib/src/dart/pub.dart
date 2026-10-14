@@ -247,7 +247,8 @@ class _DefaultPub implements Pub {
     required this._stdio,
     this._cache,
     this._flutterRoot,
-  }) : _logger = logger,
+  }) : assert(_cache != null || _flutterRoot != null),
+       _logger = logger,
        _platform = platform,
        _processManager = processManager,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager) {
@@ -265,7 +266,7 @@ class _DefaultPub implements Pub {
   final String? _flutterRoot;
   late final Git _git;
 
-  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
+  String get _flutterRootPath => (_flutterRoot ?? _cache?.flutterRoot)!;
 
   @override
   Future<void> get({

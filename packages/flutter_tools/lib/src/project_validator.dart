@@ -40,7 +40,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
     required this.platform,
     this._cache,
     this._flutterRoot,
-  });
+  }) : assert(_cache != null || _flutterRoot != null);
 
   final Logger logger;
   final FileSystem fileSystem;
@@ -49,7 +49,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
   final Cache? _cache;
   final String? _flutterRoot;
 
-  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? '';
+  String get _flutterRootPath => (_flutterRoot ?? _cache?.flutterRoot)!;
 
   String _toJsonValue(Object? obj) {
     var value = obj.toString();

@@ -86,6 +86,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -142,6 +143,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -178,6 +180,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -214,6 +217,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -263,6 +267,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,

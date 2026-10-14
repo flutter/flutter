@@ -1357,7 +1357,7 @@ class FakeToolContext extends Fake implements ToolContext {
   @override
   late final CustomDevicesConfig customDevicesConfig =
       _customDevicesConfig ??
-      CustomDevicesConfig.test(fileSystem: fs, logger: logger, platform: platform);
+      CustomDevicesConfig.test(cache: cache, fileSystem: fs, logger: logger, platform: platform);
 
   @override
   late final FlutterVersion flutterVersion = _flutterVersion ?? FakeFlutterVersion();

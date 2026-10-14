@@ -26,7 +26,8 @@ class CustomDevicesConfig {
     required Platform platform,
     this._cache,
     this._flutterRoot,
-  }) : _fileSystem = fileSystem,
+  }) : assert(_cache != null || _flutterRoot != null),
+       _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _configLoader = (() => Config.managed(
@@ -44,7 +45,8 @@ class CustomDevicesConfig {
     Directory? directory,
     this._flutterRoot,
     Platform? platform,
-  }) : _platform = platform ?? FakePlatform(),
+  }) : assert(_cache != null || _flutterRoot != null),
+       _platform = platform ?? FakePlatform(),
        _logger = logger,
        _configLoader = (() => Config.test(
          name: _kCustomDevicesConfigName,
@@ -84,7 +86,7 @@ class CustomDevicesConfig {
   }
 
   String get _defaultSchema {
-    final String flutterRoot = _flutterRoot ?? _cache?.flutterRoot ?? '';
+    final String flutterRoot = (_flutterRoot ?? _cache?.flutterRoot)!;
     final Uri uri = _fileSystem
         .directory(flutterRoot)
         .childDirectory('packages')

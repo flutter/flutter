@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 
@@ -279,6 +280,7 @@ void main() {
       expect(
         () {
           gradle_utils.updateLocalProperties(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
             project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
             analytics: globals.analytics,
             logger: globals.logger,
@@ -336,6 +338,7 @@ void main() {
       manifestFile.writeAsStringSync(manifest);
 
       gradle_utils.updateLocalProperties(
+        cache: Cache.test(processManager: FakeProcessManager.any()),
         project: FlutterProject.fromDirectoryTest(globals.fs.directory('path/to/project')),
         buildInfo: buildInfo,
         requireAndroidSdk: false,

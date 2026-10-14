@@ -253,6 +253,7 @@ environement:
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: FakeXcodeProjectInterpreter(isInstalled: false),
         analytics: fakeAnalytics,
+        flutterRoot: 'flutter',
       );
 
       final FlutterProject project = FlutterProject.fromDirectoryTest(
@@ -1218,6 +1219,7 @@ end''');
               ),
               analytics: fakeAnalytics,
               currentAbi: Abi.macosArm64,
+              flutterRoot: 'flutter',
             );
 
             fakeProcessManager.addCommands(<FakeCommand>[
@@ -1275,6 +1277,7 @@ end''');
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
         analytics: fakeAnalytics,
         currentAbi: Abi.macosX64,
+        flutterRoot: 'flutter',
       );
 
       fakeProcessManager.addCommands(<FakeCommand>[
@@ -1477,6 +1480,7 @@ end''');
         platform: FakePlatform(operatingSystem: 'macos'),
         xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: fakeProcessManager),
         analytics: fakeAnalytics,
+        flutterRoot: 'flutter',
       );
 
       final bool didInstall = await cocoaPods.processPods(
