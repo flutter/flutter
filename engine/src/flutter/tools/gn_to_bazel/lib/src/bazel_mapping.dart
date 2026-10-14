@@ -691,6 +691,15 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   '//flutter/impeller:impeller_public_config': ConfigDependency(
     '//engine/src/flutter/impeller:impeller_public_config',
   ),
+  // The desktop embeddings' shared configs, which the client wrapper lists
+  // from its own file: FLUTTER_DESKTOP_LIBRARY (private) and the public
+  // headers' include directory (its public config).
+  '//flutter/shell/platform/common:desktop_library_implementation': ConfigDependency(
+    '//engine/src/flutter/shell/platform/common:desktop_library_implementation',
+  ),
+  '//flutter/shell/platform/common:relative_flutter_library_headers': ConfigDependency(
+    '//engine/src/flutter/shell/platform/common:relative_flutter_library_headers',
+  ),
   '//flutter/third_party/icu:icu_config': ConfigImplied(),
   // Skia's text modules list //flutter/skia's private config from their own
   // files (`configs += [ "../../:skia_private" ]`); its library carries
@@ -1164,6 +1173,9 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // Declares embedder_for_target (false: the embedder's shared library is
     // a host artifact), which the embedder's own file reads.
     '//flutter/shell/platform/embedder/embedder.gni',
+    // The client wrapper's file lists (the sources and headers of the
+    // package, by absolute path), which its own file reads.
+    '//flutter/shell/platform/common/client_wrapper/core_wrapper_files.gni',
     '//flutter/third_party/glfw/glfw_args.gni',
     // The engine's answers to the Khronos trees' build_overrides (where
     // SPIRV-Headers and SPIRV-Tools are, build_with_chromium = false) and

@@ -849,6 +849,42 @@ source_set("x") {
         ]);
       });
 
+      test('get_path_info() of a list gives the list of absolute paths', () {
+        // The client wrapper's core_wrapper_files.gni: file lists made
+        // absolute where the .gni lives, read by the BUILD.gn beside it.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'flutter/lib/files.gni': '''
+lib_sources = get_path_info([
+                              "a.cc",
+                              "sub/b.cc",
+                            ],
+                            "abspath")
+lib_headers = get_path_info([ "include/x.h" ], "abspath")
+''',
+          'flutter/lib/BUILD.gn': '''
+import("files.gni")
+
+source_set("x") {
+  sources = lib_sources
+  public = lib_headers
+}
+''',
+        });
+        final GnFileEvaluation evaluation = evaluateIn(
+          tree,
+          '//flutter/lib/BUILD.gn',
+          importPolicy: const ImportPolicy(evaluatedPrefixes: <String>{'//flutter/lib/'}),
+        );
+        expect(strings(evaluation.targets.single, 'sources'), <String>[
+          '//flutter/lib/a.cc',
+          '//flutter/lib/sub/b.cc',
+        ]);
+        expect(strings(evaluation.targets.single, 'public'), <String>['//flutter/lib/include/x.h']);
+        final String output = emitBuildFile(evaluation, gnPackage: '//flutter/lib', tree: tree);
+        expect(output, contains('    srcs = [\n        "a.cc",\n        "sub/b.cc",\n    ],\n'));
+        expect(output, contains('    hdrs = ["include/x.h"],\n'));
+      });
+
       test('keeps underscore names private and rejects unknown imports', () {
         final GnSourceTree tree = sourceTree(<String, String>{
           'lib/lists.gni': '_private = [ "hidden.cc" ]\n',
