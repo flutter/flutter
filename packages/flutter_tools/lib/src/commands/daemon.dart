@@ -908,7 +908,7 @@ class AppDomain extends Domain {
         target: target,
         debuggingOptions: options,
         stayResident: true,
-        urlTunneller: options.webEnableExposeUrl! ? daemon.daemonDomain.exposeUrl : null,
+        urlTunneller: options.webConfig.enableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
         machine: machine,
         analytics: _analytics,
         buildSystem: _buildSystem,
