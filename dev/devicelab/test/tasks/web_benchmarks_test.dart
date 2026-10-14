@@ -4,7 +4,7 @@
 
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/tasks/web_benchmarks.dart';
-import 'package:flutter_devicelab/tasks/web_benchmarks_helpers.dart';
+import 'package:flutter_devicelab/tasks/web_benchmarks_comparison.dart';
 
 import '../common.dart';
 

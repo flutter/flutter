@@ -2,9 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Standard curated fast smoke-test benchmarks.
-const List<String> kSmokeTestBenchmarks = <String>['draw_rect', 'bench_card_infinite_scroll'];
-
 /// A single metric comparison entry between baseline and current.
 class MetricComparison {
   MetricComparison({
