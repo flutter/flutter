@@ -38,6 +38,7 @@ class PreviewDetector {
     required this.logger,
     required this.onChangeDetected,
     required this.onPubspecChangeDetected,
+    this.onNonDartFileChangeDetected,
     @visibleForTesting this.watcherBuilder = _defaultWatcherBuilder,
     @visibleForTesting this.onPackageConfigChangeDetected,
   }) : projectRoot = _resolveDirectory(project.directory);
@@ -59,6 +60,7 @@ class PreviewDetector {
   final Logger logger;
   final void Function(PreviewDependencyGraph) onChangeDetected;
   final void Function(String path) onPubspecChangeDetected;
+  final void Function(String path)? onNonDartFileChangeDetected;
   @visibleForTesting
   final void Function(String path)? onPackageConfigChangeDetected;
   final WatcherBuilder watcherBuilder;
@@ -186,9 +188,10 @@ class PreviewDetector {
         onPubspecChangeDetected(eventPath);
         return;
       }
-      // Only trigger a reload when changes to Dart sources are detected. We
-      // ignore the generated preview file to avoid getting stuck in a loop.
+      // Only trigger a preview analysis reload when changes to Dart sources are detected.
+      // For non-Dart files (such as data assets), notify onNonDartFileChangeDetected.
       if (!eventPath.isDartFile) {
+        onNonDartFileChangeDetected?.call(eventPath);
         return;
       }
 
@@ -196,8 +199,8 @@ class PreviewDetector {
       try {
         context = _collection.contextFor(eventPath);
       } on StateError {
-        // The modified file isn't part of the analysis context and is safe to
-        // ignore.
+        // The modified file isn't part of the analysis context, but could be a hook script.
+        onNonDartFileChangeDetected?.call(eventPath);
         return;
       }
 
