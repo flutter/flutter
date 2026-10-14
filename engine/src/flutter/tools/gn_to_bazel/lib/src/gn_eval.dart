@@ -1501,9 +1501,17 @@ final class _Evaluator {
       variable = scope.variables.putIfAbsent(name, () => GnVariable(name, isList: true));
     } else {
       if (!scope.variables.containsKey(name)) {
-        throw GnError(node.location, '${node.op} on $name, which belongs to an enclosing scope');
+        // GN copies the enclosing scope's value into the current scope
+        // first (Scope::GetValueForcedToCurrentScope) and modifies the copy;
+        // the enclosing variable is untouched. The embedder's template
+        // forwards `public_configs` to its own scope and the target block
+        // appends to it.
+        variable = GnVariable(name, isList: existing.isList)
+          ..assignments.addAll(existing.assignments);
+        scope.variables[name] = variable;
+      } else {
+        variable = existing;
       }
-      variable = existing;
     }
     if (variable.isList != value.isList) {
       throw GnError(
