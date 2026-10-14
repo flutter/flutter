@@ -72,10 +72,21 @@ class AttachCommand extends FlutterCommand {
     super.verboseHelp = false,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
        _toolContext = toolContext {
-    registerOptionBundles(optionBundles);
+    enableUsesTargetOption();
+    registerOptionBundles(const <OptionBundle>[
+      BuildModeOptionsBundle(defaultToRelease: false, excludeRelease: true),
+      VmServicePortOptionsBundle(),
+      FilesystemOptionsBundle(),
+      DeviceDiscoveryOptionsBundle(includeDeviceUser: true),
+      ResidentCompilerOptionsBundle(),
+      DdsAndDevToolsOptionsBundle(),
+    ]);
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.target,
       DebuggingOptionDescriptors.fuchsiaTargetModel,
       DebuggingOptionDescriptors.fuchsiaModule,
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
       CommonOptions.enableExperiment,
       _debugPort,
       _debugUrl,
@@ -121,17 +132,6 @@ class AttachCommand extends FlutterCommand {
     verboseOnly: true,
     help: 'Normally used only in run target.',
   );
-
-  List<OptionBundle> get optionBundles => const <OptionBundle>[
-    BuildModeOptionsBundle(defaultToRelease: false, excludeRelease: true),
-    TargetOptionBundle(),
-    VmServicePortOptionsBundle(),
-    FilesystemOptionsBundle(),
-    DartDefinesOptionsBundle(),
-    DeviceDiscoveryOptionsBundle(includeDeviceUser: true),
-    ResidentCompilerOptionsBundle(),
-    DdsAndDevToolsOptionsBundle(),
-  ];
 
   final HotRunnerFactory _hotRunnerFactory;
   final ToolContext _toolContext;
@@ -480,32 +480,6 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   bool _isIOSDevice(Device device) {
     return (device.platformType == PlatformType.ios) || (device is MacOSDesignedForIPadDevice);
   }
-}
-
-/// A bundle encapsulating the target option (`--target`).
-class TargetOptionBundle extends OptionBundle {
-  const TargetOptionBundle();
-
-  @override
-  void onRegister(FlutterCommand command) {
-    command.enableUsesTargetOption();
-  }
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    CommonOptions.target,
-  ];
-}
-
-/// A bundle encapsulating Dart defines options (`--dart-define` and `--dart-define-from-file`).
-class DartDefinesOptionsBundle extends OptionBundle {
-  const DartDefinesOptionsBundle();
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    CommonOptions.dartDefines,
-    CommonOptions.dartDefineFromFile,
-  ];
 }
 
 class HotRunnerFactory {
