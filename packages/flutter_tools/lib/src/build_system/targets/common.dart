@@ -13,9 +13,10 @@ import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../darwin/darwin.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show xcode;
+import '../../globals.dart' as globals show os;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
+import '../../windows/visual_studio.dart';
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -227,8 +228,7 @@ class KernelSnapshot extends Target {
     final String? fileSystemScheme = environment.defines[kFileSystemScheme];
 
     TargetModel targetModel = TargetModel.flutter;
-    if (targetPlatform == TargetPlatform.fuchsia_x64 ||
-        targetPlatform == TargetPlatform.fuchsia_arm64) {
+    if (targetPlatform.os == .fuchsia) {
       targetModel = TargetModel.flutterRunner;
     }
     // Force linking of the platform for desktop embedder targets since these
@@ -257,20 +257,15 @@ class KernelSnapshot extends Target {
         TargetPlatform.throwUnsupportedTarget();
     }
 
-    final String? targetOS = switch (targetPlatform) {
-      TargetPlatform.fuchsia_arm64 || TargetPlatform.fuchsia_x64 => 'fuchsia',
-      TargetPlatform.android ||
-      TargetPlatform.android_arm ||
-      TargetPlatform.android_arm64 ||
-      TargetPlatform.android_x64 => 'android',
-      TargetPlatform.darwin => 'macos',
-      TargetPlatform.ios => 'ios',
-      TargetPlatform.linux_arm64 ||
-      TargetPlatform.linux_riscv64 ||
-      TargetPlatform.linux_x64 => 'linux',
-      TargetPlatform.windows_arm64 || TargetPlatform.windows_x64 => 'windows',
-      TargetPlatform.tester || TargetPlatform.web_javascript => null,
-      TargetPlatform.unsupported => TargetPlatform.throwUnsupportedTarget(),
+    final String? targetOS = switch (targetPlatform.os) {
+      .fuchsia => 'fuchsia',
+      .android => 'android',
+      .macos => 'macos',
+      .ios => 'ios',
+      .linux => 'linux',
+      .windows => 'windows',
+      .tester || .web => null,
+      .unsupported => TargetPlatform.throwUnsupportedTarget(),
     };
 
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
@@ -357,30 +352,25 @@ class KernelSnapshot extends Target {
   }
 }
 
-/// Supports compiling a dart kernel file to an ELF binary.
-abstract class AotElfBase extends Target {
-  const AotElfBase();
+/// Supports compiling a dart kernel file to a native AOT binary.
+abstract class AotSnapshotBase extends Target {
+  const AotSnapshotBase();
 
   @override
   String get analyticsName => 'android_aot';
 
+  TargetPlatform get targetPlatform;
+
   @override
   Future<void> build(Environment environment) async {
-    final snapshotter = AOTSnapshotter(
-      fileSystem: environment.fileSystem,
-      logger: environment.logger,
-      xcode: globals.xcode!,
-      processManager: environment.processManager,
-      artifacts: environment.artifacts,
-    );
     final String outputPath = environment.buildDir.path;
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
-      throw MissingDefineException(kBuildMode, 'aot_elf');
+      throw MissingDefineException(kBuildMode, 'aot_snapshot');
     }
     final String? targetPlatformEnvironment = environment.defines[kTargetPlatform];
     if (targetPlatformEnvironment == null) {
-      throw MissingDefineException(kTargetPlatform, 'aot_elf');
+      throw MissingDefineException(kTargetPlatform, 'aot_snapshot');
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(
       environment.defines,
@@ -388,6 +378,24 @@ abstract class AotElfBase extends Target {
     );
     final buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
+    // TODO(team-windows): Support PE/COFF AOT snapshots for Windows Arm64.
+    // See: https://github.com/flutter/flutter/issues/190897
+    final String? windowsLinkerPath = targetPlatform == TargetPlatform.windows_x64
+        ? VisualStudio(
+            fileSystem: environment.fileSystem,
+            processManager: environment.processManager,
+            platform: environment.platform,
+            logger: environment.logger,
+            osUtils: globals.os,
+          ).linkPath
+        : null;
+    final snapshotter = AOTSnapshotter(
+      fileSystem: environment.fileSystem,
+      logger: environment.logger,
+      processManager: environment.processManager,
+      artifacts: environment.artifacts,
+      windowsLinkerPath: windowsLinkerPath,
+    );
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final dartObfuscation = environment.defines[kDartObfuscation] == 'true';
     final String? codeSizeDirectory = environment.defines[kCodeSizeDirectory];
@@ -418,12 +426,21 @@ abstract class AotElfBase extends Target {
   }
 }
 
-/// Generate an ELF binary from a dart kernel file in profile mode.
-class AotElfProfile extends AotElfBase {
-  const AotElfProfile(this.targetPlatform);
+List<Source> _aotOutputsForTarget(TargetPlatform targetPlatform) {
+  return <Source>[
+    const Source.pattern('{BUILD_DIR}/app.so'),
+    if (targetPlatform == TargetPlatform.windows_x64) ...const <Source>[
+      Source.pattern('{BUILD_DIR}/app.o'),
+    ],
+  ];
+}
+
+/// Generate a native AOT binary from a dart kernel file in profile mode.
+class AotSnapshotProfile extends AotSnapshotBase {
+  const AotSnapshotProfile(this.targetPlatform);
 
   @override
-  String get name => 'aot_elf_profile';
+  String get name => 'aot_snapshot_profile';
 
   @override
   List<Source> get inputs => <Source>[
@@ -437,20 +454,21 @@ class AotElfProfile extends AotElfBase {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/app.so')];
+  List<Source> get outputs => _aotOutputsForTarget(targetPlatform);
 
   @override
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
 
+  @override
   final TargetPlatform targetPlatform;
 }
 
-/// Generate an ELF binary from a dart kernel file in release mode.
-class AotElfRelease extends AotElfBase {
-  const AotElfRelease(this.targetPlatform);
+/// Generate a native AOT binary from a dart kernel file in release mode.
+class AotSnapshotRelease extends AotSnapshotBase {
+  const AotSnapshotRelease(this.targetPlatform);
 
   @override
-  String get name => 'aot_elf_release';
+  String get name => 'aot_snapshot_release';
 
   @override
   List<Source> get inputs => <Source>[
@@ -464,11 +482,12 @@ class AotElfRelease extends AotElfBase {
   ];
 
   @override
-  List<Source> get outputs => const <Source>[Source.pattern('{BUILD_DIR}/app.so')];
+  List<Source> get outputs => _aotOutputsForTarget(targetPlatform);
 
   @override
   List<Target> get dependencies => const <Target>[KernelSnapshot()];
 
+  @override
   final TargetPlatform targetPlatform;
 }
 
