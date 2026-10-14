@@ -110,6 +110,12 @@ class BackdropBlurCarrier {
     if (!isSupported() || view.getContext() == null) {
       return;
     }
+    if (flutterView == view) {
+      return;
+    }
+    if (flutterView != null) {
+      detachFromView();
+    }
     flutterView = view;
     final WindowManager wm = view.getContext().getSystemService(WindowManager.class);
     if (wm != null) {

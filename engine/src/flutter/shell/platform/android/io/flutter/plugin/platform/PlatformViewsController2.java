@@ -258,11 +258,6 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
       final FlutterMutatorView view = platformViewParent.valueAt(index);
       flutterView.addView(view);
     }
-    // Only engines running Hybrid Composition++ can route backdrop blurs through SurfaceFlinger,
-    // so only they pay for the carrier SurfaceView.
-    if (BackdropBlurCarrier.isSupported() && isHcppEnabled()) {
-      backdropBlurCarrier.attachToView(flutterView);
-    }
     // Notify platform views that they are now attached to a FlutterView.
     for (int index = 0; index < platformViews.size(); index++) {
       final PlatformView view = platformViews.valueAt(index);
@@ -803,6 +798,13 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @RequiresApi(API_LEVELS.API_34)
   public FlutterOverlaySurface createOverlaySurface() {
     if (overlayerSurface == null) {
+      // Only engines running Hybrid Composition++ create an overlay, and only they can route
+      // backdrop blurs through SurfaceFlinger, so this is where the carrier SurfaceView is
+      // added. It runs on the platform thread before the first frame's platform view
+      // positions are applied, so the carrier joins the same traversal.
+      if (BackdropBlurCarrier.isSupported() && flutterView != null) {
+        backdropBlurCarrier.attachToView(flutterView);
+      }
       final SurfaceControl.Builder surfaceControlBuilder = new SurfaceControl.Builder();
       surfaceControlBuilder.setBufferSize(flutterView.getWidth(), flutterView.getHeight());
       surfaceControlBuilder.setFormat(PixelFormat.RGBA_8888);
