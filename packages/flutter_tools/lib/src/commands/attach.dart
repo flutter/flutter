@@ -93,7 +93,7 @@ class AttachCommand extends FlutterCommand {
       _appId,
       DebuggingOptionDescriptors.pidFile,
       DebuggingOptionDescriptors.reportReady,
-      _projectRoot,
+      DebuggingOptionDescriptors.projectRoot,
       CommonOptions.machine,
       BuildInfoOptions.trackWidgetCreation,
       DebuggingOptionDescriptors.adbLogFiltering,
@@ -125,12 +125,6 @@ class AttachCommand extends FlutterCommand {
         'If you have multiple devices or emulators running, you should include the '
         'device hostname as well, e.g. "com.example.myApp@my-iphone".\n'
         'This parameter is case-insensitive.',
-  );
-
-  static const _projectRoot = StringOptionDescriptor(
-    name: 'project-root',
-    verboseOnly: true,
-    help: 'Normally used only in run target.',
   );
 
   final HotRunnerFactory _hotRunnerFactory;
@@ -389,7 +383,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             flutterDevices,
             target: targetFile,
             debuggingOptions: debuggingOptions,
-            projectRootPath: getValue(_projectRoot),
+            projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),
             dillOutputPath: getValue(BuildInfoOptions.outputDill),
             nativeAssetsYamlFile: getValue(BuildInfoOptions.nativeAssetsYamlFile),
             analytics: analytics,
