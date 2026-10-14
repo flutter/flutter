@@ -8,11 +8,8 @@ import 'package:process/process.dart';
 
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/process.dart';
-import 'base/signals.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -829,7 +826,7 @@ class CachedArtifacts implements Artifacts {
       case Artifact.fuchsiaKernelCompiler:
         throw StateError('Artifact $artifact not available for platform $platform.');
       case Artifact.flutterToolsFileGenerators:
-        return _getFileGeneratorsPath();
+        return _getFileGeneratorsPath(_fileSystem, _platform);
     }
   }
 
@@ -1201,7 +1198,7 @@ class CachedLocalEngineArtifacts implements Artifacts {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         return _fileSystem.path.join(_getDartSdkPath(), 'bin', 'snapshots', artifactFileName);
       case Artifact.flutterToolsFileGenerators:
-        return _getFileGeneratorsPath();
+        return _getFileGeneratorsPath(_fileSystem, _platform);
     }
   }
 
@@ -1431,7 +1428,7 @@ class _TestArtifacts implements Artifacts {
   }) {
     // The path to file generators is the same even in the test environment.
     if (artifact == Artifact.flutterToolsFileGenerators) {
-      return _getFileGeneratorsPath();
+      return _getFileGeneratorsPath(fileSystem);
     }
 
     final buffer = StringBuffer();
@@ -1477,18 +1474,13 @@ class _TestLocalEngine extends _TestArtifacts {
   final LocalEngineInfo localEngineInfo;
 }
 
-String _getFileGeneratorsPath() {
-  final localFileSystem = LocalFileSystem(
-    LocalSignals.instance,
-    const <ProcessSignal>[],
-    ShutdownHooks(),
-  );
+String _getFileGeneratorsPath(FileSystem fileSystem, [Platform platform = const LocalPlatform()]) {
   final String flutterRoot = Cache.defaultFlutterRoot(
-    fileSystem: localFileSystem,
-    platform: const LocalPlatform(),
+    fileSystem: fileSystem,
+    platform: platform,
     userMessages: UserMessages(),
   );
-  return localFileSystem.path.join(
+  return fileSystem.path.join(
     flutterRoot,
     'packages',
     'flutter_tools',
