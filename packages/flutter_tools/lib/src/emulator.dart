@@ -42,11 +42,9 @@ class EmulatorManager {
       logger: logger,
       processManager: processManager,
     );
-    if (iosWorkflow != null && xcode != null) {
-      _emulatorDiscoverers.add(
-        IOSEmulators(iosWorkflow: iosWorkflow, toolContext: _toolContext, xcode: xcode),
-      );
-    }
+    _emulatorDiscoverers.add(
+      IOSEmulators(iosWorkflow: iosWorkflow, toolContext: _toolContext, xcode: xcode),
+    );
     _emulatorDiscoverers.add(_androidEmulators);
   }
 

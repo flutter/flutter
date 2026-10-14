@@ -83,13 +83,7 @@ class XCDevice {
       processManager: processManager,
     );
     _coreDeviceControl =
-        coreDeviceControl ??
-        IOSCoreDeviceControl(
-          fileSystem: fs,
-          logger: logger,
-          processManager: processManager,
-          xcode: _xcode,
-        );
+        coreDeviceControl ?? IOSCoreDeviceControl(toolContext: _toolContext, xcode: _xcode);
     _xcodeDebug =
         xcodeDebug ??
         XcodeDebug(logger: logger, processManager: processManager, xcode: _xcode, fileSystem: fs);

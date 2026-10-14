@@ -15,15 +15,15 @@ import 'simulators.dart';
 class IOSEmulators extends EmulatorDiscovery {
   IOSEmulators({required this._iosWorkflow, required this._toolContext, required this._xcode});
 
-  final IOSWorkflow _iosWorkflow;
+  final IOSWorkflow? _iosWorkflow;
   final ToolContext _toolContext;
-  final Xcode _xcode;
+  final Xcode? _xcode;
 
   @override
   bool get supportsPlatform => _toolContext.platform.isMacOS;
 
   @override
-  bool get canListAnything => _iosWorkflow.canListEmulators;
+  bool get canListAnything => _iosWorkflow?.canListEmulators ?? false;
 
   @override
   Future<List<Emulator>> get emulators async =>
@@ -82,11 +82,11 @@ class IOSEmulator extends Emulator {
 }
 
 /// Return the list of iOS Simulators (there can only be zero or one).
-List<IOSEmulator> getEmulators({required ToolContext toolContext, required Xcode xcode}) {
-  final String? simulatorPath = xcode.getSimulatorPath();
+List<IOSEmulator> getEmulators({required ToolContext toolContext, required Xcode? xcode}) {
+  final String? simulatorPath = xcode?.getSimulatorPath();
   if (simulatorPath == null) {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[IOSEmulator(iosSimulatorId, toolContext: toolContext, xcode: xcode)];
+  return <IOSEmulator>[IOSEmulator(iosSimulatorId, toolContext: toolContext, xcode: xcode!)];
 }
