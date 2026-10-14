@@ -187,10 +187,10 @@ TEST_P(AiksTest, DrawVerticesImageSourceWithUpperAdvancedBlendModes) {
       DlPoint(size.width, size.height),
   };
   std::vector<DlColor> colors = {
-      DlColor::kRed().modulateOpacity(0.5),
-      DlColor::kBlue().modulateOpacity(0.5),
-      DlColor::kGreen().modulateOpacity(0.5),
-      DlColor::kRed().modulateOpacity(0.5),
+      DlColor::kRed().modulateOpacity(0.5f),
+      DlColor::kBlue().modulateOpacity(0.5f),
+      DlColor::kGreen().modulateOpacity(0.5f),
+      DlColor::kRed().modulateOpacity(0.5f),
   };
   auto vertices =
       MakeVertices(DlVertexMode::kTriangleStrip, positions, {}, {}, colors);

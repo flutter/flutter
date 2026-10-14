@@ -28,14 +28,14 @@ Vector3 RGBToYUV(Vector3 rgb, YUVColorSpace yuv_color_space) {
   Vector3 yuv;
   switch (yuv_color_space) {
     case YUVColorSpace::kBT601FullRange:
-      yuv.x = rgb.x * 0.299 + rgb.y * 0.587 + rgb.z * 0.114;
-      yuv.y = rgb.x * -0.169 + rgb.y * -0.331 + rgb.z * 0.5 + 0.5;
-      yuv.z = rgb.x * 0.5 + rgb.y * -0.419 + rgb.z * -0.081 + 0.5;
+      yuv.x = rgb.x * 0.299f + rgb.y * 0.587f + rgb.z * 0.114f;
+      yuv.y = rgb.x * -0.169f + rgb.y * -0.331f + rgb.z * 0.5f + 0.5f;
+      yuv.z = rgb.x * 0.5f + rgb.y * -0.419f + rgb.z * -0.081f + 0.5f;
       break;
     case YUVColorSpace::kBT601LimitedRange:
-      yuv.x = rgb.x * 0.257 + rgb.y * 0.516 + rgb.z * 0.100 + 0.063;
-      yuv.y = rgb.x * -0.145 + rgb.y * -0.291 + rgb.z * 0.439 + 0.5;
-      yuv.z = rgb.x * 0.429 + rgb.y * -0.368 + rgb.z * -0.071 + 0.5;
+      yuv.x = rgb.x * 0.257f + rgb.y * 0.516f + rgb.z * 0.100f + 0.063f;
+      yuv.y = rgb.x * -0.145f + rgb.y * -0.291f + rgb.z * 0.439f + 0.5f;
+      yuv.z = rgb.x * 0.429f + rgb.y * -0.368f + rgb.z * -0.071f + 0.5f;
       break;
   }
   return yuv;
@@ -75,10 +75,10 @@ std::shared_ptr<Texture> CreateTextureWithData(const Context& context,
 std::optional<TestYUVTextures> CreateTestYUVTextures(
     const Context& context,
     YUVColorSpace yuv_color_space) {
-  const Vector3 red = {244.0 / 255.0, 67.0 / 255.0, 54.0 / 255.0};
-  const Vector3 green = {76.0 / 255.0, 175.0 / 255.0, 80.0 / 255.0};
-  const Vector3 blue = {33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0};
-  const Vector3 white = {1.0, 1.0, 1.0};
+  const Vector3 red = {244.0f / 255.0f, 67.0f / 255.0f, 54.0f / 255.0f};
+  const Vector3 green = {76.0f / 255.0f, 175.0f / 255.0f, 80.0f / 255.0f};
+  const Vector3 blue = {33.0f / 255.0f, 150.0f / 255.0f, 243.0f / 255.0f};
+  const Vector3 white = {1.0f, 1.0f, 1.0f};
   const std::array<Vector3, 4> yuvs = {
       RGBToYUV(red, yuv_color_space), RGBToYUV(green, yuv_color_space),
       RGBToYUV(blue, yuv_color_space), RGBToYUV(white, yuv_color_space)};
@@ -92,9 +92,9 @@ std::optional<TestYUVTextures> CreateTestYUVTextures(
   y_data.reserve(kYSize.Area());
   uv_data.reserve(kUVSize.Area() * 2);
   for (const Vector3& yuv : yuvs) {
-    uint8_t y = std::round(yuv.x * 255.0);
-    uint8_t u = std::round(yuv.y * 255.0);
-    uint8_t v = std::round(yuv.z * 255.0);
+    uint8_t y = std::round(yuv.x * 255.0f);
+    uint8_t u = std::round(yuv.y * 255.0f);
+    uint8_t v = std::round(yuv.z * 255.0f);
     for (int j = 0; j < kYSize.width * 2; j++) {
       y_data.push_back(y);
     }
