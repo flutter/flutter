@@ -7,16 +7,23 @@ import 'dart:collection';
 import 'package:args/args.dart';
 import 'package:package_config/package_config.dart';
 import 'package:pool/pool.dart';
+import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
+import '../artifacts.dart';
+import '../base/bot_detector.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
+import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
@@ -25,6 +32,7 @@ import '../package_graph.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 
 class PackagesCommand extends FlutterCommand {
   PackagesCommand({
@@ -151,15 +159,14 @@ class PackagesCommand extends FlutterCommand {
 }
 
 class PackagesTestCommand extends FlutterCommand {
-  PackagesTestCommand({required ToolContext toolContext})
-    : _toolContext = toolContext,
-      super(toolContext: toolContext) {
+  PackagesTestCommand({required ToolContext super.toolContext}) {
     requiresPubspecYaml();
   }
 
-  final ToolContext _toolContext;
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
-  late final Pub _pub = _createPub(_toolContext);
+  late final Pub _pub = _createPub(toolContext);
 
   @override
   String get name => 'test';
@@ -190,18 +197,18 @@ class PackagesForwardCommand extends FlutterCommand {
   PackagesForwardCommand(
     this._commandName,
     this._description, {
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     bool requiresPubspec = false,
-  }) : _toolContext = toolContext,
-       super(toolContext: toolContext) {
+  }) {
     if (requiresPubspec) {
       requiresPubspecYaml();
     }
   }
 
-  final ToolContext _toolContext;
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
-  late final Pub _pub = _createPub(_toolContext);
+  late final Pub _pub = _createPub(toolContext);
 
   PubContext context = PubContext.pubForward;
 
@@ -239,16 +246,15 @@ class PackagesForwardCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand({required ToolContext toolContext})
-    : _toolContext = toolContext,
-      super(toolContext: toolContext);
+  PackagesPassthroughCommand({required ToolContext super.toolContext});
 
-  final ToolContext _toolContext;
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   ArgParser argParser = ArgParser.allowAnything();
 
-  late final Pub _pub = _createPub(_toolContext);
+  late final Pub _pub = _createPub(toolContext);
 
   @override
   String get name => 'pub';
@@ -279,11 +285,12 @@ class PackagesGetCommand extends FlutterCommand {
     this._description,
     this._context, {
     required this._buildSystem,
-    required ToolContext toolContext,
-  }) : _toolContext = toolContext,
-       super(toolContext: toolContext);
+    required ToolContext super.toolContext,
+  });
 
-  final ToolContext _toolContext;
+  @override
+  ToolContext get toolContext => super.toolContext!;
+
   final BuildSystem _buildSystem;
 
   @override
@@ -309,7 +316,7 @@ class PackagesGetCommand extends FlutterCommand {
     return '${runner!.executableName} pub $_commandName [<arguments...>]';
   }
 
-  late final Pub _pub = _createPub(_toolContext);
+  late final Pub _pub = _createPub(toolContext);
 
   /// An [ArgParser] that accepts all options and flags that the
   ///
@@ -359,8 +366,17 @@ class PackagesGetCommand extends FlutterCommand {
     } on ArgParserException {
       // Let pub give the error message.
     }
-    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
+      :FlutterVersion flutterVersion,
+      :FileSystem fs,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :FlutterProjectFactory projectFactory,
+    ) = toolContext;
 
     String? target;
     FlutterProject? rootProject;
@@ -446,15 +462,15 @@ class PackagesGetCommand extends FlutterCommand {
 
         if (project.manifest.generateLocalizations) {
           final environment = Environment(
-            artifacts: _toolContext.artifacts,
+            artifacts: artifacts,
             logger: logger,
-            cacheDir: _toolContext.cache.getRoot(),
-            engineVersion: _toolContext.flutterVersion.engineRevision,
+            cacheDir: cache.getRoot(),
+            engineVersion: flutterVersion.engineRevision,
             fileSystem: fs,
-            flutterRootDir: fs.directory(_toolContext.cache.flutterRoot),
-            outputDir: fs.directory(getBuildDirectory(_toolContext.config, fs)),
-            processManager: _toolContext.processManager,
-            platform: _toolContext.platform,
+            flutterRootDir: fs.directory(cache.flutterRoot),
+            outputDir: fs.directory(getBuildDirectory(config, fs)),
+            processManager: processManager,
+            platform: platform,
             analytics: analytics,
             projectDir: project.directory,
             packageConfigPath: packageConfigPath(),
@@ -492,6 +508,7 @@ class PackagesGetCommand extends FlutterCommand {
         // See https://github.com/flutter/flutter/issues/189550.
         if (_dependsOnFlutter(graph, workspaceRootName)) {
           await project.regeneratePlatformSpecificTooling(
+            cache: cache,
             releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
             pubspecCache: pubspecCache,
             packageGraph: graph,
@@ -505,6 +522,7 @@ class PackagesGetCommand extends FlutterCommand {
           // double post-processing.
           if (!graph.roots.contains(exampleProject.manifest.appName)) {
             await exampleProject.regeneratePlatformSpecificTooling(
+              cache: cache,
               releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
               pubspecCache: pubspecCache,
               packageGraph: graph,
@@ -545,7 +563,7 @@ class PackagesGetCommand extends FlutterCommand {
       return <Plugin>[];
     }
 
-    return findPlugins(rootProject, logger: _toolContext.logger, throwOnError: false);
+    return findPlugins(rootProject, logger: toolContext.logger, throwOnError: false);
   })();
 
   late final String? _androidEmbeddingVersion = _rootProject?.android
@@ -587,12 +605,23 @@ class PackagesGetCommand extends FlutterCommand {
   }
 }
 
-Pub _createPub(ToolContext toolContext) => Pub(
-  botDetector: toolContext.botDetector,
-  fileSystem: toolContext.fs,
-  logger: toolContext.logger,
-  platform: toolContext.platform,
-  processManager: toolContext.processManager,
-  cache: toolContext.cache,
-  stdio: toolContext.stdio,
-);
+Pub _createPub(ToolContext toolContext) {
+  final ToolContext(
+    :BotDetector botDetector,
+    :Cache cache,
+    :FileSystem fs,
+    :Logger logger,
+    :Platform platform,
+    :ProcessManager processManager,
+    :Stdio stdio,
+  ) = toolContext;
+  return Pub(
+    botDetector: botDetector,
+    cache: cache,
+    fileSystem: fs,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+    stdio: stdio,
+  );
+}

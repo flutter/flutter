@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/isolated/release_asset_server.dart';
 import 'package:flutter_tools/src/isolated/web_asset_server.dart';
@@ -371,6 +372,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: platform,
+        cache: Cache.test(processManager: FakeProcessManager.any()),
       );
 
       expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
@@ -400,6 +402,7 @@ void main() {
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           platform: platform,
+          cache: Cache.test(processManager: FakeProcessManager.any()),
         );
 
         expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], isNull);
@@ -428,6 +431,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: platform,
+        cache: Cache.test(processManager: FakeProcessManager.any()),
       );
 
       expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
@@ -457,6 +461,7 @@ void main() {
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           platform: platform,
+          cache: Cache.test(processManager: FakeProcessManager.any()),
         );
 
         expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], isNull);
@@ -485,6 +490,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: platform,
+        cache: Cache.test(processManager: FakeProcessManager.any()),
       );
 
       expect(server.basePath, 'preview');
@@ -511,6 +517,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: platform,
+        cache: Cache.test(processManager: FakeProcessManager.any()),
       );
 
       expect(server.basePath, isEmpty);
@@ -537,6 +544,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: platform,
+        cache: Cache.test(processManager: FakeProcessManager.any()),
       );
 
       var serverReady = false;
@@ -567,6 +575,7 @@ void main() {
         fileSystem: fileSystem,
         logger: BufferLogger.test(),
         platform: platform,
+        cache: Cache.test(processManager: FakeProcessManager.any()),
       );
 
       var server2Ready = false;
@@ -604,6 +613,7 @@ void main() {
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           platform: platform,
+          cache: Cache.test(processManager: FakeProcessManager.any()),
         );
 
         final client = HttpClient();
@@ -659,6 +669,7 @@ void main() {
           fileSystem: fileSystem,
           logger: BufferLogger.test(),
           platform: platform,
+          cache: Cache.test(processManager: FakeProcessManager.any()),
         );
 
         // Project source file exists in assets/ directory.
@@ -738,6 +749,7 @@ void main() {
             fileSystem: windowsFileSystem,
             logger: BufferLogger.test(),
             platform: windowsPlatform,
+            cache: Cache.test(processManager: FakeProcessManager.any()),
           );
 
           // Project source file exists in assets/ directory.
@@ -924,6 +936,7 @@ void main() {
               fileSystem: fileSystem,
               logger: logger,
               platform: platform,
+              cache: Cache.test(processManager: FakeProcessManager.any()),
             );
             server.markReady();
 

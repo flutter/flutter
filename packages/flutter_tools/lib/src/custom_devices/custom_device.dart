@@ -427,6 +427,7 @@ class CustomDevice extends Device {
     required CustomDeviceConfig config,
     required super.logger,
     required ProcessManager processManager,
+    this._bundleBuilder,
   }) : _config = config,
        _logger = logger,
        _processManager = processManager,
@@ -448,6 +449,7 @@ class CustomDevice extends Device {
          platformType: PlatformType.custom,
        );
 
+  final BundleBuilder? _bundleBuilder;
   final CustomDeviceConfig _config;
   final Logger _logger;
   final ProcessManager _processManager;
@@ -729,7 +731,7 @@ class CustomDevice extends Device {
     if (!prebuiltApplication) {
       final String assetBundleDir = getAssetBuildDirectory();
 
-      bundleBuilder ??= BundleBuilder();
+      bundleBuilder ??= _bundleBuilder!;
 
       // this just builds the asset bundle, it's the same as `flutter build bundle`
       await bundleBuilder.build(
@@ -832,8 +834,12 @@ class CustomDevices extends PollingDeviceDiscovery {
         .tryGetDevices()
         .where((CustomDeviceConfig element) => element.enabled)
         .map(
-          (CustomDeviceConfig config) =>
-              CustomDevice(config: config, logger: _logger, processManager: _processManager),
+          (CustomDeviceConfig config) => CustomDevice(
+            config: config,
+            logger: _logger,
+            processManager: _processManager,
+            bundleBuilder: BundleBuilder(cache: _customDevicesConfig.cache),
+          ),
         )
         .toList();
   }

@@ -23,6 +23,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../cache.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
@@ -976,6 +977,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(
       :Artifacts artifacts,
+      :Cache cache,
       fileSystemUtils: FileSystemUtils fsUtils,
       :FileSystem fs,
       :Logger logger,
@@ -1016,10 +1018,11 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     });
     final String? specifiedDeviceId =
         globalResults?[FlutterGlobalOptions.kDeviceIdOption] as String? ??
-        _toolContext.platform.environment['FLUTTER_DEVICE_ID'];
+        platform.environment['FLUTTER_DEVICE_ID'];
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
+      flutterRoot: cache.flutterRoot,
       targetOverride: targetFile,
       environmentType: environmentType,
       codesign: shouldCodesign,

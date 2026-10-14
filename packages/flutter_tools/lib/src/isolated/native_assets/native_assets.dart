@@ -18,7 +18,6 @@ import '../../base/logger.dart';
 import '../../base/platform.dart';
 import '../../build_info.dart';
 import '../../build_system/exceptions.dart';
-import '../../cache.dart';
 import '../../features.dart';
 import '../../globals.dart' as globals;
 import 'android/native_assets.dart';
@@ -547,10 +546,8 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
     this.runPackageName,
     this.pubspecPath, {
     required this.includeDevDependencies,
-    Cache? cache,
-    String? flutterRoot,
-  }) : assert(cache != null || flutterRoot != null),
-       _flutterRoot = (flutterRoot ?? cache?.flutterRoot)!;
+    required this._flutterRoot,
+  });
 
   final String pubspecPath;
   final String packageConfigPath;

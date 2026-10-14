@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/bundle_builder.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -44,7 +45,7 @@ void main() {
         environment.outputDir.childFile('LICENSE').createSync(recursive: true);
       });
 
-      await BundleBuilder().build(
+      await BundleBuilder(cache: Cache.test(processManager: FakeProcessManager.any())).build(
         platform: TargetPlatform.ios,
         buildInfo: BuildInfo.debug,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
@@ -81,7 +82,7 @@ void main() {
         environment.outputDir.childFile('LICENSE').createSync(recursive: true);
       });
 
-      await BundleBuilder().build(
+      await BundleBuilder(cache: Cache.test(processManager: FakeProcessManager.any())).build(
         platform: TargetPlatform.ios,
         buildInfo: BuildInfo.debug,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
@@ -182,7 +183,7 @@ void main() {
     'Handles build system failure',
     () {
       expect(
-        () => BundleBuilder().build(
+        () => BundleBuilder(cache: Cache.test(processManager: FakeProcessManager.any())).build(
           platform: TargetPlatform.ios,
           buildInfo: BuildInfo.debug,
           project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
@@ -219,7 +220,7 @@ void main() {
         environment.outputDir.childFile('LICENSE').createSync(recursive: true);
       });
 
-      await BundleBuilder().build(
+      await BundleBuilder(cache: Cache.test(processManager: FakeProcessManager.any())).build(
         platform: TargetPlatform.ios,
         buildInfo: const BuildInfo(
           BuildMode.debug,
@@ -354,7 +355,7 @@ void main() {
           dependencies.add(dep.name);
         }
       });
-      await BundleBuilder().build(
+      await BundleBuilder(cache: Cache.test(processManager: FakeProcessManager.any())).build(
         platform: TargetPlatform.ios,
         buildInfo: BuildInfo.release,
         project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),

@@ -7,10 +7,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dap_adapters/dap_adapters.dart' show Logger;
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/debug_adapters/server.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
+import '../../src/fake_process_manager.dart';
 
 /// Enable to run from local source when running out-of-process (useful in
 /// development to avoid having to keep rebuilding the flutter tool).
@@ -35,7 +37,7 @@ class InProcessDapTestServer extends DapTestServer {
       stdoutController.sink,
       fileSystem: globals.fs,
       platform: globals.platform,
-      cache: globals.cache,
+      cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: getFlutterRoot()),
       // Simulate flags based on the args to aid testing.
       enableDds: !args.contains('--no-dds'),
       ipv6: args.contains('--ipv6'),

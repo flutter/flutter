@@ -7,15 +7,19 @@ import 'dart:async';
 import 'package:dap_adapters/dap_adapters.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_adapter.dart';
 import 'package:flutter_tools/src/debug_adapters/flutter_test_adapter.dart';
+
+import '../../src/fake_process_manager.dart';
 
 /// A [FlutterDebugAdapter] that captures what process/args will be launched.
 class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
   factory FakeFlutterDebugAdapter({
     required FileSystem fileSystem,
     required Platform platform,
+    Cache? cache,
     Future<void>? customDebuggerInitialized,
     String? flutterSdkRoot,
     FutureOr<void> Function(FakeFlutterDebugAdapter adapter)? preAppStart,
@@ -37,7 +41,13 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
       clientChannel: clientChannel,
       customDebuggerInitialized: customDebuggerInitialized,
       fileSystem: fileSystem,
-      flutterSdkRoot: flutterSdkRoot ?? (platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter'),
+      cache:
+          cache ??
+          Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot:
+                flutterSdkRoot ?? (platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter'),
+          ),
       platform: platform,
       preAppStart: preAppStart,
       simulateAppStarted: simulateAppStarted,
@@ -51,8 +61,8 @@ class FakeFlutterDebugAdapter extends FlutterDebugAdapter {
     required this.clientChannel,
     required super.fileSystem,
     required super.platform,
+    required super.cache,
     this.customDebuggerInitialized,
-    super.flutterSdkRoot,
     this.preAppStart,
     this.simulateAppStarted = true,
     this.simulateAppStopError = false,
@@ -228,6 +238,7 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   factory FakeFlutterTestDebugAdapter({
     required FileSystem fileSystem,
     required Platform platform,
+    Cache? cache,
     Future<void>? customDebuggerInitialized,
     String? flutterSdkRoot,
   }) {
@@ -241,7 +252,13 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
       channel,
       customDebuggerInitialized: customDebuggerInitialized,
       fileSystem: fileSystem,
-      flutterSdkRoot: flutterSdkRoot ?? (platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter'),
+      cache:
+          cache ??
+          Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot:
+                flutterSdkRoot ?? (platform.isWindows ? r'C:\fake\flutter' : '/fake/flutter'),
+          ),
       platform: platform,
     );
   }
@@ -252,8 +269,8 @@ class FakeFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
     ByteStreamServerChannel channel, {
     required super.fileSystem,
     required super.platform,
+    required super.cache,
     this.customDebuggerInitialized,
-    super.flutterSdkRoot,
   }) : super(channel);
 
   final StreamSink<List<int>> stdin;

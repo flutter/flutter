@@ -17,6 +17,7 @@ Future<void> processPodsIfNeeded(
   XcodeBasedProject xcodeProject,
   String buildDirectory,
   BuildMode buildMode, {
+  required String flutterRoot,
   bool forceCocoaPodsOnly = false,
   bool forceSwiftPM = false,
 }) async {
@@ -85,8 +86,8 @@ Future<void> processPodsIfNeeded(
       xcodeProject.podfile.path,
       if (xcodeProject.flutterPluginSwiftPackageManifest.existsSync())
         xcodeProject.flutterPluginSwiftPackageManifest.path,
-      globals.fs.path.join(
-        globals.cache.flutterRoot,
+      xcodeProject.xcodeProjectInfoFile.fileSystem.path.join(
+        flutterRoot,
         'packages',
         'flutter_tools',
         'bin',

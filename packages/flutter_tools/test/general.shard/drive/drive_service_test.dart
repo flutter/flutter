@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
@@ -434,6 +435,7 @@ void main() {
               Restart? restart,
               CompileExpression? compileExpression,
               FlutterProject? flutterProject,
+              FlutterVersion? flutterVersion,
               PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
               io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
               Device? device,
@@ -515,6 +517,7 @@ FlutterDriverService setUpDriverService({
           Restart? restart,
           CompileExpression? compileExpression,
           FlutterProject? flutterProject,
+          FlutterVersion? flutterVersion,
           PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
           io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
           Device? device,

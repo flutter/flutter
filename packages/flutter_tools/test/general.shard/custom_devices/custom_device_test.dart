@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/bundle_builder.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
@@ -156,7 +157,7 @@ void main() {
             fileSystem: fs,
             directory: dir,
             logger: BufferLogger.test(),
-            flutterRoot: '/flutter',
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
           ),
         ).devices(),
         <Device>[],
@@ -181,7 +182,7 @@ void main() {
             fileSystem: fs,
             directory: dir,
             logger: BufferLogger.test(),
-            flutterRoot: '/flutter',
+            cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
           ),
         ).devices(),
         <Device>[],
@@ -206,7 +207,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: BufferLogger.test(),
-          flutterRoot: '/flutter',
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
         ),
       ).devices(),
       hasLength(1),
@@ -237,7 +238,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: BufferLogger.test(),
-          flutterRoot: '/flutter',
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
         ),
       );
 
@@ -270,7 +271,7 @@ void main() {
           fileSystem: fs,
           directory: dir,
           logger: BufferLogger.test(),
-          flutterRoot: '/flutter',
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
         ),
       );
 
@@ -294,7 +295,7 @@ void main() {
         fileSystem: fs,
         directory: dir,
         logger: BufferLogger.test(),
-        flutterRoot: '/flutter',
+        cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
       ),
     );
 
@@ -321,7 +322,7 @@ void main() {
         fileSystem: fs,
         directory: dir,
         logger: logger,
-        flutterRoot: '/flutter',
+        cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
       ),
     );
 
@@ -553,7 +554,7 @@ void main() {
           fileSystem: fs,
           directory: configFileDir,
           logger: BufferLogger.test(),
-          flutterRoot: '/flutter',
+          cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: '/flutter'),
         ),
       );
 

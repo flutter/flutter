@@ -17,6 +17,7 @@ import 'build_system/depfile.dart';
 import 'build_system/tools/asset_transformer.dart';
 import 'build_system/tools/shader_compiler.dart';
 import 'bundle.dart';
+import 'cache.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -24,6 +25,10 @@ import 'project.dart';
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
+  BundleBuilder({required this._cache});
+
+  final Cache _cache;
+
   /// Builds the bundle for the given target platform.
   ///
   /// The default `mainPath` is `lib/main.dart`.
@@ -51,8 +56,8 @@ class BundleBuilder {
       packageConfigPath: buildInfo.packageConfigPath,
       outputDir: globals.fs.directory(assetDirPath),
       buildDir: project.dartTool.childDirectory('flutter_build'),
-      cacheDir: globals.cache.getRoot(),
-      flutterRootDir: globals.fs.directory(globals.cache.flutterRoot),
+      cacheDir: _cache.getRoot(),
+      flutterRootDir: project.directory.fileSystem.directory(_cache.flutterRoot),
       engineVersion: globals.artifacts!.usesLocalArtifacts
           ? null
           : globals.flutterVersion.engineRevision,

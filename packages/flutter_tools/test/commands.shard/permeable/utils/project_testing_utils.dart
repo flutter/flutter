@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:process/process.dart';
 
-import '../../../src/test_flutter_command_runner.dart';
+import '../../../src/common.dart';
 
 /// A ProcessManager that invokes a real process manager, but keeps
 /// track of all commands sent to it.
@@ -69,7 +69,7 @@ Future<void> analyzeProject(
   List<String> expectedFailures = const <String>[],
 }) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
-    globals.fs.path.join(globals.cache.flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot'),
+    globals.fs.path.join(getFlutterRoot(), 'bin', 'cache', 'flutter_tools.snapshot'),
   );
 
   final args = <String>[flutterToolsSnapshotPath, 'analyze'];

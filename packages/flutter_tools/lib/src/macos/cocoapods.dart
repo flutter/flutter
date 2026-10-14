@@ -104,11 +104,9 @@ class CocoaPods {
     required Platform platform,
     required ProcessManager processManager,
     required this._xcodeProjectInterpreter,
-    this._cache,
+    required this._cache,
     Abi? currentAbi,
-    this._flutterRoot,
-  }) : assert(_cache != null || _flutterRoot != null),
-       _fileSystem = fileSystem,
+  }) : _fileSystem = fileSystem,
        _logger = logger,
        _processManager = processManager,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
@@ -127,10 +125,7 @@ class CocoaPods {
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Logger _logger;
   final Analytics _analytics;
-  final Cache? _cache;
-  final String? _flutterRoot;
-
-  String get _flutterRootPath => (_flutterRoot ?? _cache?.flutterRoot)!;
+  final Cache _cache;
 
   Future<String?>? _versionText;
 
@@ -277,7 +272,7 @@ class CocoaPods {
     final podfileTemplateName = (xcodeProject is MacOSProject) ? 'Podfile-macos' : 'Podfile-ios';
     return _fileSystem.file(
       _fileSystem.path.join(
-        _flutterRootPath,
+        _cache.flutterRoot,
         'packages',
         'flutter_tools',
         'templates',

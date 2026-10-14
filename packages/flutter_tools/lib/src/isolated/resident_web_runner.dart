@@ -295,6 +295,7 @@ class ResidentWebRunner extends ResidentRunner {
           fileSystem: fileSystem,
           logger: logger,
           platform: platform,
+          cache: cache,
           webDefines: _webDefines,
         );
         Uri url = await flutterDevice!.devFS!.create();
@@ -883,6 +884,7 @@ class ResidentWebRunner extends ResidentRunner {
             },
             device: device,
             flutterProject: flutterProject,
+            flutterVersion: flutterVersion,
             printStructuredErrorLogMethod: printStructuredErrorLog,
             vmService: _vmService.service,
           );

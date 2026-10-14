@@ -28,6 +28,7 @@ final linux = FakePlatform();
 void main() {
   testWithoutContext('default configuration', () async {
     final device = MacOSDevice(
+      flutterRoot: '',
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
       fileSystem: MemoryFileSystem.test(),
@@ -52,6 +53,7 @@ void main() {
   testWithoutContext('Attaches to log reader when running in release mode', () async {
     final completer = Completer<void>();
     final device = MacOSDevice(
+      flutterRoot: '',
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
@@ -83,6 +85,7 @@ void main() {
   testWithoutContext('No devices listed if platform is unsupported', () async {
     expect(
       await MacOSDevices(
+        flutterRoot: '',
         fileSystem: MemoryFileSystem.test(),
         processManager: FakeProcessManager.any(),
         logger: BufferLogger.test(),
@@ -101,6 +104,7 @@ void main() {
     'No devices listed if platform is supported and feature is disabled',
     () async {
       final macOSDevices = MacOSDevices(
+        flutterRoot: '',
         fileSystem: MemoryFileSystem.test(),
         processManager: FakeProcessManager.any(),
         logger: BufferLogger.test(),
@@ -115,6 +119,7 @@ void main() {
 
   testWithoutContext('devices listed if platform is supported and feature is enabled', () async {
     final macOSDevices = MacOSDevices(
+      flutterRoot: '',
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
@@ -131,6 +136,7 @@ void main() {
 
   testWithoutContext('has a well known device id macos', () async {
     final macOSDevices = MacOSDevices(
+      flutterRoot: '',
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
@@ -147,6 +153,7 @@ void main() {
 
   testWithoutContext('can discover devices with a provided timeout', () async {
     final macOSDevices = MacOSDevices(
+      flutterRoot: '',
       fileSystem: MemoryFileSystem.test(),
       processManager: FakeProcessManager.any(),
       logger: BufferLogger.test(),
@@ -169,6 +176,7 @@ void main() {
   testWithoutContext('isSupportedForProject is true with editable host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final device = MacOSDevice(
+      flutterRoot: '',
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -186,6 +194,7 @@ void main() {
     final fakeOperatingSystemUtils = FakeOperatingSystemUtils();
     fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_x64;
     final device = MacOSDevice(
+      flutterRoot: '',
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -199,6 +208,7 @@ void main() {
     final fakeOperatingSystemUtils = FakeOperatingSystemUtils();
     fakeOperatingSystemUtils.hostPlatform = HostPlatform.darwin_arm64;
     final device = MacOSDevice(
+      flutterRoot: '',
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -211,6 +221,7 @@ void main() {
   testWithoutContext('isSupportedForProject is false with no host app', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final device = MacOSDevice(
+      flutterRoot: '',
       fileSystem: fileSystem,
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),
@@ -225,6 +236,7 @@ void main() {
   testWithoutContext('executablePathForDevice uses the correct package executable', () async {
     final package = FakeMacOSApp();
     final device = MacOSDevice(
+      flutterRoot: '',
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
       processManager: FakeProcessManager.any(),

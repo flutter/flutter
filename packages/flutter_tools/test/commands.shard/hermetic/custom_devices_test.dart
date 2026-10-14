@@ -204,7 +204,10 @@ CustomDevicesCommand createCustomDevicesCommand({
           fileSystem: fileSystem,
           directory: fileSystem.directory('/'),
           logger: logger,
-          flutterRoot: platform.isWindows ? windowsFlutterRoot : linuxFlutterRoot,
+          cache: Cache.test(
+            processManager: processManager,
+            flutterRoot: platform.isWindows ? windowsFlutterRoot : linuxFlutterRoot,
+          ),
         );
 
   final operatingSystemUtils = FakeOperatingSystemUtils(
@@ -393,7 +396,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
-          flutterRoot: linuxFlutterRoot,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
 
         expect(
@@ -486,7 +492,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
-          flutterRoot: linuxFlutterRoot,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
 
         expect(
@@ -578,7 +587,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
-          flutterRoot: linuxFlutterRoot,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
 
         expect(
@@ -675,7 +687,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
-          flutterRoot: linuxFlutterRoot,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
 
         expect(
@@ -755,7 +770,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
-          flutterRoot: linuxFlutterRoot,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
 
         expect(
@@ -815,7 +833,7 @@ void main() {
         fileSystem: fs,
         directory: fs.directory('/'),
         logger: BufferLogger.test(),
-        flutterRoot: linuxFlutterRoot,
+        cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: linuxFlutterRoot),
       );
 
       config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid'));
@@ -850,7 +868,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
-          flutterRoot: linuxFlutterRoot,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
         config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2'));
         final Uint8List contentsBefore = fs.file('.flutter_custom_devices.json').readAsBytesSync();
@@ -928,7 +949,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: logger,
-          flutterRoot: linuxFlutterRoot,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         )
         ..add(
           CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', enabled: true),
@@ -964,7 +988,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: logger,
-          flutterRoot: linuxFlutterRoot,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         )
         ..add(
           CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', enabled: true),
@@ -1080,7 +1107,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
-          flutterRoot: windowsFlutterRoot,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: windowsFlutterRoot,
+          ),
         );
 
         expect(

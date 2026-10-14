@@ -22,7 +22,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
-import '../base/user_messages.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart' show kDdcCanaryFeatures;
@@ -219,9 +218,8 @@ class WebAssetServer implements AssetReader {
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
+    required Cache cache,
     Map<String, String> webDefines = const <String, String>{},
-    Cache? cache,
-    String? flutterRoot,
   }) async {
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
@@ -316,14 +314,7 @@ class WebAssetServer implements AssetReader {
         entrypoint,
         fileSystem: fileSystem,
         platform: platform,
-        flutterRoot:
-            flutterRoot ??
-            cache?.flutterRoot ??
-            Cache.defaultFlutterRoot(
-              fileSystem: fileSystem,
-              platform: platform,
-              userMessages: UserMessages(),
-            ),
+        flutterRoot: cache.flutterRoot,
         webBuildDirectory: getWebBuildDirectory(config: globals.config, fileSystem: fileSystem),
         basePath: server.basePath,
         needsCoopCoep: crossOriginIsolation,

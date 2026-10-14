@@ -78,10 +78,12 @@ class FlutterDeviceManager extends DeviceManager {
            processManager: processManager,
            logger: logger,
            artifacts: artifacts,
+           cache: customDevicesConfig.cache,
            platform: platform,
            nativeAssetsBuilder: nativeAssetsBuilder,
          ),
          MacOSDevices(
+           flutterRoot: customDevicesConfig.cache.flutterRoot,
            processManager: processManager,
            macOSWorkflow: macOSWorkflow,
            logger: logger,
@@ -100,12 +102,14 @@ class FlutterDeviceManager extends DeviceManager {
          LinuxDevices(
            platform: platform,
            featureFlags: featureFlags,
+           flutterRoot: customDevicesConfig.cache.flutterRoot,
            processManager: processManager,
            logger: logger,
            fileSystem: fileSystem,
            operatingSystemUtils: operatingSystemUtils,
          ),
          WindowsDevices(
+           flutterRoot: customDevicesConfig.cache.flutterRoot,
            processManager: processManager,
            operatingSystemUtils: operatingSystemUtils,
            logger: logger,

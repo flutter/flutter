@@ -179,7 +179,7 @@ Future<void> run(List<String> args) async {
         concurrency: math.max(1, globals.platform.numberOfProcessors - 2),
         icudtlPath: globals.fs.path.absolute(argResults[_kOptionIcudtl] as String),
         coverageDirectory: coverageDirectory,
-        nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
+        nativeAssetsBuilder: TestCompilerNativeAssetsBuilderImpl(cache: globals.cache),
       ),
     );
 

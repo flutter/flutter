@@ -24,10 +24,8 @@ class CustomDevicesConfig {
     required FileSystem fileSystem,
     required Logger logger,
     required Platform platform,
-    this._cache,
-    this._flutterRoot,
-  }) : assert(_cache != null || _flutterRoot != null),
-       _fileSystem = fileSystem,
+    required this.cache,
+  }) : _fileSystem = fileSystem,
        _logger = logger,
        _platform = platform,
        _configLoader = (() => Config.managed(
@@ -41,12 +39,10 @@ class CustomDevicesConfig {
   CustomDevicesConfig.test({
     required this._fileSystem,
     required Logger logger,
-    this._cache,
+    required this.cache,
     Directory? directory,
-    this._flutterRoot,
     Platform? platform,
-  }) : assert(_cache != null || _flutterRoot != null),
-       _platform = platform ?? FakePlatform(),
+  }) : _platform = platform ?? FakePlatform(),
        _logger = logger,
        _configLoader = (() => Config.test(
          name: _kCustomDevicesConfigName,
@@ -63,8 +59,7 @@ class CustomDevicesConfig {
   final Platform _platform;
   final FileSystem _fileSystem;
   final Logger _logger;
-  final Cache? _cache;
-  final String? _flutterRoot;
+  final Cache cache;
   final Config Function() _configLoader;
 
   // When the custom devices feature is disabled, CustomDevicesConfig is
@@ -86,9 +81,8 @@ class CustomDevicesConfig {
   }
 
   String get _defaultSchema {
-    final String flutterRoot = (_flutterRoot ?? _cache?.flutterRoot)!;
     final Uri uri = _fileSystem
-        .directory(flutterRoot)
+        .directory(cache.flutterRoot)
         .childDirectory('packages')
         .childDirectory('flutter_tools')
         .childDirectory('static')

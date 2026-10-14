@@ -43,6 +43,7 @@ void main() {
     () async {
       expect(
         await WindowsDevices(
+          flutterRoot: '',
           windowsWorkflow: WindowsWorkflow(
             featureFlags: TestFeatureFlags(),
             platform: FakePlatform(operatingSystem: 'windows'),
@@ -60,6 +61,7 @@ void main() {
   testWithoutContext('WindowsDevices lists a devices if the workflow is supported', () async {
     expect(
       await WindowsDevices(
+        flutterRoot: '',
         windowsWorkflow: WindowsWorkflow(
           featureFlags: TestFeatureFlags(isWindowsEnabled: true),
           platform: FakePlatform(operatingSystem: 'windows'),
@@ -127,6 +129,7 @@ WindowsDevice setUpWindowsDevice({
   ProcessManager? processManager,
 }) {
   return WindowsDevice(
+    flutterRoot: '',
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
     logger: logger ?? BufferLogger.test(),
     processManager: processManager ?? FakeProcessManager.any(),

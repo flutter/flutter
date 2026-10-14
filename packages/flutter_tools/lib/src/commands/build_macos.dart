@@ -10,6 +10,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../cache.dart';
 import '../context/tool_context.dart';
 import '../features.dart';
 import '../macos/build_macos.dart';
@@ -68,8 +69,7 @@ class BuildMacosCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FileSystem fs = toolContext.fs;
-    final Logger logger = toolContext.logger;
+    final ToolContext(:Cache cache, :FileSystem fs, :Logger logger) = toolContext;
 
     final BuildInfo buildInfo = await getBuildInfo();
     if (!featureFlags.isMacOSEnabled) {
@@ -84,6 +84,7 @@ class BuildMacosCommand extends BuildSubCommand {
     await buildMacOS(
       flutterProject: project,
       buildInfo: buildInfo,
+      flutterRoot: cache.flutterRoot,
       targetOverride: targetFile,
       verboseLogging: logger.isVerbose || globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
       configOnly: configOnly,

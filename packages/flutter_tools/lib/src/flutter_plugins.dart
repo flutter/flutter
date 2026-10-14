@@ -2009,7 +2009,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   FlutterProject rootProject,
   PackageConfig packageConfig,
   File mainFile, {
-  String? flutterRoot,
+  required String flutterRoot,
 }) async {
   final List<Plugin> plugins = await findPlugins(rootProject, logger: globals.logger);
   final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
@@ -2019,7 +2019,7 @@ Future<void> generateMainDartWithPluginRegistrant(
   final LanguageVersion entrypointVersion = determineLanguageVersion(
     mainFile,
     packageConfig.packageOf(mainFile.absolute.uri),
-    flutterRoot ?? '',
+    flutterRoot,
   );
   final templateContext = <String, Object>{
     'dartLanguageVersion': entrypointVersion.toString(),

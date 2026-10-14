@@ -24,10 +24,12 @@ class WindowsDevice extends DesktopDevice {
     required super.logger,
     required super.fileSystem,
     required super.operatingSystemUtils,
+    required this._flutterRoot,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super('windows', platformType: PlatformType.windows, ephemeral: false);
 
   final OperatingSystemUtils _operatingSystemUtils;
+  final String _flutterRoot;
 
   @override
   Future<bool> isSupported() async => true;
@@ -64,6 +66,7 @@ class WindowsDevice extends DesktopDevice {
       FlutterProject.current().windows,
       buildInfo,
       _targetPlatform,
+      flutterRoot: _flutterRoot,
       target: mainPath,
     );
   }
@@ -76,6 +79,7 @@ class WindowsDevice extends DesktopDevice {
 
 class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices({
+    required this._flutterRoot,
     required this._processManager,
     required this._logger,
     required this._fileSystem,
@@ -83,6 +87,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
     required this._windowsWorkflow,
   }) : super('windows devices');
 
+  final String _flutterRoot;
   final FileSystem _fileSystem;
   final Logger _logger;
   final ProcessManager _processManager;
@@ -105,6 +110,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
     }
     return <Device>[
       WindowsDevice(
+        flutterRoot: _flutterRoot,
         fileSystem: _fileSystem,
         logger: _logger,
         processManager: _processManager,

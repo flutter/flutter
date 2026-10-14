@@ -17,6 +17,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../src/common.dart';
 import '../src/context.dart' hide testLogger;
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
 
 const kExtensionName = 'ext.flutter.test.interestingExtension';
 
@@ -77,7 +78,7 @@ void main() {
 
   testWithoutContext('VM Service returns correct FlutterVersion', () async {
     final mockVMService = FakeVMService();
-    await setUpVmService(vmService: mockVMService);
+    await setUpVmService(flutterVersion: FakeFlutterVersion(), vmService: mockVMService);
 
     expect(mockVMService.services, containsPair(kFlutterVersionServiceName, kFlutterToolAlias));
   });

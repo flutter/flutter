@@ -25,7 +25,6 @@ import '../base/version_range.dart';
 import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
-import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../darwin/darwin.dart';
@@ -284,9 +283,6 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
     createProjectType: stringArg('template'),
     createAndroidLanguage: stringArg('android-language'),
   );
-
-  @override
-  ToolContext get toolContext => super.toolContext!;
 
   /// The hostname for the Flutter docs for the current channel.
   String get _snippetsHost =>
@@ -813,6 +809,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         // It won't be if they do `flutter build --no-pub`, though.
         const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
         await project.ensureReadyForPlatformSpecificTooling(
+          cache: cache,
           releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
           androidPlatform: includeAndroid,
           iosPlatform: includeIos || includeDarwin,
