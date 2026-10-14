@@ -23,12 +23,15 @@ const kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 
 /// Provides the path where templates used by flutter_tools are stored.
 class TemplatePathProvider {
-  const TemplatePathProvider({this._cache, this._flutterRoot});
+  const TemplatePathProvider({Cache? cache, String? flutterRoot})
+    : assert(cache != null || flutterRoot != null),
+      _cache = cache,
+      _flutterRoot = flutterRoot;
 
   final Cache? _cache;
   final String? _flutterRoot;
 
-  String get _flutterRootPath => _flutterRoot ?? _cache?.flutterRoot ?? globals.cache.flutterRoot;
+  String get _flutterRootPath => (_flutterRoot ?? _cache?.flutterRoot)!;
 
   /// Returns the directory containing the 'name' template directory.
   Directory directoryInPackage(String name, FileSystem fileSystem) {

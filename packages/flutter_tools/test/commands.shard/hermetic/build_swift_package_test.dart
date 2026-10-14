@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/swift_packages.dart';
@@ -2907,9 +2906,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
         // Set up templates in fs
         for (final FileSystemEntity fileEntity
             in fileSystem
-                .directory(
-                  '${globals.cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
-                )
+                .directory('${getFlutterRoot()}/packages/flutter_tools/templates/add_to_app/darwin')
                 .listSync(recursive: true)) {
           if (fileEntity is File) {
             fs.file(fileEntity.path).createSync(recursive: true);
@@ -2919,7 +2916,7 @@ public func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
 
         // Set up package_config.json for template imageDirectory
         final File packagesFile = fs.file(
-          '${globals.cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+          '${getFlutterRoot()}/packages/flutter_tools/.dart_tool/package_config.json',
         )..createSync(recursive: true);
         packagesFile.writeAsStringSync(
           json.encode(<String, Object>{
@@ -3149,9 +3146,7 @@ let package = Package(
         // Set up templates in fs
         for (final FileSystemEntity fileEntity
             in fileSystem
-                .directory(
-                  '${globals.cache.flutterRoot}/packages/flutter_tools/templates/add_to_app/darwin',
-                )
+                .directory('${getFlutterRoot()}/packages/flutter_tools/templates/add_to_app/darwin')
                 .listSync(recursive: true)) {
           if (fileEntity is File) {
             fs.file(fileEntity.path).createSync(recursive: true);
@@ -3161,7 +3156,7 @@ let package = Package(
 
         // Set up package_config.json for template imageDirectory
         final File packagesFile = fs.file(
-          '${globals.cache.flutterRoot}/packages/flutter_tools/.dart_tool/package_config.json',
+          '${getFlutterRoot()}/packages/flutter_tools/.dart_tool/package_config.json',
         )..createSync(recursive: true);
         packagesFile.writeAsStringSync(
           json.encode(<String, Object>{

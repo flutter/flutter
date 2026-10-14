@@ -69,7 +69,7 @@ void main() {
       fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
       logger = BufferLogger.test();
       processManager = FakeProcessManager.empty();
-      preRunValidator = PreRunValidator(fileSystem: fileSystem);
+      preRunValidator = PreRunValidator(fileSystem: fileSystem, cache: cache);
       lockTrackingCache = FakeLockTrackingCache();
       lockCheckingPub = FakeLockCheckingPub(lockTrackingCache);
       fakeAnalytics = getInitializedFakeAnalyticsInstance(

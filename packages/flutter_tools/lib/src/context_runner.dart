@@ -140,6 +140,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         return AssetBundleFactory.defaultInstance(
           logger: globals.logger,
           fileSystem: globals.fs,
+          flutterRoot: globals.cache.flutterRoot,
           platform: globals.platform,
         );
       },

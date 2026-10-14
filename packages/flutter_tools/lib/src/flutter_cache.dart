@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 
 import 'android/android_sdk.dart';
 import 'android/gradle_utils.dart';
@@ -411,19 +410,17 @@ class AndroidMavenArtifacts extends ArtifactSet {
     this.cache, {
     required this._java,
     required this._platform,
+    required this._processUtils,
     this._androidSdk,
     this._gradleUtils,
-    this._processManager,
-    this._processUtils,
   }) : super(DevelopmentArtifact.androidMaven);
 
   final Java? _java;
   final Platform _platform;
+  final ProcessUtils _processUtils;
   final Cache cache;
   final AndroidSdk? _androidSdk;
   final GradleUtils? _gradleUtils;
-  final ProcessUtils? _processUtils;
-  final ProcessManager? _processManager;
 
   @override
   Future<void> update(
@@ -444,19 +441,13 @@ class AndroidMavenArtifacts extends ArtifactSet {
 
     final Status status = logger.startProgress('Downloading Android Maven dependencies...');
     final File gradle = tempDir.childFile(_platform.isWindows ? 'gradlew.bat' : 'gradlew');
-    final ProcessUtils processUtils =
-        _processUtils ??
-        ProcessUtils(
-          processManager: _processManager ?? const LocalProcessManager(),
-          logger: logger,
-        );
     try {
       final String gradleExecutable = gradle.absolute.path;
       final String flutterSdk = FileSystemUtils(
         fileSystem: fileSystem,
         platform: _platform,
       ).escapePath(cache.flutterRoot);
-      final RunResult processResult = await processUtils.run(<String>[
+      final RunResult processResult = await _processUtils.run(<String>[
         gradleExecutable,
         '-b',
         fileSystem.path.join(

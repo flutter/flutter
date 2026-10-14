@@ -4,38 +4,20 @@
 
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/platform.dart';
-import 'base/user_messages.dart';
 import 'cache.dart';
 
 /// A validator that runs before the tool runs any command.
 abstract class PreRunValidator {
-  factory PreRunValidator({
-    required FileSystem fileSystem,
-    Cache? cache,
-    String? flutterRoot,
-    Platform platform,
-    UserMessages? userMessages,
-  }) = _DefaultPreRunValidator;
+  factory PreRunValidator({required FileSystem fileSystem, Cache? cache, String? flutterRoot}) =
+      _DefaultPreRunValidator;
 
   void validate();
 }
 
 class _DefaultPreRunValidator implements PreRunValidator {
-  _DefaultPreRunValidator({
-    required this.fileSystem,
-    Cache? cache,
-    String? flutterRoot,
-    Platform platform = const LocalPlatform(),
-    UserMessages? userMessages,
-  }) : _flutterRoot =
-           flutterRoot ??
-           cache?.flutterRoot ??
-           Cache.defaultFlutterRoot(
-             platform: platform,
-             fileSystem: fileSystem,
-             userMessages: userMessages ?? UserMessages(),
-           );
+  _DefaultPreRunValidator({required this.fileSystem, Cache? cache, String? flutterRoot})
+    : assert(cache != null || flutterRoot != null),
+      _flutterRoot = flutterRoot ?? cache!.flutterRoot;
 
   final FileSystem fileSystem;
   final String _flutterRoot;

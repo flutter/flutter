@@ -7,7 +7,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/pre_run_validator.dart';
 
@@ -18,14 +17,12 @@ void main() {
   group('PreRunValidator', () {
     late MemoryFileSystem fs;
     late FakePlatform platform;
-    late UserMessages userMessages;
     late BufferLogger logger;
     late Cache cache;
 
     setUp(() {
       fs = MemoryFileSystem.test();
       platform = FakePlatform(environment: <String, String>{});
-      userMessages = UserMessages();
       logger = BufferLogger.test();
       cache = Cache.test(
         fileSystem: fs,
@@ -44,12 +41,7 @@ void main() {
         );
         toolsDir.createSync(recursive: true);
 
-        final validator = PreRunValidator(
-          fileSystem: fs,
-          flutterRoot: flutterRoot,
-          platform: platform,
-          userMessages: userMessages,
-        );
+        final validator = PreRunValidator(fileSystem: fs, flutterRoot: flutterRoot);
 
         expect(() => validator.validate(), returnsNormally);
       },
@@ -62,32 +54,7 @@ void main() {
       );
       toolsDir.createSync(recursive: true);
 
-      final validator = PreRunValidator(
-        fileSystem: fs,
-        cache: cache,
-        platform: platform,
-        userMessages: userMessages,
-      );
-
-      expect(() => validator.validate(), returnsNormally);
-    });
-
-    testWithoutContext('succeeds when falls back to Cache.defaultFlutterRoot', () {
-      final String flutterRoot = Cache.defaultFlutterRoot(
-        platform: platform,
-        fileSystem: fs,
-        userMessages: userMessages,
-      );
-      final Directory toolsDir = fs.directory(
-        fs.path.join(flutterRoot, 'packages', 'flutter_tools'),
-      );
-      toolsDir.createSync(recursive: true);
-
-      final validator = PreRunValidator(
-        fileSystem: fs,
-        platform: platform,
-        userMessages: userMessages,
-      );
+      final validator = PreRunValidator(fileSystem: fs, cache: cache);
 
       expect(() => validator.validate(), returnsNormally);
     });
@@ -99,12 +66,7 @@ void main() {
       );
       expect(toolsDir.existsSync(), isFalse);
 
-      final validator = PreRunValidator(
-        fileSystem: fs,
-        cache: cache,
-        platform: platform,
-        userMessages: userMessages,
-      );
+      final validator = PreRunValidator(fileSystem: fs, cache: cache);
 
       expect(
         () => validator.validate(),
