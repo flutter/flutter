@@ -27,13 +27,6 @@ android {
     compileSdk = 36
     ndkVersion = "28.2.13676358" // This version must exactly match the version of the NDK that the recipe pulls from CIPD.
 
-    sourceSets {
-        applicationVariants.all { variant ->
-            main.assets.srcDirs += project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_assets")
-            main.jniLibs.srcDirs += project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_libs")
-        }
-    }
-
     defaultConfig {
         minSdk = 24
         targetSdk = 35
@@ -44,6 +37,14 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def flutterIntermediates = project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}").get().asFile
+        variant.sources.assets?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_assets").path)
+        variant.sources.jniLibs?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_libs").path)
     }
 }
 

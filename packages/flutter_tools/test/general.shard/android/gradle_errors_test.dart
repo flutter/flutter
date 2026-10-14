@@ -58,6 +58,8 @@ void main() {
           missingNdkSourcePropertiesFile,
           applyingKotlinAndroidPluginErrorHandler,
           useNewAgpDslErrorHandler,
+          legacyVariantApiErrorHandler,
+          kotlinAndroidPluginWithNewDslErrorHandler,
           incompatibleKotlinVersionHandler,
         ]),
       );
@@ -1799,6 +1801,124 @@ An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-p
       ProcessManager: () => processManager,
     },
   );
+
+  group('legacy variant API error', () {
+    // Each line is the error AGP 9.3.1 reports with android.newDsl=true for the
+    // named use; with android.newDsl=false the same build scripts build.
+    const reproducedErrors = <String, String>{
+      'Groovy android.applicationVariants.all': r"> Could not get unknown property 'applicationVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+      'Groovy android.libraryVariants.all': r"> Could not get unknown property 'libraryVariants' for object of type com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated.",
+      'Groovy android.testVariants.all': r"> Could not get unknown property 'testVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+      'Groovy android.unitTestVariants.all': r"> Could not get unknown property 'unitTestVariants' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.",
+      'Groovy android { variantFilter {} }': r'> Could not find method variantFilter() for arguments [build_nysjsfecfx3lipouwz60bhys$_run_closure2$_closure4@25d24e7d] on object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.',
+      'Groovy android { sourceSets { applicationVariants.all {} } }': r'> Could not find method all() for arguments [build_nysjsfecfx3lipouwz60bhys$_run_closure2$_closure4$_closure5@61df7f0b] on source set application variants of type com.android.build.gradle.internal.api.DefaultAndroidSourceSet.',
+      'Kotlin DSL android.applicationVariants.all': "  Line 3: android.applicationVariants.all { println(name) }\n                  ^ Unresolved reference 'applicationVariants'.",
+      'Kotlin DSL android.libraryVariants.all':
+          "e: file:///app/build.gradle.kts:3:9: Unresolved reference 'libraryVariants'.",
+      'Kotlin DSL android { variantFilter {} }': "  Line 3: android { variantFilter { println(name) } }\n                    ^ Unresolved reference 'variantFilter'.",
+    };
+
+    for (final MapEntry<String, String> entry in reproducedErrors.entries) {
+      testWithoutContext('matches ${entry.key}', () {
+        expect(formatTestErrorMessage(entry.value, legacyVariantApiErrorHandler), isTrue);
+      });
+    }
+
+    testWithoutContext('does not match unknown properties of other types', () {
+      const unrelated = r'''
+* What went wrong:
+A problem occurred evaluating project ':app'.
+> Could not get unknown property 'applicationVariants' for project ':app' of type org.gradle.api.Project.
+> Could not get unknown property 'flutterVersionCode' for object of type com.android.build.gradle.internal.dsl.ApplicationExtensionImpl$AgpDecorated.
+e: file:///app/build.gradle.kts:3:9: Unresolved reference 'flutterVersionCode'.
+''';
+      expect(formatTestErrorMessage(unrelated, legacyVariantApiErrorHandler), isFalse);
+    });
+
+    testWithoutContext('does not match other Flutter Gradle plugin failures', () {
+      const unrelated = r'''
+* What went wrong:
+An exception occurred applying plugin request [id: 'dev.flutter.flutter-gradle-plugin']
+> Failed to apply plugin 'dev.flutter.flutter-gradle-plugin'.
+   > java.lang.NullPointerException (no error message)
+''';
+      expect(formatTestErrorMessage(unrelated, legacyVariantApiErrorHandler), isFalse);
+    });
+
+    testUsingContext(
+      'prints the cause, the fix and the opt-out',
+      () async {
+        await legacyVariantApiErrorHandler.handler(
+          line: reproducedErrors.values.first,
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          usesAndroidX: true,
+        );
+
+        expect(testLogger.statusText, contains('does not exist when `android.newDsl` is enabled'));
+        expect(testLogger.statusText, contains("unknown property 'applicationVariants'"));
+        expect(testLogger.statusText, contains('androidComponents.onVariants'));
+        expect(testLogger.statusText, contains(kAgpVariantApiDocsUrl));
+        expect(testLogger.statusText, contains('android.newDsl=false'));
+        expect(testLogger.statusText, contains(kOptOutOfNewDslDocsUrl));
+      },
+      overrides: <Type, Generator>{
+        GradleUtils: () => FakeGradleUtils(),
+        Platform: () => fakePlatform('android'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+  });
+
+  group('kotlin-android plugin with the new DSL error', () {
+    // Reported by Kotlin Gradle Plugin 2.4.20 with AGP 9.3.1, android.newDsl=true
+    // and android.builtInKotlin=false.
+    const reproducedError = r'''
+* What went wrong:
+An exception occurred applying plugin request [id: 'org.jetbrains.kotlin.android']
+> Failed to apply plugin 'org.jetbrains.kotlin.android'.
+   > ⛔ Failed to apply plugin 'org.jetbrains.kotlin.android'
+     The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL (`android.newDsl=true` is enabled by default).
+''';
+
+    testWithoutContext('matches the reproduced error', () {
+      expect(
+        formatTestErrorMessage(reproducedError, kotlinAndroidPluginWithNewDslErrorHandler),
+        isTrue,
+      );
+    });
+
+    testWithoutContext('does not match the built-in Kotlin conflict error', () {
+      const builtInKotlinConflict =
+          "The 'org.jetbrains.kotlin.android' plugin is no longer required for Kotlin support since AGP 9.0";
+      expect(
+        formatTestErrorMessage(builtInKotlinConflict, kotlinAndroidPluginWithNewDslErrorHandler),
+        isFalse,
+      );
+    });
+
+    testUsingContext(
+      'prints the fix and the opt-out',
+      () async {
+        await kotlinAndroidPluginWithNewDslErrorHandler.handler(
+          line: reproducedError,
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          usesAndroidX: true,
+        );
+
+        expect(testLogger.statusText, contains('android.builtInKotlin=true'));
+        expect(testLogger.statusText, contains(kMigrateToBuiltInKotlinDocsUrl));
+        expect(testLogger.statusText, contains('android.newDsl=false'));
+        expect(testLogger.statusText, contains(kOptOutOfNewDslDocsUrl));
+      },
+      overrides: <Type, Generator>{
+        GradleUtils: () => FakeGradleUtils(),
+        Platform: () => fakePlatform('android'),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+  });
 }
 
 bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {

@@ -86,6 +86,8 @@ final gradleErrors = <GradleHandledError>[
   missingNdkSourcePropertiesFile,
   applyingKotlinAndroidPluginErrorHandler,
   useNewAgpDslErrorHandler,
+  legacyVariantApiErrorHandler,
+  kotlinAndroidPluginWithNewDslErrorHandler,
   incompatibleKotlinVersionHandler, // This handler should always be last, as its key log output is sometimes in error messages with other root causes.
 ];
 
@@ -742,4 +744,76 @@ For instructions on how to opt out, see: $kOptOutOfNewDslDocsUrl
         return GradleBuildStatus.exit;
       },
   eventLabel: 'use-new-agp-dsl-error',
+);
+
+/// The Android Gradle Plugin guide to the variant API (`androidComponents`).
+const String kAgpVariantApiDocsUrl = 'https://developer.android.com/build/extend-agp';
+
+/// Gradle errors for build scripts that use an Android Gradle Plugin variant
+/// API that `android.newDsl=true` removes. Each pattern matches the error that
+/// AGP 9.3.1 reports for that API; with `android.newDsl=false` the same
+/// scripts build.
+final _legacyVariantApiPatterns = <RegExp>[
+  // Groovy, for example `android.applicationVariants.all { ... }`.
+  RegExp(
+    r"Could not get unknown property '(applicationVariants|libraryVariants|testVariants|unitTestVariants)' for object of type com\.android\.build\.",
+  ),
+  // Groovy, `android { variantFilter { ... } }`.
+  RegExp(
+    r'Could not find method variantFilter\(\) for arguments \[.*\] on object of type com\.android\.build\.',
+  ),
+  // Groovy, `android { sourceSets { applicationVariants.all { ... } } }`. Inside
+  // `sourceSets`, Gradle resolves `applicationVariants` as a new source set.
+  RegExp(r'on source set application variants of type com\.android\.build\.'),
+  // Kotlin DSL, for example `android.applicationVariants.all { ... }`.
+  RegExp(r"Unresolved reference '(applicationVariants|libraryVariants|variantFilter)'\."),
+];
+
+/// Handler for a build script that uses a variant API that does not exist
+/// when `android.newDsl` is enabled.
+@visibleForTesting
+final legacyVariantApiErrorHandler = GradleHandledError(
+  test: (String line) => _legacyVariantApiPatterns.any((RegExp pattern) => pattern.hasMatch(line)),
+  handler:
+      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+        globals.printBox('''
+${globals.logger.terminal.warningMark} A Gradle build script uses an Android Gradle Plugin API that
+does not exist when `android.newDsl` is enabled:
+${line.trim()}
+
+To fix this, migrate the build script to the variant API (`androidComponents.onVariants`).
+For instructions, see: $kAgpVariantApiDocsUrl
+
+To build until the script is migrated, add `android.newDsl=false` to android/gradle.properties.
+Android Gradle Plugin 10.0 removes this option.
+For details, see: $kOptOutOfNewDslDocsUrl''', title: _boxTitle);
+
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'legacy-variant-api-error',
+);
+
+/// Handler for the `kotlin-android` plugin failing to apply because
+/// `android.newDsl` is enabled. Matches the error reported by Kotlin Gradle
+/// Plugin 2.4.20 with Android Gradle Plugin 9.3.1.
+@visibleForTesting
+final kotlinAndroidPluginWithNewDslErrorHandler = GradleHandledError(
+  test: _lineMatcher(const <String>[
+    "The 'org.jetbrains.kotlin.android' plugin is not compatible with AGP's 9.0 new DSL",
+  ]),
+  handler:
+      ({required String line, required FlutterProject project, required bool usesAndroidX}) async {
+        globals.printBox('''
+${globals.logger.terminal.warningMark} The kotlin-android plugin does not support `android.newDsl=true`.
+
+To fix this, remove the kotlin-android plugin and set `android.builtInKotlin=true` in android/gradle.properties.
+For instructions, see: $kMigrateToBuiltInKotlinDocsUrl
+
+To build until then, add `android.newDsl=false` to android/gradle.properties.
+Android Gradle Plugin 10.0 removes this option.
+For details, see: $kOptOutOfNewDslDocsUrl''', title: _boxTitle);
+
+        return GradleBuildStatus.exit;
+      },
+  eventLabel: 'kotlin-android-plugin-with-new-dsl-error',
 );

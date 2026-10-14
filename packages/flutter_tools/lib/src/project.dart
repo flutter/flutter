@@ -848,17 +848,29 @@ class AndroidProject extends FlutterProjectPlatform {
     return false;
   }
 
-  /// True, if the app project is using Kotlin.
-  bool get isKotlin {
-    if (appGradleFile.existsSync()) {
-      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+  /// True, if the app Gradle build file applies the `kotlin-android`
+  /// (`org.jetbrains.kotlin.android`) plugin.
+  bool get appliesKotlinAndroidPlugin {
+    if (!appGradleFile.existsSync()) {
+      return false;
+    }
+    if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+      return true;
+    }
+    for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+      if (firstMatchInFile(appGradleFile, pattern) != null) {
         return true;
       }
-      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
-        if (firstMatchInFile(appGradleFile, pattern) != null) {
-          return true;
-        }
-      }
+    }
+    return false;
+  }
+
+  /// True, if the app project is using Kotlin.
+  bool get isKotlin {
+    if (appliesKotlinAndroidPlugin) {
+      return true;
+    }
+    if (appGradleFile.existsSync()) {
       try {
         final String content = appGradleFile.readAsStringSync();
         if (_kotlinCompilerOptionsPattern.hasMatch(content)) {

@@ -923,6 +923,7 @@ dependencies {
       _testInMemory('default host app language', () async {
         final FlutterProject project = await someProject();
         expect(project.android.isKotlin, isFalse);
+        expect(project.android.appliesKotlinAndroidPlugin, isFalse);
       });
 
       testUsingContext(
@@ -940,6 +941,7 @@ apply plugin: 'kotlin-android'
             },
           );
           expect(project.android.isKotlin, isTrue);
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -968,6 +970,7 @@ plugins {
             },
           );
           expect(project.android.isKotlin, isTrue);
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -996,6 +999,7 @@ plugins {
             },
           );
           expect(project.android.isKotlin, isTrue);
+          expect(project.android.appliesKotlinAndroidPlugin, isTrue);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1036,6 +1040,7 @@ plugins {
           );
 
           expect(project.android.isKotlin, isFalse);
+          expect(project.android.appliesKotlinAndroidPlugin, isFalse);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -1053,6 +1058,7 @@ plugins {
               final FlutterProject project = await someProject();
               addAndroidGradleFile(project.directory, gradleFileContent: () => content);
               expect(project.android.isKotlin, expected);
+              expect(project.android.appliesKotlinAndroidPlugin, isFalse);
             },
             overrides: <Type, Generator>{
               FileSystem: () => fs,

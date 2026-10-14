@@ -130,13 +130,6 @@ class DeferredComponentModule {
 "
         compileSdk 35
 
-        sourceSets {
-            applicationVariants.all { variant ->
-                main.assets.srcDirs += project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_assets")
-                main.jniLibs.srcDirs += project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_libs")
-            }
-        }
-
         defaultConfig {
             minSdkVersion 24
             targetSdkVersion 35
@@ -146,6 +139,14 @@ class DeferredComponentModule {
         compileOptions {
             sourceCompatibility 1.8
             targetCompatibility 1.8
+        }
+    }
+
+    androidComponents {
+        onVariants(selector().all()) { variant ->
+            def flutterIntermediates = project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}").get().asFile
+            variant.sources.assets?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_assets").path)
+            variant.sources.jniLibs?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_libs").path)
         }
     }
 
