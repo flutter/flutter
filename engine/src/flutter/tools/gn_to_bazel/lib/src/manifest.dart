@@ -425,18 +425,11 @@ exports_files(["file_loader/file_loader_unittests.cc"])
 ''',
   ),
   ConvertedFile('//flutter/third_party/tonic/tests'),
-  // dart:ui's bindings as a library; its suites and benchmarks need the
-  // Dart snapshot (//flutter/lib/snapshot), libdart and the shell's test
-  // fixtures.
+  // dart:ui's bindings and their suite (on the Dart snapshot, libdart, the
+  // shell's test fixtures and the shader fixtures below).
   ConvertedFile(
     '//flutter/lib/ui',
-    skip: <String, String>{
-      'ui_unittests_fixtures': 'Dart fixtures (dart_main) are not supported yet',
-      'ui_benchmarks': 'needs //flutter/lib/snapshot and //flutter/benchmarking',
-      'ui_unittests': 'needs //flutter/lib/snapshot and the shell test fixtures',
-      'display_list_deferred_image_unittests': 'with ui_unittests',
-      'ui_testing_mocks': 'with ui_unittests',
-    },
+    skip: <String, String>{'ui_benchmarks': 'needs //flutter/benchmarking'},
     // dart_ui.gni's dart_ui_files: the dart:ui sources, which the platform
     // compile in lib/snapshot reads through lib/snapshot/libraries.json.
     appendix: '''
@@ -446,6 +439,13 @@ filegroup(
 )
 ''',
   ),
+  // The shader fixtures of lib/ui: impellerc() invoked directly, with each
+  // directory's test_fixtures destined for lib/ui's assets (`dest`).
+  ConvertedFile('//flutter/lib/ui/fixtures/shaders'),
+  ConvertedFile('//flutter/lib/ui/fixtures/shaders/general_shaders'),
+  ConvertedFile('//flutter/lib/ui/fixtures/shaders/supported_glsl_op_shaders'),
+  ConvertedFile('//flutter/lib/ui/fixtures/shaders/supported_op_shaders'),
+  ConvertedFile('//flutter/lib/ui/fixtures/shaders/uniforms'),
   ConvertedFile('//flutter/lib/io'),
   ConvertedFile('//flutter/vulkan'),
   // The GPU surfaces and their suite (on SwiftShader's static library and

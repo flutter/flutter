@@ -3,10 +3,11 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/lib/ui/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: ui_unittests_fixtures, ui_benchmarks, ui_unittests, display_list_deferred_image_unittests, ui_testing_mocks.
+# Not converted: ui_benchmarks.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -207,6 +208,127 @@ cc_library(
         "@zlib",
     ],
     alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "ui_unittests_fixtures",
+    dart_main = "fixtures/ui_test.dart",
+    fixtures = [
+        "fixtures/DashInNooglerHat.jpg",
+        "fixtures/DashInNooglerHat%20WithSpace.jpg",
+        "fixtures/DisplayP3Logo.jpg",
+        "fixtures/DisplayP3Logo.png",
+        "fixtures/FontManifest.json",
+        "fixtures/Horizontal.jpg",
+        "fixtures/Horizontal.png",
+        "fixtures/WideGamutIndexed.png",
+        "fixtures/heart_end.png",
+        "fixtures/hello_loop_2.gif",
+        "fixtures/hello_loop_2.webp",
+        "fixtures/unmultiplied_alpha.png",
+        "//engine/src/flutter/txt:third_party/fonts/Roboto-Medium.ttf",
+    ],
+    deps = ["//engine/src/flutter/lib/ui/fixtures/shaders"],
+)
+
+# SwiftShader, its ICD manifest and the Vulkan loader, next to the
+# suites below (GN: data_deps of //flutter/third_party/swiftshader and
+# ANGLE).
+flutter_gpu_test_backends(
+    name = "gpu_test_backends",
+)
+
+cc_test(
+    name = "ui_unittests",
+    size = "medium",
+    srcs = [
+        "compositing/scene_builder_unittests.cc",
+        "hooks_unittests.cc",
+        "painting/image_decoder_no_gl_unittests.cc",
+        "painting/image_decoder_no_gl_unittests.h",
+        "painting/image_decoder_unittests.cc",  # shell_enable_gl
+        "painting/image_dispose_unittests.cc",
+        "painting/image_encoding_unittests.cc",
+        "painting/image_generator_apng_unittests.cc",
+        "painting/image_generator_registry_unittests.cc",
+        "painting/paint_unittests.cc",
+        "painting/path_unittests.cc",
+        "painting/single_frame_codec_unittests.cc",
+        "semantics/semantics_update_builder_unittests.cc",
+        "window/platform_configuration_unittests.cc",
+        "window/platform_message_response_dart_port_unittests.cc",
+        "window/platform_message_response_dart_unittests.cc",
+        "window/pointer_data_packet_converter_unittests.cc",
+        "window/pointer_data_packet_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :ui
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+        "-Wno-deprecated-copy",  # from //flutter/impeller
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller
+        "-Wno-nullability-completeness",  # from //flutter/impeller
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller
+        "-Wno-suggest-override",  # from //flutter/impeller
+        "-Wno-unused-private-field",  # from //flutter/impeller
+        "-Wno-unused-variable",  # from //flutter/impeller
+    ],
+    data = [":gpu_test_backends"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":display_list_deferred_image_unittests",
+        ":ui",
+        ":ui_testing_mocks",
+        ":ui_unittests_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter:export_dynamic_symbols",
+        "//engine/src/flutter/build/bazel/dart_wrap:elf_loader",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/impeller",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/shell/common:shell_test_fixture_sources",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:fixture_test",
+        "//engine/src/flutter/testing:opengl",  # shell_enable_gl
+        "//engine/src/flutter/third_party/tonic",
+        "@libpng",
+    ],
+)
+
+cc_library(
+    name = "display_list_deferred_image_unittests",
+    testonly = True,
+    srcs = [
+        "painting/display_list_deferred_image_gpu_impeller_unittests.cc",  # impeller_supports_rendering
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :ui
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":ui",
+        ":ui_testing_mocks",
+        "//engine/src:include_root",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/renderer/testing:mocks",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "ui_testing_mocks",
+    testonly = True,
+    hdrs = ["painting/testing/mocks.h"],
+    deps = [
+        ":ui",
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/impeller/display_list",  # impeller_supports_rendering
+        "@googletest//:gtest",
+    ],
 )
 
 # What GN has no words for; maintained in the converter's manifest

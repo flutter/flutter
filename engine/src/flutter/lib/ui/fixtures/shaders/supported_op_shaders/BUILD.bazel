@@ -1,0 +1,64 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/lib/ui/fixtures/shaders/supported_op_shaders/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impellerc")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "supported_op_shaders",
+    testonly = True,
+    deps = [":fixtures"],
+)
+
+impellerc(
+    name = "compile_supported_op_shaders",
+    intermediates_subdir = "iplr",
+    iplr = True,
+    mnemonic = "IMPELLERC_SKSL",
+    shader_target_flags = ["--sksl"],
+    shaders = [
+        "127_OpFNegate.frag",  # enable_unittests
+        "129_OpFAdd.frag",  # enable_unittests
+        "131_OpFSub.frag",  # enable_unittests
+        "142_OpVectorTimesScalar.frag",  # enable_unittests
+        "143_OpMatrixTimesScalar.frag",  # enable_unittests
+        "144_OpVectorTimesMatrix.frag",  # enable_unittests
+        "145_OpMatrixTimesVector.frag",  # enable_unittests
+        "146_OpMatrixTimesMatrix.frag",  # enable_unittests
+        "148_OpDot.frag",  # enable_unittests
+        "164_OpLogicalEqual.frag",  # enable_unittests
+        "165_OpLogicalNotEqual.frag",  # enable_unittests
+        "166_OpLogicalOr.frag",  # enable_unittests
+        "167_OpLogicalAnd.frag",  # enable_unittests
+        "168_OpLogicalNot.frag",  # enable_unittests
+        "180_OpFOrdEqual.frag",  # enable_unittests
+        "183_OpFUnordNotEqual.frag",  # enable_unittests
+        "184_OpFOrdLessThan.frag",  # enable_unittests
+        "186_OpFOrdGreaterThan.frag",  # enable_unittests
+        "188_OpFOrdLessThanEqual.frag",  # enable_unittests
+        "190_OpFOrdGreaterThanEqual.frag",  # enable_unittests
+        "19_OpTypeVoid.frag",  # enable_unittests
+        "20_OpTypeBool.frag",  # enable_unittests
+        "21_OpTypeInt.frag",  # enable_unittests
+        "22_OpTypeFloat.frag",  # enable_unittests
+        "23_OpTypeVector.frag",  # enable_unittests
+        "246_OpLoopMerge.frag",  # enable_unittests
+        "24_OpTypeMatrix.frag",  # enable_unittests
+        "250_OpBranchConditional.frag",  # enable_unittests
+        "33_OpTypeFunction.frag",  # enable_unittests
+    ],
+    sl_file_extension = "iplr",
+)
+
+flutter_test_fixtures(
+    name = "fixtures",
+    dest = "//engine/src/flutter/lib/ui",
+    fixtures_targets = {":compile_supported_op_shaders": []},
+    deps = [":compile_supported_op_shaders"],
+)

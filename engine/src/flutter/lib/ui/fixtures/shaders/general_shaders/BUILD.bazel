@@ -1,0 +1,87 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/lib/ui/fixtures/shaders/general_shaders/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
+load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impellerc")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "general_shaders",
+    testonly = True,
+    deps = [":fixtures"],
+)
+
+impellerc(
+    name = "compile_general_shaders",
+    intermediates_subdir = "iplr",
+    iplr = True,
+    mnemonic = "IMPELLERC_SKSL",
+    shader_target_flags = [
+        "--sksl",
+        "--runtime-stage-metal",
+        "--runtime-stage-gles",
+        "--runtime-stage-gles3",
+        "--runtime-stage-vulkan",
+    ],
+    shaders = [
+        "blue_green_sampler.frag",  # enable_unittests
+        "children_and_uniforms.frag",  # enable_unittests
+        "circle_sdf.frag",  # enable_unittests
+        "double_sampler_swapped.frag",  # enable_unittests
+        "double_sampler.frag",  # enable_unittests
+        "filter_shader_fractional_texel.frag",  # enable_unittests
+        "filter_shader.frag",  # enable_unittests
+        "functions.frag",  # enable_unittests
+        "missing_size.frag",  # enable_unittests
+        "missing_texture.frag",  # enable_unittests
+        "no_builtin_redefinition.frag",  # enable_unittests
+        "no_uniforms.frag",  # enable_unittests
+        "sdf.frag",  # enable_unittests
+        "simple.frag",  # enable_unittests
+        "texture.frag",  # enable_unittests
+        "uniform_arrays.frag",  # enable_unittests
+        "uniform_mat2.frag",  # enable_unittests
+        "uniform_ordering.frag",  # enable_unittests
+        "uniforms_inserted.frag",  # enable_unittests
+        "uniforms_renamed.frag",  # enable_unittests
+        "uniforms_reordered.frag",  # enable_unittests
+        "uniforms_sorted.frag",  # enable_unittests
+        "uniforms.frag",  # enable_unittests
+    ],
+    sl_file_extension = "iplr",
+)
+
+# An aliased copy of `no_uniforms.frag.iplr` published under a distinct
+# asset name. The two assets have identical bytes (and therefore identical
+# embedded entrypoint names), but FragmentProgram tracks them under
+# different `library_id`s (the asset paths), so they must register at
+# distinct scoped keys in the shared shader registry. Used by
+# `fragment_shader_test.dart` to verify the no-collision behavior.
+# `no_uniforms.frag` is used so the test does not need to thread sampler
+# or uniform setup through the FragmentShader to validate it.
+gn_copy(
+    name = "no_uniforms_alt",
+    srcs = ["iplr/no_uniforms.frag.iplr"],
+    outs = ["iplr/no_uniforms_alt.frag.iplr"],
+    outputs = ["$root_gen_dir/flutter/lib/ui/fixtures/shaders/general_shaders/iplr/no_uniforms_alt.frag.iplr"],
+    deps = [":compile_general_shaders"],
+)
+
+flutter_test_fixtures(
+    name = "fixtures",
+    dest = "//engine/src/flutter/lib/ui",
+    fixtures_targets = {
+        ":compile_general_shaders": [],
+        ":no_uniforms_alt": [],
+    },
+    deps = [
+        ":compile_general_shaders",
+        ":no_uniforms_alt",
+    ],
+)

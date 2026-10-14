@@ -658,6 +658,13 @@ final class _Emitter {
           );
         case TemplateArgumentKind.ignored:
           break;
+        case TemplateArgumentKind.package:
+          final String? directory = _singleString(variable);
+          if (directory == null) {
+            throw GnError(variable.assignments.first.location, '${variable.name} has no value');
+          }
+          rule.scalars[argument.attribute] =
+              '"${_packageLabel(directory, variable.assignments.first.location)}"';
       }
     }
     // What GN discovers after the fact (templateAttributeOverrides).
@@ -668,6 +675,32 @@ final class _Emitter {
       rule.scalars[attribute] = text;
     });
     rules.add(rule);
+  }
+
+  /// The label of the package at the GN directory [directory] (a source
+  /// directory or its generated twin: `$root_gen_dir/flutter/lib/ui` names
+  /// the package of `//flutter/lib/ui`), which must be one the layout knows.
+  String _packageLabel(String directory, GnLocation location) {
+    String absolute = directory.startsWith('//')
+        ? directory
+        : _normalized('$gnPackage/$directory', location);
+    if (absolute == genDirRoot) {
+      absolute = '//';
+    } else if (absolute.startsWith('$genDirRoot/')) {
+      absolute = '//${absolute.substring(genDirRoot.length + 1)}';
+    }
+    if (absolute.length > 2 && absolute.endsWith('/')) {
+      absolute = absolute.substring(0, absolute.length - 1);
+    }
+    final String? relative = layout.relativePath(absolute);
+    final String spelled = directory.replaceFirst(genDirRoot, r'$root_gen_dir');
+    if (relative == null) {
+      throw GnError(location, '$spelled is outside the output repository');
+    }
+    if (relative != package.package && layout.owningPackage(relative) != relative) {
+      throw GnError(location, '$spelled is not a package the layout knows');
+    }
+    return '//$relative';
   }
 
   /// [variable] without the `get_target_outputs()` items of its assignments.
@@ -783,7 +816,9 @@ final class _Emitter {
   }
 
   /// copy("x") becomes a `gn_copy`: its sources as they are, GN's
-  /// destination recorded (see build/bazel/gn_action).
+  /// destination recorded (see build/bazel/gn_action) -- or, when the
+  /// outputs name the files literally (a renaming copy, which GN allows for
+  /// one source), the copies under their new names (`outs`).
   void _convertCopy(GnTarget target) {
     _use('//engine/src/flutter/build/bazel/gn_action:gn_action.bzl', 'gn_copy');
     final rule = _Rule('gn_copy', target.name, target.comments);
@@ -799,6 +834,11 @@ final class _Emitter {
                 .replaceFirst('$buildDirRoot/', r'$root_out_dir/');
             rule.list('outputs').add(e.condition, _item(text, e));
           });
+          final List<GnValue>? items = variable.unconditionalItems;
+          if (items != null &&
+              items.every((GnValue v) => v is GnStringValue && !v.value.contains('{{'))) {
+            _outputsInto(rule.list('outs'), variable, target);
+          }
         case 'deps':
         case 'public_deps':
           _labelsInto(rule.list('deps'), variable, target);
@@ -2144,11 +2184,13 @@ final class _Emitter {
     return ka.length.compareTo(kb.length);
   }
 
+  // buildifier's priority table, as far as the generated files use it.
   static const List<String> _leadingAttributes = <String>[
     'name',
     'size',
     'testonly',
     'srcs',
+    'outs',
     'hdrs',
   ];
   // buildifier's order: `deps` and `alwayslink` trail; `implementation_deps`
