@@ -1314,10 +1314,11 @@ void main() {
               .run(<String>['run', '--no-pub', '--no-hot', '--web-header', 'foo=bar']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers, <String, String>{
-            'foo': 'bar',
-          });
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.headers,
+            <String, String>{'foo': 'bar'},
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1464,10 +1465,11 @@ void main() {
           ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers, <String, String>{
-            'hurray': 'flutter,flutter=hurray',
-          });
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.headers,
+            <String, String>{'hurray': 'flutter,flutter=hurray'},
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1522,8 +1524,8 @@ server:
               .run(<String>['run', '--no-pub', '--no-hot', '--web-port=8080']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.port, 8080);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.port, 8080);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1553,8 +1555,8 @@ server:
               .run(<String>['run', '--no-pub', '--no-hot', '--web-hostname=clihost']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.host, 'clihost');
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.host, 'clihost');
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1594,9 +1596,9 @@ server:
           ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
           final Map<String, String> headers =
-              fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.headers;
+              fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.headers;
           // CLI headers override file config headers with same name
           expect(headers['X-Shared-Header'], 'from-cli');
           // CLI-only headers are included
@@ -1631,9 +1633,9 @@ server:
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.host, 'confighost');
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.port, 9000);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.host, 'confighost');
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.port, 9000);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1671,14 +1673,14 @@ server:
           ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certPath,
             '/cli/cert.pem',
           );
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
             '/cli/key.pem',
           );
         },
@@ -1713,16 +1715,16 @@ server:
               .run(<String>['run', '--no-pub', '--no-hot', '--web-tls-cert-path=/cli/cert.pem']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
           // CLI cert path overrides file config
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certPath,
             '/cli/cert.pem',
           );
           // File config key path is used as fallback
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
             '/config/key.pem',
           );
         },
@@ -1755,14 +1757,14 @@ server:
           ]);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https, isNotNull);
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certPath,
             '/cli/cert.pem',
           );
           expect(
-            fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.https!.certKeyPath,
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.https!.certKeyPath,
             '/cli/key.pem',
           );
         },
@@ -1814,8 +1816,11 @@ server:
               .run(<String>['run', '--no-pub', '--no-hot', '--base-href=/preview/']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.baseHref, '/preview/');
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(
+            fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.baseHref,
+            '/preview/',
+          );
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -1891,8 +1896,8 @@ server:
           await createTestCommandRunner(command).run(<String>['run', '--no-pub', '--no-hot']);
 
           expect(fakeWebRunnerFactory.lastOptions, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig, isNotNull);
-          expect(fakeWebRunnerFactory.lastOptions!.webDevServerConfig!.baseHref, isNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig, isNotNull);
+          expect(fakeWebRunnerFactory.lastOptions!.webConfig.devServerConfig!.baseHref, isNull);
         },
         overrides: <Type, Generator>{
           FileSystem: () => fileSystem,
@@ -2069,9 +2074,9 @@ server:
 
       final DebuggingOptions options = await command.createDebuggingOptions();
 
-      expect(options.webUseSseForDebugBackend, false);
-      expect(options.webUseSseForDebugProxy, false);
-      expect(options.webUseSseForInjectedClient, false);
+      expect(options.webConfig.useSseForDebugBackend, false);
+      expect(options.webConfig.useSseForDebugProxy, false);
+      expect(options.webConfig.useSseForInjectedClient, false);
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -2187,8 +2192,8 @@ server:
 
       final DebuggingOptions options = await command.createDebuggingOptions();
 
-      expect(options.webUseWasm, true);
-      expect(options.webRenderer, WebRendererMode.skwasm);
+      expect(options.webConfig.useWasm, true);
+      expect(options.webConfig.renderer, WebRendererMode.skwasm);
     },
     overrides: <Type, Generator>{
       Cache: () => Cache.test(processManager: FakeProcessManager.any()),
@@ -2220,10 +2225,10 @@ server:
       );
 
       final DebuggingOptions options = await command.createDebuggingOptions();
-      expect(options.webLaunchUrl, 'http://flutter.dev');
+      expect(options.webConfig.launchUrl, 'http://flutter.dev');
 
       final pattern = RegExp(r'^((http)?:\/\/)[^\s]+');
-      expect(pattern.hasMatch(options.webLaunchUrl!), true);
+      expect(pattern.hasMatch(options.webConfig.launchUrl!), true);
     },
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
