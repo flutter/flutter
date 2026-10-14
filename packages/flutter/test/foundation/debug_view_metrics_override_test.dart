@@ -1186,7 +1186,9 @@ void main() {
       expect(fake.viewFor(1).renderedSize, isNull);
       wrappedView.render(scene, size: const ui.Size(10, 20));
       expect(fake.viewFor(1).renderedSize, const ui.Size(10, 20));
-      debugApplyViewMetricsOverrides(fake).view(id: 2)!.render(scene, size: const ui.Size(400, 800));
+      debugApplyViewMetricsOverrides(fake)
+          .view(id: 2)!
+          .render(scene, size: const ui.Size(400, 800));
       expect(fake.viewFor(2).renders, 1);
       expect(fake.viewFor(2).renderedSize, isNull);
     });
