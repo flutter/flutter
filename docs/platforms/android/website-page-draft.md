@@ -8,9 +8,10 @@ beta channel. Contributor-facing details live in
 
 ## Summary
 
-The Flutter Gradle Plugin now uses only the public Android Gradle Plugin (AGP)
-API, and new and migrated Flutter projects build with AGP's new DSL enabled
-(`android.newDsl` is no longer set to `false` by Flutter). Gradle build
+The Flutter Gradle Plugin uses only the public Android Gradle Plugin (AGP)
+API. Flutter projects that set `android.builtInKotlin=true`, and whose app does
+not apply the `kotlin-android` plugin, build with AGP's new DSL enabled: Flutter
+does not add `android.newDsl=false` to them, and removes the copy it added. Gradle build
 scripts that use the legacy AGP APIs — most commonly
 `android.applicationVariants` — fail to configure and must be migrated to the
 AGP Variant API.
@@ -21,16 +22,21 @@ AGP 9 deprecated the legacy DSL and Variant APIs behind the
 `android.newDsl=false` flag. AGP 10 removes them entirely. Flutter previously
 added `android.newDsl=false` to your `gradle.properties` (via the project
 templates and an automatic migration) to keep legacy builds working. That
-opt-out stops working with AGP 10, so Flutter has migrated its own Gradle
-plugin to the public API and removed the opt-out from templates. A migration
-now *removes* the opt-out lines that Flutter previously added — it only touches
-lines carrying Flutter's marker comments, and prints a message when it does.
-Opt-outs you added by hand are left alone.
+opt-out stops working with AGP 10, so Flutter migrated its own Gradle plugin
+to the public API.
 
-`android.builtInKotlin=false` is **not** affected by this change. It is owned
-by the separate built-in-Kotlin migration (tracked in
-[flutter/flutter#184836](https://github.com/flutter/flutter/issues/184836)),
-which means one more (smaller) `gradle.properties` change later.
+The `kotlin-android` plugin fails to apply when `android.newDsl=true`, so the
+opt-out goes away only from projects that use built-in Kotlin. For those
+projects, `flutter build` removes the opt-out lines that carry Flutter's marker
+comment, and prints a message when it does. Opt-outs you added by hand are left
+alone. Projects with `android.builtInKotlin=false`, which includes every
+project created from the Flutter templates, keep `android.newDsl=false`; the
+built-in Kotlin migration (tracked in
+[flutter/flutter#184836](https://github.com/flutter/flutter/issues/184836))
+removes both.
+
+If a build script uses an API that does not exist under the new DSL,
+`flutter build` names the failing API and links to the AGP Variant API guide.
 
 ## Migration guide
 
