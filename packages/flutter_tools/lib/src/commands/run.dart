@@ -49,15 +49,28 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     required super.verboseHelp,
     super.outputPreferences,
   }) {
+    enableUsesTargetOption();
+    enableUsesPubOption();
     enableUsesFatalWarnings();
-    registerOptionBundles(optionBundles);
+    registerOptionBundles(const <OptionBundle>[
+      BuildModeOptionsBundle(defaultToRelease: false),
+      VmServicePortOptionsBundle(),
+      DeviceDiscoveryOptionsBundle(includeDeviceUser: true),
+      DdsAndDevToolsOptionsBundle(),
+      AndroidBuildOptionsBundle(),
+      EngineRenderingFlagsBundle(includeTestFlag: true),
+    ]);
+    usesWebOptions(verboseHelp: verboseHelp);
     argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
       WebOptions.webDefines,
       WebOptions.webResourcesCdn,
       CommonOptions.nativeNullAssertions,
       CommonOptions.useApplicationBinary,
       WebOptions.deprecatedJsInterop,
-      BuildInfoOptions.trackWidgetCreation,
+      CommonOptions.target,
+      CommonOptions.pub,
       CommonOptions.fatalWarnings,
       DebuggingOptionDescriptors.adbLogFiltering,
       DebuggingOptionDescriptors.traceStartup,
@@ -87,20 +100,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       DebuggingOptionDescriptors.iosProfileDebugger,
     ], verboseHelp: verboseHelp);
   }
-
-  List<OptionBundle> get optionBundles => const <OptionBundle>[
-    BuildModeOptionsBundle(defaultToRelease: false),
-    DartDefinesOptionsBundle(),
-    WebOptionsBundle(),
-    FlavorOptionBundle(),
-    TargetOptionBundle(),
-    VmServicePortOptionsBundle(),
-    PubOptionBundle(),
-    DeviceDiscoveryOptionsBundle(includeDeviceUser: true),
-    DdsAndDevToolsOptionsBundle(),
-    AndroidBuildOptionsBundle(),
-    EngineRenderingFlagsBundle(includeTestFlag: true),
-  ];
 
   final BuildSystem buildSystem;
   final BuildTargets buildTargets;
@@ -339,6 +338,13 @@ class RunCommand extends RunCommandBase {
     super.verboseHelp = false,
   }) {
     requiresPubspecYaml();
+    registerOptionBundles(const <OptionBundle>[
+      FilesystemOptionsBundle(),
+      ResidentCompilerOptionsBundle(
+        includeFrontendServerStarterPath: true,
+        includeExtraDartFlags: true,
+      ),
+    ]);
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       CommonOptions.enableExperiment,
       DebuggingOptionDescriptors.publishPort,
@@ -355,16 +361,6 @@ class RunCommand extends RunCommandBase {
       _benchmark,
     ], verboseHelp: verboseHelp);
   }
-
-  @override
-  List<OptionBundle> get optionBundles => <OptionBundle>[
-    ...super.optionBundles,
-    const FilesystemOptionsBundle(),
-    const ResidentCompilerOptionsBundle(
-      includeFrontendServerStarterPath: true,
-      includeExtraDartFlags: true,
-    ),
-  ];
 
   static const _awaitFirstFrameWhenTracing = FlagOptionDescriptor(
     name: 'await-first-frame-when-tracing',
@@ -916,79 +912,3 @@ typedef AnalyticsUsageValuesRecord = ({
   String runTargetOsVersion,
   bool? runEnableHcpp,
 });
-
-/// A bundle encapsulating the target option (`--target`).
-class TargetOptionBundle extends OptionBundle {
-  const TargetOptionBundle();
-
-  @override
-  void onRegister(FlutterCommand command) {
-    command.enableUsesTargetOption();
-  }
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    CommonOptions.target,
-  ];
-}
-
-/// A bundle encapsulating Dart defines options (`--dart-define` and `--dart-define-from-file`).
-class DartDefinesOptionsBundle extends OptionBundle {
-  const DartDefinesOptionsBundle();
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    CommonOptions.dartDefines,
-    CommonOptions.dartDefineFromFile,
-  ];
-}
-
-/// A bundle encapsulating the flavor option (`--flavor`).
-class FlavorOptionBundle extends OptionBundle {
-  const FlavorOptionBundle();
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    BuildInfoOptions.flavor,
-  ];
-}
-
-/// A bundle encapsulating the pub option (`--[no-]pub`).
-class PubOptionBundle extends OptionBundle {
-  const PubOptionBundle();
-
-  @override
-  void onRegister(FlutterCommand command) {
-    command.enableUsesPubOption();
-  }
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    CommonOptions.pub,
-  ];
-}
-
-/// A bundle encapsulating Flutter web runner and server options.
-class WebOptionsBundle extends OptionBundle {
-  const WebOptionsBundle();
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    WebOptions.webHeader,
-    WebOptions.webHostname,
-    WebOptions.webPort,
-    WebOptions.webTlsCertPath,
-    WebOptions.webTlsCertKeyPath,
-    WebOptions.webServerDebugProtocol,
-    WebOptions.webServerDebugBackendProtocol,
-    WebOptions.webServerDebugInjectedClientProtocol,
-    WebOptions.webAllowExposeUrl,
-    WebOptions.webRunHeadless,
-    WebOptions.webBrowserDebugPort,
-    WebOptions.webEnableExpressionEvaluation,
-    WebOptions.webLaunchUrl,
-    WebOptions.webBrowserFlags,
-    WebOptions.crossOriginIsolation,
-    WebOptions.baseHref,
-  ];
-}
