@@ -70,7 +70,7 @@ class DriveCommand extends RunCommandBase {
       _keepAppRunning,
       _useExistingApp,
       _driver,
-      _build,
+      DebuggingOptionDescriptors.buildOption(verboseOnly: false),
       _screenshot,
       _driverPort,
       _headless,
@@ -116,14 +116,6 @@ class DriveCommand extends RunCommandBase {
         'extension, so e.g. if the target is "lib/main.dart", the driver will be '
         '"test_driver/main_test.dart".',
     valueHelp: 'path',
-  );
-
-  static const _build = FlagOptionDescriptor(
-    name: 'build',
-    defaultsTo: true,
-    help:
-        '(deprecated) Build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
-        'flag with an existing APK.',
   );
 
   static const _screenshot = StringOptionDescriptor(
