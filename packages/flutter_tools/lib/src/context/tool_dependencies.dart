@@ -448,7 +448,7 @@ class ToolDependencies {
       ),
     };
 
-    final toolContext = ToolContext(
+    final finalToolContext = ToolContext(
       artifacts: finalArtifacts,
       botDetector: finalBotDetector,
       cache: finalCache,
@@ -489,7 +489,7 @@ class ToolDependencies {
           ),
           analytics: finalAnalytics,
           templateRenderer: templateRenderer,
-          toolContext: toolContext,
+          toolContext: finalToolContext,
         );
 
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
@@ -524,17 +524,25 @@ class ToolDependencies {
         IOSSimulatorUtils(
           analytics: finalAnalytics,
           plistParser: finalPlistParser,
-          toolContext: toolContext,
+          toolContext: finalToolContext,
           xcode: finalXcode,
         );
 
     // 12. AndroidContext Dependencies
     final AndroidSdk? Function() finalAndroidSdkBuilder =
-        androidSdkBuilder ?? (androidSdk != null ? () => androidSdk : AndroidSdk.locateAndroidSdk);
+        androidSdkBuilder ??
+        (androidSdk != null
+            ? () => androidSdk
+            : () => AndroidSdk.locateAndroidSdk(toolContext: finalToolContext));
 
     final AndroidStudio? Function() finalAndroidStudioBuilder =
         androidStudioBuilder ??
-        (androidStudio != null ? () => androidStudio : AndroidStudio.latestValid);
+        (androidStudio != null
+            ? () => androidStudio
+            : () => AndroidStudio.latestValid(
+                plistParser: finalPlistParser,
+                toolContext: finalToolContext,
+              ));
 
     late final AndroidContext finalAndroidContext;
 
@@ -586,7 +594,7 @@ class ToolDependencies {
           androidWorkflow: finalAndroidWorkflow,
           iosWorkflow: finalIOSWorkflow,
           javaBuilder: () => finalAndroidContext.java,
-          toolContext: toolContext,
+          toolContext: finalToolContext,
           xcode: finalXcode,
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
         );
@@ -657,7 +665,7 @@ class ToolDependencies {
       extensionBuildManager: extensionBuildManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
-      toolContext: toolContext,
+      toolContext: finalToolContext,
     );
   }
 }
