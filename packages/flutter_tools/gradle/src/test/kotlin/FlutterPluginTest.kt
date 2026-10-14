@@ -4,10 +4,12 @@ import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.dsl.ApplicationBuildType
 import com.android.build.api.dsl.ApplicationDefaultConfig
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryBuildType
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ApplicationVariant
 import com.android.build.api.variant.BuiltArtifactsLoader
+import com.android.build.api.variant.LibraryVariant
 import com.android.build.api.variant.SourceDirectories
 import com.android.build.api.variant.Sources
 import com.android.build.api.variant.Variant
@@ -18,6 +20,7 @@ import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.api.AndroidSourceDirectorySet
 import com.flutter.gradle.tasks.CopyFlutterApksTask
 import com.flutter.gradle.tasks.CopyFlutterAssetsTask
+import com.flutter.gradle.tasks.CopyFlutterJniLibsTask
 import com.flutter.gradle.tasks.FlutterTask
 import com.flutter.gradle.tasks.PrintTask
 import com.flutter.gradle.testing.mockAbiFilters
@@ -35,9 +38,11 @@ import org.gradle.api.GradleException
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.Transformer
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.kotlin.gradle.plugin.extraProperties
 import org.junit.jupiter.api.AfterEach
@@ -50,6 +55,7 @@ import java.util.Base64
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 
 class FlutterPluginTest {
     // Clear global singleton mocks to prevent mock state leaking into other tests in the same JVM.
@@ -209,6 +215,120 @@ class FlutterPluginTest {
         verify(exactly = 0) {
             taskContainer.register("copyFlutterApksAndroidTest", CopyFlutterApksTask::class.java, any())
         }
+        verify(exactly = 0) {
+            taskContainer.register("copyJniLibsflutterBuildAndroidTest", CopyFlutterJniLibsTask::class.java, any())
+        }
+    }
+
+    @Test
+    fun `onVariants wires the jniLibs copy to the output of the variant's compile task`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        val compileTaskProvider = project.stubTaskRegistration<FlutterTask>("compileFlutterBuildDebug")
+        val compileOutputSlot = slot<Transformer<File, FlutterTask>>()
+        val compileOutput = mockk<Provider<File>>()
+        every { compileTaskProvider.map(capture(compileOutputSlot)) } returns compileOutput
+        val compileOutputDir = mockk<Provider<Directory>>()
+        every { project.layout.dir(compileOutput) } returns compileOutputDir
+        val configureJniLibsTask = project.captureTaskConfiguration<CopyFlutterJniLibsTask>("copyJniLibsflutterBuildDebug")
+
+        applyPluginCapturingVariantCallback(env)(mockApplicationVariant())
+        val jniLibsTask = configureJniLibsTask()
+
+        verify { jniLibsTask.intermediateDir.set(compileOutputDir) }
+        val compileTask = mockk<FlutterTask>()
+        val outputDirectory = File("build/intermediates/flutter/debug")
+        every { compileTask.outputDirectory } returns outputDirectory
+        assertEquals(outputDirectory, compileOutputSlot.captured.transform(compileTask))
+        // The provider carries the task dependency, so the compile task is not looked up by name.
+        val taskContainer = project.tasks
+        verify(exactly = 0) { taskContainer.findByName(any()) }
+        verify(exactly = 0) { taskContainer.matching(any<Spec<Task>>()) }
+    }
+
+    @Test
+    fun `onVariants configures a module variant for any command line task, without APK wiring`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        // A host task, whose name matches none of the module's variant names.
+        project.setCommandLineTasks(":app:assembleDemoStaging")
+        val copyAssetsTaskProvider = project.stubTaskRegistration<CopyFlutterAssetsTask>("copyFlutterAssetsDebug")
+        val copyJniLibsTaskProvider = project.stubTaskRegistration<CopyFlutterJniLibsTask>("copyJniLibsflutterBuildDebug")
+        val assetsSource = mockk<SourceDirectories.Layered>(relaxed = true)
+        val jniLibsSource = mockk<SourceDirectories.Layered>(relaxed = true)
+
+        applyPluginToModuleCapturingVariantCallback(env)(
+            mockLibraryVariant(assetsSource = assetsSource, jniLibsSource = jniLibsSource)
+        )
+
+        val taskContainer = project.tasks
+        verify { taskContainer.register("compileFlutterBuildDebug", FlutterTask::class.java, any()) }
+        verify { assetsSource.addGeneratedSourceDirectory(copyAssetsTaskProvider, CopyFlutterAssetsTask::destinationDir) }
+        verify { jniLibsSource.addGeneratedSourceDirectory(copyJniLibsTaskProvider, CopyFlutterJniLibsTask::destinationDir) }
+        verify(exactly = 0) { taskContainer.register(any(), CopyFlutterApksTask::class.java, any()) }
+        verify(exactly = 0) { taskContainer.configureEach(any<Action<in Task>>()) }
+    }
+
+    @Test
+    fun `onVariants compiles each module variant in the build mode of its build type`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val configureCompileTasks =
+            listOf("Debug", "Profile", "Release").associateWith { variantName ->
+                env.project.captureTaskConfiguration<FlutterTask>("compileFlutterBuild$variantName")
+            }
+
+        val onVariant = applyPluginToModuleCapturingVariantCallback(env)
+        onVariant(mockLibraryVariant(name = "debug", buildType = "debug", debuggable = true, minSdkApiLevel = 24))
+        // The plugin creates `profile` with initWith(debug), so it is debuggable too.
+        onVariant(mockLibraryVariant(name = "profile", buildType = "profile", debuggable = true))
+        onVariant(mockLibraryVariant(name = "release", buildType = "release", debuggable = false))
+
+        val buildModes =
+            configureCompileTasks.mapValues { (_, configureCompileTask) ->
+                val task = configureCompileTask()
+                val buildModeSlot = slot<String>()
+                verify { task.buildMode = capture(buildModeSlot) }
+                buildModeSlot.captured
+            }
+        assertEquals(mapOf("Debug" to "debug", "Profile" to "profile", "Release" to "release"), buildModes)
+    }
+
+    @Test
+    fun `apply warns that flutter hostAppProjectName has no effect in a module and does not look up the host`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        every { project.providers.gradleProperty(FlutterPlugin.PROP_HOST_APP_PROJECT_NAME).isPresent } returns true
+
+        applyPluginToModuleCapturingVariantCallback(env)
+
+        val logger = project.logger
+        verify {
+            logger.warn(match<String> { it.contains("'flutter.hostAppProjectName' has no effect") })
+        }
+        val rootProject = project.rootProject
+        verify(exactly = 0) { rootProject.findProject(any()) }
+    }
+
+    @Test
+    fun `apply does not warn about flutter hostAppProjectName when it is not set`(
+        @TempDir tempDir: Path
+    ) {
+        val env = setupTestProjectEnvironment(tempDir)
+        val project = env.project
+        every { project.providers.gradleProperty(FlutterPlugin.PROP_HOST_APP_PROJECT_NAME).isPresent } returns false
+
+        applyPluginToModuleCapturingVariantCallback(env)
+
+        val logger = project.logger
+        verify(exactly = 0) { logger.warn(match<String> { it.contains("hostAppProjectName") }) }
     }
 
     @Test
@@ -488,6 +608,42 @@ class FlutterPluginTest {
         return onVariantSlot.captured
     }
 
+    /** [applyPluginCapturingVariantCallback] for an add-to-app module (Android library plugin). */
+    private fun applyPluginToModuleCapturingVariantCallback(env: TestProjectEnvironment): (Variant) -> Unit {
+        val project = env.project
+        every { project.plugins.hasPlugin("com.android.application") } returns false
+        every { project.extensions.findByType(ApplicationExtension::class.java) } returns null
+
+        val mockLibraryExtension = mockk<LibraryExtension>(relaxed = true)
+        every { project.extensions.findByName("android") } returns mockLibraryExtension
+        every { project.extensions.getByType(LibraryExtension::class.java) } returns mockLibraryExtension
+        val mockDebugBuildType =
+            mockk<LibraryBuildType>(relaxed = true) {
+                every { name } returns "debug"
+            }
+        val mockReleaseBuildType =
+            mockk<LibraryBuildType>(relaxed = true) {
+                every { name } returns "release"
+            }
+        val container = mockk<NamedDomainObjectContainer<LibraryBuildType>>(relaxed = true)
+        every { container.getByName("debug") } returns mockDebugBuildType
+        every { container.getByName("release") } returns mockReleaseBuildType
+        every { container.all(any<Action<in LibraryBuildType>>()) } answers {
+            val action = firstArg<Action<in LibraryBuildType>>()
+            action.execute(mockDebugBuildType)
+            action.execute(mockReleaseBuildType)
+        }
+        every { mockLibraryExtension.buildTypes } returns container
+
+        val mockComponentsExtension = setupMockComponentsExtension(project)
+        setupMockNativePluginLoader(project, env.flutterExtension)
+        val onVariantSlot = slot<(Variant) -> Unit>()
+        every { mockComponentsExtension.onVariants(any(), capture(onVariantSlot)) } returns Unit
+
+        FlutterPlugin().apply(project)
+        return onVariantSlot.captured
+    }
+
     /**
      * An [ApplicationVariant] that answers everything the plugin reads while configuring a
      * variant. Pass the values a test is about; the rest are stubbed so the plugin can run.
@@ -516,11 +672,55 @@ class FlutterPluginTest {
         return mockVariant
     }
 
+    /** [mockApplicationVariant] for an add-to-app module. */
+    private fun mockLibraryVariant(
+        name: String = "debug",
+        buildType: String = "debug",
+        debuggable: Boolean = true,
+        minSdkApiLevel: Int = 21,
+        assetsSource: SourceDirectories.Layered? = mockk(relaxed = true),
+        jniLibsSource: SourceDirectories.Layered? = mockk(relaxed = true)
+    ): LibraryVariant {
+        val mockVariant = mockk<LibraryVariant>(relaxed = true)
+        val mockSources = mockk<Sources>(relaxed = true)
+        every { mockVariant.name } returns name
+        every { mockVariant.buildType } returns buildType
+        every { mockVariant.debuggable } returns debuggable
+        every { mockVariant.flavorName } returns null
+        every { mockVariant.productFlavors } returns emptyList()
+        every { mockVariant.minSdk.apiLevel } returns minSdkApiLevel
+        every { mockVariant.sources } returns mockSources
+        every { mockSources.assets } returns assetsSource
+        every { mockSources.jniLibs } returns jniLibsSource
+        return mockVariant
+    }
+
     /** A mocked [VariantOutput] and the mocked `versionCode` property it returns. */
     private data class MockVariantOutput(
         val output: VariantOutput,
         val versionCode: Property<Int>
     )
+
+    /** Stubs registering task [name] to return a relaxed provider, which is returned. */
+    private inline fun <reified T : Task> Project.stubTaskRegistration(name: String): TaskProvider<T> {
+        val provider = mockk<TaskProvider<T>>(relaxed = true)
+        every { tasks.register(name, T::class.java, any()) } returns provider
+        return provider
+    }
+
+    /**
+     * Captures the configuration action registered for task [name]. The returned function runs
+     * that action on a relaxed mock task and returns the task, for verifying what it set.
+     */
+    private inline fun <reified T : Task> Project.captureTaskConfiguration(name: String): () -> T {
+        val action = slot<Action<T>>()
+        every { tasks.register(name, T::class.java, capture(action)) } returns mockk(relaxed = true)
+        return { mockk<T>(relaxed = true).also { action.captured.execute(it) } }
+    }
+
+    private fun Project.setCommandLineTasks(vararg taskNames: String) {
+        every { gradle.startParameter.taskNames } returns taskNames.toList()
+    }
 
     /**
      * A [VariantOutput] with an ABI filter for [abi] (none if null). Only `set` is stubbed on its
