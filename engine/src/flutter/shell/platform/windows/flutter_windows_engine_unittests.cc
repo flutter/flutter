@@ -1993,11 +1993,19 @@ TEST_F(FlutterWindowsEngineTest, UpdateSemanticsMultiView) {
 
 #ifndef FLUTTER_RELEASE
 TEST_F(FlutterWindowsEngineTest, MaxD3DFeatureLevelCapsANGLEDevice) {
+  fml::testing::LogCapture log_capture;
   _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", "10_0");
   FlutterWindowsEngineBuilder builder{GetContext()};
   std::unique_ptr<FlutterWindowsEngine> engine = builder.Build();
   _putenv_s("FLUTTER_WINDOWS_MAX_D3D_FEATURE_LEVEL", "");
 
+  // Verify the engine requested the feature level cap when creating the EGL
+  // manager.
+  EXPECT_THAT(
+      log_capture.str(),
+      ::testing::HasSubstr("Capping ANGLE's D3D11 feature level to 10_0."));
+
+  // Verify the actual feature level of the created device.
   ASSERT_NE(engine->egl_manager(), nullptr);
   Microsoft::WRL::ComPtr<ID3D11Device> device;
   ASSERT_TRUE(engine->egl_manager()->GetDevice(device.GetAddressOf()));
