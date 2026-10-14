@@ -161,24 +161,42 @@ gn_action = rule(
 def _gn_copy_impl(ctx):
     # The copy's content is its sources. GN's destination (`outputs`, under
     # the build directory) is the artifact layout, which packaging assembles;
-    # here the files travel as they are. The empty CcInfo keeps the edges
+    # here the files travel as they are -- unless the copy renames (`outs`:
+    # a literal output name, which is the point of such a copy), when each
+    # source is linked under its new name. The empty CcInfo keeps the edges
     # that GN has from libraries and binaries to copies, which order them.
+    files = ctx.files.srcs
+    if ctx.outputs.outs:
+        if len(ctx.outputs.outs) != len(files):
+            fail("%s: %d outs for %d sources" % (ctx.label, len(ctx.outputs.outs), len(files)))
+        for i, out in enumerate(ctx.outputs.outs):
+            ctx.actions.symlink(output = out, target_file = files[i])
+        files = ctx.outputs.outs
     return [
-        DefaultInfo(files = depset(ctx.files.srcs)),
+        DefaultInfo(files = depset(files)),
         CcInfo(),
     ]
 
 gn_copy = rule(
     implementation = _gn_copy_impl,
-    doc = "A GN copy(): its sources, as they are. See the implementation for why the destination is not reproduced.",
+    doc = "A GN copy(): its sources, as they are, or under their new names when the copy renames them. " +
+          "See the implementation for why the destination is not otherwise reproduced.",
     attrs = {
         "srcs": attr.label_list(
             allow_files = True,
             mandatory = True,
             doc = "GN's `sources`.",
         ),
+        "outs": attr.output_list(
+            doc = "The copies, one per source in order, when GN's `outputs` name the files literally " +
+                  "(no `{{source...}}` expansion): a renaming copy. Relative to the package, as GN's are " +
+                  "to its target_gen_dir.",
+        ),
         "outputs": attr.string_list(
             doc = "GN's `outputs`, for the record: where the build directory would hold the copies.",
+        ),
+        "deps": attr.label_list(
+            doc = "GN's `deps`: ordering only (the sources carry the file dependencies).",
         ),
     },
 )
