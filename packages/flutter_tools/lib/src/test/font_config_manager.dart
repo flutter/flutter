@@ -7,29 +7,29 @@ import 'dart:async';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 
 /// Manages a Font configuration that can be shared across multiple tests.
 class FontConfigManager {
-  FontConfigManager({required this._cache, required this._fileSystem, required this._logger});
+  FontConfigManager({required this._toolContext});
 
-  final Cache _cache;
-  final FileSystem _fileSystem;
-  final Logger _logger;
+  final ToolContext _toolContext;
   Directory? _fontsDirectory;
 
   /// Returns a Font configuration that limits font fallback to the artifact
   /// cache directory.
   late final File fontConfigFile = () {
+    final ToolContext(:Cache cache, :FileSystem fs, :Logger logger) = _toolContext;
     if (_fontsDirectory == null) {
-      _fontsDirectory = _fileSystem.systemTempDirectory.createTempSync('flutter_test_fonts.');
-      _logger.printTrace('Using this directory for fonts configuration: ${_fontsDirectory!.path}');
+      _fontsDirectory = fs.systemTempDirectory.createTempSync('flutter_test_fonts.');
+      logger.printTrace('Using this directory for fonts configuration: ${_fontsDirectory!.path}');
     }
 
-    final File cachedFontConfig = _fileSystem.file('${_fontsDirectory!.path}/fonts.conf');
+    final File cachedFontConfig = fs.file('${_fontsDirectory!.path}/fonts.conf');
     cachedFontConfig.createSync();
     cachedFontConfig.writeAsStringSync('''
 <fontconfig>
-  <dir>${_cache.getCacheArtifacts().path}</dir>
+  <dir>${cache.getCacheArtifacts().path}</dir>
   <cachedir>/var/cache/fontconfig</cachedir>
 </fontconfig>
 ''');
@@ -38,7 +38,7 @@ class FontConfigManager {
 
   Future<void> dispose() async {
     if (_fontsDirectory != null) {
-      _logger.printTrace('Deleting ${_fontsDirectory!.path}...');
+      _toolContext.logger.printTrace('Deleting ${_fontsDirectory!.path}...');
       try {
         await _fontsDirectory!.delete(recursive: true);
       } on FileSystemException {

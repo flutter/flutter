@@ -11,16 +11,15 @@ import 'package:stream_channel/stream_channel.dart';
 
 import '../artifacts.dart';
 import '../base/dds.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
 import '../native_assets.dart';
 import '../project.dart';
 import '../resident_runner.dart';
-import '../version.dart';
 import '../vmservice.dart';
 import 'font_config_manager.dart';
 import 'test_device.dart';
@@ -28,12 +27,8 @@ import 'test_device.dart';
 /// Implementation of [TestDevice] with the Flutter Tester over a [Process].
 class FlutterTesterTestDevice extends TestDevice {
   FlutterTesterTestDevice({
-    required this.artifacts,
     required this.id,
-    required this.platform,
-    required this.fileSystem,
-    required this.processManager,
-    required this.logger,
+    required this.toolContext,
     required this.flutterTesterBinPath,
     required this.debuggingOptions,
     required this.enableVmService,
@@ -41,7 +36,6 @@ class FlutterTesterTestDevice extends TestDevice {
     required this.host,
     required this.testAssetDirectory,
     required this.flutterProject,
-    required this.flutterVersion,
     required this.icudtlPath,
     required this.compileExpression,
     required this.fontConfigManager,
@@ -51,14 +45,10 @@ class FlutterTesterTestDevice extends TestDevice {
            ? Completer<Uri?>()
            : (Completer<Uri?>()..complete());
 
-  final Artifacts artifacts;
-
   /// Used for logging to identify the test that is currently being executed.
   final int id;
-  final Platform platform;
-  final FileSystem fileSystem;
-  final ProcessManager processManager;
-  final Logger logger;
+  @protected
+  final ToolContext toolContext;
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
   final bool enableVmService;
@@ -66,13 +56,12 @@ class FlutterTesterTestDevice extends TestDevice {
   final InternetAddress? host;
   final String? testAssetDirectory;
   final FlutterProject? flutterProject;
-  final FlutterVersion flutterVersion;
   final String? icudtlPath;
   final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
 
-  late final _ddsLauncher = DartDevelopmentService(logger: logger);
+  late final _ddsLauncher = DartDevelopmentService(logger: toolContext.logger);
   final Completer<Uri?> _gotProcessVmServiceUri;
   final _exitCode = Completer<int>();
 
@@ -89,6 +78,13 @@ class FlutterTesterTestDevice extends TestDevice {
     assert(!_exitCode.isCompleted);
     assert(_process == null);
     assert(_server == null);
+
+    final ToolContext(
+      :Artifacts artifacts,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
 
     // Prepare our WebSocket server to talk to the engine subprocess.
     // Let the server choose an unused port.
@@ -234,6 +230,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @override
   Future<void> kill() async {
+    final Logger logger = toolContext.logger;
     logger.printTrace('test $id: Terminating flutter_tester process');
     _process?.kill(io.ProcessSignal.sigkill);
 
@@ -250,7 +247,7 @@ class FlutterTesterTestDevice extends TestDevice {
     final int exitCode = await _exitCode.future;
 
     // On Windows, the [exitCode] and the terminating signal have no correlation.
-    if (platform.isWindows) {
+    if (toolContext.platform.isWindows) {
       return;
     }
 
@@ -273,7 +270,7 @@ class FlutterTesterTestDevice extends TestDevice {
     return connectToVmService(
       httpUri,
       compileExpression: compileExpression,
-      flutterVersion: flutterVersion,
+      flutterVersion: toolContext.flutterVersion,
       logger: logger,
     );
   }
@@ -311,6 +308,7 @@ class FlutterTesterTestDevice extends TestDevice {
     required Process process,
     required Future<void> Function(Uri uri) reportVmServiceUri,
   }) {
+    final Logger logger = toolContext.logger;
     for (final stream in <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream
           .transform(utf8LineDecoder)

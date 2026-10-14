@@ -20,19 +20,15 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
   AnalyzeBase(
     this.argResults, {
-    required this.artifacts,
-    required this.fileSystem,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
     required this.repoPackages,
     required this.suppressAnalytics,
-    required this.terminal,
+    required this.toolContext,
   });
 
   /// The parsed argument results for execution.
@@ -40,19 +36,22 @@ abstract class AnalyzeBase {
   @protected
   final List<Directory> repoPackages;
   @protected
-  final FileSystem fileSystem;
-  @protected
-  final Logger logger;
-  @protected
-  final ProcessManager processManager;
-  @protected
-  final Platform platform;
-  @protected
-  final Terminal terminal;
-  @protected
-  final Artifacts artifacts;
-  @protected
   final bool suppressAnalytics;
+  @protected
+  final ToolContext toolContext;
+
+  @protected
+  FileSystem get fileSystem => toolContext.fs;
+  @protected
+  Logger get logger => toolContext.logger;
+  @protected
+  ProcessManager get processManager => toolContext.processManager;
+  @protected
+  Platform get platform => toolContext.platform;
+  @protected
+  Terminal get terminal => toolContext.terminal;
+  @protected
+  Artifacts get artifacts => toolContext.artifacts;
 
   @protected
   String get flutterRoot => fileSystem.path.absolute(Cache.flutterRoot!);

@@ -16,18 +16,11 @@ class AnalyzeContinuously extends AnalyzeBase {
     super.argResults,
     List<Directory> repoPackages, {
     required this._analytics,
-    required super.artifacts,
-    required super.fileSystem,
-    required super.logger,
-    required super.platform,
-    required super.processManager,
-    required this.shutdownHooks,
     required super.suppressAnalytics,
-    required super.terminal,
+    required super.toolContext,
   }) : super(repoPackages: repoPackages);
 
   final Analytics _analytics;
-  final ShutdownHooks shutdownHooks;
 
   String? analysisTarget;
   bool firstAnalysis = true;
@@ -140,7 +133,7 @@ class AnalyzeContinuously extends AnalyzeBase {
             issueCount > 0 ? 1 : 0,
             analytics: _analytics,
             logger: logger,
-            shutdownHooks: shutdownHooks,
+            shutdownHooks: toolContext.shutdownHooks,
           );
         });
       }

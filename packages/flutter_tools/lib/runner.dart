@@ -193,10 +193,10 @@ Future<int> run(
                 reportCrashes!,
                 getVersion,
                 shutdownHooks,
+                usingLocalEngine: usingLocalEngine,
                 analytics: toolDeps.analytics,
                 featureFlags: featureFlags,
                 logger: toolDeps.toolContext.logger,
-                usingLocalEngine: usingLocalEngine,
               );
             }
           },
@@ -214,10 +214,10 @@ Future<int> run(
               reportCrashes!,
               getVersion,
               shutdownHooks,
+              usingLocalEngine: usingLocalEngine,
               analytics: toolDeps.analytics,
               featureFlags: featureFlags,
               logger: toolDeps.toolContext.logger,
-              usingLocalEngine: usingLocalEngine,
             );
           },
         )!;
@@ -241,10 +241,10 @@ Future<int> _handleToolError(
   bool reportCrashes,
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
+  required bool usingLocalEngine,
   required Analytics analytics,
   required FeatureFlags featureFlags,
   required Logger logger,
-  required bool usingLocalEngine,
 }) async {
   return _alreadyHandlingToolError ??= _handleToolErrorImpl(
     error,
@@ -254,10 +254,10 @@ Future<int> _handleToolError(
     reportCrashes,
     getFlutterVersion,
     shutdownHooks,
+    usingLocalEngine: usingLocalEngine,
     analytics: analytics,
     featureFlags: featureFlags,
     logger: logger,
-    usingLocalEngine: usingLocalEngine,
   );
 }
 
@@ -269,10 +269,10 @@ Future<int> _handleToolErrorImpl(
   bool reportCrashes,
   String Function() getFlutterVersion,
   ShutdownHooks shutdownHooks, {
+  required bool usingLocalEngine,
   required Analytics analytics,
   required FeatureFlags featureFlags,
   required Logger logger,
-  required bool usingLocalEngine,
 }) async {
   if (error is UsageException) {
     logger.printError('${error.message}\n');

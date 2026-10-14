@@ -63,8 +63,6 @@ void main() {
 
   setUp(() {
     testDevice = IntegrationTestTestDevice(
-      artifacts: Artifacts.test(),
-      flutterVersion: FakeFlutterVersion(),
       id: 1,
       device: FakeDevice(
         'ephemeral',
@@ -73,9 +71,9 @@ void main() {
         launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
       ),
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      logger: BufferLogger.test(),
       userIdentifier: '',
       compileExpression: null,
+      toolContext: FakeToolContext(artifacts: Artifacts.test()),
     );
 
     fakeVmServiceHost = FakeVmServiceHost(
@@ -191,8 +189,6 @@ void main() {
     'kill() completes and logs warning when DDS shutdown times out',
     () async {
       final TestDevice localTestDevice = IntegrationTestTestDevice(
-        artifacts: Artifacts.test(),
-        flutterVersion: FakeFlutterVersion(),
         id: 1,
         device: FakeDevice(
           'ephemeral',
@@ -201,9 +197,9 @@ void main() {
           launchResult: LaunchResult.succeeded(vmServiceUri: vmServiceUri),
         ),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        logger: BufferLogger.test(),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
         ddsShutdownTimeout: const Duration(milliseconds: 10),
       );
 
@@ -252,8 +248,6 @@ void main() {
     'when the device starts without providing an vmService URI',
     () async {
       final TestDevice testDevice = IntegrationTestTestDevice(
-        artifacts: Artifacts.test(),
-        flutterVersion: FakeFlutterVersion(),
         id: 1,
         device: FakeDevice(
           'ephemeral',
@@ -262,9 +256,9 @@ void main() {
           launchResult: LaunchResult.succeeded(),
         ),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        logger: BufferLogger.test(),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
       );
 
       expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
@@ -289,8 +283,6 @@ void main() {
     'when the device fails to start',
     () async {
       final TestDevice testDevice = IntegrationTestTestDevice(
-        artifacts: Artifacts.test(),
-        flutterVersion: FakeFlutterVersion(),
         id: 1,
         device: FakeDevice(
           'ephemeral',
@@ -299,9 +291,9 @@ void main() {
           launchResult: LaunchResult.failed(),
         ),
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        logger: BufferLogger.test(),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
       );
 
       expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
@@ -327,14 +319,12 @@ void main() {
     () async {
       final trackingDevice = FakeDeviceTrackingUninstall();
       final testDeviceWithUninstall = IntegrationTestTestDevice(
-        artifacts: Artifacts.test(),
-        flutterVersion: FakeFlutterVersion(),
         id: 1,
         device: trackingDevice,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-        logger: BufferLogger.test(),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
       );
 
       await testDeviceWithUninstall.start('entrypointPath');
@@ -366,14 +356,12 @@ void main() {
     () async {
       final trackingDevice = FakeDeviceTrackingUninstall();
       final testDeviceWithoutUninstall = IntegrationTestTestDevice(
-        artifacts: Artifacts.test(),
-        flutterVersion: FakeFlutterVersion(),
         id: 1,
         device: trackingDevice,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, uninstallApp: false),
-        logger: BufferLogger.test(),
         userIdentifier: '',
         compileExpression: null,
+        toolContext: FakeToolContext(artifacts: Artifacts.test()),
       );
 
       await testDeviceWithoutUninstall.start('entrypointPath');

@@ -267,7 +267,7 @@ class Daemon {
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,
     required FeatureFlags featureFlags,
-    required ToolContext toolContext,
+    required this._toolContext,
     required Xcode? xcode,
     AndroidSdk? androidSdk,
     AndroidWorkflow? androidWorkflow,
@@ -276,14 +276,15 @@ class Daemon {
     Java? java,
     this.logToStdout = false,
     this.notifyingLogger,
-  }) : _logger = notifyingLogger ?? toolContext.logger,
-       _fs = toolContext.fs,
-       _stdio = toolContext.stdio {
+  }) {
     final ToolContext(
-      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
       :ProcessManager processManager,
       :FlutterProjectFactory projectFactory,
-    ) = toolContext;
+      :Stdio stdio,
+    ) = _toolContext;
+    final Logger daemonLogger = notifyingLogger ?? logger;
     final AndroidWorkflow workflow =
         androidWorkflow ??
         AndroidWorkflow(androidSdkBuilder: () => androidSdk, featureFlags: featureFlags);
@@ -293,10 +294,10 @@ class Daemon {
       daemonDomain = DaemonDomain(
         this,
         featureFlags: featureFlags,
-        fileSystem: _fs,
-        logger: _logger,
+        fileSystem: fs,
+        logger: daemonLogger,
         projectFactory: projectFactory,
-        stdio: _stdio,
+        stdio: stdio,
       ),
     );
     registerDomain(
@@ -305,26 +306,19 @@ class Daemon {
         analytics: analytics,
         buildSystem: buildSystem,
         buildTargets: buildTargets,
-        toolContext: toolContext,
+        toolContext: _toolContext,
         xcode: xcode,
       ),
     );
     registerDomain(
-      deviceDomain = DeviceDomain(
-        this,
-        artifacts: artifacts,
-        fileSystem: _fs,
-        logger: _logger,
-        projectFactory: projectFactory,
-        deviceManager: deviceManager,
-      ),
+      deviceDomain = DeviceDomain(this, deviceManager: deviceManager, toolContext: _toolContext),
     );
     registerDomain(
       emulatorDomain = EmulatorDomain(
         this,
         androidWorkflow: workflow,
-        fileSystem: _fs,
-        logger: _logger,
+        fileSystem: fs,
+        logger: daemonLogger,
         processManager: processManager,
         androidSdk: androidSdk,
         java: java,
@@ -332,7 +326,12 @@ class Daemon {
     );
     registerDomain(devToolsDomain = DevToolsDomain(this));
     registerDomain(
-      proxyDomain = ProxyDomain(this, fileSystem: _fs, fileTransfer: fileTransfer, logger: _logger),
+      proxyDomain = ProxyDomain(
+        this,
+        fileSystem: fs,
+        fileTransfer: fileTransfer,
+        logger: daemonLogger,
+      ),
     );
 
     // Start listening.
@@ -384,9 +383,7 @@ class Daemon {
   }
 
   final DaemonConnection connection;
-  final Stdio _stdio;
-  final Logger _logger;
-  final FileSystem _fs;
+  final ToolContext _toolContext;
 
   late DaemonDomain daemonDomain;
   late AppDomain appDomain;
@@ -416,7 +413,7 @@ class Daemon {
     final Object? id = request.data['id'];
 
     if (id == null) {
-      _stdio.stderrWrite('no id for request: $request\n');
+      _toolContext.stdio.stderrWrite('no id for request: $request\n');
       return;
     }
 
@@ -1244,15 +1241,8 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(
-    Daemon daemon, {
-    required this._artifacts,
-    required FileSystem fileSystem,
-    required this._logger,
-    required this._projectFactory,
-    this._deviceManager,
-  }) : _fs = fileSystem,
-       super(daemon, 'device') {
+  DeviceDomain(Daemon daemon, {required this._toolContext, this._deviceManager})
+    : super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
     registerHandler('enable', enable);
@@ -1277,11 +1267,10 @@ class DeviceDomain extends Domain {
     _deviceManager?.deviceDiscoverers.forEach(addDeviceDiscoverer);
   }
 
-  final Artifacts _artifacts;
   final DeviceManager? _deviceManager;
-  final FileSystem _fs;
-  final Logger _logger;
-  final FlutterProjectFactory _projectFactory;
+  final ToolContext _toolContext;
+
+  Logger get _logger => daemon.notifyingLogger ?? _toolContext.logger;
 
   /// An incrementing number used to generate unique ids.
   var _id = 0;
@@ -1532,16 +1521,18 @@ class DeviceDomain extends Domain {
       devToolsServerAddress = Uri.parse(devToolsServerAddressStr);
     }
 
+    final ToolContext(:Artifacts artifacts, :FileSystem fs, :FlutterProjectFactory projectFactory) =
+        _toolContext;
     FlutterProject? project;
     try {
-      project = _projectFactory.fromDirectory(_fs.currentDirectory);
+      project = projectFactory.fromDirectory(fs.currentDirectory);
     } on ToolExit {
       // In daemon mode the cwd may not be a Flutter project, so we just ignore
       // these errors and use 'Unknown' as the package name below.
     }
     await device.dds.startDartDevelopmentService(
       Uri.parse(vmServiceUriStr),
-      artifacts: _artifacts,
+      artifacts: artifacts,
       appName:
           'Kind: Flutter - Device: ${device.displayName} - '
           'Package: ${project?.manifest.appName ?? 'Unknown'}',

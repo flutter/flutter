@@ -14,13 +14,8 @@ class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     super.argResults,
     List<Directory> repoPackages, {
-    required super.artifacts,
-    required super.fileSystem,
-    required super.logger,
-    required super.platform,
-    required super.processManager,
     required super.suppressAnalytics,
-    required super.terminal,
+    required super.toolContext,
     this.workingDirectory,
   }) : super(repoPackages: repoPackages);
 

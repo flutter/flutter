@@ -679,7 +679,6 @@ class SpawnPlugin extends PlatformPlugin {
   ) async {
     final ToolContext(
       :Artifacts artifacts,
-      :Cache cache,
       :FileSystem fs,
       :Logger logger,
       :Platform platform,
@@ -802,11 +801,7 @@ class SpawnPlugin extends PlatformPlugin {
         : 'true';
     final environment = <String, String>{
       'FLUTTER_TEST': flutterTest,
-      'FONTCONFIG_FILE': FontConfigManager(
-        cache: cache,
-        fileSystem: fs,
-        logger: logger,
-      ).fontConfigFile.path,
+      'FONTCONFIG_FILE': FontConfigManager(toolContext: _toolContext).fontConfigFile.path,
       'APP_NAME': flutterProject.manifest.appName,
       'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (nativeAssetsBuilder != null && platform.isWindows)

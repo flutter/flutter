@@ -12,6 +12,7 @@ import '../artifacts.dart';
 import '../base/dds.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
 import '../version.dart';
 import '../vmservice.dart';
@@ -23,27 +24,23 @@ const kIntegrationTestMethod = 'ext.flutter.integrationTest';
 
 class IntegrationTestTestDevice implements TestDevice {
   IntegrationTestTestDevice({
-    required this._artifacts,
-    required this.compileExpression,
-    required this.debuggingOptions,
-    required this.device,
-    required this._flutterVersion,
     required this.id,
-    required this._logger,
+    required this.device,
+    required this.debuggingOptions,
     required this.userIdentifier,
+    required this.compileExpression,
+    required this._toolContext,
     this.ddsShutdownTimeout = const Duration(seconds: 5),
   });
 
-  final Artifacts _artifacts;
   final int id;
   final Device device;
   final DebuggingOptions debuggingOptions;
-  final FlutterVersion _flutterVersion;
-  final Logger _logger;
   final String? userIdentifier;
   final CompileExpression? compileExpression;
+  final ToolContext _toolContext;
   final Duration ddsShutdownTimeout;
-  late final _ddsLauncher = DartDevelopmentService(logger: _logger);
+  late final _ddsLauncher = DartDevelopmentService(logger: _toolContext.logger);
 
   ApplicationPackage? _applicationPackage;
   final _finished = Completer<void>();
@@ -54,6 +51,8 @@ class IntegrationTestTestDevice implements TestDevice {
   /// [entrypointPath] must be a path to an un-compiled source file.
   @override
   Future<StreamChannel<String>> start(String entrypointPath) async {
+    final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :Logger logger) =
+        _toolContext;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     _applicationPackage = await ApplicationPackageFactory.instance?.getPackageForPlatform(
       targetPlatform,
@@ -86,16 +85,16 @@ class IntegrationTestTestDevice implements TestDevice {
     // streamed to the package:test_core runner.
 
     if (debuggingOptions.enableDds) {
-      _logger.printTrace('test $id: Starting Dart Development Service');
+      logger.printTrace('test $id: Starting Dart Development Service');
       await _ddsLauncher.startDartDevelopmentServiceFromDebuggingOptions(
         vmServiceUri,
-        artifacts: _artifacts,
+        artifacts: artifacts,
         appName:
             'Kind: Flutter - Device: ${device.displayName} - '
             'Package: ${package.name}',
         debuggingOptions: debuggingOptions,
       );
-      _logger.printTrace(
+      logger.printTrace(
         'test $id: Dart Development Service started at ${_ddsLauncher.uri}, forwarding to VM service at $vmServiceUri.',
       );
       vmServiceUri = _ddsLauncher.uri;
@@ -103,19 +102,19 @@ class IntegrationTestTestDevice implements TestDevice {
 
     _gotProcessVmServiceUri.complete(vmServiceUri);
 
-    _logger.printTrace('test $id: Connecting to vm service');
+    logger.printTrace('test $id: Connecting to vm service');
     final FlutterVmService vmService =
         await connectToVmService(
           vmServiceUri!,
           compileExpression: compileExpression,
-          flutterVersion: _flutterVersion,
-          logger: _logger,
+          flutterVersion: flutterVersion,
+          logger: logger,
         ).timeout(
           const Duration(seconds: 5),
           onTimeout: () => throw TimeoutException('Connecting to the VM Service timed out.'),
         );
 
-    _logger.printTrace(
+    logger.printTrace(
       'test $id: Finding the correct isolate with the integration test service extension',
     );
     final vm_service.IsolateRef isolateRef = await vmService.findExtensionIsolate(
@@ -151,14 +150,15 @@ class IntegrationTestTestDevice implements TestDevice {
 
   @override
   Future<void> kill() async {
+    final Logger logger = _toolContext.logger;
     final ApplicationPackage? applicationPackage = _applicationPackage;
     if (applicationPackage != null) {
       if (!await device.stopApp(applicationPackage, userIdentifier: userIdentifier)) {
-        _logger.printTrace('Could not stop the Integration Test app.');
+        logger.printTrace('Could not stop the Integration Test app.');
       }
       if (debuggingOptions.uninstallApp) {
         if (!await device.uninstallApp(applicationPackage, userIdentifier: userIdentifier)) {
-          _logger.printTrace('Could not uninstall the Integration Test app.');
+          logger.printTrace('Could not uninstall the Integration Test app.');
         }
       }
     }
@@ -167,9 +167,9 @@ class IntegrationTestTestDevice implements TestDevice {
     try {
       await _ddsLauncher.shutdown().timeout(ddsShutdownTimeout);
     } on TimeoutException {
-      _logger.printTrace('Warning: Dart Development Service shutdown timed out.');
+      logger.printTrace('Warning: Dart Development Service shutdown timed out.');
     } on Object catch (error) {
-      _logger.printTrace('Warning: Failed to shut down Dart Development Service: $error');
+      logger.printTrace('Warning: Failed to shut down Dart Development Service: $error');
     }
     _finished.complete();
   }

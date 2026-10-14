@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
@@ -423,13 +422,9 @@ void main() {
       final logReader = FakeDeviceLogReader();
       final DriverService driverService = FlutterDriverService(
         applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
-        artifacts: Artifacts.test(),
-        flutterVersion: FakeFlutterVersion(),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processUtils: ProcessUtils(logger: BufferLogger.test(), processManager: processManager),
         dartSdkPath: 'dart',
         devtoolsLauncher: FakeDevtoolsLauncher(),
+        toolContext: FakeToolContext(artifacts: Artifacts.test(), processManager: processManager),
         logFlushDelay: Duration.zero,
         vmServiceConnector:
             (
@@ -502,19 +497,16 @@ FlutterDriverService setUpDriverService({
   FlutterVmService? vmService,
   DevtoolsLauncher? devtoolsLauncher,
 }) {
-  logger ??= BufferLogger.test();
   return FlutterDriverService(
     applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
-    artifacts: Artifacts.test(),
-    flutterVersion: FakeFlutterVersion(),
-    logger: logger,
-    platform: platform ?? FakePlatform(),
-    processUtils: ProcessUtils(
-      logger: logger,
-      processManager: processManager ?? FakeProcessManager.any(),
-    ),
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
+    toolContext: FakeToolContext(
+      artifacts: Artifacts.test(),
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+    ),
     vmServiceConnector:
         (
           Uri httpUri, {

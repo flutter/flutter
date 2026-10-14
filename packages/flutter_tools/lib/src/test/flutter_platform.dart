@@ -7,12 +7,10 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart';
 
-import '../artifacts.dart';
 import '../base/async_guard.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -364,11 +362,7 @@ class FlutterPlatform extends PlatformPlugin {
 
   final String? integrationTestUserIdentifier;
 
-  late final _fontConfigManager = FontConfigManager(
-    cache: _toolContext.cache,
-    fileSystem: _toolContext.fs,
-    logger: _toolContext.logger,
-  );
+  late final _fontConfigManager = FontConfigManager(toolContext: _toolContext);
 
   /// The test compiler produces dill files for each test main.
   ///
@@ -483,33 +477,19 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   TestDevice _createTestDevice(int ourTestCount) {
-    final ToolContext(
-      :Artifacts artifacts,
-      :FlutterVersion flutterVersion,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = _toolContext;
     if (_isIntegrationTest) {
       return IntegrationTestTestDevice(
-        artifacts: artifacts,
         id: ourTestCount,
-        debuggingOptions: debuggingOptions,
         device: integrationTestDevice!,
-        flutterVersion: flutterVersion,
-        logger: logger,
+        debuggingOptions: debuggingOptions,
         userIdentifier: integrationTestUserIdentifier,
         compileExpression: _compileExpressionService,
+        toolContext: _toolContext,
       );
     }
     return FlutterTesterTestDevice(
-      artifacts: artifacts,
       id: ourTestCount,
-      platform: platform,
-      fileSystem: fs,
-      processManager: processManager,
-      logger: logger,
+      toolContext: _toolContext,
       flutterTesterBinPath: flutterTesterBinPath,
       enableVmService: enableVmService!,
       machine: machine,
@@ -517,7 +497,6 @@ class FlutterPlatform extends PlatformPlugin {
       host: host,
       testAssetDirectory: testAssetDirectory,
       flutterProject: flutterProject,
-      flutterVersion: flutterVersion,
       icudtlPath: icudtlPath,
       compileExpression: _compileExpressionService,
       fontConfigManager: _fontConfigManager,

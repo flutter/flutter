@@ -60,9 +60,11 @@ void main() {
 
   testWithoutContext('Missing dir error caught for FontConfigManger.dispose', () async {
     final fontConfigManager = FontConfigManager(
-      cache: Cache.test(processManager: processManager),
-      fileSystem: fileSystem,
-      logger: BufferLogger.test(),
+      toolContext: FakeToolContext(
+        cache: Cache.test(processManager: processManager),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+      ),
     );
 
     final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
@@ -332,20 +334,25 @@ void main() {
 /// Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   TestFlutterTesterDevice({
-    required super.platform,
-    required super.fileSystem,
-    required super.processManager,
+    required Platform platform,
+    required FileSystem fileSystem,
+    required ProcessManager processManager,
     required super.enableVmService,
     required List<String> dartEntrypointArgs,
     required bool enableImpeller,
     required bool enableFlutterGpu,
     super.flutterProject,
   }) : super(
-         artifacts: Artifacts.test(),
          id: 999,
+         toolContext: FakeToolContext(
+           artifacts: Artifacts.test(),
+           flutterVersion: FakeFlutterVersion(),
+           fs: fileSystem,
+           logger: BufferLogger.test(),
+           platform: platform,
+           processManager: processManager,
+         ),
          flutterTesterBinPath: '/',
-         flutterVersion: FakeFlutterVersion(),
-         logger: BufferLogger.test(),
          debuggingOptions: DebuggingOptions.enabled(
            const BuildInfo(
              BuildMode.debug,
@@ -364,9 +371,11 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
          icudtlPath: null,
          compileExpression: null,
          fontConfigManager: FontConfigManager(
-           cache: Cache.test(processManager: FakeProcessManager.any()),
-           fileSystem: fileSystem,
-           logger: BufferLogger.test(),
+           toolContext: FakeToolContext(
+             cache: Cache.test(processManager: FakeProcessManager.any()),
+             fs: fileSystem,
+             logger: BufferLogger.test(),
+           ),
          ),
          nativeAssetsBuilder: FakeNativeAssetsBuilder(),
        );
