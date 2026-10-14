@@ -719,31 +719,47 @@ class IOSSimulator extends Device {
   }
 
   @override
-  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async {
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async {
     final Process process = await _simControl.startRecordVideo(id, outputFile.path);
+    unawaited(process.stdout.drain<void>());
     final stderrBuf = StringBuffer();
     final recordingStarted = Completer<void>();
-    final Future<void> stderrFuture = process.stderr.transform(utf8.decoder).forEach((String data) {
-      stderrBuf.write(data);
-      if (!recordingStarted.isCompleted && data.contains('Recording started')) {
-        recordingStarted.complete();
-      }
-    });
+    final Future<void> stderrFuture = process.stderr
+        .transform(utf8AllowMalformed.decoder)
+        .transform(const LineSplitter())
+        .forEach((String line) {
+          stderrBuf.writeln(line);
+          if (!recordingStarted.isCompleted && line.contains('Recording started')) {
+            recordingStarted.complete();
+          }
+        });
 
-    // Wait for simctl to confirm the first frame is captured.
-    await Future.any(<Future<void>>[recordingStarted.future, process.exitCode]);
-
-    if (duration != null) {
+    Future<void> runRecording() async {
+      // Wait for simctl to confirm recording started, with a timeout.
       try {
-        await process.exitCode.timeout(duration);
+        await Future.any<void>(<Future<void>>[
+          recordingStarted.future,
+          process.exitCode,
+        ]).timeout(const Duration(seconds: 10));
       } on TimeoutException {
-        ProcessSignal.sigint.kill(process);
+        // Fall through; start the timer even if the confirmation line wasn't seen.
+      }
+
+      if (duration != null) {
+        try {
+          await process.exitCode.timeout(duration);
+        } on TimeoutException {
+          ProcessSignal.sigint.kill(process);
+        }
+      }
+      final (int exitCode, _) = await (process.exitCode, stderrFuture).wait;
+      const allowedExitCodes = <int>{0, 130, 143, -2, -15};
+      if (!allowedExitCodes.contains(exitCode)) {
+        throwToolExit('Screen recording failed (exit $exitCode): ${stderrBuf.toString().trim()}');
       }
     }
-    final (int exitCode, _) = await (process.exitCode, stderrFuture).wait;
-    if (exitCode != 0) {
-      throwToolExit('Screen recording failed (exit $exitCode): $stderrBuf');
-    }
+
+    return _IOSSimulatorScreenRecording(process, runRecording());
   }
 
   @override
@@ -757,6 +773,20 @@ class IOSSimulator extends Device {
       logReader.dispose();
     }
     await _portForwarder?.dispose();
+  }
+}
+
+class _IOSSimulatorScreenRecording implements ScreenRecording {
+  _IOSSimulatorScreenRecording(this._process, this.done);
+
+  final Process _process;
+
+  @override
+  final Future<void> done;
+
+  @override
+  Future<void> stop() async {
+    ProcessSignal.sigint.kill(_process);
   }
 }
 

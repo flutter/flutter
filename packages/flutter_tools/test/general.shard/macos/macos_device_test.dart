@@ -306,7 +306,8 @@ void main() {
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
-      await device.startScreenRecording(outputFile);
+      final ScreenRecording recording = await device.startScreenRecording(outputFile);
+      await recording.done;
       expect(fakeProcessManager, hasNoRemainingExpectations);
     },
   );
@@ -324,7 +325,8 @@ void main() {
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
-    await device.startScreenRecording(outputFile, duration: const Duration(seconds: 10));
+    final ScreenRecording recording = await device.startScreenRecording(outputFile, duration: const Duration(seconds: 10));
+    await recording.done;
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
 
@@ -345,8 +347,9 @@ void main() {
       operatingSystemUtils: FakeOperatingSystemUtils(),
     );
 
-    expect(
-      () => device.startScreenRecording(outputFile),
+    final ScreenRecording recording = await device.startScreenRecording(outputFile);
+    await expectLater(
+      () => recording.done,
       throwsToolExit(message: 'screencapture failed (exit 1): screencapture recording failed'),
     );
   });

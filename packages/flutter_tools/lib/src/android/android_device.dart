@@ -833,12 +833,26 @@ class AndroidDevice extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) async {
     const remotePath = '/data/local/tmp/flutter_screenshot.png';
-    await runAdbCheckedAsync(<String>['shell', 'screencap', '-p', remotePath]);
-    await _processUtils.run(
-      adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
-      throwOnError: true,
-    );
-    await runAdbCheckedAsync(<String>['shell', 'rm', remotePath]);
+    try {
+      await runAdbCheckedAsync(<String>['shell', 'screencap', '-p', remotePath]);
+      final RunResult pullResult = await _processUtils.run(
+        adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
+      );
+      if (pullResult.exitCode != 0) {
+        final String errorMsg = pullResult.stderr.trim().isNotEmpty
+            ? pullResult.stderr.trim()
+            : pullResult.stdout.trim();
+        throwToolExit('Failed to pull screenshot from device: $errorMsg');
+      }
+    } on ProcessException catch (error) {
+      throwToolExit('Failed to take screenshot: $error');
+    } finally {
+      try {
+        await _processUtils.run(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
+      } on Exception catch (error) {
+        _logger.printTrace('Failed to clean up remote screenshot: $error');
+      }
+    }
   }
 
   /// Records the device screen to [outputFile] using `adb screenrecord`.
@@ -852,7 +866,7 @@ class AndroidDevice extends Device {
   ///
   /// See: https://developer.android.com/tools/adb#screenrecord
   @override
-  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async {
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async {
     // https://developer.android.com/tools/adb#screenrecord
     const maxAdbSeconds = 180;
     final effectiveDuration = duration != null
@@ -868,25 +882,54 @@ class AndroidDevice extends Device {
       '${effectiveDuration.inSeconds}',
       remotePath,
     ];
-    final Process process = await _processManager.start(adbCommandForDevice(args));
-    var recordExitCode = -1;
-    try {
-      recordExitCode = await process.exitCode;
-    } finally {
+    final Process process = await _processUtils.start(adbCommandForDevice(args));
+    unawaited(process.stdout.drain<void>());
+    final Future<String> stderrFuture = process.stderr
+        .transform(utf8AllowMalformed.decoder)
+        .join();
+
+    Future<void> runRecording() async {
       try {
-        await _processUtils.run(
-          adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
-          throwOnError: true,
-        );
-      } on Exception {
-        if (recordExitCode != 0) {
-          throwToolExit('screenrecord failed with exit code $recordExitCode.');
+        final int recordExitCode = await process.exitCode;
+        final String stderr = await stderrFuture;
+        const allowedExitCodes = <int>{0, 130, 143, -2, -15};
+        final bool isAllowedExitCode =
+            allowedExitCodes.contains(recordExitCode) ||
+            (_platform.isWindows && recordExitCode == -1) ||
+            _allowHeapCorruptionOnWindows(recordExitCode, _platform);
+        if (!isAllowedExitCode) {
+          final errorMsg = stderr.trim().isNotEmpty
+              ? 'screenrecord failed with exit code $recordExitCode: ${stderr.trim()}'
+              : 'screenrecord failed with exit code $recordExitCode.';
+          throwToolExit(errorMsg);
         }
-        rethrow;
+        final RunResult pullResult = await _processUtils.run(
+          adbCommandForDevice(<String>['pull', remotePath, outputFile.path]),
+        );
+        if (pullResult.exitCode != 0) {
+          final String errorMsg = pullResult.stderr.trim().isNotEmpty
+              ? pullResult.stderr.trim()
+              : pullResult.stdout.trim();
+          throwToolExit('Failed to pull screen recording from device: $errorMsg');
+        }
+      } on ProcessException catch (error) {
+        throwToolExit('Failed to pull screen recording from device: $error');
       } finally {
-        await runAdbCheckedAsync(<String>['shell', 'rm', remotePath]);
+        try {
+          await _processUtils.run(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
+        } on Exception catch (error) {
+          _logger.printTrace('Failed to clean up remote screen recording at $remotePath: $error');
+        }
       }
     }
+
+    return _AndroidScreenRecording(
+      process,
+      runRecording(),
+      processUtils: _processUtils,
+      adbCommandForDevice: adbCommandForDevice,
+      platform: _platform,
+    );
   }
 
   @override
@@ -898,6 +941,48 @@ class AndroidDevice extends Device {
   Future<void> dispose() async {
     _logReader?._stop();
     _pastLogReader?._stop();
+  }
+}
+
+class _AndroidScreenRecording implements ScreenRecording {
+  _AndroidScreenRecording(
+    this._process,
+    this.done, {
+    required this._processUtils,
+    required this._adbCommandForDevice,
+    required this._platform,
+  });
+
+  final Process _process;
+  final ProcessUtils _processUtils;
+  final List<String> Function(List<String>) _adbCommandForDevice;
+  final Platform _platform;
+
+  @override
+  final Future<void> done;
+
+  @override
+  Future<void> stop() async {
+    if (_platform.isWindows) {
+      // adb on Windows cannot forward SIGINT via process signal. Send SIGINT directly
+      // to the on-device screenrecord process to ensure the MP4 moov atom is finalized.
+      try {
+        await _processUtils.run(_adbCommandForDevice(<String>['shell', 'pkill', '-2', 'screenrecord']));
+      } on Exception {
+        // Best effort: if pkill fails or is unavailable, fallback to process kill below.
+      }
+      unawaited(
+        _process.exitCode.timeout(
+          const Duration(seconds: 2),
+          onTimeout: () {
+            _process.kill();
+            return -1;
+          },
+        ),
+      );
+    } else {
+      ProcessSignal.sigint.kill(_process);
+    }
   }
 }
 

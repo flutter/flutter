@@ -823,14 +823,12 @@ abstract class Device {
 
   /// Starts recording the device screen to [outputFile].
   ///
-  /// Recording continues until the returned [Future] completes. The future
-  /// completes when the recording process exits — either because [duration]
-  /// elapsed or because the process received a signal (e.g. SIGINT from
-  /// Ctrl-C).
+  /// Returns a [ScreenRecording] handle that can be used to stop the recording
+  /// and await completion.
   ///
   /// [duration] caps the recording length. When null, recording runs until
-  /// the process is interrupted.
-  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async =>
+  /// stopped via [ScreenRecording.stop].
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async =>
       throw UnimplementedError();
 
   @nonVirtual
@@ -918,6 +916,15 @@ abstract class Device {
   ///
   /// For example log readers or port forwarders.
   Future<void> dispose();
+}
+
+/// A screen recording started by [Device.startScreenRecording].
+abstract interface class ScreenRecording {
+  /// Completes once the recording has been written to the output file.
+  Future<void> get done;
+
+  /// Stops the recording. [done] completes once the output has been written.
+  Future<void> stop();
 }
 
 /// Information about an application's memory usage.

@@ -496,7 +496,8 @@ void main() {
       expect(deviceUnderTest.supportsScreenRecording, isTrue);
 
       final File recording = MemoryFileSystem.test().file('recording.mp4');
-      await deviceUnderTest.startScreenRecording(recording);
+      final ScreenRecording screenRecording = await deviceUnderTest.startScreenRecording(recording);
+      await screenRecording.done;
       expect(fakeProcessManager, hasNoRemainingExpectations);
     });
 
@@ -536,8 +537,9 @@ void main() {
       );
 
       final File recording = MemoryFileSystem.test().file('recording.mp4');
-      expect(
-        () => deviceUnderTest.startScreenRecording(recording),
+      final ScreenRecording screenRecording = await deviceUnderTest.startScreenRecording(recording);
+      await expectLater(
+        () => screenRecording.done,
         throwsToolExit(message: 'Screen recording failed (exit 1): simctl record error'),
       );
     });

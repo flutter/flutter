@@ -1362,7 +1362,7 @@ class IOSDevice extends Device {
   }
 
   bool get _supportsDevicectl {
-    final Xcode? xcode = _xcode ?? globals.xcode;
+    final Xcode? xcode = _xcode;
     final Version? xcodeVersion = xcode?.currentVersion;
     return isCoreDevice &&
         xcode != null &&
@@ -1394,35 +1394,65 @@ class IOSDevice extends Device {
   bool get supportsScreenRecording => _supportsDevicectl;
 
   @override
-  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async {
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async {
     if (!_supportsDevicectl) {
       throwToolExit('flutter capture recording requires Xcode 27 or higher.');
     }
+    final Directory tempDirectory = _fileSystem.systemTempDirectory.createTempSync('core_devices.');
+    final File jsonOutputFile = tempDirectory.childFile('recording_results.json');
     final Process process;
     try {
       process = await _coreDeviceControl.startScreenRecording(
         deviceId: id,
         destination: outputFile.path,
+        duration: duration,
+        jsonOutput: jsonOutputFile,
       );
     } on Exception catch (error) {
+      try {
+        tempDirectory.deleteSync(recursive: true);
+      } on FileSystemException {
+        // Ignore.
+      }
       _handleDevicectlError(error.toString(), 'record screen');
     }
+    unawaited(process.stdout.drain<void>());
     final stderrBuf = StringBuffer();
     final Future<void> stderrFuture = process.stderr
-        .transform(utf8.decoder)
+        .transform(utf8AllowMalformed.decoder)
         .forEach(stderrBuf.write);
 
-    if (duration != null) {
+    Future<void> runRecording() async {
       try {
-        await process.exitCode.timeout(duration);
-      } on TimeoutException {
-        ProcessSignal.sigint.kill(process);
+        final (int exitCode, _) = await (process.exitCode, stderrFuture).wait;
+        const allowedExitCodes = <int>{0, 130, 143, -2, -15};
+        if (!allowedExitCodes.contains(exitCode)) {
+          _handleDevicectlError(stderrBuf.toString(), 'record screen');
+        }
+        if (jsonOutputFile.existsSync()) {
+          try {
+            final Object? decoded = json.decode(jsonOutputFile.readAsStringSync());
+            if (decoded is Map<String, Object?>) {
+              final Object? decodeResult = decoded['info'];
+              if (decodeResult is Map<String, Object?> && decodeResult['outcome'] == 'success') {
+                return;
+              }
+            }
+            _handleDevicectlError('devicectl returned unexpected JSON response', 'record screen');
+          } on FormatException {
+            _handleDevicectlError('devicectl returned non-JSON response', 'record screen');
+          }
+        }
+      } finally {
+        try {
+          tempDirectory.deleteSync(recursive: true);
+        } on FileSystemException {
+          // Ignore.
+        }
       }
     }
-    final (int exitCode, _) = await (process.exitCode, stderrFuture).wait;
-    if (exitCode != 0) {
-      _handleDevicectlError(stderrBuf.toString(), 'record screen');
-    }
+
+    return _IOSScreenRecording(process, runRecording());
   }
 
   Never _handleDevicectlError(String errorMessage, String operation) {
@@ -1452,6 +1482,20 @@ class IOSDevice extends Device {
     }
     _logReaders.clear();
     await _portForwarder?.dispose();
+  }
+}
+
+class _IOSScreenRecording implements ScreenRecording {
+  _IOSScreenRecording(this._process, this.done);
+
+  final Process _process;
+
+  @override
+  final Future<void> done;
+
+  @override
+  Future<void> stop() async {
+    ProcessSignal.sigint.kill(_process);
   }
 }
 

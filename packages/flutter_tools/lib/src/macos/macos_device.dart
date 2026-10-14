@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:process/process.dart';
 
 import '../base/common.dart';
@@ -102,7 +104,7 @@ class MacOSDevice extends DesktopDevice {
   }
 
   @override
-  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async {
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async {
     final args = <String>[
       'screencapture',
       '-v',
@@ -110,16 +112,22 @@ class MacOSDevice extends DesktopDevice {
       outputFile.path,
     ];
     final Process process = await _processManager.start(args);
+    unawaited(process.stdout.drain<void>());
     final stderrBuf = StringBuffer();
 
-    final (int exitCode, _) = await (
-      process.exitCode,
-      process.stderr.transform(utf8.decoder).forEach(stderrBuf.write),
-    ).wait;
+    Future<void> runRecording() async {
+      final (int exitCode, _) = await (
+        process.exitCode,
+        process.stderr.transform(utf8AllowMalformed.decoder).forEach(stderrBuf.write),
+      ).wait;
 
-    if (exitCode != 0) {
-      throwToolExit('screencapture failed (exit $exitCode): $stderrBuf');
+      const allowedExitCodes = <int>{0, 130, 143, -2, -15};
+      if (!allowedExitCodes.contains(exitCode)) {
+        throwToolExit('screencapture failed (exit $exitCode): $stderrBuf');
+      }
     }
+
+    return _MacOSScreenRecording(process, runRecording());
   }
 
   @override
@@ -138,6 +146,20 @@ class MacOSDevice extends DesktopDevice {
         _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
       }
     });
+  }
+}
+
+class _MacOSScreenRecording implements ScreenRecording {
+  _MacOSScreenRecording(this._process, this.done);
+
+  final Process _process;
+
+  @override
+  final Future<void> done;
+
+  @override
+  Future<void> stop() async {
+    ProcessSignal.sigint.kill(_process);
   }
 }
 

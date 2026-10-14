@@ -4,18 +4,22 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/capture.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -23,10 +27,11 @@ import '../../src/fake_devices.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-FakeToolContext _testToolContext({FileSystem? fs, Logger? logger}) => FakeToolContext(
+FakeToolContext _testToolContext({FileSystem? fs, Logger? logger, Signals? signals}) => FakeToolContext(
   fs: fs ?? MemoryFileSystem.test(),
-  logger: logger ?? testLogger,
+  logger: logger ?? BufferLogger.test(),
   platform: FakePlatform(),
+  signals: signals,
 );
 
 void main() {
@@ -34,67 +39,95 @@ void main() {
     Cache.disableLocking();
   });
 
-  group('flutter screenshot (backward compat)', () {
+  group('capture screenshot', () {
     testWithoutContext('has non-nullable toolContext', () {
       final toolContext = FakeToolContext();
-      final command = ScreenshotCommand(toolContext: toolContext);
+      final command = CaptureScreenshotCommand(toolContext: toolContext);
       expect(command.toolContext, same(toolContext));
     });
 
-    testUsingContext('requires device for device type', () async {
+    testUsingContext('requires a connected device', () async {
+      final logger = BufferLogger.test();
       await expectLater(
-        () =>
-            createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
-                .run(<String>['screenshot']),
+        () => createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext(logger: logger)),
+        ).run(<String>['capture', 'screenshot']),
         throwsToolExit(message: 'Must have a connected device for screenshot type device'),
       );
     });
 
-    testUsingContext('rejects VM Service URI for device type', () async {
+    testWithoutContext('device screenshot rejects VM Service URI', () async {
       await expectLater(
-        () =>
-            createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
-                .run(<String>['screenshot', '--vm-service-url=http://localhost:8181']),
+        () => createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext()),
+        ).run(<String>['capture', 'screenshot', '--vm-service-url=http://localhost:8181']),
         throwsToolExit(message: 'VM Service URI cannot be provided for screenshot type device'),
       );
     });
 
-    testUsingContext('requires VM Service URI for skia type', () async {
+    testWithoutContext('skia screenshot requires VM Service URI', () async {
       await expectLater(
-        () =>
-            createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
-                .run(<String>['screenshot', '--type=skia']),
+        () => createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext()),
+        ).run(<String>['capture', 'screenshot', '--type=skia']),
         throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
       );
     });
 
-    testUsingContext('skia type does not require a device', () async {
-      openChannelForTesting =
-          (String url, {CompressionOptions? compression, Logger? logger}) async {
-            expect(url, 'ws://localhost:8181/ws');
-            throw Exception('dummy');
-          };
+    testWithoutContext('skia screenshot does not require a device and uses injected vmServiceConnector', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final FakeToolContext toolContext = _testToolContext(fs: fs, logger: logger);
 
-      await expectLater(
-        () => createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
-            .run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
-        throwsA(
-          isException.having(
-            (Exception exception) => exception.toString(),
-            'message',
-            contains('dummy'),
-          ),
-        ),
+      final fakeVmService = _FakeFlutterVmService(
+        response: vm_service.Response.parse(<String, Object?>{
+          'type': 'Response',
+          'skp': base64.encode(utf8.encode('valid skp data')),
+        }),
       );
+
+      final command = CaptureScreenshotCommand(
+        toolContext: toolContext,
+        vmServiceConnector: (
+          Uri uri, {
+          ReloadSources? reloadSources,
+          Restart? restart,
+          CompileExpression? compileExpression,
+          FlutterProject? flutterProject,
+          PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+          CompressionOptions compression = CompressionOptions.compressionDefault,
+          Device? device,
+          required Logger logger,
+        }) async {
+          expect(uri.toString(), 'http://localhost:8181');
+          return fakeVmService;
+        },
+      );
+
+      await createTestCommandRunner(command).run(<String>[
+        'screenshot',
+        '--type=skia',
+        '--vm-service-url=http://localhost:8181',
+        '--out=screenshot.skp',
+      ]);
+
+      expect(command.refreshWirelessDevices, isFalse);
+
+      final File outputFile = fs.file('screenshot.skp');
+      expect(outputFile.existsSync(), isTrue);
+      expect(outputFile.readAsStringSync(), 'valid skp data');
+      expect(logger.statusText, contains('Screenshot written to screenshot.skp (0kB).'));
     });
 
     testUsingContext(
-      'takes a screenshot',
+      'takes a screenshot on connected device',
       () async {
-        await createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
-            .run(<String>['screenshot']);
+        final logger = BufferLogger.test();
+        await createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext(logger: logger)),
+        ).run(<String>['capture', 'screenshot']);
 
-        expect(testLogger.statusText, contains('Screenshot written to'));
+        expect(logger.statusText, contains('Screenshot written to'));
       },
       overrides: <Type, Generator>{
         DeviceManager: () =>
@@ -107,9 +140,9 @@ void main() {
       'rejects unsupported device',
       () async {
         await expectLater(
-          () =>
-              createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
-                  .run(<String>['screenshot']),
+          () => createTestCommandRunner(
+            CaptureCommand(toolContext: _testToolContext()),
+          ).run(<String>['capture', 'screenshot']),
           throwsToolExit(message: 'Screenshot not supported'),
         );
       },
@@ -120,92 +153,47 @@ void main() {
           ],
       },
     );
-
-    testUsingContext(
-      'should not throw for single device unsupported for project',
-      () async {
-        await createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
-            .run(<String>['screenshot']);
-      },
-      overrides: <Type, Generator>{
-        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-          ..devices = <Device>[
-            _CaptureDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
-          ],
-      },
-    );
-
-    testUsingContext(
-      'should tool exit for multiple devices unsupported for project',
-      () async {
-        await expectLater(
-          () =>
-              createTestCommandRunner(ScreenshotCommand(toolContext: _testToolContext()))
-                  .run(<String>['screenshot']),
-          throwsToolExit(message: 'Must have a connected device for screenshot type device'),
-        );
-
-        expect(
-          testLogger.statusText,
-          contains('''
-More than one device connected; please specify a device with the '-d <deviceId>' flag, or use '-d all' to act on all devices.
-
-Device 1 (mobile) • 123 • android • 1.2.3
-Device 2 (mobile) • 456 • android • 1.2.3
-'''),
-        );
-      },
-      overrides: <Type, Generator>{
-        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-          ..devices = <Device>[
-            _CaptureDevice(id: '123', name: 'Device 1', isSupportedForProject: false),
-            _CaptureDevice(id: '456', name: 'Device 2', isSupportedForProject: false),
-          ],
-      },
-    );
-  });
-
-  group('capture screenshot', () {
-    testUsingContext('requires a connected device', () async {
-      await expectLater(
-        () =>
-            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-                .run(<String>['capture', 'screenshot']),
-        throwsToolExit(message: 'Must have a connected device for screenshot type device'),
-      );
-    });
-
-    testUsingContext(
-      'takes a screenshot',
-      () async {
-        await createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-            .run(<String>['capture', 'screenshot']);
-
-        expect(testLogger.statusText, contains('Screenshot written to'));
-      },
-      overrides: <Type, Generator>{
-        DeviceManager: () =>
-            _TestDeviceManager(logger: BufferLogger.test())
-              ..devices = <Device>[_CaptureDevice(id: '123', name: 'TestDevice')],
-      },
-    );
-
-    testUsingContext('supports --type and --vm-service-url', () async {
-      await expectLater(
-        () =>
-            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-                .run(<String>['capture', 'screenshot', '--type=skia']),
-        throwsToolExit(message: 'VM Service URI must be specified for screenshot type skia'),
-      );
-    });
   });
 
   group('capture recording', () {
+    late _TestDeviceManager testDeviceManager;
+
+    setUp(() {
+      testDeviceManager = _TestDeviceManager(logger: BufferLogger.test());
+    });
+
+    testWithoutContext('rejects invalid duration without device lookup', () async {
+      await expectLater(
+        () => createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext()),
+        ).run(<String>['capture', 'recording', '--duration', 'abc']),
+        throwsToolExit(message: 'Invalid duration: "abc". Must be a positive integer.'),
+      );
+    });
+
+    testWithoutContext('rejects zero duration without device lookup', () async {
+      await expectLater(
+        () => createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext()),
+        ).run(<String>['capture', 'recording', '--duration', '0']),
+        throwsToolExit(message: 'Invalid duration: "0". Must be a positive integer.'),
+      );
+    });
+
+    testWithoutContext('rejects negative duration without device lookup', () async {
+      await expectLater(
+        () => createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext()),
+        ).run(<String>['capture', 'recording', '--duration', '-5']),
+        throwsToolExit(message: 'Invalid duration: "-5". Must be a positive integer.'),
+      );
+    });
+
     testUsingContext('requires a connected device', () async {
       await expectLater(
-        () =>
-            createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-                .run(<String>['capture', 'recording']),
+        () => createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext()),
+        ).run(<String>['capture', 'recording']),
         throwsToolExit(message: 'No connected device found'),
       );
     });
@@ -213,93 +201,228 @@ Device 2 (mobile) • 456 • android • 1.2.3
     testUsingContext(
       'rejects device that does not support recording',
       () async {
+        testDeviceManager.devices = <Device>[_CaptureDevice(id: '123', name: 'NoRecord')];
         await expectLater(
-          () =>
-              createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-                  .run(<String>['capture', 'recording']),
+          () => createTestCommandRunner(
+            CaptureCommand(toolContext: _testToolContext()),
+          ).run(<String>['capture', 'recording']),
           throwsToolExit(message: 'Screen recording not supported'),
         );
       },
       overrides: <Type, Generator>{
-        DeviceManager: () =>
-            _TestDeviceManager(logger: BufferLogger.test())
-              ..devices = <Device>[_CaptureDevice(id: '123', name: 'NoRecord')],
+        DeviceManager: () => testDeviceManager,
       },
     );
 
     testUsingContext(
-      'records video with a single device',
+      'records video with default options',
       () async {
-        await createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-            .run(<String>['capture', 'recording']);
+        final logger = BufferLogger.test();
+        final device = _CaptureDevice(id: '123', name: 'TestDevice', supportsScreenRecording: true);
+        testDeviceManager.devices = <Device>[device];
 
-        expect(testLogger.statusText, contains('Recording written to'));
+        await createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext(logger: logger)),
+        ).run(<String>['capture', 'recording']);
+
+        expect(logger.statusText, contains('Recording TestDevice... Press Ctrl-C to stop.'));
+        expect(logger.statusText, contains('Recording written to'));
+        expect(device.lastRecordingDuration, isNull);
+        expect(device.lastRecordingOutputFile, isNotNull);
+        expect(device.lastRecordingOutputFile!.basename, 'flutter_01.mp4');
       },
       overrides: <Type, Generator>{
-        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-          ..devices = <Device>[
-            _CaptureDevice(id: '123', name: 'TestDevice', supportsScreenRecording: true),
-          ],
+        DeviceManager: () => testDeviceManager,
       },
     );
 
     testUsingContext(
-      'shows duration message when duration specified',
+      'passes --duration and --out to device',
       () async {
-        await createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-            .run(<String>['capture', 'recording', '-d', '5']);
+        final fs = MemoryFileSystem.test();
+        final logger = BufferLogger.test();
+        final device = _CaptureDevice(id: '123', name: 'TestDevice', supportsScreenRecording: true);
+        testDeviceManager.devices = <Device>[device];
 
-        expect(testLogger.statusText, contains('5 seconds'));
+        await createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext(fs: fs, logger: logger)),
+        ).run(<String>['capture', 'recording', '--duration', '5', '--out', 'custom.mp4']);
+
+        expect(logger.statusText, contains('Recording TestDevice for 5 seconds...'));
+        expect(logger.statusText, contains('Recording written to custom.mp4'));
+        expect(device.lastRecordingDuration, const Duration(seconds: 5));
+        expect(device.lastRecordingOutputFile!.path, 'custom.mp4');
       },
       overrides: <Type, Generator>{
-        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-          ..devices = <Device>[
-            _CaptureDevice(id: '123', name: 'TestDevice', supportsScreenRecording: true),
-          ],
+        DeviceManager: () => testDeviceManager,
       },
     );
 
     testUsingContext(
-      'rejects invalid duration',
+      '-d selects target device when multiple devices connected',
       () async {
-        await expectLater(
-          () =>
-              createTestCommandRunner(CaptureCommand(toolContext: _testToolContext()))
-                  .run(<String>['capture', 'recording', '-d', 'abc']),
-          throwsToolExit(message: 'Invalid duration'),
+        final logger = BufferLogger.test();
+        final device1 = _CaptureDevice(id: '123', name: 'Device 1', supportsScreenRecording: true);
+        final device2 = _CaptureDevice(id: '456', name: 'Device 2', supportsScreenRecording: true);
+        testDeviceManager.devices = <Device>[device1, device2];
+
+        await createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext(logger: logger)),
+        ).run(<String>['capture', 'recording', '-d', '456']);
+
+        expect(logger.statusText, contains('Recording Device 2... Press Ctrl-C to stop.'));
+        expect(device1.lastRecordingOutputFile, isNull);
+        expect(device2.lastRecordingOutputFile, isNotNull);
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    testUsingContext(
+      'warns when duration exceeds 180 seconds on Android',
+      () async {
+        final logger = BufferLogger.test();
+        testDeviceManager.devices = <Device>[
+          _CaptureDevice(
+            id: '123',
+            name: 'AndroidDevice',
+            supportsScreenRecording: true,
+            targetPlatform: Future<TargetPlatform>.value(TargetPlatform.android_arm64),
+          ),
+        ];
+
+        await createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext(logger: logger)),
+        ).run(<String>['capture', 'recording', '--duration', '200']);
+
+        expect(
+          logger.warningText,
+          contains('Android screen recording has a maximum limit of 180 seconds'),
         );
       },
       overrides: <Type, Generator>{
-        DeviceManager: () => _TestDeviceManager(logger: BufferLogger.test())
-          ..devices = <Device>[
-            _CaptureDevice(id: '123', name: 'TestDevice', supportsScreenRecording: true),
-          ],
+        DeviceManager: () => testDeviceManager,
       },
     );
-  });
 
-  group('Screenshot output validation', () {
-    testWithoutContext('successful', () async {
-      final fs = MemoryFileSystem.test();
-      fs.file('test.png').createSync();
+    testUsingContext(
+      'throws ToolExit when recording file was not created',
+      () async {
+        final device = _CaptureDevice(
+          id: '123',
+          name: 'TestDevice',
+          supportsScreenRecording: true,
+          createOutputFileOnRecord: false,
+        );
+        testDeviceManager.devices = <Device>[device];
 
-      expect(
-        () => ScreenshotMixin.ensureOutputIsNotJsonRpcError(fs.file('test.png')),
-        returnsNormally,
-      );
-    });
+        await expectLater(
+          () => createTestCommandRunner(
+            CaptureCommand(toolContext: _testToolContext()),
+          ).run(<String>['capture', 'recording', '--out', 'nonexistent.mp4']),
+          throwsToolExit(message: 'Recording file was not created, ensure path is valid'),
+        );
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+      },
+    );
 
-    testWithoutContext('failed', () async {
-      final fs = MemoryFileSystem.test();
-      fs.file('test.png').writeAsStringSync('{"jsonrpc":"2.0", "error":"something"}');
+    testUsingContext(
+      'stops recording on SIGINT signal using signals handler',
+      () async {
+        final fakeSignals = _FakeSignals();
+        final logger = BufferLogger.test();
+        final device = _CaptureDevice(
+          id: '123',
+          name: 'TestDevice',
+          supportsScreenRecording: true,
+          completeImmediately: false,
+        );
+        testDeviceManager.devices = <Device>[device];
 
-      expect(
-        () => ScreenshotMixin.ensureOutputIsNotJsonRpcError(fs.file('test.png')),
-        throwsToolExit(
-          message: 'It appears the output file contains an error message, not valid output.',
-        ),
-      );
-    });
+        final CommandRunner<void> runner = createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext(logger: logger, signals: fakeSignals)),
+        );
+
+        final Future<void> commandFuture = runner.run(<String>['capture', 'recording']);
+        await Future<void>.delayed(Duration.zero);
+
+        expect(fakeSignals.handlers[ProcessSignal.sigint], hasLength(2));
+        expect(fakeSignals.handlers[ProcessSignal.sigterm], hasLength(2));
+
+        await fakeSignals.sendSignal(ProcessSignal.sigint);
+        await commandFuture;
+
+        expect(device.currentRecording!.stopped, isTrue);
+        expect(fakeSignals.handlers[ProcessSignal.sigint], hasLength(1));
+        expect(fakeSignals.handlers[ProcessSignal.sigterm], hasLength(1));
+        expect(logger.statusText, contains('Recording written to'));
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    testUsingContext(
+      'throws ToolExit when recording file is empty (0 bytes)',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final device = _CaptureDevice(
+          id: '123',
+          name: 'TestDevice',
+          supportsScreenRecording: true,
+          createOutputFileOnRecord: false,
+        );
+        testDeviceManager.devices = <Device>[device];
+
+        final File emptyFile = fs.file('empty.mp4')..createSync();
+        expect(emptyFile.lengthSync(), 0);
+
+        await expectLater(
+          () => createTestCommandRunner(
+            CaptureCommand(toolContext: _testToolContext(fs: fs)),
+          ).run(<String>['capture', 'recording', '--out', emptyFile.path]),
+          throwsToolExit(message: 'Recording file was not created, ensure path is valid'),
+        );
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+      },
+    );
+
+    testUsingContext(
+      'handles double SIGINT without re-entrancy issues',
+      () async {
+        final fakeSignals = _FakeSignals();
+        final logger = BufferLogger.test();
+        final device = _CaptureDevice(
+          id: '123',
+          name: 'TestDevice',
+          supportsScreenRecording: true,
+          completeImmediately: false,
+        );
+        testDeviceManager.devices = <Device>[device];
+
+        final CommandRunner<void> runner = createTestCommandRunner(
+          CaptureCommand(toolContext: _testToolContext(logger: logger, signals: fakeSignals)),
+        );
+
+        final Future<void> commandFuture = runner.run(<String>['capture', 'recording']);
+        await Future<void>.delayed(Duration.zero);
+
+        await fakeSignals.sendSignal(ProcessSignal.sigint);
+        await fakeSignals.sendSignal(ProcessSignal.sigint);
+        await commandFuture;
+
+        expect(device.currentRecording!.stopped, isTrue);
+        expect(logger.statusText, contains('Recording written to'));
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => testDeviceManager,
+      },
+    );
   });
 }
 
@@ -309,8 +432,10 @@ class _CaptureDevice extends Fake implements Device {
     required this.name,
     this.supportsScreenshot = true,
     this.supportsScreenRecording = false,
-    this._isSupportedForProject = true,
-  });
+    this.createOutputFileOnRecord = true,
+    this.completeImmediately = true,
+    Future<TargetPlatform>? targetPlatform,
+  }) : targetPlatform = targetPlatform ?? Future<TargetPlatform>.value(TargetPlatform.android);
 
   @override
   final String name;
@@ -327,7 +452,13 @@ class _CaptureDevice extends Fake implements Device {
   @override
   bool supportsScreenRecording;
 
-  final bool _isSupportedForProject;
+  final bool createOutputFileOnRecord;
+  final bool completeImmediately;
+
+  File? lastScreenshotOutputFile;
+  File? lastRecordingOutputFile;
+  Duration? lastRecordingDuration;
+  _FakeScreenRecording? currentRecording;
 
   @override
   bool get isConnected => true;
@@ -342,16 +473,24 @@ class _CaptureDevice extends Fake implements Device {
   DeviceConnectionInterface connectionInterface = DeviceConnectionInterface.attached;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
   Future<void> takeScreenshot(File outputFile) async {
+    lastScreenshotOutputFile = outputFile;
     outputFile.writeAsBytesSync(<int>[1, 2, 3, 4]);
   }
 
   @override
-  Future<void> startScreenRecording(File outputFile, {Duration? duration}) async {
-    outputFile.writeAsBytesSync(<int>[1, 2, 3, 4]);
+  Future<ScreenRecording> startScreenRecording(File outputFile, {Duration? duration}) async {
+    lastRecordingOutputFile = outputFile;
+    lastRecordingDuration = duration;
+    if (createOutputFileOnRecord) {
+      outputFile.writeAsBytesSync(<int>[1, 2, 3, 4]);
+    }
+    final recording = _FakeScreenRecording(autoComplete: completeImmediately);
+    currentRecording = recording;
+    return recording;
   }
 
   @override
@@ -361,13 +500,35 @@ class _CaptureDevice extends Fake implements Device {
   Future<String> get sdkNameAndVersion async => '1.2.3';
 
   @override
-  Future<TargetPlatform> get targetPlatform => Future<TargetPlatform>.value(TargetPlatform.android);
+  final Future<TargetPlatform> targetPlatform;
 
   @override
   Future<bool> get isLocalEmulator async => false;
 
   @override
   Category get category => Category.mobile;
+}
+
+class _FakeScreenRecording implements ScreenRecording {
+  _FakeScreenRecording({bool autoComplete = true}) {
+    if (autoComplete) {
+      _doneCompleter.complete();
+    }
+  }
+
+  final Completer<void> _doneCompleter = Completer<void>();
+  bool stopped = false;
+
+  @override
+  Future<void> get done => _doneCompleter.future;
+
+  @override
+  Future<void> stop() async {
+    stopped = true;
+    if (!_doneCompleter.isCompleted) {
+      _doneCompleter.complete();
+    }
+  }
 }
 
 class _TestDeviceManager extends DeviceManager {
@@ -380,4 +541,40 @@ class _TestDeviceManager extends DeviceManager {
     devices.forEach(discoverer.addDevice);
     return <DeviceDiscovery>[discoverer];
   }
+}
+
+class _FakeFlutterVmService extends Fake implements FlutterVmService {
+  _FakeFlutterVmService({this.response});
+
+  final vm_service.Response? response;
+
+  @override
+  Future<vm_service.Response?> screenshotSkp() async => response;
+}
+
+class _FakeSignals implements Signals {
+  final Map<ProcessSignal, List<SignalHandler>> handlers = <ProcessSignal, List<SignalHandler>>{};
+
+  @override
+  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+    handlers.putIfAbsent(signal, () => <SignalHandler>[]).add(handler);
+    return handler;
+  }
+
+  @override
+  Future<bool> removeHandler(ProcessSignal signal, Object token) async {
+    return handlers[signal]?.remove(token) ?? false;
+  }
+
+  Future<void> sendSignal(ProcessSignal signal) async {
+    final List<SignalHandler>? list = handlers[signal];
+    if (list != null) {
+      for (final SignalHandler handler in list.toList()) {
+        await handler(signal);
+      }
+    }
+  }
+
+  @override
+  Stream<Object> get errors => const Stream<Object>.empty();
 }
