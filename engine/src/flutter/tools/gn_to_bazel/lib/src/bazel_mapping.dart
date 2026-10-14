@@ -54,6 +54,8 @@ const Map<String, String> testSizes = <String, String>{
   'flow_unittests': 'medium',
   // 40 s on the host (208 tests, the shell on ANGLE and SwiftShader).
   'shell_unittests': 'medium',
+  // 11 s as a GN binary (85 tests; run_tests.py allows it 90 s).
+  'ui_unittests': 'medium',
 };
 
 /// How a suite is run: the arguments testing/run_tests.py passes it and the
@@ -300,6 +302,7 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/vulkan:vulkan': _vulkanHeadersCopts,
   '//flutter/flow:flow': _vulkanHeadersCopts,
   '//flutter/lib/ui:ui': _vulkanHeadersCopts,
+  '//flutter/lib/ui:ui_testing_mocks': _vulkanHeadersCopts,
   '//flutter/runtime:runtime': _vulkanHeadersCopts,
   '//flutter/testing:dart': _vulkanHeadersCopts,
   '//flutter/testing:fixture_test': _vulkanHeadersCopts,
@@ -862,6 +865,10 @@ enum TemplateArgumentKind {
   /// A helper variable of the invocation the template never reads
   /// (`fixtures = rebase_path(...)` feeding a string of the same block).
   ignored,
+
+  /// A directory that names a package (`dest = "$root_gen_dir/flutter/lib/ui"`),
+  /// which becomes the package's label.
+  package,
 }
 
 /// One argument of a known template: the macro attribute it becomes and how.
@@ -925,6 +932,9 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
       // The copy's ordering dependencies (the targets whose outputs are
       // among the fixtures); runfiles of the library here.
       'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
+      // The directory whose assets receive the fixtures (lib/ui's shader
+      // fixtures): the package, whose own test_fixtures copies them.
+      'dest': TemplateArgument('dest', TemplateArgumentKind.package),
       'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
     },
   ),
@@ -1076,6 +1086,9 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // converted reads them (impeller/compiler imports it without use).
     '//flutter/shell/version/version.gni',
     '//flutter/testing/testing.gni',
+    // The compiled_action template, which lib/ui's shader fixture
+    // directories import without invoking (impellerc() does).
+    '//build/compiled_action.gni',
     // Declares disable_vma_stl_shared_mutex (above).
     '//flutter/flutter_vma/config.gni',
     // Declares enable_vulkan_validation_layers; nothing converted reads it.
