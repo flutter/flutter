@@ -453,21 +453,13 @@ abstract class FlutterCommand extends Command<void> {
   /// The `hide` argument indicates whether or not to hide these options when
   /// the user asks for help.
   void usesFilesystemOptions({required bool hide}) {
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      BuildInfoOptions.outputDill,
-      BuildInfoOptions.fileSystemRoot,
-      BuildInfoOptions.fileSystemScheme,
-    ], hideOverride: hide);
+    const FilesystemOptionsBundle().register(this, argParser, hideOverride: hide);
   }
 
   /// Adds options for connecting to the Dart VM Service port.
   void usesPortOptions({required bool verboseHelp}) {
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      DebuggingOptionDescriptors.vmServicePort,
-      DebuggingOptionDescriptors.deviceVmservicePort,
-      DebuggingOptionDescriptors.hostVmservicePort,
-    ], verboseHelp: verboseHelp);
-    _usesPortOption = true;
+    const VmServicePortOptionsBundle(includeIpv6: false)
+        .register(this, argParser, verboseHelp: verboseHelp);
   }
 
   /// Add option values for output directory of artifacts
@@ -488,11 +480,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addDdsOptions({required bool verboseHelp}) {
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      DebuggingOptionDescriptors.ddsPort,
-      DebuggingOptionDescriptors.dds,
-      DebuggingOptionDescriptors.disableDds,
-    ], verboseHelp: verboseHelp);
+    const DdsAndDevToolsOptionsBundle(includeDevTools: false)
+        .register(this, argParser, verboseHelp: verboseHelp);
   }
 
   late final bool enableDds = getValue(DebuggingOptionDescriptors.dds);
@@ -692,20 +681,11 @@ abstract class FlutterCommand extends Command<void> {
     bool excludeDebug = false,
     bool excludeRelease = false,
   }) {
-    configureBuildModes(
+    BuildModeOptionsBundle(
       defaultToRelease: defaultToRelease,
       excludeDebug: excludeDebug,
       excludeRelease: excludeRelease,
-    );
-
-    if (!excludeDebug) {
-      CommonOptions.debugMode.addTo(argParser, verboseHelp: verboseHelp);
-    }
-    CommonOptions.profileMode.addTo(argParser, verboseHelp: verboseHelp);
-    if (!excludeRelease) {
-      CommonOptions.releaseMode.addTo(argParser, verboseHelp: verboseHelp);
-      CommonOptions.jitReleaseMode.addTo(argParser, verboseHelp: verboseHelp);
-    }
+    ).register(this, argParser, verboseHelp: verboseHelp);
   }
 
   void addSplitDebugInfoOption() {
@@ -747,10 +727,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addAndroidSpecificBuildOptions({bool hide = false}) {
-    BuildInfoOptions.androidGradleDaemon.addTo(argParser, hideOverride: hide);
-    BuildInfoOptions.androidSkipBuildDependencyValidation.addTo(argParser, hideOverride: hide);
-    BuildInfoOptions.androidProjectArg.addTo(argParser, hideOverride: hide);
-    BuildInfoOptions.androidProjectCacheDir.addTo(argParser, hideOverride: hide);
+    const AndroidGradleOptionsBundle().register(this, argParser, hideOverride: hide);
   }
 
   void addNativeNullAssertions({bool hide = false}) {
