@@ -298,7 +298,6 @@ void main() {
         testUsingContext(
           'returns all packages in dev, examples, and packages',
           () {
-            globals.cache.flutterRoot = _kFlutterRoot;
             final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
             final List<String> packagePaths = runner
                 .getRepoPackages()
@@ -312,6 +311,11 @@ void main() {
             ]);
           },
           overrides: <Type, Generator>{
+            Cache: () => Cache.test(
+              flutterRoot: _kFlutterRoot,
+              fileSystem: fileSystem,
+              processManager: FakeProcessManager.any(),
+            ),
             FileSystem: () => fileSystem,
             ProcessManager: () => FakeProcessManager.any(),
             Platform: () => platform,

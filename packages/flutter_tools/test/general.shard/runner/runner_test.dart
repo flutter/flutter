@@ -427,9 +427,8 @@ void main() {
       () async {
         // Since crash reporting calls the doctor, which checks for the devtools
         // version file in the cache, write a version file to the memory fs.
-        globals.cache.flutterRoot = '/path/to/flutter';
-        final Directory devtoolsDir = globals.fs.directory(
-          '${globals.cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+        final Directory devtoolsDir = fileSystem.directory(
+          '/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools',
         )..createSync(recursive: true);
         devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
@@ -488,6 +487,11 @@ void main() {
         );
       },
       overrides: <Type, Generator>{
+        Cache: () => Cache.test(
+          flutterRoot: '/path/to/flutter',
+          fileSystem: fileSystem,
+          processManager: FakeProcessManager.any(),
+        ),
         Platform: () => FakePlatform(
           environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
         ),
@@ -536,9 +540,8 @@ void main() {
         () async {
           // Since crash reporting calls the doctor, which checks for the devtools
           // version file in the cache, write a version file to the memory fs.
-          globals.cache.flutterRoot = '/path/to/flutter';
-          final Directory devtoolsDir = globals.fs.directory(
-            '${globals.cache.flutterRoot}/bin/cache/dart-sdk/bin/resources/devtools',
+          final Directory devtoolsDir = fileSystem.directory(
+            '/path/to/flutter/bin/cache/dart-sdk/bin/resources/devtools',
           )..createSync(recursive: true);
           devtoolsDir.childFile('version.json').writeAsStringSync('{"version": "1.2.3"}');
 
@@ -596,6 +599,11 @@ void main() {
           expect(await sentDetails.doctorText.text, contains('[!] Flutter'));
         },
         overrides: <Type, Generator>{
+          Cache: () => Cache.test(
+            flutterRoot: '/path/to/flutter',
+            fileSystem: fileSystem,
+            processManager: FakeProcessManager.any(),
+          ),
           Platform: () => FakePlatform(
             environment: <String, String>{
               'FLUTTER_ANALYTICS_LOG_FILE': 'test',
