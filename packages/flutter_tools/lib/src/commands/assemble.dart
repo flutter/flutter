@@ -103,15 +103,18 @@ class AssembleCommand extends FlutterCommand {
     super.verboseHelp = false,
   }) : _toolContext = toolContext {
     requiresPubspecYaml();
-    registerOptionBundles(optionBundles);
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       _define,
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
       _performanceMeasurementFile,
       _input,
       _depfile,
       _buildInputs,
       _buildOutputs,
       _output,
+      BuildInfoOptions.extraFrontEndOptions,
+      BuildInfoOptions.extraGenSnapshotOptions,
       _resourcePoolSize,
     ], verboseHelp: verboseHelp);
   }
@@ -179,15 +182,6 @@ class AssembleCommand extends FlutterCommand {
     name: 'resource-pool-size',
     help: 'The maximum number of concurrent tasks the build system will run.',
   );
-
-  List<OptionBundle> get optionBundles => const <OptionBundle>[
-    DartDefinesOptionsBundle(),
-    ResidentCompilerOptionsBundle(
-      includeInitializeFromDill: false,
-      includeNativeAssets: false,
-      includeExtraDartFlags: true,
-    ),
-  ];
 
   final BuildSystem _buildSystem;
   final FeatureFlags _featureFlags;
@@ -473,41 +467,4 @@ void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File ou
     outFile.parent.createSync(recursive: true);
   }
   outFile.writeAsStringSync(json.encode(jsonData));
-}
-
-/// A bundle encapsulating Dart defines (`--dart-define` and `--dart-define-from-file`).
-class DartDefinesOptionsBundle extends OptionBundle {
-  const DartDefinesOptionsBundle();
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => const <OptionDescriptor<Object?>>[
-    CommonOptions.dartDefines,
-    CommonOptions.dartDefineFromFile,
-  ];
-}
-
-/// A bundle encapsulating resident compiler options.
-class ResidentCompilerOptionsBundle extends OptionBundle {
-  const ResidentCompilerOptionsBundle({
-    this.includeInitializeFromDill = true,
-    this.includeNativeAssets = true,
-    this.includeExtraDartFlags = false,
-  });
-
-  final bool includeInitializeFromDill;
-  final bool includeNativeAssets;
-  final bool includeExtraDartFlags;
-
-  @override
-  List<OptionDescriptor<Object?>> get descriptors => <OptionDescriptor<Object?>>[
-    if (includeInitializeFromDill) ...const <OptionDescriptor<Object?>>[
-      BuildInfoOptions.initializeFromDill,
-      BuildInfoOptions.assumeInitializeFromDillUpToDate,
-    ],
-    if (includeNativeAssets) BuildInfoOptions.nativeAssetsYamlFile,
-    if (includeExtraDartFlags) ...const <OptionDescriptor<Object?>>[
-      BuildInfoOptions.extraFrontEndOptions,
-      BuildInfoOptions.extraGenSnapshotOptions,
-    ],
-  ];
 }
