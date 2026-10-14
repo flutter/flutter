@@ -461,7 +461,7 @@ _display_test = rule(
     },
 )
 
-def flutter_display_test(name, size = None, timeout = None, args = [], data = [], env = {}, vulkan_validation = True, tags = [], visibility = None, **kwargs):
+def flutter_display_test(name, size = None, timeout = None, shard_count = None, flaky = None, args = [], data = [], env = {}, vulkan_validation = True, tags = [], visibility = None, **kwargs):
     """A test suite that opens a window: the Impeller playground's (GLFW on X11).
 
     testing/run_tests.py starts an Xvfb for the Linux suites; here the binary
@@ -474,6 +474,11 @@ def flutter_display_test(name, size = None, timeout = None, args = [], data = []
       name: name of the test; the binary is `<name>_binary`.
       size: the test's size.
       timeout: the test's timeout.
+      shard_count: the test's shards; xvfb_run.sh hands Bazel's shard
+        variables to googletest under the GTEST_* names it reads, so a shard
+        runs its share of the suite's tests (run_tests.py's gtest-parallel,
+        in Bazel's form).
+      flaky: the test's flaky attribute.
       args: arguments of the binary.
       data: runfiles of the test.
       env: environment of the test.
@@ -495,6 +500,8 @@ def flutter_display_test(name, size = None, timeout = None, args = [], data = []
         binary = ":" + name + "_binary",
         size = size,
         timeout = timeout,
+        shard_count = shard_count,
+        flaky = flaky,
         args = args,
         data = data,
         env = env,
