@@ -48,6 +48,29 @@ class FreshScrollController extends ScrollController {
   }
 }
 
+class DriftingScrollController extends ScrollController {
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return DriftingScrollPosition(physics: physics, context: context, oldPosition: oldPosition);
+  }
+}
+
+/// Corrects its pixels on every dimension call, each time to another value.
+class DriftingScrollPosition extends ScrollPositionWithSingleContext {
+  DriftingScrollPosition({required super.physics, required super.context, super.oldPosition});
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    correctPixels(pixels + 10.0);
+    super.applyContentDimensions(minScrollExtent, maxScrollExtent);
+    return false;
+  }
+}
+
 class DimensionAligningScrollController extends ScrollController {
   bool needsAlignment = false;
   double? alignedViewportDimension;
@@ -1226,6 +1249,36 @@ void main() {
           );
         }
 
+        testWidgets('a position that keeps correcting to other pixels fails an assert', (
+          WidgetTester tester,
+        ) async {
+          final controller = DriftingScrollController();
+          addTearDown(controller.dispose);
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: SizedBox(
+                  width: 300.0,
+                  height: 300.0,
+                  child: SingleChildScrollView(
+                    controller: controller,
+                    scrollDirection: axis,
+                    reverse: reverse,
+                    child: const SizedBox(width: 960.0, height: 960.0),
+                  ),
+                ),
+              ),
+            ),
+          );
+          final Object? exception = tester.takeException();
+          expect(exception, isAssertionError);
+          expect(
+            (exception! as AssertionError).message,
+            contains('corrected its pixels twice in one layout, to different values'),
+          );
+        });
+
         for (final initialOffset in <double>[-100.0, 1000.0]) {
           testWidgets('a replacement offset is reconciled on its first layout ($initialOffset)', (
             WidgetTester tester,
@@ -1269,6 +1322,99 @@ void main() {
             expect(newController.position.pixels, initialOffset < 0.0 ? 0.0 : 660.0);
           });
         }
+
+        // A 300x300 viewport over content of the given extent along the tested axis, and 1000 along
+        // the other one, scrolled by [scrollDirection].
+        const framedContentKey = ValueKey<String>('framed content');
+        Widget framed(ScrollController controller, double contentExtent, {Axis? scrollDirection}) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: SizedBox(
+                width: 300.0,
+                height: 300.0,
+                child: SingleChildScrollView(
+                  controller: controller,
+                  scrollDirection: scrollDirection ?? axis,
+                  reverse: reverse,
+                  physics: const BouncingScrollPhysics(),
+                  child: SizedBox(
+                    key: framedContentKey,
+                    width: axis == Axis.horizontal ? contentExtent : 1000.0,
+                    height: axis == Axis.vertical ? contentExtent : 1000.0,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        // Drags 100 pixels past the trailing edge from the max scroll extent and holds there.
+        Future<TestGesture> overscrollTrailingEdge(
+          WidgetTester tester,
+          ScrollController controller,
+        ) async {
+          controller.jumpTo(controller.position.maxScrollExtent);
+          await tester.pump();
+          final TestGesture gesture = await tester.startGesture(
+            tester.getCenter(find.byType(SingleChildScrollView)),
+          );
+          final distance = reverse ? 100.0 : -100.0;
+          await gesture.moveBy(
+            axis == Axis.horizontal ? Offset(distance, 0.0) : Offset(0.0, distance),
+          );
+          await tester.pump();
+          expect(
+            controller.position.pixels,
+            greaterThan(controller.position.maxScrollExtent + 20.0),
+          );
+          return gesture;
+        }
+
+        testWidgets('a trailing overscroll survives a rounding error in the max scroll extent', (
+          WidgetTester tester,
+        ) async {
+          final controller = ScrollController();
+          addTearDown(controller.dispose);
+          await tester.pumpWidget(framed(controller, 960.0));
+          final ScrollPosition position = controller.position;
+          expect(position.maxScrollExtent, 660.0);
+          final TestGesture gesture = await overscrollTrailingEdge(tester, controller);
+          final double overscrolled = position.pixels;
+
+          // The content measures a rounding error shorter, as a relayout of the same content can.
+          // The edge has not moved, so the overscroll stays; a clamp would land a rounding error
+          // under 660.
+          await tester.pumpWidget(framed(controller, 960.0 - 1e-11));
+          expect(position.pixels, overscrolled);
+
+          await gesture.up();
+          await tester.pumpAndSettle();
+          expect(position.pixels, position.maxScrollExtent);
+        });
+
+        testWidgets('a new axis reconciles the offset again', (WidgetTester tester) async {
+          final controller = ScrollController();
+          addTearDown(controller.dispose);
+          await tester.pumpWidget(framed(controller, 960.0));
+          final RenderObject viewport = tester.renderObject(find.byKey(framedContentKey)).parent!;
+          final ScrollPosition position = controller.position;
+          expect(position.maxScrollExtent, 660.0);
+          final TestGesture gesture = await overscrollTrailingEdge(tester, controller);
+
+          // The axis turns under the held overscroll, keeping the position and the viewport. The
+          // remembered max scroll extent measured the old axis, so the offset is reconciled as a
+          // new one: the new axis has 700 to scroll, and the offset past that is brought back in.
+          await tester.pumpWidget(framed(controller, 960.0, scrollDirection: flipAxis(axis)));
+          expect(controller.position, same(position));
+          expect(tester.renderObject(find.byKey(framedContentKey)).parent, same(viewport));
+          expect(position.maxScrollExtent, 700.0);
+          expect(position.pixels, 700.0);
+
+          await gesture.up();
+          await tester.pumpAndSettle();
+          expect(position.pixels, 700.0);
+        });
 
         Future<ScrollController> pumpOverscrollable(WidgetTester tester) async {
           final controller = ScrollController();
