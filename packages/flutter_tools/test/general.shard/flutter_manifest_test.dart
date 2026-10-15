@@ -578,10 +578,13 @@ flutter:
     },
   );
 
-  testWithoutContext('FlutterManifest validates pluginRegistrantClassName is valid identifier', () {
-    for (final invalidYamlValue in <String>['123', '"123Invalid"', '"my-registrant"', '""']) {
-      final manifest =
-          '''
+  for (final invalidYamlValue in <String>['123', '"123Invalid"', '"my-registrant"', '""']) {
+    testWithoutContext(
+      'FlutterManifest validates pluginRegistrantClassName is valid identifier ($invalidYamlValue)',
+      () {
+        final testLogger = BufferLogger.test();
+        final manifest =
+            '''
 name: test
 flutter:
   module:
@@ -589,20 +592,21 @@ flutter:
     pluginRegistrantClassName: $invalidYamlValue
 ''';
 
-      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
-        manifest,
-        logger: logger,
-      );
+        final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+          manifest,
+          logger: testLogger,
+        );
 
-      expect(flutterManifest, isNull);
-      expect(
-        logger.errorText,
-        contains(
-          'The "pluginRegistrantClassName" value must be a valid class identifier if set (e.g. "MyPluginRegistrant").',
-        ),
-      );
-    }
-  });
+        expect(flutterManifest, isNull);
+        expect(
+          testLogger.errorText,
+          contains(
+            'The "pluginRegistrantClassName" value must be a valid class identifier if set (e.g. "MyPluginRegistrant").',
+          ),
+        );
+      },
+    );
+  }
 
   testWithoutContext('FlutterManifest allows a legacy plugin declaration', () {
     const manifest = '''
