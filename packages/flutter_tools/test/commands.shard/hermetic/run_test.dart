@@ -63,6 +63,29 @@ void main() {
       fileSystem = MemoryFileSystem.test();
     });
 
+    testUsingContext('preserves expected hidden and visible options across verboseHelp modes', () {
+      final defaultCommand = RunCommand(
+        appleContext: FakeAppleContext(),
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext: const DelegatingToolContext(),
+      );
+      expect(defaultCommand.argParser.options['track-widget-creation']?.hide, isFalse);
+      expect(defaultCommand.argParser.options['native-null-assertions']?.hide, isTrue);
+      expect(defaultCommand.argParser.options['adb-log-filtering']?.hide, isTrue);
+
+      final verboseCommand = RunCommand(
+        verboseHelp: true,
+        appleContext: FakeAppleContext(),
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext: const DelegatingToolContext(),
+      );
+      expect(verboseCommand.argParser.options['track-widget-creation']?.hide, isFalse);
+      expect(verboseCommand.argParser.options['native-null-assertions']?.hide, isFalse);
+      expect(verboseCommand.argParser.options['adb-log-filtering']?.hide, isFalse);
+    }, overrides: <Type, Generator>{FeatureFlags: () => FakeFeatureFlags()});
+
     testUsingContext(
       'fails when target not found',
       () async {
