@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <atomic>
+#include <string>
+#include <thread>
+
 #include "flutter/fml/logging.h"
+#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/time/time_point.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/device_buffer_descriptor.h"
@@ -65,6 +70,57 @@ namespace testing {
 
 using RendererTest = PlaygroundTest;
 INSTANTIATE_PLAYGROUND_SUITE(RendererTest);
+
+TEST_P(RendererTest, PipelineLibraryAllowsConcurrentGetPipeline) {
+  if (GetBackend() == PlaygroundBackend::kOpenGLES ||
+      GetBackend() == PlaygroundBackend::kOpenGLESSDF) {
+    GTEST_SKIP() << "GLES pipelines are created by the reactor thread.";
+  }
+  using VS = BoxFadeVertexShader;
+  using FS = BoxFadeFragmentShader;
+  auto context = GetContext();
+  ASSERT_TRUE(context);
+  auto desc = PipelineBuilder<VS, FS>::MakeDefaultPipelineDescriptor(*context);
+  ASSERT_TRUE(desc.has_value());
+  auto library = context->GetPipelineLibrary();
+  ASSERT_TRUE(library);
+  ASSERT_TRUE(library->GetPipeline(desc.value()).Get());
+
+  constexpr int kVariantCount = 64;
+  auto variant = [&](int i) {
+    PipelineDescriptor result = desc.value();
+    result.SetLabel("Variant " + std::to_string(i));
+    return result;
+  };
+
+  std::atomic_bool done = false;
+  std::thread reader([&] {
+    while (!done) {
+      EXPECT_TRUE(library->HasPipeline(desc.value()));
+      EXPECT_TRUE(library->GetPipeline(desc.value()).IsValid());
+    }
+  });
+  std::thread forward([&] {
+    for (int i = 0; i < kVariantCount; i++) {
+      library->GetPipeline(variant(i));
+    }
+  });
+  std::thread backward([&] {
+    for (int i = kVariantCount - 1; i >= 0; i--) {
+      library->GetPipeline(variant(i));
+    }
+  });
+  forward.join();
+  backward.join();
+  done = true;
+  reader.join();
+
+  for (int i = 0; i < kVariantCount; i++) {
+    auto pipeline = library->GetPipeline(variant(i)).Get();
+    ASSERT_TRUE(pipeline);
+    EXPECT_TRUE(pipeline->IsValid());
+  }
+}
 
 TEST_P(RendererTest, CanCreateBoxPrimitive) {
   using VS = BoxFadeVertexShader;
@@ -1749,6 +1805,59 @@ TEST_P(RendererTest, AttachmentRejectsOutOfRangeSubresource) {
   color0.mip_level = 0u;
   color0.slice = 1u;  // A 2D texture has a single slice.
   EXPECT_FALSE(color0.IsValid());
+}
+
+TEST_P(RendererTest, SamplerLibraryAllowsConcurrentGetSampler) {
+  auto library = GetContext()->GetSamplerLibrary();
+  ASSERT_TRUE(library);
+
+  std::vector<SamplerDescriptor> descriptors;
+  for (auto min : {MinMagFilter::kNearest, MinMagFilter::kLinear}) {
+    for (auto mag : {MinMagFilter::kNearest, MinMagFilter::kLinear}) {
+      for (auto mip :
+           {MipFilter::kBase, MipFilter::kNearest, MipFilter::kLinear}) {
+        for (auto mode :
+             {SamplerAddressMode::kClampToEdge, SamplerAddressMode::kRepeat,
+              SamplerAddressMode::kMirror}) {
+          SamplerDescriptor desc("Concurrent", min, mag, mip);
+          desc.width_address_mode = mode;
+          desc.height_address_mode = mode;
+          descriptors.push_back(desc);
+        }
+      }
+    }
+  }
+
+  constexpr size_t kThreadCount = 4;
+  std::vector<std::vector<const Sampler*>> results(
+      kThreadCount, std::vector<const Sampler*>(descriptors.size()));
+  fml::CountDownLatch start(kThreadCount);
+  std::vector<std::thread> threads;
+  threads.reserve(kThreadCount);
+  for (size_t t = 0; t < kThreadCount; t++) {
+    threads.emplace_back([&, t] {
+      start.CountDown();
+      start.Wait();
+      for (size_t i = 0; i < descriptors.size(); i++) {
+        size_t index =
+            (i + t * descriptors.size() / kThreadCount) % descriptors.size();
+        results[t][index] = library->GetSampler(descriptors[index]).get();
+      }
+    });
+  }
+  for (auto& thread : threads) {
+    thread.join();
+  }
+
+  for (size_t i = 0; i < descriptors.size(); i++) {
+    const Sampler* sampler = library->GetSampler(descriptors[i]).get();
+    ASSERT_NE(sampler, nullptr);
+    EXPECT_EQ(SamplerDescriptor::ToKey(sampler->GetDescriptor()),
+              SamplerDescriptor::ToKey(descriptors[i]));
+    for (size_t t = 0; t < kThreadCount; t++) {
+      EXPECT_EQ(results[t][i], sampler);
+    }
+  }
 }
 
 }  // namespace testing
