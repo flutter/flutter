@@ -4,6 +4,7 @@
 
 # The engine's source root (GN's `//`).
 
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 # Puts this directory on the include path. Engine code includes its own
@@ -31,4 +32,18 @@ filegroup(
     name = "gn_root_files",
     srcs = [".gn"] + glob(["build_overrides/**"]),
     visibility = ["//engine/src/flutter/build/bazel:__subpackages__"],
+)
+
+# Under the runfiles root a test runs from, this directory is where GN's
+# root_gen_dir sits (generated files at their source paths below it). GN's
+# //flutter/testing/dart writes its kernels at that root, and spawn_test
+# loads spawn_helper's from there (`kFlutterBuildDirectory/spawn_helper.dart.dill`);
+# the one kernel a test names by that path is copied here.
+copy_file(
+    name = "spawn_helper_kernel",
+    testonly = True,
+    src = "//engine/src/flutter/testing/dart:spawn_helper.dart.dill",
+    out = "spawn_helper.dart.dill",
+    allow_symlink = True,
+    visibility = ["//engine/src/flutter/testing/dart:__pkg__"],
 )

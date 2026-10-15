@@ -256,6 +256,59 @@ rather than the sandbox's path; a test that needs a library's URI asks
 `flutter::testing::GetSourceUri` for it, which the fixtures library compiles
 in for each build (GN's is `file://` plus the absolute source root).
 
+## The Dart tests under flutter_tester
+
+`testing/run_tests.py --type dart` runs every `testing/dart/*_test.dart` (and
+`vm_service/*_test.dart` with the VM service on) under `flutter_tester` --
+GN's `//flutter/shell/testing`, generated like any other package -- in five
+variants each: Skia's software renderer, Impeller on Vulkan (SwiftShader,
+linked statically) and Impeller on OpenGL ES (`flutter_tester_opengles`,
+ANGLE over SwiftShader, which carries the GPU test backends as its
+runfiles), the first two also with `--force-multithreading`; `gpu_test` once
+more per Impeller backend without Flutter GPU. `testing/testing.bzl`
+reproduces this:
+
+1. `flutter_dart_tests` compiles each test to kernel with `dart_kernel`
+   (GN's `flutter_frontend_server`) and declares a `flutter_tester_test`
+   per variant, `<test>_<variant>`, under a `test_suite`. The test's
+   packages -- `package:test` and the thirty packages below it, `vm_service`,
+   `ffi`, `vector_math`, `process` -- come from synced trees (`@dart`,
+   `@vector_math`, `@process`), staged once by `dart_package_root` at the
+   paths the engine's package configuration names them by and shared by
+   every compile (`package_roots`); the in-tree ones (`skia_gold_client`,
+   `engine_repo_tools`, `lib/gpu`) are `srcs`.
+2. `flutter_tester_test` runs the kernel as `run_tests.py` does: from the
+   source root (`engine/src` under the runfiles root, where the tests'
+   relative paths -- `flutter/lib/ui/fixtures/...`,
+   `flutter/testing/resources/...`, `flutter/third_party/skia/resources/...`
+   -- resolve), with `--use-test-fonts`, ICU's data file, lib/ui's `assets`
+   directory and `--disable-asset-fonts`, the variant's options first and the
+   file's own `// FlutterTesterOptions=` line read at run time, and
+   `FLUTTER_BUILD_DIRECTORY` (GN's build directory, which
+   `shader_test_file_utils.dart` reads) pointing at a scratch directory
+   whose `gen/` is the runfiles' `engine/src`: generated files sit at their
+   source paths there, which is what GN's `gen/` holds. What the tests read
+   rides as `data`: lib/ui's fixture images and compiled shaders at their
+   build paths, `testing/resources`, Skia's `resources/images` placed at
+   their GN path by `source_tree_files` (a synced tree is an external
+   repository, whose runfiles lie elsewhere), the fonts of `txt`'s fixtures,
+   and `spawn_helper`'s kernel copied to the root package (GN writes the
+   test kernels at the gen root, and `spawn_test` loads that one by path).
+3. The compiler's defines are GN's three in the terms of that working
+   directory rather than absolute paths: `kFlutterSrcDirectory=flutter`,
+   `kFlutterBuildDirectory=.`, `kSkiaGoldWorkDirectory=skia_gold_<test>`;
+   plus `kFlutterSrcDirectoryUri=org-dartlang-root:///engine/src/flutter`,
+   the source root as the compiler recorded it, which `spawn_test` uses for
+   its library lookup where GN's build lets it compose `file://` and the
+   absolute path (the same reason as `GetSourceUri` above).
+
+`testing/dart/BUILD.bazel` and `vm_service/BUILD.bazel` are hand-written: the
+GN files are a `foreach` over the test list with those absolute defines, and
+the run matrix is `run_tests.py`'s, which GN does not have. The outcome is
+GN's, run for run: 267 runs, the same `+N` passed count in each as
+`run_tests.py --type dart` reports against `host_debug_unopt` (242 of them
+print one; 2,334 test cases).
+
 ## Wrapped GN builds: the GPU test backends
 
 The host suites render through ANGLE (OpenGL ES on Vulkan) and SwiftShader
