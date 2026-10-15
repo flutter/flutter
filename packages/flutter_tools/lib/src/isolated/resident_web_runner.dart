@@ -747,7 +747,9 @@ class ResidentWebRunner extends ResidentRunner {
     required bool resetCompiler,
   }) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
-    final bool rebuildBundle = assetBundle.needsBuild();
+    final bool rebuildBundle = assetBundle.needsBuild(
+      manifestPath: flutterProject.pubspecFile.path,
+    );
     if (rebuildBundle) {
       logger.printTrace('Updating assets');
       final int result = await assetBundle.build(
@@ -756,6 +758,7 @@ class ResidentWebRunner extends ResidentRunner {
           environment: environment,
           logger: logger,
         ),
+        manifestPath: flutterProject.pubspecFile.path,
         packageConfigPath: debuggingOptions.buildInfo.packageConfigPath,
         targetPlatform: TargetPlatform.web_javascript,
       );

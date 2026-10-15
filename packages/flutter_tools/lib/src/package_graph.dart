@@ -71,11 +71,13 @@ Try running `flutter pub get`''');
     }
     packageNamesToVisit.addAll(dependencies);
 
-    result[current] = Dependency(
-      current,
-      packageConfig[current]!.root,
-      isExclusiveDevDependency: true,
-    );
+    final Package? package = packageConfig[current];
+    if (package == null) {
+      throwToolExit('''
+Failed to parse ${resolvedGraph.file.path}: package `$current` is missing from package_config.json.
+Try running `flutter pub get`''');
+    }
+    result[current] = Dependency(current, package.root, isExclusiveDevDependency: true);
   }
 
   // Do a second traversal of only the non-dev-dependencies, to patch up the

@@ -156,4 +156,23 @@ ${package.devDependencies.map((String d) => '  $d: {path: ../$d}').join('\n')}
       <String>['package_c'],
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/194444.
+  test('throws ToolExit when dependency is missing from package_config', () async {
+    writePubspecs(<Package>[
+      (name: 'my_app', dependencies: <String>[], devDependencies: <String>[]),
+    ]);
+    writePackageGraph(<Package>[
+      (name: 'my_app', dependencies: <String>['package_a'], devDependencies: <String>[]),
+      (name: 'package_a', dependencies: <String>[], devDependencies: <String>[]),
+    ]);
+
+    final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.directory('my_app'));
+    final PackageConfig packageConfig = await loadPackageConfig(project.packageConfig);
+
+    expect(
+      () => computeTransitiveDependencies(project, packageConfig),
+      throwsToolExit(message: 'package `package_a` is missing from package_config.json'),
+    );
+  });
 }

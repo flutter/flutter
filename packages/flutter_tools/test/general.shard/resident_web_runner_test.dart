@@ -2450,6 +2450,56 @@ flutter:
         },
       );
     }
+
+    testUsingContext(
+      'passes manifestPath to assetBundle when cwd is not project directory',
+      () async {
+        final Directory projectDir = fileSystem.directory('/other_project')..createSync();
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('name: other_project\n');
+        projectDir.childFile('lib/main.dart').createSync(recursive: true);
+        writePackageConfigFiles(directory: projectDir, mainLibName: 'other_project');
+
+        final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir);
+
+        final ResidentRunner residentWebRunner = ResidentWebRunner(
+          flutterDevice,
+          flutterProject: project,
+          debuggingOptions: DebuggingOptions.enabled(
+            BuildInfo(
+              .debug,
+              null,
+              treeShakeIcons: false,
+              packageConfigPath: projectDir
+                  .childDirectory('.dart_tool')
+                  .childFile('package_config.json')
+                  .path,
+            ),
+          ),
+          stayResident: false,
+          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildTargets: const BuildTargetsImpl(),
+          toolContext: test_fakes.FakeToolContext(
+            fs: fileSystem,
+            systemClock: SystemClock.fixed(DateTime(2001)),
+          ),
+          analytics: fakeAnalytics,
+        );
+
+        expect(fileSystem.currentDirectory.path, isNot(projectDir.path));
+
+        webDevFS.report = UpdateFSReport(success: true);
+        expect(await residentWebRunner.run(), 0);
+        final fakeAssetBundle = residentWebRunner.assetBundle as FakeCapturingAssetBundle;
+        expect(fakeAssetBundle.lastNeedsBuildManifestPath, project.pubspecFile.path);
+        expect(fakeAssetBundle.lastBuildManifestPath, project.pubspecFile.path);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+        AssetBundleFactory: FakeAssetBundleFactory.new,
+      },
+    );
   });
 }
 
@@ -2873,4 +2923,37 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   bool areDependenciesModified(DevFSContent shaderContent) => false;
+}
+
+class FakeCapturingAssetBundle extends Fake implements AssetBundle {
+  String? lastNeedsBuildManifestPath;
+  String? lastBuildManifestPath;
+
+  @override
+  bool wasBuiltOnce() => false;
+
+  @override
+  bool needsBuild({String manifestPath = 'pubspec.yaml'}) {
+    lastNeedsBuildManifestPath = manifestPath;
+    return true;
+  }
+
+  @override
+  Future<int> build({
+    FlutterHookResult? flutterHookResult,
+    String manifestPath = 'pubspec.yaml',
+    required String packageConfigPath,
+    bool deferredComponentsEnabled = false,
+    required TargetPlatform targetPlatform,
+    String? flavor,
+    bool includeAssetsFromDevDependencies = false,
+  }) async {
+    lastBuildManifestPath = manifestPath;
+    return 0;
+  }
+}
+
+class FakeAssetBundleFactory implements AssetBundleFactory {
+  @override
+  AssetBundle createBundle() => FakeCapturingAssetBundle();
 }
