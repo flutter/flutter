@@ -65,6 +65,7 @@ use_repo(
     "libwebp",
     "llvm_libc",
     "ninja",
+    "process",
     "rapidjson",
     "re2",
     "shaderc",

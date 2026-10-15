@@ -1,0 +1,15 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @process: package:process (a DEPS tree), which the
+# engine's skia_gold_client imports, and through it the Dart tests of
+# //flutter/testing/dart. The sources, for their kernel compiles
+# (dart_package_root).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)
