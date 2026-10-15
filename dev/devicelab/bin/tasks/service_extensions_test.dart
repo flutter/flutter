@@ -109,8 +109,17 @@ void main() {
       expect((event.extensionData!.data['raster'] as int) >= 0);
 
       final Future<Event> navigationFuture = navigationEvents.first;
-      // This tap triggers a navigation event.
-      unawaited(device.tap(100, 200));
+      // Trigger a navigation event by tapping the button via the Flutter Driver extension.
+      final Response tapResponse = await client.callServiceExtension(
+        'ext.flutter.driver',
+        isolateId: isolate.id,
+        args: <String, String>{
+          'command': 'tap',
+          'finderType': 'ByText',
+          'text': 'flutter drive lib/xxx.dart',
+        },
+      );
+      expect(tapResponse.json?['isError'] == false);
 
       final Event navigationEvent = await navigationFuture;
       // validate the fields
