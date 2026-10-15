@@ -167,6 +167,8 @@ Only tech leads (currently limited to Googlers) are permitted to add the
 tech lead is responsible for ensuring that a second tech lead reviews the PR and
 approves the test exemption.
 
+See the [Test Exemption RFC](https://github.com/flutter/rfc/pull/26) for some background on the topic.
+
 ## Using git
 
 Assuming your environment has been configured according to the instructions in
