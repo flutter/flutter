@@ -4,9 +4,8 @@
 
 # Generated from //flutter/impeller/core/BUILD.gn by gn_to_bazel; do not edit.
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -90,18 +89,4 @@ cc_library(
         "@abseil-cpp//absl/strings",
     ],
     alwayslink = True,
-)
-
-# What GN has no words for; maintained in the converter's manifest
-# (tools/gn_to_bazel/lib/src/manifest.dart).
-
-flutter_test_fixtures(name = "impeller_core_fixtures")
-
-cc_test(
-    name = "impeller_core_unittests",
-    deps = [
-        ":allocator_unittests",
-        ":impeller_core_fixtures",
-        "//engine/src/flutter/testing",
-    ],
 )

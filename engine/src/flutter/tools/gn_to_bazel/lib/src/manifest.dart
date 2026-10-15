@@ -156,49 +156,14 @@ filegroup(
   // Impeller's group, its own suite (impeller_unittests, which links every
   // suite source_set below) and the Flutter GPU one.
   ConvertedFile('//flutter/impeller'),
-  ConvertedFile(
-    '//flutter/impeller/base',
-    // GN links base_unittests (a source_set of suites) into the one
-    // impeller_unittests binary of //flutter/impeller, which needs every
-    // Impeller suite; until those exist, the suite runs on its own with
-    // the engine's gtest main and an empty fixtures library (the binary's
-    // compiled-in paths; GN's come from //flutter/impeller/fixtures).
-    appendix: '''
-load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
-
-flutter_test_fixtures(name = "impeller_base_fixtures")
-
-cc_test(
-    name = "impeller_base_unittests",
-    deps = [
-        ":base_unittests",
-        ":impeller_base_fixtures",
-        "//engine/src/flutter/testing",
-    ],
-)
-''',
-  ),
+  // The per-component suites (base_unittests, geometry_unittests, ...) are
+  // source_sets GN links into the one impeller_unittests binary above, and
+  // shell/profiling's into shell_unittests; they ran as binaries of their
+  // own here until those converted.
+  ConvertedFile('//flutter/impeller/base'),
   ConvertedFile(
     '//flutter/impeller/geometry',
     skip: <String, String>{'geometry_benchmarks': 'needs //flutter/impeller/entity'},
-    // As for //flutter/impeller/base: the suite runs on its own until
-    // impeller_unittests has all of them.
-    appendix: '''
-load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
-
-flutter_test_fixtures(name = "impeller_geometry_fixtures")
-
-cc_test(
-    name = "impeller_geometry_unittests",
-    deps = [
-        ":geometry_unittests",
-        ":impeller_geometry_fixtures",
-        "//engine/src/flutter/testing",
-    ],
-)
-''',
   ),
   ConvertedFile(
     '//flutter/display_list',
@@ -213,74 +178,16 @@ cc_test(
   ),
   // The shader compiler, impellerc, and what it needs of Impeller
   // (research/08, step 3).
-  ConvertedFile(
-    '//flutter/impeller/core',
-    // As for //flutter/impeller/base: the suite runs on its own until
-    // GN's impeller_unittests converts.
-    appendix: '''
-load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
-
-flutter_test_fixtures(name = "impeller_core_fixtures")
-
-cc_test(
-    name = "impeller_core_unittests",
-    deps = [
-        ":allocator_unittests",
-        ":impeller_core_fixtures",
-        "//engine/src/flutter/testing",
-    ],
-)
-''',
-  ),
+  ConvertedFile('//flutter/impeller/core'),
   ConvertedFile('//flutter/impeller/runtime_stage'),
   ConvertedFile('//flutter/impeller/shader_bundle'),
-  ConvertedFile(
-    '//flutter/impeller/compiler',
-    // The compiler's suite on its own, as for //flutter/impeller/base, with
-    // the shader fixtures of //flutter/impeller/fixtures (GN's file_fixtures,
-    // which impeller_unittests links; the tests write their intermediates
-    // next to them).
-    appendix: '''
-load("@rules_cc//cc:defs.bzl", "cc_test")
-
-cc_test(
-    name = "impeller_compiler_unittests",
-    # 98 tests compiling shaders in process (the shader-bundle ones 12 s
-    # each alone); 245 s on a machine running the other suites.
-    size = "large",
-    deps = [
-        ":compiler_unittests",
-        "//engine/src/flutter/impeller/fixtures:file_fixtures",
-        "//engine/src/flutter/testing",
-    ],
-)
-''',
-  ),
+  ConvertedFile('//flutter/impeller/compiler'),
   ConvertedFile('//flutter/impeller/compiler/shader_lib'),
   ConvertedFile('//flutter/impeller/compiler/shader_lib/flutter'),
   ConvertedFile('//flutter/impeller/compiler/shader_lib/impeller'),
   // The shader pipeline's users (research/08, step 4): impeller_shaders()
   // invocations become the macro in build/bazel/impeller.
-  ConvertedFile(
-    '//flutter/impeller/shader_archive',
-    // The suite on its own, as for //flutter/impeller/base.
-    appendix: '''
-load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
-
-flutter_test_fixtures(name = "impeller_shader_archive_fixtures")
-
-cc_test(
-    name = "impeller_shader_archive_unittests",
-    deps = [
-        ":impeller_shader_archive_fixtures",
-        ":shader_archive_unittests",
-        "//engine/src/flutter/testing",
-    ],
-)
-''',
-  ),
+  ConvertedFile('//flutter/impeller/shader_archive'),
   ConvertedFile('//flutter/impeller/tessellator'),
   ConvertedFile('//flutter/impeller/renderer'),
   // The gmock doubles of the renderer's interfaces, which the core and
@@ -330,25 +237,7 @@ exports_files(glob([
   // The display_list_unittests chain (research/08, step 5): the text stack
   // and Impeller's display list.
   ConvertedFile('//flutter/impeller/typographer/backends/skia'),
-  ConvertedFile(
-    '//flutter/impeller/display_list',
-    // The skia_conversions suite on its own, as for //flutter/impeller/base.
-    appendix: '''
-load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
-
-flutter_test_fixtures(name = "impeller_skia_conversions_fixtures")
-
-cc_test(
-    name = "impeller_skia_conversions_unittests",
-    deps = [
-        ":impeller_skia_conversions_fixtures",
-        ":skia_conversions_unittests",
-        "//engine/src/flutter/testing",
-    ],
-)
-''',
-  ),
+  ConvertedFile('//flutter/impeller/display_list'),
   // The desktop embeddings' shared code: the public headers, the input
   // model, the isolate scope, the engine switches, the core (path
   // utilities, windowing) with its tests -- the first converted test to
@@ -547,29 +436,8 @@ filegroup(
   // The GPU surfaces and their suite (on SwiftShader's static library and
   // the Impeller fixtures).
   ConvertedFile('//flutter/shell/gpu'),
-  // The sampling profiler; GN links its suite into shell_unittests, which
-  // waits on the Dart snapshot, so it runs on its own meanwhile.
-  ConvertedFile(
-    '//flutter/shell/profiling',
-    appendix: '''
-load("@rules_cc//cc:defs.bzl", "cc_test")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
-
-flutter_test_fixtures(name = "shell_profiling_fixtures")
-
-# The profiler calls the Dart API (Dart_SetThreadName); GN's shell_unittests
-# links libdart, so this binary does too.
-cc_test(
-    name = "shell_profiling_unittests",
-    deps = [
-        ":profiling_unittests",
-        ":shell_profiling_fixtures",
-        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
-        "//engine/src/flutter/testing",
-    ],
-)
-''',
-  ),
+  // The sampling profiler; GN links its suite into shell_unittests.
+  ConvertedFile('//flutter/shell/profiling'),
   ConvertedFile(
     '//flutter/lib/gpu',
     skip: <String, String>{
