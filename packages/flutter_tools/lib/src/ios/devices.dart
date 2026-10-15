@@ -328,16 +328,10 @@ class IOSDevice extends Device {
     required this._analytics,
     required this._xcode,
     required this._templateRenderer,
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
   }) : _iproxy = iProxy,
-       _toolContext = toolContext,
-       super(
-         category: Category.mobile,
-         platformType: PlatformType.ios,
-         ephemeral: true,
-         logger: toolContext.logger,
-       ) {
-    if (!_toolContext.platform.isMacOS) {
+       super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true) {
+    if (!toolContext.platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
       return;
     }
@@ -355,7 +349,6 @@ class IOSDevice extends Device {
   final Xcode _xcode;
   final IProxy _iproxy;
   final TemplateRenderer _templateRenderer;
-  final ToolContext _toolContext;
 
   Version? get sdkVersion {
     return Version.parse(_sdkVersion);
@@ -367,7 +360,7 @@ class IOSDevice extends Device {
   }
 
   late final IOSDeviceSupport deviceSupport = IOSDeviceSupport(
-    toolContext: _toolContext,
+    toolContext: toolContext,
     xcode: _xcode,
     modelCode: _modelCode,
     operatingSystemVersion: _operatingSystemVersion,
@@ -437,7 +430,7 @@ class IOSDevice extends Device {
         result = await _iosDeploy.isAppInstalled(bundleId: app.id, deviceId: id);
       }
     } on ProcessException catch (e) {
-      _toolContext.logger.printError(e.message);
+      toolContext.logger.printError(e.message);
       return false;
     }
     return result;
@@ -448,7 +441,7 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> installApp(covariant IOSApp app, {String? userIdentifier}) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final Directory bundle = fs.directory(app.deviceBundlePath);
     if (!bundle.existsSync()) {
       logger.printError(
@@ -490,7 +483,7 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     int uninstallationResult;
     try {
       if (isCoreDevice) {
@@ -531,7 +524,7 @@ class IOSDevice extends Device {
       :FileSystem fs,
       :Logger logger,
       shutdownHooks: ShutdownHooks defaultShutdownHooks,
-    ) = _toolContext;
+    ) = toolContext;
     String? packageId;
     if (isWirelesslyConnected &&
         debuggingOptions.debuggingEnabled &&
@@ -870,7 +863,7 @@ class IOSDevice extends Device {
         'Wireless debugging on iOS ${sdkVersion.major} may be slower than expected. '
         'For better performance, consider using a wired (USB) connection.';
 
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     logger.printWarning(warningMessage);
 
     logger.sendEvent('app.warning', <String, Object?>{
@@ -884,7 +877,7 @@ class IOSDevice extends Device {
   }
 
   void _printInstallError(Directory bundle) {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     logger.printError('Could not run ${bundle.path} on $id.');
     logger.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
     logger.printError('  open ios/Runner.xcworkspace');
@@ -895,7 +888,7 @@ class IOSDevice extends Device {
     SharedIOSDeviceLogReader deviceLogReader,
     Completer<Uri?> appTerminatedCompleter,
   ) async {
-    final ToolContext(:Logger logger, :UserMessages userMessages) = _toolContext;
+    final ToolContext(:Logger logger, :UserMessages userMessages) = toolContext;
     final String? uisceneWarning = userMessages.uiSceneMigrationWarning;
     if (uisceneWarning != null) {
       final uisceneWarningInterceptor = LogInterceptor(
@@ -1065,7 +1058,7 @@ class IOSDevice extends Device {
       hostPort: debuggingOptions.hostVmServicePort,
       devicePort: debuggingOptions.deviceVmServicePort,
       ipv6: debuggingOptions.ipv6,
-      logger: _toolContext.logger,
+      logger: toolContext.logger,
     );
   }
 
@@ -1132,7 +1125,7 @@ class IOSDevice extends Device {
       :FileSystem fs,
       :Logger logger,
       shutdownHooks: ShutdownHooks defaultShutdownHooks,
-    ) = _toolContext;
+    ) = toolContext;
     IOSDeploymentMethod? deploymentMethod;
 
     // Xcode 16 introduced a way to start and attach to a debugserver through LLDB.
@@ -1330,7 +1323,7 @@ class IOSDevice extends Device {
 
   @override
   DevicePortForwarder get portForwarder {
-    final ToolContext(:Logger logger, :OperatingSystemUtils os) = _toolContext;
+    final ToolContext(:Logger logger, :OperatingSystemUtils os) = toolContext;
     return _portForwarder ??= IOSDevicePortForwarder(
       logger: logger,
       iproxy: _iproxy,

@@ -159,6 +159,35 @@ class GlobalToolContext implements ToolContext {
   UserMessages get userMessages => globals.userMessages;
 }
 
+ToolContext _createFallbackToolContext() => ToolContext(
+  artifacts: globals.artifacts!,
+  botDetector: globals.botDetector,
+  cache: globals.cache,
+  config: globals.config,
+  customDevicesConfig: globals.customDevicesConfig,
+  flutterVersion: globals.flutterVersion,
+  fs: globals.fs,
+  git: globals.git,
+  localEngineLocator: globals.localEngineLocator!,
+  logger: globals.logger,
+  nativeAssetsBuilder: globals.nativeAssetsBuilder,
+  os: globals.os,
+  outputPreferences: globals.outputPreferences,
+  persistentToolState: globals.persistentToolState!,
+  platform: globals.platform,
+  preRunValidator: globals.preRunValidator,
+  processInfo: globals.processInfo,
+  processManager: globals.processManager,
+  processUtils: globals.processUtils,
+  projectFactory: globals.projectFactory,
+  shutdownHooks: globals.shutdownHooks,
+  signals: globals.signals,
+  stdio: globals.stdio,
+  systemClock: globals.systemClock,
+  terminal: globals.terminal,
+  userMessages: globals.userMessages,
+);
+
 Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? overrides}) async {
   // Wrap runner with any asynchronous initialization that should run with the
   // overrides and callbacks.
@@ -318,7 +347,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         androidWorkflow: androidWorkflow!,
         iosWorkflow: globals.iosWorkflow,
         javaBuilder: () => globals.java,
-        toolContext: globals.toolContext,
+        toolContext: _createFallbackToolContext(),
         xcode: globals.xcode,
         androidSdkBuilder: () => globals.androidSdk,
       ),
@@ -351,7 +380,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       IOSSimulatorUtils: () => IOSSimulatorUtils(
         analytics: globals.analytics,
         plistParser: globals.plistParser,
-        toolContext: globals.toolContext,
+        toolContext: _createFallbackToolContext(),
         xcode: globals.xcode!,
       ),
       IOSWorkflow: () => IOSWorkflow(
@@ -421,34 +450,6 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
-      ToolContext: () => ToolContext(
-        artifacts: globals.artifacts!,
-        botDetector: globals.botDetector,
-        cache: globals.cache,
-        config: globals.config,
-        customDevicesConfig: globals.customDevicesConfig,
-        flutterVersion: globals.flutterVersion,
-        fs: globals.fs,
-        git: globals.git,
-        localEngineLocator: globals.localEngineLocator!,
-        logger: globals.logger,
-        nativeAssetsBuilder: globals.nativeAssetsBuilder,
-        os: globals.os,
-        outputPreferences: globals.outputPreferences,
-        persistentToolState: globals.persistentToolState!,
-        platform: globals.platform,
-        preRunValidator: globals.preRunValidator,
-        processInfo: globals.processInfo,
-        processManager: globals.processManager,
-        processUtils: globals.processUtils,
-        projectFactory: globals.projectFactory,
-        shutdownHooks: globals.shutdownHooks,
-        signals: globals.signals,
-        stdio: globals.stdio,
-        systemClock: globals.systemClock,
-        terminal: globals.terminal,
-        userMessages: globals.userMessages,
-      ),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,
@@ -481,7 +482,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         ),
         analytics: globals.analytics,
         templateRenderer: globals.templateRenderer,
-        toolContext: globals.toolContext,
+        toolContext: _createFallbackToolContext(),
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
         logger: globals.logger,
