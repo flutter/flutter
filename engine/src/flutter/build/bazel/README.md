@@ -340,6 +340,15 @@ when it exits non-zero *and* the test runner reported a failed test
 is the smoke test's stated point and what a check of the harness's failure
 path can assert.
 
+One more of `run_tests.py`'s rules rides on the compilation mode: in a build
+directory without `unopt` in its name a Dart test run must not print
+`[ERROR` anywhere (`forbidden_output`), the smoke test excepted. Under
+`-c opt` -- `tools/gn` without `--unoptimized`, as the wrapped builds take
+it -- `flutter_dart_tests` gives every run `forbidden_output = ["[ERROR"]`,
+and the launcher, once the run has passed, fails it with the offending
+lines if its merged output contains the string; in `fastbuild` and `dbg` the
+list is empty and the launcher `exec`s the tester as before.
+
 ## Wrapped GN builds: the GPU test backends
 
 The host suites render through ANGLE (OpenGL ES on Vulkan) and SwiftShader
