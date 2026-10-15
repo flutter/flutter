@@ -127,7 +127,7 @@ class ResidentWebRunner extends ResidentRunner {
   // Only non-wasm debug builds of the web support the service protocol.
   @override
   late final bool supportsServiceProtocol =
-      !debuggingOptions.webUseWasm && isRunningDebug && _deviceIsDebuggable;
+      !debuggingOptions.webConfig.useWasm && isRunningDebug && _deviceIsDebuggable;
 
   /// Device is debuggable if not a WebServer device, or if running with
   /// --start-paused or using DWDS WebSocket connection (WebServer device).
@@ -156,7 +156,7 @@ class ResidentWebRunner extends ResidentRunner {
   bool get generateDartPluginRegistry => false;
 
   @override
-  bool get reloadIsRestart => debuggingOptions.webUseWasm;
+  bool get reloadIsRestart => debuggingOptions.webConfig.useWasm;
   @override
   bool get supportsDetach => stopAppDuringCleanup;
 
@@ -254,14 +254,23 @@ class ResidentWebRunner extends ResidentRunner {
 
     try {
       return await asyncGuard(() async {
-        final WebDevServerConfig originalConfig =
-            debuggingOptions.webDevServerConfig ?? const WebDevServerConfig();
+        final WebDebugConfig(
+          :WebDevServerConfig? devServerConfig,
+          :bool enableExpressionEvaluation,
+          :bool useSseForDebugProxy,
+          :bool useSseForDebugBackend,
+          :bool useSseForInjectedClient,
+          :WebRendererMode renderer,
+          :bool useWasm,
+          :bool crossOriginIsolation,
+        ) = debuggingOptions.webConfig;
+
+        final WebDevServerConfig originalConfig = devServerConfig ?? const WebDevServerConfig();
 
         final int resolvedPort = await resolvePort(originalConfig.port, osUtils);
 
         final WebDevServerConfig updatedConfig = originalConfig.copyWith(port: resolvedPort);
-        final ExpressionCompiler? expressionCompiler =
-            debuggingOptions.webEnableExpressionEvaluation
+        final ExpressionCompiler? expressionCompiler = enableExpressionEvaluation
             ? WebExpressionCompiler(flutterDevice!.generator!, fileSystem: fileSystem)
             : null;
 
@@ -271,9 +280,9 @@ class ResidentWebRunner extends ResidentRunner {
           webDevServerConfig: updatedConfig,
           packagesFilePath: packagesFilePath,
           urlTunneller: _urlTunneller,
-          useSseForDebugProxy: debuggingOptions.webUseSseForDebugProxy,
-          useSseForDebugBackend: debuggingOptions.webUseSseForDebugBackend,
-          useSseForInjectedClient: debuggingOptions.webUseSseForInjectedClient,
+          useSseForDebugProxy: useSseForDebugProxy,
+          useSseForDebugBackend: useSseForDebugBackend,
+          useSseForInjectedClient: useSseForInjectedClient,
           buildInfo: debuggingOptions.buildInfo,
           enableDwds: supportsServiceProtocol,
           ddsConfig: DartDevelopmentServiceConfiguration(
@@ -286,12 +295,12 @@ class ResidentWebRunner extends ResidentRunner {
           expressionCompiler: expressionCompiler,
           chromiumLauncher: _chromiumLauncher,
           nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-          webRenderer: debuggingOptions.webRenderer,
-          isWasm: debuggingOptions.webUseWasm,
+          webRenderer: renderer,
+          isWasm: useWasm,
           useLocalCanvasKit: debuggingOptions.buildInfo.useLocalCanvasKit,
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
-          webCrossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
+          webCrossOriginIsolation: crossOriginIsolation,
           fileSystem: fileSystem,
           logger: logger,
           platform: platform,
@@ -302,7 +311,7 @@ class ResidentWebRunner extends ResidentRunner {
         if (updatedConfig.https?.certKeyPath != null && updatedConfig.https?.certPath != null) {
           url = url.replace(scheme: 'https');
         }
-        if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
+        if (debuggingOptions.buildInfo.isDebug && !useWasm) {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true, resetCompiler: true);
           if (!report.success) {
@@ -405,12 +414,12 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   WebCompilerConfig get _compilerConfig {
-    if (debuggingOptions.webUseWasm) {
-      return WasmCompilerConfig(renderer: debuggingOptions.webRenderer);
+    if (debuggingOptions.webConfig.useWasm) {
+      return WasmCompilerConfig(renderer: debuggingOptions.webConfig.renderer);
     }
     return JsCompilerConfig.run(
       nativeNullAssertions: debuggingOptions.nativeNullAssertions,
-      renderer: debuggingOptions.webRenderer,
+      renderer: debuggingOptions.webConfig.renderer,
       deprecatedJsInterop: debuggingOptions.buildInfo.deprecatedJsInterop,
     );
   }
@@ -454,7 +463,7 @@ class ResidentWebRunner extends ResidentRunner {
     try {
       sdkName = await flutterDevice!.device!.sdkNameAndVersion;
 
-      if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webUseWasm) {
+      if (debuggingOptions.buildInfo.isDebug && !debuggingOptions.webConfig.useWasm) {
         await runSourceGenerators();
         // Don't reset the resident compiler for web, since the extra recompile is
         // wasteful.

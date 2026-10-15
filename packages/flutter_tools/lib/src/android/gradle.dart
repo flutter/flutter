@@ -175,6 +175,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required Logger logger,
     required Platform platform,
     required ProcessManager processManager,
+    required this._toolContext,
     AndroidSdk? androidSdk,
   }) : _androidContext = AndroidContext(
          androidSdkBuilder: () => androidSdk,
@@ -196,7 +197,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
        _fileSystem = toolContext.fs,
        _logger = toolContext.logger,
        _fileSystemUtils = toolContext.fileSystemUtils,
-       _processUtils = toolContext.processUtils;
+       _processUtils = toolContext.processUtils,
+       _toolContext = toolContext;
 
   final Analytics _analytics;
   final AndroidContext _androidContext;
@@ -210,6 +212,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
   late final AndroidSdk? _androidSdk = _androidContext.androidSdk;
   final FileSystemUtils _fileSystemUtils;
   final ProcessUtils _processUtils;
+  final ToolContext _toolContext;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -391,8 +394,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
         return exitCode;
       }
       final GradleBuildStatus status = await detectedGradleError!.handler(
+        gradleUtils: _gradleUtils,
+        java: _java,
         line: detectedGradleErrorLine!,
         project: project,
+        toolContext: _toolContext,
         usesAndroidX: usesAndroidX,
       );
 
@@ -459,8 +465,11 @@ class AndroidGradleBuilder implements AndroidBuilder {
   //    succeed despite an unsupported Java/Gradle version pair.
   // 3. This also helps address https://github.com/flutter/flutter/issues/167931
   //    by providing actionable version recommendations directly in the error.
-  Future<void> _checkJavaAndGradleCompatibility(FlutterProject project, BuildInfo buildInfo) async {
-    if (!buildInfo.androidSkipBuildDependencyValidation) {
+  Future<void> _checkJavaAndGradleCompatibility(
+    FlutterProject project,
+    AndroidBuildInfo androidBuildInfo,
+  ) async {
+    if (!androidBuildInfo.buildInfo.androidGradleConfig.skipBuildDependencyValidation) {
       final Version? javaVersionObj = _java?.version;
       final String? javaVersion = javaVersionObj != null
           ? '${javaVersionObj.major}.${javaVersionObj.minor}.${javaVersionObj.patch}'
@@ -574,10 +583,10 @@ To fix this, you can either:
     } else {
       options.add('-q');
     }
-    if (!buildInfo.androidGradleDaemon) {
+    if (!buildInfo.androidGradleConfig.gradleDaemon) {
       options.add('--no-daemon');
     }
-    if (buildInfo.androidSkipBuildDependencyValidation) {
+    if (buildInfo.androidGradleConfig.skipBuildDependencyValidation) {
       options.add('-PskipDependencyChecks=true');
     }
     final LocalEngineInfo? localEngineInfo = _artifacts.localEngineInfo;
@@ -645,15 +654,12 @@ To fix this, you can either:
         options.add('-Pshrink=false');
       }
     }
-    options.addAll(androidBuildInfo.buildInfo.toGradleConfig());
+    options.addAll(androidBuildInfo.toGradleConfig());
     if (buildInfo.fileSystemRoots.isNotEmpty) {
       options.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
     }
     if (buildInfo.fileSystemScheme != null) {
       options.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-    }
-    if (androidBuildInfo.splitPerAbi) {
-      options.add('-Psplit-per-abi=true');
     }
 
     options.addAll(_getAndroidNdkProvisioningProperties());
@@ -681,7 +687,7 @@ To fix this, you can either:
     );
 
     if (exitCode != 0) {
-      await _checkJavaAndGradleCompatibility(project, androidBuildInfo.buildInfo);
+      await _checkJavaAndGradleCompatibility(project, androidBuildInfo);
       throwToolExit(
         'Gradle task $assembleTask failed with exit code $exitCode',
         exitCode: exitCode,
@@ -904,14 +910,14 @@ To fix this, you can either:
     } else {
       command.add('-q');
     }
-    if (!buildInfo.androidGradleDaemon) {
+    if (!buildInfo.androidGradleConfig.gradleDaemon) {
       command.add('--no-daemon');
     }
 
     if (target.isNotEmpty) {
       command.add('-Ptarget=$target');
     }
-    command.addAll(androidBuildInfo.buildInfo.toGradleConfig());
+    command.addAll(androidBuildInfo.toGradleConfig());
     command.addAll(_getAndroidNdkProvisioningProperties());
     if (buildInfo.dartObfuscation && buildInfo.mode != BuildMode.release) {
       _logger.printStatus(
@@ -981,7 +987,7 @@ To fix this, you can either:
     if (result.exitCode != 0) {
       _logger.printStatus(result.stdout, wrap: false);
       _logger.printError(result.stderr, wrap: false);
-      await _checkJavaAndGradleCompatibility(project, androidBuildInfo.buildInfo);
+      await _checkJavaAndGradleCompatibility(project, androidBuildInfo);
       throwToolExit(
         'Gradle task $aarTask failed with exit code ${result.exitCode}.',
         exitCode: result.exitCode,

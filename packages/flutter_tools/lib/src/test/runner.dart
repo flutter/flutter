@@ -194,8 +194,8 @@ interface class FlutterTestRunner {
         testOutputDir: tempBuildDir,
         testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
-        webRenderer: debuggingOptions.webRenderer,
-        useWasm: debuggingOptions.webUseWasm,
+        webRenderer: debuggingOptions.webConfig.renderer,
+        useWasm: debuggingOptions.webConfig.useWasm,
       );
       testArgs
         ..add('--platform=chrome')
@@ -214,13 +214,13 @@ interface class FlutterTestRunner {
             browserFinder: findChromeExecutable,
             logger: logger,
           ),
-          crossOriginIsolation: debuggingOptions.webCrossOriginIsolation,
+          crossOriginIsolation: debuggingOptions.webConfig.crossOriginIsolation,
           flutterProject: flutterProject,
           flutterTesterBinPath: flutterTesterBinPath,
           toolContext: _toolContext,
-          useWasm: debuggingOptions.webUseWasm,
+          useWasm: debuggingOptions.webConfig.useWasm,
           webMemoryFS: result,
-          webRenderer: debuggingOptions.webRenderer,
+          webRenderer: debuggingOptions.webConfig.renderer,
           pauseAfterLoad: debuggingOptions.startPaused,
           testTimeRecorder: spec.testTimeRecorder,
           updateGoldens: spec.updateGoldens,

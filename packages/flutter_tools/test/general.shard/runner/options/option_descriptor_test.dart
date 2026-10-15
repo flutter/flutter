@@ -5,6 +5,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../../src/common.dart';
@@ -720,6 +721,7 @@ void main() {
           BuildInfoOptions.obfuscate,
           BuildInfoOptions.extraFrontEndOptions,
           BuildInfoOptions.extraGenSnapshotOptions,
+          DarwinAddToAppOptionsBundle.staticFrameworks,
           CommonOptions.dartDefines,
           CommonOptions.dartDefineFromFile,
           CommonOptions.enableExperiment,
@@ -736,6 +738,154 @@ void main() {
         }
       },
     );
+
+    testUsingContext('BuildModeOptionsBundle configures defaultBuildMode and respects excludeDebug and excludeRelease', () {
+      final debugDefaultCommand = _FakeCommand(
+        name: 'run',
+        description: 'Run app',
+        bundles: const <OptionBundle>[BuildModeOptionsBundle(defaultToRelease: false)],
+      );
+      createTestCommandRunner(debugDefaultCommand);
+
+      expect(debugDefaultCommand.getBuildMode(), BuildMode.debug);
+      expect(
+        debugDefaultCommand.argParser.options.keys,
+        containsAll(<String>['debug', 'profile', 'release', 'jit-release']),
+      );
+
+      final noReleaseCommand = _FakeCommand(
+        name: 'attach',
+        description: 'Attach to app',
+        bundles: const <OptionBundle>[
+          BuildModeOptionsBundle(defaultToRelease: false, excludeRelease: true),
+        ],
+      );
+      createTestCommandRunner(noReleaseCommand);
+
+      expect(noReleaseCommand.getBuildMode(), BuildMode.debug);
+      expect(noReleaseCommand.argParser.options.keys, containsAll(<String>['debug', 'profile']));
+      expect(noReleaseCommand.argParser.options, isNot(contains('release')));
+      expect(noReleaseCommand.argParser.options, isNot(contains('jit-release')));
+
+      final noDebugCommand = _FakeCommand(
+        name: 'release-only',
+        description: 'Release only',
+        bundles: const <OptionBundle>[BuildModeOptionsBundle(excludeDebug: true)],
+      );
+      createTestCommandRunner(noDebugCommand);
+
+      expect(noDebugCommand.getBuildMode(), BuildMode.release);
+      expect(noDebugCommand.argParser.options.keys, containsAll(<String>['profile', 'release']));
+      expect(noDebugCommand.argParser.options, isNot(contains('debug')));
+
+      expect(
+        // ignore: prefer_const_constructors
+        () => BuildModeOptionsBundle(defaultToRelease: false, excludeDebug: true),
+        throwsAssertionError,
+      );
+      expect(
+        // ignore: prefer_const_constructors
+        () => BuildModeOptionsBundle(excludeRelease: true),
+        throwsAssertionError,
+      );
+    });
+
+    testUsingContext(
+      'DeviceDiscoveryOptionsBundle, FilesystemOptionsBundle, VmServicePortOptionsBundle, '
+      'DdsAndDevToolsOptionsBundle, ResidentCompilerOptionsBundle, and EngineRenderingFlagsBundle register expected options',
+      () async {
+        final command = _FakeCommand(
+          name: 'run',
+          description: 'Run app',
+          bundles: const <OptionBundle>[
+            DeviceDiscoveryOptionsBundle(includeDeviceUser: true),
+            FilesystemOptionsBundle(),
+            VmServicePortOptionsBundle(),
+            DdsAndDevToolsOptionsBundle(),
+            ResidentCompilerOptionsBundle(
+              includeFrontendServerStarterPath: true,
+              includeExtraDartFlags: true,
+            ),
+            EngineRenderingFlagsBundle(includeTestFlag: true),
+          ],
+        );
+        final CommandRunner<void> runner = createTestCommandRunner(command);
+        await runner.run(<String>[
+          'run',
+          '--device-timeout=15',
+          '--device-connection=attached',
+          '--device-user=10',
+          '--host-vmservice-port=8181',
+          '--device-vmservice-port=8282',
+          '--no-dds',
+          '--ipv6',
+        ]);
+
+        expect(command.deviceDiscoveryTimeout, const Duration(seconds: 15));
+        expect(command.getValue(CommonOptions.deviceUser), '10');
+        expect(command.hostVmservicePort, 8181);
+        expect(command.deviceVmservicePort, 8282);
+        expect(command.ipv6, isTrue);
+
+        const expectedDescriptors = <OptionDescriptor<Object?>>[
+          CommonOptions.deviceTimeout,
+          CommonOptions.deviceConnection,
+          CommonOptions.deviceUser,
+          BuildInfoOptions.outputDill,
+          BuildInfoOptions.fileSystemRoot,
+          BuildInfoOptions.fileSystemScheme,
+          DebuggingOptionDescriptors.vmServicePort,
+          DebuggingOptionDescriptors.deviceVmservicePort,
+          DebuggingOptionDescriptors.hostVmservicePort,
+          DebuggingOptionDescriptors.ipv6,
+          DebuggingOptionDescriptors.ddsPort,
+          DebuggingOptionDescriptors.dds,
+          DebuggingOptionDescriptors.disableDds,
+          DebuggingOptionDescriptors.enableDevTools,
+          DebuggingOptionDescriptors.devToolsServerAddressOption,
+          BuildInfoOptions.initializeFromDill,
+          BuildInfoOptions.assumeInitializeFromDillUpToDate,
+          BuildInfoOptions.nativeAssetsYamlFile,
+          BuildInfoOptions.frontendServerStarterPath,
+          BuildInfoOptions.extraFrontEndOptions,
+          BuildInfoOptions.extraGenSnapshotOptions,
+          DebuggingOptionDescriptors.enableImpeller,
+          DebuggingOptionDescriptors.enableFlutterGpu,
+          DebuggingOptionDescriptors.enableHcpp,
+          DebuggingOptionDescriptors.enableVulkanValidation,
+          DebuggingOptionDescriptors.enableEmbedderApi,
+          DebuggingOptionDescriptors.testFlag,
+        ];
+
+        expect(
+          command.argParser.options.keys,
+          containsAll(expectedDescriptors.map((OptionDescriptor<Object?> d) => d.name)),
+        );
+      },
+    );
+
+    testUsingContext('OptionBundle.register supports verboseHelp and hideOverride overrides for FlutterCommand helpers', () async {
+      final command = _FakeCommand(name: 'helper-test', description: 'Helper delegation test');
+      command.usesFilesystemOptions(hide: false);
+      command.usesPortOptions(verboseHelp: true);
+      command.addBuildModeFlags(verboseHelp: true, defaultToRelease: false, excludeRelease: true);
+
+      expect(command.argParser.options['output-dill']!.hide, isFalse);
+      expect(command.argParser.options['vm-service-port']!.hide, isFalse);
+      expect(command.argParser.options, isNot(contains('ipv6')));
+      expect(command.getBuildMode(), BuildMode.debug);
+      expect(command.argParser.options.keys, containsAll(<String>['debug', 'profile']));
+      expect(command.argParser.options, isNot(contains('release')));
+
+      final hiddenCommand = _FakeCommand(name: 'hidden-test', description: 'Hidden override');
+      const FilesystemOptionsBundle().register(
+        hiddenCommand,
+        hiddenCommand.argParser,
+        verboseHelp: true,
+        hideOverride: true,
+      );
+      expect(hiddenCommand.argParser.options['output-dill']!.hide, isTrue);
+    });
   });
 }
 
