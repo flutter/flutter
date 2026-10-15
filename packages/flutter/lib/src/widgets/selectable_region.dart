@@ -331,13 +331,13 @@ class SelectableRegion extends StatefulWidget {
     // known. A button's position in the menu can slightly affect its
     // appearance.
     return <ContextMenuButtonItem>[
-      if (canCopy) ContextMenuButtonItem(onPressed: onCopy, type: ContextMenuButtonType.copy),
+      if (canCopy) ContextMenuButtonItem(onPressed: onCopy, kind: ContextMenuButtonKind.copy),
       if (canShare && showShareBeforeSelectAll)
-        ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+        ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
       if (canSelectAll)
-        ContextMenuButtonItem(onPressed: onSelectAll, type: ContextMenuButtonType.selectAll),
+        ContextMenuButtonItem(onPressed: onSelectAll, kind: ContextMenuButtonKind.selectAll),
       if (canShare && !showShareBeforeSelectAll)
-        ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+        ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
     ];
   }
 
@@ -2990,8 +2990,8 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       'This method should only be given selection events that select text boundaries.',
     );
     final Offset effectiveGlobalPosition = switch (event) {
-      SelectWordSelectionEvent(:final globalPosition) => globalPosition,
-      SelectParagraphSelectionEvent(:final globalPosition) => globalPosition,
+      SelectWordSelectionEvent(:final Offset globalPosition) => globalPosition,
+      SelectParagraphSelectionEvent(:final Offset globalPosition) => globalPosition,
       _ => throw ArgumentError('Unsupported selection event: $event'),
     };
     SelectionResult? lastSelectionResult;

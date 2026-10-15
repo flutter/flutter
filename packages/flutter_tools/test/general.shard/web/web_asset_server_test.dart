@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/isolated/release_asset_server.dart';
 import 'package:flutter_tools/src/isolated/web_asset_server.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
+import 'package:flutter_tools/src/web/devfs_proxy.dart';
 import 'package:flutter_tools/src/web/web_constants.dart';
 import 'package:shelf/shelf.dart';
 
@@ -363,7 +364,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: true,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -392,7 +393,7 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
@@ -420,7 +421,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: true,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.skwasm,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -449,7 +450,7 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
@@ -477,7 +478,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost', baseHref: '/preview/'),
+        webDevServerConfig: const WebDevServerConfig(baseHref: '/preview/'),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -503,7 +504,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -529,7 +530,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -559,7 +560,7 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
@@ -597,7 +598,7 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: true,
           useLocalCanvasKit: false,
@@ -651,7 +652,7 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
@@ -730,7 +731,7 @@ void main() {
             Uri.base,
             null,
             crossOriginIsolation: false,
-            webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+            webDevServerConfig: const WebDevServerConfig(),
             webRenderer: WebRendererMode.canvaskit,
             isWasm: false,
             useLocalCanvasKit: false,
@@ -919,5 +920,111 @@ void main() {
         expect(await routeResponse.readAsString(), equals('<html>index</html>'));
       }
     });
+
+    for (final (String label, BuildInfo buildInfo, bool isWasm, WebRendererMode webRenderer)
+        in <(String, BuildInfo, bool, WebRendererMode)>[
+          ('debug with isWasm: true', BuildInfo.debug, true, WebRendererMode.skwasm),
+          ('release with isWasm: false', BuildInfo.release, false, WebRendererMode.canvaskit),
+        ]) {
+      testUsingContext(
+        'applies proxy rules instead of falling back to index.html ($label)',
+        () async {
+          fileSystem.file('build/web/index.html')
+            ..createSync(recursive: true)
+            ..writeAsStringSync('<html>index</html>');
+
+          final HttpServer backendServer = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+          backendServer.listen((HttpRequest request) async {
+            if (request.uri.path == '/get') {
+              request.response
+                ..statusCode = HttpStatus.ok
+                ..headers.set('content-type', 'application/json')
+                ..write('{"method":"${request.method}","proxied":true}');
+              await request.response.close();
+            } else {
+              request.response.statusCode = HttpStatus.notFound;
+              await request.response.close();
+            }
+          });
+
+          final logger = BufferLogger.test();
+          WebAssetServer? server;
+          final client = HttpClient();
+          try {
+            server = await WebAssetServer.start(
+              null,
+              null,
+              false,
+              false,
+              false,
+              buildInfo,
+              false,
+              const DartDevelopmentServiceConfiguration(enable: false),
+              Uri.base,
+              null,
+              crossOriginIsolation: false,
+              webDevServerConfig: WebDevServerConfig(
+                proxy: <ProxyRule>[
+                  PrefixProxyRule(
+                    prefix: '/get',
+                    target: 'http://localhost:${backendServer.port}/',
+                  ),
+                ],
+              ),
+              webRenderer: webRenderer,
+              isWasm: isWasm,
+              useLocalCanvasKit: false,
+              fileSystem: fileSystem,
+              logger: logger,
+              platform: platform,
+            );
+            server.markReady();
+
+            // 1. Proxied GET request should reach backendServer instead of returning index.html.
+            final HttpClientRequest getRequest = await client.getUrl(
+              Uri.parse('http://localhost:${server.selectedPort}/get'),
+            );
+            final HttpClientResponse getResponse = await getRequest.close();
+            expect(getResponse.statusCode, HttpStatus.ok);
+            expect(await utf8.decoder.bind(getResponse).join(), '{"method":"GET","proxied":true}');
+            expect(
+              logger.statusText,
+              contains(
+                '[proxyMiddleware] Matched "/get". '
+                'Requesting "http://localhost:${backendServer.port}/get"',
+              ),
+            );
+
+            // 2. Proxied POST request should also be forwarded instead of 404ing in ReleaseAssetServer.
+            final HttpClientRequest postRequest = await client.postUrl(
+              Uri.parse('http://localhost:${server.selectedPort}/get'),
+            );
+            final HttpClientResponse postResponse = await postRequest.close();
+            expect(postResponse.statusCode, HttpStatus.ok);
+            expect(
+              await utf8.decoder.bind(postResponse).join(),
+              '{"method":"POST","proxied":true}',
+            );
+
+            // 3. Unmatched SPA route still falls back to index.html.
+            final HttpClientRequest spaRequest = await client.getUrl(
+              Uri.parse('http://localhost:${server.selectedPort}/unmatched-route'),
+            );
+            final HttpClientResponse spaResponse = await spaRequest.close();
+            expect(spaResponse.statusCode, HttpStatus.ok);
+            expect(await utf8.decoder.bind(spaResponse).join(), '<html>index</html>');
+          } finally {
+            client.close();
+            await server?.dispose();
+            await backendServer.close(force: true);
+          }
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => fileSystem,
+          Platform: () => platform,
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+    }
   });
 }

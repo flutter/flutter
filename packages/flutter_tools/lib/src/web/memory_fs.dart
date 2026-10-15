@@ -67,13 +67,11 @@ class WebMemoryFS {
     final Map<String, Object?> manifest = castStringKeyedMap(
       json.decode(manifestFile.readAsStringSync()),
     )!;
-
     // Collect all newly compiled modules and parse their metadata to identify
     // which Dart libraries they contain.
     final newModules = <String, _CompiledModule>{};
 
-    for (final String filePath in manifest.keys) {
-      final Map<String, Object?> offsets = castStringKeyedMap(manifest[filePath])!;
+    for (final MapEntry(key: filePath, value: offsets) in manifest.entries) {
       if (offsets case {
         _kCode: [final int codeStart, final int codeEnd],
         _kSourcemap: [final int sourcemapStart, final int sourcemapEnd],

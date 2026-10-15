@@ -436,6 +436,10 @@ EGLBoolean _eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     return EGL_FALSE;
   }
 
+  if (mock) {
+    mock->eglSwapBuffers();
+  }
+
   return bool_success();
 }
 
@@ -509,6 +513,12 @@ void _glCompileShader(GLuint shader) {}
 
 void _glClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a) {
   mock->glClearColor(r, g, b, a);
+}
+
+void _glClear(GLbitfield mask) {
+  if (mock) {
+    mock->glClear(mask);
+  }
 }
 
 GLuint _glCreateShader(GLenum shaderType) {
@@ -629,6 +639,12 @@ static void _glGetFramebufferAttachmentParameteriv(GLenum target,
   } else if (pname == GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME) {
     auto it = framebuffer_renderbuffers.find(attachment);
     *params = (it != framebuffer_renderbuffers.end()) ? it->second : 0;
+  }
+}
+
+static void _glGetFloatv(GLenum pname, GLfloat* data) {
+  if (mock) {
+    mock->glGetFloatv(pname, data);
   }
 }
 
@@ -962,6 +978,7 @@ static void library_init() {
   epoxy_glBindTexture = _glBindTexture;
   epoxy_glBlitFramebuffer = _glBlitFramebuffer;
   epoxy_glCompileShader = _glCompileShader;
+  epoxy_glClear = _glClear;
   epoxy_glClearColor = _glClearColor;
   epoxy_glCreateProgram = _glCreateProgram;
   epoxy_glCreateShader = _glCreateShader;
@@ -982,6 +999,7 @@ static void library_init() {
   epoxy_glGenTextures = _glGenTextures;
   epoxy_glGetFramebufferAttachmentParameteriv =
       _glGetFramebufferAttachmentParameteriv;
+  epoxy_glGetFloatv = _glGetFloatv;
   epoxy_glGetIntegerv = _glGetIntegerv;
   epoxy_glGetProgramiv = _glGetProgramiv;
   epoxy_glGetProgramInfoLog = _glGetProgramInfoLog;
