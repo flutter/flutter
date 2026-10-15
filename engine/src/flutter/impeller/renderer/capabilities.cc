@@ -102,6 +102,9 @@ class StandardCapabilities final : public Capabilities {
   bool SupportsManuallyMippedTextures() const override { return true; }
 
   // |Capabilities|
+  bool SupportsTextureArrays() const override { return true; }
+
+  // |Capabilities|
   bool SupportsExtendedRangeFormats() const override {
     return supports_extended_range_formats_;
   }

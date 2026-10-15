@@ -582,14 +582,15 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       final FileSystem fs = MemoryFileSystem.test();
       final Uri projectUri = Uri.parse('file:///unmatched_app/');
 
-      // Neither '_fe_analyzer_shared' nor 'args' matches projectUri directly
-      // (Tier 1) or via canonicalized path (Tier 2). Because pub sorts
-      // package_config.json alphabetically, picking packageConfig.packages.first
-      // would erroneously select '_fe_analyzer_shared'. Instead, Tier 3 falls
-      // back to manifestAppName ('my_app').
+      // None of the packages matches projectUri directly (Tier 1) or via
+      // canonicalized path (Tier 2). Because pub sorts package_config.json
+      // alphabetically, picking packageConfig.packages.first would erroneously
+      // select '_fe_analyzer_shared'. Instead, Tier 3 falls back to
+      // manifestAppName ('my_app') when it is present in packageConfig.
       final packageConfig = PackageConfig(<Package>[
         Package('_fe_analyzer_shared', Uri.parse('file:///pub_cache/_fe_analyzer_shared/')),
         Package('args', Uri.parse('file:///pub_cache/args/')),
+        Package('my_app', Uri.parse('file:///workspace/my_app/')),
       ]);
 
       expect(
@@ -603,21 +604,41 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
       );
     });
 
-    testWithoutContext('falls back to manifestAppName when packageConfig is empty', () {
-      final FileSystem fs = MemoryFileSystem.test();
+    testWithoutContext(
+      'returns null when no package root matches and manifestAppName is not in packageConfig',
+      () {
+        final FileSystem fs = MemoryFileSystem.test();
 
-      // When packageConfig has no packages, Tiers 1 and 2 are skipped and Tier 3
-      // returns the non-empty manifestAppName ('standalone_app').
-      expect(
-        findRunPackageName(
-          fileSystem: fs,
-          manifestAppName: 'standalone_app',
-          packageConfig: PackageConfig.empty,
-          projectUri: Uri.parse('file:///standalone_app/'),
-        ),
-        'standalone_app',
-      );
-    });
+        // When packageConfig does not contain manifestAppName (e.g. an empty
+        // package_config.json or an ancestor package_config.json from an
+        // unrelated directory), Tier 3 cannot resolve the package in
+        // packageConfig and returns null so the caller can skip native assets
+        // hooks gracefully.
+        final packageConfig = PackageConfig(<Package>[
+          Package('_fe_analyzer_shared', Uri.parse('file:///pub_cache/_fe_analyzer_shared/')),
+          Package('args', Uri.parse('file:///pub_cache/args/')),
+        ]);
+
+        expect(
+          findRunPackageName(
+            fileSystem: fs,
+            manifestAppName: 'standalone_app',
+            packageConfig: packageConfig,
+            projectUri: Uri.parse('file:///standalone_app/'),
+          ),
+          isNull,
+        );
+        expect(
+          findRunPackageName(
+            fileSystem: fs,
+            manifestAppName: 'standalone_app',
+            packageConfig: PackageConfig.empty,
+            projectUri: Uri.parse('file:///standalone_app/'),
+          ),
+          isNull,
+        );
+      },
+    );
 
     testWithoutContext(
       'returns null when no package root matches and manifestAppName is empty',
@@ -652,6 +673,7 @@ CMAKE_LINKER:FILEPATH=/usr/bin/ld.ldd
         final FileSystem fs = _ThrowingResolveLinksFileSystem(MemoryFileSystem.test());
         final packageConfig = PackageConfig(<Package>[
           Package('other_pkg', Uri.parse('file:///other_dir/')),
+          Package('fallback_app', Uri.parse('file:///fallback_dir/')),
         ]);
 
         // Tier 1 misses ('file:///broken_dir/' != 'file:///other_dir/').
@@ -754,9 +776,10 @@ environment:
           packageConfig: packageConfig,
         );
 
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo);
-        expect(result, isNotNull);
-        expect(hostFileSystem.file(result).existsSync(), isTrue);
+        final (:Uri? nativeAssetsManifest, flutterHookResult: _) =
+            await testCompilerBuildNativeAssets(buildInfo);
+        expect(nativeAssetsManifest, isNotNull);
+        expect(hostFileSystem.file(nativeAssetsManifest).existsSync(), isTrue);
       },
     );
 
@@ -768,15 +791,17 @@ environment:
         ProcessManager: () => processManager,
       },
       () async {
-        // Create a project directory whose pubspec.yaml omits the 'name' field
-        // (so project.manifest.appName is empty) and whose package_config.json
-        // contains no packages. All tiers in findRunPackageName fail and return
-        // null, causing testCompilerBuildNativeAssets to log a diagnostic warning
-        // and return null early.
+        // Create a project directory whose package_config.json does not contain
+        // the project package (e.g. an empty package_config.json or an ancestor
+        // package_config.json from an unrelated directory). All tiers in
+        // findRunPackageName fail and return null, causing
+        // testCompilerBuildNativeAssets to log a diagnostic warning and return
+        // null fields early without throwing StateError.
         final Directory projectDir = hostFileSystem.currentDirectory.childDirectory('empty_app')
           ..createSync(recursive: true);
         hostFileSystem.currentDirectory = projectDir;
         projectDir.childFile('pubspec.yaml').writeAsStringSync('''
+name: empty_app
 environment:
   sdk: '>=3.2.0 <4.0.0'
 ''');
@@ -797,8 +822,9 @@ environment:
           packageConfig: packageConfig,
         );
 
-        final Uri? result = await testCompilerBuildNativeAssets(buildInfo);
-        expect(result, isNull);
+        final (:Uri? nativeAssetsManifest, flutterHookResult: _) =
+            await testCompilerBuildNativeAssets(buildInfo);
+        expect(nativeAssetsManifest, isNull);
         expect(
           logger.warningText,
           contains('Could not determine run package name for native assets testing'),

@@ -5,10 +5,10 @@
 // Logic for native assets shared between all host OSes.
 
 import 'package:code_assets/code_assets.dart' show OS;
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
+import '../../../base/file_system.dart';
 import '../../../base/platform.dart';
 import '../../../build_info.dart';
 import '../../../globals.dart' as globals;
@@ -26,7 +26,12 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
   const TestCompilerNativeAssetsBuilderImpl();
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo) => testCompilerBuildNativeAssets(buildInfo);
+  Future<Uri?> build(BuildInfo buildInfo) async =>
+      (await buildWithHookResult(buildInfo)).nativeAssetsManifest;
+
+  @override
+  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) =>
+      testCompilerBuildNativeAssets(buildInfo);
 
   @override
   String windowsBuildDirectory(FlutterProject project) {
@@ -41,10 +46,13 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 /// and install hooks for the host test platform ([TargetPlatform.tester]),
 /// writing the generated manifest to `build/native_assets/<os>/native_assets.json`.
 ///
-/// Returns the [Uri] to the generated `native_assets.json` file, or `null` if
+/// Returns the [TestCompilerNativeAssetsBuildResult] containing the [Uri] to the
+/// generated `native_assets.json` file and hook output, or `null` fields if
 /// native assets are disabled, unsupported on the host OS, or no package can
 /// be resolved.
-Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
+Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
+  BuildInfo buildInfo,
+) async {
   final BuildInfo(
     :bool buildNativeAssets,
     :BuildMode mode,
@@ -52,12 +60,12 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
     :String packageConfigPath,
   ) = buildInfo;
   if (!buildNativeAssets) {
-    return null;
+    return (nativeAssetsManifest: null, flutterHookResult: null);
   }
   final FlutterProject project = FlutterProject.current();
   final Uri projectUri = project.directory.uri;
   final String? runPackageName = findRunPackageName(
-    fileSystem: globals.fs,
+    fileSystem: project.directory.fileSystem,
     manifestAppName: project.manifest.appName,
     packageConfig: packageConfig,
     projectUri: projectUri,
@@ -67,7 +75,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
       'Could not determine run package name for native assets testing '
       '(projectUri: $projectUri, packageConfigPath: $packageConfigPath).',
     );
-    return null;
+    return (nativeAssetsManifest: null, flutterHookResult: null);
   }
   final String pubspecPath = Uri.file(packageConfigPath)
       .resolve('../$_pubspecYamlFileName')
@@ -90,7 +98,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
       globals.fs,
       buildRunner,
     );
-    return null;
+    return (nativeAssetsManifest: null, flutterHookResult: null);
   }
 
   // Only `flutter test` uses the
@@ -131,7 +139,10 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
   );
   assert(globals.fs.file(nativeAssetsFileUri).existsSync());
 
-  return nativeAssetsFileUri;
+  return (
+    nativeAssetsManifest: nativeAssetsFileUri,
+    flutterHookResult: dartHookResult.asFlutterResult,
+  );
 }
 
 /// Resolves the target package name for native assets builds using the following
@@ -140,7 +151,7 @@ Future<Uri?> testCompilerBuildNativeAssets(BuildInfo buildInfo) async {
 /// 1. A package in [packageConfig] whose `root` URI directly matches [projectUri].
 /// 2. A package in [packageConfig] whose canonicalized `root` path matches the
 ///    canonicalized path of [projectUri] (handling symlinks and trailing slashes).
-/// 3. [manifestAppName] if it is non-empty.
+/// 3. [manifestAppName] if it is non-empty and exists in [packageConfig].
 /// 4. `null` if no package name can be determined.
 @visibleForTesting
 String? findRunPackageName({
@@ -171,8 +182,12 @@ String? findRunPackageName({
     }
   }
 
-  // 3. Fallback to the project manifest app name if non-empty.
-  return manifestAppName.isNotEmpty ? manifestAppName : null;
+  // 3. Fallback to the project manifest app name if it exists in packageConfig.
+  if (manifestAppName.isNotEmpty && packageConfig[manifestAppName] != null) {
+    return manifestAppName;
+  }
+
+  return null;
 }
 
 String _canonicalizeUriPath(FileSystem fileSystem, Uri uri) {

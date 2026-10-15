@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.engine.dart;
 
-import static android.os.Looper.getMainLooper;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
@@ -16,7 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.robolectric.Shadows.shadowOf;
+import static org.robolectric.shadows.ShadowLooper.shadowMainLooper;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -213,7 +212,7 @@ public class DartMessengerTest {
     final long messageData = 1234;
 
     messenger.handleMessageFromDart(channel, message, replyId, messageData);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     verify(fakeFlutterJni).invokePlatformMessageEmptyResponseCallback(replyId);
   }
 
@@ -231,7 +230,7 @@ public class DartMessengerTest {
     messenger.enableBufferingIncomingMessages();
     messenger.handleMessageFromDart(channel, message, replyId, messageData);
 
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     verify(fakeFlutterJni, never()).invokePlatformMessageEmptyResponseCallback(eq(replyId));
 
     final BinaryMessenger.BinaryMessageHandler handler =
@@ -239,7 +238,7 @@ public class DartMessengerTest {
             reply.reply(ByteBuffer.wrap("done".getBytes()));
     messenger.setMessageHandler(channel, handler, taskQueue);
 
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     verify(fakeFlutterJni, never()).invokePlatformMessageEmptyResponseCallback(eq(replyId));
 
     final ArgumentCaptor<ByteBuffer> response = ArgumentCaptor.forClass(ByteBuffer.class);
@@ -261,11 +260,11 @@ public class DartMessengerTest {
 
     messenger.enableBufferingIncomingMessages();
     messenger.handleMessageFromDart(channel, message, replyId, messageData);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     verify(fakeFlutterJni, never()).invokePlatformMessageEmptyResponseCallback(replyId);
 
     messenger.disableBufferingIncomingMessages();
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     verify(fakeFlutterJni).invokePlatformMessageEmptyResponseCallback(replyId);
   }
 
@@ -283,7 +282,7 @@ public class DartMessengerTest {
     messenger.enableBufferingIncomingMessages();
     messenger.handleMessageFromDart(channel, message, replyId, messageData);
 
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     verify(fakeFlutterJni, never()).invokePlatformMessageEmptyResponseCallback(eq(replyId));
 
     final BinaryMessenger.BinaryMessageHandler handler =
@@ -291,7 +290,7 @@ public class DartMessengerTest {
             reply.reply(ByteBuffer.wrap("done".getBytes()));
     messenger.setMessageHandler(channel, handler, taskQueue);
 
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     verify(fakeFlutterJni, never()).invokePlatformMessageEmptyResponseCallback(eq(replyId));
 
     final ArgumentCaptor<ByteBuffer> response = ArgumentCaptor.forClass(ByteBuffer.class);
@@ -303,7 +302,7 @@ public class DartMessengerTest {
     messenger.setMessageHandler(channel, null, null); // Unregister handler.
 
     messenger.handleMessageFromDart(channel, message, replyId, messageData);
-    shadowOf(getMainLooper()).idle();
+    shadowMainLooper().idle();
     verify(fakeFlutterJni).invokePlatformMessageEmptyResponseCallback(replyId);
   }
 
