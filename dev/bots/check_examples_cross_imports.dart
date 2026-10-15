@@ -1125,11 +1125,12 @@ final class _MaterialApiExampleLibrary extends _ExamplesLibrary {
 
   @override
   bool canImport(LibraryCrossImportStatementType import) {
-    // While the Material examples under `packages/flutter/examples/api` are not allowed to import Cupertino,
-    // the actual samples have been relocated to `packages/material_ui`,
-    // where their cross imports will be addressed separately.
-    // The existing samples in `packages/flutter/examples/api` are the now defunct orginal samples.
-    // For the purpose of the checker, allow all imports.
+    // While the Material examples under `packages/flutter/examples/api` are not
+    // allowed to import Cupertino, the actual samples have been relocated to
+    // `packages/material_ui`, where their cross imports will be addressed
+    // separately. The existing samples in `packages/flutter/examples/api` are
+    // the now defunct orginal samples. For the purpose of the checker, allow
+    // all imports.
     return true;
   }
 }
@@ -1167,6 +1168,9 @@ final class _SampleTemplatesLibraryFile extends _ExamplesLibrary {
   @override
   bool canImport(LibraryCrossImportStatementType import) {
     return switch (import) {
+      // The sample templates are fundamentally about using either Material or
+      // Cupertino, and they will be migrated to the packages repo in the long
+      // term.
       LibraryCrossImportStatementType.material => _filePath.contains('material'),
       LibraryCrossImportStatementType.materialUI => _filePath.contains('material'),
       LibraryCrossImportStatementType.cupertino => _filePath.contains('cupertino'),

@@ -359,12 +359,42 @@ void main() {
       expect(result, equals('$lines\n'));
       expect(success, isFalse);
     });
+
+    test('unknown $libraryName cross import of cupertino_ui', () async {
+      final testDartFile = '$libraryName/foo_test.dart';
+
+      final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
+        libraryName,
+        flutterSlashTestDirectory: checker.flutterSlashTestDirectory,
+        flutterTestLibraryDirectory: checker.flutterTestLibraryDirectory,
+      );
+
+      buildKnownCrossImportTestFiles();
+      writeImportInFiles(
+        <String>{testDartFile},
+        inDirectory: testFilesDirectory,
+        importString: "import 'package:cupertino_ui/cupertino_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following test in $libraryName has a disallowed import of cupertino_ui. Refactor it or move it to cupertino_ui.',
+        '║   $testDartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
   }
 
   // Regression test: Material may import Material but not material_ui. This
   // used to trip the assertion in getImportError, because the error was
   // reported as an import of Material rather than material_ui.
-  test('Material test importing material_ui reports material_ui without asserting', () async {
+  test('Material test importing material_ui reports material_ui without asserting on deprecated Material itself', () async {
     const testDartFile = 'packages/flutter/test/material/foo_test.dart';
 
     buildKnownCrossImportTestFiles();
@@ -381,6 +411,30 @@ void main() {
     final String lines = <String>[
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
       '║ The following test in packages/flutter/test/material has a disallowed import of material_ui. Refactor it or move it to material_ui.',
+      '║   $testDartFile',
+      '╚═══════════════════════════════════════════════════════════════════════════════',
+    ].join('\n');
+    expect(result, equals('$lines\n'));
+    expect(success, isFalse);
+  });
+
+  test('Cupertino test importing cupertino_ui reports cupertino_ui without asserting on deprecated Cupertino itself', () async {
+    const testDartFile = 'packages/flutter/test/cupertino/foo_test.dart';
+
+    buildKnownCrossImportTestFiles();
+    writeImportInFiles(
+      <String>{testDartFile},
+      inDirectory: checker.flutterSlashTestDirectory.childDirectory('cupertino'),
+      importString: "import 'package:cupertino_ui/cupertino_ui.dart';",
+    );
+
+    bool? success;
+    final String result = await capture(() async {
+      success = checker.check();
+    }, shouldHaveErrors: true);
+    final String lines = <String>[
+      '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+      '║ The following test in packages/flutter/test/cupertino has a disallowed import of cupertino_ui. Refactor it or move it to cupertino_ui.',
       '║   $testDartFile',
       '╚═══════════════════════════════════════════════════════════════════════════════',
     ].join('\n');
