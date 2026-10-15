@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
@@ -120,6 +121,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool configOnly = false,
   XcodeBuildAction buildAction = XcodeBuildAction.build,
   bool disablePortPublication = false,
+  required ToolContext toolContext,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -367,7 +369,12 @@ Future<XcodeBuildResult> buildXcodeProject({
       );
     }
   }
-  await processPodsIfNeeded(project.ios, buildDirectoryPath, buildInfo.mode);
+  await processPodsIfNeeded(
+    project.ios,
+    buildDirectoryPath,
+    buildInfo.mode,
+    toolContext: toolContext,
+  );
   if (configOnly) {
     return XcodeBuildResult(success: true);
   }

@@ -574,7 +574,17 @@ void main() {
             logger: globals.logger,
           );
           await project.android.ensureReadyForPlatformSpecificTooling(
-            toolContext: globals.toolContext,
+            toolContext: FakeToolContext(
+              cache: globals.cache,
+              config: globals.config,
+              flutterVersion: globals.flutterVersion,
+              fs: globals.fs,
+              logger: globals.logger,
+              os: globals.os,
+              platform: globals.platform,
+              processManager: globals.processManager,
+              systemClock: globals.systemClock,
+            ),
             gradleUtils: globals.gradleUtils,
             templateRenderer: globals.templateRenderer,
           );
@@ -613,7 +623,17 @@ void main() {
             logger: globals.logger,
           );
           await project.android.ensureReadyForPlatformSpecificTooling(
-            toolContext: globals.toolContext,
+            toolContext: FakeToolContext(
+              cache: globals.cache,
+              config: globals.config,
+              flutterVersion: globals.flutterVersion,
+              fs: globals.fs,
+              logger: globals.logger,
+              os: globals.os,
+              platform: globals.platform,
+              processManager: globals.processManager,
+              systemClock: globals.systemClock,
+            ),
             gradleUtils: globals.gradleUtils,
             templateRenderer: globals.templateRenderer,
           );

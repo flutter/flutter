@@ -18,6 +18,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -61,6 +62,7 @@ class XCDevice {
     required FileSystem fileSystem,
     required this._analytics,
     required ShutdownHooks shutdownHooks,
+    required this._toolContext,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
@@ -125,6 +127,7 @@ class XCDevice {
   final IOSCoreDeviceControl _coreDeviceControl;
   final XcodeDebug _xcodeDebug;
   final Analytics _analytics;
+  final ToolContext _toolContext;
 
   List<Object>? _cachedListResults;
 
@@ -645,6 +648,7 @@ class XCDevice {
           fileSystem: globals.fs,
           fileSystemUtils: globals.fsUtils,
           logger: _logger,
+          toolContext: _toolContext,
           analytics: globals.analytics,
           iosDeploy: _iosDeploy,
           iMobileDevice: _iMobileDevice,

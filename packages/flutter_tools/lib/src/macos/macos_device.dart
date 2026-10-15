@@ -22,6 +22,7 @@ class MacOSDevice extends DesktopDevice {
   MacOSDevice({
     required super.processManager,
     required super.logger,
+    super.toolContext,
     required super.fileSystem,
     required super.operatingSystemUtils,
   }) : _processManager = processManager,
@@ -75,6 +76,7 @@ class MacOSDevice extends DesktopDevice {
       targetOverride: mainPath,
       verboseLogging: _logger.isVerbose,
       usingCISystem: usingCISystem,
+      toolContext: toolContext,
     );
   }
 
@@ -110,6 +112,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     required this._logger,
     required this._fileSystem,
     required this._operatingSystemUtils,
+    required super.toolContext,
   }) : super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
@@ -139,6 +142,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
         logger: _logger,
         fileSystem: _fileSystem,
         operatingSystemUtils: _operatingSystemUtils,
+        toolContext: toolContext,
       ),
     ];
   }

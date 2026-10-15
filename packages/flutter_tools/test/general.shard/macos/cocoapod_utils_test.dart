@@ -19,6 +19,7 @@ import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
 
@@ -27,6 +28,7 @@ void main() {
     late MemoryFileSystem fs;
     late FakeCocoaPods cocoaPods;
     late BufferLogger logger;
+    late FakeToolContext toolContext;
 
     // Adds basic properties to the flutterProject and its subprojects.
     void setUpProject(
@@ -84,6 +86,7 @@ void main() {
       fs = MemoryFileSystem.test();
       cocoaPods = FakeCocoaPods();
       logger = BufferLogger.test();
+      toolContext = FakeToolContext(fs: fs, logger: logger);
     });
 
     group('for iOS', () {
@@ -98,6 +101,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -121,6 +125,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -143,6 +148,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -164,6 +170,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -189,6 +196,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -211,6 +219,7 @@ void main() {
               flutterProject.ios,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -235,6 +244,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               forceCocoaPodsOnly: true,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
             expect(cocoaPods.podfileSetup, isTrue);
@@ -267,6 +277,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               forceSwiftPM: true,
+              toolContext: toolContext,
             );
 
             expect(flutterProject.flutterPluginsDependenciesFile, exists);
@@ -301,6 +312,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -324,6 +336,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -346,6 +359,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -367,6 +381,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -392,6 +407,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
           },
@@ -414,6 +430,7 @@ void main() {
               flutterProject.macos,
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isFalse);
           },
@@ -439,6 +456,7 @@ void main() {
               fs.currentDirectory.childDirectory('build').path,
               BuildMode.debug,
               forceCocoaPodsOnly: true,
+              toolContext: toolContext,
             );
             expect(cocoaPods.processedPods, isTrue);
             expect(cocoaPods.podfileSetup, isTrue);
