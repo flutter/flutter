@@ -124,14 +124,14 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
                          drawable,                                            //
                          weak_last_texture,                                   //
                          weak_layer,                                          //
-                         swapchain_transients = swapchain_transients_         //
+                         swapchain_transients = swapchain_transients_,        //
+                         delegate = delegate_                                 //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
         id<MTLTexture> strong_last_texture = weak_last_texture;
         CAMetalLayer* strong_layer = weak_layer;
         if (!strong_last_texture || !strong_layer) {
           return false;
         }
-        strong_layer.presentsWithTransaction = surface_frame.submit_info().present_with_transaction;
         if (!aiks_context) {
           return false;
         }
@@ -165,6 +165,9 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         }
 
         auto surface = impeller::SurfaceMTL::MakeFromMetalLayerDrawable(
+            [delegate](id<CAMetalDrawable> drawable) -> bool {
+              return delegate->PresentDrawable((__bridge GrMTLHandle)drawable);
+            },
             aiks_context->GetContext(), drawable, swapchain_transients, clip_rect);
 
         // The surface may be null if we failed to allocate the onscreen render target
@@ -172,7 +175,6 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromCAMetalLa
         if (!surface) {
           return false;
         }
-        surface->PresentWithTransaction(surface_frame.submit_info().present_with_transaction);
 
         if (clip_rect && clip_rect->IsEmpty()) {
           if (!surface->PreparePresent()) {
@@ -249,9 +251,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
   SurfaceFrame::EncodeCallback encode_callback =
       fml::MakeCopyable([disable_partial_repaint = disable_partial_repaint_,  //
                          damage = damage_,
-                         aiks_context = aiks_context_,                 //
-                         weak_texture,                                 //
-                         swapchain_transients = swapchain_transients_  //
+                         aiks_context = aiks_context_,                  //
+                         weak_texture,                                  //
+                         swapchain_transients = swapchain_transients_,  //
+                         delegate = delegate_                           //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
         id<MTLTexture> strong_texture = weak_texture;
         if (!strong_texture) {
@@ -289,9 +292,10 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrameFromMTLTextur
         }
 
         auto surface = impeller::SurfaceMTL::MakeFromTexture(
+            [delegate](id<CAMetalDrawable> drawable) -> bool {
+              return delegate->PresentDrawable((__bridge GrMTLHandle)drawable);
+            },
             aiks_context->GetContext(), strong_texture, swapchain_transients, clip_rect);
-
-        surface->PresentWithTransaction(surface_frame.submit_info().present_with_transaction);
 
         if (clip_rect && clip_rect->IsEmpty()) {
           if (!surface->PreparePresent()) {

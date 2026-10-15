@@ -151,8 +151,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalSkia::AcquireFrameFromCAMetalLayer(
 
   // drawable is a local and needs to be strongly-captured.
   SurfaceFrame::EncodeCallback encode_callback =
-      [this, drawable, layer](const SurfaceFrame& surface_frame, DlCanvas* canvas) -> bool {
-    layer.presentsWithTransaction = surface_frame.submit_info().present_with_transaction;
+      [this, drawable](const SurfaceFrame& surface_frame, DlCanvas* canvas) -> bool {
     if (canvas == nullptr) {
       FML_DLOG(ERROR) << "Canvas not available.";
       return false;

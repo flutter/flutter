@@ -17,6 +17,10 @@ namespace impeller {
 
 class SurfaceMTL final : public Surface {
  public:
+  // Optional callback used to present the metal drawable instead of calling
+  // the default [CAMetalLayer present] method.
+  using PresentCallback = std::function<bool(id<CAMetalDrawable>)>;
+
 #pragma GCC diagnostic push
   // Disable the diagnostic for iOS Simulators. Metal without emulation isn't
   // available prior to iOS 13 and that's what the simulator headers say when
@@ -40,12 +44,14 @@ class SurfaceMTL final : public Surface {
       CAMetalLayer* layer);
 
   static std::unique_ptr<SurfaceMTL> MakeFromMetalLayerDrawable(
+      PresentCallback present_callback,
       const std::shared_ptr<Context>& context,
       id<CAMetalDrawable> drawable,
       const std::shared_ptr<SwapchainTransientsMTL>& transients,
       std::optional<IRect> clip_rect = std::nullopt);
 
   static std::unique_ptr<SurfaceMTL> MakeFromTexture(
+      PresentCallback present_callback,
       const std::shared_ptr<Context>& context,
       id<MTLTexture> texture,
       const std::shared_ptr<SwapchainTransientsMTL>& transients,
@@ -61,13 +67,6 @@ class SurfaceMTL final : public Surface {
   // Returns a Rect defining the area of the surface in device pixels
   IRect coverage() const;
 
-  /// Mark this surface as presenting with a transaction.
-  ///
-  /// If true, [Present] will block on the scheduling of a command buffer.
-  void PresentWithTransaction(bool present_with_transaction) {
-    present_with_transaction_ = present_with_transaction;
-  }
-
   /// @brief Perform the final blit and trigger end of frame workloads.
   bool PreparePresent() const;
 
@@ -79,6 +78,7 @@ class SurfaceMTL final : public Surface {
   }
 
  private:
+  PresentCallback present_callback_;
   std::weak_ptr<Context> context_;
   std::shared_ptr<Texture> resolve_texture_;
   id<CAMetalDrawable> drawable_ = nil;
@@ -87,12 +87,12 @@ class SurfaceMTL final : public Surface {
   bool requires_blit_ = false;
   std::optional<IRect> clip_rect_;
   bool frame_boundary_ = false;
-  bool present_with_transaction_ = false;
   mutable bool prepared_ = false;
 
   static bool ShouldPerformPartialRepaint(std::optional<IRect> damage_rect);
 
-  SurfaceMTL(const std::weak_ptr<Context>& context,
+  SurfaceMTL(PresentCallback present_callback,
+             const std::weak_ptr<Context>& context,
              const RenderTarget& target,
              std::shared_ptr<Texture> resolve_texture,
              id<CAMetalDrawable> drawable,
