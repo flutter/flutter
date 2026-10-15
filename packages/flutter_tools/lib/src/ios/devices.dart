@@ -832,7 +832,7 @@ class IOSDevice extends Device {
         // This is to prevent confusion if the project is later ran via Xcode
         // rather than the Flutter CLI.
         await updateGeneratedXcodeProperties(
-          project: FlutterProject.current(_fileSystem),
+          project: FlutterProject.current(_fileSystem, logger: _logger),
           buildInfo: debuggingOptions.buildInfo,
           targetOverride: mainPath,
         );
@@ -1191,7 +1191,7 @@ class IOSDevice extends Device {
     });
 
     XcodeDebugProject debugProject;
-    final FlutterProject flutterProject = FlutterProject.current(_fileSystem);
+    final FlutterProject flutterProject = FlutterProject.current(_fileSystem, logger: _logger);
 
     if (package is PrebuiltIOSApp) {
       debugProject = await _xcodeDebug.createXcodeProjectWithCustomBundle(

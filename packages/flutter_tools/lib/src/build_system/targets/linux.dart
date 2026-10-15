@@ -4,6 +4,7 @@
 
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
+import '../../base/logger.dart';
 import '../../build_info.dart';
 import '../../convert.dart';
 import '../../devfs.dart';
@@ -132,6 +133,7 @@ abstract class BundleLinuxAssets extends Target {
     final String versionInfo = getVersionInfo(
       environment.defines,
       fileSystem: environment.fileSystem,
+      logger: environment.logger,
     );
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
     final Depfile depfile = await copyAssets(
@@ -155,9 +157,14 @@ abstract class BundleLinuxAssets extends Target {
   }
 
   /// Return json encoded string that contains data about version for package_info
-  String getVersionInfo(Map<String, String> defines, {required FileSystem fileSystem}) {
-    final versionInfo =
-        jsonDecode(FlutterProject.current(fileSystem).getVersionInfo()) as Map<String, dynamic>;
+  String getVersionInfo(
+    Map<String, String> defines, {
+    required FileSystem fileSystem,
+    required Logger logger,
+  }) {
+    final versionInfo = jsonDecode(
+      FlutterProject.current(fileSystem, logger: logger).getVersionInfo(),
+    ) as Map<String, Object?>;
 
     if (defines.containsKey(kBuildNumber)) {
       versionInfo['build_number'] = defines[kBuildNumber];

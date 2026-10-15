@@ -135,7 +135,11 @@ void main() {
       os: effectiveOsUtils,
       platform: effectivePlatform,
       processManager: effectiveProcessManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: effectiveLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildCommand(
       androidContext: FakeAndroidContext(),
@@ -173,7 +177,11 @@ void main() {
       os: effectiveOsUtils,
       platform: effectivePlatform,
       processManager: effectiveProcessManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: effectiveLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildLinuxCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),

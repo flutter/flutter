@@ -83,7 +83,11 @@ flutter:
       logger: effectiveLogger,
       platform: platform ?? FakePlatform(environment: <String, String>{'FLUTTER_ROOT': '/flutter'}),
       processManager: processManager ?? FakeProcessManager.any(),
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: effectiveLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildBundleCommand(
       buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),

@@ -443,7 +443,10 @@ abstract class MacOSBundleFlutterAssets extends Target {
         .childDirectory('flutter_assets');
     assetDirectory.createSync(recursive: true);
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      environment.projectDir,
+      logger: environment.logger,
+    );
     final String? flavor = await flutterProject.macos.parseFlavorFromConfiguration(environment);
 
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);

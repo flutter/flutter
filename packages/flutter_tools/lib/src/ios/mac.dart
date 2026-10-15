@@ -125,7 +125,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return XcodeBuildResult(success: false);
   }
 
-  final FlutterProject project = FlutterProject.current(globals.fs);
+  final FlutterProject project = FlutterProject.current(globals.fs, logger: globals.logger);
   const FlutterDarwinPlatform darwinPlatform = FlutterDarwinPlatform.ios;
   final migrators = <ProjectMigrator>[
     RemoveFrameworkLinkAndEmbeddingMigration(app.project, globals.logger, globals.analytics),

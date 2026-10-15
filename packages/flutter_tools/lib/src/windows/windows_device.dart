@@ -26,10 +26,12 @@ class WindowsDevice extends DesktopDevice {
     required super.operatingSystemUtils,
   }) : _fileSystem = fileSystem,
        _operatingSystemUtils = operatingSystemUtils,
+       _logger = logger,
        super('windows', platformType: PlatformType.windows, ephemeral: false);
 
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
+  final Logger _logger;
 
   @override
   Future<bool> isSupported() async => true;
@@ -63,7 +65,7 @@ class WindowsDevice extends DesktopDevice {
     bool usingCISystem = false,
   }) async {
     await buildWindows(
-      FlutterProject.current(_fileSystem).windows,
+      FlutterProject.current(_fileSystem, logger: _logger).windows,
       buildInfo,
       _targetPlatform,
       target: mainPath,

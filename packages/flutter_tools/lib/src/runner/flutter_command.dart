@@ -10,7 +10,6 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
@@ -18,7 +17,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
 import '../base/signals.dart';
 import '../base/terminal.dart';
 import '../base/time.dart';
@@ -210,10 +208,8 @@ abstract class FlutterCommand extends Command<void> {
       toolContext?.projectFactory ?? globals.projectFactory;
   Analytics get _analytics => runner?.analytics ?? globals.analytics;
   Cache get _cache => toolContext?.cache ?? globals.cache;
-  Config get _config => toolContext?.config ?? globals.config;
   FlutterVersion get _flutterVersion => toolContext?.flutterVersion ?? globals.flutterVersion;
   FileSystemUtils get _fsUtils => toolContext?.fileSystemUtils ?? globals.fsUtils;
-  ProcessUtils get _processUtils => toolContext?.processUtils ?? globals.processUtils;
 
   /// The currently executing command (or sub-command).
 
@@ -1686,25 +1682,16 @@ abstract class FlutterCommand extends Command<void> {
     PubspecCache? pubspecCache,
   }) async {
     await project.regeneratePlatformSpecificTooling(
+      toolContext: toolContext!,
       analytics: _analytics,
-      cache: _cache,
       cocoaPods: globals.cocoaPods,
-      config: _config,
       deprecationBehavior: deprecationBehavior,
       featureFlags: featureFlags,
-      fileSystem: _fs,
-      fileSystemUtils: _fsUtils,
-      flutterVersion: _flutterVersion,
       gradleUtils: globals.gradleUtils,
-      logger: _logger,
-      os: _os,
       packageConfig: packageConfig,
       packageGraph: packageGraph,
-      platform: _platform,
-      processUtils: _processUtils,
       pubspecCache: pubspecCache,
       releaseMode: releaseMode,
-      systemClock: _clock,
       templateRenderer: globals.templateRenderer,
     );
   }

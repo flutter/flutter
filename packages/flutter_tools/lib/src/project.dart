@@ -33,6 +33,7 @@ import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cache.dart';
 import 'cmake_project.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -63,11 +64,11 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({required this._fileSystem, required this._logger, this._config});
+  FlutterProjectFactory({required this._logger, required this._fileSystem, required this._config});
 
   final Logger _logger;
   final FileSystem _fileSystem;
-  final Config? _config;
+  final Config _config;
 
   @visibleForTesting
   final projects = <String, FlutterProject>{};
@@ -75,9 +76,9 @@ class FlutterProjectFactory {
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
-    final Directory? buildDirectory = _config == null
-        ? null
-        : directory.childDirectory(getBuildDirectory(_config, directory.fileSystem));
+    final Directory buildDirectory = directory.childDirectory(
+      getBuildDirectory(_config, directory.fileSystem),
+    );
     final File pubspec = directory.childFile(bundle.defaultManifestPath);
     if (!pubspec.existsSync()) {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -207,17 +208,37 @@ class FlutterProject {
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject fromDirectory(Directory directory, {Config? config, Logger? logger}) =>
-      FlutterProjectFactory(
-        config: config,
+  static FlutterProject fromDirectory(
+    Directory directory, {
+    Config? config,
+    required Logger logger,
+  }) {
+    if (config != null) {
+      return FlutterProjectFactory(
+        logger: logger,
         fileSystem: directory.fileSystem,
-        logger: logger ?? BufferLogger.test(),
+        config: config,
       ).fromDirectory(directory);
+    }
+    final FileSystem fileSystem = directory.fileSystem;
+    final File pubspec = directory.childFile(bundle.defaultManifestPath);
+    final FlutterManifest manifest = FlutterProject._readManifest(
+      pubspec.path,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    final FlutterManifest exampleManifest = FlutterProject._readManifest(
+      FlutterProject._exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
+      logger: logger,
+      fileSystem: fileSystem,
+    );
+    return FlutterProject(directory, manifest, exampleManifest);
+  }
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject current(FileSystem fileSystem) =>
-      FlutterProject.fromDirectory(fileSystem.currentDirectory);
+  static FlutterProject current(FileSystem fileSystem, {Config? config, required Logger logger}) =>
+      FlutterProject.fromDirectory(fileSystem.currentDirectory, config: config, logger: logger);
 
   /// Create a [FlutterProject] and bypass the project caching.
   @visibleForTesting
@@ -594,48 +615,30 @@ class FlutterProject {
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
   Future<void> regeneratePlatformSpecificTooling({
+    required ToolContext toolContext,
     required Analytics analytics,
-    required Cache cache,
     required CocoaPods? cocoaPods,
-    required Config config,
     required FeatureFlags featureFlags,
-    required FileSystem fileSystem,
-    required FileSystemUtils fileSystemUtils,
-    required FlutterVersion flutterVersion,
     required gradle.GradleUtils? gradleUtils,
-    required Logger logger,
-    required OperatingSystemUtils os,
-    required Platform platform,
-    required ProcessUtils processUtils,
-    required bool releaseMode,
-    required SystemClock systemClock,
     required TemplateRenderer templateRenderer,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
-    PackageConfig? packageConfig,
-    PackageGraph? packageGraph,
+    required bool releaseMode,
     PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
   }) async {
     return ensureReadyForPlatformSpecificTooling(
+      toolContext: toolContext,
       analytics: analytics,
       androidPlatform: android.existsSync(),
-      cache: cache,
       cocoaPods: cocoaPods,
-      config: config,
       featureFlags: featureFlags,
-      fileSystem: fileSystem,
-      fileSystemUtils: fileSystemUtils,
-      flutterVersion: flutterVersion,
       gradleUtils: gradleUtils,
       iosPlatform: ios.existsSync(),
       // TODO(stuartmorgan): Revisit the conditions here once the plans for handling
       // desktop in existing projects are in place.
       linuxPlatform: featureFlags.isLinuxEnabled && linux.existsSync(),
-      logger: logger,
       macOSPlatform: featureFlags.isMacOSEnabled && macos.existsSync(),
-      os: os,
-      platform: platform,
-      processUtils: processUtils,
-      systemClock: systemClock,
       templateRenderer: templateRenderer,
       windowsPlatform: featureFlags.isWindowsEnabled && windows.existsSync(),
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
@@ -654,36 +657,39 @@ class FlutterProject {
   /// may apply optimizations or changes that are only specific to release builds,
   /// such as not including dev-only dependencies.
   Future<void> ensureReadyForPlatformSpecificTooling({
+    required ToolContext toolContext,
     required Analytics analytics,
-    required Cache cache,
     required CocoaPods? cocoaPods,
-    required Config config,
     required FeatureFlags featureFlags,
-    required FileSystem fileSystem,
-    required FileSystemUtils fileSystemUtils,
-    required FlutterVersion flutterVersion,
     required gradle.GradleUtils? gradleUtils,
-    required Logger logger,
-    required OperatingSystemUtils os,
-    required Platform platform,
-    required ProcessUtils processUtils,
-    required bool releaseMode,
-    required SystemClock systemClock,
     required TemplateRenderer templateRenderer,
+    required bool releaseMode,
     bool androidPlatform = false,
-    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     bool iosPlatform = false,
     bool linuxPlatform = false,
     bool macOSPlatform = false,
-    PackageConfig? packageConfig,
-    PackageGraph? packageGraph,
-    PubspecCache? pubspecCache,
-    bool webPlatform = false,
     bool windowsPlatform = false,
+    bool webPlatform = false,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    PubspecCache? pubspecCache,
+    PackageGraph? packageGraph,
+    PackageConfig? packageConfig,
   }) async {
     if (!directory.existsSync()) {
       return;
     }
+
+    final ToolContext(
+      :Config config,
+      :FileSystem fs,
+      :FileSystemUtils fileSystemUtils,
+      :FlutterVersion flutterVersion,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessUtils processUtils,
+      :SystemClock systemClock,
+    ) = toolContext;
 
     final migration = ProjectMigration(<ProjectMigrator>[
       AnalysisOptionsMigration(this, logger, packageConfig: packageConfig),
@@ -720,13 +726,10 @@ class FlutterProject {
     );
     if (androidPlatform) {
       await android.ensureReadyForPlatformSpecificTooling(
-        cache: cache,
-        deprecationBehavior: deprecationBehavior,
-        fileSystem: fileSystem,
-        fileSystemUtils: fileSystemUtils,
+        toolContext: toolContext,
         gradleUtils: gradleUtils,
-        logger: logger,
         templateRenderer: templateRenderer,
+        deprecationBehavior: deprecationBehavior,
       );
     }
     if (iosPlatform) {
@@ -754,7 +757,7 @@ class FlutterProject {
       cocoaPods: cocoaPods,
       config: config,
       featureFlags: featureFlags,
-      fileSystem: fileSystem,
+      fileSystem: fs,
       iosPlatform: iosPlatform,
       linuxPlatform: linuxPlatform,
       logger: logger,
@@ -1226,17 +1229,20 @@ See the link below for more information:
   }
 
   Future<void> ensureReadyForPlatformSpecificTooling({
-    required Cache cache,
-    required FileSystem fileSystem,
-    required FileSystemUtils fileSystemUtils,
+    required ToolContext toolContext,
     required gradle.GradleUtils? gradleUtils,
-    required Logger logger,
     required TemplateRenderer templateRenderer,
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
+    final ToolContext(
+      :Cache cache,
+      :FileSystem fs,
+      :FileSystemUtils fileSystemUtils,
+      :Logger logger,
+    ) = toolContext;
     if (isModule && _shouldRegenerateFromTemplate(cache: cache, fileSystemUtils: fileSystemUtils)) {
       await _regenerateLibrary(
-        fileSystem: fileSystem,
+        fileSystem: fs,
         gradleUtils: gradleUtils,
         logger: logger,
         templateRenderer: templateRenderer,
@@ -1244,16 +1250,16 @@ See the link below for more information:
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
         await _overwriteFromTemplate(
-          fileSystem.path.join('module', 'android', 'host_app_common'),
+          fs.path.join('module', 'android', 'host_app_common'),
           ephemeralDirectory,
-          fileSystem: fileSystem,
+          fileSystem: fs,
           logger: logger,
           templateRenderer: templateRenderer,
         );
         await _overwriteFromTemplate(
-          fileSystem.path.join('module', 'android', 'host_app_ephemeral'),
+          fs.path.join('module', 'android', 'host_app_ephemeral'),
           ephemeralDirectory,
-          fileSystem: fileSystem,
+          fileSystem: fs,
           logger: logger,
           templateRenderer: templateRenderer,
         );

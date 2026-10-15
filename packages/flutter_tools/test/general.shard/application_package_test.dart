@@ -762,7 +762,7 @@ void main() {
     testUsingContext('returns null when there is no ios or .ios directory', () async {
       globals.fs.file('pubspec.yaml').createSync();
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger).ios,
         null,
       ) as BuildableIOSApp?;
 
@@ -773,7 +773,7 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger).ios,
         null,
       ) as BuildableIOSApp?;
 
@@ -784,7 +784,7 @@ void main() {
       globals.fs.file('pubspec.yaml').createSync();
       globals.fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger).ios,
         null,
       ) as BuildableIOSApp?;
 
@@ -797,7 +797,7 @@ void main() {
         ..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).ios,
+        FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger).ios,
         null,
       ) as BuildableIOSApp?;
 
@@ -806,7 +806,9 @@ void main() {
 
     testUsingContext('handles project paths with periods in app name', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger),
+        ),
         'com.foo.bar',
         'Name.With.Dots',
       );
@@ -822,7 +824,9 @@ void main() {
 
     testUsingContext('returns project app icon dirname', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger),
+        ),
         'com.foo.bar',
         'Runner',
       );
@@ -836,7 +840,9 @@ void main() {
 
     testUsingContext('returns template app icon dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger),
+        ),
         'com.foo.bar',
         'Runner',
       );
@@ -882,7 +888,9 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger),
+        ),
         'com.foo.bar',
         'Runner',
       );
@@ -905,7 +913,9 @@ void main() {
 
     testUsingContext('returns project launch image dirname', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger),
+        ),
         'com.foo.bar',
         'Runner',
       );
@@ -919,7 +929,9 @@ void main() {
 
     testUsingContext('returns template launch image dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger),
+        ),
         'com.foo.bar',
         'Runner',
       );
@@ -965,7 +977,9 @@ void main() {
 }
 ''');
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(globals.fs.currentDirectory)),
+        IosProject.fromFlutter(
+          FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: globals.logger),
+        ),
         'com.foo.bar',
         'Runner',
       );
@@ -1281,7 +1295,7 @@ flutter:
   module:
     androidPackage: com.example
 ''');
-  return FlutterProject.fromDirectory(directory);
+  return FlutterProject.fromDirectory(directory, logger: globals.logger);
 }
 
 const String _aaptDataWithActivityAlias = '''

@@ -84,6 +84,7 @@ environement:
     // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
     final FlutterProject projectUnderTest = FlutterProject.fromDirectory(
       fileSystem.directory('project'),
+      logger: logger,
     );
     writePackageConfigFiles(directory: projectUnderTest.directory, mainLibName: 'my_app');
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);

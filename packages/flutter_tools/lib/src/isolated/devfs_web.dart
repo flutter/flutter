@@ -303,7 +303,10 @@ class WebDevFS implements DevFS {
         'flutter_service_worker.js',
         '// Service worker not loaded in run mode.',
       );
-      webAssetServer.writeFile('version.json', FlutterProject.current(fileSystem).getVersionInfo());
+      webAssetServer.writeFile(
+        'version.json',
+        FlutterProject.current(fileSystem, logger: logger).getVersionInfo(),
+      );
       webAssetServer.writeFile(
         'main.dart.js',
         generateDDCLibraryBundleBootstrapScript(

@@ -571,13 +571,11 @@ void main() {
           );
           final FlutterProject project = FlutterProject.fromDirectory(
             globals.fs.directory(projectPath),
+            logger: globals.logger,
           );
           await project.android.ensureReadyForPlatformSpecificTooling(
-            cache: globals.cache,
-            fileSystem: globals.fs,
-            fileSystemUtils: globals.fsUtils,
+            toolContext: globals.toolContext,
             gradleUtils: globals.gradleUtils,
-            logger: globals.logger,
             templateRenderer: globals.templateRenderer,
           );
 
@@ -612,13 +610,11 @@ void main() {
           );
           final FlutterProject project = FlutterProject.fromDirectory(
             globals.fs.directory(projectPath),
+            logger: globals.logger,
           );
           await project.android.ensureReadyForPlatformSpecificTooling(
-            cache: globals.cache,
-            fileSystem: globals.fs,
-            fileSystemUtils: globals.fsUtils,
+            toolContext: globals.toolContext,
             gradleUtils: globals.gradleUtils,
-            logger: globals.logger,
             templateRenderer: globals.templateRenderer,
           );
 

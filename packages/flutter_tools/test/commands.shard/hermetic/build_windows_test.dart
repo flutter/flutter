@@ -106,7 +106,11 @@ void main() {
       os: effectiveOsUtils,
       platform: effectivePlatform,
       processManager: effectiveProcessManager,
-      projectFactory: FlutterProjectFactory(fileSystem: fileSystem, logger: effectiveLogger),
+      projectFactory: FlutterProjectFactory(
+        fileSystem: fileSystem,
+        logger: effectiveLogger,
+        config: FakeConfig(),
+      ),
     );
     return BuildWindowsCommand(
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),

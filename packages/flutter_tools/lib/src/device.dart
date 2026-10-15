@@ -47,10 +47,10 @@ enum PlatformType {
 
 /// A discovery mechanism for flutter-supported development devices.
 abstract class DeviceManager {
-  DeviceManager({required this._logger, this._fileSystem});
+  DeviceManager({required this._logger, required this._fileSystem});
 
   final Logger _logger;
-  final FileSystem? _fileSystem;
+  final FileSystem _fileSystem;
 
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
   /// of their methods are called.
@@ -251,8 +251,8 @@ abstract class DeviceManager {
     bool includeDevicesUnsupportedByProject = false,
   }) {
     FlutterProject? flutterProject;
-    if (!includeDevicesUnsupportedByProject && _fileSystem != null) {
-      flutterProject = FlutterProject.current(_fileSystem);
+    if (!includeDevicesUnsupportedByProject) {
+      flutterProject = FlutterProject.current(_fileSystem, logger: _logger);
     }
     if (hasSpecifiedAllDevices) {
       return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProjectOrAll(

@@ -49,7 +49,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .android:
         if (applicationBinary == null) {
           return AndroidApk.fromAndroidProject(
-            FlutterProject.current(_fileSystem).android,
+            FlutterProject.current(_fileSystem, logger: _logger).android,
             processManager: _processManager,
             processUtils: _processUtils,
             logger: _logger,
@@ -69,26 +69,31 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         );
       case .ios:
         return applicationBinary == null
-            ? await IOSApp.fromIosProject(FlutterProject.current(_fileSystem).ios, buildInfo)
+            ? await IOSApp.fromIosProject(
+                FlutterProject.current(_fileSystem, logger: _logger).ios,
+                buildInfo,
+              )
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case .tester:
         return FlutterTesterApp.fromCurrentDirectory(_fileSystem);
       case .macos:
         return applicationBinary == null
-            ? MacOSApp.fromMacOSProject(FlutterProject.current(_fileSystem).macos)
+            ? MacOSApp.fromMacOSProject(FlutterProject.current(_fileSystem, logger: _logger).macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
       case .web:
-        if (!FlutterProject.current(_fileSystem).web.existsSync()) {
+        if (!FlutterProject.current(_fileSystem, logger: _logger).web.existsSync()) {
           return null;
         }
-        return WebApplicationPackage(FlutterProject.current(_fileSystem));
+        return WebApplicationPackage(FlutterProject.current(_fileSystem, logger: _logger));
       case .linux:
         return applicationBinary == null
-            ? LinuxApp.fromLinuxProject(FlutterProject.current(_fileSystem).linux)
+            ? LinuxApp.fromLinuxProject(FlutterProject.current(_fileSystem, logger: _logger).linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
       case .windows:
         return applicationBinary == null
-            ? WindowsApp.fromWindowsProject(FlutterProject.current(_fileSystem).windows)
+            ? WindowsApp.fromWindowsProject(
+                FlutterProject.current(_fileSystem, logger: _logger).windows,
+              )
             : WindowsApp.fromPrebuiltApp(applicationBinary);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();

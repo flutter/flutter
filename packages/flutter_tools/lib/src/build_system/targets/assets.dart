@@ -209,11 +209,12 @@ Future<Depfile> copyAssets(
       assetBundle.deferredComponentsEntries.entries.map<Future<void>>((
         MapEntry<String, Map<String, AssetBundleEntry>> componentEntries,
       ) async {
-        final Directory componentOutputDir = FlutterProject.fromDirectory(environment.projectDir)
-            .buildDirectory
-            .childDirectory(componentEntries.key)
-            .childDirectory('intermediates')
-            .childDirectory('flutter');
+        final Directory componentOutputDir =
+            FlutterProject.fromDirectory(environment.projectDir, logger: environment.logger)
+                .buildDirectory
+                .childDirectory(componentEntries.key)
+                .childDirectory('intermediates')
+                .childDirectory('flutter');
         await Future.wait<void>(
           componentEntries.value.entries.map<Future<void>>((
             MapEntry<String, AssetBundleEntry> entry,

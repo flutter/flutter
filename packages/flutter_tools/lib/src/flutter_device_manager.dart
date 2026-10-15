@@ -8,7 +8,6 @@ import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
-import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
@@ -39,7 +38,7 @@ class FlutterDeviceManager extends DeviceManager {
     required super.logger,
     required Platform platform,
     required ProcessManager processManager,
-    required FileSystem super.fileSystem,
+    required super.fileSystem,
     required AndroidSdk? Function() androidSdkBuilder,
     required FeatureFlags featureFlags,
     required IOSSimulatorUtils iosSimulatorUtils,

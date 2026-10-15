@@ -173,9 +173,13 @@ class UpdatePackagesCommand extends FlutterCommand {
       // such package fixed at a single version across all the pubspec.yamls.
       globals.printStatus('Upgrading packages...');
     }
-    final FlutterProject rootProject = FlutterProject.fromDirectory(rootDirectory);
+    final FlutterProject rootProject = FlutterProject.fromDirectory(
+      rootDirectory,
+      logger: globals.logger,
+    );
     final FlutterProject toolProject = FlutterProject.fromDirectory(
       rootDirectory.childDirectory('packages').childDirectory('flutter_tools'),
+      logger: globals.logger,
     );
 
     // This package is intentionally not part of the workspace to test
@@ -248,7 +252,10 @@ class UpdatePackagesCommand extends FlutterCommand {
     // Manually do a pub get for packages not part of the workspace.
     // See https://github.com/flutter/flutter/pull/170364.
     await _pubGet(toolProject, false);
-    await _pubGet(FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory), false);
+    await _pubGet(
+      FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory, logger: globals.logger),
+      false,
+    );
 
     await _downloadCoverageData();
 
@@ -332,7 +339,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       await pub.interactively(
         <String>['upgrade', '--tighten', '-C', projectTempDir.path],
         context: PubContext.updatePackages,
-        project: FlutterProject.fromDirectory(projectTempDir),
+        project: FlutterProject.fromDirectory(projectTempDir, logger: globals.logger),
         command: 'update',
       );
 
