@@ -49,7 +49,7 @@ cc_library(
 
 cc_library(
     name = "publish_wrapper_glfw_core",
-    deps = [
+    data = [
         ":publish_wrapper_glfw_core_publish_includes",
         ":publish_wrapper_glfw_core_publish_sources",
     ],
@@ -104,11 +104,11 @@ gn_copy(
 
 cc_library(
     name = "publish_wrapper_glfw",
-    deps = [
-        ":publish_wrapper_glfw_core",
+    data = [
         ":publish_wrapper_glfw_publish_includes",
         ":publish_wrapper_glfw_publish_sources",
     ],
+    deps = [":publish_wrapper_glfw_core"],
 )
 
 gn_copy(

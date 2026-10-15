@@ -2887,6 +2887,80 @@ gn_copy(
       );
     });
 
+    test('a copy relocating its sources under the gen dir produces them; a test reads them '
+        'as data; a config local; a header-only library keeps its link flags', () async {
+      // The GTK shell: the compiled GSettings schemas are copied to
+      // assets/<name>/gschemas.compiled (GN's {{source_name_part}}), the
+      // suite depends on the copy and reads the file at run time, the
+      // disable_warnings config computes its flags in a local that GN's
+      // unused-variable rule accepts because the block reads it, and
+      // flutter_linux (no sources) lists the epoxy config, whose -lepoxy
+      // the shared library's link needs.
+      final String output = await convert(r'''
+config("epoxy") {
+  libs = [ "epoxy" ]
+}
+
+config("disable_warnings") {
+  warning_flags = [ "-Wno-deprecated-volatile" ]
+  cflags = warning_flags
+  cflags_cc = warning_flags
+}
+
+source_set("sources") {
+  sources = [ "a.cc" ]
+  configs += [ ":disable_warnings" ]
+}
+
+source_set("shell") {
+  configs += [ ":epoxy" ]
+  public_deps = [ ":sources" ]
+}
+
+copy("gschemas") {
+  testonly = true
+  sources = [ "testing/gschemas/ubuntu-20.04.compiled" ]
+  outputs = [ "$root_gen_dir/flutter/example/assets/{{source_name_part}}/gschemas.compiled" ]
+}
+
+executable("shell_unittests") {
+  testonly = true
+  sources = [ "a_test.cc" ]
+  deps = [
+    ":gschemas",
+    ":sources",
+  ]
+}
+''');
+      expect(
+        output,
+        contains(
+          'gn_copy(\n    name = "gschemas",\n    testonly = True,\n'
+          '    srcs = ["testing/gschemas/ubuntu-20.04.compiled"],\n'
+          '    outs = ["assets/ubuntu-20.04/gschemas.compiled"],\n'
+          '    outputs = ["\$root_gen_dir/flutter/example/assets/{{source_name_part}}/gschemas.compiled"],\n)\n',
+        ),
+      );
+      expect(output, contains('    data = [":gschemas"],\n'));
+      expect(
+        output,
+        contains('    deps = [\n        ":sources",\n        "//engine/src:include_root",\n'),
+      );
+      // The local is nothing of the config's own; the flags are inlined in
+      // the target that lists it.
+      expect(output, contains('cc_library(\n    name = "disable_warnings",\n)\n'));
+      expect(output, contains('    cxxopts = ["-Wno-deprecated-volatile"],\n'));
+      // The header-only shell keeps the epoxy config's library (inlined, as
+      // a private config of this file is) for the links that reach it.
+      expect(
+        output,
+        contains(
+          'cc_library(\n    name = "shell",\n    linkopts = ["-lepoxy"],\n'
+          '    deps = [":sources"],\n)\n',
+        ),
+      );
+    });
+
     test('a template invocation maps its files, labels, configs and scalars', () async {
       // The flatbuffers template's public config carries two generated
       // include directories: the package's own (the `includes` of the
@@ -3206,8 +3280,17 @@ source_set("headers") {
 )
 '''),
       );
-      // A header-only library compiles nothing for the config to apply to.
-      expect(output, contains('cc_library(\n    name = "headers",\n    hdrs = ["b.h"],\n)\n'));
+      // A header-only library compiles nothing for the config's defines to
+      // apply to; the config stays for its link flags (implementation_deps
+      // carries those on to the binaries), which reach dependents' links
+      // in GN whether or not the target compiles.
+      expect(
+        output,
+        contains(
+          'cc_library(\n    name = "headers",\n    hdrs = ["b.h"],\n'
+          '    implementation_deps = ["@skia//:skia_private"],\n)\n',
+        ),
+      );
     });
 
     test('output_name on a source_set is ignored; an import inside a target', () async {
