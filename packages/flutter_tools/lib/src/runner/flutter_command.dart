@@ -296,17 +296,30 @@ abstract class FlutterCommand extends Command<void> {
 
   var _usesPortOption = false;
 
+  /// Enables the VM service port option behavior on this command.
+  void enableUsesPortOption() {
+    _usesPortOption = true;
+  }
+
   var _usesIpv6Flag = false;
 
+  /// Enables the IPv6 flag behavior on this command.
+  void enableUsesIpv6Flag() {
+    _usesIpv6Flag = true;
+  }
+
   var _usesFatalWarnings = false;
+
+  /// Enables the fatal warnings flag behavior on this command.
+  void enableUsesFatalWarnings() {
+    _usesFatalWarnings = true;
+  }
 
   DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
 
   bool get shouldRunPub => _usesPubOption && getValue(CommonOptions.pub);
 
-  bool get outputMachineFormat =>
-      argParser.options.containsKey(FlutterGlobalOptions.kMachineFlag) &&
-      boolArg(FlutterGlobalOptions.kMachineFlag);
+  bool get outputMachineFormat => getValue(CommonOptions.machine);
 
   bool get shouldUpdateCache => true;
 
@@ -384,13 +397,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesFatalWarningsOption({required bool verboseHelp}) {
-    argParser.addFlag(
-      FlutterOptions.kFatalWarnings,
-      hide: !verboseHelp,
-      help:
-          'Causes the command to fail if warnings are sent to the console '
-          'during its execution.',
-    );
+    CommonOptions.fatalWarnings.addTo(argParser, verboseHelp: verboseHelp);
     _usesFatalWarnings = true;
   }
 
@@ -411,7 +418,7 @@ abstract class FlutterCommand extends Command<void> {
   /// Path to the Dart's package config file.
   ///
   /// This can be overridden by some of its subclasses.
-  String? get packagesPath => stringArg(FlutterGlobalOptions.kPackagesOption, global: true);
+  String? get packagesPath => getValue(CommonOptions.packages);
 
   /// Whether flutter is being run from our CI.
   ///
@@ -421,22 +428,20 @@ abstract class FlutterCommand extends Command<void> {
     return getValue(CommonOptions.ci) || (_platform.environment['LUCI_CI'] == 'True');
   }
 
-  String? get debugLogsDirectoryPath =>
-      stringArg(FlutterGlobalOptions.kDebugLogsDirectoryFlag, global: true);
+  String? get debugLogsDirectoryPath => getValue(CommonOptions.debugLogsDir);
 
   /// The value of the `--filesystem-scheme` argument.
   ///
   /// This can be overridden by some of its subclasses.
-  String? get fileSystemScheme => argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-      ? stringArg(FlutterOptions.kFileSystemScheme)
+  String? get fileSystemScheme => hasOption(BuildInfoOptions.fileSystemScheme)
+      ? getValue(BuildInfoOptions.fileSystemScheme)
       : null;
 
   /// The values of the `--filesystem-root` argument.
   ///
   /// This can be overridden by some of its subclasses.
-  List<String>? get fileSystemRoots => argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-      ? stringsArg(FlutterOptions.kFileSystemRoot)
-      : null;
+  List<String>? get fileSystemRoots =>
+      hasOption(BuildInfoOptions.fileSystemRoot) ? getValue(BuildInfoOptions.fileSystemRoot) : null;
 
   void usesPubOption({bool hide = false}) {
     CommonOptions.pub.addTo(argParser, hideOverride: hide);
@@ -448,58 +453,13 @@ abstract class FlutterCommand extends Command<void> {
   /// The `hide` argument indicates whether or not to hide these options when
   /// the user asks for help.
   void usesFilesystemOptions({required bool hide}) {
-    argParser
-      ..addOption(
-        'output-dill',
-        hide: hide,
-        help: 'Specify the path to frontend server output kernel file.',
-      )
-      ..addMultiOption(
-        FlutterOptions.kFileSystemRoot,
-        hide: hide,
-        help:
-            'Specify the path that is used as the root of a virtual file system '
-            'during compilation. The input file name should be specified as a URL '
-            'using the scheme given in "--${FlutterOptions.kFileSystemScheme}".\n'
-            'Requires the "--output-dill" option to be explicitly specified.',
-      )
-      ..addOption(
-        FlutterOptions.kFileSystemScheme,
-        defaultsTo: 'org-dartlang-root',
-        hide: hide,
-        help:
-            'Specify the scheme that is used for virtual file system used in '
-            'compilation. See also the "--${FlutterOptions.kFileSystemRoot}" option.',
-      );
+    const FilesystemOptionsBundle().register(this, argParser, hideOverride: hide);
   }
 
   /// Adds options for connecting to the Dart VM Service port.
   void usesPortOptions({required bool verboseHelp}) {
-    argParser.addOption(
-      vmServicePortOption,
-      help:
-          '(deprecated; use host-vmservice-port instead) '
-          'Listen to the given port for a Dart VM Service connection.\n'
-          'Specifying port 0 (the default) will find a random free port.\n '
-          'if the Dart Development Service (DDS) is enabled, this will not be the port '
-          'of the VmService instance advertised on the command line.',
-      hide: !verboseHelp,
-    );
-    argParser.addOption(
-      'device-vmservice-port',
-      help:
-          'Look for vmservice connections only from the specified port.\n'
-          'Specifying port 0 (the default) will accept the first vmservice '
-          'discovered.',
-    );
-    argParser.addOption(
-      'host-vmservice-port',
-      help:
-          'When a device-side vmservice port is forwarded to a host-side '
-          'port, use this value as the host port.\nSpecifying port 0 '
-          '(the default) will find a random free host port.',
-    );
-    _usesPortOption = true;
+    const VmServicePortOptionsBundle(includeIpv6: false)
+        .register(this, argParser, verboseHelp: verboseHelp);
   }
 
   /// Add option values for output directory of artifacts
@@ -520,22 +480,19 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addDdsOptions({required bool verboseHelp}) {
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      DebuggingOptionDescriptors.ddsPort,
-      DebuggingOptionDescriptors.dds,
-      DebuggingOptionDescriptors.disableDds,
-    ], verboseHelp: verboseHelp);
+    const DdsAndDevToolsOptionsBundle(includeDevTools: false)
+        .register(this, argParser, verboseHelp: verboseHelp);
   }
 
   late final bool enableDds = getValue(DebuggingOptionDescriptors.dds);
 
   bool get _hostVmServicePortProvided =>
-      (argResults?.wasParsed(vmServicePortOption) ?? false) ||
-      (argResults?.wasParsed('host-vmservice-port') ?? false);
+      wasParsed(DebuggingOptionDescriptors.vmServicePort) ||
+      wasParsed(DebuggingOptionDescriptors.hostVmservicePort);
 
   int _tryParseHostVmservicePort() {
-    final String? vmServicePort = stringArg(vmServicePortOption);
-    final String? hostPort = stringArg('host-vmservice-port');
+    final String? vmServicePort = getValue(DebuggingOptionDescriptors.vmServicePort);
+    final String? hostPort = getValue(DebuggingOptionDescriptors.hostVmservicePort);
     if (vmServicePort == null && hostPort == null) {
       throwToolExit('Invalid port for `--vm-service-port/--host-vmservice-port`');
     }
@@ -577,8 +534,8 @@ abstract class FlutterCommand extends Command<void> {
     if (!_usesPortOption || !_hostVmServicePortProvided) {
       return null;
     }
-    if ((argResults?.wasParsed(vmServicePortOption) ?? false) &&
-        (argResults?.wasParsed('host-vmservice-port') ?? false)) {
+    if (wasParsed(DebuggingOptionDescriptors.vmServicePort) &&
+        wasParsed(DebuggingOptionDescriptors.hostVmservicePort)) {
       throwToolExit(
         'Only one of "--vm-service-port" and '
         '"--host-vmservice-port" may be specified.',
@@ -597,7 +554,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int? get deviceVmservicePort {
-    final String? devicePort = stringArg('device-vmservice-port');
+    final String? devicePort = getValue(DebuggingOptionDescriptors.deviceVmservicePort);
     if (!_usesPortOption || devicePort == null) {
       return null;
     }
@@ -639,18 +596,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebDefineOption() {
-    argParser.addMultiOption(
-      FlutterOptions.kWebDefinesOption,
-      help:
-          'Additional key-value pairs that will be available as template variables '
-          'in web/index.html and web/flutter_bootstrap.js files during development and build.\n'
-          'Variables are replaced in the format {{VARIABLE_NAME}}.\n'
-          'Multiple defines can be passed by repeating "--${FlutterOptions.kWebDefinesOption}" multiple times.\n'
-          'If a template contains a variable placeholder but no corresponding "--web-define" is provided, '
-          'it will warn that you have an unhandled variable.',
-      valueHelp: 'API_URL=https://api.example.com',
-      splitCommas: false,
-    );
+    WebOptions.webDefines.addTo(argParser);
   }
 
   void _usesDartDefineFromFileOption() {
@@ -658,41 +604,19 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesWebResourcesCdnFlag() {
-    argParser.addFlag(
-      FlutterOptions.kWebResourcesCdnFlag,
-      defaultsTo: true,
-      help: 'Use Web static resources hosted on a CDN.',
-    );
+    WebOptions.webResourcesCdn.addTo(argParser);
   }
 
   void usesDeviceUserOption() {
-    argParser.addOption(
-      FlutterOptions.kDeviceUser,
-      help: 'Identifier number for a user or work profile on Android only. Run "adb shell pm list users" for available identifiers.',
-      valueHelp: '10',
-    );
+    CommonOptions.deviceUser.addTo(argParser);
   }
 
   void usesDeviceTimeoutOption() {
-    argParser.addOption(
-      FlutterOptions.kDeviceTimeout,
-      help: 'Time in seconds to wait for devices to attach. Longer timeouts may be necessary for networked devices.',
-      valueHelp: '10',
-    );
+    CommonOptions.deviceTimeout.addTo(argParser);
   }
 
   void usesDeviceConnectionOption() {
-    argParser.addOption(
-      FlutterOptions.kDeviceConnection,
-      defaultsTo: 'both',
-      help: 'Discover devices based on connection type.',
-      allowed: <String>['attached', 'wireless', 'both'],
-      allowedHelp: <String, String>{
-        'both': 'Searches for both attached and wireless devices.',
-        'attached': 'Only searches for devices connected by USB or built-in (such as simulators/emulators, MacOS/Windows, Chrome)',
-        'wireless': 'Only searches for devices connected wirelessly. Discovering wireless devices may take longer.',
-      },
-    );
+    CommonOptions.deviceConnection.addTo(argParser);
   }
 
   void usesAdbLogFilteringOption({required bool hide}) {
@@ -700,23 +624,15 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesApplicationBinaryOption() {
-    argParser.addOption(
-      FlutterOptions.kUseApplicationBinary,
-      help:
-          'Specify a pre-built application binary to use when running. For Android applications, '
-          'this must be the path to an APK. For iOS applications, the path to an IPA. Other device types '
-          'do not yet support prebuilt application binaries.',
-      valueHelp: 'path/to/app.apk',
-    );
+    CommonOptions.useApplicationBinary.addTo(argParser);
   }
 
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
 
   late final Duration? deviceDiscoveryTimeout = () {
-    if ((argResults?.options.contains(FlutterOptions.kDeviceTimeout) ?? false) &&
-        (argResults?.wasParsed(FlutterOptions.kDeviceTimeout) ?? false)) {
-      final int? timeoutSeconds = int.tryParse(stringArg(FlutterOptions.kDeviceTimeout)!);
+    if (wasParsed(CommonOptions.deviceTimeout)) {
+      final int? timeoutSeconds = int.tryParse(getValue(CommonOptions.deviceTimeout)!);
       if (timeoutSeconds == null) {
         throwToolExit(
           'Could not parse "--${FlutterOptions.kDeviceTimeout}" argument. It must be an integer.',
@@ -728,9 +644,8 @@ abstract class FlutterCommand extends Command<void> {
   }();
 
   DeviceConnectionInterface? get deviceConnectionInterface {
-    if ((argResults?.options.contains(FlutterOptions.kDeviceConnection) ?? false) &&
-        (argResults?.wasParsed(FlutterOptions.kDeviceConnection) ?? false)) {
-      return switch (stringArg(FlutterOptions.kDeviceConnection)) {
+    if (wasParsed(CommonOptions.deviceConnection)) {
+      return switch (getValue(CommonOptions.deviceConnection)) {
         'attached' => DeviceConnectionInterface.attached,
         'wireless' => DeviceConnectionInterface.wireless,
         _ => null,
@@ -746,44 +661,31 @@ abstract class FlutterCommand extends Command<void> {
     deviceConnectionInterface: deviceConnectionInterface,
   );
 
-  void addBuildModeFlags({
-    required bool verboseHelp,
+  /// Configures the default build mode and excluded build modes for this command.
+  void configureBuildModes({
     bool defaultToRelease = true,
     bool excludeDebug = false,
     bool excludeRelease = false,
   }) {
     // A release build must be the default if a debug build is not possible.
     assert(defaultToRelease || !excludeDebug);
+    assert(!defaultToRelease || !excludeRelease);
     _excludeDebug = excludeDebug;
     _excludeRelease = excludeRelease;
     defaultBuildMode = defaultToRelease ? BuildMode.release : BuildMode.debug;
+  }
 
-    if (!excludeDebug) {
-      argParser.addFlag(
-        'debug',
-        negatable: false,
-        help: 'Build a debug version of your app${defaultToRelease ? '' : ' (default mode)'}.',
-      );
-    }
-    argParser.addFlag(
-      'profile',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.',
-    );
-    if (!excludeRelease) {
-      argParser.addFlag(
-        'release',
-        negatable: false,
-        help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.',
-      );
-      argParser.addFlag(
-        'jit-release',
-        negatable: false,
-        hide: !verboseHelp,
-        help:
-            'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.',
-      );
-    }
+  void addBuildModeFlags({
+    required bool verboseHelp,
+    bool defaultToRelease = true,
+    bool excludeDebug = false,
+    bool excludeRelease = false,
+  }) {
+    BuildModeOptionsBundle(
+      defaultToRelease: defaultToRelease,
+      excludeDebug: excludeDebug,
+      excludeRelease: excludeRelease,
+    ).register(this, argParser, verboseHelp: verboseHelp);
   }
 
   void addSplitDebugInfoOption() {
@@ -810,20 +712,10 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesFuchsiaOptions({bool hide = false}) {
-    argParser.addOption(
-      'target-model',
-      help: 'Target model that determines what core libraries are available.',
-      defaultsTo: 'flutter',
-      hide: hide,
-      allowed: const <String>['flutter', 'flutter_runner'],
-    );
-    argParser.addOption(
-      'module',
-      abbr: 'm',
-      hide: hide,
-      help: 'The name of the module (required if attaching to a fuchsia device).',
-      valueHelp: 'module-name',
-    );
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      DebuggingOptionDescriptors.fuchsiaTargetModel,
+      DebuggingOptionDescriptors.fuchsiaModule,
+    ], hideOverride: hide);
   }
 
   void addEnableExperimentation({required bool hide}) {
@@ -835,10 +727,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addAndroidSpecificBuildOptions({bool hide = false}) {
-    BuildInfoOptions.androidGradleDaemon.addTo(argParser, hideOverride: hide);
-    BuildInfoOptions.androidSkipBuildDependencyValidation.addTo(argParser, hideOverride: hide);
-    BuildInfoOptions.androidProjectArg.addTo(argParser, hideOverride: hide);
-    BuildInfoOptions.androidProjectCacheDir.addTo(argParser, hideOverride: hide);
+    const AndroidGradleOptionsBundle().register(this, argParser, hideOverride: hide);
   }
 
   void addNativeNullAssertions({bool hide = false}) {
@@ -851,13 +740,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void usesNativeAssetsOption({required bool hide}) {
-    argParser.addOption(
-      FlutterOptions.kNativeAssetsYamlFile,
-      help:
-          'Initializes the resident compiler with a custom native assets '
-          'yaml file instead of the default cached location.',
-      hide: hide,
-    );
+    BuildInfoOptions.nativeAssetsYamlFile.addTo(argParser, hideOverride: hide);
   }
 
   void addIgnoreDeprecationOption({bool hide = false}) {
@@ -873,14 +756,10 @@ abstract class FlutterCommand extends Command<void> {
   BuildMode getBuildMode() {
     // No debug when _excludeDebug is true. If debug is not excluded, then take
     // the command line flag (if such exists for this command).
-    bool argIfDefined(String flagName, bool ifNotDefined) {
-      return argParser.options.containsKey(flagName) ? boolArg(flagName) : ifNotDefined;
-    }
-
-    final bool debugResult = !_excludeDebug && argIfDefined('debug', false);
-    final bool jitReleaseResult = !_excludeRelease && argIfDefined('jit-release', false);
-    final bool releaseResult = !_excludeRelease && argIfDefined('release', false);
-    final bool profileResult = argIfDefined('profile', false);
+    final bool debugResult = !_excludeDebug && getValue(CommonOptions.debugMode);
+    final bool jitReleaseResult = !_excludeRelease && getValue(CommonOptions.jitReleaseMode);
+    final bool releaseResult = !_excludeRelease && getValue(CommonOptions.releaseMode);
+    final bool profileResult = getValue(CommonOptions.profileMode);
     final modeFlags = <bool>[debugResult, profileResult, jitReleaseResult, releaseResult];
     if (modeFlags.where((bool flag) => flag).length > 1) {
       throw UsageException(
@@ -941,12 +820,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addMachineOutputFlag({required bool verboseHelp}) {
-    argParser.addFlag(
-      FlutterGlobalOptions.kMachineFlag,
-      negatable: false,
-      help: 'Outputs in a machine readable structured JSON format.',
-      hide: !verboseHelp,
-    );
+    CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
   }
 
   void addEnableHcppFlag({required bool verboseHelp}) {
@@ -1093,10 +967,8 @@ abstract class FlutterCommand extends Command<void> {
     final List<String> dartDefines = extractDartDefines(defineConfigJsonMap: defineConfigJsonMap);
 
     final bool useCdn = getValue(WebOptions.webResourcesCdn);
-    var useLocalWebSdk = false;
-    if (globalResults?.wasParsed(FlutterGlobalOptions.kLocalWebSDKOption) ?? false) {
-      useLocalWebSdk = stringArg(FlutterGlobalOptions.kLocalWebSDKOption, global: true) != null;
-    }
+    final bool useLocalWebSdk =
+        wasParsed(CommonOptions.localWebSdk) && getValue(CommonOptions.localWebSdk) != null;
     final bool useLocalCanvasKit = forcedUseLocalCanvasKit ?? (!useCdn || useLocalWebSdk);
 
     final String? defaultFlavor = project.manifest.defaultFlavor;
@@ -1253,7 +1125,7 @@ abstract class FlutterCommand extends Command<void> {
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
         if (_usesFatalWarnings) {
-          _logger.fatalWarnings = boolArg(FlutterOptions.kFatalWarnings);
+          _logger.fatalWarnings = getValue(CommonOptions.fatalWarnings);
         }
         _printDeprecationWarning();
         final String? commandPath = await usagePath;
@@ -1308,11 +1180,9 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines.add('$key=$value');
     });
 
-    if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
-      final Iterable<String> defines = stringsArg(FlutterOptions.kDartDefinesOption)
-          .where((string) => string.isNotEmpty);
-      dartDefines.addAll(defines);
-    }
+    final Iterable<String> defines = getValue(CommonOptions.dartDefines)
+        .where((string) => string.isNotEmpty);
+    dartDefines.addAll(defines);
 
     return dartDefines;
   }
@@ -1320,20 +1190,17 @@ abstract class FlutterCommand extends Command<void> {
   Map<String, String> extractWebDefines() {
     final webDefines = <String, String>{};
 
-    if (argParser.options.containsKey(FlutterOptions.kWebDefinesOption)) {
-      final List<String> defines = stringsArg(FlutterOptions.kWebDefinesOption);
-      for (final define in defines) {
-        final int separatorIndex = define.indexOf('=');
-        if (separatorIndex == -1 || separatorIndex == 0) {
-          throwToolExit(
-            'Invalid web-define format: $define\n'
-            'Expected format: KEY=VALUE (e.g., API_URL=https://api.example.com)',
-          );
-        }
-        final String key = define.substring(0, separatorIndex);
-        final String value = define.substring(separatorIndex + 1);
-        webDefines[key] = value;
+    for (final String define in getValue(WebOptions.webDefines)) {
+      final int separatorIndex = define.indexOf('=');
+      if (separatorIndex == -1 || separatorIndex == 0) {
+        throwToolExit(
+          'Invalid web-define format: $define\n'
+          'Expected format: KEY=VALUE (e.g., API_URL=https://api.example.com)',
+        );
       }
+      final String key = define.substring(0, separatorIndex);
+      final String value = define.substring(separatorIndex + 1);
+      webDefines[key] = value;
     }
 
     return webDefines;
@@ -1342,47 +1209,44 @@ abstract class FlutterCommand extends Command<void> {
   Map<String, Object?> extractDartDefineConfigJsonMap() {
     final dartDefineConfigJsonMap = <String, Object?>{};
 
-    if (argParser.options.containsKey(FlutterOptions.kDartDefineFromFileOption)) {
-      final List<String> configFilePaths = stringsArg(FlutterOptions.kDartDefineFromFileOption);
-      for (final path in configFilePaths) {
-        if (!_fs.isFileSync(path)) {
-          throwToolExit(
-            'Did not find the file passed to "--${FlutterOptions.kDartDefineFromFileOption}". Path: $path',
-          );
-        }
+    for (final String path in getValue(CommonOptions.dartDefineFromFile)) {
+      if (!_fs.isFileSync(path)) {
+        throwToolExit(
+          'Did not find the file passed to "--${FlutterOptions.kDartDefineFromFileOption}". Path: $path',
+        );
+      }
 
-        String configRaw;
-        try {
-          configRaw = decodeUtf8OrUtf16(_fs.file(path).readAsBytesSync());
-        } on Exception catch (err) {
-          throwToolExit(
-            'Unable to decode the file at path "$path". '
-            'Ensure that the file is encoded in UTF-8 or UTF-16.\n'
-            'Error details: $err',
-          );
-        }
+      String configRaw;
+      try {
+        configRaw = decodeUtf8OrUtf16(_fs.file(path).readAsBytesSync());
+      } on Exception catch (err) {
+        throwToolExit(
+          'Unable to decode the file at path "$path". '
+          'Ensure that the file is encoded in UTF-8 or UTF-16.\n'
+          'Error details: $err',
+        );
+      }
 
-        // Determine whether the file content is JSON or .env format.
-        String configJsonRaw;
-        if (configRaw.trim().startsWith('{')) {
-          configJsonRaw = configRaw;
-        } else {
-          // Convert env file to JSON.
-          configJsonRaw = convertEnvFileToJsonRaw(configRaw);
-        }
+      // Determine whether the file content is JSON or .env format.
+      String configJsonRaw;
+      if (configRaw.trim().startsWith('{')) {
+        configJsonRaw = configRaw;
+      } else {
+        // Convert env file to JSON.
+        configJsonRaw = convertEnvFileToJsonRaw(configRaw);
+      }
 
-        try {
-          // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
-          (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, Object? value) {
-            dartDefineConfigJsonMap[key] = value;
-          });
-        } on FormatException catch (err) {
-          throwToolExit(
-            'Unable to parse the file at path "$path" due to a formatting error. '
-            'Ensure that the file contains valid JSON.\n'
-            'Error details: $err',
-          );
-        }
+      try {
+        // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
+        (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, Object? value) {
+          dartDefineConfigJsonMap[key] = value;
+        });
+      } on FormatException catch (err) {
+        throwToolExit(
+          'Unable to parse the file at path "$path" due to a formatting error. '
+          'Ensure that the file contains valid JSON.\n'
+          'Error details: $err',
+        );
       }
     }
 
@@ -1470,8 +1334,8 @@ abstract class FlutterCommand extends Command<void> {
   Map<String, String> extractWebHeaders() {
     final webHeaders = <String, String>{};
 
-    if (argParser.options.containsKey('web-header')) {
-      final List<String> candidates = stringsArg('web-header');
+    final List<String> candidates = getValue(WebOptions.webHeader);
+    if (candidates.isNotEmpty) {
       final invalidHeaders = <String>[];
       for (final candidate in candidates) {
         final Match? keyValueMatch = _HttpRegex.httpHeader.firstMatch(candidate);
@@ -1566,10 +1430,9 @@ abstract class FlutterCommand extends Command<void> {
   Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
     _preRunValidator.validate();
 
-    if (argParser.options.containsKey(FlutterOptions.kEnableImpeller) &&
-        (argResults?.wasParsed(FlutterOptions.kEnableImpeller) ?? false)) {
+    if (wasParsed(DebuggingOptionDescriptors.enableImpeller)) {
       if (getBuildMode().isRelease) {
-        final bool enableImpeller = boolArg(FlutterOptions.kEnableImpeller);
+        final bool enableImpeller = getValue(DebuggingOptionDescriptors.enableImpeller)!;
         final flagName = enableImpeller
             ? '--${FlutterOptions.kEnableImpeller}'
             : '--no-${FlutterOptions.kEnableImpeller}';
@@ -1623,12 +1486,7 @@ abstract class FlutterCommand extends Command<void> {
     if (shouldUpdateCache) {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
-      final bool offline;
-      if (argParser.options.containsKey('offline')) {
-        offline = boolArg('offline');
-      } else {
-        offline = false;
-      }
+      final bool offline = getValue(CommonOptions.offline);
       await _cache.updateAll(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
       }, offline: offline);
@@ -1739,7 +1597,7 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
-    if (_requiresPubspecYaml && globalResults?.wasParsed('packages') != true) {
+    if (_requiresPubspecYaml && !wasParsed(CommonOptions.packages)) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit package_config.json file path.
 
       // If there is no pubspec in the current directory, look in the parent

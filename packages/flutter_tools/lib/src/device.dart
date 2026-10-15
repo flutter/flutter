@@ -603,13 +603,12 @@ String getNameForDeviceConnectionInterface(DeviceConnectionInterface connectionI
 abstract class Device {
   Device(
     this.id, {
-    Logger? logger,
+    required Logger logger,
     this._toolContext,
     required this.category,
     required this.platformType,
     required this.ephemeral,
-  }) : assert(logger != null || _toolContext != null),
-       dds = DartDevelopmentService(logger: (logger ?? _toolContext?.logger)!);
+  }) : dds = DartDevelopmentService(logger: logger);
 
   final String id;
   final ToolContext? _toolContext;
