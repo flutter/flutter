@@ -256,11 +256,15 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `include_dirs` is the package's, as Bazel's `includes` spans the output
    tree; an ancestor package's (`$root_gen_dir/flutter`) is a dependency on
    the target whose `includes` already name that directory
-   (`genDirIncludeTargets`); an include directory in another repository is
-   a dependency on the library of that repository that carries it when
-   `includeDirLibraries` names one (ANGLE's `include/`), and is otherwise
+   (`genDirIncludeTargets`); an include directory in another repository, or
+   in another package of this one, is a dependency on the library that
+   carries it when `includeDirLibraries` names one (ANGLE's `include/`; the
+   core client wrapper's `include/flutter`, a library its manifest appendix
+   adds, since Bazel's `includes` is package-relative), and is otherwise
    dropped with a note (the dependency on that repository carries it, or
-   nothing does). `copy()` becomes a `gn_copy`, whose content is its
+   nothing does). A config another file computes with `exec_script()`
+   (`//flutter/shell/platform/linux/config`'s `pkg_config()` answers) is
+   hand-written and named in `configEffects` like any other. `copy()` becomes a `gn_copy`, whose content is its
    sources; GN's destination under the build directory is recorded, not
    reproduced. A known template's invocation becomes the macro call its
    `TemplateMapping` describes, argument by argument: files of the package,

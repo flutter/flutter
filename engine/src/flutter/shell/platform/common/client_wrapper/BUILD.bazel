@@ -103,3 +103,27 @@ cc_test(
         "//engine/src/flutter/testing",
     ],
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# The include/flutter directory as an include path, for the platform
+# wrappers' configs (//flutter/shell/platform/glfw/client_wrapper:
+# relative_core_wrapper_headers).
+cc_library(
+    name = "relative_core_wrapper_headers",
+    includes = ["include/flutter"],
+)
+
+# What publish_client_wrapper_core (publish.gni) copies from here into the
+# platform wrappers' cpp_client_wrapper_<platform>: core_wrapper_files.gni's
+# lists -- the public headers, the internal headers, the sources and the
+# shim -- and the README; the glob is exactly those.
+exports_files(["README"] + glob(
+    [
+        "*.cc",
+        "*.h",
+        "include/flutter/*.h",
+    ],
+    exclude = ["*_unittests.cc"],
+))
