@@ -381,11 +381,12 @@ void main() {
       final Logger logger = BufferLogger.test();
       final AndroidApk? androidApk = AndroidApk.fromApk(
         fs.file(''),
-        processManager: fakeProcessManager,
-        logger: logger,
-        userMessages: UserMessages(),
         androidSdk: sdk,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        toolContext: FakeToolContext(
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        ),
       );
 
       expect(androidApk, isNull);

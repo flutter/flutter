@@ -22,7 +22,6 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
-import '../context_runner.dart';
 import '../macos/swift_package_manager.dart';
 import '../plugins.dart';
 import '../xcode_project.dart';
@@ -76,24 +75,13 @@ class XcodeProjectInterpreter {
       operatingSystem: 'macos',
       environment: <String, String>{},
     );
-    final FileSystem fileSystem = MemoryFileSystem.test();
-    final Logger logger = BufferLogger.test();
     return XcodeProjectInterpreter._(
       analytics: analytics ?? const NoOpAnalytics(),
       build: build,
       toolContext: _XcodeTestToolContext(
-        config: config ?? Config.test(),
-        fs: fileSystem,
-        logger: logger,
-        os: OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          processManager: processManager,
-        ),
+        config: config,
         platform: platform,
         processManager: processManager,
-        processUtils: ProcessUtils(logger: logger, processManager: processManager),
       ),
       version: version,
     );
@@ -578,16 +566,19 @@ class XcodeProjectInterpreter {
   }
 }
 
-class _XcodeTestToolContext extends GlobalToolContext {
-  const _XcodeTestToolContext({
-    required this.config,
-    required this.fs,
-    required this.logger,
-    required this.os,
-    required this.platform,
-    required this.processManager,
-    required this.processUtils,
-  });
+class _XcodeTestToolContext implements ToolContext {
+  _XcodeTestToolContext({Config? config, required this.platform, required this.processManager})
+    : config = config ?? Config.test(),
+      fs = MemoryFileSystem.test(),
+      logger = BufferLogger.test() {
+    os = OperatingSystemUtils(
+      fileSystem: fs,
+      logger: logger,
+      platform: platform,
+      processManager: processManager,
+    );
+    processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  }
 
   @override
   final Config config;
@@ -599,7 +590,7 @@ class _XcodeTestToolContext extends GlobalToolContext {
   final Logger logger;
 
   @override
-  final OperatingSystemUtils os;
+  late final OperatingSystemUtils os;
 
   @override
   final Platform platform;
@@ -608,7 +599,10 @@ class _XcodeTestToolContext extends GlobalToolContext {
   final ProcessManager processManager;
 
   @override
-  final ProcessUtils processUtils;
+  late final ProcessUtils processUtils;
+
+  @override
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Environment variables prefixed by FLUTTER_XCODE_ will be passed as build configurations to xcodebuild.

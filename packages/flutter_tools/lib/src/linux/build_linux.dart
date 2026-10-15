@@ -42,10 +42,10 @@ Future<void> buildLinux(
   bool needCrossBuild = false,
   required TargetPlatform targetPlatform,
   String targetSysroot = '/',
-  required Logger logger,
   required ToolContext toolContext,
   bool configOnly = false,
 }) async {
+  final Logger logger = toolContext.logger;
   target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit(

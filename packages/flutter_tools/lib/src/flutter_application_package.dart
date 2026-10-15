@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
 import 'android/android_sdk.dart';
 import 'android/application_package.dart';
 import 'application_package.dart';
 import 'base/file_system.dart';
-import 'base/logger.dart';
-import 'base/process.dart';
-import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'context/tool_context.dart';
 import 'ios/application_package.dart';
@@ -34,13 +29,6 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     BuildInfo? buildInfo,
     File? applicationBinary,
   }) async {
-    final ToolContext(
-      fs: FileSystem fileSystem,
-      :Logger logger,
-      :ProcessManager processManager,
-      :ProcessUtils processUtils,
-      :UserMessages userMessages,
-    ) = _toolContext;
     switch (platform.os) {
       case .android:
         if (applicationBinary == null) {
@@ -53,18 +41,15 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         }
         return AndroidApk.fromApk(
           applicationBinary,
-          processManager: processManager,
-          logger: logger,
           androidSdk: _androidSdk!,
-          userMessages: userMessages,
-          processUtils: processUtils,
+          toolContext: _toolContext,
         );
       case .ios:
         return applicationBinary == null
             ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case .tester:
-        return FlutterTesterApp.fromCurrentDirectory(fileSystem);
+        return FlutterTesterApp.fromCurrentDirectory(_toolContext.fs);
       case .macos:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)

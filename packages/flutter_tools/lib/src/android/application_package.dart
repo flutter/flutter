@@ -15,7 +15,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/user_messages.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
 import '../project.dart';
@@ -40,11 +39,10 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   static AndroidApk? fromApk(
     File apk, {
     required AndroidSdk androidSdk,
-    required ProcessManager processManager,
-    required UserMessages userMessages,
-    required Logger logger,
-    required ProcessUtils processUtils,
+    required ToolContext toolContext,
   }) {
+    final ToolContext(:Logger logger, :ProcessManager processManager, :ProcessUtils processUtils) =
+        toolContext;
     final String? aaptPath = androidSdk.latestVersion?.aaptPath;
     if (aaptPath == null || !processManager.canRun(aaptPath)) {
       logger.printError(_aaptNotFound);
@@ -112,14 +110,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
     required ToolContext toolContext,
     BuildInfo? buildInfo,
   }) async {
-    final ToolContext(
-      :Config config,
-      fs: FileSystem fileSystem,
-      :Logger logger,
-      :ProcessManager processManager,
-      :ProcessUtils processUtils,
-      :UserMessages userMessages,
-    ) = toolContext;
+    final ToolContext(:Config config, fs: FileSystem fileSystem, :Logger logger) = toolContext;
     final File apkFile;
     final String filename;
     if (buildInfo == null) {
@@ -144,10 +135,7 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
         final AndroidApk? builtApk = AndroidApk.fromApk(
           apkFile,
           androidSdk: androidSdk!,
-          processManager: processManager,
-          logger: logger,
-          userMessages: userMessages,
-          processUtils: processUtils,
+          toolContext: toolContext,
         );
         if (builtApk != null) {
           return builtApk;
