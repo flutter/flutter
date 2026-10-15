@@ -10,8 +10,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_static/shelf_static.dart';
 
-/// Runs Chrome, opens the given `appUrl`, and returns the result reported by the
-/// app.
+/// Runs Chrome and returns the result reported by the app.
 ///
 /// The app is served from the `appDirectory`. Typically, the app is built
 /// using `flutter build web` and served from `build/web`.
@@ -19,17 +18,12 @@ import 'package:shelf_static/shelf_static.dart';
 /// The launched app is expected to report the result by sending an HTTP POST
 /// request to "/test-result" containing result data as plain text body of the
 /// request. This function has no opinion about what that string contains.
-Future<String> evalTestAppInChrome({
-  required String appDirectory,
-  String? appUrl,
-  int serverPort = 0,
-  int browserDebugPort = 0,
-}) async {
+Future<String> evalTestAppInChrome({required String appDirectory}) async {
   io.HttpServer? server;
   Chrome? chrome;
   try {
     final resultCompleter = Completer<String>();
-    server = await io.HttpServer.bind('localhost', serverPort);
+    server = await io.HttpServer.bind('localhost', 0);
     final Cascade cascade = Cascade()
         .add((Request request) async {
           if (request.requestedUri.path.endsWith('/test-result')) {
@@ -46,8 +40,8 @@ Future<String> evalTestAppInChrome({
     chrome = await Chrome.launch(
       ChromeOptions(
         headless: true,
-        debugPort: browserDebugPort,
-        url: appUrl ?? 'http://localhost:${server.port}/index.html',
+        debugPort: 0,
+        url: 'http://localhost:${server.port}/index.html',
         userDataDirectory: userDataDirectory.path,
         windowHeight: 500,
         windowWidth: 500,
@@ -69,15 +63,12 @@ class AppServer {
   static Future<AppServer> start({
     required String appDirectory,
     required String cacheControl,
-    String? appUrl,
-    int serverPort = 0,
-    int browserDebugPort = 0,
     bool headless = true,
     List<Handler>? additionalRequestHandlers,
   }) async {
     io.HttpServer server;
     Chrome chrome;
-    server = await io.HttpServer.bind('localhost', serverPort);
+    server = await io.HttpServer.bind('localhost', 0);
     final Handler staticHandler = createStaticHandler(appDirectory, defaultDocument: 'index.html');
     var cascade = Cascade();
     if (additionalRequestHandlers != null) {
@@ -97,8 +88,8 @@ class AppServer {
     chrome = await Chrome.launch(
       ChromeOptions(
         headless: headless,
-        debugPort: browserDebugPort,
-        url: appUrl ?? 'http://localhost:${server.port}/index.html',
+        debugPort: 0,
+        url: 'http://localhost:${server.port}/index.html',
         userDataDirectory: userDataDirectory.path,
       ),
       onError: chromeErrorCompleter.complete,
@@ -109,8 +100,6 @@ class AppServer {
   final Future<String> onChromeError;
   final io.HttpServer _server;
   final Chrome chrome;
-
-  int get serverPort => _server.port;
 
   Future<void> stop() async {
     chrome.stop();

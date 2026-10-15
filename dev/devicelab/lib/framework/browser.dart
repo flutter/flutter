@@ -78,7 +78,7 @@ typedef ChromeErrorCallback = void Function(String);
 
 /// Manages a single Chrome process.
 class Chrome {
-  Chrome._(this._chromeProcess, this._onError, this._debugConnection, [this.debugPort]) {
+  Chrome._(this._chromeProcess, this._onError, this._debugConnection) {
     // If the Chrome process quits before it was asked to quit, notify the
     // error listener.
     _chromeProcess.exitCode.then((int exitCode) {
@@ -87,9 +87,6 @@ class Chrome {
       }
     });
   }
-
-  /// The port Chrome is listening on for DevTools, if debugging is enabled.
-  final int? debugPort;
 
   /// Launches Chrome with the given [options].
   ///
@@ -162,12 +159,13 @@ class Chrome {
     if (withDebugging) {
       final int? port = options.debugPort == 0 ? remoteDebuggingPort : options.debugPort;
       if (port == null || port == 0) {
+        process.kill();
         throw StateError('Failed to determine Chrome remote debugging port.');
       }
       debugConnection = await _connectToChromeDebugPort(port, options.url);
     }
 
-    return Chrome._(process, onError, debugConnection, remoteDebuggingPort ?? options.debugPort);
+    return Chrome._(process, onError, debugConnection);
   }
 
   /// Connects to an existing Chrome process with the given [options].

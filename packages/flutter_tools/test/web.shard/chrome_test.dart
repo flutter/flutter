@@ -163,6 +163,7 @@ void main() {
 
       final Chromium chrome = await chromiumLauncher.launch('example_url', skipCheck: true);
       expect(chrome.debugPort, 54321);
+      expect(chrome.chromeConnection.url, Uri.parse('http://[::1]:54321/'));
     },
   );
 
