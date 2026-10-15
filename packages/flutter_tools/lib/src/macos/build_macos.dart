@@ -13,6 +13,7 @@ import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
@@ -82,6 +83,7 @@ Future<void> buildMacOS({
   required FlutterProject flutterProject,
   required BuildInfo buildInfo,
   String? targetOverride,
+  required ToolContext toolContext,
   required bool verboseLogging,
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
@@ -356,7 +358,7 @@ Future<void> buildMacOS({
   final String? applicationBundle = MacOSApp.fromMacOSProject(
     flutterProject.macos,
     plistParser: globals.plistParser,
-    toolContext: globals.toolContext,
+    toolContext: toolContext,
   ).applicationBundle(buildInfo);
   if (applicationBundle != null) {
     final Directory outputDirectory = globals.fs.directory(applicationBundle);

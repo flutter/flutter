@@ -23,7 +23,7 @@ class WindowsDevice extends DesktopDevice {
     required super.processManager,
     required super.logger,
     required super.fileSystem,
-    required super.operatingSystemUtils,
+    required OperatingSystemUtils super.operatingSystemUtils,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super('windows', platformType: PlatformType.windows, ephemeral: false);
 

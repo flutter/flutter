@@ -85,6 +85,7 @@ class BuildMacosCommand extends BuildSubCommand {
       flutterProject: project,
       buildInfo: buildInfo,
       targetOverride: targetFile,
+      toolContext: toolContext,
       verboseLogging: logger.isVerbose || globalResults?[FlutterGlobalOptions.kVerboseFlag] == true,
       configOnly: configOnly,
       sizeAnalyzer: SizeAnalyzer(

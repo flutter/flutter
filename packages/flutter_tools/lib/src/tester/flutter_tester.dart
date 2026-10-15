@@ -47,7 +47,7 @@ class FlutterTesterDevice extends Device {
     super.id, {
     required this._processManager,
     required this._flutterVersion,
-    required super.logger,
+    required Logger super.logger,
     required this._fileSystem,
     required this._artifacts,
     required this._platform,

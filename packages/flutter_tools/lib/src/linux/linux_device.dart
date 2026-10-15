@@ -21,9 +21,9 @@ import 'linux_workflow.dart';
 class LinuxDevice extends DesktopDevice {
   LinuxDevice({
     required super.processManager,
-    required super.logger,
+    required Logger super.logger,
     required super.fileSystem,
-    required super.operatingSystemUtils,
+    required OperatingSystemUtils super.operatingSystemUtils,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _logger = logger,
        super('linux', platformType: PlatformType.linux, ephemeral: false);

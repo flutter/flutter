@@ -26,7 +26,7 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
     required super.processManager,
     required super.logger,
     required super.fileSystem,
-    required super.operatingSystemUtils,
+    required OperatingSystemUtils super.operatingSystemUtils,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super('mac-designed-for-ipad', platformType: PlatformType.macos, ephemeral: false);
 
