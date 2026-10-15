@@ -9,12 +9,10 @@
 # Hand-written for that reason (the converter runs no scripts, and the file
 # is a foreach over the six); the answers are from the Debian bullseye
 # sysroots the engine pins (build/linux/sysroot_scripts/sysroots.json), as
-# `libs` -- none of the five below has include directories or flags of its
-# own -- which link against the sysroot's shared objects, as GN's do.
-#
-# Not here yet: `gtk` (gtk+-3.0), whose answer is twenty -isystem
-# directories under the sysroot and twelve libraries; it comes with the GTK
-# shell (//flutter/shell/platform/linux), the one package that lists it.
+# `libs` -- none but gtk has include directories or flags of its own --
+# which link against the sysroot's shared objects, as GN's do. gtk's twenty
+# include directories are the sysroot repository's (its overlay's
+# gtk3_include_dirs), since Bazel's `includes` is package-relative.
 #
 # GN's is_minimal_linux (a host "without x11, etc.") makes every one of these
 # an empty config; the Bazel build has no such switch yet, as tools/gn never
@@ -28,6 +26,27 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "x11",
     linkopts = ["-lX11"],
+)
+
+# pkg-config gtk+-3.0: [[<twenty include directories under the sysroot>], [],
+# ["gtk-3", ..., "glib-2.0"], []]
+cc_library(
+    name = "gtk",
+    linkopts = [
+        "-lgtk-3",
+        "-lgdk-3",
+        "-lpangocairo-1.0",
+        "-lcairo-gobject",
+        "-lgdk_pixbuf-2.0",
+        "-latk-1.0",
+        "-lpango-1.0",
+        "-lharfbuzz",
+        "-lcairo",
+        "-lgio-2.0",
+        "-lgobject-2.0",
+        "-lglib-2.0",
+    ],
+    deps = ["@sysroot_linux_x64//:gtk3_include_dirs"],
 )
 
 # pkg-config egl: [[], [], ["EGL"], []]

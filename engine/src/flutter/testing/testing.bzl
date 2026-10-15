@@ -454,6 +454,10 @@ def _display_test_impl(ctx):
         env["VK_ICD_FILENAMES"] = package + "/vk_swiftshader_icd.json"
         env["VK_LAYER_PATH"] = package + "/vulkan-data"
         env["VK_INSTANCE_LAYERS"] = "VK_LAYER_KHRONOS_validation"
+    if ctx.attr.session_bus:
+        # The wrapper starts a D-Bus session bus for the binary unless the
+        # environment has one (see xvfb_run.sh).
+        env["FLUTTER_TEST_SESSION_BUS"] = "1"
     return [
         DefaultInfo(executable = launcher, runfiles = runfiles),
         RunEnvironmentInfo(environment = env),
@@ -481,6 +485,11 @@ _display_test = rule(
             doc = "Point the Vulkan loader at the GPU test backends copied into this package (SwiftShader's ICD " +
                   "manifest, the Khronos validation layer), as testing/run_tests.py does for the Impeller suites.",
         ),
+        "session_bus": attr.bool(
+            doc = "Run the binary under a D-Bus session bus of its own (dbus-run-session) unless the environment " +
+                  "has one: what GTK's accessibility bridge needs, and what run_tests.py's run inherits from the " +
+                  "session it runs in.",
+        ),
         "_wrapper": attr.label(
             default = "//engine/src/flutter/testing:xvfb_run.sh",
             allow_single_file = True,
@@ -488,7 +497,7 @@ _display_test = rule(
     },
 )
 
-def flutter_display_test(name, size = None, timeout = None, shard_count = None, flaky = None, args = [], data = [], env = {}, vulkan_validation = True, tags = [], visibility = None, **kwargs):
+def flutter_display_test(name, size = None, timeout = None, shard_count = None, flaky = None, args = [], data = [], env = {}, vulkan_validation = True, session_bus = False, tags = [], visibility = None, **kwargs):
     """A test suite that opens a window: the Impeller playground's (GLFW on X11).
 
     testing/run_tests.py starts an Xvfb for the Linux suites; here the binary
@@ -512,6 +521,9 @@ def flutter_display_test(name, size = None, timeout = None, shard_count = None, 
       vulkan_validation: run_tests.py's vulkan_validation_env: SwiftShader as
         the ICD and the Khronos validation layer, from the GPU test backends
         copied into this package (the suite must list them as data).
+      session_bus: a D-Bus session bus of the test's own unless the
+        environment has one (GTK's accessibility bridge needs it; see
+        xvfb_run.sh).
       tags: tags of the test.
       visibility: visibility of the test.
       **kwargs: the binary's attributes (cc_test's: srcs, deps, copts, ...).
@@ -533,6 +545,7 @@ def flutter_display_test(name, size = None, timeout = None, shard_count = None, 
         data = data,
         env = env,
         vulkan_validation = vulkan_validation,
+        session_bus = session_bus,
         tags = tags,
         visibility = visibility,
     )
