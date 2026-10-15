@@ -61,16 +61,16 @@ class DriveCommand extends RunCommandBase {
   }) {
     requiresPubspecYaml();
 
-    // By default, the drive app should not publish the VM service port over mDNS
-    // to prevent a local network permission dialog on iOS 14+,
-    // which cannot be accepted or dismissed in a CI environment.
     argParser.addDescriptors(<OptionDescriptor<Object?>>[
       CommonOptions.enableExperiment,
+      // By default, the drive app should not publish the VM service port over mDNS
+      // to prevent a local network permission dialog on iOS 14+,
+      // which cannot be accepted or dismissed in a CI environment.
       _publishPort,
       _keepAppRunning,
       _useExistingApp,
       _driver,
-      DebuggingOptionDescriptors.buildOption(verboseOnly: false),
+      DebuggingOptionDescriptors.build,
       _screenshot,
       _driverPort,
       _headless,

@@ -1007,7 +1007,9 @@ void main() {}
   testUsingContext(
     'disablePortPublication defaults to true when argResults is null',
     () async {
-      fakeDeviceManager.attachedDevices = <Device>[ScreenshotDevice()];
+      final Device wirelessDevice = FakeIosDevice()
+        ..connectionInterface = DeviceConnectionInterface.wireless;
+      fakeDeviceManager.wirelessDevices = <Device>[wirelessDevice];
       final command = DriveCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true)),
         buildTargets: const BuildTargetsImpl(),
