@@ -28,7 +28,7 @@ import 'test_device.dart';
 class FlutterTesterTestDevice extends TestDevice {
   FlutterTesterTestDevice({
     required this.id,
-    required this.toolContext,
+    required ToolContext super.toolContext,
     required this.flutterTesterBinPath,
     required this.debuggingOptions,
     required this.enableVmService,
@@ -47,8 +47,6 @@ class FlutterTesterTestDevice extends TestDevice {
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
-  @protected
-  final ToolContext toolContext;
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
   final bool enableVmService;

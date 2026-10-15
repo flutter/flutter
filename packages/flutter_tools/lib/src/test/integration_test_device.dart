@@ -22,14 +22,14 @@ const kIntegrationTestExtension = 'Flutter.IntegrationTest';
 const kIntegrationTestData = 'data';
 const kIntegrationTestMethod = 'ext.flutter.integrationTest';
 
-class IntegrationTestTestDevice implements TestDevice {
+class IntegrationTestTestDevice extends TestDevice {
   IntegrationTestTestDevice({
     required this.id,
     required this.device,
     required this.debuggingOptions,
     required this.userIdentifier,
     required this.compileExpression,
-    required this._toolContext,
+    required ToolContext super.toolContext,
     this.ddsShutdownTimeout = const Duration(seconds: 5),
   });
 
@@ -38,9 +38,8 @@ class IntegrationTestTestDevice implements TestDevice {
   final DebuggingOptions debuggingOptions;
   final String? userIdentifier;
   final CompileExpression? compileExpression;
-  final ToolContext _toolContext;
   final Duration ddsShutdownTimeout;
-  late final _ddsLauncher = DartDevelopmentService(logger: _toolContext.logger);
+  late final _ddsLauncher = DartDevelopmentService(logger: toolContext.logger);
 
   ApplicationPackage? _applicationPackage;
   final _finished = Completer<void>();
@@ -52,7 +51,7 @@ class IntegrationTestTestDevice implements TestDevice {
   @override
   Future<StreamChannel<String>> start(String entrypointPath) async {
     final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :Logger logger) =
-        _toolContext;
+        toolContext;
     final TargetPlatform targetPlatform = await device.targetPlatform;
     _applicationPackage = await ApplicationPackageFactory.instance?.getPackageForPlatform(
       targetPlatform,
@@ -150,7 +149,7 @@ class IntegrationTestTestDevice implements TestDevice {
 
   @override
   Future<void> kill() async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     final ApplicationPackage? applicationPackage = _applicationPackage;
     if (applicationPackage != null) {
       if (!await device.stopApp(applicationPackage, userIdentifier: userIdentifier)) {

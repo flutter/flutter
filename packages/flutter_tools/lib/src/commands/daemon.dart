@@ -458,10 +458,15 @@ class Daemon {
 }
 
 abstract class Domain {
-  Domain(this.daemon, this.name);
+  Domain(this.daemon, this.name, {this._toolContext});
 
   final Daemon daemon;
   final String name;
+  final ToolContext? _toolContext;
+
+  @protected
+  ToolContext get toolContext => _toolContext ?? daemon._toolContext;
+
   final _handlers = <String, CommandHandler>{};
   final _handlersWithBinary = <String, CommandHandlerWithBinary>{};
 
@@ -835,21 +840,16 @@ class AppDomain extends Domain {
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
-    required this._toolContext,
+    required super.toolContext,
     required this._xcode,
-  }) : _fs = _toolContext.fs,
-       _logger = _toolContext.logger,
-       super(daemon, 'app') {
+  }) : super(daemon, 'app') {
     registerHandler('restart', restart);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
   }
 
-  final FileSystem _fs;
   final Analytics _analytics;
-  final Logger _logger;
-  final ToolContext _toolContext;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
   final Xcode? _xcode;
@@ -886,16 +886,17 @@ class AppDomain extends Domain {
       );
     }
 
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        toolContext;
+
     // We change the current working directory for the duration of the `start` command.
-    final Directory cwd = _fs.currentDirectory;
-    _fs.currentDirectory = _fs.directory(projectDirectory);
-    final FlutterProject flutterProject = _toolContext.projectFactory.fromDirectory(
-      _fs.currentDirectory,
-    );
+    final Directory cwd = fs.currentDirectory;
+    fs.currentDirectory = fs.directory(projectDirectory);
+    final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       buildInfo: options.buildInfo,
       target: target,
       userIdentifier: userIdentifier,
@@ -915,7 +916,7 @@ class AppDomain extends Domain {
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        toolContext: _toolContext,
+        toolContext: toolContext,
         webDefines: webDefines,
       );
     } else if (enableHotReload) {
@@ -931,7 +932,7 @@ class AppDomain extends Domain {
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        toolContext: _toolContext,
+        toolContext: toolContext,
         xcode: _xcode,
       );
     } else {
@@ -944,7 +945,7 @@ class AppDomain extends Domain {
         analytics: _analytics,
         buildSystem: _buildSystem,
         buildTargets: _buildTargets,
-        toolContext: _toolContext,
+        toolContext: toolContext,
         xcode: _xcode,
       );
     }
@@ -966,7 +967,7 @@ class AppDomain extends Domain {
       enableHotReload,
       cwd,
       LaunchMode.run,
-      asLogger<MachineOutputLogger>(_logger),
+      asLogger<MachineOutputLogger>(logger),
     );
   }
 
@@ -1046,7 +1047,7 @@ class AppDomain extends Domain {
       } finally {
         // If the full directory is used instead of the path then this causes
         // a TypeError with the ErrorHandlingFileSystem.
-        _fs.currentDirectory = cwd.path;
+        toolContext.fs.currentDirectory = cwd.path;
         _apps.remove(app);
       }
     });
@@ -1241,7 +1242,7 @@ typedef _DeviceEventHandler = void Function(Device device);
 /// It exports a `getDevices()` call, as well as firing `device.added` and
 /// `device.removed` events.
 class DeviceDomain extends Domain {
-  DeviceDomain(Daemon daemon, {required this._toolContext, this._deviceManager})
+  DeviceDomain(Daemon daemon, {required super.toolContext, this._deviceManager})
     : super(daemon, 'device') {
     registerHandler('getDevices', getDevices);
     registerHandler('discoverDevices', discoverDevices);
@@ -1268,9 +1269,8 @@ class DeviceDomain extends Domain {
   }
 
   final DeviceManager? _deviceManager;
-  final ToolContext _toolContext;
 
-  Logger get _logger => daemon.notifyingLogger ?? _toolContext.logger;
+  Logger get _logger => daemon.notifyingLogger ?? toolContext.logger;
 
   /// An incrementing number used to generate unique ids.
   var _id = 0;
@@ -1522,7 +1522,7 @@ class DeviceDomain extends Domain {
     }
 
     final ToolContext(:Artifacts artifacts, :FileSystem fs, :FlutterProjectFactory projectFactory) =
-        _toolContext;
+        toolContext;
     FlutterProject? project;
     try {
       project = projectFactory.fromDirectory(fs.currentDirectory);

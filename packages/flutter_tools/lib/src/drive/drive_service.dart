@@ -102,6 +102,11 @@ class DriveTestSpecification {
 
 /// An interface for the `flutter driver` integration test operations.
 abstract class DriverService {
+  DriverService({required this.toolContext});
+
+  @protected
+  final ToolContext toolContext;
+
   /// Install and launch the application for the provided [device].
   Future<void> start(
     BuildInfo buildInfo,
@@ -136,7 +141,7 @@ class FlutterDriverService extends DriverService {
     required this._applicationPackageFactory,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
-    required this._toolContext,
+    required super.toolContext,
     @visibleForTesting this._logFlushDelay = const Duration(milliseconds: 500),
     @visibleForTesting this._vmServiceConnector = connectToVmService,
   });
@@ -146,7 +151,6 @@ class FlutterDriverService extends DriverService {
   final ApplicationPackageFactory _applicationPackageFactory;
   final String _dartSdkPath;
   final DevtoolsLauncher _devtoolsLauncher;
-  final ToolContext _toolContext;
   final VMServiceConnector _vmServiceConnector;
   final Duration _logFlushDelay;
 
@@ -201,7 +205,7 @@ class FlutterDriverService extends DriverService {
       // On attempts past 1, assume the application is built correctly and re-use it.
       attempt += 1;
       prebuiltApplication = true;
-      _toolContext.logger.printError('Application failed to start on attempt: $attempt');
+      toolContext.logger.printError('Application failed to start on attempt: $attempt');
     }
     if (result == null || !result.started) {
       throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
@@ -216,7 +220,7 @@ class FlutterDriverService extends DriverService {
     DebuggingOptions debuggingOptions,
   ) async {
     final ToolContext(:Artifacts artifacts, :FlutterVersion flutterVersion, :Logger logger) =
-        _toolContext;
+        toolContext;
     Uri uri;
     if (vmServiceUri.scheme == 'ws') {
       final List<String> segments = vmServiceUri.pathSegments.toList();
@@ -265,7 +269,7 @@ class FlutterDriverService extends DriverService {
 
   @override
   Future<int> startTest(String testFile, DriveTestSpecification spec) async {
-    final ToolContext(:Platform platform, :ProcessUtils processUtils) = _toolContext;
+    final ToolContext(:Platform platform, :ProcessUtils processUtils) = toolContext;
     final String? profileMemory = spec.profileMemory;
     if (profileMemory != null) {
       unawaited(
@@ -292,7 +296,7 @@ class FlutterDriverService extends DriverService {
 
   @override
   Future<void> stop({String? userIdentifier}) async {
-    final Logger logger = _toolContext.logger;
+    final Logger logger = toolContext.logger;
     // If the application package is available, stop and uninstall.
     final ApplicationPackage? package = _applicationPackage;
     if (package != null) {
