@@ -166,19 +166,55 @@ void main() {
     final fileName = impellerEnabled
         ? 'impeller_four_frame_with_reuse_end.png'
         : 'four_frame_with_reuse_end.png';
-    final Uint8List goldenData = File(
-      path.join('flutter', 'lib', 'ui', 'fixtures', fileName),
-    ).readAsBytesSync();
+    final Uint8List goldenData = File(path.join('flutter', 'lib', 'ui', 'fixtures', fileName))
+        .readAsBytesSync();
 
     expect(imageData.buffer.asUint8List(), goldenData);
+  });
+
+  test('Animated webp decodes a frame with alpha after an opaque first frame', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/85831
+    final Uint8List data = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', 'opaque_first_frame_then_alpha.webp'),
+    ).readAsBytesSync();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+
+    // The test image contains two solid frames. The first is opaque red, and
+    // the second is blue with alpha=128.
+    ui.Image image = (await codec.getNextFrame()).image;
+    ByteData imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(0), 0xFF0000FF);
+    image = (await codec.getNextFrame()).image;
+    imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(0), 0x00008080);
+    codec.dispose();
+  });
+
+  test('Animated gif decodes a frame with alpha after an opaque first frame', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/85831
+    final Uint8List data = File(
+      path.join('flutter', 'lib', 'ui', 'fixtures', 'opaque_first_frame_then_alpha.gif'),
+    ).readAsBytesSync();
+    final ui.Codec codec = await ui.instantiateImageCodec(data);
+
+    // The test image contains two frames that restore to the background. The
+    // first is opaque red, and the second is transparent except for one blue
+    // pixel in the top left corner.
+    ui.Image image = (await codec.getNextFrame()).image;
+    ByteData imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(0), 0xFF0000FF);
+    image = (await codec.getNextFrame()).image;
+    imageData = (await image.toByteData())!;
+    expect(imageData.getUint32(0), 0x0000FFFF);
+    expect(imageData.getUint32(4), 0x00000000);
+    codec.dispose();
   });
 
   test('Animated webp can reuse across multiple frames', () async {
     // Regression test for https://github.com/flutter/flutter/issues/61150#issuecomment-679055858
 
-    final Uint8List data = File(
-      path.join('flutter', 'lib', 'ui', 'fixtures', 'heart.webp'),
-    ).readAsBytesSync();
+    final Uint8List data = File(path.join('flutter', 'lib', 'ui', 'fixtures', 'heart.webp'))
+        .readAsBytesSync();
     final ui.Codec codec = await ui.instantiateImageCodec(data);
 
     // Capture the final frame of animation. If we have not composited
@@ -194,9 +230,8 @@ void main() {
 
     final fileName = impellerEnabled ? 'impeller_heart_end.png' : 'heart_end.png';
 
-    final Uint8List goldenData = File(
-      path.join('flutter', 'lib', 'ui', 'fixtures', fileName),
-    ).readAsBytesSync();
+    final Uint8List goldenData = File(path.join('flutter', 'lib', 'ui', 'fixtures', fileName))
+        .readAsBytesSync();
 
     expect(imageData.buffer.asUint8List(), goldenData);
   });
@@ -221,9 +256,8 @@ void main() {
             ? 'impeller_2_dispose_op_restore_previous.apng.$i.png'
             : '2_dispose_op_restore_previous.apng.$i.png';
 
-        final Uint8List goldenData = File(
-          path.join('flutter', 'lib', 'ui', 'fixtures', fileName),
-        ).readAsBytesSync();
+        final Uint8List goldenData = File(path.join('flutter', 'lib', 'ui', 'fixtures', fileName))
+            .readAsBytesSync();
 
         expect(imageData.buffer.asUint8List(), goldenData);
       }
@@ -273,9 +307,8 @@ void main() {
   });
 
   test('Animated apng frame decode does not crash with invalid destination region', () async {
-    final Uint8List data = File(
-      path.join('flutter', 'lib', 'ui', 'fixtures', 'out_of_bounds.apng'),
-    ).readAsBytesSync();
+    final Uint8List data = File(path.join('flutter', 'lib', 'ui', 'fixtures', 'out_of_bounds.apng'))
+        .readAsBytesSync();
 
     final ui.Codec codec = await ui.instantiateImageCodec(data);
     try {
