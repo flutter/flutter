@@ -421,7 +421,32 @@ converter refuses to shard one. The test's environment is `run_tests.py`'s
 pointed at the copied SwiftShader manifest (`VK_ICD_FILENAMES`) and layer
 directory (`VK_LAYER_PATH`), with the Khronos layer enabled
 (`VK_INSTANCE_LAYERS`), by paths relative to the runfiles tree the test runs
-from.
+from -- for the suites that carry the backends (`gpuBackendTests`); a display
+test without them gets `vulkan_validation = False`.
+
+The GTK shell's suite (`shell/platform/linux:flutter_linux_unittests`, 855
+tests) is a display test too -- GTK opens the display at initialization --
+and needs more of a desktop session than a display: GTK's accessibility
+bridge asks the D-Bus *session bus* for the accessibility bus, and without
+one a view's `AtkPlug` has no id, an Atk assertion that the suite's
+environment (`G_DEBUG=fatal-criticals`, `run_tests.py`'s `extra_env`, the
+test's `env`) turns into an abort in the first test. `run_tests.py`'s run
+inherits the bot's session bus; a sandboxed test inherits nothing, so with
+`session_bus = True` (`sessionBusTests` in bazel_mapping.dart) `xvfb_run.sh`
+re-executes itself under `dbus-run-session`, which activates
+`at-spi-bus-launcher` on demand (`dbus` and `at-spi2-core` are host
+prerequisites, as GTK's own packages bring them), with a home directory of
+the session's own under `TEST_TMPDIR`: the sandbox mounts the real one
+read-only, and dconf -- GSettings' backend, which the launcher and the
+shell's GNOME settings read through -- aborts under that `G_DEBUG` when it
+cannot create its cache there. The empty home also makes the settings the
+schemas' defaults, which is what the suite's expectations are (under
+`run_tests.py` they are whatever the bot user has set). The daemon and the
+services it activates run without the suite's `G_DEBUG`; the binary gets it
+back. The compiled GSettings schemas the suite reads (`testing/gschemas`,
+GN's `copy()` to `assets/<name>/gschemas.compiled`) are a `gn_copy` with
+`outs` and the test's `data`: a `copy()` of the same file among a binary's
+deps is run-time data, which GN's dependency only ordered.
 
 ## Impeller's shader pipeline
 

@@ -25,6 +25,7 @@ cc_library(
 cc_library(
     name = "flutter_glfw_headers",
     hdrs = ["public/flutter_glfw.h"],
+    implementation_deps = ["//engine/src/flutter/shell/platform/common:desktop_library_implementation"],
     deps = [
         "//engine/src/flutter/shell/platform/common:common_cpp_library_headers",
         "//engine/src/flutter/shell/platform/common:relative_flutter_library_headers",

@@ -7,6 +7,8 @@ library;
 
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
+
 import 'bazel_mapping.dart';
 import 'gn_ast.dart';
 import 'gn_eval.dart';
@@ -793,6 +795,19 @@ final class _Emitter {
     return '$out    }';
   }
 
+  /// A dictionary of strings (a test's `env`) in the same layout.
+  static String _stringDictText(Map<String, String> entries) {
+    if (entries.length == 1) {
+      final MapEntry<String, String> e = entries.entries.single;
+      return '{${_starlarkString(e.key)}: ${_starlarkString(e.value)}}';
+    }
+    final out = StringBuffer('{\n');
+    for (final MapEntry<String, String> e in entries.entries) {
+      out.writeln('        ${_starlarkString(e.key)}: ${_starlarkString(e.value)},');
+    }
+    return '$out    }';
+  }
+
   /// [text] as a Starlark string literal.
   static String _starlarkString(String text) =>
       '"${text.replaceAll(r'\', r'\\').replaceAll('"', r'\"')}"';
@@ -817,8 +832,12 @@ final class _Emitter {
 
   /// copy("x") becomes a `gn_copy`: its sources as they are, GN's
   /// destination recorded (see build/bazel/gn_action) -- or, when the
-  /// outputs name the files literally (a renaming copy, which GN allows for
-  /// one source), the copies under their new names (`outs`).
+  /// outputs are under the target's own gen dir and name the files, either
+  /// literally (a renaming copy, which GN allows for one source) or through
+  /// `{{source_file_part}}`/`{{source_name_part}}` with more than the bare
+  /// name around them (the Linux shell's schemas go to
+  /// `assets/{{source_name_part}}/gschemas.compiled`), the copies under
+  /// their new names (`outs`), expanded here per source as GN expands them.
   void _convertCopy(GnTarget target) {
     _use('//engine/src/flutter/build/bazel/gn_action:gn_action.bzl', 'gn_copy');
     final rule = _Rule('gn_copy', target.name, target.comments);
@@ -835,9 +854,13 @@ final class _Emitter {
             rule.list('outputs').add(e.condition, _item(text, e));
           });
           final List<GnValue>? items = variable.unconditionalItems;
-          if (items != null &&
-              items.every((GnValue v) => v is GnStringValue && !v.value.contains('{{'))) {
+          if (items == null || !items.every((GnValue v) => v is GnStringValue)) {
+            break;
+          }
+          if (items.every((GnValue v) => !(v as GnStringValue).value.contains('{{'))) {
             _outputsInto(rule.list('outs'), variable, target);
+          } else {
+            _expandedOutputsInto(rule, items.cast<GnStringValue>(), variable, target);
           }
         case 'deps':
         case 'public_deps':
@@ -855,6 +878,45 @@ final class _Emitter {
       }
     }
     rules.add(rule);
+  }
+
+  /// A copy's output pattern with source expansions: under the target's own
+  /// gen dir, each source's expansion is an `outs` entry, unless the pattern
+  /// is the bare `{{source_file_part}}` (the copy keeps the names, and the
+  /// sources travel as they are); anywhere else (`$root_out_dir/...`, the
+  /// artifact layout) the destination is recorded alone.
+  void _expandedOutputsInto(
+    _Rule rule,
+    List<GnStringValue> patterns,
+    GnVariable variable,
+    GnTarget target,
+  ) {
+    final genDir = '$genDirRoot${gnPackage.substring(1)}/';
+    if (patterns.length != 1 || !patterns.single.value.startsWith(genDir)) {
+      return;
+    }
+    final String pattern = patterns.single.value.substring(genDir.length);
+    if (pattern == '{{source_file_part}}') {
+      return;
+    }
+    final GnLocation location = variable.assignments.first.location;
+    final List<GnValue>? sources = target.variables['sources']?.unconditionalItems;
+    if (sources == null) {
+      throw GnError(location, 'the sources of copy ${target.name} depend on a condition');
+    }
+    for (final GnValue source in sources) {
+      if (source is! GnStringValue) {
+        throw GnError(location, 'a source of copy ${target.name} is not a path');
+      }
+      final String file = p.basename(source.value);
+      final String expanded = pattern
+          .replaceAll('{{source_file_part}}', file)
+          .replaceAll('{{source_name_part}}', p.basenameWithoutExtension(file));
+      if (expanded.contains('{{')) {
+        throw GnError(location, 'output pattern $pattern of copy ${target.name} is not supported');
+      }
+      rule.list('outs').addUnique(Condition.always, _Item(expanded));
+    }
   }
 
   /// A `source_set`/`static_library` ([library]), an `executable`, or a
@@ -902,6 +964,28 @@ final class _Emitter {
         for (final String label in run.data) {
           rule.list('data').addUnique(Condition.always, _Item(_localLabel(label)));
         }
+        if (run.env.isNotEmpty) {
+          rule.scalars['env'] = _stringDictText(run.env);
+        }
+      }
+      // run_tests.py's Vulkan validation environment goes to the Impeller
+      // suites (--type impeller), and names SwiftShader's manifest and the
+      // layer next to the binary: a display test without the backends
+      // (gpuBackendTests) gets none.
+      if (display && !gpuBackendTests.contains('$gnPackage:${target.name}')) {
+        rule.scalars['vulkan_validation'] = 'False';
+      }
+      // A D-Bus session bus of the test's own (sessionBusTests), which the
+      // display wrapper starts.
+      if (sessionBusTests.contains('$gnPackage:${target.name}')) {
+        if (!display) {
+          throw GnError(
+            target.location,
+            '${target.name} is in sessionBusTests but is not a display test: only '
+            'testing/xvfb_run.sh starts the bus',
+          );
+        }
+        rule.scalars['session_bus'] = 'True';
       }
     }
     // The GPU test backends next to the binary (gpuBackendTests), which
@@ -1043,16 +1127,16 @@ final class _Emitter {
 
     // A header-only library compiles nothing: GN ignores its flags and
     // defines (they apply to no compile and propagate to no one), and so
-    // does the generated rule; its private configs likewise.
+    // does the generated rule. Its private configs stay, as
+    // implementation_deps: their link flags reach the binaries that link
+    // the library, as GN's do (the GTK shell's flutter_linux lists the
+    // epoxy config and compiles nothing; libflutter_linux_gtk.so needs
+    // -lepoxy), and their defines and include directories reach nothing,
+    // which is what a private config of a target without compiles amounts
+    // to in GN.
     final bool compiles = !(rule.lists['srcs']?.isEmpty ?? true);
     if (!compiles) {
-      const <String>[
-        'copts',
-        'conlyopts',
-        'cxxopts',
-        'local_defines',
-        'implementation_deps',
-      ].forEach(rule.lists.remove);
+      const <String>['copts', 'conlyopts', 'cxxopts', 'local_defines'].forEach(rule.lists.remove);
     }
     if (compiles) {
       // GN applies chromium_code (or no_chromium_code) to every target, and
@@ -1354,9 +1438,12 @@ final class _Emitter {
     final rule = _Rule('cc_library', target.name, target.comments);
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
-        case final String name when name.startsWith('_'):
-          // A local of the config block (GN exempts `_`-prefixed variables
-          // from its unused-variable rule): scratch for the values below.
+        case final String name when !_configVariables.contains(name):
+          // A local of the config block: scratch for the values below. GN
+          // rejects an assignment nothing reads ("had no effect"), unless
+          // the name starts with `_`, so a name outside config()'s own
+          // variables is one the block itself uses (the Linux shell's
+          // `warning_flags`, read by its cflags and cflags_cc).
           break;
         case 'defines':
           _stringsInto(rule.list('defines'), variable, defines: true);
@@ -1399,6 +1486,30 @@ final class _Emitter {
     'cflags_objcc',
   };
 
+  /// The variables GN's config() reads (`gn help config`); anything else in
+  /// a config block is a local.
+  static const Set<String> _configVariables = <String>{
+    ..._flagVariables,
+    'asmflags',
+    'configs',
+    'defines',
+    'framework_dirs',
+    'frameworks',
+    'include_dirs',
+    'inputs',
+    'ldflags',
+    'lib_dirs',
+    'libs',
+    'precompiled_header',
+    'precompiled_source',
+    'rustenv',
+    'rustflags',
+    'swiftflags',
+    'testonly',
+    'visibility',
+    'weak_frameworks',
+  };
+
   /// Copies a private config of this file into [rule] (see [_configsInto]).
   /// [use] is the assignment that listed the config; its condition applies
   /// on top of the config's own. With [flagsOnly], only the compiler flags
@@ -1414,7 +1525,7 @@ final class _Emitter {
       }
       final String attribute;
       switch (variable.name) {
-        case final String name when name.startsWith('_'):
+        case final String name when !_configVariables.contains(name):
           // A local of the config block (see _convertConfig).
           continue;
         case 'defines':
@@ -1422,8 +1533,9 @@ final class _Emitter {
         case 'include_dirs':
           _includeDirsInto(rule, variable, use.condition);
           continue;
-        case 'ldflags':
-          attribute = 'linkopts';
+        case 'libs' || 'frameworks' || 'ldflags':
+          _linkFlagsInto(rule, variable, under: use.condition);
+          continue;
         case 'visibility':
           continue;
         case 'configs':
@@ -1476,8 +1588,9 @@ final class _Emitter {
     }
   }
 
-  /// `libs`, `frameworks` and `ldflags` all become `linkopts`.
-  void _linkFlagsInto(_Rule rule, GnVariable variable) {
+  /// `libs`, `frameworks` and `ldflags` all become `linkopts`; [under] is
+  /// the condition of the listing that brings them (an inlined config's).
+  void _linkFlagsInto(_Rule rule, GnVariable variable, {Condition under = Condition.always}) {
     final _ListAttribute linkopts = rule.list('linkopts');
     switch (variable.name) {
       case 'libs':
@@ -1486,20 +1599,20 @@ final class _Emitter {
           if (lib.contains('/')) {
             throw GnError(e.assignment.location, 'library path $lib in libs is not supported');
           }
-          linkopts.add(e.condition, _item('-l$lib', e));
+          linkopts.add(under.and(e.condition), _item('-l$lib', e));
         });
       case 'frameworks':
         _forEachItem(variable, into: linkopts, (_Element e) {
           final String framework = _string(e).replaceFirst(RegExp(r'\.framework$'), '');
           linkopts
-            ..add(e.condition, _item('-framework', e, note: false))
-            ..add(e.condition, _Item(framework, comment: e.note));
+            ..add(under.and(e.condition), _item('-framework', e, note: false))
+            ..add(under.and(e.condition), _Item(framework, comment: e.note));
         });
       case 'ldflags':
         _forEachItem(variable, into: linkopts, (_Element e) {
           if (e.value is! GnStringValue || !_rawString(e).contains(rebasedPathMarker)) {
             linkopts.add(
-              e.condition,
+              under.and(e.condition),
               e.value is GnStringValue ? _item(_tokenizerEscaped(_string(e)), e) : _flagItem(e),
             );
             return;
@@ -1529,7 +1642,7 @@ final class _Emitter {
             rule.list('additional_linker_inputs').addUnique(Condition.always, _Item(label));
             out.write('\$(execpath $label)');
           }
-          linkopts.add(e.condition, _item(out.toString(), e));
+          linkopts.add(under.and(e.condition), _item(out.toString(), e));
         });
     }
   }
@@ -1723,25 +1836,41 @@ final class _Emitter {
   /// as sources: in GN a dependency on an action only orders it before the
   /// compile, the files being on disk; in Bazel the compile's inputs must
   /// name them.
-  bool _isLocalAction(String gnLabel) {
+  bool _isLocalAction(String gnLabel) => _localRule(gnLabel) == 'action';
+
+  /// GN's `copy()` targets of this file, whose products a dependent reads
+  /// at run time (the Linux shell's suite reads the compiled GSettings
+  /// schemas its copy places under the fixtures directory): in GN the
+  /// dependency orders the copy and the binary finds the file in the build
+  /// directory; in Bazel the files must be the binary's runfiles.
+  bool _isLocalCopy(String gnLabel) => _localRule(gnLabel) == 'copy';
+
+  /// The GN rule of a target of this file named by a `:name` label, or null
+  /// for any other label.
+  String? _localRule(String gnLabel) {
     if (!gnLabel.startsWith(':')) {
-      return false;
+      return null;
     }
     String name = gnLabel.substring(1);
     final int paren = name.indexOf('(');
     if (paren >= 0) {
       name = name.substring(0, paren);
     }
-    return localTargets[name]?.rule == 'action';
+    return localTargets[name]?.rule;
   }
 
   /// Like [_labelsInto] for a compiled target's dependencies: those on
-  /// actions of this file go to [sources] instead.
+  /// actions of this file go to `srcs` instead, those on copies of this
+  /// file to `data`.
   void _depsInto(_Rule rule, GnVariable variable, GnTarget target) {
     _forEachItem(variable, into: rule.list('deps'), (_Element e) {
       final String gnLabel = _string(e);
       final String label = bazelLabel(gnLabel, package: gnPackage, location: e.assignment.location);
-      final list = _isLocalAction(gnLabel) ? 'srcs' : 'deps';
+      final list = _isLocalAction(gnLabel)
+          ? 'srcs'
+          : _isLocalCopy(gnLabel)
+          ? 'data'
+          : 'deps';
       rule.list(list).addUnique(e.condition, _item(_localLabel(label), e));
     });
   }

@@ -404,6 +404,13 @@ exports_files(["README"] + glob(
   // it lists is //flutter/shell/platform/linux/config's (hand-written).
   ConvertedFile('//flutter/shell/platform/glfw'),
   ConvertedFile('//flutter/shell/platform/glfw/client_wrapper'),
+  // The GTK shell (the Linux embedding) with its suite, which runs under a
+  // display with GLib's criticals fatal as run_tests.py runs it; its
+  // system libraries are //flutter/shell/platform/linux/config's.
+  ConvertedFile(
+    '//flutter/shell/platform/linux',
+    skip: <String, String>{'flutter_gtk': 'zip_bundle: artifact packaging'},
+  ),
   // flutter_tester, the host runner of the engine's Dart tests
   // (testing/dart through run_tests.py), and its OpenGL ES variant.
   ConvertedFile('//flutter/shell/testing'),
