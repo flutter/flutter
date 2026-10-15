@@ -26,16 +26,14 @@ import '../base/utils.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
-import '../experimental/extension_arg_parser.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../resident_runner.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../web/web_device.dart';
+import 'flutter_command.dart';
 import 'local_engine.dart';
-import 'options/common_options.dart';
-import 'options/option_descriptor.dart';
 
 /// Common flutter command line options.
 abstract final class FlutterGlobalOptions {
@@ -183,17 +181,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
       negatable: false,
       help: 'Suppress analytics reporting for the current CLI invocation.',
     );
-    argParser.addOption(
-      FlutterGlobalOptions.kPackagesOption,
-      hide: !verboseHelp,
-      help: 'Path to your "package_config.json" file.',
-    );
-    argParser.addFlag(
-      FlutterGlobalOptions.kPrintDtd,
-      negatable: false,
-      help: 'Print the address of the Dart Tooling Daemon, if one is hosted by the Flutter CLI.',
-      hide: !verboseHelp,
-    );
+    argParser.addDescriptor(CommonOptions.packages, verboseHelp: verboseHelp);
+    argParser.addDescriptor(CommonOptions.printDtd, verboseHelp: verboseHelp);
 
     if (verboseHelp) {
       argParser.addSeparator('Local build selection options (not normally required):');
@@ -228,14 +217,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           'platform (e.g. MacOS ARM64) but intend to run Flutter on another (e.g. Android).',
     );
 
-    argParser.addOption(
-      FlutterGlobalOptions.kLocalWebSDKOption,
-      hide: !verboseHelp,
-      help:
-          'Name of a build output within the engine out directory, if you are building Flutter locally.\n'
-          'Use this to select a specific version of the web sdk if you have built multiple engine targets.\n'
-          'This path is relative to "--local-engine-src-path" (see above).',
-    );
+    argParser.addDescriptor(CommonOptions.localWebSdk, verboseHelp: verboseHelp);
 
     if (verboseHelp) {
       argParser.addSeparator('Options for testing the "flutter" tool itself:');
@@ -255,11 +237,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       help: 'List the special "web-server" device in device listings.',
     );
     argParser.addDescriptor(CommonOptions.ci, verboseHelp: verboseHelp);
-    argParser.addOption(
-      FlutterGlobalOptions.kDebugLogsDirectoryFlag,
-      help: 'Path to a directory where logs for debugging may be added.',
-      hide: !verboseHelp,
-    );
+    argParser.addDescriptor(CommonOptions.debugLogsDir, verboseHelp: verboseHelp);
   }
 
   void _updateArgParser({required int? wrapColumn}) {
@@ -362,7 +340,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   /// Traverses [args] to identify the target command being invoked and triggers
-  /// dynamic option initialization (via [ExtensionArgParserMixin.initializeDynamicOptions])
+  /// dynamic option initialization (via [FlutterCommand.initializeDynamicOptions])
   /// before argument parsing begins.
   Future<void> _initializeDynamicOptions(Iterable<String> args) async {
     if (_featureFlags?.isToolExtensionsEnabled != true) {
@@ -380,8 +358,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
       Command<void>? current = command;
       while (current != null) {
-        if (current case final ExtensionArgParserMixin dynamicCommand) {
-          await dynamicCommand.initializeDynamicOptions();
+        if (current case final FlutterCommand flutterCommand) {
+          await flutterCommand.initializeDynamicOptions();
         }
         current = current.parent;
       }
