@@ -1760,10 +1760,7 @@ flutter:
             },
           );
           flutterCommand.usesFlavorOption();
-          final CommandRunner<void> runner = createTestCommandRunner(
-            flutterCommand,
-            toolContext: toolContext,
-          );
+          final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
           await runner.run(<String>['dummy', '--flavor', 'custom_flavor']);
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,

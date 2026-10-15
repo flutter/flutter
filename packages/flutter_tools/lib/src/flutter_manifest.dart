@@ -662,24 +662,22 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           break;
         }
         if (yamlValue is YamlMap) {
-          for (final MapEntry(:key, :value) in yamlValue.entries) {
-            final Object? platform = key;
-            if (platform is! String) {
+          for (final MapEntry(:Object? key, :Object? value) in yamlValue.entries) {
+            if (key is! String) {
               errors.add(
-                'Expected key under "$yamlKey" to be a string, but got $platform (${platform.runtimeType}).',
+                'Expected key under "$yamlKey" to be a string, but got $key (${key.runtimeType}).',
               );
               continue;
             }
-            if (!_kValidDefaultFlavorPlatforms.contains(platform.toLowerCase())) {
+            if (!_kValidDefaultFlavorPlatforms.contains(key.toLowerCase())) {
               errors.add(
-                'Invalid platform "$platform" under "$yamlKey". Supported platforms are: '
+                'Invalid platform "$key" under "$yamlKey". Supported platforms are: '
                 '"${_kValidDefaultFlavorPlatforms.join('", "')}".',
               );
             }
-            final Object? flavor = value;
-            if (flavor is! String) {
+            if (value is! String) {
               errors.add(
-                'Expected value for "$platform" under "$yamlKey" to be a string, but got $flavor (${flavor.runtimeType}).',
+                'Expected value for "$key" under "$yamlKey" to be a string, but got $value (${value.runtimeType}).',
               );
             }
           }
