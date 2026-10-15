@@ -2403,6 +2403,20 @@ server:
       initializeFlutterRoot: false,
     );
   });
+
+  testWithoutContext('RunCommand registers --flavor, --track-widget-creation, and AndroidGradleOptionsBundle without AndroidBuildOptionsBundle flags', () {
+    final command = RunCommand(
+      appleContext: FakeAppleContext(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      buildTargets: const BuildTargetsImpl(),
+      toolContext: FakeToolContext(),
+    );
+
+    expect(command.argParser.options, contains('flavor'));
+    expect(command.argParser.options, contains('track-widget-creation'));
+    expect(command.argParser.options, contains('android-gradle-daemon'));
+    expect(command.argParser.options, isNot(contains('shrink')));
+  });
 }
 
 class TestDeviceManager extends DeviceManager {

@@ -57,7 +57,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       VmServicePortOptionsBundle(),
       DeviceDiscoveryOptionsBundle(includeDeviceUser: true),
       DdsAndDevToolsOptionsBundle(),
-      AndroidBuildOptionsBundle(),
+      AndroidGradleOptionsBundle(),
       EngineRenderingFlagsBundle(includeTestFlag: true),
     ]);
     usesWebOptions(verboseHelp: verboseHelp);
@@ -65,12 +65,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       CommonOptions.dartDefines,
       CommonOptions.dartDefineFromFile,
       WebOptions.webDefines,
+      BuildInfoOptions.flavor,
       WebOptions.webResourcesCdn,
       CommonOptions.nativeNullAssertions,
       CommonOptions.useApplicationBinary,
       WebOptions.deprecatedJsInterop,
       CommonOptions.target,
       CommonOptions.pub,
+      BuildInfoOptions.trackWidgetCreation,
       CommonOptions.fatalWarnings,
       DebuggingOptionDescriptors.adbLogFiltering,
       DebuggingOptionDescriptors.traceStartup,
