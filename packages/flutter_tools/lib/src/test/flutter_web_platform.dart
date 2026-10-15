@@ -230,20 +230,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     _fileSystem.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'static', 'Ahem.ttf'),
   );
 
-  /// The require js binary.
-  File get _requireJs => _fileSystem.file(
-    _fileSystem.path.join(
-      _artifacts.getArtifactPath(
-        Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
-      ),
-      'lib',
-      'dev_compiler',
-      'amd',
-      'require.js',
-    ),
-  );
-
   /// The ddc module loader js binary.
   File get _ddcModuleLoaderJs => _fileSystem.file(
     _fileSystem.path.join(
@@ -279,29 +265,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     ),
   );
 
-  File get _dartSdk {
-    // TODO(srujzs): Remove this assertion when the library bundle format is
-    // supported without canary mode.
-    if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
-      assert(buildInfo.canaryFeatures);
-    }
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = buildInfo.canaryFeatures
-        ? kDDCCanarySdkArtifactMap
-        : kDDCStableSdkArtifactMap;
-    return _fileSystem.file(_artifacts.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
-  }
+  File get _dartSdk =>
+      _fileSystem.file(_artifacts.getHostArtifact(kDDCSdkArtifactMap[webRenderer]!));
 
-  File get _dartSdkSourcemaps {
-    // TODO(srujzs): Remove this assertion when the library bundle format is
-    // supported without canary mode.
-    if (buildInfo.ddcModuleFormat == DdcModuleFormat.ddc) {
-      assert(buildInfo.canaryFeatures);
-    }
-    final Map<WebRendererMode, HostArtifact> dartSdkArtifactMap = buildInfo.canaryFeatures
-        ? kDDCCanarySdkSourcemapsArtifactMap
-        : kDDCStableSdkSourcemapsArtifactMap;
-    return _fileSystem.file(_artifacts.getHostArtifact(dartSdkArtifactMap[webRenderer]!));
-  }
+  File get _dartSdkSourcemaps =>
+      _fileSystem.file(_artifacts.getHostArtifact(kDDCSdkSourcemapsArtifactMap[webRenderer]!));
 
   File _canvasKitFile(String relativePath) {
     final String canvasKitPath = _fileSystem.path.join(
@@ -316,7 +284,6 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (request.url.path.endsWith('main.dart.browser_test.dart.js')) {
       return shelf.Response.ok(
         generateDDCLibraryBundleBootstrapScript(
-          entrypoint: 'main.dart',
           ddcModuleLoaderUrl: 'ddc_module_loader.js',
           mapperUrl: 'dart_stack_trace_mapper.js',
           generateLoadingIndicator: false,
@@ -388,12 +355,7 @@ window.\$dartLoader.loader.nextAttempt();
   }
 
   Future<shelf.Response> _handleStaticArtifact(shelf.Request request) async {
-    if (request.requestedUri.path.contains('require.js')) {
-      return shelf.Response.ok(
-        _requireJs.openRead(),
-        headers: <String, String>{'Content-Type': 'text/javascript'},
-      );
-    } else if (request.requestedUri.path.contains('ddc_module_loader.js')) {
+    if (request.requestedUri.path.contains('ddc_module_loader.js')) {
       return shelf.Response.ok(
         _ddcModuleLoaderJs.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
