@@ -32,7 +32,7 @@ class WebApplicationPackage extends ApplicationPackage {
 }
 
 abstract class WebDevice extends Device {
-  WebDevice(super.id, {required Logger super.logger})
+  WebDevice(super.id, {required super.logger})
     : super(category: Category.web, platformType: PlatformType.web, ephemeral: false);
 
   @override

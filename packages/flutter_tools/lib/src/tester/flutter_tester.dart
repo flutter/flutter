@@ -54,7 +54,7 @@ class FlutterTesterDevice extends Device {
     required this._buildSystem,
     required this._buildTargets,
     this._nativeAssetsBuilder,
-  }) : super(platformType: null, category: null, ephemeral: false);
+  }) : super(logger: toolContext.logger, platformType: null, category: null, ephemeral: false);
 
   final Analytics _analytics;
   final BuildSystem _buildSystem;

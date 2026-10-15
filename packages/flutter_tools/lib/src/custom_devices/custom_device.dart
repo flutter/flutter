@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -17,13 +18,14 @@ import '../base/logger.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/build_targets.dart';
 import '../bundle_builder.dart';
 import '../context/tool_context.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
@@ -424,16 +426,25 @@ class CustomDeviceAppSession {
 /// The exact actions are defined by the contents of the [CustomDeviceConfig]
 /// used to construct it.
 class CustomDevice extends Device {
-  CustomDevice({required this._config, required ToolContext super.toolContext})
-    : _globalLogReader = CustomDeviceLogReader(_config.label),
-      super(
-        _config.id,
-        category: Category.mobile,
-        ephemeral: true,
-        platformType: PlatformType.custom,
-      );
+  CustomDevice({
+    required this._config,
+    required this._analytics,
+    required this._buildSystem,
+    required this._buildTargets,
+    required ToolContext super.toolContext,
+  }) : _globalLogReader = CustomDeviceLogReader(_config.label),
+       super(
+         _config.id,
+         category: Category.mobile,
+         ephemeral: true,
+         logger: toolContext.logger,
+         platformType: PlatformType.custom,
+       );
 
   final CustomDeviceConfig _config;
+  final Analytics _analytics;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
   final _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
   Process? _globalLogReaderProcess;
@@ -739,9 +750,9 @@ class CustomDevice extends Device {
       final String assetBundleDir = getAssetBuildDirectory(config, fs);
 
       bundleBuilder ??= BundleBuilder(
-        analytics: globals.analytics,
-        buildSystem: globals.buildSystem,
-        buildTargets: globals.buildTargets,
+        analytics: _analytics,
+        buildSystem: _buildSystem,
+        buildTargets: _buildTargets,
         toolContext: toolContext,
       );
 
@@ -820,11 +831,19 @@ class CustomDevice extends Device {
 class CustomDevices extends PollingDeviceDiscovery {
   /// Create a custom device discovery that pings all enabled devices in the
   /// given [ToolContext.customDevicesConfig].
-  CustomDevices({required FeatureFlags featureFlags, required ToolContext super.toolContext})
-    : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
-      super('custom devices');
+  CustomDevices({
+    required FeatureFlags featureFlags,
+    required this._analytics,
+    required this._buildSystem,
+    required this._buildTargets,
+    required ToolContext super.toolContext,
+  }) : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
+       super('custom devices');
 
   final CustomDeviceWorkflow _customDeviceWorkflow;
+  final Analytics _analytics;
+  final BuildSystem _buildSystem;
+  final BuildTargets _buildTargets;
 
   @override
   bool get supportsPlatform => true;
@@ -836,7 +855,15 @@ class CustomDevices extends PollingDeviceDiscovery {
     return toolContext.customDevicesConfig
         .tryGetDevices()
         .where((CustomDeviceConfig element) => element.enabled)
-        .map((CustomDeviceConfig config) => CustomDevice(config: config, toolContext: toolContext))
+        .map(
+          (CustomDeviceConfig config) => CustomDevice(
+            config: config,
+            analytics: _analytics,
+            buildSystem: _buildSystem,
+            buildTargets: _buildTargets,
+            toolContext: toolContext,
+          ),
+        )
         .toList();
   }
 

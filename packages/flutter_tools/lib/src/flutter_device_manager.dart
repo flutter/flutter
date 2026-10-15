@@ -119,7 +119,13 @@ class FlutterDeviceManager extends DeviceManager {
            processManager: processManager,
            logger: logger,
          ),
-         CustomDevices(featureFlags: featureFlags, toolContext: toolContext),
+         CustomDevices(
+           featureFlags: featureFlags,
+           analytics: analytics,
+           buildSystem: buildSystem,
+           buildTargets: buildTargets,
+           toolContext: toolContext,
+         ),
          if (extensionManager != null)
            ExtensionDevices(extensionManager: extensionManager, logger: logger),
        ];
