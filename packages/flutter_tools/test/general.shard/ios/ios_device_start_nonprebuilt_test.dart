@@ -1651,16 +1651,14 @@ IOSDevice setUpIOSDevice({
     '123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
-    fileSystem: testFileSystem,
-    fileSystemUtils: FileSystemUtils(fileSystem: testFileSystem, platform: macPlatform),
-    platform: macPlatform,
-    processUtils: ProcessUtils(
-      processManager: processManager ?? FakeProcessManager.any(),
+    toolContext: FakeToolContext(
+      fs: testFileSystem,
       logger: logger,
+      platform: macPlatform,
+      processManager: processManager,
     ),
     xcode: xcode,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
-    logger: logger,
     iosDeploy: IOSDeploy(
       logger: logger,
       platform: macPlatform,
@@ -1684,6 +1682,7 @@ IOSDevice setUpIOSDevice({
     isPaired: true,
     devModeEnabled: true,
     isCoreDevice: isCoreDevice,
+    templateRenderer: FakeTemplateRenderer(),
   );
 }
 
