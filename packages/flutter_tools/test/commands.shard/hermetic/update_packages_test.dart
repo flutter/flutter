@@ -385,7 +385,7 @@ void main() {
       );
     });
 
-    testWithoutContext('--cherry-pick-package muliple', () async {
+    testWithoutContext('--cherry-pick-package multiple', () async {
       final command = UpdatePackagesCommand(
         toolContext: toolContext,
         httpClientFactory: FakeHttpClient.any,
