@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -240,7 +239,6 @@ class AnalyzeCommand extends FlutterCommand {
     final ToolContext(
       fs: FileSystem fileSystem,
       :Logger logger,
-      :ProcessManager processManager,
       :FlutterProjectFactory projectFactory,
     ) = toolContext;
 
@@ -350,10 +348,7 @@ class AnalyzeCommand extends FlutterCommand {
       }
       return ValidateProject(
         allProjectValidators: _allProjectValidators,
-        fileSystem: fileSystem,
-        logger: logger,
-        processManager: processManager,
-        projectFactory: projectFactory,
+        toolContext: toolContext,
         userPath: directoryPath,
         machine: outputMachineFormat,
       ).run();

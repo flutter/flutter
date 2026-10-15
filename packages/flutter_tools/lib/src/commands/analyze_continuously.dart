@@ -50,13 +50,9 @@ class AnalyzeContinuously extends AnalyzeBase {
     final server = AnalysisServer(
       sdkPath,
       directories,
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      terminal: terminal,
-      protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
+      toolContext: toolContext,
+      protocolTrafficLog: protocolTrafficLog,
       usePlugins: usePlugins,
     );
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
