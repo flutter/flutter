@@ -1194,6 +1194,83 @@ suite("x") {
         expect(x.variables.containsKey('target_name'), isFalse);
       });
 
+      test('a template invokes another, forwarding into its own scope', () {
+        // publish.gni's shape: publish_client_wrapper_extension invokes
+        // publish_client_wrapper_core, which invokes publish_client_wrapper;
+        // each forwards an optional invoker variable into template scope,
+        // tests it with defined() and derives the copies' destination from
+        // it, and the inner template names a file of its own directory.
+        final GnSourceTree tree = sourceTree(<String, String>{
+          'lib/publish.gni': r'''
+_readme = get_path_info("README", "abspath")
+
+template("publish") {
+  forward_variables_from(invoker, [ "suffix" ])
+  if (defined(suffix)) {
+    dir = "$root_out_dir/wrapper_$suffix"
+  } else {
+    dir = "$root_out_dir/wrapper"
+  }
+  group(target_name) {
+    forward_variables_from(invoker, [ "public_deps" ])
+    deps = [ ":${target_name}_sources" ]
+  }
+  copy("${target_name}_sources") {
+    sources = invoker.sources + [ _readme ]
+    outputs = [ "$dir/{{source_file_part}}" ]
+  }
+}
+
+template("publish_extension") {
+  publish("${target_name}_core") {
+    forward_variables_from(invoker, [ "suffix" ])
+    sources = [ "//lib/core.cc" ]
+  }
+  publish(target_name) {
+    forward_variables_from(invoker, [ "sources", "suffix" ])
+    public_deps = [ ":${target_name}_core" ]
+  }
+}
+''',
+          'a/BUILD.gn': '''
+import("//lib/publish.gni")
+
+publish_extension("wrapper_a") {
+  sources = [ "a.cc" ]
+  suffix = "a"
+}
+
+publish("plain") {
+  sources = [ "p.cc" ]
+}
+''',
+        });
+        final GnFileEvaluation evaluation = evaluateIn(tree, '//a/BUILD.gn');
+        expect(evaluation.targets.map((GnTarget t) => t.name), <String>[
+          'wrapper_a_core',
+          'wrapper_a_core_sources',
+          'wrapper_a',
+          'wrapper_a_sources',
+          'plain',
+          'plain_sources',
+        ]);
+        final GnTarget core = evaluation.targets[1];
+        expect(core.rule, 'copy');
+        expect(strings(core, 'sources'), <String>['//lib/core.cc', '//lib/README']);
+        expect(strings(core, 'outputs'), <String>['$buildDirRoot/wrapper_a/{{source_file_part}}']);
+        final GnTarget wrapper = evaluation.targets[2];
+        expect(wrapper.rule, 'group');
+        expect(strings(wrapper, 'public_deps'), <String>[':wrapper_a_core']);
+        expect(strings(wrapper, 'deps'), <String>[':wrapper_a_sources']);
+        expect(strings(evaluation.targets[3], 'sources'), <String>['a.cc', '//lib/README']);
+        // Without a suffix, defined() is false and the plain destination is
+        // used; the template-scope variable of one invocation does not leak
+        // into the next.
+        final GnTarget plain = evaluation.targets[5];
+        expect(strings(plain, 'outputs'), <String>['$buildDirRoot/wrapper/{{source_file_part}}']);
+        expect(evaluation.targets[4].variables.containsKey('public_deps'), isFalse);
+      });
+
       test("+= on an enclosing scope's variable modifies a copy, as GN does", () {
         // The embedder's embedder_source_set forwards public_configs into
         // template scope and the target block appends to it

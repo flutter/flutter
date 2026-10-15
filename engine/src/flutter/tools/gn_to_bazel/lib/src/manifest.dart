@@ -362,8 +362,41 @@ cc_test(
     skip: <String, String>{'common_cpp_accessibility': 'needs //flutter/third_party/accessibility'},
   ),
   // The C++ client wrapper (plugin API) the desktop embeddings build on,
-  // with its suite; its file lists come from core_wrapper_files.gni.
-  ConvertedFile('//flutter/shell/platform/common/client_wrapper'),
+  // with its suite; its file lists come from core_wrapper_files.gni. The
+  // GLFW wrapper's headers include the core wrapper's as siblings (the
+  // merged layout clients see), through a config whose include directory
+  // is this package's include/flutter: the library below carries it
+  // (includeDirLibraries).
+  ConvertedFile(
+    '//flutter/shell/platform/common/client_wrapper',
+    appendix: '''
+# The include/flutter directory as an include path, for the platform
+# wrappers' configs (//flutter/shell/platform/glfw/client_wrapper:
+# relative_core_wrapper_headers).
+cc_library(
+    name = "relative_core_wrapper_headers",
+    includes = ["include/flutter"],
+)
+
+# What publish_client_wrapper_core (publish.gni) copies from here into the
+# platform wrappers' cpp_client_wrapper_<platform>: core_wrapper_files.gni's
+# lists -- the public headers, the internal headers, the sources and the
+# shim -- and the README; the glob is exactly those.
+exports_files(["README"] + glob(
+    [
+        "*.cc",
+        "*.h",
+        "include/flutter/*.h",
+    ],
+    exclude = ["*_unittests.cc"],
+))
+''',
+  ),
+  // The GLFW shell (the desktop embedding's reference implementation on
+  // Linux hosts) and its client wrapper, with their suites; the X11 config
+  // it lists is //flutter/shell/platform/linux/config's (hand-written).
+  ConvertedFile('//flutter/shell/platform/glfw'),
+  ConvertedFile('//flutter/shell/platform/glfw/client_wrapper'),
   // flutter_tester, the host runner of the engine's Dart tests
   // (testing/dart through run_tests.py), and its OpenGL ES variant.
   ConvertedFile('//flutter/shell/testing'),
@@ -1027,6 +1060,10 @@ const Set<String> handWrittenPackages = <String>{
   // run_tests.py's run matrix, which GN does not have.
   'engine/src/flutter/testing/dart',
   'engine/src/flutter/testing/dart/vm_service',
+  // The Linux embeddings' system libraries: GN's foreach over pkg_config()
+  // templates, each an exec_script of pkg-config against the sysroot, whose
+  // answers the file holds.
+  'engine/src/flutter/shell/platform/linux/config',
   'engine/src/flutter/third_party',
 };
 
