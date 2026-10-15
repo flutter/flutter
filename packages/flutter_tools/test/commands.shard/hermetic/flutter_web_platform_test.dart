@@ -68,16 +68,16 @@ class _RecordingChromiumLauncher extends ChromiumLauncher {
 class FakeWebSocketSink implements WebSocketSink {
   FakeWebSocketSink(this._sink);
 
-  final StreamSink<dynamic> _sink;
+  final StreamSink<Object?> _sink;
 
   @override
-  void add(dynamic data) => _sink.add(data);
+  void add(Object? data) => _sink.add(data);
 
   @override
   void addError(Object error, [StackTrace? stackTrace]) => _sink.addError(error, stackTrace);
 
   @override
-  Future<void> addStream(Stream<dynamic> stream) => _sink.addStream(stream);
+  Future<void> addStream(Stream<Object?> stream) => _sink.addStream(stream);
 
   @override
   Future<void> close([int? closeCode, String? closeReason]) => _sink.close();
@@ -87,16 +87,16 @@ class FakeWebSocketSink implements WebSocketSink {
 }
 
 /// A [WebSocketChannel] whose incoming stream is driven by the test.
-class FakeWebSocketChannel extends StreamChannelMixin<dynamic> implements WebSocketChannel {
-  FakeWebSocketChannel(this.controller);
+class FakeWebSocketChannel extends StreamChannelMixin<Object?> implements WebSocketChannel {
+  FakeWebSocketChannel(this.controller) : sink = FakeWebSocketSink(controller.foreign.sink);
 
-  final StreamChannelController<dynamic> controller;
-
-  @override
-  Stream<dynamic> get stream => controller.foreign.stream;
+  final StreamChannelController<Object?> controller;
 
   @override
-  WebSocketSink get sink => FakeWebSocketSink(controller.foreign.sink);
+  Stream<Object?> get stream => controller.foreign.stream;
+
+  @override
+  final WebSocketSink sink;
 
   @override
   int? get closeCode => null;
@@ -366,7 +366,7 @@ void main() {
   );
 
   BrowserManager createBrowserManager(
-    StreamChannelController<dynamic> controller,
+    StreamChannelController<Object?> controller,
     Process process,
   ) {
     final chromiumLauncher = ChromiumLauncher(
@@ -397,7 +397,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/191920.
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
-      final controller = StreamChannelController<dynamic>();
+      final controller = StreamChannelController<Object?>();
       createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
 
       controller.local.sink.close();
@@ -414,7 +414,7 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       logger = BufferLogger.test(verbose: true);
       final exitCode = Completer<int>();
-      final controller = StreamChannelController<dynamic>();
+      final controller = StreamChannelController<Object?>();
       createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
 
       controller.local.sink.close();
@@ -432,7 +432,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/191920.
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
-      final controller = StreamChannelController<dynamic>();
+      final controller = StreamChannelController<Object?>();
       createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
 
       // A dying process takes its connection with it, and the connection is
@@ -456,7 +456,7 @@ void main() {
   testWithoutContext('BrowserManager reports a process exit before the connection closes', () {
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
-      final controller = StreamChannelController<dynamic>();
+      final controller = StreamChannelController<Object?>();
       createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
 
       exitCode.complete(-9);
@@ -476,7 +476,7 @@ void main() {
     () {
       FakeAsync().run((FakeAsync time) {
         final exitCode = Completer<int>();
-        final controller = StreamChannelController<dynamic>();
+        final controller = StreamChannelController<Object?>();
         final BrowserManager manager = createBrowserManager(
           controller,
           FakeProcess(exitCode: exitCode.future),
@@ -496,7 +496,7 @@ void main() {
   testWithoutContext('BrowserManager does not attribute cleanup to an unexpected process exit', () {
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
-      final controller = StreamChannelController<dynamic>();
+      final controller = StreamChannelController<Object?>();
       createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
 
       controller.local.sink.close();
