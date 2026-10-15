@@ -312,6 +312,95 @@ void main() {
     expect(regularChildSize, Size.zero);
   });
 
+  // Regression test for reactivating a shown overlayChildLayoutBuilder portal
+  // after global key reparenting.
+  //
+  // Related issue: https://github.com/flutter/flutter/issues/188500.
+  testWidgets('shown overlayChildLayoutBuilder portal can be reparented', (
+    WidgetTester tester,
+  ) async {
+    final GlobalKey portalKey = GlobalKey(debugLabel: 'moving-portal');
+    final controller = OverlayPortalController()..show();
+    bool isMoved = false;
+    late StateSetter setState;
+    late final OverlayEntry overlayEntry;
+    addTearDown(
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
+    );
+    final Widget portal = OverlayPortal.overlayChildLayoutBuilder(
+      key: portalKey,
+      controller: controller,
+      overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo layoutInfo) {
+        final Rect childRect = MatrixUtils.transformRect(
+          layoutInfo.childPaintTransform,
+          Offset.zero & layoutInfo.childSize,
+        );
+        return Positioned.fromRect(
+          rect: childRect.inflate(8.0),
+          child: const SizedBox(key: ValueKey<String>('portal-overlay')),
+        );
+      },
+      child: const SizedBox(key: ValueKey<String>('portal-target'), width: 100.0, height: 40.0),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setter) {
+                    setState = setter;
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          SizedBox(
+                            key: const ValueKey<String>('top-slot'),
+                            height: 48.0,
+                            child: Center(child: isMoved ? null : portal),
+                          ),
+                          const SizedBox(height: 80.0),
+                          SizedBox(
+                            key: const ValueKey<String>('bottom-slot'),
+                            height: 48.0,
+                            child: Center(child: isMoved ? portal : null),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byKey(const ValueKey<String>('portal-overlay')), findsOneWidget);
+
+    setState(() {
+      isMoved = true;
+    });
+    await tester.pump();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey<String>('portal-overlay')), findsOneWidget);
+    expect(
+      tester.getCenter(find.byKey(const ValueKey<String>('portal-target'))).dy,
+      greaterThan(tester.getCenter(find.byKey(const ValueKey<String>('top-slot'))).dy),
+    );
+    expect(
+      tester.getRect(find.byKey(const ValueKey<String>('portal-overlay'))),
+      tester.getRect(find.byKey(const ValueKey<String>('portal-target'))).inflate(8.0),
+    );
+  });
+
   testWidgets('Screams if RenderFollower is spotted in path', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
     addTearDown(
