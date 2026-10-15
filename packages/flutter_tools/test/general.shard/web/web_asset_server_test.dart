@@ -798,7 +798,7 @@ void main() {
         logger: BufferLogger.test(),
         platform: platform,
         useLocalCanvasKit: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         testMode: true,
       );
