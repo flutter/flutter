@@ -58,10 +58,12 @@ void main() {
       fileSystem = MemoryFileSystem.test();
       iosDeploy = IOSDeploy(
         artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          cache: cache,
+          logger: logger,
+          platform: macPlatform,
+          processManager: FakeProcessManager.any(),
+        ),
       );
       iMobileDevice = IMobileDevice(
         artifacts: artifacts,
@@ -571,10 +573,12 @@ void main() {
         logger = BufferLogger.test();
         iosDeploy = IOSDeploy(
           artifacts: Artifacts.test(),
-          cache: cache,
-          logger: logger,
-          platform: macPlatform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            cache: cache,
+            logger: logger,
+            platform: macPlatform,
+            processManager: FakeProcessManager.any(),
+          ),
         );
       });
 
@@ -798,10 +802,12 @@ void main() {
       fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
         artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: fakeProcessManager,
+        toolContext: FakeToolContext(
+          cache: cache,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
       );
       iMobileDevice = IMobileDevice(
         artifacts: artifacts,
@@ -1161,10 +1167,12 @@ void main() {
       fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
         artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: fakeProcessManager,
+        toolContext: FakeToolContext(
+          cache: cache,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
       );
       iMobileDevice = IMobileDevice(
         artifacts: artifacts,

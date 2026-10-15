@@ -254,12 +254,14 @@ void main() {
     await msvcBinDir.create(recursive: true);
 
     final CCompilerConfig result = (await cCompilerConfigWindows(
-      fileSystem: fileSystem,
-      logger: logger,
-      osUtils: FakeOperatingSystemUtils(),
-      platform: const LocalPlatform(),
-      processManager: testProcessManager,
       throwIfNotFound: true,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        os: FakeOperatingSystemUtils(),
+        platform: const LocalPlatform(),
+        processManager: testProcessManager,
+      ),
     ))!;
     expect(result.compiler.toFilePath(), msvcBinDir.childFile('cl.exe').uri.toFilePath());
     expect(result.archiver.toFilePath(), msvcBinDir.childFile('lib.exe').uri.toFilePath());
@@ -278,12 +280,14 @@ void main() {
       'returns null when Visual Studio is not found and throwIfNotFound is false',
       () async {
         final CCompilerConfig? result = await cCompilerConfigWindows(
-          fileSystem: fileSystem,
-          logger: logger,
-          osUtils: FakeOperatingSystemUtils(),
-          platform: windowsPlatform,
-          processManager: FakeProcessManager.any(),
           throwIfNotFound: false,
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+            platform: windowsPlatform,
+            processManager: FakeProcessManager.any(),
+          ),
         );
         expect(result, isNull);
       },
@@ -294,12 +298,14 @@ void main() {
       () async {
         await expectLater(
           cCompilerConfigWindows(
-            fileSystem: fileSystem,
-            logger: logger,
-            osUtils: FakeOperatingSystemUtils(),
-            platform: windowsPlatform,
-            processManager: FakeProcessManager.any(),
             throwIfNotFound: true,
+            toolContext: FakeToolContext(
+              fs: fileSystem,
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+              platform: windowsPlatform,
+              processManager: FakeProcessManager.any(),
+            ),
           ),
           throwsA(isA<ToolExit>()),
         );

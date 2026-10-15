@@ -2103,11 +2103,13 @@ IOSDevice setUpIOSDevice({
     iosDeploy:
         iosDeploy ??
         IOSDeploy(
-          logger: logger,
-          platform: macPlatform,
-          processManager: processManager ?? FakeProcessManager.any(),
           artifacts: artifacts,
-          cache: cache,
+          toolContext: FakeToolContext(
+            cache: cache,
+            logger: logger,
+            platform: macPlatform,
+            processManager: processManager ?? FakeProcessManager.any(),
+          ),
         ),
     analytics: analytics ?? FakeAnalytics(),
     iMobileDevice: IMobileDevice(

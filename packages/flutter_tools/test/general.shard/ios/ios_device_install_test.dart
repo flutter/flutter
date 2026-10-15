@@ -380,11 +380,13 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     iosDeploy: IOSDeploy(
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
       artifacts: artifacts,
-      cache: cache,
+      toolContext: FakeToolContext(
+        cache: cache,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
     ),
     analytics: FakeAnalytics(),
     coreDeviceControl: FakeIOSCoreDeviceControl(),

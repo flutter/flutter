@@ -10,6 +10,7 @@ import '../../../base/file_system.dart';
 import '../../../base/logger.dart';
 import '../../../base/os.dart';
 import '../../../base/platform.dart';
+import '../../../context/tool_context.dart';
 import '../../../windows/visual_studio.dart';
 
 /// Returns the [CCompilerConfig] for Windows by locating the active Visual Studio toolchain.
@@ -18,19 +19,22 @@ import '../../../windows/visual_studio.dart';
 /// * Throws a [ToolExit] if [throwIfNotFound] is true.
 /// * Returns null if [throwIfNotFound] is false.
 Future<CCompilerConfig?> cCompilerConfigWindows({
-  required FileSystem fileSystem,
-  required Logger logger,
-  required OperatingSystemUtils osUtils,
-  required Platform platform,
-  required ProcessManager processManager,
   required bool throwIfNotFound,
+  required ToolContext toolContext,
 }) async {
+  final ToolContext(
+    :FileSystem fs,
+    :Logger logger,
+    :OperatingSystemUtils os,
+    :Platform platform,
+    :ProcessManager processManager,
+  ) = toolContext;
   final visualStudio = VisualStudio(
-    fileSystem: fileSystem,
+    fileSystem: fs,
     platform: platform,
     logger: logger,
     processManager: processManager,
-    osUtils: osUtils,
+    osUtils: os,
   );
 
   final Uri? compiler = _toOptionalFileUri(visualStudio.clPath);

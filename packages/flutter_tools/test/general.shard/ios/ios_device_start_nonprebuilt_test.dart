@@ -1570,11 +1570,13 @@ IOSDevice setUpIOSDevice({
     xcode: null,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     iosDeploy: IOSDeploy(
-      logger: logger,
-      platform: macPlatform,
-      processManager: processManager ?? FakeProcessManager.any(),
       artifacts: artifacts,
-      cache: cache,
+      toolContext: DelegatingToolContext(
+        cache: cache,
+        logger: logger,
+        platform: macPlatform,
+        processManager: processManager ?? FakeProcessManager.any(),
+      ),
     ),
     analytics: analytics ?? FakeExactAnalytics(),
     iMobileDevice: IMobileDevice(

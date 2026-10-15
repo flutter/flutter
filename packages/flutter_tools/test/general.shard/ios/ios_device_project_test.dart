@@ -107,11 +107,13 @@ IOSDevice setUpIOSDevice(FileSystem fileSystem) {
     ),
     xcode: null,
     iosDeploy: IOSDeploy(
-      platform: platform,
-      logger: logger,
-      processManager: processManager,
       artifacts: Artifacts.test(),
-      cache: Cache.test(processManager: processManager),
+      toolContext: FakeToolContext(
+        cache: Cache.test(processManager: processManager),
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
     ),
     analytics: FakeAnalytics(),
     iMobileDevice: IMobileDevice.test(processManager: processManager),

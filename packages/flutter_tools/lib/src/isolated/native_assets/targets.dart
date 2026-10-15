@@ -6,12 +6,8 @@ import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:file/file.dart' show Directory, FileSystem;
 import 'package:hooks/hooks.dart';
-import 'package:process/process.dart' show ProcessManager;
 
 import '../../base/common.dart' show throwToolExit;
-import '../../base/logger.dart' show Logger;
-import '../../base/os.dart' show OperatingSystemUtils;
-import '../../base/platform.dart' show Platform;
 import '../../build_info.dart'
     show
         BuildMode,
@@ -268,20 +264,9 @@ class WindowsAssetTarget extends CodeAssetTarget {
     required ToolContext toolContext,
     bool mustMatchAppBuild = true,
   }) async {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :OperatingSystemUtils os,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
     cCompilerConfigSync = await cCompilerConfigWindows(
-      fileSystem: fs,
-      logger: logger,
-      osUtils: os,
-      platform: platform,
-      processManager: processManager,
       throwIfNotFound: mustMatchAppBuild,
+      toolContext: toolContext,
     );
   }
 }
