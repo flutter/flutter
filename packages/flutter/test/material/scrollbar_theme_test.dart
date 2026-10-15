@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/cupertino.dart' show CupertinoScrollbar;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -220,6 +221,48 @@ void main() {
       TargetPlatform.fuchsia,
     }),
   );
+
+  testWidgets('Scrollbar uses compatible ScrollbarTheme values on iOS', (
+    WidgetTester tester,
+  ) async {
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.iOS,
+          scrollbarTheme: ScrollbarThemeData(
+            thumbVisibility: WidgetStateProperty.all(true),
+            thickness: WidgetStateProperty.all(12.0),
+            thumbColor: WidgetStateProperty.all(Colors.blue),
+            radius: const Radius.circular(8.0),
+            interactive: false,
+          ),
+        ),
+        home: ScrollConfiguration(
+          behavior: const NoScrollbarBehavior(),
+          child: Scrollbar(
+            controller: scrollController,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: const SizedBox(width: 4000.0, height: 4000.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoScrollbar scrollbar = tester.widget<CupertinoScrollbar>(
+      find.byType(CupertinoScrollbar),
+    );
+    expect(scrollbar.thumbVisibility, isTrue);
+    expect(scrollbar.thickness, 12.0);
+    expect(scrollbar.thicknessWhileDragging, 12.0);
+    expect(scrollbar.thumbColor, Colors.blue);
+    expect(scrollbar.radius, const Radius.circular(8.0));
+    expect(scrollbar.radiusWhileDragging, const Radius.circular(8.0));
+    expect(scrollbar.interactive, false);
+  });
 
   testWidgets('Scrollbar uses values from ScrollbarTheme if exists instead of values from Theme', (
     WidgetTester tester,
