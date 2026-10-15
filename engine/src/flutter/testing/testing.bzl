@@ -388,14 +388,12 @@ def flutter_gpu_test_backends(name, visibility = None):
             src = "%s:%s" % (_GPU_TEST_BACKENDS_PACKAGE, product),
             out = file,
             allow_symlink = True,
-            testonly = True,
             visibility = ["//visibility:private"],
         )
         copies.append(file)
     native.filegroup(
         name = name,
         srcs = copies,
-        testonly = True,
         visibility = visibility,
     )
 

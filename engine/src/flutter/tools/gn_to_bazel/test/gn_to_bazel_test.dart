@@ -1915,6 +1915,27 @@ shared_library("tessellator_shared") {
       );
     });
 
+    test("an executable's output_name is accepted when it is the target's name", () async {
+      // flutter_tester's template forwards output_name = target_name.
+      final String output = await convert('''
+executable("tester") {
+  output_name = "tester"
+  sources = [ "a.cc" ]
+}
+''');
+      expect(output, contains('cc_binary(\n    name = "tester",\n'));
+      expect(output, isNot(contains('output_name')));
+      await expectLater(
+        convert('''
+executable("tester") {
+  output_name = "flutter_tester"
+  sources = [ "a.cc" ]
+}
+'''),
+        throwsGnError(line: 2, message: 'variable output_name is not converted yet'),
+      );
+    });
+
     test('keeps comments and shortens labels into the package', () async {
       final String output = await convert('''
 source_set("x") {

@@ -903,22 +903,24 @@ final class _Emitter {
           rule.list('data').addUnique(Condition.always, _Item(_localLabel(label)));
         }
       }
-      // The GPU test backends next to the binary (gpuBackendTests), which
-      // GN's data_deps place in the build directory: one copy per package.
-      if (gpuBackendTests.contains('$gnPackage:${target.name}')) {
-        if (!_declaredGpuBackends) {
-          _declaredGpuBackends = true;
-          _use('//engine/src/flutter/testing:testing.bzl', 'flutter_gpu_test_backends');
-          rules.add(
-            _Rule('flutter_gpu_test_backends', gpuBackendsTargetName, const <String>[
-              '# SwiftShader, its ICD manifest and the Vulkan loader, next to the',
-              '# suites below (GN: data_deps of //flutter/third_party/swiftshader and',
-              '# ANGLE).',
-            ]),
-          );
-        }
-        rule.list('data').addUnique(Condition.always, const _Item(':$gpuBackendsTargetName'));
+    }
+    // The GPU test backends next to the binary (gpuBackendTests), which
+    // GN's data_deps place in the build directory: one copy per package. An
+    // executable that is not a test (flutter_tester_opengles, which the Dart
+    // suites run) carries them as runfiles for the tests that run it.
+    if (!library && !shared && gpuBackendTests.contains('$gnPackage:${target.name}')) {
+      if (!_declaredGpuBackends) {
+        _declaredGpuBackends = true;
+        _use('//engine/src/flutter/testing:testing.bzl', 'flutter_gpu_test_backends');
+        rules.add(
+          _Rule('flutter_gpu_test_backends', gpuBackendsTargetName, const <String>[
+            '# SwiftShader, its ICD manifest and the Vulkan loader, next to the',
+            '# suites below (GN: data_deps of //flutter/third_party/swiftshader and',
+            '# ANGLE).',
+          ]),
+        );
       }
+      rule.list('data').addUnique(Condition.always, const _Item(':$gpuBackendsTargetName'));
     }
     if (shared) {
       rule.scalars['linkshared'] = 'True';
@@ -992,6 +994,10 @@ final class _Emitter {
           // A source_set produces no file, so GN ignores the name (harfbuzz's
           // GN sets one); a shared library's is in the rule's name already;
           // on anything else it would rename the output.
+          break;
+        case 'output_name' when _singleString(variable) == target.name:
+          // An executable named after its own target (flutter_tester's
+          // template forwards the name): the file Bazel produces anyway.
           break;
         default:
           if (_ignoredVariables.contains(variable.name) || variable.forwarded) {

@@ -126,3 +126,20 @@ flutter_test_fixtures(
         ":sampler_order_fixture",
     ],
 )
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+filegroup(
+    name = "compiled",
+    testonly = True,
+    srcs = [
+        ":fixtures",
+        ":ink_sparkle_web",
+        ":sampler_order_fixture",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/general_shaders:fixtures",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/supported_glsl_op_shaders:fixtures",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/supported_op_shaders:fixtures",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/uniforms:fixtures",
+    ],
+)

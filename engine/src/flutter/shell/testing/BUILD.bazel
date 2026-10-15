@@ -1,0 +1,152 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/testing/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "testing",
+    deps = [
+        ":flutter_tester",
+        ":flutter_tester_opengles",  # current_toolchain == host_toolchain
+    ],
+)
+
+cc_library(
+    name = "tester_gpu_configuration",
+    deps = [
+        "//engine/src/flutter/shell/gpu:gpu_surface_software",  # invoker.enable_software
+        "//engine/src/flutter/shell/gpu:gpu_surface_vulkan",  # invoker.enable_vulkan
+    ],
+)
+
+cc_library(
+    name = "tester_gpu_configuration_config",
+    defines = [
+        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+        "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+    ],
+)
+
+cc_library(
+    name = "tester_opengles_gpu_configuration",
+    deps = [
+        "//engine/src/flutter/shell/gpu:gpu_surface_gl",  # invoker.enable_gl
+    ],
+)
+
+cc_library(
+    name = "tester_opengles_gpu_configuration_config",
+    defines = [
+        "SHELL_ENABLE_GL",  # invoker.enable_gl
+    ],
+)
+
+cc_binary(
+    name = "flutter_tester",
+    srcs = [
+        "tester_context.h",
+        "tester_context_gles_factory.h",
+        "tester_context_mtl_factory.h",
+        "tester_context_vk_factory.cc",  # impeller_supports_rendering
+        "tester_context_vk_factory.h",
+        "tester_main.cc",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flow
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+        "-Wno-deprecated-copy",  # from //flutter/impeller
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller
+        "-Wno-nullability-completeness",  # from //flutter/impeller
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller
+        "-Wno-suggest-override",  # from //flutter/impeller
+        "-Wno-unused-private-field",  # from //flutter/impeller
+        "-Wno-unused-variable",  # from //flutter/impeller
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "SHELL_ENABLE_SOFTWARE",  # invoker.enable_software
+        "SHELL_ENABLE_VULKAN",  # invoker.enable_vulkan
+    ],
+    deps = [
+        ":tester_gpu_configuration",  # impeller_supports_rendering
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter:export_dynamic_test_symbols",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/build/bazel/gl_wrap:swiftshader_static",  # impeller_supports_rendering
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/shell/gpu:gpu_surface_software",
+        "//engine/src/flutter/third_party/tonic",
+        "@abseil-cpp//absl/base:no_destructor",
+        "@skia",
+    ],
+)
+
+# SwiftShader, its ICD manifest and the Vulkan loader, next to the
+# suites below (GN: data_deps of //flutter/third_party/swiftshader and
+# ANGLE).
+flutter_gpu_test_backends(
+    name = "gpu_test_backends",
+)
+
+cc_binary(
+    name = "flutter_tester_opengles",
+    srcs = [
+        "tester_context.h",
+        "tester_context_gles_factory.cc",  # impeller_supports_rendering
+        "tester_context_gles_factory.h",
+        "tester_context_mtl_factory.h",
+        "tester_context_vk_factory.h",
+        "tester_main.cc",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flow
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
+        "-Wno-deprecated-copy",  # from //flutter/impeller
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller
+        "-Wno-nullability-completeness",  # from //flutter/impeller
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller
+        "-Wno-suggest-override",  # from //flutter/impeller
+        "-Wno-unused-private-field",  # from //flutter/impeller
+        "-Wno-unused-variable",  # from //flutter/impeller
+    ],
+    data = [":gpu_test_backends"],
+    local_defines = FLUTTER_LOCAL_DEFINES + [
+        "SHELL_ENABLE_GL",  # invoker.enable_gl
+    ],
+    deps = [
+        ":tester_opengles_gpu_configuration",  # impeller_supports_rendering
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter:export_dynamic_test_symbols",
+        "//engine/src/flutter/assets",
+        "//engine/src/flutter/build/bazel/dart_wrap:common_embedder_dart_io",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller",  # impeller_supports_rendering
+        "//engine/src/flutter/lib/snapshot",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/shell/gpu:gpu_surface_software",
+        "//engine/src/flutter/testing:test_swangle_utils",  # impeller_supports_rendering
+        "//engine/src/flutter/testing:test_swiftshader_utils",  # impeller_supports_rendering
+        "//engine/src/flutter/third_party/tonic",
+        "@abseil-cpp//absl/base:no_destructor",
+        "@abseil-cpp//absl/status:statusor",  # impeller_supports_rendering
+        "@skia",
+    ],
+)

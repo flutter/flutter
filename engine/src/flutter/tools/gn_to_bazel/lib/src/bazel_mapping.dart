@@ -154,7 +154,10 @@ const Set<String> displayTests = <String>{
 /// (flutter_gpu_test_backends in testing.bzl) as `data`. The converter sees
 /// one file at a time and cannot follow the dependency to the backends, so
 /// the list is kept here; it is what `gn desc <out> <suite> runtime_deps`
-/// names libvk_swiftshader.so for.
+/// names libvk_swiftshader.so for. An executable that is not a test
+/// (flutter_tester_opengles, ANGLE over SwiftShader for the Dart suites)
+/// carries them as runfiles for the tests that run it; flutter_tester links
+/// SwiftShader statically and needs none.
 const Set<String> gpuBackendTests = <String>{
   '//flutter/impeller:impeller_dart_unittests',
   '//flutter/impeller:impeller_unittests',
@@ -164,6 +167,7 @@ const Set<String> gpuBackendTests = <String>{
   '//flutter/shell/gpu:gpu_surface_unittests',
   '//flutter/shell/platform/embedder:embedder_a11y_unittests',
   '//flutter/shell/platform/embedder:embedder_unittests',
+  '//flutter/shell/testing:flutter_tester_opengles',
 };
 
 /// The name of the flutter_gpu_test_backends target the converter declares
@@ -385,6 +389,10 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   // publish it (embedder_source_set's public_configs).
   '//flutter/shell/platform/embedder:embedder_gpu_configuration': _vulkanCopts,
   '//flutter/shell/platform/embedder:embedder_unittests_library': _vulkanCopts,
+  // flutter_tester's GPU configuration groups (software and Vulkan; OpenGL
+  // ES for the variant), both reaching the same backends.
+  '//flutter/shell/testing:tester_gpu_configuration': _vulkanCopts,
+  '//flutter/shell/testing:tester_opengles_gpu_configuration': _vulkanCopts,
   // The interop toolkit publishes the renderer backends down its chain.
   '//flutter/impeller/toolkit/interop:interop_base': _vulkanCopts,
   '//flutter/impeller/toolkit/interop:interop': _vulkanCopts,
@@ -686,6 +694,9 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   '//flutter:config': ConfigDependency('//engine/src/flutter:config'),
   '//flutter:export_dynamic_symbols': ConfigDependency(
     '//engine/src/flutter:export_dynamic_symbols',
+  ),
+  '//flutter:export_dynamic_test_symbols': ConfigDependency(
+    '//engine/src/flutter:export_dynamic_test_symbols',
   ),
   '//flutter/common:flutter_config': ConfigDependency('//engine/src/flutter/common:flutter_config'),
   '//flutter/impeller:impeller_public_config': ConfigDependency(

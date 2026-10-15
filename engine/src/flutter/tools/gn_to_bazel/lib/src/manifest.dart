@@ -93,10 +93,13 @@ config_setting(
     flag_values = {":slimpeller": "True"},
 )
 
-# config("export_dynamic_symbols") in //flutter/BUILD.gn reads these.
+# config("export_dynamic_symbols") and config("export_dynamic_test_symbols")
+# in //flutter/BUILD.gn read these.
 exports_files([
     "exported_symbols.sym",
     "exported_symbols_mac.sym",
+    "exported_test_symbols.sym",
+    "exported_test_symbols_mac.sym",
 ])
 ''',
   ),
@@ -139,6 +142,14 @@ selects.config_setting_group(
 filegroup(
     name = "resources",
     srcs = glob(["resources/**"]),
+)
+
+# package:skia_gold_client, a Dart package of this directory (no build file
+# of its own), which the Dart tests of testing/dart import; for their
+# kernel compiles.
+filegroup(
+    name = "skia_gold_client_sources",
+    srcs = glob(["skia_gold_client/lib/**/*.dart"]),
 )
 ''',
   ),
@@ -353,6 +364,9 @@ cc_test(
   // The C++ client wrapper (plugin API) the desktop embeddings build on,
   // with its suite; its file lists come from core_wrapper_files.gni.
   ConvertedFile('//flutter/shell/platform/common/client_wrapper'),
+  // flutter_tester, the host runner of the engine's Dart tests
+  // (testing/dart through run_tests.py), and its OpenGL ES variant.
+  ConvertedFile('//flutter/shell/testing'),
   // txt_unittests' embedded test font. The rest of the file is the Dart
   // runtime glue, which needs tonic, lib/snapshot and the shell.
   ConvertedFile('//flutter/runtime'),
@@ -418,16 +432,46 @@ exports_files(["file_loader/file_loader_unittests.cc"])
     skip: <String, String>{'ui_benchmarks': 'needs //flutter/benchmarking'},
     // dart_ui.gni's dart_ui_files: the dart:ui sources, which the platform
     // compile in lib/snapshot reads through lib/snapshot/libraries.json.
+    // The fixture files themselves, which the Dart tests of testing/dart
+    // read from the source root (flutter/lib/ui/fixtures/...), besides the
+    // copies in assets/.
     appendix: '''
 filegroup(
     name = "dart_ui",
     srcs = glob(["*.dart"]),
 )
+
+filegroup(
+    name = "fixture_sources",
+    srcs = glob(["fixtures/*"]),
+)
 ''',
   ),
   // The shader fixtures of lib/ui: impellerc() invoked directly, with each
   // directory's test_fixtures destined for lib/ui's assets (`dest`).
-  ConvertedFile('//flutter/lib/ui/fixtures/shaders'),
+  ConvertedFile(
+    '//flutter/lib/ui/fixtures/shaders',
+    // The compiled shaders at their build paths (each package's fixtures,
+    // and the two targets GN's fixtures depend on without listing their
+    // outputs, besides the copies in lib/ui's assets): fragment_shader_test
+    // lists the directories under $FLUTTER_BUILD_DIRECTORY/gen as GN lays
+    // them out, and reads ink_sparkle_web's JSON from iplr-json/.
+    appendix: '''
+filegroup(
+    name = "compiled",
+    testonly = True,
+    srcs = [
+        ":fixtures",
+        ":ink_sparkle_web",
+        ":sampler_order_fixture",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/general_shaders:fixtures",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/supported_glsl_op_shaders:fixtures",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/supported_op_shaders:fixtures",
+        "//engine/src/flutter/lib/ui/fixtures/shaders/uniforms:fixtures",
+    ],
+)
+''',
+  ),
   ConvertedFile('//flutter/lib/ui/fixtures/shaders/general_shaders'),
   ConvertedFile('//flutter/lib/ui/fixtures/shaders/supported_glsl_op_shaders'),
   ConvertedFile('//flutter/lib/ui/fixtures/shaders/supported_op_shaders'),
@@ -552,6 +596,14 @@ cc_library(
     include_prefix = "flutter/third_party/skia",
     visibility = ["@flutter//engine/src:__pkg__"],
     deps = ["//modules/skparagraph:engine_root_headers"],
+)
+
+# Skia's test images, which the engine's Dart tests read from the source
+# root (flutter/third_party/skia/resources/images/...; see
+# @flutter//engine/src/flutter/third_party:skia_resources).
+filegroup(
+    name = "resources_images",
+    srcs = glob(["resources/images/*"]),
 )
 ''',
   ),
@@ -971,6 +1023,10 @@ const Set<String> handWrittenPackages = <String>{
   'engine/src/flutter/impeller/tools',
   'engine/src/flutter/lib/snapshot',
   'engine/src/flutter/shell/vmservice',
+  // The Dart tests under flutter_tester: GN's foreach over the test list and
+  // run_tests.py's run matrix, which GN does not have.
+  'engine/src/flutter/testing/dart',
+  'engine/src/flutter/testing/dart/vm_service',
   'engine/src/flutter/third_party',
 };
 

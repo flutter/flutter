@@ -52,3 +52,34 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
 )
+
+# config("export_dynamic_test_symbols") in BUILD.gn: the list above plus the
+# symbol flutter_tester exposes to its Dart tests.
+cc_library(
+    name = "export_dynamic_test_symbols",
+    additional_linker_inputs = select({
+        "@platforms//os:macos": ["//engine/src/flutter/common:exported_test_symbols_mac.sym"],
+        "//conditions:default": ["//engine/src/flutter/common:exported_test_symbols.sym"],
+    }),
+    linkopts = select({
+        "@platforms//os:macos": [
+            "-Xlinker",
+            "-exported_symbols_list",
+            "-Xlinker",
+            "$(execpath //engine/src/flutter/common:exported_test_symbols_mac.sym)",
+        ],
+        "//conditions:default": [
+            "-Wl,--dynamic-list=$(execpath //engine/src/flutter/common:exported_test_symbols.sym)",
+        ],
+    }),
+    visibility = ["//visibility:public"],
+)
+
+# package:engine_repo_tools (tools/pkg/engine_repo_tools, a Dart package
+# with no build file of its own), which skia_gold_client imports; for the
+# kernel compiles of the Dart tests in testing/dart.
+filegroup(
+    name = "engine_repo_tools_sources",
+    srcs = glob(["tools/pkg/engine_repo_tools/lib/**/*.dart"]),
+    visibility = ["//visibility:public"],
+)
