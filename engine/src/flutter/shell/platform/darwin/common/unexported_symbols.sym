@@ -1,0 +1,21 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Symbols to **NOT** be exported in the Flutter.framework's dynamic symbol table.
+
+# These Swift symbols are globally visible by default because they are the Swift
+# implementation of public Objective-C APIs (@objc @implementation). 
+
+_$sSo18FlutterBinaryCodecC08InternalA11SwiftCommonEABycfC
+_$sSo18FlutterBinaryCodecC08InternalA11SwiftCommonEABycfc
+_$sSo18FlutterBinaryCodecCMa
+_$sSo18FlutterStringCodecC08InternalA11SwiftCommonEABycfC
+_$sSo18FlutterStringCodecC08InternalA11SwiftCommonEABycfc
+_$sSo18FlutterStringCodecCMa
+_$sSo22FlutterJSONMethodCodecC08InternalA11SwiftCommonEABycfC
+_$sSo22FlutterJSONMethodCodecC08InternalA11SwiftCommonEABycfc
+_$sSo22FlutterJSONMethodCodecCMa
+_$sSo23FlutterJSONMessageCodecC08InternalA11SwiftCommonEABycfC
+_$sSo23FlutterJSONMessageCodecC08InternalA11SwiftCommonEABycfc
+_$sSo23FlutterJSONMessageCodecCMa
