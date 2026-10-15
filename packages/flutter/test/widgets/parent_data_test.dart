@@ -478,6 +478,81 @@ void main() {
     parentData = tester.renderObject(find.byType(Container)).parentData! as DummyParentData;
     expect(parentData.string, 'Bar');
   });
+
+  testWidgets('applyParentData is not called when ParentData is incompatible', (
+    WidgetTester tester,
+  ) async {
+    var applyParentDataCalled = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            TestCallbackParentDataWidget(
+              onApplyParentData: () {
+                applyParentDataCalled = true;
+              },
+              child: const SizedBox(),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(applyParentDataCalled, isFalse);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(exception.toString(), startsWith('Incorrect use of ParentDataWidget.\n'));
+  });
+
+  testWidgets('applyParentData is called when ParentData is compatible', (
+    WidgetTester tester,
+  ) async {
+    var applyParentDataCalled = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            TestCallbackParentDataWidget(
+              onApplyParentData: () {
+                applyParentDataCalled = true;
+              },
+              child: const SizedBox(),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(applyParentDataCalled, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('ParentData is not overwritten when ParentDataWidget is used incorrectly', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Row(
+          children: <Widget>[
+            Stack(
+              textDirection: TextDirection.ltr,
+              children: <Widget>[Expanded(child: Container())],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final RenderObject renderObject = tester.renderObject(find.byType(Container));
+    expect(renderObject.parentData, isA<StackParentData>());
+    expect(renderObject.parentData, isNot(isA<FlexParentData>()));
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+  });
 }
 
 class SubclassPositioned extends Positioned {
@@ -575,4 +650,22 @@ class DummyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => child;
+}
+
+class TestCallbackParentDataWidget extends ParentDataWidget<FlexParentData> {
+  const TestCallbackParentDataWidget({
+    super.key,
+    required this.onApplyParentData,
+    required super.child,
+  });
+
+  final VoidCallback onApplyParentData;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    onApplyParentData();
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Row;
 }
