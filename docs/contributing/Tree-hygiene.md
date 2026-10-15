@@ -123,7 +123,7 @@ There is an automatic exception for PRs that:
 If a reviewer says a PR should have a test, then it needs a test regardless of the exemptions above.
 
 Feel free to update the bot's logic to catch more cases that should be
-automatically exempt ([in the cocoon repo](https://github.com/flutter/cocoon/blob/main/app_dart/lib/src/request_handlers/github/webhook_subscription.dart)).
+automatically exempt ([in the cocoon repo](https://github.com/flutter/cocoon/blob/main/app_dart/lib/src/service/pull_request_manager.dart)).
 
 > [!NOTE]
 > PRs adding data-driven fixes require tests that fall under the test_fixes
@@ -139,7 +139,7 @@ The following kinds of PRs are *not* automatically exempt and require an exempti
 * fixes to existing tests
 * cosmetic fixes to unpublished example apps.
 
-**In the repositories listed above, a bot will comment on your PR if you need an explicit exemption.**
+**In the repositories listed above, a bot will apply the `missing-tests` label and comment on your PR if you need an explicit exemption.** If subsequent pushes to the PR add tests (or no longer modify files requiring tests), the bot will automatically remove the `missing-tests` label.
 
 > [!IMPORTANT]
 > If the PR is in a repository that is not listed above, meaning is not
@@ -148,17 +148,24 @@ The following kinds of PRs are *not* automatically exempt and require an exempti
 
 ### Test Exemptions
 
-A `@test-exemption-reviewer` member on [Discord](Chat.md) can exempt a PR by
-commenting `test-exempt: <reason>`.
+Flutter tech leads are responsible for granting test exemptions for PRs that
+touch their area of the codebase by applying the `test-exempt` label. The
+`autosubmit` bot will prevent a PR from being merged if it has the
+`missing-tests` label without the `test-exempt` label.
 
-The reviewer of the PR (_not_ the test exemption reviewer) should first:
+The reviewer of the PR should first:
 
-1. ensure that the PR meets the criteria for exemption
+1. Ensure that the PR meets the criteria for a test exemption. _All_ reviewers
+   should feel empowered to ask for tests before escalating.
 1. LGTM the PR before requesting the exemption, _or_ clarify why an LGTM was
    not given.
+1. Escalate to the tech lead for the changed area to review and apply the
+   `test-exempt` label.
 
-Exemption reviewers are a **small volunteer group** - _all_ reviewers should
-feel empowered to ask for tests.
+Only tech leads (currently limited to Googlers) are permitted to add the
+`test-exempt` label. For PRs that are authored or reviewed by a tech lead, that
+tech lead is responsible for ensuring that a second tech lead reviews the PR and
+approves the test exemption.
 
 ## Using git
 
