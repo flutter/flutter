@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
@@ -12,6 +13,7 @@ import 'base/file_system.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
+import 'context/apple_context.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
 import 'custom_devices/custom_devices_config.dart';
@@ -41,7 +43,9 @@ class FlutterDeviceManager extends DeviceManager {
     required Platform platform,
     required ProcessManager processManager,
     required FileSystem fileSystem,
+    required Analytics analytics,
     required AndroidSdk? Function() androidSdkBuilder,
+    required AppleContext appleContext,
     required FeatureFlags featureFlags,
     required IOSSimulatorUtils iosSimulatorUtils,
     required XCDevice xcDevice,
@@ -83,7 +87,13 @@ class FlutterDeviceManager extends DeviceManager {
            platform: platform,
            nativeAssetsBuilder: nativeAssetsBuilder,
          ),
-         MacOSDevices(macOSWorkflow: macOSWorkflow, toolContext: toolContext),
+         MacOSDevices(
+           analytics: analytics,
+           appleContext: appleContext,
+           featureFlags: featureFlags,
+           macOSWorkflow: macOSWorkflow,
+           toolContext: toolContext,
+         ),
          MacOSDesignedForIPadDevices(
            processManager: processManager,
            iosWorkflow: iosWorkflow,

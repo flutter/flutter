@@ -29,6 +29,9 @@ import 'features.dart';
 import 'flutter_manifest.dart';
 import 'flutter_plugins.dart';
 import 'globals.dart' as globals;
+import 'ios/plist_parser.dart';
+import 'ios/xcodeproj.dart';
+import 'macos/xcode.dart';
 import 'migrations/analysis_options_migration.dart';
 import 'package_graph.dart';
 import 'platform_plugins.dart';
@@ -52,10 +55,21 @@ enum SupportedPlatform {
 }
 
 class FlutterProjectFactory {
-  FlutterProjectFactory({required this._logger, required this._fileSystem});
+  FlutterProjectFactory({
+    required this._fileSystem,
+    required this._logger,
+    this._featureFlags,
+    this._plistParser,
+    this._xcode,
+    this._xcodeProjectInterpreter,
+  });
 
-  final Logger _logger;
+  final FeatureFlags? _featureFlags;
   final FileSystem _fileSystem;
+  final Logger _logger;
+  final PlistParser? _plistParser;
+  final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   @visibleForTesting
   final projects = <String, FlutterProject>{};
@@ -75,7 +89,16 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest);
+      return FlutterProject(
+        directory,
+        manifest,
+        exampleManifest,
+        featureFlags: _featureFlags,
+        plistParser: _plistParser,
+        projectFactory: this,
+        xcode: _xcode,
+        xcodeProjectInterpreter: _xcodeProjectInterpreter,
+      );
     }
     return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -88,7 +111,16 @@ class FlutterProjectFactory {
         logger: _logger,
         fileSystem: _fileSystem,
       );
-      return FlutterProject(directory, manifest, exampleManifest, projectFactory: this);
+      return FlutterProject(
+        directory,
+        manifest,
+        exampleManifest,
+        featureFlags: _featureFlags,
+        plistParser: _plistParser,
+        projectFactory: this,
+        xcode: _xcode,
+        xcodeProjectInterpreter: _xcodeProjectInterpreter,
+      );
     });
   }
 
@@ -114,12 +146,20 @@ class FlutterProject {
     FlutterManifest manifest,
     this._exampleManifest, {
     this._buildDirectory,
+    this._featureFlags,
+    this._plistParser,
     this._projectFactory,
+    this._xcode,
+    this._xcodeProjectInterpreter,
   }) {
     _setManifest(manifest);
   }
 
+  final FeatureFlags? _featureFlags;
+  final PlistParser? _plistParser;
   final FlutterProjectFactory? _projectFactory;
+  final Xcode? _xcode;
+  final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
   FlutterProject? _workspaceRoot;
   bool _searchedForWorkspaceRoot = false;
@@ -196,15 +236,15 @@ class FlutterProject {
     Directory? buildDirectory,
   ]) {
     final FileSystem fileSystem = directory.fileSystem;
-    logger ??= BufferLogger.test();
+    final Logger manifestLogger = logger ?? BufferLogger.test();
     final FlutterManifest manifest = FlutterProject._readManifest(
       directory.childFile(bundle.defaultManifestPath).path,
-      logger: logger,
+      logger: manifestLogger,
       fileSystem: fileSystem,
     );
     final FlutterManifest exampleManifest = FlutterProject._readManifest(
       FlutterProject._exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
-      logger: logger,
+      logger: manifestLogger,
       fileSystem: fileSystem,
     );
     return FlutterProject(
@@ -393,7 +433,13 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  late final ios = IosProject.fromFlutter(this);
+  late final ios = IosProject.fromFlutter(
+    this,
+    featureFlags: _featureFlags,
+    plistParser: _plistParser,
+    xcode: _xcode,
+    xcodeProjectInterpreter: _xcodeProjectInterpreter,
+  );
 
   /// The Android sub project of this project.
   late final android = AndroidProject._(this);
@@ -402,7 +448,12 @@ class FlutterProject {
   late final web = WebProject._(this);
 
   /// The MacOS sub project of this project.
-  late final macos = MacOSProject.fromFlutter(this);
+  late final macos = MacOSProject.fromFlutter(
+    this,
+    featureFlags: _featureFlags,
+    xcode: _xcode,
+    xcodeProjectInterpreter: _xcodeProjectInterpreter,
+  );
 
   /// The Linux sub project of this project.
   late final linux = LinuxProject.fromFlutter(this);
@@ -467,6 +518,11 @@ class FlutterProject {
     _exampleDirectory(directory),
     _exampleManifest,
     FlutterManifest.empty(logger: _manifest.logger),
+    featureFlags: _featureFlags,
+    plistParser: _plistParser,
+    projectFactory: _projectFactory,
+    xcode: _xcode,
+    xcodeProjectInterpreter: _xcodeProjectInterpreter,
   );
 
   /// The generated scaffolding project for hosting widget previews from this
@@ -637,13 +693,22 @@ class FlutterProject {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
     if (iosPlatform) {
-      await ios.ensureReadyForPlatformSpecificTooling();
+      await ios.ensureReadyForPlatformSpecificTooling(
+        cache: globals.cache,
+        config: globals.config,
+        fileSystemUtils: globals.fsUtils,
+        platform: globals.platform,
+        plistParser: globals.plistParser,
+        processManager: globals.processManager,
+        templateRenderer: globals.templateRenderer,
+        terminal: globals.terminal,
+      );
     }
     if (linuxPlatform) {
       await linux.ensureReadyForPlatformSpecificTooling();
     }
     if (macOSPlatform) {
-      await macos.ensureReadyForPlatformSpecificTooling();
+      await macos.ensureReadyForPlatformSpecificTooling(cache: globals.cache);
     }
     if (windowsPlatform) {
       await windows.ensureReadyForPlatformSpecificTooling();

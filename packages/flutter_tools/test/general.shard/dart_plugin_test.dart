@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -1418,6 +1419,9 @@ void createFakeDartPlugins(
 }
 
 class FakeFlutterManifest extends Fake implements FlutterManifest {
+  @override
+  Logger get logger => BufferLogger.test();
+
   @override
   Set<String> dependencies = <String>{};
 
