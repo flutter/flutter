@@ -95,3 +95,31 @@ impeller_component("playground_test") {
     "//flutter/testing:testing_lib",
   ]
 }
+
+impeller_component("pipeline_variant_recorder") {
+  testonly = true
+
+  sources = [
+    "pipeline_variant_recorder.cc",
+    "pipeline_variant_recorder.h",
+  ]
+
+  public_deps = [
+    "../entity",
+    "../renderer",
+  ]
+
+  deps = [ "//flutter/fml" ]
+}
+
+impeller_component("pipeline_variant_recorder_unittests") {
+  testonly = true
+
+  sources = [ "pipeline_variant_recorder_unittests.cc" ]
+
+  deps = [
+    ":pipeline_variant_recorder",
+    "../renderer/testing:mocks",
+    "//flutter/testing:testing_lib",
+  ]
+}

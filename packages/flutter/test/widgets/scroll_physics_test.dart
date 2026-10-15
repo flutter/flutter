@@ -109,29 +109,26 @@ void main() {
     );
   });
 
-  test(
-    "ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0",
-    () {
-      final ScrollMetrics position = FixedScrollMetrics(
-        minScrollExtent: 0.0,
-        maxScrollExtent: 100.0,
-        pixels: 20.0,
-        viewportDimension: 500.0,
-        axisDirection: AxisDirection.down,
-        devicePixelRatio: 3.0,
-      );
+  test("ScrollPhysics scrolling subclasses - Creating the simulation doesn't alter the velocity for time 0", () {
+    final ScrollMetrics position = FixedScrollMetrics(
+      minScrollExtent: 0.0,
+      maxScrollExtent: 100.0,
+      pixels: 20.0,
+      viewportDimension: 500.0,
+      axisDirection: AxisDirection.down,
+      devicePixelRatio: 3.0,
+    );
 
-      const bounce = BouncingScrollPhysics();
-      const clamp = ClampingScrollPhysics();
-      const page = PageScrollPhysics();
+    const bounce = BouncingScrollPhysics();
+    const clamp = ClampingScrollPhysics();
+    const page = PageScrollPhysics();
 
-      // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
-      // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
-      expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-      expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-      expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
-    },
-  );
+    // Calls to createBallisticSimulation may happen on every frame (i.e. when the maxScrollExtent changes)
+    // Changing velocity for time 0 may cause a sudden, unwanted damping/speedup effect
+    expect(bounce.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    expect(clamp.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+    expect(page.createBallisticSimulation(position, 1000)!.dx(0), moreOrLessEquals(1000));
+  });
 
   group('BouncingScrollPhysics test', () {
     late BouncingScrollPhysics physicsUnderTest;
@@ -375,6 +372,70 @@ FlutterError
     await tester.fling(find.text('Index 2'), const Offset(0.0, -300.0), 10000.0);
   });
 
+  group('BouncingScrollPhysics selects correct spring for createBallisticSimulation', () {
+    test('on leading edge overscroll', () {
+      const physics = BouncingScrollPhysics();
+
+      final ScrollMetrics metrics = FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -500.0,
+        viewportDimension: 500.0,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 1.0,
+      );
+
+      final Simulation simStationary = physics.createBallisticSimulation(metrics, 0.0)!;
+      final Simulation simMoving = physics.createBallisticSimulation(metrics, -100.0)!;
+
+      expect(simStationary, isA<BouncingScrollSimulation>());
+      expect(simMoving, isA<BouncingScrollSimulation>());
+
+      // Stationary simulation should follow the expected spring trajectory.
+      expect(simStationary.x(0.1), closeTo(-185.7511436536831, 0.01));
+      expect(simStationary.x(0.2), closeTo(-69.00628466755506, 0.01));
+      expect(simStationary.x(0.3), closeTo(-25.635736232654022, 0.01));
+      expect(simStationary.x(0.4), closeTo(-9.523639409892818, 0.01));
+
+      final double xStationary = simStationary.x(0.2);
+      final double xMoving = simMoving.x(0.2);
+
+      // Stationary and moving simulations should produce different positions.
+      expect(xStationary, isNot(closeTo(xMoving, precisionErrorTolerance)));
+    });
+
+    test('on trailing edge overscroll', () {
+      const physics = BouncingScrollPhysics();
+
+      final ScrollMetrics metrics = FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: 1500.0,
+        viewportDimension: 500.0,
+        axisDirection: AxisDirection.down,
+        devicePixelRatio: 1.0,
+      );
+
+      final Simulation simStationary = physics.createBallisticSimulation(metrics, 0.0)!;
+      final Simulation simMoving = physics.createBallisticSimulation(metrics, -100.0)!;
+
+      expect(simStationary, isA<BouncingScrollSimulation>());
+      expect(simMoving, isA<BouncingScrollSimulation>());
+
+      // Stationary simulation should follow the expected spring trajectory.
+      expect(simStationary.x(0.1), closeTo(1185.7511436536831, 0.01));
+      expect(simStationary.x(0.2), closeTo(1069.006284667555, 0.01));
+      expect(simStationary.x(0.3), closeTo(1025.635736232654, 0.01));
+      expect(simStationary.x(0.4), closeTo(1009.5236394098928, 0.01));
+
+      final double xStationary = simStationary.x(0.2);
+      final double xMoving = simMoving.x(0.2);
+
+      // Stationary and moving simulations should produce different positions.
+      expect(xStationary, isNot(closeTo(xMoving, precisionErrorTolerance)));
+    });
+  });
+
   testWidgets('ScrollPhysics updates position when shouldUpdate returns true', (
     WidgetTester tester,
   ) async {
@@ -436,8 +497,12 @@ FlutterError
     ScrollableState scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
     final ScrollPosition firstPosition = scrollable.position;
     expect(
-      (firstPosition.physics as BouncingScrollPhysics).decelerationRate,
-      ScrollDecelerationRate.normal,
+      firstPosition.physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.normal,
+      ),
     );
 
     // Identical configuration should not recreate ScrollPosition.
@@ -445,8 +510,12 @@ FlutterError
     scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
     expect(scrollable.position, same(firstPosition));
     expect(
-      (scrollable.position.physics as BouncingScrollPhysics).decelerationRate,
-      ScrollDecelerationRate.normal,
+      scrollable.position.physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.normal,
+      ),
     );
 
     // Different decelerationRate should recreate ScrollPosition.
@@ -457,8 +526,12 @@ FlutterError
     final ScrollPosition secondPosition = scrollable.position;
     expect(secondPosition, isNot(same(firstPosition)));
     expect(
-      (secondPosition.physics as BouncingScrollPhysics).decelerationRate,
-      ScrollDecelerationRate.fast,
+      secondPosition.physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.fast,
+      ),
     );
   });
 
@@ -515,6 +588,82 @@ FlutterError
 
     expect(identical(physicsB1, physicsC2), isTrue);
     expect(physicsB1.shouldUpdate(physicsC2), isFalse);
+  });
+
+  test('ScrollPhysics supports shorthands for AlwaysScrollableScrollPhysics', () {
+    ScrollPhysics physics = const .alwaysScrollable();
+
+    expect(physics, isA<AlwaysScrollableScrollPhysics>());
+    expect(physics.parent, isNull);
+
+    physics = const .alwaysScrollable(parent: ClampingScrollPhysics());
+
+    expect(physics, isA<AlwaysScrollableScrollPhysics>());
+    expect(physics.parent, isA<ClampingScrollPhysics>());
+  });
+
+  test('ScrollPhysics supports shorthands for BouncingScrollPhysics', () {
+    const ScrollPhysics physics = .bouncing();
+
+    expect(physics.parent, isNull);
+    expect(
+      physics,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.normal,
+      ),
+    );
+
+    const ScrollPhysics physics2 = .bouncing(
+      parent: ClampingScrollPhysics(),
+      decelerationRate: ScrollDecelerationRate.fast,
+    );
+    expect(
+      physics2,
+      isA<BouncingScrollPhysics>().having(
+        (BouncingScrollPhysics bouncingPhysics) => bouncingPhysics.decelerationRate,
+        'decelerationRate',
+        ScrollDecelerationRate.fast,
+      ),
+    );
+    expect(physics2.parent, isA<ClampingScrollPhysics>());
+  });
+
+  test('ScrollPhysics supports shorthands for ClampingScrollPhysics', () {
+    ScrollPhysics physics = const .clamping();
+
+    expect(physics, isA<ClampingScrollPhysics>());
+    expect(physics.parent, isNull);
+
+    physics = const .clamping(parent: AlwaysScrollableScrollPhysics());
+
+    expect(physics, isA<ClampingScrollPhysics>());
+    expect(physics.parent, isA<AlwaysScrollableScrollPhysics>());
+  });
+
+  test('ScrollPhysics supports shorthands for NeverScrollableScrollPhysics', () {
+    ScrollPhysics physics = const .neverScrollable();
+
+    expect(physics, isA<NeverScrollableScrollPhysics>());
+    expect(physics.parent, isNull);
+
+    physics = const .neverScrollable(parent: ClampingScrollPhysics());
+
+    expect(physics, isA<NeverScrollableScrollPhysics>());
+    expect(physics.parent, isA<ClampingScrollPhysics>());
+  });
+
+  test('ScrollPhysics supports shorthands for RangeMaintainingScrollPhysics', () {
+    ScrollPhysics physics = const .rangeMaintaining();
+
+    expect(physics, isA<RangeMaintainingScrollPhysics>());
+    expect(physics.parent, isNull);
+
+    physics = const .rangeMaintaining(parent: ClampingScrollPhysics());
+
+    expect(physics, isA<RangeMaintainingScrollPhysics>());
+    expect(physics.parent, isA<ClampingScrollPhysics>());
   });
 }
 

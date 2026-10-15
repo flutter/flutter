@@ -4,8 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 
-/// A stateful wrapper that hosts a [RadioGroup] with a mutable [groupValue],
-/// making it easy to pump and interact with radio buttons in tests.
+/// A stateful wrapper that hosts a [RadioGroup] with a mutable
+/// [RadioGroup.groupValue], making it easy to pump and interact with radio
+/// buttons in tests.
 ///
 /// See https://github.com/flutter/flutter/issues/177028.
 class TestRadioGroup<T> extends StatefulWidget {
