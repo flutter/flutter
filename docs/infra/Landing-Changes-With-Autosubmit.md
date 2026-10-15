@@ -35,7 +35,7 @@ sure validations pass and have the correct number of reviews.
 * ci checks
 * approvals (2 from flutter hackers)
 * mergeability
-* test exemption (does not have `missing-tests` without `test-exempt`)
+* test exemption (does not have `missing-tests` label, or has `test-exempt` label)
 
 #### Merging a fix on red tree-status (tree is closed)
 
