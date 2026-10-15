@@ -148,7 +148,10 @@ class FrameRenderer {
   }
 
   void drawFrame() {
-    final Canvas canvas = surface.lockCanvas(null);
+    // Use lockHardwareCanvas() instead of software lockCanvas(null) to avoid ~12-14ms per-frame
+    // CPU gralloc buffer lock/copy overhead on the Android emulator, which otherwise saturates
+    // the single-threaded producer timer during the 2x (~60fps) overproduction phase.
+    final Canvas canvas = surface.lockHardwareCanvas();
     canvas.drawColor(0xff000000);
     canvas.drawText(String.valueOf(++frameCount), 20, 120, paint);
     surface.unlockCanvasAndPost(canvas);
