@@ -1056,11 +1056,12 @@ dependencies:
             contains('public static void registerWith(@NonNull FlutterEngine flutterEngine)'),
           );
 
-          final File iosHeader = iosProject.pluginRegistrantHeader;
-          final File iosImplementation = iosProject.pluginRegistrantImplementation;
-          final File iosPodspec = iosProject.pluginRegistrantHost.childFile(
-            'CustomPluginRegistrant.podspec',
-          );
+          final IosProject(
+            pluginRegistrantHeader: iosHeader,
+            pluginRegistrantImplementation: iosImplementation,
+            :pluginRegistrantHost,
+          ) = iosProject;
+          final File iosPodspec = pluginRegistrantHost.childFile('CustomPluginRegistrant.podspec');
 
           expect(iosHeader, exists);
           expect(
