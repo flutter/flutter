@@ -66,7 +66,7 @@ class DriveCommand extends RunCommandBase {
     // which cannot be accepted or dismissed in a CI environment.
     argParser.addDescriptors(<OptionDescriptor<Object?>>[
       CommonOptions.enableExperiment,
-      DebuggingOptionDescriptors.publishPortOption(enabledByDefault: false),
+      _publishPort,
       _keepAppRunning,
       _useExistingApp,
       _driver,
@@ -83,6 +83,10 @@ class DriveCommand extends RunCommandBase {
       _timeout,
     ], verboseHelp: verboseHelp);
   }
+
+  static final FlagOptionDescriptor _publishPort = DebuggingOptionDescriptors.publishPortOption(
+    enabledByDefault: false,
+  );
 
   static const _kKeepAppRunning = 'keep-app-running';
   static const _kUseExistingApp = 'use-existing-app';
@@ -255,15 +259,13 @@ class DriveCommand extends RunCommandBase {
   Future<bool> get disablePortPublication async {
     final Device? device = await targetedDevice;
     final bool isWirelessIOSDevice = device is IOSDevice && device.isWirelesslyConnected;
-    if (isWirelessIOSDevice &&
-        argResults != null &&
-        !wasParsed(DebuggingOptionDescriptors.publishPort)) {
+    if (isWirelessIOSDevice && argResults != null && !wasParsed(_publishPort)) {
       toolContext.logger.printTrace(
         'A wireless iOS device is being used. Changing `publish-port` to be enabled.',
       );
       return false;
     }
-    return !getValue(DebuggingOptionDescriptors.publishPort);
+    return !getValue(_publishPort);
   }
 
   @override

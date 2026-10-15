@@ -1004,6 +1004,25 @@ void main() {}
     );
   });
 
+  testUsingContext(
+    'disablePortPublication defaults to true when argResults is null',
+    () async {
+      fakeDeviceManager.attachedDevices = <Device>[ScreenshotDevice()];
+      final command = DriveCommand(
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: createToolContext(),
+      );
+
+      expect(await command.disablePortPublication, isTrue);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => fakeDeviceManager,
+    },
+  );
+
   for (final String flag in AndroidEngineCliFlags.allFlags) {
     testUsingContext(
       'fails when --use-application-binary is provided with --release and --$flag for Android',
