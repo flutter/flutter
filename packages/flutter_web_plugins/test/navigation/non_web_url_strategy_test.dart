@@ -37,5 +37,11 @@ void main() {
         usePathUrlStrategy();
       }, returnsNormally);
     });
+
+    test('Can usePathUrlStrategy with includeHash: true', () {
+      expect(() {
+        usePathUrlStrategy(includeHash: true);
+      }, returnsNormally);
+    });
   });
 }
