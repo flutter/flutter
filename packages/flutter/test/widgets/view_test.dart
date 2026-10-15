@@ -5,7 +5,6 @@
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -546,13 +545,13 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
 
-    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(unfocusEvent);
+    tester.platformDispatcher.notifyViewFocusChanged(unfocusEvent);
     await tester.pump();
 
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(FocusManager.instance.rootScope.hasPrimaryFocus, isTrue);
 
-    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(focusEvent);
+    tester.platformDispatcher.notifyViewFocusChanged(focusEvent);
     await tester.pump();
 
     expect(focusNode.hasPrimaryFocus, isTrue);
@@ -592,7 +591,7 @@ void main() {
     );
 
     // Focus leaves the view entirely, which parks the focus on the root scope.
-    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(
+    tester.platformDispatcher.notifyViewFocusChanged(
       ViewFocusEvent(
         viewId: view.viewId,
         state: ViewFocusState.unfocused,
@@ -606,7 +605,7 @@ void main() {
     // The screen reader picks the second control. Both the semantics driven
     // focus request and the view focus event land in the same frame.
     nodeB.requestFocus();
-    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(
+    tester.platformDispatcher.notifyViewFocusChanged(
       ViewFocusEvent(
         viewId: view.viewId,
         state: ViewFocusState.focused,
@@ -646,7 +645,7 @@ void main() {
       ),
     );
 
-    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(
+    tester.platformDispatcher.notifyViewFocusChanged(
       ViewFocusEvent(
         viewId: view.viewId,
         state: ViewFocusState.unfocused,
@@ -656,7 +655,7 @@ void main() {
     await tester.pump();
 
     nodeB.requestFocus();
-    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(
+    tester.platformDispatcher.notifyViewFocusChanged(
       ViewFocusEvent(
         viewId: view.viewId,
         state: ViewFocusState.focused,
@@ -760,7 +759,7 @@ void main() {
     tester.binding.platformDispatcher.resetFocusedViewTestValues();
 
     // Unfocus all views.
-    tester.binding.platformDispatcher.onViewFocusChange?.call(
+    tester.platformDispatcher.notifyViewFocusChanged(
       ViewFocusEvent(
         viewId: view!.viewId,
         state: ViewFocusState.unfocused,
@@ -775,7 +774,7 @@ void main() {
     tester.binding.platformDispatcher.resetFocusedViewTestValues();
 
     // Focus another view.
-    tester.binding.platformDispatcher.onViewFocusChange?.call(
+    tester.platformDispatcher.notifyViewFocusChanged(
       const ViewFocusEvent(
         viewId: 100,
         state: ViewFocusState.focused,
