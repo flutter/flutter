@@ -4,7 +4,6 @@
 
 import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -2180,45 +2179,56 @@ void main() {
     const itemHeights = <double>[68, 85, 126, 97, 54, 106, 110, 119];
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: SizedBox(
-              width: 800,
-              height: 600,
-              child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
-                  return CustomScrollView(
-                    slivers: <Widget>[
-                      SliverReorderableList(
-                        itemCount: items.length,
-                        onReorder: (int oldIndex, int newIndex) {
-                          setState(() {
-                            if (oldIndex < newIndex) {
-                              newIndex -= 1;
-                            }
-                            items.insert(newIndex, items.removeAt(oldIndex));
-                          });
-                        },
-                        itemBuilder: (BuildContext context, int index) {
-                          final int item = items[index];
-                          return SizedBox(
-                            key: ValueKey<int>(item),
-                            height: itemHeights[item],
-                            width: 800,
-                            child: Text('item $item'),
-                          );
-                        },
-                      ),
-                    ],
-                  );
-                },
+      WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        builder: (BuildContext context, Widget? child) {
+          return MediaQuery(
+            data: const MediaQueryData(),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Overlay(
+                initialEntries: <OverlayEntry>[
+                  OverlayEntry(
+                    builder: (BuildContext context) {
+                      return SizedBox(
+                        width: 800,
+                        height: 600,
+                        child: StatefulBuilder(
+                          builder: (BuildContext context, StateSetter setState) {
+                            return CustomScrollView(
+                              slivers: <Widget>[
+                                SliverReorderableList(
+                                  itemCount: items.length,
+                                  onReorder: (int oldIndex, int newIndex) {
+                                    setState(() {
+                                      if (oldIndex < newIndex) {
+                                        newIndex -= 1;
+                                      }
+                                      items.insert(newIndex, items.removeAt(oldIndex));
+                                    });
+                                  },
+                                  itemBuilder: (BuildContext context, int index) {
+                                    final int item = items[index];
+                                    return SizedBox(
+                                      key: ValueKey<int>(item),
+                                      height: itemHeights[item],
+                                      width: 800,
+                                      child: Text('item $item'),
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
 
