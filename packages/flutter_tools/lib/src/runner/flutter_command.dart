@@ -1237,10 +1237,7 @@ abstract class FlutterCommand extends Command<void> {
       }
 
       try {
-        // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
-        (json.decode(configJsonRaw) as Map<String, dynamic>).forEach((String key, Object? value) {
-          dartDefineConfigJsonMap[key] = value;
-        });
+        dartDefineConfigJsonMap.addAll(json.decode(configJsonRaw) as Map<String, Object?>);
       } on FormatException catch (err) {
         throwToolExit(
           'Unable to parse the file at path "$path" due to a formatting error. '
