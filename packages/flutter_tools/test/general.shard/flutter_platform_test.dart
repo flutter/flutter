@@ -288,51 +288,54 @@ void main() {
       expect(flutterPlatform.icudtlPath, equals('ghi'));
     });
 
-    testWithoutContext('pipeHarnessToRemote safely ignores non-JSON string and logs warning', () async {
-      final harnessController = StreamChannelController<Object?>();
-      final remoteController = StreamChannelController<String>();
-      final logger = BufferLogger.test();
+    testWithoutContext(
+      'pipeHarnessToRemote safely ignores non-JSON string and logs warning',
+      () async {
+        final harnessController = StreamChannelController<Object?>();
+        final remoteController = StreamChannelController<String>();
+        final logger = BufferLogger.test();
 
-      final Future<void> pipeFuture = pipeHarnessToRemote(
-        id: 0,
-        harnessChannel: harnessController.foreign,
-        remoteChannel: remoteController.foreign,
-        logger: logger,
-      );
+        final Future<void> pipeFuture = pipeHarnessToRemote(
+          id: 0,
+          harnessChannel: harnessController.foreign,
+          remoteChannel: remoteController.foreign,
+          logger: logger,
+        );
 
-      final receivedFromRemote = <Object?>[];
-      harnessController.local.stream.listen(receivedFromRemote.add);
+        final receivedFromRemote = <Object?>[];
+        harnessController.local.stream.listen(receivedFromRemote.add);
 
-      // Send non-JSON error string from remote channel followed by valid JSON list.
-      remoteController.local.sink.add(
-        'Loading dynamic library failed: dlopen(/opt/homebrew/share/flutter/bin/cache/libflutter.dylib)',
-      );
-      remoteController.local.sink.add('[0, {"valid": true}]');
+        // Send non-JSON error string from remote channel followed by valid JSON list.
+        remoteController.local.sink.add(
+          'Loading dynamic library failed: dlopen(/opt/homebrew/share/flutter/bin/cache/libflutter.dylib)',
+        );
+        remoteController.local.sink.add('[0, {"valid": true}]');
 
-      await pumpEventQueue();
+        await pumpEventQueue();
 
-      await remoteController.local.sink.close();
-      await harnessController.local.sink.close();
+        await remoteController.local.sink.close();
+        await harnessController.local.sink.close();
 
-      await pipeFuture;
+        await pipeFuture;
 
-      expect(
-        receivedFromRemote,
-        equals(<Object?>[
-          <Object?>[
-            0,
-            <String, Object?>{'valid': true},
-          ],
-        ]),
-      );
-      expect(
-        logger.warningText,
-        contains(
-          'Received unexpected non-JSON output from test runner: Loading dynamic library failed: dlopen',
-        ),
-      );
-      expect(logger.traceText, contains('test 0: JSON decoding failed:'));
-    });
+        expect(
+          receivedFromRemote,
+          equals(<Object?>[
+            <Object?>[
+              0,
+              <String, Object?>{'valid': true},
+            ],
+          ]),
+        );
+        expect(
+          logger.warningText,
+          contains(
+            'Received unexpected non-JSON output from test runner: Loading dynamic library failed: dlopen',
+          ),
+        );
+        expect(logger.traceText, contains('test 0: JSON decoding failed:'));
+      },
+    );
 
     testWithoutContext(
       'pipeHarnessToRemote safely ignores non-List JSON output and logs warning',
@@ -692,69 +695,65 @@ void main() {
       };
     }
 
-    testUsingContext(
-      'creates listener file in project build directory for integration tests with stable path across runs and cleans up on completion',
-      () async {
-        final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
-        final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+    testUsingContext('creates listener file in project build directory for integration tests with stable path across runs and cleans up on completion', () async {
+      final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
 
-        final device1 = _WorkingDevice();
-        final FlutterPlatform platform1 = createPlatform(
-          flutterProject: flutterProject,
-          fs: fileSystem,
-          integrationTestDevice: device1,
-        );
+      final device1 = _WorkingDevice();
+      final FlutterPlatform platform1 = createPlatform(
+        flutterProject: flutterProject,
+        fs: fileSystem,
+        integrationTestDevice: device1,
+      );
 
-        final StreamChannel<Object?> channel1 = platform1.loadChannel(
-          'test1.dart',
-          fakeSuitePlatform,
-        );
-        unawaited(channel1.stream.drain<void>());
-        await pumpEventQueue();
+      final StreamChannel<Object?> channel1 = platform1.loadChannel(
+        'test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel1.stream.drain<void>());
+      await pumpEventQueue();
 
-        final String expectedPath = fileSystem.path.join(
-          projectDir.path,
-          'build',
-          'test',
-          'listener_0.dart',
-        );
-        expect(device1.lastMainPath, equals(expectedPath));
-        expect(fileSystem.file(expectedPath).existsSync(), isTrue);
+      final String expectedPath = fileSystem.path.join(
+        projectDir.path,
+        'build',
+        'test',
+        'listener_0.dart',
+      );
+      expect(device1.lastMainPath, equals(expectedPath));
+      expect(fileSystem.file(expectedPath).existsSync(), isTrue);
 
-        // Simulate expression compiler output alongside listener file.
-        final File dillFile = fileSystem.file('$expectedPath.dill')..createSync(recursive: true);
+      // Simulate expression compiler output alongside listener file.
+      final File dillFile = fileSystem.file('$expectedPath.dill')..createSync(recursive: true);
 
-        await channel1.sink.close();
-        await pumpEventQueue();
+      await channel1.sink.close();
+      await pumpEventQueue();
 
-        expect(fileSystem.file(expectedPath).existsSync(), isFalse);
-        expect(dillFile.existsSync(), isFalse);
-        expect(logger.traceText, contains('test 0: deleting test listener file'));
+      expect(fileSystem.file(expectedPath).existsSync(), isFalse);
+      expect(dillFile.existsSync(), isFalse);
+      expect(logger.traceText, contains('test 0: deleting test listener file'));
 
-        final device2 = _WorkingDevice();
-        final FlutterPlatform platform2 = createPlatform(
-          flutterProject: flutterProject,
-          fs: fileSystem,
-          integrationTestDevice: device2,
-        );
+      final device2 = _WorkingDevice();
+      final FlutterPlatform platform2 = createPlatform(
+        flutterProject: flutterProject,
+        fs: fileSystem,
+        integrationTestDevice: device2,
+      );
 
-        final StreamChannel<Object?> channel2 = platform2.loadChannel(
-          'test1.dart',
-          fakeSuitePlatform,
-        );
-        unawaited(channel2.stream.drain<void>());
-        await pumpEventQueue();
+      final StreamChannel<Object?> channel2 = platform2.loadChannel(
+        'test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel2.stream.drain<void>());
+      await pumpEventQueue();
 
-        expect(device2.lastMainPath, equals(expectedPath));
-        expect(fileSystem.file(expectedPath).existsSync(), isTrue);
+      expect(device2.lastMainPath, equals(expectedPath));
+      expect(fileSystem.file(expectedPath).existsSync(), isTrue);
 
-        await channel2.sink.close();
-        await pumpEventQueue();
+      await channel2.sink.close();
+      await pumpEventQueue();
 
-        expect(fileSystem.file(expectedPath).existsSync(), isFalse);
-      },
-      overrides: integrationOverrides(),
-    );
+      expect(fileSystem.file(expectedPath).existsSync(), isFalse);
+    }, overrides: integrationOverrides());
 
     testUsingContext(
       'uses systemTempDirectory for non-integration tests',
