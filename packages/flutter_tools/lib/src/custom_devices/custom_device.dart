@@ -430,6 +430,7 @@ class CustomDevice extends Device {
         _config.id,
         category: Category.mobile,
         ephemeral: true,
+        logger: toolContext.logger,
         platformType: PlatformType.custom,
       );
 

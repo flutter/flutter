@@ -28,7 +28,7 @@ abstract class DesktopDevice extends Device {
     required PlatformType super.platformType,
     required super.ephemeral,
     required ToolContext super.toolContext,
-  }) : super(category: Category.desktop);
+  }) : super(category: Category.desktop, logger: toolContext.logger);
 
   final _runningProcesses = <Process>{};
   final _deviceLogReader = DesktopLogReader();
