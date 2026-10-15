@@ -411,6 +411,25 @@ exports_files(["README"] + glob(
     '//flutter/shell/platform/linux',
     skip: <String, String>{'flutter_gtk': 'zip_bundle: artifact packaging'},
   ),
+  // The Android embedding's host-testable pieces (the JNI facade with its
+  // mock, the native window, the context, the surfaces, the external view
+  // embedder, the platform view delegate) with the three suites
+  // run_tests.py runs on every non-Windows host.
+  // android_rendering_selector.h, an enum of the parent directory that no
+  // GN target lists (the shell's source set could not carry it for them:
+  // its visibility excludes these packages), comes from the hand-written
+  // parent package.
+  ConvertedFile('//flutter/shell/platform/android/jni'),
+  ConvertedFile(
+    '//flutter/shell/platform/android/context',
+    implicitDeps: <String>['//engine/src/flutter/shell/platform/android:rendering_selector'],
+  ),
+  ConvertedFile('//flutter/shell/platform/android/surface'),
+  ConvertedFile(
+    '//flutter/shell/platform/android/external_view_embedder',
+    implicitDeps: <String>['//engine/src/flutter/shell/platform/android:rendering_selector'],
+  ),
+  ConvertedFile('//flutter/shell/platform/android/platform_view_android_delegate'),
   // flutter_tester, the host runner of the engine's Dart tests
   // (testing/dart through run_tests.py), and its OpenGL ES variant.
   ConvertedFile('//flutter/shell/testing'),
@@ -1078,6 +1097,9 @@ const Set<String> handWrittenPackages = <String>{
   // templates, each an exec_script of pkg-config against the sysroot, whose
   // answers the file holds.
   'engine/src/flutter/shell/platform/linux/config',
+  // The Android shell, until its file converts: one header the converted
+  // sub-packages include.
+  'engine/src/flutter/shell/platform/android',
   'engine/src/flutter/third_party',
 };
 

@@ -1,0 +1,83 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/android/surface/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "surface",
+    srcs = [
+        "android_surface.cc",
+        "snapshot_surface_producer.cc",
+    ],
+    hdrs = [
+        "android_surface.h",
+        "snapshot_surface_producer.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flow
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":native_window",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/shell/common",
+        "//engine/src/flutter/shell/platform/android/context",
+        "//engine/src/flutter/shell/platform/android/jni",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "native_window",
+    srcs = ["android_native_window.cc"],
+    hdrs = ["android_native_window.h"],
+    copts = FLUTTER_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/display_list",
+        "//engine/src/flutter/fml",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "surface_mock",
+    testonly = True,
+    srcs = ["android_surface_mock.cc"],
+    hdrs = ["android_surface_mock.h"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flow
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-deprecated-copy",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-implicit-fallthrough",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-nullability-completeness",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-suggest-destructor-override",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-suggest-override",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-unused-private-field",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-unused-variable",  # from //flutter/shell/gpu:gpu_surface_gl
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":surface",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/shell/gpu:gpu_surface_gl",
+        "//engine/src/flutter/vulkan",  # shell_enable_vulkan
+        "@googletest//:gtest",
+    ],
+    alwayslink = True,
+)
