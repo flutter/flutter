@@ -21,6 +21,10 @@ filegroup(
             "*.bzl",
             # The checkout's git state is no input of the build.
             "**/.git/**",
+            # Nor the bytecode caches a GN build in the same checkout
+            # leaves beside the Python scripts it runs (Bazel's own runs
+            # write none: PYTHONDONTWRITEBYTECODE).
+            "**/__pycache__/**",
             "**/*_test.cc",
             "**/*_benchmark.cc",
             "absl/time/internal/cctz/testdata/**",
