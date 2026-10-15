@@ -105,7 +105,6 @@ std::optional<UberSDFParameters> UberSDFParameters::MakeRoundedSuperellipse(
       .superellipse_degree = Point(top_right.top.se_n, top_right.right.se_n),
       .angle_span = Point(top_right.top.circle_max_angle.radians,
                           top_right.right.circle_max_angle.radians),
-      .octant_offset_c = top_right.top.se_a - top_right.right.se_a,
       .circle_center_top = top_right.top.circle_center,
       .circle_center_right = top_right.right.circle_center,
       .radii = Vector4(top_right.top.circle_radius,
