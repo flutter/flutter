@@ -78,9 +78,10 @@ class BundleBuilder {
     final BuildResult result = await buildSystem.build(target, environment);
 
     if (!result.success) {
+      final Logger logger = environment.logger;
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        if (measurement.fatal || globals.logger.isVerbose) {
-          globals.printError(
+        if (measurement.fatal || logger.isVerbose) {
+          logger.printError(
             'Target ${measurement.target} failed: ${measurement.exception}',
             stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
                 ? measurement.stackTrace

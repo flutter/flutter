@@ -203,11 +203,12 @@ void main() {
   testUsingContext(
     'BundleBuilder suppresses error message on non-fatal build failure',
     () async {
+      final fileSystem = MemoryFileSystem.test();
       await expectLater(
         () => BundleBuilder().build(
           platform: TargetPlatform.ios,
           buildInfo: BuildInfo.debug,
-          project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           mainPath: 'lib/main.dart',
           assetDirPath: 'example',
           depfilePath: 'example.d',
@@ -234,11 +235,12 @@ void main() {
   testUsingContext(
     'BundleBuilder logs error message on non-fatal build failure when verbose',
     () async {
+      final fileSystem = MemoryFileSystem.test();
       await expectLater(
         () => BundleBuilder().build(
           platform: TargetPlatform.ios,
           buildInfo: BuildInfo.debug,
-          project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
           mainPath: 'lib/main.dart',
           assetDirPath: 'example',
           depfilePath: 'example.d',
