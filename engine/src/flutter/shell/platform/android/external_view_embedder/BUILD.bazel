@@ -1,0 +1,93 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/android/external_view_embedder/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "external_view_embedder",
+    srcs = [
+        "external_view_embedder.cc",
+        "external_view_embedder_2.cc",
+        "external_view_embedder_wrapper.cc",
+        "surface_pool.cc",
+    ],
+    hdrs = [
+        "external_view_embedder.h",
+        "external_view_embedder_2.h",
+        "external_view_embedder_wrapper.h",
+        "surface_pool.h",
+    ],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flow
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-deprecated-copy",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-implicit-fallthrough",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-nullability-completeness",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-suggest-destructor-override",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-suggest-override",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unused-private-field",  # from //flutter/impeller/renderer/backend/vulkan
+        "-Wno-unused-variable",  # from //flutter/impeller/renderer/backend/vulkan
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/common",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/impeller/renderer/backend/vulkan",
+        "//engine/src/flutter/shell/platform/android:rendering_selector",
+        "//engine/src/flutter/shell/platform/android/context",
+        "//engine/src/flutter/shell/platform/android/jni",
+        "//engine/src/flutter/shell/platform/android/surface",
+        "@abseil-cpp//absl/container:flat_hash_set",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+flutter_test_fixtures(
+    name = "external_view_embedder_fixtures",
+)
+
+cc_test(
+    name = "android_external_view_embedder_unittests",
+    size = "small",
+    srcs = [
+        "external_view_embedder_unittests.cc",
+        "surface_pool_unittests.cc",
+    ],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flow
+        "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-deprecated-copy",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-implicit-fallthrough",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-nullability-completeness",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-suggest-destructor-override",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-suggest-override",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-unused-private-field",  # from //flutter/shell/gpu:gpu_surface_gl
+        "-Wno-unused-variable",  # from //flutter/shell/gpu:gpu_surface_gl
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":external_view_embedder",
+        ":external_view_embedder_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/shell/gpu:gpu_surface_gl",
+        "//engine/src/flutter/shell/platform/android:rendering_selector",
+        "//engine/src/flutter/shell/platform/android/jni:jni_mock",
+        "//engine/src/flutter/shell/platform/android/surface",
+        "//engine/src/flutter/shell/platform/android/surface:surface_mock",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:skia",
+    ],
+)
