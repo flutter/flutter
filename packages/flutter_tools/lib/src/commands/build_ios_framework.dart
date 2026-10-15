@@ -47,7 +47,6 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
       releaseMode,
       cocoapods,
       plugins,
-      staticFrameworks,
       output,
       force,
     ], verboseHelp: verboseHelp);
@@ -90,10 +89,7 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         'This is intended for cases where plugins are already being built separately.',
   );
 
-  static const staticFrameworks = FlagOptionDescriptor(
-    name: 'static',
-    help: 'Build plugins as static frameworks. Link on, but do not embed these frameworks in the existing Xcode project.',
-  );
+  static const FlagOptionDescriptor staticFrameworks = DarwinAddToAppOptionsBundle.staticFrameworks;
 
   static const output = StringOptionDescriptor(
     name: 'output',

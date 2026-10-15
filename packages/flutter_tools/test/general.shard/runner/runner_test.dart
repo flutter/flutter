@@ -488,6 +488,7 @@ void main() {
       },
       overrides: <Type, Generator>{
         Cache: () => Cache.test(
+          rootOverride: fileSystem.directory('/path/to/flutter'),
           flutterRoot: '/path/to/flutter',
           fileSystem: fileSystem,
           processManager: FakeProcessManager.any(),
@@ -600,6 +601,7 @@ void main() {
         },
         overrides: <Type, Generator>{
           Cache: () => Cache.test(
+            rootOverride: fileSystem.directory('/path/to/flutter'),
             flutterRoot: '/path/to/flutter',
             fileSystem: fileSystem,
             processManager: FakeProcessManager.any(),
