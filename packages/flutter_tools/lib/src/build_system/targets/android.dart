@@ -140,7 +140,7 @@ class ProfileAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AotElfProfile(TargetPlatform.android_arm),
+    AotSnapshotProfile(TargetPlatform.android_arm),
     AotAndroidAssetBundle(),
   ];
 }
@@ -154,7 +154,7 @@ class ReleaseAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AotElfRelease(TargetPlatform.android_arm),
+    AotSnapshotRelease(TargetPlatform.android_arm),
     AotAndroidAssetBundle(),
   ];
 }
@@ -170,7 +170,7 @@ class ReleaseAndroidApplication extends CopyFlutterAotBundle {
 ///
 /// It will produce an 'app.so` in the build directory under a folder named with
 /// the matching Android ABI.
-class AndroidAot extends AotElfBase {
+class AndroidAot extends AotSnapshotBase {
   /// Create an [AndroidAot] implementation for a given [targetPlatform] and [buildMode].
   const AndroidAot(this.targetPlatform, this.buildMode);
 
@@ -185,6 +185,7 @@ class AndroidAot extends AotElfBase {
       '${targetPlatform.getName()}';
 
   /// The specific Android ABI we are building for.
+  @override
   final TargetPlatform targetPlatform;
 
   /// The selected build mode.
