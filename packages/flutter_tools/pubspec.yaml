@@ -20,8 +20,8 @@ dependencies:
   args: 2.7.0
   dap_adapters: 1.1.0
   dds: 5.4.0
-  dwds: 27.1.4
-  code_builder: 4.12.0
+  dwds: 27.2.0
+  code_builder: 4.13.0
   collection: 1.19.1
   completion: 1.0.2
   coverage: 1.15.1
@@ -81,7 +81,7 @@ dependencies:
   test_api: 0.7.15
   test_core: 0.6.21
 
-  vm_service: 15.3.0
+  vm_service: 15.4.0
 
   standard_message_codec: 0.0.1+5
 
@@ -139,4 +139,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: e3uojs
+# PUBSPEC CHECKSUM: o7c443
