@@ -1053,7 +1053,9 @@ class SliverReorderableListState extends State<SliverReorderableList>
     // Find the new index for inserting the item being dragged.
     int newIndex = _insertIndex!;
     for (final _ReorderableItemState item in _items.values) {
-      if ((_reverse && item.index == _dragIndex!) || !item.mounted) {
+      // Skip the dragged item so its original slot does not compete
+      // with the other items when determining the insertion index.
+      if (item.index == _dragIndex! || !item.mounted) {
         continue;
       }
 
@@ -1078,31 +1080,23 @@ class SliverReorderableListState extends State<SliverReorderableList>
           // the new index.
           newIndex = item.index + 1;
           break;
-        } else if (itemStart > proxyItemEnd && newIndex < (item.index + 1)) {
+        } else if (itemStart > proxyItemEnd && newIndex < item.index + 1) {
           newIndex = item.index + 1;
         } else if (proxyItemStart > itemEnd && newIndex > item.index) {
           newIndex = item.index;
         }
       } else {
-        if (item.index == _dragIndex!) {
-          // If end of the proxy is not in ending half of item,
-          // we don't process, because it's original dragged item.
-          if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
-            newIndex = _dragIndex!;
-          }
-        } else if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
-          // The start of the proxy is in the beginning half of the item, so
+        if (itemStart <= proxyItemStart && proxyItemStart <= itemMiddle) {
+          // The start of the proxy is in the beginning half of the item.
           // we should swap the item with the gap and we are done looking for
           // the new index.
           newIndex = item.index;
           break;
         } else if (itemMiddle <= proxyItemEnd && proxyItemEnd <= itemEnd) {
-          // The end of the proxy is in the ending half of the item, so
-          // we should swap the item with the gap and we are done looking for
-          // the new index.
+          // The end of the proxy is in the ending half of the item.
           newIndex = item.index + 1;
           break;
-        } else if (itemEnd < proxyItemStart && newIndex < (item.index + 1)) {
+        } else if (itemEnd < proxyItemStart && newIndex < item.index + 1) {
           newIndex = item.index + 1;
         } else if (proxyItemEnd < itemStart && newIndex > item.index) {
           newIndex = item.index;
