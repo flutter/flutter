@@ -6,6 +6,7 @@
 #include "gtest/gtest.h"
 #include "impeller/core/formats.h"
 #include "impeller/playground/playground_test.h"
+#include "impeller/renderer/backend/vulkan/render_pass_vk.h"
 #include "impeller/renderer/backend/vulkan/texture_vk.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/render_target.h"
@@ -28,19 +29,29 @@ TEST_P(RendererTest, CachesRenderPassAndFramebuffer) {
   std::shared_ptr<Texture> resolve_texture =
       render_target.GetColorAttachment(0).resolve_texture;
   TextureVK& texture_vk = TextureVK::Cast(*resolve_texture);
+  const FramebufferAttachmentsVK attachments =
+      RenderPassVK::GetFramebufferAttachments(render_target);
 
-  EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount4).framebuffer,
-            nullptr);
-  EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount4).render_pass,
-            nullptr);
+  EXPECT_EQ(
+      texture_vk.GetCachedFrameData(SampleCount::kCount4, 0u, 0u, attachments)
+          .framebuffer,
+      nullptr);
+  EXPECT_EQ(
+      texture_vk.GetCachedFrameData(SampleCount::kCount4, 0u, 0u, attachments)
+          .render_pass,
+      nullptr);
 
   auto buffer = GetContext()->CreateCommandBuffer();
   auto render_pass = buffer->CreateRenderPass(render_target);
 
-  EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount4).framebuffer,
-            nullptr);
-  EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount4).render_pass,
-            nullptr);
+  EXPECT_NE(
+      texture_vk.GetCachedFrameData(SampleCount::kCount4, 0u, 0u, attachments)
+          .framebuffer,
+      nullptr);
+  EXPECT_NE(
+      texture_vk.GetCachedFrameData(SampleCount::kCount4, 0u, 0u, attachments)
+          .render_pass,
+      nullptr);
 
   render_pass->EncodeCommands();
   EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer}).ok());
@@ -66,19 +77,29 @@ TEST_P(RendererTest, CachesRenderPassAndFramebufferNonMSAA) {
   std::shared_ptr<Texture> color_texture =
       render_target.GetColorAttachment(0).texture;
   TextureVK& texture_vk = TextureVK::Cast(*color_texture);
+  const FramebufferAttachmentsVK attachments =
+      RenderPassVK::GetFramebufferAttachments(render_target);
 
-  EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount1).framebuffer,
-            nullptr);
-  EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount1).render_pass,
-            nullptr);
+  EXPECT_EQ(
+      texture_vk.GetCachedFrameData(SampleCount::kCount1, 0u, 0u, attachments)
+          .framebuffer,
+      nullptr);
+  EXPECT_EQ(
+      texture_vk.GetCachedFrameData(SampleCount::kCount1, 0u, 0u, attachments)
+          .render_pass,
+      nullptr);
 
   auto buffer = GetContext()->CreateCommandBuffer();
   auto render_pass = buffer->CreateRenderPass(render_target);
 
-  EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount1).framebuffer,
-            nullptr);
-  EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount1).render_pass,
-            nullptr);
+  EXPECT_NE(
+      texture_vk.GetCachedFrameData(SampleCount::kCount1, 0u, 0u, attachments)
+          .framebuffer,
+      nullptr);
+  EXPECT_NE(
+      texture_vk.GetCachedFrameData(SampleCount::kCount1, 0u, 0u, attachments)
+          .render_pass,
+      nullptr);
 
   render_pass->EncodeCommands();
   EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer}).ok());
@@ -104,19 +125,29 @@ TEST_P(RendererTest, CachesRenderPassAndFramebufferMixed) {
   std::shared_ptr<Texture> resolve_texture =
       render_target.GetColorAttachment(0).resolve_texture;
   TextureVK& texture_vk = TextureVK::Cast(*resolve_texture);
+  const FramebufferAttachmentsVK attachments =
+      RenderPassVK::GetFramebufferAttachments(render_target);
 
-  EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount4).framebuffer,
-            nullptr);
-  EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount4).render_pass,
-            nullptr);
+  EXPECT_EQ(
+      texture_vk.GetCachedFrameData(SampleCount::kCount4, 0u, 0u, attachments)
+          .framebuffer,
+      nullptr);
+  EXPECT_EQ(
+      texture_vk.GetCachedFrameData(SampleCount::kCount4, 0u, 0u, attachments)
+          .render_pass,
+      nullptr);
 
   auto buffer = GetContext()->CreateCommandBuffer();
   auto render_pass = buffer->CreateRenderPass(render_target);
 
-  EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount4).framebuffer,
-            nullptr);
-  EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount4).render_pass,
-            nullptr);
+  EXPECT_NE(
+      texture_vk.GetCachedFrameData(SampleCount::kCount4, 0u, 0u, attachments)
+          .framebuffer,
+      nullptr);
+  EXPECT_NE(
+      texture_vk.GetCachedFrameData(SampleCount::kCount4, 0u, 0u, attachments)
+          .render_pass,
+      nullptr);
 
   render_pass->EncodeCommands();
   EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer}).ok());
@@ -138,19 +169,33 @@ TEST_P(RendererTest, CachesRenderPassAndFramebufferMixed) {
     other_target.SetColorAttachment(color0, 0);
     other_target.SetDepthAttachment(std::nullopt);
     other_target.SetStencilAttachment(std::nullopt);
+    const FramebufferAttachmentsVK other_attachments =
+        RenderPassVK::GetFramebufferAttachments(other_target);
 
-    EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount1).framebuffer,
-              nullptr);
-    EXPECT_EQ(texture_vk.GetCachedFrameData(SampleCount::kCount1).render_pass,
-              nullptr);
+    EXPECT_EQ(
+        texture_vk
+            .GetCachedFrameData(SampleCount::kCount1, 0u, 0u, other_attachments)
+            .framebuffer,
+        nullptr);
+    EXPECT_EQ(
+        texture_vk
+            .GetCachedFrameData(SampleCount::kCount1, 0u, 0u, other_attachments)
+            .render_pass,
+        nullptr);
 
     auto buffer_3 = GetContext()->CreateCommandBuffer();
     auto render_pass_3 = buffer_3->CreateRenderPass(other_target);
 
-    EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount1).framebuffer,
-              nullptr);
-    EXPECT_NE(texture_vk.GetCachedFrameData(SampleCount::kCount1).render_pass,
-              nullptr);
+    EXPECT_NE(
+        texture_vk
+            .GetCachedFrameData(SampleCount::kCount1, 0u, 0u, other_attachments)
+            .framebuffer,
+        nullptr);
+    EXPECT_NE(
+        texture_vk
+            .GetCachedFrameData(SampleCount::kCount1, 0u, 0u, other_attachments)
+            .render_pass,
+        nullptr);
 
     EXPECT_TRUE(render_pass_3->EncodeCommands());
     EXPECT_TRUE(GetContext()->GetCommandQueue()->Submit({buffer_3}).ok());
