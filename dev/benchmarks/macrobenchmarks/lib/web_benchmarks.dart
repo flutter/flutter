@@ -88,6 +88,7 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchBuildColorsGrid.benchmarkName: () => BenchBuildColorsGrid(),
   BenchTextCachedLayout.benchmarkName: () => BenchTextCachedLayout(),
 
+  BenchTextParagraphTiny.skParagraphName: () => BenchTextParagraphTiny.skParagraph(),
   BenchTextParagraphSmall.skParagraphName: () => BenchTextParagraphSmall.skParagraph(),
   BenchTextParagraphMedium.skParagraphName: () => BenchTextParagraphMedium.skParagraph(),
   BenchTextParagraphLarge.skParagraphName: () => BenchTextParagraphLarge.skParagraph(),
@@ -95,6 +96,7 @@ final Map<String, RecorderFactory> benchmarks = <String, RecorderFactory>{
   BenchTextParagraphBidi.skParagraphName: () => BenchTextParagraphBidi.skParagraph(),
 
   if (!kIsWasm) ...<String, RecorderFactory>{
+    BenchTextParagraphTiny.webParagraphName: () => BenchTextParagraphTiny.webParagraph(),
     BenchTextParagraphSmall.webParagraphName: () => BenchTextParagraphSmall.webParagraph(),
     BenchTextParagraphMedium.webParagraphName: () => BenchTextParagraphMedium.webParagraph(),
     BenchTextParagraphLarge.webParagraphName: () => BenchTextParagraphLarge.webParagraph(),
