@@ -1625,9 +1625,9 @@ mixin WidgetInspectorService {
   /// This method triggers two actions:
   /// 1. It calls [developer.inspect] on the provided [object], making it
   ///    available for inspection in Flutter DevTools.
-  /// 2. It posts a 'navigate' [ToolEvent] with the source code location of the
-  ///    selected widget, allowing IDEs to navigate to the corresponding file
-  ///    and line.
+  /// 2. It posts a 'navigate' event on the `ToolEvent` stream with the source
+  ///    code location of the selected widget, allowing IDEs to navigate to
+  ///    the corresponding file and line.
   ///
   /// If [restrictToProjectFiles] is true and the selected widget is not from
   /// the local project (i.e., it's from the Flutter framework or a package),

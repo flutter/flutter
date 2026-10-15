@@ -662,8 +662,8 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
           break;
         }
         if (yamlValue is YamlMap) {
-          for (final MapEntry<Object?, Object?> entry in yamlValue.entries) {
-            final Object? platform = entry.key;
+          for (final MapEntry(:key, :value) in yamlValue.entries) {
+            final Object? platform = key;
             if (platform is! String) {
               errors.add(
                 'Expected key under "$yamlKey" to be a string, but got $platform (${platform.runtimeType}).',
@@ -676,7 +676,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
                 '"${_kValidDefaultFlavorPlatforms.join('", "')}".',
               );
             }
-            final Object? flavor = entry.value;
+            final Object? flavor = value;
             if (flavor is! String) {
               errors.add(
                 'Expected value for "$platform" under "$yamlKey" to be a string, but got $flavor (${flavor.runtimeType}).',

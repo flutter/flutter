@@ -212,8 +212,6 @@ Future<bool> runTests({
   return true;
 }
 
-final RegExp _spaces = RegExp(r' +');
-
 Future<bool> shell(
   String command,
   Directory directory, {
@@ -232,12 +230,11 @@ Future<bool> shell(
       command,
     ], workingDirectory: directory.path);
   } else {
-    final List<String> segments = command.trim().split(_spaces);
-    process = await Process.start(
-      segments.first,
-      segments.skip(1).toList(),
-      workingDirectory: directory.path,
-    );
+    process = await Process.start('/usr/bin/env', <String>[
+      'bash',
+      '-c',
+      command,
+    ], workingDirectory: directory.path);
   }
   final output = <String>[];
   utf8.decoder
