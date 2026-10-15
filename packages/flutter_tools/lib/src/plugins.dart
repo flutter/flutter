@@ -184,14 +184,17 @@ class Plugin {
 
     void parseNativeOrDartPlatform<T extends PluginPlatform>(
       String platformKey,
-      ({T? plugin, List<String> errors}) Function(YamlMap) parse,
-    ) {
+      ({T? plugin, List<String> errors}) Function(YamlMap) parse, {
+      bool ignoreEmptyConfig = false,
+    }) {
       if (!platformsYaml.containsKey(platformKey)) {
         return;
       }
       final Object? yamlValue = platformsYaml[platformKey];
       if (yamlValue is! YamlMap) {
-        errors.add('Invalid "$platformKey" plugin specification.');
+        if (!ignoreEmptyConfig) {
+          errors.add('Invalid "$platformKey" plugin specification.');
+        }
         return;
       }
       final (plugin: T? parsed, errors: List<String> platformErrors) = parse(yamlValue);
@@ -202,17 +205,20 @@ class Plugin {
       if (parsed == null) {
         return;
       }
-      final nativeOrDart = parsed as NativeOrDartPlugin;
-      if (nativeOrDart.defaultPackage != null) {
-        defaultPackages[platformKey] = nativeOrDart.defaultPackage!;
+      if (parsed case final NativeOrDartPlugin nativeOrDart) {
+        if (nativeOrDart.defaultPackage != null) {
+          defaultPackages[platformKey] = nativeOrDart.defaultPackage!;
+        } else {
+          platforms[platformKey] = parsed;
+        }
+        if (nativeOrDart.dartPluginClass != null) {
+          dartPluginClasses[platformKey] = (
+            dartClass: nativeOrDart.dartPluginClass!,
+            dartFileName: nativeOrDart.dartFileName ?? '$name.dart',
+          );
+        }
       } else {
         platforms[platformKey] = parsed;
-      }
-      if (nativeOrDart.dartPluginClass != null) {
-        dartPluginClasses[platformKey] = (
-          dartClass: nativeOrDart.dartPluginClass!,
-          dartFileName: nativeOrDart.dartFileName ?? '$name.dart',
-        );
       }
     }
 
@@ -233,20 +239,17 @@ class Plugin {
       MacOSPlugin.kConfigKey,
       (YamlMap yaml) => MacOSPlugin.parseFromYaml(name, yaml),
     );
-    // Unlike native/Dart platforms, an empty `web:` entry (where the value is
-    // null rather than a YamlMap) or a `web:` entry with `default_package` is
-    // ignored rather than rejected, as existing published packages use an empty
-    // `web:` key to declare web support without a WebPlugin registrant class.
-    if (platformsYaml[WebPlugin.kConfigKey] case final YamlMap yamlValue
-        when !yamlValue.containsKey(kDefaultPackage)) {
-      final (plugin: WebPlugin? webPlugin, errors: List<String> webErrors) =
-          WebPlugin.parseFromYaml(name, yamlValue);
-      if (webErrors.isNotEmpty) {
-        errors.addAll(webErrors);
-      } else if (webPlugin != null) {
-        platforms[WebPlugin.kConfigKey] = webPlugin;
-      }
-    }
+    parseNativeOrDartPlatform(
+      WebPlugin.kConfigKey,
+      (YamlMap yaml) => yaml.containsKey(kDefaultPackage)
+          ? (plugin: null, errors: const <String>[])
+          : WebPlugin.parseFromYaml(name, yaml),
+      // Unlike native/Dart platforms, an empty `web:` entry (where the value is
+      // null rather than a YamlMap) or a `web:` entry with `default_package` is
+      // ignored rather than rejected, as existing published packages use an empty
+      // `web:` key to declare web support without a WebPlugin registrant class.
+      ignoreEmptyConfig: true,
+    );
     parseNativeOrDartPlatform(
       WindowsPlugin.kConfigKey,
       (YamlMap yaml) => WindowsPlugin.parseFromYaml(name, yaml),
