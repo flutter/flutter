@@ -904,6 +904,62 @@ class FlutterVmService {
     }
   }
 
+  /// Waits for the UI isolate of the first [FlutterView] to be created and
+  /// reach the `PauseStart` state.
+  Future<void> waitForUIIsolatePaused() async {
+    try {
+      await service.streamListen(vm_service.EventStreams.kDebug);
+    } on vm_service.RPCError {
+      // Do nothing, since the tool is already subscribed.
+    }
+
+    final isolatePaused = Completer<void>();
+    final pausedIsolateIds = <String>{};
+    String? targetIsolateId;
+    final StreamSubscription<vm_service.Event> debugEvents = service.onDebugEvent.listen((
+      vm_service.Event event,
+    ) {
+      if (event case vm_service.Event(
+        kind: vm_service.EventKind.kPauseStart,
+        isolate: vm_service.IsolateRef(id: final String eventIsolateId),
+      )) {
+        pausedIsolateIds.add(eventIsolateId);
+        if (eventIsolateId == targetIsolateId && !isolatePaused.isCompleted) {
+          isolatePaused.complete();
+        }
+      }
+    });
+    unawaited(
+      service.onDone.whenComplete(() {
+        if (!isolatePaused.isCompleted) {
+          isolatePaused.complete();
+        }
+      }),
+    );
+
+    try {
+      final List<FlutterView> flutterViews = await getFlutterViews();
+      final String? isolateId = flutterViews.firstOrNull?.uiIsolate?.id;
+      if (isolateId == null) {
+        return;
+      }
+      targetIsolateId = isolateId;
+      final vm_service.Isolate? isolate = await getIsolateOrNull(isolateId);
+      if (isolate == null ||
+          isolate.pauseEvent?.kind == vm_service.EventKind.kPauseStart ||
+          pausedIsolateIds.contains(isolateId)) {
+        return;
+      }
+      await isolatePaused.future;
+    } on vm_service.RPCError catch (e) {
+      if (!e.isConnectionDisposedException) {
+        rethrow;
+      }
+    } finally {
+      await debugEvents.cancel();
+    }
+  }
+
   /// Waits for a signal from the VM service that [extensionName] is registered.
   ///
   /// Looks at the list of loaded extensions for first Flutter view, as well as

@@ -19,7 +19,9 @@ import 'package:flutter_tools/src/test/font_config_manager.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
+import 'package:vm_service/vm_service.dart' as vm_service;
 
+import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
@@ -43,7 +45,10 @@ void main() {
     bool enableVmService = false,
     bool enableImpeller = false,
     bool enableFlutterGpu = false,
+    bool startPaused = false,
     FlutterProject? flutterProject,
+    FontConfigManager? fontConfigManager,
+    FakeVmServiceHost? vmServiceHost,
   }) => TestFlutterTesterDevice(
     platform: platform,
     fileSystem: fileSystem,
@@ -52,7 +57,10 @@ void main() {
     dartEntrypointArgs: dartEntrypointArgs,
     enableImpeller: enableImpeller,
     enableFlutterGpu: enableFlutterGpu,
+    startPaused: startPaused,
     flutterProject: flutterProject,
+    fontConfigManager: fontConfigManager,
+    vmServiceHost: vmServiceHost,
   );
 
   testUsingContext(
@@ -324,6 +332,90 @@ void main() {
         expect(uri!.port, 1234);
       },
     );
+
+    // Regression test for https://github.com/flutter/flutter/issues/192470.
+    testWithoutContext(
+      'waits for the UI isolate to reach PauseStart when startPaused is true',
+      () async {
+        processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              '/',
+              '--vm-service-port=0',
+              '--start-paused',
+              '--ipv6',
+              '--enable-checked-mode',
+              '--verify-entry-points',
+              '--enable-software-rendering',
+              '--skia-deterministic-rendering',
+              '--enable-dart-profiling',
+              '--non-interactive',
+              '--use-test-fonts',
+              '--disable-asset-fonts',
+              '--packages=.dart_tool/package_config.json',
+              'example.dill',
+            ],
+            stdout: 'The Dart VM service is listening on http://localhost:1234',
+            stderr: 'failure',
+          ),
+        ]);
+        final isolate = vm_service.Isolate(
+          id: '1',
+          pauseEvent: vm_service.Event(kind: vm_service.EventKind.kNone, timestamp: 0),
+          breakpoints: <vm_service.Breakpoint>[],
+          libraries: <vm_service.LibraryRef>[],
+          livePorts: 0,
+          name: 'main',
+          number: '1',
+          pauseOnExit: false,
+          runnable: true,
+          startTime: 0,
+          isSystemIsolate: false,
+          isolateFlags: <vm_service.IsolateFlag>[],
+        );
+        final fakeFlutterView = FlutterView(id: 'a', uiIsolate: isolate);
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            FakeVmServiceRequest(
+              method: kListViewsMethod,
+              jsonResponse: <String, Object>{
+                'views': <Object>[fakeFlutterView.toJson()],
+              },
+            ),
+            FakeVmServiceRequest(
+              method: 'getIsolate',
+              jsonResponse: isolate.toJson(),
+              args: <String, Object>{'isolateId': '1'},
+            ),
+            FakeVmServiceStreamResponse(
+              streamId: 'Debug',
+              event: vm_service.Event(
+                kind: vm_service.EventKind.kPauseStart,
+                isolate: isolate,
+                timestamp: 1,
+              ),
+            ),
+          ],
+        );
+        device = createDevice(
+          enableVmService: true,
+          startPaused: true,
+          fontConfigManager: FakeFontConfigManager(fileSystem),
+          vmServiceHost: fakeVmServiceHost,
+        );
+
+        await device.start('example.dill');
+        final Uri? uri = await device.vmServiceUri;
+
+        expect(uri!.port, 1234);
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+        expect(processManager, hasNoRemainingExpectations);
+      },
+    );
   });
 }
 
@@ -339,7 +431,10 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required List<String> dartEntrypointArgs,
     required bool enableImpeller,
     required bool enableFlutterGpu,
+    bool startPaused = false,
     super.flutterProject,
+    FontConfigManager? fontConfigManager,
+    this.vmServiceHost,
   }) : super(
          id: 999,
          flutterTesterBinPath: '/',
@@ -351,6 +446,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
              treeShakeIcons: false,
              packageConfigPath: '.dart_tool/package_config.json',
            ),
+           startPaused: startPaused,
            hostVmServicePort: 1234,
            dartEntrypointArgs: dartEntrypointArgs,
            enableImpeller: enableImpeller ? ImpellerStatus.enabled : ImpellerStatus.platformDefault,
@@ -361,9 +457,11 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
          testAssetDirectory: null,
          icudtlPath: null,
          compileExpression: null,
-         fontConfigManager: FontConfigManager(),
+         fontConfigManager: fontConfigManager ?? FontConfigManager(),
          nativeAssetsBuilder: FakeNativeAssetsBuilder(),
        );
+
+  final FakeVmServiceHost? vmServiceHost;
 
   @override
   Future<FlutterVmService> connectToVmServiceImpl(
@@ -371,7 +469,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     CompileExpression? compileExpression,
     required Logger logger,
   }) async {
-    return FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService;
+    return (vmServiceHost ?? FakeVmServiceHost(requests: <VmServiceExpectation>[])).vmService;
   }
 
   @override
@@ -385,6 +483,15 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
 class FakeHttpServer extends Fake implements HttpServer {
   @override
   int get port => 0;
+}
+
+class FakeFontConfigManager extends Fake implements FontConfigManager {
+  FakeFontConfigManager(this._fileSystem);
+
+  final FileSystem _fileSystem;
+
+  @override
+  late final File fontConfigFile = _fileSystem.file('fonts.conf');
 }
 
 class FakeNativeAssetsBuilder extends Fake implements TestCompilerNativeAssetsBuilder {

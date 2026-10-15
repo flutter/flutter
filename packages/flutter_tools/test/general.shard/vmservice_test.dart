@@ -655,6 +655,76 @@ void main() {
     });
   });
 
+  group('waitForUIIsolatePaused', () {
+    testWithoutContext(
+      'returns immediately when the UI isolate is already in PauseStart',
+      () async {
+        final vm_service.Isolate pausedIsolate = vm_service.Isolate.parse(
+          isolate.toJson()
+            ..['pauseEvent'] = vm_service.Event(
+              kind: vm_service.EventKind.kPauseStart,
+              timestamp: 0,
+            ).toJson(),
+        )!;
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            listViewsRequest,
+            FakeVmServiceRequest(
+              method: 'getIsolate',
+              jsonResponse: pausedIsolate.toJson(),
+              args: <String, Object>{'isolateId': '1'},
+            ),
+          ],
+        );
+
+        await fakeVmServiceHost.vmService.waitForUIIsolatePaused();
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+      },
+    );
+
+    testWithoutContext(
+      'waits for a PauseStart event on the Debug stream when the UI isolate is not yet paused',
+      () async {
+        final vm_service.Isolate unpausedIsolate = vm_service.Isolate.parse(
+          isolate.toJson()
+            ..['pauseEvent'] = vm_service.Event(
+              kind: vm_service.EventKind.kNone,
+              timestamp: 0,
+            ).toJson(),
+        )!;
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            listViewsRequest,
+            FakeVmServiceRequest(
+              method: 'getIsolate',
+              jsonResponse: unpausedIsolate.toJson(),
+              args: <String, Object>{'isolateId': '1'},
+            ),
+            FakeVmServiceStreamResponse(
+              streamId: 'Debug',
+              event: vm_service.Event(
+                kind: vm_service.EventKind.kPauseStart,
+                isolate: isolate,
+                timestamp: 1,
+              ),
+            ),
+          ],
+        );
+
+        await fakeVmServiceHost.vmService.waitForUIIsolatePaused();
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+      },
+    );
+  });
+
   testWithoutContext('Can process log events from the vm service', () {
     final event = vm_service.Event(
       bytes: base64.encode(utf8.encode('Hello There\n')),
