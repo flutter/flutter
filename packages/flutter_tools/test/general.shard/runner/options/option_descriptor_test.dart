@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fakes.dart';
 import '../../../src/test_flutter_command_runner.dart';
 
 class _FakeCommand extends FlutterCommand {
@@ -18,7 +18,7 @@ class _FakeCommand extends FlutterCommand {
     required this.description,
     super.verboseHelp = false,
     List<OptionBundle> bundles = const <OptionBundle>[],
-  }) {
+  }) : super(toolContext: FakeToolContext()) {
     registerOptionBundles(bundles);
   }
 
@@ -482,7 +482,7 @@ void main() {
   });
 
   group('OptionBundle and Command Integration', () {
-    testUsingContext('registers options and provides typed values via SafeArgResults', () async {
+    testWithoutContext('registers options and provides typed values via SafeArgResults', () async {
       const flagOpt = FlagOptionDescriptor(name: 'fast', defaultsTo: true, help: 'Fast mode');
       const triFlagOpt = NullableFlagOptionDescriptor(name: 'optimize', help: 'Optimize');
       const stringOpt = StringOptionDescriptor(name: 'name', defaultsTo: 'app', help: 'App name');
@@ -509,7 +509,7 @@ void main() {
       expect(command.wasProvided(stringOpt), isTrue);
     });
 
-    testUsingContext('converts FormatException from IntOptionDescriptor into ToolExit', () async {
+    testWithoutContext('converts FormatException from IntOptionDescriptor into ToolExit', () async {
       const intOpt = IntOptionDescriptor(name: 'port', help: 'Server port');
       const bundle = _SimpleBundle(descriptors: <OptionDescriptor<Object?>>[intOpt]);
       final command = _FakeCommand(
@@ -527,7 +527,7 @@ void main() {
       );
     });
 
-    testUsingContext('renders section separator titles in command usage', () {
+    testWithoutContext('renders section separator titles in command usage', () {
       const bundle = _TitledBundle();
       final command = _FakeCommand(
         name: 'build',
@@ -540,81 +540,87 @@ void main() {
       expect(command.usage, contains('--[no-]titled-flag'));
     });
 
-    testUsingContext('auto-wires verboseHelp to dynamically hide or show verboseOnly options', () {
-      const verboseFlag = FlagOptionDescriptor(
-        name: 'internal-flag',
-        verboseOnly: true,
-        help: 'Internal flag help',
-      );
-      const standardFlag = FlagOptionDescriptor(name: 'public-flag', help: 'Public flag help');
-      const bundle = _SimpleBundle(
-        descriptors: <OptionDescriptor<Object?>>[verboseFlag, standardFlag],
-      );
+    testWithoutContext(
+      'auto-wires verboseHelp to dynamically hide or show verboseOnly options',
+      () {
+        const verboseFlag = FlagOptionDescriptor(
+          name: 'internal-flag',
+          verboseOnly: true,
+          help: 'Internal flag help',
+        );
+        const standardFlag = FlagOptionDescriptor(name: 'public-flag', help: 'Public flag help');
+        const bundle = _SimpleBundle(
+          descriptors: <OptionDescriptor<Object?>>[verboseFlag, standardFlag],
+        );
 
-      final normalCommand = _FakeCommand(
-        name: 'build',
-        description: 'Build command',
-        bundles: const <OptionBundle>[bundle],
-      );
+        final normalCommand = _FakeCommand(
+          name: 'build',
+          description: 'Build command',
+          bundles: const <OptionBundle>[bundle],
+        );
 
-      createTestCommandRunner(normalCommand);
+        createTestCommandRunner(normalCommand);
 
-      expect(normalCommand.argParser.options['internal-flag']!.hide, isTrue);
-      expect(normalCommand.argParser.options['public-flag']!.hide, isFalse);
-      expect(normalCommand.usage, isNot(contains('internal-flag')));
-      expect(normalCommand.usage, contains('public-flag'));
+        expect(normalCommand.argParser.options['internal-flag']!.hide, isTrue);
+        expect(normalCommand.argParser.options['public-flag']!.hide, isFalse);
+        expect(normalCommand.usage, isNot(contains('internal-flag')));
+        expect(normalCommand.usage, contains('public-flag'));
 
-      final verboseCommand = _FakeCommand(
-        name: 'build',
-        description: 'Build command',
-        verboseHelp: true,
-        bundles: const <OptionBundle>[bundle],
-      );
-      createTestCommandRunner(verboseCommand);
+        final verboseCommand = _FakeCommand(
+          name: 'build',
+          description: 'Build command',
+          verboseHelp: true,
+          bundles: const <OptionBundle>[bundle],
+        );
+        createTestCommandRunner(verboseCommand);
 
-      expect(verboseCommand.argParser.options['internal-flag']!.hide, isFalse);
-      expect(verboseCommand.argParser.options['public-flag']!.hide, isFalse);
-      expect(verboseCommand.usage, contains('internal-flag'));
-      expect(verboseCommand.usage, contains('public-flag'));
-    });
+        expect(verboseCommand.argParser.options['internal-flag']!.hide, isFalse);
+        expect(verboseCommand.argParser.options['public-flag']!.hide, isFalse);
+        expect(verboseCommand.usage, contains('internal-flag'));
+        expect(verboseCommand.usage, contains('public-flag'));
+      },
+    );
 
-    testUsingContext('AndroidGradleOptionsBundle registers Gradle options with verbose hiding', () {
-      final normalCommand = _FakeCommand(
-        name: 'apk',
-        description: 'Build APK',
-        bundles: const <OptionBundle>[AndroidGradleOptionsBundle()],
-      );
-      createTestCommandRunner(normalCommand);
+    testWithoutContext(
+      'AndroidGradleOptionsBundle registers Gradle options with verbose hiding',
+      () {
+        final normalCommand = _FakeCommand(
+          name: 'apk',
+          description: 'Build APK',
+          bundles: const <OptionBundle>[AndroidGradleOptionsBundle()],
+        );
+        createTestCommandRunner(normalCommand);
 
-      for (final name in const <String>[
-        FlutterOptions.kAndroidGradleDaemon,
-        FlutterOptions.kAndroidSkipBuildDependencyValidation,
-        FlutterOptions.kAndroidProjectArgs,
-        FlutterOptions.kAndroidGradleProjectCacheDir,
-      ]) {
-        expect(normalCommand.argParser.options.containsKey(name), isTrue);
-        expect(normalCommand.argParser.options[name]!.hide, isTrue);
-      }
+        for (final name in const <String>[
+          FlutterOptions.kAndroidGradleDaemon,
+          FlutterOptions.kAndroidSkipBuildDependencyValidation,
+          FlutterOptions.kAndroidProjectArgs,
+          FlutterOptions.kAndroidGradleProjectCacheDir,
+        ]) {
+          expect(normalCommand.argParser.options.containsKey(name), isTrue);
+          expect(normalCommand.argParser.options[name]!.hide, isTrue);
+        }
 
-      final verboseCommand = _FakeCommand(
-        name: 'apk',
-        description: 'Build APK',
-        verboseHelp: true,
-        bundles: const <OptionBundle>[AndroidGradleOptionsBundle()],
-      );
-      createTestCommandRunner(verboseCommand);
+        final verboseCommand = _FakeCommand(
+          name: 'apk',
+          description: 'Build APK',
+          verboseHelp: true,
+          bundles: const <OptionBundle>[AndroidGradleOptionsBundle()],
+        );
+        createTestCommandRunner(verboseCommand);
 
-      for (final name in const <String>[
-        FlutterOptions.kAndroidGradleDaemon,
-        FlutterOptions.kAndroidSkipBuildDependencyValidation,
-        FlutterOptions.kAndroidProjectArgs,
-        FlutterOptions.kAndroidGradleProjectCacheDir,
-      ]) {
-        expect(verboseCommand.argParser.options[name]!.hide, isFalse);
-      }
-    });
+        for (final name in const <String>[
+          FlutterOptions.kAndroidGradleDaemon,
+          FlutterOptions.kAndroidSkipBuildDependencyValidation,
+          FlutterOptions.kAndroidProjectArgs,
+          FlutterOptions.kAndroidGradleProjectCacheDir,
+        ]) {
+          expect(verboseCommand.argParser.options[name]!.hide, isFalse);
+        }
+      },
+    );
 
-    testUsingContext('AndroidBuildOptionsBundle registers Android and Gradle options', () {
+    testWithoutContext('AndroidBuildOptionsBundle registers Android and Gradle options', () {
       final command = _FakeCommand(
         name: 'apk',
         description: 'Build APK',
@@ -650,7 +656,7 @@ void main() {
       }
     });
 
-    testUsingContext('AppleBuildOptionsBundle registers Apple build options', () {
+    testWithoutContext('AppleBuildOptionsBundle registers Apple build options', () {
       final command = _FakeCommand(
         name: 'ios',
         description: 'Build iOS',
@@ -678,7 +684,7 @@ void main() {
       }
     });
 
-    testUsingContext(
+    testWithoutContext(
       'DarwinCodeSignXCFrameworksOptionsBundle registers codesign and codesign-identity',
       () {
         final command = _FakeCommand(
@@ -703,7 +709,7 @@ void main() {
       },
     );
 
-    testUsingContext(
+    testWithoutContext(
       'DarwinAddToAppOptionsBundle registers shared Darwin Add-to-App options and subBundles',
       () {
         final command = _FakeCommand(
@@ -739,7 +745,7 @@ void main() {
       },
     );
 
-    testUsingContext('BuildModeOptionsBundle configures defaultBuildMode and respects excludeDebug and excludeRelease', () {
+    testWithoutContext('BuildModeOptionsBundle configures defaultBuildMode and respects excludeDebug and excludeRelease', () {
       final debugDefaultCommand = _FakeCommand(
         name: 'run',
         description: 'Run app',
@@ -790,7 +796,7 @@ void main() {
       );
     });
 
-    testUsingContext(
+    testWithoutContext(
       'DeviceDiscoveryOptionsBundle, FilesystemOptionsBundle, VmServicePortOptionsBundle, '
       'DdsAndDevToolsOptionsBundle, ResidentCompilerOptionsBundle, and EngineRenderingFlagsBundle register expected options',
       () async {
@@ -864,7 +870,7 @@ void main() {
       },
     );
 
-    testUsingContext('OptionBundle.register supports verboseHelp and hideOverride overrides for FlutterCommand helpers', () async {
+    testWithoutContext('OptionBundle.register supports verboseHelp and hideOverride overrides for FlutterCommand helpers', () async {
       final command = _FakeCommand(name: 'helper-test', description: 'Helper delegation test');
       command.usesFilesystemOptions(hide: false);
       command.usesPortOptions(verboseHelp: true);

@@ -104,74 +104,84 @@ class AssembleCommand extends FlutterCommand {
     required this._featureFlags,
     required ToolContext super.toolContext,
     this._extensionBuildManager,
-    bool verboseHelp = false,
-  }) : _toolContext = toolContext,
-       _verboseHelp = verboseHelp {
+    super.verboseHelp = false,
+  }) : _toolContext = toolContext {
     requiresPubspecYaml();
-    argParser.addMultiOption(
-      'define',
-      abbr: 'd',
-      valueHelp: 'target=key=value',
-      hide: !verboseHelp,
-      help:
-          'DEPRECATED. Use "--dart-define" or "-D" instead for consistency.\n'
-          '\n'
-          'Allows passing configuration to a target, as in "--define=target=key=value".',
-    );
-
-    // New -D/--dart-define (consistent across app)
-    usesDartDefineOption();
-
-    argParser.addOption(
-      'performance-measurement-file',
-      help: 'Output individual target performance to a JSON file.',
-    );
-    argParser.addMultiOption(
-      'input',
-      abbr: 'i',
-      help:
-          'Allows passing additional inputs with "--input=key=value". Unlike '
-          'defines, additional inputs do not generate a new configuration; instead '
-          'they are treated as dependencies of the targets that use them.',
-    );
-    argParser.addOption(
-      'depfile',
-      help:
-          'A file path where a depfile will be written. '
-          'This contains all build inputs and outputs in a Make-style syntax.',
-    );
-    argParser.addOption(
-      'build-inputs',
-      help:
-          'A file path where a newline-separated '
-          'file containing all inputs used will be written after a build. '
-          'This file is not included as a build input or output. This file is not '
-          'written if the build fails for any reason.',
-    );
-    argParser.addOption(
-      'build-outputs',
-      help:
-          'A file path where a newline-separated '
-          'file containing all outputs created will be written after a build. '
-          'This file is not included as a build input or output. This file is not '
-          'written if the build fails for any reason.',
-    );
-    argParser.addOption(
-      'output',
-      abbr: 'o',
-      help:
-          'A directory where output '
-          'files will be written. Must be either absolute or relative from the '
-          'root of the current Flutter project.',
-    );
-    usesExtraDartFlagOptions(verboseHelp: verboseHelp);
-    argParser.addOption(
-      'resource-pool-size',
-      help: 'The maximum number of concurrent tasks the build system will run.',
-    );
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      _define,
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
+      BuildInfoOptions.performanceMeasurementFile,
+      _input,
+      _depfile,
+      _buildInputs,
+      _buildOutputs,
+      _output,
+      BuildInfoOptions.extraFrontEndOptions,
+      BuildInfoOptions.extraGenSnapshotOptions,
+      _resourcePoolSize,
+    ], verboseHelp: verboseHelp);
   }
 
-  final bool _verboseHelp;
+  static const _define = MultiOptionDescriptor(
+    name: 'define',
+    abbr: 'd',
+    valueHelp: 'target=key=value',
+    verboseOnly: true,
+    help:
+        'DEPRECATED. Use "--dart-define" or "-D" instead for consistency.\n'
+        '\n'
+        'Allows passing configuration to a target, as in "--define=target=key=value".',
+  );
+
+  static const _input = MultiOptionDescriptor(
+    name: 'input',
+    abbr: 'i',
+    help:
+        'Allows passing additional inputs with "--input=key=value". Unlike '
+        'defines, additional inputs do not generate a new configuration; instead '
+        'they are treated as dependencies of the targets that use them.',
+  );
+
+  static const _depfile = StringOptionDescriptor(
+    name: 'depfile',
+    help:
+        'A file path where a depfile will be written. '
+        'This contains all build inputs and outputs in a Make-style syntax.',
+  );
+
+  static const _buildInputs = StringOptionDescriptor(
+    name: 'build-inputs',
+    help:
+        'A file path where a newline-separated '
+        'file containing all inputs used will be written after a build. '
+        'This file is not included as a build input or output. This file is not '
+        'written if the build fails for any reason.',
+  );
+
+  static const _buildOutputs = StringOptionDescriptor(
+    name: 'build-outputs',
+    help:
+        'A file path where a newline-separated '
+        'file containing all outputs created will be written after a build. '
+        'This file is not included as a build input or output. This file is not '
+        'written if the build fails for any reason.',
+  );
+
+  static const _output = StringOptionDescriptor(
+    name: 'output',
+    abbr: 'o',
+    help:
+        'A directory where output '
+        'files will be written. Must be either absolute or relative from the '
+        'root of the current Flutter project.',
+  );
+
+  static const _resourcePoolSize = StringOptionDescriptor(
+    name: 'resource-pool-size',
+    help: 'The maximum number of concurrent tasks the build system will run.',
+  );
+
   final BuildSystem _buildSystem;
   final ExtensionBuildManager? _extensionBuildManager;
   final FeatureFlags _featureFlags;
@@ -181,7 +191,7 @@ class AssembleCommand extends FlutterCommand {
   ToolContext get toolContext => _toolContext;
 
   @override
-  bool get hidden => !_verboseHelp;
+  bool get hidden => !verboseHelp;
 
   @override
   String get description => 'Assemble and build Flutter resources.';
@@ -283,7 +293,7 @@ class AssembleCommand extends FlutterCommand {
   Environment _createEnvironment() {
     final FileSystem fs = _toolContext.fs;
     final FlutterProject project = this.project;
-    String? output = stringArg('output');
+    String? output = getValue(_output);
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
     }
@@ -296,7 +306,7 @@ class AssembleCommand extends FlutterCommand {
     List<String> decodedDefines;
     try {
       decodedDefines = decodeDartDefines({
-        'dart-define': stringsArg('dart-define').join(','),
+        'dart-define': getValue(CommonOptions.dartDefines).join(','),
       }, 'dart-define');
     } on FormatException {
       throwToolExit(
@@ -310,8 +320,8 @@ class AssembleCommand extends FlutterCommand {
       buildDir: project.directory.childDirectory('.dart_tool').childDirectory('flutter_build'),
       projectDir: project.directory,
       packageConfigPath: packageConfigPath(),
-      defines: _parseDefines([...stringsArg('define'), ...decodedDefines]),
-      inputs: _parseDefines(stringsArg('input')),
+      defines: _parseDefines([...getValue(_define), ...decodedDefines]),
+      inputs: _parseDefines(getValue(_input)),
       cacheDir: _toolContext.cache.getRoot(),
       flutterRootDir: fs.directory(Cache.flutterRoot),
       artifacts: artifacts,
@@ -341,10 +351,9 @@ class AssembleCommand extends FlutterCommand {
       final String value = chunk.substring(indexEquals + 1);
       results[key] = value;
     }
-    final ArgResults argumentResults = argResults!;
-    if (argumentResults.wasParsed(FlutterOptions.kExtraGenSnapshotOptions)) {
-      results[kExtraGenSnapshotOptions] =
-          (argumentResults[FlutterOptions.kExtraGenSnapshotOptions] as List<String>).join(',');
+    if (wasParsed(BuildInfoOptions.extraGenSnapshotOptions)) {
+      results[kExtraGenSnapshotOptions] = getValue(BuildInfoOptions.extraGenSnapshotOptions)
+          .join(',');
     }
 
     final Map<String, Object?> defineConfigJsonMap = extractDartDefineConfigJsonMap();
@@ -359,9 +368,8 @@ class AssembleCommand extends FlutterCommand {
         !isDebug()) {
       results[kDeferredComponents] = 'true';
     }
-    if (argumentResults.wasParsed(FlutterOptions.kExtraFrontEndOptions)) {
-      results[kExtraFrontEndOptions] =
-          (argumentResults[FlutterOptions.kExtraFrontEndOptions] as List<String>).join(',');
+    if (wasParsed(BuildInfoOptions.extraFrontEndOptions)) {
+      results[kExtraFrontEndOptions] = getValue(BuildInfoOptions.extraFrontEndOptions).join(',');
     }
     return results;
   }
@@ -405,13 +413,12 @@ class AssembleCommand extends FlutterCommand {
     } else if (targets.isNotEmpty) {
       target = targets.single;
     }
-    final ArgResults argumentResults = argResults!;
     final BuildResult result = await _buildSystem.build(
       target!,
       _environment,
       buildSystemConfig: BuildSystemConfig(
-        resourcePoolSize: argumentResults.wasParsed('resource-pool-size')
-            ? int.tryParse(stringArg('resource-pool-size')!)
+        resourcePoolSize: wasParsed(_resourcePoolSize)
+            ? int.tryParse(getValue(_resourcePoolSize)!)
             : null,
       ),
     );
@@ -428,18 +435,18 @@ class AssembleCommand extends FlutterCommand {
     }
     logger.printTrace('build succeeded.');
 
-    if (argumentResults.wasParsed('build-inputs')) {
-      writeListIfChanged(result.inputFiles, stringArg('build-inputs')!, fs: fs);
+    if (wasParsed(_buildInputs)) {
+      writeListIfChanged(result.inputFiles, getValue(_buildInputs)!, fs: fs);
     }
-    if (argumentResults.wasParsed('build-outputs')) {
-      writeListIfChanged(result.outputFiles, stringArg('build-outputs')!, fs: fs);
+    if (wasParsed(_buildOutputs)) {
+      writeListIfChanged(result.outputFiles, getValue(_buildOutputs)!, fs: fs);
     }
-    if (argumentResults.wasParsed('performance-measurement-file')) {
-      final File outFile = fs.file(argumentResults['performance-measurement-file']);
+    if (wasParsed(BuildInfoOptions.performanceMeasurementFile)) {
+      final File outFile = fs.file(getValue(BuildInfoOptions.performanceMeasurementFile));
       writePerformanceData(result.performance.values, outFile);
     }
-    if (argumentResults.wasParsed('depfile')) {
-      final File depfileFile = fs.file(stringArg('depfile'));
+    if (wasParsed(_depfile)) {
+      final File depfileFile = fs.file(getValue(_depfile));
       final depfile = Depfile(result.inputFiles, result.outputFiles);
       _environment.depFileService.writeToFile(depfile, depfileFile);
     }
