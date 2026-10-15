@@ -1,0 +1,58 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The Linux embeddings' system libraries, as BUILD.gn's pkg_config() configs
+# (build/config/linux/pkg_config.gni): each is what pkg-config says of one
+# package against the sysroot (build/config/linux/pkg-config.py -s <sysroot>
+# -a x64 <package>), which GN reads through exec_script and this file holds.
+# Hand-written for that reason (the converter runs no scripts, and the file
+# is a foreach over the six); the answers are from the Debian bullseye
+# sysroots the engine pins (build/linux/sysroot_scripts/sysroots.json), as
+# `libs` -- none of the five below has include directories or flags of its
+# own -- which link against the sysroot's shared objects, as GN's do.
+#
+# Not here yet: `gtk` (gtk+-3.0), whose answer is twenty -isystem
+# directories under the sysroot and twelve libraries; it comes with the GTK
+# shell (//flutter/shell/platform/linux), the one package that lists it.
+#
+# GN's is_minimal_linux (a host "without x11, etc.") makes every one of these
+# an empty config; the Bazel build has no such switch yet, as tools/gn never
+# sets it for the configurations it builds.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+# pkg-config x11: [[], [], ["X11"], []]
+cc_library(
+    name = "x11",
+    linkopts = ["-lX11"],
+)
+
+# pkg-config egl: [[], [], ["EGL"], []]
+cc_library(
+    name = "egl",
+    linkopts = ["-lEGL"],
+)
+
+# pkg-config epoxy: [[], [], ["epoxy"], []]
+cc_library(
+    name = "epoxy",
+    linkopts = ["-lepoxy"],
+)
+
+# pkg-config wayland-client: [[], [], ["wayland-client"], []]
+cc_library(
+    name = "wayland_client",
+    linkopts = ["-lwayland-client"],
+)
+
+# pkg-config wayland-egl: [[], [], ["wayland-egl", "wayland-client"], []]
+cc_library(
+    name = "wayland_egl",
+    linkopts = [
+        "-lwayland-egl",
+        "-lwayland-client",
+    ],
+)
