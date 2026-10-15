@@ -840,6 +840,15 @@ void main() {
           .createSync(recursive: true);
 
       processManager.addCommands(<FakeCommand>[
+        // One SDK version lookup per architecture.
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'macosx', '--show-sdk-version'],
+          stdout: '12.0',
+        ),
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'macosx', '--show-sdk-version'],
+          stdout: '12.0',
+        ),
         FakeCommand(
           command: <String>[
             'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
@@ -848,6 +857,7 @@ void main() {
             '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
             '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
             '--macho-min-os-version=12.0',
+            '--macho-sdk-version=12.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
@@ -861,6 +871,7 @@ void main() {
             '--macho=${environment.buildDir.childFile('x86_64/App.framework/App').path}',
             '--macho-object=${environment.buildDir.childFile('x86_64/app.o').path}',
             '--macho-min-os-version=12.0',
+            '--macho-sdk-version=12.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             environment.buildDir.childFile('app.dill').path,
@@ -926,6 +937,74 @@ void main() {
             '-create',
             '-output',
             environment.buildDir.childFile('App.framework.dSYM/Contents/Resources/DWARF/App').path,
+          ],
+        ),
+      ]);
+
+      await const CompileMacOSFramework().build(environment);
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+  );
+
+  testUsingContext(
+    'CompileMacOSFramework uses kSdkRoot for the SDK version when provided',
+    () async {
+      const sdkRoot =
+          '/Applications/Xcode.app/Contents/Developer/Platforms/'
+          'MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk';
+      environment.defines[kDarwinArchs] = 'arm64';
+      environment.defines[kBuildMode] = 'release';
+      environment.defines[kSdkRoot] = sdkRoot;
+
+      processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', sdkRoot, '--show-sdk-version'],
+          stdout: '27.0',
+        ),
+        FakeCommand(
+          command: <String>[
+            'Artifact.genSnapshotArm64.TargetPlatform.darwin.release',
+            '--deterministic',
+            '--snapshot_kind=app-aot-macho-dylib',
+            '--macho=${environment.buildDir.childFile('arm64/App.framework/App').path}',
+            '--macho-object=${environment.buildDir.childFile('arm64/app.o').path}',
+            '--macho-min-os-version=12.0',
+            '--macho-sdk-version=27.0',
+            '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
+            '--macho-install-name=@rpath/App.framework/App',
+            environment.buildDir.childFile('app.dill').path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'dsymutil',
+            '-o',
+            environment.buildDir.childFile('arm64/App.framework.dSYM').path,
+            environment.buildDir.childFile('arm64/App.framework/App').path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xcrun',
+            'strip',
+            '-x',
+            environment.buildDir.childFile('arm64/App.framework/App').path,
+            '-o',
+            environment.buildDir.childFile('arm64/App.framework/App').path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'lipo',
+            environment.buildDir.childFile('arm64/App.framework/App').path,
+            '-create',
+            '-output',
+            environment.buildDir.childFile('App.framework/App').path,
           ],
         ),
       ]);

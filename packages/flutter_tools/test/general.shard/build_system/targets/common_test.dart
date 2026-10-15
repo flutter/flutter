@@ -819,6 +819,10 @@ void main() {
       iosEnvironment.defines[kSdkRoot] = 'path/to/iPhoneOS.sdk';
       final String build = iosEnvironment.buildDir.path;
       processManager.addCommands(<FakeCommand>[
+        const FakeCommand(
+          command: <String>['xcrun', '--sdk', 'path/to/iPhoneOS.sdk', '--show-sdk-version'],
+          stdout: '15.0',
+        ),
         FakeCommand(
           command: <String>[
             // This path is not known by the cache due to the iOS gen_snapshot split.
@@ -830,6 +834,7 @@ void main() {
             '--macho=$build/arm64/App.framework/App',
             '--macho-object=$build/arm64/app.o',
             '--macho-min-os-version=15.0',
+            '--macho-sdk-version=15.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             '$build/app.dill',

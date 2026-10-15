@@ -263,6 +263,24 @@ class Xcode {
     return runResult.stdout.trim();
   }
 
+  /// Returns the version of the SDK identified by [sdk].
+  ///
+  /// [sdk] is passed to `xcrun --sdk` and may be either a canonical SDK name
+  /// (for example 'iphoneos', 'iphonesimulator', or 'macosx') or the absolute
+  /// path to an SDK root, such as Xcode's `SDKROOT` build setting.
+  Future<String> sdkVersion(String sdk) async {
+    final RunResult runResult = await _processUtils.run(<String>[
+      ...xcrunCommand(),
+      '--sdk',
+      sdk,
+      '--show-sdk-version',
+    ]);
+    if (runResult.exitCode != 0) {
+      throwToolExit('Could not find SDK version: ${runResult.stderr}');
+    }
+    return runResult.stdout.trim();
+  }
+
   String? getSimulatorPath() {
     final String? selectPath = xcodeSelectPath;
     if (selectPath == null) {
