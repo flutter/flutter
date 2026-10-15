@@ -163,3 +163,24 @@ filegroup(
         ],
     ),
 )
+
+# The Dart packages the engine's Dart tests (//flutter/testing/dart, run by
+# flutter_tester) import: package:test and what it reaches (test_api,
+# test_core, matcher, and the core and tools packages below them), vm_service
+# with its protos and protobuf, ffi, meta -- as measured on the kernel
+# compiles' depfiles under GN (about 30 packages, 520 files); whole package
+# groups here, for the next roll. The engine's package configuration names
+# them by their paths under this tree, which dart_package_root reproduces.
+filegroup(
+    name = "test_package_sources",
+    srcs = glob([
+        "pkg/meta/lib/**/*.dart",
+        "pkg/vm_service/lib/**/*.dart",
+        "pkg/vm_service_protos/lib/**/*.dart",
+        "third_party/pkg/core/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/native/pkgs/ffi/lib/**/*.dart",
+        "third_party/pkg/protobuf/protobuf/lib/**/*.dart",
+        "third_party/pkg/test/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/tools/pkgs/*/lib/**/*.dart",
+    ]),
+)
