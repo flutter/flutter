@@ -412,12 +412,21 @@ fup_TouchResponseType PointerDelegate::EvaluatePolicy(
   fup_TouchResponseType target_response = policy_->default_response;
   float touch_slop = policy_->default_touch_slop;
   fup_TouchResponseType defer_response = policy_->default_defer_response;
+  fup_TouchResponseType uncommitted_end_response = fup_TouchResponseType::NO;
 
-  for (const auto& region : policy_->regions) {
+  for (size_t i = 0; i < policy_->regions.size(); ++i) {
+    const auto& region = policy_->regions[i];
     if (region.Contains(match_x, match_y)) {
       target_response = region.response;
       touch_slop = region.touch_slop;
       defer_response = region.defer_response;
+      for (size_t j = i + 1; j < policy_->regions.size(); ++j) {
+        const auto& fallback = policy_->regions[j];
+        if (fallback.touch_slop <= 0.f && fallback.Contains(match_x, match_y)) {
+          uncommitted_end_response = fallback.response;
+          break;
+        }
+      }
       break;
     }
   }
@@ -429,7 +438,7 @@ fup_TouchResponseType PointerDelegate::EvaluatePolicy(
   fup_TouchResponseType result = target_response;
   if (!active->committed) {
     if (phase == fup_EventPhase::REMOVE || phase == fup_EventPhase::CANCEL) {
-      result = policy_->default_response;
+      result = uncommitted_end_response;
     } else {
       result = defer_response;
     }
@@ -480,13 +489,11 @@ void PointerDelegate::WatchLoop(
         } else {
           InsertIntoBuffer(std::move(events), &to_client);
         }
-        if (intercept_all_input_) {
-          // For this simple client, always claim we want the gesture.
+        if (intercept_all_input_ || !policy_.has_value()) {
+          // For this simple client (or before a gesture-response policy has
+          // been set), always claim we want the gesture.
           response.set_response_type(fup_TouchResponseType::YES);
         } else {
-          FML_CHECK(policy_.has_value())
-              << "intercept_all_input is false, but no gesture-response policy "
-                 "has been set.";
           response.set_response_type(
               EvaluatePolicy(ixn, sample.phase(), logical_x, logical_y));
         }

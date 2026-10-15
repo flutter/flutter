@@ -43,8 +43,9 @@ struct GestureResponseRegion {
   // Minimum pointer displacement in logical pixels from the initial ADD sample
   // required before committing to |response|. When > 0, samples with
   // displacement <= |touch_slop| answer |defer_response|, and an uncommitted
-  // REMOVE or CANCEL answers the policy's |default_response| so edge taps are
-  // yielded to child views underneath.
+  // REMOVE or CANCEL falls through to subsequent matching regions in the policy
+  // or answers TouchResponseType::NO so edge taps are yielded to child views
+  // underneath.
   float touch_slop = 0.f;
   fuchsia::ui::pointer::TouchResponseType defer_response =
       fuchsia::ui::pointer::TouchResponseType::MAYBE_SUPPRESS;

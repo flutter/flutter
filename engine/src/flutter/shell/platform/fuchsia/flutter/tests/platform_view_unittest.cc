@@ -1706,7 +1706,7 @@ TEST_F(PlatformViewTests,
 }
 
 TEST_F(PlatformViewTests,
-       TouchGestureResponsePolicy_InterceptAllInputFalse_NoPolicyFailsLoudly) {
+       TouchGestureResponsePolicy_InterceptAllInputFalse_NoPolicyAnswersYes) {
   constexpr std::array<std::array<float, 2>, 2> kRect = {{{0, 0}, {100, 100}}};
   constexpr std::array<float, 9> kIdentity = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   constexpr fuchsia::ui::pointer::TouchInteractionId kIxn = {
@@ -1723,22 +1723,23 @@ TEST_F(PlatformViewTests,
           .SetInterceptAllInput(false)
           .Build();
   RunLoopUntilIdle();
+  (void)touch_server.UploadedResponses();
 
-  // On Fuchsia, FML_CHECK logs to the Fuchsia syslog rather than stderr, so
-  // the stderr matcher for EXPECT_DEATH_IF_SUPPORTED must be empty.
-  EXPECT_DEATH_IF_SUPPORTED(
-      {
-        std::vector<fuchsia::ui::pointer::TouchEvent> events =
-            TouchEventBuilder::New()
-                .AddTime(1000u)
-                .AddViewParameters(kRect, kRect, kIdentity)
-                .AddSample(kIxn, fuchsia::ui::pointer::EventPhase::ADD,
-                           {10.f, 10.f})
-                .BuildAsVector();
-        touch_server.ScheduleCallback(std::move(events));
-        RunLoopUntilIdle();
-      },
-      "");
+  std::vector<fuchsia::ui::pointer::TouchEvent> events =
+      TouchEventBuilder::New()
+          .AddTime(1000u)
+          .AddViewParameters(kRect, kRect, kIdentity)
+          .AddSample(kIxn, fuchsia::ui::pointer::EventPhase::ADD, {10.f, 10.f})
+          .BuildAsVector();
+  touch_server.ScheduleCallback(std::move(events));
+  RunLoopUntilIdle();
+
+  auto responses = touch_server.UploadedResponses();
+  ASSERT_TRUE(responses.has_value());
+  ASSERT_EQ(responses->size(), 1u);
+  ASSERT_TRUE((*responses)[0].has_response_type());
+  EXPECT_EQ((*responses)[0].response_type(),
+            fuchsia::ui::pointer::TouchResponseType::YES);
 }
 
 TEST_F(PlatformViewTests,
@@ -1763,20 +1764,24 @@ TEST_F(PlatformViewTests,
   RunLoopUntilIdle();
   (void)touch_server.UploadedResponses();
 
-  // Configure a 32px left-edge region with deferResponse MAYBE_SUPPRESS (which
-  // defaults touchSlop to kDefaultTouchSlop = 18.0 logical pixels).
+  // Configure defaultResponse YES with a 32px left-edge deferred region
+  // overlapping a child view region [0, 0, 80, 100] with response NO.
   auto msg_response = FakePlatformMessageResponse::Create();
   platform_view.HandlePlatformMessage(
       msg_response->WithMessage("flutter/platform_views",
                                 R"({
             "method": "View.setGestureResponsePolicy",
             "args": {
-              "defaultResponse": "NO",
+              "defaultResponse": "YES",
               "regions": [
                 {
                   "rectLTRB": [0.0, 0.0, 32.0, 100.0],
                   "deferResponse": "MAYBE_SUPPRESS",
                   "response": "YES_PRIORITIZE"
+                },
+                {
+                  "rectLTRB": [0.0, 0.0, 80.0, 100.0],
+                  "response": "NO"
                 }
               ]
             }

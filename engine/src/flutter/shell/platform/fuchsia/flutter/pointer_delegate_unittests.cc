@@ -965,25 +965,26 @@ TEST_F(PointerDelegateTest, GesturePolicy_FlagFalseRegionsAndDefaultResponses) {
   EXPECT_EQ((*responses)[2].response_type(), fup_TouchResponseType::NO);
 }
 
-TEST_F(PointerDelegateTest, GesturePolicy_FlagFalseNoPolicyFailsLoudly) {
+TEST_F(PointerDelegateTest, GesturePolicy_FlagFalseNoPolicyAnswersYes) {
   ResetPointerDelegate(/*intercept_all_input=*/false);
   pointer_delegate_->WatchLoop([](std::vector<flutter::PointerData>) {});
   RunLoopUntilIdle();
+  (void)touch_source_->UploadedResponses();
 
-  // On Fuchsia, FML_CHECK logs to the Fuchsia syslog rather than stderr, so
-  // the stderr matcher for EXPECT_DEATH_IF_SUPPORTED must be empty.
-  EXPECT_DEATH_IF_SUPPORTED(
-      {
-        std::vector<fup_TouchEvent> events =
-            TouchEventBuilder::New()
-                .AddTime(1000u)
-                .AddViewParameters(kRect, kRect, kIdentity)
-                .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
-                .BuildAsVector();
-        touch_source_->ScheduleCallback(std::move(events));
-        RunLoopUntilIdle();
-      },
-      "");
+  std::vector<fup_TouchEvent> events =
+      TouchEventBuilder::New()
+          .AddTime(1000u)
+          .AddViewParameters(kRect, kRect, kIdentity)
+          .AddSample(kIxnOne, fup_EventPhase::ADD, {5.f, 5.f})
+          .BuildAsVector();
+  touch_source_->ScheduleCallback(std::move(events));
+  RunLoopUntilIdle();
+
+  auto responses = touch_source_->UploadedResponses();
+  ASSERT_TRUE(responses.has_value());
+  ASSERT_EQ(responses->size(), 1u);
+  ASSERT_TRUE((*responses)[0].has_response_type());
+  EXPECT_EQ((*responses)[0].response_type(), fup_TouchResponseType::YES);
 }
 
 TEST_F(PointerDelegateTest,
@@ -1225,11 +1226,11 @@ TEST_F(PointerDelegateTest,
 TEST_F(PointerDelegateTest,
        GesturePolicy_DeferralDisambiguatesEdgeSwipeAndTap) {
   ResetPointerDelegate(/*intercept_all_input=*/false);
-  // Configure a left-edge region [0, 0, 10, 20] with defer_response
-  // MAYBE_SUPPRESS, touch_slop = 5.0 logical pixels, and response
-  // YES_PRIORITIZE.
+  // Configure default_response YES with a left-edge region [0, 0, 10, 20]
+  // (defer_response MAYBE_SUPPRESS, touch_slop = 5.0, response YES_PRIORITIZE)
+  // overlapping a child view region [0, 0, 15, 20] with response NO.
   GestureResponsePolicy policy;
-  policy.default_response = fup_TouchResponseType::NO;
+  policy.default_response = fup_TouchResponseType::YES;
   policy.regions.push_back({
       .left = 0.f,
       .top = 0.f,
@@ -1238,6 +1239,13 @@ TEST_F(PointerDelegateTest,
       .response = fup_TouchResponseType::YES_PRIORITIZE,
       .touch_slop = 5.f,
       .defer_response = fup_TouchResponseType::MAYBE_SUPPRESS,
+  });
+  policy.regions.push_back({
+      .left = 0.f,
+      .top = 0.f,
+      .right = 15.f,
+      .bottom = 20.f,
+      .response = fup_TouchResponseType::NO,
   });
   pointer_delegate_->SetGestureResponsePolicy(std::move(policy));
 

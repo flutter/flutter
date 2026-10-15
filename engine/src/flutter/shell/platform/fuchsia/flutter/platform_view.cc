@@ -967,8 +967,11 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
       default_defer_resp_it = args.FindMember("deferResponse");
     }
     if (default_defer_resp_it != args.MemberEnd()) {
-      parse_response_type(default_defer_resp_it->value,
-                          &policy.default_defer_response);
+      if (!parse_response_type(default_defer_resp_it->value,
+                               &policy.default_defer_response)) {
+        FML_LOG(ERROR) << "Invalid 'defaultDeferResponse' in " << method;
+        return false;
+      }
       if (default_slop_it == args.MemberEnd()) {
         policy.default_touch_slop = GestureResponseRegion::kDefaultTouchSlop;
       }
@@ -1009,7 +1012,10 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
         }
         auto resp_it = reg_val.FindMember("response");
         if (resp_it != reg_val.MemberEnd()) {
-          parse_response_type(resp_it->value, &region.response);
+          if (!parse_response_type(resp_it->value, &region.response)) {
+            FML_LOG(ERROR) << "Invalid region 'response' in " << method;
+            return false;
+          }
         }
         auto slop_it = reg_val.FindMember("touchSlop");
         if (slop_it != reg_val.MemberEnd() && slop_it->value.IsNumber()) {
@@ -1017,7 +1023,11 @@ bool PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
         }
         auto defer_resp_it = reg_val.FindMember("deferResponse");
         if (defer_resp_it != reg_val.MemberEnd()) {
-          parse_response_type(defer_resp_it->value, &region.defer_response);
+          if (!parse_response_type(defer_resp_it->value,
+                                   &region.defer_response)) {
+            FML_LOG(ERROR) << "Invalid region 'deferResponse' in " << method;
+            return false;
+          }
           if (slop_it == reg_val.MemberEnd()) {
             region.touch_slop = GestureResponseRegion::kDefaultTouchSlop;
           }
