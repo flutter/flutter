@@ -220,12 +220,22 @@ class RawAutocomplete<T extends Object> extends StatefulWidget {
   /// FocusNode and TextEditingController can be passed both to that text field
   /// and to RawAutocomplete.
   ///
-  /// {@tool dartpad}
+  /// <callout-box>
+  ///
   /// This examples shows how to create an autocomplete widget with the text
   /// field in the AppBar and the results in the main body of the app.
   ///
-  /// ** See code in examples/api/lib/widgets/autocomplete/raw_autocomplete.focus_node.0.dart **
-  /// {@end-tool}
+  // TODO(framework): Replace the following block with a @dartpad directive
+  // when it's supported. https://github.com/dart-lang/dartdoc/issues/4123
+  /// <small>
+  ///
+  /// To see it in action, copy and run this code snippet on [DartPad](https://dartpad.dev/).
+  ///
+  /// </small>
+  ///
+  /// {@example /examples/api/lib/widgets/autocomplete/raw_autocomplete.focus_node.0.dart#body}
+  ///
+  /// </callout-box>
   /// {@endtemplate}
   ///
   /// If this parameter is not null, then [textEditingController] must also be
@@ -686,12 +696,17 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       widget.textEditingController?.addListener(_onChangedField);
     }
     if (!identical(oldWidget.focusNode, widget.focusNode)) {
-      oldWidget.focusNode?.removeListener(_updateOptionsViewVisibility);
+      oldWidget.focusNode?.removeListener(_onFocusChange);
       if (oldWidget.focusNode == null) {
         _internalFocusNode?.dispose();
         _internalFocusNode = null;
       }
-      widget.focusNode?.addListener(_updateOptionsViewVisibility);
+      widget.focusNode?.addListener(_onFocusChange);
+      // The new node's focus state may not match the old node's. Update
+      // _hasFocus, but not the options view visibility, because this method
+      // runs during the build phase, when OverlayPortalController can't show
+      // or hide.
+      _hasFocus = _focusNode.hasFocus;
     }
   }
 
@@ -699,7 +714,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
   void dispose() {
     widget.textEditingController?.removeListener(_onChangedField);
     _internalTextEditingController?.dispose();
-    widget.focusNode?.removeListener(_updateOptionsViewVisibility);
+    widget.focusNode?.removeListener(_onFocusChange);
     _internalFocusNode?.dispose();
     _highlightedOptionIndex.dispose();
     super.dispose();

@@ -47,7 +47,7 @@ void main() {
       });
 
       final summary = TimelineSummary.summarize(timeline);
-      summary.writeTimelineToFile(summaryName, pretty: true);
+      await summary.writeTimelineToFile(summaryName, pretty: true);
     }
 
     test('platform_views_scroll_perf_hybrid_composition', () async {

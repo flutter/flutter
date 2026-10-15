@@ -1226,9 +1226,28 @@ class ErrorHandlingProcessManager extends ProcessManager {
     }
 
     // Propagate the unified analytics suppression flag.
-    if (analytics != null) {
-      environmentResult[DashEnvVar.suppressAnalytics.name] = (!analytics.telemetryEnabled)
-          .toString();
+    //
+    // If suppression was requested, either by this process's environment or by
+    // the caller-supplied environment, always propagate it so that sub-tools
+    // never report when a root tool has asked them not to.
+    //
+    // Otherwise (including an inherited or caller-supplied value other than
+    // `true`), suppress sub-tools whenever this tool would not send analytics
+    // itself. Unlike `telemetryEnabled`, `okToSend` is also false until this
+    // tool's consent message has been shown, including for the rest of the
+    // invocation that shows it (a first run, or a consent message version
+    // bump), and when analytics are suppressed for this invocation
+    // (`--suppress-analytics`).
+    //
+    // Like `package:unified_analytics`, only the exact (case-sensitive) string
+    // `true` is treated as a request to suppress analytics.
+    final String suppressKey = DashEnvVar.suppressAnalytics.name;
+    final bool suppressionRequested =
+        _platform.environment[suppressKey] == 'true' || environmentResult[suppressKey] == 'true';
+    if (suppressionRequested) {
+      environmentResult[suppressKey] = 'true';
+    } else if (analytics != null) {
+      environmentResult[suppressKey] = (!analytics.okToSend).toString();
     }
 
     // Propagate the parent tool identifier down to the spawned process.
