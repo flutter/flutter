@@ -361,15 +361,18 @@ IOSDevice setUpIOSDevice({
     processManager: FakeProcessManager.any(),
   );
   final FileSystem testFileSystem = fileSystem ?? MemoryFileSystem.test();
+  final toolContext = FakeToolContext(
+    artifacts: artifacts,
+    cache: cache,
+    fs: testFileSystem,
+    logger: logger,
+    platform: platform,
+    processManager: processManager,
+  );
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
-    toolContext: FakeToolContext(
-      fs: testFileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-    ),
+    toolContext: toolContext,
     xcode: FakeXcode(),
     sdkVersion: '13.3',
     cpuArch: .arm64,
@@ -379,13 +382,7 @@ IOSDevice setUpIOSDevice({
       artifacts: artifacts,
       cache: cache,
     ),
-    iosDeploy: IOSDeploy(
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-      artifacts: artifacts,
-      cache: cache,
-    ),
+    iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: FakeAnalytics(),
     cocoaPods: FakeCocoaPods(),
     coreDeviceControl: FakeIOSCoreDeviceControl(),

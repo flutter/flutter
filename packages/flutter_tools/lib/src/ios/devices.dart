@@ -334,7 +334,12 @@ class IOSDevice extends Device {
     required this._templateRenderer,
     required ToolContext super.toolContext,
   }) : _iproxy = iProxy,
-       super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true) {
+       super(
+         category: Category.mobile,
+         platformType: PlatformType.ios,
+         ephemeral: true,
+         logger: toolContext.logger,
+       ) {
     if (!toolContext.platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
       return;

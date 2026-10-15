@@ -1994,7 +1994,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           });
         },
         overrides: <Type, Generator>{
-          PlistParser: () => testPlistParser,
           FileSystem: () => fileSystem,
           ProcessManager: () => processManager,
           Logger: () => logger,
@@ -2039,7 +2038,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           expect(processManager, hasNoRemainingExpectations);
         },
         overrides: <Type, Generator>{
-          PlistParser: () => testPlistParser,
           FileSystem: () => fileSystem,
           ProcessManager: () => processManager,
           Logger: () => logger,
@@ -2073,7 +2071,6 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           });
         },
         overrides: <Type, Generator>{
-          PlistParser: () => testPlistParser,
           FileSystem: () => fileSystem,
           ProcessManager: () => processManager,
           Logger: () => logger,

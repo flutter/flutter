@@ -56,11 +56,13 @@ void main() {
       logger = BufferLogger.test();
       fileSystem = MemoryFileSystem.test();
       iosDeploy = IOSDeploy(
-        artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: FakeProcessManager.any(),
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          cache: cache,
+          logger: logger,
+          platform: macPlatform,
+          processManager: FakeProcessManager.any(),
+        ),
       );
       iMobileDevice = IMobileDevice(
         artifacts: artifacts,
@@ -637,11 +639,13 @@ void main() {
         fileSystem = MemoryFileSystem.test();
         logger = BufferLogger.test();
         iosDeploy = IOSDeploy(
-          artifacts: Artifacts.test(),
-          cache: cache,
-          logger: logger,
-          platform: macPlatform,
-          processManager: FakeProcessManager.any(),
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            cache: cache,
+            logger: logger,
+            platform: macPlatform,
+            processManager: FakeProcessManager.any(),
+          ),
         );
       });
 
@@ -887,11 +891,13 @@ void main() {
       iosWorkflow = FakeIOSWorkflow();
       fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
-        artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: fakeProcessManager,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          cache: cache,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
       );
       iMobileDevice = IMobileDevice(
         artifacts: artifacts,
@@ -1258,11 +1264,13 @@ void main() {
       iosWorkflow = FakeIOSWorkflow();
       fakeProcessManager = FakeProcessManager.any();
       iosDeploy = IOSDeploy(
-        artifacts: artifacts,
-        cache: cache,
-        logger: logger,
-        platform: macPlatform,
-        processManager: fakeProcessManager,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          cache: cache,
+          logger: logger,
+          platform: macPlatform,
+          processManager: fakeProcessManager,
+        ),
       );
       iMobileDevice = IMobileDevice(
         artifacts: artifacts,

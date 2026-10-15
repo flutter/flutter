@@ -392,7 +392,12 @@ class IOSSimulator extends Device {
     required ToolContext super.toolContext,
     required this._xcode,
     required this._xcodeProjectInterpreter,
-  }) : super(category: Category.mobile, ephemeral: true, platformType: PlatformType.ios);
+  }) : super(
+         category: Category.mobile,
+         ephemeral: true,
+         logger: toolContext.logger,
+         platformType: PlatformType.ios,
+       );
 
   @override
   final String name;
