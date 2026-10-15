@@ -1646,9 +1646,9 @@ dev_dependencies:
           fs.path.join('build', 'unit_test_assets', 'packages', 'asset_pkg', 'asset.txt'),
         );
         expect(memberAssetFile, exists);
-        expect(testRunner.lastFlutterProject?.directory.path, memberDir.path);
+        expect(testRunner.lastExecutionSpec?.flutterProject?.directory.path, memberDir.path);
         expect(
-          testRunner.lastTestAssetDirectory,
+          testRunner.lastExecutionSpec?.testAssetDirectory,
           fs.path.join(memberDir.path, 'build', 'unit_test_assets'),
         );
       },
@@ -2190,8 +2190,6 @@ class FakeFlutterTestRunner extends Fake implements FlutterTestRunner {
   TestWatcher? get lastTestWatcher => lastExecutionSpec?.watcher;
   FakeVmServiceHost? fakeVmServiceHost;
   List<String> get lastNames => lastExecutionSpec?.filter.names ?? const <String>[];
-  FlutterProject? get lastFlutterProject => lastExecutionSpec?.flutterProject;
-  String? get lastTestAssetDirectory => lastExecutionSpec?.testAssetDirectory;
 
   @override
   Future<int> runTests(
