@@ -12,8 +12,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -109,11 +107,7 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
+        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
 
         // ignore: avoid_redundant_argument_values
       );
@@ -180,11 +174,7 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
+        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
@@ -230,11 +220,7 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
+        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
@@ -281,11 +267,7 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
-          processManager: fakeProcessManager,
-          userMessages: UserMessages(),
-          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-          logger: logger,
-          fileSystem: fs,
+          toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
           buildInfo: const BuildInfo(
             BuildMode.debug,
             null,
@@ -303,7 +285,7 @@ void main() {
       'Licenses not available, platform and buildtools available, apk exists',
       () async {
         const aaptPath = 'aaptPath';
-        final File apkFile = globals.fs.file('app-debug.apk');
+        final File apkFile = fs.file('app-debug.apk');
         final sdkVersion = FakeAndroidSdkVersion();
         sdkVersion.aaptPath = aaptPath;
         sdk.latestVersion = sdkVersion;
@@ -347,7 +329,7 @@ void main() {
 
       await ApplicationPackageFactory.instance!.getPackageForPlatform(
         TargetPlatform.android_arm,
-        applicationBinary: globals.fs.file('app-debug.apk'),
+        applicationBinary: fs.file('app-debug.apk'),
       );
       expect(fakeProcessManager, hasNoRemainingExpectations);
     }, overrides: overrides);
@@ -368,11 +350,8 @@ void main() {
       final Logger logger = BufferLogger.test();
       final AndroidApk? androidApk = AndroidApk.fromApk(
         fs.file(''),
-        processManager: fakeProcessManager,
-        logger: logger,
-        userMessages: UserMessages(),
         androidSdk: sdk,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        toolContext: FakeToolContext(logger: logger, processManager: fakeProcessManager),
       );
 
       expect(androidApk, isNull);
@@ -435,11 +414,7 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
+        toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
       );
       expect(androidApk, isNotNull);
       expect(androidApk!.id, 'io.flutter.examples.hello_world');
@@ -509,11 +484,7 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
-          processManager: fakeProcessManager,
-          userMessages: UserMessages(),
-          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-          logger: logger,
-          fileSystem: fs,
+          toolContext: FakeToolContext(fs: fs, logger: logger, processManager: fakeProcessManager),
         );
         expect(androidApk, isNotNull);
         expect(androidApk!.id, 'io.flutter.examples.hello_world');
