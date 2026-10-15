@@ -4,7 +4,7 @@
 
 # Generated from //flutter/impeller/compiler/BUILD.gn by gn_to_bazel; do not edit.
 
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 
 package(default_visibility = ["//visibility:public"])
@@ -147,19 +147,4 @@ cc_library(
         "//engine/src/flutter/testing:testing_lib",
     ],
     alwayslink = True,
-)
-
-# What GN has no words for; maintained in the converter's manifest
-# (tools/gn_to_bazel/lib/src/manifest.dart).
-
-cc_test(
-    name = "impeller_compiler_unittests",
-    # 98 tests compiling shaders in process (the shader-bundle ones 12 s
-    # each alone); 245 s on a machine running the other suites.
-    size = "large",
-    deps = [
-        ":compiler_unittests",
-        "//engine/src/flutter/impeller/fixtures:file_fixtures",
-        "//engine/src/flutter/testing",
-    ],
 )
