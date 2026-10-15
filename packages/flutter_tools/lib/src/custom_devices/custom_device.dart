@@ -424,18 +424,16 @@ class CustomDeviceAppSession {
 /// The exact actions are defined by the contents of the [CustomDeviceConfig]
 /// used to construct it.
 class CustomDevice extends Device {
-  CustomDevice({required this._config, required this._toolContext})
+  CustomDevice({required this._config, required ToolContext super.toolContext})
     : _globalLogReader = CustomDeviceLogReader(_config.label),
       super(
         _config.id,
         category: Category.mobile,
         ephemeral: true,
-        logger: _toolContext.logger,
         platformType: PlatformType.custom,
       );
 
   final CustomDeviceConfig _config;
-  final ToolContext _toolContext;
   final _sessions = <ApplicationPackage, CustomDeviceAppSession>{};
   final CustomDeviceLogReader _globalLogReader;
   Process? _globalLogReaderProcess;
@@ -447,7 +445,7 @@ class CustomDevice extends Device {
     if (!_config.usesPortForwarding) {
       return const NoOpDevicePortForwarder();
     }
-    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
+    final ToolContext(:Logger logger, :ProcessManager processManager) = toolContext;
     return CustomDevicePortForwarder(
       deviceName: _config.label,
       forwardPortCommand: _config.forwardPortCommand!,
@@ -459,7 +457,7 @@ class CustomDevice extends Device {
 
   CustomDeviceAppSession _getOrCreateAppSession(ApplicationPackage app) {
     return _sessions.putIfAbsent(app, () {
-      final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
+      final ToolContext(:Logger logger, :ProcessManager processManager) = toolContext;
 
       /// create a new session and add its logging to the global log reader.
       /// (needed bc it's possible the infra requests a global log in [getLogReader]
@@ -494,7 +492,7 @@ class CustomDevice extends Device {
     Map<String, String> replacementValues = const <String, String>{},
   }) async {
     final List<String> interpolated = interpolateCommand(_config.pingCommand, replacementValues);
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
 
     final RunResult result;
     try {
@@ -542,7 +540,7 @@ class CustomDevice extends Device {
       <String, String>{'appName': appName, 'localPath': localPath},
       additionalReplacementValues: additionalReplacementValues,
     );
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
 
     try {
       await processUtils.run(interpolated, throwOnError: true, timeout: timeout);
@@ -569,7 +567,7 @@ class CustomDevice extends Device {
     final List<String> interpolated = interpolateCommand(_config.uninstallCommand, <String, String>{
       'appName': appName,
     }, additionalReplacementValues: additionalReplacementValues);
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
 
     try {
       await processUtils.run(interpolated, throwOnError: true, timeout: timeout);
@@ -598,7 +596,7 @@ class CustomDevice extends Device {
       'localPath': localPath,
       'appName': appName,
     }, additionalReplacementValues: additionalReplacementValues);
-    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = toolContext;
 
     try {
       await processUtils.run(interpolated, throwOnError: true, timeout: timeout);
@@ -636,7 +634,7 @@ class CustomDevice extends Device {
 
     if (_config.supportsReadingLogs && _globalLogReaderProcess == null) {
       // launch the readLogs command
-      _globalLogReaderProcess = await _toolContext.processUtils.start(_config.readLogsCommand!);
+      _globalLogReaderProcess = await toolContext.processUtils.start(_config.readLogsCommand!);
       _globalLogReader.listenToProcessOutput(_globalLogReaderProcess!);
     }
 
@@ -650,7 +648,7 @@ class CustomDevice extends Device {
       return false;
     }
 
-    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+    final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final bool result = await tryInstall(
       localPath: getAssetBuildDirectory(config, fs),
       appName: appName,
@@ -686,7 +684,7 @@ class CustomDevice extends Device {
       <String, String>{},
     );
 
-    final RunResult result = await _toolContext.processUtils.run(interpolated, throwOnError: true);
+    final RunResult result = await toolContext.processUtils.run(interpolated, throwOnError: true);
     await outputFile.writeAsBytes(base64Decode(result.stdout));
   }
 
@@ -729,7 +727,7 @@ class CustomDevice extends Device {
       :Config config,
       :FlutterVersion flutterVersion,
       :FileSystem fs,
-    ) = _toolContext;
+    ) = toolContext;
 
     final additionalReplacementValues = <String, String>{
       'buildMode': debuggingOptions.buildInfo.modeName,
@@ -817,12 +815,11 @@ class CustomDevice extends Device {
 class CustomDevices extends PollingDeviceDiscovery {
   /// Create a custom device discovery that pings all enabled devices in the
   /// given [CustomDevicesConfig].
-  CustomDevices({required FeatureFlags featureFlags, required this._toolContext})
+  CustomDevices({required FeatureFlags featureFlags, required ToolContext super.toolContext})
     : _customDeviceWorkflow = CustomDeviceWorkflow(featureFlags: featureFlags),
       super('custom devices');
 
   final CustomDeviceWorkflow _customDeviceWorkflow;
-  final ToolContext _toolContext;
 
   @override
   bool get supportsPlatform => true;
@@ -831,10 +828,10 @@ class CustomDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _customDeviceWorkflow.canListDevices;
 
   List<CustomDevice> get _enabledCustomDevices {
-    return _toolContext.customDevicesConfig
+    return toolContext.customDevicesConfig
         .tryGetDevices()
         .where((CustomDeviceConfig element) => element.enabled)
-        .map((CustomDeviceConfig config) => CustomDevice(config: config, toolContext: _toolContext))
+        .map((CustomDeviceConfig config) => CustomDevice(config: config, toolContext: toolContext))
         .toList();
   }
 

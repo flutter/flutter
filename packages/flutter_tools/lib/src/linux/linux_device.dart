@@ -78,17 +78,15 @@ class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
     required this._analytics,
     required FeatureFlags featureFlags,
-    required ToolContext toolContext,
-  }) : _toolContext = toolContext,
-       _linuxWorkflow = LinuxWorkflow(platform: toolContext.platform, featureFlags: featureFlags),
+    required ToolContext super.toolContext,
+  }) : _linuxWorkflow = LinuxWorkflow(platform: toolContext.platform, featureFlags: featureFlags),
        super('linux devices');
 
   final Analytics _analytics;
-  final ToolContext _toolContext;
   final LinuxWorkflow _linuxWorkflow;
 
   @override
-  bool get supportsPlatform => _toolContext.platform.isLinux;
+  bool get supportsPlatform => toolContext.platform.isLinux;
 
   @override
   bool get canListAnything => _linuxWorkflow.canListDevices;
@@ -101,7 +99,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[LinuxDevice(analytics: _analytics, toolContext: _toolContext)];
+    return <Device>[LinuxDevice(analytics: _analytics, toolContext: toolContext)];
   }
 
   @override

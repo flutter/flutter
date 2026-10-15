@@ -110,21 +110,20 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 }
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
-  MacOSDesignedForIPadDevices({required this._iosWorkflow, required this._toolContext})
+  MacOSDesignedForIPadDevices({required this._iosWorkflow, required ToolContext super.toolContext})
     : super('Mac designed for iPad devices');
 
   final IOSWorkflow _iosWorkflow;
-  final ToolContext _toolContext;
 
   @override
-  bool get supportsPlatform => _toolContext.platform.isMacOS;
+  bool get supportsPlatform => toolContext.platform.isMacOS;
 
   /// iOS (not desktop macOS) development is enabled, the host is an ARM Mac,
   /// and discovery is allowed for this command.
   @override
   bool get canListAnything =>
       _iosWorkflow.canListDevices &&
-      _toolContext.os.hostPlatform == HostPlatform.darwin_arm64 &&
+      toolContext.os.hostPlatform == HostPlatform.darwin_arm64 &&
       allowDiscovery;
 
   /// Set to show ARM macOS as an iOS device target.
@@ -138,7 +137,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[MacOSDesignedForIPadDevice(toolContext: _toolContext)];
+    return <Device>[MacOSDesignedForIPadDevice(toolContext: toolContext)];
   }
 
   @override

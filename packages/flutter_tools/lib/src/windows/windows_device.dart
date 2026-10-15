@@ -75,12 +75,11 @@ class WindowsDevice extends DesktopDevice {
 class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices({
     required this._analytics,
-    required this._toolContext,
+    required ToolContext super.toolContext,
     required this._windowsWorkflow,
   }) : super('windows devices');
 
   final Analytics _analytics;
-  final ToolContext _toolContext;
   final WindowsWorkflow _windowsWorkflow;
 
   @override
@@ -97,7 +96,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[WindowsDevice(analytics: _analytics, toolContext: _toolContext)];
+    return <Device>[WindowsDevice(analytics: _analytics, toolContext: toolContext)];
   }
 
   @override

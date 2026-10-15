@@ -90,13 +90,13 @@ class MacOSDevice extends DesktopDevice {
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {
-  MacOSDevices({required this._macOSWorkflow, required this._toolContext}) : super('macOS devices');
+  MacOSDevices({required this._macOSWorkflow, required ToolContext super.toolContext})
+    : super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
-  final ToolContext _toolContext;
 
   @override
-  bool get supportsPlatform => _toolContext.platform.isMacOS;
+  bool get supportsPlatform => toolContext.platform.isMacOS;
 
   @override
   bool get canListAnything => _macOSWorkflow.canListDevices;
@@ -109,7 +109,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[MacOSDevice(toolContext: _toolContext)];
+    return <Device>[MacOSDevice(toolContext: toolContext)];
   }
 
   @override
