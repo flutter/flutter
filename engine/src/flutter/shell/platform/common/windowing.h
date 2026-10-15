@@ -20,6 +20,9 @@ enum class WindowArchetype {
 
   // Popup window.
   kPopup,
+
+  // Satellite window.
+  kSatellite,
 };
 
 }  // namespace flutter

@@ -7,12 +7,11 @@ import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:analyzer_testing/package_config_file_builder.dart';
 import 'package:analyzer_testing/src/analysis_rule/pub_package_resolution.dart';
 import 'package:flutter_analyzer_plugin/src/rules/protect_public_state_subtypes.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
 import 'package_mixins/meta_mixin.dart';
 import 'package_mixins/widgets_mixin.dart';
 
-@reflectiveTest
 class ProtectPublicStateSubtypesTest extends AnalysisRuleTest
     with MetaPackage, FlutterWidgetsPackage {
   @override
@@ -29,8 +28,9 @@ class ProtectPublicStateSubtypesTest extends AnalysisRuleTest
 
   @override
   String get analysisRule => ProtectPublicStateSubtypes.code.name;
+}
 
-  static const String source = '''
+const String _source = '''
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -147,25 +147,28 @@ class MyWidgetStateValid extends State<MyWidget>{
 }
 ''';
 
-  // ignore: non_constant_identifier_names
-  Future<void> test_protect_public_state_subtypes() async {
-    await assertDiagnostics(source, <ExpectedDiagnostic>[
-      lint(224, 66),
-      lint(294, 115),
-      lint(413, 68),
-      lint(485, 45),
-      lint(543, 68),
-      lint(615, 64),
-      lint(683, 62),
-      lint(749, 59),
-      lint(812, 90),
-      lint(906, 134),
-    ]);
-  }
-}
-
 void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(ProtectPublicStateSubtypesTest);
+  late ProtectPublicStateSubtypesTest testSuite;
+
+  setUp(() {
+    testSuite = ProtectPublicStateSubtypesTest();
+    testSuite.setUp();
+  });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('protect public state subtypes', () async {
+    await testSuite.assertDiagnostics(_source, <ExpectedDiagnostic>[
+      testSuite.lint(224, 66),
+      testSuite.lint(294, 115),
+      testSuite.lint(413, 68),
+      testSuite.lint(485, 45),
+      testSuite.lint(543, 68),
+      testSuite.lint(615, 64),
+      testSuite.lint(683, 62),
+      testSuite.lint(749, 59),
+      testSuite.lint(812, 90),
+      testSuite.lint(906, 134),
+    ]);
   });
 }

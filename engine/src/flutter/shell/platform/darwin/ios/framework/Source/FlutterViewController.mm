@@ -118,14 +118,6 @@ typedef struct MouseState {
 /// cancellation.
 @property(nonatomic, assign) NSTimeInterval scrollInertiaEventAppKitDeadline;
 
-/// FlutterVSyncClient for touch events delivery frame rate correction.
-///
-/// On promotion devices(eg: iPhone13 Pro), the delivery frame rate of touch events is 60HZ
-/// but the frame rate of rendering is 120HZ, which is different and will leads jitter and laggy.
-/// With this FlutterVSyncClient, it can correct the delivery frame rate of touch events to let it
-/// keep the same with frame rate of rendering.
-@property(nonatomic, strong) FlutterVSyncClient* touchRateCorrectionVSyncClient;
-
 /// The size of the FlutterView's frame, as determined by auto-layout,
 /// before Flutter's custom auto-resizing constraints are applied.
 @property(nonatomic, assign) CGSize sizeBeforeAutoResized;
@@ -669,19 +661,37 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 - (BOOL)stateIsActive {
   // [UIApplication sharedApplication API is not available for app extension.
   UIApplication* flutterApplication = FlutterSharedApplication.application;
-  BOOL isActive = flutterApplication
-                      ? [self isApplicationStateMatching:UIApplicationStateActive
-                                         withApplication:flutterApplication]
-                      : [self isSceneStateMatching:UISceneActivationStateForegroundActive];
-  return isActive;
+
+  if (flutterApplication) {
+    return [self isApplicationStateMatching:UIApplicationStateActive
+                            withApplication:flutterApplication];
+  }
+  return [self isSceneStateMatching:UISceneActivationStateForegroundActive];
+}
+
+- (BOOL)stateIsForeground {
+  // [UIApplication sharedApplication API is not available for app extension.
+  UIApplication* flutterApplication = FlutterSharedApplication.application;
+
+  if (flutterApplication) {
+    return [self isApplicationStateMatching:UIApplicationStateActive
+                            withApplication:flutterApplication] ||
+           [self isApplicationStateMatching:UIApplicationStateInactive
+                            withApplication:flutterApplication];
+  }
+  return [self isSceneStateMatching:UISceneActivationStateForegroundActive] ||
+         [self isSceneStateMatching:UISceneActivationStateForegroundInactive];
 }
 
 - (BOOL)stateIsBackground {
   // [UIApplication sharedApplication API is not available for app extension.
   UIApplication* flutterApplication = FlutterSharedApplication.application;
-  return flutterApplication ? [self isApplicationStateMatching:UIApplicationStateBackground
-                                               withApplication:flutterApplication]
-                            : [self isSceneStateMatching:UISceneActivationStateBackground];
+
+  if (flutterApplication) {
+    return [self isApplicationStateMatching:UIApplicationStateBackground
+                            withApplication:flutterApplication];
+  }
+  return [self isSceneStateMatching:UISceneActivationStateBackground];
 }
 
 - (BOOL)shouldHandleSceneNotification:(NSNotification*)notification API_AVAILABLE(ios(13.0)) {
@@ -737,6 +747,18 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   }
 }
 
+// Creates the surface if the viewport is sized.
+//
+// Callers must guarantee GPU access is permitted since UIApplication reports
+// UIApplicationStateBackground while willEnterForeground is delivered, so the application state
+// can't be enforced here.
+- (void)createSurfaceIfReady {
+  if (!self.engine || !_viewportMetrics.physical_width) {
+    return;
+  }
+  [self surfaceUpdated:YES];
+}
+
 #pragma mark - UIViewController lifecycle notifications
 
 - (void)viewDidLoad {
@@ -752,9 +774,6 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
   // Register internal plugins.
   [self addInternalPlugins];
-
-  // Create a vsync client to correct delivery frame rate of touch events if needed.
-  [self createTouchRateCorrectionVSyncClientIfNeeded];
 
   if (@available(iOS 13.4, *)) {
     _hoverGestureRecognizer =
@@ -826,9 +845,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
     // Only recreate surface on subsequent appearances when viewport metrics are known.
     // First time surface creation is done on viewDidLayoutSubviews.
-    if (_viewportMetrics.physical_width) {
-      [self surfaceUpdated:YES];
-    }
+    [self createSurfaceIfReady];
     [self.engine.lifecycleChannel sendMessage:@"AppLifecycleState.inactive"];
     [self.engine.restorationPlugin markRestorationComplete];
   }
@@ -950,7 +967,6 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
   [self deregisterNotifications];
 
   [self.keyboardInsetManager invalidate];
-  [self invalidateTouchRateCorrectionVSyncClient];
 
   // TODO(cbracken): https://github.com/flutter/flutter/issues/156222
   // Ensure all delegates are weak and remove this.
@@ -1033,9 +1049,6 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 
 - (void)appOrSceneBecameActive {
   self.keyboardInsetManager.isKeyboardInOrTransitioningFromBackground = NO;
-  if (_viewportMetrics.physical_width) {
-    [self surfaceUpdated:YES];
-  }
   [self performSelector:@selector(goToApplicationLifecycle:)
              withObject:@"AppLifecycleState.resumed"
              afterDelay:0.0f];
@@ -1060,6 +1073,7 @@ static UIView* GetViewOrPlaceholder(UIView* existing_view) {
 }
 
 - (void)appOrSceneWillEnterForeground {
+  [self createSurfaceIfReady];
   [self goToApplicationLifecycle:@"AppLifecycleState.inactive"];
 }
 
@@ -1150,9 +1164,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
       touches_to_remove_count++;
     }
   }
-
-  // Activate or pause the correction of delivery frame rate of touch events.
-  [self triggerTouchRateCorrectionIfNeeded:touches];
 
   const CGFloat scale = self.flutterScreenIfViewLoaded.scale;
   auto packet =
@@ -1307,74 +1318,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
                                                                  viewId:self.viewIdentifier];
 }
 
-#pragma mark - Touch events rate correction
-
-- (void)createTouchRateCorrectionVSyncClientIfNeeded {
-  if (_touchRateCorrectionVSyncClient != nil) {
-    return;
-  }
-
-  double displayRefreshRate = self.displayLinkManager.displayRefreshRate;
-  const double epsilon = 0.1;
-  if (displayRefreshRate < 60.0 + epsilon) {  // displayRefreshRate <= 60.0
-
-    // If current device's max frame rate is not larger than 60HZ, the delivery rate of touch events
-    // is the same with render vsync rate. So it is unnecessary to create
-    // _touchRateCorrectionVSyncClient to correct touch callback's rate.
-    return;
-  }
-
-  FlutterFMLTaskRunner* platformTaskRunner = self.engine.platformTaskRunner;
-  if (platformTaskRunner == nil) {
-    // The engine has no platform task runner until its shell is created, and the vsync client
-    // dereferences the task runner we hand it. Losing the smoothing the correction client provides
-    // is better than dereferencing null.
-    [FlutterLogger logWarning:@"Unable to correct touch rate: the engine has no platform task "
-                              @"runner."];
-    return;
-  }
-
-  void (^callback)(CFTimeInterval, CFTimeInterval) =
-      ^(CFTimeInterval startTime, CFTimeInterval targetTime) {
-        // Do nothing in this block. Just trigger system to callback touch events with correct rate.
-      };
-  _touchRateCorrectionVSyncClient = [[FlutterVSyncClient alloc]
-                initWithTaskRunner:platformTaskRunner
-      isVariableRefreshRateEnabled:self.displayLinkManager.maxRefreshRateEnabledOnIPhone
-                    maxRefreshRate:self.displayLinkManager.displayRefreshRate
-                          callback:callback];
-  _touchRateCorrectionVSyncClient.allowPauseAfterVsync = NO;
-}
-
-- (void)triggerTouchRateCorrectionIfNeeded:(NSSet*)touches {
-  if (_touchRateCorrectionVSyncClient == nil) {
-    // If the _touchRateCorrectionVSyncClient is not created, means current devices doesn't
-    // need to correct the touch rate. So just return.
-    return;
-  }
-
-  // As long as there is a touch's phase is UITouchPhaseBegan or UITouchPhaseMoved,
-  // activate the correction. Otherwise pause the correction.
-  BOOL isUserInteracting = NO;
-  for (UITouch* touch in touches) {
-    if (touch.phase == UITouchPhaseBegan || touch.phase == UITouchPhaseMoved) {
-      isUserInteracting = YES;
-      break;
-    }
-  }
-
-  if (isUserInteracting && self.engine.viewController == self) {
-    [_touchRateCorrectionVSyncClient await];
-  } else {
-    [_touchRateCorrectionVSyncClient pause];
-  }
-}
-
-- (void)invalidateTouchRateCorrectionVSyncClient {
-  [_touchRateCorrectionVSyncClient invalidate];
-  _touchRateCorrectionVSyncClient = nil;
-}
-
 #pragma mark - Handle view resizing
 
 - (void)updateViewportMetricsIfNeeded {
@@ -1402,13 +1345,13 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [self setViewportMetricsPaddings];
   [self updateViewportMetricsIfNeeded];
 
-  // There is no guarantee that UIKit will layout subviews when the application/scene is active.
-  // Creating the surface when inactive will cause GPU accesses from the background, so only
-  // create the surface when the application/scene is actually active.
+  // There is no guarantee that UIKit will layout subviews when the application/scene is in the
+  // foreground. Creating the surface when backgrounded will cause app termination, so in that
+  // scenario, skip it here, and leave surface creation to appOrSceneWillEnterForeground.
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
-  if (firstViewBoundsUpdate && self.stateIsActive && self.engine) {
-    [self surfaceUpdated:YES];
+  if (firstViewBoundsUpdate && self.stateIsForeground) {
+    [self createSurfaceIfReady];
   }
 }
 

@@ -108,43 +108,43 @@ void main() {
       },
     );
 
+    testWithoutContext('Emits a partial status when Visual Studio installation is not launchable', () async {
+      final validator = VisualStudioValidator(
+        userMessages: userMessages,
+        visualStudio: fakeVisualStudio,
+      );
+      configureMockVisualStudioAsInstalled();
+      fakeVisualStudio.isLaunchable = false;
+
+      final ValidationResult result = await validator.validate();
+      const expectedMessage = ValidationMessage.error(
+        'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.',
+      );
+
+      expect(result.messages, contains(expectedMessage));
+      expect(result.type, ValidationType.partial);
+    });
+
     testWithoutContext(
-      'Emits a partial status when Visual Studio installation is not launchable',
+      'Emits partial status when Visual Studio is installed but too old',
       () async {
         final validator = VisualStudioValidator(
           userMessages: userMessages,
           visualStudio: fakeVisualStudio,
         );
-        configureMockVisualStudioAsInstalled();
-        fakeVisualStudio.isLaunchable = false;
+        configureMockVisualStudioAsTooOld();
 
         final ValidationResult result = await validator.validate();
         const expectedMessage = ValidationMessage.error(
-          'The current Visual Studio installation is not launchable. Please reinstall Visual Studio.',
+          'Visual Studio 2019 or later is required.\n'
+          'Download at https://visualstudio.microsoft.com/downloads/.\n'
+          'Please install the "Desktop development" workload, including all of its default components',
         );
 
         expect(result.messages, contains(expectedMessage));
         expect(result.type, ValidationType.partial);
       },
     );
-
-    testWithoutContext('Emits partial status when Visual Studio is installed but too old', () async {
-      final validator = VisualStudioValidator(
-        userMessages: userMessages,
-        visualStudio: fakeVisualStudio,
-      );
-      configureMockVisualStudioAsTooOld();
-
-      final ValidationResult result = await validator.validate();
-      const expectedMessage = ValidationMessage.error(
-        'Visual Studio 2019 or later is required.\n'
-        'Download at https://visualstudio.microsoft.com/downloads/.\n'
-        'Please install the "Desktop development" workload, including all of its default components',
-      );
-
-      expect(result.messages, contains(expectedMessage));
-      expect(result.type, ValidationType.partial);
-    });
 
     testWithoutContext(
       'Emits partial status when Visual Studio is installed without necessary components',

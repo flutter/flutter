@@ -50,27 +50,26 @@ class _AsyncSearchAnchorState extends State<_AsyncSearchAnchor> {
           },
         );
       },
-      suggestionsBuilder:
-          (BuildContext context, SearchController controller) async {
-            _searchingWithQuery = controller.text;
-            final List<String> options = (await _FakeAPI.search(
-              _searchingWithQuery!,
-            )).toList();
+      suggestionsBuilder: (BuildContext context, SearchController controller) async {
+        _searchingWithQuery = controller.text;
+        final List<String> options = (await _FakeAPI.search(
+          _searchingWithQuery!,
+        )).toList();
 
-            // If another search happened after this one, throw away these options.
-            // Use the previous options instead and wait for the newer request to
-            // finish.
-            if (_searchingWithQuery != controller.text) {
-              return _lastOptions;
-            }
+        // If another search happened after this one, throw away these options.
+        // Use the previous options instead and wait for the newer request to
+        // finish.
+        if (_searchingWithQuery != controller.text) {
+          return _lastOptions;
+        }
 
-            _lastOptions = List<ListTile>.generate(options.length, (int index) {
-              final String item = options[index];
-              return ListTile(title: Text(item));
-            });
+        _lastOptions = List<ListTile>.generate(options.length, (int index) {
+          final String item = options[index];
+          return ListTile(title: Text(item));
+        });
 
-            return _lastOptions;
-          },
+        return _lastOptions;
+      },
     );
   }
 }

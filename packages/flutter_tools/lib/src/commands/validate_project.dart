@@ -17,11 +17,11 @@ class ValidateProject {
     required this.fileSystem,
     required this.logger,
     required this.processManager,
-    required FlutterProjectFactory projectFactory,
+    required this._projectFactory,
     required this.userPath,
     this.machine = false,
     this.verbose = false,
-  }) : _projectFactory = projectFactory;
+  });
 
   final List<ProjectValidator> allProjectValidators;
   final FileSystem fileSystem;
