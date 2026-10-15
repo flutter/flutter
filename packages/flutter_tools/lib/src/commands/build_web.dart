@@ -101,6 +101,7 @@ class BuildWebCommand extends BuildSubCommand {
     }
     final bool? minifyJs = getValue(WebOptions.minifyJs);
     final bool? minifyWasm = getValue(WebOptions.minifyWasm);
+    final bool? deprecatedJsInterop = getValue(WebOptions.deprecatedJsInterop);
 
     final List<WebCompilerConfig> compilerConfigs;
 
@@ -132,6 +133,7 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           webContentHash: webContentHash,
+          deprecatedJsInterop: deprecatedJsInterop,
         ),
       ];
     } else {
@@ -145,6 +147,7 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           webContentHash: webContentHash,
+          deprecatedJsInterop: deprecatedJsInterop,
           renderer: webRenderer,
         ),
 
@@ -157,6 +160,8 @@ class BuildWebCommand extends BuildSubCommand {
             minify: minifyWasm,
             enableWasmDeferredLoading: getValue(WebOptions.enableWasmDeferredLoading),
             dryRun: true,
+            // dart2js already reports deprecated JS interop imports as errors.
+            omitDeprecatedJsInteropFindings: deprecatedJsInterop == false,
           ),
       ];
     }

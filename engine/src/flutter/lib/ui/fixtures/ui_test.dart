@@ -528,6 +528,17 @@ void platformMessagePortResponseTest() async {
   }
 }
 
+/// Responds to a port that has already been closed, simulating an isolate
+/// that exits before the platform replies.
+@pragma('vm:entry-point')
+void platformMessagePortResponseClosedPortTest() {
+  final receivePort = ReceivePort();
+  final int nativePort = receivePort.sendPort.nativePort;
+  receivePort.close();
+  _callPlatformMessageResponseDartPort(nativePort);
+  _finishCallResponse(true);
+}
+
 @pragma('vm:entry-point')
 void platformMessageResponseTest() {
   _callPlatformMessageResponseDart((ByteData? result) {
