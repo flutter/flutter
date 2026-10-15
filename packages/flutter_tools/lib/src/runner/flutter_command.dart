@@ -458,9 +458,8 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Adds options for connecting to the Dart VM Service port.
   void usesPortOptions({required bool verboseHelp}) {
-    const VmServicePortOptionsBundle(
-      includeIpv6: false,
-    ).register(this, argParser, verboseHelp: verboseHelp);
+    const VmServicePortOptionsBundle(includeIpv6: false)
+        .register(this, argParser, verboseHelp: verboseHelp);
   }
 
   /// Add option values for output directory of artifacts
@@ -481,9 +480,8 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addDdsOptions({required bool verboseHelp}) {
-    const DdsAndDevToolsOptionsBundle(
-      includeDevTools: false,
-    ).register(this, argParser, verboseHelp: verboseHelp);
+    const DdsAndDevToolsOptionsBundle(includeDevTools: false)
+        .register(this, argParser, verboseHelp: verboseHelp);
   }
 
   late final bool enableDds = getValue(DebuggingOptionDescriptors.dds);
@@ -902,12 +900,10 @@ abstract class FlutterCommand extends Command<void> {
     );
 
     final List<String> experiments = getValue(CommonOptions.enableExperiment);
-    final List<String> extraGenSnapshotOptions = getValue(
-      BuildInfoOptions.extraGenSnapshotOptions,
-    ).toList();
-    final List<String> extraFrontEndOptions = getValue(
-      BuildInfoOptions.extraFrontEndOptions,
-    ).toList();
+    final List<String> extraGenSnapshotOptions = getValue(BuildInfoOptions.extraGenSnapshotOptions)
+        .toList();
+    final List<String> extraFrontEndOptions = getValue(BuildInfoOptions.extraFrontEndOptions)
+        .toList();
 
     if (experiments.isNotEmpty) {
       for (final expFlag in experiments) {
@@ -1184,9 +1180,8 @@ abstract class FlutterCommand extends Command<void> {
       dartDefines.add('$key=$value');
     });
 
-    final Iterable<String> defines = getValue(
-      CommonOptions.dartDefines,
-    ).where((string) => string.isNotEmpty);
+    final Iterable<String> defines = getValue(CommonOptions.dartDefines)
+        .where((string) => string.isNotEmpty);
     for (final define in defines) {
       if (define.contains('\r') || define.contains('\n')) {
         throwToolExit(
