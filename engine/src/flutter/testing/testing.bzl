@@ -581,12 +581,33 @@ while IFS= read -r line; do
   options+=("$line")
 done < <(sed -n 's|^// FlutterTesterOptions=||p' "$runfiles/{source}")
 cd "$runfiles/engine/src"
-exec "$runfiles/{tester}" "$@" "${{options[@]}}" \\
+command=("$runfiles/{tester}" "$@" "${{options[@]}}" \\
   --use-test-fonts \\
   "--icu-data-file-path=$runfiles/{icu_data}" \\
   "--flutter-assets-dir=$runfiles/{assets_dir}" \\
   --disable-asset-fonts \\
-  "$runfiles/{kernel}"
+  "$runfiles/{kernel}")
+if [[ "{must_fail}" != 1 ]]; then
+  exec "${{command[@]}}"
+fi
+# A test that must fail (run_tests.py's smoke test, fail_test.dart): the
+# runner has to exit non-zero and report a failed test -- not fall over
+# before running one.
+log="$build_dir/{name}.log"
+set +e
+"${{command[@]}}" >"$log" 2>&1
+status=$?
+set -e
+cat "$log"
+if [[ "$status" -eq 0 ]]; then
+  echo "flutter_tester_test: {kernel} was expected to fail and passed" >&2
+  exit 1
+fi
+if ! grep -q "Some tests failed." "$log"; then
+  echo "flutter_tester_test: {kernel} exited with status $status without the test runner reporting a failed test" >&2
+  exit 1
+fi
+echo "flutter_tester_test: {kernel} failed as expected (status $status)" >&2
 """
 
 def _flutter_tester_test_impl(ctx):
@@ -595,11 +616,13 @@ def _flutter_tester_test_impl(ctx):
     ctx.actions.write(
         output = launcher,
         content = _TESTER_LAUNCHER.format(
+            name = ctx.label.name,
             kernel = ctx.file.kernel.short_path,
             tester = ctx.executable.tester.short_path,
             source = ctx.file.source.short_path,
             icu_data = ctx.file.icu_data.short_path,
             assets_dir = assets_dir,
+            must_fail = "1" if ctx.attr.must_fail else "0",
         ),
         is_executable = True,
     )
@@ -652,6 +675,10 @@ flutter_tester_test = rule(
         "env": attr.string_dict(
             doc = "Environment of the test.",
         ),
+        "must_fail": attr.bool(
+            doc = "The test passes when the runner exits non-zero reporting a failed test (run_tests.py's smoke test, " +
+                  "whose expect_failure only tolerates the failure).",
+        ),
     },
 )
 
@@ -694,6 +721,8 @@ def flutter_dart_tests(
         data = [],
         tester = "//engine/src/flutter/shell/testing:flutter_tester",
         tester_opengles = "//engine/src/flutter/shell/testing:flutter_tester_opengles",
+        variants = None,
+        must_fail = False,
         size = "medium",
         tags = [],
         visibility = None):
@@ -732,6 +761,11 @@ def flutter_dart_tests(
         //flutter/txt's fixtures; spawn_helper's kernel at the root).
       tester: the runner.
       tester_opengles: the runner of the OpenGL ES variants.
+      variants: the variants to run, by suffix (`skia`, `skia_mt`, `vulkan`,
+        `vulkan_mt`, `opengles`); all of them by default. run_tests.py runs
+        its smoke test in two alone.
+      must_fail: the tests must fail (flutter_tester_test's must_fail):
+        run_tests.py's smoke test, fail_test.dart.
       size: the tests' size.
       tags: tags of the tests.
       visibility: visibility of the suite.
@@ -760,15 +794,16 @@ def flutter_dart_tests(
             # (run_tests.py globs *_test.dart).
             continue
         base = test[:-len(".dart")]
-        variants = [
+        selected = [
             (suffix, backend, multithreaded, True)
             for suffix, backend, multithreaded in _TESTER_VARIANTS
+            if variants == None or suffix in variants
         ]
         if test == "gpu_test.dart":
             # Once more with Impeller but without Flutter GPU, for the
             # "Flutter GPU must be enabled" error.
-            variants += [("vulkan_no_flutter_gpu", "vulkan", False, False), ("opengles_no_flutter_gpu", "opengles", False, False)]
-        for suffix, backend, multithreaded, flutter_gpu in variants:
+            selected += [("vulkan_no_flutter_gpu", "vulkan", False, False), ("opengles_no_flutter_gpu", "opengles", False, False)]
+        for suffix, backend, multithreaded, flutter_gpu in selected:
             test_name = base + "_" + suffix
             flutter_tester_test(
                 name = test_name,
@@ -783,6 +818,7 @@ def flutter_dart_tests(
                     flutter_gpu = flutter_gpu,
                 ),
                 data = data,
+                must_fail = must_fail,
                 size = size,
                 tags = tags,
                 visibility = ["//visibility:private"],
