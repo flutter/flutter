@@ -198,6 +198,74 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   [textures unregisterTexture:textureId];
 }
 
+- (void)testPlatformTaskRunsInTrackingAndDefaultRunModes {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertTrue([engine run]);
+  FlutterFMLTaskRunner* platformTaskRunner = engine.platformTaskRunner;
+
+  __block BOOL executed = NO;
+  [platformTaskRunner postTask:^{
+    executed = YES;
+  }];
+
+  // Tasks must not run immediately.
+  XCTAssertFalse(executed);
+
+  // Runs the run loop in `UITrackingRunLoopMode` until the task is executed, or the deadline hits.
+  NSDate* deadline = [NSDate dateWithTimeIntervalSinceNow:5];
+  while (!executed && [deadline timeIntervalSinceNow] > 0) {
+    [[NSRunLoop mainRunLoop] runMode:UITrackingRunLoopMode beforeDate:deadline];
+  }
+  XCTAssertTrue(executed);
+
+  executed = NO;
+  XCTestExpectation* expectation = [self expectationWithDescription:@"task executed"];
+  [platformTaskRunner postTask:^{
+    executed = YES;
+    [expectation fulfill];
+  }];
+
+  // Waiting on the expectation runs the main run loop in the default mode.
+  [self waitForExpectations:@[ expectation ] timeout:5];
+  XCTAssertTrue(executed);
+}
+
+- (void)testFlutterRunLoopModeRunsFlutterTasksOnly {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertTrue([engine run]);
+  FlutterFMLTaskRunner* platformTaskRunner = engine.platformTaskRunner;
+
+  __block BOOL flutterTaskExecuted = NO;
+  [platformTaskRunner postTask:^{
+    flutterTaskExecuted = YES;
+  }];
+
+  // Schedule one-shot blocks in the default mode and in `UITrackingRunLoopMode` alone. The
+  // scheduled blocks are pending until their run loop modes run.
+  __block BOOL defaultTaskExecuted = NO;
+  [[NSRunLoop mainRunLoop] performInModes:@[ NSDefaultRunLoopMode ]
+                                    block:^{
+                                      defaultTaskExecuted = YES;
+                                    }];
+
+  __block BOOL trackingTaskExecuted = NO;
+  [[NSRunLoop mainRunLoop] performInModes:@[ UITrackingRunLoopMode ]
+                                    block:^{
+                                      trackingTaskExecuted = YES;
+                                    }];
+
+  // Runs the run loop in `FlutterRunLoopMode` until the platform task is executed, or the
+  // deadline hits. The mode name must match `FlutterRunLoop.flutterRunLoopMode`.
+  NSDate* deadline = [NSDate dateWithTimeIntervalSinceNow:5];
+  while (!flutterTaskExecuted && [deadline timeIntervalSinceNow] > 0) {
+    CFRunLoopRunInMode(CFSTR("FlutterRunLoopMode"), 0.1, true);
+  }
+
+  XCTAssertTrue(flutterTaskExecuted);
+  XCTAssertFalse(defaultTaskExecuted);
+  XCTAssertFalse(trackingTaskExecuted);
+}
+
 - (void)testInfoPlist {
   // Check the embedded Flutter.framework Info.plist, not the linked dylib.
   NSURL* flutterFrameworkURL =

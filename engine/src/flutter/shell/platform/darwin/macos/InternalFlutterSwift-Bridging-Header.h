@@ -5,6 +5,14 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_INTERNALFLUTTERSWIFT_BRIDGING_HEADER_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_INTERNALFLUTTERSWIFT_BRIDGING_HEADER_H_
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterDartProject.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterHourFormat.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterTexture.h"
+#import "flutter/shell/platform/darwin/common/framework/Source/FlutterTracing.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterMacOS.h"
 
 #endif  // FLUTTER_SHELL_PLATFORM_DARWIN_MACOS_INTERNALFLUTTERSWIFT_BRIDGING_HEADER_H_

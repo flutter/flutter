@@ -4,6 +4,7 @@
 
 import CoreGraphics
 import Foundation
+import InternalFlutterSwiftCommon
 
 /// Coordinates Flutter view content updates with macOS window resizing.
 ///
