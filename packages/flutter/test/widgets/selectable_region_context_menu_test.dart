@@ -157,6 +157,176 @@ void main() {
     expect((selectWordEvent.globalPosition.dy - 300).abs() < precisionErrorTolerance, isTrue);
   }, variant: _browserContextMenuEnabledVariants);
 
+  testWidgets('copy event synchronizes the active SelectableRegion without a mouse event', (
+    WidgetTester tester,
+  ) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final focusNodeA = FocusNode();
+    final focusNodeB = FocusNode();
+    addTearDown(focusNodeA.dispose);
+    addTearDown(focusNodeB.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Column(
+          children: <Widget>[
+            SelectableRegion(
+              focusNode: focusNodeA,
+              selectionControls: emptyTextSelectionControls,
+              child: const Text('first selection'),
+            ),
+            SelectableRegion(
+              focusNode: focusNodeB,
+              selectionControls: emptyTextSelectionControls,
+              child: const Text('second selection'),
+            ),
+          ],
+        ),
+      ),
+    );
+    addTearDown(() => tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink())));
+
+    // Mount the fake platform-view elements for both regions.
+    final elementA = fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    final elementB = fakePlatformViewRegistry.getViewById(currentViewId + 2) as web.HTMLElement;
+    web.document.body!.append(elementA);
+    web.document.body!.append(elementB);
+    addTearDown(() {
+      elementA.remove();
+      elementB.remove();
+    });
+
+    Future<void> selectRegion(FocusNode focusNode) async {
+      focusNode.requestFocus();
+      await tester.pump();
+      PlatformSelectableRegionContextMenu.debugActiveClient!.dispatchSelectionEvent(
+        const SelectAllSelectionEvent(),
+      );
+    }
+
+    // Select all text in the first region, then copy it without a mouse event.
+    await selectRegion(focusNodeA);
+    web.document.dispatchEvent(web.ClipboardEvent('copy'));
+    await tester.pump();
+
+    // Check the element updated, and it's the selection.
+    expect(elementA.innerText, 'first selection');
+    expect(elementB.innerText, ''); // Hasn't updated yet
+    expect(web.window.getSelection()?.toString().trim(), 'first selection');
+
+    // Select all text in the second region, then copy it without a mouse event.
+    await selectRegion(focusNodeB);
+    web.document.dispatchEvent(web.ClipboardEvent('copy'));
+    await tester.pump();
+
+    // Check the element updated, and it's the selection.
+    expect(elementA.innerText, 'first selection'); // Did not change
+    expect(elementB.innerText, 'second selection');
+    expect(web.window.getSelection()?.toString().trim(), 'second selection');
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('copy event from a nested text field is ignored', (WidgetTester tester) async {
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final regionFocusNode = FocusNode();
+    final fieldFocusNode = FocusNode();
+    final controller = TextEditingController(text: 'field text');
+    addTearDown(regionFocusNode.dispose);
+    addTearDown(fieldFocusNode.dispose);
+    addTearDown(controller.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: regionFocusNode,
+          selectionControls: emptyTextSelectionControls,
+          child: Column(
+            children: <Widget>[
+              const Text('region text'),
+              EditableText(
+                controller: controller,
+                focusNode: fieldFocusNode,
+                style: const TextStyle(fontSize: 14),
+                cursorColor: const Color(0xFF000000),
+                backgroundCursorColor: const Color(0xFFFFFFFF),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    addTearDown(() => tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink())));
+
+    // Mount the fake platform-view element.
+    final hiddenElement =
+        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    web.document.body!.append(hiddenElement);
+    addTearDown(() => hiddenElement.remove());
+
+    // Focusing the nested field gives the region focus (but not primary focus).
+    fieldFocusNode.requestFocus();
+    await tester.pump();
+    expect(regionFocusNode.hasFocus, isTrue);
+    expect(regionFocusNode.hasPrimaryFocus, isFalse);
+
+    // Add a stand-in for the engine's text-editing element, focus it and
+    // set the selection.
+    final input = web.document.createElement('input') as web.HTMLInputElement;
+    input.value = 'field text';
+    web.document.body!.append(input);
+    addTearDown(() => input.remove());
+    input.focus();
+    input.setSelectionRange(0, 10);
+
+    // The copy event on the input will bubble up.
+    input.dispatchEvent(web.ClipboardEvent('copy', web.ClipboardEventInit(bubbles: true)));
+    await tester.pump();
+
+    // Expect the input retains its selection and the input was not updated.
+    expect(input.selectionStart, 0);
+    expect(input.selectionEnd, 10);
+    expect(hiddenElement.innerText, isEmpty);
+  }, variant: _browserContextMenuEnabledVariants);
+
+  testWidgets('DOM selection reflects the region selection immediately', (
+    WidgetTester tester,
+  ) async {
+    // WebKit only enables Edit > Copy when a range selection already exists when
+    // the menu opens, so the hidden element and the DOM selection must mirror
+    // the Flutter selection before any copy event fires.
+    final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+    final focusNode = FocusNode();
+    addTearDown(focusNode.dispose);
+
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: SelectableRegion(
+          focusNode: focusNode,
+          selectionControls: emptyTextSelectionControls,
+          child: const Text('eager text'),
+        ),
+      ),
+    );
+    addTearDown(() => tester.pumpWidget(const TestWidgetsApp(home: SizedBox.shrink())));
+
+    // Mount the fake platform-view element.
+    final hiddenElement =
+        fakePlatformViewRegistry.getViewById(currentViewId + 1) as web.HTMLElement;
+    web.document.body!.append(hiddenElement);
+    addTearDown(() => hiddenElement.remove());
+
+    focusNode.requestFocus();
+    await tester.pump();
+    PlatformSelectableRegionContextMenu.debugActiveClient!.dispatchSelectionEvent(
+      const SelectAllSelectionEvent(),
+    );
+    await tester.pump();
+
+    // No copy event or right click has occurred, but the selection should've
+    // been updated.
+    expect(hiddenElement.innerText, 'eager text');
+    expect(web.window.getSelection()?.toString().trim(), 'eager text');
+  }, variant: _browserContextMenuEnabledVariants);
+
   // Regression test for https://github.com/flutter/flutter/issues/189575.
   testWidgets('right click does not dispatch event to previous stale client after losing focus', (
     WidgetTester tester,
