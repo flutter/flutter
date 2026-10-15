@@ -270,6 +270,12 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/pkg/vector_math",
         build_file = _OVERLAYS + ":vector_math/BUILD.vector_math.bazel",
     ),
+    # package:process, which the engine's skia_gold_client imports, and
+    # through it the Dart tests of //flutter/testing/dart.
+    "process": struct(
+        path = "engine/src/flutter/third_party/pkg/process",
+        build_file = _OVERLAYS + ":process/BUILD.process.bazel",
+    ),
     "shaderc": struct(
         path = "engine/src/flutter/third_party/shaderc",
         build_file = None,
