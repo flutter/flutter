@@ -2052,7 +2052,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _beforeTestShouldPropagateDevicePointerEvents = shouldPropagateDevicePointerEvents;
     _shouldVerifyInvariants = false;
 
-    runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
+    _resetTestTree(_preTestMessage);
     await pump();
     // Pretend that the first frame produced in the test body is the first frame
     // sent to the engine.
@@ -2066,9 +2066,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // We only try to clean up and verify invariants if we didn't already
       // fail. If we got an exception already, then we instead leave everything
       // alone so that we don't cause more spurious errors.
-      runApp(
-        Container(key: UniqueKey(), child: _postTestMessage),
-      ); // Unmount any remaining widgets.
+      _resetTestTree(_postTestMessage);
       await pump();
       _restorationManager?.dispose();
       _restorationManager = null;
@@ -2082,6 +2080,14 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
     assert(inTest);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
+  }
+
+  void _resetTestTree(Widget message) {
+    if (platformDispatcher.implicitView == null) {
+      runWidget(const ViewCollection(views: <Widget>[]));
+      return;
+    }
+    runApp(Container(key: UniqueKey(), child: message));
   }
 
   // The description of the currently running test, saved in [_runTest] so that
