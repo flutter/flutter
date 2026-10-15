@@ -155,16 +155,19 @@ Future<AssetBundle?> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, AssetBundleEntry> assetEntries, {
-  required TargetPlatform targetPlatform,
-  required ImpellerStatus impellerStatus,
-  required ProcessManager processManager,
-  required FileSystem fileSystem,
-  required Artifacts artifacts,
-  required Logger logger,
-  required Directory projectDir,
   required BuildMode buildMode,
-  required Platform platform,
+  required ImpellerStatus impellerStatus,
+  required Directory projectDir,
+  required TargetPlatform targetPlatform,
+  required ToolContext toolContext,
 }) async {
+  final ToolContext(
+    :Artifacts artifacts,
+    fs: FileSystem fileSystem,
+    :Logger logger,
+    :Platform platform,
+    :ProcessManager processManager,
+  ) = toolContext;
   if (bundleDir.existsSync()) {
     try {
       bundleDir.deleteSync(recursive: true);

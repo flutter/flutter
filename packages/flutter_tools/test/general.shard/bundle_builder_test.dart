@@ -196,15 +196,17 @@ void main() {
       await writeBundle(
         bundleDir,
         bundle.entries,
-        targetPlatform: TargetPlatform.tester,
-        impellerStatus: ImpellerStatus.platformDefault,
-        processManager: processManager,
-        fileSystem: fileSystem,
-        artifacts: artifacts,
-        logger: BufferLogger.test(),
-        projectDir: fileSystem.currentDirectory,
         buildMode: BuildMode.debug,
-        platform: FakePlatform(),
+        impellerStatus: ImpellerStatus.platformDefault,
+        projectDir: fileSystem.currentDirectory,
+        targetPlatform: TargetPlatform.tester,
+        toolContext: FakeToolContext(
+          artifacts: artifacts,
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processManager: processManager,
+        ),
       );
 
       final File outputAssetFile = fileSystem.file('build/flutter_assets/my-asset.txt');
