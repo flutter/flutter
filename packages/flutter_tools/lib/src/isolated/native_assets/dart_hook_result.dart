@@ -5,7 +5,6 @@
 import 'package:code_assets/code_assets.dart';
 import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
-import 'package:hooks_runner/hooks_runner.dart';
 
 import '../../asset.dart' show FlutterHookResult, HookAsset;
 import 'native_assets.dart' show FlutterCodeAsset;
@@ -45,18 +44,21 @@ final class DartHooksResult {
           Uri.parse(encodedUri! as String),
       ];
       final codeAssets = <FlutterCodeAsset>[
-        for (final (Map<String, Object?> codeAsset, String target) in codeAssetsList.map(
+        for (final (Map<String, Object?> codeAsset, String os, String arch) in codeAssetsList.map(
           (Object? codeJson) => switch (codeJson) {
-            {_assetKey: final Map<String, Object?> codeAsset, _targetKey: final String target} => (
-              codeAsset,
-              target,
-            ),
+            {
+              _assetKey: final Map<String, Object?> codeAsset,
+              _osKey: final String os,
+              _archKey: final String arch,
+            } =>
+              (codeAsset, os, arch),
             _ => throw UnimplementedError(),
           },
         ))
           FlutterCodeAsset(
             codeAsset: CodeAsset.fromEncoded(EncodedAsset.fromJson(codeAsset)),
-            target: Target.fromString(target),
+            os: OS.fromString(os),
+            architecture: Architecture.fromString(arch),
           ),
       ];
       final dataAssets = <DataAsset>[
@@ -93,7 +95,8 @@ final class DartHooksResult {
       for (final FlutterCodeAsset code in codeAssets)
         <String, Object>{
           _assetKey: code.codeAsset.encode().toJson(),
-          _targetKey: code.target.toString(),
+          _osKey: code.os.name,
+          _archKey: code.architecture.name,
         },
     ],
     _dataAssetsKey: <Object?>[for (final DataAsset asset in dataAssets) asset.encode().toJson()],
@@ -105,7 +108,8 @@ final class DartHooksResult {
   static const _codeAssetsKey = 'code_assets';
   static const _dataAssetsKey = 'data_assets';
   static const _assetKey = 'asset';
-  static const _targetKey = 'target';
+  static const _osKey = 'os';
+  static const _archKey = 'arch';
 
   /// The files that eventually should be bundled with the app.
   List<Uri> get filesToBeBundled => <Uri>[

@@ -171,6 +171,9 @@ class TextureGLES final : public Texture,
   /// false, the FBO must be re-attached before use.
   bool CachedFBOMatchesSubresource(uint32_t mip_level, uint32_t slice) const;
 
+  /// Retrieve the reactor handle for this texture.
+  const HandleGLES& GetHandle() const { return handle_.Get(); }
+
   // Visible for testing.
   std::optional<HandleGLES> GetSyncFence() const;
 

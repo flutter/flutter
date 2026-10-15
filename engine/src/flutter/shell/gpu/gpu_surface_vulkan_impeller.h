@@ -23,8 +23,14 @@ FML_TEST_CLASS(GPUSurfaceVulkanImpeller,
 
 class GPUSurfaceVulkanImpeller final : public Surface {
  public:
+  /// @param  render_to_surface  False when an external view embedder owns
+  ///                            presentation, in which case this surface must
+  ///                            neither acquire nor present an image: the
+  ///                            compositor presents the layers instead, and a
+  ///                            root-surface present would overwrite them.
   explicit GPUSurfaceVulkanImpeller(GPUSurfaceVulkanDelegate* delegate,
-                                    std::shared_ptr<impeller::Context> context);
+                                    std::shared_ptr<impeller::Context> context,
+                                    bool render_to_surface = true);
 
   // |Surface|
   ~GPUSurfaceVulkanImpeller() override;
@@ -37,6 +43,7 @@ class GPUSurfaceVulkanImpeller final : public Surface {
                   RecreatesTransientsWhenFrameSizeChanges);
 
   GPUSurfaceVulkanDelegate* delegate_;
+  bool render_to_surface_ = true;
   std::shared_ptr<impeller::Context> impeller_context_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   std::shared_ptr<impeller::SwapchainTransientsVK> transients_;
