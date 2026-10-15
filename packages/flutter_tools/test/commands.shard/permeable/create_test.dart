@@ -636,7 +636,7 @@ void main() {
     'package project sets dynamic flutter SDK version bounds in pubspec.yaml',
     () async {
       const expectedFlutterVersion = '3.13.0';
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--template=package', '--no-pub', projectDir.path]);
@@ -655,7 +655,7 @@ void main() {
     'plugin project sets dynamic flutter SDK version bounds in pubspec.yaml',
     () async {
       const expectedFlutterVersion = '3.13.0';
-      final command = CreateCommand();
+      final CreateCommand command = createCreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--template=plugin', '--no-pub', projectDir.path]);
