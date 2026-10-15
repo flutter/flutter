@@ -200,4 +200,25 @@ void main() {
     );
     expect(ShapeBorder.lerp(rInside, rOutside, 0.5), rCenter);
   });
+
+  test('RoundedRectangleBorder to CircleBorder lerp equality accounts for eccentricity', () {
+    const rrect = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16)));
+    final ShapeBorder round = ShapeBorder.lerp(rrect, const CircleBorder(), 0.5)!;
+    final ShapeBorder oval = ShapeBorder.lerp(rrect, const CircleBorder(eccentricity: 1.0), 0.5)!;
+    expect(round, isNot(oval));
+    expect(round.hashCode, isNot(oval.hashCode));
+    expect(oval, ShapeBorder.lerp(rrect, const CircleBorder(eccentricity: 1.0), 0.5));
+  });
+
+  test('RoundedRectangleBorder to CircleBorder lerp interpolates eccentricity', () {
+    const rrect = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16)));
+    final ShapeBorder round = ShapeBorder.lerp(rrect, const CircleBorder(), 0.5)!;
+    final ShapeBorder oval = ShapeBorder.lerp(rrect, const CircleBorder(eccentricity: 1.0), 0.5)!;
+    expect(
+      ShapeBorder.lerp(round, oval, 0.5),
+      ShapeBorder.lerp(rrect, const CircleBorder(eccentricity: 0.5), 0.5),
+    );
+    expect(ShapeBorder.lerp(const CircleBorder(eccentricity: 1.0), round, 1.0), round);
+    expect(ShapeBorder.lerp(round, const CircleBorder(eccentricity: 1.0), 0.0), round);
+  });
 }
