@@ -12,7 +12,6 @@ template("embed_blob") {
   assert(defined(invoker.deps), "The target dependencies must be specified")
 
   gen_blob_target_name = "gen_blob_$target_name"
-
   action(gen_blob_target_name) {
     inputs = [ invoker.blob ]
     outputs = [
@@ -35,7 +34,6 @@ template("embed_blob") {
   }
 
   embed_config = "embed_$target_name"
-
   config(embed_config) {
     include_dirs = [ get_path_info(
             get_label_info("//flutter/impeller:impeller", "target_gen_dir"),

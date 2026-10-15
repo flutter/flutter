@@ -187,8 +187,7 @@ template("embedder_source_set") {
       ]
     }
 
-    # Depend on 'icudtl.dat.S' to avoid dynamic lookups of engine library
-    # symbols.
+    # Depend on 'icudtl.dat.S' to avoid dynamic lookups of engine library symbols.
     if (is_android) {
       deps += [ "//flutter/shell/platform/android:icudtl_asm" ]
       sources += [ "$root_build_dir/gen/flutter/shell/platform/android/flutter/third_party/icu/flutter/icudtl.dat.S" ]
@@ -583,8 +582,7 @@ group("flutter_engine") {
       ":flutter_engine_library",
     ]
 
-    # For the Mac, the dylib is packaged in a framework with the appropriate
-    # headers.
+    # For the Mac, the dylib is packaged in a framework with the appropriate headers.
     if (is_mac && !embedder_for_target) {
       deps += [ ":flutter_embedder_framework" ]
     }

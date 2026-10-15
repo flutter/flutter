@@ -40,7 +40,6 @@ template("fuchsia_archive") {
   }
 
   _component_target = target_name + "__component"
-
   fuchsia_component(_component_target) {
     forward_variables_from(invoker,
                            [
@@ -86,7 +85,6 @@ template("fuchsia_archive") {
 
   _package_target = target_name + "__package"
   _package_name = target_name
-
   fuchsia_package(_package_target) {
     forward_variables_from(invoker,
                            [
@@ -100,7 +98,6 @@ template("fuchsia_archive") {
   # TODO(zijiehe): http://crbug.com/368608542, prefer using
   # gn-sdk/build_id_dir.gni
   _build_id_target = target_name + "__build_id"
-
   fuchsia_debug_symbols(_build_id_target) {
     forward_variables_from(invoker,
                            [
@@ -143,7 +140,6 @@ template("fuchsia_test_archive") {
   if (defined(invoker.gen_cml_file) && invoker.gen_cml_file) {
     _cml_file = "$root_out_dir/${target_name}.cml"
     _interpolate_cml_target = "${target_name}_interpolate_cml"
-
     action(_interpolate_cml_target) {
       testonly = true
       script = "//flutter/tools/fuchsia/interpolate_test_suite.py"

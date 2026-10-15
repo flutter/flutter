@@ -92,10 +92,9 @@ if (is_asan) {
 
 vulkan_dist = "$fuchsia_sdk_path/arch/$target_cpu/dist"
 
-# Note that the other validation libraries in the Fuchsia SDK seem to have a bug
-# right now causing crashes, so it is only recommended that we use
-# VkLayer_khronos_validation.so until we have a confirmation that they are
-# fixed.
+# Note that the other validation libraries in the Fuchsia SDK seem to have a bug right
+# now causing crashes, so it is only recommended that we use
+# VkLayer_khronos_validation.so until we have a confirmation that they are fixed.
 vulkan_validation_libs = [
   {
     name = "VkLayer_khronos_validation.so"

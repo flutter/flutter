@@ -212,19 +212,16 @@ if (current_toolchain == dart_toolchain) {
     # that data. We also expose this in the group target below so that users of
     # the dart_package_config target can just add the targets to the deps list.
     _publish_metadata_target_name = "${target_name}_package_metadata"
-
     group(_publish_metadata_target_name) {
       metadata = _metadata
     }
 
     _dart_package_config_target_name = "${target_name}_dart_package"
     _packages_path = "$target_gen_dir/${target_name}_package_config.json"
-
     dart_package_config(_dart_package_config_target_name) {
       # Do not publish the metadata to the dart_package_config json file if the
-      # disable_metadata_entry flag is enabled in the dart_tool. The reason this
-      # is here is to avoid entries that may have identical rootUris as
-      # fxb/58781 has highlighted.
+      # disable_metadata_entry flag is enabled in the dart_tool. The reason this is here
+      # is to avoid entries that may have identical rootUris as fxb/58781 has highlighted.
       deps = _dart_deps
       if (!defined(invoker.disable_metadata_entry) ||
           !invoker.disable_metadata_entry) {
@@ -247,7 +244,6 @@ if (current_toolchain == dart_toolchain) {
     # Also warn if nonexistent files are included in sources.
     if (!disable_source_verification) {
       source_verification_target_name = "${target_name}_source_verification"
-
       action(source_verification_target_name) {
         script = "//flutter/tools/fuchsia/dart/verify_sources.py"
         output_file = "$target_gen_dir/$target_name.missing"
@@ -275,7 +271,6 @@ if (current_toolchain == dart_toolchain) {
     _all_deps_sources_list_target = "${target_name}.all_deps_sources.list"
     _all_deps_sources_list_file =
         "${target_gen_dir}/${target_name}.all_deps_sources.list"
-
     generated_file(_all_deps_sources_list_target) {
       forward_variables_from(invoker, [ "testonly" ])
       outputs = [ _all_deps_sources_list_file ]
@@ -294,7 +289,6 @@ if (current_toolchain == dart_toolchain) {
     # analyzer, which recursively reads all sources.
     _all_deps_sources_target = "${target_name}.all_deps_sources"
     _all_deps_sources_file = "${target_gen_dir}/${target_name}.all_deps_sources"
-
     action(_all_deps_sources_target) {
       forward_variables_from(invoker, [ "testonly" ])
 

@@ -100,7 +100,6 @@ template("display_list_unittests_component") {
   if (defined(invoker.sources)) {
     additional_sources = invoker.sources
   }
-
   impeller_component(target_name) {
     testonly = true
     if (defined(invoker.defines)) {
@@ -181,7 +180,6 @@ template("aiks_unittests_component") {
   if (defined(invoker.sources)) {
     additional_sources = invoker.sources
   }
-
   impeller_component(target_name) {
     testonly = true
     if (defined(invoker.defines)) {

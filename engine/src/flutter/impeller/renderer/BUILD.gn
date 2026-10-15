@@ -119,7 +119,6 @@ template("renderer_unittests_component") {
   if (impeller_enable_compute) {
     predefined_sources += [ "compute_unittests.cc" ]
   }
-
   impeller_component(target_name) {
     testonly = true
     if (defined(invoker.defines)) {

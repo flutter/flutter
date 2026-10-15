@@ -7,7 +7,6 @@ import("//flutter/common/config.gni")
 template("esbuild") {
   assert(defined(invoker.entry_point))
   assert(defined(invoker.output_bundle))
-
   action(target_name) {
     forward_variables_from(invoker, [ "public_deps" ])
     if (host_os == "win") {

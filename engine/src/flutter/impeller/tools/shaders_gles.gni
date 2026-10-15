@@ -27,7 +27,6 @@ template("impeller_shaders_gles") {
                                     "_shaders_gles",
                                   ])
   impellerc_gles = "impellerc_$target_name"
-
   impellerc(impellerc_gles) {
     shaders = invoker.shaders
     sl_file_extension = "gles"
@@ -63,7 +62,6 @@ template("impeller_shaders_gles") {
 
   if (invoker.analyze) {
     analyze_lib = "analyze_$target_name"
-
     malioc_analyze_shaders(analyze_lib) {
       shaders = gles_shaders
       if (defined(invoker.gles_language_version)) {
@@ -74,7 +72,6 @@ template("impeller_shaders_gles") {
   }
 
   gles_lib = "genlib_$target_name"
-
   shader_archive(gles_lib) {
     shaders = gles_shaders
     deps = [ ":$impellerc_gles" ]
@@ -84,7 +81,6 @@ template("impeller_shaders_gles") {
   }
 
   reflect_gles = "reflect_$target_name"
-
   impellerc_reflect(reflect_gles) {
     impellerc_invocation = ":$impellerc_gles"
   }

@@ -19,7 +19,6 @@ template("impeller_shaders_vk") {
                                     "_shaders_vk",
                                   ])
   impellerc_vk = "impellerc_$target_name"
-
   impellerc(impellerc_vk) {
     mnemonic = "IMPELLERC_VULKAN"
     shaders = invoker.shaders
@@ -47,7 +46,6 @@ template("impeller_shaders_vk") {
 
   if (invoker.analyze) {
     analyze_lib = "analyze_$target_name"
-
     malioc_analyze_shaders(analyze_lib) {
       shaders = vk_shaders
       if (defined(invoker.vulkan_language_version)) {
@@ -58,7 +56,6 @@ template("impeller_shaders_vk") {
   }
 
   vk_lib = "genlib_$target_name"
-
   shader_archive(vk_lib) {
     shaders = vk_shaders
     deps = [ ":$impellerc_vk" ]
@@ -68,13 +65,11 @@ template("impeller_shaders_vk") {
   }
 
   reflect_vk = "reflect_$target_name"
-
   impellerc_reflect(reflect_vk) {
     impellerc_invocation = ":$impellerc_vk"
   }
 
   embed_vk_lib = "embed_$target_name"
-
   embed_blob(embed_vk_lib) {
     vk_library_files = get_target_outputs(":$vk_lib")
     symbol_name = shaders_base_name

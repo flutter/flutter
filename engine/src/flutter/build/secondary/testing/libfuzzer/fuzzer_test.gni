@@ -6,7 +6,6 @@
 # implementation from the real (Chromium) fuzzer_test.gni.
 template("fuzzer_test") {
   not_needed(invoker, "*")
-
   group(target_name) {
   }
 }

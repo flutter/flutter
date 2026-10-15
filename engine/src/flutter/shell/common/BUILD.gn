@@ -166,8 +166,7 @@ source_set("common") {
   }
 }
 
-# These are in their own source_set to avoid a dependency cycle with
-# //common/graphics
+# These are in their own source_set to avoid a dependency cycle with //common/graphics
 source_set("base64") {
   sources = [
     "base64.cc",

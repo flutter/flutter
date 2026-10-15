@@ -30,7 +30,6 @@ generated_file("vm_data") {
   contents = ""
   outputs = [ "$target_gen_dir/vm_data.bin" ]
 }
-
 generated_file("vm_data_product") {
   contents = ""
   outputs = [ "$target_gen_dir/vm_data_product.bin" ]

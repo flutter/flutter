@@ -57,7 +57,6 @@ generated_file("vm_isolate_snapshot_data") {
   contents = ""
   outputs = [ "$target_gen_dir/vm_isolate_snapshot.bin" ]
 }
-
 generated_file("vm_isolate_snapshot_instructions") {
   contents = ""
   outputs = [ "$target_gen_dir/vm_snapshot_instructions.bin" ]
@@ -81,10 +80,9 @@ generated_file("vm_isolate_snapshot_instructions") {
 # See: https://github.com/flutter/flutter/wiki/Flutter-engine-operation-in-AOT-Mode
 compiled_action("generate_snapshot_bin") {
   if (target_cpu == "x86" && host_os == "linux") {
-    # By default Dart will create a 32-bit gen_snapshot host binary if the
-    # target platform is 32-bit. Override this to create a 64-bit gen_snapshot
-    # for x86 targets because some host platforms may not support 32-bit
-    # binaries.
+    # By default Dart will create a 32-bit gen_snapshot host binary if the target
+    # platform is 32-bit.  Override this to create a 64-bit gen_snapshot for x86
+    # targets because some host platforms may not support 32-bit binaries.
     tool = "$dart_src/runtime/bin:gen_snapshot_host_targeting_host"
     toolchain = "//build/toolchain/$host_os:clang_x64"
   } else {

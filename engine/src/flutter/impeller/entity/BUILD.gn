@@ -99,8 +99,7 @@ impeller_shaders("framebuffer_blend_entity_shaders") {
   name = "framebuffer_blend"
   require_framebuffer_fetch = true
 
-  # malioc does not support analyzing shaders that use the framebuffer fetch
-  # extension on some GPUs.
+  # malioc does not support analyzing shaders that use the framebuffer fetch extension on some GPUs.
   analyze = false
 
   if (is_mac && !is_ios) {

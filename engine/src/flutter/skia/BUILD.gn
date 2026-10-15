@@ -173,7 +173,6 @@ template("optional") {
         include_dirs = invoker.public_include_dirs
       }
     }
-
     skia_source_set(target_name) {
       visibility = [ ":*" ]
 

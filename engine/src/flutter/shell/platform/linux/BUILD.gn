@@ -188,8 +188,7 @@ source_set("flutter_linux_sources") {
     "fl_window_state_monitor.cc",
   ]
 
-  # Set flag to stop headers being directly included (library users should not
-  # do this)
+  # Set flag to stop headers being directly included (library users should not do this)
   defines = [
     "FLUTTER_LINUX_COMPILATION",
     "FLUTTER_ENGINE_NO_PROTOTYPES",

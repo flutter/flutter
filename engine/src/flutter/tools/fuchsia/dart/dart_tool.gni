@@ -96,7 +96,6 @@ template("_dart_snapshot_invocation") {
 template("dart_prebuilt_tool") {
   assert(defined(invoker.snapshot),
          "Must specify the path to the dart snapshot")
-
   _dart_snapshot_invocation(target_name) {
     dart = prebuilt_dart
     forward_variables_from(invoker, "*")

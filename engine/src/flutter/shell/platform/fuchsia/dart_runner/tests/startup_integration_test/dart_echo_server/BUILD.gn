@@ -16,8 +16,7 @@ dart_library("lib") {
   sources = [ "main.dart" ]
 }
 
-# Dart component that serves the test Echo FIDL protocol, built using the Dart
-# AOT runner
+# Dart component that serves the test Echo FIDL protocol, built using the Dart AOT runner
 dart_component("aot_component") {
   testonly = true
 
@@ -28,8 +27,7 @@ dart_component("aot_component") {
   deps = [ ":lib" ]
 }
 
-# Dart component that serves the test Echo FIDL protocol, built using the Dart
-# AOT runner
+# Dart component that serves the test Echo FIDL protocol, built using the Dart AOT runner
 dart_component("jit_component") {
   testonly = true
 

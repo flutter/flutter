@@ -208,8 +208,8 @@ if (is_mac || is_ios) {
       deps = [ "//flutter/fml" ]
       public_deps = [ ":skia" ]
 
-      # Skia's Vulkan support is enabled for all platforms (except iOS), and so
-      # parts of Skia's graphics context reference Vulkan symbols.
+      # Skia's Vulkan support is enabled for all platforms (except iOS), and so parts of
+      # Skia's graphics context reference Vulkan symbols.
       if (shell_enable_vulkan) {
         deps += [ "//flutter/vulkan" ]
       }

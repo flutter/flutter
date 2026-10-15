@@ -112,7 +112,6 @@ template("flutter_dart_component") {
   }
 
   _dart_package_config_target_name = "${target_name}_dart_package"
-
   dart_package_config(_dart_package_config_target_name) {
     forward_variables_from(invoker,
                            [
@@ -206,8 +205,8 @@ template("flutter_dart_component") {
       # Get the path to the executable. Currently, this assumes that the tool
       # does not specify output_name so that the target name is the name to use.
       # If that's not the case, we'll need another argument to the script to
-      # specify this, since we can't know what the output name is (it might be
-      # in another file not processed yet).
+      # specify this, since we can't know what the output name is (it might be in
+      # another file not processed yet).
       host_executable =
           get_label_info(host_tool, "root_out_dir") + "/" +
           get_label_info(host_tool, "name") + host_executable_suffix
@@ -260,8 +259,8 @@ template("flutter_dart_component") {
       _convert_kernel_target_name =
           "${_kernel_target_name}_convert_kernel_manifest"
       _convert_kernel_manifest_file =
-          # TODO(richkadel): This is prefixed by "dartlang/", which is not
-          # found. Is the current toolchain set incorrectly somewhere?
+          # TODO(richkadel): This is prefixed by "dartlang/", which is not found.
+          # Is the current toolchain set incorrectly somewhere?
           string_replace(
               "${target_gen_dir}/${_convert_kernel_target_name}_kernel_manifest.json",
               "dartlang/",

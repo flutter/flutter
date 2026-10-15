@@ -38,8 +38,7 @@ generated_file("font_entitlement_config") {
 zip_bundle("font_subset") {
   if (is_mac) {
     # Mac artifacts sometimes use mac and sometimes darwin. Standardizing the
-    # names will require changes in the list of artifacts the tool is
-    # downloading.
+    # names will require changes in the list of artifacts the tool is downloading.
     output = "darwin-${target_cpu}/font-subset.zip"
   } else {
     output = "${full_target_platform_name}/font-subset.zip"

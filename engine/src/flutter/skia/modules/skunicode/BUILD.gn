@@ -80,7 +80,6 @@ if (skia_use_icu || skia_use_client_icu || skia_use_libgrapheme ||
 } else {
   group("skunicode") {
   }
-
   group("tests") {
   }
 }
