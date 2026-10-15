@@ -59,9 +59,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)launchEngine:(nullable NSString*)entrypoint
           libraryURI:(nullable NSString*)libraryOrNil
       entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
+/**
+ * Creates the shell, adopting the calling thread as this engine's platform thread.
+ *
+ * Must be called on the main thread; see the `FlutterEngine` class documentation.
+ */
 - (BOOL)createShell:(nullable NSString*)entrypoint
          libraryURI:(nullable NSString*)libraryOrNil
-       initialRoute:(nullable NSString*)initialRoute;
+       initialRoute:(nullable NSString*)initialRoute NS_SWIFT_UI_ACTOR;
 - (void)attachView;
 - (void)notifyLowMemory;
 
@@ -74,11 +79,15 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * This results in a faster creation time and a smaller memory footprint engine.
  * This should only be called on a FlutterEngine that is running.
+ *
+ * The spawned engine shares this engine's task runners, so this must be called on this engine's
+ * platform thread, which is always the main thread.
  */
 - (FlutterEngine*)spawnWithEntrypoint:(nullable NSString*)entrypoint
                            libraryURI:(nullable NSString*)libraryURI
                          initialRoute:(nullable NSString*)initialRoute
-                       entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
+                       entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs
+    NS_SWIFT_UI_ACTOR;
 
 /**
  * Dispatches the given key event data to the framework through the engine.

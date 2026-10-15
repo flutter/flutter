@@ -24,7 +24,7 @@ static const constexpr DescriptorPoolSize kDefaultBindingSize =
         .texture_bindings = 256u,  // Texture Bindings
         .storage_bindings = 32,
         .subpass_bindings = 4u  // Subpass Bindings
-    };
+};
 
 DescriptorPoolVK::DescriptorPoolVK(std::weak_ptr<const ContextVK> context)
     : context_(std::move(context)) {}

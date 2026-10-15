@@ -9,9 +9,12 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
+import '../context/apple_context.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../ios/code_signing.dart';
+import '../isolated/native_assets/native_assets_manifest.dart';
 import '../runner/flutter_command.dart' show FlutterOptions;
 import '../xcode_project.dart';
 
@@ -21,11 +24,18 @@ import '../xcode_project.dart';
 /// codesign files/directories [codesign]. It also has special logic for codesigning
 /// Flutter XCFrameworks [codesignFlutterXCFramework].
 class DarwinAddToAppCodesigning {
-  DarwinAddToAppCodesigning({
-    required XcodeCodeSigningSettings xcodeCodeSigningSettings,
-    required Logger logger,
-  }) : _logger = logger,
-       _xcodeCodeSigningSettings = xcodeCodeSigningSettings;
+  DarwinAddToAppCodesigning({required this._xcodeCodeSigningSettings, required this._logger});
+
+  DarwinAddToAppCodesigning.fromContexts({
+    required AppleContext appleContext,
+    required ToolContext toolContext,
+  }) : this(
+         logger: toolContext.logger,
+         xcodeCodeSigningSettings: XcodeCodeSigningSettings.fromContexts(
+           appleContext: appleContext,
+           toolContext: toolContext,
+         ),
+       );
 
   final XcodeCodeSigningSettings _xcodeCodeSigningSettings;
   final Logger _logger;
@@ -331,30 +341,22 @@ class DarwinAddToAppNativeAssets {
     if (!manifestFile.existsSync()) {
       return const <String, String>{};
     }
-    final manifest = json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
-    final nativeAssets = manifest['native-assets'] as Map<String, Object?>?;
-    if (nativeAssets == null) {
-      return const <String, String>{};
-    }
+    final manifestJson = json.decode(manifestFile.readAsStringSync()) as Map<String, Object?>;
+    final manifest = NativeAssetsManifest.fromJson(manifestJson);
     final result = <String, String>{};
-    for (final Object? targetAssets in nativeAssets.values) {
-      if (targetAssets is! Map<String, Object?>) {
-        continue;
-      }
-      for (final MapEntry<String, Object?> entry in targetAssets.entries) {
-        final String assetId = entry.key;
-        final Object? pathInfo = entry.value;
-        // The path info is a list of strings, where the first string is the type of path (see
-        // [KernelAssetAbsolutePath]), and the second string is the actual path.
-        if (pathInfo is List<Object?> && pathInfo.length >= 2) {
-          final path = pathInfo[1]! as String;
+    for (final Map<String, NativeAssetPath> targetAssets in manifest.assets.values) {
+      for (final MapEntry<String, NativeAssetPath>(key: assetId, value: path)
+          in targetAssets.entries) {
+        if (path
+            case NativeAssetAbsolutePath(path: final String pathString) ||
+                NativeAssetSystemPath(path: final String pathString)) {
           // A code asset is recorded under the name it is loaded with, which for
           // a framework is its `@rpath`-relative install name. Drop the prefix
           // to get back to where it sits in the bundle.
           const rpathPrefix = '@rpath/';
-          result[assetId] = path.startsWith(rpathPrefix)
-              ? path.substring(rpathPrefix.length)
-              : path;
+          result[assetId] = pathString.startsWith(rpathPrefix)
+              ? pathString.substring(rpathPrefix.length)
+              : pathString;
         }
       }
     }

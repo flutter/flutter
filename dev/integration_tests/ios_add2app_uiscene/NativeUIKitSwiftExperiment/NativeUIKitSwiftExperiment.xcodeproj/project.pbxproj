@@ -43,6 +43,7 @@
 		78D658962E95925200CAC372 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		78D6589F2E95997A00CAC372 /* NativeUIKitSwiftExperimentUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeUIKitSwiftExperimentUITests.swift; sourceTree = "<group>"; };
 		8C914C66E8DD265B4CFF52CB /* Pods_NativeUIKitSwiftExperiment_NativeUIKitSwiftExperimentUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NativeUIKitSwiftExperiment_NativeUIKitSwiftExperimentUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DA789BA41AA28F32FF83DAD /* NativeUIKitSwiftExperiment.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = NativeUIKitSwiftExperiment.entitlements; sourceTree = "<group>"; };
 		9612A8B853DE7FDD653EE7ED /* Pods-NativeUIKitSwiftExperiment.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeUIKitSwiftExperiment.release.xcconfig"; path = "Target Support Files/Pods-NativeUIKitSwiftExperiment/Pods-NativeUIKitSwiftExperiment.release.xcconfig"; sourceTree = "<group>"; };
 		A29DBD83AAC1A3A5C96040BA /* Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.debug.xcconfig"; path = "Target Support Files/Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests/Pods-NativeUIKitSwiftExperiment-NativeUIKitSwiftExperimentUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		A4D480656A4DC96AD5C5EFDD /* Pods_NativeUIKitSwiftExperiment.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_NativeUIKitSwiftExperiment.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -121,6 +122,7 @@
 				78D658942E95925200CAC372 /* Main.storyboard */,
 				78D658952E95925200CAC372 /* SceneDelegate.swift */,
 				78D658962E95925200CAC372 /* ViewController.swift */,
+				8DA789BA41AA28F32FF83DAD /* NativeUIKitSwiftExperiment.entitlements */,
 			);
 			path = NativeUIKitSwiftExperiment;
 			sourceTree = "<group>";
@@ -334,8 +336,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NativeUIKitSwiftExperiment/NativeUIKitSwiftExperiment.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EQHXZ8M8AV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NativeUIKitSwiftExperiment/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -349,7 +353,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.flutter.devicelab.NativeUIKitSwiftExperiment;
+				PRODUCT_BUNDLE_IDENTIFIER = com.google.experimental0.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -363,8 +367,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = NativeUIKitSwiftExperiment/NativeUIKitSwiftExperiment.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EQHXZ8M8AV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NativeUIKitSwiftExperiment/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -378,7 +384,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.flutter.devicelab.NativeUIKitSwiftExperiment;
+				PRODUCT_BUNDLE_IDENTIFIER = com.google.experimental0.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -512,6 +518,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EQHXZ8M8AV;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
@@ -532,6 +539,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EQHXZ8M8AV;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;

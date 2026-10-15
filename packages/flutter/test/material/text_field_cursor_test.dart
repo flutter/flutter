@@ -13,73 +13,65 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets(
-    'Cursor animates on iOS',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Material(child: TextField())));
+  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: Material(child: TextField())));
 
-      final Finder textFinder = find.byType(TextField);
-      await tester.tap(textFinder);
-      await tester.pump();
+    final Finder textFinder = find.byType(TextField);
+    await tester.tap(textFinder);
+    await tester.pump();
 
-      final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
-      final RenderEditable renderEditable = editableTextState.renderEditable;
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
 
-      expect(renderEditable.cursorColor!.opacity, 1.0);
+    expect(renderEditable.cursorColor!.opacity, 1.0);
 
-      var walltimeMicrosecond = 0;
-      var lastVerifiedOpacity = 1.0;
+    var walltimeMicrosecond = 0;
+    var lastVerifiedOpacity = 1.0;
 
-      Future<void> verifyKeyFrame({required double opacity, required int at}) async {
-        const delta = 1;
-        assert(at - delta > walltimeMicrosecond);
-        await tester.pump(Duration(microseconds: at - delta - walltimeMicrosecond));
+    Future<void> verifyKeyFrame({required double opacity, required int at}) async {
+      const delta = 1;
+      assert(at - delta > walltimeMicrosecond);
+      await tester.pump(Duration(microseconds: at - delta - walltimeMicrosecond));
 
-        // Instead of verifying the opacity at each key frame, this function
-        // verifies the opacity immediately *before* each key frame to avoid
-        // fp precision issues.
-        expect(
-          renderEditable.cursorColor!.opacity,
-          closeTo(lastVerifiedOpacity, 0.01),
-          reason: 'opacity at ${at - delta} microseconds',
-        );
+      // Instead of verifying the opacity at each key frame, this function
+      // verifies the opacity immediately *before* each key frame to avoid
+      // fp precision issues.
+      expect(
+        renderEditable.cursorColor!.opacity,
+        closeTo(lastVerifiedOpacity, 0.01),
+        reason: 'opacity at ${at - delta} microseconds',
+      );
 
-        walltimeMicrosecond = at - delta;
-        lastVerifiedOpacity = opacity;
-      }
+      walltimeMicrosecond = at - delta;
+      lastVerifiedOpacity = opacity;
+    }
 
-      await verifyKeyFrame(opacity: 1.0, at: 500000);
-      await verifyKeyFrame(opacity: 0.75, at: 537500);
-      await verifyKeyFrame(opacity: 0.5, at: 575000);
-      await verifyKeyFrame(opacity: 0.25, at: 612500);
-      await verifyKeyFrame(opacity: 0.0, at: 650000);
-      await verifyKeyFrame(opacity: 0.0, at: 850000);
-      await verifyKeyFrame(opacity: 0.25, at: 887500);
-      await verifyKeyFrame(opacity: 0.5, at: 925000);
-      await verifyKeyFrame(opacity: 0.75, at: 962500);
-      await verifyKeyFrame(opacity: 1.0, at: 1000000);
-    },
-    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}),
-  );
+    await verifyKeyFrame(opacity: 1.0, at: 500000);
+    await verifyKeyFrame(opacity: 0.75, at: 537500);
+    await verifyKeyFrame(opacity: 0.5, at: 575000);
+    await verifyKeyFrame(opacity: 0.25, at: 612500);
+    await verifyKeyFrame(opacity: 0.0, at: 650000);
+    await verifyKeyFrame(opacity: 0.0, at: 850000);
+    await verifyKeyFrame(opacity: 0.25, at: 887500);
+    await verifyKeyFrame(opacity: 0.5, at: 925000);
+    await verifyKeyFrame(opacity: 0.75, at: 962500);
+    await verifyKeyFrame(opacity: 1.0, at: 1000000);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS}));
 
-  testWidgets(
-    'Cursor does not animate on non-iOS platforms',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: Material(child: TextField(maxLines: 3))));
+  testWidgets('Cursor does not animate on non-iOS platforms', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: Material(child: TextField(maxLines: 3))));
 
-      await tester.tap(find.byType(TextField));
-      await tester.pump();
-      // Wait for the current animation to finish. If the cursor never stops its
-      // blinking animation the test will timeout.
-      await tester.pumpAndSettle();
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    // Wait for the current animation to finish. If the cursor never stops its
+    // blinking animation the test will timeout.
+    await tester.pumpAndSettle();
 
-      for (var i = 0; i < 40; i += 1) {
-        await tester.pump(const Duration(milliseconds: 100));
-        expect(tester.hasRunningAnimations, false);
-      }
-    },
-    variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}),
-  );
+    for (var i = 0; i < 40; i += 1) {
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.hasRunningAnimations, false);
+    }
+  }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS}));
 
   testWidgets('Cursor does not animate on Android', (WidgetTester tester) async {
     final defaultCursorColor = Color(ThemeData.fallback().colorScheme.primary.value);

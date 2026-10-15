@@ -6,30 +6,20 @@
 // For getPlatformVersion; remove unless needed for your plugin implementation.
 #include <VersionHelpers.h>
 
-#include <flutter/method_channel.h>
 #include <flutter/plugin_registrar_windows.h>
-#include <flutter/standard_method_codec.h>
 
 #include <memory>
 #include <sstream>
+
+#include "messages.g.h"
 
 namespace {{projectName}} {
 
 // static
 void {{pluginClass}}::RegisterWithRegistrar(
     flutter::PluginRegistrarWindows *registrar) {
-  auto channel =
-      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
-          registrar->messenger(), "{{projectName}}",
-          &flutter::StandardMethodCodec::GetInstance());
-
   auto plugin = std::make_unique<{{pluginClass}}>();
-
-  channel->SetMethodCallHandler(
-      [plugin_pointer = plugin.get()](const auto &call, auto result) {
-        plugin_pointer->HandleMethodCall(call, std::move(result));
-      });
-
+  {{pluginClass}}Api::SetUp(registrar->messenger(), plugin.get());
   registrar->AddPlugin(std::move(plugin));
 }
 
@@ -37,23 +27,15 @@ void {{pluginClass}}::RegisterWithRegistrar(
 
 {{pluginClass}}::~{{pluginClass}}() {}
 
-void {{pluginClass}}::HandleMethodCall(
-    const flutter::MethodCall<flutter::EncodableValue> &method_call,
-    std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-  if (method_call.method_name().compare("getPlatformVersion") == 0) {
-    std::ostringstream version_stream;
-    version_stream << "Windows ";
-    if (IsWindows10OrGreater()) {
-      version_stream << "10+";
-    } else if (IsWindows8OrGreater()) {
-      version_stream << "8";
-    } else if (IsWindows7OrGreater()) {
-      version_stream << "7";
-    }
-    result->Success(flutter::EncodableValue(version_stream.str()));
-  } else {
-    result->NotImplemented();
+ErrorOr<std::string> {{pluginClass}}::GetPlatformVersion() {
+  std::ostringstream version_stream;
+  version_stream << "Windows ";
+  if (IsWindows10OrGreater()) {
+    version_stream << "10+";
+  } else if (IsWindows8OrGreater()) {
+    version_stream << "8";
   }
+  return version_stream.str();
 }
 
 }  // namespace {{projectName}}

@@ -43,6 +43,18 @@ class Home extends StatelessWidget {
   }
 
   void _pushPage(BuildContext context, PageWidget page) {
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => Scaffold(body: page)));
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        pageBuilder: (
+          BuildContext context,
+          Animation<double> animation,
+          Animation<double> secondaryAnimation,
+        ) {
+          return Scaffold(body: page);
+        },
+        transitionDuration: Duration.zero,
+        reverseTransitionDuration: Duration.zero,
+      ),
+    );
   }
 }
