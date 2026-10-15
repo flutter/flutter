@@ -33,6 +33,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:test/fake.dart';
 
@@ -947,7 +948,7 @@ void main() {}
           null,
           toolContext,
           TestFeatureFlags(),
-        ).run(<String>['drive', '--no-pub', '-d', 'unsupported_device']),
+        ).run(<String>['drive', '--no-pub']),
         throwsToolExit(),
       );
       expect(capturingDriverService.device, isNull);
@@ -1439,6 +1440,10 @@ class _ProjectFilteringDriveCommand extends DriveCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+
+  @override
+  Future<DebuggingOptions> createDebuggingOptions({WebDevServerConfig? webDevServerConfig}) async =>
+      DebuggingOptions.enabled(BuildInfo.debug);
 
   @override
   Future<List<Device>?> findAllTargetDevices({
