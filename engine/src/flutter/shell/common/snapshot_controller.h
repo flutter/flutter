@@ -51,14 +51,16 @@ class SnapshotController {
       DlISize picture_size,
       SnapshotPixelFormat pixel_format) = 0;
 
+  /// See |SnapshotDelegate::MakeImpellerSnapshot|.
   virtual void MakeImpellerSnapshot(
-      sk_sp<DisplayList> display_list,
+      SnapshotDelegate::SnapshotDisplayListProvider provider,
       DlISize picture_size,
       std::function<void(const std::shared_ptr<impeller::Texture>&)> callback,
       SnapshotPixelFormat pixel_format) = 0;
 
+  /// See |SnapshotDelegate::MakeImpellerSnapshotSync|.
   virtual std::shared_ptr<impeller::Texture> MakeImpellerSnapshotSync(
-      sk_sp<DisplayList> display_list,
+      SnapshotDelegate::SnapshotDisplayListProvider provider,
       DlISize picture_size,
       SnapshotPixelFormat pixel_format) = 0;
 
