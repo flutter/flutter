@@ -100,6 +100,12 @@ class Capabilities {
   ///        bounded to the levels the texture declares.
   virtual bool SupportsManuallyMippedTextures() const = 0;
 
+  /// @brief Whether 2D array textures (`TextureType::kTexture2DArray`) can be
+  ///        allocated and sampled. True everywhere except OpenGL ES 2.0
+  ///        contexts without an array-texture extension, where callers must
+  ///        fall back to a texture atlas.
+  virtual bool SupportsTextureArrays() const = 0;
+
   /// @brief  Returns a supported `PixelFormat` for textures that store
   ///         4-channel colors (red/green/blue/alpha).
   virtual PixelFormat GetDefaultColorFormat() const = 0;

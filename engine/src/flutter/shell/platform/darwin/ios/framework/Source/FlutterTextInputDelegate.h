@@ -7,6 +7,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+
 @class FlutterTextInputPlugin;
 @class FlutterTextInputView;
 
@@ -65,6 +67,9 @@ typedef NS_ENUM(NSInteger, FlutterFloatingCursorDragState) {
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView removeTextPlaceholder:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     didResignFirstResponderWithTextInputClient:(int)client;
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+    didRestoreFirstResponderWithTextInputClient:(int)client
+                                         result:(FlutterResult)callback;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     willDismissEditMenuWithTextInputClient:(int)client;
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
