@@ -338,3 +338,8 @@ filegroup(
     name = "dart_ui",
     srcs = glob(["*.dart"]),
 )
+
+filegroup(
+    name = "fixture_sources",
+    srcs = glob(["fixtures/*"]),
+)

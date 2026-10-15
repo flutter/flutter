@@ -79,8 +79,11 @@ config_setting(
     flag_values = {":slimpeller": "True"},
 )
 
-# config("export_dynamic_symbols") in //flutter/BUILD.gn reads these.
+# config("export_dynamic_symbols") and config("export_dynamic_test_symbols")
+# in //flutter/BUILD.gn read these.
 exports_files([
     "exported_symbols.sym",
     "exported_symbols_mac.sym",
+    "exported_test_symbols.sym",
+    "exported_test_symbols_mac.sym",
 ])
