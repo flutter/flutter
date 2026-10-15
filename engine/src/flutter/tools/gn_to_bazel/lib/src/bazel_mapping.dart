@@ -79,18 +79,21 @@ const Map<String, int> testShardCounts = <String, int>{
   'impeller_unittests': 16,
 };
 
-/// How a suite is run: the arguments testing/run_tests.py passes it and the
+/// How a suite is run: the arguments testing/run_tests.py passes it, the
 /// files those arguments name, which become the `cc_test`'s `args` and
-/// `data`. GN's executable has no words for how it is run; the runner has.
-/// Paths in [args] are relative to the runfiles root, where Bazel starts a
-/// test (`engine/src/flutter/...`).
+/// `data`, and the environment it sets (`env`). GN's executable has no words
+/// for how it is run; the runner has. Paths in [args] are relative to the
+/// runfiles root, where Bazel starts a test (`engine/src/flutter/...`).
 final class TestRun {
-  const TestRun({required this.args, required this.data});
+  const TestRun({required this.args, required this.data, this.env = const <String, String>{}});
 
   final List<String> args;
 
   /// Bazel labels of the files and filegroups the arguments name.
   final List<String> data;
+
+  /// run_tests.py's `extra_env` for the suite.
+  final Map<String, String> env;
 }
 
 /// Suites run with arguments, by GN label (`//dir:name`).
@@ -132,6 +135,14 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
   // Vulkan validation layer comes from the environment
   // (vulkan_validation_env), which flutter_display_test sets. The ColorWheel
   // playground run (--enable_playground, flutter/flutter#134852) is macOS's.
+  //
+  // run_tests.py (Linux): the GTK shell's suite runs with GLib's criticals
+  // fatal, so that a g_critical in the shell fails the test.
+  '//flutter/shell/platform/linux:flutter_linux_unittests': TestRun(
+    args: <String>[],
+    data: <String>[],
+    env: <String, String>{'G_DEBUG': 'fatal-criticals'},
+  ),
 };
 
 /// The suites that open a window -- the Impeller playground's, GLFW on
@@ -139,10 +150,25 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
 /// these become flutter_display_test (testing.bzl), which runs the binary
 /// under the environment's DISPLAY or an Xvfb of its own. As with
 /// gpuBackendTests, the converter cannot follow the dependency to the
-/// playground from one file, so the list is kept here.
+/// playground from one file, so the list is kept here. A suite here that is
+/// not in [gpuBackendTests] runs without run_tests.py's Vulkan validation
+/// environment, which names the backends next to the binary.
 const Set<String> displayTests = <String>{
   '//flutter/impeller:impeller_dart_unittests',
   '//flutter/impeller:impeller_unittests',
+  // GTK opens the display at initialization (gtk_init), before any test.
+  '//flutter/shell/platform/linux:flutter_linux_unittests',
+};
+
+/// The display tests whose binaries also need a D-Bus session bus
+/// (flutter_display_test's `session_bus`): GTK's accessibility bridge asks
+/// it for the accessibility bus, and without one a view's AtkPlug has no
+/// id -- an Atk assertion the Linux shell's suite fails in its first test,
+/// fatal under its G_DEBUG. run_tests.py's run inherits the bus of the
+/// session it runs in (a bot's systemd user session); the sandbox has none,
+/// so testing/xvfb_run.sh starts one for these, as it starts the display.
+const Set<String> sessionBusTests = <String>{
+  '//flutter/shell/platform/linux:flutter_linux_unittests',
 };
 
 /// The suites that render through the GPU test backends -- ANGLE on
@@ -405,6 +431,12 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/impeller/toolkit/interop/backend:backend': _vulkanCopts,
   '//flutter/impeller/toolkit/interop/backend/gles:gles': _vulkanCopts,
   '//flutter/impeller/toolkit/interop/backend/vulkan:vulkan': _vulkanCopts,
+  // The GTK shell's sources publish disable_warnings (-Wno-deprecated-volatile
+  // for GTK's headers under C++20) to whoever includes them: flutter_linux
+  // hands it on through public_deps, and the suite and the shared library
+  // get it as dependents.
+  '//flutter/shell/platform/linux:flutter_linux_sources': <String>['-Wno-deprecated-volatile'],
+  '//flutter/shell/platform/linux:flutter_linux': <String>['-Wno-deprecated-volatile'],
 };
 
 /// inja_public_config's flags.
@@ -724,9 +756,25 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   ),
   // The Linux embeddings' pkg_config() configs (hand-written package: see
   // its BUILD.bazel): what pkg-config says of each package against the
-  // sysroot, as libraries that link it.
+  // sysroot, as libraries that link it (and, for gtk, carry its include
+  // directories through the sysroot repository).
   '//flutter/shell/platform/linux/config:x11': ConfigDependency(
     '//engine/src/flutter/shell/platform/linux/config:x11',
+  ),
+  '//flutter/shell/platform/linux/config:gtk': ConfigDependency(
+    '//engine/src/flutter/shell/platform/linux/config:gtk',
+  ),
+  '//flutter/shell/platform/linux/config:egl': ConfigDependency(
+    '//engine/src/flutter/shell/platform/linux/config:egl',
+  ),
+  '//flutter/shell/platform/linux/config:epoxy': ConfigDependency(
+    '//engine/src/flutter/shell/platform/linux/config:epoxy',
+  ),
+  '//flutter/shell/platform/linux/config:wayland_client': ConfigDependency(
+    '//engine/src/flutter/shell/platform/linux/config:wayland_client',
+  ),
+  '//flutter/shell/platform/linux/config:wayland_egl': ConfigDependency(
+    '//engine/src/flutter/shell/platform/linux/config:wayland_egl',
   ),
   '//flutter/third_party/icu:icu_config': ConfigImplied(),
   // Skia's text modules list //flutter/skia's private config from their own
@@ -1208,6 +1256,9 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // into the build directory's cpp_client_wrapper[_<platform>] (the
     // artifact clients compile), which the platform wrappers invoke.
     '//flutter/shell/platform/common/client_wrapper/publish.gni',
+    // Declares build_glfw_shell (a Linux host builds the GLFW shell beside
+    // the GTK one), which the Linux shell's file reads.
+    '//flutter/shell/platform/glfw/config.gni',
     '//flutter/third_party/glfw/glfw_args.gni',
     // The engine's answers to the Khronos trees' build_overrides (where
     // SPIRV-Headers and SPIRV-Tools are, build_with_chromium = false) and

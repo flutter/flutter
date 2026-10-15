@@ -210,8 +210,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `default_include_dirs` (`-I//`). A private config of the same file is
    inlined instead (its defines as `local_defines`, its flags as `copts`),
    since a dependency's `defines` would leak to dependents where GN's
-   private configs never do; a header-only target drops them, as GN applies
-   them to no compile. The configs a target inherits through its
+   private configs never do; a header-only target drops their defines and
+   flags, as GN applies them to no compile, and keeps their link flags
+   (`libs`, `ldflags`: inlined, or carried by the config's library as an
+   `implementation_deps` entry), which GN hands to every link that reaches
+   the target whether or not it compiles. The configs a target inherits through its
    dependencies' `all_dependent_configs` become public `deps` of the
    target, so that Skia's `SK_VULKAN` and friends reach the engine as they
    do under GN. A public config's compiler flags cannot ride a dependency:
@@ -252,7 +255,9 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    directory, `$(gen path)` for anything generated; outputs must be under
    `$target_gen_dir`. A dependency on an action of the same file becomes a
    source of the dependent, since the outputs are inputs of its compile in
-   Bazel where GN only ordered the two. A generated directory in
+   Bazel where GN only ordered the two; one on a `copy()` of the same file
+   becomes `data`, since the dependent reads the copy's product at run time
+   (the GTK shell's suite and its compiled GSettings schemas). A generated directory in
    `include_dirs` is the package's, as Bazel's `includes` spans the output
    tree; an ancestor package's (`$root_gen_dir/flutter`) is a dependency on
    the target whose `includes` already name that directory
@@ -266,7 +271,12 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    (`//flutter/shell/platform/linux/config`'s `pkg_config()` answers) is
    hand-written and named in `configEffects` like any other. `copy()` becomes a `gn_copy`, whose content is its
    sources; GN's destination under the build directory is recorded, not
-   reproduced. A known template's invocation becomes the macro call its
+   reproduced -- unless the outputs are under the copy's own
+   `target_gen_dir` and name the files, literally (a renaming copy) or
+   through `{{source_file_part}}`/`{{source_name_part}}` with more than the
+   bare name around them (`assets/{{source_name_part}}/gschemas.compiled`),
+   when the copies are produced under those names (`outs`), expanded per
+   source as GN expands them. A known template's invocation becomes the macro call its
    `TemplateMapping` describes, argument by argument: files of the package,
    labels, configs (which become the labels of their config libraries) or a
    scalar; the template's body is the macro's (`flatbuffers()` in
@@ -279,8 +289,11 @@ translations for synced dependencies (`//flutter/third_party/icu` is `@icu`,
 `config_setting` stands for which GN predicate, the import policy, the
 test sizes, how `testing/run_tests.py` runs a suite (`testRuns`: the
 arguments it passes `flow_unittests` -- the goldens directory and the font --
-become the `cc_test`'s `args` and `data`, since GN's executable has no words
-for how it is run), and which executables need the GPU test backends next
+become the `cc_test`'s `args` and `data`, and the environment it sets the
+GTK shell's suite -- `G_DEBUG=fatal-criticals` -- its `env`, since GN's
+executable has no words for how it is run; `displayTests` and
+`sessionBusTests` name the suites that need a display and a D-Bus session
+bus, which the run inherited from the bot), and which executables need the GPU test backends next
 to them (`gpuBackendTests`: suites, and `flutter_tester_opengles`, an
 ordinary executable that the Dart suites run and that carries them as
 runfiles). An executable whose `output_name` is its own name converts (the
