@@ -1047,6 +1047,7 @@ final class TemplateMapping {
     this.symbol,
     this.arguments, {
     this.innerTargets = const <String>[],
+    this.files = false,
   });
 
   final String bzl;
@@ -1059,6 +1060,14 @@ final class TemplateMapping {
   /// besides those GN's convention prefixes with `_`. The macro's business;
   /// the oracle expects them.
   final List<String> innerTargets;
+
+  /// Whether the macro's target is files (an action's outputs) rather than
+  /// a library: a compiled target's dependency on one, which in GN orders
+  /// the action before a binary that reads the files at run time (the test
+  /// fixtures' AOT snapshot of the VM service, a `public_deps` entry of
+  /// //flutter/testing:fixture_test in the profile mode), is `data` here,
+  /// as a dependency on a `copy()` is.
+  final bool files;
 
   /// [innerTargets] expanded for [name].
   Iterable<String> innerTargetsOf(String name) sync* {
@@ -1148,6 +1157,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
       'fixtures': TemplateArgument('fixtures', TemplateArgumentKind.ignored),
       'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
     },
+    files: true,
   ),
   // testing.gni's dart_snapshot_kernel and dart_snapshot_aot: a Dart entry
   // point to kernel with the test modes' arguments, and a kernel to an AOT
@@ -1159,6 +1169,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
       'dart_main': TemplateArgument('dart_main', TemplateArgumentKind.file),
       'dart_kernel': TemplateArgument('dart_kernel', TemplateArgumentKind.file),
     },
+    files: true,
   ),
   'dart_snapshot_aot': TemplateMapping(
     '//engine/src/flutter/testing:testing.bzl',
@@ -1168,6 +1179,7 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
       'dart_elf_filename': TemplateArgument('dart_elf_filename', TemplateArgumentKind.scalar),
       'deps': TemplateArgument('deps', TemplateArgumentKind.labels),
     },
+    files: true,
   ),
   // build/secondary/flutter/third_party/flatbuffers/flatbuffers.gni: flatc
   // over the schemas, the generated headers as a library.

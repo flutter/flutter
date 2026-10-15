@@ -255,9 +255,13 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    directory, `$(gen path)` for anything generated; outputs must be under
    `$target_gen_dir`. A dependency on an action of the same file becomes a
    source of the dependent, since the outputs are inputs of its compile in
-   Bazel where GN only ordered the two; one on a `copy()` of the same file
-   becomes `data`, since the dependent reads the copy's product at run time
-   (the GTK shell's suite and its compiled GSettings schemas). A generated directory in
+   Bazel where GN only ordered the two; one on a `copy()` of the same file,
+   or on a target of a template whose macro produces files rather than a
+   library (`TemplateMapping.files`: `dart_snapshot_aot`,
+   `dart_snapshot_kernel`, `impellerc`), becomes `data`, since the dependent
+   reads the product at run time (the GTK shell's suite and its compiled
+   GSettings schemas; `//flutter/testing:fixture_test` and the VM service's
+   AOT snapshot in the profile mode). A generated directory in
    `include_dirs` is the package's, as Bazel's `includes` spans the output
    tree; an ancestor package's (`$root_gen_dir/flutter`) is a dependency on
    the target whose `includes` already name that directory
