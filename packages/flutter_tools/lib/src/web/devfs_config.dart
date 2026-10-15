@@ -256,13 +256,12 @@ HttpsConfig:
   }
 }
 
-/// Validates the provided port is within the valid TCP range (0 to 65535).
-int resolvePort(int port) {
+/// Throws a [ToolExit] if [port] is outside the valid TCP range (0 to 65535).
+void validatePort(int port) {
   if (port < 0 || port > 65535) {
     throwToolExit('''
 Invalid port: $port
 Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 ''');
   }
-  return port;
 }

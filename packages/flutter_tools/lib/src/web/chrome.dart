@@ -419,7 +419,11 @@ class ChromiumLauncher {
         if (line.contains(_kDevToolsServerFailure)) {
           if (!devToolsListening.isCompleted) {
             devToolsListening.completeError(
-              Exception('Chrome failed to start the DevTools server on port $requestedPort.'),
+              Exception(
+                requestedPort == 0
+                    ? 'Chrome failed to start the DevTools server.'
+                    : 'Chrome failed to start the DevTools server on port $requestedPort.',
+              ),
             );
           }
         }
