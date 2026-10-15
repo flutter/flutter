@@ -362,7 +362,7 @@ class IOSSimulator extends Device {
     required this.simulatorCategory,
     required this._simControl,
     required this._cpuArch,
-    required Logger super.logger,
+    required super.logger,
   }) : super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
