@@ -21,8 +21,9 @@ import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart';
+import '../../src/fakes.dart' hide FakeProcess;
 
 const kDyLdLibEntry = <String, String>{'DYLD_LIBRARY_PATH': '/path/to/libraries'};
 
@@ -386,9 +387,12 @@ IOSDevice setUpIOSDevice({
       cache: cache,
     ),
     analytics: FakeAnalytics(),
+    cocoaPods: FakeCocoaPods(),
     coreDeviceControl: FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: FakeIOSCoreDeviceLauncher(),
+    plistParser: FakePlistParser(),
     xcodeDebug: FakeXcodeDebug(),
+    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     iProxy: IProxy.test(logger: logger, processManager: processManager),
     connectionInterface: interfaceType ?? DeviceConnectionInterface.attached,
     isConnected: true,

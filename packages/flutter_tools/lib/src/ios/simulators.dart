@@ -21,13 +21,13 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
-import '../context_runner.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../devfs.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
+import '../macos/cocoapods.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -37,6 +37,7 @@ import 'devices.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
 import 'plist_parser.dart';
+import 'xcodeproj.dart';
 
 const iosSimulatorId = 'apple_ios_simulator';
 
@@ -70,18 +71,21 @@ class IOSSimulators extends PollingDeviceDiscovery {
 class IOSSimulatorUtils {
   IOSSimulatorUtils({
     required this._analytics,
+    required this._cocoaPods,
     required this._plistParser,
     required this._toolContext,
     required this._xcode,
-  }) : _simControl = SimControl(
-         logger: _toolContext.logger,
-         processManager: _toolContext.processManager,
-         xcode: _xcode,
-       );
+    required this._xcodeProjectInterpreter,
+  }) {
+    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
+    _simControl = SimControl(logger: logger, processManager: processManager, xcode: _xcode);
+  }
 
-  final SimControl _simControl;
+  late final SimControl _simControl;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
   final PlistParser _plistParser;
   final ToolContext _toolContext;
 
@@ -96,8 +100,7 @@ class IOSSimulatorUtils {
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
         .map<IOSSimulator?>((BootedSimDevice device) {
-          final String? udid = device.udid;
-          final String? name = device.name;
+          final BootedSimDevice(:String? udid, :String? name) = device;
           if (udid == null) {
             logger.printTrace('Could not parse simulator udid');
             return null;
@@ -109,6 +112,7 @@ class IOSSimulatorUtils {
           return IOSSimulator(
             udid,
             analytics: _analytics,
+            cocoaPods: _cocoaPods,
             cpuArch: cpuArch,
             name: name,
             plistParser: _plistParser,
@@ -116,6 +120,7 @@ class IOSSimulatorUtils {
             simulatorCategory: device.category,
             toolContext: _toolContext,
             xcode: _xcode,
+            xcodeProjectInterpreter: _xcodeProjectInterpreter,
           );
         })
         .whereType<IOSSimulator>()
@@ -378,6 +383,7 @@ class IOSSimulator extends Device {
   IOSSimulator(
     super.id, {
     required this._analytics,
+    required this._cocoaPods,
     required this._cpuArch,
     required this.name,
     required this._plistParser,
@@ -385,6 +391,7 @@ class IOSSimulator extends Device {
     required this.simulatorCategory,
     required ToolContext super.toolContext,
     required this._xcode,
+    required this._xcodeProjectInterpreter,
   }) : super(category: Category.mobile, ephemeral: true, platformType: PlatformType.ios);
 
   @override
@@ -396,8 +403,10 @@ class IOSSimulator extends Device {
 
   final CpuArch _cpuArch;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
   final PlistParser _plistParser;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
@@ -534,7 +543,7 @@ class IOSSimulator extends Device {
       // Dart VM Service URL it logs on startup can be missed.
       const warningDelay = Duration(seconds: 30);
       final timer = Timer(warningDelay, () {
-        globals.printError(
+        logger.printError(
           'The iOS simulator log stream did not start after ${warningDelay.inSeconds} seconds. '
           'This is taking much longer than expected...',
         );
@@ -597,23 +606,23 @@ class IOSSimulator extends Device {
     BuildInfo buildInfo,
     String? mainPath,
   ) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = toolContext;
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
-      analytics: globals.analytics,
+      analytics: _analytics,
       app: app,
       buildInfo: buildInfo,
-      plistParser: globals.plistParser,
-      toolContext: const GlobalToolContext(),
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+      plistParser: _plistParser,
+      toolContext: toolContext,
+      xcodeProjectInterpreter: _xcodeProjectInterpreter,
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
-      cocoaPods: globals.cocoaPods,
-      xcode: globals.xcode,
+      cocoaPods: _cocoaPods,
+      xcode: _xcode,
     );
     if (!buildResult.success) {
       await diagnoseXcodeBuildFailure(
@@ -622,9 +631,9 @@ class IOSSimulator extends Device {
         fileSystem: fs,
         logger: logger,
         platform: FlutterDarwinPlatform.ios,
-        processUtils: globals.processUtils,
+        processUtils: processUtils,
         project: app.project.parent,
-        xcode: globals.xcode,
+        xcode: _xcode,
         device: this,
       );
       throwToolExit('Could not build the application for the simulator.');

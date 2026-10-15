@@ -477,10 +477,15 @@ class ToolDependencies {
       userMessages: finalUserMessages,
     );
 
+    final PlistParser finalPlistParser =
+        plistParser ??
+        PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
+
     final XCDevice finalXCDevice =
         xcdevice ??
         XCDevice(
           xcode: finalXcode,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
           iproxy: IProxy(
             artifacts: finalArtifacts,
             logger: finalLogger,
@@ -488,6 +493,8 @@ class ToolDependencies {
             dyLdLibEntry: finalCache.dyLdLibEntry,
           ),
           analytics: finalAnalytics,
+          cocoaPods: finalCocoaPods,
+          plistParser: finalPlistParser,
           templateRenderer: templateRenderer,
           toolContext: finalToolContext,
         );
@@ -515,17 +522,15 @@ class ToolDependencies {
         iosWorkflow ??
         IOSWorkflow(featureFlags: finalFeatureFlags, xcode: finalXcode, platform: finalPlatform);
 
-    final PlistParser finalPlistParser =
-        plistParser ??
-        PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
-
     final IOSSimulatorUtils finalIOSSimulatorUtils =
         iosSimulatorUtils ??
         IOSSimulatorUtils(
           analytics: finalAnalytics,
+          cocoaPods: finalCocoaPods,
           plistParser: finalPlistParser,
           toolContext: finalToolContext,
           xcode: finalXcode,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
         );
 
     // 12. AndroidContext Dependencies

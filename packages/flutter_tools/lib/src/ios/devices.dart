@@ -26,13 +26,13 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../context/tool_context.dart';
-import '../context_runner.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../device_port_forwarder.dart';
 import '../device_vm_service_discovery_for_attach.dart';
 import '../features.dart';
+import '../macos/cocoapods.dart';
 import '../macos/xcdevice.dart';
 import '../macos/xcode.dart';
 import '../mdns_discovery.dart';
@@ -47,6 +47,7 @@ import 'ios_workflow.dart';
 import 'iproxy.dart';
 import 'lldb.dart';
 import 'mac.dart';
+import 'plist_parser.dart';
 import 'xcode_build_settings.dart';
 import 'xcode_debug.dart';
 import 'xcodeproj.dart';
@@ -326,7 +327,10 @@ class IOSDevice extends Device {
     required this._xcodeDebug,
     required IProxy iProxy,
     required this._analytics,
+    required this._cocoaPods,
+    required this._plistParser,
     required this._xcode,
+    required this._xcodeProjectInterpreter,
     required this._templateRenderer,
     required ToolContext super.toolContext,
   }) : _iproxy = iProxy,
@@ -342,11 +346,14 @@ class IOSDevice extends Device {
   final String? _operatingSystemVersion;
   final IOSDeploy _iosDeploy;
   final Analytics _analytics;
+  final CocoaPods _cocoaPods;
   final IMobileDevice _iMobileDevice;
   final IOSCoreDeviceControl _coreDeviceControl;
   final IOSCoreDeviceLauncher _coreDeviceLauncher;
+  final PlistParser _plistParser;
   final XcodeDebug _xcodeDebug;
   final Xcode _xcode;
+  final XcodeProjectInterpreter _xcodeProjectInterpreter;
   final IProxy _iproxy;
   final TemplateRenderer _templateRenderer;
 
@@ -523,6 +530,7 @@ class IOSDevice extends Device {
     final ToolContext(
       :FileSystem fs,
       :Logger logger,
+      :ProcessUtils processUtils,
       shutdownHooks: ShutdownHooks defaultShutdownHooks,
     ) = toolContext;
     String? packageId;
@@ -544,15 +552,15 @@ class IOSDevice extends Device {
         analytics: _analytics,
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
-        plistParser: globals.plistParser,
-        toolContext: const GlobalToolContext(),
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
+        plistParser: _plistParser,
+        toolContext: toolContext,
+        xcodeProjectInterpreter: _xcodeProjectInterpreter,
         targetOverride: mainPath,
         activeArch: _cpuArch,
         deviceID: id,
         disablePortPublication:
             debuggingOptions.usingCISystem && debuggingOptions.disablePortPublication,
-        cocoaPods: globals.cocoaPods,
+        cocoaPods: _cocoaPods,
         xcode: _xcode,
       );
       if (!buildResult.success) {
@@ -563,7 +571,7 @@ class IOSDevice extends Device {
           fileSystem: fs,
           logger: logger,
           platform: FlutterDarwinPlatform.ios,
-          processUtils: _processUtils,
+          processUtils: processUtils,
           project: package.project.parent,
           xcode: _xcode,
           device: this,

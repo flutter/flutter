@@ -1183,10 +1183,12 @@ duplicate symbol '_$s29plugin_1_name23PluginNamePluginC9setDouble3key5valueySS_S
 
         await removeExtendedAttributesForProject(
           xcodeProject: xcodeProject,
-          processUtils: ProcessUtils(processManager: processManager, logger: logger),
-          logger: logger,
-          fileSystem: fs,
-          config: config,
+          toolContext: FakeToolContext(
+            config: config,
+            fs: fs,
+            logger: logger,
+            processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          ),
           xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         );
 

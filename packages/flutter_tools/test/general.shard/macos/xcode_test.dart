@@ -689,10 +689,13 @@ void main() {
             shutdownHooks: FakeShutdownHooks(),
           ),
           xcode: xcode,
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
           coreDeviceControl: FakeIOSCoreDeviceControl(),
           xcodeDebug: FakeXcodeDebug(),
           analytics: const NoOpAnalytics(),
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
           templateRenderer: FakeTemplateRenderer(),
         );
       });
@@ -725,10 +728,13 @@ void main() {
           shutdownHooks: shutdownHooks,
         ),
         xcode: Xcode.test(processManager: FakeProcessManager.any()),
+        xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
         iproxy: IProxy.test(logger: logger, processManager: FakeProcessManager.any()),
         coreDeviceControl: FakeIOSCoreDeviceControl(),
         xcodeDebug: FakeXcodeDebug(),
         analytics: const NoOpAnalytics(),
+        cocoaPods: FakeCocoaPods(),
+        plistParser: FakePlistParser(),
         templateRenderer: FakeTemplateRenderer(),
       );
 
@@ -772,10 +778,13 @@ void main() {
             shutdownHooks: FakeShutdownHooks(),
           ),
           xcode: xcode,
+          xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
           iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
           coreDeviceControl: coreDeviceControl,
           xcodeDebug: FakeXcodeDebug(),
           analytics: fakeAnalytics,
+          cocoaPods: FakeCocoaPods(),
+          plistParser: FakePlistParser(),
           templateRenderer: FakeTemplateRenderer(),
         );
       });
@@ -1608,10 +1617,13 @@ void main() {
                 shutdownHooks: FakeShutdownHooks(),
               ),
               xcode: xcode,
+              xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
               iproxy: IProxy.test(logger: logger, processManager: fakeProcessManager),
               coreDeviceControl: coreDeviceControl,
               xcodeDebug: FakeXcodeDebug(),
               analytics: fakeAnalytics,
+              cocoaPods: FakeCocoaPods(),
+              plistParser: FakePlistParser(),
               templateRenderer: FakeTemplateRenderer(),
             );
             const devicesOutput = '''

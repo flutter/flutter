@@ -80,7 +80,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
 
   @override
   Directory _outputAppDirectory(String xcodeResultOutput) =>
-      _toolContext.fs.directory(xcodeResultOutput).parent;
+      toolContext.fs.directory(xcodeResultOutput).parent;
 }
 
 /// The key that uniquely identifies an image file in an image asset.
@@ -171,14 +171,14 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   String? get exportOptionsPlist => getValue(_exportOptionsPlist);
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => _toolContext.fs
+  Directory _outputAppDirectory(String xcodeResultOutput) => toolContext.fs
       .directory(xcodeResultOutput)
       .childDirectory('Products')
       .childDirectory('Applications');
 
   @override
   Future<void> validateCommand() async {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     final String? exportOptions = exportOptionsPlist;
     if (exportOptions != null) {
       if (wasParsed(_exportMethod)) {
@@ -205,7 +205,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     String contentsJsonDirName, {
     required bool requiresSize,
   }) {
-    final Directory contentsJsonDirectory = _toolContext.fs.directory(contentsJsonDirName);
+    final Directory contentsJsonDirectory = toolContext.fs.directory(contentsJsonDirName);
     if (!contentsJsonDirectory.existsSync()) {
       return <_ImageAssetFileKey, String>{};
     }
@@ -270,7 +270,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required String templateImageDirName,
     required String projectImageDirName,
   }) {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     return projectImageInfoMap.entries.any((MapEntry<_ImageAssetFileKey, String> entry) {
       final String projectFileName = entry.value;
       final String? templateFileName = templateImageInfoMap[entry.key];
@@ -292,7 +292,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     required Map<_ImageAssetFileKey, String> imageInfoMap,
     required String imageDirName,
   }) {
-    final FileSystem fs = _toolContext.fs;
+    final FileSystem fs = toolContext.fs;
     return imageInfoMap.entries
         .where((MapEntry<_ImageAssetFileKey, String> entry) {
           final String fileName = entry.value;
@@ -419,7 +419,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     final BuildableIOSApp app = await buildableIOSApp;
 
     final String plistPath = app.builtInfoPlistPathAfterArchive;
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final AppleContext(:PlistParser plistParser) = _appleContext;
 
     if (!fs.file(plistPath).existsSync()) {
@@ -493,7 +493,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       :OperatingSystemUtils os,
       :ProcessUtils processUtils,
       :Terminal terminal,
-    ) = _toolContext;
+    ) = toolContext;
     final AppleContext(:PlistParser plistParser, :Xcode xcode) = _appleContext;
 
     final BuildInfo buildInfo = await cachedBuildInfo;
@@ -562,7 +562,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         // Create XcodeCodeSigningSettings for dependency injection into createExportPlist
         final codeSigningSettings = XcodeCodeSigningSettings.fromContexts(
           appleContext: _appleContext,
-          toolContext: _toolContext,
+          toolContext: toolContext,
         );
         generatedExportPlist = await createExportPlist(
           exportMethod: exportMethod,
@@ -706,7 +706,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
           profileSpecifier,
           codeSigningSettings: codeSigningSettings,
           fileSystem: fileSystem,
-          fileSystemUtils: fileSystemUtils ?? _toolContext.fileSystemUtils,
+          fileSystemUtils: fileSystemUtils ?? toolContext.fileSystemUtils,
         );
 
         if (profileUuid != null) {
@@ -854,7 +854,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
         codeSigningSettings ??
         XcodeCodeSigningSettings.fromContexts(
           appleContext: _appleContext,
-          toolContext: _toolContext,
+          toolContext: toolContext,
         );
 
     // Search for profiles matching the specifier (could be name or UUID)
@@ -908,8 +908,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     required this._buildSystem,
     required ToolContext super.toolContext,
     required super.verboseHelp,
-  }) : _toolContext = toolContext,
-       super(logger: toolContext.logger) {
+  }) : super(logger: toolContext.logger) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -927,7 +926,6 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   final AppleContext _appleContext;
   final BuildSystem _buildSystem;
-  final ToolContext _toolContext;
 
   @visibleForTesting
   AppleContext get appleContext => _appleContext;
@@ -937,7 +935,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
 
   @visibleForTesting
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -972,7 +970,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
   Directory _outputAppDirectory(String xcodeResultOutput);
 
   @override
-  bool get supported => _toolContext.platform.isMacOS;
+  bool get supported => toolContext.platform.isMacOS;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -985,7 +983,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       :Platform platform,
       :ProcessUtils processUtils,
       :Terminal terminal,
-    ) = _toolContext;
+    ) = toolContext;
     final AppleContext(
       :CocoaPods cocoaPods,
       :PlistParser plistParser,
@@ -1030,7 +1028,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       app: app,
       buildInfo: buildInfo,
       plistParser: plistParser,
-      toolContext: _toolContext,
+      toolContext: toolContext,
       xcodeProjectInterpreter: xcodeProjectInterpreter,
       targetOverride: targetFile,
       environmentType: environmentType,

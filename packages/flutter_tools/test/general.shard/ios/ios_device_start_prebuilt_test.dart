@@ -2078,6 +2078,7 @@ IOSDevice setUpIOSDevice({
           cache: cache,
         ),
     analytics: analytics ?? FakeAnalytics(),
+    cocoaPods: FakeCocoaPods(),
     iMobileDevice: IMobileDevice(
       logger: logger,
       processManager: processManager ?? FakeProcessManager.any(),
@@ -2086,7 +2087,9 @@ IOSDevice setUpIOSDevice({
     ),
     coreDeviceControl: coreDeviceControl ?? FakeIOSCoreDeviceControl(),
     coreDeviceLauncher: coreDeviceLauncher ?? FakeIOSCoreDeviceLauncher(),
+    plistParser: FakePlistParser(),
     xcodeDebug: xcodeDebug ?? FakeXcodeDebug(),
+    xcodeProjectInterpreter: FakeXcodeProjectInterpreter(),
     cpuArch: .arm64,
     connectionInterface: interfaceType,
     isConnected: true,

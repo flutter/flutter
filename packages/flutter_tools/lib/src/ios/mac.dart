@@ -120,10 +120,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   required Analytics analytics,
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
-  required CocoaPods? cocoaPods,
+  required CocoaPods cocoaPods,
   required PlistParser plistParser,
   required ToolContext toolContext,
-  required Xcode? xcode,
+  required Xcode xcode,
   required XcodeProjectInterpreter xcodeProjectInterpreter,
   String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
@@ -206,12 +206,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   await migration.run();
 
   if (!_checkXcodeVersion(
-        logger: logger,
-        platform: platform,
-        xcode: xcode,
-        xcodeProjectInterpreter: xcodeProjectInterpreter,
-      ) ||
-      xcode == null) {
+    logger: logger,
+    platform: platform,
+    xcode: xcode,
+    xcodeProjectInterpreter: xcodeProjectInterpreter,
+  )) {
     return XcodeBuildResult(success: false);
   }
 
@@ -227,11 +226,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
 
   await removeExtendedAttributesForProject(
-    config: config,
-    fileSystem: fs,
-    logger: logger,
-    processUtils: processUtils,
     xcodeProject: app.project,
+    toolContext: toolContext,
     xcodeProjectInterpreter: xcodeProjectInterpreter,
   );
 
@@ -351,12 +347,12 @@ Future<XcodeBuildResult> buildXcodeProject({
   // Check the public headers before checking Xcode version so headers fingerprinter is created
   // regardless of Xcode version.
   final bool headersChanged = publicHeadersChanged(
-    artifacts: artifacts,
-    buildDirectory: buildDirectoryPath,
     environmentType: environmentType,
+    mode: buildInfo.mode,
+    buildDirectory: buildDirectoryPath,
+    artifacts: artifacts,
     fileSystem: fs,
     logger: logger,
-    mode: buildInfo.mode,
   );
   final Version? xcodeVersion = xcode.currentVersion;
   if (headersChanged &&
@@ -749,12 +745,12 @@ Future<void> ensureTargetBuildDirAttribute(
 
 /// Check if the Flutter framework's public headers have changed since last built.
 bool publicHeadersChanged({
-  required Artifacts? artifacts,
-  required String buildDirectory,
+  required BuildMode mode,
   required EnvironmentType environmentType,
+  required String buildDirectory,
+  required Artifacts? artifacts,
   required FileSystem fileSystem,
   required Logger logger,
-  required BuildMode mode,
 }) {
   final String? basePath = artifacts?.getArtifactPath(
     Artifact.flutterFramework,
@@ -803,13 +799,16 @@ bool publicHeadersChanged({
 /// user reporting images in the root of their project also need to have the attributes removed.
 /// See https://github.com/flutter/flutter/pull/81435.
 Future<void> removeExtendedAttributesForProject({
-  required Config config,
-  required FileSystem fileSystem,
-  required Logger logger,
-  required ProcessUtils processUtils,
   required XcodeBasedProject xcodeProject,
+  required ToolContext toolContext,
   required XcodeProjectInterpreter xcodeProjectInterpreter,
 }) async {
+  final ToolContext(
+    :Config config,
+    fs: FileSystem fileSystem,
+    :Logger logger,
+    :ProcessUtils processUtils,
+  ) = toolContext;
   final Directory projectDirectory = xcodeProject.parent.directory;
   final futures = <Future<void>>[];
 
@@ -932,8 +931,8 @@ bool _isXcodeConcurrentBuildFailure(RunResult result) {
 Future<void> diagnoseXcodeBuildFailure(
   XcodeBuildResult result, {
   required Analytics analytics,
-  required FileSystem fileSystem,
   required Logger logger,
+  required FileSystem fileSystem,
   required FlutterDarwinPlatform platform,
   required ProcessUtils processUtils,
   required FlutterProject project,
@@ -963,12 +962,12 @@ Future<void> diagnoseXcodeBuildFailure(
   final bool issueDetected = await _handleIssues(
     result,
     xcodeBuildExecution,
-    analytics: analytics,
-    fileSystem: fileSystem,
-    logger: logger,
+    project: project,
     platform: platform,
     processUtils: processUtils,
-    project: project,
+    logger: logger,
+    fileSystem: fileSystem,
+    analytics: analytics,
     xcode: xcode,
     device: device,
   );
@@ -1038,7 +1037,7 @@ final _xcodeRequirement = 'Xcode $xcodeRequiredVersion or greater is required to
 bool _checkXcodeVersion({
   required Logger logger,
   required Platform platform,
-  required Xcode? xcode,
+  required Xcode xcode,
   required XcodeProjectInterpreter xcodeProjectInterpreter,
 }) {
   if (!platform.isMacOS) {
@@ -1048,7 +1047,7 @@ bool _checkXcodeVersion({
     logger.printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
-  if (xcode?.isRequiredVersionSatisfactory != true) {
+  if (!xcode.isRequiredVersionSatisfactory) {
     logger.printError('Found "${xcodeProjectInterpreter.versionText}". $_xcodeRequirement');
     return false;
   }
@@ -1196,12 +1195,12 @@ _XCResultIssueHandlingResult _handleXCResultIssue({
 Future<bool> _handleIssues(
   XcodeBuildResult result,
   XcodeBuildExecution? xcodeBuildExecution, {
-  required Analytics analytics,
-  required FileSystem fileSystem,
-  required Logger logger,
+  required FlutterProject project,
   required FlutterDarwinPlatform platform,
   required ProcessUtils processUtils,
-  required FlutterProject project,
+  required Logger logger,
+  required FileSystem fileSystem,
+  required Analytics analytics,
   required Xcode? xcode,
   Device? device,
 }) async {
@@ -1370,11 +1369,11 @@ Future<bool> _simulatorSupportsIntel(
   required ProcessUtils processUtils,
   required Xcode? xcode,
 }) async {
-  final Version? xcodeVersion = xcode?.currentVersion;
-  if (xcodeVersion != null && xcodeVersion.major < 26) {
+  if (xcode == null) {
     return true;
   }
-  if (xcode == null) {
+  final Version? xcodeVersion = xcode.currentVersion;
+  if (xcodeVersion != null && xcodeVersion.major < 26) {
     return true;
   }
   final String runtime = await device.sdkNameAndVersion;
