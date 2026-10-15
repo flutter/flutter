@@ -1074,11 +1074,16 @@ sealed class _ExamplesLibrary implements CrossImportCheckedLibrary {
 
   @override
   String getDisallowedImportMessage(String importedLibraryName, int filesCount) {
+    final String destination = switch (importedLibraryName) {
+      'Material' => 'material_ui',
+      'Cupertino' => 'cupertino_ui',
+      _ => importedLibraryName,
+    };
     return filesCount < 2
         ? 'The following file in $libraryName has a disallowed import of $importedLibraryName. '
-              'Refactor it or move it to the $importedLibraryName examples.\n'
+              'Refactor it or move it to the $destination examples.\n'
         : 'The following $filesCount files in $libraryName have a disallowed import of $importedLibraryName. '
-              'Refactor them or move them to the $importedLibraryName examples.\n';
+              'Refactor them or move them to the $destination examples.\n';
   }
 
   @override
