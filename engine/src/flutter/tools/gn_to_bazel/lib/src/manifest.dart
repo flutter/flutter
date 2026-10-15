@@ -354,12 +354,19 @@ cc_test(
   // utilities, windowing) with its tests -- the first converted test to
   // link the Dart VM from the wrap -- and, on the embedder and the client
   // wrapper, common_cpp (the JSON codecs, the message dispatcher) with its
-  // suite. The accessibility bridge waits for //flutter/third_party/
-  // accessibility (the Linux suite does not use it).
+  // suite. The accessibility bridge (common_cpp_accessibility) and the tree
+  // it builds on, //flutter/third_party/accessibility, are the Windows and
+  // macOS embedders': on a Linux host neither compiles under GN either
+  // (gfx::NativeWindow is defined for those two alone; the bridge fails on
+  // a deprecation warning), and nothing CI builds there reaches them --
+  // they wait for those hosts' build.
   ConvertedFile('//flutter/shell/geometry'),
   ConvertedFile(
     '//flutter/shell/platform/common',
-    skip: <String, String>{'common_cpp_accessibility': 'needs //flutter/third_party/accessibility'},
+    skip: <String, String>{
+      'common_cpp_accessibility':
+          'needs //flutter/third_party/accessibility, which compiles on Windows and macOS alone',
+    },
   ),
   // The C++ client wrapper (plugin API) the desktop embeddings build on,
   // with its suite; its file lists come from core_wrapper_files.gni. The
