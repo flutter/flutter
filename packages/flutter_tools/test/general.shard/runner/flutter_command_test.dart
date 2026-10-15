@@ -1623,7 +1623,6 @@ void main() {
             toolContext: FakeToolContext(
               fs: fileSystem,
               logger: logger,
-              fsUtils: fileSystemUtils,
               platform: platform,
               processManager: processManager,
             ),
@@ -1642,37 +1641,37 @@ void main() {
           expect(
             command.getBuildInfo(forcedBuildMode: .debug),
             throwsToolExit(
-              message:
-                  'The file at path "config.json" contains a multi-line value, which is not supported: MY_ENV_VALUE',
+              message: 'The file at path "config.json" contains a multi-line value, which is not supported: MY_ENV_VALUE',
             ),
           );
         },
       );
 
-      testWithoutContext('throws a ToolExit when --dart-define contains a multiline value', () async {
-        final command = DummyFlutterCommand(
-          toolContext: FakeToolContext(
-            fs: fileSystem,
-            logger: logger,
-            fsUtils: fileSystemUtils,
-            platform: platform,
-            processManager: processManager,
-          ),
-        )..usesDartDefineOption();
-        final CommandRunner<void> runner = createTestCommandRunner(command, fakeAnalytics);
+      testWithoutContext(
+        'throws a ToolExit when --dart-define contains a multiline value',
+        () async {
+          final command = DummyFlutterCommand(
+            toolContext: FakeToolContext(
+              fs: fileSystem,
+              logger: logger,
+              platform: platform,
+              processManager: processManager,
+            ),
+          )..usesDartDefineOption();
+          final CommandRunner<void> runner = createTestCommandRunner(command, fakeAnalytics);
 
-        fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
-        fileSystem.file('pubspec.yaml').createSync();
+          fileSystem.file(fileSystem.path.join('lib', 'main.dart')).createSync(recursive: true);
+          fileSystem.file('pubspec.yaml').createSync();
 
-        await runner.run(<String>['dummy', '--dart-define', 'MY_ENV_VALUE=hello\nworld']);
-        expect(
-          command.getBuildInfo(forcedBuildMode: .debug),
-          throwsToolExit(
-            message:
-                'Multi-line value is not supported for --dart-define or --dart-define-from-file: MY_ENV_VALUE=hello\nworld',
-          ),
-        );
-      });
+          await runner.run(<String>['dummy', '--dart-define', 'MY_ENV_VALUE=hello\nworld']);
+          expect(
+            command.getBuildInfo(forcedBuildMode: .debug),
+            throwsToolExit(
+              message: 'Multi-line value is not supported for --dart-define or --dart-define-from-file: MY_ENV_VALUE=hello\nworld',
+            ),
+          );
+        },
+      );
 
       testUsingContext(
         'throws a ToolExit when the provided file does not exist',
