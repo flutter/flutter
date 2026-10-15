@@ -158,7 +158,11 @@ tree, of which only the directories the wrapped build loads are inputs
 `flutter/build/secondary` is BUILD.gn files for the engine's own
 dependencies, and listing them made every edit to one of them rebuild the
 Dart SDK from scratch). A Dart roll that reads from a new area fails the
-sandboxed build with a missing file, and the fix is a glob. The tools come
+sandboxed build with a missing file, and the fix is a glob. The whole-tree
+globs exclude `__pycache__`: a GN build in the same checkout writes bytecode
+caches beside the Python scripts it runs (SPIRV-Tools' table generators, for
+one), and each new cache file would otherwise rebuild the wrap that reads the
+tree -- thirteen minutes for the GPU backends. The tools come
 from the same places as for the rest of the build: `@gn`, `@ninja`,
 `@clang_linux_x64`, `@sysroot_linux_x64`, and `@cpython3` as the
 `--script-executable` in place of depot_tools' `vpython3`.

@@ -201,6 +201,10 @@ filegroup(
             "BUILD.bazel",
             "REPO.bazel",
             "*.bzl",
+            # Nor the bytecode caches a GN build in the same checkout
+            # leaves beside the Python scripts it runs (Bazel's own runs
+            # write none: PYTHONDONTWRITEBYTECODE).
+            "**/__pycache__/**",
             "contrib/tests/**",
             "examples/**",
             "google/test/**",
