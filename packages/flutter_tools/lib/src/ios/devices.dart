@@ -326,7 +326,7 @@ class IOSDevice extends Device {
     required this._coreDeviceLauncher,
     required this._xcodeDebug,
     required IProxy iProxy,
-    required super.logger,
+    required Logger super.logger,
     required this._analytics,
     required this._xcode,
   }) : _iproxy = iProxy,

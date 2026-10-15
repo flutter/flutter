@@ -16,6 +16,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
@@ -42,6 +43,7 @@ Future<void> buildLinux(
   required TargetPlatform targetPlatform,
   String targetSysroot = '/',
   required Logger logger,
+  required ToolContext toolContext,
   bool configOnly = false,
 }) async {
   target ??= 'lib/main.dart';
@@ -84,11 +86,7 @@ Future<void> buildLinux(
   final Directory platformBuildDirectory = globals.fs
       .directory(linuxProject.parent.directory.path)
       .childDirectory(
-        getLinuxBuildDirectory(
-          targetPlatform,
-          flavor: buildInfo.flavor,
-          toolContext: globals.toolContext,
-        ),
+        getLinuxBuildDirectory(targetPlatform, flavor: buildInfo.flavor, toolContext: toolContext),
       );
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
@@ -139,7 +137,7 @@ Future<void> buildLinux(
           getLinuxBuildDirectory(
             targetPlatform,
             flavor: buildInfo.flavor,
-            toolContext: globals.toolContext,
+            toolContext: toolContext,
           ),
           'release',
           'bundle',

@@ -133,6 +133,7 @@ class BuildLinuxCommand extends BuildSubCommand {
       targetPlatform: targetPlatform,
       targetSysroot: getValue(_targetSysroot),
       logger: logger,
+      toolContext: toolContext,
       configOnly: configOnly,
     );
     return FlutterCommandResult.success();

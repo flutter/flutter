@@ -32,7 +32,6 @@ import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
 import 'cache.dart';
-import 'context/tool_context.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
@@ -117,8 +116,6 @@ ProcessUtils get processUtils => context.get<ProcessUtils>()!;
 
 const Platform _kLocalPlatform = LocalPlatform();
 Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
-
-ToolContext get toolContext => context.get<ToolContext>()!;
 
 UserMessages get userMessages => context.get<UserMessages>()!;
 

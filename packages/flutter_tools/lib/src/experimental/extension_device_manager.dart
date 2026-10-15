@@ -139,7 +139,7 @@ class ExtensionBackedDevice extends Device {
   ExtensionBackedDevice({
     required this.connection,
     required this._deviceService,
-    required super.logger,
+    required Logger super.logger,
     required TargetDevice targetDevice,
   }) : _targetDevice = targetDevice,
        super(
