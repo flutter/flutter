@@ -27,7 +27,7 @@ PixelDeferredImageGPUImpeller::~PixelDeferredImageGPUImpeller() = default;
 
 std::shared_ptr<impeller::Texture>
 PixelDeferredImageGPUImpeller::GetImpellerTexture(
-    const std::shared_ptr<impeller::Context>& context) const {
+    impeller::ContentContext& renderer) const {
   if (!wrapper_) {
     return nullptr;
   }

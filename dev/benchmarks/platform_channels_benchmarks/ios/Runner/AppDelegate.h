@@ -7,7 +7,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface AppDelegate : FlutterAppDelegate
+@interface AppDelegate : FlutterAppDelegate <FlutterImplicitEngineDelegate>
 
 @end
 
