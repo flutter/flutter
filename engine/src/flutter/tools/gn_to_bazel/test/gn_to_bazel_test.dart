@@ -2961,6 +2961,63 @@ executable("shell_unittests") {
       );
     });
 
+    test('a dependency on a snapshot template of the same file is data', () async {
+      // //flutter/testing's fixture_test: in the profile mode its public_deps
+      // name the VM service's AOT snapshot, whose ELF the fixtures load at
+      // run time; the macro's target is files, not a library. (GN's
+      // $target_gen_dir spelled out: the harness has no source tree.)
+      final String output = await convert(
+        r'''
+dart_snapshot_kernel("vmservice_kernel") {
+  dart_main = "fixtures/empty.dart"
+  dart_kernel = "$root_gen_dir/flutter/example/assets/vmservice_kernel.bin"
+}
+
+dart_snapshot_aot("vmservice_snapshot") {
+  dart_kernel = "$root_gen_dir/flutter/example/assets/vmservice_kernel.bin"
+  dart_elf_filename = "libvmservice_snapshot.so"
+  deps = [ ":vmservice_kernel" ]
+}
+
+source_set("fixture_test") {
+  testonly = true
+  sources = [ "fixture_test.cc" ]
+  public_deps = [ "//flutter/common" ]
+  if (flutter_runtime_mode == "profile") {
+    public_deps += [ ":vmservice_snapshot" ]
+  }
+}
+''',
+        templates: <String>{'dart_snapshot_kernel', 'dart_snapshot_aot'},
+      );
+      expect(
+        output,
+        contains(
+          'flutter_dart_snapshot_aot(\n    name = "vmservice_snapshot",\n'
+          '    dart_elf_filename = "libvmservice_snapshot.so",\n'
+          '    dart_kernel = "assets/vmservice_kernel.bin",\n'
+          '    deps = [":vmservice_kernel"],\n)\n',
+        ),
+      );
+      expect(
+        output,
+        contains(
+          '    data = select({\n'
+          '        "//engine/src/flutter/common:runtime_mode_profile": [\n'
+          '            ":vmservice_snapshot",  # flutter_runtime_mode == "profile"\n'
+          '        ],\n'
+          '        "//conditions:default": [],\n'
+          '    }),\n',
+        ),
+      );
+      expect(
+        output,
+        contains(
+          '    deps = [\n        "//engine/src:include_root",\n        "//engine/src/flutter/common",\n    ],\n',
+        ),
+      );
+    });
+
     test('a template invocation maps its files, labels, configs and scalars', () async {
       // The flatbuffers template's public config carries two generated
       // include directories: the package's own (the `includes` of the
