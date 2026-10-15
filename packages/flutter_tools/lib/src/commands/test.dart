@@ -29,6 +29,7 @@ import '../test/test_time_recorder.dart';
 import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 import '../web/compile.dart';
+import '../web/web_constants.dart';
 import '../web/web_options.dart';
 
 /// The name of the directory where Integration Tests are placed.
@@ -128,7 +129,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       _fileReporter,
       _timeout,
       _ignoreTimeouts,
-      WebOptions.wasm,
+      _wasm,
       WebOptions.crossOriginIsolation,
       _uninstall,
     ], verboseHelp: verboseHelp);
@@ -364,6 +365,12 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
         'tests for a Flutter app).',
   );
 
+  static const _wasm = FlagOptionDescriptor(
+    name: FlutterOptions.kWebWasmFlag,
+    negatable: false,
+    help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
+  );
+
   static const _uninstall = FlagOptionDescriptor(
     name: 'uninstall',
     defaultsTo: true,
@@ -391,7 +398,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   final _testFileUris = <Uri>{};
 
   bool get isWeb => getValue(_platform) == 'chrome';
-  bool get useWasm => getValue(WebOptions.wasm);
+  bool get useWasm => getValue(_wasm);
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {

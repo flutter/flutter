@@ -237,7 +237,6 @@ abstract final class BuildInfoOptions {
   static const trackWidgetCreation = FlagOptionDescriptor(
     name: 'track-widget-creation',
     defaultsTo: true,
-    verboseOnly: true,
     help:
         'Track widget creation locations. This enables features such as the widget inspector. '
         'This parameter is only functional in debug mode (i.e. when compiling JIT, not AOT).',
