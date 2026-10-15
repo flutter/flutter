@@ -1209,32 +1209,29 @@ void main() {
       controller.dispose();
     });
 
-    test(
-      'AnimationController reverse() will throw an error if there is no default duration or reverseDuration',
-      () {
-        final controller = AnimationController(vsync: const TestVSync());
+    test('AnimationController reverse() will throw an error if there is no default duration or reverseDuration', () {
+      final controller = AnimationController(vsync: const TestVSync());
 
-        late FlutterError error;
-        try {
-          controller.reverse();
-        } on FlutterError catch (e) {
-          error = e;
-        }
+      late FlutterError error;
+      try {
+        controller.reverse();
+      } on FlutterError catch (e) {
+        error = e;
+      }
 
-        expect(error, isNotNull);
-        expect(
-          error.toStringDeep(),
-          'FlutterError\n'
-          '   AnimationController.reverse() called with no default duration or\n'
-          '   reverseDuration.\n'
-          '   The "duration" or "reverseDuration" property should be set,\n'
-          '   either in the constructor or later, before calling the reverse()\n'
-          '   function.\n',
-        );
+      expect(error, isNotNull);
+      expect(
+        error.toStringDeep(),
+        'FlutterError\n'
+        '   AnimationController.reverse() called with no default duration or\n'
+        '   reverseDuration.\n'
+        '   The "duration" or "reverseDuration" property should be set,\n'
+        '   either in the constructor or later, before calling the reverse()\n'
+        '   function.\n',
+      );
 
-        controller.dispose();
-      },
-    );
+      controller.dispose();
+    });
 
     test(
       'AnimationController animateBack() will throw an error if there is no explicit duration and '
@@ -1289,71 +1286,65 @@ void main() {
       expect(() => controller.repeat(reverse: true, count: -1), throwsAssertionError);
     });
 
-    test(
-      'calling repeat by setting count as valid with reverse as false, shall run animation accordingly',
-      () {
-        final controller = AnimationController(
-          duration: const Duration(milliseconds: 100),
-          value: 0.0,
-          vsync: const TestVSync(),
-        );
+    test('calling repeat by setting count as valid with reverse as false, shall run animation accordingly', () {
+      final controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        value: 0.0,
+        vsync: const TestVSync(),
+      );
 
-        expect(controller.value, 0.0);
-        controller.repeat(count: 1);
-        tick(Duration.zero);
-        tick(const Duration(milliseconds: 25));
-        expect(controller.value, 0.25);
-        tick(const Duration(milliseconds: 50));
-        expect(controller.value, 0.5);
-        tick(const Duration(milliseconds: 99));
-        expect(controller.value, 0.99);
-        tick(const Duration(milliseconds: 100));
-        expect(controller.value, 0);
+      expect(controller.value, 0.0);
+      controller.repeat(count: 1);
+      tick(Duration.zero);
+      tick(const Duration(milliseconds: 25));
+      expect(controller.value, 0.25);
+      tick(const Duration(milliseconds: 50));
+      expect(controller.value, 0.5);
+      tick(const Duration(milliseconds: 99));
+      expect(controller.value, 0.99);
+      tick(const Duration(milliseconds: 100));
+      expect(controller.value, 0);
 
-        controller.reset();
+      controller.reset();
 
-        expect(controller.value, 0.0);
-        controller.repeat(count: 2);
-        tick(Duration.zero);
-        tick(const Duration(milliseconds: 25));
-        expect(controller.value, 0.25);
-        tick(const Duration(milliseconds: 50));
-        expect(controller.value, 0.5);
-        tick(const Duration(milliseconds: 200));
-        expect(controller.value, 0);
+      expect(controller.value, 0.0);
+      controller.repeat(count: 2);
+      tick(Duration.zero);
+      tick(const Duration(milliseconds: 25));
+      expect(controller.value, 0.25);
+      tick(const Duration(milliseconds: 50));
+      expect(controller.value, 0.5);
+      tick(const Duration(milliseconds: 200));
+      expect(controller.value, 0);
 
-        controller.reset();
-        controller.dispose();
-      },
-    );
+      controller.reset();
+      controller.dispose();
+    });
 
-    test(
-      'calling repeat by setting count as valid with reverse as true, shall run animation accordingly',
-      () {
-        final controller = AnimationController(
-          duration: const Duration(milliseconds: 100),
-          value: 0.0,
-          vsync: const TestVSync(),
-        );
+    test('calling repeat by setting count as valid with reverse as true, shall run animation accordingly', () {
+      final controller = AnimationController(
+        duration: const Duration(milliseconds: 100),
+        value: 0.0,
+        vsync: const TestVSync(),
+      );
 
-        expect(controller.value, 0.0);
-        controller.repeat(reverse: true, count: 4);
-        tick(Duration.zero);
-        tick(const Duration(milliseconds: 25));
-        expect(controller.value, 0.25);
-        tick(const Duration(milliseconds: 50));
-        expect(controller.value, 0.5);
-        tick(const Duration(milliseconds: 99));
-        expect(controller.value, 0.99);
-        tick(const Duration(milliseconds: 100));
-        expect(controller.value, 1);
-        tick(const Duration(milliseconds: 60));
-        expect(double.parse(controller.value.toStringAsFixed(1)), 0.6);
+      expect(controller.value, 0.0);
+      controller.repeat(reverse: true, count: 4);
+      tick(Duration.zero);
+      tick(const Duration(milliseconds: 25));
+      expect(controller.value, 0.25);
+      tick(const Duration(milliseconds: 50));
+      expect(controller.value, 0.5);
+      tick(const Duration(milliseconds: 99));
+      expect(controller.value, 0.99);
+      tick(const Duration(milliseconds: 100));
+      expect(controller.value, 1);
+      tick(const Duration(milliseconds: 60));
+      expect(double.parse(controller.value.toStringAsFixed(1)), 0.6);
 
-        controller.reset();
-        controller.dispose();
-      },
-    );
+      controller.reset();
+      controller.dispose();
+    });
   });
 }
 

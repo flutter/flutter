@@ -14,6 +14,7 @@ import 'dart:ui'
         BoxHeightStyle,
         BoxWidthStyle,
         Gradient,
+        Hyphens,
         LineMetrics,
         PlaceholderAlignment,
         Shader,
@@ -338,7 +339,7 @@ class RenderParagraph extends RenderBox
     InlineSpan text, {
     TextAlign textAlign = TextAlign.start,
     required TextDirection textDirection,
-    bool softWrap = true,
+    this._softWrap = true,
     TextOverflow overflow = TextOverflow.clip,
     @Deprecated(
       'Use textScaler instead. '
@@ -352,20 +353,18 @@ class RenderParagraph extends RenderBox
     StrutStyle? strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     ui.TextHeightBehavior? textHeightBehavior,
+    ui.Hyphens hyphens = ui.Hyphens.manual,
     List<RenderBox>? children,
-    Color? selectionColor,
+    this._selectionColor,
     SelectionRegistrar? registrar,
-    double devicePixelRatio = 1.0,
+    this._devicePixelRatio = 1.0,
   }) : assert(text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        assert(
          identical(textScaler, const _UnspecifiedTextScaler()) || textScaleFactor == 1.0,
          'textScaleFactor is deprecated and cannot be specified when textScaler is specified.',
        ),
-       _softWrap = softWrap,
        _overflow = overflow,
-       _devicePixelRatio = devicePixelRatio,
-       _selectionColor = selectionColor,
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -379,6 +378,7 @@ class RenderParagraph extends RenderBox
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
          textHeightBehavior: textHeightBehavior,
+         hyphens: hyphens,
        ) {
     addAll(children);
     this.registrar = registrar;
@@ -409,7 +409,8 @@ class RenderParagraph extends RenderBox
       ..locale = _textPainter.locale
       ..strutStyle = _textPainter.strutStyle
       ..textWidthBasis = _textPainter.textWidthBasis
-      ..textHeightBehavior = _textPainter.textHeightBehavior;
+      ..textHeightBehavior = _textPainter.textHeightBehavior
+      ..hyphens = _textPainter.hyphens;
   }
 
   List<AttributedString>? _cachedAttributedLabels;
@@ -758,6 +759,21 @@ class RenderParagraph extends RenderBox
     }
     _textPainter.textHeightBehavior = value;
     _overflowShader = null;
+    markNeedsLayout();
+  }
+
+  /// {@macro flutter.painting.textPainter.hyphens}
+  ui.Hyphens get hyphens => _textPainter.hyphens;
+
+  set hyphens(ui.Hyphens value) {
+    if (_textPainter.hyphens == value) {
+      return;
+    }
+    _textPainter.hyphens = value;
+    _overflowShader = null;
+    // The rendered hyphen doesn't change where lines break, but it makes its
+    // line wider, which changes the paragraph's longest line and so its size
+    // with TextWidthBasis.longestLine. Hence markNeedsLayout, not markNeedsPaint.
     markNeedsLayout();
   }
 

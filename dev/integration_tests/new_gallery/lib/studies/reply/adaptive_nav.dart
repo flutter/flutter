@@ -693,9 +693,8 @@ class _AnimatedBottomAppBar extends StatelessWidget {
                                       navigationDestinations.firstWhere((_Destination destination) {
                                         return destination.type == selectedMailbox;
                                       }).textLabel,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge!.copyWith(color: ReplyColors.white50),
+                                      style: Theme.of(context).textTheme.bodyLarge!
+                                          .copyWith(color: ReplyColors.white50),
                                     ),
                                   ),
                           ),
@@ -1055,10 +1054,8 @@ class _ReplyFabState extends State<_ReplyFab> with SingleTickerProviderStateMixi
                             widthFactor: animation.value,
                             child: Text(
                               tooltip.toUpperCase(),
-                              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                                fontSize: 16,
-                                color: theme.colorScheme.onSecondary,
-                              ),
+                              style: Theme.of(context).textTheme.headlineSmall!
+                                  .copyWith(fontSize: 16, color: theme.colorScheme.onSecondary),
                             ),
                           ),
                         ],

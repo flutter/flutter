@@ -450,9 +450,8 @@ FlutterError
         weight: 4.0,
       ),
       TweenSequenceItem<double>(
-        tween: ConstantTween<double>(
-          10.0,
-        ).chain(CurveTween(curve: Curves.linear)), // linear is a no-op
+        tween: ConstantTween<double>(10.0)
+            .chain(CurveTween(curve: Curves.linear)), // linear is a no-op
         weight: 2.0,
       ),
       TweenSequenceItem<double>(

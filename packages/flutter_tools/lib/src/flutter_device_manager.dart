@@ -15,6 +15,8 @@ import 'base/user_messages.dart';
 import 'custom_devices/custom_device.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
+import 'experimental/extension_device_manager.dart';
+import 'experimental/extension_manager.dart';
 import 'features.dart';
 import 'ios/devices.dart';
 import 'ios/ios_workflow.dart';
@@ -38,7 +40,7 @@ class FlutterDeviceManager extends DeviceManager {
     required Platform platform,
     required ProcessManager processManager,
     required FileSystem fileSystem,
-    required AndroidSdk? androidSdk,
+    required AndroidSdk? Function() androidSdkBuilder,
     required FeatureFlags featureFlags,
     required IOSSimulatorUtils iosSimulatorUtils,
     required XCDevice xcDevice,
@@ -52,10 +54,11 @@ class FlutterDeviceManager extends DeviceManager {
     required WindowsWorkflow windowsWorkflow,
     required CustomDevicesConfig customDevicesConfig,
     required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+    ExtensionManager? extensionManager,
   }) : deviceDiscoverers = <DeviceDiscovery>[
          AndroidDevices(
            logger: logger,
-           androidSdk: androidSdk,
+           androidSdkBuilder: androidSdkBuilder,
            androidWorkflow: androidWorkflow,
            processManager: processManager,
            fileSystem: fileSystem,
@@ -75,6 +78,7 @@ class FlutterDeviceManager extends DeviceManager {
            processManager: processManager,
            logger: logger,
            artifacts: artifacts,
+           platform: platform,
            nativeAssetsBuilder: nativeAssetsBuilder,
          ),
          MacOSDevices(
@@ -121,6 +125,8 @@ class FlutterDeviceManager extends DeviceManager {
            logger: logger,
            config: customDevicesConfig,
          ),
+         if (extensionManager != null)
+           ExtensionDevices(extensionManager: extensionManager, logger: logger),
        ];
 
   @override

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+
 import 'package:image/image.dart' as img;
 
 /// Checks if the image is transparent or solid black.

@@ -197,7 +197,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   bool _debugCanHandleIntent<I extends Intent>(I? intent) {
     final Object? badIntentString = switch (intent) {
       T() => null,
-      Object(:final runtimeType) => runtimeType,
+      Object(:final Type runtimeType) => runtimeType,
       // The List literal is needed to reify the type I.
       // ignore: literal_only_boolean_expressions
       null when <I>[] is List<T> => null,
@@ -1511,8 +1511,8 @@ class DoNothingAndStopPropagationIntent extends Intent {
 class DoNothingAction extends Action<Intent> {
   /// Creates a [DoNothingAction].
   ///
-  /// The optional [consumesKey] argument defaults to true.
-  DoNothingAction({bool consumesKey = true}) : _consumesKey = consumesKey;
+  /// The optional [_consumesKey] argument defaults to true.
+  DoNothingAction({this._consumesKey = true});
 
   @override
   bool consumesKey(Intent intent) => _consumesKey;
@@ -1781,9 +1781,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
 
 class _OverridableAction<T extends Intent> extends ContextAction<T>
     with _OverridableActionMixin<T> {
-  _OverridableAction({required Action<T> defaultAction, required BuildContext lookupContext})
-    : _lookupContext = lookupContext,
-      _defaultAction = defaultAction;
+  _OverridableAction({required this._defaultAction, required this._lookupContext});
 
   @override
   final Action<T> _defaultAction;
@@ -1809,11 +1807,7 @@ class _OverridableAction<T extends Intent> extends ContextAction<T>
 
 class _OverridableContextAction<T extends Intent> extends ContextAction<T>
     with _OverridableActionMixin<T> {
-  _OverridableContextAction({
-    required ContextAction<T> defaultAction,
-    required BuildContext lookupContext,
-  }) : _lookupContext = lookupContext,
-       _defaultAction = defaultAction;
+  _OverridableContextAction({required this._defaultAction, required this._lookupContext});
 
   @override
   final ContextAction<T> _defaultAction;

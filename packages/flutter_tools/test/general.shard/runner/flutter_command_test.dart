@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart' show RunCommand;
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
@@ -425,8 +426,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'success',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -449,8 +451,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'warning',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -472,8 +475,9 @@ void main() {
           Event.flutterCommandResult(
             commandPath: 'dummy',
             result: 'fail',
-            maxRss: 10,
             commandHasTerminal: false,
+            hostArch: globals.os.hostPlatform.cliName,
+            maxRss: 10,
           ),
         ),
       );
@@ -578,8 +582,9 @@ void main() {
               Event.flutterCommandResult(
                 commandPath: 'dummy',
                 result: 'killed',
-                maxRss: 10,
                 commandHasTerminal: false,
+                hostArch: globals.os.hostPlatform.cliName,
+                maxRss: 10,
               ),
             ),
           );
@@ -754,8 +759,11 @@ void main() {
         final BuildInfo enabledBuildInfo = await enabledCommand.getBuildInfo(
           forcedBuildMode: BuildMode.debug,
         );
-        expect(enabledBuildInfo.explicitAndroidEnableHcpp, isTrue);
-        expect(enabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=true'));
+        expect(enabledBuildInfo.androidGradleConfig.explicitEnableHcpp, isTrue);
+        expect(
+          AndroidBuildInfo(enabledBuildInfo).toGradleConfig(),
+          contains('-Pexplicit-enable-hcpp=true'),
+        );
 
         // The negation has to be reported too, otherwise gradle cannot tell it apart from the
         // flag being absent and would leave a manifest value of true in place.
@@ -764,8 +772,11 @@ void main() {
         final BuildInfo disabledBuildInfo = await disabledCommand.getBuildInfo(
           forcedBuildMode: BuildMode.debug,
         );
-        expect(disabledBuildInfo.explicitAndroidEnableHcpp, isFalse);
-        expect(disabledBuildInfo.toGradleConfig(), contains('-Pexplicit-enable-hcpp=false'));
+        expect(disabledBuildInfo.androidGradleConfig.explicitEnableHcpp, isFalse);
+        expect(
+          AndroidBuildInfo(disabledBuildInfo).toGradleConfig(),
+          contains('-Pexplicit-enable-hcpp=false'),
+        );
 
         // Without the flag nothing is reported, so the manifest decides.
         final defaultCommand = DummyHcppFlutterCommand();
@@ -773,11 +784,31 @@ void main() {
         final BuildInfo defaultBuildInfo = await defaultCommand.getBuildInfo(
           forcedBuildMode: BuildMode.debug,
         );
-        expect(defaultBuildInfo.explicitAndroidEnableHcpp, isNull);
+        expect(defaultBuildInfo.androidGradleConfig.explicitEnableHcpp, isNull);
         expect(
-          defaultBuildInfo.toGradleConfig(),
+          AndroidBuildInfo(defaultBuildInfo).toGradleConfig(),
           isNot(anyElement(contains('-Pexplicit-enable-hcpp'))),
         );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'reports --[no-]deprecated-js-interop in BuildInfo only when passed',
+      () async {
+        Future<bool?> deprecatedJsInteropFor(List<String> args) async {
+          final command = DummyDeprecatedJsInteropFlutterCommand();
+          await createTestCommandRunner(command).run(<String>['dummy', ...args]);
+          final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+          return buildInfo.deprecatedJsInterop;
+        }
+
+        expect(await deprecatedJsInteropFor(<String>['--deprecated-js-interop']), isTrue);
+        expect(await deprecatedJsInteropFor(<String>['--no-deprecated-js-interop']), isFalse);
+        expect(await deprecatedJsInteropFor(<String>[]), isNull);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -791,8 +822,8 @@ void main() {
         final command = DummyHcppFlutterCommand();
         await createTestCommandRunner(command).run(<String>['dummy']);
         final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
-        expect(buildInfo.androidEnableHcpp, isTrue);
-        expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=true'));
+        expect(buildInfo.androidGradleConfig.enableHcpp, isTrue);
+        expect(AndroidBuildInfo(buildInfo).toGradleConfig(), contains('-Penable-hcpp=true'));
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
@@ -807,8 +838,8 @@ void main() {
         final command = DummyHcppFlutterCommand();
         await createTestCommandRunner(command).run(<String>['dummy', '--no-enable-hcpp']);
         final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
-        expect(buildInfo.androidEnableHcpp, isFalse);
-        expect(buildInfo.toGradleConfig(), contains('-Penable-hcpp=false'));
+        expect(buildInfo.androidGradleConfig.enableHcpp, isFalse);
+        expect(AndroidBuildInfo(buildInfo).toGradleConfig(), contains('-Penable-hcpp=false'));
       },
       overrides: <Type, Generator>{
         FeatureFlags: () => TestFeatureFlags(isHcppEnabled: true),
@@ -828,8 +859,8 @@ void main() {
         );
         expect(debugBuildInfo.trackWidgetCreation, isFalse);
         expect(debugBuildInfo.treeShakeIcons, isFalse);
-        expect(debugBuildInfo.androidGradleDaemon, isTrue);
-        expect(debugBuildInfo.androidSkipBuildDependencyValidation, isTrue);
+        expect(debugBuildInfo.androidGradleConfig.gradleDaemon, isTrue);
+        expect(debugBuildInfo.androidGradleConfig.skipBuildDependencyValidation, isTrue);
 
         final BuildInfo releaseBuildInfo = await flutterCommand.getBuildInfo(
           forcedBuildMode: BuildMode.release,
@@ -853,12 +884,36 @@ void main() {
           forcedBuildMode: BuildMode.debug,
         );
         expect(debugBuildInfo.trackWidgetCreation, isTrue);
-        expect(debugBuildInfo.androidSkipBuildDependencyValidation, isFalse);
+        expect(debugBuildInfo.androidGradleConfig.skipBuildDependencyValidation, isFalse);
 
         final BuildInfo releaseBuildInfo = await command.getBuildInfo(
           forcedBuildMode: BuildMode.release,
         );
         expect(releaseBuildInfo.treeShakeIcons, isTrue);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'getBuildInfo parses AndroidGradleConfig options and populates toGradleConfig',
+      () async {
+        final command = DummyAllBuildOptionsFlutterCommand();
+        await createTestCommandRunner(command).run(<String>[
+          'dummy',
+          '--android-project-arg=x=1',
+          '--android-project-cache-dir=/c',
+          '--no-android-gradle-daemon',
+        ]);
+
+        final BuildInfo buildInfo = await command.getBuildInfo(forcedBuildMode: BuildMode.debug);
+        expect(buildInfo.androidGradleConfig.gradleDaemon, isFalse);
+        expect(
+          AndroidBuildInfo(buildInfo).toGradleConfig(),
+          containsAll(<String>['-Px=1', '--project-cache-dir=/c']),
+        );
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -1035,14 +1090,14 @@ void main() {
       final device2 = FakeDevice('device2', 'device2');
 
       testUsingContext('no device found', () async {
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
       });
 
       testUsingContext('finds single device', () async {
         testDeviceManager.addAttachedDevice(device1);
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, device1);
       });
@@ -1051,7 +1106,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
         testDeviceManager.specifiedDeviceId = 'all';
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final Device? device = await flutterCommand.findTargetDevice();
         expect(device, isNull);
         expect(testLogger.statusText, contains(UserMessages().flutterSpecifyDevice));
@@ -1071,7 +1126,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
 
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final List<Device>? devices = await flutterCommand.findAllTargetDevices();
 
         // Should prompt the user and print prompt options (so status contains "Connected devices")
@@ -1117,7 +1172,7 @@ void main() {
         testDeviceManager.addAttachedDevice(device1);
         testDeviceManager.addAttachedDevice(device2);
 
-        final flutterCommand = DummyFlutterCommand();
+        final flutterCommand = DummyFlutterCommand(toolContext: const DelegatingToolContext());
         final List<Device>? devices = await flutterCommand.findAllTargetDevices(canPrompt: false);
 
         // Should NOT prompt the user even if machine mode is false.
@@ -2135,6 +2190,7 @@ Use the "flutter config" command to enable feature flags.''',
         'FLUTTER_ENABLED_FEATURE_FLAGS is set in dartDefines',
         () async {
           final flutterCommand = DummyFlutterCommand(packagesPath: 'foo');
+          createTestCommandRunner(flutterCommand);
           final BuildInfo buildInfo = await flutterCommand.getBuildInfo(
             forcedBuildMode: BuildMode.debug,
           );
@@ -2265,6 +2321,23 @@ class FakeClock extends Fake implements SystemClock {
 }
 
 class _TestRunCommandThatOnlyValidates extends RunCommand {
+  _TestRunCommandThatOnlyValidates({ToolContext? toolContext})
+    : super(
+        appleContext: FakeAppleContext(),
+        buildSystem: globals.buildSystem,
+        buildTargets: globals.buildTargets,
+        toolContext:
+            toolContext ??
+            FakeToolContext(
+              fs: globals.fs,
+              logger: globals.logger,
+              platform: globals.platform,
+              processManager: globals.processManager,
+              artifacts: globals.artifacts,
+              cache: globals.cache,
+            ),
+      );
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     return FlutterCommandResult.success();
@@ -2403,6 +2476,12 @@ class DummyMachineFlutterCommand extends DummyFlutterCommand {
 class DummyHcppFlutterCommand extends DummyFlutterCommand {
   DummyHcppFlutterCommand() : super(name: 'dummy') {
     addEnableHcppFlag(verboseHelp: false);
+  }
+}
+
+class DummyDeprecatedJsInteropFlutterCommand extends DummyFlutterCommand {
+  DummyDeprecatedJsInteropFlutterCommand() : super(name: 'dummy') {
+    usesDeprecatedJsInteropFlag(verboseHelp: false);
   }
 }
 
