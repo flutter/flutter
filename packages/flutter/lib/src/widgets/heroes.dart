@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+
 import 'basic.dart';
 import 'binding.dart';
 import 'framework.dart';
@@ -42,14 +43,13 @@ typedef HeroPlaceholderBuilder = Widget Function(BuildContext context, Size hero
 /// A function that lets [Hero]es self supply a [Widget] that is shown during the
 /// hero's flight from one route to another instead of default (which is to
 /// show the destination route's instance of the Hero).
-typedef HeroFlightShuttleBuilder =
-    Widget Function(
-      BuildContext flightContext,
-      Animation<double> animation,
-      HeroFlightDirection flightDirection,
-      BuildContext fromHeroContext,
-      BuildContext toHeroContext,
-    );
+typedef HeroFlightShuttleBuilder = Widget Function(
+  BuildContext flightContext,
+  Animation<double> animation,
+  HeroFlightDirection flightDirection,
+  BuildContext fromHeroContext,
+  BuildContext toHeroContext,
+);
 
 typedef _OnFlightEnded = void Function(_HeroFlight flight);
 

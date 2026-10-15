@@ -273,11 +273,9 @@ class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidg
 
 class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
   _TextSelectionToolbarTrailingEdgeAlignRenderBox({
-    required bool overflowOpen,
-    required TextDirection textDirection,
-  }) : _textDirection = textDirection,
-       _overflowOpen = overflowOpen,
-       super();
+    required this._overflowOpen,
+    required this._textDirection,
+  }) : super();
 
   // The width of the menu when it was closed. This is used to achieve the
   // behavior where the open menu aligns its trailing edge to the closed menu's
@@ -430,13 +428,10 @@ class _TextSelectionToolbarItemsLayoutElement extends MultiChildRenderObjectElem
 class _RenderTextSelectionToolbarItemsLayout extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData> {
   _RenderTextSelectionToolbarItemsLayout({
-    required bool isAbove,
-    required bool overflowOpen,
-    required TextDirection textDirection,
-  }) : _isAbove = isAbove,
-       _overflowOpen = overflowOpen,
-       _textDirection = textDirection,
-       super();
+    required this._isAbove,
+    required this._overflowOpen,
+    required this._textDirection,
+  }) : super();
 
   // The index of the last item that doesn't overflow.
   int _lastIndexThatFits = -1;

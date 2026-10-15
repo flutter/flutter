@@ -785,6 +785,44 @@ TEST_P(AiksTest, MatrixBackdropFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
+TEST_P(AiksTest, MatrixBackdropFilterWithTranslation) {
+  DisplayListBuilder builder;
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlack());
+  builder.DrawPaint(paint);
+  builder.SaveLayer(std::nullopt, nullptr);
+  {
+    DlPaint paint;
+    paint.setColor(DlColor::kGreen());
+    paint.setBlendMode(DlBlendMode::kPlus);
+
+    DlPaint rect_paint;
+    rect_paint.setColor(DlColor::kRed());
+    rect_paint.setStrokeWidth(4);
+    rect_paint.setDrawStyle(DlDrawStyle::kStroke);
+    builder.DrawRect(DlRect::MakeLTRB(0, 0, 300, 300), rect_paint);
+    builder.DrawCircle(DlPoint(200, 200), 100, paint);
+
+    builder.Save();
+    builder.Translate(300, 300);
+    builder.ClipRect(DlRect::MakeLTRB(0, 0, 200, 200));
+
+    DlMatrix matrix = DlMatrix::MakeTranslation({(200 + 100 * k1OverSqrt2),
+                                                 (200 + 100 * k1OverSqrt2)}) *
+                      DlMatrix::MakeScale({0.5, 0.5, 1}) *
+                      DlMatrix::MakeTranslation({-200, -200});
+    auto backdrop_filter =
+        DlImageFilter::MakeMatrix(matrix, DlImageSampling::kLinear);
+    builder.SaveLayer(std::nullopt, nullptr, backdrop_filter.get());
+    builder.Restore();
+    builder.Restore();
+  }
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
 TEST_P(AiksTest, MatrixSaveLayerFilter) {
   DisplayListBuilder builder;
 

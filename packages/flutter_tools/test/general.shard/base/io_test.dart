@@ -173,6 +173,75 @@ void main() {
       }, FSGuardIOOverrides());
     }, mockOverrides);
   });
+
+  testWithoutContext(
+    'Stdio.stdoutWrite does not crash if stdout throws FileSystemException',
+    () async {
+      final mockStdout = CrashingStdout(asyncError: true);
+      final stdio = Stdio.test(stdout: mockStdout, stderr: FakeIOSink());
+
+      Object? printed;
+      var crashed = false;
+      await runZonedGuarded(
+        () async {
+          stdio.stdoutWrite('test message');
+          await Future<void>.delayed(Duration.zero);
+        },
+        (Object error, StackTrace stackTrace) {
+          crashed = true;
+        },
+        zoneSpecification: ZoneSpecification(
+          print: (Zone self, ZoneDelegate parent, Zone association, String line) {
+            printed = line;
+            throw const io.FileSystemException(
+              'writeFrom failed',
+              '',
+              io.OSError('Broken pipe', 32),
+            );
+          },
+        ),
+      );
+      expect(printed, 'test message');
+      expect(crashed, false);
+    },
+  );
+
+  testWithoutContext(
+    'Stdio.stdoutWrite does not crash if stdout is already done and print throws',
+    () async {
+      final mockStdout = CrashingStdout(asyncError: false);
+      final stdio = Stdio.test(stdout: mockStdout, stderr: FakeIOSink());
+
+      // Access stdout to register the done listener.
+      stdio.stdout;
+
+      mockStdout.completeDone();
+      await Future<void>.delayed(Duration.zero);
+
+      Object? printed;
+      var crashed = false;
+      runZonedGuarded(
+        () {
+          stdio.stdoutWrite('test message');
+        },
+        (Object error, StackTrace stackTrace) {
+          crashed = true;
+        },
+        zoneSpecification: ZoneSpecification(
+          print: (Zone self, ZoneDelegate parent, Zone association, String line) {
+            printed = line;
+            throw const io.FileSystemException(
+              'writeFrom failed',
+              '',
+              io.OSError('Broken pipe', 32),
+            );
+          },
+        ),
+      );
+      expect(printed, 'test message');
+      expect(crashed, false);
+    },
+  );
 }
 
 class FakeProcessSignal extends Fake implements io.ProcessSignal {
@@ -187,4 +256,35 @@ final class MockSystemTempOverrides extends io.IOOverrides {
   final io.Directory mockTemp;
   @override
   io.Directory getSystemTempDirectory() => mockTemp;
+}
+
+class CrashingStdout extends Fake implements io.Stdout {
+  CrashingStdout({required this.asyncError});
+
+  final bool asyncError;
+  final _completer = Completer<void>();
+
+  @override
+  void write(Object? object) {
+    if (!asyncError) {
+      throw const io.FileSystemException('writeFrom failed', '', io.OSError('Broken pipe', 32));
+    }
+    Zone.current.handleUncaughtError(
+      const io.FileSystemException('writeFrom failed', '', io.OSError('Broken pipe', 32)),
+      StackTrace.current,
+    );
+  }
+
+  @override
+  Future<void> get done => _completer.future;
+
+  void completeDone() {
+    _completer.complete();
+  }
+}
+
+class FakeIOSink extends Fake implements io.IOSink {
+  final _completer = Completer<void>();
+  @override
+  Future<void> get done => _completer.future;
 }
