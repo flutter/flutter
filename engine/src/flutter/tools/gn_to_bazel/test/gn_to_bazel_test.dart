@@ -2380,6 +2380,30 @@ source_set("gles") {
         contains('cc_library(\n    name = "gles_config",\n    deps = ["@angle//:headers"],\n)\n'),
       );
       expect(output, contains('"@angle//:include/GLES3/gl3.h"'));
+
+      // A directory of another package of this repository (the core client
+      // wrapper's include/flutter, which the GLFW wrapper's config names):
+      // a dependency on the library its package's appendix adds -- and, in
+      // that package itself, a plain `includes`, as the library is there.
+      const gn = '''
+config("relative_core_wrapper_headers") {
+  include_dirs = [ "//flutter/shell/platform/common/client_wrapper/include/flutter" ]
+}
+''';
+      expect(
+        await convert(gn, gnPackage: '//flutter/shell/platform/glfw/client_wrapper'),
+        contains(
+          'cc_library(\n    name = "relative_core_wrapper_headers",\n'
+          '    deps = ["//engine/src/flutter/shell/platform/common/client_wrapper:relative_core_wrapper_headers"],\n)\n',
+        ),
+      );
+      expect(
+        await convert(gn, gnPackage: '//flutter/shell/platform/common/client_wrapper'),
+        contains(
+          'cc_library(\n    name = "relative_core_wrapper_headers",\n'
+          '    includes = ["include/flutter"],\n)\n',
+        ),
+      );
     });
 
     test('a suite run_tests.py runs with arguments gets them as args and data', () async {
