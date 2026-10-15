@@ -53,7 +53,6 @@ import 'src/commands/upgrade.dart';
 import 'src/commands/widget_preview.dart';
 import 'src/context/tool_context.dart';
 import 'src/context/tool_dependencies.dart';
-import 'src/context_runner.dart';
 import 'src/devtools_launcher.dart';
 import 'src/experimental/extension_discovery.dart';
 import 'src/experimental/extension_manager.dart';
@@ -183,8 +182,7 @@ Future<void> main(List<String> args) async {
         // runner.run calls "terminal.applyFeatureFlags()"
       },
       PreRunValidator: () => PreRunValidator(fileSystem: globals.fs),
-      TestCompilerNativeAssetsBuilder: () =>
-          const TestCompilerNativeAssetsBuilderImpl(toolContext: GlobalToolContext()),
+      TestCompilerNativeAssetsBuilder: () => const TestCompilerNativeAssetsBuilderImpl(),
     },
     shutdownHooks: globals.shutdownHooks,
   );

@@ -21,6 +21,7 @@ import '../../base/process.dart';
 import '../../build_info.dart';
 import '../../build_system/exceptions.dart';
 import '../../cache.dart';
+import '../../context/tool_context.dart';
 import '../../features.dart';
 import 'android/native_assets.dart';
 import 'dart_hook_result.dart';
@@ -557,29 +558,24 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   FlutterNativeAssetsBuildRunnerImpl(
     this.packageConfigPath,
     this.packageConfig,
-    this.fileSystem,
-    this.logger,
-    this.platform,
-    this.processManager,
     this.runPackageName,
     this.pubspecPath, {
     required this.includeDevDependencies,
+    required this.toolContext,
   });
 
   final String pubspecPath;
   final String packageConfigPath;
   final PackageConfig packageConfig;
-  final FileSystem fileSystem;
-  final Logger logger;
-  final Platform platform;
-  final ProcessManager processManager;
   final String runPackageName;
 
   /// Include the dev dependencies of [runPackageName].
   final bool includeDevDependencies;
+  final ToolContext toolContext;
 
   late final _logger = logging.Logger('')
     ..onRecord.listen((logging.LogRecord record) {
+      final Logger logger = toolContext.logger;
       final int levelValue = record.level.value;
       final String message = record.message;
       if (levelValue >= logging.Level.SEVERE.value) {
@@ -598,13 +594,16 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   // in a Flutter process invocation, it should not try to update in place, so
   // use the Dart standalone executable
   // ($FLUTTER_ROOT/bin/cache/dart-sdk/bin/dart).
-  late final Uri _dartExecutable = fileSystem
-      .directory(Cache.flutterRoot)
-      .uri
-      .resolve('bin/cache/dart-sdk/bin/dart${platform.isWindows ? '.exe' : ''}');
+  late final Uri _dartExecutable = () {
+    final ToolContext(:FileSystem fs, :Platform platform) = toolContext;
+    return fs
+        .directory(Cache.flutterRoot)
+        .uri
+        .resolve('bin/cache/dart-sdk/bin/dart${platform.isWindows ? '.exe' : ''}');
+  }();
 
   late final packageLayout = PackageLayout.fromPackageConfig(
-    fileSystem,
+    toolContext.fs,
     packageConfig,
     Uri.file(packageConfigPath),
     runPackageName,
@@ -614,7 +613,7 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   late final _buildRunner = NativeAssetsBuildRunner(
     logger: _logger,
     dartExecutable: _dartExecutable,
-    fileSystem: fileSystem,
+    fileSystem: toolContext.fs,
     packageLayout: packageLayout,
     userDefines: UserDefines(workspacePubspec: Uri.file(pubspecPath)),
   );
@@ -662,12 +661,8 @@ class FlutterNativeAssetsBuildRunnerImpl implements FlutterNativeAssetsBuildRunn
   }
 
   @override
-  Future<void> setCCompilerConfig(CodeAssetTarget target) async => target.setCCompilerConfig(
-    fileSystem: fileSystem,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-  );
+  Future<void> setCCompilerConfig(CodeAssetTarget target) async =>
+      target.setCCompilerConfig(toolContext: toolContext);
 }
 
 Future<Uri> _writeNativeAssetsJson(

@@ -15,6 +15,7 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
+import '../context/tool_context.dart';
 import '../device.dart';
 import '../native_assets.dart';
 import '../project.dart';
@@ -27,10 +28,7 @@ import 'test_device.dart';
 class FlutterTesterTestDevice extends TestDevice {
   FlutterTesterTestDevice({
     required this.id,
-    required this.platform,
-    required this.fileSystem,
-    required this.processManager,
-    required this.logger,
+    required this.toolContext,
     required this.flutterTesterBinPath,
     required this.debuggingOptions,
     required this.enableVmService,
@@ -49,10 +47,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
   /// Used for logging to identify the test that is currently being executed.
   final int id;
-  final Platform platform;
-  final FileSystem fileSystem;
-  final ProcessManager processManager;
-  final Logger logger;
+  final ToolContext toolContext;
   final String flutterTesterBinPath;
   final DebuggingOptions debuggingOptions;
   final bool enableVmService;
@@ -64,6 +59,11 @@ class FlutterTesterTestDevice extends TestDevice {
   final CompileExpression? compileExpression;
   final FontConfigManager fontConfigManager;
   final TestCompilerNativeAssetsBuilder? nativeAssetsBuilder;
+
+  Platform get platform => toolContext.platform;
+  FileSystem get fileSystem => toolContext.fs;
+  ProcessManager get processManager => toolContext.processManager;
+  Logger get logger => toolContext.logger;
 
   late final _ddsLauncher = DartDevelopmentService(logger: logger);
   final Completer<Uri?> _gotProcessVmServiceUri;
@@ -141,7 +141,7 @@ class FlutterTesterTestDevice extends TestDevice {
       'UNIT_TEST_ASSETS': ?testAssetDirectory,
       if (platform.isWindows && nativeAssetsBuilder != null && flutterProject != null)
         'PATH':
-            '${nativeAssetsBuilder!.windowsBuildDirectory(flutterProject!)};${platform.environment['PATH']}',
+            '${nativeAssetsBuilder!.windowsBuildDirectory(flutterProject!, toolContext: toolContext)};${platform.environment['PATH']}',
     };
 
     logger.printTrace(

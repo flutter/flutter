@@ -13,6 +13,7 @@ import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
@@ -86,6 +87,7 @@ Future<void> buildMacOS({
   bool configOnly = false,
   SizeAnalyzer? sizeAnalyzer,
   bool usingCISystem = false,
+  required ToolContext toolContext,
 }) async {
   final Directory xcodeProject = flutterProject.macos.xcodeProject;
   if (!xcodeProject.existsSync()) {
@@ -190,7 +192,7 @@ Future<void> buildMacOS({
   await updateGeneratedXcodeProperties(
     project: flutterProject,
     buildInfo: buildInfo,
-    toolContext: globals.toolContext,
+    toolContext: toolContext,
     targetOverride: targetOverride,
     useMacOSConfig: true,
   );
@@ -212,7 +214,7 @@ Future<void> buildMacOS({
     buildInfo.mode,
     cocoaPods: globals.cocoaPods,
     templateRenderer: globals.templateRenderer,
-    toolContext: globals.toolContext,
+    toolContext: toolContext,
   );
   // If the xcfilelists do not exist, create empty version.
   if (!flutterProject.macos.inputFileList.existsSync()) {

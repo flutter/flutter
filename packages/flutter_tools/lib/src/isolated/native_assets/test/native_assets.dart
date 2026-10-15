@@ -20,21 +20,21 @@ import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
 class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBuilder {
-  const TestCompilerNativeAssetsBuilderImpl({required this._toolContext});
-
-  final ToolContext _toolContext;
+  const TestCompilerNativeAssetsBuilderImpl();
 
   @override
-  Future<Uri?> build(BuildInfo buildInfo) async =>
-      (await buildWithHookResult(buildInfo)).nativeAssetsManifest;
+  Future<Uri?> build(BuildInfo buildInfo, {required ToolContext toolContext}) async =>
+      (await buildWithHookResult(buildInfo, toolContext: toolContext)).nativeAssetsManifest;
 
   @override
-  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) =>
-      testCompilerBuildNativeAssets(buildInfo, toolContext: _toolContext);
+  Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(
+    BuildInfo buildInfo, {
+    required ToolContext toolContext,
+  }) => testCompilerBuildNativeAssets(buildInfo, toolContext: toolContext);
 
   @override
-  String windowsBuildDirectory(FlutterProject project) {
-    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
+  String windowsBuildDirectory(FlutterProject project, {required ToolContext toolContext}) {
+    final ToolContext(:Config config, :FileSystem fs) = toolContext;
     final String buildDir = getBuildDirectory(config, fs);
     return project.directory.uri.resolve('$buildDir/native_assets/windows/').toFilePath();
   }
@@ -65,13 +65,10 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   final FlutterNativeAssetsBuildRunner buildRunner = FlutterNativeAssetsBuildRunnerImpl(
     buildInfo.packageConfigPath,
     buildInfo.packageConfig,
-    fileSystem,
-    logger,
-    platform,
-    processManager,
     runPackageName,
-    includeDevDependencies: true,
     pubspecPath,
+    includeDevDependencies: true,
+    toolContext: toolContext,
   );
 
   if (!platform.isMacOS && !platform.isLinux && !platform.isWindows) {

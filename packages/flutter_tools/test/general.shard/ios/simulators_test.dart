@@ -73,7 +73,7 @@ void main() {
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         final DevicePortForwarder portForwarder = simulator.portForwarder;
         await portForwarder.forward(123);
@@ -105,7 +105,7 @@ void main() {
         name: 'iPhone 11',
         simControl: FakeSimControl(),
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
       );
 
       expect(simulator.supportsRuntimeMode(BuildMode.debug), true);
@@ -137,7 +137,7 @@ void main() {
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         expect(simulator.logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
       },
@@ -161,7 +161,7 @@ void main() {
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-14-4',
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         expect(simulator.logFilePath, '/baz/qux/456/system.log');
       },
@@ -189,7 +189,7 @@ void main() {
         name: 'iPhone SE',
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
         simControl: simControl,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
       );
 
       expect(await device.sdkMajorVersion, 11);
@@ -202,7 +202,7 @@ void main() {
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
       );
 
       expect(await device.sdkMajorVersion, 11);
@@ -215,7 +215,7 @@ void main() {
         name: 'iPhone SE',
         simulatorCategory: 'iOS 11.2',
         simControl: simControl,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
       );
 
       expect(device.category, Category.mobile);
@@ -238,7 +238,7 @@ void main() {
           name: 'Apple TV',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.tvOS-14-5',
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         expect(await simulator.isSupported(), false);
       },
@@ -259,7 +259,7 @@ void main() {
             name: 'Apple Watch',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.watchOS-8-0',
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           ).isSupported(),
           false,
         );
@@ -281,7 +281,7 @@ void main() {
             name: 'iPad 2',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           ).isSupported(),
           true,
         );
@@ -303,7 +303,7 @@ void main() {
             name: 'iPad Retina',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           ).isSupported(),
           true,
         );
@@ -325,7 +325,7 @@ void main() {
             name: 'iPhone 5',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           ).isSupported(),
           true,
         );
@@ -347,7 +347,7 @@ void main() {
             name: 'iPhone 5s',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           ).isSupported(),
           true,
         );
@@ -369,7 +369,7 @@ void main() {
             name: 'iPhone SE',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           ).isSupported(),
           true,
         );
@@ -391,7 +391,7 @@ void main() {
             name: 'iPhone 7 Plus',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           ).isSupported(),
           true,
         );
@@ -413,7 +413,7 @@ void main() {
             name: 'iPhone X',
             simControl: simControl,
             simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           ).isSupported(),
           true,
         );
@@ -449,7 +449,7 @@ void main() {
         name: 'iPhone SE',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
       );
 
       final File screenshot = MemoryFileSystem.test().file('screenshot.png');
@@ -476,7 +476,7 @@ void main() {
           name: 'iPhone SE',
           simulatorCategory: 'iOS 9.3',
           simControl: simControl,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         fakeProcessManager.addCommand(
           const FakeCommand(
@@ -503,7 +503,7 @@ void main() {
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         const expectedPredicate =
             'eventType = logEvent AND '
@@ -550,7 +550,7 @@ void main() {
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.0',
           simControl: simControl,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         const expectedPredicate =
             'eventType = logEvent AND '
@@ -631,7 +631,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.0',
             simControl: simControl,
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -676,7 +676,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -734,7 +734,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 10.3',
             simControl: simControl,
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -819,7 +819,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -881,7 +881,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -948,7 +948,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
             name: 'iPhone 11',
             simulatorCategory: 'iOS 11.0',
             simControl: simControl,
-            logger: logger,
+            toolContext: FakeToolContext(fs: fileSystem, logger: logger),
           );
           final DeviceLogReader logReader = device.getLogReader(
             app: await BuildableIOSApp.fromProject(mockIosProject, null),
@@ -1048,25 +1048,33 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         xcode: xcodeBadSimctl,
       );
       simulatorUtils = IOSSimulatorUtils(
-        operatingSystemUtils: OperatingSystemUtils(
-          fileSystem: fileSystem,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
           logger: logger,
+          os: OperatingSystemUtils(
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: osx,
+            processManager: FakeProcessManager.any(),
+          ),
           platform: osx,
-          processManager: FakeProcessManager.any(),
+          processManager: fakeProcessManager,
         ),
-        logger: logger,
-        processManager: fakeProcessManager,
         xcode: xcode,
       );
       simulatorUtilsBadSimctl = IOSSimulatorUtils(
-        operatingSystemUtils: OperatingSystemUtils(
-          fileSystem: fileSystem,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
           logger: logger,
+          os: OperatingSystemUtils(
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: osx,
+            processManager: FakeProcessManager.any(),
+          ),
           platform: osx,
-          processManager: FakeProcessManager.any(),
+          processManager: fakeProcessManager,
         ),
-        logger: logger,
-        processManager: fakeProcessManager,
         xcode: xcodeBadSimctl,
       );
     });
@@ -1201,7 +1209,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         name: 'Testo',
         simulatorCategory: 'NaN',
         simControl: simControl,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
       );
 
       expect(await iosSimulatorA.sdkMajorVersion, 11);
@@ -1271,7 +1279,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         name: 'Testo',
         simulatorCategory: 'NaN',
         simControl: simControl,
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
       );
 
       expect(await iosSimulator.stopApp(null), isFalse);
@@ -1470,7 +1478,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
@@ -1510,7 +1518,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
 
         final Directory mockDir = globals.fs.currentDirectory;
@@ -1559,7 +1567,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
@@ -1644,7 +1652,7 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
           name: 'iPhone SE',
           simulatorCategory: 'iOS 11.2',
           simControl: simControl,
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         testPlistParser.setProperty('CFBundleIdentifier', 'correct');
 
@@ -1711,7 +1719,7 @@ flutter:
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         expect(simulator.isSupportedForProject(flutterProject), true);
       },
@@ -1737,7 +1745,7 @@ flutter:
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         expect(simulator.isSupportedForProject(flutterProject), true);
       },
@@ -1762,7 +1770,7 @@ flutter:
           name: 'iPhone 11',
           simControl: simControl,
           simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-          logger: logger,
+          toolContext: FakeToolContext(fs: fileSystem, logger: logger),
         );
         expect(simulator.isSupportedForProject(flutterProject), false);
       },
@@ -1780,7 +1788,7 @@ flutter:
         name: 'iPhone 11',
         simControl: simControl,
         simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3',
-        logger: logger,
+        toolContext: FakeToolContext(fs: fileSystem, logger: logger),
       );
 
       expect(simulator.createDevFSWriter(null, ''), isA<LocalDevFSWriter>());

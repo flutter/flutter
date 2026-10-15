@@ -1020,6 +1020,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
+      toolContext: _toolContext,
       targetOverride: targetFile,
       environmentType: environmentType,
       codesign: shouldCodesign,

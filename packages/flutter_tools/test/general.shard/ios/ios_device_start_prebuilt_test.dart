@@ -1673,6 +1673,7 @@ void main() {
               isCoreDevice: true,
               coreDeviceControl: FakeIOSCoreDeviceControl(),
               logger: testLogger,
+              userMessages: OverrideUserMessages(),
               xcodeDebug: FakeXcodeDebug(
                 expectedProject: XcodeDebugProject(
                   scheme: 'Runner',
@@ -1733,6 +1734,7 @@ void main() {
               fileSystem: fileSystem,
               isCoreDevice: true,
               coreDeviceControl: FakeIOSCoreDeviceControl(),
+              userMessages: OverrideUserMessages(),
               xcodeDebug: FakeXcodeDebug(
                 expectedProject: XcodeDebugProject(
                   scheme: 'Runner',
@@ -2071,6 +2073,7 @@ IOSDevice setUpIOSDevice({
   FakeXcodeDebug? xcodeDebug,
   FakePlatform? platform,
   Xcode? xcode,
+  UserMessages? userMessages,
 }) {
   final artifacts = Artifacts.test();
   final FakePlatform macPlatform =
@@ -2087,16 +2090,16 @@ IOSDevice setUpIOSDevice({
     '123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
-    fileSystem: testFileSystem,
-    fileSystemUtils: FileSystemUtils(fileSystem: testFileSystem, platform: macPlatform),
-    platform: macPlatform,
-    processUtils: ProcessUtils(
-      processManager: processManager ?? FakeProcessManager.any(),
+    toolContext: FakeToolContext(
+      artifacts: artifacts,
+      fs: testFileSystem,
       logger: logger,
+      platform: macPlatform,
+      processManager: processManager,
+      userMessages: userMessages,
     ),
     xcode: xcode,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
-    logger: logger,
     iosDeploy:
         iosDeploy ??
         IOSDeploy(

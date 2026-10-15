@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
@@ -112,6 +113,7 @@ class IMobileDevice {
 Future<XcodeBuildResult> buildXcodeProject({
   required BuildableIOSApp app,
   required BuildInfo buildInfo,
+  required ToolContext toolContext,
   String? targetOverride,
   EnvironmentType environmentType = EnvironmentType.physical,
   CpuArch? activeArch,
@@ -363,7 +365,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     project: project,
     targetOverride: targetOverride,
     buildInfo: buildInfo,
-    toolContext: globals.toolContext,
+    toolContext: toolContext,
     printWarnings: true,
   );
   if (app.project.usesSwiftPackageManager) {
@@ -382,7 +384,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildInfo.mode,
     cocoaPods: globals.cocoaPods,
     templateRenderer: globals.templateRenderer,
-    toolContext: globals.toolContext,
+    toolContext: toolContext,
   );
   if (configOnly) {
     return XcodeBuildResult(success: true);

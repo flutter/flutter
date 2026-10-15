@@ -543,10 +543,12 @@ class _SetCCompilerConfigTarget extends FakeFlutterNativeAssetsBuildRunner {
   @override
   Future<void> setCCompilerConfig(CodeAssetTarget target) async {
     await target.setCCompilerConfig(
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
+      toolContext: FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
     );
     didSetCCompilerConfig = true;
   }

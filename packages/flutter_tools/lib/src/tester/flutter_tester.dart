@@ -15,6 +15,7 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../bundle_builder.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../devfs.dart';
 import '../device.dart';
@@ -43,25 +44,8 @@ class FlutterTesterApp extends ApplicationPackage {
 /// also be used as a regular device when `--show-test-device` is provided
 /// to the flutter command.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(
-    super.id, {
-    required this._processManager,
-    required this._flutterVersion,
-    required super.logger,
-    required this._fileSystem,
-    required this._artifacts,
-    required this._platform,
-    this._nativeAssetsBuilder,
-  }) : _logger = logger,
-       super(platformType: null, category: null, ephemeral: false);
-
-  final ProcessManager _processManager;
-  final FlutterVersion _flutterVersion;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final Artifacts _artifacts;
-  final Platform _platform;
-  final TestCompilerNativeAssetsBuilder? _nativeAssetsBuilder;
+  FlutterTesterDevice(super.id, {required ToolContext super.toolContext})
+    : super(platformType: null, category: null, ephemeral: false, logger: toolContext.logger);
 
   Process? _process;
   final DevicePortForwarder _portForwarder = const NoOpDevicePortForwarder();
@@ -80,7 +64,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
-    final FlutterVersion flutterVersion = _flutterVersion;
+    final FlutterVersion flutterVersion = toolContext.flutterVersion;
     return 'Flutter ${flutterVersion.frameworkRevisionShort}';
   }
 
@@ -128,17 +112,23 @@ class FlutterTesterDevice extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
+    final ToolContext(
+      :Artifacts artifacts,
+      :FileSystem fs,
+      :Logger logger,
+      :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {
-      _logger.printError('This device only supports debug mode.');
+      logger.printError('This device only supports debug mode.');
       return LaunchResult.failed();
     }
 
-    final Directory assetDirectory = _fileSystem.systemTempDirectory.createTempSync(
-      'flutter_tester.',
-    );
+    final Directory assetDirectory = fs.systemTempDirectory.createTempSync('flutter_tester.');
     final String applicationKernelFilePath = getKernelPathForTransformerOptions(
-      _fileSystem.path.join(assetDirectory.path, 'flutter-tester-app.dill'),
+      fs.path.join(assetDirectory.path, 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
 
@@ -154,7 +144,7 @@ class FlutterTesterDevice extends Device {
     );
 
     final command = <String>[
-      _artifacts.getArtifactPath(Artifact.flutterTester),
+      artifacts.getArtifactPath(Artifact.flutterTester),
       '--run-forever',
       '--non-interactive',
       if (debuggingOptions.enableDartProfiling) '--enable-dart-profiling',
@@ -170,14 +160,14 @@ class FlutterTesterDevice extends Device {
 
     ProtocolDiscovery? vmServiceDiscovery;
     try {
-      _logger.printTrace(command.join(' '));
-      _process = await _processManager.start(
+      logger.printTrace(command.join(' '));
+      _process = await processManager.start(
         command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
-          if (_platform.isWindows && _nativeAssetsBuilder != null)
+          if (platform.isWindows && nativeAssetsBuilder != null)
             'PATH':
-                '${_nativeAssetsBuilder.windowsBuildDirectory(project)};${_platform.environment['PATH']}',
+                '${nativeAssetsBuilder.windowsBuildDirectory(project, toolContext: toolContext)};${platform.environment['PATH']}',
         },
       );
       if (!debuggingOptions.debuggingEnabled) {
@@ -190,19 +180,19 @@ class FlutterTesterDevice extends Device {
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         ipv6: debuggingOptions.ipv6,
-        logger: _logger,
+        logger: logger,
       );
 
       final Uri? vmServiceUri = await vmServiceDiscovery.uri;
       if (vmServiceUri != null) {
         return LaunchResult.succeeded(vmServiceUri: vmServiceUri);
       }
-      _logger.printError(
+      logger.printError(
         'Failed to launch $package: '
         'The log reader failed unexpectedly.',
       );
     } on Exception catch (error) {
-      _logger.printError('Failed to launch $package: $error');
+      logger.printError('Failed to launch $package: $error');
     } finally {
       await vmServiceDiscovery?.cancel();
     }
@@ -224,7 +214,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
-    return LocalDevFSWriter(fileSystem: _fileSystem);
+    return LocalDevFSWriter(fileSystem: toolContext.fs);
   }
 
   @override
@@ -235,25 +225,9 @@ class FlutterTesterDevice extends Device {
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
-  FlutterTesterDevices({
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FlutterVersion flutterVersion,
-    required Platform platform,
-    TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-  }) : _testerDevice = FlutterTesterDevice(
-         kTesterDeviceId,
-         fileSystem: fileSystem,
-         artifacts: artifacts,
-         processManager: processManager,
-         logger: logger,
-         flutterVersion: flutterVersion,
-         platform: platform,
-         nativeAssetsBuilder: nativeAssetsBuilder,
-       ),
-       super('Flutter tester');
+  FlutterTesterDevices({required ToolContext super.toolContext})
+    : _testerDevice = FlutterTesterDevice(kTesterDeviceId, toolContext: toolContext),
+      super('Flutter tester');
 
   static const kTesterDeviceId = 'flutter-tester';
 

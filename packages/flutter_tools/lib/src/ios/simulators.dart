@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../devfs.dart';
@@ -58,44 +59,41 @@ class IOSSimulators extends PollingDeviceDiscovery {
 }
 
 class IOSSimulatorUtils {
-  IOSSimulatorUtils({
-    required Xcode xcode,
-    required Logger logger,
-    required ProcessManager processManager,
-    required this._operatingSystemUtils,
-  }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
-       _xcode = xcode;
+  IOSSimulatorUtils({required Xcode xcode, required this._toolContext}) : _xcode = xcode {
+    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
+    _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode);
+  }
 
-  final SimControl _simControl;
+  late final SimControl _simControl;
   final Xcode _xcode;
-  final OperatingSystemUtils _operatingSystemUtils;
+  final ToolContext _toolContext;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulator>[];
     }
 
-    final cpuArch = CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+    final ToolContext(:Logger logger, :OperatingSystemUtils os) = _toolContext;
+    final cpuArch = CpuArch.fromHostPlatform(os.hostPlatform);
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
         .map<IOSSimulator?>((BootedSimDevice device) {
-          final String? udid = device.udid;
-          final String? name = device.name;
+          final BootedSimDevice(:String category, :String? name, :String? udid) = device;
           if (udid == null) {
-            globals.printTrace('Could not parse simulator udid');
+            logger.printTrace('Could not parse simulator udid');
             return null;
           }
           if (name == null) {
-            globals.printTrace('Could not parse simulator name');
+            logger.printTrace('Could not parse simulator name');
             return null;
           }
           return IOSSimulator(
             udid,
             name: name,
             simControl: _simControl,
-            simulatorCategory: device.category,
-            logger: _simControl._logger,
+            simulatorCategory: category,
+            toolContext: _toolContext,
             cpuArch: cpuArch,
           );
         })
@@ -362,8 +360,13 @@ class IOSSimulator extends Device {
     required this.simulatorCategory,
     required this._simControl,
     required this._cpuArch,
-    required super.logger,
-  }) : super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
+    required ToolContext super.toolContext,
+  }) : super(
+         category: Category.mobile,
+         platformType: PlatformType.ios,
+         ephemeral: true,
+         logger: toolContext.logger,
+       );
 
   @override
   final String name;
@@ -563,9 +566,11 @@ class IOSSimulator extends Device {
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
 
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
+      toolContext: toolContext,
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
@@ -574,8 +579,8 @@ class IOSSimulator extends Device {
       await diagnoseXcodeBuildFailure(
         buildResult,
         analytics: globals.analytics,
-        fileSystem: globals.fs,
-        logger: globals.logger,
+        fileSystem: fs,
+        logger: logger,
         platform: FlutterDarwinPlatform.ios,
         project: app.project.parent,
         device: this,
@@ -584,14 +589,14 @@ class IOSSimulator extends Device {
     }
 
     // Step 2: Assert that the Xcode project was successfully built.
-    final Directory bundle = globals.fs.directory(app.simulatorBundlePath);
+    final Directory bundle = fs.directory(app.simulatorBundlePath);
     final bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
     }
 
     // Step 3: Install the updated bundle to the simulator.
-    await _simControl.install(id, globals.fs.path.absolute(bundle.path));
+    await _simControl.install(id, fs.path.absolute(bundle.path));
   }
 
   @override

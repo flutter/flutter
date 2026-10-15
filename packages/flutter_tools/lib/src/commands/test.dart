@@ -582,7 +582,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
             nativeAssetsManifest: null,
             flutterHookResult: null,
           ) // Don't build for host when running integration tests.
-        : (await nativeAssetsBuilder?.buildWithHookResult(buildInfo) ??
+        : (await nativeAssetsBuilder?.buildWithHookResult(buildInfo, toolContext: _toolContext) ??
               (nativeAssetsManifest: null, flutterHookResult: null));
     String? testAssetPath;
     if (buildTestAssets) {

@@ -185,9 +185,7 @@ Future<void> run(List<String> args) async {
         concurrency: math.max(1, platform.numberOfProcessors - 2),
         icudtlPath: fs.path.absolute(argResults[_kOptionIcudtl] as String),
         coverageDirectory: coverageDirectory,
-        nativeAssetsBuilder: TestCompilerNativeAssetsBuilderImpl(
-          toolContext: dependencies.toolContext,
-        ),
+        nativeAssetsBuilder: const TestCompilerNativeAssetsBuilderImpl(),
       ),
     );
 

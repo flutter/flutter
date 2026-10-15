@@ -96,12 +96,14 @@ void main() {
       fakeProcessManager = FakeProcessManager.empty();
       device = FlutterTesterDevice(
         'flutter-tester',
-        fileSystem: fileSystem,
-        processManager: fakeProcessManager,
-        artifacts: Artifacts.test(),
-        logger: BufferLogger.test(),
-        flutterVersion: FakeFlutterVersion(),
-        platform: FakePlatform(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          processManager: fakeProcessManager,
+          artifacts: Artifacts.test(),
+          logger: BufferLogger.test(),
+          flutterVersion: FakeFlutterVersion(),
+          platform: FakePlatform(),
+        ),
       );
       logLines = <String>[];
       device.getLogReader().logLines.listen(logLines.add);
@@ -230,12 +232,14 @@ Hello!
 
 FlutterTesterDevices setUpFlutterTesterDevices() {
   return FlutterTesterDevices(
-    logger: BufferLogger.test(),
-    artifacts: Artifacts.test(),
-    processManager: FakeProcessManager.any(),
-    fileSystem: MemoryFileSystem.test(),
-    flutterVersion: FakeFlutterVersion(),
-    platform: FakePlatform(),
+    toolContext: FakeToolContext(
+      logger: BufferLogger.test(),
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fs: MemoryFileSystem.test(),
+      flutterVersion: FakeFlutterVersion(),
+      platform: FakePlatform(),
+    ),
   );
 }
 

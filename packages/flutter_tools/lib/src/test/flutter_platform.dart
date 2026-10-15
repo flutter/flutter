@@ -7,7 +7,6 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config.dart';
-import 'package:process/process.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/platform.dart'; // ignore: implementation_imports
 import 'package:vm_service/vm_service.dart';
@@ -486,18 +485,9 @@ class FlutterPlatform extends PlatformPlugin {
         compileExpression: _compileExpressionService,
       );
     }
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = _toolContext;
     return FlutterTesterTestDevice(
       id: ourTestCount,
-      platform: platform,
-      fileSystem: fs,
-      processManager: processManager,
-      logger: logger,
+      toolContext: _toolContext,
       flutterTesterBinPath: flutterTesterBinPath,
       enableVmService: enableVmService!,
       machine: machine,

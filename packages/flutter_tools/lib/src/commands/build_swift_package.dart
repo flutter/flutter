@@ -277,7 +277,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     )..createSync(recursive: true);
     final Directory pluginsDirectory = flutterIntegrationPackage.childDirectory(_kFlutterPlugins);
 
-    await project.regeneratePlatformSpecificTooling(releaseMode: false);
+    await project.regeneratePlatformSpecificTooling(releaseMode: false, toolContext: toolContext);
 
     final List<BuildInfo> buildInfos = await _getBuildInfos();
     if (buildInfos.isEmpty) {
