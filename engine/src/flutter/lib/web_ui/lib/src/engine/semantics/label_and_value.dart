@@ -9,7 +9,7 @@ import '../browser_detection.dart';
 import '../dom.dart';
 import 'semantics.dart';
 
-/// The method used to represend a label of a leaf node in the DOM.
+/// The method used to represent a label of a leaf node in the DOM.
 ///
 /// This is required by some screen readers and web crawlers.
 ///
@@ -162,11 +162,18 @@ final class DomTextRepresentation extends LabelRepresentationBehavior {
     final DomText domText = domDocument.createTextNode(label);
     _domText = domText;
     semanticsObject.element.appendChild(domText);
+
+    // Clip the text to the node's rect. Text that overflows, such as a long
+    // label wrapping inside a small button, is still hit-tested by the browser
+    // and would steal taps from nodes underneath it. This is safe because DOM
+    // text is only used by nodes without children.
+    semanticsObject.element.style.overflow = 'hidden';
   }
 
   @override
   void cleanUp() {
     _domText?.remove();
+    semanticsObject.element.style.overflow = 'visible';
   }
 
   // DOM text does not introduce extra DOM elements, so focus should go to the
@@ -213,7 +220,7 @@ typedef _Measurement = ({
 /// ## Why use scaling rather than another method?
 ///
 /// Due to https://g-issues.chromium.org/issues/40875151?pli=1&authuser=0 and a
-/// lack of an ARIA role for plain text nodes (expecially after the removal of
+/// lack of an ARIA role for plain text nodes (especially after the removal of
 /// ARIA role "text" in WebKit, starting with Safari 17), there is no way to
 /// customize the size of the screen reader focus ring for a plain text element.
 /// The focus ring always tightly hugs the text itself. The following approaches
@@ -344,7 +351,7 @@ final class SizedSpanRepresentation extends LabelRepresentationBehavior {
     assert(
       queue != null && queue.isNotEmpty,
       '_updateSizes was called with an empty _resizeQueue. This should never '
-      'happend. If it does, please file an issue at '
+      'happen. If it does, please file an issue at '
       'https://github.com/flutter/flutter/issues/new/choose',
     );
 
@@ -602,7 +609,7 @@ class LabelAndValue extends SemanticBehavior {
   /// Moves the focus to the element that carries the semantic label.
   ///
   /// Typically a node would be [Focusable] and focus request would be satisfied
-  /// by transfering focus through the normal focusability features. However,
+  /// by transferring focus through the normal focusability features. However,
   /// sometimes accessibility focus needs to be moved to a non-focusable node,
   /// such as the title of a dialog. This method handles that situation.
   /// Different label representations use different DOM structures, so the

@@ -56,9 +56,10 @@ class DartPluginRegistrantTarget extends Target {
     // code should just do the right thing on every platform.
     // Failing that, consider throwing if `targetPlatform` isn't set and finding
     // all violations, as it's not consistently set here.
-    return targetPlatform == TargetPlatform.fuchsia_arm64 ||
-        targetPlatform == TargetPlatform.fuchsia_x64 ||
-        targetPlatform == TargetPlatform.web_javascript;
+    return switch (targetPlatform?.os) {
+      .fuchsia || .web => true,
+      _ => false,
+    };
   }
 
   @override

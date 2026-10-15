@@ -535,6 +535,43 @@ TEST_F(WindowsTest, PostPlatformThreadTaskCancelledOnEngineDestroy) {
   EXPECT_TRUE(captures.cancel_called);
 }
 
+// Verify that the cancel callback is not invoked for a task that runs.
+TEST_F(WindowsTest, PostPlatformThreadTaskNotCancelledWhenRun) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  struct Captures {
+    bool callback_called = false;
+    bool cancel_called = false;
+  } captures;
+
+  FlutterDesktopEnginePostPlatformThreadTask(
+      engine.get(),
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->callback_called = true;
+      },
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->cancel_called = true;
+      },
+      &captures);
+
+  EXPECT_FALSE(captures.cancel_called);
+
+  while (!captures.callback_called) {
+    PumpMessage();
+  }
+
+  // Ensures that the cancel callback is not called,
+  // in case the engine was shut down after running the task.
+  engine.reset();
+
+  EXPECT_TRUE(captures.callback_called);
+  EXPECT_FALSE(captures.cancel_called);
+}
+
 // Implicit view has the implicit view ID.
 TEST_F(WindowsTest, GetViewId) {
   auto& context = GetContext();

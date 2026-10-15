@@ -51,6 +51,10 @@ void runSemanticsTests() {
     EngineSemantics.debugResetSemantics();
   });
 
+  tearDown(() {
+    EnginePlatformDispatcher.instance.onSemanticsActionEvent = null;
+  });
+
   group(EngineSemanticsOwner, () {
     _testEngineSemanticsOwner();
   });
@@ -3452,6 +3456,70 @@ void _testSelectables() {
     semantics().semanticsEnabled = false;
   });
 
+  test('renders listBox and option with aria-selected and omits group on inner generic and scrollable wrappers', () async {
+    semantics()
+      ..debugOverrideTimestampFunction(() => _testTime)
+      ..semanticsEnabled = true;
+
+    final tester = SemanticsTester(owner());
+    tester.updateNode(
+      id: 0,
+      role: ui.SemanticsRole.listBox,
+      rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+      children: <SemanticsNodeUpdate>[
+        tester.updateNode(
+          id: 1,
+          rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+          children: <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: 2,
+              flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+              actions: ui.SemanticsAction.scrollUp.index | ui.SemanticsAction.scrollDown.index,
+              scrollExtentMax: 100.0,
+              scrollPosition: 0.0,
+              rect: const ui.Rect.fromLTRB(0, 0, 100, 60),
+              children: <SemanticsNodeUpdate>[
+                tester.updateNode(
+                  id: 3,
+                  role: ui.SemanticsRole.option,
+                  label: 'apple',
+                  hasTap: true,
+                  // isButton mirrors material_ui's per-item Semantics(button: true,
+                  // selected: ...); the explicit role must win over the button flag.
+                  flags: const ui.SemanticsFlags(isButton: true, isSelected: ui.Tristate.isTrue),
+                  rect: const ui.Rect.fromLTRB(0, 0, 100, 30),
+                ),
+                tester.updateNode(
+                  id: 4,
+                  role: ui.SemanticsRole.option,
+                  label: 'banana',
+                  hasTap: true,
+                  flags: const ui.SemanticsFlags(isSelected: ui.Tristate.isFalse),
+                  rect: const ui.Rect.fromLTRB(0, 30, 100, 60),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    tester.apply();
+
+    expectSemanticsTree(owner(), '''
+<sem role="listbox">
+    <sem role="none">
+        <sem role="none" style="overflow-y: scroll">
+            <flt-semantics-scroll-overflow></flt-semantics-scroll-overflow>
+            <sem role="option" aria-label="apple" aria-selected="true"></sem>
+            <sem role="option" aria-label="banana" aria-selected="false"></sem>
+        </sem>
+    </sem>
+</sem>
+''');
+
+    semantics().semanticsEnabled = false;
+  });
+
   test('Checkable takes precedence over selectable', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
@@ -4627,7 +4695,7 @@ void _testRoute() {
   // Test the scenario of a route coming up and containing non-focusable
   // descendants that can have a11y focus. The expectation is that the first
   // descendant will be auto-focused, even if it's not input-focusable.
-  test('focuses on the first non-focusable descedant', () async {
+  test('focuses on the first non-focusable descendant', () async {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -4709,6 +4777,186 @@ void _testRoute() {
 
     expect(capturedActions, isEmpty);
     expect(domDocument.activeElement, flutterViewRoot);
+
+    semantics().semanticsEnabled = false;
+  });
+
+  test('skips non-focusable Focusable containers to focus on inner descendant', () async {
+    Future<void> checkContainerRouteDefaultFocus({
+      required SemanticsNodeUpdate Function(
+        SemanticsTester tester,
+        List<SemanticsNodeUpdate> leafChildren,
+      )
+      buildContainer,
+      required Map<int, EngineSemanticsRole> expectedContainerRoles,
+      required int firstLeafId,
+    }) async {
+      // 1. Container wrapping a non-focusable leaf ('Heading') + focusable button:
+      //    route default focus should skip the container and focus the leaf <span>.
+      EngineSemantics.debugResetSemantics();
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+
+      final capturedActions = <CapturedAction>[];
+      EnginePlatformDispatcher.instance.onSemanticsActionEvent = (ui.SemanticsActionEvent event) {
+        capturedActions.add((event.nodeId, event.type, event.arguments));
+      };
+
+      var tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        flags: const ui.SemanticsFlags(scopesRoute: true),
+        transform: Matrix4.identity().toFloat64(),
+        children: <SemanticsNodeUpdate>[
+          buildContainer(tester, <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: firstLeafId,
+              label: 'Heading',
+              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+            ),
+            tester.updateNode(
+              id: firstLeafId + 1,
+              label: 'Click me!',
+              flags: const ui.SemanticsFlags(
+                isEnabled: ui.Tristate.isTrue,
+                isButton: true,
+                isFocused: ui.Tristate.isFalse,
+              ),
+              hasTap: true,
+              rect: const ui.Rect.fromLTRB(0, 50, 100, 100),
+            ),
+          ]),
+        ],
+      );
+      tester.apply();
+
+      expect(capturedActions, isEmpty);
+      for (final MapEntry<int, EngineSemanticsRole>(:key, :value)
+          in expectedContainerRoles.entries) {
+        expect(tester.getSemanticsObject(key).semanticRole?.kind, value);
+      }
+      final DomElement span = owner().debugSemanticsTree![firstLeafId]!.element
+          .querySelectorAll('span')
+          .single;
+      expect(span.tabIndex, -1);
+      expect(domDocument.activeElement, span);
+
+      // 2. Container wrapping only a focusable button:
+      //    route default focus should skip the container and focus the button.
+      EngineSemantics.debugResetSemantics();
+      semantics()
+        ..debugOverrideTimestampFunction(() => _testTime)
+        ..semanticsEnabled = true;
+
+      tester = SemanticsTester(owner());
+      tester.updateNode(
+        id: 0,
+        flags: const ui.SemanticsFlags(scopesRoute: true),
+        transform: Matrix4.identity().toFloat64(),
+        children: <SemanticsNodeUpdate>[
+          buildContainer(tester, <SemanticsNodeUpdate>[
+            tester.updateNode(
+              id: firstLeafId,
+              label: 'Click me!',
+              flags: const ui.SemanticsFlags(
+                isEnabled: ui.Tristate.isTrue,
+                isButton: true,
+                isFocused: ui.Tristate.isFalse,
+              ),
+              hasTap: true,
+              rect: const ui.Rect.fromLTRB(0, 0, 100, 50),
+            ),
+          ]),
+        ],
+      );
+      tester.apply();
+
+      expect(capturedActions, isEmpty);
+      final DomElement button = tester.getSemanticsObject(firstLeafId).element;
+      expect(button.tabIndex, 0);
+      expect(domDocument.activeElement, button);
+    }
+
+    // SemanticScrollable (hasImplicitScrolling: true)
+    await checkContainerRouteDefaultFocus(
+      buildContainer: (SemanticsTester tester, List<SemanticsNodeUpdate> children) =>
+          tester.updateNode(
+            id: 1,
+            flags: const ui.SemanticsFlags(hasImplicitScrolling: true),
+            rect: const ui.Rect.fromLTRB(0, 0, 100, 100),
+            children: children,
+          ),
+      expectedContainerRoles: <int, EngineSemanticsRole>{1: EngineSemanticsRole.scrollable},
+      firstLeafId: 2,
+    );
+
+    // SemanticForm (ui.SemanticsRole.form)
+    await checkContainerRouteDefaultFocus(
+      buildContainer: (SemanticsTester tester, List<SemanticsNodeUpdate> children) =>
+          tester.updateNode(
+            id: 1,
+            role: ui.SemanticsRole.form,
+            rect: const ui.Rect.fromLTRB(0, 0, 100, 100),
+            children: children,
+          ),
+      expectedContainerRoles: <int, EngineSemanticsRole>{1: EngineSemanticsRole.form},
+      firstLeafId: 2,
+    );
+
+    // SemanticList -> SemanticListItem
+    await checkContainerRouteDefaultFocus(
+      buildContainer: (SemanticsTester tester, List<SemanticsNodeUpdate> children) =>
+          tester.updateNode(
+            id: 1,
+            role: ui.SemanticsRole.list,
+            rect: const ui.Rect.fromLTRB(0, 0, 100, 100),
+            children: <SemanticsNodeUpdate>[
+              tester.updateNode(
+                id: 2,
+                role: ui.SemanticsRole.listItem,
+                rect: const ui.Rect.fromLTRB(0, 0, 100, 100),
+                children: children,
+              ),
+            ],
+          ),
+      expectedContainerRoles: <int, EngineSemanticsRole>{
+        1: EngineSemanticsRole.list,
+        2: EngineSemanticsRole.listItem,
+      },
+      firstLeafId: 3,
+    );
+
+    // SemanticTable -> SemanticRow -> SemanticCell
+    await checkContainerRouteDefaultFocus(
+      buildContainer: (SemanticsTester tester, List<SemanticsNodeUpdate> children) =>
+          tester.updateNode(
+            id: 1,
+            role: ui.SemanticsRole.table,
+            rect: const ui.Rect.fromLTRB(0, 0, 100, 100),
+            children: <SemanticsNodeUpdate>[
+              tester.updateNode(
+                id: 2,
+                role: ui.SemanticsRole.row,
+                rect: const ui.Rect.fromLTRB(0, 0, 100, 100),
+                children: <SemanticsNodeUpdate>[
+                  tester.updateNode(
+                    id: 3,
+                    role: ui.SemanticsRole.cell,
+                    rect: const ui.Rect.fromLTRB(0, 0, 100, 100),
+                    children: children,
+                  ),
+                ],
+              ),
+            ],
+          ),
+      expectedContainerRoles: <int, EngineSemanticsRole>{
+        1: EngineSemanticsRole.table,
+        2: EngineSemanticsRole.row,
+        3: EngineSemanticsRole.cell,
+      },
+      firstLeafId: 4,
+    );
 
     semantics().semanticsEnabled = false;
   });
@@ -5309,7 +5557,7 @@ void _testMenus() {
     expect(object.element.getAttribute('role'), 'menu');
   });
 
-  test('menu can have non-immidiate menu item nodes', () {
+  test('menu can have non-immediate menu item nodes', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
@@ -5432,7 +5680,7 @@ void _testMenus() {
     expect(object1.element.getAttribute('aria-owns'), 'flt-semantic-node-7 flt-semantic-node-8');
   });
 
-  test('menu bar can have non-immidiate menu item nodes', () {
+  test('menu bar can have non-immediate menu item nodes', () {
     semantics()
       ..debugOverrideTimestampFunction(() => _testTime)
       ..semanticsEnabled = true;
