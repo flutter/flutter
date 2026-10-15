@@ -1330,7 +1330,7 @@ void _createPlatformPluginSymlinks(
     // ERROR_ALREADY_EXISTS on Windows or EEXIST on POSIX).
     final FileSystemEntityType entityType = link.fileSystem.typeSync(link.path, followLinks: false);
     try {
-      if (entityType == FileSystemEntityType.link) {
+      if (entityType == .link) {
         try {
           final String target = link.targetSync();
           if (link.fileSystem.path.canonicalize(target) ==
@@ -1342,7 +1342,7 @@ void _createPlatformPluginSymlinks(
           // Fall through to delete and recreate if resolving target throws.
         }
         ErrorHandlingFileSystem.deleteIfExists(link);
-      } else if (entityType != FileSystemEntityType.notFound) {
+      } else if (entityType != .notFound) {
         ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
       }
       link.createSync(path);
@@ -1357,7 +1357,7 @@ void _createPlatformPluginSymlinks(
           link.path,
           followLinks: false,
         );
-        if (currentType == FileSystemEntityType.link) {
+        if (currentType == .link) {
           try {
             final String target = link.targetSync();
             if (link.fileSystem.path.canonicalize(target) ==

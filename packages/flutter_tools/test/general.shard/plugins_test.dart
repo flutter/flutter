@@ -2186,13 +2186,29 @@ flutter:
         },
       );
 
-      testUsingContext(
+      void writeFakePluginDependenciesFile(Directory pluginDir) {
+        flutterProject.flutterPluginsDependenciesFile.createSync(recursive: true);
+        flutterProject.flutterPluginsDependenciesFile.writeAsStringSync(
+          jsonEncode(<String, Object?>{
+            'plugins': <String, Object?>{
+              'linux': <Object?>[
+                <String, String>{'name': 'some_plugin', 'path': pluginDir.path},
+              ],
+              'windows': <Object?>[
+                <String, String>{'name': 'some_plugin', 'path': pluginDir.path},
+              ],
+            },
+          }),
+        );
+      }
+
+      testWithoutContext(
         'createPluginSymlinks replaces existing directories with symlinks without failing',
-        () async {
+        () {
           linuxProject.exists = true;
           windowsProject.exists = true;
           final Directory pluginDir = createFakePlugin(fs);
-          await refreshPluginsList(flutterProject);
+          writeFakePluginDependenciesFile(pluginDir);
 
           final directories = <Directory>[
             linuxProject.pluginSymlinkDirectory.childDirectory('some_plugin'),
@@ -2203,7 +2219,7 @@ flutter:
             dir.createSync(recursive: true);
             dir.childFile('stale.txt').writeAsStringSync('stale content');
           }
-          createPluginSymlinks(flutterProject);
+          createPluginSymlinks(flutterProject, featureFlagsOverride: featureFlags);
 
           final links = <Link>[
             linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
@@ -2214,55 +2230,37 @@ flutter:
             expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
           }
         },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => featureFlags,
-        },
       );
 
-      testUsingContext(
-        'createPluginSymlinks gracefully handles race conditions where matching symlink is created concurrently',
-        () async {
-          final collisionFs = _CollisionInjectingFileSystem(fs);
-          windowsProject.pluginSymlinkDirectory = collisionFs.directory(
-            windowsProject.pluginSymlinkDirectory.path,
-          );
-          linuxProject.pluginSymlinkDirectory = collisionFs.directory(
-            linuxProject.pluginSymlinkDirectory.path,
-          );
-          linuxProject.exists = true;
-          windowsProject.exists = true;
-          final Directory pluginDir = createFakePlugin(fs);
-          await refreshPluginsList(flutterProject);
+      testWithoutContext('createPluginSymlinks gracefully handles race conditions where matching symlink is created concurrently', () {
+        final collisionFs = _CollisionInjectingFileSystem(fs);
+        windowsProject.pluginSymlinkDirectory = collisionFs.directory(
+          windowsProject.pluginSymlinkDirectory.path,
+        );
+        linuxProject.pluginSymlinkDirectory = collisionFs.directory(
+          linuxProject.pluginSymlinkDirectory.path,
+        );
+        linuxProject.exists = true;
+        windowsProject.exists = true;
+        final Directory pluginDir = createFakePlugin(fs);
+        writeFakePluginDependenciesFile(pluginDir);
 
-          // Delete existing links so createPluginSymlinks will attempt to create them.
-          final links = <Link>[
-            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
-            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
-          ];
-          for (final link in links) {
-            link.deleteSync();
-          }
+        final links = <Link>[
+          linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
+          windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
+        ];
+        collisionFs.simulateMatchingCollision = true;
+        createPluginSymlinks(flutterProject, featureFlagsOverride: featureFlags);
 
-          collisionFs.simulateMatchingCollision = true;
-          createPluginSymlinks(flutterProject);
+        for (final link in links) {
+          expect(link, exists);
+          expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
+        }
+      });
 
-          for (final link in links) {
-            expect(link, exists);
-            expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
-          }
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => featureFlags,
-        },
-      );
-
-      testUsingContext(
+      testWithoutContext(
         'createPluginSymlinks repairs conflicting entity if created concurrently',
-        () async {
+        () {
           final collisionFs = _CollisionInjectingFileSystem(fs);
           windowsProject.pluginSymlinkDirectory = collisionFs.directory(
             windowsProject.pluginSymlinkDirectory.path,
@@ -2273,28 +2271,19 @@ flutter:
           linuxProject.exists = true;
           windowsProject.exists = true;
           final Directory pluginDir = createFakePlugin(fs);
-          await refreshPluginsList(flutterProject);
+          writeFakePluginDependenciesFile(pluginDir);
 
           final links = <Link>[
             linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
             windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
           ];
-          for (final link in links) {
-            link.deleteSync();
-          }
-
           collisionFs.simulateConflictingCollision = true;
-          createPluginSymlinks(flutterProject);
+          createPluginSymlinks(flutterProject, featureFlagsOverride: featureFlags);
 
           for (final link in links) {
             expect(link, exists);
             expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
           }
-        },
-        overrides: <Type, Generator>{
-          FileSystem: () => fs,
-          ProcessManager: () => FakeProcessManager.any(),
-          FeatureFlags: () => featureFlags,
         },
       );
     });
@@ -4011,12 +4000,12 @@ class _CollisionInjectingFileSystem extends ForwardingFileSystem {
   bool simulateConflictingCollision = false;
 
   @override
-  Directory directory(dynamic path) {
+  Directory directory(Object? path) {
     return _CollisionInjectingDirectory(this, delegate.directory(path));
   }
 
   @override
-  Link link(dynamic path) {
+  Link link(Object? path) {
     final Link delegateLink = delegate.link(path);
     return _CollisionInjectingLink(this, delegateLink);
   }
