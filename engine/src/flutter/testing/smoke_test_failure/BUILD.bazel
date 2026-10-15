@@ -1,0 +1,30 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# run_tests.py's smoke test (gather_dart_smoke_test): fail_test.dart, a test
+# that fails on purpose, run under flutter_tester single- and multithreaded
+# with the Skia backend before the Dart tests proper. run_tests.py runs it
+# with expect_failure, which tolerates the failure; here the two targets
+# require it -- the runner must exit non-zero reporting a failed test --
+# which is the test's stated point ("this test SHOULD FAIL") and what a smoke
+# test of the harness's failure path can check. Hand-written like
+# ../dart/BUILD.bazel (GN's foreach over flutter_frontend_server); the test
+# list is BUILD.gn's.
+
+load("//engine/src/flutter/testing:testing.bzl", "flutter_dart_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_dart_tests(
+    name = "smoke_test_failure",
+    size = "small",
+    must_fail = True,
+    package_roots = ["//engine/src/flutter/testing/dart:test_packages"],
+    tests = ["fail_test.dart"],
+    # run_tests.py's two runs: multithreaded and single-threaded, Skia.
+    variants = [
+        "skia_mt",
+        "skia",
+    ],
+)
