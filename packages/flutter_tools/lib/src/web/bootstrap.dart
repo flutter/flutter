@@ -47,10 +47,18 @@ const forceLoadModule = function (relativeUrl, root) {
 };
 ''';
 
-// TODO(srujzs): Delete this once it's no longer used internally.
-
+/// The JavaScript bootstrap script to support in-browser hot restart/reload.
+///
+/// The [ddcModuleLoaderUrl] defines the custom module loader.
+/// The [mapperUrl] loads the special Dart stack trace mapper.
+///
+/// This file is served when the browser requests "main.dart.js" in debug mode,
+/// and is responsible for bootstrapping the library bundles and attaching
+/// the hot reload hooks.
+///
+/// If [generateLoadingIndicator] is `true`, embeds a loading indicator onto the
+/// web page that's visible while the Flutter app is loading.
 String generateDDCLibraryBundleBootstrapScript({
-  required String entrypoint,
   required String ddcModuleLoaderUrl,
   required String mapperUrl,
   required bool generateLoadingIndicator,
@@ -202,72 +210,6 @@ $_simpleLoaderScript
 ''';
 }
 
-/// The JavaScript bootstrap script to support in-browser hot restart.
-///
-/// The [requireUrl] loads our cached RequireJS script file. The [mapperUrl]
-/// loads the special Dart stack trace mapper.
-///
-/// This file is served when the browser requests "main.dart.js" in debug mode,
-/// and is responsible for bootstrapping the RequireJS modules and attaching
-/// the hot reload hooks.
-///
-/// If [generateLoadingIndicator] is `true`, embeds a loading indicator onto the
-/// web page that's visible while the Flutter app is loading.
-String generateBootstrapScript({
-  required String requireUrl,
-  required String mapperUrl,
-  required bool generateLoadingIndicator,
-}) {
-  return '''
-"use strict";
-
-${generateLoadingIndicator ? _generateLoadingIndicator() : ''}
-
-// A map containing the URLs for the bootstrap scripts in debug.
-let _scriptUrls = {
-  "mapper": "$mapperUrl",
-  "requireJs": "$requireUrl"
-};
-
-// Create a TrustedTypes policy so we can attach Scripts...
-let _ttPolicy;
-if (window.trustedTypes) {
-  _ttPolicy = trustedTypes.createPolicy("flutter-tools-bootstrap", {
-    createScriptURL: (url) => {
-      let scriptUrl = _scriptUrls[url];
-      if (!scriptUrl) {
-        console.error("Unknown Flutter Web bootstrap resource!", url);
-      }
-      return scriptUrl;
-    }
-  });
-}
-
-// Creates a TrustedScriptURL for a given `scriptName`.
-// See `_scriptUrls` and `_ttPolicy` above.
-function getTTScriptUrl(scriptName) {
-  let defaultUrl = _scriptUrls[scriptName];
-  return _ttPolicy ? _ttPolicy.createScriptURL(scriptName) : defaultUrl;
-}
-
-// Attach source mapping.
-var mapperEl = document.createElement("script");
-mapperEl.defer = true;
-mapperEl.async = false;
-mapperEl.src = getTTScriptUrl("mapper");
-document.head.appendChild(mapperEl);
-
-// Attach require JS.
-var requireEl = document.createElement("script");
-requireEl.defer = true;
-requireEl.async = false;
-requireEl.src = getTTScriptUrl("requireJs");
-// This attribute tells require JS what to load as main (defined below).
-requireEl.setAttribute("data-main", "main_module.bootstrap");
-document.head.appendChild(requireEl);
-''';
-}
-
 /// Creates a visual animated loading indicator and puts it on the page to
 /// provide feedback to the developer that the app is being loaded. Otherwise,
 /// the developer would be staring at a blank page wondering if the app will
@@ -299,7 +241,11 @@ const styles = `
       content: '';
       position: absolute;
       height: 100%;
+      width: 100%;
+      left: 0;
       background-color: #0175C2;
+      transform-origin: left;
+      will-change: transform;
       animation: indeterminate_first 2.0s infinite ease-out;
   }
 
@@ -307,29 +253,29 @@ const styles = `
       content: '';
       position: absolute;
       height: 100%;
+      width: 100%;
+      left: 0;
       background-color: #02569B;
+      transform-origin: left;
+      will-change: transform;
       animation: indeterminate_second 2.0s infinite ease-in;
   }
 
   @keyframes indeterminate_first {
       0% {
-          left: -100%;
-          width: 100%;
+          transform: translateX(-100%) scaleX(1);
       }
       100% {
-          left: 100%;
-          width: 10%;
+          transform: translateX(100%) scaleX(0.1);
       }
   }
 
   @keyframes indeterminate_second {
       0% {
-          left: -150%;
-          width: 100%;
+          transform: translateX(-150%) scaleX(1);
       }
       100% {
-          left: 100%;
-          width: 10%;
+          transform: translateX(100%) scaleX(0.1);
       }
   }
 `;
@@ -347,15 +293,26 @@ const indeterminate = document.createElement('div');
 indeterminate.className = "indeterminate";
 loader.appendChild(indeterminate);
 
-document.addEventListener('dart-app-ready', function (e) {
-   loader.remove();
-   styleSheet.remove();
-}, { once: true });
+window._removeFlutterLoader = function() {
+  loader.remove();
+  styleSheet.remove();
+  window._removeFlutterLoader = null;
+};
 ''';
 }
 
 const _onLoadEndCallback = r'$onLoadEndCallback';
 
+/// Generate a synthetic main module which captures the application's main
+/// method defined in the filename [entrypoint].
+///
+/// [nativeNullAssertions] is passed through as a DDC runtime option.
+///
+/// The [onLoadEndBootstrap] names the script file to be loaded last which will
+/// trigger the callback to start the application.
+///
+/// When [isCi] is true, the concurrent script requests will be throttled to
+/// avoid resource issues.
 String generateDDCLibraryBundleMainModule({
   required String entrypoint,
   required bool nativeNullAssertions,
@@ -392,6 +349,9 @@ String generateDDCLibraryBundleMainModule({
       const sdkOptions = {
         nativeNonNullAsserts: $nativeNullAssertions,
       };
+      if (window._removeFlutterLoader) {
+        window._removeFlutterLoader();
+      }
       dartDevEmbedder.runMain(appName, sdkOptions);
     }
     /* MAIN_EXTENSION_MARKER */
@@ -403,71 +363,6 @@ String generateDDCLibraryBundleMainModule({
 
 String generateDDCLibraryBundleOnLoadEndBootstrap() {
   return '''window.$_onLoadEndCallback();''';
-}
-
-/// Generate a synthetic main module which captures the application's main
-/// method.
-///
-/// If a [bootstrapModule] name is not provided, defaults to 'main_module.bootstrap'.
-///
-/// RE: Object.keys usage in app.main:
-/// This attaches the main entrypoint and hot reload functionality to the window.
-/// The app module will have a single property which contains the actual application
-/// code. The property name is based off of the entrypoint that is generated, for example
-/// the file `foo/bar/baz.dart` will generate a property named approximately
-/// `foo__bar__baz`. Rather than attempt to guess, we assume the first property of
-/// this object is the module.
-String generateMainModule({
-  required String entrypoint,
-  required bool nativeNullAssertions,
-  String bootstrapModule = 'main_module.bootstrap',
-  String loaderRootDirectory = '',
-}) {
-  // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
-  return '''
-/* ENTRYPOINT_EXTENTION_MARKER */
-// Disable require module timeout
-require.config({
-  waitSeconds: 0
-});
-// Create the main module loaded below.
-define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
-  dart_sdk._debugger.registerDevtoolsFormatter();
-  dart_sdk.dart.nativeNonNullAsserts($nativeNullAssertions);
-
-  // See the generateMainModule doc comment.
-  var child = {};
-  child.main = app[Object.keys(app)[0]].main;
-
-  /* MAIN_EXTENSION_MARKER */
-  child.main();
-
-  window.\$dartLoader = {};
-  window.\$dartLoader.rootDirectories = ["$loaderRootDirectory"];
-  if (window.\$requireLoader) {
-    window.\$requireLoader.getModuleLibraries = dart_sdk.dart.getModuleLibraries;
-  }
-  if (window.\$dartStackTraceUtility && !window.\$dartStackTraceUtility.ready) {
-    window.\$dartStackTraceUtility.ready = true;
-    let dart = dart_sdk.dart;
-    window.\$dartStackTraceUtility.setSourceMapProvider(function(url) {
-      var baseUrl = window.location.protocol + '//' + window.location.host;
-      url = url.replace(baseUrl + '/', '');
-      if (url == 'dart_sdk.js') {
-        return dart.getSourceMap('dart_sdk');
-      }
-      url = url.replace(".lib.js", "");
-      return dart.getSourceMap(url);
-    });
-  }
-  // Prevent DDC's requireJS to interfere with modern bundling.
-  if (typeof define === 'function' && define.amd) {
-    // Preserve a copy just in case...
-    define._amd = define.amd;
-    delete define.amd;
-  }
-});
-''';
 }
 
 typedef WebTestInfo = ({String entryPoint, Uri goldensUri, String? configFile});

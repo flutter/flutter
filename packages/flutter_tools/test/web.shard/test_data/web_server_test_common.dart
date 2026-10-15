@@ -115,6 +115,7 @@ class WebServerDeviceTestRunner {
       desired: getDesiredCapabilities(
         Browser.chrome,
         true, // headless
+        platform: const LocalPlatform(),
         chromeBinary: const LocalPlatform().environment[kChromeEnvironment],
       ),
     );

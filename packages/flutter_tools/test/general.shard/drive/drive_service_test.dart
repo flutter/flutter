@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
@@ -79,7 +80,7 @@ void main() {
     );
   });
 
-  testUsingContext('Exits if application package is null for target platform', () {
+  testWithoutContext('Exits if application package is null for target platform', () {
     final DriverService driverService = setUpDriverService(
       applicationPackageFactory: FakeApplicationPackageFactory(),
     );
@@ -151,9 +152,13 @@ void main() {
       device,
       DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
     );
-    final int testResult = await driverService.startTest('foo.test', <String>[
-      '--enable-experiment=non-nullable',
-    ], PackageConfig(<Package>[Package('test', Uri.base)]));
+    final int testResult = await driverService.startTest(
+      'foo.test',
+      DriveTestSpecification(
+        arguments: const <String>['--enable-experiment=non-nullable'],
+        packageConfig: PackageConfig(<Package>[Package('test', Uri.base)]),
+      ),
+    );
 
     expect(testResult, 23);
   });
@@ -190,9 +195,11 @@ void main() {
       );
       final int testResult = await driverService.startTest(
         'foo.test',
-        <String>['--enable-experiment=non-nullable'],
-        PackageConfig(<Package>[Package('test', Uri.base)]),
-        profileMemory: 'devtools_memory.json',
+        DriveTestSpecification(
+          arguments: const <String>['--enable-experiment=non-nullable'],
+          packageConfig: PackageConfig(<Package>[Package('test', Uri.base)]),
+          profileMemory: 'devtools_memory.json',
+        ),
       );
 
       expect(launcher.closed, true);
@@ -228,9 +235,13 @@ void main() {
         device,
         DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
       );
-      final int testResult = await driverService.startTest('foo.test', <String>[
-        '--enable-experiment=non-nullable',
-      ], PackageConfig.empty);
+      final int testResult = await driverService.startTest(
+        'foo.test',
+        const DriveTestSpecification(
+          arguments: <String>['--enable-experiment=non-nullable'],
+          packageConfig: PackageConfig.empty,
+        ),
+      );
 
       expect(testResult, 23);
     },
@@ -266,8 +277,7 @@ void main() {
 
       final int testResult = await driverService.startTest(
         'foo.test',
-        <String>[],
-        PackageConfig(<Package>[Package('test', Uri.base)]),
+        DriveTestSpecification(packageConfig: PackageConfig(<Package>[Package('test', Uri.base)])),
       );
 
       expect(testResult, 11);
@@ -428,12 +438,14 @@ void main() {
       final logReader = FakeDeviceLogReader();
       final DriverService driverService = FlutterDriverService(
         applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processUtils: ProcessUtils(logger: BufferLogger.test(), processManager: processManager),
         dartSdkPath: 'dart',
         devtoolsLauncher: FakeDevtoolsLauncher(),
         logFlushDelay: Duration.zero,
+        toolContext: FakeToolContext(
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processUtils: ProcessUtils(logger: BufferLogger.test(), processManager: processManager),
+        ),
         vmServiceConnector:
             (
               Uri httpUri, {
@@ -464,6 +476,37 @@ void main() {
       expect(logReader.isListened, true);
     },
   );
+
+  group('DriveTestSpecification', () {
+    testWithoutContext('has expected defaults', () {
+      const spec = DriveTestSpecification(packageConfig: PackageConfig.empty);
+      expect(spec.arguments, isEmpty);
+      expect(spec.packageConfig, PackageConfig.empty);
+      expect(spec.headless, isNull);
+      expect(spec.chromeBinary, isNull);
+      expect(spec.browserName, isNull);
+      expect(spec.androidEmulator, isNull);
+      expect(spec.driverPort, isNull);
+      expect(spec.webBrowserFlags, isEmpty);
+      expect(spec.browserDimension, isNull);
+      expect(spec.profileMemory, isNull);
+    });
+
+    testWithoutContext('parseBrowserDimension splits width, height, and optional dpr', () {
+      expect(DriveTestSpecification.parseBrowserDimension(null), isNull);
+      expect(DriveTestSpecification.parseBrowserDimension('1600x1024'), <String>['1600', '1024']);
+      expect(DriveTestSpecification.parseBrowserDimension('1600x1024@2'), <String>[
+        '1600',
+        '1024',
+        '2',
+      ]);
+      expect(DriveTestSpecification.parseBrowserDimension('800,600@1.5'), <String>[
+        '800',
+        '600',
+        '1.5',
+      ]);
+    });
+  });
 }
 
 FlutterDriverService setUpDriverService({
@@ -475,17 +518,22 @@ FlutterDriverService setUpDriverService({
   FlutterVmService? vmService,
 }) {
   logger ??= BufferLogger.test();
+  final fs = MemoryFileSystem.test();
   return FlutterDriverService(
     applicationPackageFactory:
         applicationPackageFactory ?? FakeApplicationPackageFactory(FakeApplicationPackage()),
-    logger: logger,
-    platform: platform ?? FakePlatform(),
-    processUtils: ProcessUtils(
-      logger: logger,
-      processManager: processManager ?? FakeProcessManager.any(),
-    ),
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
+    toolContext: FakeToolContext(
+      fs: fs,
+      logger: logger,
+      platform: platform ?? FakePlatform(),
+      processUtils: ProcessUtils(
+        logger: logger,
+        processManager: processManager ?? FakeProcessManager.any(),
+      ),
+      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+    ),
     vmServiceConnector:
         (
           Uri httpUri, {

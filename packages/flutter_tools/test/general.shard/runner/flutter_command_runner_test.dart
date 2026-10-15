@@ -5,9 +5,11 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -98,9 +100,9 @@ void main() {
       testUsingContext(
         'does not check that Flutter installation is up-to-date with --machine flag present anywhere',
         () async {
-          final runner =
-              createTestCommandRunner(_FlutterCommandWithItsOwnMachineFlag(verboseHelp: false))
-                  as FlutterCommandRunner;
+          final runner = createTestCommandRunner(
+            _FlutterCommandWithItsOwnMachineFlag(verboseHelp: false),
+          ) as FlutterCommandRunner;
           final version = globals.flutterVersion as FakeFlutterVersion;
 
           await runner.run(<String>['dummy-with-machine', '--machine']);
@@ -212,6 +214,7 @@ void main() {
                 commandPath: 'version',
                 result: 'success',
                 commandHasTerminal: false,
+                hostArch: globals.os.hostPlatform.cliName,
               ),
             ),
           );
@@ -301,8 +304,55 @@ void main() {
         });
 
         testUsingContext(
-          '',
+          'returns all packages in dev, examples, and packages',
           () {
+            final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
+            final List<String> packagePaths = runner
+                .getRepoPackages()
+                .map((Directory d) => d.path)
+                .toList();
+            expect(packagePaths, <String>[
+              fileSystem
+                  .directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool'))
+                  .path,
+              fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools')).path,
+            ]);
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => platform,
+            FlutterVersion: () => FakeFlutterVersion(),
+            OutputPreferences: () => OutputPreferences.test(),
+          },
+        );
+
+        testUsingContext(
+          'ignores .dart_tool and build directories',
+          () {
+            fileSystem
+                .file(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'build', 'pubspec.yaml'))
+                .createSync(recursive: true);
+            fileSystem
+                .file(
+                  fileSystem.path.join(
+                    _kFlutterRoot,
+                    'dev',
+                    'tools',
+                    'build',
+                    'ios',
+                    'SourcePackages',
+                    'pkg',
+                    'pubspec.yaml',
+                  ),
+                )
+                .createSync(recursive: true);
+            fileSystem
+                .file(
+                  fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', '.dart_tool', 'pubspec.yaml'),
+                )
+                .createSync(recursive: true);
+
             final runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
             final List<String> packagePaths = runner
                 .getRepoPackages()
@@ -666,6 +716,57 @@ void main() {
             FeatureFlags: () => TestFeatureFlags(),
           },
         );
+
+        testUsingContext(
+          'propagates local engine options to DeferredArtifacts and context Artifacts',
+          () async {
+            fileSystem
+                .directory('engine')
+                .childDirectory('src')
+                .childDirectory('out')
+                .childDirectory('host_debug')
+                .createSync(recursive: true);
+            final deferredArtifacts = DeferredArtifacts(Artifacts.test());
+            final localToolContext = FakeToolContext(
+              artifacts: deferredArtifacts,
+              fs: fileSystem,
+              logger: BufferLogger.test(),
+              platform: platform,
+              processManager: FakeProcessManager.any(),
+            );
+            final fakeCommand = FakeFlutterCommand();
+            final runner = createTestCommandRunner(
+              fakeCommand,
+              null,
+              localToolContext,
+            ) as FlutterCommandRunner;
+
+            Artifacts? artifactsInsideCommand;
+            fakeCommand.onRun = () {
+              artifactsInsideCommand = globals.artifacts;
+            };
+
+            await runner.run(<String>[
+              '--local-engine=host_debug',
+              '--local-engine-host=host_debug',
+              '--local-engine-src-path=./engine/src',
+              'fake',
+            ]);
+
+            expect(deferredArtifacts.usesLocalArtifacts, isTrue);
+            expect(deferredArtifacts.localEngineInfo?.localTargetName, 'host_debug');
+            expect(deferredArtifacts.localEngineInfo?.localHostName, 'host_debug');
+            expect(artifactsInsideCommand, isNotNull);
+            expect(artifactsInsideCommand!.usesLocalArtifacts, isTrue);
+            expect(artifactsInsideCommand!.localEngineInfo?.localTargetName, 'host_debug');
+            expect(artifactsInsideCommand!.localEngineInfo?.localHostName, 'host_debug');
+          },
+          overrides: <Type, Generator>{
+            FileSystem: () => fileSystem,
+            ProcessManager: () => FakeProcessManager.any(),
+            Platform: () => platform,
+          },
+        );
       });
     });
   });
@@ -674,11 +775,13 @@ void main() {
 class FakeFlutterCommand extends FlutterCommand {
   bool ran = false;
   late OutputPreferences preferences;
+  void Function()? onRun;
 
   @override
   Future<FlutterCommandResult> runCommand() {
     ran = true;
     preferences = globals.outputPreferences;
+    onRun?.call();
     return Future<FlutterCommandResult>.value(const FlutterCommandResult(ExitStatus.success));
   }
 
