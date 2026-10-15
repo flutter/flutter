@@ -2236,7 +2236,7 @@ void main() {
     final Finder item5 = find.text('item 5');
 
     // Verify initial layout positions before initiating drag.
-    const double initialItem4Top = 376.0;
+    const initialItem4Top = 376.0;
     expect(tester.getTopLeft(item4).dy, equals(initialItem4Top));
     expect(tester.getTopLeft(item5).dy, equals(430.0));
 
@@ -2257,7 +2257,7 @@ void main() {
 
     // Incremental sub-pixel pointer movements in the same region must keep item 4
     // displaced and not restore it to its original resting position (376.0).
-    for (int i = 0; i < 8; i++) {
+    for (var i = 0; i < 8; i++) {
       await drag.moveBy(const Offset(0, -0.5));
       await tester.pumpAndSettle();
 
