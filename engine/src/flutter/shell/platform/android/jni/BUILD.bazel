@@ -1,0 +1,70 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/shell/platform/android/jni/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "jni",
+    srcs = ["platform_view_android_jni.cc"],
+    hdrs = ["platform_view_android_jni.h"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flow
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/flow",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/lib/ui",
+        "//engine/src/flutter/shell/platform/android/surface:native_window",
+        "@skia",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "jni_mock",
+    testonly = True,
+    hdrs = ["jni_mock.h"],
+    deps = [
+        ":jni",
+        "//engine/src/flutter:config",
+    ],
+)
+
+cc_library(
+    name = "mock_jni_env",
+    testonly = True,
+    hdrs = ["mock_jni_env.h"],
+    deps = ["//engine/src/flutter:config"],
+)
+
+flutter_test_fixtures(
+    name = "jni_fixtures",
+)
+
+cc_test(
+    name = "jni_unittests",
+    size = "small",
+    srcs = ["jni_mock_unittest.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/testing:dart
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":jni_fixtures",
+        ":jni_mock",
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing",
+        "//engine/src/flutter/testing:dart",
+        "//engine/src/flutter/testing:skia",
+    ],
+)
