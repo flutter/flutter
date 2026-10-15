@@ -323,7 +323,9 @@ extension FileSystemLocking on FileSystem {
         if (openedFile != null) {
           try {
             openedFile.closeSync();
-          } on FileSystemException {} // ignore: empty_catches
+          } on FileSystemException {
+            // Ignore errors when closing the file after lock acquisition fails.
+          }
           openedFile = null;
         }
         final int? errorCode = e.osError?.errorCode;

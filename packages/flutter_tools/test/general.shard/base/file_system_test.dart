@@ -607,7 +607,7 @@ class _LockTestingFileSystem extends ForwardingFileSystem {
   int retryAttemptsBeforeSuccess = 0;
 
   @override
-  File file(dynamic path) => _LockTestingFile(this, delegate.file(path));
+  File file(Object? path) => _LockTestingFile(this, delegate.file(path));
 }
 
 class _LockTestingFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
