@@ -179,9 +179,13 @@ core_snapshot = rule(
 def _aot_snapshot_impl(ctx):
     # GN (testing.gni's dart_snapshot_aot): gen_snapshot --deterministic
     # --snapshot_kind=app-aot-elf --loading_unit_manifest=<manifest>
-    # --elf=<elf> <kernel>. GN declares the ELF alone; the manifest, written
-    # next to it, is an output here so that the sandbox keeps it.
-    manifest = ctx.actions.declare_file("loading_unit_manifest.json", sibling = ctx.outputs.elf)
+    # --elf=<elf> <kernel>. GN declares the ELF alone and names the manifest
+    # assets/loading_unit_manifest.json whatever the ELF (the three fixtures
+    # of //flutter/runtime write the same file in turn); here it is an output,
+    # so that the sandbox keeps it, named after its ELF so that they do not
+    # collide. Nothing reads it: it lists the ELF's loading units by path.
+    elf = ctx.outputs.elf
+    manifest = ctx.actions.declare_file(elf.basename.removesuffix(".so") + ".loading_unit_manifest.json", sibling = elf)
     args = ctx.actions.args()
     args.add("--deterministic")
     args.add("--snapshot_kind=app-aot-elf")
