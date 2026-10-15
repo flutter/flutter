@@ -36,6 +36,11 @@ _PRODUCT_MODES = [
     "//engine/src/flutter/common:runtime_mode_release",
 ]
 
+# run_tests.py's `'release' in build_dir`: the modes whose build directories
+# carry the word (host_release, host_jit_release), in which it does not run
+# the VM-service Dart tests.
+_RELEASE_MODES = _PRODUCT_MODES
+
 # The GPU test backends (build/bazel/gl_wrap): SwiftShader's Vulkan driver,
 # its ICD manifest and the Vulkan loader, which a suite needs in the
 # directory of its binary.
@@ -762,7 +767,10 @@ def flutter_dart_tests(
         the package's Dart files (GN finds them through the depfile).
       vm_service: run the tests with the VM service (testing/dart/vm_service;
         run_tests.py's enable_vm_service), and microtask_profiling_test with
-        --profile-microtasks.
+        --profile-microtasks. run_tests.py skips these tests in a build
+        directory with `release` in its name; here they are incompatible in
+        the jit_release and release modes, which a wildcard or suite run
+        skips.
       srcs: Dart sources of other packages of this repository the tests
         import (skia_gold_client's, lib/gpu's), besides this package's.
       package_roots: dart_package_root targets with the packages the tests
@@ -831,6 +839,7 @@ def flutter_dart_tests(
                 must_fail = must_fail,
                 size = size,
                 tags = tags,
+                target_compatible_with = select({mode: ["@platforms//:incompatible"] for mode in _RELEASE_MODES} | {"//conditions:default": []}) if vm_service else [],
                 visibility = ["//visibility:private"],
             )
             all_tests.append(":" + test_name)
