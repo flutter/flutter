@@ -170,8 +170,11 @@ bazelisk test  //engine/src/flutter/build/bazel/dart_wrap/tests:dart_vm_smoke_te
 ```
 
 Products are targets of the package (`:gen_snapshot`, `:libdart_jit.a`,
-`:compile_commands.json`, ...), libraries are consumed through the facades
-(`:libdart_jit`, `:common_embedder_dart_io`, `:elf_loader`, ...). A full
+`:libdart_aotruntime.a`, `:compile_commands.json`, ...), libraries are
+consumed through the facades (`:libdart_jit`, `:libdart_aotruntime` -- the
+VM for AOT snapshots, which `//engine/src/flutter/runtime:libdart` picks in
+the profile and release runtime modes --, `:common_embedder_dart_io`,
+`:elf_loader`, ...). A full
 build takes as long as the GN build of the same targets (5-6 minutes of
 ninja on 24 cores, plus a few seconds for the symlink tree, `gn gen` and the
 archives); the action reserves the machine, so Bazel runs nothing else
@@ -214,9 +217,17 @@ rules in `dart/`:
    prebuilt SDK's `dartaotruntime` running its `frontend_server_aot.dart.snapshot`
    (`@dart_sdk_linux_x64`, GN's `host_prebuilt_dart_sdk`) against the
    platform and the engine's package configuration. `dart_snapshot_kernel`
-   and `dart_snapshot_aot` have macros of their own; the AOT snapshot exists
-   in the profile and release modes alone, where the kernel is compiled with
-   `--aot`. Fixtures that are other targets' outputs (GN's
+   and `dart_snapshot_aot` have macros of their own. In the profile and
+   release modes (testing.gni's `is_aot_test`) the kernel is compiled with
+   `--aot --tfa` and the wrapped build's `gen_snapshot` turns it into
+   `assets/app_elf_snapshot.so` beside it
+   (`--//engine/src/flutter/common:runtime_mode=profile`): the fixtures load
+   the ELF instead of the kernel, the embedder tests of the AOT data API run
+   and the JIT snapshot ones skip, as under GN; the `dart_snapshot_aot`
+   target is incompatible in the other modes, so a wildcard build skips it.
+   `flutter_tester` keeps the JIT VM in every mode (`shell/testing/BUILD.gn`
+   names `libdart_jit` directly), so the Dart tests run their kernels
+   unchanged there. Fixtures that are other targets' outputs (GN's
    `fixtures = get_target_outputs(":runtime_stages")`, through
    `filter_include`) are `fixtures_targets`, a dictionary of target to
    patterns, copied into `assets/` with the files; GN's `deps` of the

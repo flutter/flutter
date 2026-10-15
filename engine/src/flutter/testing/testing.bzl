@@ -253,12 +253,12 @@ def flutter_test_fixtures(
 
     A Dart entry point (GN's `dart_main`) is compiled to kernel in the same
     directory, as `kernel_blob.bin` (`<name>_kernel_blob.bin` with
-    `use_target_as_artifact_prefix`), which DartFixture loads from there.
+    `use_target_as_artifact_prefix`), which DartFixture loads from there. In
+    the AOT test modes (profile and release: testing.gni's is_aot_test) the
+    kernel is compiled for AOT and gen_snapshot turns it into
+    `app_elf_snapshot.so` beside it, which the fixtures load instead.
     The sources it imports are `dart_srcs`, by default the `.dart` files of
-    its own directory (GN finds them through the compiler's depfile). The
-    AOT snapshot GN adds in the profile and release runtime modes
-    (`app_elf_snapshot.so`) is not produced yet: the host suites run in the
-    debug mode.
+    its own directory (GN finds them through the compiler's depfile).
 
     With `dest` naming another package (GN's `dest = "$root_gen_dir/<path>"`,
     the shader fixtures of lib/ui), the fixtures belong to that package's
@@ -343,6 +343,16 @@ def flutter_test_fixtures(
             visibility = ["//visibility:private"],
         )
         copies.append(kernel)
+
+        # GN's dart_snapshot: in the AOT test modes, the ELF snapshot too.
+        elf = prefix + "app_elf_snapshot.so"
+        flutter_dart_snapshot_aot(
+            name = "_dsa_%s" % name,
+            dart_kernel = kernel,
+            dart_elf_filename = elf,
+            visibility = ["//visibility:private"],
+        )
+        copies = copies + select({mode: [paths.join("assets", elf)] for mode in _AOT_MODES} | {"//conditions:default": []})
 
     cc_library(
         name = name,
