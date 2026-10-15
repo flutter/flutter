@@ -334,6 +334,12 @@ const Map<String, String> includeDirLibraries = <String, String>{
   // tonic's config: its headers as "tonic/..." and "third_party/tonic/...".
   '//flutter/third_party': '//engine/src/flutter/third_party:include_dir',
   '//flutter': '//engine/src/flutter:config',
+  // The GLFW client wrapper's config: the core wrapper's headers as
+  // siblings of its own (the merged layout clients build), a library of
+  // the core wrapper's package (its manifest appendix) since `includes` is
+  // package-relative.
+  '//flutter/shell/platform/common/client_wrapper/include/flutter':
+      '//engine/src/flutter/shell/platform/common/client_wrapper:relative_core_wrapper_headers',
 };
 
 /// Compiler flags that GN hands to the dependents of a target through one
@@ -710,6 +716,17 @@ const Map<String, ConfigEffect> configEffects = <String, ConfigEffect>{
   ),
   '//flutter/shell/platform/common:relative_flutter_library_headers': ConfigDependency(
     '//engine/src/flutter/shell/platform/common:relative_flutter_library_headers',
+  ),
+  // The GLFW shell's public headers' include directory, which its client
+  // wrapper lists from its own file.
+  '//flutter/shell/platform/glfw:relative_flutter_glfw_headers': ConfigDependency(
+    '//engine/src/flutter/shell/platform/glfw:relative_flutter_glfw_headers',
+  ),
+  // The Linux embeddings' pkg_config() configs (hand-written package: see
+  // its BUILD.bazel): what pkg-config says of each package against the
+  // sysroot, as libraries that link it.
+  '//flutter/shell/platform/linux/config:x11': ConfigDependency(
+    '//engine/src/flutter/shell/platform/linux/config:x11',
   ),
   '//flutter/third_party/icu:icu_config': ConfigImplied(),
   // Skia's text modules list //flutter/skia's private config from their own
@@ -1187,6 +1204,10 @@ const ImportPolicy engineImportPolicy = ImportPolicy(
     // The client wrapper's file lists (the sources and headers of the
     // package, by absolute path), which its own file reads.
     '//flutter/shell/platform/common/client_wrapper/core_wrapper_files.gni',
+    // The publish_client_wrapper templates: copies of the wrapper's files
+    // into the build directory's cpp_client_wrapper[_<platform>] (the
+    // artifact clients compile), which the platform wrappers invoke.
+    '//flutter/shell/platform/common/client_wrapper/publish.gni',
     '//flutter/third_party/glfw/glfw_args.gni',
     // The engine's answers to the Khronos trees' build_overrides (where
     // SPIRV-Headers and SPIRV-Tools are, build_with_chromium = false) and
