@@ -422,7 +422,7 @@ bool DriverInfoVK::IsKnownBadDriver() const {
   // https://github.com/flutter/flutter/issues/160866
   // https://github.com/flutter/flutter/issues/160804
   // https://github.com/flutter/flutter/issues/160406
-  if (powervr_gpu_.has_value() && powervr_gpu_.value() < PowerVRGPU::kBXE) {
+  if (powervr_gpu_.has_value() && powervr_gpu_.value() < PowerVRGPU::kCXT) {
     return true;
   }
   return false;

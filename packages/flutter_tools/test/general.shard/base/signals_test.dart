@@ -59,23 +59,20 @@ void main() {
       await completer.future;
     });
 
-    testWithoutContext(
-      'signal handlers do not cause concurrent modification errors when removing handlers in a signal callback',
-      () async {
-        final completer = Completer<void>();
-        late Object token;
-        Future<void> handle(ProcessSignal s) async {
-          expect(s, signalUnderTest);
-          expect(await signals.removeHandler(signalUnderTest, token), true);
-          completer.complete();
-        }
+    testWithoutContext('signal handlers do not cause concurrent modification errors when removing handlers in a signal callback', () async {
+      final completer = Completer<void>();
+      late Object token;
+      Future<void> handle(ProcessSignal s) async {
+        expect(s, signalUnderTest);
+        expect(await signals.removeHandler(signalUnderTest, token), true);
+        completer.complete();
+      }
 
-        token = signals.addHandler(signalUnderTest, handle);
+      token = signals.addHandler(signalUnderTest, handle);
 
-        fakeSignal.controller.add(fakeSignal);
-        await completer.future;
-      },
-    );
+      fakeSignal.controller.add(fakeSignal);
+      await completer.future;
+    });
 
     testWithoutContext('signal handler error goes on error stream', () async {
       final exn = Exception('Error');

@@ -63,7 +63,7 @@ Iterable<SourceElement> getElementsFromString(String content, File file) {
 
 /// Gets an iterable over the [SourceElement]s in the given `file`.
 ///
-/// Takes an optional [ResourceProvider] to allow reading from a memory
+/// Takes an optional [afs.ResourceProvider] to allow reading from a memory
 /// filesystem.
 Iterable<SourceElement> getFileElements(File file, {afs.ResourceProvider? resourceProvider}) {
   resourceProvider ??= afs.PhysicalResourceProvider.INSTANCE;
@@ -326,17 +326,20 @@ class _SourceVisitor<T> extends RecursiveAstVisitor<T> {
 
   @override
   T? visitClassDeclaration(ClassDeclaration node) {
-    enclosingClass = node.name.lexeme;
-    if (!node.name.lexeme.startsWith('_')) {
-      enclosingClass = node.name.lexeme;
+    final String className = switch (node.namePart) {
+      NameWithTypeParameters(:final Token typeName) => typeName.lexeme,
+      PrimaryConstructorDeclaration(:final Token typeName) => typeName.lexeme,
+    };
+    enclosingClass = className;
+    if (!className.startsWith('_')) {
       var comment = <SourceLine>[];
       if (node.documentationComment != null && node.documentationComment!.tokens.isNotEmpty) {
-        comment = _processComment(node.name.lexeme, node.documentationComment!);
+        comment = _processComment(className, node.documentationComment!);
       }
       elements.add(
         SourceElement(
           SourceElementType.classType,
-          node.name.lexeme,
+          className,
           node.beginToken.charOffset,
           file: file,
           comment: comment,

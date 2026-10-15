@@ -5,7 +5,6 @@
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
@@ -546,17 +545,127 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
 
-    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(unfocusEvent);
+    tester.platformDispatcher.notifyViewFocusChanged(unfocusEvent);
     await tester.pump();
 
     expect(focusNode.hasPrimaryFocus, isFalse);
     expect(FocusManager.instance.rootScope.hasPrimaryFocus, isTrue);
 
-    ServicesBinding.instance.platformDispatcher.onViewFocusChange?.call(focusEvent);
+    tester.platformDispatcher.notifyViewFocusChanged(focusEvent);
     await tester.pump();
 
     expect(focusNode.hasPrimaryFocus, isTrue);
     expect(FocusManager.instance.rootScope.hasPrimaryFocus, isFalse);
+  });
+
+  // A screen reader can move focus straight to a control instead of tabbing
+  // into the view. On web that arrives as a SemanticsAction.focus for the
+  // control, followed by a focus event for the view with an undefined
+  // direction, and the already focused control must survive it.
+  // See https://github.com/flutter/flutter/issues/168458
+  testWidgets('ViewFocusEvent with an undefined direction keeps the focused child', (
+    WidgetTester tester,
+  ) async {
+    final nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+    final nodeB = FocusNode(debugLabel: 'b');
+    addTearDown(nodeB.dispose);
+
+    late FlutterView view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Focus(focusNode: nodeB, child: const Text('b')),
+            Builder(
+              builder: (BuildContext context) {
+                view = View.of(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Focus leaves the view entirely, which parks the focus on the root scope.
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ViewFocusEvent(
+        viewId: view.viewId,
+        state: ViewFocusState.unfocused,
+        direction: ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    expect(FocusManager.instance.rootScope.hasPrimaryFocus, isTrue);
+
+    // The screen reader picks the second control. Both the semantics driven
+    // focus request and the view focus event land in the same frame.
+    nodeB.requestFocus();
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ViewFocusEvent(
+        viewId: view.viewId,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    expect(nodeB.hasPrimaryFocus, isTrue);
+    expect(nodeA.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('ViewFocusEvent with a forward direction moves focus to the first child', (
+    WidgetTester tester,
+  ) async {
+    final nodeA = FocusNode(debugLabel: 'a');
+    addTearDown(nodeA.dispose);
+    final nodeB = FocusNode(debugLabel: 'b');
+    addTearDown(nodeB.dispose);
+
+    late FlutterView view;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          children: <Widget>[
+            Focus(focusNode: nodeA, child: const Text('a')),
+            Focus(focusNode: nodeB, child: const Text('b')),
+            Builder(
+              builder: (BuildContext context) {
+                view = View.of(context);
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ViewFocusEvent(
+        viewId: view.viewId,
+        state: ViewFocusState.unfocused,
+        direction: ViewFocusDirection.undefined,
+      ),
+    );
+    await tester.pump();
+
+    nodeB.requestFocus();
+    tester.platformDispatcher.notifyViewFocusChanged(
+      ViewFocusEvent(
+        viewId: view.viewId,
+        state: ViewFocusState.focused,
+        direction: ViewFocusDirection.forward,
+      ),
+    );
+    await tester.pump();
+
+    expect(nodeA.hasPrimaryFocus, isTrue);
+    expect(nodeB.hasPrimaryFocus, isFalse);
   });
 
   testWidgets(
@@ -650,7 +759,7 @@ void main() {
     tester.binding.platformDispatcher.resetFocusedViewTestValues();
 
     // Unfocus all views.
-    tester.binding.platformDispatcher.onViewFocusChange?.call(
+    tester.platformDispatcher.notifyViewFocusChanged(
       ViewFocusEvent(
         viewId: view!.viewId,
         state: ViewFocusState.unfocused,
@@ -665,7 +774,7 @@ void main() {
     tester.binding.platformDispatcher.resetFocusedViewTestValues();
 
     // Focus another view.
-    tester.binding.platformDispatcher.onViewFocusChange?.call(
+    tester.platformDispatcher.notifyViewFocusChanged(
       const ViewFocusEvent(
         viewId: 100,
         state: ViewFocusState.focused,

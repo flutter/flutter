@@ -25,11 +25,10 @@ TaskFunction androidViewsTest({Map<String, String>? environment}) {
     /// and moving those to an infra step that can be retried shifts the blame
     /// individual tests to the infra itself.
     section('Download android dependencies');
-    final int exitCode = await exec(
-      './gradlew',
-      <String>['-q', 'dependencies'],
-      workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views/android',
-    );
+    final int exitCode = await exec('./gradlew', <String>[
+      '-q',
+      'dependencies',
+    ], workingDirectory: '${flutterDirectory.path}/dev/integration_tests/android_views/android');
     if (exitCode != 0) {
       return TaskResult.failure('Failed to download gradle dependencies');
     }
