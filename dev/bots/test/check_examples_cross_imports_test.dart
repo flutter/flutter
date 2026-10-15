@@ -372,7 +372,7 @@ void main() {
       expect(success, isFalse);
     });
 
-    test('unknown $libraryName cross import of MaterialUI', () async {
+    test('unknown $libraryName cross import of material_ui', () async {
       final dartFile = '$libraryName/foo.dart';
 
       final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
@@ -393,7 +393,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of MaterialUI. Refactor it or move it to the MaterialUI examples.',
+        '║ The following file in $libraryName has a disallowed import of material_ui. Refactor it or move it to the material_ui examples.',
         '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -401,7 +401,7 @@ void main() {
       expect(success, isFalse);
     });
 
-    test('unknown $libraryName cross import of both Material and MaterialUI', () async {
+    test('unknown $libraryName cross import of both Material and material_ui', () async {
       final dartFile = '$libraryName/foo.dart';
 
       final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
@@ -428,7 +428,7 @@ void main() {
         '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
         '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of MaterialUI. Refactor it or move it to the MaterialUI examples.',
+        '║ The following file in $libraryName has a disallowed import of material_ui. Refactor it or move it to the material_ui examples.',
         '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -436,7 +436,7 @@ void main() {
       expect(success, isFalse);
     });
 
-    test('unknown $libraryName cross import of CupertinoUI', () async {
+    test('unknown $libraryName cross import of cupertino_ui', () async {
       final dartFile = '$libraryName/foo.dart';
 
       final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
@@ -457,7 +457,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following file in $libraryName has a disallowed import of CupertinoUI. Refactor it or move it to the CupertinoUI examples.',
+        '║ The following file in $libraryName has a disallowed import of cupertino_ui. Refactor it or move it to the cupertino_ui examples.',
         '║   $dartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');

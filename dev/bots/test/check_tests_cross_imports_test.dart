@@ -330,7 +330,7 @@ void main() {
       skip: isCupertino(libraryName), // [intended]: Cupertino can import itself
     );
 
-    test('unknown $libraryName cross import of MaterialUI', () async {
+    test('unknown $libraryName cross import of material_ui', () async {
       final testDartFile = '$libraryName/foo_test.dart';
 
       final Directory testFilesDirectory = checkerDirectories.testFilesDirectoryFor(
@@ -352,7 +352,7 @@ void main() {
       }, shouldHaveErrors: true);
       final String lines = <String>[
         '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-        '║ The following test in $libraryName has a disallowed import of MaterialUI. Refactor it or move it to MaterialUI.',
+        '║ The following test in $libraryName has a disallowed import of material_ui. Refactor it or move it to material_ui.',
         '║   $testDartFile',
         '╚═══════════════════════════════════════════════════════════════════════════════',
       ].join('\n');
@@ -363,8 +363,8 @@ void main() {
 
   // Regression test: Material may import Material but not material_ui. This
   // used to trip the assertion in getImportError, because the error was
-  // reported as an import of Material rather than MaterialUI.
-  test('Material test importing material_ui reports MaterialUI without asserting', () async {
+  // reported as an import of Material rather than material_ui.
+  test('Material test importing material_ui reports material_ui without asserting', () async {
     const testDartFile = 'packages/flutter/test/material/foo_test.dart';
 
     buildKnownCrossImportTestFiles();
@@ -380,7 +380,7 @@ void main() {
     }, shouldHaveErrors: true);
     final String lines = <String>[
       '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
-      '║ The following test in packages/flutter/test/material has a disallowed import of MaterialUI. Refactor it or move it to MaterialUI.',
+      '║ The following test in packages/flutter/test/material has a disallowed import of material_ui. Refactor it or move it to material_ui.',
       '║   $testDartFile',
       '╚═══════════════════════════════════════════════════════════════════════════════',
     ].join('\n');

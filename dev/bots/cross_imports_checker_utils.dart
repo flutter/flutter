@@ -61,13 +61,13 @@ enum LibraryCrossImportStatementType {
   material('Material', "import 'package:flutter/material.dart'"),
 
   /// A cross import of the material_ui package.
-  materialUI('MaterialUI', "import 'package:material_ui/material_ui.dart'"),
+  materialUI('material_ui', "import 'package:material_ui/material_ui.dart'"),
 
   /// A cross import of the Cupertino library.
   cupertino('Cupertino', "import 'package:flutter/cupertino.dart'"),
 
   /// A cross import of the cupertino_ui package.
-  cupertinoUI('CupertinoUI', "import 'package:cupertino_ui/cupertino_ui.dart'");
+  cupertinoUI('cupertino_ui', "import 'package:cupertino_ui/cupertino_ui.dart'");
 
   const LibraryCrossImportStatementType(this.readableName, this.importString);
 
