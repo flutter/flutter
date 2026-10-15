@@ -1093,6 +1093,8 @@ const Set<String> handWrittenPackages = <String>{
   // run_tests.py's run matrix, which GN does not have.
   'engine/src/flutter/testing/dart',
   'engine/src/flutter/testing/dart/vm_service',
+  // run_tests.py's smoke test (fail_test.dart), the same shape.
+  'engine/src/flutter/testing/smoke_test_failure',
   // The Linux embeddings' system libraries: GN's foreach over pkg_config()
   // templates, each an exec_script of pkg-config against the sysroot, whose
   // answers the file holds.

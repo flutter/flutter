@@ -309,6 +309,18 @@ GN's, run for run: 267 runs, the same `+N` passed count in each as
 `run_tests.py --type dart` reports against `host_debug_unopt` (242 of them
 print one; 2,334 test cases).
 
+`run_tests.py`'s two remaining runs are its smoke test: `fail_test.dart`
+(`testing/smoke_test_failure`, hand-written the same way), a test that fails
+on purpose, single- and multithreaded on Skia, run with `expect_failure` --
+which in `run_tests.py` only *tolerates* a failure. Under Bazel a test that
+cannot fail would say nothing, so `flutter_dart_tests(must_fail = True)`
+(`flutter_tester_test`'s `must_fail`, with `variants = ["skia_mt", "skia"]`
+for the two runs) requires it: the launcher runs the tester, and passes only
+when it exits non-zero *and* the test runner reported a failed test
+(`Some tests failed.`) -- a crash before any test ran would not do -- which
+is the smoke test's stated point and what a check of the harness's failure
+path can assert.
+
 ## Wrapped GN builds: the GPU test backends
 
 The host suites render through ANGLE (OpenGL ES on Vulkan) and SwiftShader
