@@ -8,6 +8,8 @@
 # the repository root as --sysroot and needs the headers and libraries as
 # action inputs.
 
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 # The toolchain derives the --sysroot path from this file's location.
@@ -28,6 +30,50 @@ filegroup(
         ],
         allow_empty = True,
     ),
+)
+
+# The include directories `pkg-config --cflags gtk+-3.0` reports against this
+# sysroot (build/config/linux/pkg-config.py, which GN's pkg_config() template
+# runs: //flutter/shell/platform/linux/config), as `includes` -- Bazel puts
+# them on the compiles of whatever depends on this library with -isystem,
+# which is how GN's template passes a sysroot's. The headers themselves are
+# the toolchain's inputs (:headers). The two directories under the multiarch
+# library directory are found through a file each holds rather than named,
+# so that the arm64 sysroot reads the same file.
+cc_library(
+    name = "gtk3_include_dirs",
+    includes = [
+        "usr/include/at-spi-2.0",
+        "usr/include/at-spi2-atk/2.0",
+        "usr/include/atk-1.0",
+        "usr/include/blkid",
+        "usr/include/cairo",
+        "usr/include/dbus-1.0",
+        "usr/include/freetype2",
+        "usr/include/fribidi",
+        "usr/include/gdk-pixbuf-2.0",
+        "usr/include/gio-unix-2.0",
+        "usr/include/glib-2.0",
+        "usr/include/gtk-3.0",
+        "usr/include/harfbuzz",
+        "usr/include/libmount",
+        "usr/include/libpng16",
+        "usr/include/pango-1.0",
+        "usr/include/pixman-1",
+        "usr/include/uuid",
+    ] + [
+        header[:-len("/dbus/dbus-arch-deps.h")]
+        for header in glob(
+            ["usr/lib/*-linux-gnu*/dbus-1.0/include/dbus/dbus-arch-deps.h"],
+            allow_empty = True,
+        )
+    ] + [
+        header[:-len("/glibconfig.h")]
+        for header in glob(
+            ["usr/lib/*-linux-gnu*/glib-2.0/include/glibconfig.h"],
+            allow_empty = True,
+        )
+    ],
 )
 
 filegroup(
