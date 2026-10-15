@@ -163,9 +163,11 @@ The reviewer of the PR should first:
    `test-exempt` label.
 
 Only tech leads (currently limited to Googlers) are permitted to add the
-`test-exempt` label. For PRs that are authored or reviewed by a tech lead, that
-tech lead is responsible for ensuring that a second tech lead reviews the PR and
-approves the test exemption.
+`test-exempt` label. If you're not sure who the tech lead is for the changed area,
+reach out on the [Discord](./contributing/Chat.md) #hackers channel.
+
+For PRs that are authored or reviewed by a tech lead, that tech lead is responsible
+for ensuring that a second tech lead reviews the PR and approves the test exemption.
 
 See the [Test Exemption RFC](https://github.com/flutter/rfc/pull/26) for some background on the topic.
 
