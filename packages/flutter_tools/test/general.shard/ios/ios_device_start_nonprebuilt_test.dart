@@ -1556,25 +1556,22 @@ IOSDevice setUpIOSDevice({
 
   logger ??= BufferLogger.test();
   final FileSystem testFileSystem = fileSystem ?? MemoryFileSystem.test();
+  final toolContext = FakeToolContext(
+    artifacts: artifacts,
+    cache: cache,
+    fs: testFileSystem,
+    logger: logger,
+    platform: macPlatform,
+    processManager: processManager,
+  );
   return IOSDevice(
     '123',
     name: 'iPhone 1',
     sdkVersion: sdkVersion,
-    toolContext: FakeToolContext(
-      fs: testFileSystem,
-      logger: logger,
-      platform: macPlatform,
-      processManager: processManager,
-    ),
+    toolContext: toolContext,
     xcode: FakeXcode(),
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
-    iosDeploy: IOSDeploy(
-      logger: logger,
-      platform: macPlatform,
-      processManager: processManager ?? FakeProcessManager.any(),
-      artifacts: artifacts,
-      cache: cache,
-    ),
+    iosDeploy: IOSDeploy(toolContext: toolContext),
     analytics: analytics ?? FakeExactAnalytics(),
     iMobileDevice: IMobileDevice(
       logger: logger,

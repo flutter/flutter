@@ -12,7 +12,6 @@ import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/template.dart';
 import '../base/utils.dart';
@@ -65,7 +64,6 @@ class XCDevice {
       :Cache cache,
       :FileSystem fs,
       :Logger logger,
-      :Platform platform,
       :ProcessManager processManager,
       :ShutdownHooks shutdownHooks,
     ) = _toolContext;
@@ -75,13 +73,7 @@ class XCDevice {
       logger: logger,
       processManager: processManager,
     );
-    _iosDeploy = IOSDeploy(
-      artifacts: artifacts,
-      cache: cache,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-    );
+    _iosDeploy = IOSDeploy(toolContext: _toolContext);
     _coreDeviceControl =
         coreDeviceControl ?? IOSCoreDeviceControl(toolContext: _toolContext, xcode: _xcode);
     _xcodeDebug =
