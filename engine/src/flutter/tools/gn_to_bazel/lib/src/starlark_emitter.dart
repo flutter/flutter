@@ -1840,10 +1840,17 @@ final class _Emitter {
 
   /// GN's `copy()` targets of this file, whose products a dependent reads
   /// at run time (the Linux shell's suite reads the compiled GSettings
-  /// schemas its copy places under the fixtures directory): in GN the
-  /// dependency orders the copy and the binary finds the file in the build
-  /// directory; in Bazel the files must be the binary's runfiles.
-  bool _isLocalCopy(String gnLabel) => _localRule(gnLabel) == 'copy';
+  /// schemas its copy places under the fixtures directory), and the targets
+  /// of templates whose macros produce files rather than libraries
+  /// ([TemplateMapping.files]: the test fixtures' AOT snapshot of the VM
+  /// service, which //flutter/testing:fixture_test lists in the profile
+  /// mode): in GN the dependency orders the action and the binary finds the
+  /// file in the build directory; in Bazel the files must be the binary's
+  /// runfiles.
+  bool _isLocalData(String gnLabel) {
+    final String? rule = _localRule(gnLabel);
+    return rule == 'copy' || (templateMappings[rule]?.files ?? false);
+  }
 
   /// The GN rule of a target of this file named by a `:name` label, or null
   /// for any other label.
@@ -1860,15 +1867,15 @@ final class _Emitter {
   }
 
   /// Like [_labelsInto] for a compiled target's dependencies: those on
-  /// actions of this file go to `srcs` instead, those on copies of this
-  /// file to `data`.
+  /// actions of this file go to `srcs` instead, those on copies and
+  /// file-producing templates of this file to `data`.
   void _depsInto(_Rule rule, GnVariable variable, GnTarget target) {
     _forEachItem(variable, into: rule.list('deps'), (_Element e) {
       final String gnLabel = _string(e);
       final String label = bazelLabel(gnLabel, package: gnPackage, location: e.assignment.location);
       final list = _isLocalAction(gnLabel)
           ? 'srcs'
-          : _isLocalCopy(gnLabel)
+          : _isLocalData(gnLabel)
           ? 'data'
           : 'deps';
       rule.list(list).addUnique(e.condition, _item(_localLabel(label), e));
