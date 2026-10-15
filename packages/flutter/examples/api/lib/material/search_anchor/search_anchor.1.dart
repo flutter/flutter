@@ -32,8 +32,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                 scrolledUnderElevation: 0.0,
                 titleSpacing: 0.0,
                 backgroundColor: Colors.transparent,
-                floating:
-                    true, // We can also uncomment this line and set `pinned` to true to see a pinned search bar.
+                floating: true, // We can also uncomment this line and set `pinned` to true to see a pinned search bar.
                 title: SearchAnchor.bar(
                   suggestionsBuilder:
                       (BuildContext context, SearchController controller) {

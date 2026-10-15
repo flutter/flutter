@@ -29,8 +29,11 @@ import 'dart:convert';
 ///
 /// Since the function is executed on the host driving the test, you can access any environment
 /// variable from it.
-typedef ScreenshotCallback =
-    Future<bool> Function(String name, List<int> image, [Map<String, Object?>? args]);
+typedef ScreenshotCallback = Future<bool> Function(
+  String name,
+  List<int> image, [
+  Map<String, Object?>? args,
+]);
 
 /// Classes shared between `integration_test.dart` and `flutter drive` based
 /// adaptor (ex: `integration_test_driver.dart`).

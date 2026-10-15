@@ -57,6 +57,8 @@ impeller_component("display_list") {
     "//flutter/skia",
   ]
 
+  deps = [ "//third_party/abseil-cpp/absl/hash" ]
+
   if (impeller_supports_rendering) {
     public_deps += [ "//flutter/impeller/runtime_stage" ]
   }
@@ -188,7 +190,12 @@ template("aiks_unittests_component") {
     defines += [ "_USE_MATH_DEFINES" ]
 
     sources = predefined_sources + additional_sources
-    deps = [
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    } else {
+      deps = []
+    }
+    deps += [
       ":aiks_playground",
       ":display_list",
       "//flutter/impeller/geometry:geometry_asserts",
@@ -205,6 +212,10 @@ template("aiks_unittests_component") {
 
 aiks_unittests_component("aiks_unittests") {
   sources = [ "canvas_unittests.cc" ]
+  if (impeller_enable_opengles) {
+    sources += [ "canvas_gles_unittests.cc" ]
+    deps = [ "//flutter/impeller/renderer/backend/gles:mock_gles" ]
+  }
 }
 
 aiks_unittests_component("aiks_unittests_golden") {

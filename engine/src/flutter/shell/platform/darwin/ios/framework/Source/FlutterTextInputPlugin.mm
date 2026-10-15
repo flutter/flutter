@@ -808,6 +808,8 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 @property(nonatomic, strong) NSArray<NSDictionary*>* editMenuItems;
 
 - (void)setEditableTransform:(NSArray*)matrix;
+- (BOOL)becomeFirstResponderFromFramework;
+- (BOOL)resignFirstResponderFromFramework;
 @end
 
 @implementation FlutterTextInputView {
@@ -825,6 +827,12 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   bool _isFloatingCursorActive;
   CGPoint _floatingCursorOffset;
   bool _enableInteractiveSelection;
+  BOOL _isResigningFirstResponderFromFramework;
+  // A non-framework resign arms a one-shot notification for this exact view. The responder API
+  // does not reveal which object, if any, takes focus next, so a handoff to a native input can arm
+  // it too. Framework responder calls and client updates cancel it before UIKit can restore stale
+  // input state.
+  BOOL _shouldNotifyFrameworkOnFirstResponderRestore;
   UITextInteraction* _textInteraction API_AVAILABLE(ios(13.0));
 }
 
@@ -895,6 +903,11 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)handleShareAction {
   [self.textInputDelegate flutterTextInputView:self
                              shareSelectedText:[self textInRange:_selectedTextRange]];
+}
+
+- (void)handleTranslateAction {
+  [self.textInputDelegate flutterTextInputView:self
+                         translateSelectedText:[self textInRange:_selectedTextRange]];
 }
 
 // DFS algorithm to search a UICommand from the menu tree.
@@ -1006,6 +1019,13 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
                                        type:type
                                    selector:@selector(captureTextFromCamera:)
                               suggestedMenu:suggestedMenu];
+      }
+    } else if ([type isEqualToString:@"translate"]) {
+      if (@available(iOS 17.4, *)) {
+        [self addAdditionalBasicCommandToItems:items
+                                          type:type
+                                      selector:@selector(handleTranslateAction)
+                                   encodedItem:encodedItem];
       }
     } else if ([type isEqualToString:@"custom"]) {
       NSString* callbackId = encodedItem[@"id"];
@@ -1168,6 +1188,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)setTextInputClient:(int)client {
+  _shouldNotifyFrameworkOnFirstResponderRestore = NO;
   _textInputClient = client;
   _hasPlaceholder = NO;
 }
@@ -1336,14 +1357,61 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   return _textInputClient != 0;
 }
 
-- (BOOL)resignFirstResponder {
-  BOOL success = [super resignFirstResponder];
-  if (success) {
-    if (!_preventCursorDismissWhenResignFirstResponder) {
-      [self.textInputDelegate flutterTextInputView:self
-          didResignFirstResponderWithTextInputClient:_textInputClient];
-    }
+- (BOOL)becomeFirstResponder {
+  BOOL wasFirstResponder = self.isFirstResponder;
+  BOOL success = [super becomeFirstResponder];
+  if (success && !wasFirstResponder && self.isFirstResponder &&
+      _shouldNotifyFrameworkOnFirstResponderRestore) {
+    _shouldNotifyFrameworkOnFirstResponderRestore = NO;
+    int client = _textInputClient;
+    __weak FlutterTextInputView* weakSelf = self;
+    FlutterResult handleResult = ^(id result) {
+      [weakSelf handleFirstResponderRestoreResult:result client:client];
+    };
+    // Existing framework client and FocusNode guards decide whether to accept the restored focus.
+    [self.textInputDelegate flutterTextInputView:self
+        didRestoreFirstResponderWithTextInputClient:client
+                                             result:handleResult];
   }
+  return success;
+}
+
+- (void)handleFirstResponderRestoreResult:(id)result client:(int)client {
+  if ([result isKindOfClass:[NSNumber class]] && [result boolValue]) {
+    return;
+  }
+  // The framework declined the restored focus or failed to answer. Don't leave the keyboard up
+  // without a framework client behind it, unless the view has been given another client since the
+  // restore was reported.
+  if (client == _textInputClient && self.isFirstResponder) {
+    [self resignFirstResponderFromFramework];
+  }
+}
+
+- (BOOL)resignFirstResponder {
+  BOOL wasFirstResponder = self.isFirstResponder;
+  BOOL success = [super resignFirstResponder];
+  if (success && !_preventCursorDismissWhenResignFirstResponder) {
+    if (wasFirstResponder) {
+      _shouldNotifyFrameworkOnFirstResponderRestore =
+          !_isResigningFirstResponderFromFramework && _textInputClient != 0;
+    }
+    [self.textInputDelegate flutterTextInputView:self
+        didResignFirstResponderWithTextInputClient:_textInputClient];
+  }
+  return success;
+}
+
+- (BOOL)becomeFirstResponderFromFramework {
+  _shouldNotifyFrameworkOnFirstResponderRestore = NO;
+  return [self becomeFirstResponder];
+}
+
+- (BOOL)resignFirstResponderFromFramework {
+  _shouldNotifyFrameworkOnFirstResponderRestore = NO;
+  _isResigningFirstResponderFromFramework = YES;
+  BOOL success = [self resignFirstResponder];
+  _isResigningFirstResponderFromFramework = NO;
   return success;
 }
 
@@ -2319,12 +2387,16 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
     self.temporarilyDeletedComposedCharacter = nil;
   }
 
+  // insertText finalizes composing text and should replace the whole marked
+  // range, not just the last reported selection within it. See
+  // https://github.com/flutter/flutter/issues/59541#issuecomment-4617810595.
+  UITextRange* replacedRange = self.markedTextRange ?: _selectedTextRange;
+
   NSMutableArray<FlutterTextSelectionRect*>* copiedRects =
       [[NSMutableArray alloc] initWithCapacity:[_selectionRects count]];
-  NSAssert([_selectedTextRange.start isKindOfClass:[FlutterTextPosition class]],
-           @"Expected a FlutterTextPosition for position (got %@).",
-           [_selectedTextRange.start class]);
-  NSUInteger insertPosition = ((FlutterTextPosition*)_selectedTextRange.start).index;
+  NSAssert([replacedRange.start isKindOfClass:[FlutterTextPosition class]],
+           @"Expected a FlutterTextPosition for position (got %@).", [replacedRange.start class]);
+  NSUInteger insertPosition = ((FlutterTextPosition*)replacedRange.start).index;
   for (NSUInteger i = 0; i < [_selectionRects count]; i++) {
     NSUInteger rectPosition = _selectionRects[i].position;
     if (rectPosition == insertPosition) {
@@ -2349,7 +2421,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
   [self resetScribbleInteractionStatusIfEnding];
   self.selectionRects = copiedRects;
   _selectionAffinity = kTextAffinityDownstream;
-  [self replaceRange:_selectedTextRange withText:text];
+  [self replaceRange:replacedRange withText:text];
 }
 
 - (UITextPlaceholder*)insertTextPlaceholderWithSize:(CGSize)size API_AVAILABLE(ios(13.0)) {
@@ -2853,7 +2925,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 - (void)showTextInput {
   _activeView.viewResponder = _viewResponder;
   [self addToInputParentViewIfNeeded:_activeView];
-  [_activeView becomeFirstResponder];
+  [_activeView becomeFirstResponderFromFramework];
 }
 
 - (void)enableActiveViewAccessibility {
@@ -2864,7 +2936,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)hideTextInput {
-  [_activeView resignFirstResponder];
+  [_activeView resignFirstResponderFromFramework];
 
   // Remove the input view from the view hierarchy after resigning first responder.
   // This flag is set by clearTextInputClient when autofillContext is empty.
@@ -2878,7 +2950,7 @@ static BOOL IsSelectionRectBoundaryCloserToPoint(CGPoint point,
 }
 
 - (void)triggerAutofillSave:(BOOL)saveEntries {
-  [_activeView resignFirstResponder];
+  [_activeView resignFirstResponderFromFramework];
 
   if (saveEntries) {
     // Make all the input fields in the autofill context visible,

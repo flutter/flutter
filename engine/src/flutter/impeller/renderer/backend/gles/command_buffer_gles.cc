@@ -71,8 +71,7 @@ bool CommandBufferGLES::IsValid() const {
 }
 
 // |CommandBuffer|
-bool CommandBufferGLES::OnSubmitCommands(bool block_on_schedule,
-                                         CompletionCallback callback) {
+bool CommandBufferGLES::OnSubmitCommands(CompletionCallback callback) {
   // The reactor consumes commands on the GL thread and GL synchronizes
   // buffer reuse implicitly, so submissions are tracked at reactor
   // consumption granularity rather than GPU completion.

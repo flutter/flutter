@@ -44,6 +44,7 @@ import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
 import 'src/sliders.dart';
 import 'src/text.dart';
+import 'src/text_shadow_perf.dart';
 import 'src/very_long_picture_scrolling.dart';
 
 const String kMacrobenchmarks = 'Macrobenchmarks';
@@ -118,6 +119,7 @@ class MacrobenchmarksApp extends StatelessWidget {
             const DrawArcsPage(paintStyle: PaintingStyle.fill),
         kDrawArcsAllStrokeStylesPageRouteName: (BuildContext context) =>
             const DrawArcsPage(paintStyle: PaintingStyle.stroke),
+        kTextShadowPerfRouteName: (BuildContext context) => const TextShadowPerfPage(),
       },
     );
   }
@@ -427,6 +429,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Draw Stroke Style Arcs'),
             onPressed: () {
               Navigator.pushNamed(context, kDrawArcsAllStrokeStylesPageRouteName);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kTextShadowPerfRouteName),
+            child: const Text('Text Shadow Performance'),
+            onPressed: () {
+              Navigator.pushNamed(context, kTextShadowPerfRouteName);
             },
           ),
         ],

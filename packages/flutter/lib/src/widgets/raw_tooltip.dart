@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'feedback.dart';
+import 'focus_manager.dart';
 import 'framework.dart';
 import 'media_query.dart';
 import 'overlay.dart';
@@ -35,8 +36,10 @@ const AnimationStyle _kDefaultAnimationStyle = AnimationStyle(
 /// and hide animation. This can be used to drive animations that sync up with
 /// the tooltip overlay child show/hide animation, for example to fade the
 /// tooltip in and out.
-typedef TooltipComponentBuilder =
-    Widget Function(BuildContext context, Animation<double> animation);
+typedef TooltipComponentBuilder = Widget Function(
+  BuildContext context,
+  Animation<double> animation,
+);
 
 /// Signature for computing the position of a tooltip.
 ///
@@ -404,7 +407,11 @@ class RawTooltip extends StatefulWidget {
   ///
   /// If [AnimationStyle.reverseCurve] is provided, it will be used to override
   /// the hide tooltip animation curve. If it is null, the same curve will be
-  /// used as for the show tooltip animation.
+  /// used as for the show tooltip animation. The reverse curve only takes
+  /// effect when the tooltip starts hiding from the fully shown state; a
+  /// tooltip dismissed while it is still animating in continues to use the
+  /// show curve, to avoid a visual discontinuity. See
+  /// [CurvedAnimation.reverseCurve].
   ///
   /// To disable the tooltip show/hide animation, use
   /// [AnimationStyle.noAnimation].
@@ -528,6 +535,13 @@ class RawTooltip extends StatefulWidget {
         defaultValue: null,
       ),
     );
+    properties.add(
+      DiagnosticsProperty<AnimationStyle>(
+        'animationStyle',
+        animationStyle,
+        defaultValue: _kDefaultAnimationStyle,
+      ),
+    );
   }
 }
 
@@ -540,10 +554,16 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
 
   Timer? _timer;
   AnimationController? _backingController;
+  Duration get _showDuration => widget.animationStyle.duration ?? _kDefaultAnimationStyle.duration!;
+  Duration get _hideDuration =>
+      widget.animationStyle.reverseDuration ?? _kDefaultAnimationStyle.reverseDuration!;
+  Curve get _showCurve => widget.animationStyle.curve ?? _kDefaultAnimationStyle.curve!;
+  Curve? get _hideCurve => widget.animationStyle.reverseCurve;
+
   AnimationController get _controller {
     return _backingController ??= AnimationController(
-      duration: widget.animationStyle.duration,
-      reverseDuration: widget.animationStyle.reverseDuration,
+      duration: _showDuration,
+      reverseDuration: _hideDuration,
       vsync: this,
     )..addStatusListener(_handleStatusChanged);
   }
@@ -552,7 +572,8 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   CurvedAnimation get _overlayAnimation {
     return _backingOverlayAnimation ??= CurvedAnimation(
       parent: _controller,
-      curve: widget.animationStyle.curve ?? _kDefaultAnimationStyle.curve!,
+      curve: _showCurve,
+      reverseCurve: _hideCurve,
     );
   }
 
@@ -571,10 +592,29 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     assert(mounted);
     switch ((_animationStatus.isDismissed, status.isDismissed)) {
       case (false, true):
-        RawTooltip._openedTooltips.remove(this);
+        if (RawTooltip._openedTooltips.remove(this) && RawTooltip._openedTooltips.isEmpty) {
+          FocusManager.instance.removeEarlyKeyEventHandler(_handleEarlyKeyEvent);
+          HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
+        }
         _overlayController.hide();
       case (true, false):
         _overlayController.show();
+        if (RawTooltip._openedTooltips.isEmpty) {
+          // Register an early FocusManager key handler (plus a HardwareKeyboard
+          // fallback when primaryFocus is null) while at least one tooltip is open:
+          // 1. FocusManager.addEarlyKeyEventHandler runs before walking the focus
+          //    tree and stops propagation when returning KeyEventResult.handled,
+          //    preventing Escape from simultaneously triggering focused
+          //    descendants (e.g. EditableText) or ancestor ModalRoute
+          //    DismissIntent handlers (e.g. closing DatePickerDialog while a
+          //    button tooltip is hovered).
+          // 2. HardwareKeyboard.addHandler alone runs before FocusManager, which
+          //    would empty _openedTooltips before WidgetsApp's root Focus handler
+          //    checks RawTooltip.dismissAllToolTips(), allowing Escape to fall
+          //    through to WidgetsApp's DismissIntent shortcut.
+          FocusManager.instance.addEarlyKeyEventHandler(_handleEarlyKeyEvent);
+          HardwareKeyboard.instance.addHandler(_handleHardwareKeyEvent);
+        }
         RawTooltip._openedTooltips.add(this);
         SemanticsService.tooltip(widget.semanticsTooltip ?? '');
       case (true, true) || (false, false):
@@ -788,6 +828,27 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     return true;
   }
 
+  static KeyEventResult _handleEarlyKeyEvent(KeyEvent event) {
+    if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
+        event.logicalKey == LogicalKeyboardKey.escape &&
+        RawTooltip._openedTooltips.isNotEmpty) {
+      return RawTooltip.dismissAllToolTips() ? KeyEventResult.handled : KeyEventResult.ignored;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  static bool _handleHardwareKeyEvent(KeyEvent event) {
+    if (FocusManager.instance.primaryFocus != null) {
+      return false;
+    }
+    if ((event is KeyDownEvent || event is KeyRepeatEvent) &&
+        event.logicalKey == LogicalKeyboardKey.escape &&
+        RawTooltip._openedTooltips.isNotEmpty) {
+      return RawTooltip.dismissAllToolTips();
+    }
+    return false;
+  }
+
   @protected
   @override
   void initState() {
@@ -796,6 +857,20 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     // if some other control is clicked on. Pointer events are dispatched to
     // global routes **after** other routes.
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handleGlobalPointerEvent);
+  }
+
+  @protected
+  @override
+  void didUpdateWidget(RawTooltip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animationStyle != oldWidget.animationStyle) {
+      _backingController
+        ?..duration = _showDuration
+        ..reverseDuration = _hideDuration;
+      _backingOverlayAnimation
+        ?..curve = _showCurve
+        ..reverseCurve = _hideCurve;
+    }
   }
 
   Widget _buildTooltipOverlay(BuildContext context, OverlayChildLayoutInfo layoutInfo) {
@@ -839,7 +914,10 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   @override
   void dispose() {
     GestureBinding.instance.pointerRouter.removeGlobalRoute(_handleGlobalPointerEvent);
-    RawTooltip._openedTooltips.remove(this);
+    if (RawTooltip._openedTooltips.remove(this) && RawTooltip._openedTooltips.isEmpty) {
+      FocusManager.instance.removeEarlyKeyEventHandler(_handleEarlyKeyEvent);
+      HardwareKeyboard.instance.removeHandler(_handleHardwareKeyEvent);
+    }
     // _longPressRecognizer.dispose() and _tapRecognizer.dispose() may call
     // their registered onCancel callbacks if there's a gesture in progress.
     // Remove the onCancel callbacks to prevent the registered callbacks from
@@ -854,6 +932,7 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
     super.dispose();
   }
 
+  @protected
   @override
   Widget build(BuildContext context) {
     // If message is empty then no need to create a tooltip overlay to show

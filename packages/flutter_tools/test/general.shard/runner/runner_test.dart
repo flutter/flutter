@@ -7,6 +7,11 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/executable.dart';
 import 'package:flutter_tools/runner.dart' as runner;
+
+import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
+import 'package:flutter_tools/src/android/java.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/exit.dart';
@@ -19,6 +24,9 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
+import 'package:flutter_tools/src/context/tool_dependencies.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/flutter_device_manager.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/reporting/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -83,7 +91,7 @@ void main() {
               unawaited(
                 runner.run(
                   <String>['crash'],
-                  () => <FlutterCommand>[CrashingFlutterCommand()],
+                  (ToolDependencies toolDependencies) => <FlutterCommand>[CrashingFlutterCommand()],
                   // This flutterVersion disables crash reporting.
                   flutterVersion: '[user-branch]/',
                   reportCrashes: true,
@@ -143,7 +151,7 @@ void main() {
                     '--local-engine-src-path=./engine/src',
                     'crash',
                   ],
-                  () => <FlutterCommand>[CrashingFlutterCommand()],
+                  (ToolDependencies toolDependencies) => <FlutterCommand>[CrashingFlutterCommand()],
                   // This flutterVersion disables crash reporting.
                   flutterVersion: '[user-branch]/',
                   reportCrashes: true,
@@ -181,6 +189,69 @@ void main() {
       },
     );
 
+    // The artifacts commands are built with are chosen before the command line
+    // is parsed, so they have to be rebuilt once a local engine is found.
+    testUsingContext(
+      'builds commands with the local engine the command line asks for',
+      () async {
+        fileSystem
+            .directory('engine')
+            .childDirectory('src')
+            .childDirectory('out')
+            .childDirectory('host_debug')
+            .createSync(recursive: true);
+        final ranCommands = <ArtifactsRecordingFlutterCommand>[];
+
+        // Exiting is faked out to throw, so catch that rather than the runner
+        // being able to return.
+        final completer = Completer<void>();
+        unawaited(
+          runZonedGuarded<Future<void>?>(
+            () {
+              unawaited(
+                runner.run(
+                  <String>[
+                    '--local-engine=host_debug',
+                    '--local-engine-host=host_debug',
+                    '--local-engine-src-path=./engine/src',
+                    'record',
+                  ],
+                  (ToolDependencies toolDependencies) {
+                    final command = ArtifactsRecordingFlutterCommand();
+                    ranCommands.add(command);
+                    return <FlutterCommand>[command];
+                  },
+                  flutterVersion: '[user-branch]/',
+                  shutdownHooks: ShutdownHooks(),
+                ),
+              );
+              return null;
+            },
+            (Object error, StackTrace stack) {
+              if (!completer.isCompleted) {
+                completer.complete();
+              }
+            },
+          ),
+        );
+        await completer.future;
+
+        final Artifacts? artifacts = ranCommands.singleWhere((command) => command.ran).artifacts;
+        expect(artifacts?.localEngineInfo?.targetOutPath, endsWith('engine/src/out/host_debug'));
+      },
+      overrides: <Type, Generator>{
+        Platform: () => FakePlatform(
+          environment: <String, String>{'FLUTTER_ANALYTICS_LOG_FILE': 'test', 'FLUTTER_ROOT': '/'},
+        ),
+        FileSystem: () => fileSystem,
+        ProcessManager: () => FakeProcessManager.any(),
+        Artifacts: () => Artifacts.test(),
+        HttpClientFactory: () =>
+            () => FakeHttpClient.any(),
+        Analytics: () => fakeAnalytics,
+      },
+    );
+
     testUsingContext(
       'error handling crash report (bot)',
       () async {
@@ -193,7 +264,7 @@ void main() {
               unawaited(
                 runner.run(
                   <String>['crash'],
-                  () => <FlutterCommand>[CrashingFlutterCommand()],
+                  (ToolDependencies toolDependencies) => <FlutterCommand>[CrashingFlutterCommand()],
                   // This flutterVersion disables crash reporting.
                   flutterVersion: '[user-branch]/',
                   shutdownHooks: ShutdownHooks(),
@@ -256,7 +327,7 @@ void main() {
               unawaited(
                 runner.run(
                   <String>['crash'],
-                  () => <FlutterCommand>[
+                  (ToolDependencies toolDependencies) => <FlutterCommand>[
                     CrashingFlutterCommand(asyncCrash: true, completer: commandCompleter),
                   ],
                   // This flutterVersion disables crash reporting.
@@ -303,7 +374,7 @@ void main() {
               unawaited(
                 runner.run(
                   <String>['crash'],
-                  () => <FlutterCommand>[command],
+                  (ToolDependencies toolDependencies) => <FlutterCommand>[command],
                   // This flutterVersion disables crash reporting.
                   flutterVersion: '[user-branch]/',
                   reportCrashes: true,
@@ -371,7 +442,7 @@ void main() {
               unawaited(
                 runner.run(
                   <String>['crash'],
-                  () => <FlutterCommand>[CrashingFlutterCommand()],
+                  (ToolDependencies toolDependencies) => <FlutterCommand>[CrashingFlutterCommand()],
                   // This flutterVersion disables crash reporting.
                   flutterVersion: '[user-branch]/',
                   reportCrashes: true,
@@ -480,7 +551,9 @@ void main() {
                 unawaited(
                   runner.run(
                     <String>['crash'],
-                    () => <FlutterCommand>[CrashingFlutterCommand()],
+                    (ToolDependencies toolDependencies) => <FlutterCommand>[
+                      CrashingFlutterCommand(),
+                    ],
                     // This flutterVersion disables crash reporting.
                     flutterVersion: '[user-branch]/',
                     reportCrashes: true,
@@ -564,7 +637,7 @@ void main() {
 
         await runner.run(
           <String>[command.name],
-          () => <FlutterCommand>[command],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[command],
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           reportCrashes: false,
@@ -594,7 +667,7 @@ void main() {
 
         await runner.run(
           <String>[command.name],
-          () => <FlutterCommand>[command],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[command],
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           reportCrashes: false,
@@ -622,7 +695,7 @@ void main() {
       () async {
         await runner.run(
           <String>['--version', '--machine'],
-          () => <FlutterCommand>[],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
@@ -648,7 +721,13 @@ void main() {
         final stdio = FakeStdio();
         await runner.run(
           <String>['devices', '--machine'],
-          () => <FlutterCommand>[DevicesCommand()],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[
+            DevicesCommand(
+              deviceManager: globals.deviceManager!,
+              doctor: globals.doctor!,
+              toolContext: toolDependencies.toolContext,
+            ),
+          ],
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
@@ -682,6 +761,108 @@ void main() {
         BotDetector: () => const FakeBotDetector(true),
       },
     );
+
+    testUsingContext(
+      'binds bootstrapped DeviceManager into context for command execution',
+      () async {
+        expect(globals.deviceManager, isNull);
+
+        late final ToolDependencies capturedDependencies;
+        final command = _DeviceManagerRecordingFlutterCommand();
+        await runner.run(
+          <String>[command.name],
+          (ToolDependencies toolDependencies) {
+            capturedDependencies = toolDependencies;
+            return <FlutterCommand>[command];
+          },
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(capturedDependencies.deviceManager, isA<FlutterDeviceManager>());
+        expect(command.deviceManager, same(capturedDependencies.deviceManager));
+      },
+      overrides: <Type, Generator>{
+        DeviceManager: () => null,
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+
+    group('lazy Android dependency evaluation', () {
+      var sdkEvaluations = 0;
+      var studioEvaluations = 0;
+      var gradleEvaluations = 0;
+      var javaEvaluations = 0;
+
+      setUp(() {
+        sdkEvaluations = 0;
+        studioEvaluations = 0;
+        gradleEvaluations = 0;
+        javaEvaluations = 0;
+      });
+
+      testUsingContext(
+        'does not eagerly evaluate AndroidSdk, AndroidStudio, GradleUtils, or Java during bootstrap or generateCommands',
+        () async {
+          late final ToolDependencies capturedDependencies;
+          final command = _DeviceManagerRecordingFlutterCommand();
+          await runner.run(
+            <String>[command.name],
+            (ToolDependencies toolDependencies) {
+              capturedDependencies = toolDependencies;
+              return <FlutterCommand>[
+                ...generateCommands(
+                  toolDependencies: toolDependencies,
+                  verbose: false,
+                  verboseHelp: false,
+                ),
+                command,
+              ];
+            },
+            // This flutterVersion disables crash reporting.
+            flutterVersion: '[user-branch]/',
+            shutdownHooks: ShutdownHooks(),
+          );
+
+          expect(sdkEvaluations, 0);
+          expect(studioEvaluations, 0);
+          expect(gradleEvaluations, 0);
+          expect(javaEvaluations, 0);
+
+          expect(capturedDependencies.androidContext.androidSdk, isA<FakeAndroidSdk>());
+          expect(sdkEvaluations, 1);
+          expect(capturedDependencies.androidContext.androidStudio, isA<_FakeAndroidStudio>());
+          expect(studioEvaluations, 1);
+          expect(capturedDependencies.androidContext.gradleUtils, isA<FakeGradleUtils>());
+          expect(gradleEvaluations, 1);
+          expect(capturedDependencies.androidContext.java, isA<FakeJava>());
+          expect(javaEvaluations, 1);
+        },
+        overrides: <Type, Generator>{
+          AndroidSdk: () {
+            sdkEvaluations++;
+            return FakeAndroidSdk();
+          },
+          AndroidStudio: () {
+            studioEvaluations++;
+            return _FakeAndroidStudio();
+          },
+          DeviceManager: () => null,
+          FileSystem: () => MemoryFileSystem.test(),
+          GradleUtils: () {
+            gradleEvaluations++;
+            return FakeGradleUtils();
+          },
+          Java: () {
+            javaEvaluations++;
+            return FakeJava();
+          },
+          ProcessManager: () => FakeProcessManager.any(),
+        },
+      );
+    });
   });
 
   group('unified_analytics', () {
@@ -706,7 +887,7 @@ void main() {
 
         await runner.run(
           <String>['--disable-analytics'],
-          () => <FlutterCommand>[],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
@@ -730,7 +911,7 @@ void main() {
 
         await runner.run(
           <String>['--disable-analytics'],
-          () => <FlutterCommand>[],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
         );
 
@@ -738,7 +919,7 @@ void main() {
 
         await runner.run(
           <String>['--enable-analytics'],
-          () => <FlutterCommand>[],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
         );
 
@@ -759,7 +940,7 @@ void main() {
 
         await runner.run(
           <String>['--disable-analytics'],
-          () => <FlutterCommand>[],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
         );
 
@@ -771,7 +952,7 @@ void main() {
         expect(globals.analytics.telemetryEnabled, false);
         await runner.run(
           <String>['--enable-analytics'],
-          () => <FlutterCommand>[],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
         );
 
@@ -794,7 +975,7 @@ void main() {
         await globals.analytics.setTelemetry(false);
         await runner.run(
           <String>['--disable-analytics'],
-          () => <FlutterCommand>[],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
         );
 
@@ -803,7 +984,7 @@ void main() {
         await globals.analytics.setTelemetry(true);
         await runner.run(
           <String>['--enable-analytics'],
-          () => <FlutterCommand>[],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
           shutdownHooks: ShutdownHooks(),
         );
 
@@ -825,7 +1006,7 @@ void main() {
 
         final int exitCode = await runner.run(
           <String>['--disable-analytics', '--enable-analytics'],
-          () => <FlutterCommand>[],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
           // This flutterVersion disables crash reporting.
           flutterVersion: '[user-branch]/',
           shutdownHooks: ShutdownHooks(),
@@ -847,10 +1028,42 @@ void main() {
   });
 }
 
+class ArtifactsRecordingFlutterCommand extends FlutterCommand {
+  Artifacts? artifacts;
+  bool ran = false;
+
+  @override
+  String get description => '';
+
+  @override
+  String get name => 'record';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    ran = true;
+    artifacts = toolContext?.artifacts;
+    return FlutterCommandResult.success();
+  }
+}
+
+class _DeviceManagerRecordingFlutterCommand extends FlutterCommand {
+  DeviceManager? deviceManager;
+
+  @override
+  String get description => '';
+
+  @override
+  String get name => 'record-device-manager';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    deviceManager = globals.deviceManager;
+    return FlutterCommandResult.success();
+  }
+}
+
 class CrashingFlutterCommand extends FlutterCommand {
-  CrashingFlutterCommand({bool asyncCrash = false, Completer<void>? completer})
-    : _asyncCrash = asyncCrash,
-      _completer = completer;
+  CrashingFlutterCommand({this._asyncCrash = false, this._completer});
 
   final bool _asyncCrash;
   final Completer<void>? _completer;
@@ -955,6 +1168,25 @@ class _ErrorOnCanRunFakeProcessManager extends Fake implements FakeProcessManage
     }
     return delegate.canRun(executable, workingDirectory: workingDirectory);
   }
+
+  @override
+  io.ProcessResult runSync(
+    List<dynamic> command, {
+    String? workingDirectory,
+    Map<String, String>? environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    covariant Object? stdoutEncoding = io.systemEncoding,
+    covariant Object? stderrEncoding = io.systemEncoding,
+  }) {
+    return delegate.runSync(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+    );
+  }
 }
 
 class FakeCache extends Fake implements Cache {
@@ -968,4 +1200,13 @@ class FakeCache extends Fake implements Cache {
   Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
     globals.logger.startProgress('Downloading package Foo').stop();
   }
+
+  @override
+  Directory getArtifactDirectory(String name) => globals.fs.directory(name);
+
+  @override
+  MapEntry<String, String> get dyLdLibEntry =>
+      const MapEntry<String, String>('DYLD_LIBRARY_PATH', 'fake_path');
 }
+
+class _FakeAndroidStudio extends Fake implements AndroidStudio {}

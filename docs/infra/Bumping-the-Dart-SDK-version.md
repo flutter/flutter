@@ -25,7 +25,7 @@ It is important to include the `-0` pre-release suffix (e.g., `^3.13.0-0` instea
 ## Policy and Cadence
 
 ### Ownership and Cadence
-The Dart SDK constraint bump process in the `flutter/flutter` repository is typically owned by `team-framework`. Bumps are usually performed quarterly, shortly after a new Dart stable version is released.
+The Dart SDK constraint bump process in the `flutter/flutter` repository is typically owned by `team-framework`. Bumps are performed quarterly following each stable release, tracked automatically via issues filed by the [quarterly scheduled tasks workflow](../../.github/workflows/quarterly-scheduled-tasks.yml) (see [Scheduled Recurring Tasks](Scheduled-Recurring-Tasks.md)).
 
 ### The Stable Version Constraint Policy
 The Dart SDK version constraint in `flutter/flutter` must not exceed the current Dart stable release version. Even though the `master`/`main` branch runs on newer pre-release Dart SDKs downloaded from the Engine stamp, the minimum `sdk` constraint declared in our `pubspec.yaml` files is restricted to the stable release version.
@@ -36,6 +36,10 @@ This policy is strictly enforced for two primary reasons:
    Flutter frequently needs to cherry-pick bug fixes from the `main`/`master` branch into the active `stable` (or `beta`) release branches. If the code on `main`/`master` is allowed to use language features or dependencies requiring a newer Dart version than the stable SDK, cherry-picking those commits directly onto the stable branch becomes complicated.
 2. **Formatting, Lints, and Migrations:**
    Upgrading the minimum Dart version often triggers new static analysis lints, deprecation warnings, or changes in code formatting (`dart format`). These updates sometimes require repo-wide refactoring or massive formatting migrations. Attempting to absorb and resolve these changes on a continuously rolling basis with unstable Dart versions is highly disruptive. Bumping quarterly to a defined stable target allows the team to manage and absorb formatting/lint sweeps predictably.
+
+### Large Scale Changes (LSCs) and Release Alignment
+
+If and when bumping Dart in the repository requires a large scale change (LSC)—for example, to re-format the repository (`dart format`) or perform a repo-wide lint migration—the **release team** must be included in the process. The LSC must follow branch alignment so as not to disrupt the release process (e.g., avoiding widespread merge conflicts for cherry-picks across active release branches).
 
 > [!IMPORTANT]
 > Before planning or executing a constraint bump, the target Dart SDK version must already have rolled into the `flutter/flutter` repository via an Engine roll. If the SDK constraint in the pubspecs is bumped to a version newer than the SDK downloaded in the local cache, CI, tests, and static analysis will fail.
@@ -52,12 +56,15 @@ When a Dart SDK bump introduces new language features, they should not be adopte
 
 Because the repository contains over 100 `pubspec.yaml` files (including packages, tools, manual/integration tests, and examples), the change must be made systematically.
 
+> [!TIP]
+> You can also automate this workflow using the repository's [`bump-dart`](../../.agents/skills/bump-dart/SKILL.md) skill with an AI coding assistant. The skill automatically executes the `bump_version_constraints.dart` script, updates checksums, runs static analysis, flags packages with deviating SDK constraints, and writes an execution summary report to `bump_results.md`.
+
 ### Step 1: Update `pubspec.yaml` Files
-Update the SDK constraint in all `pubspec.yaml` files across the repository. You can use a search-and-replace command or a script to automate this:
+Update the SDK constraint in all `pubspec.yaml` files across the repository. You can use the repository's Dart tool script to automate this cross-platform:
 
 ```bash
-# Example using find and sed to bump from ^3.10.0-0 to ^3.13.0-0
-find . -name "pubspec.yaml" -not -path "*/.dart_tool/*" -exec sed -i '' 's/sdk: \^3.10.0-0/sdk: \^3.13.0-0/g' {} +
+# Example to bump from ^3.10.0-0 to ^3.13.0-0
+dart dev/tools/bin/bump_version_constraints.dart ^3.10.0-0 ^3.13.0-0
 ```
 
 ### Step 2: Force Upgrade & Update Hashes

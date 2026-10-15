@@ -18,6 +18,7 @@
 #include "impeller/renderer/backend/metal/allocator_mtl.h"
 #include "impeller/renderer/backend/metal/command_buffer_mtl.h"
 #include "impeller/renderer/backend/metal/gpu_tracer_mtl.h"
+#include "impeller/renderer/backend/metal/pending_image_upload_schedule_tracker.h"
 #include "impeller/renderer/backend/metal/pipeline_library_mtl.h"
 #include "impeller/renderer/backend/metal/shader_library_mtl.h"
 #include "impeller/renderer/capabilities.h"
@@ -154,6 +155,10 @@ class ContextMTL final : public Context,
   void StoreTaskForGPU(const fml::closure& task,
                        const fml::closure& failure) override;
 
+  // |Context|
+  void TrackPendingImageUpload(
+      const std::shared_ptr<CommandBufferSchedulingReceipt>& receipt) override;
+
   // visible for testing.
   void FlushTasksAwaitingGPU();
 
@@ -189,6 +194,8 @@ class ContextMTL final : public Context,
   Mutex tasks_awaiting_gpu_mutex_;
   std::deque<PendingTasks> tasks_awaiting_gpu_
       IPLR_GUARDED_BY(tasks_awaiting_gpu_mutex_);
+  /// Tracks image uploads that have not reached a scheduled or terminal state.
+  PendingImageUploadScheduleTracker pending_image_uploads_;
   std::unique_ptr<SyncSwitchObserver> sync_switch_observer_;
   std::shared_ptr<CommandQueue> command_queue_ip_;
 #ifdef IMPELLER_DEBUG
@@ -206,6 +213,9 @@ class ContextMTL final : public Context,
 
   std::shared_ptr<CommandBuffer> CreateCommandBufferInQueue(
       id<MTLCommandQueue> queue) const;
+
+  /// Waits for pending image uploads to become scheduled or terminal.
+  void DrainPendingImageUploads();
 
   ContextMTL(const ContextMTL&) = delete;
 

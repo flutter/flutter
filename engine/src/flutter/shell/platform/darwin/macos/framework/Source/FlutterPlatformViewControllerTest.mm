@@ -35,6 +35,37 @@ TEST(FlutterPlatformViewController, TestCreatePlatformViewNoMatchingViewType) {
   EXPECT_TRUE(errored);
 }
 
+// Verifies that a create call whose viewType is not a string returns an error rather than raising.
+// An omitted argument arrives as nil and an explicit Dart null as NSNull, and the factory lookup
+// the argument feeds raises on a nil key.
+TEST(FlutterPlatformViewController, TestCreatePlatformViewInvalidViewType) {
+  // Use id so we can access handleMethodCall method.
+  id platformViewController = [[FlutterPlatformViewController alloc] init];
+
+  NSArray<NSDictionary*>* invalidArguments = @[
+    @{@"id" : @2},  // 'viewType' omitted.
+    @{@"id" : @2,
+      @"viewType" : [NSNull null]},  // 'viewType' explicitly null in Dart.
+    @{@"id" : @2,
+      @"viewType" : @7},  // 'viewType' not a string.
+  ];
+
+  for (NSDictionary* arguments in invalidArguments) {
+    FlutterMethodCall* methodCall = [FlutterMethodCall methodCallWithMethodName:@"create"
+                                                                      arguments:arguments];
+    __block bool errored = false;
+    FlutterResult result = ^(id result) {
+      if ([result isKindOfClass:[FlutterError class]]) {
+        errored = true;
+      }
+    };
+
+    [platformViewController handleMethodCall:methodCall result:result];
+
+    EXPECT_TRUE(errored) << "arguments: " << arguments.description.UTF8String;
+  }
+}
+
 TEST(FlutterPlatformViewController, TestRegisterPlatformViewFactoryAndCreate) {
   // Use id so we can access handleMethodCall method.
   id platformViewController = [[FlutterPlatformViewController alloc] init];

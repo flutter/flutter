@@ -41,11 +41,7 @@ enum CupertinoUserInterfaceLevelData {
 class CupertinoUserInterfaceLevel extends InheritedWidget {
   /// Creates a [CupertinoUserInterfaceLevel] to change descendant Cupertino widget's
   /// visual level.
-  const CupertinoUserInterfaceLevel({
-    super.key,
-    required CupertinoUserInterfaceLevelData data,
-    required super.child,
-  }) : _data = data;
+  const CupertinoUserInterfaceLevel({super.key, required this._data, required super.child});
 
   final CupertinoUserInterfaceLevelData _data;
 

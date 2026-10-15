@@ -26,7 +26,18 @@ import '../xcode_project.dart';
 
 final _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final _varExpr = RegExp(r'\$\(([^)]*)\)');
-const kSwiftPackageCacheDirectoryName = 'SourcePackages';
+
+/// Matches each `XCLocalSwiftPackageReference` object body in a
+/// `project.pbxproj` file, capturing its `relativePath` value.
+///
+/// Local Swift packages (added directly to the Xcode project rather than
+/// fetched as a remote dependency) are recorded this way; unlike remote
+/// checkouts, they never appear under the derived data `checkouts`
+/// directory, so they must be located by parsing the project file directly.
+final _localSwiftPackageReferenceExpr = RegExp(
+  r'isa\s*=\s*XCLocalSwiftPackageReference\s*;[^}]*relativePath\s*=\s*(?:"([^"]*)"|([^;]+))\s*;',
+  dotAll: true,
+);
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
@@ -51,9 +62,9 @@ class XcodeProjectInterpreter {
     required ProcessManager processManager,
     required Logger logger,
     required FileSystem fileSystem,
-    required Analytics analytics,
+    required this._analytics,
     Version? version,
-    String? build,
+    this._build,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -65,9 +76,7 @@ class XcodeProjectInterpreter {
          processManager: processManager,
        ),
        _version = version,
-       _build = build,
-       _versionText = version?.toString(),
-       _analytics = analytics;
+       _versionText = version?.toString();
 
   /// Create an [XcodeProjectInterpreter] for testing.
   ///
@@ -189,7 +198,7 @@ class XcodeProjectInterpreter {
   Future<List<String>> fetchDependenciesAndGenerateXcodebuildArgs(
     XcodeBasedProject xcodeProject,
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) async {
     // All `xcodebuild` project commands will download and resolve Swift packages.
     // We should always prefetch Swift packages before running any `xcodebuild` project command
@@ -198,7 +207,7 @@ class XcodeProjectInterpreter {
 
     return _xcodebuildProjectCommandArguments(
       buildDirectory,
-      skipPackageUpdatesAndValidation: skipPackageUpdatesAndValidation,
+      skipPackageValidation: skipPackageValidation,
     );
   }
 
@@ -209,11 +218,11 @@ class XcodeProjectInterpreter {
 
   /// Returns a list of required arguments for the `xcodebuild` Xcode project command.
   ///
-  /// When [skipPackageUpdatesAndValidation] is true, it uses arguments to attempt skipping any
-  /// Swift package updates and validation.
+  /// When [skipPackageValidation] is true, it uses arguments to attempt skipping any Swift
+  /// package validation.
   List<String> _xcodebuildProjectCommandArguments(
     Directory buildDirectory, {
-    bool skipPackageUpdatesAndValidation = true,
+    bool skipPackageValidation = true,
   }) {
     final String cachePath = swiftPackageCachePath(buildDirectory);
     return <String>[
@@ -221,8 +230,7 @@ class XcodeProjectInterpreter {
       'xcodebuild',
       '-clonedSourcePackagesDirPath',
       cachePath,
-      if (skipPackageUpdatesAndValidation) ...<String>[
-        '-skipPackageUpdates',
+      if (skipPackageValidation) ...<String>[
         '-skipPackagePluginValidation',
         '-skipPackageSignatureValidation',
       ],
@@ -395,9 +403,9 @@ class XcodeProjectInterpreter {
     await xcodeProject.prefetchSwiftPackages(
       xcodebuildProjectCommandArguments: _xcodebuildProjectCommandArguments(
         buildDirectory,
-        // skipPackageUpdatesAndValidation should be false so that when subsequent xcodebuild
+        // skipPackageValidation should be false so that when subsequent xcodebuild
         // commands run, packages should already be resolved, downloaded, updated, and validated.
-        skipPackageUpdatesAndValidation: false,
+        skipPackageValidation: false,
       ),
       processUtils: _processUtils,
       logger: _logger,
@@ -416,29 +424,33 @@ class XcodeProjectInterpreter {
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
     const corruptedProjectExitCode = 74;
     bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
-    final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
-      xcodeProject,
-      buildDirectory,
-    );
-    final RunResult result = await _processUtils.run(
-      <String>[
-        ...xcodebuildCommandArgs,
-        '-list',
-        if (projectFilename != null) ...<String>['-project', projectFilename],
-      ],
-      throwOnError: true,
-      allowedFailures: allowedFailures,
-      workingDirectory: xcodeProject.hostAppRoot.path,
-    );
-    if (allowedFailures(result.exitCode)) {
-      // User configuration error, tool exit instead of crashing.
-      throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
+    try {
+      final List<String> xcodebuildCommandArgs = await fetchDependenciesAndGenerateXcodebuildArgs(
+        xcodeProject,
+        buildDirectory,
+      );
+      final RunResult result = await _processUtils.run(
+        <String>[
+          ...xcodebuildCommandArgs,
+          '-list',
+          if (projectFilename != null) ...<String>['-project', projectFilename],
+        ],
+        throwOnError: true,
+        allowedFailures: allowedFailures,
+        workingDirectory: xcodeProject.hostAppRoot.path,
+      );
+      if (allowedFailures(result.exitCode)) {
+        // User configuration error, tool exit instead of crashing.
+        throwToolExit('Unable to get Xcode project information:\n ${result.stderr}');
+      }
+      return XcodeProjectInfo.fromXcodeBuildOutput(
+        result.toString(),
+        _logger,
+        ignoredSchemes: await _ignoredSwiftPackageSchemes(xcodeProject, buildDirectory),
+      );
+    } on ProcessException catch (exception) {
+      throwToolExit('Unable to get Xcode project information:\n $exception');
     }
-    return XcodeProjectInfo.fromXcodeBuildOutput(
-      result.toString(),
-      _logger,
-      ignoredSchemes: await _ignoredSwiftPackageSchemes(xcodeProject, buildDirectory),
-    );
   }
 
   /// Returns scheme-name candidates for Swift packages that should be excluded from
@@ -459,6 +471,7 @@ class XcodeProjectInterpreter {
       kFlutterGeneratedPluginSwiftPackageName,
       kFlutterGeneratedFrameworkSwiftPackageTargetName,
       ..._swiftPackageCheckoutSchemes(buildDirectory),
+      ..._localSwiftPackageSchemes(xcodeProject),
     };
     try {
       for (final Plugin plugin in await xcodeProject.getPlugins()) {
@@ -469,6 +482,60 @@ class XcodeProjectInterpreter {
       _logger.printTrace('Failed to get plugins while filtering Xcode schemes: $error');
     }
     return ignoredSchemes;
+  }
+
+  /// Returns scheme names contributed by local Swift package references
+  /// declared directly in the host project's `project.pbxproj`.
+  ///
+  /// Like remote checkouts (see [_swiftPackageCheckoutSchemes]), a local
+  /// Swift package that ships its own `.swiftpm/xcode/xcshareddata/xcschemes/`
+  /// directory has those schemes auto-merged into the host project's scheme
+  /// list by Xcode, despite not being declared as a scheme in the host
+  /// `.xcodeproj` itself.
+  Set<String> _localSwiftPackageSchemes(XcodeBasedProject xcodeProject) {
+    final File pbxprojFile = xcodeProject.xcodeProjectInfoFile;
+    if (!pbxprojFile.existsSync()) {
+      return const <String>{};
+    }
+    final schemes = <String>{};
+    String contents;
+    try {
+      contents = pbxprojFile.readAsStringSync();
+    } on FileSystemException catch (error) {
+      _logger.printTrace(
+        'Failed to read ${pbxprojFile.path} while filtering Xcode schemes: $error',
+      );
+      return const <String>{};
+    }
+    for (final RegExpMatch match in _localSwiftPackageReferenceExpr.allMatches(contents)) {
+      final String? relativePath = (match.group(1) ?? match.group(2))?.trim();
+      if (relativePath == null || relativePath.isEmpty) {
+        continue;
+      }
+      final Directory packageDirectory = xcodeProject.hostAppRoot.childDirectory(relativePath);
+      schemes.addAll(_schemesFromSwiftPackageSchemeDirectory(packageDirectory));
+    }
+    return schemes;
+  }
+
+  /// Returns the names of any `.xcscheme` files found in [packageDirectory]'s
+  /// `.swiftpm/xcode/xcshareddata/xcschemes` directory, if present.
+  Set<String> _schemesFromSwiftPackageSchemeDirectory(Directory packageDirectory) {
+    final Directory schemeDirectory = packageDirectory
+        .childDirectory('.swiftpm')
+        .childDirectory('xcode')
+        .childDirectory('xcshareddata')
+        .childDirectory('xcschemes');
+    if (!schemeDirectory.existsSync()) {
+      return const <String>{};
+    }
+    final schemes = <String>{};
+    for (final File schemeFile in schemeDirectory.listSync().whereType<File>()) {
+      if (_fileSystem.path.extension(schemeFile.path) == '.xcscheme') {
+        schemes.add(_fileSystem.path.basenameWithoutExtension(schemeFile.path));
+      }
+    }
+    return schemes;
   }
 
   /// Returns scheme names contributed by direct and transitive Swift package checkouts.
@@ -488,19 +555,7 @@ class XcodeProjectInterpreter {
     final schemes = <String>{};
     for (final Directory checkoutDirectory
         in checkoutsDirectory.listSync().whereType<Directory>()) {
-      final Directory schemeDirectory = checkoutDirectory
-          .childDirectory('.swiftpm')
-          .childDirectory('xcode')
-          .childDirectory('xcshareddata')
-          .childDirectory('xcschemes');
-      if (!schemeDirectory.existsSync()) {
-        continue;
-      }
-      for (final File schemeFile in schemeDirectory.listSync().whereType<File>()) {
-        if (_fileSystem.path.extension(schemeFile.path) == '.xcscheme') {
-          schemes.add(_fileSystem.path.basenameWithoutExtension(schemeFile.path));
-        }
-      }
+      schemes.addAll(_schemesFromSwiftPackageSchemeDirectory(checkoutDirectory));
     }
     return schemes;
   }

@@ -15,8 +15,7 @@ import '../convert.dart';
 ///
 /// This is only used in development mode.
 class WebExpressionCompiler implements ExpressionCompiler {
-  WebExpressionCompiler(this._generator, {required FileSystem fileSystem})
-    : _fileSystem = fileSystem;
+  WebExpressionCompiler(this._generator, {required this._fileSystem});
 
   final ResidentCompiler _generator;
   final FileSystem _fileSystem;

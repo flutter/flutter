@@ -70,8 +70,10 @@ class _MyAppState extends State<MyApp> {
         body: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Text('Version: ${_assetData?.version ?? "Unknown"}',
-                style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              'Version: ${_assetData?.version ?? "Unknown"}',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const Divider(),
             const Text('Local Assets:', style: TextStyle(fontWeight: FontWeight.bold)),
             if (_assetData != null) ...[

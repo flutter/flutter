@@ -360,13 +360,15 @@ IOSDevice setUpIOSDevice({
     artifacts: <ArtifactSet>[FakeDyldEnvironmentArtifact()],
     processManager: FakeProcessManager.any(),
   );
+  final FileSystem testFileSystem = fileSystem ?? MemoryFileSystem.test();
   return IOSDevice(
     '1234',
     name: 'iPhone 1',
     logger: logger,
+    fileSystem: testFileSystem,
+    fileSystemUtils: FileSystemUtils(fileSystem: testFileSystem, platform: platform),
     processUtils: ProcessUtils(processManager: processManager, logger: logger),
     xcode: null,
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
     sdkVersion: '13.3',
     cpuArch: .arm64,
     platform: platform,
