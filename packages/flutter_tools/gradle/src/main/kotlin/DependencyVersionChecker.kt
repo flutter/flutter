@@ -91,22 +91,24 @@ object DependencyVersionChecker {
     // Advice for maintainers for other areas of code that are impacted are documented
     // in packages/flutter_tools/lib/src/android/README.md.
 
-    @VisibleForTesting internal val warnGradleVersion: Version = Version(9, 1, 0)
+    @VisibleForTesting internal val warnGradleVersion: Version = Version(9, 5, 0)
 
-    @VisibleForTesting internal val errorGradleVersion: Version = Version(8, 14, 0)
+    @VisibleForTesting internal val errorGradleVersion: Version = Version(9, 3, 1)
 
     // Java error and warn should align with packages/flutter_tools/lib/src/android/gradle_utils.dart.
     @VisibleForTesting internal val warnJavaVersion: JavaVersion = JavaVersion.VERSION_17
 
     @VisibleForTesting internal val errorJavaVersion: JavaVersion = JavaVersion.VERSION_17
 
-    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(9, 0, 1)
+    @VisibleForTesting internal val warnAGPVersion: AndroidPluginVersion = AndroidPluginVersion(9, 3, 1)
 
-    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(8, 11, 1)
+    @VisibleForTesting internal val errorAGPVersion: AndroidPluginVersion = AndroidPluginVersion(9, 1, 1)
 
-    @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 3, 20)
+    @VisibleForTesting internal val firstUnsupportedAGPMajorVersion: Int = 10
 
-    @VisibleForTesting internal val errorKGPVersion: Version = Version(2, 2, 20)
+    @VisibleForTesting internal val warnKGPVersion: Version = Version(2, 4, 20)
+
+    @VisibleForTesting internal val errorKGPVersion: Version = Version(2, 4, 10)
 
     // If this value is changed, then make sure to change the documentation on https://docs.flutter.dev/reference/supported-platforms
     // Non inclusive.
@@ -140,10 +142,16 @@ object DependencyVersionChecker {
         }
 
         val kgpVersion: Version? = VersionFetcher.getKGPVersion(project)
-        if (kgpVersion != null) {
+        val usesBuiltInKotlin = FlutterPluginUtils.isBuiltInKotlinEnabled(project, agpVersion)
+
+        if (kgpVersion != null && !usesBuiltInKotlin) {
             checkKGPVersion(kgpVersion, project)
+        } else {
+            project.logger.debug(
+                "Skipping Kotlin min-version enforcement because the project uses " +
+                    "AGP built-in Kotlin or does not apply KGP."
+            )
         }
-        // KGP is not required, so don't log any warning if we can't find the version.
     }
 
     private fun configureMinSdkCheck(project: Project) {
@@ -208,6 +216,20 @@ object DependencyVersionChecker {
             "\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
             " to bypass this check.\n\nPotential fix: $potentialFix"
 
+    @VisibleForTesting internal fun getFutureUnsupportedMajorVersionErrorMessage(
+        dependencyName: String,
+        versionString: String,
+        unsupportedMajorVersion: Int,
+        potentialFix: String
+    ): String =
+        "Error: Your project's $dependencyName version ($versionString) is not yet " +
+            "supported. Flutter does not support $dependencyName $unsupportedMajorVersion, " +
+            "and support will be added in a future Flutter release. Please downgrade your " +
+            "$dependencyName version to a version below $unsupportedMajorVersion.0.0 to " +
+            "continue.\nAlternatively, use the flag \"--android-skip-build-dependency-validation\"" +
+            " to bypass this check (unsupported; your build may fail).\n\n" +
+            "Potential fix: $potentialFix"
+
     @VisibleForTesting
     internal fun getFlavorSpecificMessage(
         flavorName: String?,
@@ -270,6 +292,17 @@ object DependencyVersionChecker {
         androidPluginVersion: AndroidPluginVersion,
         project: Project
     ) {
+        if (androidPluginVersion.major >= firstUnsupportedAGPMajorVersion) {
+            val errorMessage: String =
+                getFutureUnsupportedMajorVersionErrorMessage(
+                    AGP_NAME,
+                    "${androidPluginVersion.major}.${androidPluginVersion.minor}.${androidPluginVersion.micro}",
+                    firstUnsupportedAGPMajorVersion,
+                    getPotentialAGPFix(project.rootDir.path)
+                )
+            project.extra.set(OUT_OF_SUPPORT_RANGE_PROPERTY, true)
+            throw DependencyValidationException(errorMessage)
+        }
         if (androidPluginVersion < errorAGPVersion) {
             val errorMessage: String =
                 getErrorMessage(

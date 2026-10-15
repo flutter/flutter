@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' as io;
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:test/fake.dart';

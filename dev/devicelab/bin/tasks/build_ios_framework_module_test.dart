@@ -427,9 +427,8 @@ Future<void> _testBuildIosFramework(Directory projectDir, {bool isModule = false
       await _checkDsym(path.join(appFrameworkDsymPath, 'Contents', 'Resources', 'DWARF', 'App'));
     }
 
-    if (Directory(
-          path.join(cocoapodsOutputPath, mode, 'FlutterPluginRegistrant.xcframework'),
-        ).existsSync() !=
+    if (Directory(path.join(cocoapodsOutputPath, mode, 'FlutterPluginRegistrant.xcframework'))
+            .existsSync() !=
         isModule) {
       throw TaskResult.failure('Unexpected FlutterPluginRegistrant.xcframework.');
     }

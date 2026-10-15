@@ -46,7 +46,7 @@ there could be information that has not been posted, ask on our Discord server i
 
 ### Issues are not always the best venue for discussions
 
-Discussions within an issue should remain focused on the topic, specifically about what the filed issue is and how to solve it. Broader discussions are best suited to happen on Discord (see [Chat](../Chat.md)) or in design docs using Google Docs (see [Design Documents](../Design-Documents.md)). This is because GitHub hides comments, doesn't have threading, notifications get lost in the swamp of other GitHub e-mails, etc.
+Discussions within an issue should remain focused on the topic, specifically about what the filed issue is and how to solve it. Broader discussions are best suited to happen on Discord (see [Chat](../Chat.md)) or in RFCs and design documents (see [Design Documents](../Design-Documents.md) and [flutter/rfc](https://github.com/flutter/rfc)). This is because GitHub hides comments, doesn't have threading, notifications get lost in the swamp of other GitHub e-mails, etc.
 
 If you move to another tool for part of the discussion, remember to add a summary of the discussion and document any decisions that took place. This allows people following the issue to keep updated and continue to participate.
 
@@ -82,23 +82,6 @@ showing the bug). Attach such a file or files to the issue itself.
 
 For legal reasons, we cannot debug problems that require looking at proprietary
 code or, generally, code that is not publicly available.
-
-### Do not post unfiltered AI output
-
-Comments should add value to the issue. Anyone can easily feed an issue URL
-into an agent, so just posting the results of doing that is generally not
-helpful.
-
-AI tools may be helpful for accomplishing specific tasks, such as
-creating reduced test cases or identifying potential duplicate issues,
-but they should be used as tools for helping you contribute to the issue
-rather than replacements for your contribution. For example, if you use an
-AI to create a reduced test case, make sure that you can actually reproduce
-the issue before posting it.
-
-Keep in mind that longer is not better in issues, and AI output is often
-verbose. If you use AI to write portions of an issue report or comment,
-consider editing the results to focus on the important details.
 
 ### Consider posting issues in English
 
@@ -342,7 +325,7 @@ Do _not_ file bugs that meet the following criteria:
 If you have an idea that you would like to land, the recommended process is:
 
 1. [File a bug](https://github.com/flutter/flutter/issues/new/choose) describing the problem.
-2. Write a [design doc](https://flutter.dev/go/template) that references this problem and describes your solution.
+2. Write an [RFC or design document](../Design-Documents.md) (following the [Flutter RFC process](https://github.com/flutter/rfc)) that references this problem and describes your solution.
 3. Socialize your design on the bug you filed and on [Chat](../Chat.md). Collect feedback from various people.
 4. Once you have received feedback, if it is mostly positive, implement your idea and submit it. See the [Tree Hygiene](../Tree-hygiene.md) wiki page for details on submitting PRs.
 

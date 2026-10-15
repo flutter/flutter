@@ -56,7 +56,7 @@ void main() {
 // @dart=2.12
 ''');
 
-    expect(determineLanguageVersion(file, null, flutterRoot), nullSafeVersion);
+    expect(determineLanguageVersion(file, null, flutterRoot), LanguageVersion(2, 12));
   });
 
   testWithoutContext('does not detect invalid language version', () {

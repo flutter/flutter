@@ -1317,28 +1317,18 @@ class _ListTile extends SlottedMultiChildRenderObjectWidget<_ListTileSlot, Rende
 class _RenderListTile extends RenderBox
     with SlottedContainerRenderObjectMixin<_ListTileSlot, RenderBox> {
   _RenderListTile({
-    required bool isDense,
-    required VisualDensity visualDensity,
-    required bool isThreeLine,
-    required TextDirection textDirection,
-    required TextBaseline titleBaselineType,
-    TextBaseline? subtitleBaselineType,
-    required double horizontalTitleGap,
-    required double minVerticalPadding,
-    required double minLeadingWidth,
-    double? minTileHeight,
-    required ListTileTitleAlignment titleAlignment,
-  }) : _isDense = isDense,
-       _visualDensity = visualDensity,
-       _isThreeLine = isThreeLine,
-       _textDirection = textDirection,
-       _titleBaselineType = titleBaselineType,
-       _subtitleBaselineType = subtitleBaselineType,
-       _horizontalTitleGap = horizontalTitleGap,
-       _minVerticalPadding = minVerticalPadding,
-       _minLeadingWidth = minLeadingWidth,
-       _minTileHeight = minTileHeight,
-       _titleAlignment = titleAlignment;
+    required this._isDense,
+    required this._visualDensity,
+    required this._isThreeLine,
+    required this._textDirection,
+    required this._titleBaselineType,
+    this._subtitleBaselineType,
+    required this._horizontalTitleGap,
+    required this._minVerticalPadding,
+    required this._minLeadingWidth,
+    this._minTileHeight,
+    required this._titleAlignment,
+  });
 
   RenderBox? get leading => childForSlot(_ListTileSlot.leading);
   RenderBox get title => childForSlot(_ListTileSlot.title)!;
