@@ -196,7 +196,7 @@ dependencies:
   video_player_avfoundation: 2.12.1
   video_player_platform_interface: 6.9.0
   video_player_web: 2.4.0
-  vm_service: 15.3.0
+  vm_service: 15.4.0
   vm_snapshot_analysis: 0.7.6
   watcher: 1.2.1
   web: 1.1.1
@@ -222,4 +222,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: l2nke8
+# PUBSPEC CHECKSUM: ahr6f0
