@@ -243,20 +243,36 @@ class UpdatePackagesCommand extends FlutterCommand {
     _checkPins(rootDirectory);
 
     // Pub get for the workspace.
-    await _pubGet(rootProject, !forceUpgrade && cherryPicks.isEmpty && !updateHashes);
+    await _pubGet(
+      rootProject,
+      !forceUpgrade && cherryPicks.isEmpty && !updateHashes,
+      offline: offline,
+    );
 
     // Manually do a pub get for packages not part of the workspace.
     // See https://github.com/flutter/flutter/pull/170364.
-    await _pubGet(toolProject, false);
-    await _pubGet(FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory), false);
+    await _pubGet(toolProject, false, offline: offline);
+    await _pubGet(
+      FlutterProject.fromDirectory(hooksUserDefineIntegrationTestDirectory),
+      false,
+      offline: offline,
+    );
 
     await _downloadCoverageData();
 
     return FlutterCommandResult.success();
   }
 
-  Future<void> _pubGet(FlutterProject project, bool enforceLockfile) async =>
-      pub.get(context: PubContext.pubGet, project: project, enforceLockfile: enforceLockfile);
+  Future<void> _pubGet(
+    FlutterProject project,
+    bool enforceLockfile, {
+    required bool offline,
+  }) async => pub.get(
+    context: PubContext.pubGet,
+    project: project,
+    enforceLockfile: enforceLockfile,
+    offline: offline,
+  );
 
   Future<List<_ProjectDeps>> _upgrade({
     required bool forceUpgrade,
