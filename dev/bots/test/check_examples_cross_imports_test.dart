@@ -493,6 +493,40 @@ void main() {
       expect(success, isFalse);
     });
 
+    test('unknown $libraryName cross import of both Cupertino and cupertino_ui', () async {
+      final dartFile = '$libraryName/foo.dart';
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        <String>{dartFile},
+        inDirectory: examplesFilesDirectory,
+        importString:
+            "import 'package:flutter/cupertino.dart';\n"
+            "import 'package:cupertino_ui/cupertino_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of Cupertino. Refactor it or move it to the Cupertino examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+        '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of cupertino_ui. Refactor it or move it to the cupertino_ui examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
     test('multiple unknown $libraryName cross imports of Cupertino', () async {
       final dartFileOne = '$libraryName/foo.dart';
       final dartFileTwo = '$libraryName/bar.dart';
