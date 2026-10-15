@@ -334,10 +334,11 @@ Future<void> testMain() async {
 
     expect(rangeBoxes1.first.toRect(), placeholderBoxes[0].toRect());
     expect(rangeBoxes2.first.toRect(), placeholderBoxes[1].toRect());
-    expect(rangeBoxes1.first.top, greaterThanOrEqualTo(0.0));
+    // Placeholder 1 sits on the baseline, placeholder 2 on the line bottom.
+    expect(rangeBoxes1.first.bottom, closeTo(paragraph.alphabeticBaseline, 1e-3));
     expect(rangeBoxes1.first.toRect().width, 50.0);
     expect(rangeBoxes1.first.toRect().height, 30.0);
-    expect(rangeBoxes2.first.top, greaterThanOrEqualTo(0.0));
+    expect(rangeBoxes2.first.bottom, closeTo(paragraph.height, 1e-3));
     expect(rangeBoxes2.first.toRect().width, 40.0);
     expect(rangeBoxes2.first.toRect().height, 60.0);
   });

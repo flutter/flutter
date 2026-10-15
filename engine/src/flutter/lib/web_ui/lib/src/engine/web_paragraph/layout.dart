@@ -621,16 +621,11 @@ class TextLayout {
               bottom = top + block.span.height;
             } else {
               // For TextBlock, BoxHeightStyle.tight returns the unscaled glyph bounds
-              // positioned relative to the line's baseline (`line.advance.top + line.fontBoundingBoxAscent`),
-              // matching SkParagraph's TextLine::getRectsForRange
+              // positioned relative to the line's baseline
+              // (`line.advance.top + line.fontBoundingBoxAscent`), matching SkParagraph's
+              // TextLine::getRectsForRange
               top = line.advance.top + line.fontBoundingBoxAscent - block.rawFontBoundingBoxAscent;
               bottom = top + block.rawFontBoundingBoxAscent + block.rawFontBoundingBoxDescent;
-              assert(
-                (block.rawFontBoundingBoxAscent +
-                        block.rawFontBoundingBoxDescent -
-                        (bottom - top).abs() <
-                    epsilon),
-              );
             }
           case ui.BoxHeightStyle.max:
             top = line.advance.top;
