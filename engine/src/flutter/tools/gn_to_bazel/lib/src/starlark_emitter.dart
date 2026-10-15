@@ -1849,8 +1849,10 @@ final class _Emitter {
   /// `include_dirs`: `includes` entries, except that a generated directory
   /// of an ancestor package (`$root_gen_dir/flutter`) is a dependency on
   /// the target whose `includes` already spans it (see
-  /// [genDirIncludeTargets]); [under] is the condition of the config that
-  /// carries them, when they are inlined.
+  /// [genDirIncludeTargets]), and a source directory outside this package
+  /// is a dependency on the library that carries it when
+  /// [includeDirLibraries] names one; [under] is the condition of the
+  /// config that carries them, when they are inlined.
   void _includeDirsInto(_Rule rule, GnVariable variable, Condition under) {
     _forEachItem(variable, into: rule.list('includes'), (_Element e) {
       final String path = _string(e);
@@ -1859,12 +1861,19 @@ final class _Emitter {
         rule.list('deps').addUnique(under.and(e.condition), _Item(_localLabel(ancestor)));
         return;
       }
-      // A directory of another repository that one of its libraries carries
-      // (includeDirLibraries): the dependency puts the same -I on the compile.
-      final String? library = includeDirLibraries[_gnPath(path)];
-      if (library != null) {
-        rule.list('deps').addUnique(under.and(e.condition), _Item(_localLabel(library)));
-        return;
+      // A directory of another repository or package that one of its
+      // libraries carries (includeDirLibraries): the dependency puts the
+      // same -I on the compile. This package's own directories are
+      // `includes` whatever the table says: the library named for them is
+      // in this package (the accessibility tree's root config carries the
+      // tree's root), and would depend on itself.
+      final String directory = _gnPath(path);
+      if (directory != gnPackage && !directory.startsWith('$gnPackage/')) {
+        final String? library = includeDirLibraries[directory];
+        if (library != null) {
+          rule.list('deps').addUnique(under.and(e.condition), _Item(_localLabel(library)));
+          return;
+        }
       }
       rule
           .list('includes')
