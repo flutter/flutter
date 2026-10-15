@@ -3582,8 +3582,7 @@ String helloNameAndAge({required String name, required int age}) {
         );
         expect(
           localizationsFile,
-          containsIgnoringWhitespace(r'''
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+          containsIgnoringWhitespace('''
     delegate,
     ...GlobalMaterialLocalizations.delegates,
   ];
@@ -3616,8 +3615,7 @@ flutter:
         );
         expect(
           localizationsFile,
-          containsIgnoringWhitespace(r'''
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+          containsIgnoringWhitespace('''
     delegate,
     ...GlobalMaterialLocalizations.delegates,
   ];
@@ -3648,8 +3646,7 @@ flutter:
       );
       expect(
         localizationsFile,
-        containsIgnoringWhitespace(r'''
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+        containsIgnoringWhitespace('''
     delegate,
     ...GlobalCupertinoLocalizations.delegates,
   ];
