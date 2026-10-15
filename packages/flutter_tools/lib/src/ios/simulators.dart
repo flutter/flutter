@@ -382,14 +382,9 @@ class IOSSimulator extends Device {
     required this._plistParser,
     required this._simControl,
     required this.simulatorCategory,
-    required this._toolContext,
+    required ToolContext super.toolContext,
     required this._xcode,
-  }) : super(
-         category: Category.mobile,
-         ephemeral: true,
-         logger: _toolContext.logger,
-         platformType: PlatformType.ios,
-       );
+  }) : super(category: Category.mobile, ephemeral: true, platformType: PlatformType.ios);
 
   @override
   final String name;
@@ -401,12 +396,11 @@ class IOSSimulator extends Device {
   final CpuArch _cpuArch;
   final Analytics _analytics;
   final PlistParser _plistParser;
-  final ToolContext _toolContext;
   final Xcode _xcode;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
-    return LocalDevFSWriter(fileSystem: _toolContext.fs);
+    return LocalDevFSWriter(fileSystem: toolContext.fs);
   }
 
   @override
@@ -466,7 +460,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> isSupported() async {
-    if (!_toolContext.platform.isMacOS) {
+    if (!toolContext.platform.isMacOS) {
       _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
     }
@@ -502,7 +496,7 @@ class IOSSimulator extends Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     if (!prebuiltApplication && package is BuildableIOSApp) {
       logger.printTrace('Building ${package.name} for $id.');
 
@@ -590,7 +584,7 @@ class IOSSimulator extends Device {
     BuildInfo buildInfo,
     String? mainPath,
   ) async {
-    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
     assert(buildInfo.isDebug);
@@ -636,7 +630,7 @@ class IOSSimulator extends Device {
 
   String get logFilePath {
     final ToolContext(:FileSystem fs, :FileSystemUtils fileSystemUtils, :Platform platform) =
-        _toolContext;
+        toolContext;
     final String? logPath = platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'];
     return logPath != null
         ? logPath.replaceAll('%{id}', id)
@@ -666,7 +660,10 @@ class IOSSimulator extends Device {
   @override
   DeviceLogReader getLogReader({covariant IOSApp? app, bool includePastLogs = false}) {
     assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
-    return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
+    return _logReaders.putIfAbsent(
+      app,
+      () => _IOSSimulatorLogReader(this, app, logger: toolContext.logger),
+    );
   }
 
   @override
@@ -675,7 +672,7 @@ class IOSSimulator extends Device {
 
   @override
   void clearLogs() {
-    final File logFile = _toolContext.fs.file(logFilePath);
+    final File logFile = toolContext.fs.file(logFilePath);
     if (logFile.existsSync()) {
       final RandomAccessFile randomFile = logFile.openSync(mode: FileMode.write);
       randomFile.truncateSync(0);
@@ -685,7 +682,7 @@ class IOSSimulator extends Device {
 
   Future<void> ensureLogsExists() async {
     if (await sdkMajorVersion < 11) {
-      final File logFile = _toolContext.fs.file(logFilePath);
+      final File logFile = toolContext.fs.file(logFilePath);
       if (!logFile.existsSync()) {
         logFile.writeAsBytesSync(<int>[]);
       }
@@ -745,6 +742,64 @@ class IOSSimulator extends Device {
       logReader.dispose();
     }
     await _portForwarder?.dispose();
+  }
+
+  Future<Process> _launchDeviceSystemLogTool() async {
+    return toolContext.processUtils.start(<String>['tail', '-n', '0', '-F', logFilePath]);
+  }
+
+  Future<Process> _launchDeviceUnifiedLogging(String? appName) async {
+    // Make NSPredicate concatenation easier to read.
+    String orP(List<String> clauses) => '(${clauses.join(" OR ")})';
+    String andP(List<String> clauses) => clauses.join(' AND ');
+    String notP(String clause) => 'NOT($clause)';
+
+    final String predicate = andP(<String>[
+      'eventType = logEvent',
+      if (appName != null) 'processImagePath ENDSWITH "$appName"',
+      // Either from Flutter or Swift (maybe assertion or fatal error) or from the app itself.
+      orP(<String>[
+        'senderImagePath ENDSWITH "/Flutter"',
+        'senderImagePath ENDSWITH "/libswiftCore.dylib"',
+        'processImageUUID == senderImageUUID',
+        'eventMessage CONTAINS "UIScene life cycle is required"',
+        'eventMessage CONTAINS "`UIScene` lifecycle will soon be required"',
+        'eventMessage CONTAINS "This process does not adopt UIScene lifecycle."',
+      ]),
+      // Filter out some messages that clearly aren't related to Flutter.
+      notP('eventMessage CONTAINS ": could not find icon for representation -> com.apple."'),
+      notP('eventMessage BEGINSWITH "assertion failed: "'),
+      notP('eventMessage CONTAINS " libxpc.dylib "'),
+    ]);
+
+    return toolContext.processUtils.start(<String>[
+      ..._xcode.xcrunCommand(),
+      'simctl',
+      'spawn',
+      id,
+      'log',
+      'stream',
+      '--style',
+      'json',
+      '--predicate',
+      predicate,
+    ]);
+  }
+
+  Future<Process?> _launchSystemLogTool() async {
+    // Versions of iOS prior to 11 tail the simulator syslog file.
+    if (await sdkMajorVersion < 11) {
+      return toolContext.processUtils.start(<String>[
+        'tail',
+        '-n',
+        '0',
+        '-F',
+        '/private/var/log/system.log',
+      ]);
+    }
+
+    // For iOS 11 and later, all relevant detail is in the device log.
+    return null;
   }
 }
 
@@ -808,75 +863,20 @@ class IOSSimulatorRuntime {
 
 /// Launches the device log reader process on the host and parses the syslog.
 @visibleForTesting
-Future<Process> launchDeviceSystemLogTool(IOSSimulator device) async {
-  return device._toolContext.processUtils.start(<String>[
-    'tail',
-    '-n',
-    '0',
-    '-F',
-    device.logFilePath,
-  ]);
-}
+Future<Process> launchDeviceSystemLogTool(IOSSimulator device) =>
+    device._launchDeviceSystemLogTool();
 
 /// Launches the device log reader process on the host and parses unified logging.
 @visibleForTesting
-Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName) async {
-  // Make NSPredicate concatenation easier to read.
-  String orP(List<String> clauses) => '(${clauses.join(" OR ")})';
-  String andP(List<String> clauses) => clauses.join(' AND ');
-  String notP(String clause) => 'NOT($clause)';
-
-  final String predicate = andP(<String>[
-    'eventType = logEvent',
-    if (appName != null) 'processImagePath ENDSWITH "$appName"',
-    // Either from Flutter or Swift (maybe assertion or fatal error) or from the app itself.
-    orP(<String>[
-      'senderImagePath ENDSWITH "/Flutter"',
-      'senderImagePath ENDSWITH "/libswiftCore.dylib"',
-      'processImageUUID == senderImageUUID',
-      'eventMessage CONTAINS "UIScene life cycle is required"',
-      'eventMessage CONTAINS "`UIScene` lifecycle will soon be required"',
-      'eventMessage CONTAINS "This process does not adopt UIScene lifecycle."',
-    ]),
-    // Filter out some messages that clearly aren't related to Flutter.
-    notP('eventMessage CONTAINS ": could not find icon for representation -> com.apple."'),
-    notP('eventMessage BEGINSWITH "assertion failed: "'),
-    notP('eventMessage CONTAINS " libxpc.dylib "'),
-  ]);
-
-  return device._toolContext.processUtils.start(<String>[
-    ...device._xcode.xcrunCommand(),
-    'simctl',
-    'spawn',
-    device.id,
-    'log',
-    'stream',
-    '--style',
-    'json',
-    '--predicate',
-    predicate,
-  ]);
-}
+Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName) =>
+    device._launchDeviceUnifiedLogging(appName);
 
 @visibleForTesting
-Future<Process?> launchSystemLogTool(IOSSimulator device) async {
-  // Versions of iOS prior to 11 tail the simulator syslog file.
-  if (await device.sdkMajorVersion < 11) {
-    return device._toolContext.processUtils.start(<String>[
-      'tail',
-      '-n',
-      '0',
-      '-F',
-      '/private/var/log/system.log',
-    ]);
-  }
-
-  // For iOS 11 and later, all relevant detail is in the device log.
-  return null;
-}
+Future<Process?> launchSystemLogTool(IOSSimulator device) => device._launchSystemLogTool();
 
 class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
-  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '') {
+  _IOSSimulatorLogReader(this.device, IOSApp? app, {required this._logger})
+    : _appName = app?.name?.replaceAll('.app', '') {
     final uisceneCrashInterceptor = LogInterceptor(
       identifier: 'uiscene_crash',
       pattern: RegExp(r'UIScene life\s?cycle is required'),
@@ -889,6 +889,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   }
 
   final IOSSimulator device;
+  final Logger _logger;
 
   final String? _appName;
 
@@ -1031,7 +1032,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   String? _lastLine;
 
   void _onSysLogDeviceLine(String line) {
-    device._toolContext.logger.printTrace('[DEVICE LOG] $line');
+    _logger.printTrace('[DEVICE LOG] $line');
     final Match? multi = _lastMessageMultipleRegex.matchAsPrefix(line);
 
     if (multi != null) {
@@ -1066,7 +1067,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
           addLogToStream(decodedJson);
         }
       } on FormatException {
-        device._toolContext.logger.printError('Logger returned non-JSON response: $message');
+        _logger.printError('Logger returned non-JSON response: $message');
       }
     }
   }
@@ -1077,7 +1078,7 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   }
 
   void _onSystemLine(String line) {
-    device._toolContext.logger.printTrace('[SYS LOG] $line');
+    _logger.printTrace('[SYS LOG] $line');
     if (!_flutterRunnerRegex.hasMatch(line)) {
       return;
     }
