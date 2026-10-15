@@ -5,8 +5,8 @@
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/analyze_size.dart';
+import '../base/bot_detector.dart';
 import '../base/common.dart';
-import '../base/config.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart' show HostPlatform, OperatingSystemUtils;
@@ -32,7 +32,6 @@ import '../migrations/xcode_project_object_version_migration.dart';
 import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../project.dart';
-import '../version.dart';
 import 'application_package.dart';
 import 'cocoapod_utils.dart';
 import 'cocoapods.dart';
@@ -115,10 +114,9 @@ Future<void> buildMacOS({
     :XcodeProjectInterpreter xcodeProjectInterpreter,
   ) = appleContext;
   final ToolContext(
-    :Config config,
+    :BotDetector botDetector,
     :FileSystem fs,
     :FileSystemUtils fileSystemUtils,
-    :FlutterVersion flutterVersion,
     :Logger logger,
     :OperatingSystemUtils os,
     :Platform platform,
@@ -144,20 +142,15 @@ Future<void> buildMacOS({
     FlutterApplicationMigration(flutterProject.macos, logger, plistParser: plistParser),
     NSApplicationMainDeprecationMigration(flutterProject.macos, logger),
     SecureRestorableStateMigration(flutterProject.macos, logger),
-    SwiftPackageManagerIntegrationMigration(
+    SwiftPackageManagerIntegrationMigration.fromToolContext(
       flutterProject.macos,
       darwinPlatform,
       buildInfo,
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
-      logger: logger,
-      fileSystem: fs,
-      plistParser: plistParser,
-      config: config,
       analytics: analytics,
-      hostPlatform: platform,
-      operatingSystemUtils: os,
-      flutterVersion: flutterVersion,
-      reportCrashes: !(await toolContext.botDetector.isRunningOnBot),
+      plistParser: plistParser,
+      reportCrashes: !(await botDetector.isRunningOnBot),
+      toolContext: toolContext,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     ),
     SwiftPackageManagerGitignoreMigration(flutterProject, logger),
     MetalAPIValidationMigrator.macos(flutterProject.macos, logger),

@@ -27,10 +27,7 @@ class MacOSDevice extends DesktopDevice {
     required this._appleContext,
     required this._featureFlags,
     required ToolContext toolContext,
-  }) : _logger = toolContext.logger,
-       _operatingSystemUtils = toolContext.os,
-       _processManager = toolContext.processManager,
-       _toolContext = toolContext,
+  }) : _toolContext = toolContext,
        super(
          'macos',
          fileSystem: toolContext.fs,
@@ -44,9 +41,6 @@ class MacOSDevice extends DesktopDevice {
   final Analytics _analytics;
   final AppleContext _appleContext;
   final FeatureFlags _featureFlags;
-  final Logger _logger;
-  final OperatingSystemUtils _operatingSystemUtils;
-  final ProcessManager _processManager;
   final ToolContext _toolContext;
 
   @override
@@ -62,11 +56,11 @@ class MacOSDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
-  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_toolContext.os.hostPlatform);
 
   @override
   Future<String> get targetPlatformDisplayName async {
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
+    if (_toolContext.os.hostPlatform == HostPlatform.darwin_arm64) {
       return 'darwin-arm64';
     }
     return 'darwin-x64';
@@ -83,7 +77,8 @@ class MacOSDevice extends DesktopDevice {
     String? mainPath,
     bool usingCISystem = false,
   }) async {
-    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        _toolContext;
     await buildMacOS(
       analytics: _analytics,
       appleContext: _appleContext,
@@ -93,7 +88,7 @@ class MacOSDevice extends DesktopDevice {
       targetOverride: mainPath,
       toolContext: _toolContext,
       usingCISystem: usingCISystem,
-      verboseLogging: _logger.isVerbose,
+      verboseLogging: logger.isVerbose,
     );
   }
 
@@ -104,18 +99,19 @@ class MacOSDevice extends DesktopDevice {
 
   @override
   void onAttached(covariant MacOSApp package, BuildInfo buildInfo, Process process) {
+    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
     // Bring app to foreground. Ideally this would be done post-launch rather
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enough along in
     // the launch process for 'open' to foreground it.
     final String? applicationBundle = package.applicationBundle(buildInfo);
     if (applicationBundle == null) {
-      _logger.printError('Failed to foreground app; application bundle not found');
+      logger.printError('Failed to foreground app; application bundle not found');
       return;
     }
-    _processManager.run(<String>['open', applicationBundle]).then((ProcessResult result) {
+    processManager.run(<String>['open', applicationBundle]).then((ProcessResult result) {
       if (result.exitCode != 0) {
-        _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
+        logger.printError('Failed to foreground app; open returned ${result.exitCode}');
       }
     });
   }
