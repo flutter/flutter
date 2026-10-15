@@ -159,35 +159,6 @@ class GlobalToolContext implements ToolContext {
   UserMessages get userMessages => globals.userMessages;
 }
 
-ToolContext _createFallbackToolContext() => ToolContext(
-  artifacts: globals.artifacts!,
-  botDetector: globals.botDetector,
-  cache: globals.cache,
-  config: globals.config,
-  customDevicesConfig: globals.customDevicesConfig,
-  flutterVersion: globals.flutterVersion,
-  fs: globals.fs,
-  git: globals.git,
-  localEngineLocator: globals.localEngineLocator!,
-  logger: globals.logger,
-  nativeAssetsBuilder: globals.nativeAssetsBuilder,
-  os: globals.os,
-  outputPreferences: globals.outputPreferences,
-  persistentToolState: globals.persistentToolState!,
-  platform: globals.platform,
-  preRunValidator: globals.preRunValidator,
-  processInfo: globals.processInfo,
-  processManager: globals.processManager,
-  processUtils: globals.processUtils,
-  projectFactory: globals.projectFactory,
-  shutdownHooks: globals.shutdownHooks,
-  signals: globals.signals,
-  stdio: globals.stdio,
-  systemClock: globals.systemClock,
-  terminal: globals.terminal,
-  userMessages: globals.userMessages,
-);
-
 Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? overrides}) async {
   // Wrap runner with any asynchronous initialization that should run with the
   // overrides and callbacks.
@@ -222,7 +193,34 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
         androidStudio: globals.androidStudio,
         androidSdk: globals.androidSdk,
-        toolContext: _createFallbackToolContext(),
+        toolContext: ToolContext(
+          artifacts: globals.artifacts!,
+          botDetector: globals.botDetector,
+          cache: globals.cache,
+          config: globals.config,
+          customDevicesConfig: globals.customDevicesConfig,
+          flutterVersion: globals.flutterVersion,
+          fs: globals.fs,
+          git: globals.git,
+          localEngineLocator: globals.localEngineLocator!,
+          logger: globals.logger,
+          nativeAssetsBuilder: globals.nativeAssetsBuilder,
+          os: globals.os,
+          outputPreferences: globals.outputPreferences,
+          persistentToolState: globals.persistentToolState!,
+          platform: globals.platform,
+          preRunValidator: globals.preRunValidator,
+          processInfo: globals.processInfo,
+          processManager: globals.processManager,
+          processUtils: globals.processUtils,
+          projectFactory: globals.projectFactory,
+          shutdownHooks: globals.shutdownHooks,
+          signals: globals.signals,
+          stdio: globals.stdio,
+          systemClock: globals.systemClock,
+          terminal: globals.terminal,
+          userMessages: globals.userMessages,
+        ),
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         platform: globals.platform,
@@ -252,7 +250,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ApplicationPackageFactory: () => FlutterApplicationPackageFactory(
         androidSdk: globals.androidSdk,
         plistParser: globals.plistParser,
-        toolContext: _createFallbackToolContext(),
+        toolContext: const GlobalToolContext(),
       ),
       Artifacts: () => CachedArtifacts(
         fileSystem: globals.fs,
