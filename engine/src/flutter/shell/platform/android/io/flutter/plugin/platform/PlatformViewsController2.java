@@ -12,6 +12,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.SparseArray;
 import android.view.AttachedSurfaceControl;
 import android.view.Gravity;
@@ -30,6 +32,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.UiThread;
 import androidx.annotation.VisibleForTesting;
+import io.flutter.BuildConfig;
 import io.flutter.Log;
 import io.flutter.embedding.android.AndroidTouchProcessor;
 import io.flutter.embedding.android.FlutterView;
@@ -86,6 +89,14 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   // Platform-thread only. Clips and overlay visibility share one transaction per frame.
   private SurfaceControl.Transaction pendingPlatformTransaction;
   private SurfaceControl.Transaction activePlatformTransaction;
+
+  // Platform-thread only. Set by onBeginFrame() and cleared by swapTransactions(): only mutations
+  // recorded through platformTransaction() in between are applied by this frame's onEndFrame().
+  private boolean frameInProgress = false;
+
+  // SurfaceFlinger reports transaction commits on a binder thread; FlutterJNI must be called on
+  // the platform thread.
+  private final Handler mainThreadHandler = new Handler(Looper.getMainLooper());
 
   private Surface overlayerSurface = null;
   private SurfaceControl overlaySurfaceControl = null;
@@ -642,12 +653,26 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     return new SurfaceHolder.Callback() {
       @Override
       public void surfaceCreated(@NonNull SurfaceHolder holder) {
+        if (platformViews.get(viewId) == null) {
+          viewsWithPendingSurfaceCallback.remove(viewId);
+          surfaceView.getHolder().removeCallback(this);
+          return;
+        }
         SurfaceControl surfaceControl = surfaceView.getSurfaceControl();
         if (surfaceControl != null && surfaceControl.isValid()) {
           SurfaceControl.Transaction tx =
-              platformTransaction()
+              newTransaction()
                   .setAlpha(surfaceControl, opacity)
                   .setCrop(surfaceControl, screenRect);
+          final AttachedSurfaceControl rootSurfaceControl =
+              flutterView == null ? null : flutterView.getRootSurfaceControl();
+          if (rootSurfaceControl != null) {
+            flutterView.invalidate();
+            rootSurfaceControl.applyTransactionOnDraw(tx);
+          } else {
+            tx.apply();
+            tx.close();
+          }
         } else {
           Log.i(
               TAG,
@@ -685,6 +710,20 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     parentView.setVisibility(View.GONE);
   }
 
+  /**
+   * Starts the platform-thread half of a frame.
+   *
+   * <p>The engine calls this before it displays or hides platform views and the overlay for a
+   * frame, and follows up with {@link #swapTransactions()} and {@link #onEndFrame()}. Mutations
+   * recorded through {@link #platformTransaction()} in between are applied together with the
+   * frame's swapchain buffers.
+   */
+  @UiThread
+  @RequiresApi(API_LEVELS.API_34)
+  public void onBeginFrame() {
+    frameInProgress = true;
+  }
+
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
   public void onEndFrame() {
@@ -707,13 +746,34 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     final AttachedSurfaceControl rootSurfaceControl =
         flutterView == null ? null : flutterView.getRootSurfaceControl();
     if (rootSurfaceControl == null) {
-      // Release the unapplied transaction and its owned fence FDs.
+      // Release the unapplied transaction and its owned fence FDs. Nothing will ever commit, so
+      // report the frame as done right away or the engine would keep routing frames here.
       tx.close();
+      notifyEndFrameTransactionCommitted();
       return;
     }
 
     flutterView.invalidate();
+    // ViewRootImpl merges tx into its own frame transaction, and merging carries the listener
+    // along, so this must be registered before applyTransactionOnDraw(). ViewRootImpl applies
+    // the merged transaction with its next draw, or on its own if that draw never happens, so
+    // the listener always fires eventually.
+    tx.addTransactionCommittedListener(
+        mainThreadHandler::post, this::notifyEndFrameTransactionCommitted);
     rootSurfaceControl.applyTransactionOnDraw(tx);
+  }
+
+  /**
+   * Tells the engine that the transaction of a frame that went through {@link #onEndFrame()} is no
+   * longer pending, so the raster thread may stop routing swapchain frames through here.
+   */
+  @UiThread
+  private void notifyEndFrameTransactionCommitted() {
+    if (flutterJNI == null) {
+      // Tests drive the transaction plumbing without an engine.
+      return;
+    }
+    flutterJNI.onEndFrameTransactionCommitted();
   }
 
   @UiThread
@@ -732,6 +792,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     activePlatformTransaction = pendingPlatformTransaction;
     pendingPlatformTransaction = null;
+    // Anything recorded from here on would only be picked up by the next swap.
+    frameInProgress = false;
   }
 
   /**
@@ -763,6 +825,20 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
   @UiThread
   @RequiresApi(API_LEVELS.API_34)
   private SurfaceControl.Transaction platformTransaction() {
+    if (!frameInProgress) {
+      // The pending transaction is only picked up by the next swapTransactions(), and the engine
+      // only routes a frame through the platform thread when it expects View state to change. A
+      // mutation recorded outside of a frame would therefore sit here until some later frame
+      // happens to come this way, which may be never. Out-of-frame mutations must be applied on
+      // their own instead, see createSurfaceClipCallback().
+      final String message =
+          "platformTransaction() called outside of a frame; the mutation will not be applied"
+              + " until the next frame that goes through the platform thread.";
+      if (BuildConfig.DEBUG) {
+        throw new IllegalStateException(message);
+      }
+      Log.e(TAG, message);
+    }
     if (pendingPlatformTransaction == null) {
       pendingPlatformTransaction = newTransaction();
     }

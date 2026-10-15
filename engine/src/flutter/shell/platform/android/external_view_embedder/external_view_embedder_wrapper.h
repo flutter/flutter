@@ -28,6 +28,7 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
       const AndroidContext& android_context,
       std::shared_ptr<PlatformViewAndroidJNI> jni_facade,
       std::shared_ptr<AndroidSurfaceFactory> surface_factory,
+      std::shared_ptr<SurfaceTransactionRouter> transaction_router,
       const TaskRunners& task_runners);
 
   // |ExternalViewEmbedder|
@@ -85,6 +86,7 @@ class AndroidExternalViewEmbedderWrapper final : public ExternalViewEmbedder {
   const TaskRunners& task_runners_;
   std::shared_ptr<PlatformViewAndroidJNI> jni_facade_;
   std::shared_ptr<AndroidSurfaceFactory> surface_factory_;
+  std::shared_ptr<SurfaceTransactionRouter> transaction_router_;
   std::unique_ptr<AndroidExternalViewEmbedder> non_hcpp_view_embedder_;
   std::unique_ptr<AndroidExternalViewEmbedder2> hcpp_view_embedder_;
 };

@@ -15,6 +15,8 @@ source_set("external_view_embedder") {
     "external_view_embedder_wrapper.h",
     "surface_pool.cc",
     "surface_pool.h",
+    "surface_transaction_router.cc",
+    "surface_transaction_router.h",
   ]
 
   public_configs = [ "//flutter:config" ]
@@ -43,6 +45,7 @@ executable("android_external_view_embedder_unittests") {
   sources = [
     "external_view_embedder_unittests.cc",
     "surface_pool_unittests.cc",
+    "surface_transaction_router_unittests.cc",
   ]
 
   deps = [

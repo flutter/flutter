@@ -67,6 +67,10 @@ class SurfaceTransaction {
 
   SurfaceTransaction& operator=(const SurfaceTransaction&) = delete;
 
+  SurfaceTransaction(SurfaceTransaction&&) = default;
+
+  SurfaceTransaction& operator=(SurfaceTransaction&&) = default;
+
   //----------------------------------------------------------------------------
   /// @brief      Wraps a transaction borrowed from Java.
   ///
