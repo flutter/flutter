@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 import 'dart:io' hide Platform;
-import 'dart:io' as io show Platform;
 
 import 'package:collection/collection.dart';
 import 'package:file/file.dart' as fs;
@@ -130,15 +129,12 @@ void main() {
       Map<String, String>? environment,
       List<String> otherArgs = const <String>[],
     ]) async {
-      final String scriptPath = path.join(
-        Directory.current.path.endsWith(path.join('dev', 'bots'))
-            ? Directory.current.path
-            : path.join(Directory.current.path, 'dev', 'bots'),
-        'test.dart',
+      final String dart = path.absolute(
+        path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),
       );
       final ProcessResult scriptProcess = processManager.runSync(<String>[
-        io.Platform.resolvedExecutable,
-        scriptPath,
+        dart,
+        'test.dart',
         ...otherArgs,
       ], environment: environment);
       return scriptProcess;
@@ -178,10 +174,7 @@ void main() {
     });
 
     test('--dry-run prints every test that would run', () async {
-      final ProcessResult result = await runScript(
-        <String, String>{'SHARD': kTestHarnessShardName},
-        <String>['--dry-run'],
-      );
+      final ProcessResult result = await runScript(<String, String>{}, <String>['--dry-run']);
       expectExitCode(result, 0);
       expect(result.stdout, contains('|> bin/flutter'));
     }, testOn: 'posix');
@@ -192,11 +185,16 @@ void main() {
         <String>['--dry-run'],
       );
       expectExitCode(result, 0);
-      expect(result.stdout, contains('|> flutter'));
-      expect(result.stdout, contains('--all-platforms'));
-      expect(result.stdout, contains('--flutter_runner'));
-      expect(result.stdout, contains('--fuchsia'));
-      expect(result.stdout, contains('--force'));
+      expect(
+        result.stdout,
+        contains(
+          '  precache\n'
+          '  --all-platforms\n'
+          '  --flutter_runner\n'
+          '  --fuchsia\n'
+          '  --force\n',
+        ),
+      );
     }, testOn: 'posix');
   });
 
