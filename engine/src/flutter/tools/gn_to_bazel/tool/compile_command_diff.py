@@ -70,6 +70,10 @@ SYNCED_REPOSITORIES = {
     'spirv-cross': 'flutter/third_party/vulkan-deps/spirv-cross/src',
     'spirv-headers': 'flutter/third_party/vulkan-deps/spirv-headers/src',
     'spirv-tools': 'flutter/third_party/vulkan-deps/spirv-tools/src',
+    # The Debian sysroot: GN's pkg_config() passes its include directories
+    # as -isystem relative to the source tree; the overlay's libraries as
+    # `includes`.
+    'sysroot_linux_x64': 'build/linux/debian_bullseye_amd64-sysroot',
     'wuffs': 'flutter/third_party/wuffs',
     'zlib': 'flutter/third_party/zlib',
 }
