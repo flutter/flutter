@@ -14,6 +14,7 @@
 #include "impeller/base/validation.h"
 #include "impeller/core/shader_types.h"
 #include "impeller/renderer/pipeline_descriptor.h"
+#include "impeller/renderer/shader_library.h"
 #include "impeller/renderer/vertex_descriptor.h"
 #include "third_party/abseil-cpp/absl/status/status.h"
 #include "third_party/abseil-cpp/absl/status/statusor.h"
@@ -42,33 +43,66 @@ RenderPipeline::RenderPipeline(
   vertex_descriptor_->RegisterDescriptorSetLayouts(
       fragment_shader_->GetDescriptorSetLayouts().data(),
       fragment_shader_->GetDescriptorSetLayouts().size());
+  core_ = std::make_shared<Core>(
+      vertex_shader_->GetScopedName(), vertex_shader_->GetEntrypoint(),
+      fragment_shader_->GetScopedName(), fragment_shader_->GetEntrypoint(),
+      vertex_descriptor_);
+}
+
+const std::shared_ptr<const RenderPipeline::Core>& RenderPipeline::GetCore()
+    const {
+  return core_;
+}
+
+RenderPipeline::Core::Core(
+    std::string vertex_name,
+    std::string vertex_entrypoint,
+    std::string fragment_name,
+    std::string fragment_entrypoint,
+    std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor)
+    : vertex_name_(std::move(vertex_name)),
+      vertex_entrypoint_(std::move(vertex_entrypoint)),
+      fragment_name_(std::move(fragment_name)),
+      fragment_entrypoint_(std::move(fragment_entrypoint)),
+      vertex_descriptor_(std::move(vertex_descriptor)) {}
+
+bool RenderPipeline::Core::BindToPipelineDescriptor(
+    impeller::ShaderLibrary& library,
+    impeller::PipelineDescriptor& desc) const {
+  auto vertex_function =
+      library.GetFunction(vertex_name_, impeller::ShaderStage::kVertex);
+  if (!vertex_function) {
+    VALIDATION_LOG << "Unable to resolve the vertex shader function '"
+                   << vertex_entrypoint_ << "' from the shader library.";
+    return false;
+  }
+  auto fragment_function =
+      library.GetFunction(fragment_name_, impeller::ShaderStage::kFragment);
+  if (!fragment_function) {
+    VALIDATION_LOG << "Unable to resolve the fragment shader function '"
+                   << fragment_entrypoint_ << "' from the shader library.";
+    return false;
+  }
+  desc.SetVertexDescriptor(vertex_descriptor_);
+  desc.AddStageEntrypoint(std::move(vertex_function));
+  desc.AddStageEntrypoint(std::move(fragment_function));
+  return true;
+}
+
+void RenderPipeline::Core::MarkBuildFailed(size_t key) const {
+  std::scoped_lock lock(failed_mutex_);
+  failed_keys_.insert(key);
+}
+
+bool RenderPipeline::Core::HasBuildFailed(size_t key) const {
+  std::scoped_lock lock(failed_mutex_);
+  return failed_keys_.count(key) != 0;
 }
 
 bool RenderPipeline::BindToPipelineDescriptor(
     impeller::ShaderLibrary& library,
     impeller::PipelineDescriptor& desc) {
-  // A failed lookup previously flowed into `AddStageEntrypoint`, which
-  // dereferences its argument, crashing with no signal about which shader
-  // was at fault.
-  auto vertex_function = vertex_shader_->GetFunctionFromLibrary(library);
-  if (!vertex_function) {
-    VALIDATION_LOG << "Unable to resolve the vertex shader function '"
-                   << vertex_shader_->GetEntrypoint()
-                   << "' from the shader library.";
-    return false;
-  }
-  auto fragment_function = fragment_shader_->GetFunctionFromLibrary(library);
-  if (!fragment_function) {
-    VALIDATION_LOG << "Unable to resolve the fragment shader function '"
-                   << fragment_shader_->GetEntrypoint()
-                   << "' from the shader library.";
-    return false;
-  }
-
-  desc.SetVertexDescriptor(vertex_descriptor_);
-  desc.AddStageEntrypoint(std::move(vertex_function));
-  desc.AddStageEntrypoint(std::move(fragment_function));
-  return true;
+  return core_->BindToPipelineDescriptor(library, desc);
 }
 
 RenderPipeline::~RenderPipeline() = default;

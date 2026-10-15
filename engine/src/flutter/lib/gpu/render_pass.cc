@@ -3,13 +3,11 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/gpu/render_pass.h"
-#include <future>
 #include <memory>
 
 #include "flutter/lib/gpu/formats.h"
 #include "flutter/lib/gpu/render_pipeline.h"
 #include "flutter/lib/gpu/shader.h"
-#include "fml/make_copyable.h"
 #include "fml/memory/ref_ptr.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/buffer_view.h"
@@ -18,11 +16,8 @@
 #include "impeller/core/shader_types.h"
 #include "impeller/geometry/color.h"
 #include "impeller/renderer/command.h"
-#include "impeller/renderer/pipeline.h"
 #include "impeller/renderer/pipeline_descriptor.h"
-#include "impeller/renderer/pipeline_library.h"
 #include "lib/gpu/context.h"
-#include "lib/ui/ui_dart_state.h"
 #include "tonic/converter/dart_converter.h"
 
 namespace flutter {
@@ -30,13 +25,10 @@ namespace gpu {
 
 IMPLEMENT_WRAPPERTYPEINFO(flutter_gpu, RenderPass);
 
-RenderPass::RenderPass() = default;
+RenderPass::RenderPass()
+    : recording_(std::make_shared<RenderPassRecording>()) {}
 
 RenderPass::~RenderPass() = default;
-
-const std::shared_ptr<const impeller::Context>& RenderPass::GetContext() const {
-  return render_pass_->GetContext();
-}
 
 impeller::RenderTarget& RenderPass::GetRenderTarget() {
   pipeline_state_dirty_ = true;
@@ -93,13 +85,23 @@ void RenderPass::ClearPipelineStateDirtyForTesting() {
   pipeline_state_dirty_ = false;
 }
 
+const RenderPassRecording& RenderPass::GetRecordingForTesting() const {
+  return *recording_;
+}
+
+RenderPassRecording* RenderPass::OpenRecording() {
+  return recording_->sealed ? nullptr : recording_.get();
+}
+
 bool RenderPass::Begin(flutter::gpu::CommandBuffer& command_buffer) {
-  render_pass_ =
-      command_buffer.GetCommandBuffer()->CreateRenderPass(render_target_);
-  if (!render_pass_) {
+  if (begun_ || !render_target_.IsValid()) {
     return false;
   }
-  command_buffer.AddRenderPass(render_pass_);
+  recording_->render_target = render_target_;
+  if (!command_buffer.AddRenderPass(recording_)) {
+    return false;
+  }
+  begun_ = true;
   return true;
 }
 
@@ -116,8 +118,8 @@ void RenderPass::SetPipeline(fml::RefPtr<RenderPipeline> pipeline) {
 // The setters below assign through the pipeline descriptor directly rather
 // than through GetPipelineDescriptor, which would dirty the state
 // unconditionally. Callers re-send the same fixed-function state ahead of
-// most draws, and dirtying on a redundant assignment would rebuild the
-// pipeline for every one of them.
+// most draws, and dirtying on a redundant assignment would snapshot the
+// pipeline state for every one of them.
 
 void RenderPass::SetCullMode(impeller::CullMode mode) {
   if (pipeline_descriptor_.GetCullMode() == mode) {
@@ -155,41 +157,130 @@ void RenderPass::BindSet(size_t slot, fml::RefPtr<BindingSet> set) {
   if (slot >= kMaxBindingSets) {
     return;
   }
+  auto* recording = OpenRecording();
+  if (!recording) {
+    return;
+  }
+  recording->Push(RecordedOp::kBindSet, recording->sets,
+                  RenderPassRecording::SetBind{
+                      .slot = static_cast<uint32_t>(slot),
+                      .contents = set ? set->Snapshot() : nullptr,
+                  });
   // On debug this makes a difference, but not on release builds.
   // NOLINTNEXTLINE(performance-move-const-arg)
   binding_sets[slot] = std::move(set);
 }
 
 void RenderPass::ClearBindings() {
-  vertex_uniform_bindings.clear();
-  vertex_texture_bindings.clear();
-  fragment_uniform_bindings.clear();
-  fragment_texture_bindings.clear();
   for (auto& set : binding_sets) {
     set = nullptr;
   }
-  for (auto& buffer : vertex_buffers) {
-    buffer = {};
+  index_buffer_type_ = impeller::IndexType::kNone;
+  if (auto* recording = OpenRecording()) {
+    recording->Push(RecordedOp::kClearBindings);
   }
-  vertex_buffer_count = 0;
-  index_buffer = {};
-  index_buffer_type = impeller::IndexType::kNone;
 }
 
-std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
-RenderPass::GetOrCreatePipeline() {
-  // Consecutive draws overwhelmingly reuse the same pipeline state; skip the
-  // descriptor rebuild, hash, and pipeline-library lookup entirely until a
-  // state mutation marks it dirty. Draw rates reach tens of thousands per
-  // frame, so this path stays free of per-draw allocation and hashing. A
-  // memoized null is a build failure that was already reported for this
-  // exact state; returning it without retrying keeps a broken pipeline from
-  // re-logging on every draw.
-  if (!pipeline_state_dirty_) {
-    return memoized_pipeline_;
+// Whether a shader stage can take resource bindings from a render pass.
+static bool IsRenderStage(impeller::ShaderStage stage) {
+  return stage == impeller::ShaderStage::kVertex ||
+         stage == impeller::ShaderStage::kFragment;
+}
+
+bool RenderPass::BindUniform(
+    Shader& shader,
+    const Shader::UniformBinding* binding,
+    const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
+    size_t offset_in_bytes,
+    size_t length_in_bytes) {
+  auto* recording = OpenRecording();
+  if (!recording || !binding || !IsRenderStage(shader.GetShaderStage())) {
+    return false;
   }
+  if (!buffer || offset_in_bytes + length_in_bytes >
+                     buffer->GetDeviceBufferDescriptor().size) {
+    return false;
+  }
+  recording->RetainReflection(shader.GetReflection());
+  recording->Push(
+      RecordedOp::kBindUniform, recording->uniforms,
+      RenderPassRecording::UniformBind{
+          .binding = binding,
+          .stage = shader.GetShaderStage(),
+          .view = impeller::BufferView(
+              buffer, impeller::Range(offset_in_bytes, length_in_bytes)),
+      });
+  return true;
+}
+
+bool RenderPass::BindTexture(Shader& shader,
+                             const Shader::TextureBinding* binding,
+                             std::shared_ptr<const impeller::Texture> texture,
+                             const impeller::SamplerDescriptor& sampler) {
+  auto* recording = OpenRecording();
+  if (!recording || !binding || !texture ||
+      !IsRenderStage(shader.GetShaderStage())) {
+    return false;
+  }
+  recording->RetainReflection(shader.GetReflection());
+  recording->Push(RecordedOp::kBindTexture, recording->textures,
+                  RenderPassRecording::TextureBind{
+                      .binding = binding,
+                      .stage = shader.GetShaderStage(),
+                      .texture = std::move(texture),
+                      .sampler = sampler,
+                  });
+  return true;
+}
+
+void RenderPass::BindVertexBuffer(size_t slot, impeller::BufferView view) {
+  auto* recording = OpenRecording();
+  if (!recording || slot >= kMaxVertexBufferSlots) {
+    return;
+  }
+  recording->Push(RecordedOp::kBindVertexBuffer, recording->vertex_buffers,
+                  RenderPassRecording::VertexBufferBind{
+                      .slot = static_cast<uint32_t>(slot),
+                      .view = std::move(view),
+                  });
+}
+
+void RenderPass::BindIndexBuffer(impeller::BufferView view,
+                                 impeller::IndexType type) {
+  index_buffer_type_ = type;
+  if (auto* recording = OpenRecording()) {
+    recording->Push(RecordedOp::kBindIndexBuffer, recording->index_buffers,
+                    RenderPassRecording::IndexBufferBind{
+                        .view = std::move(view),
+                        .type = type,
+                    });
+  }
+}
+
+void RenderPass::SetStencilReference(uint32_t reference) {
+  if (auto* recording = OpenRecording()) {
+    recording->Push(RecordedOp::kSetStencilReference,
+                    recording->stencil_references, std::move(reference));
+  }
+}
+
+void RenderPass::SetScissor(impeller::IRect32 scissor) {
+  if (auto* recording = OpenRecording()) {
+    recording->Push(RecordedOp::kSetScissor, recording->scissors,
+                    std::move(scissor));
+  }
+}
+
+void RenderPass::SetViewport(impeller::Viewport viewport) {
+  if (auto* recording = OpenRecording()) {
+    recording->Push(RecordedOp::kSetViewport, recording->viewports,
+                    std::move(viewport));
+  }
+}
+
+void RenderPass::RecordPipelineState() {
   pipeline_state_dirty_ = false;
-  memoized_pipeline_ = nullptr;
+  pipeline_known_failed_ = false;
 
   // Infer the pipeline layout based on the shape of the RenderTarget.
   auto pipeline_desc = pipeline_descriptor_;
@@ -230,148 +321,53 @@ RenderPass::GetOrCreatePipeline() {
     }
   }
 
-  auto& context = *GetContext();
-
-  if (!render_pipeline_->BindToPipelineDescriptor(*context.GetShaderLibrary(),
-                                                  pipeline_desc)) {
-    return nullptr;
+  const auto& core = render_pipeline_->GetCore();
+  const size_t key = pipeline_desc.GetHash();
+  if (core->HasBuildFailed(key)) {
+    pipeline_known_failed_ = true;
+    return;
   }
-
-  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>> pipeline;
-
-  if (context.GetBackendType() == impeller::Context::BackendType::kOpenGLES &&
-      !context.GetPipelineLibrary()->HasPipeline(pipeline_desc)) {
-    // New pipeline creation for this backend must be done on the reactor
-    // (raster) thread. We're about the draw, so we need to synchronize with a
-    // raster task in order to get the new pipeline. Depending on how busy the
-    // raster thread is, this could hang the UI thread long enough to miss a
-    // frame.
-
-    // Note that this branch is only called if a new pipeline actually needs to
-    // be built.
-    auto dart_state = flutter::UIDartState::Current();
-    std::promise<
-        std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>>
-        pipeline_promise;
-    auto pipeline_future = pipeline_promise.get_future();
-    fml::TaskRunner::RunNowOrPostTask(
-        dart_state->GetTaskRunners().GetRasterTaskRunner(),
-        fml::MakeCopyable([promise = std::move(pipeline_promise),
-                           context = GetContext(), pipeline_desc]() mutable {
-          promise.set_value(context->GetPipelineLibrary()
-                                ->GetPipeline(pipeline_desc, true, true)
-                                .Get());
-        }));
-    pipeline = pipeline_future.get();
-  } else {
-    pipeline = context.GetPipelineLibrary()->GetPipeline(pipeline_desc).Get();
-  }
-
-  if (!pipeline) {
-    VALIDATION_LOG << "Failed to build the render pipeline. The vertex and "
-                      "fragment shaders may be incompatible (for example, a "
-                      "fragment input with no matching vertex output).";
-    return nullptr;
-  }
-
-  memoized_pipeline_ = pipeline;
-  return pipeline;
+  pipeline_state_index_ =
+      static_cast<uint32_t>(recording_->pipeline_states.size());
+  recording_->pipeline_states.push_back(RenderPassRecording::PipelineState{
+      .pipeline = core,
+      .descriptor = std::move(pipeline_desc),
+      .key = key,
+  });
 }
 
 bool RenderPass::Draw(size_t element_count,
                       size_t instance_count,
                       bool indexed) {
+  auto* recording = OpenRecording();
+  if (!recording || !begun_) {
+    return false;
+  }
   if (element_count == 0u || instance_count == 0u) {
     return true;
   }
-
-  if (indexed && index_buffer_type == impeller::IndexType::kNone) {
+  if (indexed && index_buffer_type_ == impeller::IndexType::kNone) {
     // drawIndexed was called without an index buffer bound.
     return false;
   }
-
-  auto pipeline = GetOrCreatePipeline();
-  if (!pipeline) {
-    // The failure was already validation-logged with the specifics; failing
-    // the draw surfaces a Dart exception instead of crashing on a null
-    // pipeline in the backend.
+  if (!render_pipeline_) {
     return false;
   }
-  render_pass_->SetPipeline(impeller::PipelineRef(pipeline));
-
-  // Binding sets are replayed first, so an individual bind that collides
-  // with a set member overrides it for this draw. Their metadata is borrowed
-  // from the shader rather than copied, so no allocation happens here.
-  for (const auto& set : binding_sets) {
-    if (!set) {
-      continue;
-    }
-    for (const auto& buffer : set->GetBufferBindings()) {
-      render_pass_->BindResource(buffer.stage,
-                                 impeller::DescriptorType::kUniformBuffer,
-                                 buffer.slot, buffer.metadata, buffer.view);
-    }
-    for (const auto& texture : set->GetTextureBindings()) {
-      render_pass_->BindResource(
-          texture.stage, impeller::DescriptorType::kSampledImage, texture.slot,
-          texture.metadata, texture.texture, texture.sampler);
-    }
+  if (pipeline_state_dirty_) {
+    RecordPipelineState();
   }
-
-  for (const auto& [_, buffer] : vertex_uniform_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kVertex,
-        impeller::DescriptorType::kUniformBuffer, buffer.slot,
-        std::make_unique<impeller::ShaderMetadata>(*buffer.view.GetMetadata()),
-        buffer.view.resource);
+  if (pipeline_known_failed_) {
+    // The backend already failed to build this state, and logged why.
+    return false;
   }
-  for (const auto& [_, texture] : vertex_texture_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kVertex, impeller::DescriptorType::kSampledImage,
-        texture.slot,
-        std::make_unique<impeller::ShaderMetadata>(
-            *texture.texture.GetMetadata()),
-        texture.texture.resource, texture.sampler);
-  }
-  for (const auto& [_, buffer] : fragment_uniform_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kFragment,
-        impeller::DescriptorType::kUniformBuffer, buffer.slot,
-        std::make_unique<impeller::ShaderMetadata>(*buffer.view.GetMetadata()),
-        buffer.view.resource);
-  }
-  for (const auto& [_, texture] : fragment_texture_bindings) {
-    render_pass_->BindDynamicResource(
-        impeller::ShaderStage::kFragment,
-        impeller::DescriptorType::kSampledImage, texture.slot,
-        std::make_unique<impeller::ShaderMetadata>(
-            *texture.texture.GetMetadata()),
-        texture.texture.resource, texture.sampler);
-  }
-
-  render_pass_->SetVertexBuffer(vertex_buffers.data(), vertex_buffer_count);
-  if (indexed) {
-    render_pass_->SetIndexBuffer(index_buffer, index_buffer_type);
-  } else {
-    render_pass_->SetIndexBuffer(impeller::BufferView{},
-                                 impeller::IndexType::kNone);
-  }
-  render_pass_->SetElementCount(element_count);
-  render_pass_->SetInstanceCount(instance_count);
-
-  render_pass_->SetStencilReference(stencil_reference);
-
-  if (viewport.has_value()) {
-    render_pass_->SetViewport(viewport.value());
-  }
-
-  if (scissor.has_value()) {
-    render_pass_->SetScissor(scissor.value());
-  }
-
-  bool result = render_pass_->Draw().ok();
-
-  return result;
+  recording->Push(RecordedOp::kDraw, recording->draws,
+                  RenderPassRecording::Draw{
+                      .pipeline_state = pipeline_state_index_,
+                      .element_count = static_cast<uint32_t>(element_count),
+                      .instance_count = static_cast<uint32_t>(instance_count),
+                      .indexed = indexed,
+                  });
+  return true;
 }
 
 }  // namespace gpu
@@ -484,15 +480,13 @@ static void BindVertexBuffer(
     int offset_in_bytes,
     int length_in_bytes,
     int slot) {
-  if (slot < 0 || static_cast<size_t>(slot) >=
-                      flutter::gpu::RenderPass::kMaxVertexBufferSlots) {
+  if (slot < 0) {
     return;
   }
-  wrapper->vertex_buffers[slot] = impeller::BufferView(
-      buffer, impeller::Range(offset_in_bytes, length_in_bytes));
-  if (static_cast<size_t>(slot) >= wrapper->vertex_buffer_count) {
-    wrapper->vertex_buffer_count = static_cast<size_t>(slot) + 1;
-  }
+  wrapper->BindVertexBuffer(
+      static_cast<size_t>(slot),
+      impeller::BufferView(buffer,
+                           impeller::Range(offset_in_bytes, length_in_bytes)));
 }
 
 void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
@@ -511,9 +505,10 @@ static void BindIndexBuffer(
     int offset_in_bytes,
     int length_in_bytes,
     int index_type) {
-  wrapper->index_buffer = impeller::BufferView(
-      buffer, impeller::Range(offset_in_bytes, length_in_bytes));
-  wrapper->index_buffer_type = flutter::gpu::ToImpellerIndexType(index_type);
+  wrapper->BindIndexBuffer(
+      impeller::BufferView(buffer,
+                           impeller::Range(offset_in_bytes, length_in_bytes)),
+      flutter::gpu::ToImpellerIndexType(index_type));
 }
 
 void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
@@ -533,38 +528,12 @@ static bool BindUniformStruct(
     const std::shared_ptr<const impeller::DeviceBuffer>& buffer,
     int offset_in_bytes,
     int length_in_bytes) {
-  if (!uniform_struct) {
+  if (offset_in_bytes < 0 || length_in_bytes < 0) {
     return false;
   }
-
-  flutter::gpu::RenderPass::BufferUniformMap* uniform_map = nullptr;
-  switch (shader->GetShaderStage()) {
-    case impeller::ShaderStage::kVertex:
-      uniform_map = &wrapper->vertex_uniform_bindings;
-      break;
-    case impeller::ShaderStage::kFragment:
-      uniform_map = &wrapper->fragment_uniform_bindings;
-      break;
-    case impeller::ShaderStage::kUnknown:
-    case impeller::ShaderStage::kCompute:
-      return false;
-  }
-
-  if (!buffer || static_cast<size_t>(offset_in_bytes + length_in_bytes) >
-                     buffer->GetDeviceBufferDescriptor().size) {
-    return false;
-  }
-
-  uniform_map->insert_or_assign(
-      uniform_struct,
-      flutter::gpu::RenderPass::BufferAndUniformSlot{
-          .slot = uniform_struct->slot,
-          .view = impeller::BufferResource{
-              &uniform_struct->metadata,
-              impeller::BufferView(
-                  buffer, impeller::Range(offset_in_bytes, length_in_bytes)),
-          }});
-  return true;
+  return wrapper->BindUniform(*shader, uniform_struct, buffer,
+                              static_cast<size_t>(offset_in_bytes),
+                              static_cast<size_t>(length_in_bytes));
 }
 
 bool InternalFlutterGpu_RenderPass_BindUniformDevice(
@@ -603,37 +572,11 @@ static bool BindTextureBinding(
     int width_address_mode,
     int height_address_mode,
     int max_anisotropy) {
-  if (!texture_binding) {
-    return false;
-  }
-
-  const impeller::SamplerDescriptor sampler_desc =
+  return wrapper->BindTexture(
+      *shader, texture_binding, texture->GetTexture(),
       flutter::gpu::ToImpellerSamplerDescriptor(
           min_filter, mag_filter, mip_filter, width_address_mode,
-          height_address_mode, max_anisotropy);
-  auto sampler =
-      wrapper->GetContext()->GetSamplerLibrary()->GetSampler(sampler_desc);
-
-  flutter::gpu::RenderPass::TextureUniformMap* uniform_map = nullptr;
-  switch (shader->GetShaderStage()) {
-    case impeller::ShaderStage::kVertex:
-      uniform_map = &wrapper->vertex_texture_bindings;
-      break;
-    case impeller::ShaderStage::kFragment:
-      uniform_map = &wrapper->fragment_texture_bindings;
-      break;
-    case impeller::ShaderStage::kUnknown:
-    case impeller::ShaderStage::kCompute:
-      return false;
-  }
-  uniform_map->insert_or_assign(
-      texture_binding,
-      impeller::TextureAndSampler{
-          .slot = texture_binding->slot,
-          .texture = {&texture_binding->metadata, texture->GetTexture()},
-          .sampler = sampler,
-      });
-  return true;
+          height_address_mode, max_anisotropy));
 }
 
 bool InternalFlutterGpu_RenderPass_BindTexture(
@@ -736,7 +679,7 @@ void InternalFlutterGpu_RenderPass_SetDepthCompareOperation(
 void InternalFlutterGpu_RenderPass_SetStencilReference(
     flutter::gpu::RenderPass* wrapper,
     int stencil_reference) {
-  wrapper->stencil_reference = static_cast<uint32_t>(stencil_reference);
+  wrapper->SetStencilReference(static_cast<uint32_t>(stencil_reference));
 }
 
 void InternalFlutterGpu_RenderPass_SetScissor(flutter::gpu::RenderPass* wrapper,
@@ -744,7 +687,7 @@ void InternalFlutterGpu_RenderPass_SetScissor(flutter::gpu::RenderPass* wrapper,
                                               int y,
                                               int width,
                                               int height) {
-  wrapper->scissor = impeller::IRect32::MakeXYWH(x, y, width, height);
+  wrapper->SetScissor(impeller::IRect32::MakeXYWH(x, y, width, height));
 }
 
 void InternalFlutterGpu_RenderPass_SetViewport(
@@ -765,7 +708,7 @@ void InternalFlutterGpu_RenderPass_SetViewport(
   viewport.rect = rect;
   viewport.depth_range = depth_range;
 
-  wrapper->viewport = viewport;
+  wrapper->SetViewport(viewport);
 }
 
 void InternalFlutterGpu_RenderPass_SetStencilConfig(

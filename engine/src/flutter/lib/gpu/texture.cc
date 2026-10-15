@@ -8,6 +8,7 @@
 #include <limits>
 
 #include "flutter/lib/gpu/formats.h"
+#include "flutter/lib/gpu/recording.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "fml/make_copyable.h"
@@ -118,32 +119,29 @@ bool Texture::Overwrite(Context& gpu_context,
       0, 0, MipDimensionAtLevel(base_size.width, mip_level),
       MipDimensionAtLevel(base_size.height, mip_level));
 
-  // For the GLES backend, command queue submission just flushes the reactor,
-  // which needs to happen on the raster thread.
-  if (impeller_context.GetBackendType() ==
-      impeller::Context::BackendType::kOpenGLES) {
-    auto dart_state = flutter::UIDartState::Current();
-    auto& task_runners = dart_state->GetTaskRunners();
-    auto context_shared = gpu_context.GetContextShared();
-    task_runners.GetRasterTaskRunner()->PostTask(fml::MakeCopyable(
-        [context_shared, texture = texture_, staging_buffer, length,
-         destination_region, mip_level, slice]() mutable {
-          if (!EncodeAndSubmitOverwrite(*context_shared, texture,
-                                        staging_buffer, length,
-                                        destination_region, mip_level, slice)) {
-            FML_LOG(ERROR) << "Failed to encode texture overwrite blit on the "
-                              "raster thread.";
-          }
-          context_shared->DisposeThreadLocalCachedResources();
-        }));
-    return true;
+  // The blit is encoded and submitted on the raster thread, like every other
+  // Flutter GPU submission, so it stays ordered with command buffers
+  // submitted before and after it. Without a raster task runner (unit tests)
+  // it runs here.
+  fml::RefPtr<fml::TaskRunner> raster_task_runner = GetReplayTaskRunner();
+  if (!raster_task_runner) {
+    const bool result =
+        EncodeAndSubmitOverwrite(impeller_context, texture_, staging_buffer,
+                                 length, destination_region, mip_level, slice);
+    impeller_context.DisposeThreadLocalCachedResources();
+    return result;
   }
-
-  if (!EncodeAndSubmitOverwrite(impeller_context, texture_, staging_buffer,
-                                length, destination_region, mip_level, slice)) {
-    return false;
-  }
-  impeller_context.DisposeThreadLocalCachedResources();
+  raster_task_runner->PostTask(fml::MakeCopyable(
+      [context_shared = gpu_context.GetContextShared(), texture = texture_,
+       staging_buffer, length, destination_region, mip_level, slice]() mutable {
+        if (!EncodeAndSubmitOverwrite(*context_shared, texture, staging_buffer,
+                                      length, destination_region, mip_level,
+                                      slice)) {
+          FML_LOG(ERROR) << "Failed to encode texture overwrite blit on the "
+                            "raster thread.";
+        }
+        context_shared->DisposeThreadLocalCachedResources();
+      }));
   return true;
 }
 
@@ -187,7 +185,11 @@ Dart_Handle Texture::AsImage() const {
   // out.
 #if IMPELLER_SUPPORTS_RENDERING
   auto image = flutter::CanvasImage::Create();
-  auto dl_image = impeller::DlImageImpeller::Make(texture_);
+  // Flutter GPU writes this texture on the raster thread, so consumers that
+  // read it elsewhere (Image.toByteData encodes on IO) must queue behind
+  // pending submissions there.
+  auto dl_image = impeller::DlImageImpeller::Make(
+      texture_, flutter::DlImage::OwningContext::kRaster);
   image->set_image(dl_image);
   auto wrapped = image->CreateOuterWrapping();
   return wrapped;

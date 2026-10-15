@@ -55,11 +55,32 @@ fml::RefPtr<Shader> Shader::Make(
   shader->code_mapping_ = std::move(code_mapping);
   shader->inputs_ = std::move(inputs);
   shader->layouts_ = std::move(layouts);
-  shader->uniform_structs_ = std::move(uniform_structs);
-  shader->uniform_textures_ = std::move(uniform_textures);
+  shader->reflection_ =
+      MakeReflection(std::move(uniform_structs), std::move(uniform_textures));
   shader->descriptor_set_layouts_ = std::move(descriptor_set_layouts);
-  shader->RebuildBindingOrder();
   return shader;
+}
+
+std::shared_ptr<const Shader::Reflection> Shader::MakeReflection(
+    std::unordered_map<std::string, UniformBinding> uniform_structs,
+    std::unordered_map<std::string, TextureBinding> uniform_textures) {
+  auto reflection = std::make_shared<Reflection>();
+  reflection->uniform_structs = std::move(uniform_structs);
+  reflection->uniform_textures = std::move(uniform_textures);
+  reflection->uniform_struct_order.reserve(reflection->uniform_structs.size());
+  for (const auto& entry : reflection->uniform_structs) {
+    reflection->uniform_struct_order.push_back(&entry.second);
+  }
+  reflection->uniform_texture_order.reserve(
+      reflection->uniform_textures.size());
+  for (const auto& entry : reflection->uniform_textures) {
+    reflection->uniform_texture_order.push_back(&entry.second);
+  }
+  return reflection;
+}
+
+const std::shared_ptr<const Shader::Reflection>& Shader::GetReflection() const {
+  return reflection_;
 }
 
 std::string Shader::GetScopedName() const {
@@ -108,10 +129,10 @@ void Shader::ResetFrom(Shader& other) {
   code_mapping_ = std::move(other.code_mapping_);
   inputs_ = std::move(other.inputs_);
   layouts_ = std::move(other.layouts_);
-  uniform_structs_ = std::move(other.uniform_structs_);
-  uniform_textures_ = std::move(other.uniform_textures_);
+  // Swapped rather than mutated, so recordings holding the old reflection
+  // keep valid binding pointers.
+  reflection_ = std::move(other.reflection_);
   descriptor_set_layouts_ = std::move(other.descriptor_set_layouts_);
-  RebuildBindingOrder();
   if (code_changed) {
     is_dirty_ = true;
   }
@@ -181,8 +202,8 @@ Shader::GetDescriptorSetLayouts() const {
 
 const Shader::UniformBinding* Shader::GetUniformStruct(
     const std::string& name) const {
-  auto uniform = uniform_structs_.find(name);
-  if (uniform == uniform_structs_.end()) {
+  auto uniform = reflection_->uniform_structs.find(name);
+  if (uniform == reflection_->uniform_structs.end()) {
     return nullptr;
   }
   return &uniform->second;
@@ -190,8 +211,8 @@ const Shader::UniformBinding* Shader::GetUniformStruct(
 
 const Shader::TextureBinding* Shader::GetUniformTexture(
     const std::string& name) const {
-  auto uniform = uniform_textures_.find(name);
-  if (uniform == uniform_textures_.end()) {
+  auto uniform = reflection_->uniform_textures.find(name);
+  if (uniform == reflection_->uniform_textures.end()) {
     return nullptr;
   }
   return &uniform->second;
@@ -202,8 +223,9 @@ int Shader::GetUniformStructIndex(const std::string& name) const {
   if (binding == nullptr) {
     return -1;
   }
-  for (size_t i = 0; i < uniform_struct_order_.size(); i++) {
-    if (uniform_struct_order_[i] == binding) {
+  const auto& order = reflection_->uniform_struct_order;
+  for (size_t i = 0; i < order.size(); i++) {
+    if (order[i] == binding) {
       return static_cast<int>(i);
     }
   }
@@ -211,10 +233,11 @@ int Shader::GetUniformStructIndex(const std::string& name) const {
 }
 
 const Shader::UniformBinding* Shader::GetUniformStructAt(int index) const {
-  if (index < 0 || static_cast<size_t>(index) >= uniform_struct_order_.size()) {
+  const auto& order = reflection_->uniform_struct_order;
+  if (index < 0 || static_cast<size_t>(index) >= order.size()) {
     return nullptr;
   }
-  return uniform_struct_order_[index];
+  return order[index];
 }
 
 int Shader::GetUniformTextureIndex(const std::string& name) const {
@@ -222,8 +245,9 @@ int Shader::GetUniformTextureIndex(const std::string& name) const {
   if (binding == nullptr) {
     return -1;
   }
-  for (size_t i = 0; i < uniform_texture_order_.size(); i++) {
-    if (uniform_texture_order_[i] == binding) {
+  const auto& order = reflection_->uniform_texture_order;
+  for (size_t i = 0; i < order.size(); i++) {
+    if (order[i] == binding) {
       return static_cast<int>(i);
     }
   }
@@ -231,24 +255,11 @@ int Shader::GetUniformTextureIndex(const std::string& name) const {
 }
 
 const Shader::TextureBinding* Shader::GetUniformTextureAt(int index) const {
-  if (index < 0 ||
-      static_cast<size_t>(index) >= uniform_texture_order_.size()) {
+  const auto& order = reflection_->uniform_texture_order;
+  if (index < 0 || static_cast<size_t>(index) >= order.size()) {
     return nullptr;
   }
-  return uniform_texture_order_[index];
-}
-
-void Shader::RebuildBindingOrder() {
-  uniform_struct_order_.clear();
-  uniform_struct_order_.reserve(uniform_structs_.size());
-  for (const auto& entry : uniform_structs_) {
-    uniform_struct_order_.push_back(&entry.second);
-  }
-  uniform_texture_order_.clear();
-  uniform_texture_order_.reserve(uniform_textures_.size());
-  for (const auto& entry : uniform_textures_) {
-    uniform_texture_order_.push_back(&entry.second);
-  }
+  return order[index];
 }
 
 }  // namespace gpu

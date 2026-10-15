@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/ui/dart_wrapper.h"
@@ -37,6 +39,18 @@ class Shader : public RefCountedDartWrappable<Shader> {
   struct TextureBinding {
     impeller::SampledImageSlot slot{};
     impeller::ShaderMetadata metadata;
+  };
+
+  /// The shader's binding reflection. Immutable once built, and replaced
+  /// wholesale on reload, so a recording that retains it keeps every binding
+  /// pointer it took valid until the recording is replayed.
+  struct Reflection {
+    std::unordered_map<std::string, UniformBinding> uniform_structs;
+    std::unordered_map<std::string, TextureBinding> uniform_textures;
+    // The maps' entries in a stable order for index-based lookup. Entry
+    // pointers stay valid for the maps' lifetime (node-based containers).
+    std::vector<const UniformBinding*> uniform_struct_order;
+    std::vector<const TextureBinding*> uniform_texture_order;
   };
 
   ~Shader() override;
@@ -109,6 +123,14 @@ class Shader : public RefCountedDartWrappable<Shader> {
   /// The texture counterpart to `GetUniformStructAt`.
   const Shader::TextureBinding* GetUniformTextureAt(int index) const;
 
+  /// The current reflection. Binding pointers returned by the getters above
+  /// point into it, so retaining it keeps them valid across a reload.
+  const std::shared_ptr<const Reflection>& GetReflection() const;
+
+  /// The name this shader is registered under in the shared impeller shader
+  /// library.
+  std::string GetScopedName() const;
+
  private:
   Shader();
 
@@ -122,21 +144,14 @@ class Shader : public RefCountedDartWrappable<Shader> {
   std::shared_ptr<fml::Mapping> code_mapping_;
   std::vector<impeller::ShaderStageIOSlot> inputs_;
   std::vector<impeller::ShaderStageBufferLayout> layouts_;
-  std::unordered_map<std::string, UniformBinding> uniform_structs_;
-  std::unordered_map<std::string, TextureBinding> uniform_textures_;
-  // The maps' entries in a stable order for index-based lookup. Entry
-  // pointers stay valid for the maps' lifetime (node-based containers);
-  // rebuilt whenever the maps are replaced (`Make`, `ResetFrom`).
-  std::vector<const UniformBinding*> uniform_struct_order_;
-  std::vector<const TextureBinding*> uniform_texture_order_;
+  // Replaced, never mutated, so recordings may hold the old one.
+  std::shared_ptr<const Reflection> reflection_;
   std::vector<impeller::DescriptorSetLayout> descriptor_set_layouts_;
   bool is_dirty_ = true;
 
-  void RebuildBindingOrder();
-
-  // Returns the scoped name to use when registering or looking up this
-  // shader's function in a shared impeller::ShaderLibrary.
-  std::string GetScopedName() const;
+  static std::shared_ptr<const Reflection> MakeReflection(
+      std::unordered_map<std::string, UniformBinding> uniform_structs,
+      std::unordered_map<std::string, TextureBinding> uniform_textures);
 
   FML_DISALLOW_COPY_AND_ASSIGN(Shader);
 };

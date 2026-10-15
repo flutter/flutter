@@ -6,6 +6,9 @@
 #define FLUTTER_LIB_GPU_RENDER_PIPELINE_H_
 
 #include <memory>
+#include <mutex>
+#include <string>
+#include <unordered_set>
 
 #include "flutter/lib/gpu/context.h"
 #include "flutter/lib/gpu/export.h"
@@ -22,6 +25,40 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
   FML_FRIEND_MAKE_REF_COUNTED(RenderPipeline);
 
  public:
+  /// What resolving a backend pipeline needs, without the Dart wrapper, so a
+  /// recording can hold it and drop it on any thread.
+  class Core {
+   public:
+    Core(std::string vertex_name,
+         std::string vertex_entrypoint,
+         std::string fragment_name,
+         std::string fragment_entrypoint,
+         std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor);
+
+    /// Sets the vertex descriptor and stage entrypoints on [desc]. Returns
+    /// false (after a validation log naming the shader) when either stage's
+    /// function is not in [library].
+    [[nodiscard]] bool BindToPipelineDescriptor(
+        impeller::ShaderLibrary& library,
+        impeller::PipelineDescriptor& desc) const;
+
+    /// Records that the backend failed to build the pipeline for the state
+    /// hashed to [key], so later draws with that state fail on the recording
+    /// thread instead of being dropped at replay.
+    void MarkBuildFailed(size_t key) const;
+
+    bool HasBuildFailed(size_t key) const;
+
+   private:
+    const std::string vertex_name_;
+    const std::string vertex_entrypoint_;
+    const std::string fragment_name_;
+    const std::string fragment_entrypoint_;
+    const std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor_;
+    mutable std::mutex failed_mutex_;
+    mutable std::unordered_set<size_t> failed_keys_;
+  };
+
   RenderPipeline(fml::RefPtr<flutter::gpu::Shader> vertex_shader,
                  fml::RefPtr<flutter::gpu::Shader> fragment_shader,
                  std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor);
@@ -35,6 +72,8 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
   [[nodiscard]] bool BindToPipelineDescriptor(
       impeller::ShaderLibrary& library,
       impeller::PipelineDescriptor& desc);
+
+  const std::shared_ptr<const Core>& GetCore() const;
 
  private:
   fml::RefPtr<flutter::gpu::Shader> vertex_shader_;
@@ -50,6 +89,7 @@ class RenderPipeline : public RefCountedDartWrappable<RenderPipeline> {
   // reference here so the descriptor remains valid across the many
   // `BindToPipelineDescriptor` calls a single pipeline may participate in.
   std::shared_ptr<impeller::VertexDescriptor> vertex_descriptor_;
+  std::shared_ptr<const Core> core_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RenderPipeline);
 };
