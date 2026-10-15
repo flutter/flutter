@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Hand-written until shell/platform/android/BUILD.gn converts (the Android
+# shell, its JAR and its artifact bundles: the Android phase's work). What
+# the sub-packages converted for the host suites (context,
+# external_view_embedder) need of this directory is one header no GN
+# target lists -- android_rendering_selector.h, an enum the shell and its
+# pieces share -- which GN's include path serves and a sandboxed compile
+# must be handed; their manifest entries depend on it (implicitDeps). When
+# the GN file converts, the header wants a target of its own there (it
+# cannot join flutter_shell_native_src, whose visibility excludes the
+# sub-packages that include it).
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "rendering_selector",
+    hdrs = ["android_rendering_selector.h"],
+)
