@@ -24,6 +24,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/drive_service.dart';
@@ -131,9 +132,9 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
 
       await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['drive', '--no-pub', '--target', 'lib/app.dart']),
+        () =>
+            createTestCommandRunner(command)
+                .run(<String>['drive', '--no-pub', '--target', 'lib/app.dart']),
         throwsToolExit(message: 'Target file "lib/app.dart" not found'),
       );
 
@@ -185,9 +186,9 @@ void main() {
       fileSystem.file('pubspec.yaml').createSync();
 
       await expectLater(
-        () => createTestCommandRunner(
-          command,
-        ).run(<String>['drive', '--no-pub', '--target', 'test_driver/main_test.dart']),
+        () =>
+            createTestCommandRunner(command)
+                .run(<String>['drive', '--no-pub', '--target', 'test_driver/main_test.dart']),
         throwsToolExit(message: 'Test file not found: /test_driver/main_test_test.dart'),
       );
 
@@ -1446,11 +1447,13 @@ class _ProjectFilteringDriveCommand extends DriveCommand {
   }) async {
     final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = toolContext;
     final FlutterProject flutterProject = projectFactory.fromDirectory(fs.currentDirectory);
-    final matchingDevices = <Device>[
-      for (final Device device in _devices)
-        if (includeDevicesUnsupportedByProject || device.isSupportedForProject(flutterProject))
-          device,
-    ];
+    final matchingDevices = <Device>[];
+    for (final Device device in _devices) {
+      if (includeDevicesUnsupportedByProject ||
+          await device.isSupportedForProject(flutterProject)) {
+        matchingDevices.add(device);
+      }
+    }
     return matchingDevices.isEmpty ? null : matchingDevices;
   }
 }
