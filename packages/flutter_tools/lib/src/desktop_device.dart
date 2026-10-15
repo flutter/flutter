@@ -28,15 +28,12 @@ abstract class DesktopDevice extends Device {
     super.id, {
     required PlatformType super.platformType,
     required super.ephemeral,
-    super.logger,
-    ProcessManager? processManager,
-    FileSystem? fileSystem,
-    OperatingSystemUtils? operatingSystemUtils,
+    required super.logger,
     super.toolContext,
-  }) : _logger = (logger ?? toolContext?.logger)!,
-       _processManager = (processManager ?? toolContext?.processManager)!,
-       _fileSystem = (fileSystem ?? toolContext?.fs)!,
-       _operatingSystemUtils = (operatingSystemUtils ?? toolContext?.os)!,
+    required this._processManager,
+    required this._fileSystem,
+    required this._operatingSystemUtils,
+  }) : _logger = logger,
        super(category: Category.desktop);
 
   final Logger _logger;

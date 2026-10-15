@@ -191,7 +191,7 @@ class ProxiedDevice extends Device {
     required this.supportsFlutterExit,
     required this.supportsScreenshot,
     required this._supportsHardwareRendering,
-    required Logger super.logger,
+    required super.logger,
     this._fileTransfer = const FileTransfer(),
   }) : _logger = logger,
        super(id);

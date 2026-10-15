@@ -16,7 +16,15 @@ import 'linux_workflow.dart';
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
   LinuxDevice({required ToolContext super.toolContext})
-    : super('linux', platformType: PlatformType.linux, ephemeral: false);
+    : super(
+        'linux',
+        fileSystem: toolContext.fs,
+        logger: toolContext.logger,
+        operatingSystemUtils: toolContext.os,
+        platformType: PlatformType.linux,
+        processManager: toolContext.processManager,
+        ephemeral: false,
+      );
 
   @override
   Future<bool> isSupported() async => true;

@@ -425,7 +425,7 @@ class CustomDeviceAppSession {
 class CustomDevice extends Device {
   CustomDevice({
     required CustomDeviceConfig config,
-    required Logger super.logger,
+    required super.logger,
     required ProcessManager processManager,
   }) : _config = config,
        _logger = logger,
