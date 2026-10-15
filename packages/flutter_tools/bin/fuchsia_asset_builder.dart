@@ -7,6 +7,7 @@ import 'package:flutter_tools/src/asset.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/file_system.dart' as libfs;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/bundle.dart';
@@ -43,6 +44,7 @@ Future<void> writeAssetFile(libfs.File outputFile, AssetBundleEntry asset) async
 }
 
 Future<void> run(List<String> args, {required ToolContext toolContext}) async {
+  final ToolContext(:libfs.FileSystem fs, :Logger logger) = toolContext;
   final parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .dart_tool/package_config file')
     ..addOption(_kOptionAsset, help: 'The directory where to put temporary files')
@@ -52,17 +54,17 @@ Future<void> run(List<String> args, {required ToolContext toolContext}) async {
     ..addOption(_kOptionDepfile);
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
-    toolContext.logger.printError('Missing option! All options must be specified.');
+    logger.printError('Missing option! All options must be specified.');
     exit(1);
   }
   final assetDir = argResults[_kOptionAsset] as String;
   final AssetBundle? assets = await buildAssets(
     manifestPath: argResults[_kOptionManifest] as String? ?? defaultManifestPath,
-    assetDirPath: assetDir,
     packageConfigPath:
         argResults[_kOptionPackages] as String? ??
-        findPackageConfigFileOrDefault(toolContext.fs.currentDirectory).path,
+        findPackageConfigFileOrDefault(fs.currentDirectory).path,
     targetPlatform: TargetPlatform.fuchsia_arm64, // This is not arch specific.
+    toolContext: toolContext,
   );
 
   if (assets == null) {
@@ -71,7 +73,7 @@ Future<void> run(List<String> args, {required ToolContext toolContext}) async {
 
   final calls = <Future<void>>[];
   assets.entries.forEach((String fileName, AssetBundleEntry entry) {
-    final libfs.File outputFile = toolContext.fs.file(toolContext.fs.path.join(assetDir, fileName));
+    final libfs.File outputFile = fs.file(fs.path.join(assetDir, fileName));
     calls.add(writeAssetFile(outputFile, entry));
   });
   await Future.wait<void>(calls);
@@ -97,12 +99,11 @@ Future<void> writeDepfile(
   String depfilePath, {
   required ToolContext toolContext,
 }) async {
-  final depfileContent = Depfile(assets.inputFiles, <libfs.File>[
-    toolContext.fs.file(outputManifest),
-  ]);
-  final depfileService = DepfileService(fileSystem: toolContext.fs, logger: toolContext.logger);
+  final ToolContext(:libfs.FileSystem fs, :Logger logger) = toolContext;
+  final depfileContent = Depfile(assets.inputFiles, <libfs.File>[fs.file(outputManifest)]);
+  final depfileService = DepfileService(fileSystem: fs, logger: logger);
 
-  final libfs.File depfile = toolContext.fs.file(depfilePath);
+  final libfs.File depfile = fs.file(depfilePath);
   await depfile.create(recursive: true);
   depfileService.writeToFile(depfileContent, depfile);
 }

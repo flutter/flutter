@@ -26,8 +26,10 @@ import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
 
+import '../../bin/fuchsia_asset_builder.dart' as fuchsia_asset_builder;
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 import '../src/test_build_system.dart';
 
 // Tests for BundleBuilder.
@@ -369,6 +371,64 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testWithoutContext(
+    'fuchsia_asset_builder.run writes assets, manifest, and depfile without AppContext',
+    () async {
+      final fileSystem = MemoryFileSystem.test();
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+name: my_project
+flutter:
+  assets:
+    - assets/foo.txt
+''');
+      fileSystem.file('assets/foo.txt')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hello fuchsia');
+      fileSystem.file('.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          '{"configVersion": 2, "packages": [{"name": "my_project", "rootUri": "../", "packageUri": "lib/", "languageVersion": "3.0"}]}',
+        );
+      fileSystem.file('.dart_tool/package_graph.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          '{"configVersion": 1, "packages": [{"name": "my_project", "dependencies": [], "devDependencies": []}], "roots": ["my_project"]}',
+        );
+
+      final logger = BufferLogger.test();
+      final toolContext = FakeToolContext(
+        fs: fileSystem,
+        logger: logger,
+        cache: Cache.test(fileSystem: fileSystem, processManager: FakeProcessManager.empty()),
+      );
+
+      await fuchsia_asset_builder.run(<String>[
+        '--packages=.dart_tool/package_config.json',
+        '--asset-dir=out/assets',
+        '--manifest=pubspec.yaml',
+        '--asset-manifest-out=out/fuchsia.manifest',
+        '--component-name=my_component',
+        '--depfile=out/assets.d',
+      ], toolContext: toolContext);
+
+      expect(logger.errorText, isEmpty);
+      expect(fileSystem.file('out/assets/assets/foo.txt'), exists);
+      expect(fileSystem.file('out/assets/assets/foo.txt').readAsStringSync(), 'hello fuchsia');
+      expect(fileSystem.file('out/fuchsia.manifest'), exists);
+      expect(
+        fileSystem.file('out/fuchsia.manifest').readAsStringSync(),
+        contains('data/my_component/assets/foo.txt=out/assets/assets/foo.txt\n'),
+      );
+      expect(fileSystem.file('out/assets.d'), exists);
+      expect(
+        fileSystem.file('out/assets.d').readAsStringSync(),
+        allOf(contains('out/fuchsia.manifest:'), contains('assets/foo.txt')),
+      );
     },
   );
 }
