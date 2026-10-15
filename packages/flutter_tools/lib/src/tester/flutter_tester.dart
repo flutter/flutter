@@ -49,15 +49,13 @@ class FlutterTesterApp extends ApplicationPackage {
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(
     super.id, {
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     required this._analytics,
     required this._buildSystem,
     required this._buildTargets,
     this._nativeAssetsBuilder,
-  }) : _toolContext = toolContext,
-       super(logger: toolContext.logger, platformType: null, category: null, ephemeral: false);
+  }) : super(platformType: null, category: null, ephemeral: false);
 
-  final ToolContext _toolContext;
   final Analytics _analytics;
   final BuildSystem _buildSystem;
   final BuildTargets _buildTargets;
@@ -80,7 +78,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
-    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
+    final FlutterVersion flutterVersion = toolContext.flutterVersion;
     return 'Flutter ${flutterVersion.frameworkRevisionShort}';
   }
 
@@ -134,7 +132,7 @@ class FlutterTesterDevice extends Device {
       :Logger logger,
       :Platform platform,
       :ProcessManager processManager,
-    ) = _toolContext;
+    ) = toolContext;
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {
       logger.printError('This device only supports debug mode.');
@@ -153,7 +151,7 @@ class FlutterTesterDevice extends Device {
       analytics: _analytics,
       buildSystem: _buildSystem,
       buildTargets: _buildTargets,
-      toolContext: _toolContext,
+      toolContext: toolContext,
     ).build(
       project: project,
       buildInfo: buildInfo,
@@ -234,7 +232,7 @@ class FlutterTesterDevice extends Device {
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
-    return LocalDevFSWriter(fileSystem: _toolContext.fs);
+    return LocalDevFSWriter(fileSystem: toolContext.fs);
   }
 
   @override
@@ -246,7 +244,7 @@ class FlutterTesterDevice extends Device {
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
   FlutterTesterDevices({
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     required Analytics analytics,
     required BuildSystem buildSystem,
     required BuildTargets buildTargets,

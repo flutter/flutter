@@ -639,7 +639,6 @@ class ToolDependencies {
           userMessages: finalUserMessages,
           operatingSystemUtils: finalOS,
           windowsWorkflow: finalWindowsWorkflow,
-          customDevicesConfig: finalCustomDevicesConfig,
           nativeAssetsBuilder: finalNativeAssetsBuilder,
           analytics: finalAnalytics,
           buildSystem: finalBuildSystem,

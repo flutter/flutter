@@ -16,7 +16,6 @@ import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
 import 'context/tool_context.dart';
 import 'custom_devices/custom_device.dart';
-import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'experimental/extension_device_manager.dart';
 import 'experimental/extension_manager.dart';
@@ -52,7 +51,6 @@ class FlutterDeviceManager extends DeviceManager {
     required UserMessages userMessages,
     required OperatingSystemUtils operatingSystemUtils,
     required WindowsWorkflow windowsWorkflow,
-    required CustomDevicesConfig customDevicesConfig,
     required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
     required Analytics analytics,
     required BuildSystem buildSystem,
@@ -121,12 +119,7 @@ class FlutterDeviceManager extends DeviceManager {
            processManager: processManager,
            logger: logger,
          ),
-         CustomDevices(
-           featureFlags: featureFlags,
-           processManager: processManager,
-           logger: logger,
-           config: customDevicesConfig,
-         ),
+         CustomDevices(featureFlags: featureFlags, toolContext: toolContext),
          if (extensionManager != null)
            ExtensionDevices(extensionManager: extensionManager, logger: logger),
        ];
