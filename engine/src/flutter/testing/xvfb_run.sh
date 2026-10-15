@@ -30,6 +30,18 @@
 # shard was honoured. run_tests.py's gtest-parallel splits a suite the same
 # way, one process per core.
 #
+# With FLUTTER_TEST_SESSION_BUS=1 (flutter_display_test's session_bus) the
+# binary also gets a D-Bus session bus of its own, through dbus-run-session,
+# unless the environment has one (DBUS_SESSION_BUS_ADDRESS). GTK's
+# accessibility bridge (at-spi) asks the session bus for the accessibility
+# bus, and a view's AtkPlug has no id without one: the Linux shell's suite
+# then fails an Atk assertion in its first test, fatal under its G_DEBUG.
+# run_tests.py's run inherits the bus of the session it runs in (a bot's
+# systemd user session); a sandboxed test inherits nothing, so the wrapper
+# starts one, as it starts the display. dbus-daemon and at-spi2-core (whose
+# launcher the bus activates on demand) are host prerequisites, as GTK's
+# own packages bring them.
+#
 # Usage: xvfb_run.sh <binary> <arguments>...
 
 set -eu
@@ -44,6 +56,45 @@ if [[ -n "${TEST_TOTAL_SHARDS:-}" ]]; then
   if [[ -n "${TEST_SHARD_STATUS_FILE:-}" ]]; then
     export GTEST_SHARD_STATUS_FILE="$TEST_SHARD_STATUS_FILE"
   fi
+fi
+
+if [[ "${FLUTTER_TEST_SESSION_BUS:-}" == 1 && -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]]; then
+  if ! command -v dbus-run-session >/dev/null 2>&1; then
+    echo "xvfb_run.sh: no DBUS_SESSION_BUS_ADDRESS in the environment and no" >&2
+    echo "dbus-run-session on the PATH; the suite needs a D-Bus session bus" >&2
+    echo "(install dbus, or run bazel test with --test_env=DBUS_SESSION_BUS_ADDRESS)." >&2
+    exit 1
+  fi
+  # dbus-run-session exports the new bus's address to the command it runs:
+  # this script again, which then goes on to the display.
+  #
+  # The session gets a home directory of its own under the test's temporary
+  # directory. The sandbox mounts the real one read-only, and dconf --
+  # GSettings' backend, which the accessibility bus launcher and the GTK
+  # shell's GNOME settings both read through -- keeps a cache under it and
+  # reports a critical when it cannot create the file; under the suite's
+  # G_DEBUG=fatal-criticals that is an abort. An empty home also makes the
+  # settings the schemas' defaults, which is what the suite's expectations
+  # are (run_tests.py's run reads whatever the bot user has set).
+  #
+  # The daemon and the services it activates are not the test: they run
+  # without its G_DEBUG (the launcher's own criticals would otherwise abort
+  # it, and no accessibility bus would come up). The test binary gets it
+  # back below.
+  bus_scratch="$(mktemp -d "${TEST_TMPDIR:-${TMPDIR:-/tmp}}/xvfb_run.bus.XXXXXX")"
+  mkdir -p "$bus_scratch/home"
+  FLUTTER_TEST_SESSION_BUS=2 \
+    FLUTTER_TEST_BUS_SCRATCH="$bus_scratch" \
+    FLUTTER_TEST_SAVED_G_DEBUG="${G_DEBUG-}" \
+    HOME="$bus_scratch/home" \
+    exec env -u G_DEBUG dbus-run-session -- "$0" "$@"
+fi
+if [[ "${FLUTTER_TEST_SESSION_BUS:-}" == 2 ]]; then
+  if [[ -n "$FLUTTER_TEST_SAVED_G_DEBUG" ]]; then
+    export G_DEBUG="$FLUTTER_TEST_SAVED_G_DEBUG"
+  fi
+  unset FLUTTER_TEST_SESSION_BUS FLUTTER_TEST_SAVED_G_DEBUG
+  echo "xvfb_run.sh: DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS HOME=$HOME" >&2
 fi
 
 if [[ -n "${DISPLAY:-}" ]]; then
@@ -67,6 +118,9 @@ clean_up() {
     wait "$xvfb_pid" 2>/dev/null || :
   fi
   rm -rf "$scratch"
+  if [[ -n "${FLUTTER_TEST_BUS_SCRATCH:-}" ]]; then
+    rm -rf "$FLUTTER_TEST_BUS_SCRATCH"
+  fi
 }
 trap clean_up EXIT
 
