@@ -45,17 +45,19 @@ void main() {
       expect(
         timeoutSecsValue,
         isNotNull,
-        reason: '${target.name} must specify test_timeout_secs (e.g. "2700") to avoid hitting the 30-minute step execution timeout.',
+        reason:
+            '${target.name} must specify test_timeout_secs (e.g. "2700") to avoid hitting the 30-minute step execution timeout.',
       );
       if (timeoutSecsValue != null) {
         final int? timeoutSecs = int.tryParse(timeoutSecsValue.toString());
         expect(
           timeoutSecs,
           isNotNull,
-          reason: '${target.name} test_timeout_secs must be a valid integer, got "$timeoutSecsValue".',
+          reason:
+              '${target.name} test_timeout_secs must be a valid integer, got "$timeoutSecsValue".',
         );
         expect(
-          timeoutSecs!,
+          timeoutSecs,
           greaterThanOrEqualTo(2700),
           reason: '${target.name} test_timeout_secs should be at least 2700s (45 minutes).',
         );
