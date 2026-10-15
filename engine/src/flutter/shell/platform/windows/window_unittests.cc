@@ -4,6 +4,8 @@
 
 #include <array>
 
+#include <imm.h>
+
 #include "flutter/shell/platform/windows/testing/mock_direct_manipulation.h"
 #include "flutter/shell/platform/windows/testing/mock_text_input_manager.h"
 #include "flutter/shell/platform/windows/testing/mock_window.h"
@@ -23,6 +25,76 @@ namespace testing {
 TEST(MockWindow, CreateDestroy) {
   MockWindow window;
   ASSERT_TRUE(TRUE);
+}
+
+TEST(TextInputManager, ImeContextFollowsEnabledState) {
+  HWND window =
+      CreateWindowExW(0, L"STATIC", L"", WS_POPUP, 0, 0, 1, 1, nullptr, nullptr,
+                      GetModuleHandle(nullptr), nullptr);
+  ASSERT_NE(window, nullptr);
+
+  HIMC original_context = ImmGetContext(window);
+  ASSERT_NE(original_context, nullptr);
+  const BOOL original_open_status = ImmGetOpenStatus(original_context);
+  DWORD original_conversion_mode = 0;
+  DWORD original_sentence_mode = 0;
+  const BOOL original_conversion_available = ImmGetConversionStatus(
+      original_context, &original_conversion_mode, &original_sentence_mode);
+  ImmReleaseContext(window, original_context);
+
+  TextInputManager manager;
+  manager.SetWindowHandle(window);
+  manager.SetImeEnabled(false);
+  EXPECT_EQ(ImmGetContext(window), nullptr);
+
+  manager.SetImeEnabled(true);
+  HIMC restored_context = ImmGetContext(window);
+  ASSERT_NE(restored_context, nullptr);
+  EXPECT_NE(restored_context, original_context);
+  EXPECT_EQ(ImmGetOpenStatus(restored_context), original_open_status);
+  if (original_conversion_available != FALSE) {
+    DWORD restored_conversion_mode = 0;
+    DWORD restored_sentence_mode = 0;
+    ASSERT_NE(
+        ImmGetConversionStatus(restored_context, &restored_conversion_mode,
+                               &restored_sentence_mode),
+        FALSE);
+    EXPECT_EQ(restored_conversion_mode, original_conversion_mode);
+    EXPECT_EQ(restored_sentence_mode, original_sentence_mode);
+  }
+  ImmReleaseContext(window, restored_context);
+
+  manager.SetWindowHandle(nullptr);
+  HIMC final_context = ImmGetContext(window);
+  EXPECT_EQ(final_context, original_context);
+  if (final_context != nullptr) {
+    ImmReleaseContext(window, final_context);
+  }
+  DestroyWindow(window);
+}
+
+TEST(MockWindow, RestoresImeContextAfterRegainingFocus) {
+  auto windows_proc_table = std::make_unique<MockWindowsProcTable>();
+  auto text_input_manager = std::make_unique<MockTextInputManager>();
+  MockTextInputManager* text_input_manager_ptr = text_input_manager.get();
+  MockWindow window(std::move(windows_proc_table),
+                    std::move(text_input_manager));
+
+  window.OnTextInputClientChanged(true);
+
+  {
+    InSequence sequence;
+    EXPECT_CALL(window, Win32DefWindowProc(_, WM_SETFOCUS, _, _));
+    EXPECT_CALL(*text_input_manager_ptr, SetImeEnabled(true));
+  }
+  window.InjectWindowMessage(WM_SETFOCUS, 0, 0);
+
+  {
+    InSequence sequence;
+    EXPECT_CALL(*text_input_manager_ptr, SetImeEnabled(false));
+    EXPECT_CALL(window, Win32DefWindowProc(_, WM_KILLFOCUS, _, _));
+  }
+  window.InjectWindowMessage(WM_KILLFOCUS, 0, 0);
 }
 
 TEST(MockWindow, GetDpiAfterCreate) {
