@@ -5,25 +5,130 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
-import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/hook_runner.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:package_config/package_config.dart';
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../src/fake_vm_services.dart';
+import '../src/fakes.dart';
+
+HotRunner createHotRunner(
+  List<FlutterDevice> flutterDevices, {
+  required DebuggingOptions debuggingOptions,
+  required String target,
+  Analytics? analytics,
+  File? applicationBinary,
+  bool benchmarkMode = false,
+  BuildSystem? buildSystem,
+  BuildTargets? buildTargets,
+  FlutterHookRunner? dartBuilder,
+  String? dillOutputPath,
+  bool hostIsIde = false,
+  HotRunnerConfig? hotRunnerConfig,
+  bool machine = false,
+  String? nativeAssetsYamlFile,
+  ProjectFileInvalidator? projectFileInvalidator,
+  String? projectRootPath,
+  ReassembleHelper? reassembleHelper,
+  ReloadSourcesHelper reloadSourcesHelper = defaultReloadSourcesHelper,
+  bool stayResident = true,
+  StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+  ToolContext toolContext = const DelegatingToolContext(),
+  Xcode? xcode,
+}) {
+  buildSystem ??= FlutterBuildSystem(
+    fileSystem: toolContext.fs,
+    logger: toolContext.logger,
+    platform: toolContext.platform,
+  );
+
+  return HotRunner(
+    flutterDevices,
+    analytics: analytics ?? const NoOpAnalytics(),
+    buildSystem: buildSystem,
+    buildTargets: buildTargets ?? const BuildTargetsImpl(),
+    debuggingOptions: debuggingOptions,
+    target: target,
+    toolContext: toolContext,
+    xcode: xcode,
+    applicationBinary: applicationBinary,
+    benchmarkMode: benchmarkMode,
+    dartBuilder: dartBuilder,
+    dillOutputPath: dillOutputPath,
+    hostIsIde: hostIsIde,
+    hotRunnerConfig: hotRunnerConfig,
+    machine: machine,
+    nativeAssetsYamlFile: nativeAssetsYamlFile,
+    projectFileInvalidator: projectFileInvalidator,
+    projectRootPath: projectRootPath,
+    reassembleHelper: reassembleHelper,
+    reloadSourcesHelper: reloadSourcesHelper,
+    stayResident: stayResident,
+    stopwatchFactory: stopwatchFactory,
+  );
+}
+
+ColdRunner createColdRunner(
+  List<FlutterDevice> flutterDevices, {
+  required DebuggingOptions debuggingOptions,
+  required String target,
+  Analytics? analytics,
+  File? applicationBinary,
+  bool awaitFirstFrameWhenTracing = true,
+  BuildSystem? buildSystem,
+  BuildTargets? buildTargets,
+  FlutterHookRunner? dartBuilder,
+  bool machine = false,
+  bool stayResident = true,
+  ToolContext toolContext = const DelegatingToolContext(),
+  bool traceStartup = false,
+  Xcode? xcode,
+}) {
+  return ColdRunner(
+    flutterDevices,
+    analytics: analytics ?? const NoOpAnalytics(),
+    buildSystem:
+        buildSystem ??
+        FlutterBuildSystem(
+          fileSystem: toolContext.fs,
+          logger: toolContext.logger,
+          platform: toolContext.platform,
+        ),
+    buildTargets: buildTargets ?? const BuildTargetsImpl(),
+    debuggingOptions: debuggingOptions,
+    target: target,
+    toolContext: toolContext,
+    xcode: xcode,
+    applicationBinary: applicationBinary,
+    awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
+    dartBuilder: dartBuilder,
+    machine: machine,
+    stayResident: stayResident,
+    traceStartup: traceStartup,
+  );
+}
 
 final fakeUnpausedEvent = vm_service.Event(kind: vm_service.EventKind.kResume, timestamp: 0);
 
@@ -173,19 +278,16 @@ class FakeDartDevelopmentServiceException implements DartDevelopmentServiceExcep
 }
 
 class TestFlutterDevice extends FlutterDevice {
-  TestFlutterDevice(super.device, {Stream<Uri>? vmServiceUris})
-    : _vmServiceUris = vmServiceUris,
-      super(
+  TestFlutterDevice(super.device, {Future<Uri>? vmServiceUri})
+    : super(
+        toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
         generator: FakeResidentCompiler(),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
         developmentShaderCompiler: const FakeShaderCompiler(),
-      );
-
-  final Stream<Uri>? _vmServiceUris;
-
-  @override
-  Stream<Uri> get vmServiceUris => _vmServiceUris!;
+      ) {
+    this.vmServiceUri = vmServiceUri;
+  }
 }
 
 class ThrowingForwardingFileSystem extends ForwardingFileSystem {
@@ -223,7 +325,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   TargetPlatform targetPlatform = TargetPlatform.android;
 
   @override
-  Stream<Uri?> get vmServiceUris => Stream<Uri?>.value(testUri);
+  Future<Uri>? get vmServiceUri => testUri != null ? Future<Uri>.value(testUri!) : null;
 
   @override
   FlutterVmService? get vmService => vmServiceHost?.call()?.vmService;
@@ -262,14 +364,12 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
   }) async {
     if (connectError != null) {
       throw connectError!;
@@ -308,24 +408,26 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
     super.device,
     BuildInfo buildInfo,
     ResidentCompiler residentCompiler,
-    this.fakeDevFS,
-  ) : super(
-        targetPlatform: .unsupported,
-        buildInfo: buildInfo,
-        generator: residentCompiler,
-        developmentShaderCompiler: const FakeShaderCompiler(),
-      );
+    this.fakeDevFS, {
+    Future<Uri>? vmServiceUri,
+  }) : super(
+         toolContext: DelegatingToolContext(artifacts: Artifacts.test()),
+         targetPlatform: .unsupported,
+         buildInfo: buildInfo,
+         generator: residentCompiler,
+         developmentShaderCompiler: const FakeShaderCompiler(),
+       ) {
+    this.vmServiceUri = vmServiceUri ?? Future<Uri>.value(testUri);
+  }
 
   @override
   Future<void> connect({
+    required Uri vmServiceUri,
     ReloadSources? reloadSources,
     Restart? restart,
     CompileExpression? compileExpression,
-    FlutterProject? flutterProject,
     PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
     required DebuggingOptions debuggingOptions,
-    int? hostVmServicePort,
-    bool? ipv6 = false,
   }) async {}
 
   final DevFS fakeDevFS;
@@ -388,15 +490,13 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
 
 class FakeDevice extends Fake implements Device {
   FakeDevice({
-    String sdkNameAndVersion = 'Android',
-    TargetPlatform targetPlatform = TargetPlatform.android_arm,
-    bool isLocalEmulator = false,
+    this._sdkNameAndVersion = 'Android',
+    this._targetPlatform = TargetPlatform.android_arm,
+    this._isLocalEmulator = false,
     this.supportsHotRestart = true,
     this.supportsScreenshot = true,
     this.supportsFlutterExit = true,
-  }) : _isLocalEmulator = isLocalEmulator,
-       _targetPlatform = targetPlatform,
-       _sdkNameAndVersion = sdkNameAndVersion;
+  });
 
   final bool _isLocalEmulator;
   final TargetPlatform _targetPlatform;

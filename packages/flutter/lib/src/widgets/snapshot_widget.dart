@@ -50,8 +50,8 @@ enum SnapshotMode {
 class SnapshotController extends ChangeNotifier {
   /// Create a new [SnapshotController].
   ///
-  /// By default, [allowSnapshotting] is `false` and cannot be `null`.
-  SnapshotController({bool allowSnapshotting = false}) : _allowSnapshotting = allowSnapshotting;
+  /// By default, [_allowSnapshotting] is `false` and cannot be `null`.
+  SnapshotController({this._allowSnapshotting = false});
 
   /// Reset the snapshot held by any listening [SnapshotWidget].
   ///
@@ -163,16 +163,12 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
 class _RenderSnapshotWidget extends RenderProxyBox {
   // Create a new [_RenderSnapshotWidget].
   _RenderSnapshotWidget({
-    required double devicePixelRatio,
-    required SnapshotController controller,
-    required SnapshotMode mode,
-    required SnapshotPainter painter,
-    required bool autoresize,
-  }) : _devicePixelRatio = devicePixelRatio,
-       _controller = controller,
-       _mode = mode,
-       _painter = painter,
-       _autoresize = autoresize;
+    required this._devicePixelRatio,
+    required this._controller,
+    required this._mode,
+    required this._painter,
+    required this._autoresize,
+  });
 
   /// The device pixel ratio used to create the child image.
   double get devicePixelRatio => _devicePixelRatio;

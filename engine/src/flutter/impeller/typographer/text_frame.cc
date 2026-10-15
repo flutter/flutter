@@ -118,15 +118,4 @@ fml::StatusOr<flutter::DlPath> TextFrame::GetPath() const {
   return fml::Status(fml::StatusCode::kCancelled, "no path creator specified.");
 }
 
-const Font& TextFrame::GetFont() const {
-  return runs_[0].GetFont();
-}
-
-std::optional<Glyph> TextFrame::AsSingleGlyph() const {
-  if (runs_.size() == 1 && runs_[0].GetGlyphCount() == 1) {
-    return runs_[0].GetGlyphPositions()[0].glyph;
-  }
-  return std::nullopt;
-}
-
 }  // namespace impeller

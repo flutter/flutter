@@ -8,14 +8,15 @@ import 'dart:io' as io;
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
@@ -27,6 +28,7 @@ import 'package:vm_service/src/vm_service.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fakes.dart';
 
 void main() {
   late FileSystem fileSystem;
@@ -53,9 +55,15 @@ void main() {
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, hostVmServicePort: 1234),
           enableVmService: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
@@ -80,9 +88,15 @@ void main() {
           precompiledDillPath: 'example.dill',
           enableVmService: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.loadChannel('test1.dart', fakeSuitePlatform);
 
@@ -101,18 +115,25 @@ void main() {
       'an exception from the app not starting bubbles up to the test runner',
       () async {
         final testDevice = _UnstartableDevice();
+        final logger = BufferLogger.test();
         final flutterPlatform = FlutterPlatform(
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
           flutterTesterBinPath: '/',
           enableVmService: false,
           integrationTestDevice: testDevice,
-          flutterProject: _FakeFlutterProject(),
+          flutterProject: _FakeFlutterProject(directory: fileSystem.directory('/project')),
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
 
         await expectLater(
@@ -126,10 +147,7 @@ void main() {
             ),
           ),
         );
-        expect(
-          (globals.logger as BufferLogger).traceText,
-          contains('test 0: error caught during test;'),
-        );
+        expect(logger.traceText, contains('test 0: error caught during test;'));
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -142,6 +160,7 @@ void main() {
       'a shutdown signal terminates the test device',
       () async {
         final testDevice = _WorkingDevice();
+        final logger = BufferLogger.test();
 
         final shutdownHooks = ShutdownHooks();
         final flutterPlatform = FlutterPlatform(
@@ -149,14 +168,19 @@ void main() {
           flutterTesterBinPath: '/',
           enableVmService: false,
           integrationTestDevice: testDevice,
-          flutterProject: _FakeFlutterProject(),
+          flutterProject: _FakeFlutterProject(directory: fileSystem.directory('/project')),
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
-          shutdownHooks: shutdownHooks,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: logger,
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: shutdownHooks,
+          ),
         );
 
         await expectLater(
@@ -164,7 +188,6 @@ void main() {
           returnsNormally,
         );
 
-        final logger = globals.logger as BufferLogger;
         await shutdownHooks.runShutdownHooks(logger);
         expect(logger.traceText, contains('test 0: ensuring test device is terminated.'));
       },
@@ -181,9 +204,15 @@ void main() {
           flutterTesterBinPath: 'abc',
           debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, startPaused: true),
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         ),
         throwsAssertionError,
       );
@@ -197,9 +226,15 @@ void main() {
             hostVmServicePort: 123,
           ),
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: FakeProcessManager.empty(),
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: Artifacts.test(fileSystem: fileSystem),
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: FakeProcessManager.empty(),
+            shutdownHooks: ShutdownHooks(),
+          ),
         ),
         throwsAssertionError,
       );
@@ -226,9 +261,15 @@ void main() {
           capturedPlatform = platform;
         },
         buildInfo: BuildInfo.debug,
-        fileSystem: fileSystem,
-        processManager: FakeProcessManager.empty(),
-        logger: BufferLogger.test(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          artifacts: Artifacts.test(fileSystem: fileSystem),
+          config: Config.test(),
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.empty(),
+          shutdownHooks: ShutdownHooks(),
+        ),
       );
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));
@@ -246,6 +287,52 @@ void main() {
       expect(flutterPlatform.testAssetDirectory, '/build/test');
       expect(flutterPlatform.icudtlPath, equals('ghi'));
     });
+
+    testWithoutContext(
+      'pipeHarnessToRemote safely ignores non-JSON string and logs warning',
+      () async {
+        final harnessController = StreamChannelController<Object?>();
+        final remoteController = StreamChannelController<String>();
+        final logger = BufferLogger.test();
+
+        final Future<void> pipeFuture = pipeHarnessToRemote(
+          id: 0,
+          harnessChannel: harnessController.foreign,
+          remoteChannel: remoteController.foreign,
+          logger: logger,
+        );
+
+        final receivedFromRemote = <Object?>[];
+        harnessController.local.stream.listen(receivedFromRemote.add);
+
+        // Send non-JSON error string from remote channel followed by valid JSON.
+        remoteController.local.sink.add(
+          'Loading dynamic library failed: dlopen(/opt/homebrew/share/flutter/bin/cache/libflutter.dylib)',
+        );
+        remoteController.local.sink.add('{"valid": true}');
+
+        await pumpEventQueue();
+
+        await remoteController.local.sink.close();
+        await harnessController.local.sink.close();
+
+        await pipeFuture;
+
+        expect(
+          receivedFromRemote,
+          equals(<Object?>[
+            <String, Object?>{'valid': true},
+          ]),
+        );
+        expect(
+          logger.warningText,
+          contains(
+            'Received unexpected non-JSON output from test runner: Loading dynamic library failed: dlopen',
+          ),
+        );
+        expect(logger.traceText, contains('test 0: JSON decoding failed:'));
+      },
+    );
   });
 
   group('generateTestBootstrap', () {
@@ -354,9 +441,15 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: processManager,
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: artifacts,
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: processManager,
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.compiler = testCompiler;
 
@@ -417,9 +510,15 @@ void main() {
           host: InternetAddress.anyIPv4,
           updateGoldens: false,
           buildInfo: BuildInfo.debug,
-          fileSystem: fileSystem,
-          processManager: processManager,
-          logger: BufferLogger.test(),
+          toolContext: FakeToolContext(
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            artifacts: artifacts,
+            config: Config.test(),
+            platform: FakePlatform(),
+            processManager: processManager,
+            shutdownHooks: ShutdownHooks(),
+          ),
         );
         flutterPlatform.compiler = testCompiler;
 
@@ -479,6 +578,229 @@ void main() {
       },
     );
   });
+
+  group('listener.dart generation', () {
+    late SuitePlatform fakeSuitePlatform;
+    late FakeProcessManager processManager;
+    late BufferLogger logger;
+    late FileSystem windowsFs;
+
+    setUp(() {
+      fakeSuitePlatform = SuitePlatform(Runtime.vm);
+      processManager = FakeProcessManager.empty();
+      logger = BufferLogger.test();
+      windowsFs = MemoryFileSystem.test(style: .windows);
+      windowsFs.file(r'C:\.dart_tool\package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+    });
+
+    FlutterPlatform createPlatform({
+      required FlutterProject flutterProject,
+      required FileSystem fs,
+      Device? integrationTestDevice,
+      Platform? platform,
+    }) {
+      return FlutterPlatform(
+        debuggingOptions: DebuggingOptions.disabled(.debug),
+        flutterTesterBinPath: 'flutter_tester',
+        enableVmService: false,
+        flutterProject: flutterProject,
+        integrationTestDevice: integrationTestDevice,
+        host: InternetAddress.anyIPv4,
+        updateGoldens: false,
+        buildInfo: .debug,
+        toolContext: FakeToolContext(
+          fs: fs,
+          logger: logger,
+          artifacts: Artifacts.test(fileSystem: fs),
+          config: Config.test(),
+          platform: platform ?? FakePlatform(),
+          processManager: processManager,
+          shutdownHooks: ShutdownHooks(),
+        ),
+      );
+    }
+
+    Map<Type, Generator> integrationOverrides({bool windows = false}) {
+      return <Type, Generator>{
+        FileSystem: () => windows ? windowsFs : fileSystem,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        VMServiceConnector: () =>
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions? compression,
+              Device? device,
+              Logger? logger,
+            }) async => _FakeFlutterVmService(),
+        ApplicationPackageFactory: _FakeApplicationPackageFactory.new,
+        Artifacts: () => Artifacts.test(fileSystem: windows ? windowsFs : fileSystem),
+      };
+    }
+
+    testUsingContext('creates listener file in project build directory for integration tests with stable path across runs and cleans up on completion', () async {
+      final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+
+      final device1 = _WorkingDevice();
+      final FlutterPlatform platform1 = createPlatform(
+        flutterProject: flutterProject,
+        fs: fileSystem,
+        integrationTestDevice: device1,
+      );
+
+      final StreamChannel<Object?> channel1 = platform1.loadChannel(
+        'test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel1.stream.drain<void>());
+      await pumpEventQueue();
+
+      final String expectedPath = fileSystem.path.join(
+        projectDir.path,
+        'build',
+        'test',
+        'listener_0.dart',
+      );
+      expect(device1.lastMainPath, equals(expectedPath));
+      expect(fileSystem.file(expectedPath).existsSync(), isTrue);
+
+      // Simulate expression compiler output alongside listener file.
+      final File dillFile = fileSystem.file('$expectedPath.dill')..createSync(recursive: true);
+
+      await channel1.sink.close();
+      await pumpEventQueue();
+
+      expect(fileSystem.file(expectedPath).existsSync(), isFalse);
+      expect(dillFile.existsSync(), isFalse);
+      expect(logger.traceText, contains('test 0: deleting test listener file'));
+
+      final device2 = _WorkingDevice();
+      final FlutterPlatform platform2 = createPlatform(
+        flutterProject: flutterProject,
+        fs: fileSystem,
+        integrationTestDevice: device2,
+      );
+
+      final StreamChannel<Object?> channel2 = platform2.loadChannel(
+        'test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel2.stream.drain<void>());
+      await pumpEventQueue();
+
+      expect(device2.lastMainPath, equals(expectedPath));
+      expect(fileSystem.file(expectedPath).existsSync(), isTrue);
+
+      await channel2.sink.close();
+      await pumpEventQueue();
+
+      expect(fileSystem.file(expectedPath).existsSync(), isFalse);
+    }, overrides: integrationOverrides());
+
+    testUsingContext(
+      'uses systemTempDirectory for non-integration tests',
+      () async {
+        final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
+        final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+        final testCompleter = Completer<void>();
+        final testCompiler = _FakeTestCompiler();
+
+        processManager.addCommand(
+          FakeCommand(
+            command: const <String>[
+              'flutter_tester',
+              '--disable-vm-service',
+              '--enable-checked-mode',
+              '--verify-entry-points',
+              '--enable-software-rendering',
+              '--skia-deterministic-rendering',
+              '--enable-dart-profiling',
+              '--non-interactive',
+              '--use-test-fonts',
+              '--disable-asset-fonts',
+              '--packages=.dart_tool/package_config.json',
+              'path_to_output.dill',
+            ],
+            exitCode: -9,
+            completer: testCompleter,
+          ),
+        );
+
+        final FlutterPlatform platform = createPlatform(
+          flutterProject: flutterProject,
+          fs: fileSystem,
+        )..compiler = testCompiler;
+
+        final StreamChannel<Object?> channel = platform.loadChannel(
+          'test1.dart',
+          fakeSuitePlatform,
+        );
+        unawaited(channel.stream.drain<void>());
+        await pumpEventQueue();
+
+        expect(testCompiler.lastMainUri, isNotNull);
+        final String listenerPath = fileSystem.path.fromUri(testCompiler.lastMainUri);
+        expect(listenerPath, startsWith(fileSystem.systemTempDirectory.path));
+        expect(fileSystem.path.basename(listenerPath), equals('listener.dart'));
+        expect(fileSystem.file(listenerPath).existsSync(), isTrue);
+        expect(projectDir.childDirectory('build').childDirectory('test').existsSync(), isFalse);
+
+        testCompleter.complete();
+        await expectLater(channel.sink.done, completes);
+
+        expect(fileSystem.file(listenerPath).existsSync(), isFalse);
+        expect(logger.traceText, contains('test 0: deleting temporary directory'));
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Logger: () => logger,
+        Artifacts: () => Artifacts.test(fileSystem: fileSystem),
+      },
+    );
+
+    testUsingContext('creates listener file in project build directory on Windows', () async {
+      final Directory projectDir = windowsFs.directory(r'C:\custom_project')
+        ..createSync(recursive: true);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir);
+
+      final device = _WorkingDevice();
+      final FlutterPlatform platform = createPlatform(
+        flutterProject: flutterProject,
+        fs: windowsFs,
+        integrationTestDevice: device,
+        platform: FakePlatform(operatingSystem: 'windows'),
+      );
+
+      final StreamChannel<Object?> channel = platform.loadChannel(
+        r'C:\custom_project\test1.dart',
+        fakeSuitePlatform,
+      );
+      unawaited(channel.stream.drain<void>());
+      await pumpEventQueue();
+
+      final String expectedPath = windowsFs.path.join(
+        projectDir.path,
+        'build',
+        'test',
+        'listener_0.dart',
+      );
+      expect(device.lastMainPath, equals(expectedPath));
+      expect(windowsFs.file(expectedPath).existsSync(), isTrue);
+
+      await channel.sink.close();
+      await pumpEventQueue();
+
+      expect(windowsFs.file(expectedPath).existsSync(), isFalse);
+    }, overrides: integrationOverrides(windows: true));
+  });
 }
 
 class _FakeFlutterVmService extends Fake implements FlutterVmService {
@@ -528,8 +850,11 @@ class _FakeVmService extends Fake implements VmService {
 }
 
 class _FakeTestCompiler extends Fake implements TestCompiler {
+  Uri? lastMainUri;
+
   @override
   Future<TestCompilerResult> compile(Uri mainUri) async {
+    lastMainUri = mainUri;
     return TestCompilerComplete(outputPath: 'path_to_output.dill', mainUri: mainUri);
   }
 }
@@ -564,6 +889,8 @@ class _UnstartableDevice extends Fake implements Device {
 }
 
 class _WorkingDevice extends Fake implements Device {
+  String? lastMainPath;
+
   @override
   Future<void> dispose() async {}
 
@@ -586,11 +913,20 @@ class _WorkingDevice extends Fake implements Device {
     bool prebuiltApplication = false,
     String? userIdentifier,
   }) async {
+    lastMainPath = mainPath;
     return LaunchResult.succeeded(vmServiceUri: Uri.parse('http://127.0.0.1:12345/vmService'));
   }
 }
 
 class _FakeFlutterProject extends Fake implements FlutterProject {
+  _FakeFlutterProject({required this.directory});
+
+  @override
+  final Directory directory;
+
+  @override
+  Directory get buildDirectory => directory.childDirectory('build');
+
   @override
   FlutterManifest get manifest => FlutterManifest.empty(logger: BufferLogger.test());
 }

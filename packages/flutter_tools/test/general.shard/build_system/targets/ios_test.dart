@@ -805,6 +805,54 @@ void main() {
   );
 
   testUsingContext(
+    'iOS targets throw ToolExit if sdk root is unrecognized iOS SDK',
+    () async {
+      const unsupportedSdkRoot = 'path/to/XROS1.0.sdk';
+      const expectedErrorMessage =
+          'Unsupported iOS SDK root "$unsupportedSdkRoot". Expected an iPhoneOS or iPhoneSimulator SDK. '
+          "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+          '(SDKROOT) and Supported Destinations in Xcode.';
+      final fileSystem = MemoryFileSystem.test();
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        defines: <String, String>{
+          kTargetPlatform: 'ios',
+          kSdkRoot: unsupportedSdkRoot,
+          kBuildMode: 'release',
+          kIosArchs: 'arm64',
+        },
+        processManager: processManager,
+        artifacts: artifacts,
+        logger: logger,
+        fileSystem: fileSystem,
+      );
+
+      await expectLater(
+        const AotAssemblyRelease().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      await expectLater(
+        const DebugUniversalFramework().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      await expectLater(
+        const DebugUnpackIOS().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      await expectLater(
+        const DebugIosLLDBInit().build(environment),
+        throwsToolExit(message: expectedErrorMessage),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
+
+  testUsingContext(
     'AotAssemblyRelease throws exception if sdk root is missing',
     () async {
       final FileSystem fileSystem = MemoryFileSystem.test();
@@ -842,6 +890,8 @@ void main() {
     late Directory outputDir;
     late File binary;
     late FakeCommand copyPhysicalFrameworkCommand;
+    late FakeCommand chmodPhysicalFrameworkCommand;
+    late FakeCommand chmodSimulatorFrameworkCommand;
     late FakeCommand copyPhysicalFrameworkDsymCommand;
     late FakeCommand copyPhysicalFrameworkDsymCommandFailure;
     late FakeCommand lipoCommandNonFatResult;
@@ -864,6 +914,19 @@ void main() {
           '--chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r',
           'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
           outputDir.path,
+        ],
+      );
+
+      chmodPhysicalFrameworkCommand = FakeCommand(
+        command: <String>[
+          'chmod',
+          '-R',
+          'u+w',
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.physical',
+              )
+              .path,
         ],
       );
 
@@ -910,6 +973,19 @@ void main() {
       adHocCodesignCommand = FakeCommand(
         command: <String>['codesign', '--force', '--sign', '-', '--timestamp=none', binary.path],
       );
+
+      chmodSimulatorFrameworkCommand = FakeCommand(
+        command: <String>[
+          'chmod',
+          '-R',
+          'u+w',
+          outputDir
+              .childDirectory(
+                'Artifact.flutterFramework.TargetPlatform.ios.debug.EnvironmentType.simulator',
+              )
+              .path,
+        ],
+      );
     });
 
     testWithoutContext('iphonesimulator', () async {
@@ -937,6 +1013,7 @@ void main() {
           ],
           onRun: (_) => binary.createSync(recursive: true),
         ),
+        chmodSimulatorFrameworkCommand,
         lipoCommandNonFatResult,
         FakeCommand(command: <String>['lipo', binary.path, '-verify_arch', 'x86_64']),
         xattrCommand,
@@ -962,6 +1039,7 @@ void main() {
         defines: <String, String>{kIosArchs: 'arm64', kSdkRoot: 'path/to/iPhoneOS.sdk'},
       );
       processManager.addCommand(copyPhysicalFrameworkCommand);
+      processManager.addCommand(chmodPhysicalFrameworkCommand);
       await expectLater(
         const DebugUnpackIOS().build(environment),
         throwsA(
@@ -997,6 +1075,7 @@ void main() {
       );
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         copyPhysicalFrameworkDsymCommandFailure,
       ]);
       await expectLater(
@@ -1026,6 +1105,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -1063,6 +1143,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -1198,6 +1279,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1228,6 +1310,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         FakeCommand(
           command: <String>['lipo', '-info', binary.path],
           stdout: 'Architectures in the fat file:',
@@ -1269,6 +1352,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1298,6 +1382,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,
         xattrCommand,
@@ -1360,6 +1445,7 @@ void main() {
 
       processManager.addCommands(<FakeCommand>[
         copyPhysicalFrameworkCommand,
+        chmodPhysicalFrameworkCommand,
         copyPhysicalFrameworkDsymCommand,
         lipoCommandNonFatResult,
         lipoVerifyArm64Command,

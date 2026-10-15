@@ -45,6 +45,16 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
 };
 }  // namespace
 
+/// A `FlutterTexture` that vends no frames. Used to obtain a registered texture id.
+@interface TestFlutterTexture : NSObject <FlutterTexture>
+@end
+
+@implementation TestFlutterTexture
+- (CVPixelBufferRef _Nullable)copyPixelBuffer {
+  return nullptr;
+}
+@end
+
 @protocol TestFlutterPluginWithSceneEvents <NSObject, FlutterPlugin, FlutterSceneLifeCycleDelegate>
 @end
 
@@ -131,6 +141,61 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
   XCTAssertEqual(engine.uiTaskRunner, engine.uiTaskRunner);
   XCTAssertNotNil(engine.rasterTaskRunner);
   XCTAssertEqual(engine.rasterTaskRunner, engine.rasterTaskRunner);
+}
+
+- (void)testRunOnRunningEngineIsRefused {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertTrue([engine run]);
+  FlutterFMLTaskRunner* platformTaskRunner = engine.platformTaskRunner;
+
+  // Verify a second call reports that it did not restart the engine.
+  XCTAssertFalse([engine run]);
+  XCTAssertEqual(engine.platformTaskRunner, platformTaskRunner);
+}
+
+- (void)testRunWithDifferentEntrypointOnRunningEngineIsRefused {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertTrue([engine run]);
+
+  // Verify a second call reports that it did not restart the engine with a new entrypoint.
+  XCTAssertFalse([engine runWithEntrypoint:@"someOtherEntrypoint"]);
+}
+
+- (void)testRunAfterDestroyContextIsRefused {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertTrue([engine run]);
+  [engine destroyContext];
+
+  // A destroyed engine releases the shell, so the `_shell != nullptr` guard against double
+  // invocation no longer catches a second run. Verify the destroyed state is refused on its own.
+  XCTAssertFalse([engine run]);
+  XCTAssertNil(engine.platformTaskRunner);
+  XCTAssertNil(engine.uiTaskRunner);
+  XCTAssertNil(engine.rasterTaskRunner);
+}
+
+- (void)testDestroyContextIsIdempotent {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertTrue([engine run]);
+
+  // Both `appOrSceneWillTerminate` and view controller deallocation can destroy the same engine.
+  // Verify a second call is a no-op and not a double teardown.
+  [engine destroyContext];
+  [engine destroyContext];
+  XCTAssertNil(engine.platformTaskRunner);
+}
+
+- (void)testTextureCallbacksAfterDestroyContextAreIgnored {
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"foobar" project:nil];
+  XCTAssertTrue([engine run]);
+  NSObject<FlutterTextureRegistry>* textures = [[engine registrarForPlugin:@"test"] textures];
+  int64_t textureId = [textures registerTexture:[[TestFlutterTexture alloc] init]];
+  [engine destroyContext];
+
+  // Texture producers outlive the shell. Verify a frame callback arriving after teardown or during
+  // app termination don't crash.
+  [textures textureFrameAvailable:textureId];
+  [textures unregisterTexture:textureId];
 }
 
 - (void)testInfoPlist {
@@ -422,6 +487,30 @@ class TestPlatformMessageResponse : public flutter::PlatformMessageResponse {
                                         arguments:@[ @(1) ]];
   NSData* encodedMethodCall = [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:methodCall];
   OCMVerify([mockBinaryMessenger sendOnChannel:@"flutter/textinput" message:encodedMethodCall]);
+}
+
+- (void)testFlutterTextInputViewDidRestoreFirstResponderWillCallTextInputClientOnFocusReceived {
+  id mockBinaryMessenger = OCMClassMock([FlutterBinaryMessengerRelay class]);
+  FlutterEngine* engine = [[FlutterEngine alloc] init];
+  [engine setBinaryMessenger:mockBinaryMessenger];
+  [engine runWithEntrypoint:FlutterDefaultDartEntrypoint initialRoute:@"test"];
+  FlutterMethodCall* methodCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInputClient.onFocusReceived"
+                                        arguments:@[ @(123) ]];
+  NSData* encodedMethodCall = [[FlutterJSONMethodCodec sharedInstance] encodeMethodCall:methodCall];
+  NSData* encodedReply = [[FlutterJSONMethodCodec sharedInstance] encodeSuccessEnvelope:@NO];
+  id mockBinaryReply = [OCMArg invokeBlockWithArgs:encodedReply, nil];
+  OCMStub([mockBinaryMessenger sendOnChannel:@"flutter/textinput"
+                                     message:encodedMethodCall
+                                 binaryReply:mockBinaryReply]);
+
+  __block id focusReceivedResult;
+  [engine flutterTextInputView:nil
+      didRestoreFirstResponderWithTextInputClient:123
+                                           result:^(id result) {
+                                             focusReceivedResult = result;
+                                           }];
+  XCTAssertEqualObjects(focusReceivedResult, @NO);
 }
 
 - (void)testFlutterEngineUpdatesDisplays {

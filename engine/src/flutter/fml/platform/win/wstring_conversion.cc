@@ -4,23 +4,40 @@
 
 #include "flutter/fml/platform/win/wstring_conversion.h"
 
-#include <codecvt>
-#include <locale>
+#include <windows.h>
 #include <string>
 
 namespace fml {
 
-using WideStringConverter =
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t>;
-
 std::string WideStringToUtf8(const std::wstring_view str) {
-  WideStringConverter converter;
-  return converter.to_bytes(str.data(), str.data() + str.size());
+  if (str.empty()) {
+    return {};
+  }
+  int size_needed = ::WideCharToMultiByte(CP_UTF8, 0, str.data(),
+                                          static_cast<int>(str.size()), nullptr,
+                                          0, nullptr, nullptr);
+  if (size_needed <= 0) {
+    return {};
+  }
+  std::string result(size_needed, 0);
+  ::WideCharToMultiByte(CP_UTF8, 0, str.data(), static_cast<int>(str.size()),
+                        &result[0], size_needed, nullptr, nullptr);
+  return result;
 }
 
 std::wstring Utf8ToWideString(const std::string_view str) {
-  WideStringConverter converter;
-  return converter.from_bytes(str.data(), str.data() + str.size());
+  if (str.empty()) {
+    return {};
+  }
+  int size_needed = ::MultiByteToWideChar(
+      CP_UTF8, 0, str.data(), static_cast<int>(str.size()), nullptr, 0);
+  if (size_needed <= 0) {
+    return {};
+  }
+  std::wstring result(size_needed, 0);
+  ::MultiByteToWideChar(CP_UTF8, 0, str.data(), static_cast<int>(str.size()),
+                        &result[0], size_needed);
+  return result;
 }
 
 std::u16string WideStringToUtf16(const std::wstring_view str) {

@@ -76,38 +76,14 @@ class VersionFetcherTest {
     }
 
     @Test
-    fun `isHigherThan compares numeric api levels numerically`() {
-        val sdk35 = CompileSdkVersion(apiLevel = 35, previewCodename = null)
-        val sdk36 = CompileSdkVersion(apiLevel = 36, previewCodename = null)
-        assertEquals(true, sdk36.isHigherThan(sdk35))
-        assertEquals(false, sdk35.isHigherThan(sdk36))
-        assertEquals(false, sdk35.isHigherThan(sdk35))
-    }
-
-    @Test
-    fun `isHigherThan treats a preview codename as higher than any numeric api level`() {
-        val preview = CompileSdkVersion(apiLevel = null, previewCodename = "Baklava")
-        val numeric = CompileSdkVersion(apiLevel = 36, previewCodename = null)
-        assertEquals(true, preview.isHigherThan(numeric))
-        assertEquals(false, numeric.isHigherThan(preview))
-    }
-
-    @Test
-    fun `isHigherThan treats distinct preview codenames as incomparable`() {
-        // Codenames stopped being alphabetically ordered at the "Baklava" alphabet reset,
-        // so neither side may claim to be higher.
-        val baklava = CompileSdkVersion(apiLevel = null, previewCodename = "Baklava")
-        val vanilla = CompileSdkVersion(apiLevel = null, previewCodename = "VanillaIceCream")
-        assertEquals(false, baklava.isHigherThan(vanilla))
-        assertEquals(false, vanilla.isHigherThan(baklava))
-        assertEquals(false, baklava.isHigherThan(baklava))
-    }
-
-    @Test
-    fun `isHigherThan returns false when either side is unset`() {
-        val unset = CompileSdkVersion(apiLevel = null, previewCodename = null)
-        val numeric = CompileSdkVersion(apiLevel = 36, previewCodename = null)
-        assertEquals(false, unset.isHigherThan(numeric))
-        assertEquals(false, numeric.isHigherThan(unset))
+    fun `getKGPVersion returns null when pluginVersion is unknown and reflection is unknown`() {
+        val project = mockk<Project>()
+        every { project.hasProperty(eq("kotlin_version")) } returns false
+        every { project.plugins.findPlugin(KotlinAndroidPluginWrapper::class.java) } returns
+            mockk<KotlinAndroidPluginWrapper> {
+                every { pluginVersion } returns "unknown"
+            }
+        val result = VersionFetcher.getKGPVersion(project)
+        assertEquals(null, result)
     }
 }

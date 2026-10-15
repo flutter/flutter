@@ -17,6 +17,9 @@ import 'gen_l10n_types.dart';
 import 'localizations_utils.dart';
 import 'message_parser.dart';
 
+const _kMaterialUiPackage = 'material_ui';
+const _kCupertinoUiPackage = 'cupertino_ui';
+
 /// Run the localizations generation script with the configuration [options].
 Future<LocalizationsGenerator> generateLocalizations({
   required Directory projectDir,
@@ -132,11 +135,6 @@ List<String> generateMethodParameters(
 }
 
 // Similar to above, but is used for passing arguments into helper functions.
-List<String> generateMethodArguments(Message message) {
-  return message.templatePlaceholders.values
-      .map((Placeholder placeholder) => placeholder.name)
-      .toList();
-}
 
 String generateDateFormattingLogic(Message message, LocaleInfo locale) {
   if (message.templatePlaceholders.isEmpty) {
@@ -350,9 +348,8 @@ String _generateLookupByScriptCode(
             _addSpaces(
               localesWithScriptCodes
                   .map((LocaleInfo locale) {
-                    return generateSwitchClauseTemplate(
-                      locale,
-                    ).replaceAll('@(case)', locale.scriptCode!);
+                    return generateSwitchClauseTemplate(locale)
+                        .replaceAll('@(case)', locale.scriptCode!);
                   })
                   .join('\n'),
               spaces: 8,
@@ -394,9 +391,8 @@ String _generateLookupByCountryCode(
             _addSpaces(
               localesWithCountryCodes
                   .map((LocaleInfo locale) {
-                    return generateSwitchClauseTemplate(
-                      locale,
-                    ).replaceAll('@(case)', locale.countryCode!);
+                    return generateSwitchClauseTemplate(locale)
+                        .replaceAll('@(case)', locale.countryCode!);
                   })
                   .join('\n'),
               spaces: 4,
@@ -1221,6 +1217,30 @@ class LocalizationsGenerator {
       fileName: fileName,
     );
 
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromPath(
+      projectDirectory.childFile('pubspec.yaml').path,
+      fileSystem: _fs,
+      logger: logger,
+    );
+    final Set<String> dependencies = flutterManifest?.dependencies ?? const <String>{};
+    final (
+      String localizationsPackageImport,
+      String defaultLocalizationsDelegates,
+    ) = switch (dependencies) {
+      _ when dependencies.contains(_kMaterialUiPackage) => (
+        "import 'package:material_ui/material_ui.dart';",
+        'GlobalMaterialLocalizations.delegates',
+      ),
+      _ when dependencies.contains(_kCupertinoUiPackage) => (
+        "import 'package:cupertino_ui/cupertino_ui.dart';",
+        'GlobalCupertinoLocalizations.delegates',
+      ),
+      _ => (
+        "import 'package:flutter_localizations/flutter_localizations.dart';",
+        'GlobalMaterialLocalizations.delegates',
+      ),
+    };
+
     return fileTemplate
         .replaceAll('@(header)', header.isEmpty ? '' : '$header\n')
         .replaceAll('@(class)', className)
@@ -1242,6 +1262,8 @@ class LocalizationsGenerator {
           '@(requiresFoundationImport)',
           useDeferredLoading ? '' : "import 'package:flutter/foundation.dart';",
         )
+        .replaceAll('@(localizationsPackageImport)', localizationsPackageImport)
+        .replaceAll('@(defaultLocalizationsDelegates)', defaultLocalizationsDelegates)
         .replaceAll('@(canBeNullable)', usesNullableGetter ? '?' : '')
         .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!')
         // Removes all trailing whitespace from the generated file.
