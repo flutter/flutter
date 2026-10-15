@@ -5,6 +5,7 @@
 import '../base/fingerprint.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
@@ -21,6 +22,7 @@ Future<void> processPodsIfNeeded(
   BuildMode buildMode, {
   bool forceCocoaPodsOnly = false,
   bool forceSwiftPM = false,
+  required ToolContext toolContext,
 }) async {
   final FlutterProject project = xcodeProject.parent;
 
@@ -36,7 +38,7 @@ Future<void> processPodsIfNeeded(
     project,
     cocoaPods: globals.cocoaPods,
     featureFlags: featureFlags,
-    toolContext: globals.toolContext,
+    toolContext: toolContext,
     iosPlatform: project.ios.existsSync(),
     macOSPlatform: project.macos.existsSync(),
     forceCocoaPodsOnly: forceCocoaPodsOnly,

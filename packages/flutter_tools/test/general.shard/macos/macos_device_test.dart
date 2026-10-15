@@ -92,6 +92,7 @@ void main() {
           featureFlags: TestFeatureFlags(isMacOSEnabled: true),
           platform: linux,
         ),
+        toolContext: FakeToolContext(),
       ).devices(),
       isEmpty,
     );
@@ -107,6 +108,7 @@ void main() {
         platform: macOS,
         operatingSystemUtils: FakeOperatingSystemUtils(),
         macOSWorkflow: MacOSWorkflow(featureFlags: TestFeatureFlags(), platform: macOS),
+        toolContext: FakeToolContext(),
       );
 
       expect(await macOSDevices.devices(), isEmpty);
@@ -124,6 +126,7 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
+      toolContext: FakeToolContext(),
     );
 
     expect(await macOSDevices.devices(), hasLength(1));
@@ -140,6 +143,7 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
+      toolContext: FakeToolContext(),
     );
 
     expect(macOSDevices.wellKnownIds, <String>['macos']);
@@ -156,6 +160,7 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: macOS,
       ),
+      toolContext: FakeToolContext(),
     );
 
     // Timeout ignored.

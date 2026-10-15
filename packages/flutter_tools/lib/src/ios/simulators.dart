@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../devfs.dart';
@@ -63,12 +64,14 @@ class IOSSimulatorUtils {
     required Logger logger,
     required ProcessManager processManager,
     required this._operatingSystemUtils,
+    required this._toolContext,
   }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
        _xcode = xcode;
 
   final SimControl _simControl;
   final Xcode _xcode;
   final OperatingSystemUtils _operatingSystemUtils;
+  final ToolContext _toolContext;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
@@ -96,6 +99,7 @@ class IOSSimulatorUtils {
             simControl: _simControl,
             simulatorCategory: device.category,
             logger: _simControl._logger,
+            toolContext: _toolContext,
             cpuArch: cpuArch,
           );
         })
@@ -363,6 +367,7 @@ class IOSSimulator extends Device {
     required this._simControl,
     required this._cpuArch,
     required super.logger,
+    super.toolContext,
   }) : super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
@@ -569,6 +574,7 @@ class IOSSimulator extends Device {
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,
+      toolContext: toolContext,
     );
     if (!buildResult.success) {
       await diagnoseXcodeBuildFailure(

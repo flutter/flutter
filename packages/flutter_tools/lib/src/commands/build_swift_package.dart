@@ -21,6 +21,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
@@ -230,6 +231,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     processManager: _processManager,
     project: project,
     templateRenderer: _templateRenderer,
+    toolContext: toolContext!,
     xcode: _xcode!,
   );
   late final pluginRegistrant = FlutterPluginRegistrantSwiftPackage(
@@ -1591,6 +1593,7 @@ class CocoaPodPluginDependencies {
       // `swift_package_manager_enabled` to be set to true in .flutter-plugins-dependencies, which
       // podhelper.rb then uses to skip processing SwiftPM-compatible pods.
       forceSwiftPM: true,
+      toolContext: _utils.toolContext,
     );
   }
 
@@ -2169,6 +2172,7 @@ class BuildSwiftPackageUtils {
     required this.processManager,
     required this.project,
     required this.templateRenderer,
+    required this.toolContext,
     required this.xcode,
   });
 
@@ -2184,5 +2188,6 @@ class BuildSwiftPackageUtils {
   final ProcessManager processManager;
   final FlutterProject project;
   final TemplateRenderer templateRenderer;
+  final ToolContext toolContext;
   final Xcode xcode;
 }

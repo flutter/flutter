@@ -446,6 +446,35 @@ class ToolDependencies {
       ),
     };
 
+    final finalToolContext = ToolContext(
+      artifacts: finalArtifacts,
+      botDetector: finalBotDetector,
+      cache: finalCache,
+      config: finalConfig,
+      customDevicesConfig: finalCustomDevicesConfig,
+      flutterVersion: finalFlutterVersion,
+      fs: finalFS,
+      git: finalGit,
+      localEngineLocator: finalLocalEngineLocator,
+      logger: finalLogger,
+      nativeAssetsBuilder: finalNativeAssetsBuilder,
+      os: finalOS,
+      outputPreferences: finalOutputPreferences,
+      persistentToolState: finalPersistentToolState,
+      platform: finalPlatform,
+      preRunValidator: finalPreRunValidator,
+      processInfo: finalProcessInfo,
+      processManager: finalProcessManager,
+      processUtils: finalProcessUtils,
+      projectFactory: finalProjectFactory,
+      shutdownHooks: finalShutdownHooks,
+      signals: LocalSignals.instance,
+      stdio: finalStdio,
+      systemClock: finalSystemClock,
+      terminal: finalTerminal,
+      userMessages: finalUserMessages,
+    );
+
     final XCDevice finalXCDevice =
         xcdevice ??
         XCDevice(
@@ -464,6 +493,7 @@ class ToolDependencies {
           fileSystem: finalFS,
           analytics: finalAnalytics,
           shutdownHooks: finalShutdownHooks,
+          toolContext: finalToolContext,
         );
 
     final String projectRoot = findProjectRoot(finalFS) ?? finalFS.currentDirectory.path;
@@ -496,40 +526,12 @@ class ToolDependencies {
           operatingSystemUtils: finalOS,
           processManager: finalProcessManager,
           xcode: finalXcode,
+          toolContext: finalToolContext,
         );
 
     final PlistParser finalPlistParser =
         plistParser ??
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
-
-    final finalToolContext = ToolContext(
-      artifacts: finalArtifacts,
-      botDetector: finalBotDetector,
-      cache: finalCache,
-      config: finalConfig,
-      customDevicesConfig: finalCustomDevicesConfig,
-      flutterVersion: finalFlutterVersion,
-      fs: finalFS,
-      git: finalGit,
-      localEngineLocator: finalLocalEngineLocator,
-      logger: finalLogger,
-      nativeAssetsBuilder: finalNativeAssetsBuilder,
-      os: finalOS,
-      outputPreferences: finalOutputPreferences,
-      persistentToolState: finalPersistentToolState,
-      platform: finalPlatform,
-      preRunValidator: finalPreRunValidator,
-      processInfo: finalProcessInfo,
-      processManager: finalProcessManager,
-      processUtils: finalProcessUtils,
-      projectFactory: finalProjectFactory,
-      shutdownHooks: finalShutdownHooks,
-      signals: LocalSignals.instance,
-      stdio: finalStdio,
-      systemClock: finalSystemClock,
-      terminal: finalTerminal,
-      userMessages: finalUserMessages,
-    );
 
     // 12. AndroidContext Dependencies
     final AndroidSdk? Function() finalAndroidSdkBuilder =
@@ -643,6 +645,7 @@ class ToolDependencies {
           windowsWorkflow: finalWindowsWorkflow,
           customDevicesConfig: finalCustomDevicesConfig,
           nativeAssetsBuilder: finalNativeAssetsBuilder,
+          toolContext: finalToolContext,
           extensionManager: extensionManager,
         );
 

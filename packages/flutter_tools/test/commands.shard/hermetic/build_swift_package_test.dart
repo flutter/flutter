@@ -3452,6 +3452,7 @@ BuildSwiftPackageUtils _createTestUtils({
     processManager: processManager,
     project: FakeFlutterProject(directory: fs.directory(_flutterAppPath), isModule: isModule),
     templateRenderer: const MustacheTemplateRenderer(),
+    toolContext: FakeToolContext(fs: fs, logger: logger, processManager: processManager),
     xcode: FakeXcode(),
   );
 }

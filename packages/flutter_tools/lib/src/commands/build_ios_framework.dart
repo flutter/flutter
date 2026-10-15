@@ -607,6 +607,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
           getIosBuildDirectory(config: config, fileSystem: fs),
           buildInfo.mode,
           forceCocoaPodsOnly: true,
+          toolContext: toolContext,
         );
         if (hasPlugins(project)) {
           await _producePlugins(

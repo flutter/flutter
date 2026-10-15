@@ -29,6 +29,7 @@ abstract class DesktopDevice extends Device {
     required PlatformType super.platformType,
     required super.ephemeral,
     required super.logger,
+    super.toolContext,
     required this._processManager,
     required this._fileSystem,
     required this._operatingSystemUtils,
