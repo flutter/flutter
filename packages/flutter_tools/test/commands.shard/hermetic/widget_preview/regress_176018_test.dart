@@ -89,9 +89,9 @@ dependencies:
         // Populate .dart_tool/widget_preview_scaffold/pubspec.yaml with the dependencies on the
         // local projects.
         await pubspecBuilder.populatePreviewPubspec(rootProject: rootProject);
-        final yaml =
-            loadYaml(rootProject.widgetPreviewScaffoldProject.pubspecFile.readAsStringSync())
-                as YamlMap;
+        final yaml = loadYaml(
+          rootProject.widgetPreviewScaffoldProject.pubspecFile.readAsStringSync(),
+        ) as YamlMap;
         final expectedDependencies = <String, Object?>{
           'abcd': {'path': packageProject.projectRoot.path.replaceAll(r'\', '/')},
           'example': {'path': exampleProject.projectRoot.path.replaceAll(r'\', '/')},

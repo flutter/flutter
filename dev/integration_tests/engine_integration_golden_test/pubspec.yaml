@@ -3,7 +3,7 @@ description: Integration tests that capture rendering snapshots and upload them 
 publish_to: none
 
 environment:
-  sdk: ^3.11.0-0
+  sdk: ^3.13.0-0
 
 resolution: workspace
 

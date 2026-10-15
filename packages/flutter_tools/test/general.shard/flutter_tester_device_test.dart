@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
@@ -45,6 +46,7 @@ void main() {
     bool enableImpeller = false,
     bool enableFlutterGpu = false,
     FlutterProject? flutterProject,
+    FontConfigManager? fontConfigManager,
   }) => TestFlutterTesterDevice(
     platform: platform,
     fileSystem: fileSystem,
@@ -54,6 +56,7 @@ void main() {
     enableImpeller: enableImpeller,
     enableFlutterGpu: enableFlutterGpu,
     flutterProject: flutterProject,
+    fontConfigManager: fontConfigManager,
   );
 
   testUsingContext(
@@ -328,70 +331,68 @@ void main() {
   });
 
   group('termination and finished', () {
-    testUsingContext('finished throws TestDeviceException on unexpected process exit on Windows', () async {
-      platform = FakePlatform(operatingSystem: 'windows');
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            '/',
-            '--disable-vm-service',
-            '--ipv6',
-            '--enable-checked-mode',
-            '--verify-entry-points',
-            '--enable-software-rendering',
-            '--skia-deterministic-rendering',
-            '--enable-dart-profiling',
-            '--non-interactive',
-            '--use-test-fonts',
-            '--disable-asset-fonts',
-            '--packages=.dart_tool/package_config.json',
-            'example.dill',
-          ],
-          exitCode: 1,
-        ),
-      ]);
-      device = createDevice();
-      await device.start('example.dill');
+    testWithoutContext(
+      'finished throws TestDeviceException on unexpected process exit on Windows',
+      () async {
+        platform = FakePlatform(operatingSystem: 'windows');
+        processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              '/',
+              '--disable-vm-service',
+              '--ipv6',
+              '--enable-checked-mode',
+              '--verify-entry-points',
+              '--enable-software-rendering',
+              '--skia-deterministic-rendering',
+              '--enable-dart-profiling',
+              '--non-interactive',
+              '--use-test-fonts',
+              '--disable-asset-fonts',
+              '--packages=.dart_tool/package_config.json',
+              'example.dill',
+            ],
+            exitCode: 1,
+          ),
+        ]);
+        device = createDevice(fontConfigManager: FakeFontConfigManager(fileSystem));
+        await device.start('example.dill');
 
-      await expectLater(device.finished, throwsA(isA<TestDeviceException>()));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => platform,
-    });
+        await expectLater(device.finished, throwsA(isA<TestDeviceException>()));
+      },
+    );
 
-    testUsingContext('finished throws TestDeviceException on unexpected exit 0 on Windows', () async {
-      platform = FakePlatform(operatingSystem: 'windows');
-      processManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(
-          command: <String>[
-            '/',
-            '--disable-vm-service',
-            '--ipv6',
-            '--enable-checked-mode',
-            '--verify-entry-points',
-            '--enable-software-rendering',
-            '--skia-deterministic-rendering',
-            '--enable-dart-profiling',
-            '--non-interactive',
-            '--use-test-fonts',
-            '--disable-asset-fonts',
-            '--packages=.dart_tool/package_config.json',
-            'example.dill',
-          ],
-        ),
-      ]);
-      device = createDevice();
-      await device.start('example.dill');
+    testWithoutContext(
+      'finished throws TestDeviceException on unexpected exit 0 on Windows',
+      () async {
+        platform = FakePlatform(operatingSystem: 'windows');
+        processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              '/',
+              '--disable-vm-service',
+              '--ipv6',
+              '--enable-checked-mode',
+              '--verify-entry-points',
+              '--enable-software-rendering',
+              '--skia-deterministic-rendering',
+              '--enable-dart-profiling',
+              '--non-interactive',
+              '--use-test-fonts',
+              '--disable-asset-fonts',
+              '--packages=.dart_tool/package_config.json',
+              'example.dill',
+            ],
+          ),
+        ]);
+        device = createDevice(fontConfigManager: FakeFontConfigManager(fileSystem));
+        await device.start('example.dill');
 
-      await expectLater(device.finished, throwsA(isA<TestDeviceException>()));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => platform,
-    });
+        await expectLater(device.finished, throwsA(isA<TestDeviceException>()));
+      },
+    );
 
-    testUsingContext('finished completes normally when kill() is called on Windows', () async {
+    testWithoutContext('finished completes normally when kill() is called on Windows', () async {
       platform = FakePlatform(operatingSystem: 'windows');
       final exitCompleter = Completer<int>();
       processManager = FakeProcessManager.list(<FakeCommand>[
@@ -414,17 +415,13 @@ void main() {
           completer: exitCompleter,
         ),
       ]);
-      device = createDevice();
+      device = createDevice(fontConfigManager: FakeFontConfigManager(fileSystem));
       await device.start('example.dill');
       final Future<void> killFuture = device.kill();
       exitCompleter.complete(0);
       await killFuture;
 
       await expectLater(device.finished, completes);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-      Platform: () => platform,
     });
   });
 }
@@ -442,6 +439,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required bool enableImpeller,
     required bool enableFlutterGpu,
     super.flutterProject,
+    FontConfigManager? fontConfigManager,
   }) : super(
          id: 999,
          flutterTesterBinPath: '/',
@@ -463,7 +461,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
          testAssetDirectory: null,
          icudtlPath: null,
          compileExpression: null,
-         fontConfigManager: FontConfigManager(),
+         fontConfigManager: fontConfigManager ?? FontConfigManager(),
          nativeAssetsBuilder: FakeNativeAssetsBuilder(),
        );
 
@@ -495,4 +493,13 @@ class FakeHttpServer extends Fake implements HttpServer {
 class FakeNativeAssetsBuilder extends Fake implements TestCompilerNativeAssetsBuilder {
   @override
   String windowsBuildDirectory(FlutterProject project) => r'C:\native_assets\path';
+}
+
+class FakeFontConfigManager extends Fake implements FontConfigManager {
+  FakeFontConfigManager(this.fileSystem);
+
+  final FileSystem fileSystem;
+
+  @override
+  late final File fontConfigFile = fileSystem.file('fonts.conf');
 }

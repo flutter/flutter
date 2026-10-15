@@ -506,52 +506,55 @@ void main() {
         );
       });
 
-      test('runs "flutter attach" with --debug-uri if vmServiceInfoFile is created later', () async {
-        // LocalFileSystem is required here because dap_adapters' waitForVmServiceInfoFile uses .watch(),
-        // which is unsupported in MemoryFileSystem.
-        final fs = LocalFileSystem(
-          LocalSignals.instance,
-          Signals.defaultExitSignals,
-          ShutdownHooks(),
-        );
-        final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
-        final responseCompleter = Completer<void>();
-        final Directory tempDir = fs.systemTempDirectory.createTempSync(
-          'dap_flutter_attach_vmServiceInfoFile',
-        );
-        addTearDown(() => tempDir.deleteSync(recursive: true));
-        final File serviceInfoFile = tempDir.childFile('vmServiceInfo.json');
+      test(
+        'runs "flutter attach" with --debug-uri if vmServiceInfoFile is created later',
+        () async {
+          // LocalFileSystem is required here because dap_adapters' waitForVmServiceInfoFile uses .watch(),
+          // which is unsupported in MemoryFileSystem.
+          final fs = LocalFileSystem(
+            LocalSignals.instance,
+            Signals.defaultExitSignals,
+            ShutdownHooks(),
+          );
+          final adapter = FakeFlutterDebugAdapter(fileSystem: fs, platform: platform);
+          final responseCompleter = Completer<void>();
+          final Directory tempDir = fs.systemTempDirectory.createTempSync(
+            'dap_flutter_attach_vmServiceInfoFile',
+          );
+          addTearDown(() => tempDir.deleteSync(recursive: true));
+          final File serviceInfoFile = tempDir.childFile('vmServiceInfo.json');
 
-        final args = FlutterAttachRequestArguments(
-          cwd: '.',
-          program: 'program/main.dart',
-          vmServiceInfoFile: serviceInfoFile.path,
-        );
+          final args = FlutterAttachRequestArguments(
+            cwd: '.',
+            program: 'program/main.dart',
+            vmServiceInfoFile: serviceInfoFile.path,
+          );
 
-        await adapter.configurationDoneRequest(FakeRequest(), null, () {});
-        final Future<void> attachResponseFuture = adapter.attachRequest(
-          FakeRequest(),
-          args,
-          responseCompleter.complete,
-        );
-        // Write the service info file a little later to ensure we detect it:
-        await pumpEventQueue(times: 5000);
-        serviceInfoFile.writeAsStringSync('{ "uri": "ws://1.2.3.4/ws" }');
-        await attachResponseFuture;
-        await responseCompleter.future;
+          await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+          final Future<void> attachResponseFuture = adapter.attachRequest(
+            FakeRequest(),
+            args,
+            responseCompleter.complete,
+          );
+          // Write the service info file a little later to ensure we detect it:
+          await pumpEventQueue(times: 5000);
+          serviceInfoFile.writeAsStringSync('{ "uri": "ws://1.2.3.4/ws" }');
+          await attachResponseFuture;
+          await responseCompleter.future;
 
-        expect(
-          adapter.processArgs,
-          containsAllInOrder(<String>[
-            'attach',
-            '--machine',
-            '--debug-uri',
-            'ws://1.2.3.4/ws',
-            '--target',
-            'program/main.dart',
-          ]),
-        );
-      });
+          expect(
+            adapter.processArgs,
+            containsAllInOrder(<String>[
+              'attach',
+              '--machine',
+              '--debug-uri',
+              'ws://1.2.3.4/ws',
+              '--target',
+              'program/main.dart',
+            ]),
+          );
+        },
+      );
 
       test('does not record the VMs PID for terminating', () async {
         final adapter = FakeFlutterDebugAdapter(
@@ -776,6 +779,9 @@ void main() {
       });
     });
 
+    // Check --start-paused, which is also a proxy for whether we are generally
+    // enabling debug mode (and therefore expected the debugger to initialize,
+    // for example to delay forwarding `app.started` events).
     group('--start-paused', () {
       test('is passed for debug mode', () async {
         final adapter = FakeFlutterDebugAdapter(
@@ -809,45 +815,34 @@ void main() {
         expect(adapter.processArgs, isNot(contains('--start-paused')));
       });
 
-      test('is not passed if toolArgs contains --profile', () async {
-        final adapter = FakeFlutterDebugAdapter(
-          fileSystem: MemoryFileSystem.test(style: fsStyle),
-          platform: platform,
-        );
-        final responseCompleter = Completer<void>();
+      for (final argField in ['toolArgs', 'args']) {
+        final useToolArgs = argField == 'toolArgs';
+        final bool useArgs = !useToolArgs;
 
-        final args = FlutterLaunchRequestArguments(
-          cwd: '.',
-          program: 'foo.dart',
-          toolArgs: <String>['--profile'],
-        );
+        // Test each flag we expect to disable debugging.
+        for (final flag in <String>['--profile', '--release', '--wasm']) {
+          test('is not passed if $argField contains $flag', () async {
+            final adapter = FakeFlutterDebugAdapter(
+              fileSystem: MemoryFileSystem.test(style: fsStyle),
+              platform: platform,
+            );
+            final responseCompleter = Completer<void>();
 
-        await adapter.configurationDoneRequest(FakeRequest(), null, () {});
-        await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
-        await responseCompleter.future;
+            final args = FlutterLaunchRequestArguments(
+              cwd: '.',
+              program: 'foo.dart',
+              toolArgs: useToolArgs ? <String>[flag] : null,
+              args: useArgs ? <String>[flag] : null,
+            );
 
-        expect(adapter.processArgs, isNot(contains('--start-paused')));
-      });
+            await adapter.configurationDoneRequest(FakeRequest(), null, () {});
+            await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
+            await responseCompleter.future;
 
-      test('is not passed if toolArgs contains --release', () async {
-        final adapter = FakeFlutterDebugAdapter(
-          fileSystem: MemoryFileSystem.test(style: fsStyle),
-          platform: platform,
-        );
-        final responseCompleter = Completer<void>();
-
-        final args = FlutterLaunchRequestArguments(
-          cwd: '.',
-          program: 'foo.dart',
-          toolArgs: <String>['--release'],
-        );
-
-        await adapter.configurationDoneRequest(FakeRequest(), null, () {});
-        await adapter.launchRequest(FakeRequest(), args, responseCompleter.complete);
-        await responseCompleter.future;
-
-        expect(adapter.processArgs, isNot(contains('--start-paused')));
-      });
+            expect(adapter.processArgs, isNot(contains('--start-paused')));
+          });
+        }
+      }
     });
 
     test('includes toolArgs', () async {

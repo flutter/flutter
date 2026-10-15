@@ -73,9 +73,8 @@ const int kSystemCodePrivilegeNotHeld = 1314;
 /// example, the tool should generally be able to continue executing even if it
 /// fails to delete a file.
 class ErrorHandlingFileSystem extends ForwardingFileSystem {
-  ErrorHandlingFileSystem({required FileSystem delegate, required Platform platform})
-    : _platform = platform,
-      super(delegate);
+  ErrorHandlingFileSystem({required FileSystem delegate, required this._platform})
+    : super(delegate);
 
   FileSystem get fileSystem => delegate;
 
@@ -96,9 +95,8 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
       final T result = operation();
       if (result is Future) {
         return (result.whenComplete(() {
-              ErrorHandlingFileSystem._noExitOnFailure = previousValue;
-            }))
-            as T;
+          ErrorHandlingFileSystem._noExitOnFailure = previousValue;
+        })) as T;
       }
       ErrorHandlingFileSystem._noExitOnFailure = previousValue;
       return result;
@@ -218,8 +216,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
 }
 
 class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with ForwardingFile {
-  ErrorHandlingFile({required Platform platform, required this.fileSystem, required this.delegate})
-    : _platform = platform;
+  ErrorHandlingFile({required this._platform, required this.fileSystem, required this.delegate});
 
   @override
   final io.File delegate;
@@ -620,10 +617,10 @@ class ErrorHandlingFile extends ForwardingFileSystemEntity<File, io.File> with F
 class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Directory>
     with ForwardingDirectory<Directory> {
   ErrorHandlingDirectory({
-    required Platform platform,
+    required this._platform,
     required this.fileSystem,
     required this.delegate,
-  }) : _platform = platform;
+  });
 
   @override
   final io.Directory delegate;
@@ -839,8 +836,7 @@ class ErrorHandlingDirectory extends ForwardingFileSystemEntity<Directory, io.Di
 }
 
 class ErrorHandlingLink extends ForwardingFileSystemEntity<Link, io.Link> with ForwardingLink {
-  ErrorHandlingLink({required Platform platform, required this.fileSystem, required this.delegate})
-    : _platform = platform;
+  ErrorHandlingLink({required this._platform, required this.fileSystem, required this.delegate});
 
   @override
   final io.Link delegate;
@@ -1183,16 +1179,14 @@ T _runSync<T>(
 ///   * [ErrorHandlingFileSystem], for a similar file system strategy.
 class ErrorHandlingProcessManager extends ProcessManager {
   ErrorHandlingProcessManager({
-    required ProcessManager delegate,
-    required Platform platform,
+    required this._delegate,
+    required this._platform,
 
     /// A lazy callback to prevent eager circular dependency cycles during early
     /// bootstrapping of the Flutter CLI (where `Analytics` depends on
     /// `FlutterVersion`, which executes git process commands during construction).
-    required Analytics Function() analytics,
-  }) : _delegate = delegate,
-       _platform = platform,
-       _analytics = analytics;
+    required this._analytics,
+  });
 
   final ProcessManager _delegate;
   final Platform _platform;
@@ -1232,9 +1226,28 @@ class ErrorHandlingProcessManager extends ProcessManager {
     }
 
     // Propagate the unified analytics suppression flag.
-    if (analytics != null) {
-      environmentResult[DashEnvVar.suppressAnalytics.name] = (!analytics.telemetryEnabled)
-          .toString();
+    //
+    // If suppression was requested, either by this process's environment or by
+    // the caller-supplied environment, always propagate it so that sub-tools
+    // never report when a root tool has asked them not to.
+    //
+    // Otherwise (including an inherited or caller-supplied value other than
+    // `true`), suppress sub-tools whenever this tool would not send analytics
+    // itself. Unlike `telemetryEnabled`, `okToSend` is also false until this
+    // tool's consent message has been shown, including for the rest of the
+    // invocation that shows it (a first run, or a consent message version
+    // bump), and when analytics are suppressed for this invocation
+    // (`--suppress-analytics`).
+    //
+    // Like `package:unified_analytics`, only the exact (case-sensitive) string
+    // `true` is treated as a request to suppress analytics.
+    final String suppressKey = DashEnvVar.suppressAnalytics.name;
+    final bool suppressionRequested =
+        _platform.environment[suppressKey] == 'true' || environmentResult[suppressKey] == 'true';
+    if (suppressionRequested) {
+      environmentResult[suppressKey] = 'true';
+    } else if (analytics != null) {
+      environmentResult[suppressKey] = (!analytics.okToSend).toString();
     }
 
     // Propagate the parent tool identifier down to the spawned process.

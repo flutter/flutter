@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TextInputAction;
 import 'package:flutter/rendering.dart';
@@ -63,14 +65,15 @@ void main() {
     testWidgets('returns immediately when transient callback queue is empty', (
       WidgetTester tester,
     ) async {
-      driverExtension
-          .call(const WaitForCondition(NoTransientCallbacks()).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(NoTransientCallbacks()).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       await tester.idle();
       expect(result, <String, dynamic>{'isError': false, 'response': <String, dynamic>{}});
@@ -81,14 +84,15 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      driverExtension
-          .call(const WaitForCondition(NoTransientCallbacks()).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(NoTransientCallbacks()).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       // Nothing should happen until the next frame.
       await tester.idle();
@@ -133,14 +137,15 @@ void main() {
     testWidgets(
       'waiting for NoTransientCallbacks returns immediately when transient callback queue is empty',
       (WidgetTester tester) async {
-        driverExtension
-            .call(const WaitForCondition(NoTransientCallbacks()).serialize())
-            .then<void>(
-              // ignore: unawaited_futures
-              expectAsync1((Map<String, dynamic> r) {
-                result = r;
-              }),
-            );
+        unawaited(
+          driverExtension
+              .call(const WaitForCondition(NoTransientCallbacks()).serialize())
+              .then<void>(
+                expectAsync1((Map<String, dynamic> r) {
+                  result = r;
+                }),
+              ),
+        );
 
         await tester.idle();
         expect(result, <String, dynamic>{'isError': false, 'response': <String, dynamic>{}});
@@ -154,14 +159,15 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      driverExtension
-          .call(const WaitForCondition(NoTransientCallbacks()).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(NoTransientCallbacks()).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       // Nothing should happen until the next frame.
       await tester.idle();
@@ -175,14 +181,15 @@ void main() {
     testWidgets('waiting for NoPendingFrame returns immediately when frame is synced', (
       WidgetTester tester,
     ) async {
-      driverExtension
-          .call(const WaitForCondition(NoPendingFrame()).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(NoPendingFrame()).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       await tester.idle();
       expect(result, <String, dynamic>{'isError': false, 'response': <String, dynamic>{}});
@@ -193,14 +200,15 @@ void main() {
     ) async {
       SchedulerBinding.instance.scheduleFrame();
 
-      driverExtension
-          .call(const WaitForCondition(NoPendingFrame()).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(NoPendingFrame()).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       // Nothing should happen until the next frame.
       await tester.idle();
@@ -215,14 +223,15 @@ void main() {
       const SerializableWaitCondition combinedCondition = CombinedCondition(
         <SerializableWaitCondition>[NoTransientCallbacks(), NoPendingFrame()],
       );
-      driverExtension
-          .call(const WaitForCondition(combinedCondition).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(combinedCondition).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       await tester.idle();
       expect(result, <String, dynamic>{'isError': false, 'response': <String, dynamic>{}});
@@ -239,14 +248,15 @@ void main() {
       const SerializableWaitCondition combinedCondition = CombinedCondition(
         <SerializableWaitCondition>[NoTransientCallbacks(), NoPendingFrame()],
       );
-      driverExtension
-          .call(const WaitForCondition(combinedCondition).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(combinedCondition).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       // Nothing should happen until the next frame.
       await tester.idle();
@@ -268,14 +278,15 @@ void main() {
       const SerializableWaitCondition combinedCondition = CombinedCondition(
         <SerializableWaitCondition>[NoPendingFrame(), NoTransientCallbacks()],
       );
-      driverExtension
-          .call(const WaitForCondition(combinedCondition).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(combinedCondition).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       // Nothing should happen until the next frame.
       await tester.idle();
@@ -289,14 +300,15 @@ void main() {
     testWidgets(
       'waiting for NoPendingPlatformMessages returns immediately when there are no platform messages',
       (WidgetTester tester) async {
-        driverExtension
-            .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
-            .then<void>(
-              // ignore: unawaited_futures
-              expectAsync1((Map<String, dynamic> r) {
-                result = r;
-              }),
-            );
+        unawaited(
+          driverExtension
+              .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+              .then<void>(
+                expectAsync1((Map<String, dynamic> r) {
+                  result = r;
+                }),
+              ),
+        );
 
         await tester.idle();
         expect(result, <String, dynamic>{'isError': false, 'response': <String, dynamic>{}});
@@ -322,14 +334,15 @@ void main() {
         // ignore: unawaited_futures
         channel.invokeMethod<String>('sayHello', 'hello');
 
-        driverExtension
-            .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
-            .then<void>(
-              // ignore: unawaited_futures
-              expectAsync1((Map<String, dynamic> r) {
-                result = r;
-              }),
-            );
+        unawaited(
+          driverExtension
+              .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+              .then<void>(
+                expectAsync1((Map<String, dynamic> r) {
+                  result = r;
+                }),
+              ),
+        );
 
         // The channel message are delayed for 10 milliseconds, so nothing happens yet.
         await tester.pump(const Duration(milliseconds: 5));
@@ -375,14 +388,15 @@ void main() {
         // ignore: unawaited_futures
         channel2.invokeMethod<String>('sayHello', 'hello');
 
-        driverExtension
-            .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
-            .then<void>(
-              // ignore: unawaited_futures
-              expectAsync1((Map<String, dynamic> r) {
-                result = r;
-              }),
-            );
+        unawaited(
+          driverExtension
+              .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+              .then<void>(
+                expectAsync1((Map<String, dynamic> r) {
+                  result = r;
+                }),
+              ),
+        );
 
         // Neither of the channel responses is received, so nothing happens yet.
         await tester.pump(const Duration(milliseconds: 5));
@@ -432,14 +446,15 @@ void main() {
         channel1.invokeMethod<String>('sayHello', 'hello');
 
         // Calls the waiting API before the second channel message is sent.
-        driverExtension
-            .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
-            .then<void>(
-              // ignore: unawaited_futures
-              expectAsync1((Map<String, dynamic> r) {
-                result = r;
-              }),
-            );
+        unawaited(
+          driverExtension
+              .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+              .then<void>(
+                expectAsync1((Map<String, dynamic> r) {
+                  result = r;
+                }),
+              ),
+        );
 
         // The first channel message is not received, so nothing happens yet.
         await tester.pump(const Duration(milliseconds: 5));
@@ -492,14 +507,15 @@ void main() {
         // ignore: unawaited_futures
         channel1.invokeMethod<String>('sayHello', 'hello');
 
-        driverExtension
-            .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
-            .then<void>(
-              // ignore: unawaited_futures
-              expectAsync1((Map<String, dynamic> r) {
-                result = r;
-              }),
-            );
+        unawaited(
+          driverExtension
+              .call(const WaitForCondition(NoPendingPlatformMessages()).serialize())
+              .then<void>(
+                expectAsync1((Map<String, dynamic> r) {
+                  result = r;
+                }),
+              ),
+        );
 
         // The first channel message is not received, so nothing happens yet.
         await tester.pump(const Duration(milliseconds: 5));
@@ -1314,14 +1330,15 @@ void main() {
     });
 
     testWidgets('returns immediately when frame is synced', (WidgetTester tester) async {
-      driverExtension
-          .call(const WaitForCondition(NoPendingFrame()).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(NoPendingFrame()).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       await tester.idle();
       expect(result, <String, dynamic>{'isError': false, 'response': <String, dynamic>{}});
@@ -1332,14 +1349,15 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      driverExtension
-          .call(const WaitForCondition(NoPendingFrame()).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(NoPendingFrame()).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       // Nothing should happen until the next frame.
       await tester.idle();
@@ -1353,14 +1371,15 @@ void main() {
     testWidgets('waits until no pending scheduled frame', (WidgetTester tester) async {
       SchedulerBinding.instance.scheduleFrame();
 
-      driverExtension
-          .call(const WaitForCondition(NoPendingFrame()).serialize())
-          .then<void>(
-            // ignore: unawaited_futures
-            expectAsync1((Map<String, dynamic> r) {
-              result = r;
-            }),
-          );
+      unawaited(
+        driverExtension
+            .call(const WaitForCondition(NoPendingFrame()).serialize())
+            .then<void>(
+              expectAsync1((Map<String, dynamic> r) {
+                result = r;
+              }),
+            ),
+      );
 
       // Nothing should happen until the next frame.
       await tester.idle();

@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -309,7 +308,7 @@ class FlutterTesterTestDevice extends TestDevice {
             (String line) async {
               logger.printTrace('test $id: Shell: $line');
 
-              final Match? match = globals.kVMServiceMessageRegExp.firstMatch(line);
+              final Match? match = kVMServiceMessageRegExp.firstMatch(line);
               if (match != null) {
                 try {
                   final Uri uri = Uri.parse(match[1]!);

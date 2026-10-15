@@ -32,6 +32,10 @@ Before you get started, we encourage you to read these documents which describe 
 2. [Values](./docs/about/Values.md),
    which talks about what we care most about.
 
+3. [AI contribution guidelines](CONTRIBUTING.ai.md),
+   which describes our policies on using AI assistants when filing or
+   triaging issues, submitting pull requests, and reviewing code.
+
 Helping out in the issue database
 ---------------------------------
 
@@ -53,10 +57,6 @@ If you want to help us triage, you are very welcome to do so!
    do the other steps, e.g. trying to reproduce the problem and asking for people to
    provide enough details that you can reproduce the problem, pointing out duplicates,
    and so on. Chat on the #hackers-triage channel to let us know what you're up to!
-
-   * **Do not** run an unsupervised agent that posts triage comments to the issue database.
-     Any automated agent needs to be approved in advance, after discussion with the
-     Flutter team.
 
 4. Familiarize yourself with our
    [issue hygiene](./docs/contributing/issue_hygiene/README.md) wiki page,
@@ -133,10 +133,10 @@ presented.
    which includes advice for designing APIs for Flutter, and how to
    format code in the framework.
 
-5. [Flutter design doc template](https://flutter.dev/go/template),
-   which should be used when proposing a new technical design.  This is a good
+5. [Flutter RFC process](https://github.com/flutter/rfc),
+   which should be used when proposing a new technical design. This is a good
    practice to do before coding more intricate changes.
-   See also our [guidance for writing design docs](./docs/contributing/Design-Documents.md).
+   See also our [guidance for writing design docs and RFCs](./docs/contributing/Design-Documents.md).
 
 [![How to contribute to Flutter](https://img.youtube.com/vi/4yBgOBAOx_A/0.jpg)](https://www.youtube.com/watch?v=4yBgOBAOx_A)
 

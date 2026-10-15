@@ -6,6 +6,7 @@
 library;
 
 import 'package:flutter/foundation.dart';
+
 import 'data_table.dart';
 
 /// A data source for obtaining row data for [PaginatedDataTable] objects.
