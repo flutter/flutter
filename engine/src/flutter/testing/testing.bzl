@@ -602,18 +602,34 @@ command=("$runfiles/{tester}" "$@" "${{options[@]}}" \\
   "--flutter-assets-dir=$runfiles/{assets_dir}" \\
   --disable-asset-fonts \\
   "$runfiles/{kernel}")
-if [[ "{must_fail}" != 1 ]]; then
+# run_tests.py's forbidden_output: strings the run's output (stdout and
+# stderr together) must not contain, checked once the run has passed.
+forbidden=({forbidden})
+if [[ "{must_fail}" != 1 && "${{#forbidden[@]}}" -eq 0 ]]; then
   exec "${{command[@]}}"
 fi
-# A test that must fail (run_tests.py's smoke test, fail_test.dart): the
-# runner has to exit non-zero and report a failed test -- not fall over
-# before running one.
 log="$build_dir/{name}.log"
 set +e
 "${{command[@]}}" >"$log" 2>&1
 status=$?
 set -e
 cat "$log"
+if [[ "{must_fail}" != 1 ]]; then
+  if [[ "$status" -ne 0 ]]; then
+    exit "$status"
+  fi
+  for string in "${{forbidden[@]}}"; do
+    if grep -qF -- "$string" "$log"; then
+      echo "flutter_tester_test: the output of {kernel} contained the forbidden string \\"$string\\":" >&2
+      grep -F -- "$string" "$log" >&2
+      exit 1
+    fi
+  done
+  exit 0
+fi
+# A test that must fail (run_tests.py's smoke test, fail_test.dart): the
+# runner has to exit non-zero and report a failed test -- not fall over
+# before running one.
 if [[ "$status" -eq 0 ]]; then
   echo "flutter_tester_test: {kernel} was expected to fail and passed" >&2
   exit 1
@@ -624,6 +640,9 @@ if ! grep -q "Some tests failed." "$log"; then
 fi
 echo "flutter_tester_test: {kernel} failed as expected (status $status)" >&2
 """
+
+def _shell_quoted(strings):
+    return " ".join(["'" + s.replace("'", "'\\''") + "'" for s in strings])
 
 def _flutter_tester_test_impl(ctx):
     launcher = ctx.actions.declare_file(ctx.label.name + ".sh")
@@ -638,6 +657,7 @@ def _flutter_tester_test_impl(ctx):
             icu_data = ctx.file.icu_data.short_path,
             assets_dir = assets_dir,
             must_fail = "1" if ctx.attr.must_fail else "0",
+            forbidden = _shell_quoted(ctx.attr.forbidden_output),
         ),
         is_executable = True,
     )
@@ -693,6 +713,10 @@ flutter_tester_test = rule(
         "must_fail": attr.bool(
             doc = "The test passes when the runner exits non-zero reporting a failed test (run_tests.py's smoke test, " +
                   "whose expect_failure only tolerates the failure).",
+        ),
+        "forbidden_output": attr.string_list(
+            doc = "Strings the run's output must not contain (run_tests.py's forbidden_output: `[ERROR` in an " +
+                  "optimized build directory), checked once the run has passed.",
         ),
     },
 )
@@ -783,7 +807,8 @@ def flutter_dart_tests(
         `vulkan_mt`, `opengles`); all of them by default. run_tests.py runs
         its smoke test in two alone.
       must_fail: the tests must fail (flutter_tester_test's must_fail):
-        run_tests.py's smoke test, fail_test.dart.
+        run_tests.py's smoke test, fail_test.dart. Such a run is also exempt
+        from the forbidden-output rule below, as under run_tests.py.
       size: the tests' size.
       tags: tags of the tests.
       visibility: visibility of the suite.
@@ -837,6 +862,13 @@ def flutter_dart_tests(
                 ),
                 data = data,
                 must_fail = must_fail,
+                # run_tests.py: `[] if 'unopt' in build_dir or expect_failure
+                # else ['[ERROR']` -- an optimized build's runs must not log
+                # an error.
+                forbidden_output = [] if must_fail else select({
+                    "//engine/src/flutter/build/bazel:optimized": ["[ERROR"],
+                    "//conditions:default": [],
+                }),
                 size = size,
                 tags = tags,
                 target_compatible_with = select({mode: ["@platforms//:incompatible"] for mode in _RELEASE_MODES} | {"//conditions:default": []}) if vm_service else [],
