@@ -825,6 +825,98 @@ void testMain() {
     });
   });
 
+  group('accessibility placeholder', () {
+    late DomHTMLDivElement host;
+
+    setUp(() {
+      // A view only gets a placeholder while semantics is off, so make sure
+      // no earlier test left it enabled.
+      EngineSemantics.instance.semanticsEnabled = false;
+      host = createDomHTMLDivElement()
+        ..style.width = '640px'
+        ..style.height = '480px';
+      domDocument.body!.append(host);
+    });
+
+    tearDown(() {
+      host.remove();
+      EngineSemantics.instance.semanticsEnabled = false;
+    });
+
+    // These tests are about the contract `EngineFlutterView` owns: it tells the
+    // semantics helper when a view appears and disappears. Where the
+    // placeholder actually lands differs by form factor and is covered in
+    // `semantics_helper_test.dart`.
+    //
+    // A recorder is swapped in *after* the implicit view has registered, so
+    // each test sees only the calls made by the view it creates. Asserting on
+    // global placeholder counts instead would be ambiguous: on desktop all
+    // views share one placeholder, so the count does not move.
+    // See https://github.com/flutter/flutter/issues/152838
+    late _RecordingSemanticsEnabler recorder;
+
+    void useRecordingEnabler() {
+      final SemanticsHelper helper = EngineSemantics.instance.semanticsHelper;
+      final SemanticsEnabler original = helper.semanticsEnabler;
+      recorder = _RecordingSemanticsEnabler();
+      helper.semanticsEnabler = recorder;
+      // Put the real enabler back before the implicit view is disposed, so it
+      // can still clean up the placeholder it registered.
+      addTearDown(() => helper.semanticsEnabler = original);
+    }
+
+    test('is registered when a view is created', () {
+      useRecordingEnabler();
+
+      final view = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+      addTearDown(view.dispose);
+
+      expect(recorder.added, <DomElement>[view.dom.rootElement]);
+      expect(recorder.removed, isEmpty);
+    });
+
+    test('is deregistered when the view is disposed', () {
+      useRecordingEnabler();
+
+      final view = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+      view.dispose();
+
+      // A placeholder left behind by a disposed view would be detached, and
+      // its 0x0 bounding box would make the mobile activation check read a tap
+      // at the page origin as a hit on its center.
+      expect(recorder.removed, <DomElement>[view.dom.rootElement]);
+    });
+
+    test('is not registered when semantics is already enabled', () {
+      EngineSemantics.instance.semanticsEnabled = true;
+      useRecordingEnabler();
+
+      final view = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+      addTearDown(view.dispose);
+
+      expect(recorder.added, isEmpty);
+    });
+
+    test('every placeholder goes away when semantics turns on', () {
+      final DomHTMLDivElement secondHost = createDomHTMLDivElement();
+      domDocument.body!.append(secondHost);
+      addTearDown(() => secondHost.remove());
+
+      final firstView = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+      addTearDown(firstView.dispose);
+      final secondView = EngineFlutterView(EnginePlatformDispatcher.instance, secondHost);
+      addTearDown(secondView.dispose);
+
+      // The real enablers, and the real activation path a semantics update
+      // takes.
+      EngineSemantics.instance.didReceiveSemanticsUpdate();
+
+      expect(EngineSemantics.instance.semanticsEnabled, isTrue);
+      expect(EngineSemantics.instance.semanticsHelper.semanticsEnabler.placeholders, isEmpty);
+      expect(domDocument.querySelector('flt-semantics-placeholder'), isNull);
+    });
+  });
+
   group('keyboard resize behavior', () {
     setUp(() {
       // Simulate keyboard being up.
@@ -848,4 +940,157 @@ void testMain() {
       expect(myWindow.physicalSize, initialPhysicalSize);
     });
   });
+
+  group('viewPadding', () {
+    const dpr = 2.5;
+    // The insets a notched phone reports in portrait.
+    const double logicalTopInset = 44;
+    const double logicalBottomInset = 34;
+    late DomElement viewportMeta;
+    late String originalViewportContent;
+
+    setUp(() {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(dpr);
+
+      // Opt the page into a full-bleed layout, the way an app does by declaring
+      // `viewport-fit=cover` in its `index.html`.
+      viewportMeta = domDocument.querySelector('meta[name="viewport"][flt-viewport]')!;
+      originalViewportContent = viewportMeta.getAttribute('content')!;
+      viewportMeta.setAttribute('content', '$originalViewportContent, viewport-fit=cover');
+
+      // A desktop test browser reports no safe area of its own, so put the
+      // values of a notched phone in the probe that the engine measures.
+      final provider = myWindow.dimensionsProvider as FullPageDimensionsProvider;
+      provider.safeAreaProbe.style
+        ..setProperty('padding-top', '${logicalTopInset}px', 'important')
+        ..setProperty('padding-bottom', '${logicalBottomInset}px', 'important');
+    });
+
+    tearDown(() {
+      viewportMeta.setAttribute('content', originalViewportContent);
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(null);
+    });
+
+    test('reports the safe area of the device in the full page mode', () {
+      myWindow.debugForceResize();
+
+      expect(myWindow.viewPadding.top, logicalTopInset * dpr);
+      expect(myWindow.viewPadding.bottom, logicalBottomInset * dpr);
+      // Nothing else is covering the safe area, so `padding` matches it.
+      expect(myWindow.padding.top, logicalTopInset * dpr);
+      expect(myWindow.padding.bottom, logicalBottomInset * dpr);
+    });
+
+    test('is refreshed by a real browser resize, not just `debugForceResize`', () async {
+      // `_handleBrowserResize` is the only production path that refreshes the
+      // cached padding, so it is exercised here through an actual resize event
+      // rather than through the debug seam.
+      myWindow.debugForceResize();
+      expect(myWindow.viewPadding.bottom, logicalBottomInset * dpr);
+
+      // Simulate a rotation that takes the home indicator out of play.
+      final provider = myWindow.dimensionsProvider as FullPageDimensionsProvider;
+      provider.safeAreaProbe.style.setProperty('padding-bottom', '0px', 'important');
+
+      final Future<void> resized = myWindow.onResize.first;
+      (domWindow.visualViewport ?? domWindow).dispatchEvent(createDomEvent('Event', 'resize'));
+      await resized;
+
+      expect(myWindow.viewPadding.bottom, 0);
+    });
+
+    test('is zero when the app did not opt into a full-bleed layout', () {
+      viewportMeta.setAttribute('content', originalViewportContent);
+
+      myWindow.debugForceResize();
+
+      expect(myWindow.viewPadding.top, 0);
+      expect(myWindow.viewPadding.bottom, 0);
+      expect(myWindow.padding.bottom, 0);
+    });
+
+    test('is zero for a view embedded in a custom element', () {
+      final DomHTMLDivElement host = createDomHTMLDivElement();
+      domDocument.body!.append(host);
+      final view = EngineFlutterView(EnginePlatformDispatcher.instance, host);
+      addTearDown(() {
+        view.dispose();
+        host.remove();
+      });
+
+      expect(view.viewPadding.bottom, 0);
+      expect(view.padding.bottom, 0);
+    });
+  });
+
+  group('ViewPadding.minus', () {
+    const padding = ViewPadding(left: 10, top: 20, right: 30, bottom: 40);
+
+    test('leaves the padding alone when nothing is covering the view', () {
+      final ViewPadding result = padding.minus(
+        const ViewPadding(left: 0, top: 0, right: 0, bottom: 0),
+      );
+
+      expect(result.left, 10);
+      expect(result.top, 20);
+      expect(result.right, 30);
+      expect(result.bottom, 40);
+    });
+
+    test('subtracts an inset that partially covers the safe area', () {
+      // A keyboard that is shorter than the bottom safe area.
+      final ViewPadding result = padding.minus(
+        const ViewPadding(left: 0, top: 0, right: 0, bottom: 15),
+      );
+
+      expect(result.bottom, 25);
+    });
+
+    test('clamps to zero for an inset that fully covers the safe area', () {
+      // A keyboard that is taller than the bottom safe area.
+      final ViewPadding result = padding.minus(
+        const ViewPadding(left: 0, top: 0, right: 0, bottom: 400),
+      );
+
+      expect(result.bottom, 0, reason: 'Padding should never go negative.');
+      expect(result.top, 20, reason: 'The other sides should be untouched.');
+    });
+  });
+}
+
+/// Records the view lifecycle calls that [EngineFlutterView] makes, without
+/// creating or placing any DOM.
+class _RecordingSemanticsEnabler implements SemanticsEnabler {
+  final List<DomElement> added = <DomElement>[];
+  final List<DomElement> removed = <DomElement>[];
+
+  @override
+  void addPlaceholderForView(DomElement viewRoot) => added.add(viewRoot);
+
+  @override
+  void removePlaceholderForView(DomElement viewRoot) => removed.add(viewRoot);
+
+  @override
+  List<DomElement> get placeholders => <DomElement>[];
+
+  @override
+  DomElement? placeholderHostFor(DomElement viewRoot) => throw UnimplementedError();
+
+  @override
+  void removeAllPlaceholders() {}
+
+  @override
+  bool get isWaitingToEnableSemantics => false;
+
+  @override
+  bool shouldEnableSemantics(DomEvent event) => true;
+
+  @override
+  bool tryEnableSemantics(DomEvent event) => true;
+
+  @override
+  void updatePlaceholderLabel(String message) {}
+
+  @override
+  void dispose() {}
 }

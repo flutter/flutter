@@ -16,6 +16,7 @@
 #include "flutter/display_list/dl_paint.h"
 #include "flutter/testing/testing.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/renderer/testing/mocks.h"
 
 using namespace flutter;
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,6 +53,66 @@ void CanRenderLinearGradient(AiksTest* aiks_test, DlTileMode tile_mode) {
 
 }  // namespace
 
+/// Runs tests with `SupportsSSBO()` forced to false. All other capabilities are
+/// forwarded to the real device.
+class AiksTestNoSSBO : public AiksTest {
+ protected:
+  void SetUp() override {
+    AiksTest::SetUp();
+    if (::testing::Test::IsSkipped()) {
+      return;
+    }
+    old_capabilities_ = GetContext()->GetCapabilities();
+    auto capabilities =
+        std::make_shared<::testing::NiceMock<MockCapabilities>>();
+    EXPECT_CALL(*capabilities, SupportsSSBO())
+        .Times(::testing::AtLeast(1))
+        .WillRepeatedly(::testing::Return(false));
+    FLT_FORWARD(capabilities, old_capabilities_, GetDefaultColorFormat);
+    FLT_FORWARD(capabilities, old_capabilities_, GetDefaultStencilFormat);
+    FLT_FORWARD(capabilities, old_capabilities_, GetDefaultDepthStencilFormat);
+    FLT_FORWARD(capabilities, old_capabilities_, GetDefaultGlyphAtlasFormat);
+    FLT_FORWARD(capabilities, old_capabilities_, SupportsOffscreenMSAA);
+    FLT_FORWARD(capabilities, old_capabilities_, SupportsImplicitResolvingMSAA);
+    FLT_FORWARD(capabilities, old_capabilities_, SupportsReadFromResolve);
+    FLT_FORWARD(capabilities, old_capabilities_, SupportsCompute);
+    FLT_FORWARD(capabilities, old_capabilities_, SupportsTextureToTextureBlits);
+    FLT_FORWARD(capabilities, old_capabilities_, SupportsTriangleFan);
+    FLT_FORWARD(capabilities, old_capabilities_,
+                SupportsDecalSamplerAddressMode);
+    FLT_FORWARD(capabilities, old_capabilities_, SupportsPrimitiveRestart);
+    FLT_FORWARD(capabilities, old_capabilities_, Supports32BitPrimitiveIndices);
+    FLT_FORWARD(capabilities, old_capabilities_, NeedsPartitionedHostBuffer);
+    FLT_FORWARD(capabilities, old_capabilities_, GetMinimumUniformAlignment);
+    FLT_FORWARD(capabilities, old_capabilities_,
+                GetMaximumRenderPassAttachmentSize);
+    FLT_FORWARD(capabilities, old_capabilities_, GetMaxSamplerAnisotropy);
+    EXPECT_TRUE(SetCapabilities(capabilities).ok());
+  }
+
+  void TearDown() override {
+    if (old_capabilities_) {
+      std::ignore = SetCapabilities(
+          std::const_pointer_cast<Capabilities>(old_capabilities_));
+    }
+    AiksTest::TearDown();
+  }
+
+ private:
+  std::shared_ptr<const Capabilities> old_capabilities_;
+};
+
+INSTANTIATE_TEST_SUITE_P(
+    Play,
+    AiksTestNoSSBO,
+    // Only run on MetalSDF: Metal is the only backend that implements
+    // `SetCapabilities`, and these tests are specifically to test UberSDF
+    // rendering without SSBO.
+    ::testing::Values(PlaygroundBackend::kMetalSDF),
+    [](const ::testing::TestParamInfo<AiksTestNoSSBO::ParamType>& info) {
+      return PlaygroundBackendToString(info.param);
+    });
+
 TEST_P(AiksTest, CanRenderLinearGradientClamp) {
   CanRenderLinearGradient(this, DlTileMode::kClamp);
 }
@@ -63,6 +124,12 @@ TEST_P(AiksTest, CanRenderLinearGradientMirror) {
 }
 TEST_P(AiksTest, CanRenderLinearGradientDecal) {
   CanRenderLinearGradient(this, DlTileMode::kDecal);
+}
+
+// Test non-SSBO for a two-stop gradient resulting in a two texel gradient
+// texture.
+TEST_P(AiksTestNoSSBO, CanRenderLinearGradientClamp) {
+  CanRenderLinearGradient(this, DlTileMode::kClamp);
 }
 
 TEST_P(AiksTest, CanRenderLinearGradientDecalWithColorFilter) {
@@ -224,6 +291,12 @@ TEST_P(AiksTest, CanRenderLinearGradientWithOverlappingStopsClamp) {
   CanRenderLinearGradientWithOverlappingStops(this, DlTileMode::kClamp);
 }
 
+// Test non-SSBO for overlapping stops, which results in a maximum size gradient
+// texture.
+TEST_P(AiksTestNoSSBO, CanRenderLinearGradientWithOverlappingStopsClamp) {
+  CanRenderLinearGradientWithOverlappingStops(this, DlTileMode::kClamp);
+}
+
 namespace {
 void CanRenderGradientWithIncompleteStops(AiksTest* aiks_test,
                                           DlColorSourceType type) {
@@ -333,6 +406,18 @@ TEST_P(AiksTest, CanRenderRadialGradientWithIncompleteStops) {
   CanRenderGradientWithIncompleteStops(this,
                                        DlColorSourceType::kRadialGradient);
 }
+
+// Test non-SSBO for UberSDF-supported gradients (linear and radial). Each of
+// these tests covers all four tile modes in one image.
+TEST_P(AiksTestNoSSBO, CanRenderLinearGradientWithIncompleteStops) {
+  CanRenderGradientWithIncompleteStops(this,
+                                       DlColorSourceType::kLinearGradient);
+}
+TEST_P(AiksTestNoSSBO, CanRenderRadialGradientWithIncompleteStops) {
+  CanRenderGradientWithIncompleteStops(this,
+                                       DlColorSourceType::kRadialGradient);
+}
+
 TEST_P(AiksTest, CanRenderConicalGradientWithIncompleteStops) {
   CanRenderGradientWithIncompleteStops(this,
                                        DlColorSourceType::kConicalGradient);

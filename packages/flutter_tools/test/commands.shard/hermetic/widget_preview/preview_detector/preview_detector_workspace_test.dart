@@ -36,12 +36,10 @@ Widget foo() => Text('Hello world!');
       PreviewDetector previewDetector,
     ) async {
       final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
-      (await workspace.createWorkspaceProject(
-        name: 'foo',
-      )).writeFile((path: 'foo.dart', source: simplePreviewSource));
-      (await workspace.createWorkspaceProject(
-        name: 'bar',
-      )).writeFile((path: 'bar.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(name: 'foo'))
+          .writeFile((path: 'foo.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(name: 'bar'))
+          .writeFile((path: 'bar.dart', source: simplePreviewSource));
 
       final PreviewDependencyGraph mapping = await previewDetector.initialize();
       expect(mapping.nodesWithPreviews.length, 2);
@@ -52,12 +50,10 @@ Widget foo() => Text('Hello world!');
     ) async {
       final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
       // Create two projects with existing previews and one without.
-      (await workspace.createWorkspaceProject(
-        name: 'foo',
-      )).writeFile((path: 'foo.dart', source: simplePreviewSource));
-      (await workspace.createWorkspaceProject(
-        name: 'bar',
-      )).writeFile((path: 'bar.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(name: 'foo'))
+          .writeFile((path: 'foo.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(name: 'bar'))
+          .writeFile((path: 'bar.dart', source: simplePreviewSource));
 
       final WidgetPreviewProject projectBaz = (await workspace.createWorkspaceProject(name: 'baz'))
         ..writeFile((path: 'baz.dart', source: noPreviewSource));
@@ -91,12 +87,10 @@ Widget foo() => Text('Hello world!');
     ) async {
       final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
       // Create two projects with existing previews.
-      (await workspace.createWorkspaceProject(
-        name: 'foo',
-      )).writeFile((path: 'foo.dart', source: simplePreviewSource));
-      (await workspace.createWorkspaceProject(
-        name: 'bar',
-      )).writeFile((path: 'bar.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(name: 'foo'))
+          .writeFile((path: 'foo.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(name: 'bar'))
+          .writeFile((path: 'bar.dart', source: simplePreviewSource));
 
       // Initialize the file watcher.
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
@@ -124,15 +118,12 @@ Widget foo() => Text('Hello world!');
     ) async {
       final workspace = WidgetPreviewWorkspace(workspaceRoot: previewDetector.projectRoot);
       // Create three projects with existing previews.
-      (await workspace.createWorkspaceProject(
-        name: 'foo',
-      )).writeFile((path: 'foo.dart', source: simplePreviewSource));
-      (await workspace.createWorkspaceProject(
-        name: 'bar',
-      )).writeFile((path: 'bar.dart', source: simplePreviewSource));
-      (await workspace.createWorkspaceProject(
-        name: 'baz',
-      )).writeFile((path: 'baz.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(name: 'foo'))
+          .writeFile((path: 'foo.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(name: 'bar'))
+          .writeFile((path: 'bar.dart', source: simplePreviewSource));
+      (await workspace.createWorkspaceProject(name: 'baz'))
+          .writeFile((path: 'baz.dart', source: simplePreviewSource));
 
       // Initialize the file watcher.
       final PreviewDependencyGraph initialPreviews = await previewDetector.initialize();
