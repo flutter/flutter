@@ -324,12 +324,11 @@ void main() {
           pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
             return PageRouteBuilder<T>(
               settings: settings,
-              pageBuilder:
-                  (
-                    BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                  ) => builder(context),
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => builder(context),
               transitionsBuilder:
                   (
                     BuildContext context,

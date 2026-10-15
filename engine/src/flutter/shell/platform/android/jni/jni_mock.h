@@ -123,11 +123,12 @@ class JNIMock final : public PlatformViewAndroidJNI {
 
   MOCK_METHOD(void, FlutterViewDestroyOverlaySurfaces, (), (override));
 
-  MOCK_METHOD(ASurfaceTransaction*, createTransaction, (), (override));
+  MOCK_METHOD(ASurfaceTransaction*,
+              createTransaction,
+              (std::function<void()>&),
+              (override));
 
   MOCK_METHOD(void, swapTransaction, (), (override));
-
-  MOCK_METHOD(void, applyTransaction, (), (override));
 
   MOCK_METHOD(void, destroyOverlaySurface2, (), (override));
 

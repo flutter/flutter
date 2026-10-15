@@ -87,8 +87,7 @@ void main(List<String> args) {
 /// Checks the examples in `examples/**` libraries for cross imports.
 ///
 /// Excludes known examples that contain cross imports, i.e.
-/// [ExamplesCrossImportChecker.knownExamplesFlutterViewCrossImports] and
-/// [ExamplesCrossImportChecker.knownExamplesImageListCrossImports].
+/// [ExamplesCrossImportChecker.knownExamplesCrossImports].
 ///
 /// No examples should import Material or Cupertino.
 /// Any Material or Cupertino specific examples should go in
@@ -267,7 +266,6 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/lib/widgets/basic/mouse_region.0.dart',
     'packages/flutter/examples/api/lib/widgets/basic/expanded.0.dart',
     'packages/flutter/examples/api/lib/widgets/basic/mouse_region.on_exit.0.dart',
-    'packages/flutter/examples/api/lib/widgets/basic/absorb_pointer.0.dart',
     'packages/flutter/examples/api/lib/widgets/single_child_scroll_view/single_child_scroll_view.1.dart',
     'packages/flutter/examples/api/lib/widgets/single_child_scroll_view/single_child_scroll_view.0.dart',
     'packages/flutter/examples/api/lib/widgets/scroll_end_notification/scroll_end_notification.1.dart',
@@ -469,7 +467,6 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/test/widgets/basic/aspect_ratio.2_test.dart',
     'packages/flutter/examples/api/test/widgets/basic/indexed_stack.0_test.dart',
     'packages/flutter/examples/api/test/widgets/basic/clip_rrect.1_test.dart',
-    'packages/flutter/examples/api/test/widgets/basic/absorb_pointer.0_test.dart',
     'packages/flutter/examples/api/test/widgets/basic/listener.0_test.dart',
     'packages/flutter/examples/api/test/widgets/basic/clip_rrect.0_test.dart',
     'packages/flutter/examples/api/test/widgets/basic/mouse_region.0_test.dart',
@@ -600,7 +597,6 @@ class ExamplesCrossImportChecker {
     'packages/flutter/examples/api/test/widgets/context_menu/editable_text_toolbar_builder.0_test.dart',
     'packages/flutter/examples/api/test/widgets/context_menu/editable_text_toolbar_builder.1_test.dart',
     'packages/flutter/examples/api/test/widgets/selectable_region/selectable_region.0_test.dart',
-    'examples/texture/lib/main.dart',
   };
 
   static final RegExp _examplesPrefix = RegExp(

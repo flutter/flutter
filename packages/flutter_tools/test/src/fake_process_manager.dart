@@ -154,15 +154,15 @@ class FakeProcess implements io.Process {
   /// The process delays exit until both [duration] (if specified) has elapsed
   /// and [completer] (if specified) has completed.
   ///
-  /// When [outputFollowsExit] is specified, bytes are streamed to [stderr] and
-  /// [stdout] after the process exits.
+  /// When [outputFollowsExit] is specified, bytes are streamed to [_stderr] and
+  /// [_stdout] after the process exits.
   FakeProcess({
     int exitCode = 0,
     Duration duration = Duration.zero,
     this.pid = 1234,
-    List<int> stderr = const <int>[],
+    this._stderr = const <int>[],
     IOSink? stdin,
-    List<int> stdout = const <int>[],
+    this._stdout = const <int>[],
     Completer<void>? completer,
     bool outputFollowsExit = false,
   }) : _exitCode = exitCode,
@@ -172,7 +172,6 @@ class FakeProcess implements io.Process {
          }
          return exitCode;
        }),
-       _stderr = stderr,
        stdin =
            stdin ??
            IOSink(
@@ -180,13 +179,12 @@ class FakeProcess implements io.Process {
                ..stream.listen((_) {})
                ..sink,
            ),
-       _stdout = stdout,
        _completer = completer {
     if (_stderr.isEmpty) {
-      this.stderr = const Stream<List<int>>.empty();
+      stderr = const Stream<List<int>>.empty();
     } else if (outputFollowsExit) {
       // Wait for the process to exit before emitting stderr.
-      this.stderr = Stream<List<int>>.fromFuture(
+      stderr = Stream<List<int>>.fromFuture(
         this.exitCode.then((_) {
           // Return a Future so stderr isn't immediately available to those who
           // await exitCode, but is available asynchronously later.
@@ -194,14 +192,14 @@ class FakeProcess implements io.Process {
         }),
       );
     } else {
-      this.stderr = Stream<List<int>>.value(_stderr);
+      stderr = Stream<List<int>>.value(_stderr);
     }
 
     if (_stdout.isEmpty) {
-      this.stdout = const Stream<List<int>>.empty();
+      stdout = const Stream<List<int>>.empty();
     } else if (outputFollowsExit) {
       // Wait for the process to exit before emitting stdout.
-      this.stdout = Stream<List<int>>.fromFuture(
+      stdout = Stream<List<int>>.fromFuture(
         this.exitCode.then((_) {
           // Return a Future so stdout isn't immediately available to those who
           // await exitCode, but is available asynchronously later.
@@ -209,7 +207,7 @@ class FakeProcess implements io.Process {
         }),
       );
     } else {
-      this.stdout = Stream<List<int>>.value(_stdout);
+      stdout = Stream<List<int>>.value(_stdout);
     }
     this.exitCode.then((_) => this.stdin.close());
   }

@@ -13,7 +13,7 @@ namespace impeller {
 
 /// @brief  Generate a new FilterContents using this filter's configuration.
 ///
-std::shared_ptr<FilterContents> WrapInput(const ContentContext& renderer,
+std::shared_ptr<FilterContents> WrapInput(ContentContext& renderer,
                                           const flutter::DlImageFilter* filter,
                                           const FilterInput::Ref& input);
 
