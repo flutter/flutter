@@ -212,14 +212,14 @@ void main() {
     );
 
     test('empty profiles list returns TaskResult.failure', () {
-      final TaskResult result = processBenchmarkProfiles(<Map<String, dynamic>>[], options);
+      final TaskResult result = processBenchmarkProfiles(<Map<String, Object?>>[], options);
       expect(result.succeeded, isFalse);
       expect(result.message, 'No benchmark profiles were collected.');
     });
 
     test('missing or empty benchmark name returns TaskResult.failure', () {
-      final TaskResult result = processBenchmarkProfiles(<Map<String, dynamic>>[
-        <String, dynamic>{
+      final TaskResult result = processBenchmarkProfiles(<Map<String, Object?>>[
+        <String, Object?>{
           'name': '',
           'scoreKeys': <String>['frame_build_times'],
         },
@@ -229,16 +229,16 @@ void main() {
     });
 
     test('empty scoreKeys returns TaskResult.failure', () {
-      final TaskResult result = processBenchmarkProfiles(<Map<String, dynamic>>[
-        <String, dynamic>{'name': 'draw_rect', 'scoreKeys': <String>[]},
+      final TaskResult result = processBenchmarkProfiles(<Map<String, Object?>>[
+        <String, Object?>{'name': 'draw_rect', 'scoreKeys': <String>[]},
       ], options);
       expect(result.succeeded, isFalse);
       expect(result.message, 'No metrics in benchmark "draw_rect"');
     });
 
     test('successful profile transformation into TaskResult.success', () {
-      final TaskResult result = processBenchmarkProfiles(<Map<String, dynamic>>[
-        <String, dynamic>{
+      final TaskResult result = processBenchmarkProfiles(<Map<String, Object?>>[
+        <String, Object?>{
           'name': 'draw_rect',
           'scoreKeys': <String>['frame_build_times'],
           'frame_build_times': 123.4,
@@ -246,13 +246,13 @@ void main() {
       ], options);
       expect(result.succeeded, isTrue);
       expect(result.benchmarkScoreKeys, <String>['draw_rect.canvaskit.frame_build_times']);
-      expect(result.data, <String, dynamic>{'draw_rect.canvaskit.frame_build_times': 123.4});
+      expect(result.data, <String, Object?>{'draw_rect.canvaskit.frame_build_times': 123.4});
     });
 
     test('successful profile transformation into TaskResult.success (Skwasm)', () {
       final TaskResult result = processBenchmarkProfiles(
-        <Map<String, dynamic>>[
-          <String, dynamic>{
+        <Map<String, Object?>>[
+          <String, Object?>{
             'name': 'draw_rect',
             'scoreKeys': <String>['frame_build_times'],
             'frame_build_times': 123.4,
@@ -268,12 +268,12 @@ void main() {
       );
       expect(result.succeeded, isTrue);
       expect(result.benchmarkScoreKeys, <String>['draw_rect.skwasm.frame_build_times']);
-      expect(result.data, <String, dynamic>{'draw_rect.skwasm.frame_build_times': 123.4});
+      expect(result.data, <String, Object?>{'draw_rect.skwasm.frame_build_times': 123.4});
     });
 
     test('fails if scoreKeys contains empty string', () {
-      final TaskResult result = processBenchmarkProfiles(<Map<String, dynamic>>[
-        <String, dynamic>{
+      final TaskResult result = processBenchmarkProfiles(<Map<String, Object?>>[
+        <String, Object?>{
           'name': 'draw_rect',
           'scoreKeys': <String>['frame_build_times', ''],
           'frame_build_times': 123.4,
@@ -284,8 +284,8 @@ void main() {
     });
 
     test('ignores data keys that match internal keys like "name" or "scoreKeys"', () {
-      final TaskResult result = processBenchmarkProfiles(<Map<String, dynamic>>[
-        <String, dynamic>{
+      final TaskResult result = processBenchmarkProfiles(<Map<String, Object?>>[
+        <String, Object?>{
           'name': 'draw_rect',
           'scoreKeys': <String>['frame_build_times'],
           'frame_build_times': 123.4,
@@ -307,7 +307,7 @@ void main() {
       buildMode: 'profile',
     );
 
-    test('tolerance to unexpected runner arguments or parse exceptions', () async {
+    test('fails on unrecognized arguments', () async {
       final TaskResult result = await runWebBenchmarkFromArgs(options, <String>['--invalid-flag']);
       expect(result.succeeded, isFalse);
       expect(result.message, contains('Could not find an option named "--invalid-flag".'));

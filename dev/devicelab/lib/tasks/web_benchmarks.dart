@@ -362,7 +362,7 @@ Future<TaskResult> runWebBenchmark(
           } else if (request.requestedUri.path.endsWith('/next-benchmark')) {
             if (benchmarks == null) {
               try {
-                final List<String> allBenchmarks = (json.decode(requestContents) as List<dynamic>)
+                final List<String> allBenchmarks = (json.decode(requestContents) as List<Object?>)
                     .cast<String>();
                 benchmarks = benchmarkFilter.filter(allBenchmarks);
                 benchmarkIterator = benchmarks!.iterator;
@@ -473,7 +473,7 @@ Future<TaskResult> runWebBenchmark(
       unawaited(whenChromeIsReady?.then((Chrome c) => chrome = c, onError: (_) {}));
 
       print('Waiting for the benchmark to report benchmark profile.');
-      final List<Map<String, dynamic>> profiles;
+      final List<Map<String, Object?>> profiles;
       try {
         profiles = await profileData.future;
       } catch (e) {
@@ -633,14 +633,14 @@ List<String>? _parseTargetBenchmarks(Iterable<String>? raw) {
 }
 
 TaskResult processBenchmarkProfiles(
-  List<Map<String, dynamic>> profiles,
+  List<Map<String, Object?>> profiles,
   WebBenchmarkOptions benchmarkOptions,
 ) {
   if (profiles.isEmpty) {
     return TaskResult.failure('No benchmark profiles were collected.');
   }
 
-  final taskResult = <String, dynamic>{};
+  final taskResult = <String, Object?>{};
   final benchmarkScoreKeys = <String>[];
 
   for (final profile in profiles) {
@@ -658,7 +658,7 @@ TaskResult processBenchmarkProfiles(
     }
     final namespace = '$benchmarkName.$webRendererName';
     final Object? rawScoreKeys = profile['scoreKeys'];
-    final List<String> scoreKeys = rawScoreKeys is List<dynamic>
+    final List<String> scoreKeys = rawScoreKeys is List<Object?>
         ? rawScoreKeys.whereType<String>().toList()
         : <String>[];
     if (scoreKeys.isEmpty) {
@@ -699,7 +699,7 @@ Future<TaskResult> runWebBenchmarkFromArgs(
     )
     ..addFlag('clean', defaultsTo: true, help: 'Whether to run flutter clean before building');
 
-  // Allow unrecognized runner options from Devicelab runners/wrappers without crashing.
+  // Report unknown flags as a task failure.
   final ArgResults args;
   try {
     args = argParser.parse(rawArgs);
