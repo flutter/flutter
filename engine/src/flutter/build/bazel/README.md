@@ -318,7 +318,11 @@ GN files are a `foreach` over the test list with those absolute defines, and
 the run matrix is `run_tests.py`'s, which GN does not have. The outcome is
 GN's, run for run: 267 runs, the same `+N` passed count in each as
 `run_tests.py --type dart` reports against `host_debug_unopt` (242 of them
-print one; 2,334 test cases).
+print one; 2,334 test cases), and again against `host_profile_unopt` with
+`--//engine/src/flutter/common:runtime_mode=profile`. `run_tests.py` leaves
+the VM-service tests out of a build directory with `release` in its name;
+`flutter_dart_tests(vm_service = True)` makes them incompatible in the
+`jit_release` and `release` modes, which a wildcard or suite run skips.
 
 `run_tests.py`'s two remaining runs are its smoke test: `fail_test.dart`
 (`testing/smoke_test_failure`, hand-written the same way), a test that fails
