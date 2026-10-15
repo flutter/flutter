@@ -648,12 +648,102 @@ abstract class BindingBase {
           };
         },
       );
+
+      registerServiceExtension(
+        name: FoundationServiceExtensions.viewMetricsOverride.name,
+        callback: _debugHandleViewMetricsOverrideServiceExtension,
+      );
       return true;
     }());
     assert(() {
       _debugServiceExtensionsRegistered = true;
       return true;
     }());
+  }
+
+  // The parameters of the `ext.flutter.viewMetricsOverride` service extension,
+  // which [FoundationServiceExtensions.viewMetricsOverride] documents.
+  static const String _viewIdParameter = 'viewId';
+  static const String _overridesParameter = 'overrides';
+  static const String _clearAllParameter = 'clearAll';
+
+  /// Implements the `ext.flutter.viewMetricsOverride` service extension.
+  ///
+  /// See [FoundationServiceExtensions.viewMetricsOverride] for the parameters,
+  /// the reply, and the event it posts.
+  Future<Map<String, Object?>> _debugHandleViewMetricsOverrideServiceExtension(
+    Map<String, String> parameters,
+  ) async {
+    if (parameters[_clearAllParameter] == 'true') {
+      if (debugClearViewMetricsOverrides()) {
+        _postViewMetricsOverrideStateChangedEvent();
+      }
+      return _viewMetricsOverrideResult();
+    }
+
+    final String? rawViewId = parameters[_viewIdParameter];
+    final String? rawOverrides = parameters[_overridesParameter];
+    if (rawViewId == null) {
+      if (rawOverrides != null) {
+        throw const FormatException(
+          'The $_viewIdParameter parameter is required when $_overridesParameter is provided.',
+        );
+      }
+      return _viewMetricsOverrideResult();
+    }
+    final int? viewId = int.tryParse(rawViewId);
+    if (viewId == null || viewId < 0) {
+      throw FormatException(
+        'The $_viewIdParameter parameter must be a non-negative integer, got "$rawViewId".',
+      );
+    }
+
+    if (rawOverrides != null) {
+      // DebugViewMetricsOverride.fromJson throws a FormatException on a
+      // malformed payload, which the service extension machinery reports back
+      // to the caller as an error rather than silently applying part of it.
+      final DebugViewMetricsOverride override = switch (json.decode(rawOverrides)) {
+        final Map<Object?, Object?> decoded => DebugViewMetricsOverride.fromJson(decoded),
+        _ => throw const FormatException(
+          'The $_overridesParameter parameter must be a JSON object.',
+        ),
+      };
+      if (debugSetViewMetricsOverride(viewId, override)) {
+        _postViewMetricsOverrideStateChangedEvent();
+      }
+    }
+
+    return _viewMetricsOverrideResult();
+  }
+
+  // The reply to every `ext.flutter.viewMetricsOverride` call, as documented on
+  // [FoundationServiceExtensions.viewMetricsOverride].
+  //
+  // Built after the change has been applied, so that the reply describes the
+  // registry as it stands once the call is done.
+  Map<String, Object?> _viewMetricsOverrideResult() {
+    return <String, Object?>{'overrides': _viewMetricsOverridesWithStringKeys()};
+  }
+
+  // [debugViewMetricsOverrides] with its view ids stringified, because
+  // json.encode accepts only String keys. It calls toJson on the values itself.
+  // Both the reply and the event carry this map.
+  Map<String, DebugViewMetricsOverride> _viewMetricsOverridesWithStringKeys() {
+    return <String, DebugViewMetricsOverride>{
+      for (final MapEntry<int, DebugViewMetricsOverride> entry in debugViewMetricsOverrides.entries)
+        '${entry.key}': entry.value,
+    };
+  }
+
+  // The whole of [debugViewMetricsOverrides], rather than the entry that
+  // changed, because one event then describes the state of the extension for a
+  // client that missed the ones before it — including the clearAll that leaves
+  // no entry to report.
+  void _postViewMetricsOverrideStateChangedEvent() {
+    _postExtensionStateChangedEvent(
+      FoundationServiceExtensions.viewMetricsOverride.name,
+      _viewMetricsOverridesWithStringKeys(),
+    );
   }
 
   /// Whether [lockEvents] is currently locking events.
