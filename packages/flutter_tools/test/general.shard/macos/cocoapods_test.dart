@@ -401,14 +401,16 @@ environement:
           project,
           analytics: fakeAnalytics,
           cocoaPods: cocoaPodsUnderTest,
-          config: Config.test(),
           featureFlags: TestFeatureFlags(),
-          fileSystem: fileSystem,
-          iosPlatform: true,
-          logger: logger,
-          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
           releaseMode: false,
           templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fileSystem,
+            logger: logger,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          ),
+          iosPlatform: true,
         );
 
         final String debugContents = projectUnderTest.ios
