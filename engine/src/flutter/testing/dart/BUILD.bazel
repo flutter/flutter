@@ -1,0 +1,117 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's Dart tests, run by flutter_tester: hand-written, for what
+# BUILD.gn says in a form the converter does not read (a foreach over the
+# list below, flutter_frontend_server with three defines whose values are
+# absolute build paths) and for what GN cannot say at all -- how
+# testing/run_tests.py runs each kernel (gather_dart_tests: five variants a
+# test, the Impeller backends with and without --force-multithreading, and
+# gpu_test once more without Flutter GPU). The list of tests is BUILD.gn's
+# (sorted); a test added there is added here.
+#
+# The kernels are `<test>.dill` in this package; GN writes them at the gen
+# root, and the one a test loads by path (spawn_helper's) is copied there
+# (//engine/src:spawn_helper_kernel). The defines name the runfiles root's
+# paths (see flutter_dart_tests).
+
+load("//engine/src/flutter/build/bazel/dart:kernel.bzl", "dart_package_root")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_dart_tests")
+
+package(default_visibility = ["//visibility:public"])
+
+# The packages the tests import from the trees gclient syncs (package:test
+# and what it reaches, vm_service, ffi, protobuf; vector_math; process),
+# staged once at the paths the engine's package configuration names them
+# by, for every kernel compile of this directory and vm_service/.
+dart_package_root(
+    name = "test_packages",
+    trees = {
+        "@dart//:test_package_sources": "engine/src/flutter/third_party/dart",
+        "@process//:dart_sources": "engine/src/flutter/third_party/pkg/process",
+        "@vector_math//:dart_sources": "engine/src/flutter/third_party/pkg/vector_math",
+    },
+)
+
+# This directory's Dart files, for the tests of vm_service/ (which import
+# ../impeller_enabled.dart).
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["*.dart"]),
+)
+
+flutter_dart_tests(
+    name = "dart",
+    srcs = [
+        "//engine/src/flutter:engine_repo_tools_sources",
+        "//engine/src/flutter/lib/gpu:dart_sources",
+        "//engine/src/flutter/testing:skia_gold_client_sources",
+    ],
+    data = [
+        # What the tests read from the source root (run_tests.py's working
+        # directory): lib/ui's fixture images, testing/resources, Skia's
+        # test images; the compiled shaders where GN's gen/ has them
+        # (fragment_shader_test lists those directories); Roboto-Regular.ttf
+        # from //flutter/txt's fixtures (GN: the deps of every compile on
+        # txt_fixtures); spawn_helper's kernel at the gen root.
+        "//engine/src:spawn_helper_kernel",
+        "//engine/src/flutter/lib/ui:fixture_sources",
+        "//engine/src/flutter/lib/ui/fixtures/shaders:compiled",
+        "//engine/src/flutter/testing:resources",
+        "//engine/src/flutter/third_party:skia_resources",
+        "//engine/src/flutter/txt:txt_fixtures",
+    ],
+    package_roots = [":test_packages"],
+    tests = [
+        "assets_test.dart",
+        "canvas_test.dart",
+        "channel_buffers_test.dart",
+        "codec_test.dart",
+        "color_filter_test.dart",
+        "color_test.dart",
+        "compositing_test.dart",
+        "dart_test.dart",
+        "decode_image_from_pixels_sync_test.dart",
+        "encoding_test.dart",
+        "fragment_shader_test.dart",
+        "geometry_test.dart",
+        "gesture_settings_test.dart",
+        "gpu_shader_reload_test.dart",
+        "gpu_test.dart",
+        "gradient_test.dart",
+        "high_bitrate_texture_test.dart",
+        "http_allow_http_connections_test.dart",
+        "http_disallow_http_connections_test.dart",
+        "image_descriptor_test.dart",
+        "image_dispose_test.dart",
+        "image_events_test.dart",
+        "image_filter_test.dart",
+        "image_resize_test.dart",
+        "image_shader_test.dart",
+        "image_test.dart",
+        "isolate_name_server_test.dart",
+        "isolate_test.dart",
+        "lerp_test.dart",
+        "locale_test.dart",
+        "mask_filter_test.dart",
+        "painting_test.dart",
+        "paragraph_builder_test.dart",
+        "paragraph_test.dart",
+        "path_test.dart",
+        "picture_test.dart",
+        "platform_dispatcher_test.dart",
+        "platform_isolate_shutdown_test.dart",
+        "platform_isolate_test.dart",
+        "platform_view_test.dart",
+        "plugin_utilities_test.dart",
+        "process_test.dart",
+        "semantics_test.dart",
+        "spawn_helper.dart",
+        "spawn_test.dart",
+        "stringification_test.dart",
+        "task_order_test.dart",
+        "text_test.dart",
+        "window_test.dart",
+    ],
+)

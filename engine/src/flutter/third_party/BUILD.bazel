@@ -9,6 +9,7 @@
 # directory are external repositories, not part of this package.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/testing:testing.bzl", "source_tree_files")
 
 cc_library(
     name = "include_dir",
@@ -21,4 +22,13 @@ cc_library(
 exports_files(
     glob(["test_shaders/**/*.frag"]),
     visibility = ["//engine/src/flutter:__subpackages__"],
+)
+
+# Skia's test images (a synced tree, @skia) at their path under the source
+# root, flutter/third_party/skia/resources/images/..., which the Dart tests
+# of testing/dart read from that root as run_tests.py runs them.
+source_tree_files(
+    name = "skia_resources",
+    trees = {"@skia//:resources_images": "skia"},
+    visibility = ["//engine/src/flutter/testing:__subpackages__"],
 )
