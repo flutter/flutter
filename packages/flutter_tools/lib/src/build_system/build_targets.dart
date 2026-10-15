@@ -24,6 +24,8 @@ abstract class BuildTargets {
 }
 
 /// BuildTargets that return NoOpTarget for every action.
+///
+/// This class is required by internal google3 tooling (`mobile/flutter/cli/context`).
 class NoOpBuildTargets extends BuildTargets {
   const NoOpBuildTargets();
 

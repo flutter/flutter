@@ -107,7 +107,7 @@ Future<void> testMain() async {
 </sem>''');
     expectSemanticsTree(view2.semantics, '''
 <sem style="filter: opacity(0%); color: rgba(0, 0, 0, 0)">
-    <sem aria-label="d"><input aria-valuemax="1" aria-valuemin="1" aria-valuenow="1" aria-valuetext="" role="slider"></sem>
+    <sem aria-label="d"><input aria-label="d" aria-valuemax="1" aria-valuemin="1" aria-valuenow="1" aria-valuetext="" role="slider"></sem>
 </sem>
 ''');
 

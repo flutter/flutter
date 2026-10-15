@@ -1285,8 +1285,7 @@ class _ChipsState extends State<Chips> {
   Widget build(BuildContext context) {
     return ComponentDecoration(
       label: 'Chips',
-      tooltipMessage:
-          'Use ActionChip, FilterChip, or InputChip. \nActionChip can also be used for suggestion chip',
+      tooltipMessage: 'Use ActionChip, FilterChip, or InputChip. \nActionChip can also be used for suggestion chip',
       child: Column(
         children: <Widget>[
           Wrap(
