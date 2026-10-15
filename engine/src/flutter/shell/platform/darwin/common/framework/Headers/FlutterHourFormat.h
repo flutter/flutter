@@ -7,8 +7,9 @@
 
 #import <Foundation/Foundation.h>
 
+NS_SWIFT_SENDABLE
 @interface FlutterHourFormat : NSObject
-+ (BOOL)isAlwaysUse24HourFormat;
++ (BOOL)isAlwaysUse24HourFormat NS_SWIFT_NONISOLATED;
 
 @end
 
