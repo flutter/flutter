@@ -31,13 +31,12 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-final class _TestExtensionTarget extends ExtensionTarget {
-  const _TestExtensionTarget({
+final class _TestBuildTarget extends BuildTarget {
+  const _TestBuildTarget({
     required super.description,
     required this.name,
+    this.artifacts = const <ExtensionArtifact>{},
     this.errorMessage,
-    this.inputs = const <ExtensionSource>[],
-    super.isTopLevel,
     super.outputDir,
     this.shouldSucceed = true,
     super.targetPlatform = 'linux-x64',
@@ -47,7 +46,7 @@ final class _TestExtensionTarget extends ExtensionTarget {
   final String name;
 
   @override
-  final List<ExtensionSource> inputs;
+  final Set<ExtensionArtifact> artifacts;
 
   final String? errorMessage;
   final bool shouldSucceed;
@@ -60,21 +59,45 @@ final class _TestExtensionTarget extends ExtensionTarget {
   }
 }
 
+final class _TestAssembleTarget extends AssembleTarget {
+  const _TestAssembleTarget({
+    required super.description,
+    required this.name,
+    this.errorMessage,
+    this.shouldSucceed = true,
+    super.targetPlatform = 'linux-x64',
+  });
+
+  @override
+  final String name;
+
+  final String? errorMessage;
+  final bool shouldSucceed;
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    return shouldSucceed
+        ? const ExtensionBuildResult(success: true)
+        : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Assemble failed.');
+  }
+}
+
 final class _SucceedingBuildService extends BuildService {
   @override
-  List<ExtensionTarget> get targets => const <ExtensionTarget>[
-    _TestExtensionTarget(
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
+    _TestBuildTarget(
       description: 'Hermetic custom build target.',
       name: 'custom-hermetic-build',
       outputDir:
           '${BuiltInPlaceholders.projectDir}/build/hermetic/${BuiltInPlaceholders.buildMode}',
     ),
-    _TestExtensionTarget(
+  ];
+
+  @override
+  List<AssembleTarget> get assembleTargets => const <AssembleTarget>[
+    _TestAssembleTarget(
       description: 'Hermetic assemble-only target.',
       name: 'custom-hermetic-assemble-only',
-      isTopLevel: false,
-      outputDir:
-          '${BuiltInPlaceholders.projectDir}/build/hermetic/${BuiltInPlaceholders.buildMode}',
     ),
   ];
 }
@@ -89,32 +112,39 @@ void _succeedingBuildExtensionEntryPoint(SendPort sendPort) {
 
 final class _FailingAndConflictingBuildService extends BuildService {
   @override
-  List<ExtensionTarget> get targets => const <ExtensionTarget>[
-    _TestExtensionTarget(
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
+    _TestBuildTarget(
       description: 'Failing custom build target.',
       name: 'failing-build',
       shouldSucceed: false,
       errorMessage: 'Custom build compilation error.',
     ),
-    _TestExtensionTarget(
+    _TestBuildTarget(
       description: 'Custom build target with custom embedder platform.',
       name: 'custom-platform-build',
       targetPlatform: 'custom-embedder-arm64',
+      artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData},
     ),
-    _TestExtensionTarget(
-      description: 'Custom build target with invalid artifact platform.',
-      name: 'invalid-artifact-platform-build',
-      inputs: <ExtensionSource>[
-        ExtensionSource.artifact(BuiltInArtifacts.icuData, platform: 'invalid-platform'),
-      ],
+    _TestBuildTarget(
+      description: 'Custom build target with unsupported artifact.',
+      name: 'unsupported-artifact-build',
+      artifacts: <ExtensionArtifact>{ExtensionArtifact('unsupported-artifact')},
     ),
-    _TestExtensionTarget(description: 'Conflicting bundle target.', name: 'bundle'),
-    _TestExtensionTarget(
-      description: 'Conflicting copy_assets target.',
-      name: 'copy_assets',
-      isTopLevel: false,
+    _TestBuildTarget(description: 'Conflicting bundle target.', name: 'bundle'),
+    _TestBuildTarget(description: 'Empty target name that should be skipped.', name: ''),
+  ];
+
+  @override
+  List<AssembleTarget> get assembleTargets => const <AssembleTarget>[
+    _TestAssembleTarget(description: 'Conflicting copy_assets target.', name: 'copy_assets'),
+    _TestAssembleTarget(
+      description: 'Succeeding custom assemble target.',
+      name: 'custom-assemble-target',
     ),
-    _TestExtensionTarget(description: 'Empty target name that should be skipped.', name: ''),
+    _TestAssembleTarget(
+      description: 'Empty assemble target name that should be skipped.',
+      name: '',
+    ),
   ];
 }
 
@@ -128,8 +158,16 @@ void _failingBuildExtensionEntryPoint(SendPort sendPort) {
 
 final class _FirstDuplicateBuildService extends BuildService {
   @override
-  List<ExtensionTarget> get targets => const <ExtensionTarget>[
-    _TestExtensionTarget(description: 'First extension shared target.', name: 'shared-target'),
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
+    _TestBuildTarget(description: 'First extension shared target.', name: 'shared-target'),
+  ];
+
+  @override
+  List<AssembleTarget> get assembleTargets => const <AssembleTarget>[
+    _TestAssembleTarget(
+      description: 'First extension shared assemble target.',
+      name: 'shared-assemble-target',
+    ),
   ];
 }
 
@@ -143,10 +181,20 @@ void _firstDuplicateExtensionEntryPoint(SendPort sendPort) {
 
 final class _SecondDuplicateBuildService extends BuildService {
   @override
-  List<ExtensionTarget> get targets => const <ExtensionTarget>[
-    _TestExtensionTarget(
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
+    _TestBuildTarget(
       description: 'Second extension shared target.',
       name: 'shared-target',
+      shouldSucceed: false,
+      errorMessage: 'Second connection should have been skipped.',
+    ),
+  ];
+
+  @override
+  List<AssembleTarget> get assembleTargets => const <AssembleTarget>[
+    _TestAssembleTarget(
+      description: 'Second extension shared assemble target.',
+      name: 'shared-assemble-target',
       shouldSucceed: false,
       errorMessage: 'Second connection should have been skipped.',
     ),
@@ -167,8 +215,31 @@ void main() {
   });
 
   group('Tool Extensions Build Integration - Disabled', () {
+    testWithoutContext('ExtensionBuildManager.getBuildTargets() and getAssembleTargets() return empty lists when feature flag disabled', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags();
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
+
+      final List<ExtensionBuildTarget> buildTargets = await buildManager.getBuildTargets();
+      expect(buildTargets, isEmpty);
+      final List<ExtensionAssembleTarget> assembleTargets = await buildManager.getAssembleTargets();
+      expect(assembleTargets, isEmpty);
+
+      await manager.dispose();
+    });
+
     testWithoutContext(
-      'ExtensionBuildManager.getBuildTargets() returns empty list when feature flag disabled',
+      'ExtensionBuildManager.build() and assemble() return failure when feature flag disabled',
       () async {
         final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags();
@@ -184,31 +255,7 @@ void main() {
           logger: logger,
         );
 
-        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
-        expect(targets, isEmpty);
-
-        await manager.dispose();
-      },
-    );
-
-    testWithoutContext(
-      'ExtensionBuildManager.build() returns failure when feature flag disabled',
-      () async {
-        final logger = BufferLogger.test();
-        final featureFlags = TestFeatureFlags();
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final buildManager = ExtensionBuildManager(
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          logger: logger,
-        );
-
-        final ExtensionBuildResult result = await buildManager.build(
+        final ExtensionBuildResult buildResult = await buildManager.build(
           buildDir: Uri.parse('/.dart_tool/flutter_build'),
           buildMode: .debug,
           mainPath: 'lib/main.dart',
@@ -217,8 +264,20 @@ void main() {
           resolvedArtifacts: const <String, String>{},
           targetName: 'custom-linux-build',
         );
-        expect(result.success, isFalse);
-        expect(result.errorMessage, 'Tool extensions are disabled.');
+        expect(buildResult.success, isFalse);
+        expect(buildResult.errorMessage, 'Tool extensions are disabled.');
+
+        final ExtensionBuildResult assembleResult = await buildManager.assemble(
+          buildDir: Uri.parse('/.dart_tool/flutter_build'),
+          buildMode: .debug,
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('/build'),
+          projectRoot: Uri.parse('/'),
+          resolvedArtifacts: const <String, String>{},
+          targetName: 'custom-linux-assemble-only-debug',
+        );
+        expect(assembleResult.success, isFalse);
+        expect(assembleResult.errorMessage, 'Tool extensions are disabled.');
 
         await manager.dispose();
       },
@@ -274,39 +333,41 @@ void main() {
       fs.file('/lib/main.dart').createSync(recursive: true);
     });
 
-    testWithoutContext(
-      'ExtensionBuildManager.getBuildTargets() returns custom targets when feature flag enabled',
-      () async {
-        final logger = BufferLogger.test();
-        final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
-        final manager = ExtensionManager(
-          hostPlatform: HostPlatform.linux_x64,
-          logger: logger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
-          featureFlags: featureFlags,
-        );
-        final buildManager = ExtensionBuildManager(
-          extensionManager: manager,
-          featureFlags: featureFlags,
-          logger: logger,
-        );
+    testWithoutContext('ExtensionBuildManager.getBuildTargets() and getAssembleTargets() return custom targets when feature flag enabled', () async {
+      final logger = BufferLogger.test();
+      final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
+      final manager = ExtensionManager(
+        hostPlatform: HostPlatform.linux_x64,
+        logger: logger,
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+        featureFlags: featureFlags,
+      );
+      final buildManager = ExtensionBuildManager(
+        extensionManager: manager,
+        featureFlags: featureFlags,
+        logger: logger,
+      );
 
-        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
-        expect(
-          targets.map((ExtensionBuildTarget t) => t.name),
-          equals(<String>['custom-linux-build', 'custom-linux-assemble-only-debug']),
-        );
-        expect(buildManager.cachedTargets, equals(targets));
+      final List<ExtensionBuildTarget> buildTargets = await buildManager.getBuildTargets();
+      expect(
+        buildTargets.map((ExtensionBuildTarget t) => t.name),
+        equals(<String>['custom-linux-build']),
+      );
+      expect(buildManager.cachedTargets, equals(buildTargets));
 
-        expect(targets[0].isTopLevel, isTrue);
-        expect(targets[0].dependencies, isEmpty);
+      final List<ExtensionAssembleTarget> assembleTargets = await buildManager.getAssembleTargets();
+      expect(
+        assembleTargets.map((ExtensionAssembleTarget t) => t.name),
+        equals(<String>['custom-linux-assemble-only-debug']),
+      );
+      expect(buildManager.cachedAssembleTargets, equals(assembleTargets));
+      expect(
+        assembleTargets.single.dependencies,
+        equals(<String>['copy_assets', 'kernel_snapshot_program']),
+      );
 
-        expect(targets[1].isTopLevel, isFalse);
-        expect(targets[1].dependencies, equals(<String>['copy_assets', 'kernel_snapshot_program']));
-
-        await manager.dispose();
-      },
-    );
+      await manager.dispose();
+    });
 
     testWithoutContext('ExtensionBuildManager.build() throws ArgumentError when projectRoot, outputDir, or buildDir is relative', () async {
       final logger = BufferLogger.test();
@@ -366,7 +427,7 @@ void main() {
     });
 
     testWithoutContext(
-      'ExtensionBuildManager.build() returns failure for unknown target',
+      'ExtensionBuildManager.build() and assemble() return failure for unknown target',
       () async {
         final logger = BufferLogger.test();
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
@@ -382,7 +443,7 @@ void main() {
           logger: logger,
         );
 
-        final ExtensionBuildResult result = await buildManager.build(
+        final ExtensionBuildResult buildResult = await buildManager.build(
           buildDir: Uri.parse('/.dart_tool/flutter_build'),
           buildMode: .debug,
           mainPath: 'lib/main.dart',
@@ -391,10 +452,25 @@ void main() {
           resolvedArtifacts: const <String, String>{},
           targetName: 'non-existent-target',
         );
-        expect(result.success, isFalse);
+        expect(buildResult.success, isFalse);
         expect(
-          result.errorMessage,
+          buildResult.errorMessage,
           'No extension found to handle build target non-existent-target.',
+        );
+
+        final ExtensionBuildResult assembleResult = await buildManager.assemble(
+          buildDir: Uri.parse('/.dart_tool/flutter_build'),
+          buildMode: .debug,
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('/build'),
+          projectRoot: Uri.parse('/'),
+          resolvedArtifacts: const <String, String>{},
+          targetName: 'non-existent-assemble-target',
+        );
+        expect(assembleResult.success, isFalse);
+        expect(
+          assembleResult.errorMessage,
+          'No extension found to handle assemble target non-existent-assemble-target.',
         );
 
         await manager.dispose();
@@ -421,16 +497,16 @@ void main() {
           logger: logger,
         );
 
-        final List<ExtensionBuildTarget> targets = await buildManager.getBuildTargets();
-        expect(targets, hasLength(1));
-        expect(targets.first.name, 'shared-target');
-        expect(targets.first.description, 'First extension shared target.');
+        final List<ExtensionBuildTarget> buildTargets = await buildManager.getBuildTargets();
+        expect(buildTargets, hasLength(1));
+        expect(buildTargets.first.name, 'shared-target');
+        expect(buildTargets.first.description, 'First extension shared target.');
         expect(
           logger.warningText,
           contains('Skipping duplicate build target "shared-target" from extension.'),
         );
 
-        final ExtensionBuildResult result = await buildManager.build(
+        final ExtensionBuildResult buildResult = await buildManager.build(
           buildDir: Uri.parse('/.dart_tool/flutter_build'),
           buildMode: .debug,
           mainPath: 'lib/main.dart',
@@ -439,7 +515,28 @@ void main() {
           resolvedArtifacts: const <String, String>{},
           targetName: 'shared-target',
         );
-        expect(result.success, isTrue);
+        expect(buildResult.success, isTrue);
+
+        final List<ExtensionAssembleTarget> assembleTargets = await buildManager
+            .getAssembleTargets();
+        expect(assembleTargets, hasLength(1));
+        expect(assembleTargets.first.name, 'shared-assemble-target');
+        expect(assembleTargets.first.description, 'First extension shared assemble target.');
+        expect(
+          logger.warningText,
+          contains('Skipping duplicate assemble target "shared-assemble-target" from extension.'),
+        );
+
+        final ExtensionBuildResult assembleResult = await buildManager.assemble(
+          buildDir: Uri.parse('/.dart_tool/flutter_build'),
+          buildMode: .debug,
+          mainPath: 'lib/main.dart',
+          outputDir: Uri.parse('/build'),
+          projectRoot: Uri.parse('/'),
+          resolvedArtifacts: const <String, String>{},
+          targetName: 'shared-assemble-target',
+        );
+        expect(assembleResult.success, isTrue);
 
         await manager.dispose();
       },
@@ -538,6 +635,7 @@ void main() {
       expect(builtTarget?.name, equals('copy_assets'));
       // Built-in targets should not trigger extension isolate initialization.
       expect(buildManager.cachedTargets, isEmpty);
+      expect(buildManager.cachedAssembleTargets, isEmpty);
 
       final customCommand = AssembleCommand(
         buildSystem: TestBuildSystem.all(BuildResult(success: true), (
@@ -661,9 +759,9 @@ void main() {
         await commandRunner.run(<String>['build', 'custom-platform-build', '--no-pub']);
 
         await expectLater(
-          () => commandRunner.run(<String>['build', 'invalid-artifact-platform-build', '--no-pub']),
+          () => commandRunner.run(<String>['build', 'unsupported-artifact-build', '--no-pub']),
           throwsToolExit(
-            message: 'Invalid platform name "invalid-platform" for artifact "icuData".',
+            message: 'Unsupported artifact "unsupported-artifact" requested by a tool extension.',
           ),
         );
 
@@ -696,7 +794,7 @@ void main() {
           '-d',
           'BuildMode=debug',
           'copy_assets',
-          'failing-build',
+          'custom-assemble-target',
         ]);
         expect(
           testLogger.warningText,

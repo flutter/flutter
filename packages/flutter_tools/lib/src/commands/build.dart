@@ -215,9 +215,6 @@ class BuildCommand extends FlutterCommand {
     if (_extensionBuildManager case final extensionBuildManager?) {
       final List<ExtensionBuildTarget> targets = await extensionBuildManager.getBuildTargets();
       for (final target in targets) {
-        if (!target.isTopLevel) {
-          continue;
-        }
         if (!subcommands.containsKey(target.name)) {
           _addSubcommand(
             ExtensionBuildSubCommand(
@@ -328,7 +325,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
       projectDir: projectDir,
       target: target,
     );
-    final Map<String, String> resolvedArtifacts = resolveExtensionTargetArtifacts(
+    final Map<String, String> resolvedArtifacts = resolveExtensionBuildTargetArtifacts(
       artifacts: artifacts,
       buildMode: buildInfo.mode,
       target: target,

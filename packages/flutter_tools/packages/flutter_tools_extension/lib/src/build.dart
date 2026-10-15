@@ -10,7 +10,8 @@ import 'package:meta/meta.dart';
 
 import 'protocol_base/service.dart';
 
-/// Context passed to the extension target's [ExtensionTarget.build] method.
+/// Context passed to an extension target's [BuildTarget.build] or
+/// [AssembleTarget.build] method.
 @immutable
 class ExtensionBuildContext {
   const ExtensionBuildContext({
@@ -43,19 +44,19 @@ class ExtensionBuildContext {
   final Map<String, String> resolvedArtifacts;
 }
 
-/// Abstract target that encapsulates both metadata and build logic.
+/// Abstract target for a custom `flutter build <subcommand>` target.
 ///
-/// Extensions should extend this class to define custom build targets.
+/// Extensions should extend this class to contribute top-level `flutter build`
+/// subcommands via [BuildService.buildTargets].
 @immutable
-abstract class ExtensionTarget {
-  const ExtensionTarget({
+abstract class BuildTarget {
+  const BuildTarget({
     required this.description,
     required this.targetPlatform,
-    this.isTopLevel = true,
     this.outputDir = BuiltInPlaceholders.buildDir,
   });
 
-  /// The user-readable name of the target.
+  /// The user-readable name of the target (exposed as `flutter build <name>`).
   String get name;
 
   /// Description of what this target builds.
@@ -69,22 +70,51 @@ abstract class ExtensionTarget {
   /// default artifact platform when it matches a built-in Flutter target platform.
   final String targetPlatform;
 
-  /// Whether this target is a top-level target invokable through `flutter build`.
-  ///
-  /// Non-top-level targets are typically used as dependencies for other targets
-  /// and are not directly exposed to the user.
-  final bool isTopLevel;
-
   /// The directory pattern used by `flutter build` to determine this target's
   /// output directory (`{OUTPUT_DIR}`), for example
   /// `'${BuiltInPlaceholders.projectDir}/build/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
   ///
   /// Supports [BuiltInPlaceholders.projectDir], [BuiltInPlaceholders.buildDir],
   /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
-  /// When invoked via `flutter assemble -o <dir>`, the `-o` directory is used instead.
   final String outputDir;
 
-  /// The names of other targets that this target depends on.
+  /// Engine artifacts required by this build target, resolved for [targetPlatform]
+  /// and the active [BuildMode].
+  Set<ExtensionArtifact> get artifacts => const <ExtensionArtifact>{};
+
+  /// Host-side build tool or library artifacts required by this build target.
+  Set<ExtensionHostArtifact> get hostArtifacts => const <ExtensionHostArtifact>{};
+
+  /// Performs the actual compilation/build steps in the extension process/isolate.
+  ///
+  /// Access resolved artifact paths from [ExtensionBuildContext.resolvedArtifacts] using
+  /// [ExtensionArtifact.name] or [ExtensionHostArtifact.name] as keys.
+  /// Returns an [ExtensionBuildResult] indicating whether the build succeeded.
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context);
+}
+
+/// Abstract target for a custom `flutter assemble <target>` DAG node.
+///
+/// Extensions should extend this class to contribute `flutter assemble` targets
+/// with tracked [dependencies], [inputs], and [outputs] via [BuildService.assembleTargets].
+@immutable
+abstract class AssembleTarget {
+  const AssembleTarget({required this.description, required this.targetPlatform});
+
+  /// The user-readable name of the assemble target.
+  String get name;
+
+  /// Description of what this target builds.
+  final String description;
+
+  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`).
+  ///
+  /// This is an open [String] rather than an enum so that extensions for custom
+  /// embedders can declare platform identifiers that are not built into Flutter.
+  /// Used as the default artifact platform when it matches a built-in Flutter target platform.
+  final String targetPlatform;
+
+  /// The names of other assemble targets that this target depends on.
   List<String> get dependencies => const <String>[];
 
   /// The input [ExtensionSource]s for this target.
@@ -104,16 +134,23 @@ abstract class ExtensionTarget {
 
 /// Extension service interface for custom builds.
 ///
-/// Automatically routes build RPC calls to the registered [targets].
+/// Automatically routes build and assemble RPC calls to the registered
+/// [buildTargets] and [assembleTargets].
 abstract base class BuildService extends ToolExtensionService {
   /// Service namespace identifier for custom builds.
   static const String serviceNamespace = 'build';
 
-  /// RPC method identifier to query contributed build targets.
+  /// RPC method identifier to query contributed `flutter build` targets.
   static const String getBuildTargetsMethod = 'build.getBuildTargets';
 
-  /// RPC method identifier to trigger a custom build.
+  /// RPC method identifier to query contributed `flutter assemble` targets.
+  static const String getAssembleTargetsMethod = 'build.getAssembleTargets';
+
+  /// RPC method identifier to trigger a custom `flutter build` target.
   static const String buildMethod = 'build.build';
+
+  /// RPC method identifier to trigger a custom `flutter assemble` target.
+  static const String assembleMethod = 'build.assemble';
 
   /// RPC parameter key for the temporary build directory.
   static const String buildDirParam = 'buildDir';
@@ -137,19 +174,26 @@ abstract base class BuildService extends ToolExtensionService {
   static const String targetNameParam = 'targetName';
 
   static const String _getBuildTargetsRpcMethod = 'getBuildTargets';
+  static const String _getAssembleTargetsRpcMethod = 'getAssembleTargets';
   static const String _buildRpcMethod = 'build';
+  static const String _assembleRpcMethod = 'assemble';
 
   @override
   String get namespace => serviceNamespace;
 
-  /// Returns the custom build targets contributed by this extension.
-  List<ExtensionTarget> get targets;
+  /// Returns the custom `flutter build` targets contributed by this extension.
+  List<BuildTarget> get buildTargets => const <BuildTarget>[];
+
+  /// Returns the custom `flutter assemble` targets contributed by this extension.
+  List<AssembleTarget> get assembleTargets => const <AssembleTarget>[];
 
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
       _getBuildTargetsRpcMethod: _getBuildTargetsRpc,
+      _getAssembleTargetsRpcMethod: _getAssembleTargetsRpc,
       _buildRpcMethod: _buildRpc,
+      _assembleRpcMethod: _assembleRpc,
     };
   }
 
@@ -157,17 +201,30 @@ abstract base class BuildService extends ToolExtensionService {
   Future<void> shutdown() async {}
 
   Future<List<Map<String, Object?>>> _getBuildTargetsRpc(Map<String, Object?> _) async {
-    return targets
+    return buildTargets
         .map(
-          (ExtensionTarget target) => ExtensionBuildTarget(
+          (BuildTarget target) => ExtensionBuildTarget(
+            artifacts: target.artifacts,
             description: target.description,
+            hostArtifacts: target.hostArtifacts,
             name: target.name,
-            targetPlatform: target.targetPlatform,
-            dependencies: target.dependencies,
-            inputs: target.inputs,
-            isTopLevel: target.isTopLevel,
             outputDir: target.outputDir,
+            targetPlatform: target.targetPlatform,
+          ).toMap(),
+        )
+        .toList();
+  }
+
+  Future<List<Map<String, Object?>>> _getAssembleTargetsRpc(Map<String, Object?> _) async {
+    return assembleTargets
+        .map(
+          (AssembleTarget target) => ExtensionAssembleTarget(
+            dependencies: target.dependencies,
+            description: target.description,
+            inputs: target.inputs,
+            name: target.name,
             outputs: target.outputs,
+            targetPlatform: target.targetPlatform,
           ).toMap(),
         )
         .toList();
@@ -187,7 +244,9 @@ abstract base class BuildService extends ToolExtensionService {
     return uri;
   }
 
-  Future<Map<String, Object?>> _buildRpc(Map<String, Object?> params) async {
+  static (String targetName, ExtensionBuildContext context) _parseBuildRequest(
+    Map<String, Object?> params,
+  ) {
     final String targetName = _requireString(params, targetNameParam);
     final Uri projectRootUri = _requireAbsoluteUri(params, projectRootParam);
     final String mainPath = _requireString(params, mainPathParam);
@@ -216,16 +275,6 @@ abstract base class BuildService extends ToolExtensionService {
       resolvedArtifacts[key] = value;
     }
 
-    final ExtensionTarget? target = targets
-        .where((ExtensionTarget t) => t.name == targetName)
-        .firstOrNull;
-    if (target == null) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Unknown build target: $targetName',
-      ).toMap();
-    }
-
     final context = ExtensionBuildContext(
       buildDir: buildDirUri,
       buildMode: mode,
@@ -234,6 +283,35 @@ abstract base class BuildService extends ToolExtensionService {
       projectRoot: projectRootUri,
       resolvedArtifacts: resolvedArtifacts,
     );
+    return (targetName, context);
+  }
+
+  Future<Map<String, Object?>> _buildRpc(Map<String, Object?> params) async {
+    final (String targetName, ExtensionBuildContext context) = _parseBuildRequest(params);
+    final BuildTarget? target = buildTargets
+        .where((BuildTarget t) => t.name == targetName)
+        .firstOrNull;
+    if (target == null) {
+      return ExtensionBuildResult(
+        success: false,
+        errorMessage: 'Unknown build target: $targetName',
+      ).toMap();
+    }
+    final ExtensionBuildResult result = await target.build(context);
+    return result.toMap();
+  }
+
+  Future<Map<String, Object?>> _assembleRpc(Map<String, Object?> params) async {
+    final (String targetName, ExtensionBuildContext context) = _parseBuildRequest(params);
+    final AssembleTarget? target = assembleTargets
+        .where((AssembleTarget t) => t.name == targetName)
+        .firstOrNull;
+    if (target == null) {
+      return ExtensionBuildResult(
+        success: false,
+        errorMessage: 'Unknown assemble target: $targetName',
+      ).toMap();
+    }
     final ExtensionBuildResult result = await target.build(context);
     return result.toMap();
   }

@@ -42,7 +42,7 @@ final class FakeExtensionBuildManager extends ExtensionBuildManager {
   String? invokedTargetName;
 
   @override
-  Future<ExtensionBuildResult> build({
+  Future<ExtensionBuildResult> assemble({
     required Uri buildDir,
     required BuildMode buildMode,
     required String mainPath,
@@ -67,27 +67,25 @@ final class FakeTarget extends Fake implements Target {
   String get name => 'fake-target';
 }
 
-ExtensionAssembleTarget _createTarget({
+ExtensionTarget _createTarget({
   FakeExtensionBuildManager? buildManager,
   List<String> dependencies = const <String>[],
   DependencyResolverCallback? dependencyResolver,
   List<ExtensionSource> inputs = const <ExtensionSource>[],
   String name = 'custom-target',
-  String outputDir = BuiltInPlaceholders.buildDir,
   List<ExtensionSource> outputs = const <ExtensionSource>[],
   String targetPlatform = 'linux-x64',
 }) {
-  return ExtensionAssembleTarget(
-    buildManager: buildManager ?? FakeExtensionBuildManager(),
-    buildTarget: ExtensionBuildTarget(
+  return ExtensionTarget(
+    assembleTarget: ExtensionAssembleTarget(
       description: 'description',
       name: name,
       targetPlatform: targetPlatform,
       dependencies: dependencies,
       inputs: inputs,
-      outputDir: outputDir,
       outputs: outputs,
     ),
+    buildManager: buildManager ?? FakeExtensionBuildManager(),
     dependencyResolver:
         dependencyResolver ?? (String dep) => fail('Unexpected dependency lookup: $dep'),
   );
@@ -112,9 +110,9 @@ void main() {
     );
   });
 
-  testWithoutContext('ExtensionAssembleTarget delegates build to ExtensionBuildManager', () async {
+  testWithoutContext('ExtensionTarget delegates assemble to ExtensionBuildManager', () async {
     final buildManager = FakeExtensionBuildManager();
-    final ExtensionAssembleTarget target = _createTarget(buildManager: buildManager);
+    final ExtensionTarget target = _createTarget(buildManager: buildManager);
 
     expect(target.name, equals('custom-target'));
     expect(target.dependencies, isEmpty);
@@ -132,9 +130,9 @@ void main() {
     expect(buildManager.invokedResolvedArtifacts, isEmpty);
   });
 
-  testWithoutContext('ExtensionAssembleTarget resolves and passes artifacts', () async {
+  testWithoutContext('ExtensionTarget resolves and passes artifacts', () async {
     final buildManager = FakeExtensionBuildManager();
-    final ExtensionAssembleTarget target = _createTarget(
+    final ExtensionTarget target = _createTarget(
       buildManager: buildManager,
       inputs: const <ExtensionSource>[
         ExtensionSource.artifact(BuiltInArtifacts.icuData),
@@ -160,10 +158,10 @@ void main() {
   });
 
   testWithoutContext(
-    'ExtensionAssembleTarget throws MissingDefineException if BuildMode is missing',
+    'ExtensionTarget throws MissingDefineException if BuildMode is missing',
     () async {
       environment.defines.remove(kBuildMode);
-      final ExtensionAssembleTarget target = _createTarget();
+      final ExtensionTarget target = _createTarget();
 
       await expectLater(
         () => target.build(environment),
@@ -176,72 +174,71 @@ void main() {
     },
   );
 
-  testWithoutContext('ExtensionAssembleTarget throws ToolExit if build fails', () async {
+  testWithoutContext('ExtensionTarget throws ToolExit if assemble fails', () async {
     final buildManager = FakeExtensionBuildManager(
       buildResult: const ExtensionBuildResult(success: false, errorMessage: 'Build failed error'),
     );
-    final ExtensionAssembleTarget target = _createTarget(buildManager: buildManager);
+    final ExtensionTarget target = _createTarget(buildManager: buildManager);
 
     await expectLater(
       () => target.build(environment),
-      throwsToolExit(message: 'Extension build target "custom-target" failed: Build failed error'),
+      throwsToolExit(
+        message: 'Extension assemble target "custom-target" failed: Build failed error',
+      ),
     );
 
-    final ExtensionAssembleTarget emptyMessageTarget = _createTarget(
+    final ExtensionTarget emptyMessageTarget = _createTarget(
       buildManager: FakeExtensionBuildManager(
         buildResult: const ExtensionBuildResult(success: false, errorMessage: ''),
       ),
     );
     await expectLater(
       () => emptyMessageTarget.build(environment),
-      throwsToolExit(message: 'Extension build target "custom-target" failed.'),
+      throwsToolExit(message: 'Extension assemble target "custom-target" failed.'),
     );
 
-    final ExtensionAssembleTarget nullMessageTarget = _createTarget(
+    final ExtensionTarget nullMessageTarget = _createTarget(
       buildManager: FakeExtensionBuildManager(
         buildResult: const ExtensionBuildResult(success: false),
       ),
     );
     await expectLater(
       () => nullMessageTarget.build(environment),
-      throwsToolExit(message: 'Extension build target "custom-target" failed.'),
+      throwsToolExit(message: 'Extension assemble target "custom-target" failed.'),
     );
   });
 
-  testWithoutContext(
-    'ExtensionAssembleTarget maps pattern, artifact, and hostArtifact sources',
-    () {
-      final ExtensionAssembleTarget target = _createTarget(
-        inputs: const <ExtensionSource>[
-          ExtensionSource.pattern('{PROJECT_DIR}/foo.dart'),
-          ExtensionSource.artifact(BuiltInArtifacts.icuData, platform: 'linux-x64', mode: .debug),
-          ExtensionSource.hostArtifact(BuiltInHostArtifacts.impellerc),
-        ],
-        outputs: const <ExtensionSource>[ExtensionSource.pattern('{BUILD_DIR}/bar.dart')],
-      );
+  testWithoutContext('ExtensionTarget maps pattern, artifact, and hostArtifact sources', () {
+    final ExtensionTarget target = _createTarget(
+      inputs: const <ExtensionSource>[
+        ExtensionSource.pattern('{PROJECT_DIR}/foo.dart'),
+        ExtensionSource.artifact(BuiltInArtifacts.icuData, platform: 'linux-x64', mode: .debug),
+        ExtensionSource.hostArtifact(BuiltInHostArtifacts.impellerc),
+      ],
+      outputs: const <ExtensionSource>[ExtensionSource.pattern('{BUILD_DIR}/bar.dart')],
+    );
 
-      environment.buildDir.createSync(recursive: true);
-      environment.outputDir.createSync(recursive: true);
+    environment.buildDir.createSync(recursive: true);
+    environment.outputDir.createSync(recursive: true);
 
-      final ResolvedFiles resolvedInputs = target.resolveInputs(environment);
-      expect(
-        resolvedInputs.sources.map((File f) => f.path),
-        equals(<String>[
-          '/foo.dart',
-          'Artifact.icuData.TargetPlatform.linux_x64.debug',
-          'HostArtifact.impellerc',
-        ]),
-      );
+    final ResolvedFiles resolvedInputs = target.resolveInputs(environment);
+    expect(
+      resolvedInputs.sources.map((File f) => f.path),
+      equals(<String>[
+        '/foo.dart',
+        'Artifact.icuData.TargetPlatform.linux_x64.debug',
+        'HostArtifact.impellerc',
+      ]),
+    );
 
-      final ResolvedFiles resolvedOutputs = target.resolveOutputs(environment);
-      expect(resolvedOutputs.sources, hasLength(1));
-      expect(resolvedOutputs.sources.single.path, endsWith('bar.dart'));
-    },
-  );
+    final ResolvedFiles resolvedOutputs = target.resolveOutputs(environment);
+    expect(resolvedOutputs.sources, hasLength(1));
+    expect(resolvedOutputs.sources.single.path, endsWith('bar.dart'));
+  });
 
-  testWithoutContext('ExtensionAssembleTarget resolves dependencies', () {
+  testWithoutContext('ExtensionTarget resolves dependencies', () {
     final depTarget = FakeTarget();
-    final ExtensionAssembleTarget target = _createTarget(
+    final ExtensionTarget target = _createTarget(
       dependencies: const <String>['dep-target'],
       dependencyResolver: (String name) {
         if (name == 'dep-target') {
@@ -255,9 +252,9 @@ void main() {
   });
 
   testWithoutContext(
-    'ExtensionAssembleTarget throws ToolExit for unsupported artifact or hostArtifact',
+    'ExtensionTarget throws ToolExit for unsupported artifact or hostArtifact',
     () async {
-      final ExtensionAssembleTarget unknownArtifactTarget = _createTarget(
+      final ExtensionTarget unknownArtifactTarget = _createTarget(
         inputs: const <ExtensionSource>[
           ExtensionSource.artifact(ExtensionArtifact('unknownArtifact')),
         ],
@@ -270,7 +267,7 @@ void main() {
         ),
       );
 
-      final ExtensionAssembleTarget unknownHostArtifactTarget = _createTarget(
+      final ExtensionTarget unknownHostArtifactTarget = _createTarget(
         inputs: const <ExtensionSource>[
           ExtensionSource.hostArtifact(ExtensionHostArtifact('unknownHostArtifact')),
         ],
@@ -285,9 +282,9 @@ void main() {
     },
   );
 
-  testWithoutContext('ExtensionAssembleTarget supports custom targetPlatform and throws ToolExit for invalid artifact platformName', () async {
+  testWithoutContext('ExtensionTarget supports custom targetPlatform and throws ToolExit for invalid artifact platformName', () async {
     final buildManager = FakeExtensionBuildManager();
-    final ExtensionAssembleTarget customTargetPlatformTarget = _createTarget(
+    final ExtensionTarget customTargetPlatformTarget = _createTarget(
       buildManager: buildManager,
       targetPlatform: 'custom-embedder-arm64',
       inputs: const <ExtensionSource>[
@@ -310,7 +307,7 @@ void main() {
       }),
     );
 
-    final ExtensionAssembleTarget invalidArtifactPlatformTarget = _createTarget(
+    final ExtensionTarget invalidArtifactPlatformTarget = _createTarget(
       inputs: const <ExtensionSource>[
         ExtensionSource.artifact(BuiltInArtifacts.icuData, platform: 'invalid-artifact-platform'),
       ],
@@ -367,9 +364,44 @@ void main() {
   });
 
   testWithoutContext('BuiltInArtifacts, BuiltInHostArtifacts, Linux artifacts, and BuiltInTargets match host definitions', () {
-    const target = ExtensionBuildTarget(
-      description: 'Contract check target',
-      name: 'contract-target',
+    const buildTarget = ExtensionBuildTarget(
+      description: 'Contract check build target',
+      name: 'contract-build-target',
+      targetPlatform: 'linux-x64',
+      artifacts: <ExtensionArtifact>{
+        BuiltInArtifacts.flutterPatchedSdkPath,
+        BuiltInArtifacts.genSnapshot,
+        BuiltInArtifacts.icuData,
+        ExtensionArtifact('linuxDesktopPath'),
+        ExtensionArtifact('linuxHeaders'),
+      },
+      hostArtifacts: <ExtensionHostArtifact>{
+        BuiltInHostArtifacts.impellerc,
+        BuiltInHostArtifacts.libtessellator,
+      },
+    );
+
+    final Map<String, String> resolvedBuild = resolveExtensionBuildTargetArtifacts(
+      artifacts: artifacts,
+      buildMode: .debug,
+      target: buildTarget,
+    );
+    expect(
+      resolvedBuild.keys,
+      unorderedEquals(<String>[
+        BuiltInArtifacts.flutterPatchedSdkPath.name,
+        BuiltInArtifacts.genSnapshot.name,
+        BuiltInArtifacts.icuData.name,
+        'linuxDesktopPath',
+        'linuxHeaders',
+        BuiltInHostArtifacts.impellerc.name,
+        BuiltInHostArtifacts.libtessellator.name,
+      ]),
+    );
+
+    const assembleTarget = ExtensionAssembleTarget(
+      description: 'Contract check assemble target',
+      name: 'contract-assemble-target',
       targetPlatform: 'linux-x64',
       inputs: <ExtensionSource>[
         ExtensionSource.artifact(BuiltInArtifacts.flutterPatchedSdkPath),
@@ -382,23 +414,12 @@ void main() {
       ],
     );
 
-    final Map<String, String> resolved = resolveExtensionTargetArtifacts(
+    final Map<String, String> resolvedAssemble = resolveExtensionAssembleTargetArtifacts(
       artifacts: artifacts,
       buildMode: .debug,
-      target: target,
+      target: assembleTarget,
     );
-    expect(
-      resolved.keys,
-      unorderedEquals(<String>[
-        BuiltInArtifacts.flutterPatchedSdkPath.name,
-        BuiltInArtifacts.genSnapshot.name,
-        BuiltInArtifacts.icuData.name,
-        'linuxDesktopPath',
-        'linuxHeaders',
-        BuiltInHostArtifacts.impellerc.name,
-        BuiltInHostArtifacts.libtessellator.name,
-      ]),
-    );
+    expect(resolvedAssemble, equals(resolvedBuild));
 
     expect(BuiltInTargets.copyAssets, equals(const CopyAssets().name));
     expect(BuiltInTargets.kernelSnapshot, equals(const KernelSnapshot().name));

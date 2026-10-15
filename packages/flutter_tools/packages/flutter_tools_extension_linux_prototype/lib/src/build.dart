@@ -27,7 +27,7 @@ const String _kAppDill = 'app.dill';
 const String _kGeneratedConfigCmake = 'generated_config.cmake';
 
 /// Top-level Linux build target contributed by the prototype extension.
-class CustomLinuxBuildTarget extends ExtensionTarget {
+class CustomLinuxBuildTarget extends BuildTarget {
   const CustomLinuxBuildTarget()
     : super(
         description: 'A custom Linux build target from prototype extension.',
@@ -40,19 +40,11 @@ class CustomLinuxBuildTarget extends ExtensionTarget {
   String get name => LinuxBuildService.customLinuxBuildTargetName;
 
   @override
-  List<ExtensionSource> get inputs => const <ExtensionSource>[
-    ExtensionSource.pattern('${BuiltInPlaceholders.projectDir}/pubspec.yaml'),
-    ExtensionSource.pattern('${BuiltInPlaceholders.projectDir}/linux/CMakeLists.txt'),
-    ExtensionSource.pattern('${BuiltInPlaceholders.projectDir}/lib/main.dart'),
-    ExtensionSource.artifact(LinuxArtifacts.linuxHeaders),
-    ExtensionSource.artifact(LinuxArtifacts.linuxDesktopPath),
-    ExtensionSource.artifact(BuiltInArtifacts.icuData),
-  ];
-
-  @override
-  List<ExtensionSource> get outputs => const <ExtensionSource>[
-    ExtensionSource.pattern('${BuiltInPlaceholders.outputDir}/bundle/*'),
-  ];
+  Set<ExtensionArtifact> get artifacts => const <ExtensionArtifact>{
+    LinuxArtifacts.linuxHeaders,
+    LinuxArtifacts.linuxDesktopPath,
+    BuiltInArtifacts.icuData,
+  };
 
   @override
   Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
@@ -147,12 +139,11 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
 }
 
 /// Assemble-only Linux debug bundle target contributed by the prototype extension.
-class CustomLinuxAssembleOnlyDebug extends ExtensionTarget {
+class CustomLinuxAssembleOnlyDebug extends AssembleTarget {
   const CustomLinuxAssembleOnlyDebug()
     : super(
         description: 'A custom Linux assemble-only debug target.',
         targetPlatform: _kLinuxX64Platform,
-        isTopLevel: false,
       );
 
   @override
@@ -245,8 +236,10 @@ final class LinuxBuildService extends BuildService {
   static const String customLinuxBuildTargetName = 'custom-linux-build';
 
   @override
-  List<ExtensionTarget> get targets => const <ExtensionTarget>[
-    CustomLinuxBuildTarget(),
+  List<BuildTarget> get buildTargets => const <BuildTarget>[CustomLinuxBuildTarget()];
+
+  @override
+  List<AssembleTarget> get assembleTargets => const <AssembleTarget>[
     CustomLinuxAssembleOnlyDebug(),
   ];
 }

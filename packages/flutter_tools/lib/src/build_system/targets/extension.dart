@@ -15,31 +15,33 @@ import '../exceptions.dart';
 /// Resolves a build target dependency by its [dependency] name.
 typedef DependencyResolverCallback = Target Function(String dependency);
 
-/// A build target that delegates to a tool extension.
-class ExtensionAssembleTarget extends Target {
-  ExtensionAssembleTarget({
+/// A `flutter assemble` target that delegates to a tool extension.
+class ExtensionTarget extends Target {
+  ExtensionTarget({
+    required this.assembleTarget,
     required this._buildManager,
-    required this.buildTarget,
     required this._dependencyResolver,
   });
 
-  /// The extension-defined build target.
-  final ExtensionBuildTarget buildTarget;
+  /// The extension-defined assemble target.
+  final ExtensionAssembleTarget assembleTarget;
 
   final ExtensionBuildManager _buildManager;
   final DependencyResolverCallback _dependencyResolver;
 
   @override
-  String get name => buildTarget.name;
+  String get name => assembleTarget.name;
 
   @override
-  late final List<Target> dependencies = buildTarget.dependencies.map(_dependencyResolver).toList();
+  late final List<Target> dependencies = assembleTarget.dependencies
+      .map(_dependencyResolver)
+      .toList();
 
   @override
-  late final List<Source> inputs = buildTarget.inputs.map(_toHostSource).toList();
+  late final List<Source> inputs = assembleTarget.inputs.map(_toHostSource).toList();
 
   @override
-  late final List<Source> outputs = buildTarget.outputs.map(_toHostSource).toList();
+  late final List<Source> outputs = assembleTarget.outputs.map(_toHostSource).toList();
 
   @override
   Future<void> build(Environment environment) async {
@@ -58,28 +60,28 @@ class ExtensionAssembleTarget extends Target {
     }
     final mode = BuildMode.fromCliName(buildMode);
 
-    final Map<String, String> resolvedArtifacts = resolveExtensionTargetArtifacts(
+    final Map<String, String> resolvedArtifacts = resolveExtensionAssembleTargetArtifacts(
       artifacts: artifacts,
       buildMode: mode,
-      target: buildTarget,
+      target: assembleTarget,
     );
 
-    final ExtensionBuildResult result = await _buildManager.build(
+    final ExtensionBuildResult result = await _buildManager.assemble(
       buildDir: buildDir.uri,
       buildMode: mode,
       mainPath: mainPath,
       outputDir: outputDir.uri,
       projectRoot: projectDir.uri,
       resolvedArtifacts: resolvedArtifacts,
-      targetName: buildTarget.name,
+      targetName: assembleTarget.name,
     );
 
     if (!result.success) {
       final String? errorMessage = result.errorMessage;
       throwToolExit(
         errorMessage != null && errorMessage.isNotEmpty
-            ? 'Extension build target "${buildTarget.name}" failed: $errorMessage'
-            : 'Extension build target "${buildTarget.name}" failed.',
+            ? 'Extension assemble target "${assembleTarget.name}" failed: $errorMessage'
+            : 'Extension assemble target "${assembleTarget.name}" failed.',
       );
     }
   }
@@ -107,24 +109,43 @@ Directory resolveExtensionOutputDir({
   return fileSystem.directory(fileSystem.path.normalize(outputPath));
 }
 
+/// Resolves all engine and host artifacts declared on [target] using
+/// [artifacts] and [buildMode].
+///
+/// Throws a [ToolExit] if any requested artifact name is invalid or unsupported.
+Map<String, String> resolveExtensionBuildTargetArtifacts({
+  required Artifacts artifacts,
+  required BuildMode buildMode,
+  required ExtensionBuildTarget target,
+}) {
+  final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
+  final resolvedArtifacts = <String, String>{};
+  for (final ExtensionArtifact artifact in target.artifacts) {
+    final Artifact hostArtifact = _resolveArtifact(artifact);
+    resolvedArtifacts[artifact.name] = artifacts.getArtifactPath(
+      hostArtifact,
+      platform: targetPlatform,
+      mode: buildMode,
+    );
+  }
+  for (final ExtensionHostArtifact artifact in target.hostArtifacts) {
+    final HostArtifact hostArtifact = _resolveHostArtifact(artifact);
+    resolvedArtifacts[artifact.name] = artifacts.getHostArtifact(hostArtifact).path;
+  }
+  return resolvedArtifacts;
+}
+
 /// Resolves all engine and host artifact inputs declared on [target] using
 /// [artifacts] and [buildMode].
 ///
 /// Throws a [ToolExit] if any artifact platform name or requested artifact
 /// name is invalid or unsupported.
-Map<String, String> resolveExtensionTargetArtifacts({
+Map<String, String> resolveExtensionAssembleTargetArtifacts({
   required Artifacts artifacts,
   required BuildMode buildMode,
-  required ExtensionBuildTarget target,
+  required ExtensionAssembleTarget target,
 }) {
-  TargetPlatform? targetPlatform;
-  if (target.targetPlatform.isNotEmpty) {
-    try {
-      targetPlatform = TargetPlatform.fromName(target.targetPlatform);
-    } on Exception {
-      // Custom extension target platforms do not map to a built-in TargetPlatform.
-    }
-  }
+  final TargetPlatform? targetPlatform = _tryResolveTargetPlatform(target.targetPlatform);
   final resolvedArtifacts = <String, String>{};
   for (final ExtensionSource input in target.inputs) {
     switch (input) {
@@ -148,6 +169,18 @@ Map<String, String> resolveExtensionTargetArtifacts({
     }
   }
   return resolvedArtifacts;
+}
+
+TargetPlatform? _tryResolveTargetPlatform(String platformName) {
+  if (platformName.isEmpty) {
+    return null;
+  }
+  try {
+    return TargetPlatform.fromName(platformName);
+  } on Exception {
+    // Custom extension target platforms do not map to a built-in TargetPlatform.
+    return null;
+  }
 }
 
 Source _toHostSource(ExtensionSource source) => switch (source) {

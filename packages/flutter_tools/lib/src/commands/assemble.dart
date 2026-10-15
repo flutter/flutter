@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/args.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionBuildTarget;
+import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionAssembleTarget;
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -237,16 +237,17 @@ class AssembleCommand extends FlutterCommand {
     };
     if (_extensionBuildManager case final ExtensionBuildManager extensionBuildManager?
         when argumentResults.rest.any((String targetName) => !targetMap.containsKey(targetName))) {
-      for (final ExtensionBuildTarget target in await extensionBuildManager.getBuildTargets()) {
+      for (final ExtensionAssembleTarget target
+          in await extensionBuildManager.getAssembleTargets()) {
         if (targetMap.containsKey(target.name)) {
           _toolContext.logger.printWarning(
             'Skipping custom assemble target "${target.name}" because a target with that name already exists.',
           );
           continue;
         }
-        targetMap[target.name] = ExtensionAssembleTarget(
+        targetMap[target.name] = ExtensionTarget(
+          assembleTarget: target,
           buildManager: extensionBuildManager,
-          buildTarget: target,
           dependencyResolver: (String dependencyName) {
             final Target? dependency = targetMap[dependencyName];
             if (dependency == null) {
