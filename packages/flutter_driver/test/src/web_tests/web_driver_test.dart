@@ -89,6 +89,54 @@ void main() {
       );
     });
   });
+
+  group('WebFlutterDriver.connectWeb URL resolution', () {
+    String? connectedUrl;
+    final Future<FlutterWebConnection> Function(
+      String url,
+      Map<String, Object?> settings, {
+      Duration? timeout,
+    })
+    originalConnectionFactory = WebFlutterDriver.connectionFactory;
+
+    setUp(() {
+      connectedUrl = null;
+      WebFlutterDriver.connectionFactory =
+          (String url, Map<String, Object?> settings, {Duration? timeout}) async {
+            connectedUrl = url;
+            return FakeFlutterWebConnection();
+          };
+    });
+
+    tearDown(() {
+      WebFlutterDriver.connectionFactory = originalConnectionFactory;
+      WebFlutterDriver.environmentOverride = null;
+    });
+
+    test('prefers FLUTTER_WEB_APP_URL over VM_SERVICE_URL', () async {
+      WebFlutterDriver.environmentOverride = <String, String>{
+        'FLUTTER_WEB_APP_URL': 'http://localhost:8080',
+        'VM_SERVICE_URL': 'ws://127.0.0.1:1234/ws',
+      };
+
+      await WebFlutterDriver.connectWeb();
+
+      expect(connectedUrl, 'http://localhost:8080');
+    });
+
+    test(
+      'falls back to VM_SERVICE_URL for backwards compatibility when web app URL is not set',
+      () async {
+        WebFlutterDriver.environmentOverride = <String, String>{
+          'VM_SERVICE_URL': 'http://localhost:8080',
+        };
+
+        await WebFlutterDriver.connectWeb();
+
+        expect(connectedUrl, 'http://localhost:8080');
+      },
+    );
+  });
 }
 
 Matcher _throwsDriverErrorWithMessage(String expectedMessage) {

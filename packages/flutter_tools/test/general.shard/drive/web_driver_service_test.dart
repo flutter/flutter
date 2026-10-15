@@ -5,13 +5,17 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/drive/drive_service.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
 import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -19,8 +23,10 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/web/chrome_constants.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
+import 'package:package_config/package_config_types.dart';
 import 'package:test/fake.dart';
 import 'package:unified_analytics/unified_analytics.dart';
+import 'package:webdriver/async_io.dart' as async_io;
 import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
@@ -420,6 +426,75 @@ void main() {
       WebRunnerFactory: () => FakeWebRunnerFactory(doResolveToError: true),
     },
   );
+
+  testUsingContext('WebDriverService forwards vmserviceOutFile to ResidentWebRunner', () async {
+    final WebDriverService service = setUpDriverService();
+    final device = FakeDevice();
+    const testUrl = 'http://localhost:1234/test';
+    const vmserviceOutFile = 'vmservice.json';
+    await service.start(
+      BuildInfo.debug,
+      device,
+      DebuggingOptions.enabled(
+        BuildInfo.debug,
+        vmserviceOutFile: vmserviceOutFile,
+        webConfig: const WebDebugConfig(launchUrl: testUrl),
+      ),
+    );
+    expect(FakeResidentRunner.instance.debuggingOptions.vmserviceOutFile, vmserviceOutFile);
+  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+
+  testUsingContext(
+    'WebDriverService provides VM_SERVICE_URL and FLUTTER_WEB_APP_URL with web app URL',
+    () async {
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: const <String>['dart', 'test_driver/app_test.dart'],
+          environment: <String, String>{
+            'VM_SERVICE_URL': 'http://localhost:1234/test',
+            'FLUTTER_WEB_APP_URL': 'http://localhost:1234/test',
+            'DRIVER_SESSION_ID': 'fake-session-id',
+            'DRIVER_SESSION_URI': 'http://localhost:4444',
+            'DRIVER_SESSION_SPEC': 'WebDriverSpec.W3c',
+            'DRIVER_SESSION_CAPABILITIES': json.encode(<String, Object?>{'browserName': 'chrome'}),
+            'SUPPORT_TIMELINE_ACTION': 'true',
+            'FLUTTER_WEB_TEST': 'true',
+            'ANDROID_CHROME_ON_EMULATOR': 'false',
+          },
+        ),
+      ]);
+      final WebDriverService service = setUpDriverService(
+        processManager: processManager,
+        createWebDriver: ({
+          Uri? uri,
+          Map<String, Object?>? desired,
+          async_io.WebDriverSpec spec = async_io.WebDriverSpec.Auto,
+        }) async => FakeWebDriver(),
+      );
+      final device = FakeDevice();
+      const testUrl = 'http://localhost:1234/test';
+      await service.start(
+        BuildInfo.debug,
+        device,
+        DebuggingOptions.enabled(
+          BuildInfo.debug,
+          webConfig: const WebDebugConfig(launchUrl: testUrl),
+        ),
+      );
+      final int testResult = await service.startTest(
+        'test_driver/app_test.dart',
+        const DriveTestSpecification(
+          browserName: 'chrome',
+          driverPort: 4444,
+          headless: true,
+          packageConfig: PackageConfig.empty,
+        ),
+      );
+      expect(testResult, 0);
+      expect(processManager.hasRemainingExpectations, isFalse);
+    },
+    overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
+  );
 }
 
 class FakeWebRunnerFactory implements WebRunnerFactory {
@@ -501,14 +576,41 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
   }
 }
 
-WebDriverService setUpDriverService() {
+WebDriverService setUpDriverService({
+  ProcessManager? processManager,
+  CreateWebDriver? createWebDriver,
+}) {
   return WebDriverService(
     analytics: const NoOpAnalytics(),
     buildSystem: TestBuildSystem.all(BuildResult(success: true)),
     buildTargets: const BuildTargetsImpl(),
+    createWebDriver: createWebDriver ?? async_io.createDriver,
     dartSdkPath: 'dart',
-    toolContext: const DelegatingToolContext(),
+    toolContext: DelegatingToolContext(
+      platform: FakePlatform(),
+      processManager: processManager,
+      processUtils: processManager == null
+          ? null
+          : ProcessUtils(processManager: processManager, logger: BufferLogger.test()),
+    ),
   );
+}
+
+class FakeWebDriver extends Fake implements async_io.WebDriver {
+  @override
+  final String id = 'fake-session-id';
+
+  @override
+  final Uri uri = Uri.parse('http://localhost:4444');
+
+  @override
+  final async_io.WebDriverSpec spec = async_io.WebDriverSpec.W3c;
+
+  @override
+  final capabilities = <String, Object?>{'browserName': 'chrome'};
+
+  @override
+  Future<void> quit({bool closeSession = true}) async {}
 }
 
 class FakeDevice extends Fake implements Device {

@@ -28,6 +28,13 @@ import '../web/chrome_constants.dart';
 import '../web/web_runner.dart';
 import 'drive_service.dart';
 
+/// Signature for a function that creates an [async_io.WebDriver].
+typedef CreateWebDriver = Future<async_io.WebDriver> Function({
+  Uri? uri,
+  Map<String, Object?>? desired,
+  async_io.WebDriverSpec spec,
+});
+
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
   WebDriverService({
@@ -36,6 +43,7 @@ class WebDriverService extends DriverService {
     required this.buildTargets,
     required this._dartSdkPath,
     required this._toolContext,
+    @visibleForTesting this._createWebDriver = async_io.createDriver,
   });
 
   final Analytics _analytics;
@@ -43,6 +51,7 @@ class WebDriverService extends DriverService {
   final BuildTargets buildTargets;
   final String _dartSdkPath;
   final ToolContext _toolContext;
+  final CreateWebDriver _createWebDriver;
 
   late ResidentRunner _residentRunner;
   Uri? _webUri;
@@ -90,6 +99,7 @@ class WebDriverService extends DriverService {
           : DebuggingOptions.enabled(
               buildInfo,
               disablePortPublication: debuggingOptions.disablePortPublication,
+              vmserviceOutFile: debuggingOptions.vmserviceOutFile,
               webConfig: webConfig,
             ),
       platformArgs: platformArgs,
@@ -182,7 +192,7 @@ class WebDriverService extends DriverService {
     }
 
     try {
-      webDriver = await async_io.createDriver(
+      webDriver = await _createWebDriver(
         uri: Uri.parse('http://localhost:${spec.driverPort}/'),
         desired: getDesiredCapabilities(
           browser,
@@ -213,6 +223,7 @@ class WebDriverService extends DriverService {
       environment: <String, String>{
         ...platform.environment,
         'VM_SERVICE_URL': _webUri.toString(),
+        'FLUTTER_WEB_APP_URL': _webUri.toString(),
         ..._additionalDriverEnvironment(webDriver, spec.browserName, spec.androidEmulator),
       },
     );
