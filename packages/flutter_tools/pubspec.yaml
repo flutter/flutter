@@ -85,7 +85,7 @@ dependencies:
 
   standard_message_codec: 0.0.1+5
 
-  dart_style: 3.1.13
+  dart_style: 3.1.14
 
   # The below dependencies are transitive and are here to pin them to a specific version.
   _fe_analyzer_shared: 107.0.0
@@ -139,4 +139,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: o7c443
+# PUBSPEC CHECKSUM: rdkeu1
