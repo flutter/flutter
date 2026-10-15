@@ -665,7 +665,19 @@ deps = {
     'packages': [
       {
         'package': 'gn/gn/${{platform}}',
-        'version': 'git_revision:81b24e01531ecf0eff12ec9359a555ec3944ec4e'
+        'version': 'git_revision:f9eca75ae5549af4a6d4a2e2a912c652590de9da'
+      },
+    ],
+    'dep_type': 'cipd',
+  },
+  # Hermetic Python used as GN's `script_executable` (see engine/src/.gn).
+  # The host package is not nested under a ${{platform}} folder because .gn
+  # cannot use variables to locate the interpreter.
+  'engine/src/flutter/third_party/cpython3': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/cpython3/${{platform}}',
+        'version': 'version:3@3.11.9.chromium.38'
       },
     ],
     'dep_type': 'cipd',
