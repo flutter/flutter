@@ -201,7 +201,7 @@ SKWASM_EXPORT void canvas_clipRRect(flutter::DisplayListBuilder* canvas,
 SKWASM_EXPORT void canvas_clipPath(flutter::DisplayListBuilder* canvas,
                                    SkPathBuilder* path,
                                    bool antialias) {
-  canvas->ClipPath(flutter::DlPath(path->snapshot()),
+  canvas->ClipPath(Skwasm::SnapshotPath(path),
                    flutter::DlClipOp::kIntersect, antialias);
 }
 
@@ -276,7 +276,7 @@ SKWASM_EXPORT void canvas_drawArc(flutter::DisplayListBuilder* canvas,
 SKWASM_EXPORT void canvas_drawPath(flutter::DisplayListBuilder* canvas,
                                    SkPathBuilder* path,
                                    flutter::DlPaint* paint) {
-  canvas->DrawPath(flutter::DlPath(path->snapshot()),
+  canvas->DrawPath(Skwasm::SnapshotPath(path),
                    paint ? *paint : flutter::DlPaint());
 }
 
@@ -286,7 +286,7 @@ SKWASM_EXPORT void canvas_drawShadow(flutter::DisplayListBuilder* canvas,
                                      flutter::DlScalar device_pixel_ratio,
                                      uint32_t color,
                                      bool transparent_occluder) {
-  canvas->DrawShadow(flutter::DlPath(path->snapshot()), flutter::DlColor(color),
+  canvas->DrawShadow(Skwasm::SnapshotPath(path), flutter::DlColor(color),
                      elevation, transparent_occluder, device_pixel_ratio);
 }
 
