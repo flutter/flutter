@@ -541,13 +541,20 @@ zero.average                                                      0.0       2.2 
       expect(await runBenchmarkCli(<String>['--benchmark=draw_rect', '--smoke-test']), 2);
     });
 
+    test('--benchmark and --filter together exit with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--benchmark=draw_rect', '--filter=draw']), 2);
+    });
+
+    test('--smoke-test and --filter together exit with code 2', () async {
+      expect(await runBenchmarkCli(<String>['--smoke-test', '--filter=draw']), 2);
+    });
+
     test('empty --benchmark exits with code 2', () async {
       expect(await runBenchmarkCli(<String>['--benchmark=,']), 2);
     });
 
     test('invalid --filter regular expression exits with code 2', () async {
       expect(await runBenchmarkCli(<String>['--filter=[']), 2);
-      expect(await runBenchmarkCli(<String>['--benchmark=draw_rect', '--filter=[']), 2);
     });
 
     test('identical --baseline and --results-file paths exit with code 2', () async {

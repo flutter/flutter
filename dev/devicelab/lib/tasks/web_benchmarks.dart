@@ -743,18 +743,22 @@ ArgParser buildBenchmarkArgParser() {
     ..addFlag('help', abbr: 'h', negatable: false, help: 'Print this help message.')
     ..addMultiOption(
       'benchmark',
-      help: 'Target benchmark names to run (comma-separated or multiple flags).',
+      help:
+          'Target benchmark names to run (comma-separated or multiple flags). '
+          'Cannot be combined with --smoke-test or --filter.',
     )
     ..addFlag(
       'smoke-test',
       negatable: false,
-      help: 'Run the curated fast smoke-test benchmarks (${kSmokeTestBenchmarks.join(', ')}).',
+      help:
+          'Run the curated fast smoke-test benchmarks (${kSmokeTestBenchmarks.join(', ')}). '
+          'Cannot be combined with --benchmark or --filter.',
     )
     ..addOption(
       'filter',
       help:
           'Regex pattern to filter benchmark names. '
-          'Can be combined with --benchmark or --smoke-test.',
+          'Cannot be combined with --benchmark or --smoke-test.',
     )
     ..addOption('baseline', help: 'Path to a baseline JSON results file to compare against.')
     ..addOption('results-file', help: 'Path where the JSON benchmark results will be written.')
