@@ -13,6 +13,7 @@ import '../base/os.dart' show HostPlatform, OperatingSystemUtils;
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 
 /// Encapsulates information about the installed copy of Visual Studio, if any.
@@ -25,6 +26,23 @@ class VisualStudio {
     required this._osUtils,
   }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
        _logger = logger;
+
+  factory VisualStudio.fromContext(ToolContext toolContext) {
+    final ToolContext(
+      :FileSystem fs,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
+    return VisualStudio(
+      fileSystem: fs,
+      processManager: processManager,
+      platform: platform,
+      logger: logger,
+      osUtils: os,
+    );
+  }
 
   final FileSystem _fileSystem;
   final Platform _platform;
