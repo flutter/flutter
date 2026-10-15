@@ -14,6 +14,7 @@
 group("dart_wrap") {
   deps = [
     "//flutter/third_party/dart/runtime:dart_api",
+    "//flutter/third_party/dart/runtime:libdart_aotruntime",
     "//flutter/third_party/dart/runtime:libdart_jit",
     "//flutter/third_party/dart/runtime/bin:analyze_snapshot",
     "//flutter/third_party/dart/runtime/bin:common_embedder_dart_io",

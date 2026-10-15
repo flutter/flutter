@@ -78,6 +78,7 @@ gn_build(
     # Libraries. The facades below mirror the GN dependencies between them.
     archives = {
         "libcommon_embedder_dart_io.a": "//flutter/third_party/dart/runtime/bin:common_embedder_dart_io",
+        "libdart_aotruntime.a": "//flutter/third_party/dart/runtime:libdart_aotruntime",
         "libdart_builtin.a": "//flutter/third_party/dart/runtime/bin:libdart_builtin",
         "libdart_jit.a": "//flutter/third_party/dart/runtime:libdart_jit",
         "libdouble_conversion.a": "//flutter/third_party/dart/third_party/double-conversion/src:libdouble_conversion",
@@ -132,14 +133,22 @@ cc_library(
 )
 
 # //flutter/third_party/dart/runtime:libdart_aotruntime -- the VM for AOT
-# snapshots, which //flutter/runtime:libdart picks in the profile and
-# release runtime modes. Not exported by the wrapped build yet (a second
-# build of the VM's sources, DART_PRECOMPILED_RUNTIME, for modes the host
-# suites do not run in): a build in those modes fails on this target's
-# incompatibility rather than on a missing label.
+# snapshots (a second build of the VM's sources, DART_PRECOMPILED_RUNTIME),
+# which //flutter/runtime:libdart picks in the profile and release runtime
+# modes; the same GN deps as the JIT VM's.
 cc_library(
     name = "libdart_aotruntime",
-    target_compatible_with = ["@platforms//:incompatible"],
+    srcs = [":libdart_aotruntime.a"],
+    linkopts = [
+        "-ldl",
+        "-lpthread",
+    ],
+    deps = [
+        ":libdouble_conversion",
+        ":libprotozero",
+        "@dart//:dart_api_headers",
+        "@icu//:icuuc",
+    ],
 )
 
 # //flutter/third_party/dart/runtime/bin:libdart_builtin -- shared by the
