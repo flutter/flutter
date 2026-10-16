@@ -3339,6 +3339,121 @@ void main() {
       expect(dismissIntentInvoked, isTrue);
     },
   );
+
+  for (final semanticsEnabled in <bool>[false, true]) {
+    testWidgets('RawTooltip remains responsive when its hovered list item is parked '
+        'with semantics ${semanticsEnabled ? 'enabled' : 'disabled'}', (WidgetTester tester) async {
+      final controller = ScrollController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        WidgetsApp(
+          color: const Color(0x00000000),
+          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+            return PageRouteBuilder<T>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) => builder(context),
+            );
+          },
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              child: ListView.builder(
+                controller: controller,
+                itemCount: 20,
+                itemBuilder: (BuildContext context, int index) => _KeepAliveRawTooltipItem(index),
+              ),
+            ),
+          ),
+        ),
+      );
+      controller.jumpTo(700.0);
+      await tester.pump();
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      // Hovering shows the tooltip and requests keep-alive. Moving the item
+      // past the trailing cache extent in the same frame parks its layout
+      // surrogate before the new deferred overlay child can be laid out.
+      await gesture.moveTo(tester.getCenter(find.byKey(const ValueKey<int>(3))));
+      controller.jumpTo(0.0);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      // The pending-layout overlay must not block pointer updates. The exit
+      // releases keep-alive and lets the tooltip and list item be removed.
+      await gesture.moveBy(const Offset(0.0, 5.0));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.text(tooltipText), findsNothing);
+      expect(find.byKey(const ValueKey<int>(3)), findsNothing);
+
+      // Once the item is laid out again, its tooltip participates normally.
+      controller.jumpTo(700.0);
+      await tester.pump();
+      await gesture.moveTo(tester.getCenter(find.byKey(const ValueKey<int>(3))));
+      await tester.pumpAndSettle();
+      expect(find.text(tooltipText), findsOneWidget);
+    }, semanticsEnabled: semanticsEnabled);
+  }
+}
+
+class _KeepAliveRawTooltipItem extends StatefulWidget {
+  const _KeepAliveRawTooltipItem(this.index);
+
+  final int index;
+
+  @override
+  State<_KeepAliveRawTooltipItem> createState() => _KeepAliveRawTooltipItemState();
+}
+
+class _KeepAliveRawTooltipItemState extends State<_KeepAliveRawTooltipItem>
+    with AutomaticKeepAliveClientMixin<_KeepAliveRawTooltipItem> {
+  bool _hovered = false;
+
+  @override
+  bool get wantKeepAlive => _hovered;
+
+  void _handleEnter(PointerEnterEvent event) {
+    _hovered = true;
+    updateKeepAlive();
+  }
+
+  void _handleExit(PointerExitEvent event) {
+    _hovered = false;
+    updateKeepAlive();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(child: Text('Item ${widget.index}')),
+            RawTooltip(
+              semanticsTooltip: tooltipText,
+              tooltipBuilder: (BuildContext context, Animation<double> animation) =>
+                  const Text(tooltipText),
+              child: MouseRegion(
+                onEnter: _handleEnter,
+                onExit: _handleExit,
+                child: SizedBox(key: ValueKey<int>(widget.index), width: 48.0, height: 48.0),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 202.0),
+      ],
+    );
+  }
 }
 
 Future<void> setWidgetForTooltipMode(
