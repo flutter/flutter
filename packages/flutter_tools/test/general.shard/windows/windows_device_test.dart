@@ -43,14 +43,16 @@ void main() {
     () async {
       expect(
         await WindowsDevices(
+          toolContext: FakeToolContext(
+            fs: MemoryFileSystem.test(),
+            logger: BufferLogger.test(),
+            os: FakeOperatingSystemUtils(),
+            processManager: FakeProcessManager.any(),
+          ),
           windowsWorkflow: WindowsWorkflow(
             featureFlags: TestFeatureFlags(),
             platform: FakePlatform(operatingSystem: 'windows'),
           ),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
-          fileSystem: MemoryFileSystem.test(),
         ).devices(),
         <Device>[],
       );
@@ -60,14 +62,16 @@ void main() {
   testWithoutContext('WindowsDevices lists a devices if the workflow is supported', () async {
     expect(
       await WindowsDevices(
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
         windowsWorkflow: WindowsWorkflow(
           featureFlags: TestFeatureFlags(isWindowsEnabled: true),
           platform: FakePlatform(operatingSystem: 'windows'),
         ),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: MemoryFileSystem.test(),
       ).devices(),
       hasLength(1),
     );
@@ -127,10 +131,12 @@ WindowsDevice setUpWindowsDevice({
   ProcessManager? processManager,
 }) {
   return WindowsDevice(
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
-    logger: logger ?? BufferLogger.test(),
-    processManager: processManager ?? FakeProcessManager.any(),
-    operatingSystemUtils: FakeOperatingSystemUtils(),
+    toolContext: FakeToolContext(
+      fs: fileSystem ?? MemoryFileSystem.test(),
+      logger: logger ?? BufferLogger.test(),
+      os: FakeOperatingSystemUtils(),
+      processManager: processManager ?? FakeProcessManager.any(),
+    ),
   );
 }
 

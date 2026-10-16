@@ -13,7 +13,6 @@ import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
 import '../convert.dart';
@@ -36,6 +35,7 @@ final errorMatcher = RegExp(
 Future<void> buildLinux(
   LinuxProject linuxProject,
   BuildInfo buildInfo, {
+  required String flutterRoot,
   String? target,
   SizeAnalyzer? sizeAnalyzer,
   bool needCrossBuild = false,
@@ -75,7 +75,7 @@ Future<void> buildLinux(
     environmentConfig['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
     environmentConfig['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
-  writeGeneratedCmakeConfig(Cache.flutterRoot!, linuxProject, buildInfo, environmentConfig, logger);
+  writeGeneratedCmakeConfig(flutterRoot, linuxProject, buildInfo, environmentConfig, logger);
 
   createPluginSymlinks(linuxProject.parent);
 

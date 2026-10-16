@@ -385,11 +385,13 @@ void main() {
           expect(project.lldbInitFile, isNot(exists));
           expect(project.lldbHelperPythonFile, isNot(exists));
 
-          await project.ensureReadyForPlatformSpecificTooling();
+          await project.ensureReadyForPlatformSpecificTooling(
+            cache: FakeCache(olderThanToolsStamp: true),
+          );
 
           expect(project.lldbInitFile, exists);
           expect(project.lldbHelperPythonFile, exists);
-        }, overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)});
+        });
 
         testUsingContext('when they are older than tool', () async {
           final fs = MemoryFileSystem.test();
@@ -403,14 +405,16 @@ void main() {
           project.lldbHelperPythonFile.createSync(recursive: true);
           project.lldbHelperPythonFile.writeAsStringSync('old');
 
-          await project.ensureReadyForPlatformSpecificTooling();
+          await project.ensureReadyForPlatformSpecificTooling(
+            cache: FakeCache(olderThanToolsStamp: true),
+          );
 
           expect(project.lldbInitFile.readAsStringSync(), contains('Generated file, do not edit.'));
           expect(
             project.lldbHelperPythonFile.readAsStringSync(),
             contains('Generated file, do not edit.'),
           );
-        }, overrides: <Type, Generator>{Cache: () => FakeCache(olderThanToolsStamp: true)});
+        });
       });
     });
   });
@@ -845,6 +849,9 @@ class FakeFlutterManifest extends Fake implements FlutterManifest {
 
 class FakeCache extends Fake implements Cache {
   FakeCache({this.olderThanToolsStamp = false});
+
+  @override
+  String get flutterRoot => '';
 
   bool olderThanToolsStamp;
   Map<String, bool> filesOlderThanToolsStamp = <String, bool>{};

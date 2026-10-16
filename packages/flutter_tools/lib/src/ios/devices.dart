@@ -545,6 +545,7 @@ class IOSDevice extends Device {
       final XcodeBuildResult buildResult = await buildXcodeProject(
         app: package as BuildableIOSApp,
         buildInfo: debuggingOptions.buildInfo,
+        flutterRoot: _xcode!.flutterRoot,
         targetOverride: mainPath,
         activeArch: _cpuArch,
         deviceID: id,
@@ -834,6 +835,7 @@ class IOSDevice extends Device {
         await updateGeneratedXcodeProperties(
           project: FlutterProject.current(),
           buildInfo: debuggingOptions.buildInfo,
+          flutterRoot: _xcode!.flutterRoot,
           targetOverride: mainPath,
         );
       }
@@ -1207,6 +1209,7 @@ class IOSDevice extends Device {
       await updateGeneratedXcodeProperties(
         project: flutterProject,
         buildInfo: debuggingOptions.buildInfo,
+        flutterRoot: _xcode!.flutterRoot,
         targetOverride: mainPath,
         configurationBuildDir: bundle.parent.absolute.path,
       );

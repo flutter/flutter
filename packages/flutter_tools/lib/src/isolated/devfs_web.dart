@@ -20,7 +20,9 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../build_system/tools/asset_transformer.dart';
 import '../build_system/tools/shader_compiler.dart';
+import '../cache.dart';
 import '../compile.dart';
+import '../context/tool_context.dart';
 import '../devfs.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
@@ -75,11 +77,9 @@ class WebDevFS implements DevFS {
     required this.isWasm,
     required this.useLocalCanvasKit,
     required this.rootDirectory,
-    this.useDwdsWebSocketConnection = false,
     required this.webCrossOriginIsolation,
-    required this.fileSystem,
-    required this.logger,
-    required this.platform,
+    required this.toolContext,
+    this.useDwdsWebSocketConnection = false,
     this.testMode = false,
     this._webDefines = const <String, String>{},
   }) {
@@ -115,10 +115,13 @@ class WebDevFS implements DevFS {
   final WebDevServerConfig webDevServerConfig;
   final bool useDwdsWebSocketConnection;
   final bool webCrossOriginIsolation;
-  final FileSystem fileSystem;
-  final Logger logger;
-  final Platform platform;
+  final ToolContext toolContext;
   final Map<String, String> _webDefines;
+
+  FileSystem get fileSystem => toolContext.fs;
+  Logger get logger => toolContext.logger;
+  Platform get platform => toolContext.platform;
+  Cache get cache => toolContext.cache;
 
   late WebAssetServer webAssetServer;
 
@@ -217,9 +220,7 @@ class WebDevFS implements DevFS {
       testMode: testMode,
       webDevServerConfig: webDevServerConfig,
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
-      fileSystem: fileSystem,
-      logger: logger,
-      platform: platform,
+      toolContext: toolContext,
       crossOriginIsolation: webCrossOriginIsolation,
       webDefines: _webDefines,
     );

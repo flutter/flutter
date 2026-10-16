@@ -392,6 +392,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.defaultInstance(
           logger: globals.logger,
           fileSystem: globals.fs,
+          flutterRoot: getFlutterRoot(),
           platform: globals.platform,
           splitDeferredAssets: true,
         ).createBundle();
@@ -504,6 +505,7 @@ flutter:
         final AssetBundle bundle = AssetBundleFactory.defaultInstance(
           logger: globals.logger,
           fileSystem: globals.fs,
+          flutterRoot: getFlutterRoot(),
           platform: globals.platform,
           splitDeferredAssets: true,
         ).createBundle();

@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/template.dart';
 
 import '../commands.shard/permeable/utils/project_testing_utils.dart';
 import '../src/common.dart';
@@ -86,6 +87,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -93,6 +95,7 @@ void main() {
         platform: globals.platform,
         stdio: globals.stdio,
       ),
+      TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
   );
 
@@ -142,6 +145,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -149,6 +153,7 @@ void main() {
         platform: globals.platform,
         stdio: globals.stdio,
       ),
+      TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
   );
 
@@ -178,6 +183,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -185,6 +191,7 @@ void main() {
         platform: globals.platform,
         stdio: globals.stdio,
       ),
+      TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
   );
 
@@ -214,6 +221,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -221,6 +229,7 @@ void main() {
         platform: globals.platform,
         stdio: globals.stdio,
       ),
+      TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
   );
 
@@ -263,6 +272,7 @@ void main() {
     },
     overrides: <Type, Generator>{
       Pub: () => Pub.test(
+        flutterRoot: getFlutterRoot(),
         fileSystem: globals.fs,
         logger: globals.logger,
         processManager: globals.processManager,
@@ -270,12 +280,12 @@ void main() {
         platform: globals.platform,
         stdio: globals.stdio,
       ),
+      TemplatePathProvider: () => const TemplatePathProvider(flutterRoot: '../..'),
     },
   );
 }
 
 Future<void> _createProject(Directory dir, List<String> createArgs) async {
-  Cache.flutterRoot = '../..';
   final command = CreateCommand(
     androidContext: FakeAndroidContext(),
     appleContext: FakeAppleContext(),
@@ -285,7 +295,12 @@ Future<void> _createProject(Directory dir, List<String> createArgs) async {
       logger: globals.logger,
       platform: globals.platform,
       processManager: globals.processManager,
-      cache: globals.cache,
+      cache: Cache.test(
+        rootOverride: globals.fs.directory('../..'),
+        flutterRoot: '../..',
+        fileSystem: globals.fs,
+        processManager: globals.processManager,
+      ),
       flutterVersion: FakeFlutterVersion(),
       projectFactory: FlutterProjectFactory(fileSystem: globals.fs, logger: globals.logger),
     ),
