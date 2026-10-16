@@ -149,6 +149,7 @@ class ContentContext {
   PipelineRef GetBlendSaturationPipeline(ContentContextOptions opts) const;
   PipelineRef GetBlendScreenPipeline(ContentContextOptions opts) const;
   PipelineRef GetBlendSoftLightPipeline(ContentContextOptions opts) const;
+  PipelineRef GetBorderMaskBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetCirclePipeline(ContentContextOptions opts) const;
   PipelineRef GetClearBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetClipPipeline(ContentContextOptions opts) const;

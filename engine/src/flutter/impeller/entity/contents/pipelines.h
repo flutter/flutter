@@ -8,6 +8,7 @@
 #include "flutter/fml/build_config.h"
 #include "impeller/entity/advanced_blend.frag.h"
 #include "impeller/entity/advanced_blend.vert.h"
+#include "impeller/entity/border_mask_blur.frag.h"
 #include "impeller/entity/circle.frag.h"
 #include "impeller/entity/circle.vert.h"
 #include "impeller/entity/clip.frag.h"
@@ -104,6 +105,7 @@ using BlendOverlayPipeline = AdvancedBlendPipelineHandle;
 using BlendSaturationPipeline = AdvancedBlendPipelineHandle;
 using BlendScreenPipeline = AdvancedBlendPipelineHandle;
 using BlendSoftLightPipeline = AdvancedBlendPipelineHandle;
+using BorderMaskBlurPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, BorderMaskBlurFragmentShader>;
 using CirclePipeline = RenderPipelineHandle<CircleVertexShader, CircleFragmentShader>;
 using ClipPipeline = RenderPipelineHandle<ClipVertexShader, ClipFragmentShader>;
 using ColorMatrixColorFilterPipeline = RenderPipelineHandle<FilterPositionUvVertexShader, ColorMatrixColorFilterFragmentShader>;
