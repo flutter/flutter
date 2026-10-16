@@ -954,14 +954,16 @@ String getLinuxBuildDirectory(
   ) = toolContext;
   final String arch = switch (targetPlatform) {
     final TargetPlatform target => target.simpleName,
-    null => _getCurrentHostPlatformArchName(
+    null => getCurrentHostPlatform(
       operatingSystemUtils: operatingSystemUtils,
       platform: platform,
-    ),
+    ).platformName,
   };
-  final String subDirs = (flavor != null && flavor.isNotEmpty)
-      ? fileSystem.path.join('linux', arch, flavor)
-      : fileSystem.path.join('linux', arch);
+  final String subDirs = fileSystem.path.joinAll(<String>[
+    'linux',
+    arch,
+    if (flavor != null && flavor.isNotEmpty) flavor,
+  ]);
   return fileSystem.path.join(getBuildDirectory(config, fileSystem), subDirs);
 }
 
@@ -976,9 +978,11 @@ String getWindowsBuildDirectory(
   String? flavor,
 }) {
   final String arch = targetPlatform.simpleName;
-  final String subDirs = (flavor != null && flavor.isNotEmpty)
-      ? fileSystem.path.join('windows', arch, flavor)
-      : fileSystem.path.join('windows', arch);
+  final String subDirs = fileSystem.path.joinAll(<String>[
+    'windows',
+    arch,
+    if (flavor != null && flavor.isNotEmpty) flavor,
+  ]);
   return fileSystem.path.join(getBuildDirectory(config, fileSystem), subDirs);
 }
 
@@ -1191,17 +1195,6 @@ List<String> deprecatedJsInteropCompilerFlags(bool? deprecatedJsInterop) =>
       true => const <String>['--deprecated-js-interop'],
       false => const <String>['--no-deprecated-js-interop'],
     };
-
-String _getCurrentHostPlatformArchName({
-  required OperatingSystemUtils operatingSystemUtils,
-  required Platform platform,
-}) {
-  final HostPlatform hostPlatform = getCurrentHostPlatform(
-    operatingSystemUtils: operatingSystemUtils,
-    platform: platform,
-  );
-  return hostPlatform.platformName;
-}
 
 String? _uncapitalize(String? s) {
   if (s == null || s.isEmpty) {
