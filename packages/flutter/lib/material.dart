@@ -15,7 +15,7 @@
 ///  * [m3.material.io](https://m3.material.io/) for the Material 3 specification
 ///  * [m2.material.io](https://m2.material.io/) for the Material 2 specification
 @Deprecated(
-  'Use package:material_ui/material_ui.dart instead. See the migration guide at: https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui. '
+  'Use package:material_ui/material_ui.dart instead. '\n  'See the migration guide at: '\n  'https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui. '
   'This feature was deprecated after v3.47.0-0.0.pre.',
 )
 library material;
