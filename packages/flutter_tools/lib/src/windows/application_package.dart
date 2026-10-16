@@ -104,7 +104,12 @@ class BuildableWindowsApp extends WindowsApp {
   String executable(BuildMode buildMode, TargetPlatform targetPlatform, [String? flavor]) {
     final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
-      getWindowsBuildDirectory(targetPlatform, flavor),
+      getWindowsBuildDirectory(
+        targetPlatform,
+        config: globals.config,
+        fileSystem: globals.fs,
+        flavor: flavor,
+      ),
       'runner',
       buildMode.uppercaseName,
       '$binaryName.exe',

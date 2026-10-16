@@ -6,8 +6,10 @@ import 'dart:ffi' show Abi;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -16,6 +18,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -81,6 +84,7 @@ environement:
     // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
     final FlutterProject projectUnderTest = FlutterProject.fromDirectory(
       fileSystem.directory('project'),
+      logger: logger,
     );
     writePackageConfigFiles(directory: projectUnderTest.directory, mainLibName: 'my_app');
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
@@ -393,7 +397,21 @@ environement:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fileSystem.directory('project'),
         );
-        await injectPlugins(project, iosPlatform: true, releaseMode: false);
+        await injectPlugins(
+          project,
+          analytics: fakeAnalytics,
+          cocoaPods: cocoaPodsUnderTest,
+          featureFlags: TestFeatureFlags(),
+          releaseMode: false,
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fileSystem,
+            logger: logger,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          ),
+          iosPlatform: true,
+        );
 
         final String debugContents = projectUnderTest.ios
             .xcodeConfigFor('Debug')

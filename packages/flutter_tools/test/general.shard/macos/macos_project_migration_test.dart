@@ -345,6 +345,7 @@ platform :osx, '12.0'
       flutterProjectFactory = FlutterProjectFactory(
         fileSystem: memoryFileSystem,
         logger: testLogger,
+        config: FakeConfig(),
       );
     });
 

@@ -412,7 +412,10 @@ class AndroidAotDeferredComponentsBundle extends Target {
   @override
   Future<void> build(Environment environment) async {
     _components ??=
-        FlutterProject.fromDirectory(environment.projectDir).manifest.deferredComponents ??
+        FlutterProject.fromDirectory(
+          environment.projectDir,
+          logger: environment.logger,
+        ).manifest.deferredComponents ??
         <DeferredComponent>[];
     final abis = <String>[_androidAbiName];
     final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
@@ -427,7 +430,10 @@ class AndroidAotDeferredComponentsBundle extends Target {
       environment,
       _components!,
       generatedLoadingUnits,
-      FlutterProject.fromDirectory(environment.projectDir).buildDirectory,
+      FlutterProject.fromDirectory(
+        environment.projectDir,
+        logger: environment.logger,
+      ).buildDirectory,
       abis,
       dependency.buildMode,
     );

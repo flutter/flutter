@@ -132,6 +132,7 @@ void main() {
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
           fileSystem.currentDirectory,
+          logger: logger,
         );
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
@@ -194,6 +195,7 @@ void main() {
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
           fileSystem.currentDirectory,
+          logger: logger,
         );
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
@@ -235,6 +237,7 @@ void main() {
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
           fileSystem.currentDirectory,
+          logger: logger,
         );
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
@@ -322,6 +325,7 @@ void main() {
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
           fileSystem.currentDirectory,
+          logger: logger,
         );
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
@@ -454,6 +458,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -560,6 +565,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -642,6 +648,7 @@ void main() {
         setUpIOSProject(fileSystem);
         final FlutterProject flutterProject = FlutterProject.fromDirectory(
           fileSystem.currentDirectory,
+          logger: logger,
         );
         final buildableIOSApp = BuildableIOSApp(
           flutterProject.ios,
@@ -769,6 +776,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -826,6 +834,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -880,6 +889,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -930,6 +940,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -999,6 +1010,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -1078,6 +1090,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -1178,6 +1191,7 @@ void main() {
             setUpIOSProject(fileSystem, scheme: flavor);
             final FlutterProject flutterProject = FlutterProject.fromDirectory(
               fileSystem.currentDirectory,
+              logger: logger,
             );
             final buildableIOSApp = BuildableIOSApp(
               flutterProject.ios,
@@ -1263,6 +1277,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -1343,6 +1358,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -1398,6 +1414,7 @@ void main() {
           setUpIOSProject(fileSystem, createWorkspace: false);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -1454,6 +1471,7 @@ void main() {
           setUpIOSProject(fileSystem);
           final FlutterProject flutterProject = FlutterProject.fromDirectory(
             fileSystem.currentDirectory,
+            logger: logger,
           );
           final buildableIOSApp = BuildableIOSApp(
             flutterProject.ios,
@@ -1570,6 +1588,14 @@ IOSDevice setUpIOSDevice({
     xcode: null,
     iProxy: IProxy.test(logger: logger, processManager: processManager ?? FakeProcessManager.any()),
     logger: logger,
+    toolContext: FakeToolContext(
+      artifacts: artifacts,
+      cache: cache,
+      fs: testFileSystem,
+      logger: logger,
+      platform: macPlatform,
+      processManager: processManager ?? FakeProcessManager.any(),
+    ),
     iosDeploy: IOSDeploy(
       logger: logger,
       platform: macPlatform,

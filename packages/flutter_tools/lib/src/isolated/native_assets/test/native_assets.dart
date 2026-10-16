@@ -28,7 +28,7 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 
   @override
   String windowsBuildDirectory(FlutterProject project) {
-    final String buildDir = getBuildDirectory();
+    final String buildDir = getBuildDirectory(globals.config, globals.fs);
     return project.directory.uri.resolve('$buildDir/native_assets/windows/').toFilePath();
   }
 }
@@ -39,7 +39,7 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   if (!buildInfo.buildNativeAssets) {
     return (nativeAssetsManifest: null, flutterHookResult: null);
   }
-  final Uri projectUri = FlutterProject.current().directory.uri;
+  final Uri projectUri = FlutterProject.current(globals.fs, logger: globals.logger).directory.uri;
   final String runPackageName = buildInfo.packageConfig.packages
       .firstWhere((Package p) => p.root == projectUri)
       .name;
@@ -71,7 +71,7 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
   // `build/native_assets/<os>/native_assets.json` file which uses absolute
   // paths to the shared libraries.
   final OS targetOS = getNativeOSFromTargetPlatform(TargetPlatform.tester);
-  final String buildDir = getBuildDirectory();
+  final String buildDir = getBuildDirectory(globals.config, globals.fs);
   final String osName = targetOS.name;
   final Uri buildUri = projectUri.resolve('$buildDir/native_assets/$osName/');
   final Uri nativeAssetsFileUri = buildUri.resolve('native_assets.json');
@@ -101,7 +101,9 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     projectUri: projectUri,
     fileSystem: globals.fs,
     nativeAssetsFileUri: nativeAssetsFileUri,
-    targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/$osName/'),
+    targetUri: projectUri.resolve(
+      '${getBuildDirectory(globals.config, globals.fs)}/native_assets/$osName/',
+    ),
   );
   assert(globals.fs.file(nativeAssetsFileUri).existsSync());
 

@@ -303,7 +303,10 @@ class WebDevFS implements DevFS {
         'flutter_service_worker.js',
         '// Service worker not loaded in run mode.',
       );
-      webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
+      webAssetServer.writeFile(
+        'version.json',
+        FlutterProject.current(fileSystem, logger: logger).getVersionInfo(),
+      );
       webAssetServer.writeFile(
         'main.dart.js',
         generateDDCLibraryBundleBootstrapScript(
@@ -327,7 +330,9 @@ class WebDevFS implements DevFS {
     }
     var syncedBytes = 0;
     if (bundle != null) {
-      final String assetDirectory = fileSystem.path.absolute(getAssetBuildDirectory());
+      final String assetDirectory = fileSystem.path.absolute(
+        getAssetBuildDirectory(globals.config, fileSystem),
+      );
       final Directory assetDir = fileSystem.directory(assetDirectory);
 
       if (bundleFirstUpload && assetDir.existsSync()) {

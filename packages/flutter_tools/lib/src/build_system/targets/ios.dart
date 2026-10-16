@@ -454,7 +454,10 @@ class _IssueLaunchRootViewControllerAccess extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      environment.projectDir,
+      logger: environment.logger,
+    );
     if (flutterProject.ios.appDelegateSwift.existsSync()) {
       await checkForLaunchRootViewControllerAccessDeprecationSwift(
         environment.logger,
@@ -583,7 +586,10 @@ class DebugIosLLDBInit extends Target {
     // Also, this cannot check for a specific path/name for the LLDB Init File
     // since Flutter's LLDB Init file may be imported from within a user's
     // custom LLDB Init File.
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      environment.projectDir,
+      logger: environment.logger,
+    );
     if (flutterProject.isModule) {
       var anyLLDBInitFound = false;
       await for (final FileSystemEntity entity in xcodeProjectDir.list(recursive: true)) {
@@ -706,7 +712,10 @@ abstract class IosAssetBundle extends Target {
           .copySync(dsymOutputBinary.path);
     }
 
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(
+      environment.projectDir,
+      logger: environment.logger,
+    );
     final String? flavor = await flutterProject.ios.parseFlavorFromConfiguration(environment);
 
     // Copy the assets.

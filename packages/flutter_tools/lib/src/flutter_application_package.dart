@@ -2,16 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
 import 'android/android_sdk.dart';
 import 'android/application_package.dart';
 import 'application_package.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/process.dart';
-import 'base/user_messages.dart';
 import 'build_info.dart';
+import 'context/tool_context.dart';
 import 'ios/application_package.dart';
 import 'linux/application_package.dart';
 import 'macos/application_package.dart';
@@ -22,22 +19,10 @@ import 'windows/application_package.dart';
 
 /// A package factory that supports all Flutter target platforms.
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
-  FlutterApplicationPackageFactory({
-    required this._androidSdk,
-    required ProcessManager processManager,
-    required Logger logger,
-    required this._userMessages,
-    required this._fileSystem,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  FlutterApplicationPackageFactory({required this._androidSdk, required this._toolContext});
 
   final AndroidSdk? _androidSdk;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final ProcessUtils _processUtils;
-  final UserMessages _userMessages;
-  final FileSystem _fileSystem;
+  final ToolContext _toolContext;
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -45,50 +30,48 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     BuildInfo? buildInfo,
     File? applicationBinary,
   }) async {
+    final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     switch (platform.os) {
       case .android:
         if (applicationBinary == null) {
           return AndroidApk.fromAndroidProject(
-            FlutterProject.current().android,
-            processManager: _processManager,
-            processUtils: _processUtils,
-            logger: _logger,
+            FlutterProject.current(fs, logger: logger).android,
             androidSdk: _androidSdk,
-            userMessages: _userMessages,
-            fileSystem: _fileSystem,
             buildInfo: buildInfo,
+            toolContext: _toolContext,
           );
         }
         return AndroidApk.fromApk(
           applicationBinary,
-          processManager: _processManager,
-          logger: _logger,
           androidSdk: _androidSdk!,
-          userMessages: _userMessages,
-          processUtils: _processUtils,
+          toolContext: _toolContext,
         );
       case .ios:
         return applicationBinary == null
-            ? await IOSApp.fromIosProject(FlutterProject.current().ios, buildInfo)
+            ? await IOSApp.fromIosProject(FlutterProject.current(fs, logger: logger).ios, buildInfo)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case .tester:
-        return FlutterTesterApp.fromCurrentDirectory(_fileSystem);
+        return FlutterTesterApp.fromCurrentDirectory(fs);
       case .macos:
         return applicationBinary == null
-            ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
+            ? MacOSApp.fromMacOSProject(FlutterProject.current(fs, logger: logger).macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
       case .web:
-        if (!FlutterProject.current().web.existsSync()) {
+        final FlutterProject project = FlutterProject.current(fs, logger: logger);
+        if (!project.web.existsSync()) {
           return null;
         }
-        return WebApplicationPackage(FlutterProject.current());
+        return WebApplicationPackage(project);
       case .linux:
         return applicationBinary == null
-            ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
+            ? LinuxApp.fromLinuxProject(
+                FlutterProject.current(fs, logger: logger).linux,
+                toolContext: _toolContext,
+              )
             : LinuxApp.fromPrebuiltApp(applicationBinary);
       case .windows:
         return applicationBinary == null
-            ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
+            ? WindowsApp.fromWindowsProject(FlutterProject.current(fs, logger: logger).windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();

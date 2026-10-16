@@ -62,7 +62,7 @@ ${exampleProject.initialPubspecContents}
   ${packageProject.packageName}: # This resolves to the other package in the workspace
 ''');
 
-        final FlutterProject rootProject = FlutterProject.fromDirectory(root);
+        final FlutterProject rootProject = FlutterProject.fromDirectory(root, logger: logger);
         final pubspecBuilder = PreviewPubspecBuilder(
           logger: logger,
           verbose: true,

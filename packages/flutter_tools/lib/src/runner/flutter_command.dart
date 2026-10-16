@@ -10,6 +10,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
@@ -31,7 +32,9 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../features.dart';
+import '../flutter_plugins.dart';
 import '../globals.dart' as globals;
+import '../package_graph.dart';
 import '../persistent_tool_state.dart';
 import '../pre_run_validator.dart';
 import '../project.dart';
@@ -208,6 +211,7 @@ abstract class FlutterCommand extends Command<void> {
   Cache get _cache => toolContext?.cache ?? globals.cache;
   FlutterVersion get _flutterVersion => toolContext?.flutterVersion ?? globals.flutterVersion;
   FileSystemUtils get _fsUtils => toolContext?.fileSystemUtils ?? globals.fsUtils;
+  Config get _config => toolContext?.config ?? globals.config;
 
   /// The currently executing command (or sub-command).
 
@@ -917,7 +921,10 @@ abstract class FlutterCommand extends Command<void> {
       final String? customDir = getValue(BuildInfoOptions.codeSizeDirectory);
       final Directory directory = (customDir != null)
           ? _fs.directory(customDir)
-          : _fsUtils.getUniqueDirectory(_fs.directory(getBuildDirectory()), 'flutter_size');
+          : _fsUtils.getUniqueDirectory(
+              _fs.directory(getBuildDirectory(_config, _fs)),
+              'flutter_size',
+            );
       directory.createSync(recursive: true);
       codeSizeDirectory = directory.path;
     }
@@ -1526,6 +1533,31 @@ abstract class FlutterCommand extends Command<void> {
   /// - <https://github.com/flutter/flutter/issues/162649>.
   @protected
   @nonVirtual
+  Future<void> regeneratePlatformSpecificTooling(
+    FlutterProject project, {
+    required bool releaseMode,
+    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    PackageConfig? packageConfig,
+    PackageGraph? packageGraph,
+    PubspecCache? pubspecCache,
+  }) async {
+    await project.regeneratePlatformSpecificTooling(
+      toolContext: toolContext!,
+      analytics: _analytics,
+      cocoaPods: globals.cocoaPods,
+      deprecationBehavior: deprecationBehavior,
+      featureFlags: featureFlags,
+      gradleUtils: globals.gradleUtils,
+      packageConfig: packageConfig,
+      packageGraph: packageGraph,
+      pubspecCache: pubspecCache,
+      releaseMode: releaseMode,
+      templateRenderer: globals.templateRenderer,
+    );
+  }
+
+  @protected
+  @nonVirtual
   Future<void> regeneratePlatformSpecificToolingIfApplicable(
     FlutterProject project, {
     required bool releaseMode,
@@ -1533,7 +1565,7 @@ abstract class FlutterCommand extends Command<void> {
     if (!shouldRunPub) {
       return;
     }
-    await project.regeneratePlatformSpecificTooling(releaseMode: releaseMode);
+    await regeneratePlatformSpecificTooling(project, releaseMode: releaseMode);
   }
 
   /// The set of development artifacts required for this command.

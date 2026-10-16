@@ -237,14 +237,18 @@ List<FlutterCommand> generateCommands({
 }) => <FlutterCommand>[
   AnalyzeCommand(
     allProjectValidators: <ProjectValidator>[
-      GeneralInfoProjectValidator(),
-      VariableDumpMachineProjectValidator(
+      GeneralInfoProjectValidator(
+        java: toolDependencies.androidContext.java,
         logger: toolDependencies.toolContext.logger,
-        fileSystem: toolDependencies.toolContext.fs,
-        platform: toolDependencies.toolContext.platform,
-        git: toolDependencies.toolContext.git,
+        processManager: toolDependencies.toolContext.processManager,
       ),
+      VariableDumpMachineProjectValidator(toolContext: toolDependencies.toolContext),
     ],
+    androidBuilder: AndroidGradleBuilder.fromContexts(
+      analytics: toolDependencies.analytics,
+      androidContext: toolDependencies.androidContext,
+      toolContext: toolDependencies.toolContext,
+    ),
     suppressAnalytics: !toolDependencies.analytics.okToSend,
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
@@ -365,6 +369,7 @@ List<FlutterCommand> generateCommands({
   ScreenshotCommand(toolContext: toolDependencies.toolContext),
   ShellCompletionCommand(toolContext: toolDependencies.toolContext),
   TestCommand(
+    templateRenderer: const MustacheTemplateRenderer(),
     toolContext: toolDependencies.toolContext,
     verboseHelp: verboseHelp,
     verbose: verbose,

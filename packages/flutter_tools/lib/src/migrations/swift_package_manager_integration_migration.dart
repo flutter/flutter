@@ -1345,6 +1345,7 @@ $newContent
           flutterProject.directory.parent.childFile('pubspec.yaml').existsSync()) {
         final FlutterProject parentProject = FlutterProject.fromDirectory(
           flutterProject.directory.parent,
+          logger: logger,
         );
         if (parentProject.isPlugin && parentProject.hasExampleApp) {
           final String pluginName = parentProject.manifest.appName;

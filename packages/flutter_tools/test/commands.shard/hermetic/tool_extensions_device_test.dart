@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/signals.dart';
@@ -91,7 +92,11 @@ void main() {
           'flutter_tool_extensions_device_test.',
         );
 
-        final projectFactory = FlutterProjectFactory(fileSystem: localFs, logger: testLogger);
+        final projectFactory = FlutterProjectFactory(
+          fileSystem: localFs,
+          logger: testLogger,
+          config: FakeConfig(),
+        );
         final FlutterProject project = projectFactory.fromDirectory(tempDir);
 
         final featureFlags = TestFeatureFlags(isToolExtensionsEnabled: true);
@@ -161,9 +166,9 @@ void main() {
 }
 
 class TestDeviceManager extends DeviceManager {
-  TestDeviceManager({List<DeviceDiscovery>? discoverers})
+  TestDeviceManager({List<DeviceDiscovery>? discoverers, FileSystem? fileSystem})
     : deviceDiscoverers = discoverers ?? <DeviceDiscovery>[],
-      super(logger: testLogger);
+      super(logger: testLogger, fileSystem: fileSystem ?? MemoryFileSystem.test());
 
   @override
   final List<DeviceDiscovery> deviceDiscoverers;

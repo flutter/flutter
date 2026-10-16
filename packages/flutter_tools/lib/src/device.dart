@@ -15,6 +15,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'context/tool_context.dart';
 import 'devfs.dart';
 import 'device_port_forwarder.dart';
 import 'device_vm_service_discovery_for_attach.dart';
@@ -47,9 +48,10 @@ enum PlatformType {
 
 /// A discovery mechanism for flutter-supported development devices.
 abstract class DeviceManager {
-  DeviceManager({required this._logger});
+  DeviceManager({required this._logger, required this._fileSystem});
 
   final Logger _logger;
+  final FileSystem _fileSystem;
 
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
   /// of their methods are called.
@@ -251,7 +253,7 @@ abstract class DeviceManager {
   }) {
     FlutterProject? flutterProject;
     if (!includeDevicesUnsupportedByProject) {
-      flutterProject = FlutterProject.current();
+      flutterProject = FlutterProject.current(_fileSystem, logger: _logger);
     }
     if (hasSpecifiedAllDevices) {
       return DeviceDiscoverySupportFilter.excludeDevicesUnsupportedByFlutterOrProjectOrAll(
@@ -456,12 +458,16 @@ abstract class DeviceDiscovery {
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
 /// and removals.
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
-  PollingDeviceDiscovery(this.name);
+  PollingDeviceDiscovery(this.name, {this._toolContext});
 
   static const _pollingInterval = Duration(seconds: 4);
   static const _pollingTimeout = Duration(seconds: 30);
 
   final String name;
+  final ToolContext? _toolContext;
+
+  @protected
+  ToolContext get toolContext => _toolContext!;
 
   @protected
   @visibleForTesting
@@ -599,12 +605,17 @@ abstract class Device {
   Device(
     this.id, {
     required Logger logger,
+    this._toolContext,
     required this.category,
     required this.platformType,
     required this.ephemeral,
   }) : dds = DartDevelopmentService(logger: logger);
 
   final String id;
+  final ToolContext? _toolContext;
+
+  @protected
+  ToolContext get toolContext => _toolContext!;
 
   /// The [Category] for this device type.
   final Category? category;

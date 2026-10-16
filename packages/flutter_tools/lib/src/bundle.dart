@@ -14,7 +14,8 @@ import 'globals.dart' as globals;
 
 String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');
 const defaultManifestPath = 'pubspec.yaml';
-String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+String get defaultDepfilePath =>
+    globals.fs.path.join(getBuildDirectory(globals.config, globals.fs), 'snapshot_blob.bin.d');
 
 String getDefaultCachedKernelPath({
   required bool trackWidgetCreation,

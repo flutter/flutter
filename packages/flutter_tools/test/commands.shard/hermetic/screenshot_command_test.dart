@@ -348,7 +348,8 @@ class _ScreenshotDevice extends Fake implements Device {
 }
 
 class _TestDeviceManager extends DeviceManager {
-  _TestDeviceManager({required super.logger});
+  _TestDeviceManager({required super.logger, FileSystem? fileSystem})
+    : super(fileSystem: fileSystem ?? MemoryFileSystem.test());
   List<Device> devices = <Device>[];
 
   @override

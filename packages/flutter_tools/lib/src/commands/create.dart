@@ -812,13 +812,19 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
         // It won't be if they do `flutter build --no-pub`, though.
         const ignoreReleaseModeSinceItsNotABuildAndHopeItWorks = false;
         await project.ensureReadyForPlatformSpecificTooling(
-          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
+          toolContext: toolContext,
+          analytics: analytics,
           androidPlatform: includeAndroid,
+          cocoaPods: appleContext.cocoaPods,
+          featureFlags: featureFlags,
+          gradleUtils: androidContext.gradleUtils,
           iosPlatform: includeIos || includeDarwin,
           linuxPlatform: includeLinux,
           macOSPlatform: includeMacos || includeDarwin,
+          templateRenderer: templateRenderer,
           windowsPlatform: includeWindows,
           webPlatform: includeWeb,
+          releaseMode: ignoreReleaseModeSinceItsNotABuildAndHopeItWorks,
         );
       }
     }

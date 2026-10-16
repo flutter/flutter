@@ -166,7 +166,7 @@ void main() {
 
     testUsingContext('Success with project', () {
       final macosApp = MacOSApp.fromMacOSProject(
-        FlutterProject.fromDirectory(globals.fs.currentDirectory).macos,
+        FlutterProject.fromDirectory(globals.fs.currentDirectory, logger: logger).macos,
       );
 
       expect(logger.errorText, isEmpty);
@@ -175,7 +175,10 @@ void main() {
     }, overrides: overrides);
 
     testUsingContext('Chooses the correct directory for application.', () {
-      final MacOSProject project = FlutterProject.fromDirectory(globals.fs.currentDirectory).macos;
+      final MacOSProject project = FlutterProject.fromDirectory(
+        globals.fs.currentDirectory,
+        logger: logger,
+      ).macos;
       final macosApp = MacOSApp.fromMacOSProject(project) as BuildableMacOSApp;
 
       const vanillaApp = BuildInfo(
