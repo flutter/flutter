@@ -24,7 +24,9 @@ import 'sliver.dart';
 /// Every widget has a [SliverPhysicalParentData.crossAxisFlex] value associated with them.
 /// First, lay out all of the slivers with flex of 0 or null, in which case the slivers themselves will
 /// figure out how much cross axis extent to take up. For example, [SliverConstrainedCrossAxis]
-/// is an example of a widget which sets its own flex to 0. Then [RenderSliverCrossAxisGroup] will
+/// is an example of a widget which sets its own flex to 0. If the remaining cross axis
+/// extent is fully consumed, subsequent constrained children are laid out with zero
+/// cross axis extent. Then [RenderSliverCrossAxisGroup] will
 /// divide up the remaining space to all the remaining children proportionally
 /// to each child's flex factor. If the constrained slivers consume all
 /// available cross axis extent, flexible children are laid out with zero cross
@@ -69,7 +71,6 @@ class RenderSliverCrossAxisGroup extends RenderSliver
       final int flex = childParentData.crossAxisFlex ?? 0;
       if (flex == 0) {
         // If flex is 0 or null, then the child sliver must provide their own crossAxisExtent.
-        assert(_assertOutOfExtent(remainingExtent));
         child.layout(constraints.copyWith(crossAxisExtent: remainingExtent), parentUsesSize: true);
         final double? childCrossAxisExtent = child.geometry!.crossAxisExtent;
         assert(childCrossAxisExtent != null);
@@ -174,25 +175,6 @@ class RenderSliverCrossAxisGroup extends RenderSliver
     }
     return false;
   }
-}
-
-bool _assertOutOfExtent(double extent) {
-  if (extent <= 0.0) {
-    throw FlutterError.fromParts(<DiagnosticsNode>[
-      ErrorSummary('SliverCrossAxisGroup ran out of extent before child could be laid out.'),
-      ErrorDescription(
-        'SliverCrossAxisGroup lays out any slivers with a constrained cross '
-        'axis before laying out those which expand. In this case, cross axis '
-        'extent was used up before the next sliver could be laid out.',
-      ),
-      ErrorHint(
-        'Make sure that the total amount of extent allocated by constrained '
-        'child slivers does not exceed the cross axis extent that is available '
-        'for the SliverCrossAxisGroup.',
-      ),
-    ]);
-  }
-  return true;
 }
 
 /// A sliver that places multiple sliver children in a linear array along the

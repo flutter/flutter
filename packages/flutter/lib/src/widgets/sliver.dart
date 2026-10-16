@@ -1750,6 +1750,8 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
 ///    [SliverGeometry.crossAxisExtent]. For example, the [SliverConstrainedCrossAxis]
 ///    widget uses either [SliverConstrainedCrossAxis.maxExtent] or
 ///    [SliverConstraints.crossAxisExtent], deciding between whichever is smaller.
+///    If the remaining cross axis space is zero, constrained children receive a
+///    cross axis constraint of 0.0.
 /// 2. Divide up the remaining cross axis space among the children with non-zero flex
 ///    factors according to their flex factor. For example, a child with a flex
 ///    factor of 2.0 will receive twice the amount of cross axis space as a child
