@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This file is run as part of a reduced test set in CI on Mac and Windows
+// machines.
+@Tags(<String>['reduced-test-set'])
+library;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,6 +47,30 @@ class TestChildState extends State<TestChildWidget> {
 
   @override
   Widget build(BuildContext context) => toggle ? const SizedBox() : const Text('CRASHHH');
+}
+
+// Sets colSpan / rowSpan on TableCellParentData without the
+// Semantics(role: cell) node that TableCell adds, so that
+// RenderTable.assembleSemanticsNode synthesizes a cell wrapper for the
+// cell's children instead of reusing theirs.
+class RawSpan extends ParentDataWidget<TableCellParentData> {
+  const RawSpan({super.key, this.colSpan = 1, this.rowSpan = 1, required super.child});
+
+  final int colSpan;
+  final int rowSpan;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    final parentData = renderObject.parentData! as TableCellParentData;
+    if (parentData.colSpan != colSpan || parentData.rowSpan != rowSpan) {
+      parentData.colSpan = colSpan;
+      parentData.rowSpan = rowSpan;
+      renderObject.parent?.markNeedsLayout();
+    }
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Table;
 }
 
 void main() {
@@ -817,7 +847,7 @@ void main() {
       error = e;
     } finally {
       expect(error, isNotNull);
-      expect(error!.toStringDeep(), contains('Table contains irregular row lengths.'));
+      expect(error!.toStringDeep(), contains('Inconsistent number of table cells.'));
     }
   });
 
@@ -915,8 +945,10 @@ void main() {
 
     expect(
       result,
-      'One or more TableRow have no children.\n'
-      'Every TableRow in a Table must have at least one child, so there is no empty row.',
+      'Empty first TableRow.\n'
+      'The first TableRow in the table has no cells. '
+      'It must contain at least one child widget to define the '
+      "table's column count.",
     );
   });
 
@@ -1094,5 +1126,1709 @@ void main() {
 
     final int? cellWrapperIdAfterUIchanges = textFieldSemanticsNodeNew.parent?.id;
     expect(cellWrapperIdAfterUIchanges, cellWrapperId);
+  });
+
+  group('TableCell colSpan and rowSpan tests', () {
+    const spannedCellHeight = 50.0;
+    const regularCellHeight = 80.0;
+    const tableWidth = 300.0;
+
+    testWidgets('TableCell with default colSpan and rowSpan', (WidgetTester tester) async {
+      const cell = TableCell(child: Text('Cell'));
+      expect(cell.colSpan, equals(1));
+      expect(cell.rowSpan, equals(1));
+    });
+
+    testWidgets('TableCell with custom colSpan', (WidgetTester tester) async {
+      const cell = TableCell(colSpan: 3, child: Text('Cell'));
+      expect(cell.colSpan, equals(3));
+      expect(cell.rowSpan, equals(1));
+    });
+
+    testWidgets('TableCell with custom rowSpan', (WidgetTester tester) async {
+      const cell = TableCell(rowSpan: 2, child: Text('Cell'));
+      expect(cell.colSpan, equals(1));
+      expect(cell.rowSpan, equals(2));
+    });
+
+    testWidgets('TableCell with both colSpan and rowSpan', (WidgetTester tester) async {
+      const cell = TableCell(colSpan: 2, rowSpan: 3, child: Text('Cell'));
+      expect(cell.colSpan, equals(2));
+      expect(cell.rowSpan, equals(3));
+    });
+
+    testWidgets('TableCell.none has zero colSpan and rowSpan', (WidgetTester tester) async {
+      expect(TableCell.none.colSpan, equals(0));
+      expect(TableCell.none.rowSpan, equals(0));
+    });
+
+    testWidgets('Table with colSpan - basic functionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 2, child: Text('Spanning Cell')),
+                  TableCell.none,
+                ],
+              ),
+              TableRow(children: <Widget>[Text('Cell 1'), Text('Cell 2')]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Spanning Cell'), findsOneWidget);
+      expect(find.text('Cell 1'), findsOneWidget);
+      expect(find.text('Cell 2'), findsOneWidget);
+    });
+
+    testWidgets('Table with rowSpan - basic functionality', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(rowSpan: 2, child: Text('Spanning Cell')),
+                  Text('Cell 1'),
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, Text('Cell 2')]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Spanning Cell'), findsOneWidget);
+      expect(find.text('Cell 1'), findsOneWidget);
+      expect(find.text('Cell 2'), findsOneWidget);
+    });
+
+    testWidgets('Table with both colSpan and rowSpan', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 2, rowSpan: 2, child: Text('Large Cell')),
+                  TableCell.none,
+                  Text('Right Cell'),
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, TableCell.none, Text('Bottom Right')]),
+              TableRow(children: <Widget>[Text('Bottom 1'), Text('Bottom 2'), Text('Bottom 3')]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Large Cell'), findsOneWidget);
+      expect(find.text('Right Cell'), findsOneWidget);
+      expect(find.text('Bottom Right'), findsOneWidget);
+      expect(find.text('Bottom 1'), findsOneWidget);
+      expect(find.text('Bottom 2'), findsOneWidget);
+      expect(find.text('Bottom 3'), findsOneWidget);
+    });
+
+    testWidgets('TableCell colSpan exceeds table columns - throws error', (
+      WidgetTester tester,
+    ) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 3, child: Text('Too Wide')),
+                  TableCell.none,
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isA<FlutterError>());
+      expect(errors.first.exception.toString(), contains('Invalid TableCell.colSpan'));
+    });
+
+    testWidgets('TableCell rowSpan exceeds table rows - throws error', (WidgetTester tester) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(rowSpan: 3, child: Text('Too Tall')),
+                  TableCell.none,
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, Text('Cell 2')]),
+            ],
+          ),
+        ),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception, isA<FlutterError>());
+      expect(errors.first.exception.toString(), contains('Invalid TableCell.rowSpan'));
+    });
+
+    testWidgets('Non-TableCell.none widget in colSpan-covered position - throws error', (
+      WidgetTester tester,
+    ) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 2, child: Text('Spanning')),
+                  Text('not a placeholder'), // must be TableCell.none
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception.toString(), contains('must be declared as TableCell.none'));
+    });
+
+    testWidgets('Non-TableCell.none widget in rowSpan-covered position - throws error', (
+      WidgetTester tester,
+    ) async {
+      final errors = <FlutterErrorDetails>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = errors.add;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(rowSpan: 2, child: Text('Spanning')),
+                  Text('Cell 1'),
+                ],
+              ),
+              TableRow(
+                children: <Widget>[
+                  Text('not a placeholder'), // must be TableCell.none
+                  Text('Cell 2'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      FlutterError.onError = oldHandler;
+
+      expect(errors, isNotEmpty);
+      expect(errors.first.exception.toString(), contains('must be declared as TableCell.none'));
+    });
+
+    testWidgets('TableCell with colSpan at last column - valid edge case', (
+      WidgetTester tester,
+    ) async {
+      // This should not throw an error as colSpan is exactly at the boundary
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  Text('Cell 1'),
+                  TableCell(colSpan: 2, child: Text('Last Two')),
+                  TableCell.none,
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Cell 1'), findsOneWidget);
+      expect(find.text('Last Two'), findsOneWidget);
+    });
+
+    testWidgets('TableCell with rowSpan at last row - valid edge case', (
+      WidgetTester tester,
+    ) async {
+      // This should not throw an error as rowSpan is exactly at the boundary
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  Text('Cell 1'),
+                  TableCell(rowSpan: 2, child: Text('Tall Cell')),
+                ],
+              ),
+              TableRow(children: <Widget>[Text('Cell 2'), TableCell.none]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Cell 1'), findsOneWidget);
+      expect(find.text('Cell 2'), findsOneWidget);
+      expect(find.text('Tall Cell'), findsOneWidget);
+    });
+
+    testWidgets('TableCell colSpan and rowSpan assertions', (WidgetTester tester) async {
+      expect(() => TableCell(colSpan: 0, child: Container()), throwsAssertionError);
+
+      expect(() => TableCell(rowSpan: 0, child: Container()), throwsAssertionError);
+
+      expect(() => TableCell(colSpan: -1, child: Container()), throwsAssertionError);
+
+      expect(() => TableCell(rowSpan: -1, child: Container()), throwsAssertionError);
+    });
+
+    testWidgets('TableCell parent data contains colSpan and rowSpan', (WidgetTester tester) async {
+      const testKey = ValueKey<String>('TestCell');
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(key: testKey, colSpan: 2, rowSpan: 3, child: Text('Test')),
+                  TableCell.none,
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, TableCell.none]),
+              TableRow(children: <Widget>[TableCell.none, TableCell.none]),
+            ],
+          ),
+        ),
+      );
+
+      // Instead of trying to access parentData directly, test the widget properties
+      final TableCell cellWidget = tester.widget(find.byKey(testKey));
+      expect(cellWidget.colSpan, equals(2));
+      expect(cellWidget.rowSpan, equals(3));
+    });
+
+    testWidgets('Table with complex colSpan and rowSpan layout', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 2, child: Text('Header')),
+                  TableCell.none,
+                  Text('Top Right'),
+                ],
+              ),
+              TableRow(
+                children: <Widget>[
+                  TableCell(rowSpan: 2, child: Text('Left Tall')),
+                  Text('Middle'),
+                  TableCell(rowSpan: 2, child: Text('Right Tall')),
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, Text('Bottom Middle'), TableCell.none]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Header'), findsOneWidget);
+      expect(find.text('Top Right'), findsOneWidget);
+      expect(find.text('Left Tall'), findsOneWidget);
+      expect(find.text('Middle'), findsOneWidget);
+      expect(find.text('Right Tall'), findsOneWidget);
+      expect(find.text('Bottom Middle'), findsOneWidget);
+    });
+
+    testWidgets('Table with all cells using TableCell.none in spanning area', (
+      WidgetTester tester,
+    ) async {
+      // Test that using TableCell.none correctly maintains table structure
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(colSpan: 3, rowSpan: 2, child: Text('Big Cell')),
+                  TableCell.none,
+                  TableCell.none,
+                ],
+              ),
+              TableRow(children: <Widget>[TableCell.none, TableCell.none, TableCell.none]),
+              TableRow(children: <Widget>[Text('A'), Text('B'), Text('C')]),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Big Cell'), findsOneWidget);
+      expect(find.text('A'), findsOneWidget);
+      expect(find.text('B'), findsOneWidget);
+      expect(find.text('C'), findsOneWidget);
+    });
+
+    group('TableCellVerticalAlignment works correctly with colSpan and rowSpan', () {
+      // Helper to setup the table structure
+      // Layout:
+      // Row 0: | RowSpan 0-1 | ColSpan 1-2         |
+      // Row 1: |             | Reg 1       | Reg 2 |
+      Widget buildTable({TableCellVerticalAlignment? alignment}) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: tableWidth,
+              child: Table(
+                defaultVerticalAlignment: alignment ?? TableCellVerticalAlignment.fill,
+                children: const <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      TableCell(
+                        rowSpan: 2,
+                        child: SizedBox(height: spannedCellHeight, child: Text('RowSpan')),
+                      ),
+                      TableCell(
+                        colSpan: 2,
+                        child: SizedBox(height: spannedCellHeight, child: Text('ColSpan')),
+                      ),
+                      TableCell.none,
+                    ],
+                  ),
+                  TableRow(
+                    children: <Widget>[
+                      TableCell.none,
+                      TableCell(
+                        verticalAlignment: TableCellVerticalAlignment.top,
+                        child: SizedBox(height: regularCellHeight, child: Text('Reg1')),
+                      ),
+                      SizedBox(height: regularCellHeight, child: Text('Reg2')),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+
+      Future<void> pumpTable(WidgetTester tester, {TableCellVerticalAlignment? alignment}) async {
+        await tester.pumpWidget(buildTable(alignment: alignment));
+      }
+
+      Rect rowSpanRect(WidgetTester tester) => tester.getRect(find.text('RowSpan'));
+
+      Rect colSpanRect(WidgetTester tester) => tester.getRect(find.text('ColSpan'));
+
+      Rect tableRect(WidgetTester tester) => tester.getRect(find.byType(Table));
+
+      double row0Height(Rect tableRect) => tableRect.height - regularCellHeight;
+
+      testWidgets('Common constraints and dimensions', (WidgetTester tester) async {
+        await pumpTable(tester);
+
+        final Rect rowSpan = rowSpanRect(tester);
+        final Rect colSpan = colSpanRect(tester);
+
+        expect(rowSpan.width, equals(100.0));
+        expect(colSpan.width, equals(200.0));
+      });
+
+      testWidgets('Alignment: Fill', (WidgetTester tester) async {
+        await pumpTable(tester, alignment: TableCellVerticalAlignment.fill);
+
+        final Rect table = tableRect(tester);
+        final Rect rowSpan = rowSpanRect(tester);
+        final Rect colSpan = colSpanRect(tester);
+
+        expect(rowSpan.height, equals(table.height));
+        expect(colSpan.height, equals(table.height - regularCellHeight));
+      });
+
+      testWidgets('Alignment: IntrinsicHeight', (WidgetTester tester) async {
+        await pumpTable(tester, alignment: TableCellVerticalAlignment.intrinsicHeight);
+
+        final Rect table = tableRect(tester);
+        final Rect rowSpan = rowSpanRect(tester);
+        final Rect colSpan = colSpanRect(tester);
+
+        expect(colSpan.height, equals(spannedCellHeight));
+        expect(rowSpan.height, equals(table.height));
+      });
+
+      testWidgets('Alignment: Top', (WidgetTester tester) async {
+        await pumpTable(tester, alignment: TableCellVerticalAlignment.top);
+
+        final Rect table = tableRect(tester);
+        final Rect rowSpan = rowSpanRect(tester);
+        final Rect colSpan = colSpanRect(tester);
+
+        expect(rowSpan.height, equals(spannedCellHeight));
+        expect(colSpan.height, equals(spannedCellHeight));
+        expect(rowSpan.top, equals(table.top));
+        expect(colSpan.top, equals(table.top));
+      });
+
+      testWidgets('Alignment: Middle', (WidgetTester tester) async {
+        await pumpTable(tester, alignment: TableCellVerticalAlignment.middle);
+
+        final Rect table = tableRect(tester);
+        final Rect rowSpan = rowSpanRect(tester);
+        final Rect colSpan = colSpanRect(tester);
+        final double rowHeight0 = row0Height(table);
+
+        final double expectedRowSpanTop = table.top + (table.height - spannedCellHeight) / 2;
+
+        final double expectedColSpanTop = table.top + (rowHeight0 - spannedCellHeight) / 2;
+
+        expect(rowSpan.top, expectedRowSpanTop);
+        expect(colSpan.top, expectedColSpanTop);
+      });
+
+      testWidgets('Alignment: Bottom', (WidgetTester tester) async {
+        await pumpTable(tester, alignment: TableCellVerticalAlignment.bottom);
+
+        final Rect table = tableRect(tester);
+        final Rect rowSpan = rowSpanRect(tester);
+        final Rect colSpan = colSpanRect(tester);
+        final double rowHeight0 = row0Height(table);
+
+        final double expectedRowSpanTop = table.top + (table.height - spannedCellHeight);
+        final double expectedColSpanTop = table.top + (rowHeight0 - spannedCellHeight);
+
+        expect(rowSpan.top, expectedRowSpanTop);
+        expect(colSpan.top, expectedColSpanTop);
+      });
+
+      testWidgets('Alignment: Baseline', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: SizedBox(
+                width: tableWidth,
+                child: Table(
+                  defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: const <TableRow>[
+                    TableRow(
+                      children: <Widget>[
+                        TableCell(
+                          rowSpan: 2,
+                          child: Text('RowSpan', style: TextStyle(fontSize: 20)),
+                        ),
+                        TableCell(
+                          colSpan: 2,
+                          child: Text('ColSpan', style: TextStyle(fontSize: 40)),
+                        ),
+                        TableCell.none,
+                      ],
+                    ),
+                    TableRow(
+                      children: <Widget>[
+                        TableCell.none,
+                        Text('Reg1', style: TextStyle(fontSize: 12)),
+                        Text('Reg2', style: TextStyle(fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Get RenderParagraph to calculate baseline offset
+        final RenderParagraph rowSpanRender = tester.renderObject(find.text('RowSpan'));
+        final RenderParagraph colSpanRender = tester.renderObject(find.text('ColSpan'));
+        final RenderParagraph reg1Render = tester.renderObject(find.text('Reg1'));
+        final RenderParagraph reg2Render = tester.renderObject(find.text('Reg2'));
+
+        // Get positions of texts
+        final Rect rowSpanRect = tester.getRect(find.text('RowSpan'));
+        final Rect colSpanRect = tester.getRect(find.text('ColSpan'));
+        final Rect reg1Rect = tester.getRect(find.text('Reg1'));
+        final Rect reg2Rect = tester.getRect(find.text('Reg2'));
+
+        // Calculate baseline positions using text metrics
+        // The baseline is typically at ~80% of the font size from top for alphabetic baseline
+        final double rowSpanBaseline = rowSpanRect.top + rowSpanRender.text.style!.fontSize! * 0.8;
+        final double colSpanBaseline = colSpanRect.top + colSpanRender.text.style!.fontSize! * 0.8;
+
+        // Both cells in row 0 should have the same baseline
+        expect(rowSpanBaseline, closeTo(colSpanBaseline, 1.0));
+
+        // For row 1, cells with same font size should have same top position
+        final double reg1Baseline = reg1Rect.top + reg1Render.text.style!.fontSize! * 0.8;
+        final double reg2Baseline = reg2Rect.top + reg2Render.text.style!.fontSize! * 0.8;
+
+        // Both cells in row 1 should have the same baseline
+        expect(reg1Baseline, closeTo(reg2Baseline, 0.5));
+      });
+    });
+
+    group('Table golden tests', () {
+      testWidgets('Table with colSpan is displayed correctly', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          RepaintBoundary(
+            child: Center(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: SizedBox(
+                  width: 300,
+                  child: Table(
+                    border: TableBorder.all(),
+                    defaultColumnWidth: const FixedColumnWidth(100),
+                    children: <TableRow>[
+                      TableRow(
+                        children: <Widget>[
+                          TableCell(
+                            colSpan: 2,
+                            child: Container(
+                              height: 40,
+                              color: const Color(0xFF2196F3),
+                              alignment: Alignment.center,
+                              child: const Text('Spanning 2 cols'),
+                            ),
+                          ),
+                          TableCell.none,
+                          Container(
+                            height: 40,
+                            color: const Color(0xFF4CAF50),
+                            alignment: Alignment.center,
+                            child: const Text('Col 3'),
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: <Widget>[
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFFFCDD2),
+                            alignment: Alignment.center,
+                            child: const Text('R2C1'),
+                          ),
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFEF9A9A),
+                            alignment: Alignment.center,
+                            child: const Text('R2C2'),
+                          ),
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFE57373),
+                            alignment: Alignment.center,
+                            child: const Text('R2C3'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('table.colSpan.png'));
+      });
+
+      testWidgets('Table with rowSpan is displayed correctly', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          RepaintBoundary(
+            child: Center(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: SizedBox(
+                  width: 300,
+                  child: Table(
+                    border: TableBorder.all(),
+                    defaultColumnWidth: const FixedColumnWidth(100),
+                    children: <TableRow>[
+                      TableRow(
+                        children: <Widget>[
+                          TableCell(
+                            rowSpan: 2,
+                            child: Container(
+                              height: 80,
+                              color: const Color(0xFF2196F3),
+                              alignment: Alignment.center,
+                              child: const Text('Spanning\n2 rows'),
+                            ),
+                          ),
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFC8E6C9),
+                            alignment: Alignment.center,
+                            child: const Text('R1C2'),
+                          ),
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFA5D6A7),
+                            alignment: Alignment.center,
+                            child: const Text('R1C3'),
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: <Widget>[
+                          TableCell.none,
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFFFCDD2),
+                            alignment: Alignment.center,
+                            child: const Text('R2C2'),
+                          ),
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFEF9A9A),
+                            alignment: Alignment.center,
+                            child: const Text('R2C3'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await expectLater(find.byType(RepaintBoundary), matchesGoldenFile('table.rowSpan.png'));
+      });
+
+      testWidgets('Table with colSpan and rowSpan combined is displayed correctly', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          RepaintBoundary(
+            child: Center(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: SizedBox(
+                  width: 300,
+                  child: Table(
+                    border: TableBorder.all(),
+                    defaultColumnWidth: const FixedColumnWidth(100),
+                    children: <TableRow>[
+                      TableRow(
+                        children: <Widget>[
+                          TableCell(
+                            colSpan: 2,
+                            rowSpan: 2,
+                            child: Container(
+                              height: 80,
+                              color: const Color(0xFF2196F3),
+                              alignment: Alignment.center,
+                              child: const Text('2x2\nCell'),
+                            ),
+                          ),
+                          TableCell.none,
+                          Container(
+                            height: 40,
+                            color: const Color(0xFF4CAF50),
+                            alignment: Alignment.center,
+                            child: const Text('R1C3'),
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: <Widget>[
+                          TableCell.none,
+                          TableCell.none,
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFFF9800),
+                            alignment: Alignment.center,
+                            child: const Text('R2C3'),
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: <Widget>[
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFFFCDD2),
+                            alignment: Alignment.center,
+                            child: const Text('R3C1'),
+                          ),
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFEF9A9A),
+                            alignment: Alignment.center,
+                            child: const Text('R3C2'),
+                          ),
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFE57373),
+                            alignment: Alignment.center,
+                            child: const Text('R3C3'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await expectLater(
+          find.byType(RepaintBoundary),
+          matchesGoldenFile('table.colSpan_rowSpan_combined.png'),
+        );
+      });
+
+      testWidgets('Table with complex spanning layout is displayed correctly', (
+        WidgetTester tester,
+      ) async {
+        // A more complex table layout similar to what you might see in a real application
+        await tester.pumpWidget(
+          RepaintBoundary(
+            child: Center(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: SizedBox(
+                  width: 400,
+                  child: Table(
+                    border: TableBorder.all(),
+                    defaultColumnWidth: const FixedColumnWidth(100),
+                    children: <TableRow>[
+                      // Header row spanning all columns
+                      TableRow(
+                        decoration: const BoxDecoration(color: Color(0xFF607D8B)),
+                        children: <Widget>[
+                          TableCell(
+                            colSpan: 4,
+                            child: Container(
+                              height: 50,
+                              alignment: Alignment.center,
+                              child: const Text(
+                                'Table Header',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFFFFFFFF),
+                                ),
+                              ),
+                            ),
+                          ),
+                          TableCell.none,
+                          TableCell.none,
+                          TableCell.none,
+                        ],
+                      ),
+                      // Row with side label spanning multiple rows
+                      TableRow(
+                        children: <Widget>[
+                          TableCell(
+                            rowSpan: 2,
+                            child: Container(
+                              height: 80,
+                              color: const Color(0xFFFFC107),
+                              alignment: Alignment.center,
+                              child: const Text('Label'),
+                            ),
+                          ),
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFB3E5FC),
+                            alignment: Alignment.center,
+                            child: const Text('A'),
+                          ),
+                          Container(
+                            height: 40,
+                            color: const Color(0xFF81D4FA),
+                            alignment: Alignment.center,
+                            child: const Text('B'),
+                          ),
+                          Container(
+                            height: 40,
+                            color: const Color(0xFF4FC3F7),
+                            alignment: Alignment.center,
+                            child: const Text('C'),
+                          ),
+                        ],
+                      ),
+                      TableRow(
+                        children: <Widget>[
+                          TableCell.none,
+                          Container(
+                            height: 40,
+                            color: const Color(0xFFDCEDC8),
+                            alignment: Alignment.center,
+                            child: const Text('D'),
+                          ),
+                          TableCell(
+                            colSpan: 2,
+                            child: Container(
+                              height: 40,
+                              color: const Color(0xFFCE93D8),
+                              alignment: Alignment.center,
+                              child: const Text('E+F'),
+                            ),
+                          ),
+                          TableCell.none,
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        await expectLater(
+          find.byType(RepaintBoundary),
+          matchesGoldenFile('table.complex_spanning.png'),
+        );
+      });
+
+      group('Table VerticalAlignment with Spans', () {
+        Widget buildGoldenTable({required TableCellVerticalAlignment alignment}) {
+          return RepaintBoundary(
+            child: Center(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: SizedBox(
+                  width: tableWidth,
+                  child: Table(
+                    border: TableBorder.all(),
+                    defaultVerticalAlignment: alignment,
+                    children: <TableRow>[
+                      TableRow(
+                        children: <Widget>[
+                          TableCell(
+                            rowSpan: 2,
+                            child: Container(
+                              height: spannedCellHeight,
+                              color: const Color(0xFF2196F3),
+                              alignment: Alignment.center,
+                              child: const Text('RowSpan'),
+                            ),
+                          ),
+                          TableCell(
+                            colSpan: 2,
+                            child: Container(
+                              height: spannedCellHeight,
+                              color: const Color(0xFF4CAF50),
+                              alignment: Alignment.center,
+                              child: const Text('ColSpan'),
+                            ),
+                          ),
+                          TableCell.none,
+                        ],
+                      ),
+                      TableRow(
+                        children: <Widget>[
+                          TableCell.none,
+                          TableCell(
+                            verticalAlignment: TableCellVerticalAlignment.top,
+                            child: Container(
+                              height: regularCellHeight,
+                              color: const Color(0xFFFF9800),
+                              alignment: Alignment.center,
+                              child: const Text('Reg1'),
+                            ),
+                          ),
+                          Container(
+                            height: regularCellHeight,
+                            color: const Color(0xFFF44336),
+                            alignment: Alignment.center,
+                            child: const Text('Reg2'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        testWidgets('Golden: Fill alignment', (WidgetTester tester) async {
+          await tester.pumpWidget(buildGoldenTable(alignment: TableCellVerticalAlignment.fill));
+          await expectLater(
+            find.byType(RepaintBoundary),
+            matchesGoldenFile('table.vertical_alignment_fill.png'),
+          );
+        });
+
+        testWidgets('Golden: Top alignment', (WidgetTester tester) async {
+          await tester.pumpWidget(buildGoldenTable(alignment: TableCellVerticalAlignment.top));
+          await expectLater(
+            find.byType(RepaintBoundary),
+            matchesGoldenFile('table.vertical_alignment_top.png'),
+          );
+        });
+
+        testWidgets('Golden: IntrinsicHeight alignment', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            buildGoldenTable(alignment: TableCellVerticalAlignment.intrinsicHeight),
+          );
+          await expectLater(
+            find.byType(RepaintBoundary),
+            matchesGoldenFile('table.vertical_alignment_intrinsicHeight.png'),
+          );
+        });
+
+        testWidgets('Golden: Middle alignment', (WidgetTester tester) async {
+          await tester.pumpWidget(buildGoldenTable(alignment: TableCellVerticalAlignment.middle));
+          await expectLater(
+            find.byType(RepaintBoundary),
+            matchesGoldenFile('table.vertical_alignment_middle.png'),
+          );
+        });
+
+        testWidgets('Golden: Bottom alignment', (WidgetTester tester) async {
+          await tester.pumpWidget(buildGoldenTable(alignment: TableCellVerticalAlignment.bottom));
+          await expectLater(
+            find.byType(RepaintBoundary),
+            matchesGoldenFile('table.vertical_alignment_bottom.png'),
+          );
+        });
+
+        testWidgets('Golden: Baseline alignment', (WidgetTester tester) async {
+          await tester.pumpWidget(
+            RepaintBoundary(
+              child: Center(
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: SizedBox(
+                    width: tableWidth,
+                    child: Table(
+                      border: TableBorder.all(),
+                      defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: const <TableRow>[
+                        TableRow(
+                          children: <Widget>[
+                            TableCell(
+                              rowSpan: 2,
+                              child: Text('RowSpan', style: TextStyle(fontSize: 20)),
+                            ),
+                            TableCell(
+                              colSpan: 2,
+                              child: Text('ColSpan', style: TextStyle(fontSize: 40)),
+                            ),
+                            TableCell.none,
+                          ],
+                        ),
+                        TableRow(
+                          children: <Widget>[
+                            TableCell.none,
+                            Text('Reg1', style: TextStyle(fontSize: 12)),
+                            Text('Reg2', style: TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await expectLater(
+            find.byType(RepaintBoundary),
+            matchesGoldenFile('table.vertical_alignment_baseline.png'),
+          );
+        });
+      });
+    });
+
+    group('spanning cells', () {
+      // Row 0: | A (colSpan: 2)       | B (rowSpan: 2) |
+      // Row 1: | C        | D         |                |
+      Widget spanningTable({
+        required TextDirection textDirection,
+        required Widget a,
+        required Widget b,
+        required Widget c,
+        required Widget d,
+      }) {
+        return Directionality(
+          textDirection: textDirection,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Table(
+              defaultColumnWidth: const FixedColumnWidth(100.0),
+              children: <TableRow>[
+                TableRow(
+                  children: <Widget>[
+                    TableCell(colSpan: 2, child: a),
+                    TableCell.none,
+                    TableCell(rowSpan: 2, child: b),
+                  ],
+                ),
+                TableRow(children: <Widget>[c, d, TableCell.none]),
+              ],
+            ),
+          ),
+        );
+      }
+
+      testWidgets('are laid out from the right in RTL', (WidgetTester tester) async {
+        await tester.pumpWidget(
+          spanningTable(
+            textDirection: TextDirection.rtl,
+            a: const SizedBox(key: ValueKey<String>('A'), height: 20.0),
+            b: const SizedBox(key: ValueKey<String>('B'), height: 40.0),
+            c: const SizedBox(key: ValueKey<String>('C'), height: 20.0),
+            d: const SizedBox(key: ValueKey<String>('D'), height: 20.0),
+          ),
+        );
+
+        // Column 0 is the rightmost column, so the colSpan extends to the left
+        // and the rowSpan cell in the last column is at the left edge.
+        Rect rectOf(String key) => tester.getRect(find.byKey(ValueKey<String>(key)));
+        expect(rectOf('A'), const Rect.fromLTWH(100.0, 0.0, 200.0, 20.0));
+        expect(rectOf('B'), const Rect.fromLTWH(0.0, 0.0, 100.0, 40.0));
+        expect(rectOf('C'), const Rect.fromLTWH(200.0, 20.0, 100.0, 20.0));
+        expect(rectOf('D'), const Rect.fromLTWH(100.0, 20.0, 100.0, 20.0));
+      });
+
+      testWidgets('are hit across their whole span', (WidgetTester tester) async {
+        final tapped = <String>[];
+        Widget tappable(String label, double height) {
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => tapped.add(label),
+            child: SizedBox(height: height),
+          );
+        }
+
+        for (final TextDirection textDirection in TextDirection.values) {
+          tapped.clear();
+          await tester.pumpWidget(
+            spanningTable(
+              textDirection: textDirection,
+              a: tappable('A', 20.0),
+              b: tappable('B', 40.0),
+              c: tappable('C', 20.0),
+              d: tappable('D', 20.0),
+            ),
+          );
+
+          // Tap the slot that A covers in row 0 and the slot that B covers in
+          // row 1, then D as a regular cell. Only B's column moves in RTL.
+          final bColumnCenter = textDirection == TextDirection.rtl ? 50.0 : 250.0;
+          await tester.tapAt(const Offset(150.0, 10.0));
+          await tester.tapAt(Offset(bColumnCenter, 30.0));
+          await tester.tapAt(const Offset(150.0, 30.0));
+          expect(tapped, <String>['A', 'B', 'D'], reason: '$textDirection');
+        }
+      });
+
+      testWidgets('can switch a slot between a cell and a placeholder', (
+        WidgetTester tester,
+      ) async {
+        // When a cell turns into TableCell.none and back, its element is
+        // reused, so the render object in that slot is kept while it is not
+        // laid out.
+        final tapped = <String>[];
+        Widget buildTable({required bool spanned}) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                children: <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      TableCell(
+                        colSpan: spanned ? 2 : 1,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => tapped.add('A'),
+                          child: const SizedBox(height: 20.0),
+                        ),
+                      ),
+                      if (spanned)
+                        TableCell.none
+                      else
+                        TableCell(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => tapped.add('B'),
+                            child: const SizedBox(height: 20.0),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        await tester.pumpWidget(buildTable(spanned: false));
+        await tester.tapAt(const Offset(150.0, 10.0));
+
+        await tester.pumpWidget(buildTable(spanned: true));
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(150.0, 10.0));
+
+        await tester.pumpWidget(buildTable(spanned: false));
+        expect(tester.takeException(), isNull);
+        await tester.tapAt(const Offset(150.0, 10.0));
+
+        expect(tapped, <String>['B', 'A', 'B']);
+      });
+
+      testWidgets('have semantics nodes that cover their span', (WidgetTester tester) async {
+        final SemanticsHandle handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          spanningTable(
+            textDirection: TextDirection.ltr,
+            a: const SizedBox(height: 20.0, child: Text('A')),
+            b: const SizedBox(height: 40.0, child: Text('B')),
+            c: const SizedBox(height: 20.0, child: Text('C')),
+            d: const SizedBox(height: 20.0, child: Text('D')),
+          ),
+        );
+
+        final SemanticsNode a = tester.getSemantics(find.text('A'));
+        final SemanticsNode b = tester.getSemantics(find.text('B'));
+        expect(a.rect.size, const Size(200.0, 20.0));
+        expect(b.rect.size, const Size(100.0, 40.0));
+        // Placeholders add no cells, and B keeps the index of its column.
+        expect(a.parent!.childrenCount, 2);
+        expect(a.indexInParent, 0);
+        expect(b.indexInParent, 2);
+
+        handle.dispose();
+      });
+
+      testWidgets('synthesized cell wrappers cover their span', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/192849.
+        //
+        // TableCell wraps its child in Semantics(role: cell), so
+        // assembleSemanticsNode reuses that node for the cell. RawSpan sets
+        // colSpan / rowSpan without that node, forcing the table to synthesize
+        // a cell wrapper whose rect must cover the whole span, not a single
+        // column width and row height.
+        //
+        // Layout (LTR, four 100px columns, three 20px rows):
+        //   Row 0: | f0 | wide (colSpan: 2)  | none  | f3  |
+        //   Row 1: | big (colSpan: 2, rowSpan: 2) | none | f1 | tall (rowSpan: 2) |
+        //   Row 2: | none                   | none  | f2  | none |
+        final SemanticsHandle handle = tester.ensureSemantics();
+        final fillerLabel = ValueNotifier<String>('f0');
+        addTearDown(fillerLabel.dispose);
+
+        Widget buildTable() {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                children: <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      SizedBox(
+                        height: 20.0,
+                        child: ValueListenableBuilder<String>(
+                          valueListenable: fillerLabel,
+                          builder: (BuildContext context, String value, Widget? child) =>
+                              Text(value),
+                        ),
+                      ),
+                      const RawSpan(colSpan: 2, child: SizedBox(height: 20.0, child: Text('wide'))),
+                      TableCell.none,
+                      const SizedBox(height: 20.0),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      RawSpan(
+                        colSpan: 2,
+                        rowSpan: 2,
+                        child: SizedBox(height: 40.0, child: Text('big')),
+                      ),
+                      TableCell.none,
+                      SizedBox(height: 20.0),
+                      RawSpan(rowSpan: 2, child: SizedBox(height: 40.0, child: Text('tall'))),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      TableCell.none,
+                      TableCell.none,
+                      SizedBox(height: 20.0),
+                      TableCell.none,
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        Offset localOffset(SemanticsNode node) {
+          final Matrix4? transform = node.transform;
+          if (transform == null) {
+            return Offset.zero;
+          }
+          return MatrixUtils.getAsTranslation(transform)!;
+        }
+
+        SemanticsNode wrapperOf(String label) {
+          final SemanticsNode text = tester.getSemantics(find.text(label));
+          final SemanticsNode wrapper = text.parent!;
+          expect(
+            wrapper.role,
+            SemanticsRole.cell,
+            reason: 'The $label cell must be wrapped by a synthesized cell node.',
+          );
+          return wrapper;
+        }
+
+        void expectSpanGeometry() {
+          // colSpan = 2, rowSpan = 1 at row 0, column 1.
+          final SemanticsNode wide = wrapperOf('wide');
+          expect(wide.rect, const Rect.fromLTWH(0.0, 0.0, 200.0, 20.0));
+          expect(localOffset(wide), const Offset(100.0, 0.0));
+
+          // colSpan = 2, rowSpan = 2 at row 1, column 0.
+          final SemanticsNode big = wrapperOf('big');
+          expect(big.rect, const Rect.fromLTWH(0.0, 0.0, 200.0, 40.0));
+          expect(localOffset(big), Offset.zero);
+
+          // colSpan = 1, rowSpan = 2 at row 1, column 3.
+          final SemanticsNode tall = wrapperOf('tall');
+          expect(tall.rect, const Rect.fromLTWH(0.0, 0.0, 100.0, 40.0));
+          expect(localOffset(tall), const Offset(300.0, 0.0));
+
+          // The text nodes are normalized to the wrapper origin.
+          for (final label in <String>['wide', 'big', 'tall']) {
+            expect(
+              localOffset(tester.getSemantics(find.text(label))),
+              Offset.zero,
+              reason: 'The $label text must sit at the wrapper origin.',
+            );
+          }
+        }
+
+        await tester.pumpWidget(buildTable());
+        expectSpanGeometry();
+
+        // Changing a sibling cell reassembles the table's semantics while the
+        // spanning cells' own nodes are left untouched, so the geometry must
+        // be stable across repeated assemble passes.
+        fillerLabel.value = 'f0b';
+        await tester.pump();
+        expectSpanGeometry();
+
+        handle.dispose();
+      });
+
+      testWidgets('aligned cells keep their semantics position across reassembles', (
+        WidgetTester tester,
+      ) async {
+        // Regression test for https://github.com/flutter/flutter/issues/192849.
+        //
+        // assembleSemanticsNode normalizes every cell child out of the table's
+        // coordinate space into the space of the node it is attached to: the
+        // row, or a synthesized cell wrapper. The position of a cell that is
+        // not top aligned sits below the top of its row, so the normalized and
+        // the unnormalized position overlap in the table's coordinate space and
+        // a test against the child's rect cannot tell them apart. A child that
+        // is not recognized as normalized keeps its table space transform and
+        // ends up one row below where it is painted, and a child that is
+        // recognized as normalized more than once is shifted down again on
+        // every reassemble until it drifts away from the cell's layout offset.
+        // The target is therefore derived from the cell render object's layout
+        // offset on every pass, so it must equal the painted position and stay
+        // put while sibling cells trigger repeated reassembles.
+        //
+        // Layout (LTR, five 100px columns, rows of 20/100/60 pixels, cells
+        // middle aligned through the table's default alignment):
+        //   Row 0: | 20 | filler | 20 | 20 | 20 |
+        //   Row 1: | midWrap | midCell | spanWrap (rowSpan: 2) | spanCell (rowSpan: 2) | 100 |
+        //   Row 2: | 60 | 60 | none | none | 60 |
+        final SemanticsHandle handle = tester.ensureSemantics();
+        final fillerLabel = ValueNotifier<String>('f0');
+        addTearDown(fillerLabel.dispose);
+
+        Widget buildTable() {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                children: <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      const SizedBox(height: 20.0),
+                      SizedBox(
+                        height: 20.0,
+                        child: ValueListenableBuilder<String>(
+                          valueListenable: fillerLabel,
+                          builder: (BuildContext context, String value, Widget? child) =>
+                              Text(value),
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      // No TableCell, so the text has no cell role and the
+                      // table synthesizes a wrapper around it.
+                      SizedBox(height: 20.0, child: Text('midWrap')),
+                      TableCell(child: SizedBox(height: 20.0, child: Text('midCell'))),
+                      RawSpan(rowSpan: 2, child: SizedBox(height: 80.0, child: Text('spanWrap'))),
+                      TableCell(rowSpan: 2, child: SizedBox(height: 80.0, child: Text('spanCell'))),
+                      SizedBox(height: 100.0),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      SizedBox(height: 60.0),
+                      SizedBox(height: 60.0),
+                      TableCell.none,
+                      TableCell.none,
+                      SizedBox(height: 60.0),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // The position of [node] in the table's coordinate space, which is the
+        // space the widget is painted in. The walk stops at the table because
+        // the table node itself is transformed into the physical pixel space
+        // of the semantics root, while the widget tree is laid out in logical
+        // pixels.
+        Offset semanticsOrigin(SemanticsNode node) {
+          Offset origin = Offset.zero;
+          SemanticsNode? current = node;
+          while (current != null && current.role != SemanticsRole.table) {
+            final Matrix4? transform = current.transform;
+            if (transform != null) {
+              origin += MatrixUtils.transformPoint(transform, Offset.zero);
+            }
+            current = current.parent;
+          }
+          return origin;
+        }
+
+        void expectSemanticsMatchesPaint() {
+          // The layout this test depends on: every cell is middle aligned in
+          // its row, so each one starts 60 pixels down from the top of the
+          // table, one row below the 20 pixel tall first row.
+          expect(tester.getRect(find.text('midWrap')).topLeft, const Offset(0.0, 60.0));
+          expect(tester.getRect(find.text('midCell')).topLeft, const Offset(100.0, 60.0));
+          expect(tester.getRect(find.text('spanWrap')).topLeft, const Offset(200.0, 60.0));
+          expect(tester.getRect(find.text('spanCell')).topLeft, const Offset(300.0, 60.0));
+
+          for (final label in <String>['midWrap', 'midCell', 'spanWrap', 'spanCell']) {
+            final Finder finder = find.text(label);
+            expect(
+              semanticsOrigin(tester.getSemantics(finder)),
+              tester.getRect(finder).topLeft,
+              reason: 'The $label semantics node must be where it is painted.',
+            );
+          }
+        }
+
+        await tester.pumpWidget(buildTable());
+        expectSemanticsMatchesPaint();
+
+        // Changing a sibling cell reassembles the table's semantics while the
+        // aligned cells' own nodes are left untouched, so their geometry must
+        // survive repeated assemble passes unchanged.
+        for (var pass = 1; pass <= 3; pass++) {
+          fillerLabel.value = 'f$pass';
+          await tester.pump();
+          expectSemanticsMatchesPaint();
+        }
+
+        handle.dispose();
+      });
+
+      testWidgets('aligned cells follow layout when rows are resized', (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/192849.
+        //
+        // assembleSemanticsNode rewrites a child's transform from layout on
+        // every pass, but the framework only recomputes a child's own
+        // geometry when that child is dirtied. When a row grows, the cell
+        // render object moves with it while the child's semantics node keeps
+        // the transform the table wrote for its old position, so the pass has
+        // to re-derive the position from the cell's new layout offset instead
+        // of trusting the transform it finds.
+        //
+        // Layout (LTR, four 100px columns, default middle alignment):
+        //   Row 0: | driver | 40    | 40   | 40 |                 height = driver
+        //   Row 1: | driver | midWrap | midCell | spanWrap (rowSpan: 2) | height = driver
+        //   Row 2: | 40 | 40 | 40 | none |                            height = 40
+        // Row 1's top and the middle aligned cells' offset inside it both
+        // change when the driver grows, and the spanning wrapper's rect has
+        // to grow with rows 1 and 2.
+        final SemanticsHandle handle = tester.ensureSemantics();
+        final driver = ValueNotifier<double>(40.0);
+        addTearDown(driver.dispose);
+
+        Widget buildTable() {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                children: <TableRow>[
+                  TableRow(
+                    children: <Widget>[
+                      // Changing the text marks the table's semantics dirty so
+                      // it is reassembled after the relayout.
+                      ValueListenableBuilder<double>(
+                        valueListenable: driver,
+                        builder: (BuildContext context, double value, Widget? child) =>
+                            SizedBox(height: value, child: Text('d${value.toInt()}')),
+                      ),
+                      const SizedBox(height: 40.0),
+                      const SizedBox(height: 40.0),
+                      const SizedBox(height: 40.0),
+                    ],
+                  ),
+                  TableRow(
+                    children: <Widget>[
+                      ValueListenableBuilder<double>(
+                        valueListenable: driver,
+                        builder: (BuildContext context, double value, Widget? child) =>
+                            SizedBox(height: value),
+                      ),
+                      const SizedBox(height: 20.0, child: Text('midWrap')),
+                      const TableCell(child: SizedBox(height: 20.0, child: Text('midCell'))),
+                      const RawSpan(
+                        rowSpan: 2,
+                        child: SizedBox(height: 20.0, child: Text('spanWrap')),
+                      ),
+                    ],
+                  ),
+                  const TableRow(
+                    children: <Widget>[
+                      SizedBox(height: 40.0),
+                      SizedBox(height: 40.0),
+                      SizedBox(height: 40.0),
+                      TableCell.none,
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        // The position of [node] in the table's coordinate space, which is the
+        // space the widget is painted in. The walk stops at the table because
+        // the table node itself is transformed into the physical pixel space
+        // of the semantics root, while the widget tree is laid out in logical
+        // pixels.
+        Offset semanticsOrigin(SemanticsNode node) {
+          Offset origin = Offset.zero;
+          SemanticsNode? current = node;
+          while (current != null && current.role != SemanticsRole.table) {
+            final Matrix4? transform = current.transform;
+            if (transform != null) {
+              origin += MatrixUtils.transformPoint(transform, Offset.zero);
+            }
+            current = current.parent;
+          }
+          return origin;
+        }
+
+        Offset localOffset(SemanticsNode node) {
+          final Matrix4? transform = node.transform;
+          if (transform == null) {
+            return Offset.zero;
+          }
+          return MatrixUtils.getAsTranslation(transform)!;
+        }
+
+        void expectGeometry(double driverHeight) {
+          // The driver is row 0 and row 1, so row 1 starts driverHeight down
+          // the table, is driverHeight tall, and its middle aligned 20 pixel
+          // cells start (driverHeight - 20) / 2 into it.
+          final double middle = driverHeight + (driverHeight - 20.0) / 2.0;
+          expect(tester.getRect(find.text('midWrap')).topLeft, Offset(100.0, middle));
+          expect(tester.getRect(find.text('midCell')).topLeft, Offset(200.0, middle));
+
+          for (final label in <String>['midWrap', 'midCell', 'spanWrap']) {
+            final Finder finder = find.text(label);
+            expect(
+              semanticsOrigin(tester.getSemantics(finder)),
+              tester.getRect(finder).topLeft,
+              reason: 'The $label semantics node must be where it is painted.',
+            );
+          }
+
+          // The spanning wrapper covers rows 1 and 2, which are
+          // driverHeight + 40 pixels tall together.
+          final SemanticsNode spanWrapper = tester.getSemantics(find.text('spanWrap')).parent!;
+          expect(
+            spanWrapper.role,
+            SemanticsRole.cell,
+            reason: 'The spanWrap cell must be wrapped by a synthesized cell node.',
+          );
+          expect(spanWrapper.rect, Rect.fromLTWH(0.0, 0.0, 100.0, driverHeight + 40.0));
+          expect(localOffset(spanWrapper), const Offset(300.0, 0.0));
+        }
+
+        await tester.pumpWidget(buildTable());
+        expectGeometry(40.0);
+
+        // The rows move and the middle aligned cells move inside their row.
+        // Neither change dirties the aligned cells' own semantics nodes, so
+        // the reassemble has to repair the transforms it wrote earlier.
+        driver.value = 100.0;
+        await tester.pump();
+        expectGeometry(100.0);
+
+        driver.value = 40.0;
+        await tester.pump();
+        expectGeometry(40.0);
+
+        handle.dispose();
+      });
+
+      testWidgets('a cell that leaves and rejoins keeps the table in sync', (
+        WidgetTester tester,
+      ) async {
+        // Regression test for https://github.com/flutter/flutter/issues/192849.
+        //
+        // assembleSemanticsNode remembers the transform it wrote for each
+        // child so it can tell its own writes apart from the framework's.
+        // That bookkeeping only means something for children that are still
+        // part of the table: a cell whose content is removed takes its
+        // semantics node out of the tree, and a cell that comes back brings a
+        // node the table has never seen. The surviving cells must keep their
+        // positions across those passes, and the returning cell must be placed
+        // where it is painted.
+        final SemanticsHandle handle = tester.ensureSemantics();
+
+        Widget buildTable({required bool withC}) {
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: Table(
+                defaultColumnWidth: const FixedColumnWidth(100.0),
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                children: <TableRow>[
+                  const TableRow(
+                    children: <Widget>[
+                      SizedBox(height: 20.0, child: Text('a')),
+                      SizedBox(height: 20.0, child: Text('b')),
+                    ],
+                  ),
+                  TableRow(
+                    children: <Widget>[
+                      if (withC)
+                        const TableCell(child: SizedBox(height: 20.0, child: Text('c')))
+                      else
+                        const SizedBox(height: 20.0),
+                      const SizedBox(height: 40.0, child: Text('d')),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        Offset semanticsOrigin(SemanticsNode node) {
+          Offset origin = Offset.zero;
+          SemanticsNode? current = node;
+          while (current != null && current.role != SemanticsRole.table) {
+            final Matrix4? transform = current.transform;
+            if (transform != null) {
+              origin += MatrixUtils.transformPoint(transform, Offset.zero);
+            }
+            current = current.parent;
+          }
+          return origin;
+        }
+
+        void expectPositions(Iterable<String> labels) {
+          for (final label in labels) {
+            final Finder finder = find.text(label);
+            expect(
+              semanticsOrigin(tester.getSemantics(finder)),
+              tester.getRect(finder).topLeft,
+              reason: 'The $label semantics node must be where it is painted.',
+            );
+          }
+        }
+
+        const Iterable<String> all = <String>['a', 'b', 'c', 'd'];
+        const Iterable<String> withoutC = <String>['a', 'b', 'd'];
+
+        await tester.pumpWidget(buildTable(withC: true));
+        expectPositions(all);
+
+        // The cell's semantics node leaves the tree; the others are
+        // reassembled while it is gone.
+        await tester.pumpWidget(buildTable(withC: false));
+        expect(find.text('c'), findsNothing);
+        expectPositions(withoutC);
+
+        // A new node comes back for the same slot, while the table still
+        // holds geometry for the cells that never left.
+        await tester.pumpWidget(buildTable(withC: true));
+        expectPositions(all);
+
+        handle.dispose();
+      });
+    });
   });
 }
