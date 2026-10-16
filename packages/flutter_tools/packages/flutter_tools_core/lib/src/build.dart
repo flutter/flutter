@@ -88,10 +88,10 @@ class ExtensionBuildTarget {
   const ExtensionBuildTarget({
     required this.description,
     required this.name,
-    required this.targetPlatform,
     this.artifacts = const <ExtensionArtifact>{},
     this.hostArtifacts = const <ExtensionHostArtifact>{},
     this.outputDir = BuiltInPlaceholders.buildDir,
+    this.targetPlatform = '',
   });
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.

@@ -187,6 +187,48 @@ abstract base class BuildService extends ToolExtensionService {
   /// Returns the custom `flutter assemble` targets contributed by this extension.
   List<AssembleTarget> get assembleTargets => const <AssembleTarget>[];
 
+  /// Returns the custom build targets contributed by this extension.
+  Future<List<ExtensionBuildTarget>> getBuildTargets() async => buildTargets
+      .map(
+        (BuildTarget target) => ExtensionBuildTarget(
+          artifacts: target.artifacts,
+          description: target.description,
+          hostArtifacts: target.hostArtifacts,
+          name: target.name,
+          outputDir: target.outputDir,
+          targetPlatform: target.targetPlatform,
+        ),
+      )
+      .toList();
+
+  /// Triggers a custom build for the given [targetName].
+  Future<ExtensionBuildResult> build({
+    required BuildMode buildMode,
+    required String mainPath,
+    required Uri projectRoot,
+    required String targetName,
+  }) async {
+    final BuildTarget? target = buildTargets
+        .where((BuildTarget t) => t.name == targetName)
+        .firstOrNull;
+    if (target == null) {
+      return ExtensionBuildResult(
+        success: false,
+        errorMessage: 'Unknown build target: $targetName',
+      );
+    }
+    return target.build(
+      ExtensionBuildContext(
+        buildDir: projectRoot,
+        buildMode: buildMode,
+        mainPath: mainPath,
+        outputDir: projectRoot,
+        projectRoot: projectRoot,
+        resolvedArtifacts: const <String, String>{},
+      ),
+    );
+  }
+
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
     return <String, ExtensionRpcHandler>{
@@ -201,18 +243,8 @@ abstract base class BuildService extends ToolExtensionService {
   Future<void> shutdown() async {}
 
   Future<List<Map<String, Object?>>> _getBuildTargetsRpc(Map<String, Object?> _) async {
-    return buildTargets
-        .map(
-          (BuildTarget target) => ExtensionBuildTarget(
-            artifacts: target.artifacts,
-            description: target.description,
-            hostArtifacts: target.hostArtifacts,
-            name: target.name,
-            outputDir: target.outputDir,
-            targetPlatform: target.targetPlatform,
-          ).toMap(),
-        )
-        .toList();
+    final List<ExtensionBuildTarget> targets = await getBuildTargets();
+    return targets.map((ExtensionBuildTarget target) => target.toMap()).toList();
   }
 
   Future<List<Map<String, Object?>>> _getAssembleTargetsRpc(Map<String, Object?> _) async {
@@ -251,10 +283,19 @@ abstract base class BuildService extends ToolExtensionService {
     final Uri projectRootUri = _requireAbsoluteUri(params, projectRootParam);
     final String mainPath = _requireString(params, mainPathParam);
     final String buildMode = _requireString(params, buildModeParam);
-    final Uri outputDirUri = _requireAbsoluteUri(params, outputDirParam);
-    final Uri buildDirUri = _requireAbsoluteUri(params, buildDirParam);
+    final Uri outputDirUri = switch (params[outputDirParam]) {
+      String() => _requireAbsoluteUri(params, outputDirParam),
+      _ when !params.containsKey(outputDirParam) => projectRootUri,
+      _ => throw RpcException.invalidParams('Missing or invalid "$outputDirParam" parameter.'),
+    };
+    final Uri buildDirUri = switch (params[buildDirParam]) {
+      String() => _requireAbsoluteUri(params, buildDirParam),
+      _ when !params.containsKey(buildDirParam) => projectRootUri,
+      _ => throw RpcException.invalidParams('Missing or invalid "$buildDirParam" parameter.'),
+    };
     final Map<String, Object?> rawResolvedArtifacts = switch (params[resolvedArtifactsParam]) {
       final Map<String, Object?> value => value,
+      _ when !params.containsKey(resolvedArtifactsParam) => const <String, Object?>{},
       _ => throw RpcException.invalidParams(
         'Missing or invalid "$resolvedArtifactsParam" parameter.',
       ),
@@ -291,13 +332,16 @@ abstract base class BuildService extends ToolExtensionService {
     final BuildTarget? target = buildTargets
         .where((BuildTarget t) => t.name == targetName)
         .firstOrNull;
-    if (target == null) {
-      return ExtensionBuildResult(
-        success: false,
-        errorMessage: 'Unknown build target: $targetName',
-      ).toMap();
+    if (target != null) {
+      final ExtensionBuildResult result = await target.build(context);
+      return result.toMap();
     }
-    final ExtensionBuildResult result = await target.build(context);
+    final ExtensionBuildResult result = await build(
+      buildMode: context.buildMode,
+      mainPath: context.mainPath,
+      projectRoot: context.projectRoot,
+      targetName: targetName,
+    );
     return result.toMap();
   }
 
