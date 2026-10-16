@@ -789,22 +789,32 @@ void _validateFonts(YamlList fonts, List<String> errors) {
 class AssetsEntry {
   const AssetsEntry({
     required this.uri,
+    this.bundleUri,
     this.flavors = const <String>{},
     this.platforms = const <String>{},
     this.transformers = const <AssetTransformerEntry>[],
   });
 
   final Uri uri;
+
+  /// The path and runtime lookup key inside the asset bundle.
+  ///
+  /// When omitted, [uri] determines both the source and bundle paths. Directory
+  /// entries rewrite the directory prefix, preserving filenames and image variants.
+  /// Package declarations retain their `packages/<package>/` namespace.
+  final Uri? bundleUri;
+
   final Set<String> flavors;
   final Set<String> platforms;
   final List<AssetTransformerEntry> transformers;
 
   Object? get descriptor {
-    if (transformers.isEmpty && flavors.isEmpty && platforms.isEmpty) {
+    if (bundleUri == null && transformers.isEmpty && flavors.isEmpty && platforms.isEmpty) {
       return uri.toString();
     }
     return <String, Object?>{
       _pathKey: uri.toString(),
+      if (bundleUri != null) _bundlePathKey: bundleUri!.toFilePath(windows: false),
       if (flavors.isNotEmpty) _flavorKey: flavors.toList(),
       if (platforms.isNotEmpty) _platformsKey: platforms.toList(),
       if (transformers.isNotEmpty)
@@ -813,6 +823,7 @@ class AssetsEntry {
   }
 
   static const _pathKey = 'path';
+  static const _bundlePathKey = 'bundle_path';
   static const _flavorKey = 'flavors';
   static const _platformsKey = 'platforms';
   static const _transformersKey = 'transformers';
@@ -859,6 +870,36 @@ class AssetsEntry {
         );
       }
 
+      Uri? bundleUri;
+      if (yaml.containsKey(_bundlePathKey)) {
+        final Object? bundlePath = yaml[_bundlePathKey];
+        if (bundlePath is! String || bundlePath.isEmpty) {
+          return (null, 'The bundle_path of asset "$path" must be a non-empty string.');
+        }
+        final List<String> segments = bundlePath.split('/');
+        final Iterable<String> names = bundlePath.endsWith('/')
+            ? segments.take(segments.length - 1)
+            : segments;
+        if (names.any((String segment) => segment.isEmpty || segment == '.' || segment == '..') ||
+            bundlePath.contains(r'\') ||
+            bundlePath.contains(':') ||
+            bundlePath.runes.any((int rune) => rune < 32 || rune == 127)) {
+          return (
+            null,
+            'The bundle_path of asset "$path" must be a relative path with '
+                'forward slashes and no empty, ".", or ".." segments.',
+          );
+        }
+        if (path.endsWith('/') != bundlePath.endsWith('/')) {
+          return (
+            null,
+            'The path and bundle_path of asset "$path" must either both '
+                'end with "/" for directories, or neither for files.',
+          );
+        }
+        bundleUri = Uri(pathSegments: segments);
+      }
+
       final (List<String>? flavors, List<String> flavorsErrors) = _parseFlavorsSection(
         yaml[_flavorKey],
       );
@@ -882,6 +923,7 @@ class AssetsEntry {
       return (
         AssetsEntry(
           uri: Uri(pathSegments: path.split('/')),
+          bundleUri: bundleUri,
           flavors: Set<String>.from(flavors ?? <String>[]),
           platforms: Set<String>.from(platforms ?? <String>[]),
           transformers: transformers ?? <AssetTransformerEntry>[],
@@ -981,6 +1023,7 @@ class AssetsEntry {
     }
 
     return uri == other.uri &&
+        bundleUri == other.bundleUri &&
         setEquals(flavors, other.flavors) &&
         setEquals(platforms, other.platforms);
   }
@@ -988,6 +1031,7 @@ class AssetsEntry {
   @override
   int get hashCode => Object.hashAll(<Object?>[
     uri.hashCode,
+    bundleUri,
     Object.hashAllUnordered(flavors),
     Object.hashAllUnordered(platforms),
     Object.hashAll(transformers),
@@ -995,7 +1039,7 @@ class AssetsEntry {
 
   @override
   String toString() =>
-      'AssetsEntry(uri: $uri, flavors: $flavors, platforms: $platforms, transformers: $transformers)';
+      'AssetsEntry(uri: $uri, bundleUri: $bundleUri, flavors: $flavors, platforms: $platforms, transformers: $transformers)';
 }
 
 /// Represents an entry in the "transformers" section of an asset.

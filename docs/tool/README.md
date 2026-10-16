@@ -30,6 +30,8 @@ to the Flutter SDK controlled `flutter` and `dart` binaries.
 
 Markdown documentation can be found for some commands in [flutter/packages/flutter_tools/doc/](https://github.com/flutter/flutter/tree/main/packages/flutter_tools/doc).
 
+See [Asset bundle paths](Asset-bundle-paths.md) for mapping asset sources to runtime lookup keys.
+
 ## Analysis
 
 To run dart analysis on the Flutter tool codebase, run:
