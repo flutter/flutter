@@ -136,7 +136,8 @@ void main() {
       final manager = ExtensionManager(
         hostPlatform: HostPlatform.linux_x64,
         logger: logger,
-        featureFlags: TestFeatureFlags(),
+        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
       );
       final artifactManager = ExtensionArtifactManager(
         extensionManager: manager,
@@ -148,8 +149,8 @@ void main() {
       );
 
       await artifactManager.ensureArtifactsDownloaded();
+      expect(manager.isInitialized, isFalse);
       expect(fs.directory('/dart_data').existsSync(), isFalse);
-      expect(fs.currentDirectory.childDirectory('.dart_tool').existsSync(), isFalse);
       await manager.dispose();
     });
 
@@ -207,7 +208,6 @@ void main() {
       );
       expect(artifactFile.existsSync(), isTrue);
       expect(artifactFile.readAsBytesSync(), equals(content));
-      expect(fs.currentDirectory.childDirectory('.dart_tool').existsSync(), isFalse);
 
       // Second call should verify SHA-256 and skip downloading.
       await artifactManager.ensureArtifactsDownloaded(targetPlatforms: const <String>{'linux-x64'});

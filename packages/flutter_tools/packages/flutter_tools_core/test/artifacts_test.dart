@@ -114,6 +114,38 @@ void main() {
         }),
         throwsArgumentError,
       );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'name': '',
+          'url': 'https://example.com/a.zip',
+          'sha256': '123',
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'name': '../evil',
+          'url': 'https://example.com/a.zip',
+          'sha256': '123',
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'name': 'sub/bin',
+          'url': 'https://example.com/a.zip',
+          'sha256': '123',
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ArtifactDependency.fromJson(const <String, Object?>{
+          'name': 'test',
+          'url': 'https://example.com/a.zip',
+          'sha256': '../badsha',
+        }),
+        throwsArgumentError,
+      );
     });
   });
 }

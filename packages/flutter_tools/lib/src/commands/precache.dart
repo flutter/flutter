@@ -21,6 +21,7 @@ class PrecacheCommand extends FlutterCommand {
     required this._logger,
     required this._featureFlags,
     this._extensionArtifactManager,
+    super.toolContext,
   }) {
     argParser.addFlag(
       'all-platforms',
@@ -219,7 +220,7 @@ class PrecacheCommand extends FlutterCommand {
           .map((DevelopmentArtifact a) => a.name)
           .toSet();
       await _extensionArtifactManager.ensureArtifactsDownloaded(
-        targetPlatforms: includeAllPlatforms ? null : requiredStrings,
+        targetPlatforms: (includeAllPlatforms || downloadDefaultArtifacts) ? null : requiredStrings,
       );
     }
     return FlutterCommandResult.success();

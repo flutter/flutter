@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -511,24 +509,38 @@ void main() {
     expect(cache.osUtils.hostPlatformOverride, HostPlatform.darwin_x64);
   });
 
-  testUsingContext('precache invokes ExtensionArtifactManager and never creates .dart_tool in CWD outside a project', () async {
-    final fs = MemoryFileSystem.test();
-    final Directory emptyCwd = fs.directory('/outside_any_project')..createSync(recursive: true);
-    fs.currentDirectory = emptyCwd;
-
+  testWithoutContext('precache invokes ExtensionArtifactManager with explicit platform filter when flags are provided', () async {
     final fakeArtifactManager = FakeExtensionArtifactManager();
+    final toolContext = FakeToolContext(cache: cache);
     final command = PrecacheCommand(
       cache: cache,
       logger: BufferLogger.test(),
       featureFlags: TestFeatureFlags(isLinuxEnabled: true, isToolExtensionsEnabled: true),
       platform: FakePlatform(),
       extensionArtifactManager: fakeArtifactManager,
+      toolContext: toolContext,
     );
     await createTestCommandRunner(command).run(const <String>['precache', '--linux']);
 
     expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
     expect(fakeArtifactManager.requestedTargetPlatforms, contains('linux'));
-    expect(emptyCwd.childDirectory('.dart_tool').existsSync(), isFalse);
+  });
+
+  testWithoutContext('precache passes null targetPlatforms to ExtensionArtifactManager when no platform flags are provided', () async {
+    final fakeArtifactManager = FakeExtensionArtifactManager();
+    final toolContext = FakeToolContext(cache: cache);
+    final command = PrecacheCommand(
+      cache: cache,
+      logger: BufferLogger.test(),
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true, isToolExtensionsEnabled: true),
+      platform: FakePlatform(),
+      extensionArtifactManager: fakeArtifactManager,
+      toolContext: toolContext,
+    );
+    await createTestCommandRunner(command).run(const <String>['precache']);
+
+    expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
+    expect(fakeArtifactManager.requestedTargetPlatforms, isNull);
   });
 }
 

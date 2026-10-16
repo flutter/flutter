@@ -31,6 +31,10 @@ abstract base class ArtifactService extends ToolExtensionService {
 
   /// Returns the list of [ArtifactDependency] objects required by this
   /// extension for the given [hostPlatform] and optional [targetPlatform].
+  ///
+  /// [targetPlatform] is a [String] rather than `TargetPlatform` so extensions
+  /// can match custom out-of-tree embedder identifiers (e.g. `'tizen-arm64'`)
+  /// as well as built-in platform names or OS prefixes (e.g. `'linux'`).
   Future<List<ArtifactDependency>> downloadArtifacts({
     required HostPlatform hostPlatform,
     String? targetPlatform,

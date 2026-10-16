@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/experimental/extension_discovery.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/artifact.dart';
+import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:test/test.dart';
 
@@ -85,7 +86,13 @@ void main() {
           ArtifactService.downloadArtifactsMethod,
           params: const <String, Object?>{},
         ),
-        throwsA(isA<json_rpc.RpcException>()),
+        throwsA(
+          isA<json_rpc.RpcException>().having(
+            (json_rpc.RpcException e) => e.code,
+            'code',
+            error_code.INVALID_PARAMS,
+          ),
+        ),
       );
 
       await expectLater(
@@ -93,7 +100,13 @@ void main() {
           ArtifactService.downloadArtifactsMethod,
           params: const <String, Object?>{ArtifactService.hostPlatformParam: 'invalid-host'},
         ),
-        throwsA(isA<json_rpc.RpcException>()),
+        throwsA(
+          isA<json_rpc.RpcException>().having(
+            (json_rpc.RpcException e) => e.code,
+            'code',
+            error_code.INVALID_PARAMS,
+          ),
+        ),
       );
 
       await expectLater(
@@ -104,7 +117,13 @@ void main() {
             ArtifactService.targetPlatformParam: 123,
           },
         ),
-        throwsA(isA<json_rpc.RpcException>()),
+        throwsA(
+          isA<json_rpc.RpcException>().having(
+            (json_rpc.RpcException e) => e.code,
+            'code',
+            error_code.INVALID_PARAMS,
+          ),
+        ),
       );
     });
 

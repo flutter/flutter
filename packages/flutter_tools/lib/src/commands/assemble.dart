@@ -348,14 +348,20 @@ class AssembleCommand extends FlutterCommand {
     return results;
   }
 
+  static final _builtInTargetNames = <String>{
+    for (final Target target in _kDefaultTargets) target.name,
+  };
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     final ToolContext(:FileSystem fs, :Logger logger) = _toolContext;
     final List<Target> targets = createTargets();
-    final String? targetPlatformStr = _environment.defines[kTargetPlatform];
-    await _extensionArtifactManager?.ensureArtifactsDownloaded(
-      targetPlatforms: targetPlatformStr != null ? <String>{targetPlatformStr} : null,
-    );
+    if (targets.any((Target target) => !_builtInTargetNames.contains(target.name))) {
+      final String? targetPlatformStr = _environment.defines[kTargetPlatform];
+      await _extensionArtifactManager?.ensureArtifactsDownloaded(
+        targetPlatforms: targetPlatformStr != null ? <String>{targetPlatformStr} : null,
+      );
+    }
     final nonDeferredTargets = <Target>[];
     final List<Target> deferredTargets = <AndroidAotDeferredComponentsBundle>[];
     for (final target in targets) {

@@ -38,13 +38,13 @@ class ToolExtensionCapabilities {
 
   /// Deserializes [ToolExtensionCapabilities] from a JSON map payload.
   factory ToolExtensionCapabilities.fromJson(Map<String, Object?> json) {
-    final Object? servicesList = json['services'];
+    final Object? servicesList = json[servicesKey];
     final services = servicesList is Iterable ? List<String>.from(servicesList) : <String>[];
-    final Object? platformsList = json['supportedPlatforms'];
+    final Object? platformsList = json[supportedPlatformsKey];
     final Set<String> supportedPlatforms = platformsList is Iterable
         ? platformsList.map((Object? p) => p.toString().toLowerCase()).toSet()
         : const <String>{'linux', 'macos', 'windows'};
-    final String? extensionName = switch (json['extensionName']) {
+    final String? extensionName = switch (json[extensionNameKey]) {
       final String name => name,
       _ => null,
     };
@@ -54,6 +54,15 @@ class ToolExtensionCapabilities {
       supportedPlatforms: supportedPlatforms,
     );
   }
+
+  /// Map key for [extensionName].
+  static const String extensionNameKey = 'extensionName';
+
+  /// Map key for [services].
+  static const String servicesKey = 'services';
+
+  /// Map key for [supportedPlatforms].
+  static const String supportedPlatformsKey = 'supportedPlatforms';
 
   /// Optional identifier name of the extension package.
   final String? extensionName;
@@ -71,8 +80,8 @@ class ToolExtensionCapabilities {
 
   /// Serializes capabilities to a map payload.
   Map<String, Object?> toMap() => <String, Object?>{
-    'extensionName': ?extensionName,
-    'services': services,
-    'supportedPlatforms': supportedPlatforms.toList(),
+    extensionNameKey: ?extensionName,
+    servicesKey: services,
+    supportedPlatformsKey: supportedPlatforms.toList(),
   };
 }

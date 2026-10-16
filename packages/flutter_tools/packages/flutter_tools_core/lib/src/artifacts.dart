@@ -81,6 +81,12 @@ class ArtifactDependency {
       urlKey: final String urlStr,
       sha256Key: final String sha256,
     }) {
+      if (!_isValidSinglePathSegment(name)) {
+        throw ArgumentError('Invalid artifact dependency name: "$name"');
+      }
+      if (!_isValidSinglePathSegment(sha256)) {
+        throw ArgumentError('Invalid artifact dependency sha256: "$sha256"');
+      }
       final Uri? uri = Uri.tryParse(urlStr);
       if (uri == null || !uri.hasScheme) {
         throw ArgumentError('Invalid artifact dependency URL: "$urlStr"');
@@ -104,6 +110,16 @@ class ArtifactDependency {
       );
     }
     throw ArgumentError('Invalid ArtifactDependency JSON: $json');
+  }
+
+  static bool _isValidSinglePathSegment(String value) {
+    final String trimmed = value.trim();
+    return trimmed.isNotEmpty &&
+        trimmed == value &&
+        value != '.' &&
+        value != '..' &&
+        !value.contains('/') &&
+        !value.contains(r'\');
   }
 
   /// Map key for [hostPlatform].
@@ -144,7 +160,13 @@ class ArtifactDependency {
   /// Optional host platform this artifact is intended for.
   final HostPlatform? hostPlatform;
 
-  /// Optional target platform identifier this artifact is intended for (e.g. `'linux-x64'`).
+  /// Optional target platform identifier this artifact is intended for
+  /// (e.g. `'linux-x64'` or `'custom-embedder-arm64'`).
+  ///
+  /// This is a [String] rather than a closed `TargetPlatform` enum because tool
+  /// extensions may target custom out-of-tree embedders as well as built-in
+  /// platform families (matching both exact identifiers and `<os>-<arch>`
+  /// prefixes such as `'linux'` matching `'linux-x64'`).
   final String? targetPlatform;
 
   /// Serializes the artifact dependency to a JSON-serializable map.
