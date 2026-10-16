@@ -2410,6 +2410,198 @@ void main() {
       debugPrint = oldDebugPrint;
     }
   });
+
+  group('FocusNode.canRequestFocus -', () {
+    // Builds a column of focusable nodes.
+    Widget buildNodeList(List<FocusNode> nodes, Set<int> disabledNodes) {
+      return Column(
+        children: List<Widget>.generate(
+          nodes.length,
+          (int index) => Focus(
+            debugLabel: 'node$index',
+            focusNode: nodes[index],
+            canRequestFocus: !disabledNodes.contains(index),
+            child: const SizedBox.shrink(),
+          ),
+        ),
+      );
+    }
+
+    // Requests focus for every node in order, then returns to node 8 so that
+    // it becomes the current primary focus.
+    //
+    // Node 8 (not 9) is focused last so that node 9 — a later sibling in build
+    // order — is still focusable when node 8 is disabled, which is what hands
+    // the stale mark to node 9.
+    Future<void> focusEveryNodeInOrder(WidgetTester tester, List<FocusNode> nodes) async {
+      for (final node in nodes) {
+        node.requestFocus();
+        await tester.pump();
+      }
+      nodes[8].requestFocus();
+      await tester.pump();
+      expect(nodes[8].hasPrimaryFocus, isTrue);
+    }
+
+    List<FocusNode> createFocusNodes(int count) {
+      return List<FocusNode>.generate(count, (int index) => FocusNode(debugLabel: 'node$index'));
+    }
+
+    Future<List<FocusNode>> createFocusedNodes(WidgetTester tester) async {
+      final List<FocusNode> nodes = createFocusNodes(10);
+      addTearDown(() {
+        for (final node in nodes) {
+          node.dispose();
+        }
+      });
+      await tester.pumpWidget(buildNodeList(nodes, <int>{}));
+      await focusEveryNodeInOrder(tester, nodes);
+      return nodes;
+    }
+
+    // Regression test for https://github.com/flutter/flutter/issues/185076.
+    testWidgets('disabling all siblings in the same build does not leave '
+        'primary focus on an unfocusable node', (WidgetTester tester) async {
+      final List<FocusNode> nodes = await createFocusedNodes(tester);
+
+      final FocusScopeNode enclosingScope = nodes[8].enclosingScope!;
+
+      // Disable every node in a single build.
+      await tester.pumpWidget(buildNodeList(nodes, <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
+      await tester.pump();
+
+      // No node can take focus, so focus falls back to the enclosing scope
+      // rather than staying on a disabled node.
+      expect(tester.binding.focusManager.primaryFocus, same(enclosingScope));
+      for (final node in nodes) {
+        expect(node.hasPrimaryFocus, isFalse);
+      }
+    });
+
+    testWidgets('disabling a focused sibling in the same build moves focus '
+        'to the most recently focused sibling', (WidgetTester tester) async {
+      final List<FocusNode> nodes = await createFocusedNodes(tester);
+
+      // Disable the current primary focus (node 8) and node 9 in a single build.
+      await tester.pumpWidget(buildNodeList(nodes, <int>{8, 9}));
+      await tester.pump();
+
+      // Focus moves to node 7, the most recently focused node that can still
+      // take focus, rather than to one of the disabled nodes.
+      expect(nodes[7].hasPrimaryFocus, isTrue);
+      expect(nodes[8].hasPrimaryFocus, isFalse);
+      expect(nodes[9].hasPrimaryFocus, isFalse);
+    });
+
+    testWidgets('disabling a sibling scope in the same build does not leave '
+        'primary focus on its unfocusable child', (WidgetTester tester) async {
+      final node = FocusNode(debugLabel: 'node');
+      final scopedNode = FocusNode(debugLabel: 'scopedNode');
+      final scope = FocusScopeNode(debugLabel: 'scope');
+      addTearDown(() {
+        node.dispose();
+        scopedNode.dispose();
+        scope.dispose();
+      });
+
+      Widget build({required bool enabled}) => Column(
+        children: <Widget>[
+          Focus(focusNode: node, canRequestFocus: enabled, child: const SizedBox.shrink()),
+          FocusScope(
+            node: scope,
+            canRequestFocus: enabled,
+            child: Focus(focusNode: scopedNode, child: const SizedBox.shrink()),
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(build(enabled: true));
+      scopedNode.requestFocus();
+      await tester.pump();
+      node.requestFocus();
+      await tester.pump();
+      final FocusScopeNode enclosingScope = node.enclosingScope!;
+
+      // `node` is disabled first and hands focus to `scope`'s child, which is
+      // still focusable at that instant; `scope` is disabled afterwards.
+      await tester.pumpWidget(build(enabled: false));
+      await tester.pump();
+
+      expect(scopedNode.hasPrimaryFocus, isFalse);
+      expect(tester.binding.focusManager.primaryFocus, same(enclosingScope));
+    });
+
+    testWidgets('a pending autofocus wins over a node that became unfocusable '
+        'in the same build', (WidgetTester tester) async {
+      final List<FocusNode> nodes = createFocusNodes(10);
+      final autofocusNode = FocusNode(debugLabel: 'autofocusNode');
+      addTearDown(() {
+        for (final node in nodes) {
+          node.dispose();
+        }
+        autofocusNode.dispose();
+      });
+
+      Widget build({required Set<int> disabledNodes, required bool autofocus}) {
+        return FocusScope(
+          child: Column(
+            children: <Widget>[
+              for (int index = 0; index < nodes.length; index += 1)
+                Focus(
+                  debugLabel: 'node$index',
+                  focusNode: nodes[index],
+                  canRequestFocus: !disabledNodes.contains(index),
+                  child: const SizedBox.shrink(),
+                ),
+              Focus(focusNode: autofocusNode, autofocus: autofocus, child: const SizedBox.shrink()),
+            ],
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(disabledNodes: const <int>{}, autofocus: false));
+      await focusEveryNodeInOrder(tester, nodes);
+
+      // Every node becomes unfocusable in this build, which hands the stale
+      // mark to the unfocusable node 9. An autofocus request for the same
+      // scope is queued in that same build, and must win over the stale mark.
+      await tester.pumpWidget(
+        build(disabledNodes: const <int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, autofocus: true),
+      );
+      await tester.pump();
+
+      expect(nodes[9].hasPrimaryFocus, isFalse);
+      expect(autofocusNode.hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('an unfocusable ancestor releases an explicitly requested '
+        'focus', (WidgetTester tester) async {
+      final node = FocusNode(debugLabel: 'node');
+      final scope = FocusScopeNode(debugLabel: 'scope');
+      addTearDown(() {
+        node.dispose();
+        scope.dispose();
+      });
+
+      await tester.pumpWidget(
+        FocusScope(
+          node: scope,
+          child: Focus(focusNode: node, child: const SizedBox.shrink()),
+        ),
+      );
+
+      // The mark comes from an explicit requestFocus() call, so the node is
+      // also the scope's focused child. Before the mark can be applied, an
+      // ancestor is disabled, which makes the node unfocusable without moving
+      // focus itself.
+      node.requestFocus();
+      scope.descendantsAreFocusable = false;
+      await tester.pump();
+
+      expect(node.hasPrimaryFocus, isFalse);
+      expect(tester.binding.focusManager.primaryFocus, same(scope));
+    });
+  });
 }
 
 class _LoggingTestFocusNode extends FocusNode {
