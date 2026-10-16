@@ -1634,28 +1634,46 @@ extension type const _NativeLocale(Locale value) implements _NativeType<Locale, 
 
 extension type const _NativeShadows(List<Shadow> value)
     implements _NativeType<List<Shadow>, Handle> {
-  List<Object?> encode() => <Object?>[
-    for (final Shadow item in value) ...<Object?>[
-      _NativeColor(item.color).encode(),
-      item.offset.dx,
-      item.offset.dy,
-      item.blurSigma,
-    ],
-  ];
+  List<Object?> encode() {
+    final result = List<Object?>.filled(value.length * 4, null);
+    for (var i = 0; i < value.length; i++) {
+      final Shadow item = value[i];
+      final int base = i * 4;
+      result[base] = _NativeColor(item.color).encode();
+      result[base + 1] = item.offset.dx;
+      result[base + 2] = item.offset.dy;
+      result[base + 3] = item.blurSigma;
+    }
+    return result;
+  }
 }
 
 extension type const _NativeFontFeatures(List<FontFeature> value)
     implements _NativeType<List<FontFeature>, Handle> {
-  List<Object?> encode() => <Object?>[
-    for (final FontFeature item in value) ...<Object?>[item.feature, item.value],
-  ];
+  List<Object?> encode() {
+    final result = List<Object?>.filled(value.length * 2, null);
+    for (var i = 0; i < value.length; i++) {
+      final FontFeature item = value[i];
+      final int base = i * 2;
+      result[base] = item.feature;
+      result[base + 1] = item.value;
+    }
+    return result;
+  }
 }
 
 extension type const _NativeFontVariations(List<FontVariation> value)
     implements _NativeType<List<FontVariation>, Handle> {
-  List<Object?> encode() => <Object?>[
-    for (final FontVariation item in value) ...<Object?>[item.axis, item.value],
-  ];
+  List<Object?> encode() {
+    final result = List<Object?>.filled(value.length * 2, null);
+    for (var i = 0; i < value.length; i++) {
+      final FontVariation item = value[i];
+      final int base = i * 2;
+      result[base] = item.axis;
+      result[base + 1] = item.value;
+    }
+    return result;
+  }
 }
 
 extension type const _NativePaint(Paint value) implements _NativeType<Paint, Handle> {

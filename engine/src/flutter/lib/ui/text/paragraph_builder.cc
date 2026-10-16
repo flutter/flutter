@@ -31,58 +31,89 @@ namespace {
 
 const double kTextHeightNone = 0.0;
 
-template <typename T>
-T GetListElement(Dart_Handle list, intptr_t index) {
-  return tonic::DartConverter<T>::FromDart(Dart_ListGetAt(list, index));
-}
-
 void DecodePaint(Dart_Handle list, std::optional<DlPaint>& out_paint) {
-  Dart_Handle objects = Dart_ListGetAt(list, 0);
-  Dart_Handle data = Dart_ListGetAt(list, 1);
-  Paint paint(objects, data);
+  Dart_Handle handles[2];
+  Dart_ListGetRange(list, 0, 2, handles);
+  Paint paint(handles[0], handles[1]);
   if (paint.isNotNull()) {
-    DlPaint dl_paint;
-    paint.paint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
+    paint.paint(out_paint.emplace(), DisplayListOpFlags::kDrawParagraphFlags,
                 DlTileMode::kDecal);
-    out_paint = dl_paint;
   }
 }
+
+struct DartListElements {
+  explicit DartListElements(Dart_Handle list) {
+    Dart_ListLength(list, &length);
+    if (length > 0) {
+      if (length > kInlineCapacity) {
+        heap_storage.resize(length);
+        data = heap_storage.data();
+      }
+      Dart_ListGetRange(list, 0, length, data);
+    }
+  }
+
+  static constexpr intptr_t kInlineCapacity = 16;
+  intptr_t length = 0;
+  Dart_Handle inline_storage[kInlineCapacity];
+  std::vector<Dart_Handle> heap_storage;
+  Dart_Handle* data = inline_storage;
+
+  Dart_Handle operator[](intptr_t index) const { return data[index]; }
+};
 
 void DecodeTextShadows(Dart_Handle shadows_handle,
                        std::vector<txt::TextShadow>& decoded_shadows) {
   decoded_shadows.clear();
-  intptr_t length = 0;
-  Dart_ListLength(shadows_handle, &length);
-  decoded_shadows.reserve(length / 4);
-  for (intptr_t i = 0; i < length; i += 4) {
+  DartListElements handles(shadows_handle);
+  if (handles.length <= 0) {
+    return;
+  }
+  decoded_shadows.reserve(handles.length / 4);
+  for (intptr_t i = 0; i < handles.length; i += 4) {
     decoded_shadows.emplace_back(
-        static_cast<SkColor>(GetListElement<uint32_t>(shadows_handle, i)),
-        SkPoint::Make(GetListElement<double>(shadows_handle, i + 1),
-                      GetListElement<double>(shadows_handle, i + 2)),
-        GetListElement<double>(shadows_handle, i + 3));
+        static_cast<SkColor>(
+            tonic::DartConverter<uint32_t>::FromDart(handles[i])),
+        SkPoint::Make(
+            static_cast<float>(
+                tonic::DartConverter<double>::FromDart(handles[i + 1])),
+            static_cast<float>(
+                tonic::DartConverter<double>::FromDart(handles[i + 2]))),
+        tonic::DartConverter<double>::FromDart(handles[i + 3]));
   }
 }
 
 void DecodeFontFeatures(Dart_Handle font_features_handle,
                         txt::FontFeatures& font_features) {
-  intptr_t length = 0;
-  Dart_ListLength(font_features_handle, &length);
-  for (intptr_t i = 0; i < length; i += 2) {
+  DartListElements handles(font_features_handle);
+  for (intptr_t i = 0; i < handles.length; i += 2) {
     font_features.SetFeature(
-        GetListElement<std::string>(font_features_handle, i),
-        GetListElement<int32_t>(font_features_handle, i + 1));
+        tonic::DartConverter<std::string>::FromDart(handles[i]),
+        tonic::DartConverter<int32_t>::FromDart(handles[i + 1]));
   }
 }
 
 void DecodeFontVariations(Dart_Handle font_variations_handle,
                           txt::FontVariations& font_variations) {
-  intptr_t length = 0;
-  Dart_ListLength(font_variations_handle, &length);
-  for (intptr_t i = 0; i < length; i += 2) {
+  DartListElements handles(font_variations_handle);
+  for (intptr_t i = 0; i < handles.length; i += 2) {
     font_variations.SetAxisValue(
-        GetListElement<std::string>(font_variations_handle, i),
+        tonic::DartConverter<std::string>::FromDart(handles[i]),
         static_cast<float>(
-            GetListElement<double>(font_variations_handle, i + 1)));
+            tonic::DartConverter<double>::FromDart(handles[i + 1])));
+  }
+}
+
+void DecodeFontFamilyFallback(Dart_Handle fallback_handle,
+                              std::vector<std::string>& font_families) {
+  DartListElements handles(fallback_handle);
+  if (handles.length <= 0) {
+    return;
+  }
+  font_families.reserve(font_families.size() + handles.length);
+  for (intptr_t i = 0; i < handles.length; ++i) {
+    font_families.push_back(
+        tonic::DartConverter<std::string>::FromDart(handles[i]));
   }
 }
 
@@ -128,11 +159,8 @@ void DecodeStrut(Dart_Handle strut_handle,
         tonic::DartConverter<std::string>::FromDart(in.font_family));
   }
   if (in.has_font_family_fallback()) {
-    auto fallback = tonic::DartConverter<std::vector<std::string>>::FromDart(
-        in.font_family_fallback);
-    paragraph_style.strut_font_families.insert(
-        paragraph_style.strut_font_families.end(), fallback.begin(),
-        fallback.end());
+    DecodeFontFamilyFallback(in.font_family_fallback,
+                             paragraph_style.strut_font_families);
   }
   if (paragraph_style.strut_font_families.empty()) {
     // Provide an empty font name so that the platform default font will be
@@ -281,10 +309,7 @@ void ParagraphBuilder::pushStyle(TextStyle in) {
             ? tonic::DartConverter<std::string>::FromDart(in.font_family)
             : "");
     if (in.has_font_family_fallback()) {
-      auto fallback = tonic::DartConverter<std::vector<std::string>>::FromDart(
-          in.font_family_fallback);
-      style.font_families.insert(style.font_families.end(), fallback.begin(),
-                                 fallback.end());
+      DecodeFontFamilyFallback(in.font_family_fallback, style.font_families);
     }
   }
   if (in.has_font_features()) {

@@ -156,7 +156,9 @@ struct DartConverter<flutter::TextStyle> {
       return {};
     }
     flutter::TextStyle result;
-    Dart_Handle bytes_handle = Dart_ListGetAt(handle, 0);
+    Dart_Handle handles[9];
+    Dart_ListGetRange(handle, 1, 9, handles);
+    Dart_Handle bytes_handle = handles[0];
     Dart_TypedData_Type type;
     void* data = nullptr;
     intptr_t length = 0;
@@ -165,30 +167,14 @@ struct DartConverter<flutter::TextStyle> {
                 offsetof(flutter::TextStyle, leading_distribution) +
                     sizeof(result.leading_distribution));
     Dart_TypedDataReleaseData(bytes_handle);
-    if (result.has_font_family()) {
-      result.font_family = Dart_ListGetAt(handle, 2);
-    }
-    if (result.has_font_family_fallback()) {
-      result.font_family_fallback = Dart_ListGetAt(handle, 3);
-    }
-    if (result.has_locale()) {
-      result.locale = Dart_ListGetAt(handle, 4);
-    }
-    if (result.has_background()) {
-      result.background = Dart_ListGetAt(handle, 5);
-    }
-    if (result.has_foreground()) {
-      result.foreground = Dart_ListGetAt(handle, 6);
-    }
-    if (result.has_shadows()) {
-      result.shadows = Dart_ListGetAt(handle, 7);
-    }
-    if (result.has_font_features()) {
-      result.font_features = Dart_ListGetAt(handle, 8);
-    }
-    if (result.has_font_variations()) {
-      result.font_variations = Dart_ListGetAt(handle, 9);
-    }
+    result.font_family = handles[1];
+    result.font_family_fallback = handles[2];
+    result.locale = handles[3];
+    result.background = handles[4];
+    result.foreground = handles[5];
+    result.shadows = handles[6];
+    result.font_features = handles[7];
+    result.font_variations = handles[8];
     return result;
   }
 
@@ -210,7 +196,9 @@ struct DartConverter<flutter::ParagraphStyle> {
       return {};
     }
     flutter::ParagraphStyle result;
-    Dart_Handle bytes_handle = Dart_ListGetAt(handle, 0);
+    Dart_Handle handles[5];
+    Dart_ListGetRange(handle, 1, 5, handles);
+    Dart_Handle bytes_handle = handles[0];
     Dart_TypedData_Type type;
     void* data = nullptr;
     intptr_t length = 0;
@@ -219,18 +207,10 @@ struct DartConverter<flutter::ParagraphStyle> {
         &result, data,
         offsetof(flutter::ParagraphStyle, hyphens) + sizeof(result.hyphens));
     Dart_TypedDataReleaseData(bytes_handle);
-    if (result.has_font_family()) {
-      result.font_family = Dart_ListGetAt(handle, 2);
-    }
-    if (result.has_strut_style()) {
-      result.strut_style = Dart_ListGetAt(handle, 3);
-    }
-    if (result.has_ellipsis()) {
-      result.ellipsis = Dart_ListGetAt(handle, 4);
-    }
-    if (result.has_locale()) {
-      result.locale = Dart_ListGetAt(handle, 5);
-    }
+    result.font_family = handles[1];
+    result.strut_style = handles[2];
+    result.ellipsis = handles[3];
+    result.locale = handles[4];
     return result;
   }
 
@@ -252,7 +232,9 @@ struct DartConverter<flutter::StrutStyle> {
       return {};
     }
     flutter::StrutStyle result;
-    Dart_Handle bytes_handle = Dart_ListGetAt(handle, 0);
+    Dart_Handle handles[3];
+    Dart_ListGetRange(handle, 1, 3, handles);
+    Dart_Handle bytes_handle = handles[0];
     Dart_TypedData_Type type;
     void* data = nullptr;
     intptr_t length = 0;
@@ -261,12 +243,8 @@ struct DartConverter<flutter::StrutStyle> {
                 offsetof(flutter::StrutStyle, force_strut_height) +
                     sizeof(result.force_strut_height));
     Dart_TypedDataReleaseData(bytes_handle);
-    if (result.has_font_family()) {
-      result.font_family = Dart_ListGetAt(handle, 2);
-    }
-    if (result.has_font_family_fallback()) {
-      result.font_family_fallback = Dart_ListGetAt(handle, 3);
-    }
+    result.font_family = handles[1];
+    result.font_family_fallback = handles[2];
     return result;
   }
 

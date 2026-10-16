@@ -218,7 +218,8 @@ class NonNullableColorStyle {
       contains('bool has_font_size() const { return (present_mask & (1u << 0)) != 0; }'),
     );
     expect(cppHeader, isNot(contains('has_font_family')));
-    expect(cppHeader, contains('result.font_family = Dart_ListGetAt(handle, 2);'));
+    expect(cppHeader, contains('Dart_ListGetRange(handle, 1, 2, handles);'));
+    expect(cppHeader, contains('result.font_family = handles[1];'));
 
     final String dartCode = await generateDartEncoders(
       definitions,
@@ -349,7 +350,11 @@ ${fieldsSource(33)}
         File(cppPath).readAsStringSync(),
       );
       expect(
-        await generateDartEncoders(definitions, partOfFile: library.firstFragment.source.shortName),
+        await generateDartEncoders(
+          definitions,
+          partOfFile: library.firstFragment.source.shortName,
+          libraryName: library.name,
+        ),
         File(dartPath).readAsStringSync(),
       );
 

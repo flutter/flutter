@@ -131,17 +131,19 @@ static_assert(std::is_trivially_copyable_v<$structName>);
 String _generateTonicConverter(NativeData definition) {
   final String cppType = definition.symbol.qualifiedName;
   final String lastPackedMember = definition.packedFields.last._cppName;
-  final Iterable<NativeDataField> handleFields = definition.handleFields;
-  final String handleExtractions = <String>[
+  final List<NativeDataField> handleFields = definition.handleFields.toList();
+  final int handleCount = handleFields.length;
+  final listGetBlock = handleCount == 0
+      ? '    Dart_Handle bytes_handle = Dart_ListGetAt(handle, 1);'
+      : '''
+    Dart_Handle handles[${handleCount + 1}];
+    Dart_ListGetRange(handle, 1, ${handleCount + 1}, handles);
+    Dart_Handle bytes_handle = handles[0];''';
+  final String handleAssignments = <String>[
     for (final (int index, NativeDataField field) in handleFields.indexed)
-      if (field.isNullable) ...<String>[
-        '    if (result.has_${field._cppName}()) {',
-        '      result.${field._cppName} = Dart_ListGetAt(handle, ${index + 2});',
-        '    }',
-      ] else
-        '    result.${field._cppName} = Dart_ListGetAt(handle, ${index + 2});',
+      '    result.${field._cppName} = handles[${index + 1}];',
   ].join('\n');
-  final handleExtractionBlock = handleExtractions.isEmpty ? '' : '$handleExtractions\n';
+  final handleAssignmentBlock = handleAssignments.isEmpty ? '' : '$handleAssignments\n';
 
   return '''
 template <>
@@ -156,7 +158,7 @@ struct DartConverter<$cppType> {
       return {};
     }
     $cppType result;
-    Dart_Handle bytes_handle = Dart_ListGetAt(handle, 0);
+$listGetBlock
     Dart_TypedData_Type type;
     void* data = nullptr;
     intptr_t length = 0;
@@ -164,7 +166,7 @@ struct DartConverter<$cppType> {
     std::memcpy(&result, data,
                 offsetof($cppType, $lastPackedMember) + sizeof(result.$lastPackedMember));
     Dart_TypedDataReleaseData(bytes_handle);
-$handleExtractionBlock    return result;
+$handleAssignmentBlock    return result;
   }
 
   static $cppType FromFfi(FfiType val) { return FromDart(val); }

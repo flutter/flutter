@@ -5,7 +5,7 @@
 // GENERATED CODE - DO NOT EDIT BY HAND.
 // ignore_for_file: unused_element
 
-part of 'ui.dart';
+part of dart.ui;
 
 final class _PackedTextStyle extends Struct {
   @Double()
@@ -92,7 +92,7 @@ final class _PackedTextStyle extends Struct {
 }
 
 extension type const _EncodedTextStyle(List<Object?> _data) implements Object {
-  _PackedTextStyle get packed => _data[1]! as _PackedTextStyle;
+  _PackedTextStyle get packed => _data[0]! as _PackedTextStyle;
 }
 
 _EncodedTextStyle _encodeTextStyleFfi({
@@ -225,8 +225,8 @@ _EncodedTextStyle _encodeTextStyleFfi({
   }
   packed.presentMask = mask;
   return _EncodedTextStyle(<Object?>[
-    bytes,
     packed,
+    bytes,
     fontFamily,
     fontFamilyFallback,
     locale?.encode(),
@@ -332,7 +332,7 @@ final class _PackedParagraphStyle extends Struct {
 }
 
 extension type const _EncodedParagraphStyle(List<Object?> _data) implements Object {
-  _PackedParagraphStyle get packed => _data[1]! as _PackedParagraphStyle;
+  _PackedParagraphStyle get packed => _data[0]! as _PackedParagraphStyle;
 }
 
 _EncodedParagraphStyle _encodeParagraphStyleFfi({
@@ -421,8 +421,8 @@ _EncodedParagraphStyle _encodeParagraphStyleFfi({
   }
   packed.presentMask = mask;
   return _EncodedParagraphStyle(<Object?>[
-    bytes,
     packed,
+    bytes,
     fontFamily,
     strutStyle?.encode(),
     ellipsis,
@@ -506,7 +506,7 @@ final class _PackedStrutStyle extends Struct {
 }
 
 extension type const _EncodedStrutStyle(List<Object?> _data) implements Object {
-  _PackedStrutStyle get packed => _data[1]! as _PackedStrutStyle;
+  _PackedStrutStyle get packed => _data[0]! as _PackedStrutStyle;
 }
 
 _EncodedStrutStyle _encodeStrutStyleFfi({
@@ -572,7 +572,7 @@ _EncodedStrutStyle _encodeStrutStyleFfi({
   }
   packed.forceStrutHeight = forceStrutHeight.value;
   packed.presentMask = mask;
-  return _EncodedStrutStyle(<Object?>[bytes, packed, fontFamily, fontFamilyFallback]);
+  return _EncodedStrutStyle(<Object?>[packed, bytes, fontFamily, fontFamilyFallback]);
 }
 
 @pragma('vm:prefer-inline')

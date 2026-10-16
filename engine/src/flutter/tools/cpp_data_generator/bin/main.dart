@@ -29,14 +29,16 @@ Future<void> main(List<String> arguments) async {
   final String dartOutputPath = parsedArguments.option('dart-out')!;
   final String? stampPath = parsedArguments.option('stamp');
 
-  final SomeResolvedUnitResult result = await resolveFile(path: File(inputPath).absolute.path);
+  final SomeResolvedUnitResult result = await resolveFile(
+    path: path.normalize(File(inputPath).absolute.path),
+  );
   if (result is! ResolvedUnitResult) {
     throw StateError('Failed to resolve $inputPath: $result');
   }
 
   final String flutterRoot = Engine.findWithin().flutterDir.path;
   final String relativeCppPath = path.relative(
-    File(cppOutputPath).absolute.path,
+    path.normalize(File(cppOutputPath).absolute.path),
     from: flutterRoot,
   );
   final String underscored = path
@@ -50,6 +52,7 @@ Future<void> main(List<String> arguments) async {
   final String dartCode = await generateDartEncoders(
     definitions,
     partOfFile: libElement.firstFragment.source.shortName,
+    libraryName: libElement.name,
   );
 
   File(cppOutputPath).writeAsStringSync(cppHeader);

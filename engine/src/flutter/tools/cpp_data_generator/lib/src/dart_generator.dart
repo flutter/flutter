@@ -15,6 +15,7 @@ import 'parser.dart';
 Future<String> generateDartEncoders(
   Iterable<NativeData> definitions, {
   required String partOfFile,
+  String? libraryName,
 }) async {
   final String sections = <String>[
     for (final NativeData definition in definitions)
@@ -25,6 +26,9 @@ Future<String> generateDartEncoders(
       ].join('\n'),
   ].join('\n');
 
+  final String partOfTarget = (libraryName != null && libraryName.isNotEmpty)
+      ? libraryName
+      : "'$partOfFile'";
   final unformatted =
       '''
 // Copyright 2013 The Flutter Authors. All rights reserved.
@@ -34,7 +38,7 @@ Future<String> generateDartEncoders(
 // GENERATED CODE - DO NOT EDIT BY HAND.
 // ignore_for_file: unused_element
 
-part of '$partOfFile';
+part of $partOfTarget;
 
 $sections''';
 
@@ -107,7 +111,7 @@ $hashBody
 }
 
 extension type const $encodedName(List<Object?> _data) implements Object {
-  $structName get packed => _data[1]! as $structName;
+  $structName get packed => _data[0]! as $structName;
 }
 ''';
 }
@@ -122,8 +126,8 @@ String _generateEncoder(NativeData definition) {
     for (final NativeDataField field in definition.fields) ?field._dartEncodeBlock,
   ].join('\n');
   final returnElements = <String>[
-    'bytes',
     'packed',
+    'bytes',
     for (final NativeDataField field in definition.handleFields)
       field.resolvedType.dartEncode(field.dartName),
   ];
