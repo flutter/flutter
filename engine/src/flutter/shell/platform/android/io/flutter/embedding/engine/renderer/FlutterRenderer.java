@@ -63,6 +63,18 @@ public class FlutterRenderer implements TextureRegistry {
    */
   @VisibleForTesting public static boolean debugForceSurfaceProducerGlTextures = false;
 
+  @Nullable private static volatile Boolean hardwareBufferDefectOverride = null;
+
+  /**
+   * Overrides the HardwareBuffer defect check for new surface producers across all engines.
+   *
+   * @param override {@code null} to restore the device check, {@code true} to force SurfaceTexture,
+   *     or {@code false} to skip the defect check
+   */
+  public static void setHardwareBufferDefectOverride(@Nullable Boolean override) {
+    hardwareBufferDefectOverride = override;
+  }
+
   /**
    * Returns true if this device has a known {@link android.hardware.HardwareBuffer} defect.
    *
@@ -75,6 +87,10 @@ public class FlutterRenderer implements TextureRegistry {
    *     href="https://github.com/flutter/engine/pull/54879">engine pr #54879</a>
    */
   private static boolean hasAndroidHardwareBufferDefect() {
+    final Boolean override = hardwareBufferDefectOverride;
+    if (override != null) {
+      return override;
+    }
     // To test if some device should be added from this list app developers first should attempt to
     // play a video and see a failure in the logs.
     /// ```E/ACodec: Failed to allocate buffers after transitioning to IDLE state (error 0xfffffc0e)
