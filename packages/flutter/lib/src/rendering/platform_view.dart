@@ -631,6 +631,10 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   // immediately dispatched to `_handlePointerEvent`.
   final Set<int> forwardedPointers = <int>{};
 
+  // Maps each pointer that is down and whose events were dispatched to `_handlePointerEvent`
+  // to the last event dispatched for it. See `_cancelForwardedPointers`.
+  final Map<int, PointerEvent> _lastForwardedEvents = <int, PointerEvent>{};
+
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   // TODO(amirh): get a list of GestureRecognizers here.
   // https://github.com/flutter/flutter/issues/20953
@@ -657,7 +661,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
     if (!forwardedPointers.contains(event.pointer)) {
       _cacheEvent(event);
     } else {
-      _handlePointerEvent(event);
+      _forwardEvent(event);
     }
     stopTrackingIfPointerNoLongerDown(event);
   }
@@ -686,7 +690,57 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _flushPointerCache(int pointer) {
-    cachedEvents.remove(pointer)?.forEach(_handlePointerEvent);
+    cachedEvents.remove(pointer)?.forEach(_forwardEvent);
+  }
+
+  void _forwardEvent(PointerEvent event) {
+    if (event is PointerUpEvent || event is PointerCancelEvent) {
+      _lastForwardedEvents.remove(event.pointer);
+    } else {
+      _lastForwardedEvents[event.pointer] = event;
+    }
+    _handlePointerEvent(event);
+  }
+
+  // Dispatches a PointerCancelEvent to `_handlePointerEvent` for each pointer that is
+  // still down and whose events were dispatched to it.
+  //
+  // This must be called when this recognizer stops forwarding the events of such
+  // pointers mid-gesture, e.g. when the render object is detached or this recognizer
+  // is replaced. Otherwise the platform view never sees these pointers go up and
+  // keeps them down forever. On Android, for example, every later touch would then
+  // be delivered to the view as an additional pointer of the stale gesture.
+  // See https://github.com/flutter/flutter/issues/193708.
+  @pragma('vm:notify-debugger-on-exception')
+  void _cancelForwardedPointers() {
+    final List<PointerEvent> lastEvents = _lastForwardedEvents.values.toList();
+    _lastForwardedEvents.clear();
+    for (final event in lastEvents) {
+      final PointerCancelEvent cancel = PointerCancelEvent(
+        viewId: event.viewId,
+        timeStamp: event.timeStamp,
+        pointer: event.pointer,
+        kind: event.kind,
+        device: event.device,
+        position: event.position,
+      ).transformed(event.transform);
+      // Unlike the events forwarded from `handleEvent`, these aren't dispatched by
+      // the PointerRouter, which would catch and report errors.
+      try {
+        _handlePointerEvent(cancel);
+      } catch (exception, stack) {
+        FlutterError.reportError(
+          FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'rendering library',
+            context: ErrorDescription(
+              'while dispatching a pointer cancel event to a platform view',
+            ),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -697,12 +751,19 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void reset() {
+    _cancelForwardedPointers();
     _gestureIds.clear();
     forwardedPointers.forEach(super.stopTrackingPointer);
     forwardedPointers.clear();
     cachedEvents.keys.forEach(super.stopTrackingPointer);
     cachedEvents.clear();
     resolve(GestureDisposition.rejected);
+  }
+
+  @override
+  void dispose() {
+    _cancelForwardedPointers();
+    super.dispose();
   }
 }
 
