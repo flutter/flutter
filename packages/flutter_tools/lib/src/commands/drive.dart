@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -61,17 +60,17 @@ class DriveCommand extends RunCommandBase {
     super.verboseHelp = false,
   }) {
     requiresPubspecYaml();
-    addEnableExperimentation(hide: !verboseHelp);
 
-    // By default, the drive app should not publish the VM service port over mDNS
-    // to prevent a local network permission dialog on iOS 14+,
-    // which cannot be accepted or dismissed in a CI environment.
-    addPublishPort(enabledByDefault: false, verboseHelp: verboseHelp);
-    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+    argParser.addDescriptors(<OptionDescriptor<Object?>>[
+      CommonOptions.enableExperiment,
+      // By default, the drive app should not publish the VM service port over mDNS
+      // to prevent a local network permission dialog on iOS 14+,
+      // which cannot be accepted or dismissed in a CI environment.
+      _publishPort,
       _keepAppRunning,
       _useExistingApp,
       _driver,
-      _build,
+      DebuggingOptionDescriptors.build,
       _screenshot,
       _driverPort,
       _headless,
@@ -84,6 +83,10 @@ class DriveCommand extends RunCommandBase {
       _timeout,
     ], verboseHelp: verboseHelp);
   }
+
+  static final FlagOptionDescriptor _publishPort = DebuggingOptionDescriptors.publishPortOption(
+    enabledByDefault: false,
+  );
 
   static const _kKeepAppRunning = 'keep-app-running';
   static const _kUseExistingApp = 'use-existing-app';
@@ -117,14 +120,6 @@ class DriveCommand extends RunCommandBase {
         'extension, so e.g. if the target is "lib/main.dart", the driver will be '
         '"test_driver/main_test.dart".',
     valueHelp: 'path',
-  );
-
-  static const _build = FlagOptionDescriptor(
-    name: 'build',
-    defaultsTo: true,
-    help:
-        '(deprecated) Build the app before running. To use an existing app, pass the "--${FlutterOptions.kUseApplicationBinary}" '
-        'flag with an existing APK.',
   );
 
   static const _screenshot = StringOptionDescriptor(
@@ -241,7 +236,7 @@ class DriveCommand extends RunCommandBase {
   @override
   final aliases = <String>['driver'];
 
-  String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+  String? get userIdentifier => getValue(CommonOptions.deviceUser);
 
   String? get screenshot => getValue(_screenshot);
 
@@ -251,7 +246,7 @@ class DriveCommand extends RunCommandBase {
   @override
   bool get cachePubGet => false;
 
-  String? get applicationBinaryPath => stringArg(FlutterOptions.kUseApplicationBinary);
+  String? get applicationBinaryPath => getValue(CommonOptions.useApplicationBinary);
 
   Future<Device?> get targetedDevice async {
     return findTargetDevice(includeDevicesUnsupportedByProject: applicationBinaryPath == null);
@@ -262,18 +257,15 @@ class DriveCommand extends RunCommandBase {
   // change it to be enabled.
   @override
   Future<bool> get disablePortPublication async {
-    final ArgResults? localArgResults = argResults;
     final Device? device = await targetedDevice;
     final bool isWirelessIOSDevice = device is IOSDevice && device.isWirelesslyConnected;
-    if (isWirelessIOSDevice &&
-        localArgResults != null &&
-        !localArgResults.wasParsed('publish-port')) {
+    if (isWirelessIOSDevice && argResults != null && !wasParsed(_publishPort)) {
       toolContext.logger.printTrace(
         'A wireless iOS device is being used. Changing `publish-port` to be enabled.',
       );
       return false;
     }
-    return !boolArg('publish-port');
+    return !getValue(_publishPort);
   }
 
   @override
