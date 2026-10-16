@@ -1758,6 +1758,330 @@ void main() {
     expect(dartSdkVersionFormat.allMatches(currentDartSdkVersion).length, 1);
   });
 
+  group('Dart SDK cache integrity', () {
+    late MemoryFileSystem fileSystem;
+    late BufferLogger logger;
+    late Cache cache;
+    String? originalFlutterRoot;
+
+    setUp(() {
+      originalFlutterRoot = Cache.flutterRoot;
+      fileSystem = MemoryFileSystem.test();
+      logger = BufferLogger.test();
+      Cache.flutterRoot = '/flutter';
+      cache = Cache.test(
+        fileSystem: fileSystem,
+        logger: logger,
+        processManager: FakeProcessManager.any(),
+      );
+      fileSystem.directory(cache.getRoot().path).createSync(recursive: true);
+    });
+
+    tearDown(() {
+      Cache.flutterRoot = originalFlutterRoot;
+    });
+
+    void setupValidSdk() {
+      fileSystem
+          .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+          .createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join(cache.getRoot().path, 'dart-sdk', 'version'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('1.2.3');
+      fileSystem.file(
+          fileSystem.path.join(
+            cache.getRoot().path,
+            'dart-sdk',
+            'bin',
+            'resources',
+            'devtools',
+            'version.json',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version": "2.3.4"}');
+    }
+
+    testWithoutContext('passes when SDK is valid', () {
+      setupValidSdk();
+      expect(cache.devToolsVersion, '2.3.4');
+      expect(
+        fileSystem
+            .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+            .existsSync(),
+        true,
+      );
+      expect(
+        fileSystem.directory(fileSystem.path.join(cache.getRoot().path, 'dart-sdk')).existsSync(),
+        true,
+      );
+    });
+
+    testWithoutContext('fails and recovers when devtools version.json is missing', () async {
+      fileSystem
+          .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+          .createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join(cache.getRoot().path, 'dart-sdk', 'version'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('1.2.3');
+      fileSystem
+          .directory(
+            fileSystem.path.join(cache.getRoot().path, 'dart-sdk', 'bin', 'resources', 'devtools'),
+          )
+          .createSync(recursive: true);
+
+      expect(() => cache.devToolsVersion, throwsToolExit());
+      expect(
+        fileSystem
+            .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+            .existsSync(),
+        false,
+      );
+      expect(
+        fileSystem.directory(fileSystem.path.join(cache.getRoot().path, 'dart-sdk')).existsSync(),
+        false,
+      );
+      expect(logger.errorText, contains('appears to be corrupted or incomplete'));
+      expect(logger.errorText, contains('DevTools version file does not exist'));
+    });
+
+    testWithoutContext('fails and recovers when SDK version file is missing', () async {
+      fileSystem
+          .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+          .createSync(recursive: true);
+      fileSystem.file(
+          fileSystem.path.join(
+            cache.getRoot().path,
+            'dart-sdk',
+            'bin',
+            'resources',
+            'devtools',
+            'version.json',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version": "2.3.4"}');
+
+      expect(() => cache.devToolsVersion, throwsToolExit());
+      expect(
+        fileSystem
+            .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+            .existsSync(),
+        false,
+      );
+      expect(
+        fileSystem.directory(fileSystem.path.join(cache.getRoot().path, 'dart-sdk')).existsSync(),
+        false,
+      );
+      expect(logger.errorText, contains('appears to be corrupted or incomplete'));
+      expect(logger.errorText, contains('Dart SDK version file does not exist'));
+    });
+
+    testWithoutContext('fails and recovers when SDK version file is empty', () async {
+      fileSystem
+          .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+          .createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join(cache.getRoot().path, 'dart-sdk', 'version'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('');
+      fileSystem.file(
+          fileSystem.path.join(
+            cache.getRoot().path,
+            'dart-sdk',
+            'bin',
+            'resources',
+            'devtools',
+            'version.json',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"version": "2.3.4"}');
+
+      expect(() => cache.devToolsVersion, throwsToolExit());
+      expect(
+        fileSystem
+            .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+            .existsSync(),
+        false,
+      );
+      expect(
+        fileSystem.directory(fileSystem.path.join(cache.getRoot().path, 'dart-sdk')).existsSync(),
+        false,
+      );
+      expect(logger.errorText, contains('appears to be corrupted or incomplete'));
+      expect(logger.errorText, contains('version file at'));
+      expect(logger.errorText, contains('dart-sdk/version is empty'));
+    });
+
+    testWithoutContext('fails and recovers when devtools version.json is invalid JSON', () async {
+      fileSystem
+          .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+          .createSync(recursive: true);
+      fileSystem.file(fileSystem.path.join(cache.getRoot().path, 'dart-sdk', 'version'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('1.2.3');
+      fileSystem.file(
+          fileSystem.path.join(
+            cache.getRoot().path,
+            'dart-sdk',
+            'bin',
+            'resources',
+            'devtools',
+            'version.json',
+          ),
+        )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{invalid json}');
+
+      expect(() => cache.devToolsVersion, throwsToolExit());
+      expect(
+        fileSystem
+            .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+            .existsSync(),
+        false,
+      );
+      expect(
+        fileSystem.directory(fileSystem.path.join(cache.getRoot().path, 'dart-sdk')).existsSync(),
+        false,
+      );
+      expect(logger.errorText, contains('appears to be corrupted or incomplete'));
+      expect(logger.errorText, contains('Failed to parse JSON from DevTools version file'));
+    });
+
+    testWithoutContext(
+      'fails and recovers when devtools version.json is missing version key',
+      () async {
+        fileSystem
+            .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+            .createSync(recursive: true);
+        fileSystem.file(fileSystem.path.join(cache.getRoot().path, 'dart-sdk', 'version'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('1.2.3');
+        fileSystem.file(
+            fileSystem.path.join(
+              cache.getRoot().path,
+              'dart-sdk',
+              'bin',
+              'resources',
+              'devtools',
+              'version.json',
+            ),
+          )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"not-version": "1.0.0"}');
+
+        expect(() => cache.devToolsVersion, throwsToolExit());
+        expect(
+          fileSystem
+              .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+              .existsSync(),
+          false,
+        );
+        expect(
+          fileSystem.directory(fileSystem.path.join(cache.getRoot().path, 'dart-sdk')).existsSync(),
+          false,
+        );
+        expect(logger.errorText, contains('appears to be corrupted or incomplete'));
+        expect(logger.errorText, contains('DevTools version key is null or missing'));
+      },
+    );
+
+    testWithoutContext(
+      'fails and recovers when devtools version.json has a non-string version key',
+      () async {
+        fileSystem
+            .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+            .createSync(recursive: true);
+        fileSystem.file(fileSystem.path.join(cache.getRoot().path, 'dart-sdk', 'version'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('1.2.3');
+        fileSystem.file(
+            fileSystem.path.join(
+              cache.getRoot().path,
+              'dart-sdk',
+              'bin',
+              'resources',
+              'devtools',
+              'version.json',
+            ),
+          )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"version": 123}');
+
+        expect(() => cache.devToolsVersion, throwsToolExit());
+        expect(
+          fileSystem
+              .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+              .existsSync(),
+          false,
+        );
+        expect(
+          fileSystem.directory(fileSystem.path.join(cache.getRoot().path, 'dart-sdk')).existsSync(),
+          false,
+        );
+        expect(logger.errorText, contains('appears to be corrupted or incomplete'));
+        expect(logger.errorText, contains('Expected DevTools version to be a String'));
+      },
+    );
+
+    testWithoutContext(
+      'fails and recovers when devtools version.json has an empty version string',
+      () async {
+        fileSystem
+            .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+            .createSync(recursive: true);
+        fileSystem.file(fileSystem.path.join(cache.getRoot().path, 'dart-sdk', 'version'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('1.2.3');
+        fileSystem.file(
+            fileSystem.path.join(
+              cache.getRoot().path,
+              'dart-sdk',
+              'bin',
+              'resources',
+              'devtools',
+              'version.json',
+            ),
+          )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"version": ""}');
+
+        expect(() => cache.devToolsVersion, throwsToolExit());
+        expect(
+          fileSystem
+              .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+              .existsSync(),
+          false,
+        );
+        expect(
+          fileSystem.directory(fileSystem.path.join(cache.getRoot().path, 'dart-sdk')).existsSync(),
+          false,
+        );
+        expect(logger.errorText, contains('appears to be corrupted or incomplete'));
+        expect(logger.errorText, contains('DevTools version is empty'));
+      },
+    );
+
+    testWithoutContext('fails and recovers during updateAll when SDK is corrupted', () async {
+      fileSystem
+          .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+          .createSync(recursive: true);
+      // No dart-sdk directory
+
+      expect(() => cache.updateAll(<DevelopmentArtifact>{}), throwsToolExit());
+      expect(
+        fileSystem
+            .file(fileSystem.path.join(cache.getRoot().path, 'engine-dart-sdk.stamp'))
+            .existsSync(),
+        false,
+      );
+      expect(
+        fileSystem.directory(fileSystem.path.join(cache.getRoot().path, 'dart-sdk')).existsSync(),
+        false,
+      );
+    });
+  });
+
   group('AndroidMavenArtifacts', () {
     MemoryFileSystem? memoryFileSystem;
     Cache? cache;
