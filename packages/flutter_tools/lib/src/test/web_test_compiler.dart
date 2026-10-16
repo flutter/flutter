@@ -5,6 +5,7 @@
 import 'package:package_config/package_config.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:process/process.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -19,6 +20,7 @@ import '../cache.dart';
 import '../compile.dart';
 import '../context/tool_context.dart';
 import '../dart/language_version.dart';
+import '../globals.dart' as globals;
 import '../web/bootstrap.dart';
 import '../web/compile.dart';
 import '../web/memory_fs.dart';
@@ -26,9 +28,11 @@ import 'test_config.dart';
 
 /// A web compiler for the test runner.
 class WebTestCompiler {
-  WebTestCompiler({required this._toolContext});
+  WebTestCompiler({required this._toolContext, Analytics? analytics})
+    : _analytics = analytics ?? globals.analytics;
 
   final ToolContext _toolContext;
+  final Analytics _analytics;
 
   Future<File> _generateTestEntrypoint({
     required List<String> testFiles,
@@ -150,7 +154,19 @@ class WebTestCompiler {
       fs: fs,
       projectRootPath: projectDirectory.absolute.path,
     );
-    if (output == null || output.errorCount > 0) {
+    final bool compileFailed = output == null || output.errorCount > 0;
+    if (buildInfo.deprecatedJsInterop case final bool deprecatedJsInterop) {
+      _analytics.send(
+        Event.flutterBuildInfo(
+          label: 'web-compile',
+          buildType: 'web',
+          command: 'test',
+          settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+          error: compileFailed ? 'ddc-compile-failure' : null,
+        ),
+      );
+    }
+    if (compileFailed) {
       throwToolExit('Failed to compile');
     }
     // Cache the output kernel file to speed up subsequent compiles.

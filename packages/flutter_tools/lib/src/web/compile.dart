@@ -118,6 +118,7 @@ class WebBuilder {
     final migration = ProjectMigration(migrators);
     await migration.run();
 
+    final String buildSettingsString = _buildEventAnalyticsSettings(configs: compilerConfigs);
     final Status status = _logger.startProgress('Compiling $target for the Web...');
     final sw = Stopwatch()..start();
     try {
@@ -163,6 +164,20 @@ class WebBuilder {
                 : null,
           );
         }
+        final failedTargets = <String>[
+          for (final ExceptionMeasurement measurement in result.exceptions.values)
+            measurement.target,
+        ]..sort();
+        _analytics.send(
+          Event.flutterBuildInfo(
+            label: 'web-compile',
+            buildType: 'web',
+            settings: buildSettingsString,
+            error: failedTargets.isEmpty
+                ? 'web-compile-failure'
+                : '${failedTargets.join(',')}-failure',
+          ),
+        );
         throwToolExit('Failed to compile application for the Web.');
       }
     } on Exception catch (err) {
@@ -178,8 +193,6 @@ class WebBuilder {
       'Built ${_fileSystem.path.relative(outputDirectory.path)}',
       color: TerminalColor.green,
     );
-
-    final String buildSettingsString = _buildEventAnalyticsSettings(configs: compilerConfigs);
 
     _analytics.send(
       Event.flutterBuildInfo(label: 'web-compile', buildType: 'web', settings: buildSettingsString),
