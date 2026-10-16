@@ -424,7 +424,6 @@ class _LineBuilder {
       return true;
     }
     // Let's walk backwards and see how many clusters we need to remove to fit the ellipsis in the line
-    var cutOffWidth = 0.0;
     while (true) {
       if (clusterIndex <= start) {
         // We have removed all the clusters in this line and still can't fit the ellipsis
@@ -442,11 +441,11 @@ class _LineBuilder {
             ? ui.TextDirection.ltr
             : ui.TextDirection.rtl,
       );
-      cutOffWidth += widthCluster;
       if (_isWhitespace(cluster)) {
         // We skip whitespaces when cutting off for ellipsis, so just continue
-      } else if (canFit(ellipsisSpan.advanceWidth()! - cutOffWidth)) {
-        // We can fit the ellipsis now
+      } else if (canFit(ellipsisSpan.advanceWidth()!)) {
+        // The line (with all the clusters removed so far already subtracted from its widths)
+        // ends with this cluster and we can fit the ellipsis after it now.
         _layout.ellipsisClusters = ellipsisSpan.extractClusters();
         break;
       }
