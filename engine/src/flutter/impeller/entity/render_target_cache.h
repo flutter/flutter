@@ -38,6 +38,9 @@ class RenderTargetCache : public RenderTargetAllocator {
   // |RenderTargetAllocator|
   void Clear() override;
 
+  // |RenderTargetAllocator|
+  void RemoveFromCache(const std::shared_ptr<Texture>& texture) override;
+
   RenderTarget CreateOffscreen(
       const Context& context,
       ISize size,
