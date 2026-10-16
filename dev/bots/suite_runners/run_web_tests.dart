@@ -436,14 +436,7 @@ class WebTestsSuite {
     );
 
     // Run the app.
-    final int serverPort = await findAvailablePortAndPossiblyCauseFlakyTests();
-    final int browserDebugPort = await findAvailablePortAndPossiblyCauseFlakyTests();
-    final String result = await evalTestAppInChrome(
-      appUrl: 'http://localhost:$serverPort/index.html',
-      appDirectory: appBuildDirectory,
-      serverPort: serverPort,
-      browserDebugPort: browserDebugPort,
-    );
+    final String result = await evalTestAppInChrome(appDirectory: appBuildDirectory);
 
     if (!result.contains('--- TEST SUCCEEDED ---')) {
       foundError(<String>[result, '${red}Web stack trace integration test failed.$reset']);
@@ -529,14 +522,7 @@ class WebTestsSuite {
     );
 
     // Run the app.
-    final int serverPort = await findAvailablePortAndPossiblyCauseFlakyTests();
-    final int browserDebugPort = await findAvailablePortAndPossiblyCauseFlakyTests();
-    final String result = await evalTestAppInChrome(
-      appUrl: 'http://localhost:$serverPort/index.html',
-      appDirectory: appBuildDirectory,
-      serverPort: serverPort,
-      browserDebugPort: browserDebugPort,
-    );
+    final String result = await evalTestAppInChrome(appDirectory: appBuildDirectory);
 
     if (!result.contains('--- TEST SUCCEEDED ---')) {
       foundError(<String>[result, '${red}Web release mode test failed.$reset']);

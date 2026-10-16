@@ -27,6 +27,7 @@ template("native_activity_apk") {
   android_manifest = "$target_gen_dir/AndroidManifest.xml"
 
   android_manifest_target_name = "android_manifest_$target_name"
+
   templater(android_manifest_target_name) {
     input = android_manifest_template
     output = android_manifest
@@ -34,12 +35,14 @@ template("native_activity_apk") {
   }
 
   shared_library_target_name = "shared_library_$target_name"
+
   shared_library(shared_library_target_name) {
     forward_variables_from(invoker, "*", [ "output_name" ])
     output_name = invoker_apk_name
   }
 
   apk_target_name = "apk_$target_name"
+
   action(apk_target_name) {
     forward_variables_from(invoker, [ "testonly" ])
 
