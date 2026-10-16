@@ -97,6 +97,43 @@ void testMain() {
       expect(await matchImage(onlyTofuImage, emptyImage), isFalse);
       expect(await matchImage(unassignedTofuImage, emptyImage), isFalse);
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/193695
+    test('concurrent paragraph layout and picture rasterization does not crash', () async {
+      const bounds = ui.Rect.fromLTRB(0, 0, 200, 100);
+      final imageFutures = <Future<ui.Image>>[];
+      for (var i = 0; i < 8; i++) {
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, bounds);
+        final ui.Paragraph paragraph = makeSimpleText('Worker raster $i', fontSize: 12.0 + i);
+        canvas.drawParagraph(paragraph, ui.Offset.zero);
+        paragraph.dispose();
+        final ui.Picture picture = recorder.endRecording();
+        imageFutures.add(picture.toImage(200, 100).whenComplete(picture.dispose));
+      }
+
+      // Concurrently lay out and record paragraphs on the UI thread while
+      // the background Wasm worker rasterizes the queued pictures.
+      for (var j = 0; j < 16; j++) {
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, bounds);
+        final ui.Paragraph paragraph = makeSimpleText(
+          'Concurrent UI layout $j',
+          fontSize: 14.0 + (j % 6),
+        );
+        expect(paragraph.width, greaterThan(0));
+        canvas.drawParagraph(paragraph, ui.Offset.zero);
+        paragraph.dispose();
+        recorder.endRecording().dispose();
+      }
+
+      final List<ui.Image> images = await Future.wait(imageFutures);
+      for (final image in images) {
+        expect(image.width, 200);
+        expect(image.height, 100);
+        image.dispose();
+      }
+    });
     // TODO(hterkelsen): https://github.com/flutter/flutter/issues/71520
   }, skip: isSafari || isFirefox);
 }

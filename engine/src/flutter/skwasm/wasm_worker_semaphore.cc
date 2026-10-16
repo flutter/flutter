@@ -23,6 +23,10 @@ int __wrap_sem_init(sem_t* sem, int pshared, unsigned int value) {
 }
 
 int __wrap_sem_destroy(sem_t* sem) {
+  if (!sem) {
+    errno = EINVAL;
+    return -1;
+  }
   return 0;
 }
 
@@ -32,9 +36,9 @@ int __wrap_sem_post(sem_t* sem) {
     return -1;
   }
   auto* count = reinterpret_cast<int*>(sem);
+  int cur = __c11_atomic_load(reinterpret_cast<_Atomic(int)*>(count),
+                              __ATOMIC_RELAXED);
   for (;;) {
-    int cur = __c11_atomic_load(reinterpret_cast<_Atomic(int)*>(count),
-                                __ATOMIC_RELAXED);
     if (cur >= SEM_VALUE_MAX) {
       errno = EOVERFLOW;
       return -1;
