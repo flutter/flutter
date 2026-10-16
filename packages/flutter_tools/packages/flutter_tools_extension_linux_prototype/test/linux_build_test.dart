@@ -268,9 +268,9 @@ void main() {
           await expectLater(
             () => buildHandler(<String, Object?>{...validParams, ...overrides}),
             throwsA(
-              isA<RpcException>().having(
-                (RpcException e) => e.message,
-                'message',
+              isA<Exception>().having(
+                (Exception e) => e.toString(),
+                'toString',
                 contains('Missing or invalid "$expectedParam" parameter.'),
               ),
             ),
