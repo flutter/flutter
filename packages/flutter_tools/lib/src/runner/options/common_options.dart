@@ -1282,17 +1282,4 @@ abstract final class DebuggingOptionDescriptors {
         '(deprecated) If necessary, build the app before running. To use an existing app, '
         'pass the "--${FlutterOptions.kUseApplicationBinary}" flag with an existing application artifact.',
   );
-
-  static FlagOptionDescriptor buildOption({bool verboseOnly = true}) {
-    if (verboseOnly) {
-      return build;
-    }
-    return const FlagOptionDescriptor(
-      name: 'build',
-      defaultsTo: true,
-      help:
-          '(deprecated) If necessary, build the app before running. To use an existing app, '
-          'pass the "--${FlutterOptions.kUseApplicationBinary}" flag with an existing application artifact.',
-    );
-  }
 }
