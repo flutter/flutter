@@ -164,20 +164,28 @@ class WebBuilder {
                 : null,
           );
         }
-        final failedTargets = <String>[
-          for (final ExceptionMeasurement measurement in result.exceptions.values)
-            measurement.target,
-        ]..sort();
-        _analytics.send(
-          Event.flutterBuildInfo(
-            label: 'web-compile',
-            buildType: 'web',
-            settings: buildSettingsString,
-            error: failedTargets.isEmpty
-                ? 'web-compile-failure'
-                : '${failedTargets.join(',')}-failure',
-          ),
+        final bool hasDeprecatedJsInteropFlag = compilerConfigs.any(
+          (WebCompilerConfig config) =>
+              config is JsCompilerConfig && config.deprecatedJsInterop != null,
         );
+        if (hasDeprecatedJsInteropFlag) {
+          final List<String> failedTargets = <String>{
+            for (final ExceptionMeasurement measurement in result.exceptions.values)
+              measurement.target,
+          }.toList()..sort();
+          final rawError = failedTargets.isEmpty
+              ? 'web-compile-failure'
+              : '${failedTargets.join(',')}-failure';
+          final error = rawError.length > 100 ? '${rawError.substring(0, 92)}...-fail' : rawError;
+          _analytics.send(
+            Event.flutterBuildInfo(
+              label: 'web-compile',
+              buildType: 'web',
+              settings: buildSettingsString,
+              error: error,
+            ),
+          );
+        }
         throwToolExit('Failed to compile application for the Web.');
       }
     } on Exception catch (err) {
@@ -303,8 +311,20 @@ String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) 
   values['web-renderer'] = renderers.join(',');
   values['web-target'] = targets.join(',');
 
-  final List<String> sortedList =
-      values.entries.map((MapEntry<String, Object> e) => '${e.key}: ${e.value};').toList()..sort();
+  String formatValues(Map<String, Object> entries) {
+    final List<String> sortedList =
+        entries.entries.map((MapEntry<String, Object> e) => '${e.key}: ${e.value};').toList()
+          ..sort();
+    return sortedList.join(' ');
+  }
 
-  return sortedList.join(' ');
+  final String result = formatValues(values);
+  // GA4 / package:unified_analytics enforces a 100-character limit on event
+  // parameter values. When dual-compile (Wasm + JS) combines `dryRun`,
+  // `deprecatedJsInterop`, and `optimizationLevel`, the joined string reaches
+  // 116–117 chars; drop `optimizationLevel` to stay within 95 chars.
+  if (result.length > 100 && values.remove('optimizationLevel') != null) {
+    return formatValues(values);
+  }
+  return result;
 }

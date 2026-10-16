@@ -277,14 +277,7 @@ environement:
         logger.errorText,
         contains('Target hello failed: FormatException: illegal character in input string'),
       );
-      expect(fakeAnalytics.sentEvents, <Event>[
-        Event.flutterBuildInfo(
-          label: 'web-compile',
-          buildType: 'web',
-          settings: 'web-renderer: canvaskit; web-target: js;',
-          error: 'hello-failure',
-        ),
-      ]);
+      expect(fakeAnalytics.sentEvents, isEmpty);
     },
     overrides: <Type, Generator>{
       ProcessManager: () => FakeProcessManager.any(),
@@ -325,7 +318,8 @@ environement:
           terminal: FakeTerminal(),
         );
         final compilerConfigs = <WebCompilerConfig>[
-          JsCompilerConfig(deprecatedJsInterop: deprecatedJsInterop),
+          const WasmCompilerConfig(optimizationLevel: 4, dryRun: true),
+          JsCompilerConfig(optimizationLevel: 4, deprecatedJsInterop: deprecatedJsInterop),
         ];
 
         await webBuilder.buildWeb(
@@ -354,13 +348,13 @@ environement:
               label: 'web-compile',
               buildType: 'web',
               settings:
-                  'deprecatedJsInterop: $deprecatedJsInterop; web-renderer: canvaskit; web-target: js;',
+                  'deprecatedJsInterop: $deprecatedJsInterop; dryRun: true; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
             ),
             Event.flutterBuildInfo(
               label: 'web-compile',
               buildType: 'web',
               settings:
-                  'deprecatedJsInterop: $deprecatedJsInterop; web-renderer: canvaskit; web-target: js;',
+                  'deprecatedJsInterop: $deprecatedJsInterop; dryRun: true; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
               error: 'dart2js-failure',
             ),
           ]),

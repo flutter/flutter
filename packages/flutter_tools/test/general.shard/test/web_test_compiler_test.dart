@@ -119,214 +119,121 @@ void main() {
   });
 
   for (final deprecatedJsInterop in <bool>[true, false]) {
-    testUsingContext('web test compiler emits flutterBuildInfo analytics when '
-        'deprecatedJsInterop: $deprecatedJsInterop succeeds', () async {
-      final logger = BufferLogger.test();
-      final fileSystem = MemoryFileSystem.test();
-      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: fileSystem,
-        fakeFlutterVersion: FakeFlutterVersion(),
-      );
-      fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);
-      fileSystem.file('build/out').createSync(recursive: true);
-      fileSystem.file('build/build/out.sources').createSync(recursive: true);
-      fileSystem.file('build/build/out.json')
-        ..createSync()
-        ..writeAsStringSync('{}');
-      fileSystem.file('build/build/out.map').createSync();
-      fileSystem.file('build/build/out.metadata').createSync();
-      final platform = FakePlatform(environment: <String, String>{});
-      final config = Config(
-        Config.kFlutterSettings,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-      );
-      final buildInfo = BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-        deprecatedJsInterop: deprecatedJsInterop,
-      );
-      final String cachedKernelPath = getDefaultCachedKernelPath(
-        trackWidgetCreation: false,
-        dartDefines: const <String>[],
-        config: config,
-        fileSystem: fileSystem,
-        targetModel: TargetModel.dartdevc,
-        extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
-      );
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <Pattern>[
-            'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-            'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
-            '--sdk-root',
-            'HostArtifact.flutterWebSdk/',
-            '--incremental',
-            '--target=dartdevc',
-            '--experimental-emit-debug-metadata',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '--output-dill',
-            'build/out',
-            '--packages',
-            '.dart_tool/package_config.json',
-            '-Ddart.vm.profile=false',
-            '-Ddart.vm.product=false',
-            '--enable-asserts',
-            '--filesystem-root',
-            'project/test',
-            '--filesystem-root',
-            'build',
-            '--filesystem-scheme',
-            'org-dartlang-app',
-            '--initialize-from-dill',
-            cachedKernelPath,
-            '--platform',
-            'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
-            '--verbosity=error',
-            ...ddcFrontEndOptions(buildInfo),
-          ],
-          stdout: 'result abc\nline0\nline1\nabc\nabc build/out 0',
-        ),
-      ]);
-      final compiler = WebTestCompiler(
-        analytics: fakeAnalytics,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
-          config: config,
+    for (final succeeds in <bool>[true, false]) {
+      testUsingContext('web test compiler emits flutterBuildInfo analytics when '
+          'deprecatedJsInterop: $deprecatedJsInterop (succeeds: $succeeds)', () async {
+        final logger = BufferLogger.test();
+        final fileSystem = MemoryFileSystem.test();
+        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
+          fakeFlutterVersion: FakeFlutterVersion(),
+        );
+        fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);
+        if (succeeds) {
+          fileSystem.file('build/out').createSync(recursive: true);
+          fileSystem.file('build/build/out.sources').createSync(recursive: true);
+          fileSystem.file('build/build/out.json')
+            ..createSync()
+            ..writeAsStringSync('{}');
+          fileSystem.file('build/build/out.map').createSync();
+          fileSystem.file('build/build/out.metadata').createSync();
+        }
+        final platform = FakePlatform(environment: <String, String>{});
+        final config = Config(
+          Config.kFlutterSettings,
+          fileSystem: fileSystem,
           logger: logger,
-          platform: FakePlatform(environment: <String, String>{}),
-          processManager: processManager,
-          shutdownHooks: FakeShutdownHooks(),
-        ),
-      );
-
-      await compiler.initialize(
-        projectDirectory: fileSystem.directory('project'),
-        testOutputDir: 'build',
-        testFiles: <String>['project/test/fake_test.dart'],
-        buildInfo: buildInfo,
-        webRenderer: WebRendererMode.canvaskit,
-        useWasm: false,
-      );
-
-      expect(processManager.hasRemainingExpectations, isFalse);
-      expect(fakeAnalytics.sentEvents, <Event>[
-        Event.flutterBuildInfo(
-          label: 'web-compile',
-          buildType: 'web',
-          command: 'test',
-          settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
-        ),
-      ]);
-    });
-
-    testUsingContext('web test compiler emits flutterBuildInfo analytics with error when '
-        'deprecatedJsInterop: $deprecatedJsInterop fails', () async {
-      final logger = BufferLogger.test();
-      final fileSystem = MemoryFileSystem.test();
-      final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
-        fs: fileSystem,
-        fakeFlutterVersion: FakeFlutterVersion(),
-      );
-      fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);
-      final platform = FakePlatform(environment: <String, String>{});
-      final config = Config(
-        Config.kFlutterSettings,
-        fileSystem: fileSystem,
-        logger: logger,
-        platform: platform,
-      );
-      final buildInfo = BuildInfo(
-        BuildMode.debug,
-        '',
-        treeShakeIcons: false,
-        packageConfigPath: '.dart_tool/package_config.json',
-        deprecatedJsInterop: deprecatedJsInterop,
-      );
-      final String cachedKernelPath = getDefaultCachedKernelPath(
-        trackWidgetCreation: false,
-        dartDefines: const <String>[],
-        config: config,
-        fileSystem: fileSystem,
-        targetModel: TargetModel.dartdevc,
-        extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
-      );
-      final processManager = FakeProcessManager.list(<FakeCommand>[
-        FakeCommand(
-          command: <Pattern>[
-            'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
-            'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
-            '--sdk-root',
-            'HostArtifact.flutterWebSdk/',
-            '--incremental',
-            '--target=dartdevc',
-            '--experimental-emit-debug-metadata',
-            '-DFLUTTER_WEB_USE_SKIA=true',
-            '-DFLUTTER_WEB_USE_SKWASM=false',
-            '--output-dill',
-            'build/out',
-            '--packages',
-            '.dart_tool/package_config.json',
-            '-Ddart.vm.profile=false',
-            '-Ddart.vm.product=false',
-            '--enable-asserts',
-            '--filesystem-root',
-            'project/test',
-            '--filesystem-root',
-            'build',
-            '--filesystem-scheme',
-            'org-dartlang-app',
-            '--initialize-from-dill',
-            cachedKernelPath,
-            '--platform',
-            'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
-            '--verbosity=error',
-            ...ddcFrontEndOptions(buildInfo),
-          ],
-          stdout: 'result abc\nline0\nline1\nabc\nabc build/out 1',
-        ),
-      ]);
-      final compiler = WebTestCompiler(
-        analytics: fakeAnalytics,
-        toolContext: FakeToolContext(
-          artifacts: Artifacts.test(),
+          platform: platform,
+        );
+        final buildInfo = BuildInfo(
+          BuildMode.debug,
+          '',
+          treeShakeIcons: false,
+          packageConfigPath: '.dart_tool/package_config.json',
+          deprecatedJsInterop: deprecatedJsInterop,
+        );
+        final String cachedKernelPath = getDefaultCachedKernelPath(
+          trackWidgetCreation: false,
+          dartDefines: const <String>[],
           config: config,
-          fs: fileSystem,
-          logger: logger,
-          platform: FakePlatform(environment: <String, String>{}),
-          processManager: processManager,
-          shutdownHooks: FakeShutdownHooks(),
-        ),
-      );
+          fileSystem: fileSystem,
+          targetModel: TargetModel.dartdevc,
+          extraFrontEndOptions: ddcFrontEndOptions(buildInfo),
+        );
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          FakeCommand(
+            command: <Pattern>[
+              'Artifact.engineDartAotRuntime.TargetPlatform.web_javascript',
+              'Artifact.frontendServerSnapshotForEngineDartSdk.TargetPlatform.web_javascript',
+              '--sdk-root',
+              'HostArtifact.flutterWebSdk/',
+              '--incremental',
+              '--target=dartdevc',
+              '--experimental-emit-debug-metadata',
+              '-DFLUTTER_WEB_USE_SKIA=true',
+              '-DFLUTTER_WEB_USE_SKWASM=false',
+              '--output-dill',
+              'build/out',
+              '--packages',
+              '.dart_tool/package_config.json',
+              '-Ddart.vm.profile=false',
+              '-Ddart.vm.product=false',
+              '--enable-asserts',
+              '--filesystem-root',
+              'project/test',
+              '--filesystem-root',
+              'build',
+              '--filesystem-scheme',
+              'org-dartlang-app',
+              '--initialize-from-dill',
+              cachedKernelPath,
+              '--platform',
+              'file:///HostArtifact.webPlatformKernelFolder/ddc_outline.dill',
+              '--verbosity=error',
+              ...ddcFrontEndOptions(buildInfo),
+            ],
+            stdout: 'result abc\nline0\nline1\nabc\nabc build/out ${succeeds ? 0 : 1}',
+          ),
+        ]);
+        final compiler = WebTestCompiler(
+          analytics: fakeAnalytics,
+          toolContext: FakeToolContext(
+            artifacts: Artifacts.test(),
+            config: config,
+            fs: fileSystem,
+            logger: logger,
+            platform: FakePlatform(environment: <String, String>{}),
+            processManager: processManager,
+            shutdownHooks: FakeShutdownHooks(),
+          ),
+        );
 
-      await expectLater(
-        compiler.initialize(
+        final Future<Object?> result = compiler.initialize(
           projectDirectory: fileSystem.directory('project'),
           testOutputDir: 'build',
           testFiles: <String>['project/test/fake_test.dart'],
           buildInfo: buildInfo,
           webRenderer: WebRendererMode.canvaskit,
           useWasm: false,
-        ),
-        throwsToolExit(message: 'Failed to compile'),
-      );
+        );
+        if (succeeds) {
+          await result;
+        } else {
+          await expectLater(result, throwsToolExit(message: 'Failed to compile'));
+        }
 
-      expect(processManager.hasRemainingExpectations, isFalse);
-      expect(fakeAnalytics.sentEvents, <Event>[
-        Event.flutterBuildInfo(
-          label: 'web-compile',
-          buildType: 'web',
-          command: 'test',
-          settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
-          error: 'ddc-compile-failure',
-        ),
-      ]);
-    });
+        expect(processManager.hasRemainingExpectations, isFalse);
+        expect(fakeAnalytics.sentEvents, <Event>[
+          Event.flutterBuildInfo(
+            label: 'web-compile',
+            buildType: 'web',
+            command: 'test',
+            settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+            error: succeeds ? null : 'ddc-compile-failure',
+          ),
+        ]);
+      });
+    }
   }
 
   testUsingContext('web test compiler issues valid compile command (wasm)', () async {

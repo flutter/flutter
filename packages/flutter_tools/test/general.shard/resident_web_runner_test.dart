@@ -2540,6 +2540,33 @@ flutter:
         },
       );
     }
+
+    testUsingContext(
+      'ResidentWebRunner does not send flutterBuildInfo analytics on debug DDC '
+      'compile when deprecatedJsInterop is null',
+      () async {
+        fakeVmServiceHost = FakeVmServiceHost(requests: kAttachExpectations.toList());
+        setupMocks();
+
+        final ResidentRunner residentWebRunner = setUpResidentRunner(flutterDevice);
+        residentWebRunner.artifactDirectory.childFile('app.dill').writeAsStringSync('ABC');
+
+        final connectionInfoCompleter = Completer<DebugConnectionInfo>();
+        unawaited(residentWebRunner.run(connectionInfoCompleter: connectionInfoCompleter));
+        await connectionInfoCompleter.future;
+
+        expect(
+          fakeAnalytics.sentEvents.where((Event e) => e.eventData['label'] == 'web-compile'),
+          isEmpty,
+        );
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => fakeAnalytics,
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Pub: ThrowingPub.new,
+      },
+    );
   });
 }
 
