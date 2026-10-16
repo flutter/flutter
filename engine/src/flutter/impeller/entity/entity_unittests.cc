@@ -947,7 +947,6 @@ TEST_P(EntityTest, GaussianBlurFilter) {
 
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
     const char* input_type_names[] = {"Texture", "Solid Color"};
-    const char* blur_type_names[] = {"Image blur", "Mask blur"};
     const char* pass_variation_names[] = {"New"};
     const char* blur_style_names[] = {"Normal", "Solid", "Outer", "Inner"};
     const char* tile_mode_names[] = {"Clamp", "Repeat", "Mirror", "Decal"};
@@ -961,7 +960,6 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     // UI state.
     static int selected_input_type = 0;
     static Color input_color = Color::Black();
-    static int selected_blur_type = 0;
     static int selected_pass_variation = 0;
     static bool combined_sigma = false;
     static float blur_amount_coarse[2] = {0, 0};
@@ -988,13 +986,9 @@ TEST_P(EntityTest, GaussianBlurFilter) {
         ImGui::ColorEdit4("Input color",
                           reinterpret_cast<float*>(&input_color));
       }
-      ImGui::Combo("Blur type", &selected_blur_type, blur_type_names,
-                   sizeof(blur_type_names) / sizeof(char*));
-      if (selected_blur_type == 0) {
-        ImGui::Combo("Pass variation", &selected_pass_variation,
-                     pass_variation_names,
-                     sizeof(pass_variation_names) / sizeof(char*));
-      }
+      ImGui::Combo("Pass variation", &selected_pass_variation,
+                   pass_variation_names,
+                   sizeof(pass_variation_names) / sizeof(char*));
       ImGui::Checkbox("Combined sigma", &combined_sigma);
       if (combined_sigma) {
         ImGui::SliderFloat("Sigma (coarse)", blur_amount_coarse, 0, 1000);
@@ -1069,10 +1063,6 @@ TEST_P(EntityTest, GaussianBlurFilter) {
     };
     FML_CHECK(blur);
 
-    auto mask_blur = FilterContents::MakeBorderMaskBlur(
-        FilterInput::Make(input), blur_sigma_x, blur_sigma_y,
-        blur_styles[selected_blur_style]);
-
     auto ctm = Matrix::MakeScale(GetContentScale()) *
                Matrix::MakeTranslation(Vector3(offset[0], offset[1])) *
                Matrix::MakeRotationZ(Radians(rotation)) *
@@ -1080,10 +1070,8 @@ TEST_P(EntityTest, GaussianBlurFilter) {
                Matrix::MakeSkew(skew[0], skew[1]) *
                Matrix::MakeTranslation(-Point(input_size) / 2);
 
-    auto target_contents = selected_blur_type == 0 ? blur : mask_blur;
-
     Entity entity;
-    entity.SetContents(target_contents);
+    entity.SetContents(blur);
     entity.SetTransform(ctm);
 
     entity.Render(context, pass);
@@ -1100,12 +1088,10 @@ TEST_P(EntityTest, GaussianBlurFilter) {
 
     // Renders a green bounding rect of the target filter.
     Entity bounds_entity;
-    std::optional<Rect> target_contents_coverage =
-        target_contents->GetCoverage(entity);
-    if (target_contents_coverage.has_value()) {
-      std::unique_ptr<Geometry> geom =
-          Geometry::MakeFillPath(flutter::DlPath::MakeRect(
-              target_contents->GetCoverage(entity).value()));
+    std::optional<Rect> blur_coverage = blur->GetCoverage(entity);
+    if (blur_coverage.has_value()) {
+      std::unique_ptr<Geometry> geom = Geometry::MakeFillPath(
+          flutter::DlPath::MakeRect(blur->GetCoverage(entity).value()));
       auto contents = std::make_shared<SolidColorContents>(geom.get());
       contents->SetColor(bounds_color);
 
@@ -1362,33 +1348,6 @@ TEST_P(EntityTest, SolidStrokeCoverageIsCorrect) {
     auto actual = entity.GetCoverage();
     auto expected = Rect::MakeLTRB(-4, -4, 14, 14);
 
-    ASSERT_TRUE(actual.has_value());
-    ASSERT_RECT_NEAR(actual.value(), expected);
-  }
-}
-
-TEST_P(EntityTest, BorderMaskBlurCoverageIsCorrect) {
-  auto geom = Geometry::MakeFillPath(
-      flutter::DlPath::MakeRect(Rect::MakeXYWH(0, 0, 300, 400)));
-  auto fill = std::make_shared<SolidColorContents>(geom.get());
-  fill->SetColor(Color::CornflowerBlue());
-  auto border_mask_blur = FilterContents::MakeBorderMaskBlur(
-      FilterInput::Make(fill), Radius{3}, Radius{4});
-
-  {
-    Entity e;
-    e.SetTransform(Matrix());
-    auto actual = border_mask_blur->GetCoverage(e);
-    auto expected = Rect::MakeXYWH(-3, -4, 306, 408);
-    ASSERT_TRUE(actual.has_value());
-    ASSERT_RECT_NEAR(actual.value(), expected);
-  }
-
-  {
-    Entity e;
-    e.SetTransform(Matrix::MakeRotationZ(Radians{kPi / 4}));
-    auto actual = border_mask_blur->GetCoverage(e);
-    auto expected = Rect::MakeXYWH(-287.792, -4.94975, 504.874, 504.874);
     ASSERT_TRUE(actual.has_value());
     ASSERT_RECT_NEAR(actual.value(), expected);
   }
