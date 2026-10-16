@@ -1486,6 +1486,31 @@ void main() async {
     }
   }, skip: !(impellerEnabled && flutterGpuEnabled));
 
+  test('RenderPass.draw throws a StateError before bindPipeline', () async {
+    final RenderPassState state = createSimpleRenderPass();
+    final gpu.HostBuffer transients = gpu.gpuContext.createHostBuffer();
+    state.renderPass.bindVertexBuffer(
+      transients.emplace(float32(<double>[-0.5, 0.5, 0.0, -0.5, 0.5, 0.5])),
+    );
+    state.renderPass.bindIndexBuffer(
+      transients.emplace(Uint16List.fromList(<int>[0, 1, 2]).buffer.asByteData()),
+      gpu.IndexType.int16,
+    );
+
+    expect(() => state.renderPass.draw(3), throwsStateError);
+    expect(() => state.renderPass.drawIndexed(3), throwsStateError);
+
+    // Binding a pipeline makes the same pass drawable.
+    final gpu.RenderPipeline pipeline = await createUnlitRenderPipeline();
+    state.renderPass.bindPipeline(pipeline);
+    state.renderPass.bindUniform(
+      pipeline.vertexShader.getUniformSlot('VertInfo'),
+      transients.emplace(unlitUBO(Matrix4.identity(), Colors.lime)),
+    );
+    state.renderPass.draw(3);
+    await submitAndWait(state.commandBuffer);
+  }, skip: !(impellerEnabled && flutterGpuEnabled));
+
   // Renders a green triangle pointing downwards.
   test('Can render triangle', () async {
     final RenderPassState state = createSimpleRenderPass();

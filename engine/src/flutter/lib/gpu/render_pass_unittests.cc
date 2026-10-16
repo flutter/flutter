@@ -139,5 +139,15 @@ TEST(FlutterGpuRenderPassTest, BindSetReplacesTheSlotContents) {
   }
 }
 
+// A draw before bindPipeline must fail instead of dereferencing the missing
+// pipeline. The pass has no context or backend render pass either, so the
+// check has to come before anything that touches them.
+TEST(FlutterGpuRenderPassTest, DrawWithoutPipelineFails) {
+  auto render_pass = fml::MakeRefCounted<RenderPass>();
+
+  EXPECT_FALSE(InternalFlutterGpu_RenderPass_Draw(render_pass.get(), 3, 1));
+  EXPECT_FALSE(render_pass->Draw(3, 1, /*indexed=*/false));
+}
+
 }  // namespace
 }  // namespace flutter::gpu

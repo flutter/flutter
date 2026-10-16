@@ -387,6 +387,10 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// the entire bitmask.
   int _maxBoundVertexSlot = -1;
 
+  /// Whether [bindPipeline] has been called on this pass. [draw] and
+  /// [drawIndexed] need a pipeline.
+  bool _hasPipeline = false;
+
   /// Creates a new RenderPass.
   RenderPass._(
     GpuContext gpuContext,
@@ -445,6 +449,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
 
   void bindPipeline(RenderPipeline pipeline) {
     _bindPipeline(pipeline);
+    _hasPipeline = true;
   }
 
   /// Binds [bufferView] as the vertex buffer at the given [slot].
@@ -701,12 +706,15 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// instance receives the same vertex buffer data. This is valid, but every
   /// instance will produce the same geometry unless the shader varies its output
   /// another way.
+  ///
+  /// Throws a [StateError] if [bindPipeline] has not been called.
   void draw(int vertexCount, {int instanceCount = 1}) {
     RangeError.checkNotNegative(vertexCount, 'vertexCount');
     RangeError.checkNotNegative(instanceCount, 'instanceCount');
     if (vertexCount == 0 || instanceCount == 0) {
       return;
     }
+    _validatePipelineBound('draw');
     _validateVertexBindings();
     if (!_draw(vertexCount, instanceCount)) {
       throw Exception("Failed to append draw");
@@ -731,15 +739,26 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// instance receives the same vertex and index buffer data. This is valid, but
   /// every instance will produce the same geometry unless the shader varies its
   /// output another way.
+  ///
+  /// Throws a [StateError] if [bindPipeline] has not been called.
   void drawIndexed(int indexCount, {int instanceCount = 1}) {
     RangeError.checkNotNegative(indexCount, 'indexCount');
     RangeError.checkNotNegative(instanceCount, 'instanceCount');
     if (indexCount == 0 || instanceCount == 0) {
       return;
     }
+    _validatePipelineBound('drawIndexed');
     _validateVertexBindings();
     if (!_drawIndexed(indexCount, instanceCount)) {
       throw Exception("Failed to append drawIndexed");
+    }
+  }
+
+  /// Throws a [StateError] when no pipeline has been bound. The native side
+  /// cannot build a draw without one.
+  void _validatePipelineBound(String method) {
+    if (!_hasPipeline) {
+      throw StateError('$method called before bindPipeline.');
     }
   }
 
