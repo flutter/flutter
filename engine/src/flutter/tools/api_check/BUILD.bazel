@@ -1,0 +1,35 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:apicheck: the check that dart:ui's enums agree with the embedder
+# API, the web engine and the Android and iOS embeddings. A Dart package with
+# no GN build file; its tests are run_tests.py's (--type dart-host).
+
+load("//engine/src/flutter/build/bazel/dart:package_test.bzl", "dart_package_test")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)
+
+# The tests parse the API's sources out of the tree: dart:ui's library, the
+# web engine's, embedder.h and the headers behind dart:ui, the Java and
+# Swift files that mirror the enums.
+dart_package_test(
+    name = "tests",
+    data = [
+        "//engine/src/flutter:shell/platform/darwin/ios/framework/Source/AccessibilityFeatures.swift",
+        "//engine/src/flutter:web_ui_dart_sources",
+        "//engine/src/flutter/lib/ui:dart_ui",
+        "//engine/src/flutter/lib/ui:semantics/semantics_node.h",
+        "//engine/src/flutter/lib/ui:window/platform_configuration.h",
+        "//engine/src/flutter/shell/platform/android:io/flutter/embedding/engine/systemchannels/LifecycleChannel.java",
+        "//engine/src/flutter/shell/platform/android:io/flutter/view/AccessibilityBridge.java",
+        "//engine/src/flutter/shell/platform/common:app_lifecycle_state.h",
+        "//engine/src/flutter/shell/platform/embedder:embedder.h",
+    ],
+    deps = ["//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources"],
+)

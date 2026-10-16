@@ -1,0 +1,24 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The engine's CI configuration: the builder configurations
+# (builders/*.json, which engine_build_configs reads and `et` builds from)
+# and the scripts of the CI steps, among them package:ci_scripts (bin/ and
+# test/ here, the formatter and the license and DEPS checks).
+#
+# ci_scripts' tests are in run_tests.py's dart-host list but not here:
+# format_test.dart writes files into the checkout, adds them to the git index,
+# runs ci/format.sh over the working tree and removes them again -- a test of
+# the checkout and its git repository, which no runfiles tree holds (and which
+# a sandboxed test must not touch); run them with `dart test` in this
+# directory. The other packages of that list are dart_package_test targets
+# (//engine/src/flutter:dart_host_tests).
+
+package(default_visibility = ["//visibility:public"])
+
+# The builder configurations, for the tests of the packages that read them.
+filegroup(
+    name = "builder_configs",
+    srcs = glob(["builders/**/*.json"]),
+)

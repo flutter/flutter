@@ -276,6 +276,22 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/pkg/process",
         build_file = _OVERLAYS + ":process/BUILD.process.bazel",
     ),
+    # package:io, package:node_preamble and package:process_runner: the other
+    # packages of the engine's pub workspace under third_party/pkg that its
+    # Dart tools and their tests reach (testing/run_tests.py --type dart-host,
+    # build/bazel/dart/package_test.bzl).
+    "io": struct(
+        path = "engine/src/flutter/third_party/pkg/io",
+        build_file = _OVERLAYS + ":io/BUILD.io.bazel",
+    ),
+    "node_preamble": struct(
+        path = "engine/src/flutter/third_party/pkg/node_preamble",
+        build_file = _OVERLAYS + ":node_preamble/BUILD.node_preamble.bazel",
+    ),
+    "process_runner": struct(
+        path = "engine/src/flutter/third_party/pkg/process_runner",
+        build_file = _OVERLAYS + ":process_runner/BUILD.process_runner.bazel",
+    ),
     # google/gtest-parallel: the runner testing/run_tests.py puts every
     # engine suite through (a process per test, --repeat=2), which
     # flutter_cc_test reproduces (testing.bzl).
