@@ -674,4 +674,69 @@ void main() {
     expect(plugin.platforms.keys, isNot(contains(WebPlugin.kConfigKey)));
     expect(Plugin.validatePluginYaml(pluginYaml), isEmpty);
   });
+
+  testWithoutContext('Plugin parsing rejects non-string implements, non-bool flags, and non-string supportedVariants', () {
+    final fileSystem = MemoryFileSystem.test();
+    const pluginYamlRaw =
+        'implements: 123\n'
+        'platforms:\n'
+        ' android:\n'
+        '  ffiPlugin: "true"\n'
+        ' ios:\n'
+        '  pluginClass: IosClass\n'
+        '  sharedDarwinSource: "yes"\n'
+        ' windows:\n'
+        '  pluginClass: WinClass\n'
+        '  supportedVariants:\n'
+        '   - 1\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+      () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message:
+            'Invalid plugin specification $_kTestPluginName.\n'
+            'Invalid "android" plugin specification: the "ffiPlugin" field must be a boolean.\n'
+            'Invalid "android" plugin specification: at least one of "package" and "pluginClass", "dartPluginClass", "ffiPlugin: true", or "default_package" must be specified.\n'
+            'Invalid "ios" plugin specification: the "sharedDarwinSource" field must be a boolean.\n'
+            'Invalid "windows" plugin specification: the "supportedVariants" field must be a list of strings.\n'
+            'Invalid "implements" specification.',
+      ),
+    );
+  });
+
+  testWithoutContext('Plugin parsing rejects invalid dartPluginClass next to default_package', () {
+    final fileSystem = MemoryFileSystem.test();
+    const pluginYamlRaw =
+        'platforms:\n'
+        ' linux:\n'
+        '  default_package: some_package\n'
+        '  dartPluginClass: "Invalid Class"\n';
+
+    final pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+    expect(
+      () => Plugin.fromYaml(
+        _kTestPluginName,
+        _kTestPluginPath,
+        pluginYaml,
+        null,
+        const <String>[],
+        isDevDependency: false,
+        fileSystem: fileSystem,
+      ),
+      throwsToolExit(
+        message:
+            'Invalid plugin specification $_kTestPluginName.\n'
+            'Invalid "linux" plugin specification: the "dartPluginClass" field must be a valid identifier, optionally with dot-separated segments.',
+      ),
+    );
+  });
 }

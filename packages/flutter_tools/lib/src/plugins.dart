@@ -385,9 +385,9 @@ class Plugin {
     return YamlMap.wrap(map);
   }
 
-  static List<String> validatePluginYaml(YamlMap? yaml) {
+  static List<String> validatePluginYaml(YamlMap? yaml, {String packageName = 'plugin'}) {
     final (:List<String> errors, plugin: _) = _parseFromYaml(
-      'plugin',
+      packageName,
       '',
       yaml,
       null,
