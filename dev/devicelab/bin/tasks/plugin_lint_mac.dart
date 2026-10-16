@@ -322,6 +322,12 @@ Future<void> _tryMacOSLint(String podspecPath, List<String> extraArguments) asyn
   await eval('pod', <String>['lib', 'lint', podspecPath, ...extraArguments]);
 }
 
+/// Creates a local `FlutterMacOS.podspec` in [tempDir] symlinked to the cached
+/// `FlutterMacOS.xcframework` engine artifact and returns the podspec path.
+///
+/// Passing this podspec via `--include-podspecs` ensures `pod lib lint` builds
+/// against the local engine framework and current deployment target rather than
+/// pulling an outdated `FlutterMacOS` podspec from CocoaPods trunk.
 String _setUpFlutterMacOSPodspec({required String flutterRoot, required Directory tempDir}) {
   final flutterMacOSPodspec = File(path.join(tempDir.path, 'FlutterMacOS.podspec'));
   final flutterMacOSFramework = Directory(
@@ -336,10 +342,7 @@ String _setUpFlutterMacOSPodspec({required String flutterRoot, required Director
     ),
   );
 
-  copyDirectorySync(
-    flutterMacOSFramework,
-    Directory(path.join(tempDir.path, 'FlutterMacOS.xcframework')),
-  );
+  Link(path.join(tempDir.path, 'FlutterMacOS.xcframework')).createSync(flutterMacOSFramework.path);
 
   flutterMacOSPodspec.writeAsStringSync('''
 Pod::Spec.new do |s|
@@ -357,13 +360,18 @@ end
   return flutterMacOSPodspec.path;
 }
 
+/// Creates a local `Flutter.podspec` in [tempDir] symlinked to the cached
+/// `Flutter.xcframework` engine artifact and returns the podspec path.
+///
+/// Passing this podspec via `--include-podspecs` ensures `pod lib lint` builds
+/// against the local engine framework and current deployment target rather than
+/// pulling an outdated `Flutter` podspec from CocoaPods trunk.
 String _setUpFlutterIosPodspec({required String flutterRoot, required Directory tempDir}) {
   final flutterIosPodspec = File(path.join(tempDir.path, 'Flutter.podspec'));
   final flutterIosFramework = Directory(
     path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', 'ios', 'Flutter.xcframework'),
   );
-
-  copyDirectorySync(flutterIosFramework, Directory(path.join(tempDir.path, 'Flutter.xcframework')));
+  Link(path.join(tempDir.path, 'Flutter.xcframework')).createSync(flutterIosFramework.path);
 
   flutterIosPodspec.writeAsStringSync('''
 Pod::Spec.new do |s|
@@ -379,35 +387,4 @@ Pod::Spec.new do |s|
 end
 ''');
   return flutterIosPodspec.path;
-}
-
-/// Recursively copies `srcDir` to `destDir`, invoking [onFileCopied], if
-/// specified, for each source/destination file pair.
-///
-/// Creates `destDir` if needed.
-void copyDirectorySync(
-  Directory srcDir,
-  Directory destDir, {
-  void Function(File srcFile, File destFile)? onFileCopied,
-}) {
-  if (!srcDir.existsSync()) {
-    throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
-  }
-
-  if (!destDir.existsSync()) {
-    destDir.createSync(recursive: true);
-  }
-
-  for (final FileSystemEntity entity in srcDir.listSync()) {
-    final String newPath = path.join(destDir.path, path.basename(entity.path));
-    if (entity is File) {
-      final newFile = File(newPath);
-      entity.copySync(newPath);
-      onFileCopied?.call(entity, newFile);
-    } else if (entity is Directory) {
-      copyDirectorySync(entity, Directory(newPath));
-    } else {
-      throw Exception('${entity.path} is neither File nor Directory');
-    }
-  }
 }
