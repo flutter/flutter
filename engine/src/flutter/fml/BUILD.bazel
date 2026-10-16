@@ -3,9 +3,8 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/fml/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: fml_benchmarks.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
@@ -203,6 +202,25 @@ cc_library(
 
 flutter_test_fixtures(
     name = "fml_fixtures",
+)
+
+cc_test(
+    name = "fml_benchmarks",
+    size = "medium",
+    srcs = ["message_loop_task_queues_benchmark.cc"],
+    args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    data = ["@icu//:icudata"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = [
+        "benchmark",
+        "manual",
+    ],
+    deps = [
+        ":fml",
+        "//engine/src:include_root",
+        "//engine/src/flutter/benchmarking",
+    ],
 )
 
 flutter_cc_test(

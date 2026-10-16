@@ -104,10 +104,11 @@ exports_files([
 ])
 ''',
   ),
-  ConvertedFile(
-    '//flutter/fml',
-    skip: <String, String>{'fml_benchmarks': 'needs //flutter/benchmarking'},
-  ),
+  ConvertedFile('//flutter/fml'),
+  // The benchmark library (google/benchmark through @benchmark) and the
+  // engine's wrapper of it, for the benchmark executables run_tests.py
+  // --type benchmarks runs (benchmarkRuns).
+  ConvertedFile('//flutter/benchmarking'),
   ConvertedFile(
     '//flutter/testing',
     // The fixtures macro in testing.bzl compiles this file into every
@@ -156,21 +157,8 @@ filegroup(
   // shell/profiling's into shell_unittests; they ran as binaries of their
   // own here until those converted.
   ConvertedFile('//flutter/impeller/base'),
-  ConvertedFile(
-    '//flutter/impeller/geometry',
-    skip: <String, String>{'geometry_benchmarks': 'needs //flutter/impeller/entity'},
-  ),
-  ConvertedFile(
-    '//flutter/display_list',
-    skip: <String, String>{
-      'display_list_builder_benchmarks': 'needs //flutter/benchmarking',
-      'display_list_region_benchmarks': 'needs //flutter/benchmarking',
-      'display_list_transform_benchmarks': 'needs //flutter/benchmarking',
-      'display_list_benchmarks_source': 'needs //flutter/benchmarking',
-      'display_list_benchmarks': 'needs display_list_benchmarks_source',
-      'primitive_rendering_benchmarks': 'needs display_list_benchmarks_source',
-    },
-  ),
+  ConvertedFile('//flutter/impeller/geometry'),
+  ConvertedFile('//flutter/display_list'),
   // The shader compiler, impellerc, and what it needs of Impeller
   // (research/08, step 3).
   ConvertedFile('//flutter/impeller/core'),
@@ -322,7 +310,6 @@ exports_files(["README"] + glob(
   ConvertedFile('//flutter/runtime'),
   ConvertedFile(
     '//flutter/txt',
-    skip: <String, String>{'txt_benchmarks': 'needs //flutter/third_party/benchmark'},
     // The fonts are fixtures of other packages' tests (display_list's).
     appendix: '''
 exports_files(glob(["third_party/fonts/*"]))
@@ -379,7 +366,6 @@ exports_files(["file_loader/file_loader_unittests.cc"])
   // shell's test fixtures and the shader fixtures below).
   ConvertedFile(
     '//flutter/lib/ui',
-    skip: <String, String>{'ui_benchmarks': 'needs //flutter/benchmarking'},
     // dart_ui.gni's dart_ui_files: the dart:ui sources, which the platform
     // compile in lib/snapshot reads through lib/snapshot/libraries.json.
     // The fixture files themselves, which the Dart tests of testing/dart
@@ -458,10 +444,7 @@ filegroup(
   // The shell proper needs the Dart runtime glue (lib/ui, runtime, tonic)
   // and the GPU surfaces; what converts now is what //flutter/common/graphics
   // and the shell's own small libraries need.
-  ConvertedFile(
-    '//flutter/shell/common',
-    skip: <String, String>{'shell_benchmarks': 'needs //flutter/benchmarking'},
-  ),
+  ConvertedFile('//flutter/shell/common'),
   // The embedder API: its libraries, its shared library and its three suites.
   // What stays out is the artifact side -- the header copied into the build
   // root, the group and the zip bundle CI archives -- which is a later
@@ -527,6 +510,16 @@ cc_library(
     deps = ["//modules/skparagraph:engine_root_headers"],
 )
 
+# tools/Resources.h, which modules/skparagraph/utils/TestFontCollection.cpp
+# (test-only, check_includes off; txt_benchmarks links it) includes and does
+# not use; for that package alone, not the headers above (which every
+# compile in the tree stages).
+cc_library(
+    name = "tools_resources_header",
+    hdrs = ["tools/Resources.h"],
+    visibility = ["//modules/skparagraph:__pkg__"],
+)
+
 # Skia's test images, which the engine's Dart tests read from the source
 # root (flutter/third_party/skia/resources/images/...; see
 # @flutter//engine/src/flutter/third_party:skia_resources).
@@ -581,6 +574,7 @@ cc_library(
     '//flutter/skia/modules/skparagraph',
     implicitDeps: <String>[
       '@skia//:skia_headers',
+      '@skia//:tools_resources_header',
       '@skia//modules/skparagraph:skparagraph_headers',
     ],
     appendix: '''
@@ -863,6 +857,29 @@ cc_library(
         "src/**/*.hh",
     ]),
     textual_hdrs = glob(["src/**/*.cc"]),
+)
+''',
+  ),
+  // google/benchmark as the engine builds it (secondary tree): the GN list
+  // names src/ alone; the public headers under include/benchmark, which the
+  // config's include directory serves, ride the dependency -- under their
+  // path from the engine's source root too ("third_party/benchmark/include/
+  // benchmark/benchmark.h", txt's benchmark runner's spelling), as for
+  // libtess2.
+  ConvertedFile(
+    '//flutter/third_party/benchmark',
+    implicitDeps: <String>['@benchmark//:headers'],
+    appendix: '''
+cc_library(
+    name = "headers",
+    hdrs = glob(["include/benchmark/*.h"]),
+    deps = [":flutter_root_headers"],
+)
+
+cc_library(
+    name = "flutter_root_headers",
+    hdrs = glob(["include/benchmark/*.h"]),
+    include_prefix = "third_party/benchmark",
 )
 ''',
   ),

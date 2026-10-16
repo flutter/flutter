@@ -1,0 +1,46 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/benchmarking/BUILD.gn by gn_to_bazel; do not edit.
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "benchmarking",
+    testonly = True,
+    srcs = ["benchmarking.cc"],
+    hdrs = ["benchmarking.h"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "//engine/src/flutter/fml",
+        "@benchmark",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "benchmark_library_config",
+)
+
+cc_library(
+    name = "benchmarking_library",
+    testonly = True,
+    srcs = ["library.cc"],
+    hdrs = ["library.h"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":benchmark_library_config",
+        "//engine/src:include_root",
+        "//engine/src/flutter:config",
+        "@benchmark",
+    ],
+    alwayslink = True,
+)

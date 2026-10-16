@@ -382,7 +382,13 @@ final class _Emitter {
       case 'static_library':
         _convertCcTarget(target, 'cc_library', library: true);
       case 'executable':
-        _convertCcTarget(target, _isTest(target) ? 'cc_test' : 'cc_binary', library: false);
+        _convertCcTarget(
+          target,
+          _isTest(target) || benchmarkRuns.containsKey('$gnPackage:${target.name}')
+              ? 'cc_test'
+              : 'cc_binary',
+          library: false,
+        );
       case 'shared_library':
         _convertCcTarget(target, 'cc_binary', library: false, shared: true);
       case 'config':
@@ -585,7 +591,8 @@ final class _Emitter {
 
   /// The engine's test executables are testonly and named `*tests`
   /// (`fml_unittests`, `display_list_rendertests`); testonly benchmarks and
-  /// tools stay binaries.
+  /// tools stay binaries -- but for the benchmarks run_tests.py runs
+  /// ([benchmarkRuns]), which are tests tagged `benchmark` and `manual`.
   static bool _isTest(GnTarget target) {
     final List<GnValue>? testonly = target.variables['testonly']?.unconditionalItems;
     final bool isTestonly =
@@ -965,8 +972,15 @@ final class _Emitter {
         }
         rule.scalars['shard_count'] = '$shards';
       }
-      // How run_tests.py runs the suite (testRuns), which GN cannot say.
-      final TestRun? run = testRuns[gnLabel];
+      // How run_tests.py runs the suite (testRuns), which GN cannot say;
+      // a benchmark it runs (benchmarkRuns) the same way, tagged out of
+      // wildcard runs.
+      final TestRun? benchmark = benchmarkRuns[gnLabel];
+      if (benchmark != null) {
+        rule.list('tags').addUnique(Condition.always, const _Item('benchmark'));
+        rule.list('tags').addUnique(Condition.always, const _Item('manual'));
+      }
+      final TestRun? run = benchmark ?? testRuns[gnLabel];
       if (run != null) {
         for (final String arg in run.args) {
           rule.list('args').addUnique(Condition.always, _Item(arg));

@@ -303,7 +303,12 @@ options it gives gtest-parallel for `ui_unittests` -- `--timeout=90` -- its
 `runner_args`, since GN's executable has no words for how it is run;
 `gtestParallelSuites` names the suites `run_tests.py` puts through
 gtest-parallel, a process per test and every test twice, which become
-`flutter_cc_test` rather than `cc_test`; `displayTests` and
+`flutter_cc_test` rather than `cc_test`; `benchmarkRuns` names the
+benchmark executables `run_tests.py --type benchmarks` runs with ICU's data
+file, which become `cc_test`s tagged `benchmark` and `manual` -- out of a
+wildcard run, as every CI builder but `host_release_test` leaves them, and
+under `//engine/src/flutter:benchmarks` -- where GN's other testonly
+executables stay binaries; `displayTests` and
 `sessionBusTests` name the suites that need a display and a D-Bus session
 bus, which the run inherited from the bot), and which executables need the GPU test backends next
 to them (`gpuBackendTests`: suites, and `flutter_tester_opengles`, an
