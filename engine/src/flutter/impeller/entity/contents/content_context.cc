@@ -231,7 +231,6 @@ struct ContentContext::Pipelines {
   Variants<BlendSaturationPipeline> blend_saturation;
   Variants<BlendScreenPipeline> blend_screen;
   Variants<BlendSoftLightPipeline> blend_softlight;
-  Variants<BorderMaskBlurPipeline> border_mask_blur;
   Variants<CirclePipeline> circle;
   Variants<ClipPipeline> clip;
   Variants<ColorMatrixColorFilterPipeline> color_matrix_color_filter;
@@ -721,8 +720,6 @@ ContentContext::ContentContext(
                                             {supports_decal});
     pipelines_->gaussian_blur.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil, {supports_decal});
-    pipelines_->border_mask_blur.CreateDefault(*context_,
-                                               options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
                                                         options_trianglestrip);
     pipelines_->shadow_vertices_.CreateDefault(*context_, options);
@@ -1172,11 +1169,6 @@ PipelineRef ContentContext::GetTiledTexturePipeline(
 PipelineRef ContentContext::GetGaussianBlurPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->gaussian_blur, opts);
-}
-
-PipelineRef ContentContext::GetBorderMaskBlurPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->border_mask_blur, opts);
 }
 
 PipelineRef ContentContext::GetMorphologyFilterPipeline(
