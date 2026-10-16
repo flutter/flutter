@@ -212,7 +212,12 @@ void main() {
     final ExtensionTarget target = _createTarget(
       inputs: const <ExtensionSource>[
         ExtensionSource.pattern('{PROJECT_DIR}/foo.dart'),
-        ExtensionSource.artifact(BuiltInArtifacts.icuData, platform: 'linux-x64', mode: .debug),
+        ExtensionSource.artifact(BuiltInArtifacts.icuData, mode: .debug),
+        ExtensionSource.artifact(
+          BuiltInArtifacts.genSnapshot,
+          platform: 'linux-arm64',
+          mode: .release,
+        ),
         ExtensionSource.hostArtifact(BuiltInHostArtifacts.impellerc),
       ],
       outputs: const <ExtensionSource>[ExtensionSource.pattern('{BUILD_DIR}/bar.dart')],
@@ -227,6 +232,7 @@ void main() {
       equals(<String>[
         '/foo.dart',
         'Artifact.icuData.TargetPlatform.linux_x64.debug',
+        'Artifact.genSnapshot.TargetPlatform.linux_arm64.release',
         'HostArtifact.impellerc',
       ]),
     );

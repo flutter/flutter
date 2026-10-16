@@ -63,6 +63,7 @@ final class _TestAssembleTarget extends AssembleTarget {
   const _TestAssembleTarget({
     required super.description,
     required this.name,
+    this.dependencies = const <String>[],
     this.errorMessage,
     this.shouldSucceed = true,
     super.targetPlatform = 'linux-x64',
@@ -70,6 +71,9 @@ final class _TestAssembleTarget extends AssembleTarget {
 
   @override
   final String name;
+
+  @override
+  final List<String> dependencies;
 
   final String? errorMessage;
   final bool shouldSucceed;
@@ -140,6 +144,11 @@ final class _FailingAndConflictingBuildService extends BuildService {
     _TestAssembleTarget(
       description: 'Succeeding custom assemble target.',
       name: 'custom-assemble-target',
+    ),
+    _TestAssembleTarget(
+      description: 'Assemble target with unknown dependency.',
+      name: 'unknown-dep-assemble-target',
+      dependencies: <String>['non-existent-dep'],
     ),
     _TestAssembleTarget(
       description: 'Empty assemble target name that should be skipped.',
@@ -775,7 +784,12 @@ void main() {
         expect(command.subcommands.containsKey(''), isFalse);
 
         final assembleCommand = AssembleCommand(
-          buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+          buildSystem: TestBuildSystem.all(BuildResult(success: true), (
+            Target target,
+            Environment environment,
+          ) {
+            target.dependencies;
+          }),
           extensionBuildManager: buildManager,
           featureFlags: featureFlags,
           toolContext: FakeToolContext(
@@ -800,6 +814,22 @@ void main() {
           testLogger.warningText,
           contains(
             'Skipping custom assemble target "copy_assets" because a target with that name already exists.',
+          ),
+        );
+
+        await expectLater(
+          () => assembleRunner.run(<String>[
+            'assemble',
+            '-o',
+            '/out',
+            '-d',
+            'BuildMode=debug',
+            'unknown-dep-assemble-target',
+          ]),
+          throwsToolExit(
+            message:
+                'Target "non-existent-dep" required by "unknown-dep-assemble-target" not found. '
+                'It might not be registered.',
           ),
         );
 

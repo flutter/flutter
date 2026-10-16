@@ -37,11 +37,19 @@ class ExtensionTarget extends Target {
       .map(_dependencyResolver)
       .toList();
 
-  @override
-  late final List<Source> inputs = assembleTarget.inputs.map(_toHostSource).toList();
+  late final TargetPlatform? _defaultTargetPlatform = _tryResolveTargetPlatform(
+    assembleTarget.targetPlatform,
+  );
 
   @override
-  late final List<Source> outputs = assembleTarget.outputs.map(_toHostSource).toList();
+  late final List<Source> inputs = assembleTarget.inputs
+      .map((ExtensionSource s) => _toHostSource(s, defaultTargetPlatform: _defaultTargetPlatform))
+      .toList();
+
+  @override
+  late final List<Source> outputs = assembleTarget.outputs
+      .map((ExtensionSource s) => _toHostSource(s, defaultTargetPlatform: _defaultTargetPlatform))
+      .toList();
 
   @override
   Future<void> build(Environment environment) async {
@@ -183,25 +191,26 @@ TargetPlatform? _tryResolveTargetPlatform(String platformName) {
   }
 }
 
-Source _toHostSource(ExtensionSource source) => switch (source) {
-  ExtensionPatternSource(:final String value, :final bool optional) => Source.pattern(
-    value,
-    optional: optional,
-  ),
-  ExtensionArtifactSource(
-    :final ExtensionArtifact artifact,
-    :final String? platform,
-    :final BuildMode? mode,
-  ) =>
-    Source.artifact(
-      _resolveArtifact(artifact),
-      platform: _resolveArtifactPlatform(platform, artifact),
-      mode: mode,
-    ),
-  ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact) => Source.hostArtifact(
-    _resolveHostArtifact(artifact),
-  ),
-};
+Source _toHostSource(ExtensionSource source, {TargetPlatform? defaultTargetPlatform}) =>
+    switch (source) {
+      ExtensionPatternSource(:final String value, :final bool optional) => Source.pattern(
+        value,
+        optional: optional,
+      ),
+      ExtensionArtifactSource(
+        :final ExtensionArtifact artifact,
+        :final String? platform,
+        :final BuildMode? mode,
+      ) =>
+        Source.artifact(
+          _resolveArtifact(artifact),
+          platform: _resolveArtifactPlatform(platform, artifact) ?? defaultTargetPlatform,
+          mode: mode,
+        ),
+      ExtensionHostArtifactSource(:final ExtensionHostArtifact artifact) => Source.hostArtifact(
+        _resolveHostArtifact(artifact),
+      ),
+    };
 
 Artifact _resolveArtifact(ExtensionArtifact artifact) => switch (artifact.name) {
   'flutterPatchedSdkPath' => Artifact.flutterPatchedSdkPath,
