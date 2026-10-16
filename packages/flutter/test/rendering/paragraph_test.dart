@@ -773,10 +773,9 @@ void main() {
     final result = SemanticsNode();
     final truncatedChild = SemanticsNode();
     truncatedChild.tags = <SemanticsTag>{const PlaceholderSpanIndexSemanticsTag(0)};
-    paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
-    paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[
-      truncatedChild,
-    ]);
+    final config = SemanticsConfiguration();
+    paragraph.describeSemanticsConfiguration(config);
+    paragraph.assembleSemanticsNode(result, config, <SemanticsNode>[truncatedChild]);
     // It should only contain the semantics node of the TextSpan.
     expect(result.childrenCount, 1);
     result.visitChildren((SemanticsNode node) {
@@ -800,8 +799,9 @@ void main() {
     layout(paragraph);
 
     final node = SemanticsNode();
-    paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
-    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    final config = SemanticsConfiguration();
+    paragraph.describeSemanticsConfiguration(config);
+    paragraph.assembleSemanticsNode(node, config, <SemanticsNode>[]);
     final children = <SemanticsNode>[];
     node.visitChildren((SemanticsNode child) {
       children.add(child);
@@ -821,8 +821,9 @@ void main() {
     );
     layout(paragraph);
     final node = SemanticsNode();
-    paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
-    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    final config = SemanticsConfiguration();
+    paragraph.describeSemanticsConfiguration(config);
+    paragraph.assembleSemanticsNode(node, config, <SemanticsNode>[]);
     expect(node.attributedLabel.string, '');
     expect(node.attributedLabel.attributes.length, 0);
   });
@@ -841,8 +842,9 @@ void main() {
 
     var failed = false;
     try {
-      paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
-      paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
+      final config = SemanticsConfiguration();
+      paragraph.describeSemanticsConfiguration(config);
+      paragraph.assembleSemanticsNode(SemanticsNode(), config, <SemanticsNode>[]);
     } on AssertionError catch (e) {
       failed = true;
       expect(e.message, 'MultiTapGestureRecognizer is not supported.');
@@ -866,8 +868,9 @@ void main() {
     layout(paragraph);
 
     final node = SemanticsNode();
-    paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
-    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    final config = SemanticsConfiguration();
+    paragraph.describeSemanticsConfiguration(config);
+    paragraph.assembleSemanticsNode(node, config, <SemanticsNode>[]);
     expect(node.childrenCount, 2);
   });
 
@@ -892,8 +895,9 @@ void main() {
     layout(paragraph);
 
     final node = SemanticsNode();
-    paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
-    paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
+    final config = SemanticsConfiguration();
+    paragraph.describeSemanticsConfiguration(config);
+    paragraph.assembleSemanticsNode(node, config, <SemanticsNode>[]);
     expect(node.childrenCount, 2);
   });
 
