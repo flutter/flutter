@@ -601,6 +601,51 @@ void main() {
     );
     expect(tester.getSize(find.byType(CupertinoPageScaffold)), Size.zero);
   });
+
+  testWidgets(
+    'CupertinoPageScaffold supports arbitrary ObstructingWidget without PreferredSizeWidget as navigationBar',
+    (WidgetTester tester) async {
+      late BuildContext childContext;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.only(top: 20)),
+            child: CupertinoPageScaffold(
+              navigationBar: const _CustomObstructingBar(height: 60.0, obstructs: true),
+              child: Builder(
+                builder: (BuildContext context) {
+                  childContext = context;
+                  return Container();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Top padding absorbed because it obstructs fully
+      expect(MediaQuery.of(childContext).padding.top, 0);
+      // Pushed down by custom bar height of 60.0
+      expect(tester.getRect(find.byType(Container)), const Rect.fromLTRB(0, 60, 800, 600));
+    },
+  );
+}
+
+class _CustomObstructingBar extends StatelessWidget implements ObstructingWidget {
+  const _CustomObstructingBar({required this.height, required this.obstructs});
+
+  final double height;
+  final bool obstructs;
+
+  @override
+  bool shouldFullyObstruct(BuildContext context) => obstructs;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(height: height, child: const Text('Custom Obstructing Bar'));
+  }
 }
 
 class _ScaffoldWithPrimaryScrollView extends StatefulWidget {
