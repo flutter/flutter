@@ -1003,22 +1003,15 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
     try {
       comparison = compareResults(
         current: data,
-        baseline: <String, dynamic>{
-          for (final MapEntry<String, dynamic> entry in baseline.entries)
-            if (data.containsKey(entry.key)) entry.key: entry.value,
-        },
+        baseline: baseline,
         regressionThreshold: regressionThreshold,
-        failOnMissingBaseline: false,
       );
     } on FormatException catch (e) {
       printError('Invalid metric values for comparison: ${e.message}');
       return 2;
     }
 
-    final bool hasOverlap = comparison.metrics.any(
-      (MetricComparison metric) => metric.baseline != null && metric.current != null,
-    );
-    if (!hasOverlap) {
+    if (comparison.metrics.isEmpty) {
       printError('The current results and the baseline have no metrics in common.');
       return 2;
     }
