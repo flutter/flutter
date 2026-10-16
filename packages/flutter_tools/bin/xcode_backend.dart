@@ -717,6 +717,10 @@ class Context {
 
     if (platform == TargetPlatform.ios) {
       flutterArgs.add('-dTargetDeviceOSVersion=${environment['TARGET_DEVICE_OS_VERSION'] ?? ''}');
+      final String? deploymentTarget = environment['IPHONEOS_DEPLOYMENT_TARGET'];
+      if (deploymentTarget != null) {
+        flutterArgs.add('-dIosDeploymentTarget=$deploymentTarget');
+      }
       final String? expandedCodeSignIdentity = environment['EXPANDED_CODE_SIGN_IDENTITY'];
       if (expandedCodeSignIdentity != null &&
           expandedCodeSignIdentity.isNotEmpty &&

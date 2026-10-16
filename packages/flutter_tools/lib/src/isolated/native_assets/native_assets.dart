@@ -506,6 +506,7 @@ Future<List<File>> installCodeAssets({
     assetTargetLocations,
     codesignIdentity,
     flutterTester,
+    iosDeploymentTarget: environmentDefines[kIosDeploymentTarget],
   );
   final manifest = NativeAssetsManifest.fromTargetLocations(assetTargetLocations);
   await _writeNativeAssetsJson(manifest, nativeAssetsFileUri, fileSystem);
@@ -765,8 +766,9 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
   FileSystem fileSystem,
   Map<FlutterCodeAsset, FlutterCodeAssetTargetLocation> assetTargetLocations,
   String? codesignIdentity,
-  bool flutterTester,
-) async {
+  bool flutterTester, {
+  String? iosDeploymentTarget,
+}) async {
   // We only have to copy code assets that are bundled within the app.
   // If a code asset that use a linking mode of [LookupInProcess],
   // [LookupInExecutable] or [DynamicLoadingSystem] do not have anything to
@@ -826,6 +828,7 @@ Future<List<File>> _copyNativeCodeAssetsForOS(
         codesignIdentity,
         buildMode,
         fileSystem,
+        deploymentTarget: iosDeploymentTarget,
       );
     case OS.android:
       assert(codesignIdentity == null);

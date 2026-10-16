@@ -1017,6 +1017,12 @@ const kFileSystemRoots = 'FileSystemRoots';
 /// provided, defaults to arm64.
 const kIosArchs = 'IosArchs';
 
+/// The iOS app deployment target used to package native code assets.
+///
+/// Passed from Xcode's IPHONEOS_DEPLOYMENT_TARGET build setting. May include
+/// minor and patch versions. If absent, defaults to Flutter's minimum iOS version.
+const kIosDeploymentTarget = 'IosDeploymentTarget';
+
 /// The define to control what macOS architectures are built for.
 ///
 /// This is expected to be a space-delimited list of architectures. If not

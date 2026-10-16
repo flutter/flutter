@@ -51,9 +51,22 @@ void main() {
     projectUri = environment.projectDir.uri;
   });
 
-  for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release]) {
+  for (final (BuildMode buildMode, String? deploymentTarget, String expectedMinimum)
+      in <(BuildMode, String?, String)>[
+        for (final buildMode in <BuildMode>[BuildMode.debug, BuildMode.release])
+          for (final (String? deploymentTarget, String expectedMinimum) in <(String?, String)>[
+            (null, '15.0'),
+            ('', '15.0'),
+            ('14.0', '15.0'),
+            ('16', '16'),
+            ('16.4', '16.4'),
+            ('17.2.1', '17.2.1'),
+            (' 16.4 ', '16.4'),
+          ])
+            (buildMode, deploymentTarget, expectedMinimum),
+      ]) {
     testUsingContext(
-      'build with assets $buildMode',
+      'build with assets $buildMode deployment target $deploymentTarget',
       overrides: <Type, Generator>{
         FeatureFlags: () =>
             TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
@@ -256,6 +269,7 @@ void main() {
           kBuildMode: buildMode.cliName,
           kSdkRoot: '.../iPhone Simulator',
           kIosArchs: 'arm64 x86_64',
+          kIosDeploymentTarget: ?deploymentTarget,
         };
         final DartHooksResult dartHookResult = await runFlutterSpecificHooks(
           environmentDefines: environmentDefines,
@@ -288,10 +302,52 @@ void main() {
           ]),
         );
         expect(environment.buildDir.childFile(InstallCodeAssets.nativeAssetsFilename), exists);
+        for (final name in <String>['bar', 'buz']) {
+          expect(
+            fileSystem
+                .file('/build/native_assets/ios/$name.framework/Info.plist')
+                .readAsStringSync(),
+            contains('<key>MinimumOSVersion</key>\n\t<string>$expectedMinimum</string>'),
+          );
+        }
         // Two archs.
         expect(buildRunner.buildInvocations, 2);
         expect(buildRunner.linkInvocations, buildMode == BuildMode.release ? 2 : 0);
       },
+    );
+  }
+
+  for (final target in <String>['16.4beta', '16.4.1.2', 'invalid', '-1', '16&4']) {
+    testUsingContext(
+      'rejects malformed iOS deployment target $target before copying assets',
+      () async {
+        await expectLater(
+          copyNativeCodeAssetsIOS(
+            Uri.directory('/build/native_assets/ios/'),
+            <Uri, List<FlutterCodeAsset>>{
+              Uri.file('bar.framework/bar'): <FlutterCodeAsset>[
+                FlutterCodeAsset(
+                  codeAsset: CodeAsset(
+                    package: 'bar',
+                    name: 'bar.dart',
+                    linkMode: DynamicLoadingBundled(),
+                    file: Uri.file('arm64/libbar.dylib'),
+                  ),
+                  os: OS.iOS,
+                  architecture: Architecture.arm64,
+                ),
+              ],
+            },
+            null,
+            BuildMode.debug,
+            fileSystem,
+            deploymentTarget: target,
+          ),
+          throwsToolExit(message: 'Invalid iOS deployment target "$target"'),
+        );
+        expect(fileSystem.directory('/build/native_assets/ios').existsSync(), isFalse);
+      },
+      overrides: <Type, Generator>{ProcessManager: () => processManager},
     );
   }
 
