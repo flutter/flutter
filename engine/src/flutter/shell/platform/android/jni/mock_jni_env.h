@@ -7,10 +7,21 @@
 
 #include <jni.h>
 
+#include "flutter/fml/platform/android/jni_util.h"
+
 namespace flutter {
 
 class MockJavaVM : public JavaVM {
  public:
+  static MockJavaVM& GetInstance() {
+    static MockJavaVM jvm;
+    static const bool initialized = [] {
+      fml::jni::InitJavaVM(&jvm);
+      return true;
+    }();
+    return jvm;
+  }
+
   MockJavaVM() {
     functions = &jni_invoke_;
 

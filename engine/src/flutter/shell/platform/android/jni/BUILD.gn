@@ -38,6 +38,8 @@ source_set("mock_jni_env") {
   sources = [ "mock_jni_env.h" ]
 
   public_configs = [ "//flutter:config" ]
+
+  deps = [ "//flutter/fml" ]
 }
 
 test_fixtures("jni_fixtures") {
