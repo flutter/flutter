@@ -67,66 +67,64 @@ std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
       /*generate_mips=*/false, impeller_pixel_format);
 }
 
-/// Holds a rendering context current for the duration of a snapshot, along
-/// with the single AiksContext the snapshot must use.
+/// The rendering context state a snapshot needs. |pbuffer_surface| and
+/// |context_result| must be kept alive for the duration of the snapshot to
+/// keep the context current.
+struct SnapshotContext {
+  // Destroyed in reverse order: the context result is released before the
+  // offscreen surface it made current.
+  std::unique_ptr<Surface> pbuffer_surface;
+  std::unique_ptr<GLContextResult> context_result;
+  std::shared_ptr<impeller::AiksContext> aiks_context;
+};
+
+/// Makes a rendering context current and selects the single AiksContext a
+/// snapshot must use.
 ///
 /// Constructing an AiksContext issues graphics commands, so on backends that
 /// need a current context (OpenGL ES) the AiksContext is only obtained once a
-/// context is current. If no context can be made current, |GetAiksContext|
-/// returns nullptr and the snapshot must fail.
-class ScopedSnapshotContext {
- public:
-  explicit ScopedSnapshotContext(const SnapshotController::Delegate& delegate) {
-    if (const std::unique_ptr<Surface>& surface = delegate.GetSurface()) {
-      context_result_ = surface->MakeRenderContextCurrent();
-      if (!context_result_ || !context_result_->GetResult()) {
-        return;
-      }
-      aiks_context_ = delegate.GetAiksContext();
-    } else if (const std::unique_ptr<SnapshotSurfaceProducer>& producer =
-                   delegate.GetSnapshotSurfaceProducer()) {
-      // The producer makes its offscreen surface current before it constructs
-      // the surface's AiksContext, so reuse that AiksContext rather than
-      // asking the delegate, which would construct yet another one.
-      pbuffer_surface_ = producer->CreateSnapshotSurface();
-      if (!pbuffer_surface_) {
-        return;
-      }
-      context_result_ = pbuffer_surface_->MakeRenderContextCurrent();
-      if (!context_result_ || !context_result_->GetResult()) {
-        return;
-      }
-      aiks_context_ = pbuffer_surface_->GetAiksContext();
-    } else {
-      // No surface and no way to make one. Backends that get here (Metal,
-      // Vulkan) have no notion of a current context, so constructing an
-      // AiksContext is safe.
-      aiks_context_ = delegate.GetAiksContext();
+/// context is current. If no context can be made current, the returned
+/// |aiks_context| is nullptr and the snapshot must fail.
+SnapshotContext MakeSnapshotContextCurrent(
+    const SnapshotController::Delegate& delegate) {
+  SnapshotContext result;
+  if (const std::unique_ptr<Surface>& surface = delegate.GetSurface()) {
+    result.context_result = surface->MakeRenderContextCurrent();
+    if (!result.context_result || !result.context_result->GetResult()) {
+      return result;
     }
+    result.aiks_context = delegate.GetAiksContext();
+  } else if (const std::unique_ptr<SnapshotSurfaceProducer>& producer =
+                 delegate.GetSnapshotSurfaceProducer()) {
+    // The producer makes its offscreen surface current before it constructs
+    // the surface's AiksContext, so reuse that AiksContext rather than asking
+    // the delegate, which would construct yet another one.
+    result.pbuffer_surface = producer->CreateSnapshotSurface();
+    if (!result.pbuffer_surface) {
+      return result;
+    }
+    result.context_result = result.pbuffer_surface->MakeRenderContextCurrent();
+    if (!result.context_result || !result.context_result->GetResult()) {
+      return result;
+    }
+    result.aiks_context = result.pbuffer_surface->GetAiksContext();
+  } else {
+    // No surface and no way to make one. Backends that get here (Metal,
+    // Vulkan) have no notion of a current context, so constructing an
+    // AiksContext is safe.
+    result.aiks_context = delegate.GetAiksContext();
   }
-
-  const std::shared_ptr<impeller::AiksContext>& GetAiksContext() const {
-    return aiks_context_;
-  }
-
- private:
-  // Destroyed in reverse order: the context result is released before the
-  // offscreen surface it made current.
-  std::unique_ptr<Surface> pbuffer_surface_;
-  std::unique_ptr<GLContextResult> context_result_;
-  std::shared_ptr<impeller::AiksContext> aiks_context_;
-
-  FML_DISALLOW_COPY_AND_ASSIGN(ScopedSnapshotContext);
-};
+  return result;
+}
 
 std::shared_ptr<impeller::Texture> DoMakeRasterSnapshot(
     const SnapshotDelegate::SnapshotDisplayListProvider& provider,
     DlISize size,
     const SnapshotController::Delegate& delegate,
     SnapshotPixelFormat pixel_format) {
-  ScopedSnapshotContext snapshot_context(delegate);
+  SnapshotContext snapshot_context = MakeSnapshotContextCurrent(delegate);
   const std::shared_ptr<impeller::AiksContext>& aiks_context =
-      snapshot_context.GetAiksContext();
+      snapshot_context.aiks_context;
   if (!aiks_context) {
     return nullptr;
   }

@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "flutter/common/graphics/texture.h"
 #include "flutter/display_list/display_list.h"
@@ -108,6 +109,17 @@ class SnapshotDelegate {
   ///
   using SnapshotDisplayListProvider =
       std::function<sk_sp<DisplayList>(impeller::AiksContext* aiks_context)>;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Makes a provider that produces an already recorded
+  ///             |display_list|.
+  ///
+  static SnapshotDisplayListProvider MakeDisplayListProvider(
+      sk_sp<DisplayList> display_list) {
+    return [display_list = std::move(display_list)](impeller::AiksContext*) {
+      return display_list;
+    };
+  }
 
   //----------------------------------------------------------------------------
   /// @brief      Renders the display list produced by |provider| into a

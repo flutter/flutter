@@ -10,6 +10,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/painting/canvas.h"
 #include "flutter/lib/ui/painting/display_list_deferred_image_gpu_skia.h"
+#include "flutter/lib/ui/snapshot_layer_tree_helper.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #if IMPELLER_SUPPORTS_RENDERING
 #include "flutter/impeller/display_list/dl_image_impeller.h"  // nogncheck
@@ -253,24 +254,10 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
           SnapshotDelegate::SnapshotDisplayListProvider provider;
           if (layer_tree) {
             FML_DCHECK(picture_bounds == layer_tree->frame_size());
-            // Flatten only once the snapshot controller has made a rendering
-            // context current, and with the AiksContext that renders the
-            // snapshot. Constructing an AiksContext up front, with no context
-            // current, breaks the OpenGL ES backend.
-            // https://github.com/flutter/flutter/issues/192365
-            provider = fml::MakeCopyable(
-                [layer_tree = std::move(layer_tree),
-                 texture_registry = snapshot_delegate->GetTextureRegistry(),
-                 bounds = DlRect::MakeWH(width, height)](
-                    impeller::AiksContext* aiks_context) mutable {
-                  return layer_tree->Flatten(bounds, texture_registry,
-                                             /*gr_context=*/nullptr,
-                                             aiks_context);
-                });
+            provider = MakeLayerTreeSnapshotProvider(
+                std::move(layer_tree), snapshot_delegate->GetTextureRegistry());
           } else {
-            provider = [display_list](impeller::AiksContext*) {
-              return display_list;
-            };
+            provider = SnapshotDelegate::MakeDisplayListProvider(display_list);
           }
           snapshot_delegate->MakeImpellerSnapshot(
               std::move(provider), picture_bounds,
