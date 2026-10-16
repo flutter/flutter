@@ -24,10 +24,12 @@ final windows = FakePlatform(operatingSystem: 'windows');
 void main() {
   testWithoutContext('LinuxDevice defaults', () async {
     final device = LinuxDevice(
-      processManager: FakeProcessManager.any(),
-      logger: BufferLogger.test(),
-      fileSystem: MemoryFileSystem.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
+      toolContext: FakeToolContext(
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        processManager: FakeProcessManager.any(),
+      ),
     );
 
     final linuxApp = PrebuiltLinuxApp(executable: 'foo');
@@ -48,10 +50,12 @@ void main() {
 
   testWithoutContext('LinuxDevice on arm64 hosts is arm64', () async {
     final deviceArm64Host = LinuxDevice(
-      processManager: FakeProcessManager.any(),
-      logger: BufferLogger.test(),
-      fileSystem: MemoryFileSystem.test(),
-      operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+      toolContext: FakeToolContext(
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(hostPlatform: HostPlatform.linux_arm64),
+        processManager: FakeProcessManager.any(),
+      ),
     );
     expect(await deviceArm64Host.targetPlatform, TargetPlatform.linux_arm64);
   });
@@ -59,12 +63,14 @@ void main() {
   testWithoutContext('LinuxDevice: no devices listed if platform unsupported', () async {
     expect(
       await LinuxDevices(
-        fileSystem: MemoryFileSystem.test(),
-        platform: windows,
         featureFlags: TestFeatureFlags(isLinuxEnabled: true),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          platform: windows,
+          processManager: FakeProcessManager.any(),
+        ),
       ).devices(),
       <Device>[],
     );
@@ -73,12 +79,14 @@ void main() {
   testWithoutContext('LinuxDevice: no devices listed if Linux feature flag disabled', () async {
     expect(
       await LinuxDevices(
-        fileSystem: MemoryFileSystem.test(),
-        platform: linux,
         featureFlags: TestFeatureFlags(),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          platform: linux,
+          processManager: FakeProcessManager.any(),
+        ),
       ).devices(),
       <Device>[],
     );
@@ -87,12 +95,14 @@ void main() {
   testWithoutContext('LinuxDevice: devices', () async {
     expect(
       await LinuxDevices(
-        fileSystem: MemoryFileSystem.test(),
-        platform: linux,
         featureFlags: TestFeatureFlags(isLinuxEnabled: true),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          platform: linux,
+          processManager: FakeProcessManager.any(),
+        ),
       ).devices(),
       hasLength(1),
     );
@@ -101,12 +111,14 @@ void main() {
   testWithoutContext('LinuxDevice has well known id "linux"', () async {
     expect(
       LinuxDevices(
-        fileSystem: MemoryFileSystem.test(),
-        platform: linux,
         featureFlags: TestFeatureFlags(isLinuxEnabled: true),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          platform: linux,
+          processManager: FakeProcessManager.any(),
+        ),
       ).wellKnownIds,
       <String>['linux'],
     );
@@ -115,12 +127,14 @@ void main() {
   testWithoutContext('LinuxDevice: discoverDevices', () async {
     // Timeout ignored.
     final List<Device> devices = await LinuxDevices(
-      fileSystem: MemoryFileSystem.test(),
-      platform: linux,
       featureFlags: TestFeatureFlags(isLinuxEnabled: true),
-      logger: BufferLogger.test(),
-      processManager: FakeProcessManager.any(),
-      operatingSystemUtils: FakeOperatingSystemUtils(),
+      toolContext: FakeToolContext(
+        fs: MemoryFileSystem.test(),
+        logger: BufferLogger.test(),
+        os: FakeOperatingSystemUtils(),
+        platform: linux,
+        processManager: FakeProcessManager.any(),
+      ),
     ).discoverDevices(timeout: const Duration(seconds: 10));
     expect(devices, hasLength(1));
   });
@@ -133,10 +147,12 @@ void main() {
 
     expect(
       LinuxDevice(
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
       ).isSupportedForProject(flutterProject),
       true,
     );
@@ -149,10 +165,12 @@ void main() {
 
     expect(
       LinuxDevice(
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: fileSystem,
-        operatingSystemUtils: FakeOperatingSystemUtils(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
       ).isSupportedForProject(flutterProject),
       false,
     );
@@ -163,10 +181,12 @@ void main() {
     () async {
       final mockApp = FakeLinuxApp();
       final device = LinuxDevice(
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: MemoryFileSystem.test(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
       );
 
       expect(device.executablePathForDevice(mockApp, BuildInfo.debug), 'debug/executable');

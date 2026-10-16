@@ -51,53 +51,76 @@ enum XCDeviceEventInterface {
 
 /// A utility class for interacting with Xcode xcdevice command line tools.
 class XCDevice {
-  XCDevice({
-    required Artifacts artifacts,
-    required Cache cache,
-    required ProcessManager processManager,
-    required Logger logger,
-    required Xcode xcode,
-    required Platform platform,
+  factory XCDevice({
+    required Analytics analytics,
     required IProxy iproxy,
-    required FileSystem fileSystem,
-    required this._analytics,
-    required ShutdownHooks shutdownHooks,
-    required this._toolContext,
+    required ToolContext toolContext,
+    required Xcode xcode,
     @visibleForTesting IOSCoreDeviceControl? coreDeviceControl,
     XcodeDebug? xcodeDebug,
-  }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _logger = logger,
-       _iMobileDevice = IMobileDevice(
-         artifacts: artifacts,
-         cache: cache,
-         logger: logger,
-         processManager: processManager,
-       ),
-       _iosDeploy = IOSDeploy(
-         artifacts: artifacts,
-         cache: cache,
-         logger: logger,
-         platform: platform,
-         processManager: processManager,
-       ),
-       _coreDeviceControl =
-           coreDeviceControl ??
-           IOSCoreDeviceControl(
-             logger: logger,
-             processManager: processManager,
-             xcode: xcode,
-             fileSystem: fileSystem,
-           ),
-       _xcodeDebug =
-           xcodeDebug ??
-           XcodeDebug(
-             logger: logger,
-             processManager: processManager,
-             xcode: xcode,
-             fileSystem: fileSystem,
-           ),
-       _iProxy = iproxy,
-       _xcode = xcode {
+  }) {
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      fs: FileSystem fileSystem,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+      :ShutdownHooks shutdownHooks,
+    ) = toolContext;
+    return XCDevice._(
+      analytics: analytics,
+      coreDeviceControl:
+          coreDeviceControl ??
+          IOSCoreDeviceControl(
+            logger: logger,
+            processManager: processManager,
+            xcode: xcode,
+            fileSystem: fileSystem,
+          ),
+      iMobileDevice: IMobileDevice(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        processManager: processManager,
+      ),
+      iosDeploy: IOSDeploy(
+        artifacts: artifacts,
+        cache: cache,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
+      iProxy: iproxy,
+      logger: logger,
+      processUtils: ProcessUtils(logger: logger, processManager: processManager),
+      shutdownHooks: shutdownHooks,
+      toolContext: toolContext,
+      xcode: xcode,
+      xcodeDebug:
+          xcodeDebug ??
+          XcodeDebug(
+            logger: logger,
+            processManager: processManager,
+            xcode: xcode,
+            fileSystem: fileSystem,
+          ),
+    );
+  }
+
+  XCDevice._({
+    required this._analytics,
+    required this._coreDeviceControl,
+    required this._iMobileDevice,
+    required this._iosDeploy,
+    required this._iProxy,
+    required this._logger,
+    required this._processUtils,
+    required ShutdownHooks shutdownHooks,
+    required this._toolContext,
+    required this._xcode,
+    required this._xcodeDebug,
+  }) {
     shutdownHooks.addShutdownHook(dispose);
 
     _setupDeviceIdentifierByEventStream();

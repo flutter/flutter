@@ -13,7 +13,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -59,26 +58,31 @@ class IOSSimulators extends PollingDeviceDiscovery {
 }
 
 class IOSSimulatorUtils {
-  IOSSimulatorUtils({
-    required Xcode xcode,
-    required Logger logger,
-    required ProcessManager processManager,
-    required this._operatingSystemUtils,
+  factory IOSSimulatorUtils({required ToolContext toolContext, required Xcode xcode}) {
+    final ToolContext(:Logger logger, :ProcessManager processManager) = toolContext;
+    return IOSSimulatorUtils._(
+      simControl: SimControl(logger: logger, processManager: processManager, xcode: xcode),
+      toolContext: toolContext,
+      xcode: xcode,
+    );
+  }
+
+  IOSSimulatorUtils._({
+    required this._simControl,
     required this._toolContext,
-  }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
-       _xcode = xcode;
+    required this._xcode,
+  });
 
   final SimControl _simControl;
-  final Xcode _xcode;
-  final OperatingSystemUtils _operatingSystemUtils;
   final ToolContext _toolContext;
+  final Xcode _xcode;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulator>[];
     }
 
-    final cpuArch = CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+    final cpuArch = CpuArch.fromHostPlatform(_toolContext.os.hostPlatform);
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
