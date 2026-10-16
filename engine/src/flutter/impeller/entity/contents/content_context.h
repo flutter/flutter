@@ -196,7 +196,6 @@ class ContentContext {
   PipelineRef GetRadialGradientUniformFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetRRectBlurPipeline(ContentContextOptions opts) const;
   PipelineRef GetRSuperellipseBlurPipeline(ContentContextOptions opts) const;
-  PipelineRef GetScreenBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetSolidFillPipeline(ContentContextOptions opts) const;
   PipelineRef GetSourceATopBlendPipeline(ContentContextOptions opts) const;
   PipelineRef GetSourceBlendPipeline(ContentContextOptions opts) const;
