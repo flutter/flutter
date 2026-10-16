@@ -434,7 +434,7 @@ fml::StatusOr<RenderTarget> MakeDownsampleSubpass(
           TextureFillVertexShader::FrameInfo frame_info;
           frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
 
-          TextureFillFragmentShader::FragInfo frag_info;
+          TextureFillFragmentShader::FragInfo frag_info{};
           frag_info.alpha = 1.0;
 
           const Quad& uvs = pass_args.uvs;
@@ -583,7 +583,7 @@ fml::StatusOr<RenderTarget> MakeBlurSubpass(
         KernelSamples kernel_info = GenerateBlurInfo(blur_info);
         LerpHackResult lerped_kernel = LerpHackKernelSamples(kernel_info);
 
-        GaussianBlurFragmentShader::FragInfo frag_info;
+        GaussianBlurFragmentShader::FragInfo frag_info{};
         frag_info.unpremultiply = blur_info.apply_unpremultiply;
         frag_info.sample_count = lerped_kernel.sample_count;
         GaussianBlurFragmentShader::BindFragInfo(

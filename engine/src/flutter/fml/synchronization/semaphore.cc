@@ -159,7 +159,7 @@ class PlatformSemaphore {
 
  private:
   bool valid_;
-  sem_t sem_;
+  sem_t sem_ = {};
 
   FML_DISALLOW_COPY_AND_ASSIGN(PlatformSemaphore);
 };
