@@ -26,15 +26,14 @@ class MacOSDevice extends DesktopDevice {
     required this._analytics,
     required this._appleContext,
     required this._featureFlags,
-    required ToolContext toolContext,
-  }) : _toolContext = toolContext,
-       super(
+    required this._toolContext,
+  }) : super(
          'macos',
-         fileSystem: toolContext.fs,
-         logger: toolContext.logger,
-         operatingSystemUtils: toolContext.os,
+         fileSystem: _toolContext.fs,
+         logger: _toolContext.logger,
+         operatingSystemUtils: _toolContext.os,
          platformType: PlatformType.macos,
-         processManager: toolContext.processManager,
+         processManager: _toolContext.processManager,
          ephemeral: false,
        );
 
