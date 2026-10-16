@@ -9,46 +9,78 @@ part of dart.ui;
 
 final class _PackedTextStyle extends Struct {
   @Double()
-  external double decorationThickness;
+  external double _decorationThickness;
 
   @Double()
-  external double fontSize;
+  external double _fontSize;
 
   @Double()
-  external double letterSpacing;
+  external double _letterSpacing;
 
   @Double()
-  external double wordSpacing;
+  external double _wordSpacing;
 
   @Double()
-  external double height;
+  external double _height;
 
   @Uint32()
-  external int color;
+  external int _color;
 
   @Int32()
-  external int decoration;
+  external int _decoration;
 
   @Uint32()
-  external int decorationColor;
+  external int _decorationColor;
 
   @Int32()
-  external int fontWeight;
+  external int _fontWeight;
 
   @Uint32()
-  external int presentMask;
+  external int _presentMask;
 
   @Uint8()
-  external int decorationStyle;
+  external int _decorationStyle;
 
   @Uint8()
-  external int fontStyle;
+  external int _fontStyle;
 
   @Uint8()
-  external int textBaseline;
+  external int _textBaseline;
 
   @Uint8()
-  external int leadingDistribution;
+  external int _leadingDistribution;
+
+  Color? get color => (_presentMask & (1 << 0)) == 0 ? null : _NativeColor.decode(_color);
+
+  TextDecoration? get decoration =>
+      (_presentMask & (1 << 1)) == 0 ? null : _NativeTextDecoration.decode(_decoration);
+
+  Color? get decorationColor =>
+      (_presentMask & (1 << 2)) == 0 ? null : _NativeColor.decode(_decorationColor);
+
+  TextDecorationStyle? get decorationStyle =>
+      (_presentMask & (1 << 3)) == 0 ? null : TextDecorationStyle.values[_decorationStyle];
+
+  double? get decorationThickness => (_presentMask & (1 << 4)) == 0 ? null : _decorationThickness;
+
+  FontWeight? get fontWeight =>
+      (_presentMask & (1 << 5)) == 0 ? null : _NativeFontWeight.decode(_fontWeight);
+
+  FontStyle? get fontStyle => (_presentMask & (1 << 6)) == 0 ? null : FontStyle.values[_fontStyle];
+
+  TextBaseline? get textBaseline =>
+      (_presentMask & (1 << 7)) == 0 ? null : TextBaseline.values[_textBaseline];
+
+  double? get fontSize => (_presentMask & (1 << 8)) == 0 ? null : _fontSize;
+
+  double? get letterSpacing => (_presentMask & (1 << 9)) == 0 ? null : _letterSpacing;
+
+  double? get wordSpacing => (_presentMask & (1 << 10)) == 0 ? null : _wordSpacing;
+
+  double? get height => (_presentMask & (1 << 11)) == 0 ? null : _height;
+
+  TextLeadingDistribution? get leadingDistribution =>
+      (_presentMask & (1 << 12)) == 0 ? null : TextLeadingDistribution.values[_leadingDistribution];
 
   @override
   bool operator ==(Object other) {
@@ -56,38 +88,38 @@ final class _PackedTextStyle extends Struct {
       return true;
     }
     return other is _PackedTextStyle &&
-        decorationThickness == other.decorationThickness &&
-        fontSize == other.fontSize &&
-        letterSpacing == other.letterSpacing &&
-        wordSpacing == other.wordSpacing &&
-        height == other.height &&
-        color == other.color &&
-        decoration == other.decoration &&
-        decorationColor == other.decorationColor &&
-        fontWeight == other.fontWeight &&
-        presentMask == other.presentMask &&
-        decorationStyle == other.decorationStyle &&
-        fontStyle == other.fontStyle &&
-        textBaseline == other.textBaseline &&
-        leadingDistribution == other.leadingDistribution;
+        _presentMask == other._presentMask &&
+        _decorationThickness == other._decorationThickness &&
+        _fontSize == other._fontSize &&
+        _letterSpacing == other._letterSpacing &&
+        _wordSpacing == other._wordSpacing &&
+        _height == other._height &&
+        _color == other._color &&
+        _decoration == other._decoration &&
+        _decorationColor == other._decorationColor &&
+        _fontWeight == other._fontWeight &&
+        _decorationStyle == other._decorationStyle &&
+        _fontStyle == other._fontStyle &&
+        _textBaseline == other._textBaseline &&
+        _leadingDistribution == other._leadingDistribution;
   }
 
   @override
   int get hashCode => Object.hash(
-    decorationThickness,
-    fontSize,
-    letterSpacing,
-    wordSpacing,
-    height,
-    color,
-    decoration,
-    decorationColor,
-    fontWeight,
-    presentMask,
-    decorationStyle,
-    fontStyle,
-    textBaseline,
-    leadingDistribution,
+    _presentMask,
+    _decorationThickness,
+    _fontSize,
+    _letterSpacing,
+    _wordSpacing,
+    _height,
+    _color,
+    _decoration,
+    _decorationColor,
+    _fontWeight,
+    _decorationStyle,
+    _fontStyle,
+    _textBaseline,
+    _leadingDistribution,
   );
 }
 
@@ -126,79 +158,79 @@ _EncodedTextStyle _encodeTextStyleFfi({
   } else {
     color = const .new(Color(0xFFFFFFFF));
   }
-  packed.color = color.encode();
+  packed._color = color.encode();
   if (decoration != null) {
     mask |= 1 << 1;
   } else {
     decoration = const .new(.none);
   }
-  packed.decoration = decoration.encode();
+  packed._decoration = decoration.encode();
   if (decorationColor != null) {
     mask |= 1 << 2;
   } else {
     decorationColor = const .new(Color(0x00000000));
   }
-  packed.decorationColor = decorationColor.encode();
+  packed._decorationColor = decorationColor.encode();
   if (decorationStyle != null) {
     mask |= 1 << 3;
   } else {
     decorationStyle = const .new(.solid);
   }
-  packed.decorationStyle = decorationStyle.value.index;
+  packed._decorationStyle = decorationStyle.value.index;
   if (decorationThickness != null) {
     mask |= 1 << 4;
   } else {
     decorationThickness = const .new(1.0);
   }
-  packed.decorationThickness = decorationThickness.value;
+  packed._decorationThickness = decorationThickness.value;
   if (fontWeight != null) {
     mask |= 1 << 5;
   } else {
     fontWeight = const .new(.normal);
   }
-  packed.fontWeight = fontWeight.encode();
+  packed._fontWeight = fontWeight.encode();
   if (fontStyle != null) {
     mask |= 1 << 6;
   } else {
     fontStyle = const .new(.normal);
   }
-  packed.fontStyle = fontStyle.value.index;
+  packed._fontStyle = fontStyle.value.index;
   if (textBaseline != null) {
     mask |= 1 << 7;
   } else {
     textBaseline = const .new(.alphabetic);
   }
-  packed.textBaseline = textBaseline.value.index;
+  packed._textBaseline = textBaseline.value.index;
   if (fontSize != null) {
     mask |= 1 << 8;
   } else {
     fontSize = const .new(14.0);
   }
-  packed.fontSize = fontSize.value;
+  packed._fontSize = fontSize.value;
   if (letterSpacing != null) {
     mask |= 1 << 9;
   } else {
     letterSpacing = const .new(0.0);
   }
-  packed.letterSpacing = letterSpacing.value;
+  packed._letterSpacing = letterSpacing.value;
   if (wordSpacing != null) {
     mask |= 1 << 10;
   } else {
     wordSpacing = const .new(0.0);
   }
-  packed.wordSpacing = wordSpacing.value;
+  packed._wordSpacing = wordSpacing.value;
   if (height != null) {
     mask |= 1 << 11;
   } else {
     height = const .new(kTextHeightNone);
   }
-  packed.height = height.value;
+  packed._height = height.value;
   if (leadingDistribution != null) {
     mask |= 1 << 12;
   } else {
     leadingDistribution = const .new(.proportional);
   }
-  packed.leadingDistribution = leadingDistribution.value.index;
+  packed._leadingDistribution = leadingDistribution.value.index;
   if (fontFamily != null) {
     mask |= 1 << 13;
   }
@@ -223,7 +255,7 @@ _EncodedTextStyle _encodeTextStyleFfi({
   if (fontVariations != null) {
     mask |= 1 << 20;
   }
-  packed.presentMask = mask;
+  packed._presentMask = mask;
   return _EncodedTextStyle(<Object?>[
     packed,
     bytes,
@@ -238,65 +270,57 @@ _EncodedTextStyle _encodeTextStyleFfi({
   ]);
 }
 
-@pragma('vm:prefer-inline')
-String _textStyleToString(TextStyle s) {
-  final _PackedTextStyle packed = s._encoded.packed;
-  final int mask = packed.presentMask;
-  return 'TextStyle('
-      'color: ${(mask & (1 << 0)) != 0 ? _NativeColor.decode(packed.color) : "unspecified"}, '
-      'decoration: ${(mask & (1 << 1)) != 0 ? _NativeTextDecoration.decode(packed.decoration) : "unspecified"}, '
-      'decorationColor: ${(mask & (1 << 2)) != 0 ? _NativeColor.decode(packed.decorationColor) : "unspecified"}, '
-      'decorationStyle: ${(mask & (1 << 3)) != 0 ? TextDecorationStyle.values[packed.decorationStyle] : "unspecified"}, '
-      'decorationThickness: ${(mask & (1 << 4)) != 0 ? packed.decorationThickness : "unspecified"}, '
-      'fontWeight: ${(mask & (1 << 5)) != 0 ? _NativeFontWeight.decode(packed.fontWeight) : "unspecified"}, '
-      'fontStyle: ${(mask & (1 << 6)) != 0 ? FontStyle.values[packed.fontStyle] : "unspecified"}, '
-      'textBaseline: ${(mask & (1 << 7)) != 0 ? TextBaseline.values[packed.textBaseline] : "unspecified"}, '
-      'fontSize: ${(mask & (1 << 8)) != 0 ? packed.fontSize : "unspecified"}, '
-      'letterSpacing: ${(mask & (1 << 9)) != 0 ? packed.letterSpacing : "unspecified"}, '
-      'wordSpacing: ${(mask & (1 << 10)) != 0 ? packed.wordSpacing : "unspecified"}, '
-      'height: ${(mask & (1 << 11)) != 0 ? packed.height : "unspecified"}, '
-      'leadingDistribution: ${(mask & (1 << 12)) != 0 ? TextLeadingDistribution.values[packed.leadingDistribution] : "unspecified"}, '
-      'fontFamily: ${(mask & (1 << 13)) != 0 ? s._fontFamily : "unspecified"}, '
-      'fontFamilyFallback: ${(mask & (1 << 14)) != 0 ? s._fontFamilyFallback : "unspecified"}, '
-      'locale: ${(mask & (1 << 15)) != 0 ? s._locale : "unspecified"}, '
-      'background: ${(mask & (1 << 16)) != 0 ? s._background : "unspecified"}, '
-      'foreground: ${(mask & (1 << 17)) != 0 ? s._foreground : "unspecified"}, '
-      'shadows: ${(mask & (1 << 18)) != 0 ? s._shadows : "unspecified"}, '
-      'fontFeatures: ${(mask & (1 << 19)) != 0 ? s._fontFeatures : "unspecified"}, '
-      'fontVariations: ${(mask & (1 << 20)) != 0 ? s._fontVariations : "unspecified"}'
-      ')';
-}
-
 final class _PackedParagraphStyle extends Struct {
   @Double()
-  external double fontSize;
+  external double _fontSize;
 
   @Double()
-  external double height;
+  external double _height;
 
   @Int32()
-  external int maxLines;
+  external int _maxLines;
 
   @Int32()
-  external int textHeightBehavior;
+  external int _textHeightBehavior;
 
   @Int32()
-  external int fontWeight;
+  external int _fontWeight;
 
   @Uint16()
-  external int presentMask;
+  external int _presentMask;
 
   @Uint8()
-  external int textAlign;
+  external int _textAlign;
 
   @Uint8()
-  external int textDirection;
+  external int _textDirection;
 
   @Uint8()
-  external int fontStyle;
+  external int _fontStyle;
 
   @Uint8()
-  external int hyphens;
+  external int _hyphens;
+
+  TextAlign? get textAlign => (_presentMask & (1 << 0)) == 0 ? null : TextAlign.values[_textAlign];
+
+  TextDirection? get textDirection =>
+      (_presentMask & (1 << 1)) == 0 ? null : TextDirection.values[_textDirection];
+
+  int? get maxLines => (_presentMask & (1 << 2)) == 0 ? null : _maxLines;
+
+  double? get fontSize => (_presentMask & (1 << 3)) == 0 ? null : _fontSize;
+
+  double? get height => (_presentMask & (1 << 4)) == 0 ? null : _height;
+
+  TextHeightBehavior? get textHeightBehavior =>
+      (_presentMask & (1 << 5)) == 0 ? null : _NativeTextHeightBehavior.decode(_textHeightBehavior);
+
+  FontWeight? get fontWeight =>
+      (_presentMask & (1 << 6)) == 0 ? null : _NativeFontWeight.decode(_fontWeight);
+
+  FontStyle? get fontStyle => (_presentMask & (1 << 7)) == 0 ? null : FontStyle.values[_fontStyle];
+
+  Hyphens? get hyphens => (_presentMask & (1 << 8)) == 0 ? null : Hyphens.values[_hyphens];
 
   @override
   bool operator ==(Object other) {
@@ -304,30 +328,30 @@ final class _PackedParagraphStyle extends Struct {
       return true;
     }
     return other is _PackedParagraphStyle &&
-        fontSize == other.fontSize &&
-        height == other.height &&
-        maxLines == other.maxLines &&
-        textHeightBehavior == other.textHeightBehavior &&
-        fontWeight == other.fontWeight &&
-        presentMask == other.presentMask &&
-        textAlign == other.textAlign &&
-        textDirection == other.textDirection &&
-        fontStyle == other.fontStyle &&
-        hyphens == other.hyphens;
+        _presentMask == other._presentMask &&
+        _fontSize == other._fontSize &&
+        _height == other._height &&
+        _maxLines == other._maxLines &&
+        _textHeightBehavior == other._textHeightBehavior &&
+        _fontWeight == other._fontWeight &&
+        _textAlign == other._textAlign &&
+        _textDirection == other._textDirection &&
+        _fontStyle == other._fontStyle &&
+        _hyphens == other._hyphens;
   }
 
   @override
   int get hashCode => Object.hash(
-    fontSize,
-    height,
-    maxLines,
-    textHeightBehavior,
-    fontWeight,
-    presentMask,
-    textAlign,
-    textDirection,
-    fontStyle,
-    hyphens,
+    _presentMask,
+    _fontSize,
+    _height,
+    _maxLines,
+    _textHeightBehavior,
+    _fontWeight,
+    _textAlign,
+    _textDirection,
+    _fontStyle,
+    _hyphens,
   );
 }
 
@@ -358,55 +382,55 @@ _EncodedParagraphStyle _encodeParagraphStyleFfi({
   } else {
     textAlign = const .new(.start);
   }
-  packed.textAlign = textAlign.value.index;
+  packed._textAlign = textAlign.value.index;
   if (textDirection != null) {
     mask |= 1 << 1;
   } else {
     textDirection = const .new(.ltr);
   }
-  packed.textDirection = textDirection.value.index;
+  packed._textDirection = textDirection.value.index;
   if (maxLines != null) {
     mask |= 1 << 2;
   } else {
     maxLines = const .new(0);
   }
-  packed.maxLines = maxLines.value;
+  packed._maxLines = maxLines.value;
   if (fontSize != null) {
     mask |= 1 << 3;
   } else {
     fontSize = const .new(14.0);
   }
-  packed.fontSize = fontSize.value;
+  packed._fontSize = fontSize.value;
   if (height != null) {
     mask |= 1 << 4;
   } else {
     height = const .new(kTextHeightNone);
   }
-  packed.height = height.value;
+  packed._height = height.value;
   if (textHeightBehavior != null) {
     mask |= 1 << 5;
   } else {
     textHeightBehavior = const .new(.new());
   }
-  packed.textHeightBehavior = textHeightBehavior.encode();
+  packed._textHeightBehavior = textHeightBehavior.encode();
   if (fontWeight != null) {
     mask |= 1 << 6;
   } else {
     fontWeight = const .new(.normal);
   }
-  packed.fontWeight = fontWeight.encode();
+  packed._fontWeight = fontWeight.encode();
   if (fontStyle != null) {
     mask |= 1 << 7;
   } else {
     fontStyle = const .new(.normal);
   }
-  packed.fontStyle = fontStyle.value.index;
+  packed._fontStyle = fontStyle.value.index;
   if (hyphens != null) {
     mask |= 1 << 8;
   } else {
     hyphens = const .new(.manual);
   }
-  packed.hyphens = hyphens.value.index;
+  packed._hyphens = hyphens.value.index;
   if (fontFamily != null) {
     mask |= 1 << 9;
   }
@@ -419,7 +443,7 @@ _EncodedParagraphStyle _encodeParagraphStyleFfi({
   if (locale != null) {
     mask |= 1 << 12;
   }
-  packed.presentMask = mask;
+  packed._presentMask = mask;
   return _EncodedParagraphStyle(<Object?>[
     packed,
     bytes,
@@ -430,51 +454,46 @@ _EncodedParagraphStyle _encodeParagraphStyleFfi({
   ]);
 }
 
-@pragma('vm:prefer-inline')
-String _paragraphStyleToString(ParagraphStyle s) {
-  final _PackedParagraphStyle packed = s._encoded.packed;
-  final int mask = packed.presentMask;
-  return 'ParagraphStyle('
-      'textAlign: ${(mask & (1 << 0)) != 0 ? TextAlign.values[packed.textAlign] : "unspecified"}, '
-      'textDirection: ${(mask & (1 << 1)) != 0 ? TextDirection.values[packed.textDirection] : "unspecified"}, '
-      'maxLines: ${(mask & (1 << 2)) != 0 ? packed.maxLines : "unspecified"}, '
-      'fontSize: ${(mask & (1 << 3)) != 0 ? packed.fontSize : "unspecified"}, '
-      'height: ${(mask & (1 << 4)) != 0 ? packed.height : "unspecified"}, '
-      'textHeightBehavior: ${(mask & (1 << 5)) != 0 ? _NativeTextHeightBehavior.decode(packed.textHeightBehavior) : "unspecified"}, '
-      'fontWeight: ${(mask & (1 << 6)) != 0 ? _NativeFontWeight.decode(packed.fontWeight) : "unspecified"}, '
-      'fontStyle: ${(mask & (1 << 7)) != 0 ? FontStyle.values[packed.fontStyle] : "unspecified"}, '
-      'hyphens: ${(mask & (1 << 8)) != 0 ? Hyphens.values[packed.hyphens] : "unspecified"}, '
-      'fontFamily: ${(mask & (1 << 9)) != 0 ? s._fontFamily : "unspecified"}, '
-      'strutStyle: ${(mask & (1 << 10)) != 0 ? s._strutStyle : "unspecified"}, '
-      'ellipsis: ${(mask & (1 << 11)) != 0 ? s._ellipsis : "unspecified"}, '
-      'locale: ${(mask & (1 << 12)) != 0 ? s._locale : "unspecified"}'
-      ')';
-}
-
 final class _PackedStrutStyle extends Struct {
   @Double()
-  external double fontSize;
+  external double _fontSize;
 
   @Double()
-  external double height;
+  external double _height;
 
   @Double()
-  external double leading;
+  external double _leading;
 
   @Int32()
-  external int fontWeight;
+  external int _fontWeight;
 
   @Uint16()
-  external int presentMask;
+  external int _presentMask;
 
   @Uint8()
-  external int leadingDistribution;
+  external int _leadingDistribution;
 
   @Uint8()
-  external int fontStyle;
+  external int _fontStyle;
 
   @Bool()
-  external bool forceStrutHeight;
+  external bool _forceStrutHeight;
+
+  double? get fontSize => (_presentMask & (1 << 2)) == 0 ? null : _fontSize;
+
+  double? get height => (_presentMask & (1 << 3)) == 0 ? null : _height;
+
+  TextLeadingDistribution? get leadingDistribution =>
+      (_presentMask & (1 << 4)) == 0 ? null : TextLeadingDistribution.values[_leadingDistribution];
+
+  double? get leading => (_presentMask & (1 << 5)) == 0 ? null : _leading;
+
+  FontWeight? get fontWeight =>
+      (_presentMask & (1 << 6)) == 0 ? null : _NativeFontWeight.decode(_fontWeight);
+
+  FontStyle? get fontStyle => (_presentMask & (1 << 7)) == 0 ? null : FontStyle.values[_fontStyle];
+
+  bool? get forceStrutHeight => (_presentMask & (1 << 8)) == 0 ? null : _forceStrutHeight;
 
   @override
   bool operator ==(Object other) {
@@ -482,26 +501,26 @@ final class _PackedStrutStyle extends Struct {
       return true;
     }
     return other is _PackedStrutStyle &&
-        fontSize == other.fontSize &&
-        height == other.height &&
-        leading == other.leading &&
-        fontWeight == other.fontWeight &&
-        presentMask == other.presentMask &&
-        leadingDistribution == other.leadingDistribution &&
-        fontStyle == other.fontStyle &&
-        forceStrutHeight == other.forceStrutHeight;
+        _presentMask == other._presentMask &&
+        _fontSize == other._fontSize &&
+        _height == other._height &&
+        _leading == other._leading &&
+        _fontWeight == other._fontWeight &&
+        _leadingDistribution == other._leadingDistribution &&
+        _fontStyle == other._fontStyle &&
+        _forceStrutHeight == other._forceStrutHeight;
   }
 
   @override
   int get hashCode => Object.hash(
-    fontSize,
-    height,
-    leading,
-    fontWeight,
-    presentMask,
-    leadingDistribution,
-    fontStyle,
-    forceStrutHeight,
+    _presentMask,
+    _fontSize,
+    _height,
+    _leading,
+    _fontWeight,
+    _leadingDistribution,
+    _fontStyle,
+    _forceStrutHeight,
   );
 }
 
@@ -534,60 +553,43 @@ _EncodedStrutStyle _encodeStrutStyleFfi({
   } else {
     fontSize = const .new(14.0);
   }
-  packed.fontSize = fontSize.value;
+  packed._fontSize = fontSize.value;
   if (height != null) {
     mask |= 1 << 3;
   } else {
     height = const .new(kTextHeightNone);
   }
-  packed.height = height.value;
+  packed._height = height.value;
   if (leadingDistribution != null) {
     mask |= 1 << 4;
   } else {
     leadingDistribution = const .new(.proportional);
   }
-  packed.leadingDistribution = leadingDistribution.value.index;
+  packed._leadingDistribution = leadingDistribution.value.index;
   if (leading != null) {
     mask |= 1 << 5;
   } else {
     leading = const .new(-1.0);
   }
-  packed.leading = leading.value;
+  packed._leading = leading.value;
   if (fontWeight != null) {
     mask |= 1 << 6;
   } else {
     fontWeight = const .new(.normal);
   }
-  packed.fontWeight = fontWeight.encode();
+  packed._fontWeight = fontWeight.encode();
   if (fontStyle != null) {
     mask |= 1 << 7;
   } else {
     fontStyle = const .new(.normal);
   }
-  packed.fontStyle = fontStyle.value.index;
+  packed._fontStyle = fontStyle.value.index;
   if (forceStrutHeight != null) {
     mask |= 1 << 8;
   } else {
     forceStrutHeight = const .new(false);
   }
-  packed.forceStrutHeight = forceStrutHeight.value;
-  packed.presentMask = mask;
+  packed._forceStrutHeight = forceStrutHeight.value;
+  packed._presentMask = mask;
   return _EncodedStrutStyle(<Object?>[packed, bytes, fontFamily, fontFamilyFallback]);
-}
-
-@pragma('vm:prefer-inline')
-String _strutStyleToString(StrutStyle s) {
-  final _PackedStrutStyle packed = s._encoded.packed;
-  final int mask = packed.presentMask;
-  return 'StrutStyle('
-      'fontFamily: ${(mask & (1 << 0)) != 0 ? s._fontFamily : "unspecified"}, '
-      'fontFamilyFallback: ${(mask & (1 << 1)) != 0 ? s._fontFamilyFallback : "unspecified"}, '
-      'fontSize: ${(mask & (1 << 2)) != 0 ? packed.fontSize : "unspecified"}, '
-      'height: ${(mask & (1 << 3)) != 0 ? packed.height : "unspecified"}, '
-      'leadingDistribution: ${(mask & (1 << 4)) != 0 ? TextLeadingDistribution.values[packed.leadingDistribution] : "unspecified"}, '
-      'leading: ${(mask & (1 << 5)) != 0 ? packed.leading : "unspecified"}, '
-      'fontWeight: ${(mask & (1 << 6)) != 0 ? _NativeFontWeight.decode(packed.fontWeight) : "unspecified"}, '
-      'fontStyle: ${(mask & (1 << 7)) != 0 ? FontStyle.values[packed.fontStyle] : "unspecified"}, '
-      'forceStrutHeight: ${(mask & (1 << 8)) != 0 ? packed.forceStrutHeight : "unspecified"}'
-      ')';
 }

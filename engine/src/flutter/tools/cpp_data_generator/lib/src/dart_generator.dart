@@ -10,8 +10,8 @@ import 'package:path/path.dart' as path;
 
 import 'parser.dart';
 
-/// Emits the `part of` Dart file containing `_Packed<Type>`,
-/// `_encode<Type>Ffi`, and `_<type>ToString`.
+/// Emits the `part of` Dart file containing `_Packed<Type>` and
+/// `_encode<Type>Ffi`.
 Future<String> generateDartEncoders(
   Iterable<NativeData> definitions, {
   required String partOfFile,
@@ -19,11 +19,7 @@ Future<String> generateDartEncoders(
 }) async {
   final String sections = <String>[
     for (final NativeData definition in definitions)
-      <String>[
-        _generatePackedStruct(definition),
-        _generateEncoder(definition),
-        _generateToString(definition),
-      ].join('\n'),
+      <String>[_generatePackedStruct(definition), _generateEncoder(definition)].join('\n'),
   ].join('\n');
 
   final String partOfTarget = (libraryName != null && libraryName.isNotEmpty)
@@ -82,22 +78,29 @@ String _generatePackedStruct(NativeData definition) {
   final String fields = <String>[
     for (final NativeDataField field in definition.packedFields) field._dartPackedFieldDeclaration,
   ].join('\n\n');
-  final fieldNames = <String>[
-    for (final NativeDataField field in definition.packedFields) field.dartName,
+  final String getters = <String>[
+    for (final NativeDataField field in definition.fields)
+      if (field.isPacked) field._dartPackedGetterDeclaration,
+  ].join('\n\n');
+  final getterBlock = getters.isEmpty ? '' : '\n$getters\n';
+  final rawFieldNames = <String>[
+    if (definition.hasNullableFields) '_presentMask',
+    for (final NativeDataField field in definition.packedFields)
+      if (field.dartName != 'presentMask') '_${field.dartName}',
   ];
   final equalsConditions = <String>[
     'other is $structName',
-    ...fieldNames.map((String name) => '$name == other.$name'),
+    ...rawFieldNames.map((String name) => '$name == other.$name'),
   ];
-  final String hashBody = switch (fieldNames.length) {
-    1 => '  int get hashCode => ${fieldNames.single}.hashCode;',
-    <= 20 => '  int get hashCode => Object.hash(${fieldNames.join(', ')});',
-    _ => '  int get hashCode => Object.hashAll(<Object?>[${fieldNames.join(', ')}]);',
+  final String hashBody = switch (rawFieldNames.length) {
+    1 => '  int get hashCode => ${rawFieldNames.single}.hashCode;',
+    <= 20 => '  int get hashCode => Object.hash(${rawFieldNames.join(', ')});',
+    _ => '  int get hashCode => Object.hashAll(<Object?>[${rawFieldNames.join(', ')}]);',
   };
   return '''
 final class $structName extends Struct {
 $fields
-
+$getterBlock
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
@@ -136,7 +139,7 @@ String _generateEncoder(NativeData definition) {
     '  final $structName packed = Struct.create<$structName>(bytes);',
     if (definition.hasNullableFields) '  var mask = 0;',
     if (encodeBlocks.isNotEmpty) encodeBlocks,
-    if (definition.hasNullableFields) '  packed.presentMask = mask;',
+    if (definition.hasNullableFields) '  packed._presentMask = mask;',
     '  return $encodedName(<Object?>[${returnElements.join(', ')}]);',
   ].join('\n');
   return '''
@@ -144,33 +147,6 @@ $encodedName _encode${definition.typeName}Ffi({
 $parameters
 }) {
 $bodyLines
-}
-''';
-}
-
-String _generateToString(NativeData definition) {
-  final int fieldCount = definition.fields.length;
-  final bool needsPacked = definition.packedFields.isNotEmpty;
-  final preambleLines = <String>[
-    if (needsPacked) '  final ${definition._packedDartStructName} packed = s._encoded.packed;',
-    if (definition.hasNullableFields) '  final int mask = packed.presentMask;',
-  ];
-  final preamble = preambleLines.isEmpty ? '' : '${preambleLines.join('\n')}\n';
-  final String lowerCamelName = definition.typeName.isEmpty
-      ? definition.typeName
-      : '${definition.typeName[0].toLowerCase()}${definition.typeName.substring(1)}';
-  final String segments = definition.fields.indexed
-      .map(
-        ((int, NativeDataField) entry) =>
-            '      ${entry.$2._dartToStringSegment(isLast: entry.$1 + 1 == fieldCount)}',
-      )
-      .join('\n');
-  return '''
-@pragma('vm:prefer-inline')
-String _${lowerCamelName}ToString(${definition.typeName} s) {
-$preamble  return '${definition.typeName}('
-$segments
-      ')';
 }
 ''';
 }
@@ -186,7 +162,17 @@ extension on NativeDataField {
     final FfiPrimitive primitive = resolvedType.primitive!;
     return '''
   @${primitive.annotation}()
-  external ${primitive.dartFieldType} $dartName;''';
+  external ${primitive.dartFieldType} _$dartName;''';
+  }
+
+  String get _dartPackedGetterDeclaration {
+    final String returnType = resolvedType.dartType!.getDisplayString();
+    final String decoded = resolvedType.dartDecode('_$dartName');
+    return switch (bitIndex) {
+      final int bitIndex =>
+        '  $returnType? get $dartName => (_presentMask & (1 << $bitIndex)) == 0 ? null : $decoded;',
+      null => '  $returnType get $dartName => $decoded;',
+    };
   }
 
   String get _dartParameterDeclaration =>
@@ -200,25 +186,13 @@ extension on NativeDataField {
   } else {
     $dartName = $defaultValueCode;
   }
-  packed.$dartName = ${resolvedType.dartEncode(dartName)};''',
+  packed._$dartName = ${resolvedType.dartEncode(dartName)};''',
     (false, final int bitIndex) =>
       '''
   if ($dartName != null) {
     mask |= 1 << $bitIndex;
   }''',
-    (true, null) => '  packed.$dartName = ${resolvedType.dartEncode(dartName)};',
+    (true, null) => '  packed._$dartName = ${resolvedType.dartEncode(dartName)};',
     (false, null) => null,
   };
-
-  String get _dartDecodedExpression =>
-      isPacked ? resolvedType.dartDecode('packed.$dartName') : 's._$dartName';
-
-  String _dartToStringSegment({required bool isLast}) {
-    final suffix = isLast ? '' : ', ';
-    return switch (bitIndex) {
-      final int bitIndex =>
-        "'$dartName: \${(mask & (1 << $bitIndex)) != 0 ? $_dartDecodedExpression : \"unspecified\"}$suffix'",
-      null => "'$dartName: \${$_dartDecodedExpression}$suffix'",
-    };
-  }
 }

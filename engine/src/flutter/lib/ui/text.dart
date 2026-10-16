@@ -1755,7 +1755,9 @@ class TextStyle {
          fontStyle: fontStyle == null ? null : .new(fontStyle),
          textBaseline: textBaseline == null ? null : .new(textBaseline),
          fontFamily: fontFamily == null ? null : .new(fontFamily),
-         fontFamilyFallback: fontFamilyFallback == null ? null : .new(fontFamilyFallback),
+         fontFamilyFallback: fontFamilyFallback == null || fontFamilyFallback.isEmpty
+             ? null
+             : .new(fontFamilyFallback),
          fontSize: fontSize == null ? null : .new(fontSize),
          letterSpacing: letterSpacing == null ? null : .new(letterSpacing),
          wordSpacing: wordSpacing == null ? null : .new(wordSpacing),
@@ -1898,7 +1900,40 @@ class TextStyle {
   );
 
   @override
-  String toString() => _textStyleToString(this);
+  String toString() {
+    final _PackedTextStyle packed = _encoded.packed;
+    final String? fontFamily = _fontFamily?.value;
+    final double? letterSpacing = packed.letterSpacing;
+    final double? wordSpacing = packed.wordSpacing;
+    final String heightText = switch (packed.height) {
+      null => 'unspecified',
+      kTextHeightNone => 'kTextHeightNone',
+      final double height => '${height}x',
+    };
+    return 'TextStyle('
+        'color: ${packed.color ?? "unspecified"}, '
+        'decoration: ${packed.decoration ?? "unspecified"}, '
+        'decorationColor: ${packed.decorationColor ?? "unspecified"}, '
+        'decorationStyle: ${packed.decorationStyle ?? "unspecified"}, '
+        'decorationThickness: ${packed.decorationThickness ?? "unspecified"}, '
+        'fontWeight: ${packed.fontWeight ?? "unspecified"}, '
+        'fontStyle: ${packed.fontStyle ?? "unspecified"}, '
+        'textBaseline: ${packed.textBaseline ?? "unspecified"}, '
+        'fontFamily: ${fontFamily != null && fontFamily.isNotEmpty ? fontFamily : "unspecified"}, '
+        'fontFamilyFallback: ${_fontFamilyFallback ?? "unspecified"}, '
+        'fontSize: ${packed.fontSize ?? "unspecified"}, '
+        'letterSpacing: ${letterSpacing != null ? "${letterSpacing}x" : "unspecified"}, '
+        'wordSpacing: ${wordSpacing != null ? "${wordSpacing}x" : "unspecified"}, '
+        'height: $heightText, '
+        'leadingDistribution: ${packed.leadingDistribution ?? "unspecified"}, '
+        'locale: ${_locale ?? "unspecified"}, '
+        'background: ${_background ?? "unspecified"}, '
+        'foreground: ${_foreground ?? "unspecified"}, '
+        'shadows: ${_shadows ?? "unspecified"}, '
+        'fontFeatures: ${_fontFeatures ?? "unspecified"}, '
+        'fontVariations: ${_fontVariations ?? "unspecified"}'
+        ')';
+  }
 }
 
 /// An opaque object that determines the configuration used by
@@ -2053,7 +2088,25 @@ class ParagraphStyle {
   int get hashCode => Object.hash(_encoded.packed, _fontFamily, _strutStyle, _ellipsis, _locale);
 
   @override
-  String toString() => _paragraphStyleToString(this);
+  String toString() {
+    final _PackedParagraphStyle packed = _encoded.packed;
+    final double? height = packed.height;
+    return 'ParagraphStyle('
+        'textAlign: ${packed.textAlign ?? "unspecified"}, '
+        'textDirection: ${packed.textDirection ?? "unspecified"}, '
+        'fontWeight: ${packed.fontWeight ?? "unspecified"}, '
+        'fontStyle: ${packed.fontStyle ?? "unspecified"}, '
+        'maxLines: ${packed.maxLines ?? "unspecified"}, '
+        'textHeightBehavior: ${packed.textHeightBehavior ?? "unspecified"}, '
+        'fontFamily: ${_fontFamily ?? "unspecified"}, '
+        'fontSize: ${packed.fontSize ?? "unspecified"}, '
+        'height: ${height != null && height != kTextHeightNone ? "${height}x" : "unspecified"}, '
+        'strutStyle: ${_strutStyle ?? "unspecified"}, '
+        'ellipsis: ${_ellipsis != null ? '"$_ellipsis"' : "unspecified"}, '
+        'locale: ${_locale ?? "unspecified"}, '
+        'hyphens: ${packed.hyphens ?? "unspecified"}'
+        ')';
+  }
 }
 
 /// See also:
@@ -2119,7 +2172,9 @@ class StrutStyle {
     bool? forceStrutHeight,
   }) : this._(
          fontFamily: fontFamily == null ? null : .new(fontFamily),
-         fontFamilyFallback: fontFamilyFallback == null ? null : .new(fontFamilyFallback),
+         fontFamilyFallback: fontFamilyFallback == null || fontFamilyFallback.isEmpty
+             ? null
+             : .new(fontFamilyFallback),
          fontSize: fontSize == null ? null : .new(fontSize),
          height: height == null ? null : .new(height),
          leadingDistribution: leadingDistribution == null ? null : .new(leadingDistribution),
@@ -2174,9 +2229,6 @@ class StrutStyle {
     _fontFamily,
     _fontFamilyFallback == null ? null : Object.hashAll(_fontFamilyFallback.value),
   );
-
-  @override
-  String toString() => _strutStyleToString(this);
 }
 
 /// A direction in which text flows.

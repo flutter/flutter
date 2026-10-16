@@ -51,6 +51,7 @@ Future<String> generateCppHeader(
 #include <cstring>
 #include <type_traits>
 
+#include "flutter/fml/logging.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 namespace $namespace {
@@ -157,16 +158,18 @@ struct DartConverter<$cppType> {
     if (Dart_IsNull(handle)) {
       return {};
     }
-    $cppType result;
 $listGetBlock
     Dart_TypedData_Type type;
     void* data = nullptr;
     intptr_t length = 0;
     Dart_TypedDataAcquireData(bytes_handle, &type, &data, &length);
-    std::memcpy(&result, data,
-                offsetof($cppType, $lastPackedMember) + sizeof(result.$lastPackedMember));
-    Dart_TypedDataReleaseData(bytes_handle);
-$handleAssignmentBlock    return result;
+    $cppType result;
+    constexpr size_t kPackedSize =
+        offsetof($cppType, $lastPackedMember) + sizeof(result.$lastPackedMember);
+    FML_DCHECK(length >= static_cast<intptr_t>(kPackedSize));
+    std::memcpy(&result, data, kPackedSize);
+$handleAssignmentBlock    Dart_TypedDataReleaseData(bytes_handle);
+    return result;
   }
 
   static $cppType FromFfi(FfiType val) { return FromDart(val); }
@@ -189,7 +192,7 @@ extension on NativeDataField {
 
   String get _cppType => resolvedType.primitive?.cppType ?? 'Dart_Handle';
 
-  String get _cppFieldDeclaration => '$_cppType $_cppName;';
+  String get _cppFieldDeclaration => '$_cppType $_cppName = {};';
 
   String? get _cppPresenceGetter => switch (bitIndex) {
     final int bitIndex =>

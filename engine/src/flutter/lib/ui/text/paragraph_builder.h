@@ -22,11 +22,11 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
   FML_FRIEND_MAKE_REF_COUNTED(ParagraphBuilder);
 
  public:
-  static void Create(Dart_Handle wrapper, ParagraphStyle in);
+  static void Create(Dart_Handle wrapper, const ParagraphStyle& in);
 
   ~ParagraphBuilder() override;
 
-  void pushStyle(TextStyle in);
+  void pushStyle(const TextStyle& in);
 
   void pop();
 

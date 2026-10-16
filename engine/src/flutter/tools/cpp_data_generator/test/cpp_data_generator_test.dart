@@ -23,15 +23,17 @@ extension type const _NativeData._(String symbol) {
 
 extension type const _NativeType<DartT, NativeT extends NativeType>._unconstructable(DartT value) {}
 
-extension type const _NativeValue<DartT, NativeT extends SizedNativeType>(DartT value)
-    implements _NativeType<DartT, NativeT> {}
+extension type const _NativeBool(bool value) implements _NativeType<bool, Bool> {}
+
+extension type const _NativeInt32(int value) implements _NativeType<int, Int32> {}
+
+extension type const _NativeDouble(double value) implements _NativeType<double, Double> {}
 
 extension type const _NativeHandle<DartT extends Object>(DartT value)
     implements _NativeType<DartT, Handle> {}
 
-typedef _NativeBool = _NativeValue<bool, Bool>;
-typedef _NativeInt32 = _NativeValue<int, Int32>;
-typedef _NativeDouble = _NativeValue<double, Double>;
+extension type const _NativeEnum<T extends Enum>(T value)
+    implements _NativeType<T, NativeType> {}
 ''';
 
 void main() {
@@ -70,7 +72,7 @@ class SampleStyle {
   SampleStyle._({
     _NativeColor? color = const .new(0xFF00FF00),
     _NativeDouble? fontSize = const .new(_kDefaultSize),
-    _NativeValue<SampleAlign, Uint8>? textAlign = const .new(SampleAlign.center),
+    _NativeEnum<SampleAlign>? textAlign = const .new(SampleAlign.center),
     this._fontFamily,
     this._fontFamilyFallback,
   });
@@ -125,11 +127,11 @@ class SampleStyle {
     );
     expect(cppHeader, contains('#ifndef FLUTTER_TEST_SAMPLE_STYLE_G_H_'));
     expect(cppHeader, contains('class SampleStyle {'));
-    expect(cppHeader, contains('uint32_t color;'));
-    expect(cppHeader, contains('double font_size;'));
-    expect(cppHeader, contains('uint8_t text_align;'));
-    expect(cppHeader, contains('Dart_Handle font_family;'));
-    expect(cppHeader, contains('Dart_Handle font_family_fallback;'));
+    expect(cppHeader, contains('uint32_t color = {};'));
+    expect(cppHeader, contains('double font_size = {};'));
+    expect(cppHeader, contains('uint8_t text_align = {};'));
+    expect(cppHeader, contains('Dart_Handle font_family = {};'));
+    expect(cppHeader, contains('Dart_Handle font_family_fallback = {};'));
     expect(
       cppHeader,
       contains('bool has_font_family() const { return (present_mask & (1u << 3)) != 0; }'),
@@ -141,6 +143,17 @@ class SampleStyle {
     );
     expect(dartCode, contains("part of '_virtual_input.dart';"));
     expect(dartCode, contains('final class _PackedSampleStyle extends Struct {'));
+    expect(
+      dartCode,
+      contains(
+        'int? get color => (_presentMask & (1 << 0)) == 0 ? null : _NativeColor.decode(_color);',
+      ),
+    );
+    expect(
+      dartCode,
+      contains('double? get fontSize => (_presentMask & (1 << 1)) == 0 ? null : _fontSize;'),
+    );
+    expect(dartCode, contains('SampleAlign.values[_textAlign]'));
     expect(dartCode, contains('bool operator ==(Object other)'));
     expect(dartCode, contains('int get hashCode =>'));
     expect(
@@ -151,7 +164,6 @@ class SampleStyle {
     expect(dartCode, contains('color = const .new(0xFF00FF00);'));
     expect(dartCode, contains('fontSize = const .new(_kDefaultSize);'));
     expect(dartCode, contains('textAlign = const .new(SampleAlign.center);'));
-    expect(dartCode, contains('String _sampleStyleToString(SampleStyle s)'));
   });
 
   test('validates missing default value on primitive field', () async {
@@ -176,7 +188,7 @@ extension type const _NativeColor(int value) implements _NativeType<int, Uint32>
 class NonNullableColorStyle {
   @_NativeData(symbol: 'flutter::NonNullableColorStyle')
   NonNullableColorStyle._({
-    _NativeColor color = const .new(0xFF00FF00),
+    required _NativeColor color,
     _NativeDouble? fontSize = const .new(12.0),
     required this._fontFamily,
   });
@@ -198,7 +210,7 @@ class NonNullableColorStyle {
     expect(colorField.dartName, 'color');
     expect(colorField.isNullable, isFalse);
     expect(colorField.bitIndex, isNull);
-    expect(colorField.defaultValueCode, 'const .new(0xFF00FF00)');
+    expect(colorField.defaultValueCode, isNull);
 
     expect(fontSizeField.dartName, 'fontSize');
     expect(fontSizeField.isNullable, isTrue);
@@ -226,9 +238,12 @@ class NonNullableColorStyle {
       partOfFile: '_virtual_input.dart',
     );
     expect(dartCode, contains('required _NativeColor color,'));
-    expect(dartCode, contains('  packed.color = color.encode();'));
-    expect(dartCode, contains(r"'color: ${_NativeColor.decode(packed.color)}, '"));
-    expect(dartCode, contains(r"'fontFamily: ${s._fontFamily}'"));
+    expect(dartCode, contains('  packed._color = color.encode();'));
+    expect(dartCode, contains('int get color => _NativeColor.decode(_color);'));
+    expect(
+      dartCode,
+      contains('double? get fontSize => (_presentMask & (1 << 0)) == 0 ? null : _fontSize;'),
+    );
   });
 
   test('validates missing static decode() on primitive encoder', () async {
@@ -328,7 +343,7 @@ ${fieldsSource(33)}
     final String cpp64 = await generateCppHeader(<NativeData>[
       mask64,
     ], headerGuard: 'FLUTTER_TEST_MASK64_G_H_');
-    expect(cpp64, contains('uint64_t present_mask;'));
+    expect(cpp64, contains('uint64_t present_mask = {};'));
     expect(cpp64, contains('bool has_f31() const { return (present_mask & (1u << 31)) != 0; }'));
     expect(cpp64, contains('bool has_f32() const { return (present_mask & (1ull << 32)) != 0; }'));
   });

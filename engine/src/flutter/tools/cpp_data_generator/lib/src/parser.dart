@@ -98,7 +98,12 @@ String _identity(String expression) => expression;
 /// Resolved type mapping for a constructor parameter.
 final class ResolvedType {
   /// Creates a [ResolvedType] with the given encode/decode callbacks and optional [primitive].
-  const ResolvedType({this.dartEncode = _identity, this.dartDecode = _identity, this.primitive});
+  const ResolvedType({
+    this.dartType,
+    this.dartEncode = _identity,
+    this.dartDecode = _identity,
+    this.primitive,
+  });
 
   /// Parses a [ResolvedType] from the resolved analyzer types of a parameter.
   factory ResolvedType.parse({
@@ -106,12 +111,18 @@ final class ResolvedType {
     required DartType nativeType,
     required DartType dartType,
   }) {
+    final String extensionTypeName = extensionType.element.name!;
     // Enums are special since we know how to encode them efficiently at compile time.
     if (dartType.element case final EnumElement enumElement) {
+      assert(
+        extensionTypeName == '_NativeEnum' &&
+            extensionType.element.getMethod('encode') == null &&
+            extensionType.element.getMethod('decode') == null,
+        'Enum parameter ${dartType.getDisplayString()} must use _NativeEnum without custom encode/decode, got $extensionTypeName.',
+      );
       return ResolvedType.fromEnum(enumElement);
     }
 
-    final String extensionTypeName = extensionType.element.name!;
     final String nativeName = nativeType.element!.name!;
 
     final FfiPrimitive? primitive = FfiPrimitive.tryParse(nativeName);
@@ -137,7 +148,12 @@ final class ResolvedType {
     // Non-primitive types typically don't need a decoder because they are stored.
     final _InvocationExpressionString decode = suppliedDecode ?? _identity;
 
-    return ResolvedType(primitive: primitive, dartEncode: encode, dartDecode: decode);
+    return ResolvedType(
+      dartType: dartType,
+      primitive: primitive,
+      dartEncode: encode,
+      dartDecode: decode,
+    );
   }
 
   /// Creates a [ResolvedType] for a Dart enum backed by an unsigned integer FFI field.
@@ -150,11 +166,16 @@ final class ResolvedType {
       _ => .uint32,
     };
     return ResolvedType(
+      dartType: enumElement.thisType,
       primitive: enumPrimitive,
       dartEncode: (String expression) => '$expression.value.index',
       dartDecode: (String raw) => '$enumName.values[$raw]',
     );
   }
+
+  /// The unwrapped Dart value type (e.g., `Color`, `double`, or `List<String>`),
+  /// or `null` for synthesized fields like [NativeDataField._presentMask].
+  final DartType? dartType;
 
   /// The underlying FFI primitive type, or `null` if passed as a `Dart_Handle`.
   final FfiPrimitive? primitive;
@@ -163,8 +184,6 @@ final class ResolvedType {
   final String Function(String expression) dartEncode;
 
   /// Formats a Dart expression that decodes an FFI representation back into its Dart value.
-  ///
-  /// Typically used to generate the `toString` implementation for the Dart type.
   final String Function(String expression) dartDecode;
 
   /// Whether this type is packed into the `dart:ffi` `Struct` rather than stored as a handle.
@@ -220,10 +239,11 @@ final class NativeDataField {
       dartType: dartType,
     );
 
+    final isNullable = bitIndex != null;
     assert(
-      resolved.isPrimitive == parameter.hasDefaultValue,
-      'Primitive parameter $fieldName must specify a default value, '
-      'and Handle parameters must not.',
+      (resolved.isPrimitive && isNullable) == parameter.hasDefaultValue,
+      'Nullable primitive parameter $fieldName must specify a default value, '
+      'and non-nullable or Handle parameters must not.',
     );
 
     return NativeDataField(
@@ -277,7 +297,8 @@ final class NativeDataField {
   final int? bitIndex;
 
   /// The Dart default value expression from the constructor parameter
-  /// (e.g., `'const .new(.new(0x00000000))'`), or `null` for handle fields.
+  /// (e.g., `'const .new(.new(0x00000000))'`), or `null` for non-nullable or
+  /// handle fields.
   final String? defaultValueCode;
 
   /// Whether this field is nullable and tracked by a bit in `presentMask`.

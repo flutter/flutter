@@ -12,34 +12,35 @@
 #include <cstring>
 #include <type_traits>
 
+#include "flutter/fml/logging.h"
 #include "third_party/tonic/converter/dart_converter.h"
 
 namespace flutter {
 
 class TextStyle {
  public:
-  double decoration_thickness;
-  double font_size;
-  double letter_spacing;
-  double word_spacing;
-  double height;
-  uint32_t color;
-  int32_t decoration;
-  uint32_t decoration_color;
-  int32_t font_weight;
-  uint32_t present_mask;
-  uint8_t decoration_style;
-  uint8_t font_style;
-  uint8_t text_baseline;
-  uint8_t leading_distribution;
-  Dart_Handle font_family;
-  Dart_Handle font_family_fallback;
-  Dart_Handle locale;
-  Dart_Handle background;
-  Dart_Handle foreground;
-  Dart_Handle shadows;
-  Dart_Handle font_features;
-  Dart_Handle font_variations;
+  double decoration_thickness = {};
+  double font_size = {};
+  double letter_spacing = {};
+  double word_spacing = {};
+  double height = {};
+  uint32_t color = {};
+  int32_t decoration = {};
+  uint32_t decoration_color = {};
+  int32_t font_weight = {};
+  uint32_t present_mask = {};
+  uint8_t decoration_style = {};
+  uint8_t font_style = {};
+  uint8_t text_baseline = {};
+  uint8_t leading_distribution = {};
+  Dart_Handle font_family = {};
+  Dart_Handle font_family_fallback = {};
+  Dart_Handle locale = {};
+  Dart_Handle background = {};
+  Dart_Handle foreground = {};
+  Dart_Handle shadows = {};
+  Dart_Handle font_features = {};
+  Dart_Handle font_variations = {};
 
   bool has_color() const { return (present_mask & (1u << 0)) != 0; }
   bool has_decoration() const { return (present_mask & (1u << 1)) != 0; }
@@ -74,20 +75,20 @@ static_assert(std::is_trivially_copyable_v<TextStyle>);
 
 class ParagraphStyle {
  public:
-  double font_size;
-  double height;
-  int32_t max_lines;
-  int32_t text_height_behavior;
-  int32_t font_weight;
-  uint16_t present_mask;
-  uint8_t text_align;
-  uint8_t text_direction;
-  uint8_t font_style;
-  uint8_t hyphens;
-  Dart_Handle font_family;
-  Dart_Handle strut_style;
-  Dart_Handle ellipsis;
-  Dart_Handle locale;
+  double font_size = {};
+  double height = {};
+  int32_t max_lines = {};
+  int32_t text_height_behavior = {};
+  int32_t font_weight = {};
+  uint16_t present_mask = {};
+  uint8_t text_align = {};
+  uint8_t text_direction = {};
+  uint8_t font_style = {};
+  uint8_t hyphens = {};
+  Dart_Handle font_family = {};
+  Dart_Handle strut_style = {};
+  Dart_Handle ellipsis = {};
+  Dart_Handle locale = {};
 
   bool has_text_align() const { return (present_mask & (1u << 0)) != 0; }
   bool has_text_direction() const { return (present_mask & (1u << 1)) != 0; }
@@ -110,16 +111,16 @@ static_assert(std::is_trivially_copyable_v<ParagraphStyle>);
 
 class StrutStyle {
  public:
-  double font_size;
-  double height;
-  double leading;
-  int32_t font_weight;
-  uint16_t present_mask;
-  uint8_t leading_distribution;
-  uint8_t font_style;
-  bool force_strut_height;
-  Dart_Handle font_family;
-  Dart_Handle font_family_fallback;
+  double font_size = {};
+  double height = {};
+  double leading = {};
+  int32_t font_weight = {};
+  uint16_t present_mask = {};
+  uint8_t leading_distribution = {};
+  uint8_t font_style = {};
+  bool force_strut_height = {};
+  Dart_Handle font_family = {};
+  Dart_Handle font_family_fallback = {};
 
   bool has_font_family() const { return (present_mask & (1u << 0)) != 0; }
   bool has_font_family_fallback() const {
@@ -155,7 +156,6 @@ struct DartConverter<flutter::TextStyle> {
     if (Dart_IsNull(handle)) {
       return {};
     }
-    flutter::TextStyle result;
     Dart_Handle handles[9];
     Dart_ListGetRange(handle, 1, 9, handles);
     Dart_Handle bytes_handle = handles[0];
@@ -163,10 +163,12 @@ struct DartConverter<flutter::TextStyle> {
     void* data = nullptr;
     intptr_t length = 0;
     Dart_TypedDataAcquireData(bytes_handle, &type, &data, &length);
-    std::memcpy(&result, data,
-                offsetof(flutter::TextStyle, leading_distribution) +
-                    sizeof(result.leading_distribution));
-    Dart_TypedDataReleaseData(bytes_handle);
+    flutter::TextStyle result;
+    constexpr size_t kPackedSize =
+        offsetof(flutter::TextStyle, leading_distribution) +
+        sizeof(result.leading_distribution);
+    FML_DCHECK(length >= static_cast<intptr_t>(kPackedSize));
+    std::memcpy(&result, data, kPackedSize);
     result.font_family = handles[1];
     result.font_family_fallback = handles[2];
     result.locale = handles[3];
@@ -175,6 +177,7 @@ struct DartConverter<flutter::TextStyle> {
     result.shadows = handles[6];
     result.font_features = handles[7];
     result.font_variations = handles[8];
+    Dart_TypedDataReleaseData(bytes_handle);
     return result;
   }
 
@@ -195,7 +198,6 @@ struct DartConverter<flutter::ParagraphStyle> {
     if (Dart_IsNull(handle)) {
       return {};
     }
-    flutter::ParagraphStyle result;
     Dart_Handle handles[5];
     Dart_ListGetRange(handle, 1, 5, handles);
     Dart_Handle bytes_handle = handles[0];
@@ -203,14 +205,16 @@ struct DartConverter<flutter::ParagraphStyle> {
     void* data = nullptr;
     intptr_t length = 0;
     Dart_TypedDataAcquireData(bytes_handle, &type, &data, &length);
-    std::memcpy(
-        &result, data,
-        offsetof(flutter::ParagraphStyle, hyphens) + sizeof(result.hyphens));
-    Dart_TypedDataReleaseData(bytes_handle);
+    flutter::ParagraphStyle result;
+    constexpr size_t kPackedSize =
+        offsetof(flutter::ParagraphStyle, hyphens) + sizeof(result.hyphens);
+    FML_DCHECK(length >= static_cast<intptr_t>(kPackedSize));
+    std::memcpy(&result, data, kPackedSize);
     result.font_family = handles[1];
     result.strut_style = handles[2];
     result.ellipsis = handles[3];
     result.locale = handles[4];
+    Dart_TypedDataReleaseData(bytes_handle);
     return result;
   }
 
@@ -231,7 +235,6 @@ struct DartConverter<flutter::StrutStyle> {
     if (Dart_IsNull(handle)) {
       return {};
     }
-    flutter::StrutStyle result;
     Dart_Handle handles[3];
     Dart_ListGetRange(handle, 1, 3, handles);
     Dart_Handle bytes_handle = handles[0];
@@ -239,12 +242,15 @@ struct DartConverter<flutter::StrutStyle> {
     void* data = nullptr;
     intptr_t length = 0;
     Dart_TypedDataAcquireData(bytes_handle, &type, &data, &length);
-    std::memcpy(&result, data,
-                offsetof(flutter::StrutStyle, force_strut_height) +
-                    sizeof(result.force_strut_height));
-    Dart_TypedDataReleaseData(bytes_handle);
+    flutter::StrutStyle result;
+    constexpr size_t kPackedSize =
+        offsetof(flutter::StrutStyle, force_strut_height) +
+        sizeof(result.force_strut_height);
+    FML_DCHECK(length >= static_cast<intptr_t>(kPackedSize));
+    std::memcpy(&result, data, kPackedSize);
     result.font_family = handles[1];
     result.font_family_fallback = handles[2];
+    Dart_TypedDataReleaseData(bytes_handle);
     return result;
   }
 

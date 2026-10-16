@@ -123,7 +123,8 @@ void DecodeStrut(Dart_Handle strut_handle,
   StrutStyle in = tonic::DartConverter<StrutStyle>::FromDart(strut_handle);
   const bool has_height_override =
       in.has_height() && in.height != kTextHeightNone;
-  if (!in.has_font_family() && !in.has_font_size() && !has_height_override &&
+  if (!in.has_font_family() && !in.has_font_family_fallback() &&
+      !in.has_font_size() && !has_height_override &&
       !in.has_leading_distribution() && !in.has_leading() &&
       !in.has_font_weight() && !in.has_font_style() &&
       !in.has_force_strut_height()) {
@@ -173,7 +174,7 @@ void DecodeStrut(Dart_Handle strut_handle,
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ParagraphBuilder);
 
-void ParagraphBuilder::Create(Dart_Handle wrapper, ParagraphStyle in) {
+void ParagraphBuilder::Create(Dart_Handle wrapper, const ParagraphStyle& in) {
   UIDartState::ThrowIfUIOperationsProhibited();
   auto res = fml::MakeRefCounted<ParagraphBuilder>(in);
   res->AssociateWithDartWrapper(wrapper);
@@ -239,7 +240,7 @@ ParagraphBuilder::ParagraphBuilder(const ParagraphStyle& in) {
 
 ParagraphBuilder::~ParagraphBuilder() = default;
 
-void ParagraphBuilder::pushStyle(TextStyle in) {
+void ParagraphBuilder::pushStyle(const TextStyle& in) {
   // Set to use the properties of the previous style if the property is not
   // explicitly given.
   txt::TextStyle style = m_paragraph_builder_->PeekStyle();
