@@ -91,20 +91,26 @@ class ExtensionPlugin {
 
   /// Deserializes an [ExtensionPlugin] from a JSON-serializable map.
   factory ExtensionPlugin.fromJson(Map<String, Object?> json) {
-    return ExtensionPlugin(
-      name: switch (json[nameKey]) {
-        final String value => value,
-        _ => '',
-      },
-      path: switch (json[pathKey]) {
-        final String value => value,
-        _ => '',
-      },
-      configuration: switch (json[configurationKey]) {
-        final Map<String, Object?> value => value,
-        _ => const <String, Object?>{},
-      },
-    );
+    final String name = switch (json[nameKey]) {
+      final String value when value.isNotEmpty => value,
+      final Object? invalid => throw ArgumentError(
+        'Missing or invalid "$nameKey" for ExtensionPlugin: $invalid',
+      ),
+    };
+    final Uri path = switch (json[pathKey]) {
+      final String value when value.isNotEmpty => _parseDirectoryUri(value, pathKey),
+      final Object? invalid => throw ArgumentError(
+        'Missing or invalid "$pathKey" for ExtensionPlugin: $invalid',
+      ),
+    };
+    final Map<String, Object?> configuration = switch (json[configurationKey]) {
+      final Map<String, Object?> value => value,
+      null => const <String, Object?>{},
+      final Object? invalid => throw ArgumentError(
+        'Invalid "$configurationKey" for ExtensionPlugin: $invalid',
+      ),
+    };
+    return ExtensionPlugin(name: name, path: path, configuration: configuration);
   }
 
   /// Map key for [configuration].
@@ -116,22 +122,37 @@ class ExtensionPlugin {
   /// Map key for [path].
   static const String pathKey = 'path';
 
+  static Uri _parseDirectoryUri(String rawUri, String fieldName) {
+    final Uri? uri = Uri.tryParse(rawUri);
+    if (uri == null || !uri.hasAbsolutePath || !uri.path.endsWith('/')) {
+      throw ArgumentError(
+        '"$fieldName" must be an absolute directory URI ending with "/": $rawUri',
+      );
+    }
+    return uri;
+  }
+
   /// Deserializes a list of [ExtensionPlugin] objects from RPC parameter data.
   static List<ExtensionPlugin> listFromJson(Object? rpcResult) {
     if (rpcResult case final List<Object?> list) {
       return <ExtensionPlugin>[
         for (final Object? item in list)
-          if (item case final Map<String, Object?> map) ExtensionPlugin.fromJson(map),
+          switch (item) {
+            final Map<String, Object?> map => ExtensionPlugin.fromJson(map),
+            final Object? invalid => throw ArgumentError(
+              'Invalid entry in ExtensionPlugin list: $invalid',
+            ),
+          },
       ];
     }
-    return const <ExtensionPlugin>[];
+    throw ArgumentError('Invalid ExtensionPlugin list: $rpcResult');
   }
 
   /// The package name of the plugin.
   final String name;
 
-  /// The absolute path to the plugin root directory on disk.
-  final String path;
+  /// The absolute, trailing-slash terminated directory URI of the plugin root on disk.
+  final Uri path;
 
   /// The raw platform-specific configuration map from `pubspec.yaml` under
   /// `flutter.plugin.platforms.<platformKey>`.
@@ -140,7 +161,7 @@ class ExtensionPlugin {
   /// Serializes the plugin to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     nameKey: name,
-    pathKey: path,
+    pathKey: path.toString(),
     configurationKey: configuration,
   };
 
@@ -153,11 +174,11 @@ class ExtensionPlugin {
         (other is ExtensionPlugin &&
             other.name == name &&
             other.path == path &&
-            _mapEquals(other.configuration, configuration));
+            _deepEquals(other.configuration, configuration));
   }
 
   @override
-  int get hashCode => Object.hash(name, path, _mapHash(configuration));
+  int get hashCode => Object.hash(name, path, _deepHash(configuration));
 }
 
 /// Representation of a custom build target provided by a tool extension.
@@ -311,23 +332,44 @@ class ExtensionBuildResult {
   int get hashCode => Object.hash(success, errorMessage);
 }
 
-bool _mapEquals<K, V>(Map<K, V> a, Map<K, V> b) {
+bool _deepEquals(Object? a, Object? b) {
   if (identical(a, b)) {
     return true;
   }
-  if (a.length != b.length) {
-    return false;
-  }
-  for (final MapEntry(:K key, :V value) in a.entries) {
-    if (!b.containsKey(key) || b[key] != value) {
+  if (a is Map<Object?, Object?> && b is Map<Object?, Object?>) {
+    if (a.length != b.length) {
       return false;
     }
+    for (final MapEntry(:Object? key, :Object? value) in a.entries) {
+      if (!b.containsKey(key) || !_deepEquals(value, b[key])) {
+        return false;
+      }
+    }
+    return true;
   }
-  return true;
+  if (a is List<Object?> && b is List<Object?>) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (var i = 0; i < a.length; i++) {
+      if (!_deepEquals(a[i], b[i])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return a == b;
 }
 
-int _mapHash<K, V>(Map<K, V> map) {
-  return Object.hashAllUnordered(<int>[
-    for (final MapEntry(:K key, :V value) in map.entries) Object.hash(key, value),
-  ]);
+int _deepHash(Object? value) {
+  return switch (value) {
+    final Map<Object?, Object?> map => Object.hashAllUnordered(<int>[
+      for (final MapEntry(:Object? key, :Object? value) in map.entries)
+        Object.hash(_deepHash(key), _deepHash(value)),
+    ]),
+    final List<Object?> list => Object.hashAll(<int>[
+      for (final Object? item in list) _deepHash(item),
+    ]),
+    _ => value.hashCode,
+  };
 }

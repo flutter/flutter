@@ -4,52 +4,29 @@
 
 import 'package:meta/meta.dart';
 
-/// Configuration for running Dart build and link hooks (`native_assets`) for an
-/// extension build target.
+/// C compiler toolchain configuration for running Dart build and link hooks
+/// (`native_assets`) on an extension build target.
 ///
-/// Allows custom extension targets whose `targetPlatform` is not a built-in
-/// Flutter `TargetPlatform` (or that use a custom cross-compiler toolchain) to
-/// specify the target OS, architecture, and C compiler configuration passed to
-/// `HookConfig` when building `CodeAsset`s and `DataAsset`s.
+/// Groups the archiver ([ar]), C compiler ([cc]), and linker ([ld]) executable
+/// URIs together so partial compiler configurations cannot be constructed.
 @immutable
-class ExtensionNativeAssetsConfig {
-  const ExtensionNativeAssetsConfig({
-    required this.targetArchitecture,
-    required this.targetOs,
-    this.ar,
-    this.cc,
+class ExtensionCCompilerConfig {
+  const ExtensionCCompilerConfig({
+    required this.ar,
+    required this.cc,
+    required this.ld,
     this.envScript,
     this.envScriptArgs,
-    this.ld,
   });
 
-  /// Deserializes an [ExtensionNativeAssetsConfig] from a JSON-serializable map.
-  factory ExtensionNativeAssetsConfig.fromJson(Map<String, Object?> json) {
-    return ExtensionNativeAssetsConfig(
-      targetArchitecture: switch (json[targetArchitectureKey]) {
-        final String value => value,
-        _ => throw ArgumentError(
-          'Missing or invalid "$targetArchitectureKey" for ExtensionNativeAssetsConfig.',
-        ),
-      },
-      targetOs: switch (json[targetOsKey]) {
-        final String value => value,
-        _ => throw ArgumentError(
-          'Missing or invalid "$targetOsKey" for ExtensionNativeAssetsConfig.',
-        ),
-      },
-      ar: switch (json[arKey]) {
-        final String value => value,
-        null => null,
-        final Object? invalid => throw ArgumentError('Invalid "$arKey": $invalid'),
-      },
-      cc: switch (json[ccKey]) {
-        final String value => value,
-        null => null,
-        final Object? invalid => throw ArgumentError('Invalid "$ccKey": $invalid'),
-      },
+  /// Deserializes an [ExtensionCCompilerConfig] from a JSON-serializable map.
+  factory ExtensionCCompilerConfig.fromJson(Map<String, Object?> json) {
+    return ExtensionCCompilerConfig(
+      ar: _parseAbsoluteUri(json[arKey], arKey),
+      cc: _parseAbsoluteUri(json[ccKey], ccKey),
+      ld: _parseAbsoluteUri(json[ldKey], ldKey),
       envScript: switch (json[envScriptKey]) {
-        final String value => value,
+        final String value => _parseAbsoluteUri(value, envScriptKey),
         null => null,
         final Object? invalid => throw ArgumentError('Invalid "$envScriptKey": $invalid'),
       },
@@ -63,11 +40,6 @@ class ExtensionNativeAssetsConfig {
         ],
         null => null,
         final Object? invalid => throw ArgumentError('Invalid "$envScriptArgsKey": $invalid'),
-      },
-      ld: switch (json[ldKey]) {
-        final String value => value,
-        null => null,
-        final Object? invalid => throw ArgumentError('Invalid "$ldKey": $invalid'),
       },
     );
   }
@@ -87,6 +59,110 @@ class ExtensionNativeAssetsConfig {
   /// Map key for [ld].
   static const String ldKey = 'ld';
 
+  /// Absolute URI to the archiver (`ar`) executable.
+  final Uri ar;
+
+  /// Absolute URI to the C compiler (`cc`) executable.
+  final Uri cc;
+
+  /// Absolute URI to the linker (`ld`) executable.
+  final Uri ld;
+
+  /// Optional absolute URI to an environment setup script for the compiler toolchain.
+  final Uri? envScript;
+
+  /// Optional arguments passed to [envScript].
+  final List<String>? envScriptArgs;
+
+  static Uri _parseAbsoluteUri(Object? rawValue, String fieldName) {
+    if (rawValue is! String || rawValue.isEmpty) {
+      throw ArgumentError(
+        'Missing or invalid "$fieldName" for ExtensionCCompilerConfig: $rawValue',
+      );
+    }
+    final Uri? uri = Uri.tryParse(rawValue);
+    if (uri == null || !uri.hasAbsolutePath) {
+      throw ArgumentError('"$fieldName" must be an absolute URI: $rawValue');
+    }
+    return uri;
+  }
+
+  /// Serializes the compiler configuration to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    arKey: ar.toString(),
+    ccKey: cc.toString(),
+    ldKey: ld.toString(),
+    if (envScript != null) envScriptKey: envScript.toString(),
+    envScriptArgsKey: ?envScriptArgs,
+  };
+
+  @override
+  String toString() =>
+      'ExtensionCCompilerConfig(cc: $cc, ar: $ar, ld: $ld, '
+      'envScript: $envScript, envScriptArgs: $envScriptArgs)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionCCompilerConfig &&
+            other.ar == ar &&
+            other.cc == cc &&
+            other.ld == ld &&
+            other.envScript == envScript &&
+            _nullableListEquals(other.envScriptArgs, envScriptArgs));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    ar,
+    cc,
+    ld,
+    envScript,
+    envScriptArgs == null ? null : Object.hashAll(envScriptArgs!),
+  );
+}
+
+/// Configuration for running Dart build and link hooks (`native_assets`) for an
+/// extension build target.
+///
+/// Allows custom extension targets whose `targetPlatform` is not a built-in
+/// Flutter `TargetPlatform` (or that use a custom cross-compiler toolchain) to
+/// specify the target OS, architecture, and C compiler configuration passed to
+/// `HookConfig` when building `CodeAsset`s and `DataAsset`s.
+@immutable
+class ExtensionNativeAssetsConfig {
+  const ExtensionNativeAssetsConfig({
+    required this.targetArchitecture,
+    required this.targetOs,
+    this.cCompilerConfig,
+  });
+
+  /// Deserializes an [ExtensionNativeAssetsConfig] from a JSON-serializable map.
+  factory ExtensionNativeAssetsConfig.fromJson(Map<String, Object?> json) {
+    return ExtensionNativeAssetsConfig(
+      targetArchitecture: switch (json[targetArchitectureKey]) {
+        final String value when value.isNotEmpty => value,
+        _ => throw ArgumentError(
+          'Missing or invalid "$targetArchitectureKey" for ExtensionNativeAssetsConfig.',
+        ),
+      },
+      targetOs: switch (json[targetOsKey]) {
+        final String value when value.isNotEmpty => value,
+        _ => throw ArgumentError(
+          'Missing or invalid "$targetOsKey" for ExtensionNativeAssetsConfig.',
+        ),
+      },
+      cCompilerConfig: switch (json[cCompilerConfigKey]) {
+        final Map<String, Object?> map => ExtensionCCompilerConfig.fromJson(map),
+        null => null,
+        final Object? invalid => throw ArgumentError('Invalid "$cCompilerConfigKey": $invalid'),
+      },
+    );
+  }
+
+  /// Map key for [cCompilerConfig].
+  static const String cCompilerConfigKey = 'cCompilerConfig';
+
   /// Map key for [targetArchitecture].
   static const String targetArchitectureKey = 'targetArchitecture';
 
@@ -101,37 +177,21 @@ class ExtensionNativeAssetsConfig {
   /// `'arm64'`, `'arm'`, `'ia32'`, `'riscv64'`).
   final String targetArchitecture;
 
-  /// Optional path to the C compiler (`cc`) executable.
-  final String? cc;
-
-  /// Optional path to the archiver (`ar`) executable.
-  final String? ar;
-
-  /// Optional path to the linker (`ld`) executable.
-  final String? ld;
-
-  /// Optional path to an environment setup script for the compiler toolchain.
-  final String? envScript;
-
-  /// Optional arguments passed to [envScript].
-  final List<String>? envScriptArgs;
+  /// Optional C compiler toolchain configuration for `CodeAsset` hooks.
+  final ExtensionCCompilerConfig? cCompilerConfig;
 
   /// Serializes the configuration to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     targetOsKey: targetOs,
     targetArchitectureKey: targetArchitecture,
-    ccKey: ?cc,
-    arKey: ?ar,
-    ldKey: ?ld,
-    envScriptKey: ?envScript,
-    envScriptArgsKey: ?envScriptArgs,
+    cCompilerConfigKey: ?cCompilerConfig?.toMap(),
   };
 
   @override
   String toString() =>
       'ExtensionNativeAssetsConfig(targetOs: $targetOs, '
-      'targetArchitecture: $targetArchitecture, cc: $cc, ar: $ar, ld: $ld, '
-      'envScript: $envScript, envScriptArgs: $envScriptArgs)';
+      'targetArchitecture: $targetArchitecture, '
+      'cCompilerConfig: $cCompilerConfig)';
 
   @override
   bool operator ==(Object other) {
@@ -139,23 +199,11 @@ class ExtensionNativeAssetsConfig {
         (other is ExtensionNativeAssetsConfig &&
             other.targetOs == targetOs &&
             other.targetArchitecture == targetArchitecture &&
-            other.cc == cc &&
-            other.ar == ar &&
-            other.ld == ld &&
-            other.envScript == envScript &&
-            _nullableListEquals(other.envScriptArgs, envScriptArgs));
+            other.cCompilerConfig == cCompilerConfig);
   }
 
   @override
-  int get hashCode => Object.hash(
-    targetOs,
-    targetArchitecture,
-    cc,
-    ar,
-    ld,
-    envScript,
-    envScriptArgs == null ? null : Object.hashAll(envScriptArgs!),
-  );
+  int get hashCode => Object.hash(targetOs, targetArchitecture, cCompilerConfig);
 }
 
 bool _nullableListEquals<T>(List<T>? a, List<T>? b) {

@@ -810,11 +810,40 @@ class CustomPlatformPlugin extends PluginPlatform implements NativeOrDartPlugin 
   });
 
   factory CustomPlatformPlugin.fromYaml(String name, String platformKey, YamlMap yaml) {
+    if (!validate(yaml)) {
+      throwToolExit('Invalid "$platformKey" plugin specification for plugin "$name".');
+    }
+    final dartPluginClass = yaml[kDartPluginClass] as String?;
+    final dartFileName = yaml[kDartFileName] as String?;
+    if (dartPluginClass == null && dartFileName != null) {
+      throwToolExit(
+        '"dartFileName" cannot be specified without "dartPluginClass" in $platformKey platform of plugin "$name"',
+      );
+    }
     return CustomPlatformPlugin(
       configuration: _yamlToMap(yaml),
       name: name,
       platformKey: platformKey,
     );
+  }
+
+  static bool validate(YamlMap yaml) {
+    if (yaml.isEmpty) {
+      return false;
+    }
+    if (yaml.containsKey(kPluginClass)) {
+      final Object? pluginClass = yaml[kPluginClass];
+      if (pluginClass is! String || !isValidPluginIdentifier(pluginClass)) {
+        return false;
+      }
+    }
+    if (yaml.containsKey(kDartPluginClass)) {
+      final Object? dartPluginClass = yaml[kDartPluginClass];
+      if (dartPluginClass is! String || !isValidPluginIdentifier(dartPluginClass)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   final String name;

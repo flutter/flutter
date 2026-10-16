@@ -7,9 +7,7 @@ import 'package:data_assets/data_assets.dart';
 import 'package:hooks/hooks.dart';
 
 import '../../base/common.dart' show throwToolExit;
-import '../../base/file_system.dart' show Directory, File, FileSystem, LocalFileSystem;
-import '../../base/io.dart' show Process, ProcessResult;
-import '../../base/platform.dart' show LocalPlatform;
+import '../../base/file_system.dart' show Directory, File, FileSystem;
 import '../../build_info.dart'
     show
         BuildMode,
@@ -326,9 +324,6 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
 
   CCompilerConfig? cCompilerConfigSync;
 
-  CCompilerConfig? get resolvedCCompilerConfig =>
-      cCompilerConfigSync ?? cCompilerConfigFromDefines(environmentDefines);
-
   /// On platforms where the Flutter app is compiled with a native toolchain, configures this target
   /// to contain a [CCompilerConfig] matching that toolchain.
   ///
@@ -349,7 +344,7 @@ sealed class CodeAssetTarget extends AssetBuildTarget {
         CodeAssetExtension(
           targetArchitecture: architecture,
           linkModePreference: LinkModePreference.dynamic,
-          cCompiler: resolvedCCompilerConfig,
+          cCompiler: cCompilerConfigSync,
           targetOS: os,
         ),
     ];
@@ -442,9 +437,18 @@ final class LinuxAssetTarget extends CodeAssetTarget {
       return;
     }
 
-    cCompilerConfigSync = await _cCompilerConfigLinuxFallback(
+    final CCompilerConfig? fallbackConfig = _cCompilerConfigLinuxFallback(
       environmentDefines: environmentDefines,
       fileSystem: fileSystem ?? cmakeBuildDirectory?.fileSystem,
+    );
+    if (fallbackConfig != null || environmentDefines.containsKey(kExtensionTargetOs)) {
+      cCompilerConfigSync = fallbackConfig;
+      return;
+    }
+
+    cCompilerConfigSync = await cCompilerConfigLinux(
+      cmakeDirectory: cmakeBuildDirectory,
+      throwIfNotFound: mustMatchAppBuild,
     );
   }
 
@@ -490,7 +494,7 @@ final class IOSAssetTarget extends CodeAssetTarget {
         CodeAssetExtension(
           targetArchitecture: architecture,
           linkModePreference: LinkModePreference.dynamic,
-          cCompiler: resolvedCCompilerConfig,
+          cCompiler: cCompilerConfigSync,
           targetOS: OS.iOS,
           iOS: _getIOSConfig(environmentDefines, fileSystem),
         ),
@@ -513,7 +517,7 @@ final class MacOSAssetTarget extends CodeAssetTarget {
         CodeAssetExtension(
           targetArchitecture: architecture,
           linkModePreference: LinkModePreference.dynamic,
-          cCompiler: resolvedCCompilerConfig,
+          cCompiler: cCompilerConfigSync,
           targetOS: OS.macOS,
           macOS: MacOSCodeConfig(targetVersion: targetMacOSVersion),
         ),
@@ -558,7 +562,7 @@ final class AndroidAssetTarget extends CodeAssetTarget {
       CodeAssetExtension(
         targetArchitecture: architecture,
         linkModePreference: LinkModePreference.dynamic,
-        cCompiler: resolvedCCompilerConfig,
+        cCompiler: cCompilerConfigSync,
         targetOS: OS.android,
         android: _androidCodeConfig,
       ),
@@ -694,22 +698,26 @@ List<String> _parseEnvScriptArgs(String? rawArgs) {
     return const <String>[];
   }
   if (rawArgs.startsWith('[')) {
-    final Object? decoded = json.decode(rawArgs);
-    if (decoded case final List<Object?> list) {
-      return <String>[
-        for (final Object? item in list)
-          if (item is String) item,
-      ];
+    try {
+      final Object? decoded = json.decode(rawArgs);
+      if (decoded case final List<Object?> list) {
+        return <String>[
+          for (final Object? item in list)
+            if (item is String) item,
+        ];
+      }
+    } on FormatException {
+      // Fall back to space-delimited splitting below.
     }
   }
   return rawArgs.split(' ').where((String s) => s.isNotEmpty).toList();
 }
 
-Future<CCompilerConfig?> _cCompilerConfigLinuxFallback({
+CCompilerConfig? _cCompilerConfigLinuxFallback({
   required Map<String, String> environmentDefines,
   required FileSystem? fileSystem,
-}) async {
-  final Uri? compiler = await _resolveLinuxExecutable(
+}) {
+  final Uri? compiler = _resolveLinuxExecutable(
     const <String>['clang', 'gcc'],
     explicitPath: _emptyToNull(environmentDefines[kExtensionCCompilerCc]),
     fileSystem: fileSystem,
@@ -718,13 +726,13 @@ Future<CCompilerConfig?> _cCompilerConfigLinuxFallback({
     return null;
   }
   final String? compilerParentDir = fileSystem?.file(compiler).parent.path;
-  final Uri? archiver = await _resolveLinuxExecutable(
+  final Uri? archiver = _resolveLinuxExecutable(
     const <String>['llvm-ar', 'ar'],
     explicitPath: _emptyToNull(environmentDefines[kExtensionCCompilerAr]),
     fileSystem: fileSystem,
     siblingDir: compilerParentDir,
   );
-  final Uri? linker = await _resolveLinuxExecutable(
+  final Uri? linker = _resolveLinuxExecutable(
     const <String>['ld.lld', 'ld'],
     explicitPath: _emptyToNull(environmentDefines[kExtensionCCompilerLd]),
     fileSystem: fileSystem,
@@ -752,46 +760,23 @@ Future<CCompilerConfig?> _cCompilerConfigLinuxFallback({
   );
 }
 
-Future<Uri?> _resolveLinuxExecutable(
+Uri? _resolveLinuxExecutable(
   List<String> candidates, {
   required String? explicitPath,
   required FileSystem? fileSystem,
   String? siblingDir,
-}) async {
+}) {
   if (explicitPath != null) {
     return Uri.file(explicitPath);
   }
   if (fileSystem != null) {
-    final searchDirs = <String>[
-      ?siblingDir,
-      if (const LocalPlatform().environment['PATH'] case final String pathEnv
-          when pathEnv.isNotEmpty)
-        ...pathEnv.split(':').where((String dir) => dir.isNotEmpty),
-      '/usr/bin',
-      '/bin',
-      '/usr/local/bin',
-    ];
+    final searchDirs = <String>[?siblingDir, '/usr/bin', '/bin', '/usr/local/bin'];
     for (final candidate in candidates) {
       for (final searchDir in searchDirs) {
         final File candidateFile = fileSystem.file(fileSystem.path.join(searchDir, candidate));
         if (candidateFile.existsSync()) {
           return candidateFile.uri;
         }
-      }
-    }
-  }
-  if (fileSystem == null || fileSystem is LocalFileSystem) {
-    for (final candidate in candidates) {
-      try {
-        final ProcessResult result = await Process.run('which', <String>[candidate]);
-        if (result.exitCode == 0 && result.stdout is String) {
-          final String path = (result.stdout as String).trim();
-          if (path.isNotEmpty) {
-            return Uri.file(path);
-          }
-        }
-      } on Object {
-        // Ignore and try next candidate.
       }
     }
   }

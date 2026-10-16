@@ -29,16 +29,6 @@ import '../depfile.dart';
 import '../exceptions.dart' show MissingDefineException;
 import 'common.dart';
 
-export '../../build_info.dart'
-    show
-        kExtensionCCompilerAr,
-        kExtensionCCompilerCc,
-        kExtensionCCompilerEnvScript,
-        kExtensionCCompilerEnvScriptArgs,
-        kExtensionCCompilerLd,
-        kExtensionTargetArch,
-        kExtensionTargetOs;
-
 enum HookPlatform { native, web }
 
 /// Runs the dart build of the app.
@@ -331,7 +321,7 @@ class InstallCodeAssets extends Target {
       environmentDefines: environment.defines,
     );
     Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    if (targetOS case OS.linux || OS.windows) {
+    if (targetOS case .linux || .windows) {
       // Avoid needing migration for CMake files, keep old directory structure.
       targetUri = targetUri.resolve('${targetOS.name}/');
     }

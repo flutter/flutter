@@ -208,11 +208,14 @@ class KernelSnapshot extends Target {
     try {
       targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
     } on Exception {
-      if (environment.defines.containsKey(kExtensionTargetOs)) {
-        targetPlatform = TargetPlatform.linux_x64;
-      } else {
-        rethrow;
-      }
+      targetPlatform = switch (environment.defines[kExtensionTargetOs]?.toLowerCase()) {
+        'android' => TargetPlatform.android,
+        'fuchsia' => TargetPlatform.fuchsia_arm64,
+        'ios' => TargetPlatform.ios,
+        'macos' || 'darwin' => TargetPlatform.darwin,
+        'windows' => TargetPlatform.windows_x64,
+        _ => TargetPlatform.linux_x64,
+      };
     }
 
     // This configuration is all optional.

@@ -164,20 +164,13 @@ class Plugin {
       );
     }
 
-    const builtInPlatforms = <String>{
-      AndroidPlugin.kConfigKey,
-      IOSPlugin.kConfigKey,
-      LinuxPlugin.kConfigKey,
-      MacOSPlugin.kConfigKey,
-      WebPlugin.kConfigKey,
-      WindowsPlugin.kConfigKey,
-    };
-
-    for (final Object? key in platformsYaml.keys) {
-      if (key is String && !builtInPlatforms.contains(key)) {
-        if (_providesImplementationForPlatform(platformsYaml, key)) {
-          platforms[key] = CustomPlatformPlugin.fromYaml(name, key, platformsYaml[key] as YamlMap);
-        }
+    final customPlatformKeys = <String>[
+      for (final Object? key in platformsYaml.keys)
+        if (key is String && !_builtInPlatformKeys.contains(key)) key,
+    ];
+    for (final key in customPlatformKeys) {
+      if (_providesImplementationForPlatform(platformsYaml, key)) {
+        platforms[key] = CustomPlatformPlugin.fromYaml(name, key, platformsYaml[key] as YamlMap);
       }
     }
 
@@ -190,8 +183,7 @@ class Plugin {
       LinuxPlugin.kConfigKey,
       MacOSPlugin.kConfigKey,
       WindowsPlugin.kConfigKey,
-      for (final Object? key in platformsYaml.keys)
-        if (key is String && !builtInPlatforms.contains(key)) key,
+      ...customPlatformKeys,
     ];
     final defaultPackages = <String, String>{};
     final dartPluginClasses = <String, DartPluginClassAndFilePair>{};
@@ -344,6 +336,15 @@ class Plugin {
   static bool _hasNonNullNonStringValue(YamlMap yaml, String key) =>
       yaml[key] != null && yaml[key] is! String;
 
+  static const _builtInPlatformKeys = <String>{
+    AndroidPlugin.kConfigKey,
+    IOSPlugin.kConfigKey,
+    LinuxPlugin.kConfigKey,
+    MacOSPlugin.kConfigKey,
+    WebPlugin.kConfigKey,
+    WindowsPlugin.kConfigKey,
+  };
+
   static List<String> _validateMultiPlatformYaml({required YamlMap parentMap}) {
     final Object? platforms = parentMap['platforms'];
     if (platforms is! YamlMap?) {
@@ -391,6 +392,11 @@ class Plugin {
         'Invalid "macos" plugin specification.',
       if (isInvalid(WindowsPlugin.kConfigKey, WindowsPlugin.validate))
         'Invalid "windows" plugin specification.',
+      for (final Object? key in yaml.keys)
+        if (key is String &&
+            !_builtInPlatformKeys.contains(key) &&
+            isInvalid(key, CustomPlatformPlugin.validate))
+          'Invalid "$key" plugin specification.',
     ];
   }
 

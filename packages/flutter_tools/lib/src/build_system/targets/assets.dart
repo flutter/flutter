@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
@@ -41,6 +42,7 @@ Future<Depfile> copyAssets(
   required BuildMode buildMode,
   List<File> additionalInputs = const <File>[],
   String? flavor,
+  @visibleForTesting FlutterProject? flutterProject,
 }) async {
   final File pubspecFile = environment.projectDir.childFile('pubspec.yaml');
   // Only the default asset bundle style is supported in assemble.
@@ -50,14 +52,25 @@ Future<Depfile> copyAssets(
     platform: environment.platform,
     splitDeferredAssets: buildMode != BuildMode.debug && buildMode != BuildMode.jitRelease,
   ).createBundle();
-  final int resultCode = await assetBundle.build(
-    flutterHookResult: dartHookResult.asFlutterResult,
-    manifestPath: pubspecFile.path,
-    packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
-    deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
-    targetPlatform: targetPlatform,
-    flavor: flavor,
-  );
+  final int resultCode = switch (assetBundle) {
+    final ManifestAssetBundle manifestBundle => await manifestBundle.build(
+      flutterHookResult: dartHookResult.asFlutterResult,
+      flutterProject: flutterProject,
+      manifestPath: pubspecFile.path,
+      packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
+      deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
+      targetPlatform: targetPlatform,
+      flavor: flavor,
+    ),
+    _ => await assetBundle.build(
+      flutterHookResult: dartHookResult.asFlutterResult,
+      manifestPath: pubspecFile.path,
+      packageConfigPath: findPackageConfigFileOrDefault(environment.projectDir).path,
+      deferredComponentsEnabled: environment.defines[kDeferredComponents] == 'true',
+      targetPlatform: targetPlatform,
+      flavor: flavor,
+    ),
+  };
   if (resultCode != 0) {
     throw Exception('Failed to bundle asset files.');
   }
@@ -270,13 +283,20 @@ Future<Depfile> copyAssets(
 
 /// Copy the assets defined in the flutter manifest into a build directory.
 class CopyAssets extends Target {
-  const CopyAssets();
+  const CopyAssets({@visibleForTesting this.flutterProject});
+
+  @visibleForTesting
+  final FlutterProject? flutterProject;
 
   @override
   String get name => 'copy_assets';
 
   @override
-  List<Target> get dependencies => const <Target>[LinkHooks(), KernelSnapshot()];
+  List<Target> get dependencies => const <Target>[
+    LinkHooks(),
+    KernelSnapshot(),
+    InstallCodeAssets(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[
@@ -329,6 +349,7 @@ class CopyAssets extends Target {
       targetPlatform: resolvedTargetPlatform,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
+      flutterProject: flutterProject,
     );
     environment.depFileService.writeToFile(
       depfile,

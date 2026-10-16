@@ -11,17 +11,21 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/assets.dart';
+import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_plugins.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/targets.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:yaml/yaml.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 import '../../src/package_config.dart';
 import '../isolated/fake_native_assets_build_runner.dart';
@@ -146,10 +150,49 @@ platforms:
         expect(resolved.map((Plugin p) => p.name), equals(<String>['url_launcher_custom']));
       },
     );
+
+    testWithoutContext('Plugin.fromYaml rejects invalid custom platform specifications', () {
+      expect(
+        () => Plugin.fromYaml(
+          'my_plugin',
+          '/packages/my_plugin',
+          loadYaml('''
+platforms:
+  custom_embedder:
+    pluginClass: Bad;Class
+''') as YamlMap,
+          null,
+          const <String>[],
+          fileSystem: fileSystem,
+          isDevDependency: false,
+        ),
+        throwsToolExit(message: 'Invalid "custom_embedder" plugin specification.'),
+      );
+
+      expect(
+        () => Plugin.fromYaml(
+          'my_plugin',
+          '/packages/my_plugin',
+          loadYaml('''
+platforms:
+  custom_embedder:
+    pluginClass: GoodClass
+    dartFileName: src/custom.dart
+''') as YamlMap,
+          null,
+          const <String>[],
+          fileSystem: fileSystem,
+          isDevDependency: false,
+        ),
+        throwsToolExit(
+          message: '"dartFileName" cannot be specified without "dartPluginClass" in custom_embedder platform of plugin "my_plugin"',
+        ),
+      );
+    });
   });
 
   group('ExtensionNativeAssetsConfig and custom-target Dart hooks interop', () {
-    testWithoutContext('AssetBuildTarget.targetsFor resolves OS, Architecture, and CCompilerConfig for custom targetPlatform', () {
+    testWithoutContext('AssetBuildTarget.targetsFor resolves OS, Architecture, and CCompilerConfig for custom targetPlatform', () async {
       final defines = <String, String>{
         kBuildMode: BuildMode.debug.cliName,
         kTargetPlatform: 'custom-embedder-riscv64',
@@ -178,16 +221,17 @@ platforms:
       final linuxTarget = assetTarget as LinuxAssetTarget;
       expect(linuxTarget.os, OS.linux);
       expect(linuxTarget.architecture, Architecture.riscv64);
+      await linuxTarget.setCCompilerConfig();
       expect(
-        linuxTarget.resolvedCCompilerConfig?.compiler,
+        linuxTarget.cCompilerConfigSync?.compiler,
         Uri.file('/toolchain/bin/riscv64-linux-gnu-gcc'),
       );
       expect(
-        linuxTarget.resolvedCCompilerConfig?.archiver,
+        linuxTarget.cCompilerConfigSync?.archiver,
         Uri.file('/toolchain/bin/riscv64-linux-gnu-ar'),
       );
       expect(
-        linuxTarget.resolvedCCompilerConfig?.linker,
+        linuxTarget.cCompilerConfigSync?.linker,
         Uri.file('/toolchain/bin/riscv64-linux-gnu-ld'),
       );
     });
@@ -277,11 +321,8 @@ platforms:
       expect(target.cCompilerConfigSync!.linker, Uri.file('/usr/bin/ld.lld'));
     });
 
-    testUsingContext(
+    testWithoutContext(
       'CopyAssets includes NativeAssetsManifest.json and tolerates custom kTargetPlatform',
-      overrides: <Type, Generator>{
-        FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
-      },
       () async {
         final Directory projectDir = fileSystem.directory('/project')..createSync(recursive: true);
         projectDir.childFile('pubspec.yaml').writeAsStringSync('''
@@ -290,6 +331,7 @@ environment:
   sdk: ^3.7.0
 ''');
         writePackageConfigFiles(directory: projectDir, mainLibName: 'test_app');
+        final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(projectDir, logger);
 
         final environment = Environment.test(
           projectDir,
@@ -308,13 +350,79 @@ environment:
             .childFile(InstallCodeAssets.nativeAssetsFilename)
             .writeAsStringSync('{"format-version":[1,0,0],"native-assets":{}}');
 
-        await const CopyAssets().build(environment);
+        await CopyAssets(flutterProject: flutterProject).build(environment);
 
         final File bundledManifest = environment.buildDir
             .childDirectory('flutter_assets')
             .childFile('NativeAssetsManifest.json');
         expect(bundledManifest, exists);
         expect(bundledManifest.readAsStringSync(), '{"format-version":[1,0,0],"native-assets":{}}');
+      },
+    );
+
+    testWithoutContext(
+      'KernelSnapshot resolves targetOS from kExtensionTargetOs for custom kTargetPlatform',
+      () async {
+        const boundaryKey = '4d2d9609-c662-4571-afde-31410f96caa6';
+        fileSystem.file('.dart_tool/package_config.json')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{"configVersion": 2, "packages":[]}');
+        final processManager = FakeProcessManager.empty();
+        final environment = Environment.test(
+          fileSystem.currentDirectory,
+          artifacts: artifacts,
+          defines: <String, String>{
+            kBuildMode: BuildMode.profile.cliName,
+            kTargetPlatform: 'custom-embedder-arm64',
+            kExtensionTargetOs: 'windows',
+          },
+          fileSystem: fileSystem,
+          inputs: <String, String>{},
+          logger: logger,
+          processManager: processManager,
+        );
+        environment.buildDir.createSync(recursive: true);
+        final String build = environment.buildDir.path;
+        final String flutterPatchedSdkPath = artifacts.getArtifactPath(
+          Artifact.flutterPatchedSdkPath,
+          platform: TargetPlatform.windows_x64,
+          mode: BuildMode.profile,
+        );
+        processManager.addCommand(
+          FakeCommand(
+            command: <String>[
+              artifacts.getArtifactPath(Artifact.engineDartAotRuntime),
+              artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+              '--sdk-root',
+              '$flutterPatchedSdkPath/',
+              '--target=flutter',
+              '--no-print-incremental-dependencies',
+              ...buildModeOptions(BuildMode.profile, <String>[]),
+              '--track-creation-locations',
+              '--aot',
+              '--tfa',
+              '--target-os',
+              'windows',
+              '--packages',
+              '/.dart_tool/package_config.json',
+              '--output-dill',
+              '$build/app.dill',
+              '--depfile',
+              '$build/kernel_snapshot_program.d',
+              '--verbosity=error',
+              '--recorded-uses=$build/recorded_uses.json',
+              'file:///lib/main.dart',
+            ],
+            stdout: 'result $boundaryKey\n$boundaryKey\n$boundaryKey $build/app.dill 0\n',
+            onRun: (_) {
+              fileSystem.file('$build/recorded_uses.json').createSync();
+            },
+          ),
+        );
+
+        await const KernelSnapshot().build(environment);
+
+        expect(processManager, hasNoRemainingExpectations);
       },
     );
   });
