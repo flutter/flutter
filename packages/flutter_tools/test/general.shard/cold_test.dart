@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -117,7 +118,7 @@ void main() {
         expect(result, 0);
         expect(
           memoryFileSystem
-              .directory(getBuildDirectory())
+              .directory(getBuildDirectory(Config.test(), memoryFileSystem))
               .childFile('start_up_info.json')
               .existsSync(),
           true,

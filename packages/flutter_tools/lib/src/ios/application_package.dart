@@ -137,14 +137,21 @@ class BuildableIOSApp extends IOSApp {
   String get deviceBundlePath => _buildAppPath(XcodeSdk.IPhoneOS.platformName);
 
   @override
-  Directory get appDeltaDirectory =>
-      globals.fs.directory(globals.fs.path.join(getIosBuildDirectory(), 'app-delta'));
+  Directory get appDeltaDirectory => globals.fs.directory(
+    globals.fs.path.join(
+      getIosBuildDirectory(config: globals.config, fileSystem: globals.fs),
+      'app-delta',
+    ),
+  );
 
   // Xcode uses this path for the final archive bundle location,
   // not a top-level output directory.
   // Specifying `build/ios/archive/Runner` will result in `build/ios/archive/Runner.xcarchive`.
-  String get archiveBundlePath =>
-      globals.fs.path.join(getIosBuildDirectory(), 'archive', _appProductName ?? 'Runner');
+  String get archiveBundlePath => globals.fs.path.join(
+    getIosBuildDirectory(config: globals.config, fileSystem: globals.fs),
+    'archive',
+    _appProductName ?? 'Runner',
+  );
 
   // The output xcarchive bundle path `build/ios/archive/Runner.xcarchive`.
   String get archiveBundleOutputPath => '$archiveBundlePath.xcarchive';
@@ -173,10 +180,17 @@ class BuildableIOSApp extends IOSApp {
   Future<String> get templateLaunchImageDirNameForImages async =>
       _templateImageAssetDirNameForImages(_launchImageAsset);
 
-  String get ipaOutputPath => globals.fs.path.join(getIosBuildDirectory(), 'ipa');
+  String get ipaOutputPath => globals.fs.path.join(
+    getIosBuildDirectory(config: globals.config, fileSystem: globals.fs),
+    'ipa',
+  );
 
   String _buildAppPath(String type) {
-    return globals.fs.path.join(getIosBuildDirectory(), type, '$_appProductName.app');
+    return globals.fs.path.join(
+      getIosBuildDirectory(config: globals.config, fileSystem: globals.fs),
+      type,
+      '$_appProductName.app',
+    );
   }
 
   String _projectImageAssetDirName(String asset) =>

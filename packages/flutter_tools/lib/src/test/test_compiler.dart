@@ -114,7 +114,7 @@ class TestCompiler {
   TestCompiler(
     BuildInfo buildInfo,
     this.flutterProject, {
-    required this._templateRenderer,
+    required this.templateRenderer,
     required ToolContext toolContext,
     String? precompiledDillPath,
     this.testTimeRecorder,
@@ -152,7 +152,7 @@ class TestCompiler {
     final ToolContext(:Config config, :FileSystem fs) = toolContext;
     return fs.path.join(
       flutterProject!.directory.path,
-      getBuildDirectory(),
+      getBuildDirectory(config, fs),
       'test_cache',
       getDefaultCachedKernelPath(
         config: config,
@@ -174,7 +174,7 @@ class TestCompiler {
   final TestTimeRecorder? testTimeRecorder;
   final ResidentCompilerFactory residentCompilerFactory = const ResidentCompilerFactory();
 
-  final TemplateRenderer _templateRenderer;
+  final TemplateRenderer templateRenderer;
   final ToolContext _toolContext;
 
   ResidentCompiler? compiler;
@@ -278,7 +278,7 @@ class TestCompiler {
             buildInfo.packageConfig,
             mainFile,
             logger: logger,
-            templateRenderer: _templateRenderer,
+            templateRenderer: templateRenderer,
           );
           invalidatedRegistrantFiles.add(flutterProject!.dartPluginRegistrant.absolute.uri);
           _registrantLanguageVersion = languageVersion;

@@ -396,42 +396,6 @@ class ToolDependencies {
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
-    // 11. AppleContext Dependencies
-    final XcodeProjectInterpreter finalXcodeProjectInterpreter =
-        xcodeProjectInterpreter ??
-        XcodeProjectInterpreter(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          analytics: finalAnalytics,
-        );
-
-    final Xcode finalXcode =
-        xcode ??
-        Xcode(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          userMessages: finalUserMessages,
-        );
-
-    final CocoaPods finalCocoaPods =
-        cocoaPods ??
-        CocoaPods(
-          fileSystem: finalFS,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          platform: finalPlatform,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          analytics: finalAnalytics,
-        );
-
-    final CocoaPodsValidator finalCocoapodsValidator =
-        cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
-
     // Artifacts will be updated later if a local engine is used.
     final Artifacts finalArtifacts = switch (artifacts) {
       final DeferredArtifacts deferredArtifacts => deferredArtifacts,
@@ -474,6 +438,36 @@ class ToolDependencies {
       terminal: finalTerminal,
       userMessages: finalUserMessages,
     );
+
+    // 11. AppleContext Dependencies
+    final XcodeProjectInterpreter finalXcodeProjectInterpreter =
+        xcodeProjectInterpreter ??
+        XcodeProjectInterpreter(analytics: finalAnalytics, toolContext: finalToolContext);
+
+    final Xcode finalXcode =
+        xcode ??
+        Xcode(
+          platform: finalPlatform,
+          processManager: finalProcessManager,
+          logger: finalLogger,
+          fileSystem: finalFS,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+          userMessages: finalUserMessages,
+        );
+
+    final CocoaPods finalCocoaPods =
+        cocoaPods ??
+        CocoaPods(
+          fileSystem: finalFS,
+          processManager: finalProcessManager,
+          logger: finalLogger,
+          platform: finalPlatform,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+          analytics: finalAnalytics,
+        );
+
+    final CocoaPodsValidator finalCocoapodsValidator =
+        cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
     final XCDevice finalXCDevice =
         xcdevice ??

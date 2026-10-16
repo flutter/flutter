@@ -57,7 +57,7 @@ class LinuxDevice extends DesktopDevice {
       buildInfo,
       target: mainPath,
       targetPlatform: await targetPlatform,
-      logger: toolContext.logger,
+      toolContext: toolContext,
     );
   }
 

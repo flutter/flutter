@@ -16,6 +16,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../features.dart';
 import '../flutter_plugins.dart';
@@ -42,9 +43,10 @@ Future<void> buildLinux(
   bool needCrossBuild = false,
   required TargetPlatform targetPlatform,
   String targetSysroot = '/',
-  required Logger logger,
+  required ToolContext toolContext,
   bool configOnly = false,
 }) async {
+  final Logger logger = toolContext.logger;
   target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
     throwToolExit(
@@ -89,7 +91,9 @@ Future<void> buildLinux(
   final String buildModeName = buildInfo.mode.cliName;
   final Directory platformBuildDirectory = globals.fs
       .directory(linuxProject.parent.directory.path)
-      .childDirectory(getLinuxBuildDirectory(targetPlatform, buildInfo.flavor));
+      .childDirectory(
+        getLinuxBuildDirectory(targetPlatform, flavor: buildInfo.flavor, toolContext: toolContext),
+      );
   final Directory buildDirectory = platformBuildDirectory.childDirectory(buildModeName);
   try {
     await _runCmake(
@@ -136,7 +140,11 @@ Future<void> buildLinux(
       // This analysis is only supported for release builds.
       outputDirectory: globals.fs.directory(
         globals.fs.path.join(
-          getLinuxBuildDirectory(targetPlatform, buildInfo.flavor),
+          getLinuxBuildDirectory(
+            targetPlatform,
+            flavor: buildInfo.flavor,
+            toolContext: toolContext,
+          ),
           'release',
           'bundle',
         ),
