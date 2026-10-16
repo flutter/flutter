@@ -331,7 +331,10 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
   desc.SetSampleCount(sample_count);
 
   ColorAttachmentDescriptor color0 = *desc.GetColorAttachmentDescriptor(0u);
+  // Variants are created from the descriptor of the default variant, so reset
+  // everything that only some of the blend modes below set.
   color0.format = color_attachment_pixel_format;
+  color0.blending_enabled = true;
   color0.alpha_blend_op = BlendOperation::kAdd;
   color0.color_blend_op = BlendOperation::kAdd;
   color0.write_mask = ColorWriteMaskBits::kAll;
@@ -454,6 +457,10 @@ void ContentContextOptions::ApplyToPipelineDescriptor(
       << has_depth_stencil_attachments;
   if (maybe_stencil.has_value()) {
     StencilAttachmentDescriptor front_stencil = maybe_stencil.value();
+    // As with the blend modes, reset the operations that only some of the
+    // stencil modes below set.
+    front_stencil.stencil_failure = StencilOperation::kKeep;
+    front_stencil.depth_stencil_pass = StencilOperation::kKeep;
     StencilAttachmentDescriptor back_stencil = front_stencil;
 
     switch (stencil_mode) {
