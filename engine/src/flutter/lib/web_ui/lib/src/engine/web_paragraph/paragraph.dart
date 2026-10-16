@@ -44,6 +44,9 @@ class WebParagraphStyle implements ui.ParagraphStyle {
          fontStyle: fontStyle,
          fontWeight: fontWeight,
          height: height,
+         // Propagate the paragraph's default leadingDistribution to the root text style
+         // so spans and lines inherit it unless overridden by a child TextStyle.
+         leadingDistribution: textHeightBehavior?.leadingDistribution,
          locale: locale,
          color: color,
        ),
@@ -1504,10 +1507,11 @@ class ChildStyleNode extends StyleNode {
   @override
   double? get _wordSpacing => style.wordSpacing ?? parent._wordSpacing;
 
+  // Preserve `style.height` as-is (including `ui.kTextHeightNone`) so a child
+  // span can explicitly override a non-null parent height and disable the
+  // height multiplier during layout.
   @override
-  double? get _height {
-    return style.height == ui.kTextHeightNone ? null : (style.height ?? parent._height);
-  }
+  double? get _height => style.height ?? parent._height;
 
   @override
   ui.TextLeadingDistribution? get _leadingDistribution =>
@@ -1590,8 +1594,9 @@ class RootStyleNode extends StyleNode {
   @override
   double? get _height => style.height;
 
+  // Inherit the default leadingDistribution from ParagraphStyle.textHeightBehavior.
   @override
-  ui.TextLeadingDistribution? get _leadingDistribution => null;
+  ui.TextLeadingDistribution? get _leadingDistribution => style.leadingDistribution;
 
   @override
   ui.Locale? get _locale => style.locale;
