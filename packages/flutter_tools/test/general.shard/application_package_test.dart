@@ -7,6 +7,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/application_package.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -109,11 +110,14 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
+        ),
 
         // ignore: avoid_redundant_argument_values
       );
@@ -180,16 +184,19 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
         ),
       );
       expect(androidApk, isNotNull);
@@ -230,16 +237,19 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
         buildInfo: const BuildInfo(
           BuildMode.debug,
           null,
           treeShakeIcons: false,
           packageConfigPath: '.dart_tool/package_config.json',
+        ),
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
         ),
       );
 
@@ -281,16 +291,19 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
-          processManager: fakeProcessManager,
-          userMessages: UserMessages(),
-          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-          logger: logger,
-          fileSystem: fs,
           buildInfo: const BuildInfo(
             BuildMode.debug,
             null,
             treeShakeIcons: false,
             packageConfigPath: '.dart_tool/package_config.json',
+          ),
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fs,
+            logger: logger,
+            processManager: fakeProcessManager,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+            userMessages: UserMessages(),
           ),
         );
 
@@ -368,11 +381,12 @@ void main() {
       final Logger logger = BufferLogger.test();
       final AndroidApk? androidApk = AndroidApk.fromApk(
         fs.file(''),
-        processManager: fakeProcessManager,
-        logger: logger,
-        userMessages: UserMessages(),
         androidSdk: sdk,
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        toolContext: FakeToolContext(
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+        ),
       );
 
       expect(androidApk, isNull);
@@ -435,11 +449,14 @@ void main() {
       final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
         project.android,
         androidSdk: sdk,
-        processManager: fakeProcessManager,
-        userMessages: UserMessages(),
-        processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-        logger: logger,
-        fileSystem: fs,
+        toolContext: FakeToolContext(
+          config: Config.test(),
+          fs: fs,
+          logger: logger,
+          processManager: fakeProcessManager,
+          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+          userMessages: UserMessages(),
+        ),
       );
       expect(androidApk, isNotNull);
       expect(androidApk!.id, 'io.flutter.examples.hello_world');
@@ -509,11 +526,14 @@ void main() {
         final AndroidApk? androidApk = await AndroidApk.fromAndroidProject(
           project.android,
           androidSdk: sdk,
-          processManager: fakeProcessManager,
-          userMessages: UserMessages(),
-          processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
-          logger: logger,
-          fileSystem: fs,
+          toolContext: FakeToolContext(
+            config: Config.test(),
+            fs: fs,
+            logger: logger,
+            processManager: fakeProcessManager,
+            processUtils: ProcessUtils(processManager: fakeProcessManager, logger: logger),
+            userMessages: UserMessages(),
+          ),
         );
         expect(androidApk, isNotNull);
         expect(androidApk!.id, 'io.flutter.examples.hello_world');

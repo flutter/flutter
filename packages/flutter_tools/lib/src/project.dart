@@ -222,7 +222,8 @@ class FlutterProject {
 
   /// The location of the build folder.
   Directory get buildDirectory =>
-      _buildDirectory ?? directory.childDirectory(getBuildDirectory(null, directory.fileSystem));
+      _buildDirectory ??
+      directory.childDirectory(getBuildDirectory(globals.config, directory.fileSystem));
 
   /// The manifest of this project.
   FlutterManifest get manifest => _manifest;

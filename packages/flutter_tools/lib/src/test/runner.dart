@@ -679,6 +679,7 @@ class SpawnPlugin extends PlatformPlugin {
   ) async {
     final ToolContext(
       :Artifacts artifacts,
+      :Config config,
       :FileSystem fs,
       :Logger logger,
       :Platform platform,
@@ -699,7 +700,7 @@ class SpawnPlugin extends PlatformPlugin {
     ) = spec;
 
     final Directory buildDirectory = fs.directory(
-      fs.path.join(flutterProject.directory.path, getBuildDirectory()),
+      fs.path.join(flutterProject.directory.path, getBuildDirectory(config, fs)),
     );
     final Directory isolateSpawningTesterDirectory = buildDirectory.childDirectory(
       'isolate_spawning_tester',

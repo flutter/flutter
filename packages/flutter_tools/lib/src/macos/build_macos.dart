@@ -151,7 +151,10 @@ Future<void> buildMacOS({
     featureFlags: featureFlags,
   );
 
-  final String buildDirectoryPath = getMacOSBuildDirectory();
+  final String buildDirectoryPath = getMacOSBuildDirectory(
+    config: globals.config,
+    fileSystem: globals.fs,
+  );
   final Directory flutterBuildDir = flutterProject.directory.childDirectory(buildDirectoryPath);
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
@@ -434,7 +437,12 @@ Future<void> _writeCodeSizeAnalysis(BuildInfo buildInfo, SizeAnalyzer? sizeAnaly
   // This analysis is only supported for release builds.
   // Attempt to guess the correct .app by picking the first one.
   final Directory candidateDirectory = globals.fs.directory(
-    globals.fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products', 'Release'),
+    globals.fs.path.join(
+      getMacOSBuildDirectory(config: globals.config, fileSystem: globals.fs),
+      'Build',
+      'Products',
+      'Release',
+    ),
   );
   final Directory appDirectory = candidateDirectory.listSync().whereType<Directory>().firstWhere((
     Directory directory,

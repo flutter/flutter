@@ -646,7 +646,10 @@ class CustomDevice extends Device {
       return false;
     }
 
-    final bool result = await tryInstall(localPath: getAssetBuildDirectory(), appName: appName);
+    final bool result = await tryInstall(
+      localPath: getAssetBuildDirectory(globals.config, globals.fs),
+      appName: appName,
+    );
 
     return result;
   }
@@ -727,7 +730,7 @@ class CustomDevice extends Device {
     };
 
     if (!prebuiltApplication) {
-      final String assetBundleDir = getAssetBuildDirectory();
+      final String assetBundleDir = getAssetBuildDirectory(globals.config, globals.fs);
 
       bundleBuilder ??= BundleBuilder();
 

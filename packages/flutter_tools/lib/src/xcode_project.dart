@@ -244,7 +244,9 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform {
     }
     return _projectInfo ??= await xcodeProjectInterpreter.getInfo(
       this,
-      buildDirectory: globals.fs.directory(darwinPlatform.buildDirectory()),
+      buildDirectory: globals.fs.directory(
+        darwinPlatform.buildDirectory(config: globals.config, fileSystem: globals.fs),
+      ),
     );
   }
 
