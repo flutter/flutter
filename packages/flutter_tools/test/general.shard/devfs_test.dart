@@ -158,6 +158,7 @@ void main() {
         'test',
         fileSystem.currentDirectory,
         buildMode: BuildMode.debug,
+        targetPlatform: TargetPlatform.android,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
           fs: fileSystem,
@@ -170,6 +171,32 @@ void main() {
       expect(() async => devFS.create(), throwsA(isA<DevFSException>()));
     },
   );
+
+  testWithoutContext('DevFS create passes target platform to its asset transformer', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
+    final fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
+
+    for (final TargetPlatform targetPlatform in TargetPlatform.values) {
+      final devFS = DevFS(
+        fakeVmServiceHost.vmService,
+        'test',
+        fileSystem.currentDirectory,
+        buildMode: BuildMode.debug,
+        targetPlatform: targetPlatform,
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          os: osUtils,
+          processManager: FakeProcessManager.empty(),
+        ),
+        httpClient: FakeHttpClient.any(),
+      );
+
+      expect(devFS.assetTransformer.targetPlatform, targetPlatform);
+    }
+  });
 
   testWithoutContext('DevFS destroy is resilient to vmservice disconnection', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
@@ -184,6 +211,7 @@ void main() {
       'test',
       fileSystem.currentDirectory,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         fs: fileSystem,
@@ -228,6 +256,7 @@ void main() {
       'test',
       fileSystem.currentDirectory,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         fs: fileSystem,
@@ -299,6 +328,7 @@ void main() {
       'test',
       fileSystem.currentDirectory,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         fs: fileSystem,
@@ -346,6 +376,7 @@ void main() {
         'test',
         fileSystem.currentDirectory,
         buildMode: BuildMode.debug,
+        targetPlatform: TargetPlatform.android,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
           fs: fileSystem,
@@ -394,6 +425,7 @@ void main() {
       'test',
       fileSystem.currentDirectory,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         fs: fileSystem,
@@ -448,6 +480,7 @@ void main() {
       'test',
       fileSystem.currentDirectory,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         fs: fileSystem,
@@ -528,6 +561,7 @@ void main() {
       'test',
       fileSystem.currentDirectory,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         fs: fileSystem,
@@ -582,6 +616,7 @@ void main() {
       'test',
       fileSystem.currentDirectory,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         config: Config.test(),
@@ -700,6 +735,7 @@ void main() {
         'test',
         fileSystem.currentDirectory,
         buildMode: BuildMode.debug,
+        targetPlatform: TargetPlatform.android,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
           config: Config.test(),
@@ -761,6 +797,7 @@ void main() {
         'test',
         fileSystem.currentDirectory,
         buildMode: BuildMode.debug,
+        targetPlatform: TargetPlatform.android,
         toolContext: FakeToolContext(
           artifacts: Artifacts.test(),
           config: Config.test(),
@@ -853,6 +890,7 @@ void main() {
         'test',
         fileSystem.currentDirectory,
         buildMode: BuildMode.debug,
+        targetPlatform: TargetPlatform.android,
         toolContext: FakeToolContext(
           artifacts: artifacts,
           config: Config.test(),
@@ -934,6 +972,7 @@ void main() {
         'test',
         fileSystem.currentDirectory,
         buildMode: BuildMode.debug,
+        targetPlatform: TargetPlatform.android,
         toolContext: FakeToolContext(
           artifacts: artifacts,
           config: Config.test(),
@@ -1021,6 +1060,7 @@ void main() {
           fileSystem: fileSystem,
           dartBinaryPath: 'dart',
           buildMode: BuildMode.debug,
+          targetPlatform: TargetPlatform.android,
         ),
         logger: BufferLogger.test(),
       );
@@ -1070,6 +1110,7 @@ void main() {
           fileSystem: fileSystem,
           dartBinaryPath: 'dart',
           buildMode: BuildMode.debug,
+          targetPlatform: TargetPlatform.android,
         ),
         logger: BufferLogger.test(),
       );

@@ -57,6 +57,7 @@ void main() {
       fileSystem: fileSystem,
       dartBinaryPath: artifacts.getArtifactPath(Artifact.engineDartBinary),
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
     );
 
     final AssetTransformationResult result = await transformer.transformAsset(
@@ -80,6 +81,81 @@ void main() {
       isEmpty,
       reason: 'Transformer did not clean up after itself.',
     );
+  });
+
+  testWithoutContext('Passes build mode and target platform as environment variables', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final artifacts = Artifacts.test();
+
+    final File asset = fileSystem.file('asset.txt')..createSync();
+    const outputPath = 'output.txt';
+
+    final String dartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+
+    String? expectedTargetPlatformFor(TargetPlatform targetPlatform) {
+      return switch (targetPlatform) {
+        .android || .android_arm || .android_arm64 || .android_x64 => 'android',
+        .ios => 'ios',
+        .darwin => 'macOS',
+        .linux_x64 || .linux_arm64 || .linux_riscv64 => 'linux',
+        .windows_arm64 || .windows_x64 => 'windows',
+        .fuchsia_arm64 || .fuchsia_x64 => 'fuchsia',
+        .web_javascript => 'web',
+        .unsupported || .tester => null,
+      };
+    }
+
+    for (final TargetPlatform targetPlatform in TargetPlatform.values) {
+      final String? expectedtargetPlatform = expectedTargetPlatformFor(targetPlatform);
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[
+            dartBinaryPath,
+            'run',
+            'my_dump_transformer_environment_transformer',
+            '--input=/.tmp_rand0/rand0/asset.txt-transformOutput0.txt',
+            '--output=/.tmp_rand0/rand0/asset.txt-transformOutput1.txt',
+          ],
+          environment: <String, String>{
+            'FLUTTER_BUILD_MODE': 'debug',
+            'FLUTTER_BUILD_TARGET_PLATFORM': ?expectedtargetPlatform,
+          },
+          onRun: (List<String> args) {
+            final ArgResults parsedArgs =
+                (ArgParser()
+                      ..addOption('input')
+                      ..addOption('output'))
+                    .parse(args);
+            fileSystem.file(parsedArgs['input']).copySync(parsedArgs['output'] as String);
+          },
+        ),
+      ]);
+
+      final transformer = AssetTransformer(
+        processManager: processManager,
+        fileSystem: fileSystem,
+        dartBinaryPath: dartBinaryPath,
+        buildMode: BuildMode.debug,
+        targetPlatform: targetPlatform,
+      );
+
+      final AssetTransformationResult result = await transformer.transformAsset(
+        asset: asset,
+        outputPath: outputPath,
+        workingDirectory: fileSystem.currentDirectory.path,
+        transformerEntries: <AssetTransformerEntry>[
+          const AssetTransformerEntry(
+            package: 'my_dump_transformer_environment_transformer',
+            args: <String>[],
+          ),
+        ],
+        logger: BufferLogger.test(),
+      );
+
+      expect(asset, exists);
+      expect(processManager, hasNoRemainingExpectations);
+      expect(result.failure, isNull);
+    }
   });
 
   testWithoutContext('logs useful error information when transformation process returns a nonzero exit code', () async {
@@ -118,6 +194,7 @@ void main() {
       fileSystem: fileSystem,
       dartBinaryPath: dartBinaryPath,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
     );
 
     final AssetTransformationResult result = await transformer.transformAsset(
@@ -181,6 +258,7 @@ void main() {
       fileSystem: fileSystem,
       dartBinaryPath: dartBinaryPath,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
     );
 
     final AssetTransformationResult result = await transformer.transformAsset(
@@ -281,6 +359,7 @@ void main() {
       fileSystem: fileSystem,
       dartBinaryPath: dartBinaryPath,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
     );
 
     final AssetTransformationResult result = await transformer.transformAsset(
@@ -351,7 +430,10 @@ void main() {
           // Do nothing.
         },
         stderr: 'Transformation failed, but I forgot to exit with a non-zero code.',
-        environment: const <String, String>{'FLUTTER_BUILD_MODE': 'debug'},
+        environment: const <String, String>{
+          'FLUTTER_BUILD_MODE': 'debug',
+          'FLUTTER_BUILD_TARGET_PLATFORM': 'android',
+        },
       ),
     ]);
 
@@ -360,6 +442,7 @@ void main() {
       fileSystem: fileSystem,
       dartBinaryPath: dartBinaryPath,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
     );
 
     final AssetTransformationResult result = await transformer.transformAsset(
@@ -444,6 +527,7 @@ void main() {
       fileSystem: fileSystem,
       dartBinaryPath: dartBinaryPath,
       buildMode: BuildMode.debug,
+      targetPlatform: TargetPlatform.android,
     );
 
     final AssetTransformationResult result = await transformer.transformAsset(
