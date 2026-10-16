@@ -812,6 +812,10 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
 
     flutterView.invalidate();
     rootSurfaceControl.applyTransactionOnDraw(tx);
+    // Defer the next frame until this Choreographer traversal finishes so its View mutations do
+    // not overwrite this frame's layout before draw. If the traversal skips drawing (e.g. a
+    // pre-draw listener cancels draw), the next commit merges into ViewRootImpl's still-pending
+    // transaction (falling back to mailbox replacement).
     if (shouldDeferUntilNextTraversal()) {
       frameStagedForTraversal = true;
       choreographerCallbackFired = false;
@@ -913,6 +917,8 @@ public class PlatformViewsController2 implements PlatformViewsAccessibilityDeleg
     }
     activeRasterTransactions.clear();
     synchronized (transactionLock) {
+      // If platform tasks posted before detach run swapTransactions() after an immediate
+      // re-attach seals new frames, batches can shift by one until those stale tasks drain.
       pendingRasterFrames.clear();
       pendingRasterTransactions.clear();
     }
