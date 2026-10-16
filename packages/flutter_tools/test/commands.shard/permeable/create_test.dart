@@ -168,6 +168,10 @@ void main() {
     expect(identifier.contains('@'), isFalse);
   });
 
+  test('createUTIIdentifier capitalizes a final single-character segment', () {
+    expect(CreateBase.createUTIIdentifier('org.example', 'foo_b'), 'org.example.fooB');
+  });
+
   test('createWindowsIdentifier emits a GUID', () {
     final String identifier = CreateBase.createWindowsIdentifier('org', 'project');
     expect(Uuid.isValidUUID(fromString: identifier), isTrue);
