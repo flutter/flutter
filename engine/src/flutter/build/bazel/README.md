@@ -608,6 +608,31 @@ timeout) -- so each suite reserves eight CPUs from Bazel (`tags = ["cpu:8"]`)
 and gives the runner the same eight workers: the same processes and
 repeats, three suites at a time on a 24-core host.
 
+### The benchmarks (`--type benchmarks`)
+
+`run_tests.py --type benchmarks` (`run_engine_benchmarks`; of the CI
+builders only `host_release_test` asks for it) runs six benchmark
+executables -- `shell_benchmarks`, `fml_benchmarks`, `ui_benchmarks`,
+`display_list_builder_benchmarks`, `geometry_benchmarks`, `txt_benchmarks`
+-- each with `--icu-data-file-path`, and requires exit code 0; google
+benchmark itself decides how long each case runs. They are testonly
+executables GN does not name `*tests`, so the converter would make them
+binaries; the ones in its `benchmarkRuns` table become `cc_test`s instead,
+with the ICU argument and `@icu//:icudata`, tagged `benchmark` and `manual`.
+`manual` keeps them out of `bazel test //engine/src/flutter/...` as the
+other builders' runs leave them out; `//engine/src/flutter:benchmarks` (a
+`test_suite`, itself manual) runs the six, and
+`//engine/src/flutter:benchmark_binaries` (a filegroup over the six and the
+four benchmark binaries nobody runs, `host_release_test`'s build list) keeps
+them all compiling in a wildcard build. `//flutter/benchmarking` converts
+like any other package over `@benchmark` (google/benchmark, the secondary
+tree's GN converted at fetch time; `//flutter/benchmarking`'s GN lost a
+config whose include directory was a target label, which contributed
+nothing). The sizes follow GN's unoptimized binaries on the host: 10–34 s
+for five of them (`medium`), 1,087 s for `ui_benchmarks`, whose one case
+completes a 3 MB platform message in a Dart isolate per iteration outside
+the timed region (`enormous`); CI runs them optimized.
+
 ## Impeller's shader pipeline
 
 Every Impeller library with shaders invokes `impeller_shaders()`

@@ -3,9 +3,8 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/geometry/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: geometry_benchmarks.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 
 package(default_visibility = ["//visibility:public"])
@@ -127,4 +126,25 @@ cc_library(
         "//engine/src/flutter/testing:testing_lib",
     ],
     alwayslink = True,
+)
+
+cc_test(
+    name = "geometry_benchmarks",
+    size = "medium",
+    srcs = ["geometry_benchmarks.cc"],
+    args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    data = ["@icu//:icudata"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = [
+        "benchmark",
+        "manual",
+    ],
+    deps = [
+        ":geometry",
+        "//engine/src:include_root",
+        "//engine/src/flutter/benchmarking",
+        "//engine/src/flutter/impeller/entity",
+        "//engine/src/flutter/impeller/tessellator:tessellator_libtess",
+    ],
 )

@@ -40,6 +40,7 @@ use_repo(
     "abseil-cpp",
     "abseil_cpp_tree",
     "angle",
+    "benchmark",
     "boringssl",
     "clang_linux_x64",
     "cpython3",

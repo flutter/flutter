@@ -3,9 +3,8 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/txt/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: txt_benchmarks.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
@@ -85,6 +84,35 @@ flutter_test_fixtures(
     fixtures = [
         "third_party/fonts/NotoColorEmoji.ttf",
         "third_party/fonts/Roboto-Regular.ttf",
+    ],
+)
+
+cc_test(
+    name = "txt_benchmarks",
+    size = "medium",
+    srcs = [
+        "benchmarks/skparagraph_benchmarks.cc",
+        "benchmarks/txt_run_all_benchmarks.cc",
+        "tests/txt_test_utils.cc",
+        "tests/txt_test_utils.h",
+    ],
+    args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    data = ["@icu//:icudata"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = [
+        "benchmark",
+        "manual",
+    ],
+    deps = [
+        ":txt",
+        ":txt_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/testing:testing_lib",
+        "@benchmark",
+        "@skia//modules/skparagraph",
+        "@skia//modules/skparagraph:utils",
     ],
 )
 

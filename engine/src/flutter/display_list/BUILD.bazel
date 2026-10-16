@@ -3,10 +3,9 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/display_list/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: display_list_builder_benchmarks, display_list_region_benchmarks, display_list_transform_benchmarks, display_list_benchmarks_source, display_list_benchmarks, primitive_rendering_benchmarks.
 
-load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -234,5 +233,107 @@ flutter_cc_test(
         "//engine/src/flutter/testing",
         "//engine/src/flutter/txt",
         "@abseil-cpp//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "display_list_builder_benchmarks",
+    size = "medium",
+    srcs = ["benchmarking/dl_builder_benchmarks.cc"],
+    args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    data = ["@icu//:icudata"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = [
+        "benchmark",
+        "manual",
+    ],
+    deps = [
+        ":display_list",
+        ":display_list_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/benchmarking",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+)
+
+cc_binary(
+    name = "display_list_region_benchmarks",
+    testonly = True,
+    srcs = ["benchmarking/dl_region_benchmarks.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":display_list_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/benchmarking",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+)
+
+cc_binary(
+    name = "display_list_transform_benchmarks",
+    testonly = True,
+    srcs = ["benchmarking/dl_transform_benchmarks.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":display_list_fixtures",
+        "//engine/src:include_root",
+        "//engine/src/flutter/benchmarking",
+        "//engine/src/flutter/testing:testing_lib",
+    ],
+)
+
+cc_library(
+    name = "display_list_benchmarks_source",
+    testonly = True,
+    deps = [
+        ":display_list",
+        ":display_list_fixtures",
+        "//engine/src/flutter/benchmarking",
+        "//engine/src/flutter/build/bazel/dart_wrap:libdart_jit",  # for tracing; !is_wasm
+        "//engine/src/flutter/common/graphics",
+        "//engine/src/flutter/display_list/testing:display_list_surface_provider",
+        "//engine/src/flutter/display_list/testing:display_list_testing",
+        "//engine/src/flutter/fml",
+        "//engine/src/flutter/testing:skia",
+        "//engine/src/flutter/testing:testing_lib",
+        "@skia",
+    ],
+)
+
+cc_binary(
+    name = "display_list_benchmarks",
+    testonly = True,
+    srcs = [
+        "benchmarking/dl_benchmarks.cc",
+        "benchmarking/dl_benchmarks.h",
+    ],
+    copts = CHROMIUM_CODE_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :display_list_benchmarks_source
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES + ["DISPLAY_LIST_BENCHMARK_ALL_OPS"],
+    deps = [
+        ":display_list_benchmarks_source",
+        "//engine/src:include_root",
+    ],
+)
+
+cc_binary(
+    name = "primitive_rendering_benchmarks",
+    testonly = True,
+    srcs = [
+        "benchmarking/dl_benchmarks.cc",
+        "benchmarking/dl_benchmarks.h",
+    ],
+    copts = CHROMIUM_CODE_COPTS + FLUTTER_TESTONLY_COPTS + [
+        "-Wno-redundant-parens",  # from :display_list_benchmarks_source
+    ],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        ":display_list_benchmarks_source",
+        "//engine/src:include_root",
     ],
 )

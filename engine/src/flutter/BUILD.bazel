@@ -124,3 +124,41 @@ test_suite(
         "//engine/src/flutter/tools/pkg/git_repo_tools:tests",
     ],
 )
+
+# run_tests.py --type benchmarks (run_engine_benchmarks; CI's host_release_test
+# alone asks for it): the six benchmark executables it runs, each with ICU's
+# data file (the converter's benchmarkRuns). They are tests tagged `manual`,
+# as is this suite, so a wildcard run leaves them out as every other builder
+# does; `bazel test //engine/src/flutter:benchmarks` is the type.
+test_suite(
+    name = "benchmarks",
+    tags = ["manual"],
+    tests = [
+        "//engine/src/flutter/display_list:display_list_builder_benchmarks",
+        "//engine/src/flutter/fml:fml_benchmarks",
+        "//engine/src/flutter/impeller/geometry:geometry_benchmarks",
+        "//engine/src/flutter/lib/ui:ui_benchmarks",
+        "//engine/src/flutter/shell/common:shell_benchmarks",
+        "//engine/src/flutter/txt:txt_benchmarks",
+    ],
+)
+
+# The benchmark executables host_release_test builds (its target list): the
+# six above and the four nobody runs. Through this filegroup a wildcard build
+# compiles them all, as GN's does, manual tags notwithstanding.
+filegroup(
+    name = "benchmark_binaries",
+    testonly = True,
+    srcs = [
+        "//engine/src/flutter/display_list:display_list_benchmarks",
+        "//engine/src/flutter/display_list:display_list_builder_benchmarks",
+        "//engine/src/flutter/display_list:display_list_region_benchmarks",
+        "//engine/src/flutter/display_list:display_list_transform_benchmarks",
+        "//engine/src/flutter/display_list:primitive_rendering_benchmarks",
+        "//engine/src/flutter/fml:fml_benchmarks",
+        "//engine/src/flutter/impeller/geometry:geometry_benchmarks",
+        "//engine/src/flutter/lib/ui:ui_benchmarks",
+        "//engine/src/flutter/shell/common:shell_benchmarks",
+        "//engine/src/flutter/txt:txt_benchmarks",
+    ],
+)

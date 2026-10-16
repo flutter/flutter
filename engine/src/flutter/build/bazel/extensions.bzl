@@ -41,6 +41,16 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/boringssl/src",
         build_file = _OVERLAYS + ":boringssl/BUILD.boringssl.bazel",
     ),
+    # google/benchmark, for //flutter/benchmarking and the benchmark
+    # executables (testing/run_tests.py --type benchmarks): the secondary
+    # tree's GN over the synced tree, converted at fetch time; the tree's own
+    # Bazel files are not used, as Skia's are not.
+    "benchmark": struct(
+        path = "engine/src/flutter/third_party/benchmark",
+        build_file = None,
+        gn_build_files = ["engine/src/flutter/build/secondary/flutter/third_party/benchmark/BUILD.gn"],
+        gn_repository = "@benchmark=//flutter/third_party/benchmark",
+    ),
     # Embedding API headers and the inputs of the wrapped GN build (see the
     # overlay).
     "dart": struct(
