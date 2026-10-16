@@ -101,30 +101,66 @@ void testMain() {
     // Regression test for https://github.com/flutter/flutter/issues/193695
     test('concurrent paragraph layout and picture rasterization does not crash', () async {
       const bounds = ui.Rect.fromLTRB(0, 0, 200, 100);
-      final imageFutures = <Future<ui.Image>>[];
-      for (var i = 0; i < 8; i++) {
+
+      // Warm up surface sizing so subsequent image.toByteData() calls dispatch
+      // rasterizeImage directly to the Wasm worker without waiting on a resize
+      // round-trip first.
+      {
         final recorder = ui.PictureRecorder();
         final canvas = ui.Canvas(recorder, bounds);
-        final ui.Paragraph paragraph = makeSimpleText('Worker raster $i', fontSize: 12.0 + i);
+        final ui.Paragraph warmup = makeSimpleText('Warmup', fontSize: 14);
+        canvas.drawParagraph(warmup, ui.Offset.zero);
+        warmup.dispose();
+        final ui.Picture picture = recorder.endRecording();
+        final ui.Image image = picture.toImageSync(200, 100);
+        picture.dispose();
+        await image.toByteData();
+        image.dispose();
+      }
+
+      // Pre-record images at distinct fractional font sizes and canvas scales
+      // so the background Wasm worker misses its thread-local SkStrikeCache and
+      // enters FreeType (FT_Face) during rasterization.
+      final workerImages = <ui.Image>[];
+      for (var i = 0; i < 16; i++) {
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, bounds);
+        canvas.scale(1.0 + i * 0.031, 1.0 + i * 0.031);
+        final ui.Paragraph paragraph = makeSimpleText(
+          'Worker raster $i',
+          fontSize: 12.0 + i * 1.73,
+        );
         canvas.drawParagraph(paragraph, ui.Offset.zero);
         paragraph.dispose();
         final ui.Picture picture = recorder.endRecording();
-        imageFutures.add(picture.toImage(200, 100).whenComplete(picture.dispose));
+        workerImages.add(picture.toImageSync(200, 100));
+        picture.dispose();
       }
 
-      // Concurrently lay out and record paragraphs on the UI thread while
-      // the background Wasm worker rasterizes the queued pictures.
-      for (var j = 0; j < 16; j++) {
-        final recorder = ui.PictureRecorder();
-        final canvas = ui.Canvas(recorder, bounds);
-        final ui.Paragraph paragraph = makeSimpleText(
-          'Concurrent UI layout $j',
-          fontSize: 14.0 + (j % 6),
-        );
-        expect(paragraph.width, greaterThan(0));
-        canvas.drawParagraph(paragraph, ui.Offset.zero);
-        paragraph.dispose();
-        recorder.endRecording().dispose();
+      var completedImages = 0;
+      final imageFutures = <Future<ui.Image>>[
+        for (final ui.Image image in workerImages)
+          image.toByteData().then((_) {
+            completedImages++;
+            return image;
+          }),
+      ];
+
+      // Concurrently lay out paragraphs at fresh fractional font sizes on the
+      // UI thread across macrotask turns while the Wasm worker rasterizes the
+      // queued images.
+      var uiStep = 0;
+      for (var batch = 0; batch < 8 && completedImages < workerImages.length; batch++) {
+        await Future<void>.delayed(Duration.zero);
+        for (var j = 0; j < 16; j++) {
+          uiStep++;
+          final ui.Paragraph paragraph = makeSimpleText(
+            'Concurrent UI layout $uiStep',
+            fontSize: 14.0 + uiStep * 0.137,
+          );
+          expect(paragraph.width, greaterThan(0));
+          paragraph.dispose();
+        }
       }
 
       final List<ui.Image> images = await Future.wait(imageFutures);
