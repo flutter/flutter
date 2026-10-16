@@ -201,8 +201,8 @@ SKWASM_EXPORT void canvas_clipRRect(flutter::DisplayListBuilder* canvas,
 SKWASM_EXPORT void canvas_clipPath(flutter::DisplayListBuilder* canvas,
                                    SkPathBuilder* path,
                                    bool antialias) {
-  canvas->ClipPath(Skwasm::SnapshotPath(path),
-                   flutter::DlClipOp::kIntersect, antialias);
+  canvas->ClipPath(Skwasm::SnapshotPath(path), flutter::DlClipOp::kIntersect,
+                   antialias);
 }
 
 SKWASM_EXPORT void canvas_drawColor(flutter::DisplayListBuilder* canvas,

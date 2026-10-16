@@ -26,7 +26,9 @@ int SignOf(SkScalar x) {
   return x < 0.0f ? 1 : 0;
 }
 
-int CrossSign(const SkVector& a, const SkVector& b, SkScalar* out_cross = nullptr) {
+int CrossSign(const SkVector& a,
+              const SkVector& b,
+              SkScalar* out_cross = nullptr) {
   const SkScalar cross = a.fX * b.fY - a.fY * b.fX;
   if (out_cross) {
     *out_cross = cross;
@@ -66,7 +68,8 @@ bool IsPiecewiseConvexSkPath(const SkPath& sk_path) {
   SkVector prev_out_vec = {0.0f, 0.0f};
   SkVector first_in_vec = {0.0f, 0.0f};
 
-  auto check_join = [](const SkVector& u, const SkVector& v, int winding) -> bool {
+  auto check_join = [](const SkVector& u, const SkVector& v,
+                       int winding) -> bool {
     const SkScalar u_len2 = u.fX * u.fX + u.fY * u.fY;
     const SkScalar v_len2 = v.fX * v.fX + v.fY * v.fY;
     if (u_len2 == 0.0f || v_len2 == 0.0f) {
@@ -160,8 +163,8 @@ bool IsPiecewiseConvexSkPath(const SkPath& sk_path) {
         return false;
     }
 
-    if (in_vec.fX == 0.0f && in_vec.fY == 0.0f &&
-        out_vec.fX == 0.0f && out_vec.fY == 0.0f) {
+    if (in_vec.fX == 0.0f && in_vec.fY == 0.0f && out_vec.fX == 0.0f &&
+        out_vec.fY == 0.0f) {
       continue;
     }
     if (first_in_vec.fX == 0.0f && first_in_vec.fY == 0.0f) {

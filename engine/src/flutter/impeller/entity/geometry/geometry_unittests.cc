@@ -1450,12 +1450,15 @@ TEST(EntityGeometryTest, RotatedStrokedCircleGeometryCoverage) {
 }
 
 TEST(EntityGeometryTest, FillPathGeometryRoundSuperellipseIsNormalMode) {
-  const flutter::DlRect bounds = flutter::DlRect::MakeXYWH(0.0f, 0.0f, 25.6f, 25.6f);
+  const flutter::DlRect bounds =
+      flutter::DlRect::MakeXYWH(0.0f, 0.0f, 25.6f, 25.6f);
   const Scalar max_radius = 12.8f;
   for (int col = 0; col < 40; ++col) {
     const Scalar radius = (max_radius / 40.0f) * static_cast<Scalar>(col);
-    const auto rse = flutter::DlRoundSuperellipse::MakeRectRadius(bounds, radius);
-    const flutter::DlPath rse_path = flutter::DlPath::MakeRoundSuperellipse(rse);
+    const auto rse =
+        flutter::DlRoundSuperellipse::MakeRectRadius(bounds, radius);
+    const flutter::DlPath rse_path =
+        flutter::DlPath::MakeRoundSuperellipse(rse);
     FillPathGeometry geom(rse_path);
     EXPECT_EQ(geom.GetResultMode(), GeometryResult::Mode::kNormal)
         << "Expected kNormal for RSuperellipse col=" << col

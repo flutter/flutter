@@ -13,7 +13,8 @@
 #include "third_party/skia/include/utils/SkParsePath.h"
 
 namespace {
-std::unordered_map<const SkPathBuilder*, flutter::DlPath>& GetPathSnapshotCache() {
+std::unordered_map<const SkPathBuilder*, flutter::DlPath>&
+GetPathSnapshotCache() {
   static auto* cache =
       new std::unordered_map<const SkPathBuilder*, flutter::DlPath>();
   return *cache;
