@@ -76,7 +76,7 @@ class AnalyzeCommand extends FlutterCommand {
       hide: !verboseHelp,
     );
     argParser.addFlag('suggestions', help: 'Show suggestions about the current flutter project.');
-    addMachineOutputFlag(verboseHelp: verboseHelp);
+    CommonOptions.machine.addTo(argParser, verboseHelp: verboseHelp);
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag(
@@ -87,7 +87,8 @@ class AnalyzeCommand extends FlutterCommand {
     );
     argParser.addFlag('plugins', defaultsTo: true, help: 'Whether to enable analyzer plugins.');
 
-    usesPubOption();
+    enableUsesPubOption();
+    CommonOptions.pub.addTo(argParser);
 
     // Not used by analyze --watch
     argParser.addFlag(
