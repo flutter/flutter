@@ -19,7 +19,6 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
@@ -43,7 +42,6 @@ import '../migrations/xcode_script_build_phase_migration.dart';
 import '../migrations/xcode_thin_binary_build_phase_input_paths_migration.dart';
 import '../plugins.dart';
 import '../project.dart';
-import '../version.dart';
 import 'application_package.dart';
 import 'code_signing.dart';
 import 'migrations/host_app_info_plist_migration.dart';
@@ -140,14 +138,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     :BotDetector botDetector,
     :Config config,
     :FileSystem fs,
-    :FileSystemUtils fileSystemUtils,
-    :FlutterVersion flutterVersion,
     :Logger logger,
     :OperatingSystemUtils os,
     :Platform platform,
-    :ProcessManager processManager,
     :ProcessUtils processUtils,
-    :AnsiTerminal terminal,
   ) = toolContext;
   final bool isVerbose = verboseLogging || logger.isVerbose;
 
@@ -169,20 +163,15 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveBitcodeMigration(app.project, logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, logger),
     UIApplicationMainDeprecationMigration(app.project, logger),
-    SwiftPackageManagerIntegrationMigration(
+    SwiftPackageManagerIntegrationMigration.fromToolContext(
       app.project,
       darwinPlatform,
       buildInfo,
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
-      logger: logger,
-      fileSystem: fs,
-      plistParser: plistParser,
-      config: config,
       analytics: analytics,
-      hostPlatform: platform,
-      operatingSystemUtils: os,
-      flutterVersion: flutterVersion,
+      plistParser: plistParser,
       reportCrashes: !(await botDetector.isRunningOnBot),
+      toolContext: toolContext,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
     ),
     SwiftPackageManagerGitignoreMigration(project, logger),
     MetalAPIValidationMigrator.ios(app.project, logger),
@@ -369,14 +358,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (codesign && environmentType == EnvironmentType.physical) {
     autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeamBuildSetting(
       buildSettings: buildSettings,
-      platform: platform,
-      processManager: processManager,
-      logger: logger,
-      config: config,
-      terminal: terminal,
-      fileSystem: fs,
-      fileSystemUtils: fileSystemUtils,
       plistParser: plistParser,
+      toolContext: toolContext,
     );
   }
 

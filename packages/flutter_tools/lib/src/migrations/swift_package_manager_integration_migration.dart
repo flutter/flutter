@@ -16,6 +16,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/project_migrator.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../ios/plist_parser.dart';
@@ -48,6 +49,41 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
        _buildInfo = buildInfo,
        _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
        super(logger);
+
+  factory SwiftPackageManagerIntegrationMigration.fromToolContext(
+    XcodeBasedProject project,
+    FlutterDarwinPlatform platform,
+    BuildInfo buildInfo, {
+    required Analytics analytics,
+    required PlistParser plistParser,
+    required bool reportCrashes,
+    required ToolContext toolContext,
+    required XcodeProjectInterpreter xcodeProjectInterpreter,
+  }) {
+    final ToolContext(
+      :Config config,
+      :FileSystem fs,
+      :FlutterVersion flutterVersion,
+      :Logger logger,
+      :OperatingSystemUtils os,
+      platform: Platform hostPlatform,
+    ) = toolContext;
+    return SwiftPackageManagerIntegrationMigration(
+      project,
+      platform,
+      buildInfo,
+      analytics: analytics,
+      config: config,
+      fileSystem: fs,
+      flutterVersion: flutterVersion,
+      hostPlatform: hostPlatform,
+      logger: logger,
+      operatingSystemUtils: os,
+      plistParser: plistParser,
+      reportCrashes: reportCrashes,
+      xcodeProjectInterpreter: xcodeProjectInterpreter,
+    );
+  }
 
   final XcodeBasedProject _xcodeProject;
   final FlutterDarwinPlatform _platform;
