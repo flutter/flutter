@@ -8,20 +8,12 @@ import 'package:pub_semver/pub_semver.dart';
 
 /// Runs the module AAR test with older Gradle/AGP versions.
 ///
-/// Uses the oldest AGP and Gradle that Flutter supports. Keep in sync with
-/// errorAGPVersion and errorGradleVersion in
-/// packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt.
-/// Older AGP versions (e.g. 8.2.1) can't compile against API 37, which Flutter
-/// AARs require of their consumers.
-///
-/// Gradle 8.x cannot run on newer JDKs (Java 25 requires Gradle 9.1.0+, see
+/// Gradle 8.4 cannot run on newer JDKs (Java 25 requires Gradle 9.1.0+, see
 /// https://docs.gradle.org/current/userguide/compatibility.html), so this task
-/// runs on a CI target pinned to Java 17.
+/// runs on a CI target pinned to Java 17 to keep coverage of pre-AGP 8.3
+/// projects.
 Future<void> main() async {
   await task(
-    buildAndroidHostAppWithModuleAarTest(
-      gradleVersion: '8.14',
-      agpVersion: Version.parse('8.11.1'),
-    ),
+    buildAndroidHostAppWithModuleAarTest(gradleVersion: '8.4', agpVersion: Version.parse('8.2.1')),
   );
 }

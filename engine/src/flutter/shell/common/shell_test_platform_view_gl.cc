@@ -90,13 +90,6 @@ ShellTestPlatformViewGL::CreateExternalViewEmbedder() {
   return shell_test_external_view_embedder_;
 }
 
-// |PlatformView|
-PointerDataDispatcherMaker ShellTestPlatformViewGL::GetDispatcherMaker() {
-  return [](DefaultPointerDataDispatcher::Delegate& delegate) {
-    return std::make_unique<SmoothPointerDataDispatcher>(delegate);
-  };
-}
-
 // |GPUSurfaceGLDelegate|
 std::unique_ptr<GLContextResult>
 ShellTestPlatformViewGL::GLContextMakeCurrent() {

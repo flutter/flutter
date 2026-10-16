@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 import 'package:meta/meta.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -512,10 +512,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     );
 
     for (final ValidationResult result in validationResults.whereType<ValidationResult>()) {
-      logger.printStatus('\n${result.coloredLeadingBox} ${result.statusInfo}');
+      logger.printStatus('\n${result.coloredLeadingBox(terminal)} ${result.statusInfo}');
       for (final ValidationMessage message in result.messages) {
         logger.printStatus(
-          '${message.coloredIndicator} ${message.message}',
+          '${message.coloredIndicator(terminal)} ${message.message}',
           indent: result.leadingBox.length + 1,
         );
       }

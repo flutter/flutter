@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
 import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
@@ -352,7 +353,11 @@ void main() {
     await service.start(
       BuildInfo.profile,
       device,
-      DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: testUrl, ipv6: true),
+      DebuggingOptions.enabled(
+        BuildInfo.profile,
+        webConfig: const WebDebugConfig(launchUrl: testUrl),
+        ipv6: true,
+      ),
     );
     await service.stop();
     expect(service.webUri, Uri.parse(testUrl));
@@ -368,13 +373,13 @@ void main() {
       device,
       DebuggingOptions.enabled(
         BuildInfo.profile,
-        webDevServerConfig: webDevServerConfig,
+        webConfig: WebDebugConfig(devServerConfig: webDevServerConfig),
         ipv6: true,
       ),
     );
     await service.stop();
     expect(
-      FakeResidentRunner.instance.debuggingOptions.webDevServerConfig?.headers,
+      FakeResidentRunner.instance.debuggingOptions.webConfig.devServerConfig?.headers,
       equals(webHeaders),
     );
   }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
@@ -387,7 +392,11 @@ void main() {
       service.start(
         BuildInfo.profile,
         device,
-        DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: invalidTestUrl, ipv6: true),
+        DebuggingOptions.enabled(
+          BuildInfo.profile,
+          webConfig: const WebDebugConfig(launchUrl: invalidTestUrl),
+          ipv6: true,
+        ),
       ),
       throwsA(isA<FormatException>()),
     );
@@ -424,6 +433,8 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   ResidentRunner createWebRunner(
     FlutterDevice device, {
     required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
     required FlutterProject flutterProject,
     required bool stayResident,
