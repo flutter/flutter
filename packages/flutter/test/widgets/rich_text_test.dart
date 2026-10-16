@@ -8,6 +8,170 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  const languages = <String, List<(String, TextDirection)>>{
+    'Russian': <(String, TextDirection)>[('мир', TextDirection.ltr)],
+    'Arabic': <(String, TextDirection)>[('نص', TextDirection.rtl)],
+    'Hebrew': <(String, TextDirection)>[('עם', TextDirection.rtl)],
+    'mixed Russian, Arabic and Hebrew': <(String, TextDirection)>[
+      ('мир', TextDirection.ltr),
+      ('نص', TextDirection.rtl),
+      ('עם', TextDirection.rtl),
+    ],
+  };
+  for (final sample in languages.entries) {
+    for (final TextDirection direction in TextDirection.values) {
+      testWidgets('${sample.key} WidgetSpans preserve script order and hit targets: $direction', (
+        WidgetTester tester,
+      ) async {
+        final keys = <GlobalKey>[];
+        final tapped = <int>[];
+        final spans = <InlineSpan>[];
+        for (final (String word, TextDirection _) in sample.value) {
+          for (var i = 0; i < 3; i++) {
+            spans.add(TextSpan(text: '$word '));
+            if (i < 2) {
+              final int index = keys.length;
+              final GlobalKey key = GlobalKey();
+              keys.add(key);
+              spans.add(
+                WidgetSpan(
+                  child: GestureDetector(
+                    key: key,
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => tapped.add(index),
+                    child: SizedBox(width: 20.0 + 10 * index, height: 20),
+                  ),
+                ),
+              );
+            }
+          }
+        }
+        for (final width in <double>[800, 80, 800]) {
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: direction,
+              child: Center(
+                child: SizedBox(
+                  width: width,
+                  child: RichText(
+                    text: TextSpan(
+                      style: const TextStyle(fontFamily: 'Ahem', fontSize: 10),
+                      children: spans,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          final List<Rect> rects = keys
+              .map((GlobalKey key) => tester.getRect(find.byKey(key)))
+              .toList();
+          tapped.clear();
+          for (var i = 0; i < rects.length; i++) {
+            expect(rects[i].width, 20.0 + 10 * i);
+            if (width == 800 && i.isEven) {
+              expect(rects[i].top, rects[i + 1].top);
+              expect(
+                rects[i].left < rects[i + 1].left,
+                sample.value[i ~/ 2].$2 == TextDirection.ltr,
+              );
+            }
+            await tester.tapAt(rects[i].center);
+          }
+          expect(tapped, List<int>.generate(keys.length, (int index) => index));
+        }
+      });
+    }
+  }
+
+  testWidgets('RTL WidgetSpans keep their positions and hit targets after reflow', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/54400.
+    final keys = List<GlobalKey>.generate(3, (int index) => GlobalKey());
+    final tapped = <int>[];
+    for (final width in <double>[500, 80, 500]) {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(
+            child: SizedBox(
+              width: width,
+              child: RichText(
+                text: TextSpan(
+                  children: <InlineSpan>[
+                    for (var i = 0; i < keys.length; i++)
+                      WidgetSpan(
+                        child: GestureDetector(
+                          key: keys[i],
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () => tapped.add(i),
+                          child: SizedBox(width: 30.0 + 20 * i, height: 20),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      final List<Rect> rects = keys
+          .map((GlobalKey key) => tester.getRect(find.byKey(key)))
+          .toList();
+      expect(rects[0].top, rects[1].top);
+      expect(rects[0].left, greaterThan(rects[1].left));
+      if (width == 80) {
+        expect(rects[2].top, greaterThan(rects[1].top));
+        expect(rects[2].right, rects[0].right);
+      } else {
+        expect(rects[2].top, rects[1].top);
+        expect(rects[1].left, greaterThan(rects[2].left));
+      }
+      tapped.clear();
+      for (var i = 0; i < rects.length; i++) {
+        expect(rects[i].width, 30.0 + 20 * i);
+        await tester.tapAt(rects[i].center);
+      }
+      expect(tapped, <int>[0, 1, 2]);
+    }
+  });
+
+  testWidgets('RTL Arabic text positions WidgetSpans in reading order', (
+    WidgetTester tester,
+  ) async {
+    final keys = List<GlobalKey>.generate(3, (int index) => GlobalKey());
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.rtl,
+        child: Center(
+          child: SizedBox(
+            width: 800,
+            child: Text.rich(
+              TextSpan(
+                text: 'هذا اختبار',
+                style: const TextStyle(fontSize: 20),
+                children: <InlineSpan>[
+                  WidgetSpan(child: SizedBox(key: keys[0], width: 30, height: 20)),
+                  const TextSpan(text: ' و '),
+                  WidgetSpan(child: SizedBox(key: keys[1], width: 50, height: 20)),
+                  const TextSpan(text: ' ثم '),
+                  WidgetSpan(child: SizedBox(key: keys[2], width: 70, height: 20)),
+                  const TextSpan(text: ' ، لكنه معطل'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final List<Rect> rects = keys.map((GlobalKey key) => tester.getRect(find.byKey(key))).toList();
+    expect(rects[0].top, rects[1].top);
+    expect(rects[1].top, rects[2].top);
+    expect(rects[0].left, greaterThan(rects[1].left));
+    expect(rects[1].left, greaterThan(rects[2].left));
+  });
+
   testWidgets('RichText with recognizers without handlers does not throw', (
     WidgetTester tester,
   ) async {

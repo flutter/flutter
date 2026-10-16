@@ -7,6 +7,177 @@ import 'dart:ui';
 import 'package:test/test.dart';
 
 void main() {
+  group('placeholder boxes in logical order', () {
+    const languages = <String, List<(String, TextDirection)>>{
+      'Russian': <(String, TextDirection)>[('мир', TextDirection.ltr)],
+      'Arabic': <(String, TextDirection)>[('نص', TextDirection.rtl)],
+      'Hebrew': <(String, TextDirection)>[('עם', TextDirection.rtl)],
+      'mixed Russian, Arabic and Hebrew': <(String, TextDirection)>[
+        ('мир', TextDirection.ltr),
+        ('نص', TextDirection.rtl),
+        ('עם', TextDirection.rtl),
+      ],
+    };
+    for (final sample in languages.entries) {
+      for (final TextDirection direction in TextDirection.values) {
+        test('${sample.key} preserve placeholder identity and script order: $direction', () {
+          // Ahem makes geometry deterministic; the SkParagraph language test also
+          // exercises real script fonts and asserts there are no missing glyphs.
+          final builder = ParagraphBuilder(
+            ParagraphStyle(textDirection: direction, fontFamily: 'Ahem', fontSize: 10),
+          );
+          final offsets = <int>[];
+          var offset = 0;
+          for (final (String word, TextDirection _) in sample.value) {
+            for (var i = 0; i < 3; i++) {
+              final text = '$word ';
+              builder.addText(text);
+              offset += text.length;
+              if (i < 2) {
+                offsets.add(offset++);
+                builder.addPlaceholder(10.0 + 10 * offsets.length, 20, PlaceholderAlignment.bottom);
+              }
+            }
+          }
+          final Paragraph paragraph = builder.build();
+          addTearDown(paragraph.dispose);
+          for (final width in <double>[800, 80, 800]) {
+            paragraph.layout(ParagraphConstraints(width: width));
+            final List<TextBox> boxes = paragraph.getBoxesForPlaceholders();
+            expect(boxes, hasLength(offsets.length));
+            for (var i = 0; i < boxes.length; i++) {
+              expect(boxes[i].right - boxes[i].left, closeTo(20 + 10 * i, 0.001));
+              expect(boxes[i].direction, sample.value[i ~/ 2].$2);
+              expect(boxes[i], paragraph.getBoxesForRange(offsets[i], offsets[i] + 1).single);
+              final Rect rect = boxes[i].toRect();
+              final double startX = boxes[i].direction == TextDirection.rtl
+                  ? rect.right - rect.width / 4
+                  : rect.left + rect.width / 4;
+              expect(
+                paragraph.getPositionForOffset(Offset(startX, rect.center.dy)).offset,
+                offsets[i],
+              );
+              expect(
+                paragraph
+                    .getPositionForOffset(Offset(rect.left + rect.right - startX, rect.center.dy))
+                    .offset,
+                offsets[i] + 1,
+              );
+              if (width == 800 && i.isEven) {
+                expect(boxes[i].top, boxes[i + 1].top);
+                expect(
+                  boxes[i].left < boxes[i + 1].left,
+                  sample.value[i ~/ 2].$2 == TextDirection.ltr,
+                );
+              }
+            }
+          }
+        });
+      }
+    }
+
+    for (final TextDirection direction in TextDirection.values) {
+      test('preserve identity across bidi layout and reflow: $direction', () {
+        final builder = ParagraphBuilder(ParagraphStyle(textDirection: direction));
+        for (final width in <double>[30, 50, 70]) {
+          builder.addPlaceholder(width, 20, PlaceholderAlignment.bottom);
+        }
+        final Paragraph paragraph = builder.build();
+        addTearDown(paragraph.dispose);
+
+        for (final width in <double>[500, 80, 500]) {
+          paragraph.layout(ParagraphConstraints(width: width));
+          final List<TextBox> boxes = paragraph.getBoxesForPlaceholders();
+          expect(boxes, hasLength(3));
+          for (var i = 0; i < boxes.length; i++) {
+            expect(boxes[i].right - boxes[i].left, 30 + 20 * i);
+            expect(boxes[i].bottom - boxes[i].top, 20);
+            expect(boxes[i].direction, direction);
+            expect(boxes[i].toRect(), paragraph.getBoxesForRange(i, i + 1).single.toRect());
+          }
+          if (direction == TextDirection.rtl) {
+            expect(boxes.map((TextBox box) => box.left), <double>[
+              width - 30,
+              width - 80,
+              width - (width == 80 ? 70 : 150),
+            ]);
+          } else {
+            expect(boxes.map((TextBox box) => box.left), <double>[
+              0,
+              30,
+              if (width == 80) 0 else 80,
+            ]);
+          }
+          expect(boxes[0].top, boxes[1].top);
+          expect(boxes[2].top, width == 80 ? greaterThan(boxes[1].top) : boxes[1].top);
+        }
+      });
+
+      test('preserve identity with an opposite-direction embedding: $direction', () {
+        final builder = ParagraphBuilder(
+          ParagraphStyle(textDirection: direction, fontFamily: 'Ahem', fontSize: 20),
+        );
+        builder.addPlaceholder(30, 20, PlaceholderAlignment.bottom);
+        builder.addText(direction == TextDirection.rtl ? '\u202a' : '\u202b');
+        builder.addPlaceholder(50, 20, PlaceholderAlignment.bottom);
+        builder.addPlaceholder(70, 20, PlaceholderAlignment.bottom);
+        builder.addText('\u202c');
+        builder.addPlaceholder(90, 20, PlaceholderAlignment.bottom);
+        final Paragraph paragraph = builder.build();
+        addTearDown(paragraph.dispose);
+        paragraph.layout(const ParagraphConstraints(width: 500));
+        final List<TextBox> boxes = paragraph.getBoxesForPlaceholders();
+        expect(boxes, hasLength(4));
+        expect(
+          boxes.map((TextBox box) => box.left),
+          direction == TextDirection.rtl ? <double>[470, 350, 400, 260] : <double>[0, 100, 30, 150],
+        );
+        const offsets = <int>[0, 2, 3, 5];
+        for (var i = 0; i < boxes.length; i++) {
+          expect(boxes[i].right - boxes[i].left, 30 + 20 * i);
+          final TextBox range = paragraph.getBoxesForRange(offsets[i], offsets[i] + 1).single;
+          expect(boxes[i], range);
+          final Rect rect = boxes[i].toRect();
+          final double startX = boxes[i].direction == TextDirection.rtl
+              ? rect.right - rect.width / 4
+              : rect.left + rect.width / 4;
+          expect(paragraph.getPositionForOffset(Offset(startX, rect.center.dy)).offset, offsets[i]);
+          expect(
+            paragraph
+                .getPositionForOffset(Offset(rect.left + rect.right - startX, rect.center.dy))
+                .offset,
+            offsets[i] + 1,
+          );
+        }
+      });
+    }
+
+    for (final ellipsis in <String?>[null, '\u2026']) {
+      test('omit RTL placeholders after maxLines, ellipsis: $ellipsis', () {
+        final builder = ParagraphBuilder(
+          ParagraphStyle(
+            textDirection: TextDirection.rtl,
+            fontFamily: 'Ahem',
+            fontSize: 20,
+            maxLines: 1,
+            ellipsis: ellipsis,
+          ),
+        );
+        for (final width in <double>[30, 50, 70]) {
+          builder.addPlaceholder(width, 20, PlaceholderAlignment.bottom);
+        }
+        final Paragraph paragraph = builder.build();
+        addTearDown(paragraph.dispose);
+        paragraph.layout(const ParagraphConstraints(width: 110));
+        final List<TextBox> boxes = paragraph.getBoxesForPlaceholders();
+        expect(boxes, hasLength(2));
+        expect(boxes.map((TextBox box) => box.right - box.left), <double>[30, 50]);
+        expect(boxes[0].left, greaterThan(boxes[1].left));
+        expect(paragraph.getBoxesForRange(2, 3), isEmpty);
+      });
+    }
+  });
+
   // Ahem font uses a constant ideographic/alphabetic baseline ratio.
   const kAhemBaselineRatio = 1.25;
 
