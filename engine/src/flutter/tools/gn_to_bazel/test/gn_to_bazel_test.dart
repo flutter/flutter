@@ -2559,6 +2559,51 @@ executable("flutter_linux_unittests") {
       expect(gtkOutput, contains('    env = {"G_DEBUG": "fatal-criticals"},\n'));
     });
 
+    test('a benchmark run_tests.py runs is a manual cc_test; the others stay binaries', () async {
+      // fml_benchmarks (benchmarkRuns): run_engine_benchmarks' ICU argument
+      // and its file, tagged out of wildcard runs.
+      final GnFileEvaluation evaluation = await evaluate('''
+executable("fml_benchmarks") {
+  testonly = true
+  sources = [ "message_loop_task_queues_benchmark.cc" ]
+  deps = [ "//flutter/benchmarking" ]
+}
+''');
+      final String output = emitBuildFile(evaluation, gnPackage: '//flutter/fml');
+      expect(
+        output,
+        contains('''
+cc_test(
+    name = "fml_benchmarks",
+    size = "medium",
+    srcs = ["message_loop_task_queues_benchmark.cc"],
+    args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    data = ["@icu//:icudata"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    tags = [
+        "benchmark",
+        "manual",
+    ],
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/benchmarking",
+    ],
+)
+'''),
+      );
+      // A testonly executable named neither *tests nor in benchmarkRuns.
+      final GnFileEvaluation binary = await evaluate('''
+executable("display_list_region_benchmarks") {
+  testonly = true
+  sources = [ "benchmarking/dl_region_benchmarks.cc" ]
+}
+''');
+      final String binaryOutput = emitBuildFile(binary, gnPackage: '//flutter/display_list');
+      expect(binaryOutput, contains('cc_binary(\n    name = "display_list_region_benchmarks",'));
+      expect(binaryOutput, isNot(contains('tags')));
+    });
+
     test('all_dependent_configs cross private deps; engine code gets FLUTTER_COPTS', () async {
       final String output = await convert('''
 config("vulkan_public") {
