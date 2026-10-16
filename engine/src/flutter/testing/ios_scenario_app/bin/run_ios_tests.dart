@@ -195,7 +195,7 @@ final _args = ArgParser()
   ..addOption(
     'os-version',
     help: 'The OS version of the iOS simulator device to use.',
-    defaultsTo: '26.2',
+    defaultsTo: '27.0',
   )
   ..addOption(
     'dump-xcresult-on-failure',
