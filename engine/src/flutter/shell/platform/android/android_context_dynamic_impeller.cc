@@ -89,6 +89,7 @@ GetActualRenderingAPIForImpeller(
   // feature. In these cases it will use OpenGLES.
   if (IsDeviceEmulator()) {
     // Avoid using Vulkan on known emulators.
+    FML_LOG(IMPORTANT) << "Emulator detected, falling back to OpenGLES.";
     return nullptr;
   }
 
@@ -97,6 +98,8 @@ GetActualRenderingAPIForImpeller(
   if (strcmp(property, kAndroidHuawei) == 0) {
     // Avoid using Vulkan on Huawei as AHB imports do not
     // consistently work.
+    FML_LOG(IMPORTANT) << "Huawei device detected (ro.com.google.clientidbase="
+                       << kAndroidHuawei << "), falling back to OpenGLES.";
     return nullptr;
   }
 
@@ -109,13 +112,19 @@ GetActualRenderingAPIForImpeller(
       __system_property_find("ro.vendor.mediatek.platform") != nullptr) {
     // Probably MediaTek. Avoid Vulkan if older than 32 to work around
     // crashes when importing AHB.
+    __system_property_get("ro.vendor.mediatek.platform", property);
+    FML_LOG(IMPORTANT) << "MediaTek vendor API level " << vendor_api_level
+                       << " is below "
+                       << kMinimumAndroidApiLevelForMediaTekVulkan
+                       << " (ro.vendor.mediatek.platform=" << property
+                       << "), falling back to OpenGLES.";
     return nullptr;
   }
 
   __system_property_get("ro.product.board", property);
   if (IsKnownBadSOC(property)) {
-    FML_LOG(INFO)
-        << "Known bad Vulkan driver encountered, falling back to OpenGLES.";
+    FML_LOG(IMPORTANT) << "Known bad SoC encountered (ro.product.board="
+                       << property << "), falling back to OpenGLES.";
     return nullptr;
   }
 
@@ -133,6 +142,8 @@ GetActualRenderingAPIForImpeller(
           .enable_surface_control = settings.enable_surface_control,
       });
   if (!vulkan_backend->IsValid()) {
+    FML_LOG(IMPORTANT)
+        << "Could not create a Vulkan context, falling back to OpenGLES.";
     return nullptr;
   }
   return vulkan_backend;
