@@ -10,8 +10,8 @@
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/paint.h"
 #include "flutter/lib/ui/text/paragraph.h"
+#include "flutter/lib/ui/text/text_styles.g.h"
 #include "flutter/txt/src/txt/paragraph_builder.h"
-#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace flutter {
 
@@ -22,33 +22,11 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
   FML_FRIEND_MAKE_REF_COUNTED(ParagraphBuilder);
 
  public:
-  static void Create(Dart_Handle wrapper,
-                     Dart_Handle encoded_handle,
-                     Dart_Handle strutData,
-                     const std::string& fontFamily,
-                     const std::vector<std::string>& strutFontFamilies,
-                     double fontSize,
-                     double height,
-                     const std::u16string& ellipsis,
-                     const std::string& locale);
+  static void Create(Dart_Handle wrapper, ParagraphStyle in);
 
   ~ParagraphBuilder() override;
 
-  void pushStyle(const tonic::Int32List& encoded,
-                 const std::vector<std::string>& fontFamilies,
-                 double fontSize,
-                 double letterSpacing,
-                 double wordSpacing,
-                 double height,
-                 double decorationThickness,
-                 const std::string& locale,
-                 Dart_Handle background_objects,
-                 Dart_Handle background_data,
-                 Dart_Handle foreground_objects,
-                 Dart_Handle foreground_data,
-                 Dart_Handle shadows_data,
-                 Dart_Handle font_features_data,
-                 Dart_Handle font_variations_data);
+  void pushStyle(TextStyle in);
 
   void pop();
 
@@ -69,16 +47,10 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
   void build(Dart_Handle paragraph_handle);
 
  private:
-  explicit ParagraphBuilder(Dart_Handle encoded,
-                            Dart_Handle strutData,
-                            const std::string& fontFamily,
-                            const std::vector<std::string>& strutFontFamilies,
-                            double fontSize,
-                            double height,
-                            const std::u16string& ellipsis,
-                            const std::string& locale);
+  explicit ParagraphBuilder(const ParagraphStyle& in);
 
   std::unique_ptr<txt::ParagraphBuilder> m_paragraph_builder_;
+  bool m_default_half_leading_ = false;
 };
 
 }  // namespace flutter

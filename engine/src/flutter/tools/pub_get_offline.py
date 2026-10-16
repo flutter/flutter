@@ -39,6 +39,7 @@ ALL_PACKAGES = [
     os.path.join(ENGINE_DIR, 'tools', 'clang_tidy'),
     os.path.join(ENGINE_DIR, 'tools', 'clangd_check'),
     os.path.join(ENGINE_DIR, 'tools', 'compare_goldens'),
+    os.path.join(ENGINE_DIR, 'tools', 'cpp_data_generator'),
     os.path.join(ENGINE_DIR, 'tools', 'engine_tool'),
     os.path.join(ENGINE_DIR, 'tools', 'gen_web_locale_keymap'),
     os.path.join(ENGINE_DIR, 'tools', 'githooks'),
