@@ -1,0 +1,29 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:flutter_frontend_server: the engine's additions to the Dart
+# frontend server (the toString transformer), run from the prebuilt SDK's
+# frontend_server_aot.dart.snapshot. Hand-written: the GN file's one target
+# copies that snapshot into the build directory (copy("frontend_server")),
+# which the kernel compiles here take from @dart_sdk_linux_x64 directly
+# (build/bazel/dart/kernel.bzl); its tests are run_tests.py's
+# (--type dart-host).
+
+load("//engine/src/flutter/build/bazel/dart:package_test.bzl", "dart_package_test")
+
+package(default_visibility = ["//visibility:public"])
+
+# The test compiles its fixture with the frontend server out of
+# FLUTTER_BUILD_DIRECTORY -- gen/frontend_server_aot.dart.snapshot against
+# flutter_patched_sdk/, as GN's build directory lays them out -- and runs
+# the kernel on the SDK's VM; its expected output follows the directory's
+# name (a product platform in a `release` build).
+dart_package_test(
+    name = "tests",
+    build_directory = {
+        "@dart_sdk_linux_x64//:frontend_server": "gen",
+        "//engine/src/flutter/lib/snapshot:strong_platform": "flutter_patched_sdk",
+    },
+    deps = ["//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources"],
+)

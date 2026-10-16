@@ -44,9 +44,8 @@ filegroup(
 flutter_dart_tests(
     name = "dart",
     srcs = [
-        "//engine/src/flutter:engine_repo_tools_sources",
         "//engine/src/flutter/lib/gpu:dart_sources",
-        "//engine/src/flutter/testing:skia_gold_client_sources",
+        "//engine/src/flutter/testing/skia_gold_client:dart_sources",
     ],
     data = [
         # What the tests read from the source root (run_tests.py's working

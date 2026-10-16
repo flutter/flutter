@@ -2,8 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# snapshot.bzl: the Dart snapshot pipeline of //flutter/lib/snapshot
-# (compile_platform, gen_snapshot, bin_to_assembly) as Bazel rules.
+# The Dart rules: snapshot.bzl, the snapshot pipeline of //flutter/lib/snapshot
+# (compile_platform, gen_snapshot, bin_to_assembly); kernel.bzl, GN's
+# flutter_frontend_server (dart_kernel, dart_package_root); package_test.bzl,
+# run_tests.py's --type dart-host (dart_package_test).
 
 package(default_visibility = ["//visibility:public"])
 
