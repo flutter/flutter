@@ -379,7 +379,8 @@ class Scrollable extends StatefulWidget {
     var currentContext = context;
     // This is the context that will need to establish the dependency.
     final originalContext = currentContext;
-    InheritedElement? element = currentContext.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
+    InheritedElement? element = currentContext
+        .getElementForInheritedWidgetOfExactType<_ScrollableScope>();
     while (element != null) {
       final ScrollableState scrollable = (element.widget as _ScrollableScope).scrollable;
       if (axis == null || axisDirectionToAxis(scrollable.axisDirection) == axis) {
@@ -1283,7 +1284,9 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
         granularity: effectiveEvent.granularity,
       );
     } else {
-      _currentDragStartRelatedToOrigin = _inferPositionRelatedToOrigin(effectiveEvent.globalPosition);
+      _currentDragStartRelatedToOrigin = _inferPositionRelatedToOrigin(
+        effectiveEvent.globalPosition,
+      );
       final Offset startOffset = _currentDragStartRelatedToOrigin!.translate(
         -deltaToOrigin.dx,
         -deltaToOrigin.dy,
@@ -1309,7 +1312,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
         _autoScroller.stopAutoScroll();
         return result;
       }
-      _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
+      _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(effectiveEvent));
       if (_autoScroller.scrolling) {
         return SelectionResult.pending;
       }

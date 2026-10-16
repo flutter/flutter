@@ -1305,7 +1305,7 @@ class TextTreeRenderer {
     if (node.emptyBodyDescription != null &&
         properties.isEmpty &&
         children.isEmpty &&
-        prefixLineOne.isNotEmpty) {
+        effectivePrefixLineOne.isNotEmpty) {
       builder.write(node.emptyBodyDescription!);
       if (config.lineBreakProperties) {
         builder.write(config.lineBreak);
@@ -1360,7 +1360,7 @@ class TextTreeRenderer {
     }
 
     final String prefixChildren = config.bodyIndent;
-    final prefixChildrenRaw = '$prefixOtherLines$prefixChildren';
+    final prefixChildrenRaw = '$effectivePrefixOtherLines$prefixChildren';
     if (children.isEmpty &&
         config.addBlankLineIfNoChildren &&
         builder.requiresMultipleLines &&
@@ -1375,7 +1375,7 @@ class TextTreeRenderer {
         builder.write(config.lineBreak);
       }
 
-      builder.prefixOtherLines = prefixOtherLines;
+      builder.prefixOtherLines = effectivePrefixOtherLines;
 
       for (var i = 0; i < children.length; i++) {
         final DiagnosticsNode child = children[i];
@@ -1711,7 +1711,9 @@ abstract class DiagnosticsNode {
       effectiveNodes.add(DiagnosticsNode.message('...'));
       truncated = true;
     }
-    final List<_JsonDiagnosticsNode> json = effectiveNodes.map<_JsonDiagnosticsNode>((DiagnosticsNode node) {
+    final List<_JsonDiagnosticsNode> json = effectiveNodes.map<_JsonDiagnosticsNode>((
+      DiagnosticsNode node,
+    ) {
       return node.toJsonMap(delegate.delegateForNode(node));
     }).toList();
     if (truncated) {

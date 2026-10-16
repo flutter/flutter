@@ -861,7 +861,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       if (childLayoutGeometry.visible || currentScrollOffset > 0) {
         updateChildLayoutOffset(currentChild, effectiveLayoutOffset, growthDirection);
       } else {
-        updateChildLayoutOffset(currentChild, -currentScrollOffset + initialLayoutOffset, growthDirection);
+        updateChildLayoutOffset(
+          currentChild,
+          -currentScrollOffset + initialLayoutOffset,
+          growthDirection,
+        );
       }
 
       maxPaintOffset = math.max(
@@ -1112,6 +1116,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // Our new reference frame render object's main axis extent.
     final double pivotExtent;
     final GrowthDirection growthDirection;
+    // `rect`, or a default if it was not provided, in `target`'s coordinate
+    // system.
+    final Rect effectiveRect;
 
     // `leadingScrollOffset` is currently the scrollOffset of our new reference
     // frame (`pivot` or `target`), within `child`.
@@ -1128,7 +1135,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         Axis.horizontal => pivot.size.width,
         Axis.vertical => pivot.size.height,
       };
-      final Rect effectiveRect = rect ?? target.paintBounds;
+      effectiveRect = rect ?? target.paintBounds;
       rectLocal = MatrixUtils.transformRect(target.getTransformTo(pivot), effectiveRect);
     } else if (onlySlivers) {
       // `pivot` does not exist. We'll have to make up one from `target`, the
@@ -1138,7 +1145,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       // TODO(LongCatIsLooong): make sure this works if `targetSliver` is a
       // persistent header, when #56413 relands.
       pivotExtent = targetSliver.geometry!.scrollExtent;
-      final Rect effectiveRect;
       if (rect == null) {
         switch (effectiveAxis) {
           case Axis.horizontal:
@@ -1196,10 +1202,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // offset.pixels is changed after the last performLayout, the new scroll
     // position will not be accounted for.
     final Matrix4 transform = target.getTransformTo(this);
-    Rect targetRect = MatrixUtils.transformRect(transform, rect ?? target.paintBounds);
+    Rect targetRect = MatrixUtils.transformRect(transform, effectiveRect);
     final double extentOfPinnedSlivers = maxScrollObstructionExtentBefore(sliver);
 
-    final double mainAxisExtentDifference = switch (axis) {
+    final double mainAxisExtentDifference = switch (effectiveAxis) {
       Axis.horizontal => size.width - extentOfPinnedSlivers - rectLocal.width,
       Axis.vertical => size.height - extentOfPinnedSlivers - rectLocal.height,
     };
@@ -1217,7 +1223,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
           // If child's growth direction is reverse, when viewport.offset is
           // `leadingScrollOffset`, it is positioned just outside of the leading
           // edge of the viewport.
-          leadingScrollOffset -= switch (axis) {
+          leadingScrollOffset -= switch (effectiveAxis) {
             Axis.vertical => targetRect.height,
             Axis.horizontal => targetRect.width,
           };
