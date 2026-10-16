@@ -20,11 +20,11 @@ typedef ExtensionKernelCompileFn = Future<Uri> Function(DiscoveredProjectExtensi
 /// manages caching across `$PUB_CACHE` and local workspace packages.
 class ExtensionKernelCompiler {
   ExtensionKernelCompiler({
+    required this._artifacts,
     required this._fileSystem,
     required this._logger,
     required this._platform,
     required this._processManager,
-    this._artifacts,
     this._flutterRoot,
   });
 
@@ -34,11 +34,11 @@ class ExtensionKernelCompiler {
   /// Environment variable overriding the Pub cache directory.
   static const String kPubCacheEnv = 'PUB_CACHE';
 
+  final Artifacts _artifacts;
   final FileSystem _fileSystem;
   final Logger _logger;
   final Platform _platform;
   final ProcessManager _processManager;
-  final Artifacts? _artifacts;
   final String? _flutterRoot;
 
   /// Compiles [extension] to a `.dill` file (or returns the cached `.dill` URI
@@ -83,36 +83,75 @@ class ExtensionKernelCompiler {
     }
 
     dillFile.parent.createSync(recursive: true);
-    final String dartExecutable = _resolveDartExecutable();
-    final command = <String>[
-      dartExecutable,
-      'compile',
-      'kernel',
-      '--packages=${packageConfigFile.path}',
-      '--output=${dillFile.path}',
-      '--depfile=${depFile.path}',
-      entrypointFile.path,
-    ];
-
-    _logger.printTrace(
-      'ExtensionKernelCompiler: compiling "${extension.name}" with: ${command.join(' ')}',
-    );
-    final ProcessResult result = await _processManager.run(command);
-    if (result.exitCode != 0) {
-      if (dillFile.existsSync()) {
-        try {
-          dillFile.deleteSync();
-        } on FileSystemException {
-          // Best-effort cleanup of incomplete kernel output.
+    return _fileSystem.runLocked<Uri>(
+      lockPath: '${dillFile.path}.lock',
+      logger: _logger,
+      scope: () async {
+        if (isImmutableCache) {
+          if (dillFile.existsSync() && dillFile.lengthSync() > 0) {
+            _logger.printTrace(
+              'ExtensionKernelCompiler: reusing cached pub-cache kernel "${dillFile.path}".',
+            );
+            return dillFile.absolute.uri;
+          }
+        } else if (!_needsRecompilation(
+          dillFile: dillFile,
+          depFile: depFile,
+          packageConfigFile: packageConfigFile,
+          entrypointFile: entrypointFile,
+        )) {
+          _logger.printTrace(
+            'ExtensionKernelCompiler: reusing up-to-date local kernel "${dillFile.path}".',
+          );
+          return dillFile.absolute.uri;
         }
-      }
-      throw StateError(
-        'Failed to compile extension "${extension.name}" to kernel '
-        '(exit code ${result.exitCode}):\n${result.stderr}',
-      );
-    }
 
-    return dillFile.absolute.uri;
+        final File tempDillFile = _fileSystem.file('${dillFile.path}.tmp');
+        final File tempDepFile = _fileSystem.file('${depFile.path}.tmp');
+        final String dartExecutable = _resolveDartExecutable();
+        final command = <String>[
+          dartExecutable,
+          'compile',
+          'kernel',
+          '--packages=${packageConfigFile.path}',
+          '--output=${tempDillFile.path}',
+          '--depfile=${tempDepFile.path}',
+          entrypointFile.path,
+        ];
+
+        _logger.printTrace(
+          'ExtensionKernelCompiler: compiling "${extension.name}" with: ${command.join(' ')}',
+        );
+        final ProcessResult result = await _processManager.run(command);
+        if (result.exitCode != 0) {
+          _tryDeleteFile(tempDillFile);
+          _tryDeleteFile(tempDepFile);
+          throw StateError(
+            'Failed to compile extension "${extension.name}" to kernel '
+            '(exit code ${result.exitCode}):\n${result.stderr}',
+          );
+        }
+
+        if (tempDepFile.existsSync()) {
+          tempDepFile.renameSync(depFile.path);
+        }
+        if (tempDillFile.existsSync()) {
+          tempDillFile.renameSync(dillFile.path);
+        }
+        return dillFile.absolute.uri;
+      },
+    );
+  }
+
+  static void _tryDeleteFile(File file) {
+    if (!file.existsSync()) {
+      return;
+    }
+    try {
+      file.deleteSync();
+    } on FileSystemException {
+      // Best-effort cleanup of incomplete kernel output.
+    }
   }
 
   /// Determines whether [extension]'s package root resides inside `$PUB_CACHE`.
@@ -318,15 +357,5 @@ class ExtensionKernelCompiler {
     );
   }
 
-  String _resolveDartExecutable() {
-    if (_artifacts case final Artifacts artifacts) {
-      return artifacts.getArtifactPath(Artifact.engineDartBinary);
-    }
-    final dartBinName = _platform.isWindows ? 'dart.exe' : 'dart';
-    final String? flutterRoot = _flutterRoot ?? Cache.flutterRoot;
-    if (flutterRoot != null && flutterRoot.isNotEmpty) {
-      return _fileSystem.path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', dartBinName);
-    }
-    return dartBinName;
-  }
+  String _resolveDartExecutable() => _artifacts.getArtifactPath(Artifact.engineDartBinary);
 }

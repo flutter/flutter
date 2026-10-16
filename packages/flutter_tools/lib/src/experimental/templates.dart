@@ -121,40 +121,37 @@ base class ExtensionTemplateManager extends TemplateService {
   }
 
   /// Queries `template.getAppTemplates` from active extension isolates.
-  Future<Set<String>> fetchAppPlatformTemplates({Directory? projectDir}) async {
-    if (!_featureFlags.isToolExtensionsEnabled) {
-      return const <String>{};
-    }
-    await _extensionManager.ensureInitialized(
-      requiredServices: const <String>{TemplateService.serviceNamespace},
-      startDir: projectDir,
+  Future<Set<String>> fetchAppPlatformTemplates({
+    Iterable<String>? platforms,
+    Directory? projectDir,
+  }) async {
+    return _fetchPlatformTemplates(
+      method: TemplateService.getAppTemplatesMethod,
+      cache: _cachedAppPlatformTemplates,
+      platforms: platforms,
+      projectDir: projectDir,
     );
-    final List<ExtensionConnection> connections = _extensionManager.connections
-        .where(
-          (ExtensionConnection c) =>
-              c.capabilities.services.contains(TemplateService.serviceNamespace),
-        )
-        .toList();
-
-    for (final connection in connections) {
-      try {
-        final Object? rpcResult = await connection
-            .sendRequest(TemplateService.getAppTemplatesMethod)
-            .timeout(_kRpcTimeout);
-        if (rpcResult case final List<Object?> list) {
-          _cachedAppPlatformTemplates.addAll(list.whereType<String>());
-        }
-      } on Object catch (e) {
-        _logger.printTrace(
-          'Failed to get results from extension for ${TemplateService.getAppTemplatesMethod}: $e',
-        );
-      }
-    }
-    return Set<String>.unmodifiable(_cachedAppPlatformTemplates);
   }
 
   /// Queries `template.getPluginTemplates` from active extension isolates.
-  Future<Set<String>> fetchPluginPlatformTemplates({Directory? projectDir}) async {
+  Future<Set<String>> fetchPluginPlatformTemplates({
+    Iterable<String>? platforms,
+    Directory? projectDir,
+  }) async {
+    return _fetchPlatformTemplates(
+      method: TemplateService.getPluginTemplatesMethod,
+      cache: _cachedPluginPlatformTemplates,
+      platforms: platforms,
+      projectDir: projectDir,
+    );
+  }
+
+  Future<Set<String>> _fetchPlatformTemplates({
+    required Set<String> cache,
+    required String method,
+    Iterable<String>? platforms,
+    Directory? projectDir,
+  }) async {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const <String>{};
     }
@@ -162,28 +159,37 @@ base class ExtensionTemplateManager extends TemplateService {
       requiredServices: const <String>{TemplateService.serviceNamespace},
       startDir: projectDir,
     );
+    final Set<String>? platformSet = platforms?.toSet();
+    final Set<String>? matchingExtensionNames = platformSet == null
+        ? null
+        : <String>{
+            for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions)
+              if (ext.config.platforms.any(platformSet.contains)) ext.name,
+          };
     final List<ExtensionConnection> connections = _extensionManager.connections
         .where(
           (ExtensionConnection c) =>
-              c.capabilities.services.contains(TemplateService.serviceNamespace),
+              c.capabilities.services.contains(TemplateService.serviceNamespace) &&
+              (matchingExtensionNames == null ||
+                  c.extensionName == null ||
+                  matchingExtensionNames.contains(c.extensionName)),
         )
         .toList();
 
+    final results = <String>{};
     for (final connection in connections) {
       try {
-        final Object? rpcResult = await connection
-            .sendRequest(TemplateService.getPluginTemplatesMethod)
-            .timeout(_kRpcTimeout);
+        final Object? rpcResult = await connection.sendRequest(method).timeout(_kRpcTimeout);
         if (rpcResult case final List<Object?> list) {
-          _cachedPluginPlatformTemplates.addAll(list.whereType<String>());
+          final Iterable<String> paths = list.whereType<String>();
+          cache.addAll(paths);
+          results.addAll(paths);
         }
       } on Object catch (e) {
-        _logger.printTrace(
-          'Failed to get results from extension for ${TemplateService.getPluginTemplatesMethod}: $e',
-        );
+        _logger.printTrace('Failed to get results from extension for $method: $e');
       }
     }
-    return Set<String>.unmodifiable(_cachedPluginPlatformTemplates);
+    return Set<String>.unmodifiable(platformSet == null ? cache : results);
   }
 
   /// Resolves a template package URI to a local directory.

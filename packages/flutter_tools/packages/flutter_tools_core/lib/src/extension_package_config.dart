@@ -17,7 +17,7 @@ final class ExtensionPackageConfig {
     Iterable<String> services = const <String>{},
     Iterable<String> supportedPlatforms = const <String>{},
     Iterable<String> templates = const <String>{},
-  }) : entrypoint = entrypoint ?? 'bin/$name.dart',
+  }) : entrypoint = _validateEntrypoint(entrypoint ?? 'bin/$name.dart'),
        supportedPlatforms = Set<String>.unmodifiable(
          supportedPlatforms.map((String p) => p.toLowerCase()),
        ),
@@ -54,8 +54,8 @@ final class ExtensionPackageConfig {
     };
 
     final String entrypoint = switch (map[kEntrypointKey]) {
-      final String e when e.trim().isNotEmpty => e.trim(),
-      null => 'bin/$name.dart',
+      final String e when e.trim().isNotEmpty => _validateEntrypoint(e),
+      null => _validateEntrypoint('bin/$name.dart'),
       final Object? other => throw FormatException(
         'Extension config.yaml "$kEntrypointKey" must be a non-empty string, got: $other.',
       ),
@@ -146,6 +146,23 @@ final class ExtensionPackageConfig {
       kTemplatesKey: templates.toList(),
       kPlatformsKey: platforms.toList(),
     };
+  }
+
+  static String _validateEntrypoint(String entrypoint) {
+    final String trimmed = entrypoint.trim();
+    final Uri? parsedUri = Uri.tryParse(trimmed);
+    if (trimmed.isEmpty ||
+        trimmed.startsWith('/') ||
+        trimmed.contains(r'\') ||
+        trimmed.split('/').contains('..') ||
+        parsedUri == null ||
+        parsedUri.hasScheme) {
+      throw FormatException(
+        'Extension config.yaml "$kEntrypointKey" must be a relative path within the package, '
+        'got: "$entrypoint".',
+      );
+    }
+    return trimmed;
   }
 
   static Set<String> _parseStringSet(Object? raw, String fieldName) {

@@ -102,6 +102,21 @@ void main() {
         }),
         throwsFormatException,
       );
+      for (final invalidEntrypoint in const <String>[
+        '../outside.dart',
+        'bin/../../outside.dart',
+        '/abs/path.dart',
+        'file:///abs/path.dart',
+        r'bin\my_ext.dart',
+      ]) {
+        expect(
+          () => ExtensionPackageConfig.fromMap(<String, Object?>{
+            ExtensionPackageConfig.kNameKey: 'my_ext',
+            ExtensionPackageConfig.kEntrypointKey: invalidEntrypoint,
+          }),
+          throwsFormatException,
+        );
+      }
       expect(
         () => ExtensionPackageConfig.fromMap(const <String, Object?>{
           ExtensionPackageConfig.kNameKey: 'my_ext',

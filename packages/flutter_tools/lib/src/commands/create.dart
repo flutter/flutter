@@ -1012,8 +1012,14 @@ Your $application code is in $relativeAppMain.
   }) async {
     final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
     final Set<String> platformTemplatePaths = isPlugin
-        ? await manager.fetchPluginPlatformTemplates(projectDir: projectDir)
-        : await manager.fetchAppPlatformTemplates(projectDir: projectDir);
+        ? await manager.fetchPluginPlatformTemplates(
+            platforms: requestedCustomPlatforms,
+            projectDir: projectDir,
+          )
+        : await manager.fetchAppPlatformTemplates(
+            platforms: requestedCustomPlatforms,
+            projectDir: projectDir,
+          );
     final candidatePaths = <String>{...platformTemplatePaths};
     for (final ProjectTemplate cached in manager.cachedTemplates) {
       if (requestedCustomPlatforms.contains(cached.name)) {
@@ -1035,9 +1041,17 @@ Your $application code is in $relativeAppMain.
       }
       ProjectTemplate? matchingTemplate;
       for (final ProjectTemplate cached in manager.cachedTemplates) {
-        if (cached.templatePath == templatePath || requestedCustomPlatforms.contains(cached.name)) {
+        if (cached.templatePath == templatePath) {
           matchingTemplate = cached;
           break;
+        }
+      }
+      if (matchingTemplate == null) {
+        for (final ProjectTemplate cached in manager.cachedTemplates) {
+          if (requestedCustomPlatforms.contains(cached.name)) {
+            matchingTemplate = cached;
+            break;
+          }
         }
       }
       final Map<String, Object?> renderedParameters = matchingTemplate != null

@@ -617,6 +617,7 @@ class ToolDependencies {
     final extensionKernelCompiler = ExtensionKernelCompiler(
       artifacts: finalArtifacts,
       fileSystem: finalFS,
+      flutterRoot: flutterRoot,
       logger: finalLogger,
       platform: finalPlatform,
       processManager: finalProcessManager,

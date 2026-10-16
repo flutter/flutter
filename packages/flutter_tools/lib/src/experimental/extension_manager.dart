@@ -21,12 +21,12 @@ import 'project_extension_finder.dart';
 /// Manages active tool extension isolate connections and exposes capability proxies.
 class ExtensionManager {
   ExtensionManager({
+    required this._featureFlags,
     required this.hostPlatform,
     required Logger logger,
     ExtensionDiscovery? discovery,
     this._entryPoints = const <ExtensionEntryPoint>[],
     ProjectExtensionFinder? extensionFinder,
-    this._featureFlags,
     FileSystem? fileSystem,
     bool isSafeMode = false,
     ExtensionKernelCompileFn? kernelCompileFn,
@@ -54,14 +54,14 @@ class ExtensionManager {
   final Logger _logger;
   final ExtensionDiscovery _discovery;
   final List<ExtensionEntryPoint> _entryPoints;
-  final FeatureFlags? _featureFlags;
+  final FeatureFlags _featureFlags;
   final ProjectExtensionFinder? _extensionFinder;
   final ExtensionKernelCompileFn? _kernelCompileFn;
   final ExtensionUriSpawner _uriSpawner;
   final Platform? _platform;
   final bool _explicitSafeMode;
 
-  bool get _isToolExtensionsEnabled => _featureFlags?.isToolExtensionsEnabled ?? false;
+  bool get _isToolExtensionsEnabled => _featureFlags.isToolExtensionsEnabled;
 
   bool get isInitialized => _isInitialized;
   bool _isInitialized = false;

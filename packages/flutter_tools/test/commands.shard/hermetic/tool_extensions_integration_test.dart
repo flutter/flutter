@@ -216,9 +216,23 @@ void main() {
           projectManifest: null,
         ),
         platform: platform,
+        isToolExtensionsEnabledOverride: true,
       );
 
       expect(flags.isToolExtensionsEnabled, isFalse);
+
+      final disabledFlagsWithOverride = FlutterFeatureFlags(
+        flutterVersion: FakeFlutterVersion(),
+        featuresConfig: FlutterFeaturesConfig(
+          globalConfig: Config.test(logger: logger),
+          platform: FakePlatform(),
+          projectManifest: null,
+        ),
+        platform: FakePlatform(),
+        isToolExtensionsEnabledOverride: true,
+      );
+
+      expect(disabledFlagsWithOverride.isToolExtensionsEnabled, isFalse);
     });
 
     testWithoutContext(

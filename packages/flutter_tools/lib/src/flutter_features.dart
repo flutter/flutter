@@ -110,10 +110,7 @@ interface class FlutterFeatureFlags extends FeatureFlags with FlutterFeatureFlag
     }
 
     if (feature == toolExtensionsFeature) {
-      if (_isToolExtensionsEnabledOverride != null) {
-        return _isToolExtensionsEnabledOverride;
-      }
-      if (isSafeModeActive(platform.environment)) {
+      if (_isToolExtensionsEnabledOverride == false || isSafeModeActive(platform.environment)) {
         return false;
       }
     }

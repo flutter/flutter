@@ -350,6 +350,8 @@ services:
       const expectedDillPath =
           '/workspace/app/.dart_tool/flutter_tools/extensions/my_ext/extension.dill';
       const expectedDepfilePath = '$expectedDillPath.d';
+      const expectedTempDillPath = '$expectedDillPath.tmp';
+      const expectedTempDepfilePath = '$expectedDepfilePath.tmp';
 
       final processManager = FakeProcessManager.list(<FakeCommand>[
         FakeCommand(
@@ -358,18 +360,20 @@ services:
             'compile',
             'kernel',
             '--packages=${packageConfigFile.path}',
-            '--output=$expectedDillPath',
-            '--depfile=$expectedDepfilePath',
+            '--output=$expectedTempDillPath',
+            '--depfile=$expectedTempDepfilePath',
             entrypointFile.path,
           ],
           onRun: (_) {
-            final File dill = fs.file(expectedDillPath)
+            final File dill = fs.file(expectedTempDillPath)
               ..createSync(recursive: true)
               ..writeAsBytesSync(<int>[1, 2, 3]);
             dill.setLastModifiedSync(DateTime.utc(2026, 1, 1, 1));
-            fs.file(expectedDepfilePath)
+            fs.file(expectedTempDepfilePath)
               ..createSync(recursive: true)
-              ..writeAsStringSync('$expectedDillPath: ${entrypointFile.path} ${helperFile.path}\n');
+              ..writeAsStringSync(
+                '$expectedTempDillPath: ${entrypointFile.path} ${helperFile.path}\n',
+              );
           },
         ),
         FakeCommand(
@@ -378,12 +382,14 @@ services:
             'compile',
             'kernel',
             '--packages=${packageConfigFile.path}',
-            '--output=$expectedDillPath',
-            '--depfile=$expectedDepfilePath',
+            '--output=$expectedTempDillPath',
+            '--depfile=$expectedTempDepfilePath',
             entrypointFile.path,
           ],
           onRun: (_) {
-            final File dill = fs.file(expectedDillPath)..writeAsBytesSync(<int>[4, 5, 6]);
+            final File dill = fs.file(expectedTempDillPath)
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(<int>[4, 5, 6]);
             dill.setLastModifiedSync(DateTime.utc(2026, 1, 1, 3));
           },
         ),
@@ -483,13 +489,13 @@ services:
               'compile',
               'kernel',
               '--packages=${packageConfigFile.path}',
-              '--output=${targetDill.path}',
-              '--depfile=${targetDill.path}.d',
+              '--output=${targetDill.path}.tmp',
+              '--depfile=${targetDill.path}.d.tmp',
               entrypointFile.path,
             ],
             onRun: (_) {
               compileInvocations++;
-              targetDill
+              fs.file('${targetDill.path}.tmp')
                 ..createSync(recursive: true)
                 ..writeAsBytesSync(<int>[9, 9, 9]);
             },
@@ -498,11 +504,80 @@ services:
 
         final Uri dill1 = await compiler.compile(extension);
         expect(dill1, targetDill.uri);
+        expect(fs.file('${targetDill.path}.lock').existsSync(), isTrue);
+        expect(fs.file('${targetDill.path}.tmp').existsSync(), isFalse);
         final Uri dill2 = await compiler.compile(extension);
         expect(dill2, targetDill.uri);
         expect(compileInvocations, 1);
         expect(processManager, hasNoRemainingExpectations);
       },
     );
+
+    test('cleans up temporary files and preserves existing .dill when compilation fails', () async {
+      final fs = MemoryFileSystem.test();
+      final logger = BufferLogger.test();
+      final artifacts = Artifacts.test(fileSystem: fs);
+      final String dartBinary = artifacts.getArtifactPath(Artifact.engineDartBinary);
+
+      final File packageConfigFile = fs.file('/workspace/app/.dart_tool/package_config.json')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{"configVersion":2,"packages":[]}');
+      final Directory extDir = fs.directory('/workspace/my_ext')..createSync(recursive: true);
+      final File entrypointFile = extDir.childFile('bin/my_ext.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('void main() {}');
+
+      const expectedDillPath =
+          '/workspace/app/.dart_tool/flutter_tools/extensions/my_ext/extension.dill';
+      const expectedDepfilePath = '$expectedDillPath.d';
+
+      final processManager = FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <String>[
+            dartBinary,
+            'compile',
+            'kernel',
+            '--packages=${packageConfigFile.path}',
+            '--output=$expectedDillPath.tmp',
+            '--depfile=$expectedDepfilePath.tmp',
+            entrypointFile.path,
+          ],
+          exitCode: 254,
+          stderr: 'Compilation error',
+          onRun: (_) {
+            fs.file('$expectedDillPath.tmp')
+              ..createSync(recursive: true)
+              ..writeAsBytesSync(<int>[0]);
+            fs.file('$expectedDepfilePath.tmp')
+              ..createSync(recursive: true)
+              ..writeAsStringSync('partial');
+          },
+        ),
+      ]);
+
+      final compiler = ExtensionKernelCompiler(
+        artifacts: artifacts,
+        fileSystem: fs,
+        logger: logger,
+        platform: FakePlatform(environment: const <String, String>{'HOME': '/home/test'}),
+        processManager: processManager,
+        flutterRoot: '/flutter',
+      );
+
+      final extension = DiscoveredProjectExtension(
+        name: 'my_ext',
+        rootUri: Uri.directory(extDir.path),
+        packageUri: Uri.directory(extDir.childDirectory('lib').path),
+        packageConfigUri: packageConfigFile.uri,
+        workspaceRootPath: '/workspace/app',
+        config: ExtensionPackageConfig(name: 'my_ext'),
+      );
+
+      await expectLater(compiler.compile(extension), throwsStateError);
+      expect(fs.file(expectedDillPath).existsSync(), isFalse);
+      expect(fs.file('$expectedDillPath.tmp').existsSync(), isFalse);
+      expect(fs.file('$expectedDepfilePath.tmp').existsSync(), isFalse);
+      expect(processManager, hasNoRemainingExpectations);
+    });
   });
 }
