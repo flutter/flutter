@@ -93,5 +93,66 @@ void doTests() {
       expect(semanticsHost.style.position, isEmpty);
       expect(semanticsHost.style.transformOrigin, isEmpty);
     });
+
+    test('attachGlobalStyles enforces direction: ltr on flutter-view and sceneHost', () {
+      final DomElement flutterViewElement = createDomElement(DomManager.flutterViewTagName);
+      domDocument.body!.append(flutterViewElement);
+      StyleManager.attachGlobalStyles(
+        node: flutterViewElement,
+        styleId: 'test-ltr-view',
+        styleNonce: 'testing',
+        cssSelectorPrefix: DomManager.flutterViewTagName,
+      );
+
+      final DomElement sceneHost = createDomElement(DomManager.sceneHostTagName);
+      flutterViewElement.append(sceneHost);
+      StyleManager.attachGlobalStyles(
+        node: sceneHost,
+        styleId: 'test-ltr-scene',
+        styleNonce: 'testing',
+        cssSelectorPrefix: '',
+      );
+
+      expect(domWindow.getComputedStyle(flutterViewElement).direction, 'ltr');
+      expect(domWindow.getComputedStyle(sceneHost).direction, 'ltr');
+
+      flutterViewElement.remove();
+    });
+
+    test('attachGlobalStyles isolates directionality when document has dir="rtl"', () {
+      final String? previousDir = domDocument.documentElement!.getAttribute('dir');
+      try {
+        domDocument.documentElement!.setAttribute('dir', 'rtl');
+
+        final DomElement flutterViewElement = createDomElement(DomManager.flutterViewTagName);
+        domDocument.body!.append(flutterViewElement);
+        StyleManager.attachGlobalStyles(
+          node: flutterViewElement,
+          styleId: 'test-rtl-doc-view',
+          styleNonce: 'testing',
+          cssSelectorPrefix: DomManager.flutterViewTagName,
+        );
+
+        final DomElement sceneHost = createDomElement(DomManager.sceneHostTagName);
+        flutterViewElement.append(sceneHost);
+        StyleManager.attachGlobalStyles(
+          node: sceneHost,
+          styleId: 'test-rtl-doc-scene',
+          styleNonce: 'testing',
+          cssSelectorPrefix: '',
+        );
+
+        expect(domWindow.getComputedStyle(flutterViewElement).direction, 'ltr');
+        expect(domWindow.getComputedStyle(sceneHost).direction, 'ltr');
+
+        flutterViewElement.remove();
+      } finally {
+        if (previousDir != null) {
+          domDocument.documentElement!.setAttribute('dir', previousDir);
+        } else {
+          domDocument.documentElement!.removeAttribute('dir');
+        }
+      }
+    });
   });
 }

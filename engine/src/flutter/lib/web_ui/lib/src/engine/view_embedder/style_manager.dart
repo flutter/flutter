@@ -82,10 +82,18 @@ void applyGlobalCssRulesToSheet(
   String cssSelectorPrefix = '',
   required String defaultCssFont,
 }) {
+  // Ensure that Flutter's coordinate space and layout remain LTR regardless of
+  // any ambient directionality on the host document (e.g. <html dir="rtl">).
+  final rootSelector = cssSelectorPrefix.isNotEmpty ? cssSelectorPrefix : ':host';
   styleElement.appendText(
+    '$rootSelector {'
+    '  direction: ltr;'
+    '  text-align: left;'
+    '}'
     // Fixes #115216 by ensuring that our parameters only affect the flt-scene-host children.
     '$cssSelectorPrefix ${DomManager.sceneHostTagName} {'
     '  font: $defaultCssFont;'
+    '  direction: ltr;'
     '}'
     // This undoes browser's default painting and layout attributes of range
     // input, which is used in semantics.
