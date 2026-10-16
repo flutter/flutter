@@ -414,8 +414,6 @@ dependencies:
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       testUsingContext(
@@ -431,8 +429,6 @@ dependencies:
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       testUsingContext(
@@ -450,8 +446,6 @@ dependencies:
           FileSystem: () => MemoryFileSystem.test(),
           ProcessManager: () => FakeProcessManager.any(),
           FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
-          FlutterProjectFactory: () =>
-              FlutterProjectFactory(logger: logger, fileSystem: globals.fs),
         },
       );
       _testInMemory('creates Android library in module', () async {
@@ -917,7 +911,11 @@ dependencies {
         xcodeProjectInterpreter = XcodeProjectInterpreter.test(
           processManager: FakeProcessManager.any(),
         );
-        flutterProjectFactory = FlutterProjectFactory(logger: logger, fileSystem: fs);
+        flutterProjectFactory = FlutterProjectFactory(
+          fileSystem: fs,
+          logger: logger,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
       });
 
       _testInMemory('default host app language', () async {
@@ -1160,7 +1158,12 @@ android {
         fs = MemoryFileSystem.test();
         testPlistUtils = FakePlistParser();
         xcodeProjectInterpreter = FakeXcodeProjectInterpreter();
-        flutterProjectFactory = FlutterProjectFactory(fileSystem: fs, logger: logger);
+        flutterProjectFactory = FlutterProjectFactory(
+          fileSystem: fs,
+          logger: logger,
+          plistParser: testPlistUtils,
+          xcodeProjectInterpreter: xcodeProjectInterpreter,
+        );
       });
 
       void testWithMocks(String description, Future<void> Function() testMethod) {
@@ -2270,7 +2273,12 @@ resolution: workspace
       fs = MemoryFileSystem.test();
       testPlistParser = FakePlistParser();
       mockXcodeProjectInterpreter = FakeXcodeProjectInterpreter();
-      flutterProjectFactory = FlutterProjectFactory(fileSystem: fs, logger: logger);
+      flutterProjectFactory = FlutterProjectFactory(
+        fileSystem: fs,
+        logger: logger,
+        plistParser: testPlistParser,
+        xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+      );
       const buildContext = XcodeProjectBuildContext(scheme: 'Runner');
       mockXcodeProjectInterpreter.buildSettingsByBuildContext[buildContext] = <String, String>{
         IosProject.kProductBundleIdKey: 'io.flutter.someProject',
@@ -2735,8 +2743,6 @@ void _testInMemory(
         platform: globals.platform,
         artifacts: <ArtifactSet>[],
       ),
-      FlutterProjectFactory: () =>
-          FlutterProjectFactory(fileSystem: testFileSystem, logger: globals.logger),
       Pub: ThrowingPub.new,
     },
   );

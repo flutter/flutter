@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/macos/macos_device.dart';
 import 'package:flutter_tools/src/project.dart';
 
 import 'package:test/fake.dart';
+import 'package:unified_analytics/unified_analytics.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -656,11 +657,21 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 
 class FakeMacOSDevice extends MacOSDevice {
   FakeMacOSDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  });
+    required FileSystem fileSystem,
+    required Logger logger,
+    required OperatingSystemUtils operatingSystemUtils,
+    required ProcessManager processManager,
+  }) : super(
+         analytics: const NoOpAnalytics(),
+         appleContext: FakeAppleContext(),
+         featureFlags: TestFeatureFlags(),
+         toolContext: FakeToolContext(
+           fs: fileSystem,
+           logger: logger,
+           os: operatingSystemUtils,
+           processManager: processManager,
+         ),
+       );
 
   @override
   String get name => 'dummy';
