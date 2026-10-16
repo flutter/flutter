@@ -2082,6 +2082,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
   }
 
+  /// Resets the widget tree to a known state before or after a test.
+  ///
+  /// When there is no implicit view, the tree cannot display [message], so an
+  /// empty [ViewCollection] is used to unmount any remaining views instead.
   void _resetTestTree(Widget message) {
     if (platformDispatcher.implicitView == null) {
       runWidget(const ViewCollection(views: <Widget>[]));
