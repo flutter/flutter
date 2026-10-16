@@ -52,6 +52,19 @@ const String defaultTestSize = 'small';
 const Map<String, String> testSizes = <String, String>{
   // 50 s on the host: the performance overlay goldens.
   'flow_unittests': 'medium',
+  // The benchmarks run_tests.py --type benchmarks runs (benchmarkRuns),
+  // timed as GN's unoptimized binaries on the host, where google-benchmark
+  // runs each case until its timing settles: 10 s (fml), 23 s (geometry),
+  // 34 s (display_list_builder), 16 s (txt), 31 s (shell); lib/ui's one
+  // case completes a 3 MB platform message in a Dart isolate per iteration
+  // outside the timed region, 1,087 s unoptimized (CI runs the benchmarks
+  // in host_release only).
+  'fml_benchmarks': 'medium',
+  'geometry_benchmarks': 'medium',
+  'display_list_builder_benchmarks': 'medium',
+  'txt_benchmarks': 'medium',
+  'shell_benchmarks': 'medium',
+  'ui_benchmarks': 'enormous',
   // 40 s on the host (208 tests, the shell on ANGLE and SwiftShader).
   'shell_unittests': 'medium',
   // 11 s as a GN binary (85 tests; run_tests.py allows it 90 s).
@@ -217,6 +230,31 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
   ),
 };
 
+/// The benchmark executables testing/run_tests.py runs (`--type benchmarks`,
+/// run_engine_benchmarks on a Linux host; CI's host_release_test), each
+/// with ICU's data file, by GN label. GN makes them binaries (testonly, not
+/// named `*tests`); for the runner's sake each becomes a `cc_test` with
+/// `tags = ["benchmark", "manual"]` -- a wildcard `bazel test` leaves them
+/// out, as every CI builder but host_release_test does, and
+/// `//engine/src/flutter/testing:benchmarks` runs them all -- with these
+/// arguments and data. The other benchmark executables of the tree
+/// (display_list_benchmarks, primitive_rendering_benchmarks, ...) are built
+/// by that builder and run by no one; they stay binaries.
+const Map<String, TestRun> benchmarkRuns = <String, TestRun>{
+  '//flutter/shell/common:shell_benchmarks': _benchmarkRun,
+  '//flutter/fml:fml_benchmarks': _benchmarkRun,
+  '//flutter/lib/ui:ui_benchmarks': _benchmarkRun,
+  '//flutter/display_list:display_list_builder_benchmarks': _benchmarkRun,
+  '//flutter/impeller/geometry:geometry_benchmarks': _benchmarkRun,
+  '//flutter/txt:txt_benchmarks': _benchmarkRun,
+};
+
+/// run_engine_benchmarks' one argument, ICU's data file (icu_flags).
+const TestRun _benchmarkRun = TestRun(
+  args: <String>['--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat'],
+  data: <String>['@icu//:icudata'],
+);
+
 /// The suites that open a window -- the Impeller playground's, GLFW on
 /// X11 -- by GN label. run_tests.py starts an Xvfb for the Linux suites;
 /// these become flutter_display_test (testing.bzl), which runs the binary
@@ -355,6 +393,9 @@ const Map<String, String> labelOverrides = <String, String>{
   '//flutter/third_party/re2': '@re2',
   '//third_party/libtess2': '@libtess2',
   '//flutter/third_party/harfbuzz': '@harfbuzz',
+  // google/benchmark (the secondary tree's GN over the synced tree), for
+  // //flutter/benchmarking and the benchmark executables.
+  '//flutter/third_party/benchmark': '@benchmark',
   // The Impeller playground's window and UI libraries (secondary tree).
   '//flutter/third_party/glfw': '@glfw',
   '//flutter/third_party/imgui': '@imgui',
@@ -480,6 +521,7 @@ const Map<String, List<String>> propagatedCopts = <String, List<String>>{
   '//flutter/testing:dart': _vulkanHeadersCopts,
   '//flutter/testing:fixture_test': _vulkanHeadersCopts,
   '//flutter/shell/gpu:gpu_surface_software': _vulkanHeadersCopts,
+  '//flutter/display_list:display_list_benchmarks_source': _vulkanHeadersCopts,
   '//flutter/flutter_vma:flutter_vma': _vulkanCopts,
   '//flutter/flutter_vma:flutter_skia_vma': _vulkanCopts,
   '//flutter/impeller/renderer/backend/vulkan:vulkan': _vulkanCopts,
