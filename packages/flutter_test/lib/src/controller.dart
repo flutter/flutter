@@ -1206,8 +1206,10 @@ abstract class WidgetController {
   /// gesture), and should clean up the pointer at the end of the test:
   ///
   /// ```dart
-  /// final TestGesture gesture = await tester.startHover(find.text('target'));
-  /// addTearDown(gesture.removePointer);
+  /// testWidgets('MyWidget', (WidgetTester tester) async {
+  ///   final TestGesture gesture = await tester.startHover(find.text('target'));
+  ///   addTearDown(gesture.removePointer);
+  /// });
   /// ```
   /// {@endtemplate}
   ///

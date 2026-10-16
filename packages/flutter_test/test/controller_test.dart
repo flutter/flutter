@@ -366,6 +366,7 @@ void main() {
     );
 
     final TestGesture gesture0 = await tester.startHover(find.text('View0Target'));
+    addTearDown(() => gesture0.removePointer(view: view0));
     await tester.pump();
     expect(logs, equals(<String>['view0 hover 100']));
     logs.clear();
