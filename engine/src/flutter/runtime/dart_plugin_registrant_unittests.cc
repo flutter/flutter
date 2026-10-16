@@ -33,9 +33,9 @@ class DartIsolateTest : public FixtureTest {
   }
 
   void SetUp() override {
-    OverrideDartPluginRegistrant(GetSourceUri(
-        "flutter/runtime/fixtures/dart_tool/flutter_build/"
-        "dart_plugin_registrant.dart"));
+    OverrideDartPluginRegistrant(
+        GetSourceUri("flutter/runtime/fixtures/dart_tool/flutter_build/"
+                     "dart_plugin_registrant.dart"));
   }
 
   void TearDown() override {
