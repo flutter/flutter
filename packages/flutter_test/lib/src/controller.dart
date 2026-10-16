@@ -1212,10 +1212,14 @@ abstract class WidgetController {
   /// No mouse or stylus device may already be connected to [MouseTracker] when
   /// this method is called (for example, from an active hover gesture or a prior
   /// [tap], [press], or [drag] with [PointerDeviceKind.mouse] or
-  /// [PointerDeviceKind.stylus]). Callers must remove any active mouse or stylus
-  /// pointer via [TestGesture.removePointer] before starting a hover gesture (or
-  /// use [TestGesture.moveTo] / [TestGesture.moveBy] on an existing gesture), and
-  /// should clean up the pointer at the end of the test:
+  /// [PointerDeviceKind.stylus]). If a previous gesture returned a [TestGesture]
+  /// (such as [startHover], [press], [startGesture], or [createGesture]), call
+  /// [TestGesture.removePointer] on it before starting a new hover gesture (or
+  /// reuse it with [TestGesture.moveTo] / [TestGesture.moveBy]). Because
+  /// one-shot helpers like [tap] and [drag] discard their [TestGesture] without
+  /// removing the pointer, use a method that returns a [TestGesture] instead
+  /// when combining mouse or stylus interactions with [startHover]. Callers
+  /// should also clean up the pointer at the end of the test:
   ///
   /// ```dart
   /// testWidgets('MyWidget', (WidgetTester tester) async {
@@ -1275,9 +1279,12 @@ abstract class WidgetController {
       !binding.mouseTracker.mouseIsConnected,
       'A mouse or stylus pointer is already connected to MouseTracker (for '
       'example, from an active hover gesture or a prior tap, press, or drag '
-      'with PointerDeviceKind.mouse or PointerDeviceKind.stylus). Call '
-      'removePointer() on the existing TestGesture before starting a new hover '
-      'gesture, or use moveTo() or moveBy() to move the existing pointer.',
+      'with PointerDeviceKind.mouse or PointerDeviceKind.stylus). If the '
+      'previous gesture returned a TestGesture, call removePointer() on it '
+      'before starting a new hover gesture (or use moveTo() / moveBy() on it). '
+      'One-shot helpers like tap() and drag() discard their TestGesture '
+      'without removing the pointer, so use startHover(), press(), or '
+      'startGesture() instead when combining mouse or stylus gestures.',
     );
     return TestAsyncUtils.guard<TestGesture>(() async {
       final TestGesture gesture = await createGesture(pointer: pointer, kind: kind);
