@@ -202,8 +202,7 @@ void main() {
       expect(
         testLines,
         equals(sortedTestLines),
-        reason:
-            'Tests in tool_integration_tests must be sorted deterministically to prevent uneven clustering across platforms.',
+        reason: 'Tests in tool_integration_tests must be sorted deterministically to prevent uneven clustering across platforms.',
       );
     });
   });
