@@ -186,11 +186,11 @@ class FlutterWebPlatform extends PlatformPlugin {
     bool updateGoldens = false,
   }) async {
     final shelf.Server server = await serverFactory();
+    final FileSystem fs = toolContext.fs;
     if (testPackageUri == null) {
-      final PackageConfig packageConfig = await currentPackageConfig();
+      final PackageConfig packageConfig = await currentPackageConfig(toolContext: toolContext);
       testPackageUri = packageConfig['test']!.packageUriRoot;
     }
-    final FileSystem fs = toolContext.fs;
     final File testDartJs = fs.file(fs.path.join(testPackageUri.toFilePath(), 'dart.js'));
     final File testHostDartJs = fs.file(
       fs.path.join(
