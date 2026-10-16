@@ -24,6 +24,7 @@ void main() {
         category: Category.desktop,
         id: 'custom_linux_device',
         name: 'Linux Custom Extension Prototype Device',
+        buildTarget: 'custom-linux-build',
         ephemeral: false,
         sdkNameAndVersion: 'Custom Linux 1.0.0',
         targetPlatform: 'linux-x64',
@@ -33,6 +34,7 @@ void main() {
       expect(map['id'], 'custom_linux_device');
       expect(map['name'], 'Linux Custom Extension Prototype Device');
       expect(map['category'], 'desktop');
+      expect(map['buildTarget'], 'custom-linux-build');
       expect(map['ephemeral'], isFalse);
       expect(map['isSupported'], isTrue);
       expect(map['sdkNameAndVersion'], 'Custom Linux 1.0.0');
@@ -42,6 +44,7 @@ void main() {
       expect(parsed, equals(device));
       expect(parsed.hashCode, equals(device.hashCode));
       expect(parsed.toString(), contains('custom_linux_device'));
+      expect(parsed.toString(), contains('custom-linux-build'));
     });
 
     test('deserializes correctly with minimal fields and default values', () {
@@ -55,12 +58,14 @@ void main() {
       expect(device.id, 'minimal_device');
       expect(device.name, 'Minimal Device');
       expect(device.category, Category.mobile);
+      expect(device.buildTarget, isNull);
       expect(device.ephemeral, isTrue);
       expect(device.isSupported, isTrue);
       expect(device.sdkNameAndVersion, isNull);
       expect(device.targetPlatform, isNull);
 
       final Map<String, Object?> map = device.toMap();
+      expect(map.containsKey('buildTarget'), isFalse);
       expect(map.containsKey('sdkNameAndVersion'), isFalse);
       expect(map.containsKey('targetPlatform'), isFalse);
     });
@@ -87,6 +92,57 @@ void main() {
 
       expect(device1, isNot(equals(device2)));
       expect(device1.hashCode, isNot(equals(device2.hashCode)));
+    });
+
+    test('fromJson ignores non-string buildTarget', () {
+      final device = TargetDevice.fromJson(const <String, Object?>{
+        'id': 'device_1',
+        'name': 'Device 1',
+        'category': 'desktop',
+        'buildTarget': 123,
+      });
+      expect(device.buildTarget, isNull);
+    });
+  });
+
+  group('ExtensionDebuggingOptions', () {
+    test('serializes and deserializes correctly', () {
+      const options = ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true);
+      final Map<String, Object?> map = options.toMap();
+      expect(map['buildMode'], 'debug');
+      expect(map['debuggingEnabled'], isTrue);
+
+      final parsed = ExtensionDebuggingOptions.fromJson(map);
+      expect(parsed, equals(options));
+      expect(parsed.hashCode, equals(options.hashCode));
+      expect(parsed.toString(), contains('buildMode: debug'));
+      expect(parsed.toString(), contains('debuggingEnabled: true'));
+    });
+
+    test('defaults debuggingEnabled to false and validates fields', () {
+      final parsed = ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+        'buildMode': 'release',
+      });
+      expect(parsed.buildMode, BuildMode.release);
+      expect(parsed.debuggingEnabled, isFalse);
+
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{}),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'invalid_mode',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'debug',
+          'debuggingEnabled': 'not_a_bool',
+        }),
+        throwsA(isA<FormatException>()),
+      );
     });
   });
 }

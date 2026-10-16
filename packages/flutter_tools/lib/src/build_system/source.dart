@@ -73,6 +73,17 @@ class SourceVisitor implements ResolvedFiles {
     }
   }
 
+  String _safeResolveSymbolicLinks(Directory dir) {
+    if (!dir.existsSync()) {
+      return environment.fileSystem.path.normalize(dir.absolute.path);
+    }
+    try {
+      return dir.resolveSymbolicLinksSync();
+    } on FileSystemException {
+      return environment.fileSystem.path.normalize(dir.absolute.path);
+    }
+  }
+
   /// Visit a [Source] which contains a file URL.
   ///
   /// The URL may include constants defined in an [Environment]. If
@@ -91,13 +102,13 @@ class SourceVisitor implements ResolvedFiles {
       ...environment.fileSystem.path.split(switch (rawParts.first) {
         // flutter root will not contain a symbolic link.
         Environment.kFlutterRootDirectory => environment.flutterRootDir.absolute.path,
-        Environment.kProjectDirectory => environment.projectDir.resolveSymbolicLinksSync(),
+        Environment.kProjectDirectory => _safeResolveSymbolicLinks(environment.projectDir),
         Environment.kWorkspaceDirectory => environment.fileSystem.path.dirname(
           environment.fileSystem.path.dirname(environment.packageConfigPath),
         ),
-        Environment.kBuildDirectory => environment.buildDir.resolveSymbolicLinksSync(),
-        Environment.kCacheDirectory => environment.cacheDir.resolveSymbolicLinksSync(),
-        Environment.kOutputDirectory => environment.outputDir.resolveSymbolicLinksSync(),
+        Environment.kBuildDirectory => _safeResolveSymbolicLinks(environment.buildDir),
+        Environment.kCacheDirectory => _safeResolveSymbolicLinks(environment.cacheDir),
+        Environment.kOutputDirectory => _safeResolveSymbolicLinks(environment.outputDir),
         // If the pattern does not start with an env variable, then we have nothing
         // to resolve it to, error out.
         _ => throw InvalidPatternException(pattern),

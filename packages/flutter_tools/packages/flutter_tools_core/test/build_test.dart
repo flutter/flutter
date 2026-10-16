@@ -99,16 +99,18 @@ void main() {
 
   group('ExtensionBuildResult', () {
     test('serializes and deserializes successful result without errorMessage', () {
-      const result = ExtensionBuildResult(success: true);
+      const result = ExtensionBuildResult(success: true, executablePath: '/path/to/bundle/app');
 
       final Map<String, Object?> map = result.toMap();
       expect(map[ExtensionBuildResult.successKey], isTrue);
       expect(map.containsKey(ExtensionBuildResult.errorMessageKey), isFalse);
+      expect(map[ExtensionBuildResult.executablePathKey], '/path/to/bundle/app');
 
       final parsed = ExtensionBuildResult.fromJson(map);
       expect(parsed, equals(result));
       expect(parsed.hashCode, equals(result.hashCode));
       expect(parsed.toString(), contains('success: true'));
+      expect(parsed.toString(), contains('/path/to/bundle/app'));
     });
 
     test('serializes and deserializes failed result with errorMessage', () {
@@ -117,6 +119,7 @@ void main() {
       final Map<String, Object?> map = result.toMap();
       expect(map[ExtensionBuildResult.successKey], isFalse);
       expect(map[ExtensionBuildResult.errorMessageKey], 'Compilation failed.');
+      expect(map.containsKey(ExtensionBuildResult.executablePathKey), isFalse);
 
       final parsed = ExtensionBuildResult.fromJson(map);
       expect(parsed, equals(result));

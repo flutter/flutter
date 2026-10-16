@@ -1477,24 +1477,67 @@ abstract class FlutterCommand extends Command<void> {
     return runCommand();
   }
 
+  bool _isPackageConfigMissingOrStale(Directory projectDir) {
+    final File pubspecFile = projectDir.childFile('pubspec.yaml');
+    if (!pubspecFile.existsSync()) {
+      return false;
+    }
+    final File? packageConfigFile = switch (packagesPath) {
+      final String path => _fs.file(path),
+      null => findPackageConfigFile(projectDir),
+    };
+    if (packageConfigFile == null || !packageConfigFile.existsSync()) {
+      return true;
+    }
+    try {
+      return pubspecFile.lastModifiedSync().isAfter(packageConfigFile.lastModifiedSync());
+    } on FileSystemException {
+      return true;
+    }
+  }
+
   Future<FlutterProject> _updateCacheAndRunPubGet() async {
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
+    final bool offline = shouldUpdateCache && getValue(CommonOptions.offline);
     if (shouldUpdateCache) {
       // First always update universal artifacts, as some of these (e.g.
       // ios-deploy on macOS) are required to determine `requiredArtifacts`.
-      final bool offline = getValue(CommonOptions.offline);
       await _cache.updateAll(<DevelopmentArtifact>{
         DevelopmentArtifact.universal,
       }, offline: offline);
+    }
+
+    var ranEarlyPubGet = false;
+    if (shouldRunPub) {
+      final String? projectRootPath = findProjectRoot(_fs, _fs.currentDirectory.path);
+      if (projectRootPath != null) {
+        final Directory projectDir = _fs.directory(projectRootPath);
+        if ((!_usesTargetOption || projectDir.childFile(targetFile).existsSync()) &&
+            _isPackageConfigMissingOrStale(projectDir)) {
+          final FlutterProject earlyProject = _projectFactory.fromDirectory(projectDir);
+          earlyProject.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+          await pub.get(
+            context: PubContext.getVerifyContext(name),
+            project: earlyProject,
+            checkUpToDate: cachePubGet,
+          );
+          ranEarlyPubGet = true;
+        }
+      }
+    }
+
+    if (shouldUpdateCache) {
       await _cache.updateAll(await requiredArtifacts, offline: offline);
     }
     await validateCommand();
 
     final FlutterProject project = _projectFactory.fromDirectory(_fs.currentDirectory);
-    project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+    if (!ranEarlyPubGet) {
+      project.checkForDeprecation(deprecationBehavior: deprecationBehavior);
+    }
 
-    if (shouldRunPub) {
+    if (shouldRunPub && !ranEarlyPubGet) {
       await pub.get(
         context: PubContext.getVerifyContext(name),
         project: project,

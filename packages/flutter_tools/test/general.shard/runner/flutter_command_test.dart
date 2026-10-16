@@ -57,6 +57,8 @@ void main() {
     late PreRunValidator preRunValidator;
     late FakeLockTrackingCache lockTrackingCache;
     late FakeLockCheckingPub lockCheckingPub;
+    late List<String> orderEvents;
+    late _OrderTrackingPub orderTrackingPub;
 
     setUpAll(() {
       Cache.flutterRoot = '/path/to/sdk/flutter';
@@ -76,6 +78,8 @@ void main() {
       preRunValidator = PreRunValidator(fileSystem: fileSystem);
       lockTrackingCache = FakeLockTrackingCache();
       lockCheckingPub = FakeLockCheckingPub(lockTrackingCache);
+      orderEvents = <String>[];
+      orderTrackingPub = _OrderTrackingPub(orderEvents, fileSystem);
       fakeAnalytics = getInitializedFakeAnalyticsInstance(
         fs: fileSystem,
         fakeFlutterVersion: FakeFlutterVersion(),
@@ -149,6 +153,27 @@ void main() {
         ProcessManager: () => processManager,
         Cache: () => lockTrackingCache,
         Pub: () => lockCheckingPub,
+      },
+    );
+
+    testUsingContext(
+      'runs pub.get before requiredArtifacts and validateCommand when package_config.json is missing or stale',
+      () async {
+        fileSystem.file('pubspec.yaml').writeAsStringSync('name: test_app\n');
+        final flutterCommand = _OrderTrackingFlutterCommand(orderEvents);
+        final CommandRunner<void> runner = createTestCommandRunner(flutterCommand);
+        await runner.run(<String>['ordertrack']);
+
+        expect(
+          orderEvents,
+          equals(<String>['pub.get', 'requiredArtifacts', 'validateCommand', 'runCommand']),
+        );
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        Cache: () => lockTrackingCache,
+        Pub: () => orderTrackingPub,
       },
     );
 
@@ -2491,5 +2516,68 @@ class DummyAllBuildOptionsFlutterCommand extends DummyFlutterCommand {
     addTreeShakeIconsFlag();
     usesExtraDartFlagOptions(verboseHelp: false);
     addAndroidSpecificBuildOptions();
+  }
+}
+
+class _OrderTrackingPub extends Fake implements Pub {
+  _OrderTrackingPub(this._events, this._fileSystem);
+
+  final List<String> _events;
+  final FileSystem _fileSystem;
+
+  @override
+  Future<void> get({
+    required FlutterProject project,
+    bool checkUpToDate = false,
+    PubContext? context,
+    bool enforceLockfile = false,
+    String? flutterRootOverride,
+    bool offline = false,
+    PubOutputMode outputMode = PubOutputMode.all,
+    bool shouldSkipThirdPartyGenerator = true,
+    bool upgrade = false,
+  }) async {
+    _events.add('pub.get');
+    _fileSystem
+        .file(_fileSystem.path.join('.dart_tool', 'package_config.json'))
+        .createSync(recursive: true);
+  }
+}
+
+class _OrderTrackingFlutterCommand extends FlutterCommand {
+  _OrderTrackingFlutterCommand(this._events) {
+    usesPubOption();
+  }
+
+  final List<String> _events;
+
+  @override
+  String get description => 'tracks lifecycle order';
+
+  @override
+  String get name => 'ordertrack';
+
+  @override
+  bool get shouldUpdateCache => true;
+
+  @override
+  bool get regeneratePlatformSpecificToolingDuringVerify => false;
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    _events.add('requiredArtifacts');
+    return const <DevelopmentArtifact>{};
+  }
+
+  @override
+  Future<void> validateCommand() async {
+    _events.add('validateCommand');
+    await super.validateCommand();
+  }
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    _events.add('runCommand');
+    return FlutterCommandResult.success();
   }
 }
