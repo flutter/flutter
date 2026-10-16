@@ -801,6 +801,58 @@ class WebPlugin extends PluginPlatform {
   }
 }
 
+/// Represents a plugin declaration for a custom or extension-contributed platform.
+class CustomPlatformPlugin extends PluginPlatform implements NativeOrDartPlugin {
+  const CustomPlatformPlugin({
+    required this.configuration,
+    required this.name,
+    required this.platformKey,
+  });
+
+  factory CustomPlatformPlugin.fromYaml(String name, String platformKey, YamlMap yaml) {
+    return CustomPlatformPlugin(
+      configuration: _yamlToMap(yaml),
+      name: name,
+      platformKey: platformKey,
+    );
+  }
+
+  final String name;
+  final String platformKey;
+  final Map<String, Object?> configuration;
+
+  @override
+  bool hasMethodChannel() => configuration[kPluginClass] is String;
+
+  @override
+  bool hasFfi() => configuration[kFfiPlugin] == true;
+
+  @override
+  bool hasDart() => configuration[kDartPluginClass] is String;
+
+  @override
+  Map<String, Object?> toMap() => <String, Object?>{
+    'name': name,
+    'platformKey': platformKey,
+    ...configuration,
+  };
+
+  static Map<String, Object?> _yamlToMap(YamlMap yaml) {
+    return <String, Object?>{
+      for (final MapEntry(:Object? key, :Object? value) in yaml.entries)
+        if (key is String) key: _convertYamlValue(value),
+    };
+  }
+
+  static Object? _convertYamlValue(Object? value) {
+    return switch (value) {
+      final YamlMap map => _yamlToMap(map),
+      final YamlList list => <Object?>[for (final Object? item in list) _convertYamlValue(item)],
+      _ => value,
+    };
+  }
+}
+
 final _internalCapitalLetterRegex = RegExp(r'(?=(?!^)[A-Z])');
 String _filenameForCppClass(String className) {
   return className.splitMapJoin(

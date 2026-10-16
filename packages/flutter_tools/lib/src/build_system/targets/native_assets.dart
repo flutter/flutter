@@ -12,6 +12,7 @@
 /// need to be run in the `Target`s in `flutter assemble`.
 library;
 
+import 'package:code_assets/code_assets.dart' show OS;
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 
@@ -27,6 +28,16 @@ import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart' show MissingDefineException;
 import 'common.dart';
+
+export '../../build_info.dart'
+    show
+        kExtensionCCompilerAr,
+        kExtensionCCompilerCc,
+        kExtensionCCompilerEnvScript,
+        kExtensionCCompilerEnvScriptArgs,
+        kExtensionCCompilerLd,
+        kExtensionTargetArch,
+        kExtensionTargetOs;
 
 enum HookPlatform { native, web }
 
@@ -315,10 +326,14 @@ class InstallCodeAssets extends Target {
     // native_asset.yaml that can be used by the final AOT compilation.
     final Uri nativeAssetsFileUri = environment.buildDir.childFile(nativeAssetsFilename).uri;
 
+    final OS targetOS = getNativeOSFromTargetPlatform(
+      targetPlatform,
+      environmentDefines: environment.defines,
+    );
     Uri targetUri = environment.outputDir.childDirectory('native_assets').uri;
-    if (targetPlatform.os case .linux || .windows) {
+    if (targetOS case OS.linux || OS.windows) {
       // Avoid needing migration for CMake files, keep old directory structure.
-      targetUri = targetUri.resolve('${targetPlatform.osName}/');
+      targetUri = targetUri.resolve('${targetOS.name}/');
     }
 
     final List<File> installedFiles = await installCodeAssets(
@@ -375,7 +390,15 @@ TargetPlatform _getTargetPlatformFromEnvironment(Environment environment, String
   if (targetPlatformEnvironment == null) {
     throw MissingDefineException(kTargetPlatform, name);
   }
-  return TargetPlatform.fromName(targetPlatformEnvironment);
+  try {
+    return TargetPlatform.fromName(targetPlatformEnvironment);
+  } on Exception {
+    if (environment.defines.containsKey(kExtensionTargetOs) &&
+        environment.defines.containsKey(kExtensionTargetArch)) {
+      return TargetPlatform.unsupported;
+    }
+    rethrow;
+  }
 }
 
 Future<FlutterNativeAssetsBuildRunner> createFlutterNativeAssetsBuildRunner(

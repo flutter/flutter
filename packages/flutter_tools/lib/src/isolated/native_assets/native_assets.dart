@@ -491,7 +491,10 @@ Future<List<File>> installCodeAssets({
   required Uri nativeAssetsFileUri,
   required Uri targetUri,
 }) async {
-  final OS targetOS = getNativeOSFromTargetPlatform(targetPlatform);
+  final OS targetOS = getNativeOSFromTargetPlatform(
+    targetPlatform,
+    environmentDefines: environmentDefines,
+  );
   final flutterTester = targetPlatform == TargetPlatform.tester;
   final BuildMode buildMode = _getBuildMode(environmentDefines, flutterTester);
 
@@ -916,7 +919,14 @@ Never _throwNativeAssetsLinkFailed() {
   throwToolExit('Linking native assets failed. See the logs for more details.');
 }
 
-OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
+OS getNativeOSFromTargetPlatform(
+  TargetPlatform platform, {
+  Map<String, String>? environmentDefines,
+}) {
+  if (environmentDefines?[kExtensionTargetOs] case final String extensionOs
+      when extensionOs.isNotEmpty) {
+    return parseNativeOS(extensionOs);
+  }
   switch (platform.os) {
     case .ios:
       return OS.iOS;

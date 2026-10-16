@@ -295,10 +295,7 @@ class CopyAssets extends Target {
   List<String> get depfiles => const <String>['flutter_assets.d'];
 
   @override
-  Future<void> build(
-    Environment environment, {
-    TargetPlatform targetPlatform = TargetPlatform.android,
-  }) async {
+  Future<void> build(Environment environment, {TargetPlatform? targetPlatform}) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -307,11 +304,29 @@ class CopyAssets extends Target {
     final Directory output = environment.buildDir.childDirectory('flutter_assets');
     output.createSync(recursive: true);
     final DartHooksResult dartHookResult = await LinkHooks.loadHookResult(environment);
+    TargetPlatform resolvedTargetPlatform = targetPlatform ?? TargetPlatform.android;
+    if (targetPlatform == null) {
+      final String? targetPlatformDefine = environment.defines[kTargetPlatform];
+      if (targetPlatformDefine != null) {
+        try {
+          resolvedTargetPlatform = TargetPlatform.fromName(targetPlatformDefine);
+        } on Exception {
+          // Fall back to TargetPlatform.android for custom extension platforms.
+        }
+      }
+    }
+    final File nativeAssetsFile = environment.buildDir.childFile(
+      InstallCodeAssets.nativeAssetsFilename,
+    );
     final Depfile depfile = await copyAssets(
       environment,
       output,
+      additionalContent: <String, DevFSContent>{
+        if (nativeAssetsFile.existsSync())
+          'NativeAssetsManifest.json': DevFSFileContent(nativeAssetsFile),
+      },
       dartHookResult: dartHookResult,
-      targetPlatform: targetPlatform,
+      targetPlatform: resolvedTargetPlatform,
       buildMode: buildMode,
       flavor: environment.defines[kFlavor],
     );

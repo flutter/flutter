@@ -164,6 +164,23 @@ class Plugin {
       );
     }
 
+    const builtInPlatforms = <String>{
+      AndroidPlugin.kConfigKey,
+      IOSPlugin.kConfigKey,
+      LinuxPlugin.kConfigKey,
+      MacOSPlugin.kConfigKey,
+      WebPlugin.kConfigKey,
+      WindowsPlugin.kConfigKey,
+    };
+
+    for (final Object? key in platformsYaml.keys) {
+      if (key is String && !builtInPlatforms.contains(key)) {
+        if (_providesImplementationForPlatform(platformsYaml, key)) {
+          platforms[key] = CustomPlatformPlugin.fromYaml(name, key, platformsYaml[key] as YamlMap);
+        }
+      }
+    }
+
     // TODO(stuartmorgan): Consider merging web into this common handling; the
     //  fact that its implementation of Dart-only plugins and default packages
     //  are separate is legacy.
@@ -173,6 +190,8 @@ class Plugin {
       LinuxPlugin.kConfigKey,
       MacOSPlugin.kConfigKey,
       WindowsPlugin.kConfigKey,
+      for (final Object? key in platformsYaml.keys)
+        if (key is String && !builtInPlatforms.contains(key)) key,
     ];
     final defaultPackages = <String, String>{};
     final dartPluginClasses = <String, DartPluginClassAndFilePair>{};
