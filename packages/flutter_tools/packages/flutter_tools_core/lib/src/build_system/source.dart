@@ -14,22 +14,7 @@ import '../build.dart';
 /// See also:
 ///
 /// * [BuiltInArtifacts], commonly used artifacts.
-@immutable
-class ExtensionArtifact {
-  const ExtensionArtifact(this.name);
-
-  /// The unique identifying name of this artifact.
-  final String name;
-
-  @override
-  bool operator ==(Object other) => other is ExtensionArtifact && other.name == name;
-
-  @override
-  int get hashCode => name.hashCode;
-
-  @override
-  String toString() => name;
-}
+extension type const ExtensionArtifact(String name) {}
 
 /// Represents an artifact used by the host build system (e.g. compilers, tools).
 ///
@@ -39,24 +24,9 @@ class ExtensionArtifact {
 /// See also:
 ///
 /// * [BuiltInHostArtifacts], commonly used host artifacts.
-@immutable
-class ExtensionHostArtifact {
-  const ExtensionHostArtifact(this.name);
+extension type const ExtensionHostArtifact(String name) {}
 
-  /// The unique identifying name of this host artifact.
-  final String name;
-
-  @override
-  bool operator ==(Object other) => other is ExtensionHostArtifact && other.name == name;
-
-  @override
-  int get hashCode => name.hashCode;
-
-  @override
-  String toString() => name;
-}
-
-/// A description of an input or output of an [ExtensionBuildTarget].
+/// A description of an input or output of an [ExtensionAssembleTarget].
 @immutable
 sealed class ExtensionSource {
   const ExtensionSource();

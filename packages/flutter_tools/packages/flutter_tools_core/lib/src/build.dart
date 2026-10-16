@@ -82,23 +82,174 @@ enum BuildMode {
   String toString() => cliName;
 }
 
-/// Representation of a custom build target provided by a tool extension.
+/// Representation of a custom `flutter build` subcommand target provided by a tool extension.
 @immutable
 class ExtensionBuildTarget {
   const ExtensionBuildTarget({
     required this.description,
     required this.name,
-    required this.targetPlatform,
-    this.dependencies = const <String>[],
-    this.inputs = const <ExtensionSource>[],
-    this.isTopLevel = true,
+    this.artifacts = const <ExtensionArtifact>{},
+    this.hostArtifacts = const <ExtensionHostArtifact>{},
     this.outputDir = BuiltInPlaceholders.buildDir,
-    this.outputs = const <ExtensionSource>[],
+    this.targetPlatform = '',
   });
 
   /// Deserializes an [ExtensionBuildTarget] from a JSON-serializable map.
   factory ExtensionBuildTarget.fromJson(Map<String, Object?> json) {
     return ExtensionBuildTarget(
+      description: switch (json[descriptionKey]) {
+        final String value => value,
+        _ => '',
+      },
+      name: switch (json[nameKey]) {
+        final String value => value,
+        _ => '',
+      },
+      targetPlatform: switch (json[targetPlatformKey]) {
+        final String value => value,
+        _ => '',
+      },
+      artifacts: switch (json[artifactsKey]) {
+        final List<Object?> rawArtifacts => <ExtensionArtifact>{
+          for (final item in rawArtifacts)
+            switch (item) {
+              final String name => ExtensionArtifact(name),
+              _ => throw ArgumentError('Invalid entry in "$artifactsKey": $item'),
+            },
+        },
+        null => const <ExtensionArtifact>{},
+        final Object? invalid => throw ArgumentError('Invalid "$artifactsKey": $invalid'),
+      },
+      hostArtifacts: switch (json[hostArtifactsKey]) {
+        final List<Object?> rawHostArtifacts => <ExtensionHostArtifact>{
+          for (final item in rawHostArtifacts)
+            switch (item) {
+              final String name => ExtensionHostArtifact(name),
+              _ => throw ArgumentError('Invalid entry in "$hostArtifactsKey": $item'),
+            },
+        },
+        null => const <ExtensionHostArtifact>{},
+        final Object? invalid => throw ArgumentError('Invalid "$hostArtifactsKey": $invalid'),
+      },
+      outputDir: switch (json[outputDirKey]) {
+        final String value => value,
+        _ => BuiltInPlaceholders.buildDir,
+      },
+    );
+  }
+
+  /// Map key for [artifacts].
+  static const String artifactsKey = 'artifacts';
+
+  /// Map key for [description].
+  static const String descriptionKey = 'description';
+
+  /// Map key for [hostArtifacts].
+  static const String hostArtifactsKey = 'hostArtifacts';
+
+  /// Map key for [name].
+  static const String nameKey = 'name';
+
+  /// Map key for [outputDir].
+  static const String outputDirKey = 'outputDir';
+
+  /// Map key for [targetPlatform].
+  static const String targetPlatformKey = 'targetPlatform';
+
+  /// Deserializes a list of [ExtensionBuildTarget] objects from RPC response data.
+  static List<ExtensionBuildTarget> listFromJson(Object? rpcResult) {
+    if (rpcResult case final List<Object?> list) {
+      return <ExtensionBuildTarget>[
+        for (final item in list)
+          if (item case final Map<String, Object?> map) ExtensionBuildTarget.fromJson(map),
+      ];
+    }
+    return const <ExtensionBuildTarget>[];
+  }
+
+  /// Description of what this target builds.
+  final String description;
+
+  /// The name of this build target (e.g. `'custom-apk'`).
+  final String name;
+
+  /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`).
+  ///
+  /// This is an open [String] rather than an enum so that extensions for custom
+  /// embedders can declare platform identifiers that are not built into Flutter.
+  /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
+  /// default artifact platform when it matches a built-in Flutter target platform.
+  final String targetPlatform;
+
+  /// Engine artifacts required by this build target, resolved for [targetPlatform]
+  /// and the active [BuildMode].
+  final Set<ExtensionArtifact> artifacts;
+
+  /// Host-side build tool or library artifacts required by this build target.
+  final Set<ExtensionHostArtifact> hostArtifacts;
+
+  /// The directory pattern used by `flutter build` to determine this target's
+  /// output directory (`{OUTPUT_DIR}`), for example
+  /// `'${BuiltInPlaceholders.projectDir}/build/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
+  ///
+  /// Supports [BuiltInPlaceholders.projectDir], [BuiltInPlaceholders.buildDir],
+  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
+  final String outputDir;
+
+  /// Serializes the build target to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    descriptionKey: description,
+    nameKey: name,
+    targetPlatformKey: targetPlatform,
+    artifactsKey: artifacts.map((ExtensionArtifact a) => a.name).toList(),
+    hostArtifactsKey: hostArtifacts.map((ExtensionHostArtifact a) => a.name).toList(),
+    outputDirKey: outputDir,
+  };
+
+  @override
+  String toString() =>
+      'ExtensionBuildTarget(name: $name, targetPlatform: $targetPlatform, '
+      'description: $description, artifacts: $artifacts, '
+      'hostArtifacts: $hostArtifacts, outputDir: $outputDir)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionBuildTarget &&
+            other.description == description &&
+            other.name == name &&
+            other.targetPlatform == targetPlatform &&
+            other.outputDir == outputDir &&
+            _setEquals(other.artifacts, artifacts) &&
+            _setEquals(other.hostArtifacts, hostArtifacts));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    description,
+    name,
+    targetPlatform,
+    outputDir,
+    Object.hashAllUnordered(artifacts),
+    Object.hashAllUnordered(hostArtifacts),
+  );
+}
+
+/// Representation of a custom `flutter assemble` target provided by a tool extension.
+@immutable
+class ExtensionAssembleTarget {
+  const ExtensionAssembleTarget({
+    required this.description,
+    required this.name,
+    required this.targetPlatform,
+    this.dependencies = const <String>[],
+    this.inputs = const <ExtensionSource>[],
+    this.outputs = const <ExtensionSource>[],
+  });
+
+  /// Deserializes an [ExtensionAssembleTarget] from a JSON-serializable map.
+  factory ExtensionAssembleTarget.fromJson(Map<String, Object?> json) {
+    return ExtensionAssembleTarget(
       description: switch (json[descriptionKey]) {
         final String value => value,
         _ => '',
@@ -133,14 +284,6 @@ class ExtensionBuildTarget {
         null => const <ExtensionSource>[],
         final Object? invalid => throw ArgumentError('Invalid "$inputsKey": $invalid'),
       },
-      isTopLevel: switch (json[isTopLevelKey]) {
-        final bool value => value,
-        _ => true,
-      },
-      outputDir: switch (json[outputDirKey]) {
-        final String value => value,
-        _ => BuiltInPlaceholders.buildDir,
-      },
       outputs: switch (json[outputsKey]) {
         final List<Object?> rawOutputs => <ExtensionSource>[
           for (final item in rawOutputs)
@@ -164,14 +307,8 @@ class ExtensionBuildTarget {
   /// Map key for [inputs].
   static const String inputsKey = 'inputs';
 
-  /// Map key for [isTopLevel].
-  static const String isTopLevelKey = 'isTopLevel';
-
   /// Map key for [name].
   static const String nameKey = 'name';
-
-  /// Map key for [outputDir].
-  static const String outputDirKey = 'outputDir';
 
   /// Map key for [outputs].
   static const String outputsKey = 'outputs';
@@ -179,33 +316,29 @@ class ExtensionBuildTarget {
   /// Map key for [targetPlatform].
   static const String targetPlatformKey = 'targetPlatform';
 
-  /// Deserializes a list of [ExtensionBuildTarget] objects from RPC response data.
-  static List<ExtensionBuildTarget> listFromJson(Object? rpcResult) {
+  /// Deserializes a list of [ExtensionAssembleTarget] objects from RPC response data.
+  static List<ExtensionAssembleTarget> listFromJson(Object? rpcResult) {
     if (rpcResult case final List<Object?> list) {
-      return <ExtensionBuildTarget>[
+      return <ExtensionAssembleTarget>[
         for (final item in list)
-          if (item case final Map<String, Object?> map) ExtensionBuildTarget.fromJson(map),
+          if (item case final Map<String, Object?> map) ExtensionAssembleTarget.fromJson(map),
       ];
     }
-    return const <ExtensionBuildTarget>[];
+    return const <ExtensionAssembleTarget>[];
   }
 
   /// Description of what this target builds.
   final String description;
 
-  /// The name of this build target (e.g. `'custom-apk'`).
+  /// The name of this assemble target (e.g. `'custom-linux-assemble-only-debug'`).
   final String name;
 
   /// The target platform identifier (e.g. `'linux-x64'`, `'custom-embedder-arm64'`).
   ///
   /// This is an open [String] rather than an enum so that extensions for custom
   /// embedders can declare platform identifiers that are not built into Flutter.
-  /// Used to substitute [BuiltInPlaceholders.targetPlatform] in [outputDir], and as the
-  /// default artifact platform when it matches a built-in Flutter target platform.
+  /// Used as the default artifact platform when it matches a built-in Flutter target platform.
   final String targetPlatform;
-
-  /// Whether this target is a top-level target invokable through `flutter build`.
-  final bool isTopLevel;
 
   /// The names of other targets that this target depends on.
   final List<String> dependencies;
@@ -217,43 +350,29 @@ class ExtensionBuildTarget {
   /// `ExtensionSource.pattern('${BuiltInPlaceholders.outputDir}/app.bundle')`).
   final List<ExtensionSource> outputs;
 
-  /// The directory pattern used by `flutter build` to determine this target's
-  /// output directory (`{OUTPUT_DIR}`), for example
-  /// `'${BuiltInPlaceholders.projectDir}/build/custom/${BuiltInPlaceholders.targetPlatform}/${BuiltInPlaceholders.buildMode}'`.
-  ///
-  /// Supports [BuiltInPlaceholders.projectDir], [BuiltInPlaceholders.buildDir],
-  /// [BuiltInPlaceholders.buildMode], and [BuiltInPlaceholders.targetPlatform].
-  /// When invoked via `flutter assemble -o <dir>`, the `-o` directory is used instead.
-  final String outputDir;
-
-  /// Serializes the build target to a JSON-serializable map.
+  /// Serializes the assemble target to a JSON-serializable map.
   Map<String, Object?> toMap() => <String, Object?>{
     descriptionKey: description,
     nameKey: name,
     targetPlatformKey: targetPlatform,
-    isTopLevelKey: isTopLevel,
     dependenciesKey: dependencies,
     inputsKey: inputs.map((ExtensionSource s) => s.toMap()).toList(),
     outputsKey: outputs.map((ExtensionSource s) => s.toMap()).toList(),
-    outputDirKey: outputDir,
   };
 
   @override
   String toString() =>
-      'ExtensionBuildTarget(name: $name, targetPlatform: $targetPlatform, '
-      'description: $description, isTopLevel: $isTopLevel, '
-      'dependencies: $dependencies, inputs: $inputs, outputs: $outputs, '
-      'outputDir: $outputDir)';
+      'ExtensionAssembleTarget(name: $name, targetPlatform: $targetPlatform, '
+      'description: $description, dependencies: $dependencies, '
+      'inputs: $inputs, outputs: $outputs)';
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other is ExtensionBuildTarget &&
+        (other is ExtensionAssembleTarget &&
             other.description == description &&
             other.name == name &&
             other.targetPlatform == targetPlatform &&
-            other.isTopLevel == isTopLevel &&
-            other.outputDir == outputDir &&
             _listEquals(other.dependencies, dependencies) &&
             _listEquals(other.inputs, inputs) &&
             _listEquals(other.outputs, outputs));
@@ -264,8 +383,6 @@ class ExtensionBuildTarget {
     description,
     name,
     targetPlatform,
-    isTopLevel,
-    outputDir,
     Object.hashAll(dependencies),
     Object.hashAll(inputs),
     Object.hashAll(outputs),
@@ -337,4 +454,14 @@ bool _listEquals<T>(List<T> a, List<T> b) {
     }
   }
   return true;
+}
+
+bool _setEquals<T>(Set<T> a, Set<T> b) {
+  if (identical(a, b)) {
+    return true;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+  return a.containsAll(b);
 }

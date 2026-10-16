@@ -11,63 +11,114 @@ import 'package:test/test.dart';
 
 void main() {
   group('LinuxBuildService', () {
-    test('targets returns prototype Linux targets', () {
+    test('buildTargets and assembleTargets return prototype Linux targets', () {
       final service = LinuxBuildService();
-      final List<ExtensionTarget> targets = service.targets;
+      final LinuxBuildService(
+        :List<BuildTarget> buildTargets,
+        :List<AssembleTarget> assembleTargets,
+      ) = service;
 
       expect(
-        targets.map((ExtensionTarget t) => (t.name, t.isTopLevel)),
-        equals(<(String, bool)>[
-          (LinuxBuildService.customLinuxBuildTargetName, true),
-          ('custom-linux-assemble-only-debug', false),
-        ]),
+        buildTargets.map((BuildTarget t) => t.name),
+        equals(<String>[LinuxBuildService.customLinuxBuildTargetName]),
+      );
+      expect(
+        assembleTargets.map((AssembleTarget t) => t.name),
+        equals(<String>['custom-linux-assemble-only-debug']),
       );
     });
 
-    test('initialize registers getBuildTargets and build RPC handlers', () async {
-      final service = LinuxBuildService();
-      expect(service.namespace, BuildService.serviceNamespace);
+    test(
+      'initialize registers getBuildTargets, getAssembleTargets, build, and assemble RPC handlers',
+      () async {
+        final service = LinuxBuildService();
+        expect(service.namespace, BuildService.serviceNamespace);
 
-      final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
-      expect(handlers.keys, containsAll(<String>['getBuildTargets', 'build']));
+        final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
+        expect(
+          handlers.keys,
+          containsAll(<String>['getBuildTargets', 'getAssembleTargets', 'build', 'assemble']),
+        );
 
-      final Object? targetsResult = await handlers['getBuildTargets']!(const <String, Object?>{});
-      final List<ExtensionBuildTarget> targets = ExtensionBuildTarget.listFromJson(targetsResult);
-      expect(targets, hasLength(2));
-      expect(targets.first.name, LinuxBuildService.customLinuxBuildTargetName);
+        final Object? buildTargetsResult = await handlers['getBuildTargets']!(
+          const <String, Object?>{},
+        );
+        final List<ExtensionBuildTarget> buildTargets = ExtensionBuildTarget.listFromJson(
+          buildTargetsResult,
+        );
+        expect(buildTargets, hasLength(1));
+        expect(buildTargets.single.name, LinuxBuildService.customLinuxBuildTargetName);
+        expect(
+          buildTargets.single.artifacts,
+          equals(const <ExtensionArtifact>{
+            LinuxArtifacts.linuxHeaders,
+            LinuxArtifacts.linuxDesktopPath,
+            BuiltInArtifacts.icuData,
+          }),
+        );
 
-      final Object? missingCmakeResultObj = await handlers['build']!(<String, Object?>{
-        BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
-        BuildService.buildModeParam: 'debug',
-        BuildService.mainPathParam: 'lib/main.dart',
-        BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
-        BuildService.projectRootParam: '/project',
-        BuildService.resolvedArtifactsParam: const <String, String>{},
-        BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
-      });
-      final missingCmakeResult = ExtensionBuildResult.fromJson(
-        missingCmakeResultObj! as Map<String, Object?>,
-      );
-      expect(missingCmakeResult.success, isFalse);
-      expect(missingCmakeResult.errorMessage, contains('Missing linux/CMakeLists.txt'));
+        final Object? assembleTargetsResult = await handlers['getAssembleTargets']!(
+          const <String, Object?>{},
+        );
+        final List<ExtensionAssembleTarget> assembleTargets = ExtensionAssembleTarget.listFromJson(
+          assembleTargetsResult,
+        );
+        expect(assembleTargets, hasLength(1));
+        expect(assembleTargets.single.name, 'custom-linux-assemble-only-debug');
 
-      final Object? unknownTargetResultObj = await handlers['build']!(<String, Object?>{
-        BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
-        BuildService.buildModeParam: 'debug',
-        BuildService.mainPathParam: 'lib/main.dart',
-        BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
-        BuildService.projectRootParam: '/project',
-        BuildService.resolvedArtifactsParam: const <String, String>{},
-        BuildService.targetNameParam: 'unknown-target',
-      });
-      final unknownResult = ExtensionBuildResult.fromJson(
-        unknownTargetResultObj! as Map<String, Object?>,
-      );
-      expect(unknownResult.success, isFalse);
-      expect(unknownResult.errorMessage, contains('Unknown build target: unknown-target'));
+        final Object? missingCmakeResultObj = await handlers['build']!(<String, Object?>{
+          BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
+          BuildService.buildModeParam: 'debug',
+          BuildService.mainPathParam: 'lib/main.dart',
+          BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+          BuildService.projectRootParam: '/project',
+          BuildService.resolvedArtifactsParam: const <String, String>{},
+          BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
+        });
+        final missingCmakeResult = ExtensionBuildResult.fromJson(
+          missingCmakeResultObj! as Map<String, Object?>,
+        );
+        expect(missingCmakeResult.success, isFalse);
+        expect(missingCmakeResult.errorMessage, contains('Missing linux/CMakeLists.txt'));
 
-      await service.shutdown();
-    });
+        final Object? unknownBuildTargetResultObj = await handlers['build']!(<String, Object?>{
+          BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
+          BuildService.buildModeParam: 'debug',
+          BuildService.mainPathParam: 'lib/main.dart',
+          BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+          BuildService.projectRootParam: '/project',
+          BuildService.resolvedArtifactsParam: const <String, String>{},
+          BuildService.targetNameParam: 'unknown-target',
+        });
+        final unknownBuildResult = ExtensionBuildResult.fromJson(
+          unknownBuildTargetResultObj! as Map<String, Object?>,
+        );
+        expect(unknownBuildResult.success, isFalse);
+        expect(unknownBuildResult.errorMessage, contains('Unknown build target: unknown-target'));
+
+        final Object? unknownAssembleTargetResultObj = await handlers['assemble']!(
+          <String, Object?>{
+            BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
+            BuildService.buildModeParam: 'debug',
+            BuildService.mainPathParam: 'lib/main.dart',
+            BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+            BuildService.projectRootParam: '/project',
+            BuildService.resolvedArtifactsParam: const <String, String>{},
+            BuildService.targetNameParam: 'unknown-assemble-target',
+          },
+        );
+        final unknownAssembleResult = ExtensionBuildResult.fromJson(
+          unknownAssembleTargetResultObj! as Map<String, Object?>,
+        );
+        expect(unknownAssembleResult.success, isFalse);
+        expect(
+          unknownAssembleResult.errorMessage,
+          contains('Unknown assemble target: unknown-assemble-target'),
+        );
+
+        await service.shutdown();
+      },
+    );
 
     test('CustomLinuxAssembleOnlyDebug copies artifacts and application binary', () async {
       final Directory tempDir = Directory.systemTemp.createTempSync('linux_build_test.');
