@@ -616,6 +616,15 @@ class RenderTable extends RenderBox {
     _cachedCells.clear();
   }
 
+  // Converts an index into [_columnLefts], which is a visual left-to-right
+  // column slot, into the index of the column it holds in the table's logical
+  // column order. The two only differ in RTL, where the logical columns are laid
+  // out from right to left.
+  int _logicalColumnIndex(int visualColumnIndex) => switch (textDirection) {
+    TextDirection.ltr => visualColumnIndex,
+    TextDirection.rtl => _columns - 1 - visualColumnIndex,
+  };
+
   /// Provides custom semantics for tables by generating nodes for rows and maybe cells.
   ///
   /// Table rows are not RenderObjects, so their semantics nodes must be created separately.
@@ -774,7 +783,10 @@ class RenderTable extends RenderBox {
           }
         }
 
-        cell.indexInParent = x;
+        // `x` is a visual column slot, but assistive technologies expect the
+        // column number of a cell to follow the table's logical column order
+        // regardless of the direction the table is laid out in.
+        cell.indexInParent = _logicalColumnIndex(x);
         cells.add(cell);
       }
 
@@ -1231,6 +1243,9 @@ class RenderTable extends RenderBox {
 
   // cache the table geometry for painting purposes
   final List<double> _rowTops = <double>[];
+  // The left edge of each column, always ordered from left to right on screen.
+  // In RTL that is the reverse of the logical column order: entry `i` is the
+  // left edge of logical column `columns - 1 - i`.
   Iterable<double>? _columnLefts;
   late double _tableWidth;
 

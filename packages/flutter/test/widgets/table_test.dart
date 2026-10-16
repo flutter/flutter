@@ -1095,4 +1095,67 @@ void main() {
     final int? cellWrapperIdAfterUIchanges = textFieldSemanticsNodeNew.parent?.id;
     expect(cellWrapperIdAfterUIchanges, cellWrapperId);
   });
+
+  testWidgets('Table cell semantics indexInParent is the logical column (LTR)', (
+    WidgetTester tester,
+  ) async {
+    final semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(child: Text('Cell 1')),
+                  TableCell(child: Text('Cell 2')),
+                  TableCell(child: Text('Cell 3')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.text('Cell 1')).indexInParent, 0);
+    expect(tester.getSemantics(find.text('Cell 2')).indexInParent, 1);
+    expect(tester.getSemantics(find.text('Cell 3')).indexInParent, 2);
+
+    semantics.dispose();
+  });
+
+  testWidgets('Table cell semantics indexInParent is the logical column (RTL)', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/192848.
+    // The first cell is painted on the right in RTL, but it is still the first
+    // column of the row.
+    final semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Table(
+            children: const <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  TableCell(child: Text('Cell 1')),
+                  TableCell(child: Text('Cell 2')),
+                  TableCell(child: Text('Cell 3')),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.text('Cell 1')).indexInParent, 0);
+    expect(tester.getSemantics(find.text('Cell 2')).indexInParent, 1);
+    expect(tester.getSemantics(find.text('Cell 3')).indexInParent, 2);
+
+    semantics.dispose();
+  });
 }
