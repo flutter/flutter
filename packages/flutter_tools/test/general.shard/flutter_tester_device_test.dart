@@ -5,12 +5,14 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -20,6 +22,7 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test/fake.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 import '../src/fake_process_manager.dart';
 import '../src/fake_vm_services.dart';
@@ -55,21 +58,20 @@ void main() {
     flutterProject: flutterProject,
   );
 
-  testUsingContext(
-    'Missing dir error caught for FontConfigManger.dispose',
-    () async {
-      final fontConfigManager = FontConfigManager();
+  testWithoutContext('Missing dir error caught for FontConfigManger.dispose', () async {
+    final fontConfigManager = FontConfigManager(
+      toolContext: FakeToolContext(
+        cache: Cache.test(processManager: processManager),
+        fs: fileSystem,
+        logger: BufferLogger.test(),
+      ),
+    );
 
-      final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
-      fontsDirectory.deleteSync(recursive: true);
+    final Directory fontsDirectory = fileSystem.file(fontConfigManager.fontConfigFile).parent;
+    fontsDirectory.deleteSync(recursive: true);
 
-      await fontConfigManager.dispose();
-    },
-    overrides: <Type, Generator>{
-      FileSystem: () => fileSystem,
-      ProcessManager: () => processManager,
-    },
-  );
+    await fontConfigManager.dispose();
+  });
 
   testUsingContext(
     'Flutter tester passes through impeller config and environment variables.',
@@ -332,9 +334,9 @@ void main() {
 /// Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   TestFlutterTesterDevice({
-    required super.platform,
-    required super.fileSystem,
-    required super.processManager,
+    required Platform platform,
+    required FileSystem fileSystem,
+    required ProcessManager processManager,
     required super.enableVmService,
     required List<String> dartEntrypointArgs,
     required bool enableImpeller,
@@ -342,8 +344,15 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     super.flutterProject,
   }) : super(
          id: 999,
+         toolContext: FakeToolContext(
+           artifacts: Artifacts.test(),
+           flutterVersion: FakeFlutterVersion(),
+           fs: fileSystem,
+           logger: BufferLogger.test(),
+           platform: platform,
+           processManager: processManager,
+         ),
          flutterTesterBinPath: '/',
-         logger: BufferLogger.test(),
          debuggingOptions: DebuggingOptions.enabled(
            const BuildInfo(
              BuildMode.debug,
@@ -361,7 +370,13 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
          testAssetDirectory: null,
          icudtlPath: null,
          compileExpression: null,
-         fontConfigManager: FontConfigManager(),
+         fontConfigManager: FontConfigManager(
+           toolContext: FakeToolContext(
+             cache: Cache.test(processManager: FakeProcessManager.any()),
+             fs: fileSystem,
+             logger: BufferLogger.test(),
+           ),
+         ),
          nativeAssetsBuilder: FakeNativeAssetsBuilder(),
        );
 

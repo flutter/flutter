@@ -335,7 +335,8 @@ class FlutterCommandRunner extends CommandRunner<void> {
     await super.run(args);
     if (exitWithCodeOne) {
       // No need to print anything because the help was already printed.
-      await exitWithHooks(1, shutdownHooks: _toolContext.shutdownHooks);
+      final ToolContext(:Logger logger, :ShutdownHooks shutdownHooks) = _toolContext;
+      await exitWithHooks(1, analytics: _analytics, logger: logger, shutdownHooks: shutdownHooks);
     }
   }
 
