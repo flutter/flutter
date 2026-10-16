@@ -180,6 +180,7 @@ void SnapshotControllerImpeller::MakeImpellerSnapshot(
     DlISize picture_size,
     std::function<void(const std::shared_ptr<impeller::Texture>&)> callback,
     SnapshotPixelFormat pixel_format) {
+  FML_DCHECK(provider);
   std::shared_ptr<const fml::SyncSwitch> sync_switch =
       GetDelegate().GetIsGpuDisabledSyncSwitch();
   sync_switch->Execute(
@@ -219,6 +220,7 @@ SnapshotControllerImpeller::MakeImpellerSnapshotSync(
     SnapshotDelegate::SnapshotDisplayListProvider provider,
     DlISize picture_size,
     SnapshotPixelFormat pixel_format) {
+  FML_DCHECK(provider);
   return DoMakeRasterSnapshot(provider, picture_size, GetDelegate(),
                               pixel_format);
 }

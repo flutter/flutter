@@ -290,7 +290,8 @@ Dart_Handle Picture::DoRasterizeToImage(const sk_sp<DisplayList>& display_list,
             snapshot_display_list =
                 layer_tree->Flatten(DlRect::MakeWH(width, height),
                                     snapshot_delegate->GetTextureRegistry(),
-                                    snapshot_delegate->GetGrContext());
+                                    snapshot_delegate->GetGrContext(),
+                                    /*aiks_context=*/nullptr);
           }
           snapshot_delegate->MakeSkiaSnapshot(
               snapshot_display_list, picture_bounds,
