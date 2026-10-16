@@ -23,7 +23,6 @@ import '../device.dart';
 import '../native_assets.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
@@ -32,6 +31,7 @@ import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 import '../web/compile.dart';
 import '../web/web_constants.dart';
+import '../web/web_options.dart';
 
 /// The name of the directory where Integration Tests are placed.
 ///
@@ -76,26 +76,32 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     FlutterTestRunner? testRunner,
     this.testWrapper = const TestWrapper(),
     this.verbose = false,
-    bool verboseHelp = false,
+    super.verboseHelp = false,
   }) : _testRunner =
            testRunner ??
-           FlutterTestRunner(templateRenderer: templateRenderer, toolContext: toolContext!),
-       super() {
+           FlutterTestRunner(templateRenderer: templateRenderer, toolContext: toolContext!) {
     requiresPubspecYaml();
-    usesPubOption();
-    usesFrontendServerStarterPathOption(verboseHelp: verboseHelp);
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addEnableExperimentation(hide: !verboseHelp);
-    usesDartDefineOption();
-    usesDeviceUserOption();
-    usesFlavorOption();
-    addEnableImpellerFlag(verboseHelp: verboseHelp);
-    addMachineOutputFlag(verboseHelp: verboseHelp);
-    addEnableFlutterGpuFlag(verboseHelp: verboseHelp);
-    addEnableHcppFlag(verboseHelp: verboseHelp);
-    usesDeprecatedJsInteropFlag(verboseHelp: verboseHelp);
+    enableUsesPubOption();
+    enableUsesFatalWarnings();
+    registerOptionBundles(const <OptionBundle>[
+      DdsAndDevToolsOptionsBundle(includeDevTools: false),
+    ]);
 
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.pub,
+      BuildInfoOptions.frontendServerStarterPath,
+      BuildInfoOptions.trackWidgetCreation,
+      CommonOptions.enableExperiment,
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
+      CommonOptions.deviceUser,
+      BuildInfoOptions.flavor,
+      DebuggingOptionDescriptors.enableImpeller,
+      CommonOptions.machine,
+      DebuggingOptionDescriptors.enableFlutterGpu,
+      DebuggingOptionDescriptors.enableHcpp,
+      WebOptions.deprecatedJsInterop,
+      CommonOptions.fatalWarnings,
       _experimentalFasterTesting,
       _name,
       _plainName,
@@ -126,12 +132,9 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       _timeout,
       _ignoreTimeouts,
       _wasm,
-      _crossOriginIsolation,
+      WebOptions.crossOriginIsolation,
       _uninstall,
     ], verboseHelp: verboseHelp);
-
-    addDdsOptions(verboseHelp: verboseHelp);
-    usesFatalWarningsOption(verboseHelp: verboseHelp);
   }
 
   static const _experimentalFasterTesting = FlagOptionDescriptor(
@@ -370,17 +373,6 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
   );
 
-  static const _crossOriginIsolation = FlagOptionDescriptor(
-    name: 'cross-origin-isolation',
-    verboseOnly: true,
-    help:
-        'Adds the Cross-Origin-Opener-Policy and Cross-Origin-Embedder-Policy '
-        'headers to the web server. These headers are required for using APIs like '
-        'SharedArrayBuffer. This is on by default for the "skwasm" web renderer, '
-        'and this flag can be used to override the default. To disable this for the '
-        'skwasm renderer, use "--no-cross-origin-isolation".',
-  );
-
   static const _uninstall = FlagOptionDescriptor(
     name: 'uninstall',
     defaultsTo: true,
@@ -571,12 +563,10 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       debugLogsDirectoryPath: debugLogsDirectoryPath,
       webConfig: WebDebugConfig(
         renderer: webRenderer,
-        crossOriginIsolation: wasParsed(_crossOriginIsolation)
-            ? getValue(_crossOriginIsolation)
-            : null,
+        crossOriginIsolation: getValue(WebOptions.crossOriginIsolation),
         useWasm: useWasm,
       ),
-      printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+      printDtd: getValue(CommonOptions.printDtd),
       enableHcpp: explicitEnableHcpp,
       uninstallApp: getValue(_uninstall),
     );
@@ -776,7 +766,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       ignoreTimeouts: getValue(_ignoreTimeouts),
       failFast: getValue(_failFast),
       integrationTestDevice: integrationTestDevice,
-      integrationTestUserIdentifier: stringArg(FlutterOptions.kDeviceUser),
+      integrationTestUserIdentifier: getValue(CommonOptions.deviceUser),
       testTimeRecorder: testTimeRecorder,
       nativeAssetsBuilder: nativeAssetsBuilder,
     );

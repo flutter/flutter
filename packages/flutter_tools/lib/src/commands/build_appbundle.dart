@@ -40,18 +40,11 @@ class BuildAppBundleCommand extends BuildSubCommand {
       AndroidBuildOptionsBundle(),
     ]);
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
-      _targetPlatform,
+      AndroidBuildOptionsBundle.targetPlatformWithDefaults,
       _deferredComponents,
       _validateDeferredComponents,
     ]);
   }
-
-  static const _targetPlatform = MultiOptionDescriptor(
-    name: 'target-platform',
-    defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
-    allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
-    help: 'The target platform for which the app is compiled.',
-  );
 
   static const _deferredComponents = FlagOptionDescriptor(
     name: 'deferred-components',
@@ -141,7 +134,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
     return Event.commandUsageValues(
       workflow: commandPath,
       commandHasTerminal: hasTerminal,
-      buildAppBundleTargetPlatform: getValue(_targetPlatform).join(','),
+      buildAppBundleTargetPlatform: getValue(AndroidBuildOptionsBundle.targetPlatformWithDefaults)
+          .join(','),
       buildAppBundleBuildMode: buildMode,
       buildBundleEnableHcpp:
           explicitEnableHcpp ?? project.android.computeHcppEnabled(ifAbsent: enableHcpp),
@@ -156,7 +150,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
     }
     final androidBuildInfo = AndroidBuildInfo(
       await getBuildInfo(),
-      targetArchs: getValue(_targetPlatform).map<CpuArch>(getCpuArchForName),
+      targetArchs: getValue(AndroidBuildOptionsBundle.targetPlatformWithDefaults)
+          .map<CpuArch>(getCpuArchForName),
     );
     // Do all setup verification that doesn't involve loading units. Checks that
     // require generated loading units are done after gen_snapshot in assemble.
