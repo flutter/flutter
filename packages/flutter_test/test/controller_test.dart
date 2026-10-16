@@ -349,6 +349,8 @@ void main() {
               child: Listener(
                 onPointerHover: (PointerHoverEvent event) =>
                     logs.add('view0 hover ${event.viewId}'),
+                onPointerDown: (PointerDownEvent event) => logs.add('view0 down ${event.viewId}'),
+                onPointerUp: (PointerUpEvent event) => logs.add('view0 up ${event.viewId}'),
                 child: const Center(child: Text('View0Target')),
               ),
             ),
@@ -357,6 +359,8 @@ void main() {
               child: Listener(
                 onPointerHover: (PointerHoverEvent event) =>
                     logs.add('view1 hover ${event.viewId}'),
+                onPointerDown: (PointerDownEvent event) => logs.add('view1 down ${event.viewId}'),
+                onPointerUp: (PointerUpEvent event) => logs.add('view1 up ${event.viewId}'),
                 child: const Center(child: Text('View1Target')),
               ),
             ),
@@ -365,20 +369,47 @@ void main() {
       ),
     );
 
+    final Offset view0Center = tester.getCenter(find.text('View0Target'));
     final TestGesture gesture0 = await tester.startHover(find.text('View0Target'));
     addTearDown(() => gesture0.removePointer(view: view0));
     await tester.pump();
     expect(logs, equals(<String>['view0 hover 100']));
     logs.clear();
 
+    // Follow-up calls on gesture0 targeting view0 must pass view: view0.
+    await gesture0.moveBy(const Offset(5.0, 0.0), view: view0);
+    await gesture0.down(view0Center, view: view0);
+    await gesture0.up(view: view0);
+    await tester.pump();
+    expect(logs, equals(<String>['view0 hover 100', 'view0 down 100', 'view0 up 100']));
+    logs.clear();
+
     await gesture0.removePointer(view: view0);
     await tester.pump();
 
-    final TestGesture gestureAt0 = await tester.startHoverAt(
-      tester.getCenter(find.text('View0Target')),
-      view: view0,
-    );
+    // Hovering on view1 (the implicit tester.view).
+    final TestGesture gesture1 = await tester.startHover(find.text('View1Target'));
+    addTearDown(gesture1.removePointer);
+    await tester.pump();
+    expect(logs, equals(<String>['view1 hover ${view1.viewId}']));
+    logs.clear();
+
+    await gesture1.moveBy(const Offset(5.0, 0.0));
+    await tester.pump();
+    expect(logs, equals(<String>['view1 hover ${view1.viewId}']));
+    logs.clear();
+
+    await gesture1.removePointer();
+    await tester.pump();
+
+    // startHoverAt with explicit view: view0 and follow-up moveTo with view: view0.
+    final TestGesture gestureAt0 = await tester.startHoverAt(view0Center, view: view0);
     addTearDown(() => gestureAt0.removePointer(view: view0));
+    await tester.pump();
+    expect(logs, equals(<String>['view0 hover 100']));
+    logs.clear();
+
+    await gestureAt0.moveTo(view0Center + const Offset(5.0, 0.0), view: view0);
     await tester.pump();
     expect(logs, equals(<String>['view0 hover 100']));
   });
@@ -396,7 +427,7 @@ void main() {
         isA<AssertionError>().having(
           (AssertionError e) => e.message,
           'message',
-          'Touch and trackpad pointers cannot generate hover events.',
+          contains('Touch and trackpad pointers cannot generate hover events.'),
         ),
       ),
     );
@@ -407,14 +438,14 @@ void main() {
         isA<AssertionError>().having(
           (AssertionError e) => e.message,
           'message',
-          'Touch and trackpad pointers cannot generate hover events.',
+          contains('Touch and trackpad pointers cannot generate hover events.'),
         ),
       ),
     );
   });
 
   testWidgets(
-    'WidgetTester.startHoverAt throws assertion error when a hover pointer is already connected',
+    'WidgetTester.startHoverAt throws assertion error when a mouse or stylus pointer is already connected',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(textDirection: TextDirection.ltr, child: Text('test')),
@@ -429,9 +460,24 @@ void main() {
           isA<AssertionError>().having(
             (AssertionError e) => e.message,
             'message',
-            'A hover pointer is already connected. Call removePointer() on the '
-                'existing TestGesture before starting a new hover gesture, or use '
-                'moveTo() or moveBy() to move the existing pointer.',
+            contains('A mouse or stylus pointer is already connected to MouseTracker'),
+          ),
+        ),
+      );
+
+      await gesture.removePointer();
+      await tester.pump();
+
+      // A mouse tap also connects a mouse device to MouseTracker without removing it.
+      await tester.tap(find.text('test'), kind: PointerDeviceKind.mouse);
+
+      expect(
+        () => tester.startHover(find.text('test')),
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError e) => e.message,
+            'message',
+            contains('A mouse or stylus pointer is already connected to MouseTracker'),
           ),
         ),
       );

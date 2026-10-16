@@ -1193,6 +1193,15 @@ abstract class WidgetController {
   /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
   ///
   /// {@template flutter.flutter_test.WidgetController.startHover}
+  /// This method dispatches a [PointerAddedEvent] (via [TestGesture.addPointer])
+  /// followed by a [PointerHoverEvent] (via [TestGesture.moveTo]) at the target
+  /// location. For hit-tested widgets at that location:
+  ///
+  ///  * [MouseRegion.onEnter] is fired once when the [PointerAddedEvent] is
+  ///    processed (for mouse and stylus pointers tracked by [MouseTracker]).
+  ///  * [MouseRegion.onHover] and [Listener.onPointerHover] are each fired once
+  ///    when the subsequent [PointerHoverEvent] is processed.
+  ///
   /// The return value is a [TestGesture] object that can be used to continue the
   /// hover (e.g. moving the pointer with [TestGesture.moveTo] or
   /// [TestGesture.moveBy], or dispatching a down event with [TestGesture.down]).
@@ -1200,10 +1209,13 @@ abstract class WidgetController {
   /// By default, `kind` is [PointerDeviceKind.mouse] because touch pointers
   /// ([PointerDeviceKind.touch]) cannot generate hover events.
   ///
-  /// Only one hover pointer may be connected at a time. Callers must remove the
-  /// pointer via [TestGesture.removePointer] before starting another hover
-  /// gesture (or use [TestGesture.moveTo] / [TestGesture.moveBy] on the existing
-  /// gesture), and should clean up the pointer at the end of the test:
+  /// No mouse or stylus device may already be connected to [MouseTracker] when
+  /// this method is called (for example, from an active hover gesture or a prior
+  /// [tap], [press], or [drag] with [PointerDeviceKind.mouse] or
+  /// [PointerDeviceKind.stylus]). Callers must remove any active mouse or stylus
+  /// pointer via [TestGesture.removePointer] before starting a hover gesture (or
+  /// use [TestGesture.moveTo] / [TestGesture.moveBy] on an existing gesture), and
+  /// should clean up the pointer at the end of the test:
   ///
   /// ```dart
   /// testWidgets('MyWidget', (WidgetTester tester) async {
@@ -1261,9 +1273,11 @@ abstract class WidgetController {
     );
     assert(
       !binding.mouseTracker.mouseIsConnected,
-      'A hover pointer is already connected. Call removePointer() on the '
-      'existing TestGesture before starting a new hover gesture, or use '
-      'moveTo() or moveBy() to move the existing pointer.',
+      'A mouse or stylus pointer is already connected to MouseTracker (for '
+      'example, from an active hover gesture or a prior tap, press, or drag '
+      'with PointerDeviceKind.mouse or PointerDeviceKind.stylus). Call '
+      'removePointer() on the existing TestGesture before starting a new hover '
+      'gesture, or use moveTo() or moveBy() to move the existing pointer.',
     );
     return TestAsyncUtils.guard<TestGesture>(() async {
       final TestGesture gesture = await createGesture(pointer: pointer, kind: kind);
