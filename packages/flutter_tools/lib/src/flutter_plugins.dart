@@ -12,13 +12,11 @@ import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
 import 'base/common.dart';
-import 'base/config.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/process.dart';
 import 'base/template.dart';
 import 'base/time.dart';
 import 'base/utils.dart';
@@ -1563,8 +1561,7 @@ Future<void> injectPlugins(
   PackageGraph? packageGraph,
   PackageConfig? packageConfig,
 }) async {
-  final ToolContext(:Config config, :FileSystem fs, :Logger logger, :ProcessUtils processUtils) =
-      toolContext;
+  final ToolContext(:FileSystem fs, :Logger logger) = toolContext;
   final List<Plugin> plugins = await findPlugins(
     project,
     logger: logger,
@@ -1642,11 +1639,8 @@ Future<void> injectPlugins(
           project: project,
           cocoapods: cocoaPods,
           swiftPackageManager: SwiftPackageManager(
-            fileSystem: fs,
             templateRenderer: templateRenderer,
-            processUtils: processUtils,
-            config: config,
-            logger: logger,
+            toolContext: toolContext,
           ),
           fileSystem: fs,
           featureFlags: featureFlags,

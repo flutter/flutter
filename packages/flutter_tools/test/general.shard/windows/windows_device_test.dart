@@ -47,10 +47,12 @@ void main() {
             featureFlags: TestFeatureFlags(),
             platform: FakePlatform(operatingSystem: 'windows'),
           ),
-          operatingSystemUtils: FakeOperatingSystemUtils(),
-          logger: BufferLogger.test(),
-          processManager: FakeProcessManager.any(),
-          fileSystem: MemoryFileSystem.test(),
+          toolContext: FakeToolContext(
+            fs: MemoryFileSystem.test(),
+            logger: BufferLogger.test(),
+            os: FakeOperatingSystemUtils(),
+            processManager: FakeProcessManager.any(),
+          ),
         ).devices(),
         <Device>[],
       );
@@ -64,10 +66,12 @@ void main() {
           featureFlags: TestFeatureFlags(isWindowsEnabled: true),
           platform: FakePlatform(operatingSystem: 'windows'),
         ),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        logger: BufferLogger.test(),
-        processManager: FakeProcessManager.any(),
-        fileSystem: MemoryFileSystem.test(),
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: BufferLogger.test(),
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
       ).devices(),
       hasLength(1),
     );
@@ -127,10 +131,12 @@ WindowsDevice setUpWindowsDevice({
   ProcessManager? processManager,
 }) {
   return WindowsDevice(
-    fileSystem: fileSystem ?? MemoryFileSystem.test(),
-    logger: logger ?? BufferLogger.test(),
-    processManager: processManager ?? FakeProcessManager.any(),
-    operatingSystemUtils: FakeOperatingSystemUtils(),
+    toolContext: FakeToolContext(
+      fs: fileSystem ?? MemoryFileSystem.test(),
+      logger: logger ?? BufferLogger.test(),
+      os: FakeOperatingSystemUtils(),
+      processManager: processManager ?? FakeProcessManager.any(),
+    ),
   );
 }
 

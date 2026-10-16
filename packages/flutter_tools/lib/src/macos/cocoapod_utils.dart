@@ -66,11 +66,8 @@ Future<void> processPodsIfNeeded(
 
     // Generate an empty Swift Package Manager manifest to invalidate fingerprinter
     final swiftPackageManager = SwiftPackageManager(
-      fileSystem: globals.localFileSystem,
       templateRenderer: globals.templateRenderer,
-      processUtils: globals.processUtils,
-      config: globals.config,
-      logger: globals.logger,
+      toolContext: toolContext,
     );
     final FlutterDarwinPlatform platform = xcodeProject is IosProject
         ? FlutterDarwinPlatform.ios
