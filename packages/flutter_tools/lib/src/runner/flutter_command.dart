@@ -265,6 +265,11 @@ abstract class FlutterCommand extends Command<void> {
   ArgParser get argParser => _argParser ??= ArgParser(usageLineLength: _usageLineLength);
   ArgParser? _argParser;
 
+  /// The base [ArgParser] created by [FlutterCommand], before any subclass
+  /// overrides [argParser] (for example, to copy and hide options).
+  @internal
+  ArgParser? get baseArgParser => _argParser;
+
   int? get _usageLineLength {
     final OutputPreferences? prefs = _outputPreferences ?? toolContext?.outputPreferences;
     if (prefs != null) {
@@ -318,6 +323,21 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Registers multiple [OptionBundle] instances with this command.
   void registerOptionBundles(List<OptionBundle> bundles) => bundles.forEach(registerOptionBundle);
+
+  // TODO(kevmoo): Remove after migrating Google3 G3DebugAdapterCommand.
+  void usesIpv6Flag({required bool verboseHelp}) {
+    DebuggingOptionDescriptors.ipv6.addTo(argParser, verboseHelp: verboseHelp);
+  }
+
+  // TODO(kevmoo): Remove after migrating Google3 G3DebugAdapterCommand.
+  void addDdsOptions({required bool verboseHelp}) {
+    DebuggingOptionDescriptors.dds.addTo(argParser);
+    DebuggingOptionDescriptors.ddsPort.addTo(argParser, verboseHelp: verboseHelp);
+    DebuggingOptionDescriptors.devToolsServerAddressOption.addTo(
+      argParser,
+      verboseHelp: verboseHelp,
+    );
+  }
 
   void requiresPubspecYaml() {
     _requiresPubspecYaml = true;

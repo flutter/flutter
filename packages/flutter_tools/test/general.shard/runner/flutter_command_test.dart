@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io' as io;
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -818,6 +819,24 @@ void main() {
         expect(await deprecatedJsInteropFor(<String>['--deprecated-js-interop']), isTrue);
         expect(await deprecatedJsInteropFor(<String>['--no-deprecated-js-interop']), isFalse);
         expect(await deprecatedJsInteropFor(<String>[]), isNull);
+      },
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+      },
+    );
+
+    testUsingContext(
+      'preserves hasOption and typed getters when subclass replaces argParser with a copy',
+      () async {
+        final command = _DummyOverriddenArgParserCommand();
+        await createTestCommandRunner(command)
+            .run(<String>['dummy', '--filesystem-scheme=org-dartlang-app', '--ipv6']);
+        expect(command.hasOption(BuildInfoOptions.fileSystemScheme), isTrue);
+        expect(command.hasOption(DebuggingOptionDescriptors.ipv6), isTrue);
+        expect(command.hasOption(CommonOptions.fatalWarnings), isFalse);
+        expect(command.fileSystemScheme, 'org-dartlang-app');
+        expect(command.ipv6, isTrue);
       },
       overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
@@ -2520,4 +2539,65 @@ class DummyAllBuildOptionsFlutterCommand extends DummyFlutterCommand {
       BuildInfoOptions.extraGenSnapshotOptions,
     ]);
   }
+}
+
+class _DummyOverriddenArgParserCommand extends FlutterCommand {
+  _DummyOverriddenArgParserCommand() {
+    registerOptionBundle(const FilesystemOptionsBundle());
+    DebuggingOptionDescriptors.ipv6.addTo(argParser);
+    final copy = ArgParser(
+      allowTrailingOptions: argParser.allowTrailingOptions,
+      usageLineLength: argParser.usageLineLength,
+    );
+    for (final MapEntry<String, Option> entry in argParser.options.entries) {
+      final Option option = entry.value;
+      if (option.isFlag) {
+        copy.addFlag(
+          entry.key,
+          abbr: option.abbr,
+          help: option.help,
+          defaultsTo: option.defaultsTo as bool?,
+          negatable: option.negatable!,
+          hide: option.hide,
+        );
+      } else if (option.isSingle) {
+        copy.addOption(
+          entry.key,
+          abbr: option.abbr,
+          help: option.help,
+          valueHelp: option.valueHelp,
+          defaultsTo: option.defaultsTo as String?,
+          hide: option.hide,
+        );
+      } else if (option.isMultiple) {
+        copy.addMultiOption(
+          entry.key,
+          abbr: option.abbr,
+          help: option.help,
+          valueHelp: option.valueHelp,
+          defaultsTo: option.defaultsTo as Iterable<String>?,
+          splitCommas: option.splitCommas,
+          hide: option.hide,
+        );
+      }
+    }
+    _overriddenArgParser = copy;
+  }
+
+  ArgParser? _overriddenArgParser;
+
+  @override
+  ArgParser get argParser => _overriddenArgParser ?? super.argParser;
+
+  @override
+  String get description => 'does nothing';
+
+  @override
+  String get name => 'dummy';
+
+  @override
+  bool get shouldUpdateCache => false;
+
+  @override
+  Future<FlutterCommandResult> runCommand() async => FlutterCommandResult.success();
 }
