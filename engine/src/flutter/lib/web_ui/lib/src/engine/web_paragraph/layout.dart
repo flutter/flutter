@@ -1205,12 +1205,14 @@ abstract class LineBlock {
     final double runHeight = span.style.height! * fontSize;
     final double fontHeight = span.fontBoundingBoxAscent + span.fontBoundingBoxDescent;
     switch (span.style.leadingDistribution) {
-      case null:
       case ui.TextLeadingDistribution.even:
+        // Split extra leading equally above ascent and below descent (half-leading).
         final double extraLeading = (runHeight - fontHeight) / 2;
         _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent + extraLeading;
         _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent + extraLeading;
+      case null:
       case ui.TextLeadingDistribution.proportional:
+        // Default to proportional scaling of ascent and descent, matching SkParagraph.
         final double multiplier = fontHeight == 0 ? 1.0 : runHeight / fontHeight;
         _multipliedFontBoundingBoxAscent = span.fontBoundingBoxAscent * multiplier;
         _multipliedFontBoundingBoxDescent = span.fontBoundingBoxDescent * multiplier;
@@ -1480,6 +1482,7 @@ class TextLine {
   ui.Rect advance = ui.Rect.zero;
   double fontBoundingBoxAscent = 0.0;
   double fontBoundingBoxDescent = 0.0;
+  bool _hasLineMetrics = false;
 
   double paintBoundsAscent = 0.0;
   double paintBoundsDescent = 0.0;
@@ -1494,27 +1497,32 @@ class TextLine {
   List<LineBlock> visualBlocks = <LineBlock>[];
 
   void updateBoundingBox(LineBlock block) {
+    final double blockAscent;
+    final double blockDescent;
     if (block is TextBlock) {
       // Line always counts multiplied metrics.
-      fontBoundingBoxAscent = math.max(
-        fontBoundingBoxAscent,
-        block.multipliedFontBoundingBoxAscent,
-      );
-      fontBoundingBoxDescent = math.max(
-        fontBoundingBoxDescent,
-        block.multipliedFontBoundingBoxDescent,
-      );
+      blockAscent = block.multipliedFontBoundingBoxAscent;
+      blockDescent = block.multipliedFontBoundingBoxDescent;
       paintBoundsAscent = math.max(paintBoundsAscent, block.paintBoundsAscent);
       paintBoundsDescent = math.max(paintBoundsDescent, block.paintBoundsDescent);
       paintBoundsLeft = math.min(paintBoundsLeft, block.paintBounds.left);
       paintBoundsRight = math.max(paintBoundsRight, block.paintBounds.right);
     } else if (block is PlaceholderBlock) {
-      fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, block.ascent);
-      fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, block.descent);
+      blockAscent = block.ascent;
+      blockDescent = block.descent;
       // There's no need to update paint bounds because placeholders aren't painted by the
       // paragraph.
     } else {
       throw UnsupportedError('Unknown block type: $block');
+    }
+
+    if (!_hasLineMetrics) {
+      fontBoundingBoxAscent = blockAscent;
+      fontBoundingBoxDescent = blockDescent;
+      _hasLineMetrics = true;
+    } else {
+      fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, blockAscent);
+      fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, blockDescent);
     }
   }
 }
