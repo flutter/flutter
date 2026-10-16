@@ -6,17 +6,14 @@ import 'package:flutter_tools/src/base/bot_detector.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 
 import '../../src/common.dart';
-import '../../src/fakes.dart';
 
 void main() {
   group('BotDetector', () {
     late FakePlatform fakePlatform;
-    late FakeStdio fakeStdio;
     late BotDetector botDetector;
 
     setUp(() {
       fakePlatform = FakePlatform()..environment = <String, String>{};
-      fakeStdio = FakeStdio();
       botDetector = BotDetector(platform: fakePlatform);
     });
 
@@ -26,12 +23,15 @@ void main() {
         fakePlatform.environment['TRAVIS'] = 'true';
         expect(await botDetector.isRunningOnBot, isFalse);
 
+        fakePlatform.environment['BOT'] = 'False';
+        expect(await botDetector.isRunningOnBot, isFalse);
+
         fakePlatform.environment['BOT'] = '0';
         expect(await botDetector.isRunningOnBot, isFalse);
       });
 
       testWithoutContext('returns false when BOT or CI is false, 0, or empty', () async {
-        for (final value in <String>['false', '0', '']) {
+        for (final value in <String>['false', 'False', 'FALSE', '0', ' 0 ', '', '   ']) {
           fakePlatform.environment
             ..clear()
             ..['BOT'] = value;
@@ -45,7 +45,7 @@ void main() {
       });
 
       testWithoutContext('returns true when BOT or CI is true or 1', () async {
-        for (final value in <String>['true', '1']) {
+        for (final value in <String>['true', 'True', 'TRUE', '1', ' 1 ']) {
           fakePlatform.environment
             ..clear()
             ..['BOT'] = value;
@@ -70,13 +70,6 @@ void main() {
         fakePlatform.environment['FLUTTER_HOST'] = 'foo';
         fakePlatform.environment['TRAVIS'] = 'true';
 
-        expect(await botDetector.isRunningOnBot, isFalse);
-      });
-
-      testWithoutContext('returns false with and without a terminal attached', () async {
-        fakeStdio.stdout.hasTerminal = true;
-        expect(await botDetector.isRunningOnBot, isFalse);
-        fakeStdio.stdout.hasTerminal = false;
         expect(await botDetector.isRunningOnBot, isFalse);
       });
 

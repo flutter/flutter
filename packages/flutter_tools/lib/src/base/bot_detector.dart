@@ -10,7 +10,7 @@ class BotDetector {
   final Platform _platform;
 
   Future<bool> get isRunningOnBot async {
-    final String? bot = _platform.environment['BOT'];
+    final String? bot = _platform.environment['BOT']?.trim().toLowerCase();
     if ( // Explicitly stated to not be a bot.
     bot == 'false' ||
         bot == '0'
@@ -23,7 +23,7 @@ class BotDetector {
       return false;
     }
 
-    final String? ci = _platform.environment['CI'];
+    final String? ci = _platform.environment['CI']?.trim().toLowerCase();
     return bot == 'true' ||
         bot == '1'
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
