@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
 import 'application_package.dart';
@@ -35,11 +36,18 @@ abstract class DesktopDevice extends Device {
   }) : _logger = logger,
        super(category: Category.desktop);
 
+  /// How long [dispose] waits for tracked processes to report their exit, since a
+  /// crashed app's exit can arrive after the VM service disconnect that
+  /// triggered [dispose].
+  @visibleForTesting
+  static const kExitReportGracePeriod = Duration(milliseconds: 500);
+
   final Logger _logger;
   final ProcessManager _processManager;
   final FileSystem _fileSystem;
   final OperatingSystemUtils _operatingSystemUtils;
   final _runningProcesses = <Process>{};
+  final _pendingExitChecks = <Future<void>>{};
   final _deviceLogReader = DesktopLogReader();
 
   @override
@@ -130,14 +138,23 @@ abstract class DesktopDevice extends Device {
       rethrow;
     }
     _runningProcesses.add(process);
-    unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
+    final Future<void> exitFuture = process.exitCode.then((int exitCode) async {
+      _runningProcesses.remove(process);
+      final Future<void> exitCheck = onProcessExited(package, buildInfo, process, exitCode);
+      _pendingExitChecks.add(exitCheck);
+      try {
+        await exitCheck;
+      } finally {
+        _pendingExitChecks.remove(exitCheck);
+      }
+    });
 
     _deviceLogReader.listenToProcessOutput(process);
     if (debuggingOptions.buildInfo.isRelease) {
       return LaunchResult.succeeded();
     }
     final vmServiceDiscovery = ProtocolDiscovery.vmService(
-      SingleLaunchLogReader(_deviceLogReader.logLines, process.exitCode),
+      SingleLaunchLogReader(_deviceLogReader.logLines, exitFuture),
       devicePort: debuggingOptions.deviceVmServicePort,
       hostPort: debuggingOptions.hostVmServicePort,
       ipv6: debuggingOptions.ipv6,
@@ -208,6 +225,14 @@ abstract class DesktopDevice extends Device {
 
   @override
   Future<void> dispose() async {
+    if (_runningProcesses.isNotEmpty) {
+      await Future.wait(<Future<int>>[
+        for (final Process process in _runningProcesses) process.exitCode,
+      ]).timeout(kExitReportGracePeriod, onTimeout: () => const <int>[]);
+    }
+    while (_pendingExitChecks.isNotEmpty) {
+      await Future.wait<void>(_pendingExitChecks);
+    }
     await portForwarder.dispose();
   }
 
@@ -225,6 +250,20 @@ abstract class DesktopDevice extends Device {
   /// Called after a process is attached, allowing any device-specific extra
   /// steps to be run.
   void onAttached(ApplicationPackage package, BuildInfo buildInfo, Process process) {}
+
+  /// Called after a process exits, allowing any device-specific extra
+  /// steps (such as crash diagnostics) to be run.
+  ///
+  /// Both [dispose] and debug/profile startup failure handling in [startApp]
+  /// await the returned future, so overrides should bound any asynchronous
+  /// work with a short timeout.
+  @protected
+  Future<void> onProcessExited(
+    ApplicationPackage package,
+    BuildInfo buildInfo,
+    Process process,
+    int exitCode,
+  ) async {}
 
   /// Computes a set of environment variables used to pass debugging information
   /// to the engine without interfering with application level command line
@@ -390,10 +429,11 @@ class DesktopLogReader extends DeviceLogReader {
 /// returned by `getLogReader()` can't provide that signal — it must survive
 /// across relaunches — so a fresh, throwaway [SingleLaunchLogReader] is
 /// created for each [DesktopDevice.startApp] call instead, scoped to that
-/// single process via `scope` (typically `process.exitCode`). This mirrors
-/// how `AndroidDevice.startApp` avoids reusing its cached `getLogReader()`
-/// singleton for the same reason, constructing a fresh `AdbLogReader` for VM
-/// Service discovery on each launch.
+/// single launch via `scope` (in [DesktopDevice.startApp], the future that
+/// completes after `process.exitCode` and [DesktopDevice.onProcessExited]).
+/// This mirrors how `AndroidDevice.startApp` avoids reusing its cached
+/// `getLogReader()` singleton for the same reason, constructing a fresh
+/// `AdbLogReader` for VM Service discovery on each launch.
 class SingleLaunchLogReader extends DeviceLogReader {
   SingleLaunchLogReader(Stream<String> source, Future<void> scope) {
     _subscription = source.listen(_controller.add, onError: _controller.addError);
