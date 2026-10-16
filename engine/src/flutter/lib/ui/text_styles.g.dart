@@ -190,7 +190,7 @@ _EncodedTextStyle _encodeTextStyleFfi({
   if (height != null) {
     mask |= 1 << 11;
   } else {
-    height = const .new(1.0);
+    height = const .new(kTextHeightNone);
   }
   packed.height = height.value;
   if (leadingDistribution != null) {
@@ -374,7 +374,7 @@ _EncodedParagraphStyle _encodeParagraphStyleFfi({
   if (height != null) {
     mask |= 1 << 4;
   } else {
-    height = const .new(1.0);
+    height = const .new(kTextHeightNone);
   }
   packed.height = height.value;
   if (textHeightBehavior != null) {
@@ -525,7 +525,7 @@ _EncodedStrutStyle _encodeStrutStyleFfi({
   if (height != null) {
     mask |= 1 << 3;
   } else {
-    height = const .new(1.0);
+    height = const .new(kTextHeightNone);
   }
   packed.height = height.value;
   if (leadingDistribution != null) {
