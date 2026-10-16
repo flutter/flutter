@@ -625,25 +625,17 @@ class ToolDependencies {
     final DeviceManager finalDeviceManager =
         deviceManager ??
         FlutterDeviceManager(
-          logger: finalLogger,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          fileSystem: finalFS,
+          analytics: finalAnalytics,
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
+          androidWorkflow: finalAndroidWorkflow,
+          extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,
-          xcDevice: finalXCDevice,
-          androidWorkflow: finalAndroidWorkflow,
           iosWorkflow: finalIOSWorkflow,
-          flutterVersion: finalFlutterVersion,
-          artifacts: finalArtifacts,
           macOSWorkflow: finalMacOSWorkflow,
-          userMessages: finalUserMessages,
-          windowsWorkflow: finalWindowsWorkflow,
-          nativeAssetsBuilder: finalNativeAssetsBuilder,
-          analytics: finalAnalytics,
           toolContext: finalToolContext,
-          extensionManager: extensionManager,
+          windowsWorkflow: finalWindowsWorkflow,
+          xcDevice: finalXCDevice,
         );
 
     return ToolDependencies(

@@ -10,6 +10,7 @@ import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'context/tool_context.dart';
@@ -36,71 +37,70 @@ import 'windows/windows_workflow.dart';
 /// A provider for all of the device discovery instances.
 class FlutterDeviceManager extends DeviceManager {
   FlutterDeviceManager({
-    required super.logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
+    required Analytics analytics,
     required AndroidSdk? Function() androidSdkBuilder,
+    required AndroidWorkflow androidWorkflow,
     required FeatureFlags featureFlags,
     required IOSSimulatorUtils iosSimulatorUtils,
-    required XCDevice xcDevice,
-    required AndroidWorkflow androidWorkflow,
     required IOSWorkflow iosWorkflow,
-    required FlutterVersion flutterVersion,
-    required Artifacts artifacts,
     required MacOSWorkflow macOSWorkflow,
-    required UserMessages userMessages,
-    required WindowsWorkflow windowsWorkflow,
-    required TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
-    required Analytics analytics,
     required ToolContext toolContext,
+    required WindowsWorkflow windowsWorkflow,
+    required XCDevice xcDevice,
     ExtensionManager? extensionManager,
-  }) : deviceDiscoverers = <DeviceDiscovery>[
-         AndroidDevices(
-           logger: logger,
-           androidSdkBuilder: androidSdkBuilder,
-           androidWorkflow: androidWorkflow,
-           processManager: processManager,
-           fileSystem: fileSystem,
-           platform: platform,
-           userMessages: userMessages,
-         ),
-         IOSDevices(
-           platform: platform,
-           xcdevice: xcDevice,
-           iosWorkflow: iosWorkflow,
-           logger: logger,
-         ),
-         IOSSimulators(iosSimulatorUtils: iosSimulatorUtils),
-         FlutterTesterDevices(
-           fileSystem: fileSystem,
-           flutterVersion: flutterVersion,
-           processManager: processManager,
-           logger: logger,
-           artifacts: artifacts,
-           platform: platform,
-           nativeAssetsBuilder: nativeAssetsBuilder,
-         ),
-         MacOSDevices(macOSWorkflow: macOSWorkflow, toolContext: toolContext),
-         MacOSDesignedForIPadDevices(iosWorkflow: iosWorkflow, toolContext: toolContext),
-         LinuxDevices(analytics: analytics, featureFlags: featureFlags, toolContext: toolContext),
-         WindowsDevices(
-           analytics: analytics,
-           toolContext: toolContext,
-           windowsWorkflow: windowsWorkflow,
-         ),
-         WebDevices(
-           featureFlags: featureFlags,
-           fileSystem: fileSystem,
-           platform: platform,
-           processManager: processManager,
-           logger: logger,
-         ),
-         CustomDevices(featureFlags: featureFlags, toolContext: toolContext),
-         if (extensionManager != null)
-           ExtensionDevices(extensionManager: extensionManager, logger: logger),
-       ];
+  }) : super(logger: toolContext.logger) {
+    final ToolContext(
+      :Artifacts artifacts,
+      :FlutterVersion flutterVersion,
+      fs: FileSystem fileSystem,
+      :Logger logger,
+      :TestCompilerNativeAssetsBuilder? nativeAssetsBuilder,
+      :Platform platform,
+      :ProcessManager processManager,
+      :UserMessages userMessages,
+    ) = toolContext;
+    deviceDiscoverers = <DeviceDiscovery>[
+      AndroidDevices(
+        logger: logger,
+        androidSdkBuilder: androidSdkBuilder,
+        androidWorkflow: androidWorkflow,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        platform: platform,
+        userMessages: userMessages,
+      ),
+      IOSDevices(platform: platform, xcdevice: xcDevice, iosWorkflow: iosWorkflow, logger: logger),
+      IOSSimulators(iosSimulatorUtils: iosSimulatorUtils),
+      FlutterTesterDevices(
+        fileSystem: fileSystem,
+        flutterVersion: flutterVersion,
+        processManager: processManager,
+        logger: logger,
+        artifacts: artifacts,
+        platform: platform,
+        nativeAssetsBuilder: nativeAssetsBuilder,
+      ),
+      MacOSDevices(macOSWorkflow: macOSWorkflow, toolContext: toolContext),
+      MacOSDesignedForIPadDevices(iosWorkflow: iosWorkflow, toolContext: toolContext),
+      LinuxDevices(analytics: analytics, featureFlags: featureFlags, toolContext: toolContext),
+      WindowsDevices(
+        analytics: analytics,
+        toolContext: toolContext,
+        windowsWorkflow: windowsWorkflow,
+      ),
+      WebDevices(
+        featureFlags: featureFlags,
+        fileSystem: fileSystem,
+        platform: platform,
+        processManager: processManager,
+        logger: logger,
+      ),
+      CustomDevices(featureFlags: featureFlags, toolContext: toolContext),
+      if (extensionManager != null)
+        ExtensionDevices(extensionManager: extensionManager, logger: logger),
+    ];
+  }
 
   @override
-  final List<DeviceDiscovery> deviceDiscoverers;
+  late final List<DeviceDiscovery> deviceDiscoverers;
 }
