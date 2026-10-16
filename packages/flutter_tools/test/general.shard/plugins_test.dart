@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
@@ -2186,106 +2185,129 @@ flutter:
         },
       );
 
-      void writeFakePluginDependenciesFile(Directory pluginDir) {
-        flutterProject.flutterPluginsDependenciesFile.createSync(recursive: true);
-        flutterProject.flutterPluginsDependenciesFile.writeAsStringSync(
-          jsonEncode(<String, Object?>{
-            'plugins': <String, Object?>{
-              'linux': <Object?>[
-                <String, String>{'name': 'some_plugin', 'path': pluginDir.path},
-              ],
-              'windows': <Object?>[
-                <String, String>{'name': 'some_plugin', 'path': pluginDir.path},
-              ],
+      // Regression test for https://github.com/flutter/flutter/issues/193103.
+      testWithoutContext('createPluginSymlinks retries and cleans up when concurrent creation causes PathExistsException', () {
+        const pluginSymlinkPath =
+            r'C:\.tmp_rand0\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
+        late final FileSystem customFs;
+        var createAttempts = 0;
+        var creatingConcurrentDirectory = false;
+        customFs = ErrorHandlingFileSystem(
+          platform: FakePlatform(operatingSystem: 'windows'),
+          delegate: MemoryFileSystem.test(
+            style: .windows,
+            opHandle: (String context, FileSystemOp op) {
+              if (!creatingConcurrentDirectory && context == pluginSymlinkPath && op == .create) {
+                createAttempts++;
+                if (createAttempts == 1) {
+                  // Simulate another process creating a directory at the link
+                  // path after the initial typeSync check and before createSync.
+                  creatingConcurrentDirectory = true;
+                  try {
+                    customFs.directory(pluginSymlinkPath).createSync(recursive: true);
+                  } finally {
+                    creatingConcurrentDirectory = false;
+                  }
+                  throw const PathExistsException(
+                    pluginSymlinkPath,
+                    OSError('Cannot create a file when that file already exists', 183),
+                    'Cannot create link',
+                  );
+                }
+              }
             },
-          }),
+          ),
         );
-      }
 
-      testWithoutContext(
-        'createPluginSymlinks replaces existing directories with symlinks without failing',
-        () {
-          linuxProject.exists = true;
-          windowsProject.exists = true;
-          final Directory pluginDir = createFakePlugin(fs);
-          writeFakePluginDependenciesFile(pluginDir);
-
-          final directories = <Directory>[
-            linuxProject.pluginSymlinkDirectory.childDirectory('some_plugin'),
-            windowsProject.pluginSymlinkDirectory.childDirectory('some_plugin'),
-          ];
-          for (final dir in directories) {
-            ErrorHandlingFileSystem.deleteIfExists(dir, recursive: true);
-            dir.createSync(recursive: true);
-            dir.childFile('stale.txt').writeAsStringSync('stale content');
-          }
-          createPluginSymlinks(flutterProject, featureFlagsOverride: featureFlags);
-
-          final links = <Link>[
-            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
-            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
-          ];
-          for (final link in links) {
-            expect(link, exists);
-            expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
-          }
-        },
-      );
-
-      testWithoutContext('createPluginSymlinks gracefully handles race conditions where matching symlink is created concurrently', () {
-        final collisionFs = _CollisionInjectingFileSystem(fs);
-        windowsProject.pluginSymlinkDirectory = collisionFs.directory(
-          windowsProject.pluginSymlinkDirectory.path,
-        );
-        linuxProject.pluginSymlinkDirectory = collisionFs.directory(
-          linuxProject.pluginSymlinkDirectory.path,
-        );
-        linuxProject.exists = true;
+        setUpProject(customFs);
         windowsProject.exists = true;
-        final Directory pluginDir = createFakePlugin(fs);
-        writeFakePluginDependenciesFile(pluginDir);
+        flutterProject.flutterPluginsDependenciesFile.createSync(recursive: true);
+        flutterProject.flutterPluginsDependenciesFile.writeAsStringSync(r'''
+{
+  "plugins": {
+    "windows": [
+      {
+        "name": "some_plugin",
+        "path": "C:\\some_plugin"
+      }
+    ]
+  }
+}
+''');
 
-        final links = <Link>[
-          linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
-          windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
-        ];
-        collisionFs.simulateMatchingCollision = true;
         createPluginSymlinks(flutterProject, featureFlagsOverride: featureFlags);
 
-        for (final link in links) {
-          expect(link, exists);
-          expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
-        }
+        final Link link = windowsProject.pluginSymlinkDirectory.childLink('some_plugin');
+        expect(createAttempts, 2);
+        expect(link, exists);
+        expect(link.targetSync(), r'C:\some_plugin');
       });
 
-      testWithoutContext(
-        'createPluginSymlinks repairs conflicting entity if created concurrently',
-        () {
-          final collisionFs = _CollisionInjectingFileSystem(fs);
-          windowsProject.pluginSymlinkDirectory = collisionFs.directory(
-            windowsProject.pluginSymlinkDirectory.path,
-          );
-          linuxProject.pluginSymlinkDirectory = collisionFs.directory(
-            linuxProject.pluginSymlinkDirectory.path,
-          );
-          linuxProject.exists = true;
-          windowsProject.exists = true;
-          final Directory pluginDir = createFakePlugin(fs);
-          writeFakePluginDependenciesFile(pluginDir);
+      // Regression test for https://github.com/flutter/flutter/issues/193103.
+      testWithoutContext('createPluginSymlinks keeps a matching link created concurrently', () {
+        const pluginSymlinkPath =
+            r'C:\.tmp_rand0\app\windows\flutter\ephemeral\.plugin_symlinks\some_plugin';
+        late final MemoryFileSystem rawFs;
+        var createAttempts = 0;
+        var creatingConcurrentLink = false;
+        var deleted = false;
+        rawFs = MemoryFileSystem.test(
+          style: .windows,
+          opHandle: (String context, FileSystemOp op) {
+            if (context != pluginSymlinkPath) {
+              return;
+            }
+            if (op == .delete) {
+              deleted = true;
+            }
+            if (!creatingConcurrentLink && op == .create) {
+              createAttempts++;
+              if (createAttempts == 1) {
+                // Simulate another process creating the identical link first.
+                creatingConcurrentLink = true;
+                try {
+                  rawFs.link(pluginSymlinkPath).createSync(r'C:\some_plugin');
+                } finally {
+                  creatingConcurrentLink = false;
+                }
+                throw const PathExistsException(
+                  pluginSymlinkPath,
+                  OSError('Cannot create a file when that file already exists', 183),
+                  'Cannot create link',
+                );
+              }
+            }
+          },
+        );
+        final FileSystem customFs = ErrorHandlingFileSystem(
+          platform: FakePlatform(operatingSystem: 'windows'),
+          delegate: rawFs,
+        );
 
-          final links = <Link>[
-            linuxProject.pluginSymlinkDirectory.childLink('some_plugin'),
-            windowsProject.pluginSymlinkDirectory.childLink('some_plugin'),
-          ];
-          collisionFs.simulateConflictingCollision = true;
-          createPluginSymlinks(flutterProject, featureFlagsOverride: featureFlags);
+        setUpProject(customFs);
+        windowsProject.exists = true;
+        flutterProject.flutterPluginsDependenciesFile.createSync(recursive: true);
+        flutterProject.flutterPluginsDependenciesFile.writeAsStringSync(r'''
+{
+  "plugins": {
+    "windows": [
+      {
+        "name": "some_plugin",
+        "path": "C:\\some_plugin"
+      }
+    ]
+  }
+}
+''');
 
-          for (final link in links) {
-            expect(link, exists);
-            expect(fs.path.normalize(link.targetSync()), fs.path.normalize(pluginDir.path));
-          }
-        },
-      );
+        createPluginSymlinks(flutterProject, featureFlagsOverride: featureFlags);
+
+        final Link link = windowsProject.pluginSymlinkDirectory.childLink('some_plugin');
+        expect(createAttempts, 1);
+        expect(deleted, isFalse);
+        expect(link, exists);
+        expect(link.targetSync(), r'C:\some_plugin');
+      });
     });
 
     group('pubspec', () {
@@ -2952,6 +2974,86 @@ iosPrefix: FLT
           );
           return fileSystem;
         },
+        Platform: () => FakePlatform(operatingSystem: 'windows'),
+        ProcessManager: () => FakeProcessManager.empty(),
+      },
+    );
+
+    // Regression test for https://github.com/flutter/flutter/issues/193103.
+    testUsingContext(
+      'Symlink ERROR_ACCESS_DENIED on retry after PathExistsException shows developers paths that were used',
+      () async {
+        const retryPluginSymlinkPath =
+            r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\retry_plugin';
+        var retryCreateAttempts = 0;
+        final FileSystem fileSystem = ErrorHandlingFileSystem(
+          platform: FakePlatform(),
+          delegate: MemoryFileSystem.test(
+            style: .windows,
+            opHandle: (String context, FileSystemOp op) {
+              if (context == retryPluginSymlinkPath && op == .create) {
+                retryCreateAttempts++;
+                if (retryCreateAttempts == 1) {
+                  throw const PathExistsException(
+                    retryPluginSymlinkPath,
+                    OSError('Cannot create a file when that file already exists', 183),
+                    'Cannot create link',
+                  );
+                }
+                throw const FileSystemException('', '', OSError('', 5));
+              }
+            },
+          ),
+        );
+
+        final flutterProject = FakeFlutterProject()
+          ..directory = fileSystem.currentDirectory.childDirectory('app');
+        final Directory windowsManagedDirectory = flutterProject.directory
+            .childDirectory('windows')
+            .childDirectory('flutter');
+        final windowsProject = FakeWindowsProject()
+          ..managedDirectory = windowsManagedDirectory
+          ..pluginSymlinkDirectory = windowsManagedDirectory
+              .childDirectory('ephemeral')
+              .childDirectory('.plugin_symlinks')
+          ..exists = true;
+
+        final File dependenciesFile = flutterProject.directory.childFile(
+          '.flutter-plugins-dependencies',
+        );
+        flutterProject
+          ..flutterPluginsDependenciesFile = dependenciesFile
+          ..windows = windowsProject;
+
+        writePackageConfigFiles(directory: flutterProject.directory, mainLibName: 'my_app');
+
+        dependenciesFile.writeAsStringSync(r'''
+{
+  "plugins": {
+    "windows": [
+      {
+        "name": "retry_plugin",
+        "path": "C:\\retry_plugin"
+      }
+    ]
+  }
+}
+''');
+
+        const expectedRetryMessage =
+            'ERROR_ACCESS_DENIED file system exception thrown while trying to '
+            r'create a symlink from C:\retry_plugin to '
+            r'C:\app\windows\flutter\ephemeral\.plugin_symlinks\retry_plugin';
+
+        expect(
+          () => createPluginSymlinks(
+            flutterProject,
+            featureFlagsOverride: TestFeatureFlags(isWindowsEnabled: true),
+          ),
+          throwsToolExit(message: expectedRetryMessage),
+        );
+      },
+      overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: 'windows'),
         ProcessManager: () => FakeProcessManager.empty(),
       },
@@ -3990,101 +4092,5 @@ final class FakeCocoaPodsCapturesInvalidate extends Fake implements CocoaPods {
   @override
   void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {
     capturedInvocations.add(xcodeProject);
-  }
-}
-
-class _CollisionInjectingFileSystem extends ForwardingFileSystem {
-  _CollisionInjectingFileSystem(super.delegate);
-
-  bool simulateMatchingCollision = false;
-  bool simulateConflictingCollision = false;
-
-  @override
-  Directory directory(Object? path) {
-    return _CollisionInjectingDirectory(this, delegate.directory(path));
-  }
-
-  @override
-  Link link(Object? path) {
-    final Link delegateLink = delegate.link(path);
-    return _CollisionInjectingLink(this, delegateLink);
-  }
-}
-
-class _CollisionInjectingDirectory extends ForwardingFileSystemEntity<Directory, io.Directory>
-    with ForwardingDirectory<Directory> {
-  _CollisionInjectingDirectory(this._fileSystem, this.delegate);
-
-  final _CollisionInjectingFileSystem _fileSystem;
-
-  @override
-  final io.Directory delegate;
-
-  @override
-  FileSystem get fileSystem => _fileSystem;
-
-  @override
-  Directory wrapDirectory(io.Directory delegate) =>
-      _CollisionInjectingDirectory(_fileSystem, delegate);
-
-  @override
-  File wrapFile(io.File delegate) => delegate as File;
-
-  @override
-  Link wrapLink(io.Link delegate) => _CollisionInjectingLink(_fileSystem, delegate as Link);
-
-  @override
-  Directory childDirectory(String basename) =>
-      _fileSystem.directory(fileSystem.path.join(path, basename));
-
-  @override
-  File childFile(String basename) => _fileSystem.file(fileSystem.path.join(path, basename));
-
-  @override
-  Link childLink(String basename) => _fileSystem.link(fileSystem.path.join(path, basename));
-}
-
-class _CollisionInjectingLink extends ForwardingFileSystemEntity<Link, io.Link>
-    with ForwardingLink {
-  _CollisionInjectingLink(this._fileSystem, this.delegate);
-
-  final _CollisionInjectingFileSystem _fileSystem;
-
-  @override
-  final io.Link delegate;
-
-  @override
-  FileSystem get fileSystem => _fileSystem;
-
-  @override
-  File wrapFile(io.File delegate) => delegate as File;
-
-  @override
-  Directory wrapDirectory(io.Directory delegate) => delegate as Directory;
-
-  @override
-  Link wrapLink(io.Link delegate) => _CollisionInjectingLink(_fileSystem, delegate);
-
-  @override
-  void createSync(String target, {bool recursive = false}) {
-    if (_fileSystem.simulateMatchingCollision) {
-      _fileSystem.simulateMatchingCollision = false;
-      delegate.createSync(target, recursive: recursive);
-      throw const FileSystemException(
-        'Cannot create link',
-        '',
-        OSError('Cannot create a file when that file already exists', 183),
-      );
-    }
-    if (_fileSystem.simulateConflictingCollision) {
-      _fileSystem.simulateConflictingCollision = false;
-      delegate.createSync('/conflicting_target_path', recursive: recursive);
-      throw const FileSystemException(
-        'Cannot create link',
-        '',
-        OSError('Cannot create a file when that file already exists', 183),
-      );
-    }
-    super.createSync(target, recursive: recursive);
   }
 }

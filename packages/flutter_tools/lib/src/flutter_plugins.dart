@@ -13,6 +13,7 @@ import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
@@ -1302,6 +1303,32 @@ void handleSymlinkException(
   }
 }
 
+/// Returns true if `link.path` already holds a link to [target]. Otherwise,
+/// deletes whatever occupies `link.path` and returns false.
+bool _keepOrDeleteExistingLink(Link link, String target) {
+  final FileSystem fileSystem = link.fileSystem;
+  final FileSystemEntityType type = fileSystem.typeSync(link.path, followLinks: false);
+  if (type == .notFound) {
+    return false;
+  }
+  if (type != .link) {
+    ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
+    return false;
+  }
+  try {
+    if (fileSystem.path.canonicalize(link.targetSync()) == fileSystem.path.canonicalize(target) &&
+        link.existsSync()) {
+      return true;
+    }
+  } on FileSystemException {
+    // Fall through to delete and recreate if resolving target throws.
+  }
+  // Delete links non-recursively: on Windows, a recursive delete can't remove
+  // file symlinks.
+  ErrorHandlingFileSystem.deleteIfExists(link);
+  return false;
+}
+
 /// Creates [symlinkDirectory] containing symlinks to each plugin listed in [platformPlugins].
 ///
 /// If [force] is true, the directory will be created only if missing.
@@ -1328,55 +1355,21 @@ void _createPlatformPluginSymlinks(
     // points to an outdated target, it must be cleaned up before creating the
     // new link to avoid FileSystemException collisions (such as
     // ERROR_ALREADY_EXISTS on Windows or EEXIST on POSIX).
-    final FileSystemEntityType entityType = link.fileSystem.typeSync(link.path, followLinks: false);
+    if (_keepOrDeleteExistingLink(link, path)) {
+      continue;
+    }
     try {
-      if (entityType == .link) {
-        try {
-          final String target = link.targetSync();
-          if (link.fileSystem.path.canonicalize(target) ==
-                  link.fileSystem.path.canonicalize(path) &&
-              link.existsSync()) {
-            continue;
-          }
-        } on FileSystemException {
-          // Fall through to delete and recreate if resolving target throws.
-        }
-        ErrorHandlingFileSystem.deleteIfExists(link);
-      } else if (entityType != .notFound) {
-        ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
-      }
-      link.createSync(path);
-    } on FileSystemException catch (e) {
-      const windowsErrorAlreadyExists = 183;
-      const posixErrorFileExists = 17;
-      final bool isAlreadyExists =
-          e.osError?.errorCode == windowsErrorAlreadyExists ||
-          e.osError?.errorCode == posixErrorFileExists;
-      if (isAlreadyExists) {
-        final FileSystemEntityType currentType = link.fileSystem.typeSync(
-          link.path,
-          followLinks: false,
-        );
-        if (currentType == .link) {
-          try {
-            final String target = link.targetSync();
-            if (link.fileSystem.path.canonicalize(target) ==
-                link.fileSystem.path.canonicalize(path)) {
-              continue;
-            }
-          } on FileSystemException {
-            // Target could not be read; fall through to retry recreation.
-          }
-        }
-        // If a conflicting or stale entity was created concurrently, attempt to remove it and retry.
-        try {
-          ErrorHandlingFileSystem.deleteIfExists(link, recursive: true);
-          link.createSync(path);
+      try {
+        link.createSync(path);
+      } on PathExistsException {
+        // A concurrent `flutter` process may have created `link.path` after the
+        // check above. Keep it if it already points to `path`.
+        if (_keepOrDeleteExistingLink(link, path)) {
           continue;
-        } on FileSystemException {
-          // If retry fails, fall through to handleSymlinkException and rethrow.
         }
+        link.createSync(path);
       }
+    } on FileSystemException catch (e) {
       handleSymlinkException(
         e,
         platform: globals.platform,

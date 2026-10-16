@@ -84,6 +84,7 @@ export 'dart:io'
         // Link              NO! Use `file_system.dart`
         // NetworkInterface  NO! Use `io.dart`
         OSError,
+        PathExistsException,
         // Platform          NO! use `platform.dart`
         Process,
         ProcessException,
