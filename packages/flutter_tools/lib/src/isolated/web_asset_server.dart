@@ -78,11 +78,10 @@ class WebAssetServer implements AssetReader {
     this._digests, {
     required this.webRenderer,
     required this.useLocalCanvasKit,
-    required ToolContext toolContext,
+    required this._toolContext,
     this._baseHref,
     this._webDefines = const <String, String>{},
-  }) : _toolContext = toolContext,
-       basePath = WebTemplate.baseHref(htmlTemplate(toolContext.fs, 'index.html', _kDefaultIndex));
+  }) : basePath = WebTemplate.baseHref(htmlTemplate(_toolContext.fs, 'index.html', _kDefaultIndex));
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
