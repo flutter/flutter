@@ -75,11 +75,52 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
-# package:engine_repo_tools (tools/pkg/engine_repo_tools, a Dart package
-# with no build file of its own), which skia_gold_client imports; for the
-# kernel compiles of the Dart tests in testing/dart.
+# What the tests of the engine's Dart tools read from directories of this
+# package (testing/run_tests.py --type dart-host; the tests themselves are
+# dart_package_test targets in the packages' own directories, see the suite
+# below): .ci.yaml (engine_build_configs, engine_tool; the builder
+# configurations are //engine/src/flutter/ci's), bin/et (engine_tool's
+# entry-point test), and for api_check the
+# web engine's dart:ui sources and the iOS embedding's AccessibilityFeatures
+# (lib/web_ui and shell/platform/darwin have no build file of their own yet;
+# when they do, these move there).
+exports_files([
+    ".ci.yaml",
+    "shell/platform/darwin/ios/framework/Source/AccessibilityFeatures.swift",
+])
+
 filegroup(
-    name = "engine_repo_tools_sources",
-    srcs = glob(["tools/pkg/engine_repo_tools/lib/**/*.dart"]),
+    name = "et_entry_points",
+    srcs = glob(["bin/et*"]),
     visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "web_ui_dart_sources",
+    srcs = glob(["lib/web_ui/lib/**/*.dart"]),
+    visibility = ["//visibility:public"],
+)
+
+# run_tests.py --type dart-host: `dart test` in each Dart package of
+# build_dart_host_test_list, as dart_package_test runs it
+# (build/bazel/dart/package_test.bzl). Thirteen packages there, eleven here:
+# ci's tests format files they write into the checkout and add to the git
+# index (format_test.dart), and clang_tidy's read a GN build directory's
+# compile_commands.json; both run with `dart test` in the checkout, not from
+# a build (ci/BUILD.bazel and tools/clang_tidy/BUILD.bazel say so).
+test_suite(
+    name = "dart_host_tests",
+    tests = [
+        "//engine/src/flutter/flutter_frontend_server:tests",
+        "//engine/src/flutter/testing/skia_gold_client:tests",
+        "//engine/src/flutter/tools/api_check:tests",
+        "//engine/src/flutter/tools/bazel_tools:tests",
+        "//engine/src/flutter/tools/build_bucket_golden_scraper:tests",
+        "//engine/src/flutter/tools/engine_tool:tests",
+        "//engine/src/flutter/tools/githooks:tests",
+        "//engine/src/flutter/tools/header_guard_check:tests",
+        "//engine/src/flutter/tools/pkg/engine_build_configs:tests",
+        "//engine/src/flutter/tools/pkg/engine_repo_tools:tests",
+        "//engine/src/flutter/tools/pkg/git_repo_tools:tests",
+    ],
 )

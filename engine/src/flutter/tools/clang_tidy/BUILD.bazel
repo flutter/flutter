@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:clang_tidy: the clang-tidy driver of the engine's lint step. A Dart
+# package with no GN build file.
+#
+# Its tests are in run_tests.py's dart-host list but not here: they read a GN
+# build directory's compile_commands.json (COMPILE_COMMANDS_PATH, or the
+# newest out/*/) and expect more than a thousand entries in it, so they test
+# the tool against GN's compilation database, which a Bazel build does not
+# write; run them with `dart test` in this directory beside a GN build.
+# The library is here for the packages that import it (githooks).
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]) + [
+        "//engine/src/flutter/tools/pkg/engine_repo_tools:dart_sources",
+        "//engine/src/flutter/tools/pkg/git_repo_tools:dart_sources",
+    ],
+)

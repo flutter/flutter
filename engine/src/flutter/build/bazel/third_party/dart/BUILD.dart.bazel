@@ -184,3 +184,38 @@ filegroup(
         "third_party/pkg/tools/pkgs/*/lib/**/*.dart",
     ]),
 )
+
+# The packages of this tree that the engine's own Dart tools and their tests
+# import when `dart test` runs in a package of the tree
+# (testing/run_tests.py --type dart-host; build/bazel/dart/package_test.bzl):
+# package:test's runner and everything below it -- the analyzer it parses
+# test files with, coverage, shelf and the web-socket packages of its browser
+# platforms, vm_service, frontend_server_client -- and the core and tools
+# packages the tools use directly (args, path, yaml, logging, ...); 48
+# packages as resolved in the engine's package configuration. Whole package
+# groups again, for the next roll.
+filegroup(
+    name = "host_package_sources",
+    srcs = glob([
+        "pkg/_fe_analyzer_shared/lib/**/*.dart",
+        "pkg/analyzer/lib/**/*.dart",
+        "pkg/frontend_server_client/lib/**/*.dart",
+        "pkg/meta/lib/**/*.dart",
+        "pkg/vm_service/lib/**/*.dart",
+        "third_party/pkg/core/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/http/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/native/pkgs/ffi/lib/**/*.dart",
+        "third_party/pkg/shelf/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/test/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/tools/pkgs/*/lib/**/*.dart",
+        "third_party/pkg/web/web/lib/**/*.dart",
+        "third_party/pkg/webkit_inspection_protocol/lib/**/*.dart",
+    ]) + [":test_runner"],
+)
+
+# package:test's entry point, which dart_package_test runs on the VM: what
+# `dart test` delegates to.
+filegroup(
+    name = "test_runner",
+    srcs = ["third_party/pkg/test/pkgs/test/bin/test.dart"],
+)

@@ -21,3 +21,10 @@ cc_library(
     name = "rendering_selector",
     hdrs = ["android_rendering_selector.h"],
 )
+
+# The Java enums that mirror dart:ui's, which tools/api_check's tests parse
+# (run_tests.py --type dart-host).
+exports_files([
+    "io/flutter/embedding/engine/systemchannels/LifecycleChannel.java",
+    "io/flutter/view/AccessibilityBridge.java",
+])

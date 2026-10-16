@@ -146,14 +146,6 @@ filegroup(
     name = "resources",
     srcs = glob(["resources/**"]),
 )
-
-# package:skia_gold_client, a Dart package of this directory (no build file
-# of its own), which the Dart tests of testing/dart import; for their
-# kernel compiles.
-filegroup(
-    name = "skia_gold_client_sources",
-    srcs = glob(["skia_gold_client/lib/**/*.dart"]),
-)
 ''',
   ),
   // Impeller's group, its own suite (impeller_unittests, which links every
