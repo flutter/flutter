@@ -5,9 +5,9 @@
 # Generated from //flutter/shell/platform/embedder/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: copy_headers, flutter_engine, embedder-archive.
 
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends", "flutter_test_fixtures")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -409,7 +409,7 @@ cc_library(
     includes = ["."],
 )
 
-cc_test(
+flutter_cc_test(
     name = "embedder_unittests",
     size = "medium",
     srcs = [
@@ -459,7 +459,7 @@ cc_library(
     includes = ["."],
 )
 
-cc_test(
+flutter_cc_test(
     name = "embedder_a11y_unittests",
     size = "small",
     srcs = ["tests/embedder_a11y_unittests.cc"],
@@ -489,7 +489,7 @@ cc_test(
 )
 
 # Tests that build in FLUTTER_ENGINE_NO_PROTOTYPES mode.
-cc_test(
+flutter_cc_test(
     name = "embedder_proctable_unittests",
     size = "small",
     srcs = ["tests/embedder_unittests_proctable.cc"],

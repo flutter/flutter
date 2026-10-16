@@ -1,0 +1,19 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Root BUILD file of @gtest_parallel: google/gtest-parallel (a DEPS tree),
+# the runner testing/run_tests.py puts every engine suite through -- each
+# test in a process of its own, every test twice (--repeat=2), as many
+# workers as cores -- and that flutter_cc_test (testing.bzl) runs the same
+# suites through here. The launcher script imports the module beside it.
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "gtest_parallel",
+    srcs = [
+        "gtest-parallel",
+        "gtest_parallel.py",
+    ],
+)

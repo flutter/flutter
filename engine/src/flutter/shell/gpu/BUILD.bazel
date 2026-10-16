@@ -4,9 +4,9 @@
 
 # Generated from //flutter/shell/gpu/BUILD.gn by gn_to_bazel; do not edit.
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -166,7 +166,7 @@ flutter_gpu_test_backends(
     name = "gpu_test_backends",
 )
 
-cc_test(
+flutter_cc_test(
     name = "gpu_surface_unittests",
     size = "small",
     srcs = ["gpu_surface_unittests.cc"],

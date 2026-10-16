@@ -293,9 +293,13 @@ translations for synced dependencies (`//flutter/third_party/icu` is `@icu`,
 `config_setting` stands for which GN predicate, the import policy, the
 test sizes, how `testing/run_tests.py` runs a suite (`testRuns`: the
 arguments it passes `flow_unittests` -- the goldens directory and the font --
-become the `cc_test`'s `args` and `data`, and the environment it sets the
-GTK shell's suite -- `G_DEBUG=fatal-criticals` -- its `env`, since GN's
-executable has no words for how it is run; `displayTests` and
+become the test's `args` and `data`, the environment it sets the
+GTK shell's suite -- `G_DEBUG=fatal-criticals` -- its `env`, and the
+options it gives gtest-parallel for `ui_unittests` -- `--timeout=90` -- its
+`runner_args`, since GN's executable has no words for how it is run;
+`gtestParallelSuites` names the suites `run_tests.py` puts through
+gtest-parallel, a process per test and every test twice, which become
+`flutter_cc_test` rather than `cc_test`; `displayTests` and
 `sessionBusTests` name the suites that need a display and a D-Bus session
 bus, which the run inherited from the bot), and which executables need the GPU test backends next
 to them (`gpuBackendTests`: suites, and `flutter_tester_opengles`, an

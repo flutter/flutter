@@ -66,6 +66,14 @@ const Map<String, String> testSizes = <String, String>{
   // rendering through SwiftShader with validation on: 3,266 s serial on the
   // host, sharded (testShardCounts).
   'impeller_unittests': 'large',
+  // Under gtest-parallel (gtestParallelSuites: a process per test, twice,
+  // eight workers): 559 tests, 48 s beside the other suites, against
+  // small's 60 s.
+  'display_list_unittests': 'medium',
+  // 855 tests, each process initializing GTK under the display and the
+  // session bus: past small's 60 s under gtest-parallel (54 s with a
+  // worker per core, alone).
+  'flutter_linux_unittests': 'medium',
 };
 
 /// Test targets (by GN name) split into shards (`shard_count`), with the
@@ -85,7 +93,12 @@ const Map<String, int> testShardCounts = <String, int>{
 /// for how it is run; the runner has. Paths in [args] are relative to the
 /// runfiles root, where Bazel starts a test (`engine/src/flutter/...`).
 final class TestRun {
-  const TestRun({required this.args, required this.data, this.env = const <String, String>{}});
+  const TestRun({
+    required this.args,
+    required this.data,
+    this.env = const <String, String>{},
+    this.runnerArgs = const <String>[],
+  });
 
   final List<String> args;
 
@@ -94,7 +107,52 @@ final class TestRun {
 
   /// run_tests.py's `extra_env` for the suite.
   final Map<String, String> env;
+
+  /// gtest-parallel's own options for the suite (what run_tests.py passes
+  /// ahead of `--`: ui_unittests' `--timeout=90`), for a suite of
+  /// [gtestParallelSuites].
+  final List<String> runnerArgs;
 }
+
+/// The suites testing/run_tests.py runs through gtest-parallel (its
+/// run_cc_tests, on a Linux host): each becomes a flutter_cc_test
+/// (testing.bzl) -- or, in [displayTests], a flutter_display_test with
+/// `gtest_parallel` -- which puts the binary through the same runner with
+/// the same flags: a process per test, every test twice (`--repeat=2`), a
+/// worker per core. The Impeller suites are not here: their builder
+/// (`--type impeller` on macOS, host_debug_unopt_impeller_tests on Linux)
+/// runs the binaries whole. GN labels, `//dir:name`.
+const Set<String> gtestParallelSuites = <String>{
+  '//flutter/assets:assets_unittests',
+  '//flutter/shell/platform/glfw/client_wrapper:client_wrapper_glfw_unittests',
+  '//flutter/shell/platform/common/client_wrapper:client_wrapper_unittests',
+  '//flutter/shell/platform/common:common_cpp_core_unittests',
+  '//flutter/shell/platform/common:common_cpp_unittests',
+  '//flutter/runtime:dart_plugin_registrant_unittests',
+  '//flutter/display_list:display_list_rendertests',
+  '//flutter/display_list:display_list_unittests',
+  '//flutter/shell/platform/embedder:embedder_a11y_unittests',
+  '//flutter/shell/platform/embedder:embedder_proctable_unittests',
+  '//flutter/shell/platform/embedder:embedder_unittests',
+  '//flutter/fml:fml_unittests',
+  '//flutter/shell/geometry:geometry_unittests',
+  '//flutter/shell/gpu:gpu_surface_unittests',
+  '//flutter/runtime:no_dart_plugin_registrant_unittests',
+  '//flutter/runtime:runtime_unittests',
+  '//flutter/testing:testing_unittests',
+  '//flutter/third_party/tonic/tests:tonic_unittests',
+  '//flutter/lib/ui:ui_unittests',
+  // Every host but Windows.
+  '//flutter/shell/platform/android/external_view_embedder:android_external_view_embedder_unittests',
+  '//flutter/shell/platform/android/jni:jni_unittests',
+  '//flutter/shell/platform/android/platform_view_android_delegate:platform_view_android_delegate_unittests',
+  '//flutter/shell/common:shell_unittests',
+  // Linux.
+  '//flutter/flow:flow_unittests',
+  '//flutter/shell/platform/glfw:flutter_glfw_unittests',
+  '//flutter/shell/platform/linux:flutter_linux_unittests',
+  '//flutter/txt:txt_unittests',
+};
 
 /// Suites run with arguments, by GN label (`//dir:name`).
 const Map<String, TestRun> testRuns = <String, TestRun>{
@@ -142,6 +200,20 @@ const Map<String, TestRun> testRuns = <String, TestRun>{
     args: <String>[],
     data: <String>[],
     env: <String, String>{'G_DEBUG': 'fatal-criticals'},
+  ),
+  // run_tests.py: "the image release unit test can take a while on slow
+  // machines" -- gtest-parallel's timeout for the suite's processes.
+  '//flutter/lib/ui:ui_unittests': TestRun(
+    args: <String>[],
+    data: <String>[],
+    runnerArgs: <String>['--timeout=90'],
+  ),
+  // run_tests.py (Linux) passes txt_unittests ICU's data file; the suite's
+  // main (txt_run_all_unittests.cc) reads no such flag, so the argument is
+  // carried for the day it does, with the file it names.
+  '//flutter/txt:txt_unittests': TestRun(
+    args: <String>['--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat'],
+    data: <String>['@icu//:icudata'],
   ),
 };
 
