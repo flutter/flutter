@@ -723,6 +723,37 @@ void main() {
         expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
       },
     );
+
+    testWithoutContext('polls until a FlutterView is registered', () async {
+      final vm_service.Isolate pausedIsolate = vm_service.Isolate.parse(
+        isolate.toJson()
+          ..['pauseEvent'] = vm_service.Event(
+            kind: vm_service.EventKind.kPauseStart,
+            timestamp: 0,
+          ).toJson(),
+      )!;
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Debug'},
+          ),
+          const FakeVmServiceRequest(
+            method: kListViewsMethod,
+            jsonResponse: <String, Object>{'views': <Object>[]},
+          ),
+          listViewsRequest,
+          FakeVmServiceRequest(
+            method: 'getIsolate',
+            jsonResponse: pausedIsolate.toJson(),
+            args: <String, Object>{'isolateId': '1'},
+          ),
+        ],
+      );
+
+      await fakeVmServiceHost.vmService.waitForUIIsolatePaused();
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+    });
   });
 
   testWithoutContext('Can process log events from the vm service', () {

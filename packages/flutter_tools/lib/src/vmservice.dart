@@ -938,6 +938,9 @@ class FlutterVmService {
     );
 
     try {
+      // getFlutterViews() polls until the engine registers a view, which only
+      // happens once the root isolate is created. It returns an empty list only
+      // if the VM service disconnects.
       final List<FlutterView> flutterViews = await getFlutterViews();
       final String? isolateId = flutterViews.firstOrNull?.uiIsolate?.id;
       if (isolateId == null) {
