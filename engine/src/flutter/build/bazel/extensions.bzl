@@ -276,6 +276,13 @@ _SOURCE_REPOSITORIES = {
         path = "engine/src/flutter/third_party/pkg/process",
         build_file = _OVERLAYS + ":process/BUILD.process.bazel",
     ),
+    # google/gtest-parallel: the runner testing/run_tests.py puts every
+    # engine suite through (a process per test, --repeat=2), which
+    # flutter_cc_test reproduces (testing.bzl).
+    "gtest_parallel": struct(
+        path = "engine/src/flutter/third_party/gtest-parallel",
+        build_file = _OVERLAYS + ":gtest_parallel/BUILD.gtest_parallel.bazel",
+    ),
     "shaderc": struct(
         path = "engine/src/flutter/third_party/shaderc",
         build_file = None,

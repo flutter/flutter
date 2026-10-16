@@ -5,10 +5,10 @@
 # Generated from //flutter/shell/platform/common/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: common_cpp_accessibility.
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -166,7 +166,7 @@ flutter_test_fixtures(
     name = "common_cpp_core_fixtures",
 )
 
-cc_test(
+flutter_cc_test(
     name = "common_cpp_core_unittests",
     size = "small",
     srcs = ["path_utils_unittests.cc"],
@@ -186,7 +186,7 @@ flutter_test_fixtures(
     name = "common_cpp_fixtures",
 )
 
-cc_test(
+flutter_cc_test(
     name = "common_cpp_unittests",
     size = "small",
     srcs = [

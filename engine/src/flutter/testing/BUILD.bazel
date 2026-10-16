@@ -5,9 +5,9 @@
 # Generated from //flutter/testing/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_dart_snapshot_aot", "flutter_dart_snapshot_kernel", "flutter_test_fixtures")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_dart_snapshot_aot", "flutter_dart_snapshot_kernel", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -309,7 +309,7 @@ cc_library(
     alwayslink = True,
 )
 
-cc_test(
+flutter_cc_test(
     name = "testing_unittests",
     size = "small",
     deps = [
@@ -326,6 +326,8 @@ exports_files([
     "fixtures_location.cc",
     # The display wrapper of flutter_display_test (testing.bzl).
     "xvfb_run.sh",
+    # The gtest-parallel wrapper of flutter_cc_test (testing.bzl).
+    "gtest_parallel_run.sh",
 ])
 
 selects.config_setting_group(

@@ -930,36 +930,57 @@ final class _Emitter {
     bool shared = false,
   }) {
     // A suite that opens a window (displayTests) runs under a display:
-    // testing.bzl's macro, with cc_test's attributes.
-    final bool display = kind == 'cc_test' && displayTests.contains('$gnPackage:${target.name}');
-    if (display) {
-      _use('//engine/src/flutter/testing:testing.bzl', 'flutter_display_test');
+    // testing.bzl's macro, with cc_test's attributes. A suite run_tests.py
+    // runs through gtest-parallel (gtestParallelSuites) is the macro that
+    // does the same, or the display macro told to.
+    final gnLabel = '$gnPackage:${target.name}';
+    final bool display = kind == 'cc_test' && displayTests.contains(gnLabel);
+    final bool gtestParallel = kind == 'cc_test' && gtestParallelSuites.contains(gnLabel);
+    final ruleKind = display
+        ? 'flutter_display_test'
+        : gtestParallel
+        ? 'flutter_cc_test'
+        : kind;
+    if (display || gtestParallel) {
+      _use('//engine/src/flutter/testing:testing.bzl', ruleKind);
     } else {
       _use('@rules_cc//cc:defs.bzl', kind);
     }
     final String name = shared
         ? 'lib${_singleString(target.variables['output_name']) ?? target.name}.so'
         : target.name;
-    final rule = _Rule(display ? 'flutter_display_test' : kind, name, target.comments);
+    final rule = _Rule(ruleKind, name, target.comments);
     if (kind == 'cc_test') {
       rule.scalars['size'] = '"${testSizes[target.name] ?? defaultTestSize}"';
       final int? shards = testShardCounts[target.name];
       if (shards != null) {
-        if (!display) {
+        if (!display && !gtestParallel) {
           throw GnError(
             target.location,
-            '${target.name} is in testShardCounts but is not a display test: '
-            'only testing/xvfb_run.sh hands gtest the shard variables, so a '
-            'plain cc_test cannot be sharded',
+            '${target.name} is in testShardCounts but is neither a display test nor '
+            'run through gtest-parallel: only testing/xvfb_run.sh and '
+            'testing/gtest_parallel_run.sh hand the shard variables on, so a plain '
+            'cc_test cannot be sharded',
           );
         }
         rule.scalars['shard_count'] = '$shards';
       }
       // How run_tests.py runs the suite (testRuns), which GN cannot say.
-      final TestRun? run = testRuns['$gnPackage:${target.name}'];
+      final TestRun? run = testRuns[gnLabel];
       if (run != null) {
         for (final String arg in run.args) {
           rule.list('args').addUnique(Condition.always, _Item(arg));
+        }
+        if (run.runnerArgs.isNotEmpty) {
+          if (!gtestParallel) {
+            throw GnError(
+              target.location,
+              '${target.name} has runnerArgs in testRuns but is not in gtestParallelSuites',
+            );
+          }
+          for (final String arg in run.runnerArgs) {
+            rule.list('runner_args').addUnique(Condition.always, _Item(arg));
+          }
         }
         for (final String label in run.data) {
           rule.list('data').addUnique(Condition.always, _Item(_localLabel(label)));
@@ -967,6 +988,9 @@ final class _Emitter {
         if (run.env.isNotEmpty) {
           rule.scalars['env'] = _stringDictText(run.env);
         }
+      }
+      if (display && gtestParallel) {
+        rule.scalars['gtest_parallel'] = 'True';
       }
       // run_tests.py's Vulkan validation environment goes to the Impeller
       // suites (--type impeller), and names SwiftShader's manifest and the

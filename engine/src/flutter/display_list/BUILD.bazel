@@ -5,9 +5,9 @@
 # Generated from //flutter/display_list/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: display_list_builder_benchmarks, display_list_region_benchmarks, display_list_transform_benchmarks, display_list_benchmarks_source, display_list_benchmarks, primitive_rendering_benchmarks.
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -176,9 +176,9 @@ flutter_test_fixtures(
     fixtures = ["//engine/src/flutter/txt:third_party/fonts/Roboto-Regular.ttf"],
 )
 
-cc_test(
+flutter_cc_test(
     name = "display_list_unittests",
-    size = "small",
+    size = "medium",
     srcs = [
         "benchmarking/dl_complexity_unittests.cc",
         "display_list_unittests.cc",
@@ -215,7 +215,7 @@ cc_test(
     ],
 )
 
-cc_test(
+flutter_cc_test(
     name = "display_list_rendertests",
     size = "medium",
     srcs = ["//engine/src/flutter/display_list/testing:dl_rendering_unittests.cc"],
