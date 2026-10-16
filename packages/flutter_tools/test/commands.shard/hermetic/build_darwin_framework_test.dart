@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/commands/darwin_add_to_app.dart';
 import 'package:flutter_tools/src/context/apple_context.dart';
 import 'package:flutter_tools/src/darwin/darwin.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/xcode_project.dart';
 import 'package:test/fake.dart';
@@ -1792,6 +1793,7 @@ BuildIOSFrameworkCommand createBuildIOSFrameworkCommand({
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
+    templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: artifacts,
       flutterVersion: flutterVersion,
@@ -1840,6 +1842,7 @@ BuildMacOSFrameworkCommand createBuildMacOSFrameworkCommand({
     appleContext: appleContext ?? FakeAppleContext(),
     buildSystem: buildSystem ?? TestBuildSystem.all(BuildResult(success: true)),
     codesign: codesign ?? FakeDarwinAddToAppCodesigning(),
+    templateRenderer: const MustacheTemplateRenderer(),
     toolContext: FakeToolContext(
       artifacts: artifacts,
       flutterVersion: flutterVersion,

@@ -8,14 +8,12 @@ import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/native_assets.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/isolated/native_assets/dart_hook_result.dart';
 import 'package:flutter_tools/src/isolated/native_assets/ios/native_assets.dart';
 import 'package:flutter_tools/src/isolated/native_assets/native_assets.dart';
@@ -57,7 +55,12 @@ void main() {
       overrides: <Type, Generator>{
         FeatureFlags: () =>
             TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
-        ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      },
+      () async {
+        if (const LocalPlatform().isWindows) {
+          return; // Backslashes in commands, but we will never run these commands on Windows.
+        }
+        processManager = FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(
             command: <Pattern>[
               'xcrun',
@@ -210,12 +213,7 @@ void main() {
               '/build/native_assets/ios/buz.framework',
             ],
           ),
-        ]),
-      },
-      () async {
-        if (const LocalPlatform().isWindows) {
-          return; // Backslashes in commands, but we will never run these commands on Windows.
-        }
+        ]);
         final File packageConfig = environment.projectDir.childFile(
           '.dart_tool/package_config.json',
         );
@@ -262,6 +260,7 @@ void main() {
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          logger: logger,
           buildRunner: buildRunner,
           buildCodeAssets: const BuildCodeAssetsOptions(appBuildDirectory: null),
           buildDataAssets: true,
@@ -273,11 +272,13 @@ void main() {
           targetPlatform: TargetPlatform.ios,
           projectUri: projectUri,
           fileSystem: fileSystem,
+          logger: logger,
+          processManager: processManager,
           nativeAssetsFileUri: nonFlutterTesterAssetUri,
           targetUri: projectUri.resolve('${getBuildDirectory()}/native_assets/ios/'),
         );
         expect(
-          (globals.logger as BufferLogger).traceText,
+          logger.traceText,
           stringContainsInOrder(<String>[
             'Running build hooks for ios_arm64, ios_x64.',
             'Running build hooks for ios_arm64, ios_x64 done.',
@@ -321,17 +322,14 @@ void main() {
         ),
       ];
 
-      fatAssetTargetLocationsIOS(assets);
+      fatAssetTargetLocationsIOS(assets, logger: logger);
 
-      final fakeStdio = globals.stdio as FakeStdio;
       expect(
-        fakeStdio.writtenToStderr,
+        logger.errorText,
         contains(
-          contains(
-            'Code asset "package:bar/bar.dart" has different framework names for '
-            'different architectures. Picking "bar.framework" and '
-            'ignoring "bar_different.framework".',
-          ),
+          'Code asset "package:bar/bar.dart" has different framework names for '
+          'different architectures. Picking "bar.framework" and '
+          'ignoring "bar_different.framework".',
         ),
       );
     },
@@ -339,7 +337,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Logger: () => logger,
-      Stdio: () => FakeStdio(),
     },
   );
 }

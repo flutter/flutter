@@ -23,6 +23,7 @@ import 'base/yaml.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -564,6 +565,7 @@ class FlutterProject {
   Future<void> regeneratePlatformSpecificTooling({
     DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
     required bool releaseMode,
+    required ToolContext toolContext,
     PubspecCache? pubspecCache,
     PackageGraph? packageGraph,
     PackageConfig? packageConfig,
@@ -579,6 +581,7 @@ class FlutterProject {
       webPlatform: featureFlags.isWebEnabled && web.existsSync(),
       deprecationBehavior: deprecationBehavior,
       releaseMode: releaseMode,
+      toolContext: toolContext,
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
@@ -593,6 +596,7 @@ class FlutterProject {
   /// such as not including dev-only dependencies.
   Future<void> ensureReadyForPlatformSpecificTooling({
     required bool releaseMode,
+    required ToolContext toolContext,
     bool androidPlatform = false,
     bool iosPlatform = false,
     bool linuxPlatform = false,
@@ -609,7 +613,7 @@ class FlutterProject {
     }
 
     final migration = ProjectMigration(<ProjectMigrator>[
-      AnalysisOptionsMigration(this, globals.logger, packageConfig: packageConfig),
+      AnalysisOptionsMigration(this, toolContext.logger, packageConfig: packageConfig),
     ]);
     await migration.run();
 
@@ -637,13 +641,13 @@ class FlutterProject {
       await android.ensureReadyForPlatformSpecificTooling(deprecationBehavior: deprecationBehavior);
     }
     if (iosPlatform) {
-      await ios.ensureReadyForPlatformSpecificTooling();
+      await ios.ensureReadyForPlatformSpecificTooling(toolContext: toolContext);
     }
     if (linuxPlatform) {
       await linux.ensureReadyForPlatformSpecificTooling();
     }
     if (macOSPlatform) {
-      await macos.ensureReadyForPlatformSpecificTooling();
+      await macos.ensureReadyForPlatformSpecificTooling(toolContext: toolContext);
     }
     if (windowsPlatform) {
       await windows.ensureReadyForPlatformSpecificTooling();

@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -147,7 +148,7 @@ void main() {
             'APP_NAME': '',
             'FLUTTER_TEST_IMPELLER': 'true',
             'PATH':
-                '${device.nativeAssetsBuilder!.windowsBuildDirectory(project)};${platform.environment['PATH']}',
+                '${device.nativeAssetsBuilder!.windowsBuildDirectory(project, toolContext: device.toolContext)};${platform.environment['PATH']}',
           },
         ),
       );
@@ -332,9 +333,9 @@ void main() {
 /// Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   TestFlutterTesterDevice({
-    required super.platform,
-    required super.fileSystem,
-    required super.processManager,
+    required Platform platform,
+    required FileSystem fileSystem,
+    required ProcessManager processManager,
     required super.enableVmService,
     required List<String> dartEntrypointArgs,
     required bool enableImpeller,
@@ -343,7 +344,12 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   }) : super(
          id: 999,
          flutterTesterBinPath: '/',
-         logger: BufferLogger.test(),
+         toolContext: FakeToolContext(
+           fs: fileSystem,
+           logger: BufferLogger.test(),
+           platform: platform,
+           processManager: processManager,
+         ),
          debuggingOptions: DebuggingOptions.enabled(
            const BuildInfo(
              BuildMode.debug,
@@ -389,5 +395,6 @@ class FakeHttpServer extends Fake implements HttpServer {
 
 class FakeNativeAssetsBuilder extends Fake implements TestCompilerNativeAssetsBuilder {
   @override
-  String windowsBuildDirectory(FlutterProject project) => r'C:\native_assets\path';
+  String windowsBuildDirectory(FlutterProject project, {required ToolContext toolContext}) =>
+      r'C:\native_assets\path';
 }

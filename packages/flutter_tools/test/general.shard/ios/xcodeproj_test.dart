@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -25,6 +26,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show DelegatingToolContext, FakeOperatingSystemUtils;
 import '../../src/package_config.dart';
 
 const xcodebuild = '/usr/bin/xcodebuild';
@@ -1678,6 +1680,12 @@ PODS:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            toolContext: DelegatingToolContext(
+              artifacts: localIosArtifacts,
+              config: Config.test(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+            ),
             printWarnings: true,
           );
 
@@ -1760,6 +1768,12 @@ Build settings for action build and target good_plugin:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            toolContext: DelegatingToolContext(
+              artifacts: localIosArtifacts,
+              config: Config.test(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+            ),
             printWarnings: true,
           );
 
@@ -1828,6 +1842,12 @@ Build settings for action build and target good_plugin:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            toolContext: DelegatingToolContext(
+              artifacts: localIosArtifacts,
+              config: Config.test(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+            ),
             printWarnings: true,
           );
 
@@ -1902,6 +1922,12 @@ Build settings for action build and target bad_plugin:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            toolContext: DelegatingToolContext(
+              artifacts: localIosArtifacts,
+              config: Config.test(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+            ),
             printWarnings: true,
           );
 
@@ -2015,6 +2041,12 @@ PODS:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
+            toolContext: DelegatingToolContext(
+              artifacts: localIosArtifacts,
+              config: Config.test(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+            ),
             printWarnings: true,
           );
 
@@ -2062,7 +2094,16 @@ PODS:
         fs.directory('path/to/project'),
       );
       await expectLater(
-        () => updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo),
+        () => updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          toolContext: DelegatingToolContext(
+            artifacts: localIosArtifacts,
+            config: Config.test(),
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+          ),
+        ),
         throwsToolExit(message: '32-bit iOS local engine binaries are not supported.'),
       );
     });
@@ -2077,7 +2118,15 @@ PODS:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
-
+          toolContext: DelegatingToolContext(
+            artifacts: Artifacts.testLocalEngine(
+              localEngine: 'out/host_profile_arm64',
+              localEngineHost: 'out/host_release',
+            ),
+            config: Config.test(),
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+          ),
           useMacOSConfig: true,
         );
 
@@ -2118,7 +2167,15 @@ PODS:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
-
+          toolContext: DelegatingToolContext(
+            artifacts: Artifacts.testLocalEngine(
+              localEngine: 'out/host_profile',
+              localEngineHost: 'out/host_release',
+            ),
+            config: Config.test(),
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+          ),
           useMacOSConfig: true,
         );
 
@@ -2154,7 +2211,16 @@ PODS:
       final FlutterProject project = FlutterProject.fromDirectoryTest(
         fs.directory('path/to/project'),
       );
-      await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+      await updateGeneratedXcodeProperties(
+        project: project,
+        buildInfo: buildInfo,
+        toolContext: DelegatingToolContext(
+          artifacts: localIosArtifacts,
+          config: Config.test(),
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+        ),
+      );
 
       final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.readAsStringSync(), contains('EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386\n'));
@@ -2173,7 +2239,16 @@ PODS:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fs.directory('path/to/project'),
         );
-        await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          toolContext: DelegatingToolContext(
+            artifacts: localIosArtifacts,
+            config: Config.test(),
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+          ),
+        );
 
         final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.existsSync(), isTrue);
@@ -2203,7 +2278,16 @@ PODS:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fs.directory('path/to/project'),
         );
-        await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          toolContext: DelegatingToolContext(
+            artifacts: localIosArtifacts,
+            config: Config.test(),
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+          ),
+        );
 
         final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
         expect(config.existsSync(), isTrue);
@@ -2229,7 +2313,19 @@ PODS:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            toolContext: DelegatingToolContext(
+              artifacts: Artifacts.testLocalEngine(
+                localEngine: 'out/ios_debug_sim_unopt',
+                localEngineHost: 'out/host_debug_unopt',
+              ),
+              config: Config.test(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+            ),
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
@@ -2263,7 +2359,19 @@ PODS:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            toolContext: DelegatingToolContext(
+              artifacts: Artifacts.testLocalEngine(
+                localEngine: 'out/ios_debug_sim_arm64',
+                localEngineHost: 'out/host_debug_unopt',
+              ),
+              config: Config.test(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+            ),
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
@@ -2313,6 +2421,12 @@ PODS:
       await updateGeneratedXcodeProperties(
         project: FlutterProject.fromDirectoryTest(fs.directory('path/to/project')),
         buildInfo: buildInfo,
+        toolContext: DelegatingToolContext(
+          artifacts: localIosArtifacts,
+          config: Config.test(),
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+        ),
       );
 
       final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
@@ -2565,7 +2679,12 @@ flutter:
           await updateGeneratedXcodeProperties(
             project: project,
             buildInfo: buildInfo,
-
+            toolContext: DelegatingToolContext(
+              artifacts: localIosArtifacts,
+              config: Config.test(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+            ),
             configurationBuildDir: 'path/to/project/build/ios/iphoneos',
           );
 
@@ -2592,7 +2711,16 @@ flutter:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            toolContext: DelegatingToolContext(
+              artifacts: localIosArtifacts,
+              config: Config.test(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+            ),
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
@@ -2617,7 +2745,16 @@ flutter:
           final FlutterProject project = FlutterProject.fromDirectoryTest(
             fs.directory('path/to/project'),
           );
-          await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+          await updateGeneratedXcodeProperties(
+            project: project,
+            buildInfo: buildInfo,
+            toolContext: DelegatingToolContext(
+              artifacts: localIosArtifacts,
+              config: Config.test(),
+              logger: logger,
+              os: FakeOperatingSystemUtils(),
+            ),
+          );
 
           final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
           expect(config.existsSync(), isTrue);
@@ -2651,6 +2788,12 @@ flutter:
         await updateGeneratedXcodeProperties(
           project: project,
           buildInfo: buildInfo,
+          toolContext: DelegatingToolContext(
+            artifacts: Artifacts.test(),
+            config: Config.test(),
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+          ),
           useMacOSConfig: true,
         );
         final File buildPhaseScript = fs.file(
@@ -2677,7 +2820,16 @@ flutter:
         final FlutterProject project = FlutterProject.fromDirectoryTest(
           fs.directory('path/to/project'),
         );
-        await updateGeneratedXcodeProperties(project: project, buildInfo: buildInfo);
+        await updateGeneratedXcodeProperties(
+          project: project,
+          buildInfo: buildInfo,
+          toolContext: DelegatingToolContext(
+            artifacts: Artifacts.test(),
+            config: Config.test(),
+            logger: logger,
+            os: FakeOperatingSystemUtils(),
+          ),
+        );
         final File buildPhaseScript = fs.file(
           'path/to/project/ios/Flutter/ephemeral/flutter_native_integration.env',
         );

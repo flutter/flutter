@@ -139,12 +139,18 @@ void main() {
           FlutterManifest.empty(logger: logger),
           FlutterManifest.empty(logger: logger),
         );
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         expectNotExists(project.directory);
       });
       _testInMemory('does nothing in plugin or package root project', () async {
         final FlutterProject project = await aPluginProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         expectNotExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
@@ -183,7 +189,10 @@ dependencies:
 ''');
         final FlutterProject project = FlutterProject.fromDirectory(directory);
 
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
 
         expectNotExists(project.flutterPluginsDependenciesFile);
       });
@@ -193,7 +202,10 @@ dependencies:
         // that a project was a plugin, but shouldn't be as this creates false
         // positives.
         project.directory.childDirectory('example').createSync();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         expectExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
@@ -207,28 +219,40 @@ dependencies:
       });
       _testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         expectExists(
           project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'),
         );
       });
       _testInMemory('generates Xcode configuration for iOS', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         expectExists(
           project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'),
         );
       });
       _testInMemory('injects plugins for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         expectExists(
           androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')),
         );
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       _testInMemory('checkForDeprecation fails on invalid android app manifest file', () async {
@@ -299,7 +323,10 @@ dependencies:
         final FlutterProject project = await aPluginProject();
         project.example.directory.deleteSync();
 
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         expect(
           testLogger.statusText,
           isNot(
@@ -311,7 +338,10 @@ dependencies:
       });
       _testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
       });
 
@@ -325,7 +355,10 @@ dependencies:
           // Don't bother with Android, we just want the manifest.
           project.directory.childDirectory('android').deleteSync(recursive: true);
 
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await project.regeneratePlatformSpecificTooling(
+            releaseMode: false,
+            toolContext: const DelegatingToolContext(),
+          );
           expect(
             project.flutterPluginsDependenciesFile.readAsStringSync(),
             contains('"dev_dependency":true'),
@@ -348,7 +381,10 @@ dependencies:
           // Create a project that depends on that plugin.
           final FlutterProject project = await projectWithPluginDependency();
 
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await project.regeneratePlatformSpecificTooling(
+            releaseMode: false,
+            toolContext: const DelegatingToolContext(),
+          );
           expect(
             project.android.generatedPluginRegistrantFile.readAsStringSync(),
             contains('MyPlugin'),
@@ -371,7 +407,10 @@ dependencies:
           // Create a project that depends on that plugin.
           final FlutterProject project = await projectWithPluginDependency();
 
-          await project.regeneratePlatformSpecificTooling(releaseMode: true);
+          await project.regeneratePlatformSpecificTooling(
+            releaseMode: true,
+            toolContext: const DelegatingToolContext(),
+          );
           expect(
             project.android.generatedPluginRegistrantFile.readAsStringSync(),
             isNot(contains('MyPlugin')),
@@ -391,7 +430,10 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.macos.managedDirectory.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await project.regeneratePlatformSpecificTooling(
+            releaseMode: false,
+            toolContext: const DelegatingToolContext(),
+          );
           expectExists(project.macos.pluginRegistrantImplementation);
         },
         overrides: <Type, Generator>{
@@ -407,7 +449,10 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.macos.managedDirectory.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await project.regeneratePlatformSpecificTooling(
+            releaseMode: false,
+            toolContext: const DelegatingToolContext(),
+          );
           expectExists(project.macos.generatedXcodePropertiesFile);
         },
         overrides: <Type, Generator>{
@@ -423,7 +468,10 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.linux.cmakeFile.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await project.regeneratePlatformSpecificTooling(
+            releaseMode: false,
+            toolContext: const DelegatingToolContext(),
+          );
           expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.h'));
           expectExists(project.linux.managedDirectory.childFile('generated_plugin_registrant.cc'));
         },
@@ -440,7 +488,10 @@ dependencies:
         () async {
           final FlutterProject project = await someProject();
           project.windows.cmakeFile.createSync(recursive: true);
-          await project.regeneratePlatformSpecificTooling(releaseMode: false);
+          await project.regeneratePlatformSpecificTooling(
+            releaseMode: false,
+            toolContext: const DelegatingToolContext(),
+          );
           expectExists(project.windows.managedDirectory.childFile('generated_plugin_registrant.h'));
           expectExists(
             project.windows.managedDirectory.childFile('generated_plugin_registrant.cc'),
@@ -456,7 +507,10 @@ dependencies:
       );
       _testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         expectExists(project.android.hostAppGradleRoot.childFile('settings.gradle'));
         expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
         expectExists(
@@ -465,7 +519,10 @@ dependencies:
       });
       _testInMemory('creates iOS pod in module', () async {
         final FlutterProject project = await aModuleProject();
-        await project.regeneratePlatformSpecificTooling(releaseMode: false);
+        await project.regeneratePlatformSpecificTooling(
+          releaseMode: false,
+          toolContext: const DelegatingToolContext(),
+        );
         final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
         expectExists(flutter.childFile('flutter_export_environment.sh'));

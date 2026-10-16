@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/template.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
 import 'package:flutter_tools/src/ios/core_devices.dart';
@@ -29,6 +30,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' hide FakeProcess;
 
 class LocalFileSystemFake extends Fake implements LocalFileSystem {
   MemoryFileSystem memoryFileSystem = MemoryFileSystem.test();
@@ -87,10 +89,8 @@ void main() {
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -115,10 +115,8 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
         );
@@ -145,10 +143,8 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
         );
@@ -171,10 +167,8 @@ void main() {
         final processUtils = ProcessUtils(processManager: processManager, logger: logger);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
         );
@@ -220,10 +214,8 @@ void main() {
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -273,10 +265,8 @@ void main() {
         fakeLLDB.setIsRunning(true, 123);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -336,10 +326,8 @@ void main() {
         fakeLLDB.setIsRunning(true, 123);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -404,10 +392,8 @@ void main() {
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -459,10 +445,8 @@ void main() {
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -507,10 +491,8 @@ void main() {
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -561,10 +543,8 @@ void main() {
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -609,10 +589,8 @@ void main() {
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -659,10 +637,8 @@ void main() {
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -711,10 +687,8 @@ void main() {
         final fakeLLDB = FakeLLDB(attachSuccess: false);
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: FakeXcodeDebug(),
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -750,10 +724,8 @@ void main() {
 
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: FakeIOSCoreDeviceControl(),
-          logger: logger,
           xcodeDebug: fakeXcodeDebug,
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
@@ -785,10 +757,8 @@ void main() {
 
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: FakeIOSCoreDeviceControl(),
-          logger: logger,
           xcodeDebug: fakeXcodeDebug,
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
@@ -820,10 +790,8 @@ void main() {
 
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: FakeIOSCoreDeviceControl(),
-          logger: logger,
           xcodeDebug: fakeXcodeDebug,
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
@@ -855,10 +823,8 @@ void main() {
 
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: FakeIOSCoreDeviceControl(),
-          logger: logger,
           xcodeDebug: fakeXcodeDebug,
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: FakeLLDB(),
@@ -889,10 +855,8 @@ void main() {
         final fakeLLDB = FakeLLDB();
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: xcodeDebug,
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -920,10 +884,8 @@ void main() {
 
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: xcodeDebug,
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -950,10 +912,8 @@ void main() {
 
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: xcodeDebug,
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -979,10 +939,8 @@ void main() {
 
         final launcher = IOSCoreDeviceLauncher(
           coreDeviceControl: fakeCoreDeviceControl,
-          logger: logger,
           xcodeDebug: xcodeDebug,
-          fileSystem: MemoryFileSystem.test(),
-          processUtils: processUtils,
+          toolContext: FakeToolContext(logger: logger, processUtils: processUtils),
           xcodeProjectInterpreter: XcodeProjectInterpreter.test(processManager: processManager),
           deviceVersion: Version(16, 0, 0),
           lldb: fakeLLDB,
@@ -4310,6 +4268,7 @@ class FakeXcodeDebug extends Fake implements XcodeDebug {
     required BuildInfo buildInfo,
     String? mainPath,
     required String configurationBuildDir,
+    required ToolContext toolContext,
   }) async {}
 }
 
@@ -4471,10 +4430,12 @@ IOSDeviceSupport createDeviceSupport({
 }) {
   final Logger testLogger = logger ?? BufferLogger.test();
   return IOSDeviceSupport(
-    logger: testLogger,
-    processUtils:
-        processUtils ??
-        ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
+    toolContext: FakeToolContext(
+      logger: testLogger,
+      processUtils:
+          processUtils ??
+          ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
+    ),
     xcode: null,
     homeDirectory: homeDirectory,
     modelCode: modelCode,
