@@ -425,7 +425,7 @@ class KernelCompiler {
         ];
 
     _logger.printTrace(command.join(' '));
-    final Process server = await _processManager.start(command);
+    final Process server = await _startFrontendServer(_processManager, command);
 
     // Use permissive decoder for compiler stderr which may contain invalid UTF-8
     server.stderr.transform<String>(utf8AllowMalformed.decoder).listen(_logger.printError);
@@ -435,6 +435,25 @@ class KernelCompiler {
       return _stdoutHandler.compilerOutput?.future;
     }
     return null;
+  }
+}
+
+/// Starts the frontend server described by [command].
+///
+/// If the executable cannot be started, for example because the Dart SDK in
+/// the Flutter cache is missing or corrupted, this exits the tool with an
+/// actionable message instead of crashing with an unhandled [ProcessException].
+Future<Process> _startFrontendServer(ProcessManager processManager, List<String> command) async {
+  try {
+    return await processManager.start(command);
+  } on ProcessException catch (error) {
+    throwToolExit(
+      'Failed to start the Dart frontend server.\n'
+      '$error\n'
+      'The Dart SDK in the Flutter cache may be missing or corrupted. Delete '
+      'the "bin/cache" directory in your Flutter SDK and run the command again '
+      'to re-download it.',
+    );
   }
 }
 
@@ -1015,7 +1034,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ...?_filterExtraFrontEndOptions(extraFrontEndOptions),
     ];
     _logger.printTrace(command.join(' '));
-    _server = await _processManager.start(command);
+    _server = await _startFrontendServer(_processManager, command);
     _server?.stdout
         .transform(utf8LineDecoder)
         .listen(

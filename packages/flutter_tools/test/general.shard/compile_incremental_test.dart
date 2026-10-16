@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -130,6 +131,42 @@ void main() {
     expect(output?.outputFilename, equals('/path/to/main.dart.dill'));
     expect(fakeProcessManager, hasNoRemainingExpectations);
   });
+
+  testWithoutContext(
+    'incremental compile exits the tool when the frontend server cannot be started',
+    () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>[
+            ...frontendServerCommand,
+            '--initialize-from-dill',
+            expectedCachePath,
+            '--verbosity=error',
+          ],
+          exception: ProcessException(
+            'Artifact.engineDartAotRuntime',
+            <String>[],
+            'Failed to find "Artifact.engineDartAotRuntime" in the search path.',
+          ),
+        ),
+      );
+
+      await expectLater(
+        asyncGuard(
+          () => generator.recompile(
+            Uri.parse('/path/to/main.dart'),
+            null,
+            outputPath: '/build/',
+            packageConfig: PackageConfig.empty,
+            fs: MemoryFileSystem(),
+            projectRootPath: '',
+          ),
+        ),
+        throwsToolExit(message: 'Failed to start the Dart frontend server'),
+      );
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    },
+  );
 
   testWithoutContext('incremental compile sends correct package URI for pub workspace member package located under root lib/', () async {
     final packageConfig = PackageConfig(<Package>[

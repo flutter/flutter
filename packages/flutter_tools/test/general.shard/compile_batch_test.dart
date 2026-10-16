@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -91,6 +92,61 @@ void main() {
       completer.complete();
 
       expect((await output)?.outputFilename, '');
+    },
+  );
+
+  testWithoutContext(
+    'KernelCompiler exits the tool when the frontend server cannot be started',
+    () async {
+      final logger = BufferLogger.test();
+      final stdoutHandler = StdoutHandler(logger: logger, fileSystem: MemoryFileSystem.test());
+
+      final kernelCompiler = KernelCompiler(
+        artifacts: Artifacts.test(),
+        fileSystem: MemoryFileSystem.test(),
+        fileSystemRoots: <String>[],
+        fileSystemScheme: '',
+        logger: logger,
+        processManager: FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'Artifact.engineDartAotRuntime',
+              'Artifact.frontendServerSnapshotForEngineDartSdk',
+              '--sdk-root',
+              '/path/to/sdkroot/',
+              '--target=flutter',
+              '--no-print-incremental-dependencies',
+              '-Ddart.vm.profile=false',
+              '-Ddart.vm.product=false',
+              '--enable-asserts',
+              '--no-link-platform',
+              '--packages',
+              '.dart_tool/package_config.json',
+              '--verbosity=error',
+              'file:///path/to/main.dart',
+            ],
+            exception: ProcessException(
+              'Artifact.engineDartAotRuntime',
+              <String>[],
+              'Failed to find "Artifact.engineDartAotRuntime" in the search path.',
+            ),
+          ),
+        ]),
+        stdoutHandler: stdoutHandler,
+      );
+
+      await expectLater(
+        kernelCompiler.compile(
+          sdkRoot: '/path/to/sdkroot',
+          mainPath: '/path/to/main.dart',
+          buildMode: BuildMode.debug,
+          trackWidgetCreation: false,
+          dartDefines: const <String>[],
+          packageConfig: PackageConfig.empty,
+          packagesPath: '.dart_tool/package_config.json',
+        ),
+        throwsToolExit(message: 'Failed to start the Dart frontend server'),
+      );
     },
   );
 
