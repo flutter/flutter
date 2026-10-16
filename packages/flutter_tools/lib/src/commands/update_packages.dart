@@ -6,13 +6,11 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 import 'package:yaml/yaml.dart';
 import 'package:yaml_edit/yaml_edit.dart';
 
-import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -118,22 +116,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   late final Pub _pub = _injectedPub ?? _createPub();
 
   Pub _createPub() {
-    final ToolContext(
-      :BotDetector botDetector,
-      :Cache cache,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
-    return Pub(
-      botDetector: botDetector,
-      cache: cache,
-      fileSystem: fs,
-      logger: logger,
-      platform: platform,
-      processManager: processManager,
-    );
+    return Pub(toolContext: toolContext);
   }
 
   late final Net _net = _createNet();

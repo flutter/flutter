@@ -288,16 +288,7 @@ class CreateCommand extends FlutterCommand with CreateBase, ExtensionArgParserMi
   String get _snippetsHost =>
       toolContext.flutterVersion.channel == 'stable' ? 'api.flutter.dev' : 'main-api.flutter.dev';
   Net get _netInstance => net ?? Net(logger: toolContext.logger, platform: toolContext.platform);
-  Pub get _pubInstance =>
-      pub ??
-      Pub(
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-        processManager: toolContext.processManager,
-        platform: toolContext.platform,
-        botDetector: toolContext.botDetector,
-        cache: toolContext.cache,
-      );
+  Pub get _pubInstance => pub ?? Pub(toolContext: toolContext);
 
   /// Fetches the code for a sample from the Flutter docs website.
   Future<String?> _fetchSampleFromServer(String sampleId) async {

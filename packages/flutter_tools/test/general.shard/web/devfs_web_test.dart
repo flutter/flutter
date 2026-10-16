@@ -36,6 +36,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fake_web_devfs.dart';
+import '../../src/fakes.dart';
 import '../../src/testbed.dart';
 
 const kTransparentImage = <int>[
@@ -1502,10 +1503,12 @@ void main() {
       useLocalCanvasKit: false,
       testMode: true,
       webDevServerConfig: webDevServerConfig,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      cache: Cache.test(processManager: FakeProcessManager.any()),
+      toolContext: FakeToolContext(
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        fs: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       crossOriginIsolation: false,
     );
 
@@ -1540,10 +1543,12 @@ void main() {
       useLocalCanvasKit: false,
       testMode: true,
       webDevServerConfig: webDevServerConfig,
-      fileSystem: globals.fs,
-      logger: globals.logger,
-      platform: globals.platform,
-      cache: Cache.test(processManager: FakeProcessManager.any()),
+      toolContext: FakeToolContext(
+        cache: Cache.test(processManager: FakeProcessManager.any()),
+        fs: globals.fs,
+        logger: globals.logger,
+        platform: globals.platform,
+      ),
       crossOriginIsolation: false,
     );
 

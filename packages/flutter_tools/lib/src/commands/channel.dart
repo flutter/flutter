@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
@@ -169,14 +167,7 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<void> _switchChannel(String branchName) async {
-    final ToolContext(
-      :Cache cache,
-      :FileSystem fs,
-      :Git git,
-      :Logger logger,
-      :Platform platform,
-      :ProcessUtils processUtils,
-    ) = toolContext;
+    final ToolContext(:Cache cache, :Git git, :Logger logger) = toolContext;
 
     logger.printStatus("Switching to flutter channel '$branchName'...");
     if (kObsoleteBranches.containsKey(branchName)) {
@@ -191,13 +182,7 @@ class ChannelCommand extends FlutterCommand {
     }
     await _checkout(branchName, git: git, cache: cache, force: boolArg('force'));
     if (boolArg('cache-artifacts')) {
-      await precacheArtifacts(
-        workingDirectory: cache.flutterRoot,
-        logger: logger,
-        processUtils: processUtils,
-        fileSystem: fs,
-        platform: platform,
-      );
+      await precacheArtifacts(toolContext: toolContext, workingDirectory: cache.flutterRoot);
     }
     logger.printStatus("Successfully switched to flutter channel '$branchName'.");
     logger.printStatus(

@@ -4,12 +4,10 @@
 
 import 'dart:async';
 
-import 'package:process/process.dart';
-
-import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
 import '../build_info.dart';
+import '../cache.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../project.dart';
@@ -19,17 +17,19 @@ import 'windows_workflow.dart';
 
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
-  WindowsDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-    required this._flutterRoot,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       super('windows', platformType: PlatformType.windows, ephemeral: false);
+  WindowsDevice({required ToolContext toolContext})
+    : _toolContext = toolContext,
+      super(
+        'windows',
+        ephemeral: false,
+        fileSystem: toolContext.fs,
+        logger: toolContext.logger,
+        operatingSystemUtils: toolContext.os,
+        platformType: PlatformType.windows,
+        processManager: toolContext.processManager,
+      );
 
-  final OperatingSystemUtils _operatingSystemUtils;
-  final String _flutterRoot;
+  final ToolContext _toolContext;
 
   @override
   Future<bool> isSupported() async => true;
@@ -43,13 +43,19 @@ class WindowsDevice extends DesktopDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
 
-  TargetPlatform get _targetPlatform => switch (_operatingSystemUtils.hostPlatform) {
-    HostPlatform.windows_arm64 => TargetPlatform.windows_arm64,
-    _ => TargetPlatform.windows_x64,
-  };
+  TargetPlatform get _targetPlatform {
+    final OperatingSystemUtils os = _toolContext.os;
+    return switch (os.hostPlatform) {
+      HostPlatform.windows_arm64 => TargetPlatform.windows_arm64,
+      _ => TargetPlatform.windows_x64,
+    };
+  }
 
   @override
-  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+  Future<CpuArch> get cpuArch async {
+    final OperatingSystemUtils os = _toolContext.os;
+    return CpuArch.fromHostPlatform(os.hostPlatform);
+  }
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -62,11 +68,12 @@ class WindowsDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
+    final Cache cache = _toolContext.cache;
     await buildWindows(
       FlutterProject.current().windows,
       buildInfo,
       _targetPlatform,
-      flutterRoot: _flutterRoot,
+      flutterRoot: cache.flutterRoot,
       target: mainPath,
     );
   }
@@ -78,20 +85,10 @@ class WindowsDevice extends DesktopDevice {
 }
 
 class WindowsDevices extends PollingDeviceDiscovery {
-  WindowsDevices({
-    required this._flutterRoot,
-    required this._processManager,
-    required this._logger,
-    required this._fileSystem,
-    required this._operatingSystemUtils,
-    required this._windowsWorkflow,
-  }) : super('windows devices');
+  WindowsDevices({required this._toolContext, required this._windowsWorkflow})
+    : super('windows devices');
 
-  final String _flutterRoot;
-  final FileSystem _fileSystem;
-  final Logger _logger;
-  final ProcessManager _processManager;
-  final OperatingSystemUtils _operatingSystemUtils;
+  final ToolContext _toolContext;
   final WindowsWorkflow _windowsWorkflow;
 
   @override
@@ -108,15 +105,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[
-      WindowsDevice(
-        flutterRoot: _flutterRoot,
-        fileSystem: _fileSystem,
-        logger: _logger,
-        processManager: _processManager,
-        operatingSystemUtils: _operatingSystemUtils,
-      ),
-    ];
+    return <Device>[WindowsDevice(toolContext: _toolContext)];
   }
 
   @override

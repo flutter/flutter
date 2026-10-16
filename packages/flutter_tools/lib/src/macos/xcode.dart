@@ -17,6 +17,7 @@ import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../ios/xcodeproj.dart';
 import '../xcode_project.dart';
 
@@ -45,14 +46,25 @@ String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
 
 /// A utility class for interacting with Xcode command line tools.
 class Xcode {
-  Xcode({
+  Xcode({required ToolContext toolContext, required this._xcodeProjectInterpreter})
+    : _fileSystem = toolContext.fs,
+      _logger = toolContext.logger,
+      _platform = toolContext.platform,
+      _processUtils = ProcessUtils(
+        logger: toolContext.logger,
+        processManager: toolContext.processManager,
+      ),
+      _userMessage = toolContext.userMessages,
+      flutterRoot = toolContext.cache.flutterRoot;
+
+  Xcode._({
+    required this._fileSystem,
+    required this.flutterRoot,
+    required Logger logger,
     required this._platform,
     required ProcessManager processManager,
-    required Logger logger,
-    required this._fileSystem,
-    required this._xcodeProjectInterpreter,
     required UserMessages userMessages,
-    required this.flutterRoot,
+    required this._xcodeProjectInterpreter,
   }) : _userMessage = userMessages,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _logger = logger;
@@ -72,7 +84,7 @@ class Xcode {
   }) {
     platform ??= FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
     logger ??= BufferLogger.test();
-    return Xcode(
+    return Xcode._(
       platform: platform,
       processManager: processManager,
       fileSystem: fileSystem ?? MemoryFileSystem.test(),

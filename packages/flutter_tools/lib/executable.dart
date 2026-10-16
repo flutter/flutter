@@ -229,13 +229,7 @@ List<FlutterCommand> generateCommands({
   AnalyzeCommand(
     allProjectValidators: <ProjectValidator>[
       GeneralInfoProjectValidator(),
-      VariableDumpMachineProjectValidator(
-        logger: toolDependencies.toolContext.logger,
-        fileSystem: toolDependencies.toolContext.fs,
-        platform: toolDependencies.toolContext.platform,
-        git: toolDependencies.toolContext.git,
-        cache: toolDependencies.toolContext.cache,
-      ),
+      VariableDumpMachineProjectValidator(toolContext: toolDependencies.toolContext),
     ],
     suppressAnalytics: !toolDependencies.analytics.okToSend,
     toolContext: toolDependencies.toolContext,

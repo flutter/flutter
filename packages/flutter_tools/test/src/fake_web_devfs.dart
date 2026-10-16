@@ -27,6 +27,7 @@ import 'package:test/fake.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import 'fake_process_manager.dart';
+import 'fakes.dart';
 
 /// Helper function to create a [WebDevFS] with sensible testbed defaults.
 WebDevFS createWebDevFS({
@@ -76,10 +77,12 @@ WebDevFS createWebDevFS({
     rootDirectory: rootDirectory ?? globals.fs.currentDirectory,
     useDwdsWebSocketConnection: useDwdsWebSocketConnection,
     webCrossOriginIsolation: webCrossOriginIsolation,
-    fileSystem: fileSystem ?? globals.fs,
-    logger: logger ?? globals.logger,
-    platform: platform ?? globals.platform,
-    cache: cache ?? Cache.test(processManager: FakeProcessManager.any()),
+    toolContext: FakeToolContext(
+      cache: cache ?? Cache.test(processManager: FakeProcessManager.any()),
+      fs: fileSystem ?? globals.fs,
+      logger: logger ?? globals.logger,
+      platform: platform ?? globals.platform,
+    ),
     testMode: testMode,
     webDefines: webDefines,
   );

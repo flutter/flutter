@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
-import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -313,22 +311,10 @@ class UpgradeCommandRunner {
   // This method should only be called if the upgrade command is invoked
   // re-entrantly with the `--continue` flag
   Future<void> _runCommandSecondHalf(FlutterVersion flutterVersion) async {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :PersistentToolState persistentToolState,
-      :Platform platform,
-      :ProcessUtils processUtils,
-    ) = _toolContext;
+    final ToolContext(:Logger logger, :PersistentToolState persistentToolState) = _toolContext;
     // Make sure the welcome message re-display is delayed until the end.
     persistentToolState.setShouldRedisplayWelcomeMessage(false);
-    await precacheArtifacts(
-      workingDirectory: workingDirectory,
-      fileSystem: fs,
-      logger: logger,
-      platform: platform,
-      processUtils: processUtils,
-    );
+    await precacheArtifacts(toolContext: _toolContext, workingDirectory: workingDirectory);
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
@@ -477,30 +463,14 @@ class UpgradeCommandRunner {
   /// Update the user's packages.
   @protected
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
-    final ToolContext(
-      :BotDetector botDetector,
-      :Cache cache,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-      :FlutterProjectFactory projectFactory,
-      :Stdio stdio,
-    ) = _toolContext;
+    final ToolContext(:FileSystem fs, :Logger logger, :FlutterProjectFactory projectFactory) =
+        _toolContext;
     logger.printStatus('');
     logger.printStatus(flutterVersion.toString());
     final String? projectRoot = findProjectRoot(fs);
     if (projectRoot != null) {
       logger.printStatus('');
-      await Pub(
-        botDetector: botDetector,
-        cache: cache,
-        fileSystem: fs,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
-        stdio: stdio,
-      ).get(
+      await Pub(toolContext: _toolContext).get(
         context: PubContext.pubUpgrade,
         project: projectFactory.fromDirectory(fs.directory(projectRoot)),
         upgrade: true,
@@ -527,22 +497,17 @@ class UpgradeCommandRunner {
 /// Check for and download any engine and pkg/ updates. We run the 'flutter'
 /// shell script reentrantly here so that it will download the updated
 /// Dart and so forth if necessary.
-Future<void> precacheArtifacts({
-  required FileSystem fileSystem,
-  required Logger logger,
-  required Platform platform,
-  required ProcessUtils processUtils,
-  String? workingDirectory,
-}) async {
+Future<void> precacheArtifacts({required ToolContext toolContext, String? workingDirectory}) async {
+  final ToolContext(
+    :FileSystem fs,
+    :Logger logger,
+    :Platform platform,
+    :ProcessUtils processUtils,
+  ) = toolContext;
   logger.printStatus('');
   logger.printStatus('Upgrading engine...');
   final int code = await processUtils.stream(
-    <String>[
-      fileSystem.path.join('bin', 'flutter'),
-      '--no-color',
-      '--no-version-check',
-      'precache',
-    ],
+    <String>[fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache'],
     allowReentrantFlutter: true,
     environment: Map<String, String>.of(platform.environment),
     workingDirectory: workingDirectory,

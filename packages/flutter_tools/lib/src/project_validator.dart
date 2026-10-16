@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'base/file_system.dart';
-import 'base/logger.dart';
 import 'base/platform.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'flutter_manifest.dart';
 import 'git.dart';
 import 'project.dart';
@@ -33,19 +33,9 @@ abstract class MachineProjectValidator extends ProjectValidator {
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class VariableDumpMachineProjectValidator extends MachineProjectValidator {
-  VariableDumpMachineProjectValidator({
-    required this.fileSystem,
-    required this.git,
-    required this.logger,
-    required this.platform,
-    required this._cache,
-  });
+  VariableDumpMachineProjectValidator({required this._toolContext});
 
-  final Logger logger;
-  final FileSystem fileSystem;
-  final Platform platform;
-  final Git git;
-  final Cache _cache;
+  final ToolContext _toolContext;
 
   String _toJsonValue(Object? obj) {
     var value = obj.toString();
@@ -58,7 +48,8 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
-    final version = FlutterVersion(flutterRoot: _cache.flutterRoot, fs: fileSystem, git: git);
+    final ToolContext(:Cache cache, :FileSystem fs, :Git git, :Platform platform) = _toolContext;
+    final version = FlutterVersion(flutterRoot: cache.flutterRoot, fs: fs, git: git);
     final result = <String, Object?>{
       'FlutterProject.directory': project.directory.absolute.path,
       'FlutterProject.metadataFile': project.metadataFile.absolute.path,
@@ -91,7 +82,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
       'Platform.pathSeparator': platform.pathSeparator,
 
       // Cache
-      'Cache.flutterRoot': _cache.flutterRoot,
+      'Cache.flutterRoot': cache.flutterRoot,
     };
 
     return <ProjectValidatorResult>[

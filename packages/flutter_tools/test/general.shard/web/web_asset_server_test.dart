@@ -24,6 +24,7 @@ import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 const kTransparentImage = <int>[
   0x89,
@@ -369,10 +370,12 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
@@ -399,10 +402,12 @@ void main() {
           isWasm: false,
           useLocalCanvasKit: false,
           testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
         );
 
         expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], isNull);
@@ -428,10 +433,12 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
@@ -458,10 +465,12 @@ void main() {
           isWasm: false,
           useLocalCanvasKit: false,
           testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
         );
 
         expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], isNull);
@@ -487,10 +496,12 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       expect(server.basePath, 'preview');
@@ -514,10 +525,12 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       expect(server.basePath, isEmpty);
@@ -541,10 +554,12 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       var serverReady = false;
@@ -572,10 +587,12 @@ void main() {
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       var server2Ready = false;
@@ -610,10 +627,12 @@ void main() {
           webRenderer: WebRendererMode.canvaskit,
           isWasm: true,
           useLocalCanvasKit: false,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
         );
 
         final client = HttpClient();
@@ -666,10 +685,12 @@ void main() {
           isWasm: false,
           useLocalCanvasKit: false,
           testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
         );
 
         // Project source file exists in assets/ directory.
@@ -746,10 +767,12 @@ void main() {
             isWasm: false,
             useLocalCanvasKit: false,
             testMode: true,
-            fileSystem: windowsFileSystem,
-            logger: BufferLogger.test(),
-            platform: windowsPlatform,
-            cache: Cache.test(processManager: FakeProcessManager.any()),
+            toolContext: FakeToolContext(
+              cache: Cache.test(processManager: FakeProcessManager.any()),
+              fs: windowsFileSystem,
+              logger: BufferLogger.test(),
+              platform: windowsPlatform,
+            ),
           );
 
           // Project source file exists in assets/ directory.
@@ -932,10 +955,12 @@ void main() {
               webRenderer: webRenderer,
               isWasm: isWasm,
               useLocalCanvasKit: false,
-              fileSystem: fileSystem,
-              logger: logger,
-              platform: platform,
-              cache: Cache.test(processManager: FakeProcessManager.any()),
+              toolContext: FakeToolContext(
+                cache: Cache.test(processManager: FakeProcessManager.any()),
+                fs: fileSystem,
+                logger: logger,
+                platform: platform,
+              ),
             );
             server.markReady();
 
