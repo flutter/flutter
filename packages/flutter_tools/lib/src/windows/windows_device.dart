@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../base/os.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
@@ -17,16 +16,15 @@ import 'windows_workflow.dart';
 
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
-  WindowsDevice({required ToolContext toolContext})
-    : _toolContext = toolContext,
-      super(
+  WindowsDevice({required this._toolContext})
+    : super(
         'windows',
         ephemeral: false,
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-        operatingSystemUtils: toolContext.os,
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        operatingSystemUtils: _toolContext.os,
         platformType: PlatformType.windows,
-        processManager: toolContext.processManager,
+        processManager: _toolContext.processManager,
       );
 
   final ToolContext _toolContext;
@@ -43,19 +41,13 @@ class WindowsDevice extends DesktopDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => _targetPlatform;
 
-  TargetPlatform get _targetPlatform {
-    final OperatingSystemUtils os = _toolContext.os;
-    return switch (os.hostPlatform) {
-      HostPlatform.windows_arm64 => TargetPlatform.windows_arm64,
-      _ => TargetPlatform.windows_x64,
-    };
-  }
+  TargetPlatform get _targetPlatform => switch (_toolContext.os.hostPlatform) {
+    HostPlatform.windows_arm64 => TargetPlatform.windows_arm64,
+    _ => TargetPlatform.windows_x64,
+  };
 
   @override
-  Future<CpuArch> get cpuArch async {
-    final OperatingSystemUtils os = _toolContext.os;
-    return CpuArch.fromHostPlatform(os.hostPlatform);
-  }
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_toolContext.os.hostPlatform);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -68,12 +60,11 @@ class WindowsDevice extends DesktopDevice {
     required BuildInfo buildInfo,
     bool usingCISystem = false,
   }) async {
-    final Cache cache = _toolContext.cache;
     await buildWindows(
       FlutterProject.current().windows,
       buildInfo,
       _targetPlatform,
-      flutterRoot: cache.flutterRoot,
+      flutterRoot: _toolContext.cache.flutterRoot,
       target: mainPath,
     );
   }

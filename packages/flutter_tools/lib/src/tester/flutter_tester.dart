@@ -24,7 +24,6 @@ import '../device_port_forwarder.dart';
 import '../native_assets.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
-import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
   factory FlutterTesterApp.fromCurrentDirectory(FileSystem fileSystem) {
@@ -45,9 +44,8 @@ class FlutterTesterApp extends ApplicationPackage {
 /// also be used as a regular device when `--show-test-device` is provided
 /// to the flutter command.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(super.id, {required ToolContext toolContext})
-    : _toolContext = toolContext,
-      super(logger: toolContext.logger, platformType: null, category: null, ephemeral: false);
+  FlutterTesterDevice(super.id, {required this._toolContext})
+    : super(logger: _toolContext.logger, platformType: null, category: null, ephemeral: false);
 
   final ToolContext _toolContext;
 
@@ -67,10 +65,8 @@ class FlutterTesterDevice extends Device {
   DevicePortForwarder get portForwarder => _portForwarder;
 
   @override
-  Future<String> get sdkNameAndVersion async {
-    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
-    return 'Flutter ${flutterVersion.frameworkRevisionShort}';
-  }
+  Future<String> get sdkNameAndVersion async =>
+      'Flutter ${_toolContext.flutterVersion.frameworkRevisionShort}';
 
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
@@ -218,10 +214,8 @@ class FlutterTesterDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 
   @override
-  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
-    final FileSystem fs = _toolContext.fs;
-    return LocalDevFSWriter(fileSystem: fs);
-  }
+  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) =>
+      LocalDevFSWriter(fileSystem: _toolContext.fs);
 
   @override
   Future<void> dispose() async {

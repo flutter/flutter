@@ -4,7 +4,6 @@
 
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
@@ -18,16 +17,15 @@ import 'linux_workflow.dart';
 
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
-  LinuxDevice({required ToolContext toolContext})
-    : _toolContext = toolContext,
-      super(
+  LinuxDevice({required this._toolContext})
+    : super(
         'linux',
         ephemeral: false,
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-        operatingSystemUtils: toolContext.os,
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        operatingSystemUtils: _toolContext.os,
         platformType: PlatformType.linux,
-        processManager: toolContext.processManager,
+        processManager: _toolContext.processManager,
       );
 
   final ToolContext _toolContext;
@@ -53,10 +51,7 @@ class LinuxDevice extends DesktopDevice {
   }();
 
   @override
-  Future<CpuArch> get cpuArch async {
-    final OperatingSystemUtils os = _toolContext.os;
-    return CpuArch.fromHostPlatform(os.hostPlatform);
-  }
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_toolContext.os.hostPlatform);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -87,19 +82,15 @@ class LinuxDevice extends DesktopDevice {
 }
 
 class LinuxDevices extends PollingDeviceDiscovery {
-  LinuxDevices({required FeatureFlags featureFlags, required ToolContext toolContext})
-    : _toolContext = toolContext,
-      _linuxWorkflow = LinuxWorkflow(platform: toolContext.platform, featureFlags: featureFlags),
+  LinuxDevices({required FeatureFlags featureFlags, required this._toolContext})
+    : _linuxWorkflow = LinuxWorkflow(platform: _toolContext.platform, featureFlags: featureFlags),
       super('linux devices');
 
   final ToolContext _toolContext;
   final LinuxWorkflow _linuxWorkflow;
 
   @override
-  bool get supportsPlatform {
-    final Platform platform = _toolContext.platform;
-    return platform.isLinux;
-  }
+  bool get supportsPlatform => _toolContext.platform.isLinux;
 
   @override
   bool get canListAnything => _linuxWorkflow.canListDevices;
