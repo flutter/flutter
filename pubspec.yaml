@@ -212,7 +212,7 @@ dependencies:
   xml: 6.6.1
   yaml: 3.1.4
   cli_util: 0.4.2
-  dart_style: 3.1.13
+  dart_style: 3.1.14
   file_testing: 3.1.0
   flutter_lints: 6.0.0
   lints: 6.1.0
@@ -222,4 +222,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: ahr6f0
+# PUBSPEC CHECKSUM: ps2ats
