@@ -392,7 +392,7 @@ class Plugin {
       yaml,
       null,
       const <String>[],
-      fileSystem: MemoryFileSystem.test(),
+      fileSystem: MemoryFileSystem(),
       isDevDependency: false,
     );
     return errors;
