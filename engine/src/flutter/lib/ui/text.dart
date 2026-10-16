@@ -1569,11 +1569,11 @@ bool _listEquals<T>(List<T>? a, List<T>? b) {
   return true;
 }
 
-/// Marks a Dart constructor to be code-generated into a C++ struct and FFI encoder/decoder.
+/// An annotation that marks a Dart constructor to be code-generated into a C++ struct
+/// and FFI encoder/decoder.
 ///
 /// The marked Dart constructor's formal parameters must be subtypes of [_NativeType],
-/// or its subtypes, to provide the code generator with required information. See
-/// [TextStyle._] for more details.
+/// to provide the code generator with required information. See [TextStyle._] for more details.
 extension type const _NativeData._(String symbol) {
   const _NativeData({required this.symbol});
 }
@@ -1585,7 +1585,16 @@ extension type const _NativeData._(String symbol) {
 ///   is packed inline into a `dart:ffi` `Struct`.
 /// - `Handle` [NativeT] is stored on the Dart instance and passed in the encoded
 ///   list to C++.
-extension type const _NativeType<DartT, NativeT extends NativeType>._unconstructable(DartT value) {}
+///   Do not construct a _NativeType directly. Use one of its subtypes.
+extension type const _NativeType<DartT, NativeT extends NativeType>._unconstructable(DartT value) {
+  // The encode method defines how to turn the DartT value into a NativeT. This is not needed if NativeT
+  // is a `SizedNativeType`, or a `Handle`.
+  //NativeType encode() => ...;
+
+  // The decode method defines how to reverse the process defined by `encode. This is typically not
+  // needed for `Handle`s because their Dart representation are stored as fields by convention.
+  //static DartT decode(NativeType raw) => ...;
+}
 
 extension type const _NativeBool(bool value) implements _NativeType<bool, Bool> {}
 
@@ -1596,7 +1605,8 @@ extension type const _NativeDouble(double value) implements _NativeType<double, 
 extension type const _NativeHandle<T extends Object>(T value) implements _NativeType<T, Handle> {}
 
 // Not defining how to decode and encode allows the code generator to determine the NativeType
-// based on the how many cases are in the Enum.
+// based on the how many cases are in the Enum. Typically you can use this wrapper for all Enums,
+// without having to introduce a subtype.
 extension type const _NativeEnum<T extends Enum>(T value) implements _NativeType<T, NativeType> {}
 
 extension type const _NativeColor(Color value) implements _NativeType<Color, Uint32> {

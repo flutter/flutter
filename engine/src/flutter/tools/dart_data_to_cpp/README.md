@@ -1,6 +1,6 @@
 # dart_data_to_cpp
 
-Generates C++ classes and Dart glue code to streamline passing a `dart:ui` data class to C++.
+Generates C++ classes and Dart glue code to streamline the process of passing a `dart:ui` data class to C++ (and adding new parameters).
 
 `dart_data_to_cpp` inspects every constructor annotated with `@_NativeData(symbol: '...')` in a dart library and uses its formal parameters as the single source of truth to generate:
 
@@ -12,11 +12,12 @@ The goal of this code generator is to hide the encoding / layout details so addi
 ## Minimal Sample
 
 ### 1. Define `_NativeType` mappings and `@_NativeData` constructor
+Typically you can skip this step if you're adding a parameter to an existing class.
 
 ```dart
 part 'text_styles.g.dart';
 
-// Marks a constructor for C++ struct and Dart FFI code generation.
+// An annotation that marks a constructor for C++ struct and Dart FFI code generation.
 extension type const _NativeData._(String symbol) {
   const _NativeData({required this.symbol});
 }
