@@ -104,6 +104,7 @@ class JNIMock final : public PlatformViewAndroidJNI {
                int height,
                int viewWidth,
                int viewHeight,
+               double device_pixel_ratio,
                MutatorsStack mutators_stack),
               (override));
 
@@ -146,6 +147,7 @@ class JNIMock final : public PlatformViewAndroidJNI {
                int32_t height,
                int32_t viewWidth,
                int32_t viewHeight,
+               double device_pixel_ratio,
                MutatorsStack mutators_stack),
               (override));
 

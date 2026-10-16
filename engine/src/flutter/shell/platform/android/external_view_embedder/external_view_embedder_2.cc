@@ -214,6 +214,10 @@ void AndroidExternalViewEmbedder2::SubmitFlutterView(
               view_rect.GetHeight(),  //
               ToPhysicalPixels(params.sizePoints().width, device_pixel_ratio),
               ToPhysicalPixels(params.sizePoints().height, device_pixel_ratio),
+              // The captured ratio, not `device_pixel_ratio_`. This task runs
+              // on the platform thread after the frame was submitted, and the
+              // member may already describe a later frame.
+              device_pixel_ratio,     //
               params.mutatorsStack()  //
           );
           // Remove from views visible last frame, so we can hide the rest.
