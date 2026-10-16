@@ -142,6 +142,24 @@ TEST_F(FlPlatformHandlerTest, PlaySound) {
   EXPECT_TRUE(called);
 }
 
+TEST_F(FlPlatformHandlerTest, SetApplicationSwitcherDescription) {
+  gboolean called = FALSE;
+  g_autoptr(FlValue) args = fl_value_new_map();
+  fl_value_set_string_take(args, "label", fl_value_new_string("My Title"));
+  fl_mock_binary_messenger_invoke_json_method(
+      messenger, "flutter/platform",
+      "SystemChrome.setApplicationSwitcherDescription", args,
+      [](FlMockBinaryMessenger* messenger, FlMethodResponse* response,
+         gpointer user_data) {
+        gboolean* called = static_cast<gboolean*>(user_data);
+        *called = TRUE;
+
+        EXPECT_TRUE(FL_IS_METHOD_SUCCESS_RESPONSE(response));
+      },
+      &called);
+  EXPECT_TRUE(called);
+}
+
 TEST_F(FlPlatformHandlerTest, ExitApplication) {
   // Indicate that the binding is initialized.
   gboolean called = FALSE;
