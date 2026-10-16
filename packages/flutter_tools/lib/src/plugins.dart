@@ -392,6 +392,11 @@ class Plugin {
       yaml,
       null,
       const <String>[],
+      // `_parseFromYaml` requires a `FileSystem` to construct `AndroidPlugin`,
+      // which only accesses `_fileSystem` lazily when `toMap()` is called. Since
+      // `validatePluginYaml` is called from `FlutterManifest` where no
+      // `FileSystem` is available and the parsed `Plugin` is discarded here,
+      // an unused `MemoryFileSystem` is passed.
       fileSystem: MemoryFileSystem(),
       isDevDependency: false,
     );
