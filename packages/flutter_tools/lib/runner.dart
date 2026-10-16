@@ -25,6 +25,7 @@ import 'src/context_runner.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/emulator.dart';
+import 'src/experimental/extension_discovery.dart';
 import 'src/features.dart';
 import 'src/globals.dart' as globals;
 import 'src/reporting/crash_reporting.dart';
@@ -37,6 +38,7 @@ Future<int> run(
   List<String> args,
   List<FlutterCommand> Function(ToolDependencies toolDependencies) commands, {
   required ShutdownHooks shutdownHooks,
+  List<ExtensionEntryPoint> extensionEntryPoints = const <ExtensionEntryPoint>[],
   String? flutterVersion,
   bool muteCommandLogging = false,
   Map<Type, Generator>? overrides,
@@ -62,8 +64,8 @@ Future<int> run(
     reportCrashes ??= !await globals.isRunningOnBot;
     final ToolDependencies toolDeps = await ToolDependencies.bootstrap(
       analytics: globals.analytics,
-      androidSdk: globals.androidSdk,
-      androidStudio: globals.androidStudio,
+      androidSdkBuilder: () => globals.androidSdk,
+      androidStudioBuilder: () => globals.androidStudio,
       androidWorkflow: androidWorkflow,
       artifacts: globals.artifacts,
       botDetector: globals.botDetector,
@@ -78,14 +80,15 @@ Future<int> run(
       deviceManager: globals.deviceManager,
       doctor: globals.doctor,
       emulatorManager: emulatorManager,
+      extensionEntryPoints: extensionEntryPoints,
       featureFlags: featureFlags,
       flutterVersion: globals.flutterVersion,
       fs: globals.fs,
       git: globals.git,
-      gradleUtils: globals.gradleUtils,
+      gradleUtilsBuilder: () => globals.gradleUtils!,
       iosSimulatorUtils: globals.iosSimulatorUtils,
       iosWorkflow: globals.iosWorkflow,
-      java: globals.java,
+      javaBuilder: () => globals.java,
       localEngineLocator: globals.localEngineLocator,
       logger: globals.logger,
       nativeAssetsBuilder: globals.nativeAssetsBuilder,
