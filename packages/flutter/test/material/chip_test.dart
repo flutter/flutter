@@ -5898,6 +5898,89 @@ void main() {
     expect(renderLayoutCount.layoutCount, 1);
   });
 
+  for (final kind in <String>['selection', 'avatar', 'delete', 'enable']) {
+    testWidgets('RawChip updates $kind animation style after rebuilding', (
+      WidgetTester tester,
+    ) async {
+      const backgroundColor = Color(0xff00ff00);
+      const disabledColor = Color(0xffff0000);
+
+      Widget buildChip({required bool active, required AnimationStyle? style}) {
+        return wrapForChip(
+          child: Center(
+            child: RawChip(
+              chipAnimationStyle: style == null
+                  ? null
+                  : ChipAnimationStyle(
+                      selectAnimation: style,
+                      avatarDrawerAnimation: style,
+                      deleteDrawerAnimation: style,
+                      enableAnimation: style,
+                    ),
+              selected: kind == 'selection' && active,
+              avatar: kind == 'avatar' && active ? const CircleAvatar() : null,
+              onDeleted: kind == 'delete' && active ? () {} : null,
+              isEnabled: kind != 'enable' || active,
+              onSelected: (bool value) {},
+              backgroundColor: backgroundColor,
+              selectedColor: const Color(0xff0000ff),
+              disabledColor: disabledColor,
+              label: const Text('RawChip'),
+            ),
+          ),
+        );
+      }
+
+      void expectActive(bool active) {
+        switch (kind) {
+          case 'selection':
+            expect(getSelectProgress(tester), active ? 1.0 : 0.0);
+          case 'avatar':
+            expect(getAvatarDrawerProgress(tester), active ? 1.0 : 0.0);
+          case 'delete':
+            expect(getDeleteDrawerProgress(tester), active ? 1.0 : 0.0);
+          case 'enable':
+            expect(
+              getMaterialBox(tester),
+              paints..rrect(color: active ? backgroundColor : disabledColor),
+            );
+        }
+      }
+
+      const initialStyle = AnimationStyle(duration: Duration(seconds: 1));
+      const updatedStyle = AnimationStyle(
+        duration: Duration(milliseconds: 100),
+        reverseDuration: Duration(milliseconds: 50),
+      );
+      await tester.pumpWidget(buildChip(active: false, style: initialStyle));
+      await tester.pumpWidget(buildChip(active: true, style: updatedStyle));
+      await tester.pump(const Duration(milliseconds: 100));
+      expectActive(true);
+
+      await tester.pumpWidget(buildChip(active: false, style: updatedStyle));
+      await tester.pump(const Duration(milliseconds: 50));
+      expectActive(false);
+
+      await tester.pumpWidget(buildChip(active: true, style: AnimationStyle.noAnimation));
+      expectActive(true);
+
+      await tester.pumpWidget(buildChip(active: false, style: null));
+      await tester.pump(const Duration(milliseconds: 50));
+      switch (kind) {
+        case 'selection':
+          expect(getMaterialBox(tester), isNot(paints..rrect(color: backgroundColor)));
+        case 'avatar':
+          expect(getAvatarDrawerProgress(tester), greaterThan(0.0));
+        case 'delete':
+          expect(getDeleteDrawerProgress(tester), greaterThan(0.0));
+        case 'enable':
+          expect(getMaterialBox(tester), isNot(paints..rrect(color: disabledColor)));
+      }
+      await tester.pumpAndSettle();
+      expectActive(false);
+    });
+  }
+
   testWidgets('ChipAnimationStyle.enableAnimation overrides chip enable animation duration', (
     WidgetTester tester,
   ) async {
