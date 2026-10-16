@@ -308,6 +308,152 @@ abstract class SceneBuilderRecorder extends Recorder {
   }
 }
 
+/// A frame-driven recorder for benchmarking `dart:ui` [Paragraph] operations
+/// across individual phases: build, layout (uncached and cached), paint
+/// (uncached and cached), and total.
+///
+/// Each sample executes across a two-frame cycle:
+/// - **Frame 1 (Uncached)**: Builds fresh [Paragraph] instances
+///   (`buildDuration`), performs initial layout at [layoutWidth]
+///   (`layoutDuration`), and paints/renders them to the surface
+///   (`paintDuration`, `totalDuration`, and `totalUiFrame`).
+/// - **Frame 2 (Cached)**: Paints and renders the already-painted [Paragraph]
+///   instances a second time (`cachedPaintDuration`, hitting the paragraph's
+///   raster/blob cache), then re-lays them out at [relayoutWidth]
+///   (`cachedLayoutDuration`, reusing shaped runs / extracted clusters and
+///   bidi regions), and finally disposes the paragraphs.
+abstract class ParagraphRecorder extends Recorder {
+  ParagraphRecorder({required String name}) : super._(name, true);
+
+  @override
+  Profile? get profile => _profile;
+  Profile? _profile;
+
+  /// Primary layout constraint width used on the initial uncached layout.
+  double get layoutWidth;
+
+  /// Secondary layout constraint width used to measure cached re-layout.
+  double get relayoutWidth;
+
+  /// Builds the [Paragraph] instances for the given [iteration].
+  List<Paragraph> buildParagraphs(int iteration);
+
+  /// Computes the canvas position for the paragraph at [index] inside the
+  /// viewport.
+  Offset paragraphOffset(int index, Offset baseOffset);
+
+  bool _isUncachedFrame = true;
+  int _iteration = 0;
+  List<Paragraph> _currentParagraphs = const <Paragraph>[];
+
+  Duration _lastBuildDuration = Duration.zero;
+  Duration _lastLayoutDuration = Duration.zero;
+  Duration _lastPaintDuration = Duration.zero;
+  Duration _lastTotalDuration = Duration.zero;
+
+  Future<void> _paintAndRender(List<Paragraph> paragraphs, Offset baseOffset) async {
+    final pictureRecorder = PictureRecorder();
+    final canvas = Canvas(pictureRecorder);
+    for (var i = 0; i < paragraphs.length; i++) {
+      canvas.drawParagraph(paragraphs[i], paragraphOffset(i, baseOffset));
+    }
+    final Picture picture = pictureRecorder.endRecording();
+    final sceneBuilder = SceneBuilder()..addPicture(Offset.zero, picture);
+    final Scene scene = sceneBuilder.build();
+    // On the web, render is asynchronous.
+    await (PlatformDispatcher.instance as dynamic).render(scene);
+    picture.dispose();
+    scene.dispose();
+  }
+
+  @override
+  Future<Profile> run() {
+    final profileCompleter = Completer<Profile>();
+    _profile = Profile(name: name);
+    _isUncachedFrame = true;
+    _iteration = 0;
+    _currentParagraphs = const <Paragraph>[];
+
+    PlatformDispatcher.instance.onBeginFrame = (_) {
+      try {
+        if (_isUncachedFrame) {
+          startMeasureFrame(_profile!);
+        }
+      } catch (error, stackTrace) {
+        profileCompleter.completeError(error, stackTrace);
+        rethrow;
+      }
+    };
+
+    PlatformDispatcher.instance.onDrawFrame = () async {
+      try {
+        if (_isUncachedFrame) {
+          _lastBuildDuration = timeAction(() {
+            _currentParagraphs = buildParagraphs(_iteration);
+          });
+          final constraints = ParagraphConstraints(width: layoutWidth);
+          _lastLayoutDuration = timeAction(() {
+            for (final Paragraph paragraph in _currentParagraphs) {
+              paragraph.layout(constraints);
+            }
+          });
+          _lastPaintDuration = await timeAsyncAction(() async {
+            await _paintAndRender(_currentParagraphs, const Offset(8.0, 8.0));
+          });
+          _lastTotalDuration = _lastBuildDuration + _lastLayoutDuration + _lastPaintDuration;
+          endMeasureFrame();
+
+          _isUncachedFrame = false;
+          PlatformDispatcher.instance.scheduleFrame();
+        } else {
+          final Duration cachedPaintDuration = await timeAsyncAction(() async {
+            await _paintAndRender(_currentParagraphs, const Offset(10.0, 10.0));
+          });
+          final relayoutConstraints = ParagraphConstraints(width: relayoutWidth);
+          final Duration cachedLayoutDuration = timeAction(() {
+            for (final Paragraph paragraph in _currentParagraphs) {
+              paragraph.layout(relayoutConstraints);
+            }
+          });
+          final Duration cachedTotalDuration = cachedLayoutDuration + cachedPaintDuration;
+
+          for (final Paragraph paragraph in _currentParagraphs) {
+            paragraph.dispose();
+          }
+          _currentParagraphs = const <Paragraph>[];
+
+          _profile!.addDataPoint('buildDuration', _lastBuildDuration, reported: true);
+          _profile!.addDataPoint('layoutDuration', _lastLayoutDuration, reported: true);
+          _profile!.addDataPoint('cachedLayoutDuration', cachedLayoutDuration, reported: true);
+          _profile!.addDataPoint('paintDuration', _lastPaintDuration, reported: true);
+          _profile!.addDataPoint('cachedPaintDuration', cachedPaintDuration, reported: true);
+          _profile!.addDataPoint('totalDuration', _lastTotalDuration, reported: true);
+          _profile!.addDataPoint('cachedTotalDuration', cachedTotalDuration, reported: true);
+
+          _iteration += 1;
+          _isUncachedFrame = true;
+
+          if (shouldContinue()) {
+            PlatformDispatcher.instance.scheduleFrame();
+          } else {
+            profileCompleter.complete(_profile!);
+          }
+        }
+      } catch (error, stackTrace) {
+        for (final Paragraph paragraph in _currentParagraphs) {
+          paragraph.dispose();
+        }
+        _currentParagraphs = const <Paragraph>[];
+        profileCompleter.completeError(error, stackTrace);
+        rethrow;
+      }
+    };
+
+    PlatformDispatcher.instance.scheduleFrame();
+    return profileCompleter.future;
+  }
+}
+
 /// A recorder for benchmarking interactions with the framework by creating
 /// widgets.
 ///

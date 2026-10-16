@@ -209,6 +209,7 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
             '--web-run-headless',
             '--no-web-enable-expression-evaluation',
             '--web-browser-flag=--disable-popup-blocking',
+            '--web-browser-flag=--enable-experimental-web-platform-features',
             '--web-browser-flag=--bwsi',
             '--web-browser-flag=--no-first-run',
             '--web-browser-flag=--no-default-browser-check',
@@ -338,6 +339,11 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
           } else if (request.requestedUri.path.endsWith('/next-benchmark')) {
             if (benchmarks == null) {
               benchmarks = (json.decode(requestContents) as List<dynamic>).cast<String>();
+              final String? filter = io.Platform.environment['WEB_BENCHMARK_FILTER'];
+              if (filter != null && filter.isNotEmpty) {
+                final filterPattern = RegExp(filter);
+                benchmarks = benchmarks!.where(filterPattern.hasMatch).toList();
+              }
               benchmarkIterator = benchmarks!.iterator;
             }
             if (benchmarkIterator.moveNext()) {
