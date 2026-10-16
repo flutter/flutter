@@ -89,7 +89,11 @@ class TextLayout {
 
   void calculateStrutMetrics() {
     if (paragraph.paragraphStyle.strutStyle != null) {
-      paragraph.paragraphStyle.strutStyle?.calculateMetrics();
+      // Pass the paragraph's default leadingDistribution as a fallback when
+      // StrutStyle.leadingDistribution is not explicitly set.
+      paragraph.paragraphStyle.strutStyle?.calculateMetrics(
+        paragraph.paragraphStyle.textStyle.leadingDistribution,
+      );
     }
   }
 
@@ -183,10 +187,76 @@ class TextLayout {
       paragraph.minIntrinsicWidth = 0;
       paragraph.longestLine = double.negativeInfinity;
       paragraph.maxLineWidthWithTrailingSpaces = double.negativeInfinity;
-      paragraph.height = _mapping._clusters.last.advance.height;
+
+      // This mirrors SkParagraph's `ParagraphImpl::computeEmptyMetrics`, in the same order:
+      // font metrics -> height multiplier -> TextHeightBehavior -> strut.
+      final WebStrutStyle? strutStyle = paragraph.paragraphStyle.strutStyle;
+      final ParagraphSpan span = _mapping._clusters.last.span;
+      final double rawAscent = span.fontBoundingBoxAscent;
+      final double rawDescent = span.fontBoundingBoxDescent;
+      var ascent = rawAscent;
+      var descent = rawDescent;
+      // SkParagraph keeps a line leading separately from the ascent and the descent. For lines
+      // with text it is always zero (`Run::calculateMetrics` folds everything into the ascent and
+      // the descent, and so does `LineBlock`), but see quirk 2 below.
+      var leading = 0.0;
+
+      // Apply the span's height multiplier.
+      if (span.style.height != null) {
+        final double fontSize = span.style.fontSize ?? StyleManager.defaultFontSize;
+        final double runHeight = span.style.height! * fontSize;
+        final double fontHeight = rawAscent + rawDescent;
+        // SkParagraph quirks, kept on purpose to stay in sync with the other renderers:
+        // 1. For an empty paragraph the half-leading flag comes from the StrutStyle, not from the
+        //    text style. `dart:ui` resolves the strut's flag as
+        //    `strutStyle.leadingDistribution ?? textHeightBehavior.leadingDistribution`, and
+        //    without a strut it is always `proportional`.
+        // 2. With half-leading the extra leading is stored as the line leading instead of being
+        //    split between the ascent and the descent as it is for a line with text. As a result
+        //    `TextHeightBehavior` below does not remove it, a non-forced strut is compared against
+        //    the unscaled ascent and descent, and the alphabetic baseline sits below the top of
+        //    the line by half of the leading.
+        // TODO(jlavrova): File a bug against SkParagraph and remove the quirks from both.
+        final useHalfLeading =
+            strutStyle?.effectiveLeadingDistribution == ui.TextLeadingDistribution.even;
+        if (useHalfLeading) {
+          leading = runHeight - fontHeight;
+        } else {
+          final double multiplier = fontHeight == 0 ? 1.0 : runHeight / fontHeight;
+          ascent *= multiplier;
+          descent *= multiplier;
+        }
+      }
+
+      // For an empty paragraph, the single line acts as both first and last line,
+      // so apply both first-ascent and last-descent behavior.
+      final ui.TextHeightBehavior? textHeightBehavior = paragraph.paragraphStyle.textHeightBehavior;
+      if (textHeightBehavior != null) {
+        if (!textHeightBehavior.applyHeightToFirstAscent) {
+          ascent = rawAscent;
+        }
+        if (!textHeightBehavior.applyHeightToLastDescent) {
+          descent = rawDescent;
+        }
+      }
+
+      // The strut is applied last, after TextHeightBehavior, so `forceStrutHeight` wins over it.
+      // `lineAscent` and `lineDescent` already include half of the strut's leading each.
+      if (strutStyle != null) {
+        if (strutStyle.forceStrutHeight ?? false) {
+          ascent = strutStyle.lineAscent;
+          descent = strutStyle.lineDescent;
+          leading = 0.0;
+        } else {
+          ascent = math.max(ascent, strutStyle.lineAscent);
+          descent = math.max(descent, strutStyle.lineDescent);
+        }
+      }
+
+      paragraph.height = ascent + descent + leading;
       // This is not 100% correct but we have no text to measure the baselines from
-      paragraph.alphabeticBaseline = _mapping._clusters.first.advance.height;
-      paragraph.ideographicBaseline = _mapping._clusters.first.advance.height;
+      paragraph.alphabeticBaseline = leading / 2 + ascent;
+      paragraph.ideographicBaseline = ascent + descent + leading;
       return;
     }
 
@@ -214,6 +284,9 @@ class TextLayout {
     ClusterRange hardlineClusterRange,
     double top, {
     required bool isSyntheticEmptyLine,
+    // No isFirstLine parameter is needed because the first line is determined
+    // directly inside _finishLine via lines.isEmpty before line is appended.
+    required bool isLastLine,
   }) {
     assert(contentClusterRange.end == whitespaceClusterRange.start);
     assert(whitespaceClusterRange.end == hardlineClusterRange.start);
@@ -272,21 +345,22 @@ class TextLayout {
       whitespaceTextRange,
       hardlineTextRange,
       allTextRange,
+      paragraph.paragraphStyle.strutStyle,
       isSyntheticEmptyLine: isSyntheticEmptyLine,
       includesTrailingNewline: includesTrailingNewline,
     );
 
     if (isSyntheticEmptyLine) {
       if (lines.isNotEmpty) {
-        line.fontBoundingBoxAscent = lines.last.fontBoundingBoxAscent;
-        line.fontBoundingBoxDescent = lines.last.fontBoundingBoxDescent;
-        line.paintBoundsAscent = lines.last.paintBoundsAscent;
-        line.paintBoundsDescent = lines.last.paintBoundsDescent;
+        line.inheritMetricsFrom(lines.last);
       }
-      line.advance = ui.Rect.fromLTWH(0, top, 0, line.height);
-      line.trailingSpacesWidth = 0.0;
-      lines.add(line);
-      return line.advance.height;
+      return _finishLine(
+        line,
+        top: top,
+        width: 0.0,
+        trailingSpacesWidth: 0.0,
+        isLastLine: isLastLine,
+      );
     }
 
     // Get logical bidi levels belonging to the line.
@@ -481,17 +555,36 @@ class TextLayout {
       line.updateBoundingBox(block);
     }
 
-    line.advance = ui.Rect.fromLTWH(
-      0,
-      top,
+    return _finishLine(
+      line,
+      top: top,
       // Line advance.width should not include trailing spaces (that are counted as a part of a block)
-      blockShiftFromLineStart - trailingSpacesWidth,
-      // At the end this shift is equal to the entire line width
-      line.height,
+      width: blockShiftFromLineStart - trailingSpacesWidth,
+      trailingSpacesWidth: trailingSpacesWidth,
+      isLastLine: isLastLine,
     );
+  }
+
+  /// Finalizes [line] vertical metrics and horizontal advance, appends it to
+  /// [lines], and returns the resulting line height.
+  double _finishLine(
+    TextLine line, {
+    required double top,
+    required double width,
+    required double trailingSpacesWidth,
+    required bool isLastLine,
+  }) {
+    // Apply TextHeightBehavior to the first line's ascent and the last line's
+    // descent before computing the line advance so the wrapper accumulates the
+    // final line heights in a single pass.
+    line.applyTextHeightBehavior(
+      paragraph.paragraphStyle.textHeightBehavior,
+      isFirstLine: lines.isEmpty,
+      isLastLine: isLastLine,
+    );
+    line.advance = ui.Rect.fromLTWH(0, top, width, line.height);
     line.trailingSpacesWidth = trailingSpacesWidth;
     lines.add(line);
-
     return line.advance.height;
   }
 
@@ -1418,7 +1511,8 @@ class TextLine {
     this.textRange,
     this.whitespacesRange,
     this.hardLineBreakRange,
-    this.allLineTextRange, {
+    this.allLineTextRange,
+    this.strutStyle, {
     required this.isSyntheticEmptyLine,
     required this.includesTrailingNewline,
   });
@@ -1456,6 +1550,7 @@ class TextLine {
   final ui.TextRange hardLineBreakRange;
   final ui.TextRange allLineTextRange;
   final int lineNumber;
+  final WebStrutStyle? strutStyle;
 
   /// True if this line is an artificial empty line added after a trailing
   /// newline at the end of the text (e.g. Line 1 in `'Hello\n'`).
@@ -1480,9 +1575,15 @@ class TextLine {
   bool lastLine = false;
 
   ui.Rect advance = ui.Rect.zero;
-  double fontBoundingBoxAscent = 0.0;
-  double fontBoundingBoxDescent = 0.0;
-  bool _hasLineMetrics = false;
+  // Every line is at least as tall as the strut (including half of the strut leading on each
+  // side), both in scaled and in raw metrics. Raw metrics (without height multipliers) are tracked
+  // alongside scaled metrics so TextHeightBehavior can revert the first line's ascent or the last
+  // line's descent to unscaled font bounds.
+  late double fontBoundingBoxAscent = strutStyle?.lineAscent ?? 0.0;
+  late double fontBoundingBoxDescent = strutStyle?.lineDescent ?? 0.0;
+  late double rawFontBoundingBoxAscent = strutStyle?.lineAscent ?? 0.0;
+  late double rawFontBoundingBoxDescent = strutStyle?.lineDescent ?? 0.0;
+  late bool _hasLineMetrics = strutStyle != null;
 
   double paintBoundsAscent = 0.0;
   double paintBoundsDescent = 0.0;
@@ -1496,33 +1597,79 @@ class TextLine {
 
   List<LineBlock> visualBlocks = <LineBlock>[];
 
+  /// Copies vertical font and paint metrics from [other].
+  ///
+  /// Used for the synthetic empty line after a trailing newline, which inherits
+  /// the preceding line's metrics just like SkParagraph's fEndLine.
+  void inheritMetricsFrom(TextLine other) {
+    fontBoundingBoxAscent = other.fontBoundingBoxAscent;
+    fontBoundingBoxDescent = other.fontBoundingBoxDescent;
+    rawFontBoundingBoxAscent = other.rawFontBoundingBoxAscent;
+    rawFontBoundingBoxDescent = other.rawFontBoundingBoxDescent;
+    paintBoundsAscent = other.paintBoundsAscent;
+    paintBoundsDescent = other.paintBoundsDescent;
+  }
+
+  /// Applies [textHeightBehavior] overrides to the first line's ascent and the
+  /// last line's descent by reverting them to unscaled font metrics.
+  void applyTextHeightBehavior(
+    ui.TextHeightBehavior? textHeightBehavior, {
+    required bool isFirstLine,
+    required bool isLastLine,
+  }) {
+    if (textHeightBehavior == null) {
+      return;
+    }
+    if (isFirstLine && !textHeightBehavior.applyHeightToFirstAscent) {
+      fontBoundingBoxAscent = rawFontBoundingBoxAscent;
+    }
+    if (isLastLine && !textHeightBehavior.applyHeightToLastDescent) {
+      fontBoundingBoxDescent = rawFontBoundingBoxDescent;
+    }
+  }
+
   void updateBoundingBox(LineBlock block) {
-    final double blockAscent;
-    final double blockDescent;
     if (block is TextBlock) {
-      // Line always counts multiplied metrics.
-      blockAscent = block.multipliedFontBoundingBoxAscent;
-      blockDescent = block.multipliedFontBoundingBoxDescent;
+      // Paint bounds always reflect the actual painted glyph bounds regardless of forceStrutHeight.
       paintBoundsAscent = math.max(paintBoundsAscent, block.paintBoundsAscent);
       paintBoundsDescent = math.max(paintBoundsDescent, block.paintBoundsDescent);
       paintBoundsLeft = math.min(paintBoundsLeft, block.paintBounds.left);
       paintBoundsRight = math.max(paintBoundsRight, block.paintBounds.right);
-    } else if (block is PlaceholderBlock) {
-      blockAscent = block.ascent;
-      blockDescent = block.descent;
-      // There's no need to update paint bounds because placeholders aren't painted by the
-      // paragraph.
-    } else {
-      throw UnsupportedError('Unknown block type: $block');
     }
 
+    // When forceStrutHeight is enabled, the line metrics (scaled and raw alike) stay locked to the
+    // strut and ignore both text and placeholder blocks, matching SkParagraph's
+    // InternalLineMetrics::add. Raw metrics must stay locked too so TextHeightBehavior cannot
+    // revert the first or last line to metrics taller than the strut.
+    if (strutStyle?.forceStrutHeight ?? false) {
+      return;
+    }
+
+    // Text blocks contribute both height-scaled and raw font metrics.
+    // Placeholders have no height multiplier, so their raw and scaled metrics
+    // are identical, and they do not affect glyph paint bounds.
+    final (double ascent, double descent, double rawAscent, double rawDescent) = switch (block) {
+      TextBlock() => (
+        block.multipliedFontBoundingBoxAscent,
+        block.multipliedFontBoundingBoxDescent,
+        block.rawFontBoundingBoxAscent,
+        block.rawFontBoundingBoxDescent,
+      ),
+      PlaceholderBlock() => (block.ascent, block.descent, block.ascent, block.descent),
+      _ => throw UnsupportedError('Unknown block type: $block'),
+    };
+
     if (!_hasLineMetrics) {
-      fontBoundingBoxAscent = blockAscent;
-      fontBoundingBoxDescent = blockDescent;
+      fontBoundingBoxAscent = ascent;
+      fontBoundingBoxDescent = descent;
+      rawFontBoundingBoxAscent = rawAscent;
+      rawFontBoundingBoxDescent = rawDescent;
       _hasLineMetrics = true;
     } else {
-      fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, blockAscent);
-      fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, blockDescent);
+      fontBoundingBoxAscent = math.max(fontBoundingBoxAscent, ascent);
+      fontBoundingBoxDescent = math.max(fontBoundingBoxDescent, descent);
+      rawFontBoundingBoxAscent = math.max(rawFontBoundingBoxAscent, rawAscent);
+      rawFontBoundingBoxDescent = math.max(rawFontBoundingBoxDescent, rawDescent);
     }
   }
 }

@@ -365,12 +365,21 @@ class _LineBuilder {
       _widthConsumedText + _widthWhitespaces,
     );
 
+    final int? maxLines = _layout.paragraph.paragraphStyle.maxLines;
+    final bool willReachMaxLines = maxLines != null && _layout.lines.length + 1 >= maxLines;
+    // This content line is the last line of the paragraph if it hits the
+    // maxLines cap, or if it reaches the artificial EOF cluster without a
+    // trailing newline (when hasTrailingNewline is true and maxLines is not
+    // yet reached, the synthetic empty line added below becomes the last line).
+    final bool isLastLine =
+        willReachMaxLines || (!hasTrailingNewline && _newlineEnd == _layout.allClusters.length - 1);
     final double height = _layout.addLine(
       ClusterRange(start: start, end: _whitespaceStart),
       ClusterRange(start: _whitespaceStart, end: _whitespaceEnd),
       ClusterRange(start: _whitespaceEnd, end: _newlineEnd),
       _top,
       isSyntheticEmptyLine: false,
+      isLastLine: isLastLine,
     );
     _top += height;
 
@@ -385,6 +394,7 @@ class _LineBuilder {
           ClusterRange(start: _newlineEnd, end: _newlineEnd),
           _top,
           isSyntheticEmptyLine: true,
+          isLastLine: true,
         );
       } else {
         _layout.paragraph.didExceedMaxLines = true;
