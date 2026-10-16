@@ -193,6 +193,15 @@ Future<int> run(List<String> arguments) async {
       failures++;
     }
   }
+  // The hand-written files that repeat a list of their GN file (the Dart
+  // test packages' `tests`): the two must agree, in every run over the
+  // manifest's files.
+  if (options.rest.isEmpty && outDir == null) {
+    for (final String message in mirroredListMismatches(tree, mirroredLists)) {
+      stderr.writeln('error: $message');
+      failures++;
+    }
+  }
   final String? depfile = options.option('depfile');
   if (depfile != null) {
     File(depfile)
@@ -200,7 +209,10 @@ Future<int> run(List<String> arguments) async {
       ..writeAsStringSync('${tree.loadedFiles.join('\n')}\n');
   }
   if (check && failures == 0) {
-    stdout.writeln('${inputs.length} generated BUILD.bazel file(s) up to date');
+    stdout.writeln(
+      '${inputs.length} generated BUILD.bazel file(s) up to date; '
+      '${mirroredLists.length} hand-written list(s) match their GN files',
+    );
   }
   return failures == 0 ? 0 : 1;
 }
