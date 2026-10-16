@@ -17,12 +17,14 @@ import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/project_migrator.dart';
+import 'base/signals.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -222,7 +224,8 @@ class FlutterProject {
 
   /// The location of the build folder.
   Directory get buildDirectory =>
-      _buildDirectory ?? directory.childDirectory(getBuildDirectory(null, directory.fileSystem));
+      _buildDirectory ??
+      directory.childDirectory(getBuildDirectory(globals.config, directory.fileSystem));
 
   /// The manifest of this project.
   FlutterManifest get manifest => _manifest;
@@ -625,8 +628,39 @@ class FlutterProject {
     if (isPlugin || !anyPlatformEnabled) {
       return;
     }
+    final toolContext = ToolContext(
+      artifacts: globals.artifacts!,
+      botDetector: globals.botDetector,
+      cache: globals.cache,
+      config: globals.config,
+      customDevicesConfig: globals.customDevicesConfig,
+      flutterVersion: globals.flutterVersion,
+      fs: globals.fs,
+      git: globals.git,
+      localEngineLocator: globals.localEngineLocator!,
+      logger: globals.logger,
+      nativeAssetsBuilder: globals.nativeAssetsBuilder,
+      os: globals.os,
+      outputPreferences: globals.outputPreferences,
+      persistentToolState: globals.persistentToolState!,
+      platform: globals.platform,
+      preRunValidator: globals.preRunValidator,
+      processInfo: globals.processInfo,
+      processManager: globals.processManager,
+      processUtils: globals.processUtils,
+      projectFactory: globals.projectFactory,
+      shutdownHooks: globals.shutdownHooks,
+      signals: LocalSignals.instance,
+      stdio: globals.stdio,
+      systemClock: globals.systemClock,
+      terminal: globals.terminal,
+      userMessages: globals.userMessages,
+    );
     await refreshPluginsList(
       this,
+      cocoaPods: globals.cocoaPods,
+      featureFlags: featureFlags,
+      toolContext: toolContext,
       iosPlatform: iosPlatform,
       macOSPlatform: macOSPlatform,
       pubspecCache: pubspecCache,
@@ -653,12 +687,17 @@ class FlutterProject {
     }
     await injectPlugins(
       this,
+      analytics: globals.analytics,
       androidPlatform: androidPlatform,
+      cocoaPods: globals.cocoaPods,
+      featureFlags: featureFlags,
       iosPlatform: iosPlatform,
       linuxPlatform: linuxPlatform,
       macOSPlatform: macOSPlatform,
-      windowsPlatform: windowsPlatform,
       releaseMode: releaseMode,
+      templateRenderer: globals.templateRenderer,
+      toolContext: toolContext,
+      windowsPlatform: windowsPlatform,
       pubspecCache: pubspecCache,
       packageGraph: packageGraph,
       packageConfig: packageConfig,
@@ -1402,7 +1441,12 @@ class WebProject extends FlutterProjectPlatform {
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Create .dart_tool/dartpad/web_plugin_registrant.dart.
     /// See: https://github.com/dart-lang/dart-services/pull/874
-    await injectBuildTimePluginFilesForWebPlatform(parent, destination: dartpadToolDirectory);
+    await injectBuildTimePluginFilesForWebPlatform(
+      parent,
+      destination: dartpadToolDirectory,
+      logger: globals.logger,
+      templateRenderer: globals.templateRenderer,
+    );
   }
 }
 

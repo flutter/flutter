@@ -31,7 +31,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
-import '../../src/fakes.dart' show FakeLogger, FakePlistParser;
+import '../../src/fakes.dart' show FakeLogger, FakePlistParser, FakeToolContext;
 
 final Platform macosPlatform = FakePlatform(
   operatingSystem: 'macos',
@@ -1050,26 +1050,34 @@ Dec 20 17:04:32 md32-11-vm1 Another App[88374]: Ignore this text''',
         xcode: xcodeBadSimctl,
       );
       simulatorUtils = IOSSimulatorUtils(
-        operatingSystemUtils: OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: osx,
-          processManager: FakeProcessManager.any(),
-        ),
-        logger: logger,
-        processManager: fakeProcessManager,
         xcode: xcode,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          os: OperatingSystemUtils(
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: osx,
+            processManager: FakeProcessManager.any(),
+          ),
+          platform: osx,
+          processManager: fakeProcessManager,
+        ),
       );
       simulatorUtilsBadSimctl = IOSSimulatorUtils(
-        operatingSystemUtils: OperatingSystemUtils(
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: osx,
-          processManager: FakeProcessManager.any(),
-        ),
-        logger: logger,
-        processManager: fakeProcessManager,
         xcode: xcodeBadSimctl,
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          logger: logger,
+          os: OperatingSystemUtils(
+            fileSystem: fileSystem,
+            logger: logger,
+            platform: osx,
+            processManager: FakeProcessManager.any(),
+          ),
+          platform: osx,
+          processManager: fakeProcessManager,
+        ),
       );
     });
 

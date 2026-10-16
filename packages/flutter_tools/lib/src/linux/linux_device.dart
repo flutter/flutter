@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:process/process.dart';
-
-import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../features.dart';
@@ -19,17 +15,8 @@ import 'linux_workflow.dart';
 
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
-  LinuxDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  }) : _operatingSystemUtils = operatingSystemUtils,
-       _logger = logger,
-       super('linux', platformType: PlatformType.linux, ephemeral: false);
-
-  final OperatingSystemUtils _operatingSystemUtils;
-  final Logger _logger;
+  LinuxDevice({required super.toolContext})
+    : super('linux', platformType: PlatformType.linux, ephemeral: false);
 
   @override
   Future<bool> isSupported() async => true;
@@ -42,16 +29,17 @@ class LinuxDevice extends DesktopDevice {
 
   @override
   late final Future<TargetPlatform> targetPlatform = () async {
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_x64) {
+    final HostPlatform hostPlatform = toolContext.os.hostPlatform;
+    if (hostPlatform == HostPlatform.linux_x64) {
       return TargetPlatform.linux_x64;
-    } else if (_operatingSystemUtils.hostPlatform == HostPlatform.linux_riscv64) {
+    } else if (hostPlatform == HostPlatform.linux_riscv64) {
       return TargetPlatform.linux_riscv64;
     }
     return TargetPlatform.linux_arm64;
   }();
 
   @override
-  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(toolContext.os.hostPlatform);
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -69,7 +57,7 @@ class LinuxDevice extends DesktopDevice {
       buildInfo,
       target: mainPath,
       targetPlatform: await targetPlatform,
-      logger: _logger,
+      toolContext: toolContext,
     );
   }
 
@@ -80,26 +68,14 @@ class LinuxDevice extends DesktopDevice {
 }
 
 class LinuxDevices extends PollingDeviceDiscovery {
-  LinuxDevices({
-    required Platform platform,
-    required FeatureFlags featureFlags,
-    required this._operatingSystemUtils,
-    required this._fileSystem,
-    required this._processManager,
-    required this._logger,
-  }) : _platform = platform,
-       _linuxWorkflow = LinuxWorkflow(platform: platform, featureFlags: featureFlags),
-       super('linux devices');
+  LinuxDevices({required FeatureFlags featureFlags, required ToolContext super.toolContext})
+    : _linuxWorkflow = LinuxWorkflow(platform: toolContext.platform, featureFlags: featureFlags),
+      super('linux devices');
 
-  final Platform _platform;
   final LinuxWorkflow _linuxWorkflow;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final OperatingSystemUtils _operatingSystemUtils;
 
   @override
-  bool get supportsPlatform => _platform.isLinux;
+  bool get supportsPlatform => toolContext.platform.isLinux;
 
   @override
   bool get canListAnything => _linuxWorkflow.canListDevices;
@@ -112,14 +88,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[
-      LinuxDevice(
-        logger: _logger,
-        processManager: _processManager,
-        fileSystem: _fileSystem,
-        operatingSystemUtils: _operatingSystemUtils,
-      ),
-    ];
+    return <Device>[LinuxDevice(toolContext: toolContext)];
   }
 
   @override

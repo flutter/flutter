@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/test.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:flutter_tools/src/isolated/mustache_template.dart';
 import 'package:flutter_tools/src/native_assets.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
@@ -107,7 +108,11 @@ void main() {
 
   testUsingContext('accepts --[no-]deprecated-js-interop', () {
     expectAcceptsDeprecatedJsInteropFlag(
-      TestCommand(toolContext: toolContext, testWrapper: FakePackageTest()),
+      TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testWrapper: FakePackageTest(),
+      ),
     );
   });
 
@@ -119,7 +124,11 @@ void main() {
       fs.directory('.dart_tool').childFile('package_config.json').writeAsStringSync('');
 
       final fakePackageTest = FakePackageTest();
-      final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testWrapper: fakePackageTest,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       expect(() => commandRunner.run(const <String>['test', '--no-pub']), throwsToolExit());
@@ -150,7 +159,11 @@ dev_dependencies:
       );
 
       final fakePackageTest = FakePackageTest();
-      final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testWrapper: fakePackageTest,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       expect(
@@ -169,7 +182,11 @@ dev_dependencies:
     () async {
       final fakePackageTest = FakePackageTest();
 
-      final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testWrapper: fakePackageTest,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--no-pub']);
@@ -194,7 +211,11 @@ dev_dependencies:
       () async {
         final fakePackageTest = FakePackageTest();
 
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>[
@@ -219,7 +240,11 @@ dev_dependencies:
       () async {
         final fakePackageTest = FakePackageTest();
 
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub']);
@@ -238,7 +263,11 @@ dev_dependencies:
       'passes boolean selectors and multiple tags/exclude-tags through to package:test',
       () async {
         final fakePackageTest = FakePackageTest();
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(<String>[
@@ -285,7 +314,11 @@ dev_dependencies:
 
     Future<void> expectPassesReporter(String value) async {
       final fakePackageTest = FakePackageTest();
-      final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testWrapper: fakePackageTest,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(<String>['test', '--no-pub', '-r', value]);
@@ -322,7 +355,11 @@ dev_dependencies:
       'by default, passes no reporter',
       () async {
         final fakePackageTest = FakePackageTest();
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(<String>['test', '--no-pub']);
@@ -341,7 +378,11 @@ dev_dependencies:
     () async {
       final fakePackageTest = FakePackageTest();
 
-      final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testWrapper: fakePackageTest,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       expect(
@@ -394,7 +435,11 @@ dev_dependencies:
       );
       final testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
       await commandRunner.run(const <String>[
         'test',
@@ -483,7 +528,11 @@ resolution: workspace
       );
       final testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
       await commandRunner.run(const <String>[
         'test',
@@ -537,7 +586,11 @@ resolution: workspace
       );
       final testRunner = FakeFlutterTestRunner(0, null, fakeVmServiceHost);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
       await commandRunner.run(const <String>[
         'test',
@@ -562,7 +615,11 @@ resolution: workspace
     () async {
       final testRunner = FakeFlutterTestRunner(0);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       expect(
@@ -590,7 +647,11 @@ resolution: workspace
   group('Pipes to package:test', () {
     Future<void> expectPassesArgument(String value, [String? passValue]) async {
       final fakePackageTest = FakePackageTest();
-      final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testWrapper: fakePackageTest,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(<String>['test', '--no-pub', value]);
@@ -616,7 +677,11 @@ resolution: workspace
       'passes --preset through to package:test',
       () async {
         final fakePackageTest = FakePackageTest();
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(<String>['test', '--no-pub', '--preset=foo', '--preset=bar']);
@@ -636,7 +701,11 @@ resolution: workspace
       'passes -P through to package:test',
       () async {
         final fakePackageTest = FakePackageTest();
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(<String>['test', '--no-pub', '-Pfoo', '-Pbar']);
@@ -658,7 +727,11 @@ resolution: workspace
     () async {
       final testRunner = FakeFlutterTestRunner(0);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>[
@@ -693,7 +766,10 @@ resolution: workspace
   testUsingContext(
     'Generates a satisfactory test runner package_config.json when --experimental-faster-testing is set',
     () async {
-      final testCommand = TestCommand(toolContext: toolContext);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       var caughtToolExit = false;
@@ -748,7 +824,10 @@ resolution: workspace
   testUsingContext(
     'Pipes specified arguments to package:test when --experimental-faster-testing is set',
     () async {
-      final testCommand = TestCommand(toolContext: toolContext);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       var caughtToolExit = false;
@@ -832,7 +911,10 @@ const List<String> packageTestArgs = <String>[
   testUsingContext(
     'Only passes --no-color and --chain-stack-traces to package:test by default when --experimental-faster-testing is set',
     () async {
-      final testCommand = TestCommand(toolContext: toolContext);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       var caughtToolExit = false;
@@ -882,6 +964,7 @@ const List<String> packageTestArgs = <String>[
       final testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
 
       final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
         verbose: true,
@@ -916,7 +999,11 @@ const List<String> packageTestArgs = <String>[
     () async {
       final testRunner = FakeFlutterTestRunner(0, const Duration(milliseconds: 1));
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--no-pub', '--', 'test/fake_test.dart']);
@@ -939,7 +1026,11 @@ const List<String> packageTestArgs = <String>[
     () async {
       final fakePackageTest = FakePackageTest();
 
-      final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testWrapper: fakePackageTest,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--no-pub', 'integration_test']);
@@ -960,7 +1051,11 @@ const List<String> packageTestArgs = <String>[
     () async {
       final fakePackageTest = FakePackageTest();
 
-      final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testWrapper: fakePackageTest,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>[
@@ -987,7 +1082,11 @@ const List<String> packageTestArgs = <String>[
       () async {
         final fakePackageTest = FakePackageTest();
 
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub']);
@@ -1008,7 +1107,11 @@ const List<String> packageTestArgs = <String>[
       () async {
         final fakePackageTest = FakePackageTest();
 
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub', 'integration_test']);
@@ -1029,7 +1132,11 @@ const List<String> packageTestArgs = <String>[
       () async {
         final fakePackageTest = FakePackageTest();
 
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>[
@@ -1054,7 +1161,11 @@ const List<String> packageTestArgs = <String>[
       () async {
         final fakePackageTest = FakePackageTest();
 
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>[
@@ -1079,7 +1190,11 @@ const List<String> packageTestArgs = <String>[
       () async {
         final fakePackageTest = FakePackageTest();
 
-        final testCommand = TestCommand(toolContext: toolContext, testWrapper: fakePackageTest);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testWrapper: fakePackageTest,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>[
@@ -1104,7 +1219,11 @@ const List<String> packageTestArgs = <String>[
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         expect(
@@ -1130,7 +1249,11 @@ const List<String> packageTestArgs = <String>[
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub']);
@@ -1148,7 +1271,11 @@ const List<String> packageTestArgs = <String>[
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub', '--platform=chrome']);
@@ -1166,7 +1293,11 @@ const List<String> packageTestArgs = <String>[
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>[
@@ -1189,7 +1320,11 @@ const List<String> packageTestArgs = <String>[
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub', 'integration_test']);
@@ -1214,7 +1349,11 @@ const List<String> packageTestArgs = <String>[
     () async {
       final testRunner = FakeFlutterTestRunner(0);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       expect(
@@ -1235,7 +1374,11 @@ const List<String> packageTestArgs = <String>[
     () async {
       final testRunner = FakeFlutterTestRunner(0);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       expect(
@@ -1255,7 +1398,11 @@ const List<String> packageTestArgs = <String>[
     () async {
       final testRunner = FakeFlutterTestRunner(0);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--no-pub', 'integration_test']);
@@ -1279,7 +1426,11 @@ const List<String> packageTestArgs = <String>[
     () async {
       final testRunner = FakeFlutterTestRunner(0);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>[
@@ -1306,7 +1457,11 @@ const List<String> packageTestArgs = <String>[
     () async {
       final testRunner = FakeFlutterTestRunner(0);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--no-pub']);
@@ -1344,7 +1499,11 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter''');
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--no-pub', '--flavor', 'vanilla']);
@@ -1384,7 +1543,11 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter''');
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       const buildArgsFlavorless = <String>['test', '--no-pub'];
@@ -1420,7 +1583,11 @@ dev_dependencies:
     () async {
       final testRunner = FakeFlutterTestRunner(0);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--no-pub', '--no-test-assets']);
@@ -1452,7 +1619,11 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter''');
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--no-pub']);
@@ -1492,6 +1663,7 @@ dev_dependencies:
         ),
       );
       final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testRunner: testRunner,
         nativeAssetsBuilder: nativeAssetsBuilder,
@@ -1536,7 +1708,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         try {
@@ -1559,7 +1735,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         toolContext.logger.printWarning('Warning: Mild annoyance, Will Robinson!');
@@ -1592,7 +1772,11 @@ dev_dependencies:
           processManager: toolContext.processManager,
         );
 
-        final testCommand = TestCommand(toolContext: testToolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: testToolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         logger.printError('Error: Danger Will Robinson!');
@@ -1621,7 +1805,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub']);
@@ -1638,7 +1826,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>[
@@ -1659,7 +1851,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub', '--enable-impeller']);
@@ -1676,7 +1872,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>[
@@ -1698,7 +1898,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub', '--no-enable-hcpp']);
@@ -1715,7 +1919,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub']);
@@ -1732,7 +1940,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub']);
@@ -1749,7 +1961,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub', '--no-uninstall']);
@@ -1766,7 +1982,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(<String>[
@@ -1788,7 +2008,11 @@ dev_dependencies:
       () async {
         final testRunner = FakeFlutterTestRunner(0);
 
-        final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+        final testCommand = TestCommand(
+          templateRenderer: const MustacheTemplateRenderer(),
+          toolContext: toolContext,
+          testRunner: testRunner,
+        );
         final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
         await commandRunner.run(const <String>['test', '--no-pub', '--platform=chrome', '--wasm']);
@@ -1842,6 +2066,7 @@ resolution: workspace
       final testRunner = FakeFlutterTestRunner(0);
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: toolContext,
         testWrapper: fakePackageTest,
         testRunner: testRunner,
@@ -1866,7 +2091,11 @@ resolution: workspace
     () async {
       final testRunner = FakeFlutterTestRunner(79);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       expect(
@@ -1885,7 +2114,11 @@ resolution: workspace
     () async {
       final testRunner = FakeFlutterTestRunner(0);
 
-      final testCommand = TestCommand(toolContext: toolContext, testRunner: testRunner);
+      final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        testRunner: testRunner,
+      );
       final CommandRunner<void> commandRunner = createTestCommandRunner(testCommand);
 
       await commandRunner.run(const <String>['test', '--name', r'^(?!Golden).+', '--no-pub']);
@@ -1918,6 +2151,7 @@ resolution: workspace
 
       final fakePackageTest = FakePackageTest();
       final testCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
         toolContext: FakeToolContext(
           fs: globals.fs,
           logger: logger,
@@ -2045,7 +2279,10 @@ resolution: workspace
     );
 
     testUsingContext('preserves expected hidden options and test-specific --wasm help text', () {
-      final defaultCommand = TestCommand(toolContext: toolContext);
+      final defaultCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+      );
 
       expect(defaultCommand.argParser.options['track-widget-creation']!.hide, isFalse);
       expect(
@@ -2079,7 +2316,11 @@ resolution: workspace
         ]),
       );
 
-      final verboseCommand = TestCommand(toolContext: toolContext, verboseHelp: true);
+      final verboseCommand = TestCommand(
+        templateRenderer: const MustacheTemplateRenderer(),
+        toolContext: toolContext,
+        verboseHelp: true,
+      );
       final hiddenInVerboseMode = <String>{
         for (final entry in verboseCommand.argParser.options.entries)
           if (entry.value.hide) entry.key,
