@@ -1190,17 +1190,37 @@ abstract class WidgetController {
   /// Dispatch a hover sequence at the center of the given widget, assuming it is
   /// exposed.
   ///
+  /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
+  ///
+  /// {@template flutter.flutter_test.WidgetController.startHover}
   /// The return value is a [TestGesture] object that can be used to continue the
-  /// hover (e.g. moving the pointer or dispatching a down event).
+  /// hover (e.g. moving the pointer with [TestGesture.moveTo] or
+  /// [TestGesture.moveBy], or dispatching a down event with [TestGesture.down]).
   ///
-  /// By default, the gesture kind is [PointerDeviceKind.mouse].
+  /// By default, `kind` is [PointerDeviceKind.mouse] because touch pointers
+  /// ([PointerDeviceKind.touch]) cannot generate hover events.
   ///
+  /// Only one hover pointer may be connected at a time. Callers must remove the
+  /// pointer via [TestGesture.removePointer] before starting another hover
+  /// gesture (or use [TestGesture.moveTo] / [TestGesture.moveBy] on the existing
+  /// gesture), and should clean up the pointer at the end of the test:
+  ///
+  /// ```dart
+  /// final TestGesture gesture = await tester.startHover(find.text('target'));
+  /// addTearDown(gesture.removePointer);
+  /// ```
+  /// {@endtemplate}
+  ///
+  /// In multi-view tests, [startHover] resolves the target [FlutterView] from
+  /// `finder` for the initial hover events, but follow-up calls on the returned
+  /// [TestGesture] (such as [TestGesture.moveTo], [TestGesture.down], or
+  /// [TestGesture.removePointer]) must explicitly pass `view` if targeting a
+  /// view other than [view].
   ///
   /// See also:
   ///
   ///  * [press], which dispatches a pointer down sequence.
   ///  * [startHoverAt], which starts a hover gesture at a specific location.
-  /// {@macro flutter.flutter_test.WidgetController.tap.warnIfMissed}
   Future<TestGesture> startHover(
     finders.FinderBase<Element> finder, {
     int? pointer,
@@ -1218,10 +1238,11 @@ abstract class WidgetController {
 
   /// Dispatch a hover sequence at the given location.
   ///
-  /// The return value is a [TestGesture] object that can be used to continue the
-  /// hover (e.g. moving the pointer or dispatching a down event).
+  /// {@macro flutter.flutter_test.WidgetController.startHover}
   ///
-  /// By default, the gesture kind is [PointerDeviceKind.mouse].
+  /// In multi-view tests, if `view` is provided, follow-up calls on the returned
+  /// [TestGesture] (such as [TestGesture.moveTo], [TestGesture.down], or
+  /// [TestGesture.removePointer]) must also explicitly pass `view`.
   ///
   /// See also:
   ///
@@ -1232,12 +1253,18 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.mouse,
     FlutterView? view,
   }) {
-    assert(kind != PointerDeviceKind.trackpad);
+    assert(
+      kind != PointerDeviceKind.touch && kind != PointerDeviceKind.trackpad,
+      'Touch and trackpad pointers cannot generate hover events.',
+    );
+    assert(
+      !binding.mouseTracker.mouseIsConnected,
+      'A hover pointer is already connected. Call removePointer() on the '
+      'existing TestGesture before starting a new hover gesture, or use '
+      'moveTo() or moveBy() to move the existing pointer.',
+    );
     return TestAsyncUtils.guard<TestGesture>(() async {
-      final TestGesture gesture = await createGesture(
-        pointer: pointer,
-        kind: kind,
-      );
+      final TestGesture gesture = await createGesture(pointer: pointer, kind: kind);
       await gesture.addPointer(location: location, view: view);
       await gesture.moveTo(location, view: view);
       return gesture;
@@ -1903,12 +1930,10 @@ abstract class WidgetController {
     required PointerDeviceKind kind,
     required int buttons,
   }) {
-    final int p = pointer ?? _getNextPointer();
     return TestGesture(
       dispatcher: sendEventToBinding,
       kind: kind,
-      pointer: p,
-      device: kind == PointerDeviceKind.mouse ? p : null,
+      pointer: pointer ?? _getNextPointer(),
       buttons: buttons,
     );
   }

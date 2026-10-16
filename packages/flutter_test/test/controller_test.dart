@@ -9,6 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'multi_view_testing.dart';
+
 class TestDragData {
   const TestDragData(this.slop, this.dragDistance, this.expectedOffsets);
 
@@ -214,72 +216,69 @@ void main() {
     expect(logs, equals(<String>['down $b']));
   });
 
-  testWidgets('WidgetTester.startHover and startHoverAt must respect kinds and allow click sequences', (
-    WidgetTester tester,
-  ) async {
-    final logs = <String>[];
+  testWidgets(
+    'WidgetTester.startHover and startHoverAt must respect kinds and allow click sequences',
+    (WidgetTester tester) async {
+      final logs = <String>[];
 
-    await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: GestureDetector(
-          onTap: () => logs.add('tap'),
-          child: Listener(
-            onPointerHover: (PointerHoverEvent event) =>
-                logs.add('hover ${event.buttons} ${event.kind.name}'),
-            onPointerDown: (PointerDownEvent event) =>
-                logs.add('down ${event.buttons} ${event.kind.name}'),
-            onPointerUp: (PointerUpEvent event) =>
-                logs.add('up ${event.buttons} ${event.kind.name}'),
-            child: const Text('test'),
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: GestureDetector(
+            onTap: () => logs.add('tap'),
+            child: Listener(
+              onPointerHover: (PointerHoverEvent event) =>
+                  logs.add('hover ${event.buttons} ${event.kind.name}'),
+              onPointerDown: (PointerDownEvent event) =>
+                  logs.add('down ${event.buttons} ${event.kind.name}'),
+              onPointerUp: (PointerUpEvent event) =>
+                  logs.add('up ${event.buttons} ${event.kind.name}'),
+              child: const Text('test'),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    final TestGesture gesture = await tester.startHover(
-      find.text('test'),
-    );
-    addTearDown(() => gesture.removePointer());
-    await tester.pump();
-    expect(logs, equals(<String>['hover 0 mouse']));
-    logs.clear();
+      final TestGesture gesture = await tester.startHover(find.text('test'));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      expect(logs, equals(<String>['hover 0 mouse']));
+      logs.clear();
 
-    await gesture.down(tester.getCenter(find.text('test')));
-    await tester.pump();
-    expect(logs, equals(<String>['down 1 mouse']));
-    logs.clear();
+      await gesture.down(tester.getCenter(find.text('test')));
+      await tester.pump();
+      expect(logs, equals(<String>['down 1 mouse']));
+      logs.clear();
 
-    await gesture.up();
-    await tester.pump();
-    expect(logs, equals(<String>['up 0 mouse', 'tap']));
-    logs.clear();
+      await gesture.up();
+      await tester.pump();
+      expect(logs, equals(<String>['up 0 mouse', 'tap']));
+      logs.clear();
 
-    await gesture.removePointer();
-    await tester.pump();
+      await gesture.removePointer();
+      await tester.pump();
 
-    final TestGesture gestureAt = await tester.startHoverAt(
-      tester.getCenter(find.text('test')),
-      kind: PointerDeviceKind.stylus,
-    );
-    addTearDown(() => gestureAt.removePointer());
-    await tester.pump();
-    expect(logs, equals(<String>['hover 0 stylus']));
-    logs.clear();
+      final TestGesture gestureAt = await tester.startHoverAt(
+        tester.getCenter(find.text('test')),
+        kind: PointerDeviceKind.stylus,
+      );
+      addTearDown(gestureAt.removePointer);
+      await tester.pump();
+      expect(logs, equals(<String>['hover 0 stylus']));
+      logs.clear();
 
-    await gestureAt.down(tester.getCenter(find.text('test')));
-    await tester.pump();
-    expect(logs, equals(<String>['down 1 stylus']));
-    logs.clear();
+      await gestureAt.down(tester.getCenter(find.text('test')));
+      await tester.pump();
+      expect(logs, equals(<String>['down 1 stylus']));
+      logs.clear();
 
-    await gestureAt.up();
-    await tester.pump();
-    expect(logs, equals(<String>['up 0 stylus', 'tap']));
-  });
+      await gestureAt.up();
+      await tester.pump();
+      expect(logs, equals(<String>['up 0 stylus', 'tap']));
+    },
+  );
 
-  testWidgets('WidgetTester.startHover default values', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('WidgetTester.startHover default values', (WidgetTester tester) async {
     final logs = <String>[];
 
     await tester.pumpWidget(
@@ -294,12 +293,96 @@ void main() {
     );
 
     final TestGesture gesture = await tester.startHover(find.text('test'));
-    addTearDown(() => gesture.removePointer());
+    addTearDown(gesture.removePointer);
     await tester.pump();
     expect(logs, equals(<String>['hover 0 mouse']));
   });
 
-  testWidgets('WidgetTester.startHoverAt throws assertion error for trackpad', (
+  testWidgets('WidgetTester.startHover and startHoverAt must respect pointer', (
+    WidgetTester tester,
+  ) async {
+    final logs = <int>[];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Listener(
+          onPointerHover: (PointerHoverEvent event) => logs.add(event.pointer),
+          child: const Text('test'),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startHover(find.text('test'), pointer: 42);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    expect(logs, equals(<int>[42]));
+    logs.clear();
+
+    await gesture.removePointer();
+    await tester.pump();
+
+    final TestGesture gestureAt = await tester.startHoverAt(
+      tester.getCenter(find.text('test')),
+      pointer: 99,
+    );
+    addTearDown(gestureAt.removePointer);
+    await tester.pump();
+    expect(logs, equals(<int>[99]));
+  });
+
+  testWidgets('WidgetTester.startHover and startHoverAt work in multi-view', (
+    WidgetTester tester,
+  ) async {
+    final FlutterView view0 = FakeView(tester.view);
+    final FlutterView view1 = tester.view;
+    final logs = <String>[];
+
+    await tester.pumpWidget(
+      wrapWithView: false,
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ViewCollection(
+          views: <Widget>[
+            View(
+              view: view0,
+              child: Listener(
+                onPointerHover: (PointerHoverEvent event) =>
+                    logs.add('view0 hover ${event.viewId}'),
+                child: const Center(child: Text('View0Target')),
+              ),
+            ),
+            View(
+              view: view1,
+              child: Listener(
+                onPointerHover: (PointerHoverEvent event) =>
+                    logs.add('view1 hover ${event.viewId}'),
+                child: const Center(child: Text('View1Target')),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final TestGesture gesture0 = await tester.startHover(find.text('View0Target'));
+    await tester.pump();
+    expect(logs, equals(<String>['view0 hover 100']));
+    logs.clear();
+
+    await gesture0.removePointer(view: view0);
+    await tester.pump();
+
+    final TestGesture gestureAt0 = await tester.startHoverAt(
+      tester.getCenter(find.text('View0Target')),
+      view: view0,
+    );
+    addTearDown(() => gestureAt0.removePointer(view: view0));
+    await tester.pump();
+    expect(logs, equals(<String>['view0 hover 100']));
+  });
+
+  testWidgets('WidgetTester.startHoverAt throws assertion error for touch and trackpad', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -307,10 +390,52 @@ void main() {
     );
 
     expect(
+      () => tester.startHoverAt(Offset.zero, kind: PointerDeviceKind.touch),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message,
+          'message',
+          'Touch and trackpad pointers cannot generate hover events.',
+        ),
+      ),
+    );
+
+    expect(
       () => tester.startHoverAt(Offset.zero, kind: PointerDeviceKind.trackpad),
-      throwsA(isA<AssertionError>()),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError e) => e.message,
+          'message',
+          'Touch and trackpad pointers cannot generate hover events.',
+        ),
+      ),
     );
   });
+
+  testWidgets(
+    'WidgetTester.startHoverAt throws assertion error when a hover pointer is already connected',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(textDirection: TextDirection.ltr, child: Text('test')),
+      );
+
+      final TestGesture gesture = await tester.startHover(find.text('test'));
+      addTearDown(gesture.removePointer);
+
+      expect(
+        () => tester.startHover(find.text('test')),
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError e) => e.message,
+            'message',
+            'A hover pointer is already connected. Call removePointer() on the '
+                'existing TestGesture before starting a new hover gesture, or use '
+                'moveTo() or moveBy() to move the existing pointer.',
+          ),
+        ),
+      );
+    },
+  );
 
   testWidgets(
     'WidgetTester.startHover integrates with MouseRegion and interleaves with move/moveTo',
@@ -336,7 +461,7 @@ void main() {
 
       // Hover at the center of the MouseRegion (50.0, 50.0)
       final TestGesture gesture = await tester.startHoverAt(const Offset(50.0, 50.0));
-      addTearDown(() => gesture.removePointer());
+      addTearDown(gesture.removePointer);
       await tester.pump();
       expect(logs, equals(<String>['enter', 'hover (50.0, 50.0)']));
       logs.clear();
