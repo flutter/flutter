@@ -339,7 +339,11 @@ class GLFWKeyHelper implements KeyHelper {
     required int keyCode,
     required bool isDown,
   }) {
-    final int effectiveModifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
+    final int effectiveModifiers = _mergeModifiers(
+      modifiers: modifiers,
+      keyCode: keyCode,
+      isDown: isDown,
+    );
     return switch (key) {
       ModifierKey.controlModifier => effectiveModifiers & modifierControl != 0,
       ModifierKey.shiftModifier => effectiveModifiers & modifierShift != 0,
@@ -470,7 +474,11 @@ class GtkKeyHelper implements KeyHelper {
     required int keyCode,
     required bool isDown,
   }) {
-    final int effectiveModifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
+    final int effectiveModifiers = _mergeModifiers(
+      modifiers: modifiers,
+      keyCode: keyCode,
+      isDown: isDown,
+    );
     return switch (key) {
       ModifierKey.controlModifier => effectiveModifiers & modifierControl != 0,
       ModifierKey.shiftModifier => effectiveModifiers & modifierShift != 0,

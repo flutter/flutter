@@ -330,21 +330,23 @@ class _RenderSliverFloatingHeader extends RenderSliverSingleBoxAdapter {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
-      final Offset effectiveOffset = offset + switch (applyGrowthDirectionToAxisDirection(
-        constraints.axisDirection,
-        constraints.growthDirection,
-      )) {
-        AxisDirection.up => Offset(
-          0.0,
-          geometry!.paintExtent - childMainAxisPosition(child!) - childExtent,
-        ),
-        AxisDirection.left => Offset(
-          geometry!.paintExtent - childMainAxisPosition(child!) - childExtent,
-          0.0,
-        ),
-        AxisDirection.right => Offset(childMainAxisPosition(child!), 0.0),
-        AxisDirection.down => Offset(0.0, childMainAxisPosition(child!)),
-      };
+      final Offset effectiveOffset =
+          offset +
+          switch (applyGrowthDirectionToAxisDirection(
+            constraints.axisDirection,
+            constraints.growthDirection,
+          )) {
+            AxisDirection.up => Offset(
+              0.0,
+              geometry!.paintExtent - childMainAxisPosition(child!) - childExtent,
+            ),
+            AxisDirection.left => Offset(
+              geometry!.paintExtent - childMainAxisPosition(child!) - childExtent,
+              0.0,
+            ),
+            AxisDirection.right => Offset(childMainAxisPosition(child!), 0.0),
+            AxisDirection.down => Offset(0.0, childMainAxisPosition(child!)),
+          };
       context.paintChild(child!, effectiveOffset);
     }
   }

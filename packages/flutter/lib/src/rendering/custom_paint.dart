@@ -753,7 +753,8 @@ class RenderCustomPaint extends RenderProxyBox {
     List<CustomPainterSemantics>? newChildSemanticsParam,
   ) {
     final List<SemanticsNode> oldSemantics = oldSemanticsParam ?? const <SemanticsNode>[];
-    final List<CustomPainterSemantics> newChildSemantics = newChildSemanticsParam ?? const <CustomPainterSemantics>[];
+    final List<CustomPainterSemantics> newChildSemantics =
+        newChildSemanticsParam ?? const <CustomPainterSemantics>[];
 
     assert(() {
       final Map<Key, int> keys = HashMap<Key, int>();

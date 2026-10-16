@@ -809,7 +809,9 @@ class BoxHitTestResult extends HitTestResult {
   }) {
     var effectiveTransform = transform;
     if (effectiveTransform != null) {
-      effectiveTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(effectiveTransform));
+      effectiveTransform = Matrix4.tryInvert(
+        PointerEvent.removePerspectiveTransform(effectiveTransform),
+      );
       if (effectiveTransform == null) {
         // Objects are not visible on screen and cannot be hit-tested.
         return false;
@@ -935,7 +937,9 @@ class BoxHitTestResult extends HitTestResult {
       pushTransform(rawTransform);
     } else {
       assert(paintTransform != null);
-      final Matrix4? effectiveTransform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(paintTransform!));
+      final Matrix4? effectiveTransform = Matrix4.tryInvert(
+        PointerEvent.removePerspectiveTransform(paintTransform!),
+      );
       assert(effectiveTransform != null, 'paintTransform must be invertible.');
       pushTransform(effectiveTransform!);
     }

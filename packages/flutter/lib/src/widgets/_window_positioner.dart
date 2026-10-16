@@ -482,10 +482,16 @@ class WindowPositioner {
         final double rightOverhang = result.dx + effectiveChildSize.width - displayRect.right;
         if (leftOverhang < 0.0) {
           result = result.translate(-leftOverhang, 0.0);
-          effectiveChildSize = Size(effectiveChildSize.width + leftOverhang, effectiveChildSize.height);
+          effectiveChildSize = Size(
+            effectiveChildSize.width + leftOverhang,
+            effectiveChildSize.height,
+          );
         }
         if (rightOverhang > 0.0) {
-          effectiveChildSize = Size(effectiveChildSize.width - rightOverhang, effectiveChildSize.height);
+          effectiveChildSize = Size(
+            effectiveChildSize.width - rightOverhang,
+            effectiveChildSize.height,
+          );
         }
       }
 
@@ -494,10 +500,16 @@ class WindowPositioner {
         final double bottomOverhang = result.dy + effectiveChildSize.height - displayRect.bottom;
         if (topOverhang < 0.0) {
           result = result.translate(0.0, -topOverhang);
-          effectiveChildSize = Size(effectiveChildSize.width, effectiveChildSize.height + topOverhang);
+          effectiveChildSize = Size(
+            effectiveChildSize.width,
+            effectiveChildSize.height + topOverhang,
+          );
         }
         if (bottomOverhang > 0.0) {
-          effectiveChildSize = Size(effectiveChildSize.width, effectiveChildSize.height - bottomOverhang);
+          effectiveChildSize = Size(
+            effectiveChildSize.width,
+            effectiveChildSize.height - bottomOverhang,
+          );
         }
       }
 

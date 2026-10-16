@@ -1404,9 +1404,14 @@ class ElasticInOutCurve extends Curve {
     final double s = period / 4.0;
     final double localT = 2.0 * t - 1.0;
     if (localT < 0.0) {
-      return -0.5 * math.pow(2.0, 10.0 * localT) * math.sin((localT - s) * (math.pi * 2.0) / period);
+      return -0.5 *
+          math.pow(2.0, 10.0 * localT) *
+          math.sin((localT - s) * (math.pi * 2.0) / period);
     } else {
-      return math.pow(2.0, -10.0 * localT) * math.sin((localT - s) * (math.pi * 2.0) / period) * 0.5 + 1.0;
+      return math.pow(2.0, -10.0 * localT) *
+              math.sin((localT - s) * (math.pi * 2.0) / period) *
+              0.5 +
+          1.0;
     }
   }
 

@@ -65,7 +65,8 @@ class LinearBorderEdge {
     }
 
     final LinearBorderEdge effectiveA = a ?? LinearBorderEdge(alignment: b!.alignment, size: 0);
-    final LinearBorderEdge effectiveB = b ?? LinearBorderEdge(alignment: effectiveA.alignment, size: 0);
+    final LinearBorderEdge effectiveB =
+        b ?? LinearBorderEdge(alignment: effectiveA.alignment, size: 0);
 
     return LinearBorderEdge(
       size: lerpDouble(effectiveA.size, effectiveB.size, t)!,

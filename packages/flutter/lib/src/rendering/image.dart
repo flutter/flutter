@@ -353,7 +353,10 @@ class RenderImage extends RenderBox {
   Size _sizeForConstraints(BoxConstraints constraints) {
     // Folds the given |width| and |height| into |constraints| so they can all
     // be treated uniformly.
-    final BoxConstraints effectiveConstraints = BoxConstraints.tightFor(width: _width, height: _height).enforce(constraints);
+    final BoxConstraints effectiveConstraints = BoxConstraints.tightFor(
+      width: _width,
+      height: _height,
+    ).enforce(constraints);
 
     if (_image == null) {
       return effectiveConstraints.smallest;

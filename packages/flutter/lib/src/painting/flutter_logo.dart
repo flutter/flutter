@@ -342,7 +342,10 @@ class _FlutterLogoPainter extends BoxPainter {
     };
     final FittedSizes fittedSize = applyBoxFit(BoxFit.contain, logoSize, canvasSize);
     assert(fittedSize.source == logoSize);
-    final Rect rect = Alignment.center.inscribe(fittedSize.destination, effectiveOffset & canvasSize);
+    final Rect rect = Alignment.center.inscribe(
+      fittedSize.destination,
+      effectiveOffset & canvasSize,
+    );
     final double centerSquareHeight = canvasSize.shortestSide;
     final centerSquare = Rect.fromLTWH(
       effectiveOffset.dx + (canvasSize.width - centerSquareHeight) / 2.0,
