@@ -309,7 +309,8 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     }
 
     if (config.usesPortForwarding) {
-      final ToolContext(:OperatingSystemUtils os, :ProcessManager processManager) = toolContext;
+      final ToolContext(:Logger logger, :OperatingSystemUtils os, :ProcessManager processManager) =
+          toolContext;
       final portForwarder = CustomDevicePortForwarder(
         deviceName: device.displayName,
         forwardPortCommand: config.forwardPortCommand!,
