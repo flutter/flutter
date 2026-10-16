@@ -2225,8 +2225,11 @@ TEST_P(EntityTest, SpecializationConstantsAreAppliedToVariants) {
 
 TEST_P(EntityTest, DecalSpecializationAppliedToMorphologyFilter) {
   ContentContext& content_context = GetContentContext();
+  // Morphology filters only draw without depth/stencil attachments, so their
+  // default pipeline has none and variants cannot add them.
   auto default_color_burn = content_context.GetMorphologyFilterPipeline({
       .color_attachment_pixel_format = PixelFormat::kR8G8B8A8UNormInt,
+      .has_depth_stencil_attachments = false,
   });
 
   auto decal_supported = static_cast<Scalar>(
