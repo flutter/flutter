@@ -1165,29 +1165,34 @@ DevTools listening on ws://127.0.0.1:12345/devtools/browser/
     },
   );
 
-  testWithoutContext('respects custom user data directory flag', () async {
-    const customUserDataDir = '/custom/chrome/data/dir';
-    processManager.addCommand(
-      const FakeCommand(
-        command: <String>[
-          'example_chrome',
-          '--user-data-dir=$customUserDataDir',
-          '--remote-debugging-port=12345',
-          ...kChromeArgs,
-          'example_url',
-        ],
-        stderr: kDevtoolsStderr,
-      ),
-    );
+  for (final customUserDataDir in <String>[
+    '/custom/chrome/data/dir',
+    '/custom/chrome/profile=user=one',
+  ]) {
+    testWithoutContext('respects custom user data directory flag: $customUserDataDir', () async {
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            'example_chrome',
+            '--user-data-dir=$customUserDataDir',
+            '--remote-debugging-port=12345',
+            ...kChromeArgs,
+            'example_url',
+          ],
+          stderr: kDevtoolsStderr,
+        ),
+      );
 
-    await expectReturnsNormallyLater(
-      chromeLauncher.launch(
-        'example_url',
-        skipCheck: true,
-        webBrowserFlags: <String>['--user-data-dir=$customUserDataDir'],
-      ),
-    );
-  });
+      await expectReturnsNormallyLater(
+        chromeLauncher.launch(
+          'example_url',
+          skipCheck: true,
+          webBrowserFlags: <String>['--user-data-dir=$customUserDataDir'],
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+  }
 }
 
 /// Fake chrome connection that fails to get tabs a few times.
