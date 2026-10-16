@@ -1697,7 +1697,8 @@ class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
 /// After all slivers with null or zero flex (e.g. [SliverConstrainedCrossAxis])
 /// are laid out (which should determine their own [SliverGeometry.crossAxisExtent]),
 /// the remaining space is laid out among the slivers with nonzero flex
-/// proportionally to their flex value.
+/// proportionally to their flex value. If the constrained slivers consume all
+/// available cross-axis extent, flexible children will receive zero extent.
 class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerParentData> {
   /// Creates an object that assigns a [flex] value to the child sliver.
   ///
@@ -1752,7 +1753,9 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
 /// 2. Divide up the remaining cross axis space among the children with non-zero flex
 ///    factors according to their flex factor. For example, a child with a flex
 ///    factor of 2.0 will receive twice the amount of cross axis space as a child
-///    with a flex factor 1.0.
+///    with a flex factor 1.0. If the constrained slivers consume all of the
+///    available cross axis space, flexible children receive a cross axis
+///    constraint of 0.0.
 /// 3. Layout each of the remaining children with the cross axis constraint
 ///    allocated in the previous step.
 /// 4. Set the geometry to that of whichever child has the longest
