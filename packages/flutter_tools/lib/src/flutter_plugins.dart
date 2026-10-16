@@ -1560,6 +1560,30 @@ bool hasPlugins(FlutterProject project) {
   return _readFileContent(project.flutterPluginsDependenciesFile) != null;
 }
 
+/// Returns whether any plugin used by the specified Flutter [project] is only
+/// a dev dependency.
+///
+/// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
+bool hasDevDependencyPlugins(FlutterProject project) {
+  final String? pluginFileContent = _readFileContent(project.flutterPluginsDependenciesFile);
+  if (pluginFileContent == null) {
+    return false;
+  }
+  final Object? pluginInfo = json.decode(pluginFileContent);
+  if (pluginInfo is! Map<String, Object?>) {
+    return false;
+  }
+  final Object? platformPlugins = pluginInfo[_kFlutterPluginsPluginListKey];
+  if (platformPlugins is! Map<String, Object?>) {
+    return false;
+  }
+  return platformPlugins.values
+      .whereType<List<Object?>>()
+      .expand((List<Object?> plugins) => plugins)
+      .whereType<Map<String, Object?>>()
+      .any((Map<String, Object?> plugin) => plugin[_kFlutterPluginsDevDependencyKey] == true);
+}
+
 /// Resolves the plugin implementations for the platform specified by [platformKey].
 ///
 /// Uses [_resolvePluginImplementations] with [_PluginResolutionType.nativeOrDart]
