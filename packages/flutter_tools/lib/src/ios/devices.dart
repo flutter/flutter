@@ -361,26 +361,14 @@ class IOSDevice extends Device {
     return sdkVersion?.major ?? 0;
   }
 
-  late final IOSDeviceSupport deviceSupport = () {
-    final ToolContext(
-      :FileSystem fs,
-      :FileSystemUtils fileSystemUtils,
-      :Logger logger,
-      :ProcessUtils processUtils,
-    ) = toolContext;
-    return IOSDeviceSupport(
-      logger: logger,
-      processUtils: processUtils,
-      xcode: _xcode,
-      homeDirectory: fileSystemUtils.homeDirPath == null
-          ? null
-          : fs.directory(fileSystemUtils.homeDirPath),
-      modelCode: _modelCode,
-      operatingSystemVersion: _operatingSystemVersion,
-      cpuArchitectureString: _cpuArchitectureString,
-      deviceId: id,
-    );
-  }();
+  late final IOSDeviceSupport deviceSupport = IOSDeviceSupport(
+    toolContext: toolContext,
+    xcode: _xcode,
+    modelCode: _modelCode,
+    operatingSystemVersion: _operatingSystemVersion,
+    cpuArchitectureString: _cpuArchitectureString,
+    deviceId: id,
+  );
 
   @override
   final String name;

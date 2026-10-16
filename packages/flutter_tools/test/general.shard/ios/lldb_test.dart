@@ -21,6 +21,7 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' show FakeToolContext;
 
 const _deviceId = '123';
 const _appProcessId = 5678;
@@ -1095,10 +1096,12 @@ IOSDeviceSupport createDeviceSupport({
 }) {
   final Logger testLogger = logger ?? BufferLogger.test();
   return IOSDeviceSupport(
-    logger: testLogger,
-    processUtils:
-        processUtils ??
-        ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
+    toolContext: FakeToolContext(
+      logger: testLogger,
+      processUtils:
+          processUtils ??
+          ProcessUtils(processManager: FakeProcessManager.empty(), logger: testLogger),
+    ),
     xcode: null,
     homeDirectory: homeDirectory,
     modelCode: modelCode,

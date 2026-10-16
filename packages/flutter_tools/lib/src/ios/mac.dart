@@ -263,10 +263,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
+  final Logger logger = toolContext.logger;
   final FlutterManifest manifest = app.project.parent.manifest;
   final String? buildName = parsedBuildName(
     manifest: manifest,
-    logger: globals.logger,
+    logger: logger,
     buildInfo: buildInfo,
   );
   final bool buildNameIsMissing = buildName == null || buildName.isEmpty;
@@ -277,7 +278,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final String? buildNumber = parsedBuildNumber(
     manifest: manifest,
-    logger: globals.logger,
+    logger: logger,
     buildInfo: buildInfo,
   );
   final bool buildNumberIsMissing = buildNumber == null || buildNumber.isEmpty;

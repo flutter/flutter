@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/device_port_forwarder.dart';
 import 'package:flutter_tools/src/ios/application_package.dart';
@@ -2301,7 +2300,6 @@ class FakeIOSCoreDeviceLauncher extends Fake implements IOSCoreDeviceLauncher {
     required List<String> launchArguments,
     required IOSApp package,
     required TemplateRenderer templateRenderer,
-    required ToolContext toolContext,
     String? mainPath,
     Duration? discoveryTimeout,
   }) async {

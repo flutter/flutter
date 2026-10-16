@@ -526,7 +526,7 @@ class XCDevice {
     //  },
     // ...
 
-    final ToolContext(:FileSystem fs, :Logger logger, :ProcessUtils processUtils) = _toolContext;
+    final Logger logger = _toolContext.logger;
     final deviceMap = <String, IOSDevice>{};
     for (final device in allAvailableDevices) {
       if (device is Map<String, Object?>) {
@@ -641,12 +641,10 @@ class XCDevice {
           coreDeviceControl: _coreDeviceControl,
           coreDeviceLauncher: IOSCoreDeviceLauncher(
             coreDeviceControl: _coreDeviceControl,
-            logger: logger,
             xcodeDebug: _xcodeDebug,
-            fileSystem: fs,
-            processUtils: processUtils,
             xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
             deviceVersion: Version.parse(sdkVersionString),
+            toolContext: _toolContext,
           ),
           xcodeDebug: _xcodeDebug,
           xcode: _xcode,
