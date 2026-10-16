@@ -101,18 +101,36 @@ void main() {
         isTrue,
       );
 
-      await expectLater(
-        isSupportedHandler(<String, Object?>{}),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains(
-              'Invalid or missing parameters for ${DeviceService.isSupportedForProjectMethod}.',
-            ),
+      for (final invalidParams in <Map<String, Object?>>[
+        const <String, Object?>{},
+        <String, Object?>{
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          DeviceService.projectParam: const <String, Object?>{},
+        },
+        <String, Object?>{
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          DeviceService.projectParam: <String, Object?>{
+            ExtensionFlutterProject.appNameKey: 'test_app',
+            ExtensionFlutterProject.buildDirectoryKey: 'relative/build/',
+            ExtensionFlutterProject.directoryKey: tempDir.uri.toString(),
+          },
+        },
+      ]) {
+        await expectLater(
+          isSupportedHandler(invalidParams),
+          throwsA(
+            isA<Exception>()
+                .having((Exception e) => e.toString(), 'code', contains('-32602'))
+                .having(
+                  (Exception e) => e.toString(),
+                  'message',
+                  contains(
+                    'Invalid or missing parameters for ${DeviceService.isSupportedForProjectMethod}.',
+                  ),
+                ),
           ),
-        ),
-      );
+        );
+      }
     });
   });
 }

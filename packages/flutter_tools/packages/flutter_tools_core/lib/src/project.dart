@@ -21,42 +21,53 @@ class ExtensionFlutterProject {
   });
 
   /// Deserializes an [ExtensionFlutterProject] from a JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if required fields are missing or if
+  /// [buildDirectory] or [directory] are not valid trailing-slash-terminated
+  /// absolute directory URIs.
   factory ExtensionFlutterProject.fromJson(Map<String, Object?> json) {
-    return ExtensionFlutterProject(
-      appName: switch (json[appNameKey]) {
-        final String value => value,
-        _ => '',
-      },
-      buildDirectory: switch (json[buildDirectoryKey]) {
-        final String value => Uri.parse(value),
-        _ => Uri(),
-      },
-      directory: switch (json[directoryKey]) {
-        final String value => Uri.parse(value),
-        _ => Uri(),
-      },
-      appVersion: switch (json[appVersionKey]) {
-        final String value => value,
-        _ => null,
-      },
-      dependencies: switch (json[dependenciesKey]) {
-        final Iterable<Object?> items => <String>{
-          for (final Object? item in items)
-            if (item case final String value) value,
-        },
-        _ => const <String>{},
-      },
-      isEmpty: json[isEmptyKey] == true,
-      isModule: json[isModuleKey] == true,
-      isPlugin: json[isPluginKey] == true,
-      workspace: switch (json[workspaceKey]) {
-        final Iterable<Object?> items => <String>[
-          for (final Object? item in items)
-            if (item case final String value) value,
-        ],
-        _ => const <String>[],
-      },
-    );
+    if (json case {
+      appNameKey: final String appName,
+      buildDirectoryKey: final String buildDirectoryStr,
+      directoryKey: final String directoryStr,
+    }) {
+      final Uri? buildDirectoryUri = Uri.tryParse(buildDirectoryStr);
+      final Uri? directoryUri = Uri.tryParse(directoryStr);
+      if (buildDirectoryUri != null &&
+          buildDirectoryUri.hasAbsolutePath &&
+          buildDirectoryUri.path.endsWith('/') &&
+          directoryUri != null &&
+          directoryUri.hasAbsolutePath &&
+          directoryUri.path.endsWith('/')) {
+        return ExtensionFlutterProject(
+          appName: appName,
+          buildDirectory: buildDirectoryUri,
+          directory: directoryUri,
+          appVersion: switch (json[appVersionKey]) {
+            final String value => value,
+            _ => null,
+          },
+          dependencies: switch (json[dependenciesKey]) {
+            final Iterable<Object?> items => <String>{
+              for (final Object? item in items)
+                if (item case final String value) value,
+            },
+            _ => const <String>{},
+          },
+          isEmpty: json[isEmptyKey] == true,
+          isModule: json[isModuleKey] == true,
+          isPlugin: json[isPluginKey] == true,
+          workspace: switch (json[workspaceKey]) {
+            final Iterable<Object?> items => <String>[
+              for (final Object? item in items)
+                if (item case final String value) value,
+            ],
+            _ => const <String>[],
+          },
+        );
+      }
+    }
+    throw FormatException('Invalid ExtensionFlutterProject JSON: $json');
   }
 
   /// Map key for [appName].
@@ -92,13 +103,15 @@ class ExtensionFlutterProject {
   /// The `version` property in the project's `pubspec.yaml` file, if valid.
   final String? appVersion;
 
-  /// The location of the project's build directory.
+  /// The absolute directory URI of the project's build directory (e.g.,
+  /// `file:///path/to/my_app/build/`), trailing-slash terminated.
   final Uri buildDirectory;
 
   /// Direct dependency package names declared in the project's `pubspec.yaml` file.
   final Set<String> dependencies;
 
-  /// The root directory of the Flutter project.
+  /// The absolute root directory URI of the Flutter project (e.g.,
+  /// `file:///path/to/my_app/`), trailing-slash terminated.
   final Uri directory;
 
   /// Whether the project's `pubspec.yaml` file is missing or empty.

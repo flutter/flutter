@@ -5,7 +5,9 @@
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -20,6 +22,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools_core/flutter_tools_core.dart' show ExtensionFlutterProject;
 import 'package:flutter_tools_extension_linux_prototype/flutter_tools_extension_linux_prototype.dart';
 
+import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/fakes.dart';
 import '../../src/test_flutter_command_runner.dart';
@@ -85,12 +88,11 @@ void main() {
   });
 
   group('Tool Extensions Device Integration - Enabled', () {
-    testUsingContext(
+    testWithoutContext(
       'FlutterProject.toExtensionProject extracts project and manifest metadata',
       () async {
-        final localFs = LocalFileSystem.test(signals: LocalSignals.instance);
-        addTearDown(localFs.dispose);
-        final Directory tempDir = localFs.systemTempDirectory.createTempSync(
+        final fs = MemoryFileSystem.test();
+        final Directory tempDir = fs.systemTempDirectory.createTempSync(
           'flutter_tool_extensions_project_test.',
         );
         tempDir.childFile('pubspec.yaml').writeAsStringSync('''
@@ -107,8 +109,10 @@ flutter:
     androidX: true
 ''');
 
-        final projectFactory = FlutterProjectFactory(fileSystem: localFs, logger: testLogger);
-        final FlutterProject project = projectFactory.fromDirectory(tempDir);
+        final FlutterProject project = FlutterProject.fromDirectoryTest(
+          tempDir,
+          BufferLogger.test(),
+        );
         final ExtensionFlutterProject extProject = project.toExtensionProject();
 
         expect(extProject.appName, 'sample_app');

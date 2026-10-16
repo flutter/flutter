@@ -61,10 +61,15 @@ abstract base class DeviceService extends ToolExtensionService {
       deviceIdParam: final String deviceId,
       projectParam: final Map<String, Object?> projectMap,
     }) {
-      return isSupportedForProject(
-        deviceId: deviceId,
-        project: ExtensionFlutterProject.fromJson(projectMap),
-      );
+      final ExtensionFlutterProject project;
+      try {
+        project = ExtensionFlutterProject.fromJson(projectMap);
+      } on FormatException {
+        throw RpcException.invalidParams(
+          'Invalid or missing parameters for $isSupportedForProjectMethod.',
+        );
+      }
+      return isSupportedForProject(deviceId: deviceId, project: project);
     }
     throw RpcException.invalidParams(
       'Invalid or missing parameters for $isSupportedForProjectMethod.',
