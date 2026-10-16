@@ -226,6 +226,9 @@ void main() {
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
+          .createSync();
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
       fileSystem
@@ -308,6 +311,9 @@ void main() {
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
           .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
+          .createSync();
       // Project info
       fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
@@ -369,6 +375,7 @@ void main() {
       expect(assetDirectory.childFile('kernel_blob.bin'), exists);
       expect(assetDirectory.childFile('vm_snapshot_data'), exists);
       expect(assetDirectory.childFile('isolate_snapshot_data'), exists);
+      expect(assetDirectory.childFile('vmservice_snapshot.dill'), exists);
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -409,6 +416,9 @@ void main() {
           .createSync();
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
           .createSync();
       // Project info
       writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
@@ -502,6 +512,9 @@ void main() {
           .createSync();
       fileSystem
           .file(artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug))
+          .createSync();
+      fileSystem
+          .file(artifacts.getArtifactPath(Artifact.vmserviceKernelDill, mode: BuildMode.debug))
           .createSync();
       // Project info
       fileSystem
@@ -621,6 +634,12 @@ void main() {
           .childFile('App')
           .createSync(recursive: true);
 
+      // Stale VMService.framework from a prior profile build should be deleted.
+      environment.outputDir
+          .childDirectory('VMService.framework')
+          .childFile('VMService')
+          .createSync(recursive: true);
+
       final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
       final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
       final File infoPlist = frameworkDirectory.childFile('Info.plist');
@@ -674,7 +693,132 @@ void main() {
       expect(assetDirectory.childFile('kernel_blob.bin'), isNot(exists));
       expect(assetDirectory.childFile('vm_snapshot_data'), isNot(exists));
       expect(assetDirectory.childFile('isolate_snapshot_data'), isNot(exists));
+      expect(assetDirectory.childFile('vmservice_snapshot.dill'), isNot(exists));
+      expect(environment.outputDir.childDirectory('VMService.framework'), isNot(exists));
       expect(fakeAnalytics.sentEvents, isEmpty);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+      Platform: () => macPlatform,
+    },
+  );
+
+  testUsingContext(
+    'ProfileIosApplicationBundle builds and signs VMService.framework',
+    () async {
+      environment.defines[kBuildMode] = 'profile';
+      environment.defines[kCodesignIdentity] = 'ABC123';
+      environment.defines[kXcodeAction] = 'build';
+
+      fileSystem.file('pubspec.yaml').writeAsStringSync('name: my_app');
+      writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'my_app');
+
+      fileSystem
+          .file(fileSystem.path.join('ios', 'Flutter', 'AppFrameworkInfo.plist'))
+          .createSync(recursive: true);
+
+      environment.buildDir
+          .childDirectory('App.framework')
+          .childFile('App')
+          .createSync(recursive: true);
+      environment.buildDir.childFile('native_assets.json').createSync();
+
+      final String vmServiceDylibPath = artifacts.getArtifactPath(
+        Artifact.vmserviceSharedLibrary,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.profile,
+      );
+      fileSystem.file(vmServiceDylibPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('vmservice_dylib_bytes');
+
+      final Directory frameworkDirectory = environment.outputDir.childDirectory('App.framework');
+      final File frameworkDirectoryBinary = frameworkDirectory.childFile('App');
+      final File infoPlist = frameworkDirectory.childFile('Info.plist');
+      final Directory vmServiceFrameworkDirectory = environment.outputDir.childDirectory(
+        'VMService.framework',
+      );
+      final File vmServiceBinary = vmServiceFrameworkDirectory.childFile('VMService');
+      final File vmServiceInfoPlist = vmServiceFrameworkDirectory.childFile('Info.plist');
+
+      processManager.addCommands(<FakeCommand>[
+        createPlutilFakeCommand(infoPlist),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.FinderInfo',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'xattr',
+            '-r',
+            '-d',
+            'com.apple.provenance',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            frameworkDirectoryBinary.path,
+          ],
+        ),
+        createPlutilFakeCommand(vmServiceInfoPlist),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.FinderInfo', vmServiceBinary.path],
+        ),
+        FakeCommand(
+          command: <String>['xattr', '-r', '-d', 'com.apple.provenance', vmServiceBinary.path],
+        ),
+        FakeCommand(
+          command: <String>[
+            'codesign',
+            '--force',
+            '--sign',
+            'ABC123',
+            '--timestamp=none',
+            vmServiceBinary.path,
+          ],
+        ),
+      ]);
+
+      const target = ProfileIosApplicationBundle();
+      await target.build(environment);
+      expect(processManager, hasNoRemainingExpectations);
+
+      expect(vmServiceBinary, exists);
+      expect(vmServiceBinary.readAsStringSync(), 'vmservice_dylib_bytes');
+      expect(vmServiceInfoPlist, exists);
+      expect(
+        vmServiceInfoPlist.readAsStringSync(),
+        contains('<string>io.flutter.flutter.vmservice</string>'),
+      );
+      expect(
+        target.inputs,
+        contains(
+          const Source.artifact(
+            Artifact.vmserviceSharedLibrary,
+            platform: TargetPlatform.ios,
+            mode: BuildMode.profile,
+          ),
+        ),
+      );
+      expect(
+        target.resolveOutputs(environment).sources.map((File file) => file.path),
+        containsAll(<String>[
+          vmServiceFrameworkDirectory.childFile('VMService').path,
+          vmServiceFrameworkDirectory.childFile('Info.plist').path,
+        ]),
+      );
     },
     overrides: <Type, Generator>{
       FileSystem: () => fileSystem,

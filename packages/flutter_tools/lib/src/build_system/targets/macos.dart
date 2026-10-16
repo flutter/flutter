@@ -519,48 +519,115 @@ abstract class MacOSBundleFlutterAssets extends Target {
         environment.fileSystem
             .file(isolateSnapshotData)
             .copySync(assetDirectory.childFile('isolate_snapshot_data').path);
+
+        final String vmserviceDill = environment.artifacts.getArtifactPath(
+          Artifact.vmserviceKernelDill,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.debug,
+        );
+        environment.fileSystem
+            .file(vmserviceDill)
+            .copySync(assetDirectory.childFile('vmservice_snapshot.dill').path);
       } on Exception catch (err) {
         throw Exception('Failed to copy precompiled runtimes: $err');
       }
     }
-    // Create symlink to current version. These must be relative, from the
-    // framework root for Resources/App and from the versions root for
-    // Current.
     try {
-      final Link currentVersion = outputDirectory.parent.childLink('Current');
-      if (!currentVersion.existsSync()) {
-        final String linkPath = environment.fileSystem.path.relative(
-          outputDirectory.path,
-          from: outputDirectory.parent.path,
-        );
-        currentVersion.createSync(linkPath);
-      }
-      // Create symlink to current resources.
-      final Link currentResources = frameworkRootDirectory.childLink('Resources');
-      if (!currentResources.existsSync()) {
-        final String linkPath = environment.fileSystem.path.relative(
-          environment.fileSystem.path.join(currentVersion.path, 'Resources'),
-          from: frameworkRootDirectory.path,
-        );
-        currentResources.createSync(linkPath);
-      }
-      // Create symlink to current binary.
-      final Link currentFramework = frameworkRootDirectory.childLink('App');
-      if (!currentFramework.existsSync()) {
-        final String linkPath = environment.fileSystem.path.relative(
-          environment.fileSystem.path.join(currentVersion.path, 'App'),
-          from: frameworkRootDirectory.path,
-        );
-        currentFramework.createSync(linkPath);
-      }
+      _createVersionedFrameworkSymlinks(frameworkRootDirectory, 'App');
     } on FileSystemException {
       throw Exception(
         'Failed to create symlinks for framework. try removing '
         'the "${environment.outputDir.path}" directory and rerunning',
       );
     }
+
+    final Directory vmServiceRootDir = environment.outputDir.childDirectory(
+      _kVmServiceFrameworkName,
+    );
+    if (buildMode == BuildMode.profile) {
+      final String vmServiceDylibPath = environment.artifacts.getArtifactPath(
+        Artifact.vmserviceSharedLibrary,
+        platform: TargetPlatform.darwin,
+        mode: BuildMode.profile,
+      );
+      final File vmServiceDylibFile = environment.fileSystem.file(vmServiceDylibPath);
+      final Directory vmServiceVersionDir = vmServiceRootDir
+          .childDirectory('Versions')
+          .childDirectory('A');
+      final Directory vmServiceResourcesDir = vmServiceVersionDir.childDirectory('Resources')
+        ..createSync(recursive: true);
+
+      vmServiceDylibFile.copySync(vmServiceVersionDir.childFile(_kVmServiceExecutableName).path);
+      vmServiceResourcesDir.childFile('Info.plist').writeAsStringSync(_kMacOSVmServiceInfoPlist);
+
+      try {
+        _createVersionedFrameworkSymlinks(vmServiceRootDir, _kVmServiceExecutableName);
+      } on FileSystemException catch (err) {
+        throw Exception('Failed to create symlinks for $_kVmServiceFrameworkName: $err');
+      }
+    } else if (vmServiceRootDir.existsSync()) {
+      vmServiceRootDir.deleteSync(recursive: true);
+    }
+  }
+
+  /// Creates the relative symlinks (`Versions/Current`, `Resources`, and
+  /// [executableName]) for a versioned macOS framework bundle at [frameworkDir].
+  void _createVersionedFrameworkSymlinks(Directory frameworkDir, String executableName) {
+    final Directory versionDir = frameworkDir.childDirectory('Versions').childDirectory('A');
+    final Link currentVersion = versionDir.parent.childLink('Current');
+    if (!currentVersion.existsSync()) {
+      final String linkPath = frameworkDir.fileSystem.path.relative(
+        versionDir.path,
+        from: versionDir.parent.path,
+      );
+      currentVersion.createSync(linkPath);
+    }
+    final Link currentResources = frameworkDir.childLink('Resources');
+    if (!currentResources.existsSync()) {
+      final String linkPath = frameworkDir.fileSystem.path.relative(
+        frameworkDir.fileSystem.path.join(currentVersion.path, 'Resources'),
+        from: frameworkDir.path,
+      );
+      currentResources.createSync(linkPath);
+    }
+    final Link currentExecutable = frameworkDir.childLink(executableName);
+    if (!currentExecutable.existsSync()) {
+      final String linkPath = frameworkDir.fileSystem.path.relative(
+        frameworkDir.fileSystem.path.join(currentVersion.path, executableName),
+        from: frameworkDir.path,
+      );
+      currentExecutable.createSync(linkPath);
+    }
   }
 }
+
+const _kVmServiceFrameworkName = 'VMService.framework';
+const _kVmServiceExecutableName = 'VMService';
+
+const _kMacOSVmServiceInfoPlist = r'''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleExecutable</key>
+  <string>VMService</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.flutter.flutter.vmservice</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>VMService</string>
+  <key>CFBundlePackageType</key>
+  <string>FMWK</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0</string>
+  <key>CFBundleVersion</key>
+  <string>1.0</string>
+</dict>
+</plist>
+''';
 
 /// Bundle the debug flutter assets into the App.framework.
 class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
@@ -592,6 +659,11 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
       platform: TargetPlatform.darwin,
       mode: BuildMode.debug,
     ),
+    const Source.artifact(
+      Artifact.vmserviceKernelDill,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.debug,
+    ),
   ];
 
   @override
@@ -605,6 +677,9 @@ class DebugMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
     ),
     const Source.pattern(
       '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/isolate_snapshot_data',
+    ),
+    const Source.pattern(
+      '{OUTPUT_DIR}/App.framework/Versions/A/Resources/flutter_assets/vmservice_snapshot.dill',
     ),
   ];
 }
@@ -628,12 +703,21 @@ class ProfileMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   List<Source> get inputs => <Source>[
     ...super.inputs,
     const Source.pattern('{BUILD_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+    const Source.artifact(
+      Artifact.vmserviceSharedLibrary,
+      platform: TargetPlatform.darwin,
+      mode: BuildMode.profile,
+    ),
   ];
 
   @override
   List<Source> get outputs => <Source>[
     ...super.outputs,
     const Source.pattern('{OUTPUT_DIR}/App.framework.dSYM/Contents/Resources/DWARF/App'),
+    const Source.pattern(
+      '{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/$_kVmServiceExecutableName',
+    ),
+    const Source.pattern('{OUTPUT_DIR}/$_kVmServiceFrameworkName/Versions/A/Resources/Info.plist'),
   ];
 }
 

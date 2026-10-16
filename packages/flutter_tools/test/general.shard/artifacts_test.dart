@@ -163,6 +163,38 @@ void main() {
           'frontend_server_aot.dart.snapshot',
         ),
       );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceSharedLibrary,
+          platform: TargetPlatform.ios,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join(
+          'root',
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          'ios-profile',
+          'libvmservice_snapshot.dylib',
+        ),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceSharedLibrary,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join(
+          'root',
+          'bin',
+          'cache',
+          'artifacts',
+          'engine',
+          'darwin-x64-profile',
+          'libvmservice_snapshot.dylib',
+        ),
+      );
     });
 
     testWithoutContext(
@@ -513,6 +545,22 @@ void main() {
       expect(
         artifacts.getArtifactPath(Artifact.genSnapshot),
         fileSystem.path.join('/out', 'android_debug_unopt', 'universal', 'gen_snapshot'),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceSharedLibrary,
+          platform: TargetPlatform.ios,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'libvmservice_snapshot.dylib'),
+      );
+      expect(
+        artifacts.getArtifactPath(
+          Artifact.vmserviceSharedLibrary,
+          platform: TargetPlatform.darwin,
+          mode: BuildMode.profile,
+        ),
+        fileSystem.path.join('/out', 'android_debug_unopt', 'libvmservice_snapshot.dylib'),
       );
     });
 

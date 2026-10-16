@@ -419,6 +419,9 @@ zip_bundle("zip_macos_flutter_framework") {
       destination = "FlutterMacOS.framework"
     },
   ]
+  if (flutter_runtime_mode == "profile") {
+    deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+  }
 }
 
 generated_file("macos_framework_without_entitlement_config") {

@@ -523,6 +523,14 @@ group("universal_flutter_framework") {
   if (is_asan) {
     deps += [ ":copy_asan_runtime_dylib" ]
   }
+
+  # In debug mode, the VM service runs from Kernel (vmservice_snapshot.dill)
+  # packaged in the application bundle's flutter_assets/. Only profile mode
+  # requires the precompiled AOT dynamic library, which is wrapped in
+  # VMService.framework by flutter_tools during the application build.
+  if (flutter_runtime_mode == "profile") {
+    deps += [ "//flutter/shell/vmservice:vmservice_snapshot" ]
+  }
 }
 
 action("flutter_framework") {

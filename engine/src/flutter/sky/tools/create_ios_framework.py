@@ -93,6 +93,9 @@ def main():
   if arm64_out_dir:
     gen_snapshot = os.path.join(arm64_out_dir, 'universal', 'gen_snapshot_arm64')
     sky_utils.copy_binary(gen_snapshot, os.path.join(dst, 'gen_snapshot_arm64'))
+    arm64_vmservice = os.path.join(arm64_out_dir, 'libvmservice_snapshot.dylib')
+    if os.path.exists(arm64_vmservice):
+      sky_utils.copy_binary(arm64_vmservice, os.path.join(dst, 'libvmservice_snapshot.dylib'))
   if x64_out_dir:
     gen_snapshot = os.path.join(x64_out_dir, 'universal', 'gen_snapshot_x64')
     sky_utils.copy_binary(gen_snapshot, os.path.join(dst, 'gen_snapshot_x64'))
@@ -186,6 +189,12 @@ def zip_archive(dst, args):
       'Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
       'Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
   ]
+
+  # Check if VM service snapshot exists and add it to be signed.
+  vmservice_dylib = 'libvmservice_snapshot.dylib'
+  if os.path.exists(os.path.join(dst, vmservice_dylib)):
+    without_entitlements.append(vmservice_dylib)
+
   if args.include_extension_safe_frameworks:
     without_entitlements.extend([
         'extension_safe/Flutter.xcframework/ios-arm64/Flutter.framework/Flutter',
@@ -217,6 +226,8 @@ def zip_archive(dst, args):
       'without_entitlements.txt',
       'unsigned_binaries.txt',
   ]
+  if os.path.exists(os.path.join(dst, vmservice_dylib)):
+    zip_contents.append(vmservice_dylib)
 
   if args.include_extension_safe_frameworks:
     zip_contents.append('extension_safe/Flutter.xcframework')
