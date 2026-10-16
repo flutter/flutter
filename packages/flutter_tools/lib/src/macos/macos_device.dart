@@ -7,7 +7,6 @@ import 'package:process/process.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../context/tool_context.dart';
@@ -20,16 +19,15 @@ import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
-  MacOSDevice({required ToolContext toolContext})
-    : _toolContext = toolContext,
-      super(
+  MacOSDevice({required this._toolContext})
+    : super(
         'macos',
         ephemeral: false,
-        fileSystem: toolContext.fs,
-        logger: toolContext.logger,
-        operatingSystemUtils: toolContext.os,
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        operatingSystemUtils: _toolContext.os,
         platformType: PlatformType.macos,
-        processManager: toolContext.processManager,
+        processManager: _toolContext.processManager,
       );
 
   final ToolContext _toolContext;
@@ -47,19 +45,11 @@ class MacOSDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
-  Future<CpuArch> get cpuArch async {
-    final OperatingSystemUtils os = _toolContext.os;
-    return CpuArch.fromHostPlatform(os.hostPlatform);
-  }
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_toolContext.os.hostPlatform);
 
   @override
-  Future<String> get targetPlatformDisplayName async {
-    final OperatingSystemUtils os = _toolContext.os;
-    if (os.hostPlatform == HostPlatform.darwin_arm64) {
-      return 'darwin-arm64';
-    }
-    return 'darwin-x64';
-  }
+  Future<String> get targetPlatformDisplayName async =>
+      _toolContext.os.hostPlatform == HostPlatform.darwin_arm64 ? 'darwin-arm64' : 'darwin-x64';
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -115,10 +105,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
   final ToolContext _toolContext;
 
   @override
-  bool get supportsPlatform {
-    final Platform platform = _toolContext.platform;
-    return platform.isMacOS;
-  }
+  bool get supportsPlatform => _toolContext.platform.isMacOS;
 
   @override
   bool get canListAnything => _macOSWorkflow.canListDevices;

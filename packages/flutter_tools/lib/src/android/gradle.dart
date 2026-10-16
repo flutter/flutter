@@ -183,14 +183,13 @@ class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder.fromContexts({
     required this._analytics,
     required this._androidContext,
-    required ToolContext toolContext,
-  }) : _artifacts = toolContext.artifacts,
-       _cache = toolContext.cache,
-       _fileSystem = toolContext.fs,
-       _logger = toolContext.logger,
-       _fileSystemUtils = toolContext.fileSystemUtils,
-       _processUtils = toolContext.processUtils,
-       _toolContext = toolContext;
+    required this._toolContext,
+  }) : _artifacts = _toolContext.artifacts,
+       _cache = _toolContext.cache,
+       _fileSystem = _toolContext.fs,
+       _logger = _toolContext.logger,
+       _fileSystemUtils = _toolContext.fileSystemUtils,
+       _processUtils = _toolContext.processUtils;
 
   final Analytics _analytics;
   final AndroidContext _androidContext;
