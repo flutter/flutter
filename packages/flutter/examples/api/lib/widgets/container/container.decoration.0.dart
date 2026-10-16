@@ -2,17 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 /// Flutter code sample for [Container.decoration].
 
 void main() => runApp(const ContainerDecorationExampleApp());
 
 /// The color of the border painted by both samples below.
-const Color borderColor = Color(0xFF3F51B5); // Colors.indigo
+const Color borderColor = Color(0xFF3F51B5);
 
 /// The color of the opaque child placed inside both [Container]s below.
-const Color fillColor = Color(0xFFFFC107); // Colors.amber
+const Color fillColor = Color(0xFFFFC107);
 
 /// The page background, which shows through the corner gaps when the child
 /// is clipped to the outer radius.
@@ -36,7 +36,15 @@ class ContainerDecorationExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: ContainerDecorationExample());
+    return WidgetsApp(
+      color: backgroundColor,
+      // WidgetsApp does not install a [DefaultTextStyle], so without this the
+      // labels below fall back to a style with no color.
+      textStyle: const TextStyle(color: Color(0xFF000000), fontSize: 14.0),
+      builder: (BuildContext context, Widget? child) {
+        return const ContainerDecorationExample();
+      },
+    );
   }
 }
 
@@ -45,80 +53,79 @@ class ContainerDecorationExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: const Text('Container decoration and a clipped child'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Text(
-              'A child clipped to the outer corner radius',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const Text(
-              'The border insets the child, so clipping the child to the '
-              'outer corner radius pulls its corners away from the inside '
-              'of the border and shows the background through the gaps. '
-              'Clipping to the corner radius minus the border width aligns '
-              'the curves.',
-            ),
-            const SizedBox(height: 8.0),
-            Wrap(
-              spacing: 16.0,
-              runSpacing: 16.0,
-              children: <Widget>[
-                _Sample(
-                  label: 'Clipped to the outer radius',
-                  child: Container(
-                    key: const Key('gap-pitfall'),
-                    width: sampleSize,
-                    height: sampleSize,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: borderColor,
-                        width: borderWidth,
+    return ColoredBox(
+      color: backgroundColor,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const Text(
+                'A child clipped to the outer corner radius',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const Text(
+                'The border insets the child, so clipping the child to the '
+                'outer corner radius pulls its corners away from the inside '
+                'of the border and shows the background through the gaps. '
+                'Clipping to the corner radius minus the border width aligns '
+                'the curves.',
+              ),
+              const SizedBox(height: 8.0),
+              Wrap(
+                spacing: 16.0,
+                runSpacing: 16.0,
+                children: <Widget>[
+                  _Sample(
+                    label: 'Clipped to the outer radius',
+                    child: Container(
+                      key: const Key('gap-pitfall'),
+                      width: sampleSize,
+                      height: sampleSize,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: borderColor,
+                          width: borderWidth,
+                        ),
+                        borderRadius: BorderRadius.circular(outerRadius),
                       ),
-                      borderRadius: BorderRadius.circular(outerRadius),
-                    ),
-                    // The child is inset by the border (see
-                    // Decoration.padding), so outerRadius no longer matches
-                    // the border's inner edge, whose radius is innerRadius
-                    // (outerRadius minus the border width): the corners pull
-                    // away from the border, leaving background-colored gaps.
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(outerRadius),
-                      child: const ColoredBox(color: fillColor),
+                      // The child is inset by the border (see
+                      // Decoration.padding), so outerRadius no longer matches
+                      // the border's inner edge, whose radius is innerRadius
+                      // (outerRadius minus the border width): the corners pull
+                      // away from the border, leaving background-colored gaps.
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(outerRadius),
+                        child: const ColoredBox(color: fillColor),
+                      ),
                     ),
                   ),
-                ),
-                _Sample(
-                  label: 'Clipped to the outer radius minus the border width',
-                  child: Container(
-                    key: const Key('gap-recommended'),
-                    width: sampleSize,
-                    height: sampleSize,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: borderColor,
-                        width: borderWidth,
+                  _Sample(
+                    label: 'Clipped to the outer radius minus the border width',
+                    child: Container(
+                      key: const Key('gap-recommended'),
+                      width: sampleSize,
+                      height: sampleSize,
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: borderColor,
+                          width: borderWidth,
+                        ),
+                        borderRadius: BorderRadius.circular(outerRadius),
                       ),
-                      borderRadius: BorderRadius.circular(outerRadius),
-                    ),
-                    // Reducing the clip radius to innerRadius aligns the
-                    // child's corners with the inside of the border.
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(innerRadius),
-                      child: const ColoredBox(color: fillColor),
+                      // Reducing the clip radius to innerRadius aligns the
+                      // child's corners with the inside of the border.
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(innerRadius),
+                        child: const ColoredBox(color: fillColor),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

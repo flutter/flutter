@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_api_samples/widgets/container/container.clip_behavior.0.dart'
     as example;
 import 'package:flutter_test/flutter_test.dart';
@@ -29,7 +29,7 @@ void main() {
       }
 
       final ui.Image image = (await tester.binding.runAsync<ui.Image>(
-        () => captureImage(tester.element(find.byType(MaterialApp))),
+        () => captureImage(tester.element(find.byType(WidgetsApp))),
       ))!;
       addTearDown(image.dispose);
       final ByteData bytes = (await tester.binding.runAsync<ByteData?>(
