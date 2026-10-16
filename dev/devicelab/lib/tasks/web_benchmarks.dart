@@ -1016,7 +1016,7 @@ Future<int> runBenchmarkCli(List<String> rawArgs) async {
       return 2;
     }
 
-    print(formatAnsiSummaryTable(comparison));
+    print(formatAnsiSummaryTable(comparison, enableAnsi: io.stdout.supportsAnsiEscapes));
     if (comparison.hasRegressions) {
       printError(
         'FAILED: 1 or more metrics exceeded the regression threshold of $regressionThreshold%.',
