@@ -1766,9 +1766,13 @@ static void SetThreadPriority(FlutterThreadPriority priority) {
                                           binaryMessageHandler:
                                               (nullable FlutterBinaryMessageHandler)handler {
   _currentMessengerConnection += 1;
-  _messengerHandlers[channel] =
-      [[FlutterEngineHandlerInfo alloc] initWithConnection:@(_currentMessengerConnection)
-                                                   handler:[handler copy]];
+  if (handler) {
+    _messengerHandlers[channel] =
+        [[FlutterEngineHandlerInfo alloc] initWithConnection:@(_currentMessengerConnection)
+                                                     handler:[handler copy]];
+  } else {
+    [_messengerHandlers removeObjectForKey:channel];
+  }
   return _currentMessengerConnection;
 }
 
