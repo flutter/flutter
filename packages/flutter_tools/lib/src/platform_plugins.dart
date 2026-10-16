@@ -107,6 +107,7 @@ typedef _CommonPlatformFields = ({
   String? defaultPackage,
 });
 
+/// Parses the common platform fields from the given [yaml].
 ({_CommonPlatformFields fields, List<String> errors}) _parseCommonPlatformFields(
   String name,
   YamlMap yaml, {
@@ -260,6 +261,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     return plugin!;
   }
 
+  /// Parses the Android plugin configuration from the given [yaml].
   static ({AndroidPlugin? plugin, List<String> errors}) parseFromYaml(
     String name,
     YamlMap yaml, {
@@ -470,6 +472,7 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
     return plugin!;
   }
 
+  /// Parses the iOS plugin configuration from the given [yaml].
   static ({IOSPlugin? plugin, List<String> errors}) parseFromYaml(String name, YamlMap yaml) {
     final (:_CommonPlatformFields fields, :List<String> errors) = _parseCommonPlatformFields(
       name,
@@ -594,6 +597,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
     return plugin!;
   }
 
+  /// Parses the macOS plugin configuration from the given [yaml].
   static ({MacOSPlugin? plugin, List<String> errors}) parseFromYaml(String name, YamlMap yaml) {
     final (:_CommonPlatformFields fields, :List<String> errors) = _parseCommonPlatformFields(
       name,
@@ -715,6 +719,7 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
     return plugin!;
   }
 
+  /// Parses the Windows plugin configuration from the given [yaml].
   static ({WindowsPlugin? plugin, List<String> errors}) parseFromYaml(String name, YamlMap yaml) {
     final (:_CommonPlatformFields fields, :List<String> errors) = _parseCommonPlatformFields(
       name,
@@ -844,6 +849,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     return plugin!;
   }
 
+  /// Parses the Linux plugin configuration from the given [yaml].
   static ({LinuxPlugin? plugin, List<String> errors}) parseFromYaml(String name, YamlMap yaml) {
     final (:_CommonPlatformFields fields, :List<String> errors) = _parseCommonPlatformFields(
       name,
@@ -931,6 +937,7 @@ class WebPlugin extends PluginPlatform {
     return plugin!;
   }
 
+  /// Parses the Web plugin configuration from the given [yaml].
   static ({WebPlugin? plugin, List<String> errors}) parseFromYaml(String name, YamlMap yaml) {
     final errors = <String>[];
     final Object? rawPluginClass = yaml[kPluginClass];
