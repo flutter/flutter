@@ -917,27 +917,20 @@ Never _throwNativeAssetsLinkFailed() {
 }
 
 OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
-  switch (platform) {
-    case TargetPlatform.ios:
+  switch (platform.os) {
+    case .ios:
       return OS.iOS;
-    case TargetPlatform.darwin:
+    case .macos:
       return OS.macOS;
-    case TargetPlatform.linux_x64:
-    case TargetPlatform.linux_arm64:
-    case TargetPlatform.linux_riscv64:
+    case .linux:
       return OS.linux;
-    case TargetPlatform.windows_x64:
-    case TargetPlatform.windows_arm64:
+    case .windows:
       return OS.windows;
-    case TargetPlatform.fuchsia_arm64:
-    case TargetPlatform.fuchsia_x64:
+    case .fuchsia:
       return OS.fuchsia;
-    case TargetPlatform.android:
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
+    case .android:
       return OS.android;
-    case TargetPlatform.tester:
+    case .tester:
       if (const LocalPlatform().isMacOS) {
         return OS.macOS;
       } else if (const LocalPlatform().isLinux) {
@@ -947,9 +940,9 @@ OS getNativeOSFromTargetPlatform(TargetPlatform platform) {
       } else {
         throw StateError('Unknown operating system');
       }
-    case TargetPlatform.web_javascript:
+    case .web:
       throw StateError('No dart builds for web yet.');
-    case TargetPlatform.unsupported:
+    case .unsupported:
       TargetPlatform.throwUnsupportedTarget();
   }
 }

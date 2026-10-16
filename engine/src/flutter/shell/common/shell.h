@@ -121,7 +121,6 @@ class Shell final : public PlatformView::Delegate,
   using CreateCallback = std::function<std::unique_ptr<T>(Shell&)>;
   typedef std::function<std::unique_ptr<Engine>(
       Engine::Delegate& delegate,
-      const PointerDataDispatcherMaker& dispatcher_maker,
       DartVM& vm,
       fml::RefPtr<const DartSnapshot> isolate_snapshot,
       TaskRunners task_runners,
@@ -304,6 +303,11 @@ class Shell final : public PlatformView::Delegate,
   ///             warning. The shell will attempt to purge caches. Current, only
   ///             the rasterizer cache is purged.
   void NotifyLowMemoryWarning() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Clears any cached render targets and textures on the
+  ///             rasterizer.
+  void ClearRenderTargetCache() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Used by embedders to flush the microtask queue. Required
@@ -751,6 +755,9 @@ class Shell final : public PlatformView::Delegate,
 
   // |Engine::Delegate|
   void RequestViewFocusChange(const ViewFocusChangeRequest& request) override;
+
+  // |Engine::Delegate|
+  void OnEngineResetInternalState() override;
 
   // |Rasterizer::Delegate|
   void OnFrameRasterized(const FrameTiming&) override;
