@@ -85,7 +85,7 @@ Future<void> buildWindows(
   _writeGeneratedFlutterConfig(windowsProject, buildInfo, target, toolContext: toolContext);
   createPluginSymlinks(windowsProject.parent);
 
-  final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio.fromContext(toolContext);
+  final VisualStudio visualStudio = visualStudioOverride ?? VisualStudio(toolContext: toolContext);
   final String? cmakePath = visualStudio.cmakePath;
   final String? cmakeGenerator = visualStudio.cmakeGenerator;
   if (cmakePath == null || cmakeGenerator == null) {

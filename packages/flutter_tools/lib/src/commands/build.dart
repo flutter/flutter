@@ -12,7 +12,6 @@ import '../artifacts.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/template.dart';
 import '../build_info.dart';
@@ -60,7 +59,6 @@ class BuildCommand extends FlutterCommand {
       :FlutterVersion flutterVersion,
       fs: FileSystem fileSystem,
       :Logger logger,
-      os: OperatingSystemUtils osUtils,
       :Platform platform,
       :ProcessManager processManager,
     ) = toolContext;
@@ -197,13 +195,7 @@ class BuildCommand extends FlutterCommand {
         featureFlags: featureFlags,
         toolContext: toolContext,
         verboseHelp: verboseHelp,
-        visualStudio: VisualStudio(
-          fileSystem: fileSystem,
-          platform: platform,
-          logger: logger,
-          processManager: processManager,
-          osUtils: osUtils,
-        ),
+        visualStudio: VisualStudio(toolContext: toolContext),
       ),
     );
   }
