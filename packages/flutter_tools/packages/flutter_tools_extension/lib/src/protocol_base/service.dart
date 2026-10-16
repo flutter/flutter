@@ -32,6 +32,7 @@ class ToolExtensionCapabilities {
   /// Creates [ToolExtensionCapabilities] listing supported [services] and [supportedPlatforms].
   const ToolExtensionCapabilities({
     required this.services,
+    this.extensionName,
     this.supportedPlatforms = const <String>{'linux', 'macos', 'windows'},
   });
 
@@ -43,8 +44,19 @@ class ToolExtensionCapabilities {
     final Set<String> supportedPlatforms = platformsList is Iterable
         ? platformsList.map((Object? p) => p.toString().toLowerCase()).toSet()
         : const <String>{'linux', 'macos', 'windows'};
-    return ToolExtensionCapabilities(services: services, supportedPlatforms: supportedPlatforms);
+    final String? extensionName = switch (json['extensionName']) {
+      final String name => name,
+      _ => null,
+    };
+    return ToolExtensionCapabilities(
+      services: services,
+      extensionName: extensionName,
+      supportedPlatforms: supportedPlatforms,
+    );
   }
+
+  /// Optional identifier name of the extension package.
+  final String? extensionName;
 
   /// The list of service namespace identifiers supported by the extension.
   final List<String> services;
@@ -59,6 +71,7 @@ class ToolExtensionCapabilities {
 
   /// Serializes capabilities to a map payload.
   Map<String, Object?> toMap() => <String, Object?>{
+    'extensionName': ?extensionName,
     'services': services,
     'supportedPlatforms': supportedPlatforms.toList(),
   };

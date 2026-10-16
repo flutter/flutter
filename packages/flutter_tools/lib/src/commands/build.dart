@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide HostPlatform;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -21,6 +21,7 @@ import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
+import '../experimental/extension_artifact_manager.dart';
 import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../macos/xcode.dart';
@@ -50,6 +51,7 @@ class BuildCommand extends FlutterCommand {
     required TemplateRenderer templateRenderer,
     required ToolContext toolContext,
     AndroidBuilder? androidBuilder,
+    this._extensionArtifactManager,
     this._extensionBuildManager,
     bool verboseHelp = false,
   }) : _appleContext = appleContext,
@@ -207,6 +209,7 @@ class BuildCommand extends FlutterCommand {
     );
   }
 
+  final ExtensionArtifactManager? _extensionArtifactManager;
   final ExtensionBuildManager? _extensionBuildManager;
 
   @override
@@ -217,6 +220,7 @@ class BuildCommand extends FlutterCommand {
         if (!subcommands.containsKey(target.name)) {
           _addSubcommand(
             ExtensionBuildSubCommand(
+              artifactManager: _extensionArtifactManager,
               buildManager: extensionBuildManager,
               target: target,
               toolContext: toolContext,
@@ -283,18 +287,16 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
   ExtensionBuildSubCommand({
     required this._buildManager,
     required this.target,
-    required ToolContext toolContext,
+    required ToolContext super.toolContext,
     required super.verboseHelp,
-  }) : super(
-         logger: toolContext.logger,
-         outputPreferences: toolContext.outputPreferences,
-         toolContext: toolContext,
-       ) {
+    this._artifactManager,
+  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
     usesTargetOption();
     usesPubOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
   }
 
+  final ExtensionArtifactManager? _artifactManager;
   final ExtensionBuildManager _buildManager;
 
   /// The custom build target definition provided by the tool extension.
@@ -311,6 +313,7 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    await _artifactManager?.ensureArtifactsDownloaded();
     final BuildInfo buildInfo = await getBuildInfo();
 
     final ExtensionBuildResult result = await _buildManager.build(

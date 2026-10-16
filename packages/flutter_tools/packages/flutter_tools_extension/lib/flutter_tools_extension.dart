@@ -9,6 +9,9 @@
 /// and service handler interfaces implemented by extension authors.
 library flutter_tools_extension;
 
+export 'package:json_rpc_2/json_rpc_2.dart' show RpcException;
+
+export 'src/artifacts.dart';
 export 'src/build.dart';
 export 'src/config.dart';
 export 'src/device.dart';

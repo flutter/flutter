@@ -2,11 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/precache.dart';
+import 'package:flutter_tools/src/experimental/extension_artifact_manager.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
@@ -507,6 +510,37 @@ void main() {
 
     expect(cache.osUtils.hostPlatformOverride, HostPlatform.darwin_x64);
   });
+
+  testUsingContext('precache invokes ExtensionArtifactManager and never creates .dart_tool in CWD outside a project', () async {
+    final fs = MemoryFileSystem.test();
+    final Directory emptyCwd = fs.directory('/outside_any_project')..createSync(recursive: true);
+    fs.currentDirectory = emptyCwd;
+
+    final fakeArtifactManager = FakeExtensionArtifactManager();
+    final command = PrecacheCommand(
+      cache: cache,
+      logger: BufferLogger.test(),
+      featureFlags: TestFeatureFlags(isLinuxEnabled: true, isToolExtensionsEnabled: true),
+      platform: FakePlatform(),
+      extensionArtifactManager: fakeArtifactManager,
+    );
+    await createTestCommandRunner(command).run(const <String>['precache', '--linux']);
+
+    expect(fakeArtifactManager.ensureArtifactsDownloadedCalled, isTrue);
+    expect(fakeArtifactManager.requestedTargetPlatforms, contains('linux'));
+    expect(emptyCwd.childDirectory('.dart_tool').existsSync(), isFalse);
+  });
+}
+
+class FakeExtensionArtifactManager extends Fake implements ExtensionArtifactManager {
+  bool ensureArtifactsDownloadedCalled = false;
+  Set<String>? requestedTargetPlatforms;
+
+  @override
+  Future<void> ensureArtifactsDownloaded({Set<String>? targetPlatforms}) async {
+    ensureArtifactsDownloadedCalled = true;
+    requestedTargetPlatforms = targetPlatforms;
+  }
 }
 
 class FakeCache extends Fake implements Cache {

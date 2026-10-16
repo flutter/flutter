@@ -36,6 +36,7 @@ import '../custom_devices/custom_devices_config.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../emulator.dart';
+import '../experimental/extension_artifact_manager.dart';
 import '../experimental/extension_build_manager.dart';
 import '../experimental/extension_discovery.dart';
 import '../experimental/extension_manager.dart';
@@ -98,6 +99,7 @@ class ToolDependencies {
     required this.emulatorManager,
     required this.featureFlags,
     required this.toolContext,
+    this.extensionArtifactManager,
     this.extensionBuildManager,
     this.extensionManager,
   });
@@ -128,6 +130,9 @@ class ToolDependencies {
 
   /// Manager for discovering, launching, and creating emulators.
   final EmulatorManager emulatorManager;
+
+  /// Manager for querying and downloading custom artifacts via tool extensions.
+  final ExtensionArtifactManager? extensionArtifactManager;
 
   /// Manager for querying custom build targets and executing builds via tool extensions.
   final ExtensionBuildManager? extensionBuildManager;
@@ -616,6 +621,15 @@ class ToolDependencies {
       logger: finalLogger,
     );
 
+    final extensionArtifactManager = ExtensionArtifactManager(
+      extensionManager: extensionManager,
+      featureFlags: finalFeatureFlags,
+      fileSystem: finalFS,
+      logger: finalLogger,
+      osUtils: finalOS,
+      platform: finalPlatform,
+    );
+
     final extensionBuildManager = ExtensionBuildManager(
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,
@@ -665,6 +679,7 @@ class ToolDependencies {
       deviceManager: finalDeviceManager,
       doctor: finalDoctor,
       emulatorManager: finalEmulatorManager,
+      extensionArtifactManager: extensionArtifactManager,
       extensionBuildManager: extensionBuildManager,
       extensionManager: extensionManager,
       featureFlags: finalFeatureFlags,

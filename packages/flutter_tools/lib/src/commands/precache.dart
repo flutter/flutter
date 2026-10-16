@@ -7,6 +7,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../cache.dart';
+import '../experimental/extension_artifact_manager.dart';
 import '../features.dart';
 import '../runner/flutter_command.dart';
 
@@ -19,6 +20,7 @@ class PrecacheCommand extends FlutterCommand {
     required this._platform,
     required this._logger,
     required this._featureFlags,
+    this._extensionArtifactManager,
   }) {
     argParser.addFlag(
       'all-platforms',
@@ -93,6 +95,7 @@ class PrecacheCommand extends FlutterCommand {
   final Logger _logger;
   final Platform _platform;
   final FeatureFlags _featureFlags;
+  final ExtensionArtifactManager? _extensionArtifactManager;
 
   @override
   final name = 'precache';
@@ -210,6 +213,14 @@ class PrecacheCommand extends FlutterCommand {
       await _cache.updateAll(requiredArtifacts);
     } else {
       _logger.printStatus('Already up-to-date.');
+    }
+    if (_extensionArtifactManager != null) {
+      final Set<String> requiredStrings = requiredArtifacts
+          .map((DevelopmentArtifact a) => a.name)
+          .toSet();
+      await _extensionArtifactManager.ensureArtifactsDownloaded(
+        targetPlatforms: includeAllPlatforms ? null : requiredStrings,
+      );
     }
     return FlutterCommandResult.success();
   }

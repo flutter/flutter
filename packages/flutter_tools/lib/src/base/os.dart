@@ -6,6 +6,7 @@ import 'dart:ffi' show Abi;
 
 import 'package:archive/archive.dart';
 import 'package:file/file.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' as tools_core;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -628,36 +629,5 @@ String? findProjectRoot(FileSystem fileSystem, [String? directory]) {
   }
 }
 
-enum HostPlatform {
-  darwin_x64('darwin-x64', 'x64'),
-  darwin_arm64('darwin-arm64', 'arm64'),
-  linux_x64('linux-x64', 'x64'),
-  linux_arm64('linux-arm64', 'arm64'),
-  linux_riscv64('linux-riscv64', 'riscv64'),
-  windows_x64('windows-x64', 'x64'),
-  windows_arm64('windows-arm64', 'arm64');
-
-  const HostPlatform(this.cliName, this.platformName);
-
-  final String cliName;
-  final String platformName;
-
-  /// Returns the host platform for the specified OS and architecture.
-  ///
-  /// [os] is an operating system name as returned by
-  /// [Platform.operatingSystem]. [arch] is an architecture name matching the
-  /// [platformName] of one of the values of this enum. Returns null if no match
-  /// is found.
-  static HostPlatform? fromOsAndArch(String os, String arch) {
-    return switch ((os, arch.toLowerCase())) {
-      ('macos', 'x64') => darwin_x64,
-      ('macos', 'arm64') => darwin_arm64,
-      ('linux', 'x64') => linux_x64,
-      ('linux', 'arm64') => linux_arm64,
-      ('linux', 'riscv64') => linux_riscv64,
-      ('windows', 'x64') => windows_x64,
-      ('windows', 'arm64') => windows_arm64,
-      _ => null,
-    };
-  }
-}
+/// Host platforms that Flutter tools can be executed on.
+typedef HostPlatform = tools_core.HostPlatform;
