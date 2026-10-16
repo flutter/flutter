@@ -653,12 +653,9 @@ class ToolDependencies {
           appleContext: appleContext,
           extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
-          iosSimulatorUtils: finalIOSSimulatorUtils,
-          iosWorkflow: finalIOSWorkflow,
           macOSWorkflow: finalMacOSWorkflow,
           toolContext: finalToolContext,
           windowsWorkflow: finalWindowsWorkflow,
-          xcDevice: finalXCDevice,
         );
 
     return ToolDependencies(

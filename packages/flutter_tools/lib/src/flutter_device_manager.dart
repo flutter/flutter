@@ -43,14 +43,16 @@ class FlutterDeviceManager extends DeviceManager {
     required AndroidWorkflow androidWorkflow,
     required AppleContext appleContext,
     required FeatureFlags featureFlags,
-    required IOSSimulatorUtils iosSimulatorUtils,
-    required IOSWorkflow iosWorkflow,
     required MacOSWorkflow macOSWorkflow,
     required ToolContext toolContext,
     required WindowsWorkflow windowsWorkflow,
-    required XCDevice xcDevice,
     ExtensionManager? extensionManager,
   }) : super(logger: toolContext.logger) {
+    final AppleContext(
+      :IOSSimulatorUtils iosSimulatorUtils,
+      :IOSWorkflow iosWorkflow,
+      xcdevice: XCDevice xcDevice,
+    ) = appleContext;
     final ToolContext(
       :Artifacts artifacts,
       :FlutterVersion flutterVersion,

@@ -88,7 +88,7 @@ abstract class IOSApp extends ApplicationPackage {
     BuildInfo? buildInfo, {
     required ToolContext toolContext,
   }) async {
-    final ToolContext(:FileSystem fs, :Logger logger, :Platform platform) = toolContext;
+    final ToolContext(:Logger logger, :Platform platform) = toolContext;
     if (!platform.isMacOS) {
       return null;
     }
@@ -105,7 +105,7 @@ abstract class IOSApp extends ApplicationPackage {
       logger.printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
-    return BuildableIOSApp.fromProject(project, buildInfo, fileSystem: fs, logger: logger);
+    return BuildableIOSApp.fromProject(project, buildInfo, toolContext: toolContext);
   }
 
   @override
@@ -133,12 +133,12 @@ class BuildableIOSApp extends IOSApp {
   static Future<BuildableIOSApp?> fromProject(
     IosProject project,
     BuildInfo? buildInfo, {
-    required FileSystem fileSystem,
-    required Logger logger,
+    required ToolContext toolContext,
   }) async {
     final String? productName = await project.productName(buildInfo);
     final String? projectBundleId = await project.productBundleIdentifier(buildInfo);
     if (projectBundleId != null) {
+      final ToolContext(fs: FileSystem fileSystem, :Logger logger) = toolContext;
       return BuildableIOSApp(
         project,
         projectBundleId,

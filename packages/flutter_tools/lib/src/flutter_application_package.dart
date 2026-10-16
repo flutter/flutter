@@ -35,12 +35,13 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
     BuildInfo? buildInfo,
     File? applicationBinary,
   }) async {
-    final FileSystem fs = _toolContext.fs;
+    final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
+    final FlutterProject currentProject = projectFactory.fromDirectory(fs.currentDirectory);
     switch (platform.os) {
       case .android:
         if (applicationBinary == null) {
           return AndroidApk.fromAndroidProject(
-            FlutterProject.current().android,
+            currentProject.android,
             androidSdk: _androidSdk,
             buildInfo: buildInfo,
             toolContext: _toolContext,
@@ -53,11 +54,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
         );
       case .ios:
         return applicationBinary == null
-            ? await IOSApp.fromIosProject(
-                FlutterProject.current().ios,
-                buildInfo,
-                toolContext: _toolContext,
-              )
+            ? await IOSApp.fromIosProject(currentProject.ios, buildInfo, toolContext: _toolContext)
             : IOSApp.fromPrebuiltApp(
                 applicationBinary,
                 plistParser: _plistParser,
@@ -68,7 +65,7 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
       case .macos:
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(
-                FlutterProject.current().macos,
+                currentProject.macos,
                 plistParser: _plistParser,
                 toolContext: _toolContext,
               )
@@ -78,17 +75,17 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
                 toolContext: _toolContext,
               );
       case .web:
-        if (!FlutterProject.current().web.existsSync()) {
+        if (!currentProject.web.existsSync()) {
           return null;
         }
-        return WebApplicationPackage(FlutterProject.current());
+        return WebApplicationPackage(currentProject);
       case .linux:
         return applicationBinary == null
-            ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
+            ? LinuxApp.fromLinuxProject(currentProject.linux)
             : LinuxApp.fromPrebuiltApp(applicationBinary);
       case .windows:
         return applicationBinary == null
-            ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
+            ? WindowsApp.fromWindowsProject(currentProject.windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary, toolContext: _toolContext);
       case .fuchsia || .unsupported:
         TargetPlatform.throwUnsupportedTarget();
