@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -13,6 +12,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/dds.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -21,6 +21,7 @@ import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
 import '../context/tool_context.dart';
 import '../device.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../vmservice.dart';
 import 'web_driver_service.dart';
@@ -55,15 +56,11 @@ class FlutterDriverFactory {
         toolContext: _toolContext,
       );
     }
-    final ToolContext(:Logger logger, :Platform platform, :ProcessUtils processUtils) =
-        _toolContext;
     return FlutterDriverService(
       applicationPackageFactory: _applicationPackageFactory,
       dartSdkPath: _dartSdkPath,
       devtoolsLauncher: _devtoolsLauncher,
-      logger: logger,
-      platform: platform,
-      processUtils: processUtils,
+      toolContext: _toolContext,
     );
   }
 }
@@ -138,9 +135,7 @@ class FlutterDriverService extends DriverService {
     required this._applicationPackageFactory,
     required this._dartSdkPath,
     required this._devtoolsLauncher,
-    required this._logger,
-    required this._platform,
-    required this._processUtils,
+    required this._toolContext,
     @visibleForTesting this._logFlushDelay = const Duration(milliseconds: 500),
     @visibleForTesting this._vmServiceConnector = connectToVmService,
   });
@@ -148,13 +143,15 @@ class FlutterDriverService extends DriverService {
   static const _kLaunchAttempts = 3;
 
   final ApplicationPackageFactory _applicationPackageFactory;
-  final Logger _logger;
-  final Platform _platform;
-  final ProcessUtils _processUtils;
   final String _dartSdkPath;
-  final VMServiceConnector _vmServiceConnector;
   final DevtoolsLauncher _devtoolsLauncher;
+  final ToolContext _toolContext;
+  final VMServiceConnector _vmServiceConnector;
   final Duration _logFlushDelay;
+
+  Logger get _logger => _toolContext.logger;
+  Platform get _platform => _toolContext.platform;
+  ProcessUtils get _processUtils => _toolContext.processUtils;
 
   Device? _device;
   ApplicationPackage? _applicationPackage;
@@ -188,6 +185,19 @@ class FlutterDriverService extends DriverService {
       buildInfo: buildInfo,
       applicationBinary: applicationBinary,
     );
+    if (_applicationPackage == null) {
+      var message = 'No application found for $targetPlatform.';
+      final ToolContext(:FileSystem fs, :FlutterProjectFactory projectFactory) = _toolContext;
+      final String? hint = await getMissingPackageHintForPlatform(
+        targetPlatform,
+        fileSystem: fs,
+        projectFactory: projectFactory,
+      );
+      if (hint != null) {
+        message += '\n$hint';
+      }
+      throwToolExit(message);
+    }
     var attempt = 0;
     LaunchResult? result;
     var prebuiltApplication = applicationBinary != null;

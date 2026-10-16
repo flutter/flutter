@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
@@ -76,6 +77,22 @@ void main() {
         DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
       ),
       throwsToolExit(message: 'Application failed to start. Will not run test. Quitting.'),
+    );
+  });
+
+  testWithoutContext('Exits if application package is null for target platform', () {
+    final DriverService driverService = setUpDriverService(
+      applicationPackageFactory: FakeApplicationPackageFactory(),
+    );
+    final Device device = FakeDevice(LaunchResult.succeeded());
+
+    expect(
+      () => driverService.start(
+        BuildInfo.profile,
+        device,
+        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+      ),
+      throwsToolExit(message: 'No application found for TargetPlatform.android_arm.'),
     );
   });
 
@@ -421,12 +438,14 @@ void main() {
       final logReader = FakeDeviceLogReader();
       final DriverService driverService = FlutterDriverService(
         applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
-        logger: BufferLogger.test(),
-        platform: FakePlatform(),
-        processUtils: ProcessUtils(logger: BufferLogger.test(), processManager: processManager),
         dartSdkPath: 'dart',
         devtoolsLauncher: FakeDevtoolsLauncher(),
         logFlushDelay: Duration.zero,
+        toolContext: FakeToolContext(
+          logger: BufferLogger.test(),
+          platform: FakePlatform(),
+          processUtils: ProcessUtils(logger: BufferLogger.test(), processManager: processManager),
+        ),
         vmServiceConnector:
             (
               Uri httpUri, {
@@ -491,23 +510,30 @@ void main() {
 }
 
 FlutterDriverService setUpDriverService({
+  ApplicationPackageFactory? applicationPackageFactory,
+  DevtoolsLauncher? devtoolsLauncher,
   Logger? logger,
   Platform? platform,
   ProcessManager? processManager,
   FlutterVmService? vmService,
-  DevtoolsLauncher? devtoolsLauncher,
 }) {
   logger ??= BufferLogger.test();
+  final fs = MemoryFileSystem.test();
   return FlutterDriverService(
-    applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
-    logger: logger,
-    platform: platform ?? FakePlatform(),
-    processUtils: ProcessUtils(
-      logger: logger,
-      processManager: processManager ?? FakeProcessManager.any(),
-    ),
+    applicationPackageFactory:
+        applicationPackageFactory ?? FakeApplicationPackageFactory(FakeApplicationPackage()),
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
+    toolContext: FakeToolContext(
+      fs: fs,
+      logger: logger,
+      platform: platform ?? FakePlatform(),
+      processUtils: ProcessUtils(
+        logger: logger,
+        processManager: processManager ?? FakeProcessManager.any(),
+      ),
+      projectFactory: FlutterProjectFactory(fileSystem: fs, logger: logger),
+    ),
     vmServiceConnector:
         (
           Uri httpUri, {
@@ -532,12 +558,12 @@ FlutterDriverService setUpDriverService({
 }
 
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
-  FakeApplicationPackageFactory(this.applicationPackage);
+  FakeApplicationPackageFactory([this.applicationPackage]);
 
-  ApplicationPackage applicationPackage;
+  ApplicationPackage? applicationPackage;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(
+  Future<ApplicationPackage?> getPackageForPlatform(
     TargetPlatform platform, {
     BuildInfo? buildInfo,
     File? applicationBinary,
