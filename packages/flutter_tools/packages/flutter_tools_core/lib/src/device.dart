@@ -45,6 +45,7 @@ class TargetDevice {
     required this.category,
     required this.id,
     required this.name,
+    this.buildTarget,
     this.ephemeral = true,
     this.isSupported = true,
     this.sdkNameAndVersion,
@@ -57,12 +58,16 @@ class TargetDevice {
       category: Category.fromString(json[categoryKey] as String? ?? '') ?? Category.desktop,
       id: json[idKey] as String? ?? '',
       name: json[nameKey] as String? ?? '',
+      buildTarget: json[buildTargetKey] as String?,
       ephemeral: json[ephemeralKey] as bool? ?? true,
       isSupported: json[isSupportedKey] as bool? ?? true,
       sdkNameAndVersion: json[sdkNameAndVersionKey] as String?,
       targetPlatform: json[targetPlatformKey] as String?,
     );
   }
+
+  /// Map key for [buildTarget].
+  static const String buildTargetKey = 'buildTarget';
 
   /// Map key for [category].
   static const String categoryKey = 'category';
@@ -105,6 +110,10 @@ class TargetDevice {
   /// Display name of the device.
   final String name;
 
+  /// The name of the extension build target used to build an application for
+  /// this device during `flutter run`.
+  final String? buildTarget;
+
   /// Whether the device is ephemeral.
   ///
   /// Ephemeral devices are targets that can dynamically connect and disconnect
@@ -129,6 +138,7 @@ class TargetDevice {
     categoryKey: category.value,
     idKey: id,
     nameKey: name,
+    buildTargetKey: ?buildTarget,
     ephemeralKey: ephemeral,
     isSupportedKey: isSupported,
     sdkNameAndVersionKey: ?sdkNameAndVersion,
@@ -139,7 +149,8 @@ class TargetDevice {
   String toString() =>
       'TargetDevice(id: $id, name: $name, category: $category, '
       'targetPlatform: $targetPlatform, sdkNameAndVersion: $sdkNameAndVersion, '
-      'ephemeral: $ephemeral, isSupported: $isSupported)';
+      'ephemeral: $ephemeral, isSupported: $isSupported, '
+      'buildTarget: $buildTarget)';
 
   @override
   bool operator ==(Object other) {
@@ -148,6 +159,7 @@ class TargetDevice {
             other.category == category &&
             other.id == id &&
             other.name == name &&
+            other.buildTarget == buildTarget &&
             other.ephemeral == ephemeral &&
             other.isSupported == isSupported &&
             other.sdkNameAndVersion == sdkNameAndVersion &&
@@ -155,6 +167,14 @@ class TargetDevice {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(category, id, name, ephemeral, isSupported, sdkNameAndVersion, targetPlatform);
+  int get hashCode => Object.hash(
+    category,
+    id,
+    name,
+    buildTarget,
+    ephemeral,
+    isSupported,
+    sdkNameAndVersion,
+    targetPlatform,
+  );
 }

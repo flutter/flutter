@@ -312,9 +312,13 @@ class FlutterDevice {
   }
 
   Future<Uri?> setupDevFS(String fsName, Directory rootDirectory) {
+    final FlutterVmService? service = vmService;
+    if (service == null) {
+      return Future<Uri?>.value();
+    }
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
-      vmService!,
+      service,
       fsName,
       rootDirectory,
       buildMode: buildInfo.mode,
@@ -704,7 +708,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         final String data = await device.vmService!
             .flutterDebugDumpSemanticsTreeInInverseHitTestOrder(isolateId: view.uiIsolate!.id!);
@@ -720,7 +727,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterToggleDebugPaintSizeEnabled(isolateId: view.uiIsolate!.id!);
       }
@@ -739,6 +749,9 @@ abstract class ResidentHandlers {
       if (device!.targetPlatform == TargetPlatform.web_javascript) {
         continue;
       }
+      if (device.vmService == null) {
+        continue;
+      }
       final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterTogglePerformanceOverlayOverride(
@@ -755,7 +768,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterToggleWidgetInspector(isolateId: view.uiIsolate!.id!);
       }
@@ -769,7 +785,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterToggleInvertOversizedImages(isolateId: view.uiIsolate!.id!);
       }
@@ -783,7 +802,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterToggleProfileWidgetBuilds(isolateId: view.uiIsolate!.id!);
       }
@@ -796,8 +818,14 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol) {
       return false;
     }
-    final List<FlutterView> views = await flutterDevices.first!.vmService!.getFlutterViews();
-    final Brightness? current = await flutterDevices.first!.vmService!.flutterBrightnessOverride(
+    final FlutterDevice? firstDeviceWithService = flutterDevices
+        .where((FlutterDevice? d) => d?.vmService != null)
+        .firstOrNull;
+    if (firstDeviceWithService == null) {
+      return false;
+    }
+    final List<FlutterView> views = await firstDeviceWithService.vmService!.getFlutterViews();
+    final Brightness? current = await firstDeviceWithService.vmService!.flutterBrightnessOverride(
       isolateId: views.first.uiIsolate!.id!,
     );
     final Brightness next = switch (current) {
@@ -805,7 +833,10 @@ abstract class ResidentHandlers {
       Brightness.dark || null => Brightness.light,
     };
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterBrightnessOverride(
           isolateId: view.uiIsolate!.id!,
@@ -1321,10 +1352,15 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
     _finished = Completer<int>();
     // Listen for service protocol connection to close.
+    var activeConnections = 0;
     for (final FlutterDevice? device in flutterDevices) {
       if (device == null) {
         continue;
       }
+      if (!device.isWaitingForVmService && device.vmService == null) {
+        continue;
+      }
+      activeConnections++;
       try {
         if (device.vmServiceUri == null) {
           throw Exception('VM Service URI info not available.');
@@ -1351,7 +1387,12 @@ abstract class ResidentRunner extends ResidentHandlers {
       unawaited(
         device.vmService!.service.onDone
             .then<void>(_serviceProtocolDone, onError: _serviceProtocolError)
-            .whenComplete(_serviceDisconnected),
+            .whenComplete(() {
+              activeConnections--;
+              if (activeConnections == 0) {
+                _serviceDisconnected();
+              }
+            }),
       );
     }
   }

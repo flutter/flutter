@@ -35,14 +35,28 @@ class ExtensionManager {
   final List<ExtensionEntryPoint> _entryPoints;
   final FeatureFlags _featureFlags;
   bool get isInitialized => _isInitialized;
-  bool _isInitialized = false;
+  var _isInitialized = false;
+  var _entryPointsSpawned = false;
   Future<void>? _initFuture;
-  final List<DiagnosticsExtension> _diagnosticsExtensions = <DiagnosticsExtension>[];
-  final List<ConfigurationExtension> _configurationExtensions = <ConfigurationExtension>[];
-  final List<DeviceService> _deviceExtensions = <DeviceService>[];
+  final _diagnosticsExtensions = <DiagnosticsExtension>[];
+  final _configurationExtensions = <ConfigurationExtension>[];
+  final _deviceExtensions = <DeviceService>[];
 
-  /// Ensures entrypoints are initialized; idempotent.
+  /// Ensures entrypoints are initialized; idempotent once connections are active.
+  ///
+  /// If a previous initialization completed with zero active connections (for
+  /// example, before `pub.get()` generated `.dart_tool/package_config.json`),
+  /// subsequent calls re-run initialization so newly resolved project extensions
+  /// are discovered.
   Future<void> ensureInitialized() {
+    if (_isInitialized &&
+        (_discovery.connections.isEmpty ||
+            (_diagnosticsExtensions.isEmpty &&
+                _configurationExtensions.isEmpty &&
+                _deviceExtensions.isEmpty))) {
+      _isInitialized = false;
+      _initFuture = null;
+    }
     return _initFuture ??= _doInitialize();
   }
 
@@ -51,10 +65,11 @@ class ExtensionManager {
       _isInitialized = true;
       return;
     }
-    if (_entryPoints.isNotEmpty) {
+    if (_entryPoints.isNotEmpty && !_entryPointsSpawned) {
+      _entryPointsSpawned = true;
       await initialize(entryPoints: _entryPoints);
     } else {
-      _isInitialized = true;
+      await initialize();
     }
   }
 
@@ -151,6 +166,7 @@ class ExtensionManager {
     _configurationExtensions.clear();
     _deviceExtensions.clear();
     _isInitialized = false;
+    _entryPointsSpawned = false;
     _initFuture = null;
     await _discovery.dispose();
   }
