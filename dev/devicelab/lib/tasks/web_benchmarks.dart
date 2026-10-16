@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show LineSplitter, json, utf8;
 import 'dart:io' as io;
 
+import 'package:args/args.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:shelf/shelf.dart';
@@ -55,7 +56,28 @@ Future<void> deleteDirectoryWithRetry(
   }
 }
 
-Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
+Future<TaskResult> runWebBenchmark(
+  WebBenchmarkOptions benchmarkOptions, {
+  List<String>? targetBenchmarks,
+  String? filterPattern,
+  bool? clean,
+  Map<String, String>? environment,
+}) async {
+  environment ??= io.Platform.environment;
+
+  final BenchmarkFilter benchmarkFilter;
+  try {
+    benchmarkFilter = BenchmarkFilter.parse(
+      targetBenchmarks: targetBenchmarks,
+      filterPattern: filterPattern,
+      environment: environment,
+    );
+  } on Exception catch (e) {
+    return TaskResult.failure(e.toString());
+  }
+
+  final bool effectiveClean = clean ?? environment['BENCHMARK_CLEAN']?.toLowerCase() != 'false';
+
   // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
   Logger.root.level = Level.INFO;
   final String macrobenchmarksDirectory = path.join(
@@ -186,7 +208,9 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
 
   try {
     return await inDirectory(macrobenchmarksDirectory, () async {
-      await flutter('clean');
+      if (effectiveClean) {
+        await flutter('clean');
+      }
 
       server = await io.HttpServer.bind('localhost', benchmarkServerPort);
 
@@ -337,8 +361,20 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
             return Response.ok('', headers: requestHeaders);
           } else if (request.requestedUri.path.endsWith('/next-benchmark')) {
             if (benchmarks == null) {
-              benchmarks = (json.decode(requestContents) as List<dynamic>).cast<String>();
-              benchmarkIterator = benchmarks!.iterator;
+              try {
+                final List<String> allBenchmarks = (json.decode(requestContents) as List<Object?>)
+                    .cast<String>();
+                benchmarks = benchmarkFilter.filter(allBenchmarks);
+                benchmarkIterator = benchmarks!.iterator;
+              } catch (e, stackTrace) {
+                final String errorMessage = e is FormatException ? e.message : e.toString();
+                print('[ERROR] $errorMessage');
+                if (!profileData.isCompleted) {
+                  profileData.completeError(e, stackTrace);
+                }
+                // Do NOT call server.close() here; let outer cleanup handle server shutdown.
+                return Response.internalServerError(body: errorMessage, headers: requestHeaders);
+              }
             }
             if (benchmarkIterator.moveNext()) {
               final String nextBenchmark = benchmarkIterator.current;
@@ -437,44 +473,13 @@ Future<TaskResult> runWebBenchmark(WebBenchmarkOptions benchmarkOptions) async {
       unawaited(whenChromeIsReady?.then((Chrome c) => chrome = c, onError: (_) {}));
 
       print('Waiting for the benchmark to report benchmark profile.');
-      final taskResult = <String, dynamic>{};
-      final benchmarkScoreKeys = <String>[];
-      final List<Map<String, dynamic>> profiles = await profileData.future;
-
-      print('Received profile data');
-      for (final profile in profiles) {
-        final benchmarkName = profile['name'] as String;
-        if (benchmarkName.isEmpty) {
-          throw 'Benchmark name is empty';
-        }
-
-        final String webRendererName;
-        if (benchmarkOptions.useWasm) {
-          webRendererName = benchmarkOptions.forceSingleThreadedSkwasm ? 'skwasm_st' : 'skwasm';
-        } else {
-          webRendererName = 'canvaskit';
-        }
-        final namespace = '$benchmarkName.$webRendererName';
-        final scoreKeys = List<String>.from(profile['scoreKeys'] as List<dynamic>);
-        if (scoreKeys.isEmpty) {
-          throw 'No score keys in benchmark "$benchmarkName"';
-        }
-        for (final scoreKey in scoreKeys) {
-          if (scoreKey.isEmpty) {
-            throw 'Score key is empty in benchmark "$benchmarkName". '
-                'Received [${scoreKeys.join(', ')}]';
-          }
-          benchmarkScoreKeys.add('$namespace.$scoreKey');
-        }
-
-        for (final String key in profile.keys) {
-          if (key == 'name' || key == 'scoreKeys') {
-            continue;
-          }
-          taskResult['$namespace.$key'] = profile[key];
-        }
+      final List<Map<String, Object?>> profiles;
+      try {
+        profiles = await profileData.future;
+      } catch (e) {
+        return TaskResult.failure(e.toString());
       }
-      return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
+      return processBenchmarkProfiles(profiles, benchmarkOptions);
     });
   } finally {
     await sigintSub?.cancel();
@@ -503,4 +508,215 @@ Handler createBuildDirectoryHandler(String buildDirectoryPath) {
       return response;
     }
   };
+}
+
+/// Filters benchmarks based on an exact list of targets or a regular expression pattern.
+///
+/// If [targetBenchmarks] is provided, only the exact benchmarks listed will be run. If
+/// [targetBenchmarks] is null, all benchmarks are considered candidates (unless further filtered).
+/// If a filter pattern is provided, it is parsed as a [RegExp] and only benchmarks matching
+/// the pattern will be run.
+///
+/// Target benchmarks and a filter pattern are mutually exclusive. Specifying both (whether
+/// through arguments, environment variables, or a mix of the two) throws an [Exception]
+/// instead of combining them.
+///
+/// Example target lists: `['scroll_perf', 'build_perf']`
+/// Example filter patterns: `skwasm` (matches any benchmark name containing 'skwasm'),
+/// `^scroll_` (matches names starting with 'scroll_').
+class BenchmarkFilter {
+  /// Creates a filter from already-parsed values.
+  ///
+  /// Throws an [Exception] if both [targetBenchmarks] (after trimming and dropping empty
+  /// entries) and [compiledFilter] are provided.
+  BenchmarkFilter({List<String>? targetBenchmarks, this.compiledFilter})
+    : targetBenchmarks = _parseTargetBenchmarks(targetBenchmarks) {
+    if (this.targetBenchmarks != null && compiledFilter != null) {
+      throw _targetsAndFilterConflict(this.targetBenchmarks!, compiledFilter!.pattern);
+    }
+  }
+
+  /// Creates a filter from raw arguments, falling back to the environment.
+  ///
+  /// [targetBenchmarks] falls back to the comma-separated `BENCHMARK_TARGETS` environment
+  /// variable, and [filterPattern] falls back to the `BENCHMARK_FILTER` environment variable.
+  /// Empty values are treated as unset.
+  ///
+  /// Throws an [Exception] if both target benchmarks and a filter pattern end up specified
+  /// (from arguments, environment variables, or one of each), or if the filter pattern is not
+  /// a valid regular expression.
+  factory BenchmarkFilter.parse({
+    List<String>? targetBenchmarks,
+    String? filterPattern,
+    Map<String, String>? environment,
+  }) {
+    environment ??= const <String, String>{};
+    final List<String>? effectiveTargets = _parseTargetBenchmarks(
+      targetBenchmarks ?? environment['BENCHMARK_TARGETS']?.split(','),
+    );
+    final String? rawFilterPattern = filterPattern ?? environment['BENCHMARK_FILTER'];
+    final String? effectiveFilterPattern = (rawFilterPattern?.isEmpty ?? true)
+        ? null
+        : rawFilterPattern;
+
+    if (effectiveTargets != null && effectiveFilterPattern != null) {
+      throw _targetsAndFilterConflict(effectiveTargets, effectiveFilterPattern);
+    }
+
+    RegExp? compiledFilter;
+    if (effectiveFilterPattern != null) {
+      try {
+        compiledFilter = RegExp(effectiveFilterPattern);
+      } on FormatException catch (e) {
+        throw Exception('Invalid filterPattern "$effectiveFilterPattern": ${e.message}');
+      }
+    }
+
+    return BenchmarkFilter(targetBenchmarks: effectiveTargets, compiledFilter: compiledFilter);
+  }
+
+  final List<String>? targetBenchmarks;
+  final RegExp? compiledFilter;
+
+  static Exception _targetsAndFilterConflict(List<String> targets, String pattern) {
+    return Exception(
+      'Cannot combine target benchmarks with a filter pattern; specify only one.\n'
+      '  Target benchmarks (--benchmark / BENCHMARK_TARGETS): [${targets.join(', ')}]\n'
+      '  Filter pattern (--filter / BENCHMARK_FILTER): "$pattern"',
+    );
+  }
+
+  List<String> filter(List<String> allBenchmarks) {
+    final Set<String> availableSet = allBenchmarks.toSet();
+
+    Iterable<String> filtered = allBenchmarks;
+    // Strict validation: fail fast if ANY target benchmark is missing/misspelled
+    if (targetBenchmarks != null && targetBenchmarks!.isNotEmpty) {
+      final Set<String> targetSet = targetBenchmarks!.toSet();
+      final Set<String> missing = targetSet.difference(availableSet);
+      if (missing.isNotEmpty) {
+        throw Exception(
+          'Unrecognized target benchmark(s): [${missing.join(', ')}].\n'
+          'Available benchmarks: [${allBenchmarks.join(', ')}]',
+        );
+      }
+      filtered = targetSet;
+    } else if (compiledFilter != null) {
+      filtered = filtered.where(compiledFilter!.hasMatch);
+    }
+
+    final List<String> result = filtered.toList();
+    if (result.isEmpty) {
+      throw Exception(
+        'No benchmarks matched the requested filter.\n'
+        '  Target benchmarks: $targetBenchmarks\n'
+        '  Filter pattern: ${compiledFilter?.pattern}\n'
+        '  Available benchmarks: [${allBenchmarks.join(', ')}]',
+      );
+    }
+    return result;
+  }
+}
+
+/// Parses a list of target benchmarks from an iterable of strings.
+/// Splits comma-separated values, trims whitespace, and removes empty strings.
+List<String>? _parseTargetBenchmarks(Iterable<String>? raw) {
+  if (raw == null || raw.isEmpty) {
+    return null;
+  }
+  final List<String> result = raw
+      .expand((String b) => b.split(','))
+      .map((String s) => s.trim())
+      .where((String s) => s.isNotEmpty)
+      .toList();
+  return result.isEmpty ? null : result;
+}
+
+TaskResult processBenchmarkProfiles(
+  List<Map<String, Object?>> profiles,
+  WebBenchmarkOptions benchmarkOptions,
+) {
+  if (profiles.isEmpty) {
+    return TaskResult.failure('No benchmark profiles were collected.');
+  }
+
+  final taskResult = <String, Object?>{};
+  final benchmarkScoreKeys = <String>[];
+
+  for (final profile in profiles) {
+    final Object? nameValue = profile['name'];
+    final String? benchmarkName = nameValue is String ? nameValue : null;
+    if (benchmarkName == null || benchmarkName.isEmpty) {
+      return TaskResult.failure('Benchmark name is empty');
+    }
+
+    final String webRendererName;
+    if (benchmarkOptions.useWasm) {
+      webRendererName = benchmarkOptions.forceSingleThreadedSkwasm ? 'skwasm_st' : 'skwasm';
+    } else {
+      webRendererName = 'canvaskit';
+    }
+    final namespace = '$benchmarkName.$webRendererName';
+    final Object? rawScoreKeys = profile['scoreKeys'];
+    final List<String> scoreKeys = rawScoreKeys is List<Object?>
+        ? rawScoreKeys.whereType<String>().toList()
+        : <String>[];
+    if (scoreKeys.isEmpty) {
+      return TaskResult.failure('No metrics in benchmark "$benchmarkName"');
+    }
+    for (final scoreKey in scoreKeys) {
+      if (scoreKey.isEmpty) {
+        return TaskResult.failure('Received an empty metric name in benchmark "$benchmarkName".');
+      }
+      benchmarkScoreKeys.add('$namespace.$scoreKey');
+    }
+
+    for (final String key in profile.keys) {
+      if (key == 'name' || key == 'scoreKeys') {
+        continue;
+      }
+      taskResult['$namespace.$key'] = profile[key];
+    }
+  }
+
+  return TaskResult.success(taskResult, benchmarkScoreKeys: benchmarkScoreKeys);
+}
+
+Future<TaskResult> runWebBenchmarkFromArgs(
+  WebBenchmarkOptions options,
+  List<String> rawArgs,
+) async {
+  final argParser = ArgParser()
+    ..addMultiOption(
+      'benchmark',
+      help:
+          'Target benchmark names to run (comma-separated or multiple flags). '
+          'Cannot be combined with --filter.',
+    )
+    ..addOption(
+      'filter',
+      help: 'Regex pattern to filter benchmark names. Cannot be combined with --benchmark.',
+    )
+    ..addFlag('clean', defaultsTo: true, help: 'Whether to run flutter clean before building');
+
+  // Report unknown flags as a task failure.
+  final ArgResults args;
+  try {
+    args = argParser.parse(rawArgs);
+  } on ArgParserException catch (e) {
+    return TaskResult.failure(e.message);
+  }
+
+  final rawBenchmarks = args['benchmark'] as List<String>?;
+  final List<String>? targetBenchmarks = _parseTargetBenchmarks(rawBenchmarks);
+
+  final filterPattern = args['filter'] as String?;
+  final bool? clean = args.wasParsed('clean') ? args['clean'] as bool : null;
+
+  return runWebBenchmark(
+    options,
+    targetBenchmarks: targetBenchmarks,
+    filterPattern: filterPattern,
+    clean: clean,
+  );
 }
