@@ -393,24 +393,8 @@ void main() {
     );
   }
 
-  testWithoutContext('BrowserManager reports a browser that closed its connection', () {
+  testWithoutContext('BrowserManager reports a disconnect and starts cleanup at once', () {
     // Regression test for https://github.com/flutter/flutter/issues/191920.
-    FakeAsync().run((FakeAsync time) {
-      final exitCode = Completer<int>();
-      final controller = StreamChannelController<Object?>();
-      createBrowserManager(controller, FakeProcess(exitCode: exitCode.future));
-
-      controller.local.sink.close();
-      time.flushMicrotasks();
-
-      expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
-
-      exitCode.complete(0);
-      time.flushMicrotasks();
-    });
-  });
-
-  testWithoutContext('BrowserManager starts cleanup without waiting for the browser to exit', () {
     FakeAsync().run((FakeAsync time) {
       logger = BufferLogger.test(verbose: true);
       final exitCode = Completer<int>();
@@ -493,7 +477,7 @@ void main() {
     },
   );
 
-  testWithoutContext('BrowserManager does not attribute cleanup to an unexpected process exit', () {
+  testWithoutContext('BrowserManager does not report a clean exit after cleanup', () {
     FakeAsync().run((FakeAsync time) {
       final exitCode = Completer<int>();
       final controller = StreamChannelController<Object?>();
@@ -506,10 +490,7 @@ void main() {
       time.flushMicrotasks();
 
       expect(logger.errorText, contains('closed its connection to the test host unexpectedly'));
-      expect(
-        logger.errorText,
-        contains('exited with code 0 after disconnecting from the test host'),
-      );
+      expect(logger.errorText, isNot(contains('exited with code')));
       expect(logger.errorText, isNot(contains('exited unexpectedly')));
     });
   });

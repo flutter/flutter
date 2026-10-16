@@ -839,10 +839,12 @@ class BrowserManager {
     unawaited(
       _browser.onExit.then((int exitCode) {
         if (_unexpectedDisconnect) {
-          _logger.printError(
-            'Chrome browser process (PID: ${_browser.pid}) '
-            'exited with code $exitCode after disconnecting from the test host.',
-          );
+          if (exitCode != 0) {
+            _logger.printError(
+              'Chrome browser process (PID: ${_browser.pid}) '
+              'exited with code $exitCode after disconnecting from the test host.',
+            );
+          }
         } else if (!_closed) {
           _logger.printError(
             'Chrome browser process (PID: ${_browser.pid}) '
