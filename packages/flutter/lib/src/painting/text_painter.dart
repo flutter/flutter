@@ -1067,7 +1067,8 @@ class TextPainter {
   /// that falls on a soft hyphen. [Hyphens.hidden] suppresses the glyph; the line
   /// still breaks at U+00AD regardless.
   ///
-  /// Not yet supported on the web, where the hyphen glyph is never rendered.
+  /// On the web, only the Skwasm renderer supports this so far. With CanvasKit,
+  /// the hyphen glyph is never rendered.
   /// {@endtemplate}
   Hyphens get hyphens => _hyphens;
   Hyphens _hyphens;

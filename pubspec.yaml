@@ -196,7 +196,7 @@ dependencies:
   video_player_avfoundation: 2.12.1
   video_player_platform_interface: 6.9.0
   video_player_web: 2.4.0
-  vm_service: 15.3.0
+  vm_service: 15.4.0
   vm_snapshot_analysis: 0.7.6
   watcher: 1.2.1
   web: 1.1.1
@@ -212,7 +212,7 @@ dependencies:
   xml: 6.6.1
   yaml: 3.1.4
   cli_util: 0.4.2
-  dart_style: 3.1.13
+  dart_style: 3.1.14
   file_testing: 3.1.0
   flutter_lints: 6.0.0
   lints: 6.1.0
@@ -222,4 +222,4 @@ dependencies:
 dev_dependencies:
   ffigen: 20.1.1
 
-# PUBSPEC CHECKSUM: l2nke8
+# PUBSPEC CHECKSUM: ps2ats
