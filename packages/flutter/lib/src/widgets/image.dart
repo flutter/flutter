@@ -1163,9 +1163,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   /// true.
   bool _isPaused = false;
 
-  // Listened to instead of depending on TickerMode, so that changing it does
-  // not rebuild this widget.
+  /// The [TickerMode] values that decide [_isPaused].
+  ///
+  /// This is listened to instead of depending on [TickerMode], so that a
+  /// change does not rebuild the image.
   ValueListenable<TickerModeData>? _tickerModeNotifier;
+
+  /// The [MediaQueryData.disableAnimations] value that decides [_isPaused].
   bool _disableAnimations = false;
 
   @override
@@ -1307,12 +1311,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
+    final ImageInfo? currentImageInfo = _imageInfo;
     if (synchronousCall &&
         _frameNumber != null &&
-        _imageInfo != null &&
+        currentImageInfo != null &&
         _lastException == null &&
         _loadingProgress == null &&
-        imageInfo.isCloneOf(_imageInfo!)) {
+        imageInfo.isCloneOf(currentImageInfo)) {
       // Listening to the stream again sends the frame that is already shown.
       // It is not a new frame.
       imageInfo.dispose();
