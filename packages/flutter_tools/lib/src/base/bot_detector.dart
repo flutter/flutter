@@ -2,29 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:meta/meta.dart';
-
-import '../persistent_tool_state.dart';
-import 'io.dart';
-import 'net.dart';
 import 'platform.dart';
 
 class BotDetector {
-  BotDetector({
-    required HttpClientFactory httpClientFactory,
-    required this._platform,
-    required this._persistentToolState,
-  }) : _azureDetector = AzureDetector(httpClientFactory: httpClientFactory);
+  const BotDetector({required this._platform});
 
   final Platform _platform;
-  final AzureDetector _azureDetector;
-  final PersistentToolState _persistentToolState;
 
   Future<bool> get isRunningOnBot async {
+    final String? bot = _platform.environment['BOT'];
     if ( // Explicitly stated to not be a bot.
-    _platform.environment['BOT'] == 'false'
+    bot == 'false' ||
+        bot == '0'
         // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
         ||
         _platform.environment.containsKey('FLUTTER_HOST')
@@ -34,12 +23,14 @@ class BotDetector {
       return false;
     }
 
-    if (_platform.environment['BOT'] == 'true'
+    final String? ci = _platform.environment['CI'];
+    return bot == 'true' ||
+        bot == '1'
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         ||
         _platform.environment['TRAVIS'] == 'true' ||
         _platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
-        _platform.environment.containsKey('CI') // Travis and AppVeyor
+        (ci != null && ci.isNotEmpty && ci != 'false' && ci != '0') // Travis and AppVeyor
         // https://www.appveyor.com/docs/environment-variables/
         ||
         _platform.environment.containsKey('APPVEYOR')
@@ -64,59 +55,11 @@ class BotDetector {
         // Property when running on borg.
         ||
         _platform.environment.containsKey('BORG_ALLOC_DIR')
+        // Property when running on Azure.
+        ||
+        _platform.environment.containsKey('AZURE_HTTP_USER_AGENT')
         // https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables
         ||
-        _platform.environment.containsKey('TF_BUILD')) {
-      return true;
-    }
-
-    if (_persistentToolState.isRunningOnBot != null) {
-      return _persistentToolState.isRunningOnBot!;
-    }
-
-    final bool result = await _azureDetector.isRunningOnAzure;
-    _persistentToolState.setIsRunningOnBot(result);
-    return result;
-  }
-}
-
-// Are we running on Azure?
-// https://docs.microsoft.com/en-us/azure/virtual-machines/linux/instance-metadata-service
-@visibleForTesting
-class AzureDetector {
-  AzureDetector({required this._httpClientFactory});
-
-  static const _serviceUrl = 'http://169.254.169.254/metadata/instance';
-
-  final HttpClientFactory _httpClientFactory;
-
-  bool? _isRunningOnAzure;
-
-  Future<bool> get isRunningOnAzure async {
-    if (_isRunningOnAzure != null) {
-      return _isRunningOnAzure!;
-    }
-    const connectionTimeout = Duration(milliseconds: 250);
-    const requestTimeout = Duration(seconds: 1);
-    final HttpClient client = _httpClientFactory()..connectionTimeout = connectionTimeout;
-    try {
-      final HttpClientRequest request = await client
-          .getUrl(Uri.parse(_serviceUrl))
-          .timeout(requestTimeout);
-      request.headers.add('Metadata', true);
-      await request.close();
-    } on HttpException {
-      // The connection was established but an HTTP error occurred.
-      // This still indicates we're running on Azure.
-      return _isRunningOnAzure = true;
-    } on Object {
-      // Metadata detection is best-effort. Any other failure (socket errors,
-      // timeouts, malformed redirect URIs, WSL1 networking issues, etc.)
-      // should not prevent Flutter from starting.
-      return _isRunningOnAzure = false;
-    }
-
-    // We got a response. We're running on Azure.
-    return _isRunningOnAzure = true;
+        _platform.environment.containsKey('TF_BUILD');
   }
 }
