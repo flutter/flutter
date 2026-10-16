@@ -2432,6 +2432,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   of changes to the [Navigator]'s session history.
 class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   final Map<R, Set<RouteAware>> _listeners = <R, Set<RouteAware>>{};
+  final Expando<bool> _coveredRoutes = Expando<bool>();
 
   /// Whether this observer is managing changes for the specified route.
   ///
@@ -2455,6 +2456,9 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
     final Set<RouteAware> subscribers = _listeners.putIfAbsent(route, () => <RouteAware>{});
     if (subscribers.add(routeAware)) {
       routeAware.didPush();
+      if (_coveredRoutes[route] == true) {
+        routeAware.didPushNext();
+      }
     }
   }
 
@@ -2478,6 +2482,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is R && previousRoute is R) {
+      _coveredRoutes[previousRoute] = null;
       final List<RouteAware>? previousSubscribers = _listeners[previousRoute]?.toList();
 
       if (previousSubscribers != null) {
@@ -2499,6 +2504,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route is R && previousRoute is R) {
+      _coveredRoutes[previousRoute] = true;
       final Set<RouteAware>? previousSubscribers = _listeners[previousRoute];
 
       if (previousSubscribers != null) {
@@ -2506,6 +2512,22 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
           routeAware.didPushNext();
         }
       }
+    }
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is R && previousRoute is R) {
+      _coveredRoutes[previousRoute] = _coveredRoutes[route];
+      _coveredRoutes[route] = null;
+    }
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    if (newRoute is R && oldRoute is R) {
+      _coveredRoutes[newRoute] = _coveredRoutes[oldRoute];
+      _coveredRoutes[oldRoute] = null;
     }
   }
 }
