@@ -6427,7 +6427,7 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// Text displayed in a [RichText] widget must be explicitly styled. When
 /// picking which style to use, consider using [DefaultTextStyle.of] the current
-/// [BuildContext] to provide defaults. [MediaQuery.maybeBoldTextOf],
+/// [BuildContext] to provide defaults. [MediaQuery.boldTextOf],
 /// [MediaQuery.maybeLineHeightScaleFactorOverrideOf],
 /// [MediaQuery.maybeLetterSpacingOverrideOf], [MediaQuery.maybeWordSpacingOverrideOf],
 /// and [MediaQuery.maybeParagraphSpacingOverrideOf] can also be used to ensure the styling
