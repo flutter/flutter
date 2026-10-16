@@ -242,6 +242,88 @@ flutter:
     },
   );
 
+  testWithoutContext('correctly bundles assets given environment conditions', () async {
+    final fileSystem = MemoryFileSystem();
+    fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_asset_bundle_test.',
+    );
+    final logger = BufferLogger.test();
+    final platform = FakePlatform(
+      environment: <String, String>{'APP': 'alpha', 'AUDIENCE': 'internal'},
+    );
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+    fileSystem.file('common.txt').createSync();
+    fileSystem.file('alpha.txt').createSync();
+    fileSystem.file('production.txt').createSync();
+    fileSystem.file('internal.txt').createSync();
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - common.txt
+    - path: alpha.txt
+      environment:
+        APP: alpha
+    - path: production.txt
+      environment:
+        AUDIENCE: production
+    - path: internal.txt
+      environment:
+        APP:
+          - alpha
+          - beta
+        AUDIENCE: internal
+''');
+
+    final ManifestAssetBundle bundle = await buildBundleWithFlavor(
+      null,
+      logger: logger,
+      fileSystem: fileSystem,
+      platform: platform,
+    );
+
+    expect(bundle.entries.keys, containsAll(<String>['common.txt', 'alpha.txt', 'internal.txt']));
+    expect(bundle.entries.keys, isNot(contains('production.txt')));
+  });
+
+  testWithoutContext('throws a tool exit for conflicting environment conditions', () async {
+    final fileSystem = MemoryFileSystem();
+    fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync(
+      'flutter_asset_bundle_test.',
+    );
+    final logger = BufferLogger.test();
+    final platform = FakePlatform(environment: <String, String>{'APP': 'alpha'});
+    writePackageConfigFiles(directory: fileSystem.currentDirectory, mainLibName: 'example');
+    fileSystem.file('asset.txt').createSync();
+    fileSystem.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - path: asset.txt
+      environment:
+        APP: alpha
+    - path: asset.txt
+      environment:
+        APP:
+          - alpha
+          - beta
+''');
+
+    expect(
+      buildBundleWithFlavor(null, logger: logger, fileSystem: fileSystem, platform: platform),
+      throwsToolExit(
+        message:
+            'Multiple assets entries include the file "asset.txt", but they specify different environment conditions.\n'
+            'An entry with the path "asset.txt" specifies the environment conditions: {APP: {alpha}}.\n'
+            'An entry with the path "asset.txt" specifies the environment conditions: {APP: {alpha, beta}}.',
+      ),
+    );
+  });
+
   testWithoutContext('throws ToolExit when flavor from file-level declaration has different flavor from containing folder flavor declaration', () async {
     final fileSystem = MemoryFileSystem();
     fileSystem.currentDirectory = fileSystem.systemTempDirectory.createTempSync(

@@ -579,6 +579,35 @@ void main() {
     expect(environmentA.buildDir.path, isNot(environmentB.buildDir.path));
   });
 
+  testWithoutContext('asset environment changes the build configuration', () async {
+    fileSystem.file('pubspec.yaml').writeAsStringSync(r'''
+name: example
+flutter:
+  assets:
+    - path: asset.txt
+      environment:
+        APP: alpha
+''');
+    final environmentA = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(environment: <String, String>{'APP': 'alpha'}),
+    );
+    final environmentB = Environment.test(
+      fileSystem.currentDirectory,
+      artifacts: Artifacts.test(),
+      processManager: FakeProcessManager.any(),
+      fileSystem: fileSystem,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(environment: <String, String>{'APP': 'beta'}),
+    );
+
+    expect(environmentA.buildDir.path, isNot(environmentB.buildDir.path));
+  });
+
   testWithoutContext('Additional inputs do not change the build configuration', () async {
     final environmentA = Environment.test(
       fileSystem.currentDirectory,

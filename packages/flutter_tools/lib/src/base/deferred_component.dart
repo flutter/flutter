@@ -111,6 +111,9 @@ class DeferredComponent {
       if (asset.platforms.isNotEmpty) {
         out.write(' (platforms: ${asset.platforms.join(', ')})');
       }
+      if (asset.environment.isNotEmpty) {
+        out.write(' (environment: ${asset.environment})');
+      }
     }
     return out.toString();
   }
