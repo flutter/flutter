@@ -132,7 +132,6 @@ class BundleBuilder {
 
 Future<AssetBundle?> buildAssets({
   required String manifestPath,
-  String? assetDirPath,
   required String packageConfigPath,
   required TargetPlatform targetPlatform,
   String? flavor,
