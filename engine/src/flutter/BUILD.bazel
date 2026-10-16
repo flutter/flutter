@@ -129,7 +129,9 @@ test_suite(
 # alone asks for it): the six benchmark executables it runs, each with ICU's
 # data file (the converter's benchmarkRuns). They are tests tagged `manual`,
 # as is this suite, so a wildcard run leaves them out as every other builder
-# does; `bazel test //engine/src/flutter:benchmarks` is the type.
+# does; `bazel test //engine/src/flutter:benchmarks` is the type -- less its
+# Dart test (run_benchmark_tests: testing/benchmark/test/parse_and_send_test
+# .dart), which reads the checkout's git log and stays with `dart` there.
 test_suite(
     name = "benchmarks",
     tags = ["manual"],

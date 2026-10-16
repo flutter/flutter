@@ -631,7 +631,11 @@ config whose include directory was a target label, which contributed
 nothing). The sizes follow GN's unoptimized binaries on the host: 10–34 s
 for five of them (`medium`), 1,087 s for `ui_benchmarks`, whose one case
 completes a 3 MB platform message in a Dart isolate per iteration outside
-the timed region (`enormous`); CI runs them optimized.
+the timed region (`enormous`); CI runs them optimized. The type's other
+half, `run_benchmark_tests` -- `dart test/parse_and_send_test.dart` in
+`testing/benchmark` -- reads the checkout's git log (`getGitLog`, `git log`
+two directories up), so like `ci`'s tests it stays with `dart` in the
+checkout.
 
 ## Impeller's shader pipeline
 
