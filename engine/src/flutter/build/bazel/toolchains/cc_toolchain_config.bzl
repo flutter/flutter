@@ -167,11 +167,17 @@ _LINUX_EXECUTABLE_LINK_FLAGS = [
 _LINUX_LINK_LIBS = ["-ldl"]
 
 # //build/config:debug, :release, //build/config/compiler:no_optimize,
-# :optimize, :symbols.
+# :optimize, and the symbol configs BUILDCONFIG.gn picks by symbol_level:
+# :symbols (-g2) for an unoptimized build, :no_symbols (-g0) for an
+# optimized one on Linux ("Linux is slowed by having symbols as part of
+# the target binary, whereas Mac and Windows have them separate, so in
+# Release Linux, default them off"), so host_debug, host_profile and
+# host_release all compile with -g0; a macOS toolchain would take -g2 in
+# both. --copt=-g2 restores symbols for a profile.
 _DBG_COMPILE_FLAGS = ["-O0", "-g2"]
 _DBG_DEFINES = ["_DEBUG", "_GLIBCXX_DEBUG=1"]
 _FASTBUILD_COMPILE_FLAGS = ["-O0", "-g1"]
-_OPT_COMPILE_FLAGS = ["-O2", "-g2", "-fno-ident", "-fdata-sections", "-ffunction-sections"]
+_OPT_COMPILE_FLAGS = ["-O2", "-g0", "-fno-ident", "-fdata-sections", "-ffunction-sections"]
 _OPT_DEFINES = ["NDEBUG", "NVALGRIND", "DYNAMIC_ANNOTATIONS_ENABLED=0"]
 _OPT_LINK_FLAGS = ["-Wl,-O2", "-Wl,--gc-sections"]
 
