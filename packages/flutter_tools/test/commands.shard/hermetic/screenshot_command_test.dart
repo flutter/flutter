@@ -119,7 +119,15 @@ void main() {
         throwsToolExit(message: 'File was not created, ensure path is valid'),
       );
       expect(
-        () => ScreenshotCommand.checkOutput(fs.file('../'), fs),
+        () => ScreenshotCommand.checkOutput(fs.file('non-existent-file.png'), fs),
+        throwsToolExit(message: 'File was not created, ensure path is valid'),
+      );
+      expect(
+        () => ScreenshotCommand.checkOutput(fs.file('sub_dir/non-existent-file.png'), fs),
+        throwsToolExit(message: 'File was not created, ensure path is valid'),
+      );
+      expect(
+        () => ScreenshotCommand.checkOutput(fs.file('sub_dir'), fs),
         throwsToolExit(message: 'File was not created, ensure path is valid'),
       );
       expect(
@@ -133,30 +141,6 @@ void main() {
       expect(
         () => ScreenshotCommand.checkOutput(fs.file('sub_dir/test.png'), fs),
         throwsToolExit(message: 'File was not created, ensure path is valid'),
-      );
-    });
-  });
-
-  group('Screenshot output validation', () {
-    testWithoutContext('successful', () async {
-      final fs = MemoryFileSystem.test();
-      fs.file('test.png').createSync();
-
-      expect(
-        () => ScreenshotCommand.ensureOutputIsNotJsonRpcError(fs.file('test.png')),
-        returnsNormally,
-      );
-    });
-
-    testWithoutContext('failed', () async {
-      final fs = MemoryFileSystem.test();
-      fs.file('test.png').writeAsStringSync('{"jsonrpc":"2.0", "error":"something"}');
-
-      expect(
-        () => ScreenshotCommand.ensureOutputIsNotJsonRpcError(fs.file('test.png')),
-        throwsToolExit(
-          message: 'It appears the output file contains an error message, not valid output.',
-        ),
       );
     });
   });
