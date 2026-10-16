@@ -22,7 +22,9 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
   FML_FRIEND_MAKE_REF_COUNTED(ParagraphBuilder);
 
  public:
-  static void Create(Dart_Handle wrapper, const ParagraphStyle& in);
+  static void Create(Dart_Handle wrapper,
+                     const ParagraphStyle& in,
+                     const TextStyle& default_text_style);
 
   ~ParagraphBuilder() override;
 
@@ -47,10 +49,10 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
   void build(Dart_Handle paragraph_handle);
 
  private:
-  explicit ParagraphBuilder(const ParagraphStyle& in);
+  ParagraphBuilder(const ParagraphStyle& in,
+                   const TextStyle& default_text_style);
 
   std::unique_ptr<txt::ParagraphBuilder> m_paragraph_builder_;
-  bool m_default_half_leading_ = false;
 };
 
 }  // namespace flutter

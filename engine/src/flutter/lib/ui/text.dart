@@ -2003,7 +2003,7 @@ class ParagraphStyle {
   ///
   /// * `hyphens`: Whether to render a hyphen glyph for soft hyphens (U+00AD)
   ///   that fall at a line break. Defaults to [Hyphens.manual].
-  ParagraphStyle({
+  factory ParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
     int? maxLines,
@@ -2017,21 +2017,25 @@ class ParagraphStyle {
     String? ellipsis,
     Locale? locale,
     Hyphens? hyphens,
-  }) : this._(
-         textAlign: textAlign == null ? null : .new(textAlign),
-         textDirection: textDirection == null ? null : .new(textDirection),
-         maxLines: maxLines == null ? null : .new(maxLines),
-         fontFamily: fontFamily == null ? null : .new(fontFamily),
-         fontSize: fontSize == null ? null : .new(fontSize),
-         height: height == null ? null : .new(height),
-         textHeightBehavior: textHeightBehavior == null ? null : .new(textHeightBehavior),
-         fontWeight: fontWeight == null ? null : .new(fontWeight),
-         fontStyle: fontStyle == null ? null : .new(fontStyle),
-         strutStyle: strutStyle == null ? null : .new(strutStyle),
-         ellipsis: ellipsis == null ? null : .new(ellipsis),
-         locale: locale == null ? null : .new(locale),
-         hyphens: hyphens == null ? null : .new(hyphens),
-       );
+  }) =>
+      ParagraphStyle._(
+          textAlign: textAlign == null ? null : .new(textAlign),
+          textDirection: textDirection == null ? null : .new(textDirection),
+          maxLines: maxLines == null ? null : .new(maxLines),
+          textHeightBehavior: textHeightBehavior == null ? null : .new(textHeightBehavior),
+          strutStyle: strutStyle == null ? null : .new(strutStyle),
+          ellipsis: ellipsis == null ? null : .new(ellipsis),
+          hyphens: hyphens == null ? null : .new(hyphens),
+        )
+        .._defaultTextStyle = TextStyle(
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          height: height,
+          leadingDistribution: textHeightBehavior?.leadingDistribution,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          locale: locale,
+        );
 
   // See the instructions above the TextStyle._ constructor declaration.
   @_NativeData(symbol: 'flutter::ParagraphStyle')
@@ -2039,37 +2043,24 @@ class ParagraphStyle {
     _NativeEnum<TextAlign>? textAlign = const .new(.start),
     _NativeEnum<TextDirection>? textDirection = const .new(.ltr),
     _NativeInt32? maxLines = const .new(0),
-    _NativeDouble? fontSize = const .new(14.0),
-    _NativeDouble? height = const .new(kTextHeightNone),
     _NativeTextHeightBehavior? textHeightBehavior = const .new(.new()),
-    _NativeFontWeight? fontWeight = const .new(.normal),
-    _NativeEnum<FontStyle>? fontStyle = const .new(.normal),
     _NativeEnum<Hyphens>? hyphens = const .new(.manual),
-    this._fontFamily,
     this._strutStyle,
     this._ellipsis,
-    this._locale,
   }) : _encoded = _encodeParagraphStyleFfi(
          textAlign: textAlign,
          textDirection: textDirection,
          maxLines: maxLines,
-         fontFamily: _fontFamily,
-         fontSize: fontSize,
-         height: height,
          textHeightBehavior: textHeightBehavior,
-         fontWeight: fontWeight,
-         fontStyle: fontStyle,
          strutStyle: _strutStyle,
          ellipsis: _ellipsis,
-         locale: _locale,
          hyphens: hyphens,
        );
 
   final _EncodedParagraphStyle _encoded;
-  final _NativeHandle<String>? _fontFamily;
   final _NativeStrutStyle? _strutStyle;
   final _NativeHandle<String>? _ellipsis;
-  final _NativeLocale? _locale;
+  late final TextStyle _defaultTextStyle;
 
   @override
   bool operator ==(Object other) {
@@ -2079,32 +2070,32 @@ class ParagraphStyle {
     return other is ParagraphStyle &&
         other.runtimeType == runtimeType &&
         _encoded.packed == other._encoded.packed &&
-        _fontFamily == other._fontFamily &&
         _strutStyle == other._strutStyle &&
         _ellipsis == other._ellipsis &&
-        _locale == other._locale;
+        _defaultTextStyle == other._defaultTextStyle;
   }
 
   @override
-  int get hashCode => Object.hash(_encoded.packed, _fontFamily, _strutStyle, _ellipsis, _locale);
+  int get hashCode => Object.hash(_encoded.packed, _strutStyle, _ellipsis, _defaultTextStyle);
 
   @override
   String toString() {
     final _PackedParagraphStyle packed = _encoded.packed;
-    final double? height = packed.height;
+    final _PackedTextStyle packedTextStyle = _defaultTextStyle._encoded.packed;
+    final double? height = packedTextStyle.height;
     return 'ParagraphStyle('
         'textAlign: ${packed.textAlign ?? "unspecified"}, '
         'textDirection: ${packed.textDirection ?? "unspecified"}, '
-        'fontWeight: ${packed.fontWeight ?? "unspecified"}, '
-        'fontStyle: ${packed.fontStyle ?? "unspecified"}, '
+        'fontWeight: ${packedTextStyle.fontWeight ?? "unspecified"}, '
+        'fontStyle: ${packedTextStyle.fontStyle ?? "unspecified"}, '
         'maxLines: ${packed.maxLines ?? "unspecified"}, '
         'textHeightBehavior: ${packed.textHeightBehavior ?? "unspecified"}, '
-        'fontFamily: ${_fontFamily ?? "unspecified"}, '
-        'fontSize: ${packed.fontSize ?? "unspecified"}, '
+        'fontFamily: ${_defaultTextStyle._fontFamily ?? "unspecified"}, '
+        'fontSize: ${packedTextStyle.fontSize ?? "unspecified"}, '
         'height: ${height != null && height != kTextHeightNone ? "${height}x" : "unspecified"}, '
         'strutStyle: ${_strutStyle ?? "unspecified"}, '
         'ellipsis: ${_ellipsis != null ? '"$_ellipsis"' : "unspecified"}, '
-        'locale: ${_locale ?? "unspecified"}, '
+        'locale: ${_defaultTextStyle._locale ?? "unspecified"}, '
         'hyphens: ${packed.hyphens ?? "unspecified"}'
         ')';
   }
@@ -3442,11 +3433,11 @@ abstract class ParagraphBuilder {
 
 base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements ParagraphBuilder {
   _NativeParagraphBuilder(ParagraphStyle style) {
-    _constructor(style._encoded);
+    _constructor(style._encoded, style._defaultTextStyle._encoded);
   }
 
-  @Native<Void Function(Handle, Handle)>(symbol: 'ParagraphBuilder::Create')
-  external void _constructor(_EncodedParagraphStyle style);
+  @Native<Void Function(Handle, Handle, Handle)>(symbol: 'ParagraphBuilder::Create')
+  external void _constructor(_EncodedParagraphStyle style, _EncodedTextStyle defaultTextStyle);
 
   @override
   int get placeholderCount => _placeholderCount;

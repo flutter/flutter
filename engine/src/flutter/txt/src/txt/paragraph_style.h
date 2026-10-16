@@ -61,6 +61,7 @@ class ParagraphStyle {
  public:
   // Default TextStyle. Used in GetTextStyle() to obtain the base TextStyle to
   // inherit off of.
+  TextStyle default_text_style;
   int font_weight = FontWeight::normal;
   FontStyle font_style = FontStyle::normal;
   std::string font_family = "";

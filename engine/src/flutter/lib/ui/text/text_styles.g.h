@@ -75,36 +75,24 @@ static_assert(std::is_trivially_copyable_v<TextStyle>);
 
 class ParagraphStyle {
  public:
-  double font_size = {};
-  double height = {};
   int32_t max_lines = {};
-  uint16_t font_weight = {};
-  uint16_t present_mask = {};
   uint8_t text_align = {};
   uint8_t text_direction = {};
   uint8_t text_height_behavior = {};
-  uint8_t font_style = {};
   uint8_t hyphens = {};
-  Dart_Handle font_family = {};
+  uint8_t present_mask = {};
   Dart_Handle strut_style = {};
   Dart_Handle ellipsis = {};
-  Dart_Handle locale = {};
 
   bool has_text_align() const { return (present_mask & (1u << 0)) != 0; }
   bool has_text_direction() const { return (present_mask & (1u << 1)) != 0; }
   bool has_max_lines() const { return (present_mask & (1u << 2)) != 0; }
-  bool has_font_size() const { return (present_mask & (1u << 3)) != 0; }
-  bool has_height() const { return (present_mask & (1u << 4)) != 0; }
   bool has_text_height_behavior() const {
-    return (present_mask & (1u << 5)) != 0;
+    return (present_mask & (1u << 3)) != 0;
   }
-  bool has_font_weight() const { return (present_mask & (1u << 6)) != 0; }
-  bool has_font_style() const { return (present_mask & (1u << 7)) != 0; }
-  bool has_hyphens() const { return (present_mask & (1u << 8)) != 0; }
-  bool has_font_family() const { return (present_mask & (1u << 9)) != 0; }
-  bool has_strut_style() const { return (present_mask & (1u << 10)) != 0; }
-  bool has_ellipsis() const { return (present_mask & (1u << 11)) != 0; }
-  bool has_locale() const { return (present_mask & (1u << 12)) != 0; }
+  bool has_hyphens() const { return (present_mask & (1u << 4)) != 0; }
+  bool has_strut_style() const { return (present_mask & (1u << 5)) != 0; }
+  bool has_ellipsis() const { return (present_mask & (1u << 6)) != 0; }
 };
 static_assert(std::is_standard_layout_v<ParagraphStyle>);
 static_assert(std::is_trivially_copyable_v<ParagraphStyle>);
@@ -198,8 +186,8 @@ struct DartConverter<flutter::ParagraphStyle> {
     if (Dart_IsNull(handle)) {
       return {};
     }
-    Dart_Handle handles[5];
-    Dart_ListGetRange(handle, 1, 5, handles);
+    Dart_Handle handles[3];
+    Dart_ListGetRange(handle, 1, 3, handles);
     Dart_Handle bytes_handle = handles[0];
     Dart_TypedData_Type type;
     void* data = nullptr;
@@ -207,13 +195,12 @@ struct DartConverter<flutter::ParagraphStyle> {
     Dart_TypedDataAcquireData(bytes_handle, &type, &data, &length);
     flutter::ParagraphStyle result;
     constexpr size_t kPackedSize =
-        offsetof(flutter::ParagraphStyle, hyphens) + sizeof(result.hyphens);
+        offsetof(flutter::ParagraphStyle, present_mask) +
+        sizeof(result.present_mask);
     FML_DCHECK(length >= static_cast<intptr_t>(kPackedSize));
     std::memcpy(&result, data, kPackedSize);
-    result.font_family = handles[1];
-    result.strut_style = handles[2];
-    result.ellipsis = handles[3];
-    result.locale = handles[4];
+    result.strut_style = handles[1];
+    result.ellipsis = handles[2];
     Dart_TypedDataReleaseData(bytes_handle);
     return result;
   }

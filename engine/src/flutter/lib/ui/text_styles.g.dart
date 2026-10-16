@@ -271,20 +271,8 @@ _EncodedTextStyle _encodeTextStyleFfi({
 }
 
 final class _PackedParagraphStyle extends Struct {
-  @Double()
-  external double _fontSize;
-
-  @Double()
-  external double _height;
-
   @Int32()
   external int _maxLines;
-
-  @Uint16()
-  external int _fontWeight;
-
-  @Uint16()
-  external int _presentMask;
 
   @Uint8()
   external int _textAlign;
@@ -296,10 +284,10 @@ final class _PackedParagraphStyle extends Struct {
   external int _textHeightBehavior;
 
   @Uint8()
-  external int _fontStyle;
+  external int _hyphens;
 
   @Uint8()
-  external int _hyphens;
+  external int _presentMask;
 
   TextAlign? get textAlign => (_presentMask & (1 << 0)) == 0 ? null : TextAlign.values[_textAlign];
 
@@ -308,19 +296,10 @@ final class _PackedParagraphStyle extends Struct {
 
   int? get maxLines => (_presentMask & (1 << 2)) == 0 ? null : _maxLines;
 
-  double? get fontSize => (_presentMask & (1 << 3)) == 0 ? null : _fontSize;
-
-  double? get height => (_presentMask & (1 << 4)) == 0 ? null : _height;
-
   TextHeightBehavior? get textHeightBehavior =>
-      (_presentMask & (1 << 5)) == 0 ? null : _NativeTextHeightBehavior.decode(_textHeightBehavior);
+      (_presentMask & (1 << 3)) == 0 ? null : _NativeTextHeightBehavior.decode(_textHeightBehavior);
 
-  FontWeight? get fontWeight =>
-      (_presentMask & (1 << 6)) == 0 ? null : _NativeFontWeight.decode(_fontWeight);
-
-  FontStyle? get fontStyle => (_presentMask & (1 << 7)) == 0 ? null : FontStyle.values[_fontStyle];
-
-  Hyphens? get hyphens => (_presentMask & (1 << 8)) == 0 ? null : Hyphens.values[_hyphens];
+  Hyphens? get hyphens => (_presentMask & (1 << 4)) == 0 ? null : Hyphens.values[_hyphens];
 
   @override
   bool operator ==(Object other) {
@@ -329,28 +308,20 @@ final class _PackedParagraphStyle extends Struct {
     }
     return other is _PackedParagraphStyle &&
         _presentMask == other._presentMask &&
-        _fontSize == other._fontSize &&
-        _height == other._height &&
         _maxLines == other._maxLines &&
-        _fontWeight == other._fontWeight &&
         _textAlign == other._textAlign &&
         _textDirection == other._textDirection &&
         _textHeightBehavior == other._textHeightBehavior &&
-        _fontStyle == other._fontStyle &&
         _hyphens == other._hyphens;
   }
 
   @override
   int get hashCode => Object.hash(
     _presentMask,
-    _fontSize,
-    _height,
     _maxLines,
-    _fontWeight,
     _textAlign,
     _textDirection,
     _textHeightBehavior,
-    _fontStyle,
     _hyphens,
   );
 }
@@ -363,16 +334,10 @@ _EncodedParagraphStyle _encodeParagraphStyleFfi({
   required _NativeEnum<TextAlign>? textAlign,
   required _NativeEnum<TextDirection>? textDirection,
   required _NativeInt32? maxLines,
-  required _NativeDouble? fontSize,
-  required _NativeDouble? height,
   required _NativeTextHeightBehavior? textHeightBehavior,
-  required _NativeFontWeight? fontWeight,
-  required _NativeEnum<FontStyle>? fontStyle,
   required _NativeEnum<Hyphens>? hyphens,
-  required _NativeHandle<String>? fontFamily,
   required _NativeStrutStyle? strutStyle,
   required _NativeHandle<String>? ellipsis,
-  required _NativeLocale? locale,
 }) {
   final bytes = Uint8List(sizeOf<_PackedParagraphStyle>());
   final _PackedParagraphStyle packed = Struct.create<_PackedParagraphStyle>(bytes);
@@ -395,63 +360,26 @@ _EncodedParagraphStyle _encodeParagraphStyleFfi({
     maxLines = const .new(0);
   }
   packed._maxLines = maxLines.value;
-  if (fontSize != null) {
-    mask |= 1 << 3;
-  } else {
-    fontSize = const .new(14.0);
-  }
-  packed._fontSize = fontSize.value;
-  if (height != null) {
-    mask |= 1 << 4;
-  } else {
-    height = const .new(kTextHeightNone);
-  }
-  packed._height = height.value;
   if (textHeightBehavior != null) {
-    mask |= 1 << 5;
+    mask |= 1 << 3;
   } else {
     textHeightBehavior = const .new(.new());
   }
   packed._textHeightBehavior = textHeightBehavior.encode();
-  if (fontWeight != null) {
-    mask |= 1 << 6;
-  } else {
-    fontWeight = const .new(.normal);
-  }
-  packed._fontWeight = fontWeight.encode();
-  if (fontStyle != null) {
-    mask |= 1 << 7;
-  } else {
-    fontStyle = const .new(.normal);
-  }
-  packed._fontStyle = fontStyle.value.index;
   if (hyphens != null) {
-    mask |= 1 << 8;
+    mask |= 1 << 4;
   } else {
     hyphens = const .new(.manual);
   }
   packed._hyphens = hyphens.value.index;
-  if (fontFamily != null) {
-    mask |= 1 << 9;
-  }
   if (strutStyle != null) {
-    mask |= 1 << 10;
+    mask |= 1 << 5;
   }
   if (ellipsis != null) {
-    mask |= 1 << 11;
-  }
-  if (locale != null) {
-    mask |= 1 << 12;
+    mask |= 1 << 6;
   }
   packed._presentMask = mask;
-  return _EncodedParagraphStyle(<Object?>[
-    packed,
-    bytes,
-    fontFamily,
-    strutStyle?.encode(),
-    ellipsis,
-    locale?.encode(),
-  ]);
+  return _EncodedParagraphStyle(<Object?>[packed, bytes, strutStyle?.encode(), ellipsis]);
 }
 
 final class _PackedStrutStyle extends Struct {

@@ -74,11 +74,10 @@ void DecodeTextShadows(Dart_Handle shadows_handle,
     decoded_shadows.emplace_back(
         static_cast<SkColor>(
             tonic::DartConverter<uint32_t>::FromDart(handles[i])),
-        SkPoint::Make(
-            static_cast<float>(
-                tonic::DartConverter<double>::FromDart(handles[i + 1])),
-            static_cast<float>(
-                tonic::DartConverter<double>::FromDart(handles[i + 2]))),
+        SkPoint::Make(static_cast<float>(tonic::DartConverter<double>::FromDart(
+                          handles[i + 1])),
+                      static_cast<float>(tonic::DartConverter<double>::FromDart(
+                          handles[i + 2]))),
         tonic::DartConverter<double>::FromDart(handles[i + 3]));
   }
 }
@@ -121,8 +120,12 @@ void DecodeStrut(Dart_Handle strut_handle,
                  bool default_half_leading,
                  txt::ParagraphStyle& paragraph_style) {
   StrutStyle in = tonic::DartConverter<StrutStyle>::FromDart(strut_handle);
-  const bool has_height_override =
-      in.has_height() && in.height != kTextHeightNone;
+  // Primitive fields on `flutter::StrutStyle` are pre-populated with their
+  // default values from `StrutStyle._` in `lib/ui/text.dart` when omitted by
+  // the caller, so `in.has_<field>()` checks are not needed to read them
+  // (except `leading_distribution`, which falls back to `ParagraphStyle`'s
+  // `default_half_leading` when omitted).
+  const bool has_height_override = in.height != kTextHeightNone;
   if (!in.has_font_family() && !in.has_font_family_fallback() &&
       !in.has_font_size() && !has_height_override &&
       !in.has_leading_distribution() && !in.has_leading() &&
@@ -131,28 +134,17 @@ void DecodeStrut(Dart_Handle strut_handle,
     return;
   }
   paragraph_style.strut_enabled = true;
-
-  if (in.has_font_weight()) {
-    paragraph_style.strut_font_weight = in.font_weight;
-  }
-  if (in.has_font_style()) {
-    paragraph_style.strut_font_style =
-        static_cast<txt::FontStyle>(in.font_style);
-  }
+  paragraph_style.strut_font_weight = in.font_weight;
+  paragraph_style.strut_font_style = static_cast<txt::FontStyle>(in.font_style);
   paragraph_style.strut_half_leading = in.has_leading_distribution()
                                            ? (in.leading_distribution == 1)
                                            : default_half_leading;
-
-  if (in.has_font_size()) {
-    paragraph_style.strut_font_size = in.font_size;
-  }
+  paragraph_style.strut_font_size = in.font_size;
   if (has_height_override) {
     paragraph_style.strut_height = in.height;
     paragraph_style.strut_has_height_override = true;
   }
-  if (in.has_leading()) {
-    paragraph_style.strut_leading = in.leading;
-  }
+  paragraph_style.strut_leading = in.leading;
   paragraph_style.force_strut_height = in.force_strut_height;
 
   if (in.has_font_family()) {
@@ -174,59 +166,73 @@ void DecodeStrut(Dart_Handle strut_handle,
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ParagraphBuilder);
 
-void ParagraphBuilder::Create(Dart_Handle wrapper, const ParagraphStyle& in) {
+void ParagraphBuilder::Create(Dart_Handle wrapper,
+                              const ParagraphStyle& in,
+                              const TextStyle& default_text_style) {
   UIDartState::ThrowIfUIOperationsProhibited();
-  auto res = fml::MakeRefCounted<ParagraphBuilder>(in);
+  auto res = fml::MakeRefCounted<ParagraphBuilder>(in, default_text_style);
   res->AssociateWithDartWrapper(wrapper);
 }
 
-ParagraphBuilder::ParagraphBuilder(const ParagraphStyle& in) {
+ParagraphBuilder::ParagraphBuilder(const ParagraphStyle& in,
+                                   const TextStyle& default_text_style) {
+  // Primitive fields on `flutter::ParagraphStyle` and `flutter::TextStyle` are
+  // pre-populated with their default values from `ParagraphStyle._` and
+  // `TextStyle._` in `lib/ui/text.dart` when omitted by the caller, so they can
+  // be assigned directly without `has_<field>()` checks.
   txt::ParagraphStyle style;
-  if (in.has_text_align()) {
-    style.text_align = static_cast<txt::TextAlign>(in.text_align);
-  }
-  if (in.has_text_direction()) {
-    style.text_direction = static_cast<txt::TextDirection>(in.text_direction);
-  }
-  if (in.has_font_weight()) {
-    style.font_weight = in.font_weight;
-  }
-  if (in.has_font_style()) {
-    style.font_style = static_cast<txt::FontStyle>(in.font_style);
-  }
-  if (in.has_font_family()) {
-    style.font_family =
-        tonic::DartConverter<std::string>::FromDart(in.font_family);
-  }
-  if (in.has_font_size()) {
-    style.font_size = in.font_size;
-  }
-  if (in.has_height() && in.height != kTextHeightNone) {
-    style.height = in.height;
-    style.has_height_override = true;
-  }
-  if (in.has_text_height_behavior()) {
-    style.text_height_behavior = in.text_height_behavior & 0x3;
-    m_default_half_leading_ = ((in.text_height_behavior >> 2) & 0x1) != 0;
-  }
+  style.text_align = static_cast<txt::TextAlign>(in.text_align);
+  style.text_direction = static_cast<txt::TextDirection>(in.text_direction);
+  style.text_height_behavior = in.text_height_behavior & 0x3;
+
+  // Still check `in.has_max_lines()` because an omitted `maxLines`
+  // means unlimited lines (`std::numeric_limits<size_t>::max()`).
   if (in.has_max_lines()) {
     style.max_lines = in.max_lines;
   }
+  const bool default_half_leading = default_text_style.leading_distribution == 1;
   if (in.has_strut_style()) {
-    DecodeStrut(in.strut_style, m_default_half_leading_, style);
+    DecodeStrut(in.strut_style, default_half_leading, style);
   }
   if (in.has_ellipsis()) {
     style.ellipsis =
         tonic::DartConverter<std::u16string>::FromDart(in.ellipsis);
   }
-  if (in.has_locale()) {
-    style.locale = tonic::DartConverter<std::string>::FromDart(in.locale);
+  // Hyphens.manual (0) renders the soft hyphen glyph; Hyphens.hidden (1)
+  // suppresses it.
+  style.render_soft_hyphens = in.hyphens == 0;
+
+  style.font_weight = default_text_style.font_weight;
+  style.font_style = static_cast<txt::FontStyle>(default_text_style.font_style);
+  if (default_text_style.has_font_family()) {
+    style.font_family = tonic::DartConverter<std::string>::FromDart(
+        default_text_style.font_family);
   }
-  if (in.has_hyphens()) {
-    // Hyphens.manual (0) renders the soft hyphen glyph; Hyphens.hidden (1)
-    // suppresses it.
-    style.render_soft_hyphens = in.hyphens == 0;
+  style.font_size = default_text_style.font_size;
+  if (default_text_style.height != kTextHeightNone) {
+    style.height = default_text_style.height;
+    style.has_height_override = true;
   }
+  if (default_text_style.has_locale()) {
+    style.locale =
+        tonic::DartConverter<std::string>::FromDart(default_text_style.locale);
+  }
+
+  style.default_text_style.color = default_text_style.color;
+  style.default_text_style.decoration =
+      static_cast<txt::TextDecoration>(default_text_style.decoration);
+  style.default_text_style.decoration_color =
+      default_text_style.decoration_color;
+  style.default_text_style.decoration_style =
+      static_cast<txt::TextDecorationStyle>(
+          default_text_style.decoration_style);
+  style.default_text_style.decoration_thickness_multiplier =
+      default_text_style.decoration_thickness;
+  style.default_text_style.text_baseline =
+      static_cast<txt::TextBaseline>(default_text_style.text_baseline);
+  style.default_text_style.letter_spacing = default_text_style.letter_spacing;
+  style.default_text_style.word_spacing = default_text_style.word_spacing;
+  style.default_text_style.half_leading = default_half_leading;
 
   FontCollection& font_collection = UIDartState::Current()
                                         ->platform_configuration()
@@ -241,13 +247,11 @@ ParagraphBuilder::ParagraphBuilder(const ParagraphStyle& in) {
 ParagraphBuilder::~ParagraphBuilder() = default;
 
 void ParagraphBuilder::pushStyle(const TextStyle& in) {
-  // Set to use the properties of the previous style if the property is not
-  // explicitly given.
+  // `PeekStyle()` returns `base_style_` (seeded from `default_text_style` in
+  // the constructor) when the style stack is empty, or the parent
+  // `txt::TextStyle` when styles are nested. Only fields explicitly provided on
+  // `in` (`in.has_<field>()`) overwrite the inherited style.
   txt::TextStyle style = m_paragraph_builder_->PeekStyle();
-
-  style.half_leading = in.has_leading_distribution()
-                           ? (in.leading_distribution == 1)
-                           : m_default_half_leading_;
 
   if (in.has_color()) {
     style.color = in.color;
@@ -268,6 +272,7 @@ void ParagraphBuilder::pushStyle(const TextStyle& in) {
   if (in.has_text_baseline()) {
     // TODO(abarth): Implement TextBaseline. The CSS version of this
     // property wasn't wired up either.
+    style.text_baseline = static_cast<txt::TextBaseline>(in.text_baseline);
   }
   if (in.has_font_weight()) {
     style.font_weight = in.font_weight;
@@ -287,6 +292,9 @@ void ParagraphBuilder::pushStyle(const TextStyle& in) {
   if (in.has_height()) {
     style.height = in.height;
     style.has_height_override = style.height != kTextHeightNone;
+  }
+  if (in.has_leading_distribution()) {
+    style.half_leading = in.leading_distribution == 1;
   }
   if (in.has_locale()) {
     style.locale = tonic::DartConverter<std::string>::FromDart(in.locale);
