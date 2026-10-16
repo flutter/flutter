@@ -28,7 +28,7 @@ abstract class Signals {
   }) {
     assert((analytics == null) == (logger == null), 'Pass both analytics and logger, or neither.');
     final signals = LocalSignals._(exitSignals, shutdownHooks: shutdownHooks);
-    if ((analytics, logger) case (final Analytics analytics, final Logger logger)) {
+    if (analytics != null && logger != null) {
       signals.configureExit(analytics: analytics, logger: logger);
     }
     return signals;
