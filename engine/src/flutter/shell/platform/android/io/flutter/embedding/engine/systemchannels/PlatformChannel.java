@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.systemchannels;
 
 import android.content.pm.ActivityInfo;
+import android.graphics.Rect;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -136,6 +137,13 @@ public class PlatformChannel {
                   result.error("error", exception.getMessage(), null);
                 }
                 break;
+              case "SystemChrome.setSystemGestureExclusionRects":
+                {
+                  List<Rect> rects = decodeRects((JSONArray) arguments);
+                  platformMessageHandler.setSystemGestureExclusionRects(rects);
+                  result.success(null);
+                  break;
+                }
               case "SystemNavigator.setFrameworkHandlesBack":
                 {
                   boolean frameworkHandlesBack = (boolean) arguments;
@@ -320,6 +328,26 @@ public class PlatformChannel {
     }
     String label = encodedDescription.getString("label");
     return new AppSwitcherDescription(color, label);
+  }
+
+  /**
+   * Decodes a list of JSON-encoded rects, in physical pixels, to a list of {@link Rect}.
+   *
+   * @throws JSONException if {@code encodedRects} does not contain expected keys and value types.
+   */
+  @NonNull
+  private List<Rect> decodeRects(@NonNull JSONArray encodedRects) throws JSONException {
+    List<Rect> rects = new ArrayList<>(encodedRects.length());
+    for (int i = 0; i < encodedRects.length(); ++i) {
+      JSONObject encodedRect = encodedRects.getJSONObject(i);
+      rects.add(
+          new Rect(
+              encodedRect.getInt("left"),
+              encodedRect.getInt("top"),
+              encodedRect.getInt("right"),
+              encodedRect.getInt("bottom")));
+    }
+    return rects;
   }
 
   /**
@@ -520,6 +548,17 @@ public class PlatformChannel {
      * systemUiOverlayStyle}, i.e., the given status bar and navigation bar colors and brightness.
      */
     void setSystemUiOverlayStyle(@NonNull SystemChromeStyle systemUiOverlayStyle);
+
+    /**
+     * The Flutter application would like the Android system to not use the given {@code rects} for
+     * system gestures, such as the back gesture.
+     *
+     * <p>The rects are in physical pixels, relative to the Flutter view. The framework uses this to
+     * keep text selection handles near the edges of the screen draggable. See {@link
+     * android.view.View#setSystemGestureExclusionRects(List)}, which is available starting in
+     * Android 10 (API 29).
+     */
+    default void setSystemGestureExclusionRects(@NonNull List<Rect> rects) {}
 
     /**
      * The Flutter application would or would not like to handle navigation pop events itself.
