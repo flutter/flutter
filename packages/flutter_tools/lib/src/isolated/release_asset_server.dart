@@ -46,6 +46,9 @@ class ReleaseAssetServer {
   // keystore/signing config, or arbitrary project files) are not served from
   // them. The web build output directory is unrestricted because it only
   // contains generated, publishable assets.
+  //
+  // An empty set relies on the request path staying below its root, which
+  // `resolveRequestPathUnder` enforces for every root listed below.
   static const Set<String> _sourceMapExtensions = <String>{'.dart', '.map'};
 
   static const Set<String> _staticAssetExtensions = <String>{
@@ -84,7 +87,16 @@ class ReleaseAssetServer {
       fileUri = entrypoint;
     } else {
       for (final (Uri uri, Set<String> allowedExtensions) in _searchPaths()) {
-        final Uri potential = uri.resolve(requestPath);
+        final Uri? potential = resolveRequestPathUnder(
+          uri,
+          requestPath,
+          fileSystem: _fileSystem,
+          windows: _platform.isWindows,
+        );
+        if (potential == null) {
+          // The request path does not name a location below this root.
+          continue;
+        }
         final String potentialPath = potential.toFilePath(windows: _platform.isWindows);
         if (allowedExtensions.isNotEmpty &&
             !allowedExtensions.contains(_fileSystem.path.extension(potentialPath))) {
