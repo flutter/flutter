@@ -1597,7 +1597,7 @@ class SliverAppBar extends StatefulWidget {
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
     this.shape,
-    this.toolbarHeight = kToolbarHeight,
+    this.toolbarHeight,
     this.leadingWidth,
     this.toolbarTextStyle,
     this.titleTextStyle,
@@ -1609,7 +1609,7 @@ class SliverAppBar extends StatefulWidget {
   }) : assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        assert(stretchTriggerOffset > 0.0),
        assert(
-         collapsedHeight == null || collapsedHeight >= toolbarHeight,
+         collapsedHeight == null || toolbarHeight == null || collapsedHeight >= toolbarHeight,
          'The "collapsedHeight" argument has to be larger than or equal to [toolbarHeight].',
        ),
        _variant = _SliverAppVariant.small;
@@ -1668,7 +1668,7 @@ class SliverAppBar extends StatefulWidget {
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
     this.shape,
-    this.toolbarHeight = _MediumScrollUnderFlexibleConfig.collapsedHeight,
+    double this.toolbarHeight = _MediumScrollUnderFlexibleConfig.collapsedHeight,
     this.leadingWidth,
     this.toolbarTextStyle,
     this.titleTextStyle,
@@ -1739,7 +1739,7 @@ class SliverAppBar extends StatefulWidget {
     this.stretchTriggerOffset = 100.0,
     this.onStretchTrigger,
     this.shape,
-    this.toolbarHeight = _LargeScrollUnderFlexibleConfig.collapsedHeight,
+    double this.toolbarHeight = _LargeScrollUnderFlexibleConfig.collapsedHeight,
     this.leadingWidth,
     this.toolbarTextStyle,
     this.titleTextStyle,
@@ -1985,8 +1985,12 @@ class SliverAppBar extends StatefulWidget {
 
   /// {@macro flutter.material.appbar.toolbarHeight}
   ///
+  /// If this is null, [AppBarThemeData.toolbarHeight] is used. If that is also
+  /// null, [kToolbarHeight] is used. The [SliverAppBar.medium] and
+  /// [SliverAppBar.large] constructors always provide a non-null default.
+  ///
   /// This property is used to configure an [AppBar].
-  final double toolbarHeight;
+  final double? toolbarHeight;
 
   /// {@macro flutter.material.appbar.leadingWidth}
   ///
@@ -2088,9 +2092,16 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
     final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
+    final double toolbarHeight =
+        widget.toolbarHeight ?? AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight;
+    assert(
+      widget.collapsedHeight == null || widget.collapsedHeight! >= toolbarHeight,
+      'The "collapsedHeight" argument has to be larger than or equal to the toolbar height, '
+      'which is [toolbarHeight] or, when that is null, [AppBarThemeData.toolbarHeight].',
+    );
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
         ? (widget.collapsedHeight ?? 0.0) + bottomHeight + topPadding
-        : (widget.collapsedHeight ?? widget.toolbarHeight) + bottomHeight + topPadding;
+        : (widget.collapsedHeight ?? toolbarHeight) + bottomHeight + topPadding;
     final double? effectiveExpandedHeight;
     final double effectiveCollapsedHeight;
     final Widget? effectiveFlexibleSpace;
@@ -2168,7 +2179,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           snapConfiguration: _snapConfiguration,
           stretchConfiguration: _stretchConfiguration,
           showOnScreenConfiguration: _showOnScreenConfiguration,
-          toolbarHeight: widget.toolbarHeight,
+          toolbarHeight: toolbarHeight,
           leadingWidth: widget.leadingWidth,
           toolbarTextStyle: widget.toolbarTextStyle,
           titleTextStyle: widget.titleTextStyle,

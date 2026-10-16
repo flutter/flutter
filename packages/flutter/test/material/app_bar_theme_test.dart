@@ -860,6 +860,71 @@ void main() {
     expect(leadingConstraints.minWidth, 40);
   });
 
+  testWidgets('SliverAppBar uses AppBarThemeData.toolbarHeight', (WidgetTester tester) async {
+    const double themeToolbarHeight = 70;
+    const contentKey = Key('content');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(appBarTheme: const AppBarThemeData(toolbarHeight: themeToolbarHeight)),
+        home: const CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(title: Text('Title')),
+            SliverToBoxAdapter(child: SizedBox(key: contentKey, height: 100)),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(AppBar)).height, themeToolbarHeight);
+    // The extent of the sliver reflects the themed toolbar height as well.
+    expect(tester.getTopLeft(find.byKey(contentKey)).dy, themeToolbarHeight);
+  });
+
+  testWidgets('SliverAppBar.toolbarHeight takes priority over AppBarThemeData.toolbarHeight', (
+    WidgetTester tester,
+  ) async {
+    const double themeToolbarHeight = 70;
+    const double toolbarHeight = 48;
+    const contentKey = Key('content');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(appBarTheme: const AppBarThemeData(toolbarHeight: themeToolbarHeight)),
+        home: const CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(title: Text('Title'), toolbarHeight: toolbarHeight),
+            SliverToBoxAdapter(child: SizedBox(key: contentKey, height: 100)),
+          ],
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(AppBar)).height, toolbarHeight);
+    expect(tester.getTopLeft(find.byKey(contentKey)).dy, toolbarHeight);
+  });
+
+  testWidgets('SliverAppBar asserts if collapsedHeight is less than the themed toolbarHeight', (
+    WidgetTester tester,
+  ) async {
+    final errors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = errors.add;
+    addTearDown(() => FlutterError.onError = oldHandler);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(appBarTheme: const AppBarThemeData(toolbarHeight: 70)),
+        home: const CustomScrollView(
+          slivers: <Widget>[SliverAppBar(title: Text('Title'), collapsedHeight: 60)],
+        ),
+      ),
+    );
+    FlutterError.onError = oldHandler;
+
+    expect(errors, isNotEmpty);
+    expect(errors.first.exception, isAssertionError);
+    expect(errors.first.exception.toString(), contains('collapsedHeight'));
+  });
+
   testWidgets('SliverAppBar.medium uses AppBarThemeData properties', (WidgetTester tester) async {
     const title = 'Medium App Bar';
 
