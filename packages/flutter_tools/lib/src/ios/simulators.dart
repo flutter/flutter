@@ -58,20 +58,12 @@ class IOSSimulators extends PollingDeviceDiscovery {
 }
 
 class IOSSimulatorUtils {
-  factory IOSSimulatorUtils({required ToolContext toolContext, required Xcode xcode}) {
-    final ToolContext(:Logger logger, :ProcessManager processManager) = toolContext;
-    return IOSSimulatorUtils._(
-      simControl: SimControl(logger: logger, processManager: processManager, xcode: xcode),
-      toolContext: toolContext,
-      xcode: xcode,
-    );
-  }
-
-  IOSSimulatorUtils._({
-    required this._simControl,
-    required this._toolContext,
-    required this._xcode,
-  });
+  IOSSimulatorUtils({required this._toolContext, required this._xcode})
+    : _simControl = SimControl(
+        logger: _toolContext.logger,
+        processManager: _toolContext.processManager,
+        xcode: _xcode,
+      );
 
   final SimControl _simControl;
   final ToolContext _toolContext;
