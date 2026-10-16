@@ -144,39 +144,64 @@ void main() {
       expect(receivedEnv.buildDir, customBuildDir.absolute.uri);
     });
 
-    test('logs error when extension clean RPC throws without failing caller', () async {
-      void failingEntryPoint(SendPort sendPort) {
-        ToolExtensionEntryPoint.run(
-          sendPort,
-          <ToolExtensionService>[
-            _FakeCleanService((CleanEnvironment _) async {
-              throw StateError('Simulated extension clean failure');
-            }),
-          ],
-          supportedPlatforms: const <String>{'linux'},
+    test(
+      'logs error when extension clean RPC throws without failing caller or sibling extensions',
+      () async {
+        final verifyPort = ReceivePort();
+        addTearDown(verifyPort.close);
+        final SendPort verifySendPort = verifyPort.sendPort;
+
+        void failingEntryPoint(SendPort sendPort) {
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _FakeCleanService((CleanEnvironment _) async {
+                throw StateError('Simulated extension clean failure');
+              }),
+            ],
+            supportedPlatforms: const <String>{'linux'},
+          );
+        }
+
+        void succeedingEntryPoint(SendPort sendPort) {
+          ToolExtensionEntryPoint.run(
+            sendPort,
+            <ToolExtensionService>[
+              _FakeCleanService((CleanEnvironment env) async {
+                verifySendPort.send(env.toMap());
+              }),
+            ],
+            supportedPlatforms: const <String>{'linux'},
+          );
+        }
+
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          entryPoints: <ExtensionEntryPoint>[failingEntryPoint, succeedingEntryPoint],
         );
-      }
+        addTearDown(manager.dispose);
 
-      final manager = ExtensionManager(
-        hostPlatform: HostPlatform.linux_x64,
-        logger: logger,
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        entryPoints: <ExtensionEntryPoint>[failingEntryPoint],
-      );
-      addTearDown(manager.dispose);
+        final cleanManager = ExtensionCleanManager(
+          extensionManager: manager,
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+          logger: logger,
+        );
 
-      final cleanManager = ExtensionCleanManager(
-        extensionManager: manager,
-        featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
-        logger: logger,
-      );
+        final Directory projectDir = fs.directory('/my_project')..createSync(recursive: true);
+        projectDir.childFile('pubspec.yaml').writeAsStringSync('name: test_app\n');
+        final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir, logger);
+        final Directory buildDir = projectDir.childDirectory('build');
 
-      final Directory projectDir = fs.directory('/my_project')..createSync(recursive: true);
-      projectDir.childFile('pubspec.yaml').writeAsStringSync('name: test_app\n');
-      final FlutterProject project = FlutterProject.fromDirectoryTest(projectDir, logger);
+        await cleanManager.cleanProject(project, buildDirectory: buildDir);
+        expect(logger.errorText, contains('Failed to clean extension artifacts'));
 
-      await cleanManager.cleanProject(project, buildDirectory: projectDir.childDirectory('build'));
-      expect(logger.errorText, contains('Failed to clean extension artifacts'));
-    });
+        final Object? rawReceived = await verifyPort.first;
+        final receivedEnv = CleanEnvironment.fromJson(rawReceived! as Map<String, Object?>);
+        expect(receivedEnv.projectRoot, project.directory.absolute.uri);
+        expect(receivedEnv.buildDir, buildDir.absolute.uri);
+      },
+    );
   });
 }
