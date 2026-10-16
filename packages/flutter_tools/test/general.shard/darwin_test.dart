@@ -135,10 +135,7 @@ void main() {
         filePath: '/path/to',
         lineNumber: 123,
       );
-      expect(
-        logger.errorText,
-        matches(RegExp(r'^\[[^\]]*\] /path/to:123: warning: warning message\n$')),
-      );
+      expect(logger.errorText, '/path/to:123: warning: warning message\n');
       expect(verboseLogger.hadErrorOutput, isFalse);
     });
   });

@@ -252,6 +252,9 @@ class DelegatingLogger implements Logger {
 
   final Logger _delegate;
 
+  /// The wrapped [Logger] to which this logger delegates.
+  Logger get delegate => _delegate;
+
   @override
   bool get quiet => _delegate.quiet;
 
