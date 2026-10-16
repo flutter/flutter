@@ -278,20 +278,11 @@ base class RenderTarget {
          depthStencilAttachment: depthStencilAttachment,
        );
 
-  _validate() {
-    for (final color in colorAttachments) {
-      color._validate();
-    }
-    if (depthStencilAttachment != null) {
-      depthStencilAttachment!._validate();
-    }
-  }
-
-  /// Validates attachment mip levels, slices, and sizes. Out-of-range
-  /// subresources and mismatched sizes are undefined behavior in the engine,
-  /// and the engine-side checks are compiled out in release builds, so this
-  /// runs unconditionally.
-  void _validateAttachments() {
+  /// Validates attachment usage, formats, sample counts, mip levels, slices,
+  /// and sizes, and returns the size every attachment renders into.
+  /// Violations are undefined behavior in the engine, and the engine-side
+  /// checks are compiled out in release builds, so this runs unconditionally.
+  (int, int) _validateAttachments(GpuContext gpuContext) {
     // The size of the first attachment, against which the rest are checked.
     // Each attachment renders into its mip level, clamped to a minimum of 1x1.
     int? width;
@@ -313,19 +304,48 @@ base class RenderTarget {
       }
     }
 
-    for (final color in colorAttachments) {
+    // Every attachment must have the same sample count. The resolve textures
+    // are checked by ColorAttachment._validate in the loop below.
+    int? sampleCount;
+    void checkSampleCount(Texture texture, String label) {
+      if (sampleCount == null) {
+        sampleCount = texture.sampleCount;
+      } else if (sampleCount != texture.sampleCount) {
+        throw Exception(
+          "All render target attachments must have the same sample count. "
+          "$label has a sample count of ${texture.sampleCount}, but an earlier "
+          "attachment has $sampleCount.",
+        );
+      }
+    }
+
+    for (final (index, color) in colorAttachments.indexed) {
+      final String label = "ColorAttachment $index";
+      color._validate();
       _validateAttachmentSubresource(
         color.texture,
         color.mipLevel,
         color.slice,
         "ColorAttachment",
       );
+      _validateRenderTargetUsage(color.texture, label);
+      if (_isDepthStencilFormat(color.texture.format)) {
+        throw Exception(
+          "$label texture has the depth/stencil format ${color.texture.format}. "
+          "Use it as a DepthStencilAttachment instead.",
+        );
+      }
+      checkSampleCount(color.texture, label);
       if (color.resolveTexture != null) {
         _validateAttachmentSubresource(
           color.resolveTexture!,
           color.mipLevel,
           color.slice,
           "ColorAttachment resolve texture",
+        );
+        _validateRenderTargetUsage(
+          color.resolveTexture!,
+          "$label resolve texture",
         );
       }
       accumulate(color.texture, color.mipLevel);
@@ -339,12 +359,73 @@ base class RenderTarget {
         ds.slice,
         "DepthStencilAttachment",
       );
+      _validateRenderTargetUsage(ds.texture, "DepthStencilAttachment");
+      if (!_isDepthStencilFormat(ds.texture.format)) {
+        throw Exception(
+          "DepthStencilAttachment texture must have a depth or stencil format, "
+          "but has ${ds.texture.format}.",
+        );
+      }
+      ds._validate();
+      checkSampleCount(ds.texture, "DepthStencilAttachment");
       accumulate(ds.texture, ds.mipLevel);
     }
+    // Checked last so that a size mismatch is reported as such.
+    if (!gpuContext.doesSupportFramebufferRenderMipmap) {
+      final int mipLevel = <int>[
+        for (final color in colorAttachments) color.mipLevel,
+        if (ds != null) ds.mipLevel,
+      ].fold(0, (int a, int b) => a > b ? a : b);
+      if (mipLevel > 0) {
+        throw Exception(
+          "The render target renders into mip level $mipLevel, but this "
+          "backend cannot render into non-zero mip levels. "
+          "See GpuContext.doesSupportFramebufferRenderMipmap.",
+        );
+      }
+    }
+    final int? targetWidth = width;
+    final int? targetHeight = height;
+    if (targetWidth == null || targetHeight == null) {
+      throw Exception(
+        "A render target needs at least one color or depth-stencil attachment.",
+      );
+    }
+    return (targetWidth, targetHeight);
   }
 
   final List<ColorAttachment> colorAttachments;
   final DepthStencilAttachment? depthStencilAttachment;
+}
+
+bool _isDepthStencilFormat(PixelFormat format) {
+  return switch (format) {
+    PixelFormat.s8UInt ||
+    PixelFormat.d24UnormS8Uint ||
+    PixelFormat.d32FloatS8UInt => true,
+    _ => false,
+  };
+}
+
+void _validateRenderTargetUsage(Texture texture, String label) {
+  if (!texture.enableRenderTargetUsage) {
+    throw Exception(
+      "$label texture was not created with render target usage. "
+      "Create it with enableRenderTargetUsage: true.",
+    );
+  }
+}
+
+void _validateBufferView(BufferView bufferView, String label) {
+  final int offset = bufferView.offsetInBytes;
+  final int length = bufferView.lengthInBytes;
+  final int size = bufferView.buffer.sizeInBytes;
+  if (offset < 0 || length < 0 || offset + length > size) {
+    throw RangeError(
+      "$label range [$offset, ${offset + length}) is outside the "
+      "$size byte buffer.",
+    );
+  }
 }
 
 void _validateAttachmentSubresource(
@@ -387,17 +468,29 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// the entire bitmask.
   int _maxBoundVertexSlot = -1;
 
+  /// Number of color attachments in the render target.
+  late final int _colorAttachmentCount;
+
+  /// Size of the render target, which scissor and viewport rectangles must
+  /// lie within.
+  late final int _targetWidth;
+  late final int _targetHeight;
+
+  /// How many indices of the bound index buffer [drawIndexed] can read, or
+  /// null when no index buffer is bound.
+  int? _boundIndexCount;
+
   /// Creates a new RenderPass.
   RenderPass._(
     GpuContext gpuContext,
     CommandBuffer commandBuffer,
     RenderTarget renderTarget,
   ) {
-    renderTarget._validateAttachments();
-    assert(() {
-      renderTarget._validate();
-      return true;
-    }());
+    final (int targetWidth, int targetHeight) = renderTarget
+        ._validateAttachments(gpuContext);
+    _targetWidth = targetWidth;
+    _targetHeight = targetHeight;
+    _colorAttachmentCount = renderTarget.colorAttachments.length;
 
     _initialize();
     String? error;
@@ -476,6 +569,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
         'bindVertexBuffer slot must be in [0, $_kMaxVertexBufferSlots)',
       );
     }
+    _validateBufferView(bufferView, 'bindVertexBuffer');
     _boundVertexSlotsMask |= 1 << slot;
     if (slot > _maxBoundVertexSlot) {
       _maxBoundVertexSlot = slot;
@@ -493,6 +587,12 @@ base class RenderPass extends NativeFieldWrapperClass1 {
   /// [indexType] is the width of each index. The number of indices to draw
   /// is passed separately, to [drawIndexed].
   void bindIndexBuffer(BufferView bufferView, IndexType indexType) {
+    _validateBufferView(bufferView, 'bindIndexBuffer');
+    final int indexSize = switch (indexType) {
+      IndexType.int16 => 2,
+      IndexType.int32 => 4,
+    };
+    _boundIndexCount = bufferView.lengthInBytes ~/ indexSize;
     bufferView.buffer._bindAsIndexBuffer(
       this,
       bufferView.offsetInBytes,
@@ -586,9 +686,11 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     _clearBindings();
     _boundVertexSlotsMask = 0;
     _maxBoundVertexSlot = -1;
+    _boundIndexCount = null;
   }
 
   void setColorBlendEnable(bool enable, {int colorAttachmentIndex = 0}) {
+    _validateColorAttachmentIndex(colorAttachmentIndex);
     _setColorBlendEnable(colorAttachmentIndex, enable);
   }
 
@@ -596,6 +698,7 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     ColorBlendEquation equation, {
     int colorAttachmentIndex = 0,
   }) {
+    _validateColorAttachmentIndex(colorAttachmentIndex);
     _setColorBlendEquation(
       colorAttachmentIndex,
       equation.colorBlendOperation.index,
@@ -605,6 +708,19 @@ base class RenderPass extends NativeFieldWrapperClass1 {
       equation.sourceAlphaBlendFactor.index,
       equation.destinationAlphaBlendFactor.index,
     );
+  }
+
+  void _validateColorAttachmentIndex(int colorAttachmentIndex) {
+    if (colorAttachmentIndex < 0 ||
+        colorAttachmentIndex >= _colorAttachmentCount) {
+      throw RangeError.range(
+        colorAttachmentIndex,
+        0,
+        _colorAttachmentCount - 1,
+        'colorAttachmentIndex',
+        'The render target has $_colorAttachmentCount color attachment(s)',
+      );
+    }
   }
 
   void setDepthWriteEnable(bool enable) {
@@ -660,12 +776,33 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     );
   }
 
+  /// Throws if [scissor] has negative values or does not lie within the
+  /// render target. Metal rejects such a scissor rectangle.
   void setScissor(Scissor scissor) {
-    assert(() {
-      scissor._validate();
-      return true;
-    }());
+    scissor._validate();
+    _validateRectInTarget(
+      'scissor',
+      scissor.x,
+      scissor.y,
+      scissor.width,
+      scissor.height,
+    );
     _setScissor(scissor.x, scissor.y, scissor.width, scissor.height);
+  }
+
+  void _validateRectInTarget(
+    String label,
+    int x,
+    int y,
+    int width,
+    int height,
+  ) {
+    if (x + width > _targetWidth || y + height > _targetHeight) {
+      throw Exception(
+        "The $label rectangle ($x, $y, ${width}x$height) must lie within the "
+        "${_targetWidth}x$_targetHeight render target.",
+      );
+    }
   }
 
   void setCullMode(CullMode cullMode) {
@@ -736,6 +873,16 @@ base class RenderPass extends NativeFieldWrapperClass1 {
     RangeError.checkNotNegative(instanceCount, 'instanceCount');
     if (indexCount == 0 || instanceCount == 0) {
       return;
+    }
+    final int? boundIndexCount = _boundIndexCount;
+    if (boundIndexCount != null && indexCount > boundIndexCount) {
+      throw RangeError.range(
+        indexCount,
+        0,
+        boundIndexCount,
+        'indexCount',
+        'The bound index buffer holds $boundIndexCount indices',
+      );
     }
     _validateVertexBindings();
     if (!_drawIndexed(indexCount, instanceCount)) {
