@@ -8,12 +8,8 @@ import 'android/android_device_discovery.dart';
 import 'android/android_sdk.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
-<<<<<<< HEAD
-import 'base/os.dart';
-=======
 import 'base/file_system.dart';
 import 'base/logger.dart';
->>>>>>> di/29b-1-flutter-plugins
 import 'base/platform.dart';
 import 'base/user_messages.dart';
 import 'context/tool_context.dart';

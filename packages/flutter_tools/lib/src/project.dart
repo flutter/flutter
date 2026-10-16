@@ -20,12 +20,8 @@ import 'base/config.dart';
 import 'base/error_handling_io.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/os.dart';
-import 'base/platform.dart';
-import 'base/process.dart';
 import 'base/project_migrator.dart';
 import 'base/template.dart';
-import 'base/time.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'base/yaml.dart';
@@ -45,7 +41,6 @@ import 'package_graph.dart';
 import 'platform_plugins.dart';
 import 'project_validator_result.dart';
 import 'template.dart';
-import 'version.dart';
 import 'xcode_project.dart';
 
 export 'cmake_project.dart';
@@ -679,17 +674,7 @@ class FlutterProject {
       return;
     }
 
-    final ToolContext(
-      :Config config,
-      :FileSystem fs,
-      :FileSystemUtils fileSystemUtils,
-      :FlutterVersion flutterVersion,
-      :Logger logger,
-      :OperatingSystemUtils os,
-      :Platform platform,
-      :ProcessUtils processUtils,
-      :SystemClock systemClock,
-    ) = toolContext;
+    final Logger logger = toolContext.logger;
 
     final migration = ProjectMigration(<ProjectMigrator>[
       AnalysisOptionsMigration(this, logger, packageConfig: packageConfig),

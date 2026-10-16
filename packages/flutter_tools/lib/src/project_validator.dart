@@ -9,6 +9,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/platform.dart';
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'flutter_manifest.dart';
 import 'git.dart';
 import 'project.dart';
@@ -36,17 +37,9 @@ abstract class MachineProjectValidator extends ProjectValidator {
 ///
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class VariableDumpMachineProjectValidator extends MachineProjectValidator {
-  VariableDumpMachineProjectValidator({
-    required this.logger,
-    required this.fileSystem,
-    required this.platform,
-    required this.git,
-  });
+  const VariableDumpMachineProjectValidator({required this.toolContext});
 
-  final Logger logger;
-  final FileSystem fileSystem;
-  final Platform platform;
-  final Git git;
+  final ToolContext toolContext;
 
   String _toJsonValue(Object? obj) {
     var value = obj.toString();
@@ -59,6 +52,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 
   @override
   Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
+    final ToolContext(fs: FileSystem fileSystem, :Git git, :Platform platform) = toolContext;
     final version = FlutterVersion(flutterRoot: Cache.flutterRoot!, fs: fileSystem, git: git);
     final result = <String, Object?>{
       'FlutterProject.directory': project.directory.absolute.path,

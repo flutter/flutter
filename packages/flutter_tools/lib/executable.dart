@@ -242,12 +242,7 @@ List<FlutterCommand> generateCommands({
         logger: toolDependencies.toolContext.logger,
         processManager: toolDependencies.toolContext.processManager,
       ),
-      VariableDumpMachineProjectValidator(
-        logger: toolDependencies.toolContext.logger,
-        fileSystem: toolDependencies.toolContext.fs,
-        platform: toolDependencies.toolContext.platform,
-        git: toolDependencies.toolContext.git,
-      ),
+      VariableDumpMachineProjectValidator(toolContext: toolDependencies.toolContext),
     ],
     androidBuilder: AndroidGradleBuilder.fromContexts(
       analytics: toolDependencies.analytics,
