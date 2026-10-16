@@ -12,4 +12,5 @@ export 'src/build.dart';
 export 'src/config.dart';
 export 'src/device.dart';
 export 'src/diagnostics.dart';
+export 'src/extension_package_config.dart';
 export 'src/templates.dart';

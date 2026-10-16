@@ -13,6 +13,7 @@ import '../cache.dart';
 import '../features.dart';
 import 'extension_discovery.dart';
 import 'extension_manager.dart';
+import 'project_extension_finder.dart';
 
 const Duration _kRpcTimeout = Duration(seconds: 5);
 
@@ -22,7 +23,6 @@ const Duration _kRpcTimeout = Duration(seconds: 5);
 /// project templates, resolve their directories on the host, and generate
 /// template parameters over the extension protocol RPC.
 base class ExtensionTemplateManager extends TemplateService {
-  /// Creates an [ExtensionTemplateManager].
   ExtensionTemplateManager({
     required this._extensionManager,
     required this._featureFlags,
@@ -36,26 +36,55 @@ base class ExtensionTemplateManager extends TemplateService {
   final Logger _logger;
 
   List<ProjectTemplate>? _cachedTemplates;
+  final _cachedCustomPlatforms = <String>{};
+  final _cachedAppPlatformTemplates = <String>{};
+  final _cachedPluginPlatformTemplates = <String>{};
 
   /// Retrieve the cached templates synchronously.
   ///
   /// Returns the list of project templates cached from the last [getProjectTemplates] call.
   List<ProjectTemplate> get cachedTemplates => _cachedTemplates ?? const <ProjectTemplate>[];
 
+  /// Retrieve the cached custom platform names declared by discovered extensions.
+  Set<String> get cachedCustomPlatforms => Set<String>.unmodifiable(_cachedCustomPlatforms);
+
+  /// Discovers custom platform names declared in `extension/flutter_tools/config.yaml`
+  /// for extensions in [projectDir] and the current working directory.
+  Future<Set<String>> getCustomPlatforms({Directory? projectDir}) async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return const <String>{};
+    }
+    await _extensionManager.discoverExtensions();
+    if (projectDir != null) {
+      await _extensionManager.discoverExtensions(startDir: projectDir);
+    }
+    for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions) {
+      _cachedCustomPlatforms.addAll(ext.config.platforms);
+    }
+    return cachedCustomPlatforms;
+  }
+
   /// Retrieve templates by routing `template.getProjectTemplates` to active tool extensions.
   ///
-  /// Results are cached after the first successful call.
-  Future<List<ProjectTemplate>> getProjectTemplates() async {
+  /// Results are cached after the first successful call, and refreshed if
+  /// [projectDir] introduces additional discovered extensions.
+  Future<List<ProjectTemplate>> getProjectTemplates({Directory? projectDir}) async {
     if (!_featureFlags.isToolExtensionsEnabled) {
       return const <ProjectTemplate>[];
     }
-    if (_cachedTemplates != null) {
+    await getCustomPlatforms(projectDir: projectDir);
+    final int previousConnectionCount = _extensionManager.connections.length;
+    await _extensionManager.ensureInitialized(
+      requiredServices: const <String>{TemplateService.serviceNamespace},
+      startDir: projectDir,
+    );
+    if (_cachedTemplates != null &&
+        _extensionManager.connections.length == previousConnectionCount) {
       return _cachedTemplates!;
     }
 
-    await _extensionManager.ensureInitialized();
-
     final templates = <ProjectTemplate>[];
+    final seenNames = <String>{};
     final List<ExtensionConnection> connections = _extensionManager.connections
         .where(
           (ExtensionConnection c) =>
@@ -79,44 +108,126 @@ base class ExtensionTemplateManager extends TemplateService {
       }),
     );
 
-    results.forEach(templates.addAll);
+    for (final templateList in results) {
+      for (final template in templateList) {
+        if (seenNames.add(template.name)) {
+          templates.add(template);
+        }
+      }
+    }
 
     _cachedTemplates = templates;
     return templates;
   }
 
+  /// Queries `template.getAppTemplates` from active extension isolates.
+  Future<Set<String>> fetchAppPlatformTemplates({Directory? projectDir}) async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return const <String>{};
+    }
+    await _extensionManager.ensureInitialized(
+      requiredServices: const <String>{TemplateService.serviceNamespace},
+      startDir: projectDir,
+    );
+    final List<ExtensionConnection> connections = _extensionManager.connections
+        .where(
+          (ExtensionConnection c) =>
+              c.capabilities.services.contains(TemplateService.serviceNamespace),
+        )
+        .toList();
+
+    for (final connection in connections) {
+      try {
+        final Object? rpcResult = await connection
+            .sendRequest(TemplateService.getAppTemplatesMethod)
+            .timeout(_kRpcTimeout);
+        if (rpcResult case final List<Object?> list) {
+          _cachedAppPlatformTemplates.addAll(list.whereType<String>());
+        }
+      } on Object catch (e) {
+        _logger.printTrace(
+          'Failed to get results from extension for ${TemplateService.getAppTemplatesMethod}: $e',
+        );
+      }
+    }
+    return Set<String>.unmodifiable(_cachedAppPlatformTemplates);
+  }
+
+  /// Queries `template.getPluginTemplates` from active extension isolates.
+  Future<Set<String>> fetchPluginPlatformTemplates({Directory? projectDir}) async {
+    if (!_featureFlags.isToolExtensionsEnabled) {
+      return const <String>{};
+    }
+    await _extensionManager.ensureInitialized(
+      requiredServices: const <String>{TemplateService.serviceNamespace},
+      startDir: projectDir,
+    );
+    final List<ExtensionConnection> connections = _extensionManager.connections
+        .where(
+          (ExtensionConnection c) =>
+              c.capabilities.services.contains(TemplateService.serviceNamespace),
+        )
+        .toList();
+
+    for (final connection in connections) {
+      try {
+        final Object? rpcResult = await connection
+            .sendRequest(TemplateService.getPluginTemplatesMethod)
+            .timeout(_kRpcTimeout);
+        if (rpcResult case final List<Object?> list) {
+          _cachedPluginPlatformTemplates.addAll(list.whereType<String>());
+        }
+      } on Object catch (e) {
+        _logger.printTrace(
+          'Failed to get results from extension for ${TemplateService.getPluginTemplatesMethod}: $e',
+        );
+      }
+    }
+    return Set<String>.unmodifiable(_cachedPluginPlatformTemplates);
+  }
+
   /// Resolves a template package URI to a local directory.
   ///
-  /// Currently only supports 'package:flutter_tools/' and
-  /// 'package:flutter_tools_extension_linux_prototype/' URIs, resolving them
-  /// relative to the Flutter SDK root.
+  /// Supports `package:flutter_tools/`, discovered project extension packages,
+  /// and `package:flutter_tools_extension_linux_prototype/` URIs.
   Directory resolveTemplateDirectory(String templatePath) {
-    if (templatePath.startsWith('package:flutter_tools/')) {
-      final String relativePath = templatePath.substring('package:flutter_tools/'.length);
-      final String absolutePath = _fileSystem.path.join(
-        Cache.flutterRoot!,
-        'packages',
-        'flutter_tools',
-        'lib',
-        relativePath,
-      );
-      return _fileSystem.directory(absolutePath);
-    }
-    // TODO(bkonyi): Resolve package URIs generically using package config or discovered paths.
-    if (templatePath.startsWith('package:flutter_tools_extension_linux_prototype/')) {
-      final String relativePath = templatePath.substring(
-        'package:flutter_tools_extension_linux_prototype/'.length,
-      );
-      final String absolutePath = _fileSystem.path.join(
-        Cache.flutterRoot!,
-        'packages',
-        'flutter_tools',
-        'packages',
-        'flutter_tools_extension_linux_prototype',
-        'lib',
-        relativePath,
-      );
-      return _fileSystem.directory(absolutePath);
+    if (templatePath.startsWith('package:')) {
+      final String withoutScheme = templatePath.substring('package:'.length);
+      final int slashIndex = withoutScheme.indexOf('/');
+      if (slashIndex > 0) {
+        final String packageName = withoutScheme.substring(0, slashIndex);
+        final String relativePath = withoutScheme.substring(slashIndex + 1);
+        if (packageName == 'flutter_tools') {
+          final String absolutePath = _fileSystem.path.join(
+            Cache.flutterRoot!,
+            'packages',
+            'flutter_tools',
+            'lib',
+            relativePath,
+          );
+          return _fileSystem.directory(absolutePath);
+        }
+        for (final DiscoveredProjectExtension ext in _extensionManager.discoveredExtensions) {
+          if (ext.name == packageName) {
+            final Directory packageLibDir = _fileSystem.directory(ext.packageUri);
+            return _fileSystem.directory(
+              _fileSystem.path.joinAll(<String>[packageLibDir.path, ...relativePath.split('/')]),
+            );
+          }
+        }
+        if (packageName == 'flutter_tools_extension_linux_prototype') {
+          final String absolutePath = _fileSystem.path.join(
+            Cache.flutterRoot!,
+            'packages',
+            'flutter_tools',
+            'packages',
+            'flutter_tools_extension_linux_prototype',
+            'lib',
+            relativePath,
+          );
+          return _fileSystem.directory(absolutePath);
+        }
+      }
     }
     throw ArgumentError('Unsupported template path format: $templatePath');
   }
@@ -167,8 +278,9 @@ base class ExtensionTemplateManager extends TemplateService {
   Set<ProjectTemplate> get projectTemplates => cachedTemplates.toSet();
 
   @override
-  Set<String> get appPlatformTemplates => const <String>{};
+  Set<String> get appPlatformTemplates => Set<String>.unmodifiable(_cachedAppPlatformTemplates);
 
   @override
-  Set<String> get pluginPlatformTemplates => const <String>{};
+  Set<String> get pluginPlatformTemplates =>
+      Set<String>.unmodifiable(_cachedPluginPlatformTemplates);
 }

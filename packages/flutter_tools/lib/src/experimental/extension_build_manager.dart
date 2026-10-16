@@ -40,7 +40,9 @@ base class ExtensionBuildManager {
     }
 
     try {
-      await _extensionManager.ensureInitialized();
+      await _extensionManager.ensureInitialized(
+        requiredServices: const <String>{BuildService.serviceNamespace},
+      );
     } on Object catch (e) {
       _logger.printTrace('Failed to initialize extension manager: $e');
       return const <ExtensionBuildTarget>[];
@@ -106,7 +108,9 @@ base class ExtensionBuildManager {
     }
 
     try {
-      await _extensionManager.ensureInitialized();
+      await _extensionManager.ensureInitialized(
+        requiredServices: const <String>{BuildService.serviceNamespace},
+      );
     } on Object catch (e) {
       _logger.printTrace('Failed to initialize extension manager: $e');
       return ExtensionBuildResult(

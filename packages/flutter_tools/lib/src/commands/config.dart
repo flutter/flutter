@@ -114,8 +114,13 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   }
 
   Future<ExtensionConfiguration?> get _activeExtensionConfig async {
+    if (!featureFlags.isToolExtensionsEnabled || !areToolExtensionsEnabled) {
+      return null;
+    }
     if (_extensionManager case final extensionManager?) {
-      await extensionManager.ensureInitialized();
+      await extensionManager.ensureInitialized(
+        requiredServices: const <String>{ConfigurationExtension.serviceNamespace},
+      );
       final List<ConfigurationExtension> extensions = extensionManager.configurationExtensions;
       if (extensions.isNotEmpty) {
         return ExtensionConfiguration(extensions: extensions, logger: _toolContext.logger);
