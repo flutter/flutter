@@ -5,6 +5,9 @@
 @DefaultAsset('skwasm')
 library skwasm_impl;
 
+// TODO(simolus3): Remove these analyzer ignores, https://dartbug.com/63166.
+// ignore: unnecessary_import, import_internal_library
+import 'dart:_js_interop_wasm';
 import 'dart:_wasm';
 import 'dart:ffi';
 import 'dart:js_interop';

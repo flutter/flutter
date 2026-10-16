@@ -67,6 +67,8 @@ source_set("fml") {
     "process.h",
     "raster_thread_merger.cc",
     "raster_thread_merger.h",
+    "safe_math.cc",
+    "safe_math.h",
     "shared_thread_merger.cc",
     "shared_thread_merger.h",
     "status.h",
@@ -83,6 +85,8 @@ source_set("fml") {
     "task_queue_id.h",
     "task_runner.cc",
     "task_runner.h",
+    "task_runner_util.cc",
+    "task_runner_util.h",
     "task_source.cc",
     "task_source.h",
     "thread.cc",
@@ -111,7 +115,7 @@ source_set("fml") {
     ":string_conversion",
   ]
 
-  deps = []
+  deps = [ "//third_party/abseil-cpp/absl/numeric:int128" ]
   if (target_os != "wasm") {
     deps += [ "//flutter/third_party/icu" ]
 
@@ -347,11 +351,13 @@ if (enable_unittests) {
       "message_loop_unittests.cc",
       "paths_unittests.cc",
       "raster_thread_merger_unittests.cc",
+      "safe_math_unittests.cc",
       "string_conversion_unittests.cc",
       "synchronization/count_down_latch_unittests.cc",
       "synchronization/semaphore_unittest.cc",
       "synchronization/sync_switch_unittest.cc",
       "synchronization/waitable_event_unittest.cc",
+      "task_runner_util_unittests.cc",
       "task_source_unittests.cc",
       "thread_unittests.cc",
       "time/chrono_timestamp_provider.cc",

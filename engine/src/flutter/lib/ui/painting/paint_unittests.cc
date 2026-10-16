@@ -68,6 +68,50 @@ TEST_F(ShellTest, ConvertPaintToDlPaint) {
     FAIL() << "mask filter was nullptr";
   }
   EXPECT_EQ(dl_paint.getDrawStyle(), DlDrawStyle::kStroke);
+  EXPECT_FALSE(dl_paint.isAntiAlias());
+}
+
+TEST_F(ShellTest, ConvertDefaultPaintToDlPaint) {
+  auto message_latch = std::make_shared<fml::AutoResetWaitableEvent>();
+  DlPaint dl_paint;
+
+  auto nativeToDlPaint = [message_latch, &dl_paint](Dart_NativeArguments args) {
+    Dart_Handle dart_paint = Dart_GetNativeArgument(args, 0);
+    Dart_Handle paint_objects =
+        Dart_GetField(dart_paint, tonic::ToDart("_objects"));
+    Dart_Handle paint_data = Dart_GetField(dart_paint, tonic::ToDart("_data"));
+    Paint ui_paint(paint_objects, paint_data);
+
+    ui_paint.paint(dl_paint, DisplayListOpFlags::kDrawRectFlags,
+                   DlTileMode::kClamp);
+    message_latch->Signal();
+  };
+
+  Settings settings = CreateSettingsForFixture();
+  TaskRunners task_runners("test",                  // label
+                           GetCurrentTaskRunner(),  // platform
+                           CreateNewThread(),       // raster
+                           CreateNewThread(),       // ui
+                           CreateNewThread()        // io
+  );
+
+  AddNativeCallback("ConvertPaintToDlPaint",
+                    CREATE_NATIVE_ENTRY(nativeToDlPaint));
+
+  std::unique_ptr<Shell> shell = CreateShell(settings, task_runners);
+
+  ASSERT_TRUE(shell->IsSetup());
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("convertDefaultPaintToDlPaint");
+
+  shell->RunEngine(std::move(configuration), [](auto result) {
+    ASSERT_EQ(result, Engine::RunStatus::Success);
+  });
+
+  message_latch->Wait();
+  DestroyShell(std::move(shell), task_runners);
+
+  EXPECT_TRUE(dl_paint.isAntiAlias());
 }
 
 }  // namespace testing

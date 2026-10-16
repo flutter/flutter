@@ -16,4 +16,8 @@ When triaging web issues follow the following process:
   * [flutter/packages](https://github.com/flutter/packages/pulls?q=is%3Aopen+is%3Apr+label%3Atriage-web+sort%3Aupdated-asc+-is%3Adraft)
     * Remove the `triage-web` label when the PR is approved.
     * If you are the last reviewer, add the `autosubmit` label.
-* Triage [untriaged issues](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-web%2Cfyi-web+-label%3Atriaged-web+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+-label%3A%22waiting+for+customer+response%22+)
+* Triage [untriaged issues](https://github.com/flutter/flutter/issues?q=is%3Aissue+is%3Aopen+label%3Ateam-web%2Cfyi-web+-label%3Atriaged-web+no%3Aassignee+-label%3A%22will+need+additional+triage%22+sort%3Aupdated-asc+-label%3A%22waiting+for+response%22+)
+
+## Additional resources
+
+* [flutter-zl/web-triage](https://github.com/flutter-zl/web-triage): One triager's longer-form notes on routing, priority, and labeling, with logs from past sessions.

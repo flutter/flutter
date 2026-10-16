@@ -210,4 +210,16 @@ void main() {
     expect(inner.getMinIntrinsicHeight(double.infinity), 0);
     expect(inner.getMaxIntrinsicHeight(double.infinity), 0);
   });
+
+  testWidgets('CustomPaint does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: CustomPaint()),
+      ),
+    );
+    expect(tester.getSize(find.byType(CustomPaint)), Size.zero);
+  });
 }

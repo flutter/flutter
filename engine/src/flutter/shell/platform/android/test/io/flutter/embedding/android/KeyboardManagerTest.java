@@ -800,6 +800,100 @@ public class KeyboardManagerTest {
   }
 
   @Test
+  public void virtualKeyboardShiftUpClearsState() {
+    final KeyboardTester tester = new KeyboardTester();
+    final ArrayList<CallRecord> calls = new ArrayList<>();
+
+    tester.recordEmbedderCallsTo(calls);
+    tester.respondToTextInputWith(true); // Suppress redispatching
+
+    final long virtualShiftLeftPhysicalKey = KEYCODE_SHIFT_LEFT | KeyboardMap.kAndroidPlane;
+
+    // 1. Simulate ShiftLeft DOWN from virtual keyboard (scancode = 0)
+    assertTrue(
+        tester.keyboardManager.handleEvent(
+            new FakeKeyEvent(
+                ACTION_DOWN,
+                0,
+                KEYCODE_SHIFT_LEFT,
+                0,
+                '\0',
+                META_SHIFT_ON,
+                KeyCharacterMap.VIRTUAL_KEYBOARD,
+                0)));
+
+    verifyEmbedderEvents(
+        calls,
+        new KeyData[] {
+          buildKeyData(
+              Type.kDown,
+              virtualShiftLeftPhysicalKey,
+              LOGICAL_SHIFT_LEFT,
+              null,
+              false,
+              DeviceType.kKeyboard),
+        });
+    calls.clear();
+
+    // 2. Simulate ShiftLeft UP from virtual keyboard (scancode = 0) with meta bit still active
+    assertTrue(
+        tester.keyboardManager.handleEvent(
+            new FakeKeyEvent(
+                ACTION_UP,
+                0,
+                KEYCODE_SHIFT_LEFT,
+                0,
+                '\0',
+                META_SHIFT_ON,
+                KeyCharacterMap.VIRTUAL_KEYBOARD,
+                0)));
+
+    // Verify that it does NOT synthesize SHIFT_RIGHT DOWN.
+    // It should only send SHIFT_LEFT UP.
+    verifyEmbedderEvents(
+        calls,
+        new KeyData[] {
+          buildKeyData(
+              Type.kUp,
+              virtualShiftLeftPhysicalKey,
+              LOGICAL_SHIFT_LEFT,
+              null,
+              false,
+              DeviceType.kKeyboard),
+        });
+    calls.clear();
+
+    // 3. Simulate Backspace DOWN from virtual keyboard (scancode = 0) with meta bit still active
+    final long virtualBackspacePhysicalKey = KEYCODE_DEL | KeyboardMap.kAndroidPlane;
+    assertTrue(
+        tester.keyboardManager.handleEvent(
+            new FakeKeyEvent(
+                ACTION_DOWN,
+                0,
+                KEYCODE_DEL,
+                0,
+                '\0',
+                META_SHIFT_ON,
+                KeyCharacterMap.VIRTUAL_KEYBOARD,
+                0)));
+
+    // Verify that it does NOT synthesize SHIFT_LEFT DOWN or SHIFT_RIGHT DOWN.
+    // It should only send Backspace DOWN.
+    verifyEmbedderEvents(
+        calls,
+        new KeyData[] {
+          buildKeyData(
+              Type.kDown,
+              virtualBackspacePhysicalKey,
+              LOGICAL_BACKSPACE,
+              null,
+              false,
+              DeviceType.kKeyboard),
+        });
+    calls.clear();
+  }
+
+  @Test
   public void tapUpperA() {
     final KeyboardTester tester = new KeyboardTester();
     final ArrayList<CallRecord> calls = new ArrayList<>();

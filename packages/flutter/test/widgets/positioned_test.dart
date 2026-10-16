@@ -84,7 +84,7 @@ void main() {
     ); // t=0
     recordMetrics();
     final completer = Completer<void>();
-    controller.forward().whenComplete(completer.complete);
+    unawaited(controller.forward().whenComplete(completer.complete));
     expect(completer.isCompleted, isFalse);
     await tester.pump(); // t=0 again
     expect(completer.isCompleted, isFalse);
@@ -128,5 +128,19 @@ void main() {
     controller.stop(canceled: false);
     await tester.pump();
     expect(completer.isCompleted, isTrue);
+  });
+
+  testWidgets('Positioned does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Stack(children: [Positioned(top: 0.0, left: 0.0, child: Placeholder())]),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Stack)), Size.zero);
   });
 }

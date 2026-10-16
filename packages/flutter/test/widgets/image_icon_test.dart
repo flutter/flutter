@@ -98,6 +98,50 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('ImageIcon respects IconTheme color by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: IconTheme(
+          data: const IconThemeData(color: Color(0xFF0000FF)),
+          child: ImageIcon(image),
+        ),
+      ),
+    );
+
+    expect(tester.widget<Image>(find.byType(Image)).color, const Color(0xFF0000FF));
+    imageCache.clear();
+  });
+
+  testWidgets('ImageIcon ignores IconTheme color when useOriginalColors is true', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: IconTheme(
+          data: const IconThemeData(color: Color(0xFF0000FF)),
+          child: ImageIcon(image, useOriginalColors: true),
+        ),
+      ),
+    );
+
+    expect(tester.widget<Image>(find.byType(Image)).color, null);
+    imageCache.clear();
+  });
+
+  testWidgets(
+    'ImageIcon throws assertion error if color is provided and useOriginalColors is true',
+    (WidgetTester tester) async {
+      expect(
+        () => ImageIcon(image, color: const Color(0xFF0000FF), useOriginalColors: true),
+        throwsAssertionError,
+      );
+
+      imageCache.clear();
+    },
+  );
+
   testWidgets('ImageIcon does not crash at zero area', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

@@ -444,6 +444,45 @@ void main() {
       await setAppLifecycleState(AppLifecycleState.resumed);
       expect(focusNode.hasPrimaryFocus, isFalse);
     });
+
+    testWidgets('Suspended focus is not restored on resume when another node claimed focus.', (
+      WidgetTester tester,
+    ) async {
+      Future<void> setAppLifecycleState(AppLifecycleState state) async {
+        final ByteData? message = const StringCodec().encodeMessage(state.toString());
+        await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .handlePlatformMessage('flutter/lifecycle', message, (_) {});
+      }
+
+      final BuildContext context = await setupWidget(tester);
+      final scope = FocusScopeNode(debugLabel: 'Scope');
+      addTearDown(scope.dispose);
+      scope.attach(context).reparent(parent: tester.binding.focusManager.rootScope);
+      final nodeA = FocusNode(debugLabel: 'A');
+      addTearDown(nodeA.dispose);
+      nodeA.attach(context).reparent(parent: scope);
+      final nodeB = FocusNode(debugLabel: 'B');
+      addTearDown(nodeB.dispose);
+      nodeB.attach(context).reparent(parent: scope);
+
+      nodeA.requestFocus();
+      await tester.pump();
+      expect(nodeA.hasPrimaryFocus, isTrue);
+
+      // App goes inactive: nodeA's focus is suspended and parked.
+      await setAppLifecycleState(AppLifecycleState.inactive);
+      expect(nodeA.hasPrimaryFocus, isFalse);
+
+      // Another node requests focus before the app resumes (e.g. a different
+      // window/view was activated).
+      nodeB.requestFocus();
+
+      // On resume, the suspended nodeA must not steal focus back from nodeB.
+      await setAppLifecycleState(AppLifecycleState.resumed);
+      await tester.pump();
+      expect(nodeB.hasPrimaryFocus, isTrue);
+      expect(nodeA.hasPrimaryFocus, isFalse);
+    }, variant: TargetPlatformVariant.desktop());
   });
 
   group(FocusScopeNode, () {
@@ -1364,81 +1403,79 @@ void main() {
       },
     );
 
-    testWidgets(
-      'Key handling bubbles up and terminates when handled.',
-      (WidgetTester tester) async {
-        final receivedAnEvent = <FocusNode>{};
-        final shouldHandle = <FocusNode>{};
-        KeyEventResult handleEvent(FocusNode node, RawKeyEvent event) {
-          if (shouldHandle.contains(node)) {
-            receivedAnEvent.add(node);
-            return KeyEventResult.handled;
-          }
-          return KeyEventResult.ignored;
+    testWidgets('Key handling bubbles up and terminates when handled.', (
+      WidgetTester tester,
+    ) async {
+      final receivedAnEvent = <FocusNode>{};
+      final shouldHandle = <FocusNode>{};
+      KeyEventResult handleEvent(FocusNode node, RawKeyEvent event) {
+        if (shouldHandle.contains(node)) {
+          receivedAnEvent.add(node);
+          return KeyEventResult.handled;
         }
+        return KeyEventResult.ignored;
+      }
 
-        Future<void> sendEvent() async {
-          receivedAnEvent.clear();
-          await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
-        }
+      Future<void> sendEvent() async {
+        receivedAnEvent.clear();
+        await tester.sendKeyEvent(LogicalKeyboardKey.metaLeft, platform: 'fuchsia');
+      }
 
-        final BuildContext context = await setupWidget(tester);
-        final scope1 = FocusScopeNode(debugLabel: 'Scope 1');
-        addTearDown(scope1.dispose);
-        final FocusAttachment scope1Attachment = scope1.attach(context, onKey: handleEvent);
-        final scope2 = FocusScopeNode(debugLabel: 'Scope 2');
-        addTearDown(scope2.dispose);
-        final FocusAttachment scope2Attachment = scope2.attach(context, onKey: handleEvent);
-        final parent1 = FocusNode(debugLabel: 'Parent 1', onKey: handleEvent);
-        addTearDown(parent1.dispose);
-        final FocusAttachment parent1Attachment = parent1.attach(context);
-        final parent2 = FocusNode(debugLabel: 'Parent 2', onKey: handleEvent);
-        addTearDown(parent2.dispose);
-        final FocusAttachment parent2Attachment = parent2.attach(context);
-        final child1 = FocusNode(debugLabel: 'Child 1');
-        addTearDown(child1.dispose);
-        final FocusAttachment child1Attachment = child1.attach(context, onKey: handleEvent);
-        final child2 = FocusNode(debugLabel: 'Child 2');
-        addTearDown(child2.dispose);
-        final FocusAttachment child2Attachment = child2.attach(context, onKey: handleEvent);
-        final child3 = FocusNode(debugLabel: 'Child 3');
-        addTearDown(child3.dispose);
-        final FocusAttachment child3Attachment = child3.attach(context, onKey: handleEvent);
-        final child4 = FocusNode(debugLabel: 'Child 4');
-        addTearDown(child4.dispose);
-        final FocusAttachment child4Attachment = child4.attach(context, onKey: handleEvent);
-        scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
-        scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
-        parent1Attachment.reparent(parent: scope1);
-        parent2Attachment.reparent(parent: scope2);
-        child1Attachment.reparent(parent: parent1);
-        child2Attachment.reparent(parent: parent1);
-        child3Attachment.reparent(parent: parent2);
-        child4Attachment.reparent(parent: parent2);
-        child4.requestFocus();
-        await tester.pump();
-        shouldHandle.addAll(<FocusNode>{scope2, parent2, child2, child4});
-        await sendEvent();
-        expect(receivedAnEvent, equals(<FocusNode>{child4}));
-        shouldHandle.remove(child4);
-        await sendEvent();
-        expect(receivedAnEvent, equals(<FocusNode>{parent2}));
-        shouldHandle.remove(parent2);
-        await sendEvent();
-        expect(receivedAnEvent, equals(<FocusNode>{scope2}));
-        shouldHandle.clear();
-        await sendEvent();
-        expect(receivedAnEvent, isEmpty);
-        child1.requestFocus();
-        await tester.pump();
-        shouldHandle.addAll(<FocusNode>{scope2, parent2, child2, child4});
-        await sendEvent();
-        // Since none of the focused nodes handle this event, nothing should
-        // receive it.
-        expect(receivedAnEvent, isEmpty);
-      },
-      variant: KeySimulatorTransitModeVariant.all(),
-    );
+      final BuildContext context = await setupWidget(tester);
+      final scope1 = FocusScopeNode(debugLabel: 'Scope 1');
+      addTearDown(scope1.dispose);
+      final FocusAttachment scope1Attachment = scope1.attach(context, onKey: handleEvent);
+      final scope2 = FocusScopeNode(debugLabel: 'Scope 2');
+      addTearDown(scope2.dispose);
+      final FocusAttachment scope2Attachment = scope2.attach(context, onKey: handleEvent);
+      final parent1 = FocusNode(debugLabel: 'Parent 1', onKey: handleEvent);
+      addTearDown(parent1.dispose);
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final parent2 = FocusNode(debugLabel: 'Parent 2', onKey: handleEvent);
+      addTearDown(parent2.dispose);
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final child1 = FocusNode(debugLabel: 'Child 1');
+      addTearDown(child1.dispose);
+      final FocusAttachment child1Attachment = child1.attach(context, onKey: handleEvent);
+      final child2 = FocusNode(debugLabel: 'Child 2');
+      addTearDown(child2.dispose);
+      final FocusAttachment child2Attachment = child2.attach(context, onKey: handleEvent);
+      final child3 = FocusNode(debugLabel: 'Child 3');
+      addTearDown(child3.dispose);
+      final FocusAttachment child3Attachment = child3.attach(context, onKey: handleEvent);
+      final child4 = FocusNode(debugLabel: 'Child 4');
+      addTearDown(child4.dispose);
+      final FocusAttachment child4Attachment = child4.attach(context, onKey: handleEvent);
+      scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope1);
+      parent2Attachment.reparent(parent: scope2);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent1);
+      child3Attachment.reparent(parent: parent2);
+      child4Attachment.reparent(parent: parent2);
+      child4.requestFocus();
+      await tester.pump();
+      shouldHandle.addAll(<FocusNode>{scope2, parent2, child2, child4});
+      await sendEvent();
+      expect(receivedAnEvent, equals(<FocusNode>{child4}));
+      shouldHandle.remove(child4);
+      await sendEvent();
+      expect(receivedAnEvent, equals(<FocusNode>{parent2}));
+      shouldHandle.remove(parent2);
+      await sendEvent();
+      expect(receivedAnEvent, equals(<FocusNode>{scope2}));
+      shouldHandle.clear();
+      await sendEvent();
+      expect(receivedAnEvent, isEmpty);
+      child1.requestFocus();
+      await tester.pump();
+      shouldHandle.addAll(<FocusNode>{scope2, parent2, child2, child4});
+      await sendEvent();
+      // Since none of the focused nodes handle this event, nothing should
+      // receive it.
+      expect(receivedAnEvent, isEmpty);
+    }, variant: KeySimulatorTransitModeVariant.all());
 
     testWidgets('Initial highlight mode guesses correctly.', (WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.automatic;
@@ -1454,35 +1491,31 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets(
-      'Mouse events change initial focus highlight mode on mobile.',
-      (WidgetTester tester) async {
-        expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
-        RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
-        final TestGesture gesture = await tester.createGesture(
-          kind: PointerDeviceKind.mouse,
-          pointer: 0,
-        );
-        await gesture.moveTo(Offset.zero);
-        expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-      },
-      variant: TargetPlatformVariant.mobile(),
-    );
+    testWidgets('Mouse events change initial focus highlight mode on mobile.', (
+      WidgetTester tester,
+    ) async {
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
+      RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+        pointer: 0,
+      );
+      await gesture.moveTo(Offset.zero);
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+    }, variant: TargetPlatformVariant.mobile());
 
-    testWidgets(
-      'Mouse events change initial focus highlight mode on desktop.',
-      (WidgetTester tester) async {
-        expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-        RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
-        final TestGesture gesture = await tester.createGesture(
-          kind: PointerDeviceKind.mouse,
-          pointer: 0,
-        );
-        await gesture.moveTo(Offset.zero);
-        expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-      },
-      variant: TargetPlatformVariant.desktop(),
-    );
+    testWidgets('Mouse events change initial focus highlight mode on desktop.', (
+      WidgetTester tester,
+    ) async {
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+      RendererBinding.instance.initMouseTracker(); // Clear out the mouse state.
+      final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+        pointer: 0,
+      );
+      await gesture.moveTo(Offset.zero);
+      expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
+    }, variant: TargetPlatformVariant.desktop());
 
     testWidgets('Keyboard events change initial focus highlight mode.', (
       WidgetTester tester,

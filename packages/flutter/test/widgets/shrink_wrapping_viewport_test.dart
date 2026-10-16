@@ -56,4 +56,17 @@ void main() {
     renderObject.paint(context, Offset.zero);
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
+
+  testWidgets('ShrinkWrappingViewport does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final offset = ViewportOffset.fixed(5);
+    addTearDown(tester.view.reset);
+    addTearDown(offset.dispose);
+    await tester.pumpWidget(
+      TestWidgetsApp(
+        home: Center(child: ShrinkWrappingViewport(offset: offset)),
+      ),
+    );
+    expect(tester.getSize(find.byType(ShrinkWrappingViewport)), Size.zero);
+  });
 }

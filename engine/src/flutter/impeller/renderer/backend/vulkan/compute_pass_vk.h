@@ -23,7 +23,6 @@ class ComputePassVK final : public ComputePass {
 
   std::shared_ptr<CommandBufferVK> command_buffer_;
   std::string label_;
-  std::array<uint32_t, 3> max_wg_size_ = {};
   bool is_valid_ = false;
 
   // Per-command state.
@@ -65,7 +64,7 @@ class ComputePassVK final : public ComputePass {
   void AddTextureMemoryBarrier() override;
 
   // |ComputePass|
-  fml::Status Compute(const ISize& grid_size) override;
+  fml::Status Compute(std::array<uint32_t, 3> workgroup_count) override;
 
   // |ResourceBinder|
   bool BindResource(ShaderStage stage,

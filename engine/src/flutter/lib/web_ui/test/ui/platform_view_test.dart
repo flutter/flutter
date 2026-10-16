@@ -824,6 +824,59 @@ Future<void> testMain() async {
     expect(platformViewsHost.querySelector('flt-platform-view'), isNull);
   });
 
+  test('does not crash when a platform view is disposed mid-frame', () async {
+    await createPlatformView(0, platformViewType);
+    await createPlatformView(1, platformViewType);
+
+    final sb = ui.SceneBuilder()
+      ..pushOffset(0, 0)
+      ..addPlatformView(0, width: 10, height: 10)
+      ..addPlatformView(1, width: 10, height: 10)
+      ..pop();
+    await renderScene(sb.build());
+    _expectSceneMatches(<_EmbeddedViewMarker>[_platformView, _platformView]);
+
+    // Build the next frame by hand so that a platform view can be disposed
+    // after the composition was created, but before the frame is submitted.
+    final ViewRasterizer rasterizer = renderer.rasterizers[implicitView.viewId]!;
+    final PlatformViewEmbedder embedder = rasterizer.viewEmbedder;
+    final rootLayer = RootLayer();
+    // The views are composited in the opposite order, so the DOM needs to be
+    // updated for this composition.
+    rootLayer.children.add(PlatformViewLayer(1, ui.Offset.zero, 10, 10));
+    rootLayer.children.add(PlatformViewLayer(0, ui.Offset.zero, 10, 10));
+
+    embedder.frameSize = rasterizer.currentFrameSize;
+    final Frame frame = rasterizer.context.acquireFrame(embedder);
+    frame.raster(LayerTree(rootLayer), rasterizer.currentFrameSize, null);
+
+    // View 0 is disposed while it is still part of the composition which is
+    // about to be submitted.
+    embedder.disposeView(0);
+
+    final warnings = <String>[];
+    final void Function(String) originalPrintWarning = printWarning;
+    printWarning = (String warning) => warnings.add(warning);
+    try {
+      await expectLater(embedder.submitFrame(null), completes);
+    } finally {
+      printWarning = originalPrintWarning;
+    }
+
+    // The disposed view is left out of the composition.
+    _expectSceneMatches(<_EmbeddedViewMarker>[_platformView]);
+    expect(embedder.debugActiveComposition.entities, hasLength(1));
+    expect(
+      warnings,
+      contains(
+        contains(
+          'Cannot render platform views: 0. '
+          'These views were disposed while they were being composited.',
+        ),
+      ),
+    );
+  });
+
   test('preserves the DOM node of an unrendered platform view', () async {
     await createPlatformView(1, platformViewType);
 
@@ -857,49 +910,45 @@ Future<void> testMain() async {
     expect(platformViewsHost.querySelectorAll('flt-platform-view'), hasLength(2));
   });
 
-  test(
-    'does not crash when resizing the window after textures have been registered',
-    () async {
-      ui_web.platformViewRegistry.registerViewFactory(
-        'test-platform-view',
-        (int viewId) => createDomHTMLDivElement()..id = 'view-0',
-      );
-      await createPlatformView(0, 'test-platform-view');
+  test('does not crash when resizing the window after textures have been registered', () async {
+    ui_web.platformViewRegistry.registerViewFactory(
+      'test-platform-view',
+      (int viewId) => createDomHTMLDivElement()..id = 'view-0',
+    );
+    await createPlatformView(0, 'test-platform-view');
 
-      final ui.Codec codec = await renderer.instantiateImageCodec(kAnimatedGif);
+    final ui.Codec codec = await renderer.instantiateImageCodec(kAnimatedGif);
 
-      final ui.FrameInfo frame = await codec.getNextFrame();
-      final ui.Image ckImage = frame.image;
+    final ui.FrameInfo frame = await codec.getNextFrame();
+    final ui.Image ckImage = frame.image;
 
-      ui.Scene testScene() {
-        final sb = LayerSceneBuilder();
-        sb.pushOffset(0, 0);
-        final recorder = ui.PictureRecorder();
-        final canvas = ui.Canvas(recorder, ui.Rect.largest);
-        canvas.drawImage(ckImage, ui.Offset.zero, ui.Paint());
-        final ui.Picture picture = recorder.endRecording();
-        sb.addPicture(ui.Offset.zero, picture);
-        sb.addPlatformView(0, width: 10, height: 10);
-        return sb.build();
-      }
+    ui.Scene testScene() {
+      final sb = LayerSceneBuilder();
+      sb.pushOffset(0, 0);
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder, ui.Rect.largest);
+      canvas.drawImage(ckImage, ui.Offset.zero, ui.Paint());
+      final ui.Picture picture = recorder.endRecording();
+      sb.addPicture(ui.Offset.zero, picture);
+      sb.addPlatformView(0, width: 10, height: 10);
+      return sb.build();
+    }
 
-      implicitView.debugPhysicalSizeOverride = const ui.Size(100, 100);
-      implicitView.debugForceResize();
-      await renderScene(testScene());
-      _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView]);
+    implicitView.debugPhysicalSizeOverride = const ui.Size(100, 100);
+    implicitView.debugForceResize();
+    await renderScene(testScene());
+    _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView]);
 
-      implicitView.debugPhysicalSizeOverride = const ui.Size(200, 200);
-      implicitView.debugForceResize();
-      await renderScene(testScene());
-      _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView]);
+    implicitView.debugPhysicalSizeOverride = const ui.Size(200, 200);
+    implicitView.debugForceResize();
+    await renderScene(testScene());
+    _expectSceneMatches(<_EmbeddedViewMarker>[_overlay, _platformView]);
 
-      implicitView.debugPhysicalSizeOverride = null;
-      implicitView.debugForceResize();
+    implicitView.debugPhysicalSizeOverride = null;
+    implicitView.debugForceResize();
 
-      // ImageDecoder is not supported in Safari or Firefox.
-    },
-    skip: isSafari || isFirefox,
-  );
+    // ImageDecoder is not supported in Safari or Firefox.
+  }, skip: isSafari || isFirefox);
 
   test('does not crash when a prerolled platform view is not composited', () async {
     await createPlatformView(1, platformViewType);

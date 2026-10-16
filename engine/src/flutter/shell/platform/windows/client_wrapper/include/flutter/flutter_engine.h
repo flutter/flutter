@@ -85,6 +85,15 @@ class FlutterEngine : public PluginRegistry {
   // once on the platform thread.
   void SetNextFrameCallback(std::function<void()> callback);
 
+  // Returns true if the current thread is the platform thread.
+  bool IsPlatformThread() const;
+
+  // Schedule a callback to be called on the platform thread.
+  //
+  // This can be called on any thread. The callback is executed only
+  // once on the platform thread.
+  void PostPlatformThreadTask(std::function<void()> callback);
+
   // Called to pass an external window message to the engine for lifecycle
   // state updates. Non-Flutter windows must call this method in their WndProc
   // in order to be included in the logic for application lifecycle state
@@ -94,9 +103,12 @@ class FlutterEngine : public PluginRegistry {
                                                       WPARAM wparam,
                                                       LPARAM lparam);
 
-  // Returns the DXGI adapter used for rendering or nullptr in case of error.
-  IDXGIAdapter* GetGraphicsAdapter() {
-    return FlutterDesktopEngineGetGraphicsAdapter(engine_);
+  // Retrieves the DXGI adapter used for rendering. Returns true if the adapter
+  // was successfully retrieved, or false if an error occured.
+  // The caller must provide a valid pointer to an IDXGIAdapter* and is
+  // responsible for releasing the adapter.
+  bool GetGraphicsAdapter(IDXGIAdapter** adapter_out) {
+    return FlutterDesktopEngineGetGraphicsAdapter(engine_, adapter_out);
   }
 
  private:

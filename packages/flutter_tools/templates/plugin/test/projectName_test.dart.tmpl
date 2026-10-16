@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:{{projectName}}/{{projectName}}.dart';
+import 'package:{{projectName}}/{{projectName}}_pigeon.dart';
 import 'package:{{projectName}}/{{projectName}}_platform_interface.dart';
-import 'package:{{projectName}}/{{projectName}}_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class Mock{{pluginDartClass}}Platform
@@ -12,10 +12,10 @@ class Mock{{pluginDartClass}}Platform
 }
 
 void main() {
-  final {{pluginDartClass}}Platform initialPlatform = {{pluginDartClass}}Platform.instance;
+  final initialPlatform = {{pluginDartClass}}Platform.instance;
 
-  test('$MethodChannel{{pluginDartClass}} is the default instance', () {
-    expect(initialPlatform, isInstanceOf<MethodChannel{{pluginDartClass}}>());
+  test('Pigeon{{pluginDartClass}} is the default instance', () {
+    expect(initialPlatform, isInstanceOf<Pigeon{{pluginDartClass}}>());
   });
 
   test('getPlatformVersion', () async {

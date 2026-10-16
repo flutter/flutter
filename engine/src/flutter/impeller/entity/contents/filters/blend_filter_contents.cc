@@ -5,6 +5,7 @@
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
 
 #include <array>
+#include <cmath>
 #include <memory>
 #include <optional>
 
@@ -25,6 +26,7 @@
 #include "impeller/entity/texture_fill.frag.h"
 #include "impeller/entity/texture_fill.vert.h"
 #include "impeller/geometry/color.h"
+#include "impeller/geometry/constants.h"
 #include "impeller/renderer/render_pass.h"
 #include "impeller/renderer/snapshot.h"
 
@@ -116,12 +118,47 @@ static std::optional<Entity> AdvancedBlend(
     return std::nullopt;
   }
 
+  Rect subpass_coverage = coverage;
+  if (entity.GetContents()) {
+    auto coverage_hint = entity.GetContents()->GetCoverageHint();
+
+    if (coverage_hint.has_value()) {
+      auto maybe_subpass_coverage =
+          subpass_coverage.Intersection(*coverage_hint);
+      if (!maybe_subpass_coverage.has_value()) {
+        return std::nullopt;  // Nothing to render.
+      }
+
+      subpass_coverage = *maybe_subpass_coverage;
+    }
+  }
+
+  // The subpass render target has an integral size, rounded up so that it keeps
+  // any partially covered edge pixels of |subpass_coverage|. A size that is
+  // meant to be integral can land slightly above or below it after floating
+  // point math (the backdrop's coverage goes through the transform and its
+  // inverse), so values within kEhCloseEnough of an integer snap to it instead
+  // of gaining a pixel. The texture coordinates must describe the same rect as
+  // the quad, which spans the render target: if they describe the fractional
+  // coverage instead, the contents are scaled by the ratio between the two,
+  // and that ratio changes from frame to frame for animated content. Both the
+  // allocation and the sampled rect use this one size.
+  const Size coverage_size = subpass_coverage.GetSize();
+  const Size render_target_size(
+      std::ceil(coverage_size.width - kEhCloseEnough),
+      std::ceil(coverage_size.height - kEhCloseEnough));
+  const Rect render_target_coverage =
+      Rect::MakeOriginSize(subpass_coverage.GetOrigin(), render_target_size);
+  if (render_target_coverage.IsEmpty()) {
+    return std::nullopt;  // Nothing to render.
+  }
+
   auto dst_snapshot =
       inputs[0]->GetSnapshot("AdvancedBlend(Dst)", renderer, entity);
   if (!dst_snapshot.has_value()) {
     return std::nullopt;
   }
-  auto maybe_dst_uvs = dst_snapshot->GetCoverageUVs(coverage);
+  auto maybe_dst_uvs = dst_snapshot->GetCoverageUVs(render_target_coverage);
   if (!maybe_dst_uvs.has_value()) {
     return std::nullopt;
   }
@@ -138,7 +175,7 @@ static std::optional<Entity> AdvancedBlend(
       }
       return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode());
     }
-    auto maybe_src_uvs = src_snapshot->GetCoverageUVs(coverage);
+    auto maybe_src_uvs = src_snapshot->GetCoverageUVs(render_target_coverage);
     if (!maybe_src_uvs.has_value()) {
       if (!dst_snapshot.has_value()) {
         return std::nullopt;
@@ -146,21 +183,6 @@ static std::optional<Entity> AdvancedBlend(
       return Entity::FromSnapshot(dst_snapshot.value(), entity.GetBlendMode());
     }
     src_uvs = maybe_src_uvs.value();
-  }
-
-  Rect subpass_coverage = coverage;
-  if (entity.GetContents()) {
-    auto coverage_hint = entity.GetContents()->GetCoverageHint();
-
-    if (coverage_hint.has_value()) {
-      auto maybe_subpass_coverage =
-          subpass_coverage.Intersection(*coverage_hint);
-      if (!maybe_subpass_coverage.has_value()) {
-        return std::nullopt;  // Nothing to render.
-      }
-
-      subpass_coverage = *maybe_subpass_coverage;
-    }
   }
 
   //----------------------------------------------------------------------------
@@ -203,7 +225,6 @@ static std::optional<Entity> AdvancedBlend(
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             dst_snapshot->sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
-    frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
     blend_info.dst_input_alpha =
         absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
             ? dst_snapshot->opacity
@@ -223,14 +244,11 @@ static std::optional<Entity> AdvancedBlend(
       blend_info.color_factor = 0;
       blend_info.src_input_alpha = src_snapshot->opacity;
       FS::BindTextureSamplerSrc(pass, src_snapshot->texture, src_sampler);
-      frame_info.src_y_coord_scale = src_snapshot->texture->GetYCoordScale();
     }
     auto blend_uniform = data_host_buffer.EmplaceUniform(blend_info);
     FS::BindBlendInfo(pass, blend_uniform);
 
-    frame_info.mvp = pass.GetOrthographicTransform() *
-                     Matrix::MakeTranslation(coverage.GetOrigin() -
-                                             subpass_coverage.GetOrigin());
+    frame_info.mvp = pass.GetOrthographicTransform();
 
     auto uniform_view = data_host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(pass, uniform_view);
@@ -244,12 +262,12 @@ static std::optional<Entity> AdvancedBlend(
     return std::nullopt;
   }
   fml::StatusOr<RenderTarget> render_target =
-      renderer.MakeSubpass("Advanced Blend Filter",            //
-                           ISize(subpass_coverage.GetSize()),  //
-                           command_buffer,                     //
-                           callback,                           //
-                           /*msaa_enabled=*/false,             //
-                           /*depth_stencil_enabled=*/false     //
+      renderer.MakeSubpass("Advanced Blend Filter",         //
+                           ISize(render_target_size),       //
+                           command_buffer,                  //
+                           callback,                        //
+                           /*msaa_enabled=*/false,          //
+                           /*depth_stencil_enabled=*/false  //
       );
   if (!render_target.ok()) {
     return std::nullopt;
@@ -370,7 +388,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             dst_snapshot->sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
-    frame_info.dst_y_coord_scale = dst_snapshot->texture->GetYCoordScale();
 
     frame_info.mvp = Entity::GetShaderTransform(
         entity.GetShaderClipDepth(), pass,
@@ -472,8 +489,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
         renderer.GetContext()->GetSamplerLibrary()->GetSampler(
             dst_snapshot->sampler_descriptor);
     FS::BindTextureSamplerDst(pass, dst_snapshot->texture, dst_sampler);
-    frame_info.texture_sampler_y_coord_scale =
-        dst_snapshot->texture->GetYCoordScale();
 
     frag_info.input_alpha_output_alpha_tmx_tmy =
         Vector4(absorb_opacity == ColorFilterContents::AbsorbOpacity::kYes
@@ -573,8 +588,6 @@ static std::optional<Entity> PipelineBlend(
       frame_info.mvp = pass.GetOrthographicTransform() *
                        Matrix::MakeTranslation(-subpass_coverage.GetOrigin()) *
                        input->transform;
-      frame_info.texture_sampler_y_coord_scale =
-          input->texture->GetYCoordScale();
 
       FS::FragInfo frag_info;
       frag_info.alpha =
@@ -704,8 +717,6 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
 
       VS::FrameInfo frame_info;
       frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-      frame_info.texture_sampler_y_coord_scale =
-          dst_snapshot->texture->GetYCoordScale();
 
       FS::FragInfo frag_info;
       frag_info.alpha = 1.0;
@@ -838,7 +849,6 @@ std::optional<Entity> BlendFilterContents::CreateFramebufferAdvancedBlend(
       FS::BindTextureSamplerSrc(pass, src_texture, src_sampler);
 
       frame_info.mvp = Matrix::MakeOrthographic(ISize(1, 1));
-      frame_info.src_y_coord_scale = src_texture->GetYCoordScale();
       VS::BindFrameInfo(pass, data_host_buffer.EmplaceUniform(frame_info));
 
       frag_info.src_input_alpha = 1.0;

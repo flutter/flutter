@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_basic_message_channel.h"
@@ -11,11 +12,19 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_message_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 
+class FlBasicMessageChannelTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override { messenger = fl_mock_binary_messenger_new(); }
+
+  ~FlBasicMessageChannelTest() { g_clear_object(&messenger); }
+
+  FlMockBinaryMessenger* messenger = nullptr;
+};
+
 // Checks sending a message without a response works.
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
-TEST(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
   gboolean called = FALSE;
   fl_mock_binary_messenger_set_standard_message_channel(
       messenger, "test",
@@ -44,10 +53,7 @@ TEST(FlBasicMessageChannelTest, SendMessageWithoutResponse) {
 // NOLINTEND(clang-analyzer-core.StackAddressEscape)
 
 // Checks sending a message with a response works.
-TEST(FlBasicMessageChannelTest, SendMessageWithResponse) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlBasicMessageChannelTest, SendMessageWithResponse) {
   fl_mock_binary_messenger_set_standard_message_channel(
       messenger, "test",
       [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
@@ -84,10 +90,7 @@ TEST(FlBasicMessageChannelTest, SendMessageWithResponse) {
 }
 
 // Checks the engine reporting a send failure is handled.
-TEST(FlBasicMessageChannelTest, SendFailure) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlBasicMessageChannelTest, SendFailure) {
   fl_mock_binary_messenger_set_error_channel(messenger, "test", 42, "Error");
 
   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
@@ -113,9 +116,7 @@ TEST(FlBasicMessageChannelTest, SendFailure) {
 }
 
 // Checks the shell able to receive and respond to messages from the engine.
-TEST(FlBasicMessageChannelTest, ReceiveMessage) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
+TEST_F(FlBasicMessageChannelTest, ReceiveMessage) {
   // Listen for messages from the engine.
   g_autoptr(FlStandardMessageCodec) codec = fl_standard_message_codec_new();
   g_autoptr(FlBasicMessageChannel) messages_channel =
@@ -158,10 +159,7 @@ TEST(FlBasicMessageChannelTest, ReceiveMessage) {
 }
 
 // Checks sending a null message with a response works.
-TEST(FlBasicMessageChannelTest, SendNullMessageWithResponse) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlBasicMessageChannelTest, SendNullMessageWithResponse) {
   fl_mock_binary_messenger_set_standard_message_channel(
       messenger, "test",
       [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,
@@ -190,10 +188,7 @@ TEST(FlBasicMessageChannelTest, SendNullMessageWithResponse) {
 }
 
 // Checks sending a message with a custom type generates an error.
-TEST(FlBasicMessageChannelTest, CustomType) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlBasicMessageChannelTest, CustomType) {
   fl_mock_binary_messenger_set_standard_message_channel(
       messenger, "test",
       [](FlMockBinaryMessenger* messenger, GTask* task, FlValue* message,

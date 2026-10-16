@@ -20,7 +20,10 @@ source_set("shaderc_util_flutter") {
     "//flutter/third_party/vulkan-deps/spirv-tools/src:spvtools",
   ]
 
-  defines = [ "ENABLE_HLSL=1" ]
+  defines = [
+    "ENABLE_HLSL=1",
+    "SHADERC_ENABLE_HLSL=1",
+  ]
 
   if (is_clang) {
     cflags_cc = [

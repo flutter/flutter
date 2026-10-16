@@ -33,7 +33,9 @@ namespace {
 // An EGL manager that initializes EGL but fails to create surfaces.
 class HalfBrokenEGLManager : public egl::Manager {
  public:
-  HalfBrokenEGLManager() : egl::Manager(egl::GpuPreference::NoPreference) {}
+  HalfBrokenEGLManager()
+      : egl::Manager(egl::GpuPreference::NoPreference,
+                     /*allow_inverted_surface=*/false) {}
 
   std::unique_ptr<egl::WindowSurface>
   CreateWindowSurface(HWND hwnd, size_t width, size_t height) override {
@@ -67,6 +69,7 @@ TEST(WindowsNoFixtureTest, GetTextureRegistrar) {
   FlutterDesktopEngineProperties properties = {};
   properties.assets_path = L"";
   properties.icu_data_path = L"icudtl.dat";
+  properties.impeller_switch = DefaultImpeller;
   auto engine = FlutterDesktopEngineCreate(&properties);
   ASSERT_NE(engine, nullptr);
   auto texture_registrar = FlutterDesktopEngineGetTextureRegistrar(engine);
@@ -132,9 +135,8 @@ TEST_F(WindowsTest, LaunchHeadlessEngine) {
 
   std::string view_ids;
   bool signaled = false;
-  context.AddNativeFunction(
-      "SignalStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        auto handle = Dart_GetNativeArgument(args, 0);
+  context.AddFfiNativeFunction(
+      "SignalStringValue", CREATE_FFI_LAMBDA([&](Dart_Handle handle) {
         ASSERT_FALSE(Dart_IsError(handle));
         view_ids = tonic::DartConverter<std::string>::FromDart(handle);
         signaled = true;
@@ -218,9 +220,8 @@ TEST_F(WindowsTest, VerifyNativeFunction) {
   builder.SetDartEntrypoint("verifyNativeFunction");
 
   bool signaled = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { signaled = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { signaled = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
@@ -240,12 +241,11 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithParameters) {
 
   bool bool_value = false;
   bool signaled = false;
-  auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &bool_value);
-    ASSERT_FALSE(Dart_IsError(handle));
+  auto native_entry = CREATE_FFI_LAMBDA([&](bool value) {
+    bool_value = value;
     signaled = true;
   });
-  context.AddNativeFunction("SignalBoolValue", native_entry);
+  context.AddFfiNativeFunction("SignalBoolValue", native_entry);
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
@@ -265,13 +265,12 @@ TEST_F(WindowsTest, PlatformExecutable) {
 
   std::string executable_name;
   bool signaled = false;
-  auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-    auto handle = Dart_GetNativeArgument(args, 0);
+  auto native_entry = CREATE_FFI_LAMBDA([&](Dart_Handle handle) {
     ASSERT_FALSE(Dart_IsError(handle));
     executable_name = tonic::DartConverter<std::string>::FromDart(handle);
     signaled = true;
   });
-  context.AddNativeFunction("SignalStringValue", native_entry);
+  context.AddFfiNativeFunction("SignalStringValue", native_entry);
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
@@ -292,19 +291,18 @@ TEST_F(WindowsTest, VerifyNativeFunctionWithReturn) {
 
   bool bool_value_to_return = true;
   int count = 2;
-  auto bool_return_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-    Dart_SetBooleanReturnValue(args, bool_value_to_return);
+  auto bool_return_entry = CREATE_FFI_LAMBDA([&]() {
     --count;
+    return bool_value_to_return;
   });
-  context.AddNativeFunction("SignalBoolReturn", bool_return_entry);
+  context.AddFfiNativeFunction("SignalBoolReturn", bool_return_entry);
 
   bool bool_value_passed = false;
-  auto bool_pass_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-    auto handle = Dart_GetNativeBooleanArgument(args, 0, &bool_value_passed);
-    ASSERT_FALSE(Dart_IsError(handle));
+  auto bool_pass_entry = CREATE_FFI_LAMBDA([&](bool value) {
+    bool_value_passed = value;
     --count;
   });
-  context.AddNativeFunction("SignalBoolValue", bool_pass_entry);
+  context.AddFfiNativeFunction("SignalBoolValue", bool_pass_entry);
 
   ViewControllerPtr controller{builder.Run()};
   ASSERT_NE(controller, nullptr);
@@ -333,10 +331,9 @@ TEST_F(WindowsTest, NextFrameCallback) {
     WindowsConfigBuilder builder(context);
     builder.SetDartEntrypoint("drawHelloWorld");
 
-    auto native_entry = CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-      captures.frame_scheduled_latch.Signal();
-    });
-    context.AddNativeFunction("NotifyFirstFrameScheduled", native_entry);
+    auto native_entry =
+        CREATE_FFI_LAMBDA([&]() { captures.frame_scheduled_latch.Signal(); });
+    context.AddFfiNativeFunction("NotifyFirstFrameScheduled", native_entry);
 
     ViewControllerPtr controller{builder.Run()};
     EXPECT_NE(controller, nullptr);
@@ -406,6 +403,175 @@ TEST_F(WindowsTest, PresentHeadless) {
   }
 }
 
+// Verify IsPlatformThread returns true on the platform thread.
+TEST_F(WindowsTest, IsPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  EXPECT_TRUE(FlutterDesktopEngineIsPlatformThread(engine.get()));
+}
+
+// Verify IsPlatformThread returns false on a background thread.
+TEST_F(WindowsTest, IsNotPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  bool result = true;
+  std::thread background(
+      [&]() { result = FlutterDesktopEngineIsPlatformThread(engine.get()); });
+  background.join();
+
+  EXPECT_FALSE(result);
+}
+
+// Verify a task can be posted to the platform thread while on the platform
+// thread.
+TEST_F(WindowsTest, PostPlatformThreadTaskFromPlatformThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  struct Captures {
+    std::thread::id thread_id;
+    bool done = false;
+  } captures;
+
+  FlutterDesktopEnginePostPlatformThreadTask(
+      engine.get(),
+      [](void* user_data) {
+        auto captures = static_cast<Captures*>(user_data);
+        captures->thread_id = std::this_thread::get_id();
+        captures->done = true;
+      },
+      /*on_cancel=*/nullptr, &captures);
+
+  while (!captures.done) {
+    PumpMessage();
+  }
+
+  EXPECT_EQ(captures.thread_id, std::this_thread::get_id());
+}
+
+// Verify a task can be posted to the platform thread while on a background
+// thread.
+TEST_F(WindowsTest, PostPlatformThreadTaskFromBackgroundThread) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  std::mutex background_thread_id_mutex;
+  struct Captures {
+    std::thread::id background_thread_id;
+    std::thread::id platform_thread_id;
+    bool done = false;
+  } captures;
+
+  std::thread background([&]() {
+    {
+      std::scoped_lock lock{background_thread_id_mutex};
+      captures.background_thread_id = std::this_thread::get_id();
+    }
+
+    FlutterDesktopEnginePostPlatformThreadTask(
+        engine.get(),
+        [](void* user_data) {
+          auto captures = static_cast<Captures*>(user_data);
+          captures->platform_thread_id = std::this_thread::get_id();
+          captures->done = true;
+        },
+        /*on_cancel=*/nullptr, &captures);
+  });
+  background.join();
+
+  while (!captures.done) {
+    PumpMessage();
+  }
+
+  std::scoped_lock lock{background_thread_id_mutex};
+  EXPECT_NE(captures.background_thread_id, std::thread::id{});
+  EXPECT_NE(captures.background_thread_id, captures.platform_thread_id);
+  EXPECT_EQ(captures.platform_thread_id, std::this_thread::get_id());
+}
+
+// Verify that destroying the engine after posting a task invokes the cancel
+// callback instead of the task callback.
+TEST_F(WindowsTest, PostPlatformThreadTaskCancelledOnEngineDestroy) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  struct Captures {
+    bool callback_called = false;
+    bool cancel_called = false;
+  } captures;
+
+  FlutterDesktopEnginePostPlatformThreadTask(
+      engine.get(),
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->callback_called = true;
+      },
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->cancel_called = true;
+      },
+      &captures);
+
+  // Destroy the engine before the task has a chance to run. The cancel
+  // callback should be called and the task callback should not.
+  engine.reset();
+
+  EXPECT_FALSE(captures.callback_called);
+  EXPECT_TRUE(captures.cancel_called);
+}
+
+// Verify that the cancel callback is not invoked for a task that runs.
+TEST_F(WindowsTest, PostPlatformThreadTaskNotCancelledWhenRun) {
+  auto& context = GetContext();
+  WindowsConfigBuilder builder(context);
+
+  EnginePtr engine{builder.RunHeadless()};
+  ASSERT_NE(engine, nullptr);
+
+  struct Captures {
+    bool callback_called = false;
+    bool cancel_called = false;
+  } captures;
+
+  FlutterDesktopEnginePostPlatformThreadTask(
+      engine.get(),
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->callback_called = true;
+      },
+      [](void* user_data) {
+        static_cast<Captures*>(user_data)->cancel_called = true;
+      },
+      &captures);
+
+  EXPECT_FALSE(captures.cancel_called);
+
+  while (!captures.callback_called) {
+    PumpMessage();
+  }
+
+  // Ensures that the cancel callback is not called,
+  // in case the engine was shut down after running the task.
+  engine.reset();
+
+  EXPECT_TRUE(captures.callback_called);
+  EXPECT_FALSE(captures.cancel_called);
+}
+
 // Implicit view has the implicit view ID.
 TEST_F(WindowsTest, GetViewId) {
   auto& context = GetContext();
@@ -439,8 +605,9 @@ TEST_F(WindowsTest, GetEngineGraphicsAdapter) {
   ASSERT_NE(controller, nullptr);
   auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
 
-  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
+  // Can't use smart pointer because the result is not a real COM object.
+  IDXGIAdapter* dxgi_adapter;
+  ASSERT_TRUE(FlutterDesktopEngineGetGraphicsAdapter(engine, &dxgi_adapter));
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
@@ -504,8 +671,9 @@ TEST_F(WindowsTest, GetEngineGraphicsAdapterWithLowPowerPreference) {
   ASSERT_NE(controller, nullptr);
   auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
 
-  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
+  // Can't use smart pointer because the result is not a real COM object.
+  IDXGIAdapter* dxgi_adapter;
+  ASSERT_TRUE(FlutterDesktopEngineGetGraphicsAdapter(engine, &dxgi_adapter));
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
@@ -527,8 +695,9 @@ TEST_F(WindowsTest, GetEngineGraphicsAdapterWithHighPerformancePreference) {
   ASSERT_NE(controller, nullptr);
   auto engine = FlutterDesktopViewControllerGetEngine(controller.get());
 
-  Microsoft::WRL::ComPtr<IDXGIAdapter> dxgi_adapter;
-  dxgi_adapter = FlutterDesktopEngineGetGraphicsAdapter(engine);
+  // Can't use smart pointer because the result is not a real COM object.
+  IDXGIAdapter* dxgi_adapter;
+  ASSERT_TRUE(FlutterDesktopEngineGetGraphicsAdapter(engine, &dxgi_adapter));
   ASSERT_NE(dxgi_adapter, nullptr);
   DXGI_ADAPTER_DESC desc{};
   ASSERT_TRUE(SUCCEEDED(dxgi_adapter->GetDesc(&desc)));
@@ -678,9 +847,8 @@ TEST_F(WindowsTest, GetKeyboardStateHeadless) {
   builder.SetDartEntrypoint("sendGetKeyboardState");
 
   std::atomic<bool> done = false;
-  context.AddNativeFunction(
-      "SignalStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        auto handle = Dart_GetNativeArgument(args, 0);
+  context.AddFfiNativeFunction(
+      "SignalStringValue", CREATE_FFI_LAMBDA([&](Dart_Handle handle) {
         ASSERT_FALSE(Dart_IsError(handle));
         auto value = tonic::DartConverter<std::string>::FromDart(handle);
         EXPECT_EQ(value, "Success");
@@ -707,13 +875,11 @@ TEST_F(WindowsTest, AddRemoveView) {
   builder.SetDartEntrypoint("onMetricsChangedSignalViewIds");
 
   bool ready = false;
-  context.AddNativeFunction(
-      "Signal",
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { ready = true; }));
+  context.AddFfiNativeFunction("Signal",
+                               CREATE_FFI_LAMBDA([&]() { ready = true; }));
 
-  context.AddNativeFunction(
-      "SignalStringValue", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        auto handle = Dart_GetNativeArgument(args, 0);
+  context.AddFfiNativeFunction(
+      "SignalStringValue", CREATE_FFI_LAMBDA([&](Dart_Handle handle) {
         ASSERT_FALSE(Dart_IsError(handle));
 
         std::scoped_lock lock{mutex};
@@ -765,9 +931,8 @@ TEST_F(WindowsTest, EngineId) {
   builder.SetDartEntrypoint("testEngineId");
 
   std::optional<int64_t> engineId;
-  context.AddNativeFunction(
-      "NotifyEngineId", CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
-        const auto argument = Dart_GetNativeArgument(args, 0);
+  context.AddFfiNativeFunction(
+      "NotifyEngineId", CREATE_FFI_LAMBDA([&](Dart_Handle argument) {
         if (!Dart_IsNull(argument)) {
           const auto handle = tonic::DartConverter<int64_t>::FromDart(argument);
           engineId = handle;
@@ -794,9 +959,8 @@ TEST_F(WindowsTest, EnableIAccessible) {
 
   // Setup: a signal for when we have send out all of our semantics updates
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   // Setup: Create a view
   ViewControllerPtr controller{builder.Run()};
@@ -842,9 +1006,8 @@ TEST_F(WindowsTest, EnableIAccessibleEx) {
 
   // Setup: a signal for when we have send out all of our semantics updates
   bool done = false;
-  auto native_entry =
-      CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) { done = true; });
-  context.AddNativeFunction("Signal", native_entry);
+  auto native_entry = CREATE_FFI_LAMBDA([&]() { done = true; });
+  context.AddFfiNativeFunction("Signal", native_entry);
 
   // Setup: Create a view
   ViewControllerPtr controller{builder.Run()};

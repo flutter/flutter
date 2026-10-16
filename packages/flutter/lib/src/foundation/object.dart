@@ -10,10 +10,10 @@
 /// return `object.runtimeType.toString()`; otherwise, it will return the
 /// [optimizedValue], which must be a simple constant string.
 String objectRuntimeType(Object? object, String optimizedValue) {
-  var effectiveOptimizedValue = optimizedValue;
+  var newOptimizedValue = optimizedValue;
   assert(() {
-    effectiveOptimizedValue = object.runtimeType.toString();
+    newOptimizedValue = object.runtimeType.toString();
     return true;
   }());
-  return effectiveOptimizedValue;
+  return newOptimizedValue;
 }

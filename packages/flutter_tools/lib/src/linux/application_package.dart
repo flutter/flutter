@@ -7,7 +7,6 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
-import '../globals.dart' as globals;
 
 abstract class LinuxApp extends ApplicationPackage {
   LinuxApp({required String projectBundleId}) : super(id: projectBundleId);
@@ -27,7 +26,7 @@ abstract class LinuxApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String executable(BuildMode buildMode);
+  String executable(BuildMode buildMode, [String? flavor]);
 }
 
 class PrebuiltLinuxApp extends LinuxApp {
@@ -38,7 +37,7 @@ class PrebuiltLinuxApp extends LinuxApp {
   final String _executable;
 
   @override
-  String executable(BuildMode buildMode) => _executable;
+  String executable(BuildMode buildMode, [String? flavor]) => _executable;
 
   @override
   String get name => _executable;
@@ -51,9 +50,14 @@ class BuildableLinuxApp extends LinuxApp {
   final LinuxProject project;
 
   @override
-  String executable(BuildMode buildMode) {
+  String executable(BuildMode buildMode, [String? flavor]) {
     final String? binaryName = getCmakeExecutableName(project);
-    return globals.fs.path.join(getLinuxBuildDirectory(), buildMode.cliName, 'bundle', binaryName);
+    return project.cmakeFile.fileSystem.path.join(
+      getLinuxBuildDirectory(null, flavor),
+      buildMode.cliName,
+      'bundle',
+      binaryName,
+    );
   }
 
   @override

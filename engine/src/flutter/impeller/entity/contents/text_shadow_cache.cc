@@ -15,19 +15,16 @@ namespace impeller {
 // Rounds sigma values for gaussian blur to nearest decimal.
 static constexpr int32_t kMaxSigmaDenominator = 10;
 
-TextShadowCache::TextShadowCacheKey::TextShadowCacheKey(Scalar p_max_basis,
-                                                        int64_t p_identifier,
-                                                        bool p_is_single_glyph,
-                                                        const Font& p_font,
-                                                        Sigma p_sigma,
-                                                        Color p_color)
+TextShadowCache::TextShadowCacheKey::TextShadowCacheKey(
+    Scalar p_max_basis,
+    Sigma p_sigma,
+    Color p_color,
+    TextFrameFingerprint p_fingerprint)
     : max_basis(p_max_basis),
-      identifier(p_identifier),
-      is_single_glyph(p_is_single_glyph),
-      font(p_font),
       rounded_sigma(Rational(std::round(p_sigma.sigma * kMaxSigmaDenominator),
                              kMaxSigmaDenominator)),
-      color(p_color) {}
+      color(p_color),
+      fingerprint(p_fingerprint) {}
 
 void TextShadowCache::MarkFrameStart() {
   for (auto& entry : entries_) {

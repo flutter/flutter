@@ -29,6 +29,20 @@ bool Attachment::IsValid() const {
     return false;
   }
 
+  const TextureDescriptor& desc = texture->GetTextureDescriptor();
+  if (mip_level >= desc.mip_count) {
+    VALIDATION_LOG << "Attachment mip_level " << mip_level
+                   << " is out of range; the texture has " << desc.mip_count
+                   << " mip levels.";
+    return false;
+  }
+  const uint32_t slice_count = desc.type == TextureType::kTextureCube ? 6u : 1u;
+  if (slice >= slice_count) {
+    VALIDATION_LOG << "Attachment slice " << slice
+                   << " is out of range for the texture type.";
+    return false;
+  }
+
   if (StoreActionNeedsResolveTexture(store_action)) {
     if (!resolve_texture || !resolve_texture->IsValid()) {
       VALIDATION_LOG << "Store action needs resolve but no valid resolve "
@@ -123,7 +137,7 @@ std::string AttachmentToString(const Attachment& attachment) {
 std::string ColorAttachmentToString(const ColorAttachment& color) {
   std::stringstream stream;
   stream << AttachmentToString(color) << ",";
-  stream << "ClearColor=(" << ColorToString(color.clear_color) << ")";
+  stream << "ClearColor=" << color.clear_color;
   return stream.str();
 }
 

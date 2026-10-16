@@ -47,10 +47,11 @@ SKWASM_EXPORT SkAnimatedImage* animatedImage_create(SkData* data,
     return SkAnimatedImage::Make(std::move(android_codec)).release();
   }
 
-  return SkAnimatedImage::Make(
-             std::move(android_codec),
-             SkImageInfo::MakeUnknown(target_width, target_height),
-             SkIRect::MakeWH(target_width, target_height), nullptr)
+  SkImageInfo info = android_codec->getInfo();
+  info = info.makeWH(target_width, target_height);
+  return SkAnimatedImage::Make(std::move(android_codec), info,
+                               SkIRect::MakeWH(target_width, target_height),
+                               nullptr)
       .release();
 }
 

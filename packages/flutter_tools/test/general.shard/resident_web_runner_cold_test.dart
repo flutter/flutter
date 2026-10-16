@@ -7,15 +7,14 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/tools/shader_compiler.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/isolated/devfs_web.dart';
 import 'package:flutter_tools/src/isolated/resident_web_runner.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -59,12 +58,12 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        ),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -78,7 +77,6 @@ name: my_app
       expect(debugConnectionInfo.wsUri, null);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,
@@ -94,12 +92,12 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        buildSystem: TestBuildSystem.all(BuildResult(success: false)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        ),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -110,7 +108,6 @@ name: my_app
       expect(await residentWebRunner.waitForAppToFinish(), 1);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: false)),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,
@@ -126,12 +123,12 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        buildSystem: TestBuildSystem.error(Exception('foo')),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        ),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -142,7 +139,6 @@ name: my_app
       expect(await residentWebRunner.waitForAppToFinish(), 1);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.error(Exception('foo')),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,
@@ -157,12 +153,12 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        ),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -176,7 +172,6 @@ name: my_app
       expect(result.code, 0);
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.all(BuildResult(success: true)),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,
@@ -191,12 +186,15 @@ name: my_app
         mockFlutterDevice,
         flutterProject: project,
         debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        terminal: Terminal.test(),
-        platform: FakePlatform(),
-        outputPreferences: OutputPreferences.test(),
-        systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        buildSystem: TestBuildSystem.list(<BuildResult>[
+          BuildResult(success: true),
+          BuildResult(success: false),
+        ]),
+        buildTargets: const BuildTargetsImpl(),
+        toolContext: FakeToolContext(
+          fs: fileSystem,
+          systemClock: SystemClock.fixed(DateTime(0, 0, 0)),
+        ),
         analytics: getInitializedFakeAnalyticsInstance(
           fs: fileSystem,
           fakeFlutterVersion: FakeFlutterVersion(),
@@ -211,10 +209,6 @@ name: my_app
       expect(result.message, contains('Failed to recompile application.'));
     },
     overrides: <Type, Generator>{
-      BuildSystem: () => TestBuildSystem.list(<BuildResult>[
-        BuildResult(success: true),
-        BuildResult(success: false),
-      ]),
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       Pub: ThrowingPub.new,
@@ -230,6 +224,9 @@ class FakeWebDevFS extends Fake implements WebDevFS {
   Future<Uri> create() async {
     return Uri.base;
   }
+
+  @override
+  void markReady() {}
 }
 
 class FakeWebDevice extends Fake implements Device {
@@ -282,5 +279,23 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   FlutterVmService? vmService;
 
   @override
+  final DevelopmentShaderCompiler developmentShaderCompiler = const FakeShaderCompiler();
+
+  @override
   Future<void> handleHotRestart() async {}
+}
+
+class FakeShaderCompiler implements DevelopmentShaderCompiler {
+  const FakeShaderCompiler();
+
+  @override
+  void configureCompiler(TargetPlatform? platform) {}
+
+  @override
+  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+    throw UnimplementedError();
+  }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

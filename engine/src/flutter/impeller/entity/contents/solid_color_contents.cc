@@ -81,7 +81,7 @@ std::optional<Color> SolidColorContents::AsBackgroundColor(
   if (geometry == nullptr) {
     return std::nullopt;
   }
-  Rect target_rect = Rect::MakeSize(target_size);
+  IRect target_rect = IRect::MakeSize(target_size);
   return geometry->CoversArea(entity.GetTransform(), target_rect)
              ? GetColor()
              : std::optional<Color>();

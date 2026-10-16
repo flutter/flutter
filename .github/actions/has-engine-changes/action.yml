@@ -1,0 +1,46 @@
+name: 'Has Engine Changes'
+description: 'Checks if there are any engine changes in the current branch'
+outputs:
+  changed:
+    description: "Returns 'true' if there are engine changes, 'false' otherwise"
+    value: ${{ steps.check.outputs.changed }}
+runs:
+  using: "composite"
+  steps:
+    - name: Check Engine Changes
+      id: check
+      shell: bash
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        MERGE_GROUP_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+        PUSH_BEFORE_SHA: ${{ github.event.before }}
+      run: |
+        EMPTY_SHA="0000000000000000000000000000000000000000"
+        if [ "$EVENT_NAME" = "pull_request" ]; then
+          BASE_REF="$PR_BASE_SHA"
+        elif [ "$EVENT_NAME" = "merge_group" ]; then
+          BASE_REF="$MERGE_GROUP_BASE_SHA"
+        elif [ "$EVENT_NAME" = "push" ] && [ -n "$PUSH_BEFORE_SHA" ] && [ "$PUSH_BEFORE_SHA" != "$EMPTY_SHA" ]; then
+          BASE_REF="$PUSH_BEFORE_SHA"
+        else
+          if git show-ref --verify --quiet refs/remotes/upstream/master; then
+            BASE_REF="upstream/master"
+          else
+            BASE_REF="origin/master"
+          fi
+        fi
+
+        echo "Comparing against base SHA: $BASE_REF"
+
+        CHANGED_FILES=$(.github/scripts/git_files_changed.sh "$BASE_REF")
+        echo "Changed files in this branch:"
+        echo "$CHANGED_FILES"
+
+        if [ "$(printf '%s\n' "$CHANGED_FILES" | .github/scripts/did_engine_change.sh)" = "true" ]; then
+          echo "Engine files changed."
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "No engine files changed."
+          echo "changed=false" >> "$GITHUB_OUTPUT"
+        fi

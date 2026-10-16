@@ -6,8 +6,8 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../base/config.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
 import '../version.dart';
 
 /// This function is called from within the context runner to perform
@@ -30,13 +30,15 @@ Analytics getAnalytics({
 }) {
   final String version = flutterVersion.getVersionString(redactUnknownBranches: true);
   final suppressEnvFlag = environment['FLUTTER_SUPPRESS_ANALYTICS']?.toLowerCase() == 'true';
+  final String? aiAgentName = AiAgent.detectAgentName(environment);
+  final hasAiAgent = aiAgentName != null;
 
   if ( // Ignore local user branches.
   version.startsWith('[user-branch]') ||
       // Many CI systems don't do a full git checkout.
       version.endsWith('/unknown') ||
-      // Ignore bots.
-      runningOnBot ||
+      // Ignore bots, unless run by an AI agent.
+      (runningOnBot && !hasAiAgent) ||
       // Ignore when suppressed by FLUTTER_SUPPRESS_ANALYTICS.
       suppressEnvFlag) {
     return const NoOpAnalytics();
@@ -56,6 +58,7 @@ Analytics getAnalytics({
     enableAsserts: enableAsserts,
     clientIde: clientIde,
     enabledFeatures: getEnabledFeatures(config),
+    agent: aiAgentName,
   );
 }
 
@@ -72,11 +75,13 @@ String? getEnabledFeatures(Config config) {
 }
 
 /// Function to safely grab the max rss from [ProcessInfo].
-int? getMaxRss(ProcessInfo processInfo) {
+int? getMaxRss(ProcessInfo processInfo, {required Logger logger}) {
   try {
-    return globals.processInfo.maxRss;
+    return processInfo.maxRss;
   } on Exception catch (error) {
-    globals.printTrace('Querying maxRss failed with error: $error');
+    logger.printTrace('Querying maxRss failed with error: $error');
+  } on UnsupportedError {
+    // maxRss is unsupported on this platform.
   }
   return null;
 }

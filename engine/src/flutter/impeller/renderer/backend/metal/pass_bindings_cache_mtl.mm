@@ -32,6 +32,12 @@ bool PassBindingsCacheMTL::SetBuffer(ShaderStage stage,
                                      uint64_t index,
                                      uint64_t offset,
                                      id<MTLBuffer> buffer) {
+  if (index == kOptimizedOutBinding) {
+    // The shader compiler dead-code-eliminated this resource, so it has no
+    // argument-table slot. Skip the bind rather than forward an out-of-range
+    // index to Metal, which has no bounds check and would crash.
+    return true;
+  }
   auto& buffers_map = buffers_[stage];
   auto found = buffers_map.find(index);
   if (found != buffers_map.end() && found->second.buffer == buffer) {
@@ -75,6 +81,10 @@ bool PassBindingsCacheMTL::SetBuffer(ShaderStage stage,
 bool PassBindingsCacheMTL::SetTexture(ShaderStage stage,
                                       uint64_t index,
                                       id<MTLTexture> texture) {
+  if (index == kOptimizedOutBinding) {
+    // See SetBuffer: a dead-code-eliminated sampler has no argument-table slot.
+    return true;
+  }
   auto& texture_map = textures_[stage];
   auto found = texture_map.find(index);
   if (found != texture_map.end() && found->second == texture) {
@@ -99,6 +109,10 @@ bool PassBindingsCacheMTL::SetTexture(ShaderStage stage,
 bool PassBindingsCacheMTL::SetSampler(ShaderStage stage,
                                       uint64_t index,
                                       id<MTLSamplerState> sampler) {
+  if (index == kOptimizedOutBinding) {
+    // See SetBuffer: a dead-code-eliminated sampler has no argument-table slot.
+    return true;
+  }
   auto& sampler_map = samplers_[stage];
   auto found = sampler_map.find(index);
   if (found != sampler_map.end() && found->second == sampler) {

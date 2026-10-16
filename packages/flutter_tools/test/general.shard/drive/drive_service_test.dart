@@ -135,9 +135,13 @@ void main() {
       device,
       DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
     );
-    final int testResult = await driverService.startTest('foo.test', <String>[
-      '--enable-experiment=non-nullable',
-    ], PackageConfig(<Package>[Package('test', Uri.base)]));
+    final int testResult = await driverService.startTest(
+      'foo.test',
+      DriveTestSpecification(
+        arguments: const <String>['--enable-experiment=non-nullable'],
+        packageConfig: PackageConfig(<Package>[Package('test', Uri.base)]),
+      ),
+    );
 
     expect(testResult, 23);
   });
@@ -174,9 +178,11 @@ void main() {
       );
       final int testResult = await driverService.startTest(
         'foo.test',
-        <String>['--enable-experiment=non-nullable'],
-        PackageConfig(<Package>[Package('test', Uri.base)]),
-        profileMemory: 'devtools_memory.json',
+        DriveTestSpecification(
+          arguments: const <String>['--enable-experiment=non-nullable'],
+          packageConfig: PackageConfig(<Package>[Package('test', Uri.base)]),
+          profileMemory: 'devtools_memory.json',
+        ),
       );
 
       expect(launcher.closed, true);
@@ -212,9 +218,13 @@ void main() {
         device,
         DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
       );
-      final int testResult = await driverService.startTest('foo.test', <String>[
-        '--enable-experiment=non-nullable',
-      ], PackageConfig.empty);
+      final int testResult = await driverService.startTest(
+        'foo.test',
+        const DriveTestSpecification(
+          arguments: <String>['--enable-experiment=non-nullable'],
+          packageConfig: PackageConfig.empty,
+        ),
+      );
 
       expect(testResult, 23);
     },
@@ -250,8 +260,7 @@ void main() {
 
       final int testResult = await driverService.startTest(
         'foo.test',
-        <String>[],
-        PackageConfig(<Package>[Package('test', Uri.base)]),
+        DriveTestSpecification(packageConfig: PackageConfig(<Package>[Package('test', Uri.base)])),
       );
 
       expect(testResult, 11);
@@ -404,6 +413,81 @@ void main() {
     );
     await driverService.stop();
   });
+
+  testWithoutContext(
+    'Listens to device log reader even if connection to VM service fails',
+    () async {
+      final processManager = FakeProcessManager.empty();
+      final logReader = FakeDeviceLogReader();
+      final DriverService driverService = FlutterDriverService(
+        applicationPackageFactory: FakeApplicationPackageFactory(FakeApplicationPackage()),
+        logger: BufferLogger.test(),
+        platform: FakePlatform(),
+        processUtils: ProcessUtils(logger: BufferLogger.test(), processManager: processManager),
+        dartSdkPath: 'dart',
+        devtoolsLauncher: FakeDevtoolsLauncher(),
+        logFlushDelay: Duration.zero,
+        vmServiceConnector:
+            (
+              Uri httpUri, {
+              ReloadSources? reloadSources,
+              Restart? restart,
+              CompileExpression? compileExpression,
+              FlutterProject? flutterProject,
+              PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+              io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+              Device? device,
+              required Logger logger,
+            }) async {
+              throw Exception('Failed to connect to VM service');
+            },
+      );
+      final device = FakeDevice(LaunchResult.failed(), logReader: logReader);
+
+      try {
+        await driverService.reuseApplication(
+          Uri.parse('http://127.0.0.1:63426/1UasC_ihpXY=/'),
+          device,
+          DebuggingOptions.enabled(BuildInfo.debug),
+        );
+        fail('Expected reuseApplication to fail');
+      } on Exception catch (e) {
+        expect(e.toString(), contains('Failed to connect to VM service'));
+      }
+      expect(logReader.isListened, true);
+    },
+  );
+
+  group('DriveTestSpecification', () {
+    testWithoutContext('has expected defaults', () {
+      const spec = DriveTestSpecification(packageConfig: PackageConfig.empty);
+      expect(spec.arguments, isEmpty);
+      expect(spec.packageConfig, PackageConfig.empty);
+      expect(spec.headless, isNull);
+      expect(spec.chromeBinary, isNull);
+      expect(spec.browserName, isNull);
+      expect(spec.androidEmulator, isNull);
+      expect(spec.driverPort, isNull);
+      expect(spec.webBrowserFlags, isEmpty);
+      expect(spec.browserDimension, isNull);
+      expect(spec.profileMemory, isNull);
+    });
+
+    testWithoutContext('parseBrowserDimension splits width, height, and optional dpr', () {
+      expect(DriveTestSpecification.parseBrowserDimension(null), isNull);
+      expect(DriveTestSpecification.parseBrowserDimension('1600x1024'), <String>['1600', '1024']);
+      expect(DriveTestSpecification.parseBrowserDimension('1600x1024@2'), <String>[
+        '1600',
+        '1024',
+        '2',
+      ]);
+      expect(DriveTestSpecification.parseBrowserDimension('800,600@1.5'), <String>[
+        '800',
+        '600',
+        '1.5',
+      ]);
+    });
+  });
 }
 
 FlutterDriverService setUpDriverService({
@@ -466,8 +550,10 @@ class FakeApplicationPackage extends Fake implements ApplicationPackage {
 }
 
 class FakeDevice extends Fake implements Device {
-  FakeDevice(this.result, {this.supportsFlutterExit = true});
+  FakeDevice(this.result, {this.supportsFlutterExit = true, DeviceLogReader? logReader})
+    : _logReader = logReader ?? NoOpDeviceLogReader('test');
 
+  final DeviceLogReader _logReader;
   LaunchResult result;
   bool didStopApp = false;
   bool didUninstallApp = false;
@@ -495,7 +581,7 @@ class FakeDevice extends Fake implements Device {
   Future<DeviceLogReader> getLogReader({
     ApplicationPackage? app,
     bool includePastLogs = false,
-  }) async => NoOpDeviceLogReader('test');
+  }) async => _logReader;
 
   @override
   Future<LaunchResult> startApp(
@@ -562,4 +648,26 @@ class FakeDartDevelopmentService extends Fake
   Future<void> shutdown() async {
     disposed = true;
   }
+}
+
+class FakeDeviceLogReader implements DeviceLogReader {
+  final StreamController<String> _logLinesController = StreamController<String>.broadcast();
+  bool isListened = false;
+
+  @override
+  String get name => 'fake_log_reader';
+
+  @override
+  Stream<String> get logLines {
+    isListened = true;
+    return _logLinesController.stream;
+  }
+
+  @override
+  void dispose() {
+    _logLinesController.close();
+  }
+
+  @override
+  Future<void> provideVmService(FlutterVmService connectedVmService) async {}
 }

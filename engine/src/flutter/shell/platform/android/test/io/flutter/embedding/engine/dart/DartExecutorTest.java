@@ -83,7 +83,7 @@ public class DartExecutorTest {
     FlutterInjector.setInstance(
         new FlutterInjector.Builder().setFlutterLoader(mockFlutterLoader).build());
     DartEntrypoint entrypoint = DartEntrypoint.createDefault();
-    assertEquals(entrypoint.pathToBundle, "my/custom/path");
-    assertEquals(entrypoint.dartEntrypointFunctionName, "main");
+    assertEquals("my/custom/path", entrypoint.pathToBundle);
+    assertEquals("main", entrypoint.dartEntrypointFunctionName);
   }
 }

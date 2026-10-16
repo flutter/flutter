@@ -431,4 +431,18 @@ void main() {
       );
     });
   });
+
+  testWidgets('CustomMultiChildLayout does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    final size = ValueNotifier<Size>(const Size(100, 200));
+    addTearDown(tester.view.reset);
+    addTearDown(size.dispose);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: CustomMultiChildLayout(delegate: NotifierLayoutDelegate(size))),
+      ),
+    );
+    expect(tester.getSize(find.byType(CustomMultiChildLayout)), Size.zero);
+  });
 }

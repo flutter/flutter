@@ -26,12 +26,15 @@ void main() {
   Logger? logger;
   DtdLauncher? dtdLauncher;
   DevtoolsServerLauncher? devtoolsLauncher;
-  final project = BasicProject();
+  late BasicProject project;
+  var projectCounter = 0;
   const ProcessManager processManager = LocalProcessManager();
 
   setUp(() async {
     logger = BufferLogger.test();
     tempDir = createResolvedTempDirectorySync('widget_preview_smoke_test.');
+    projectCounter++;
+    project = BasicProject(name: 'test_smoke_$projectCounter');
     await project.setUpIn(tempDir);
   });
 
@@ -56,53 +59,42 @@ void main() {
       );
     });
 
-    testWithoutContext(
-      'runs flutter pub get in widget_preview_scaffold if '
-      "widget_preview_scaffold/.dart_tool doesn't exist",
-      () async {
-        // Regression test for https://github.com/flutter/flutter/issues/178660
-        // Generate the widget preview scaffold, but don't bother launching it.
-        processManager.runSync(<String>[
-          flutterBin,
-          'widget-preview',
-          'start',
-          '--no-${WidgetPreviewStartCommand.kLaunchPreviewer}',
-        ], workingDirectory: tempDir.path);
+    testWithoutContext('runs flutter pub get in widget_preview_scaffold if '
+        "widget_preview_scaffold/.dart_tool doesn't exist", () async {
+      // Regression test for https://github.com/flutter/flutter/issues/178660
+      // Generate the widget preview scaffold, but don't bother launching it.
+      processManager.runSync(<String>[
+        flutterBin,
+        'widget-preview',
+        'start',
+        '--no-${WidgetPreviewStartCommand.kLaunchPreviewer}',
+      ], workingDirectory: tempDir.path);
 
-        // Ensure widget_preview_scaffold/.dart_tool/package_config.json exists.
-        final Directory widgetPreviewScaffoldDartTool = tempDir
-            .childDirectory('.dart_tool')
-            .childDirectory('widget_preview_scaffold')
-            .childDirectory('.dart_tool');
-        expect(widgetPreviewScaffoldDartTool, exists);
-        expect(widgetPreviewScaffoldDartTool.childFile('package_config.json'), exists);
+      // Ensure .widget_preview/.dart_tool/package_config.json exists.
+      final Directory widgetPreviewScaffoldDartTool = tempDir
+          .childDirectory('.widget_preview')
+          .childDirectory('.dart_tool');
+      expect(widgetPreviewScaffoldDartTool, exists);
+      expect(widgetPreviewScaffoldDartTool.childFile('package_config.json'), exists);
 
-        // Delete widget_preview_scaffold/.dart_tool/. This simulates an interrupted
-        // flutter widget-preview start where 'flutter pub get' wasn't run after
-        // the widget_preview_scaffold project was created.
-        widgetPreviewScaffoldDartTool.deleteSync(recursive: true);
+      // Delete .widget_preview/.dart_tool/. This simulates an interrupted
+      // flutter widget-preview start where 'flutter pub get' wasn't run after
+      // the widget_preview_scaffold project was created.
+      widgetPreviewScaffoldDartTool.deleteSync(recursive: true);
 
-        // Ensure we don't crash due to the package_config.json lookup pointing to
-        // the parent project's package_config.json due to
-        // widget_preview_scaffold/.dart_tool/package_config.json not existing.
-        await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
-      },
-      // Project is always regenerated.
-      skip: true, // See https://github.com/flutter/flutter/issues/179036.
-    );
+      // Ensure we don't crash due to the package_config.json lookup pointing to
+      // the parent project's package_config.json due to
+      // .widget_preview/.dart_tool/package_config.json not existing.
+      await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
+    });
 
-    testWithoutContext(
-      'does not recreate project on subsequent runs',
-      () async {
-        // The first run of 'flutter widget-preview start' should generate a new preview scaffold
-        await runWidgetPreview(tempDir: tempDir, expectedMessages: firstLaunchMessagesWeb);
+    testWithoutContext('does not recreate project on subsequent runs', () async {
+      // The first run of 'flutter widget-preview start' should generate a new preview scaffold
+      await runWidgetPreview(tempDir: tempDir, expectedMessages: firstLaunchMessagesWeb);
 
-        // We shouldn't regenerate the scaffold after the initial run.
-        await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
-      },
-      // Project is always regenerated.
-      skip: true, // See https://github.com/flutter/flutter/issues/179036.
-    );
+      // We shouldn't regenerate the scaffold after the initial run.
+      await runWidgetPreview(tempDir: tempDir, expectedMessages: subsequentLaunchMessagesWeb);
+    });
 
     testUsingContext('can connect to an existing DTD instance', () async {
       dtdLauncher = DtdLauncher(

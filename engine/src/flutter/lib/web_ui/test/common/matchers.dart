@@ -205,13 +205,13 @@ Matcher hasHtml(String htmlPattern) {
   if (originalDom.children.isEmpty) {
     fail(
       'Test HTML pattern is empty.\n'
-      'The pattern must contain exacly one top-level element, but was: $htmlPattern',
+      'The pattern must contain exactly one top-level element, but was: $htmlPattern',
     );
   }
   if (originalDom.children.length > 1) {
     fail(
       'Test HTML pattern has more than one top-level element.\n'
-      'The pattern must contain exacly one top-level element, but was: $htmlPattern',
+      'The pattern must contain exactly one top-level element, but was: $htmlPattern',
     );
   }
   return HtmlPatternMatcher(originalDom.children.single);
@@ -257,7 +257,7 @@ class HtmlPatternMatcher extends Matcher {
   final html.Element pattern;
 
   @override
-  bool matches(final Object? object, Map<Object?, Object?> matchState) {
+  bool matches(Object? object, Map<Object?, Object?> matchState) {
     // TODO(srujzs): Replace this with `!object.isJSAny` once we have that API
     // in `dart:js_interop`.
     // https://github.com/dart-lang/sdk/issues/56905

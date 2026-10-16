@@ -61,6 +61,15 @@ class MockVulkanContextBuilder {
   MockVulkanContextBuilder();
 
   //------------------------------------------------------------------------------
+  /// @brief      Initialize a mocked Vulkan instance and select a physical
+  ///             device without creating the logical device or full context.
+  ///
+  /// @return     A `ContextVK::DeviceSelection` if a physical device can be
+  ///             selected.
+  ///
+  absl::StatusOr<ContextVK::DeviceSelection> SelectDevice();
+
+  //------------------------------------------------------------------------------
   /// @brief      Create a Vulkan context with Vulkan functions mocked. The
   ///             caller is given a chance to tinker on the settings right
   ///             before a context is created.
@@ -86,6 +95,12 @@ class MockVulkanContextBuilder {
   MockVulkanContextBuilder& SetInstanceLayers(
       const std::vector<std::string>& instance_layers) {
     instance_layers_ = instance_layers;
+    return *this;
+  }
+
+  MockVulkanContextBuilder& SetDeviceExtensions(
+      const std::vector<std::string>& device_extensions) {
+    device_extensions_ = device_extensions;
     return *this;
   }
 
@@ -128,10 +143,24 @@ class MockVulkanContextBuilder {
     return *this;
   }
 
+  /// Make the next `count` calls to vkCreateImage for a fixed-rate-compressed
+  /// image (one carrying a VkImageCompressionControlEXT in its pNext chain)
+  /// fail with VK_ERROR_COMPRESSION_EXHAUSTED_EXT. Also advertises the
+  /// VK_EXT_image_compression_control feature/format support so the
+  /// fixed-rate-compression path is exercised.
+  MockVulkanContextBuilder& SetCompressionExhaustedCreateImageFailures(
+      int count) {
+    compression_exhausted_create_image_failures_ = count;
+    return *this;
+  }
+
  private:
+  ContextVK::Settings PrepareSettings();
+
   std::function<void(ContextVK::Settings&)> settings_callback_;
   std::vector<std::string> instance_extensions_;
   std::vector<std::string> instance_layers_;
+  std::vector<std::string> device_extensions_;
   std::optional<ContextVK::EmbedderData> embedder_data_;
   std::function<void(VkPhysicalDevice physicalDevice,
                      VkFormat format,
@@ -144,6 +173,7 @@ class MockVulkanContextBuilder {
       acquire_next_image_callback_;
   std::function<std::remove_pointer_t<PFN_vkWaitForFences>>
       wait_for_fences_callback_;
+  int compression_exhausted_create_image_failures_ = 0;
 };
 
 /// @brief Override the image size returned by all swapchain images.
@@ -151,6 +181,10 @@ void SetSwapchainImageSize(ISize size);
 
 std::vector<VkImageMemoryBarrier>& GetImageMemoryBarriers(
     VkCommandBuffer buffer);
+
+/// @brief Returns the viewports passed to `vkCmdSetViewport` calls on the
+///        given command buffer, in call order.
+const std::vector<VkViewport>& GetRecordedViewports(VkCommandBuffer buffer);
 
 }  // namespace testing
 }  // namespace impeller

@@ -8,16 +8,17 @@ For example, after building `ios_debug_sim_unopt` (to run on Intel Macs) or `ios
 run:
 
 ```sh
-# From the root of the engine repository
-$ ./testing/ios_scenario_app/run_ios_tests.sh ios_debug_sim_unopt
+$ engine/src/flutter/testing/ios_scenario_app/run_ios_tests.sh ios_debug_sim_unopt
 ```
 
 or:
 
 ```sh
-# From the root of the engine repository
-$ ./testing/ios_scenario_app/run_ios_tests.sh ios_debug_sim_unopt_arm64
+$ engine/src/flutter/testing/ios_scenario_app/run_ios_tests.sh ios_debug_sim_unopt_arm64
 ```
+
+The paths above are relative to the root of the checkout, but the script
+resolves everything from its own location, so it can be run from any directory.
 
 To run or debug in Xcode, open the xcodeproj file located in
 `<engine_out_dir>/ios_debug_sim_unopt/ios_scenario_app/Scenarios/Scenarios.xcodeproj`.
@@ -29,10 +30,12 @@ grep for `run_ios_tests.sh`.
 
 ## iOS Platform View Tests
 
-For PlatformView tests on iOS, edit the dictionaries in
-[AppDelegate.m](Scenarios/Scenarios/AppDelegate.m) and
-[GoldenTestManager.m](Scenarios/ScenariosUITests/GoldenTestManager.m) so that
-the correct golden image can be found. Also, add a
+For PlatformView tests on iOS, register the scenario in
+[scenarios.dart](../lib/src/scenarios.dart) and add its launch argument to
+`scenarioArguments` in
+[SceneDelegate.m](Scenarios/Scenarios/SceneDelegate.m). The golden identifier
+is derived from the launch argument -- drop the leading `--` and swap `-` for
+`_` -- so it does not need to be registered anywhere else. Also, add a
 [GoldenPlatformViewTests](Scenarios/ScenariosUITests/GoldenPlatformViewTests.h)
 in [PlatformViewUITests.m](Scenarios/ScenariosUITests/PlatformViewUITests.m).
 

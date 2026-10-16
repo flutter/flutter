@@ -70,14 +70,14 @@ Future<void> testMain() async {
       }
     }
 
-    await matchGoldenFile('$image.png', region: region);
+    await matchGoldenFile('web_paragraph.$image.png', region: region);
     WebParagraphProfiler.log();
   }
 
   test(
     'Dummy test to warm up GPU',
     () async {
-      await draw('dummyText', 'Dummy text', 'Dummy text', 1, 1);
+      await draw('dummy_text', 'Dummy text', 'Dummy text', 1, 1);
     },
     timeout: Timeout.none,
     skip: true,
@@ -86,7 +86,7 @@ Future<void> testMain() async {
   test(
     'Build/Layout/Paint small text',
     () async {
-      await draw('smallText', 'Abcdef', 'Small text', 10, 100);
+      await draw('small_text', 'Abcdef', 'Small text', 10, 100);
     },
     timeout: Timeout.none,
     skip: true,
@@ -95,7 +95,7 @@ Future<void> testMain() async {
   test(
     'Build/Layout/Paint medium text',
     () async {
-      await draw('mediumText', 'Abcdef ghijkl mnopqrs tuvwxyz.', 'Medium text', 10, 100);
+      await draw('medium_text', 'Abcdef ghijkl mnopqrs tuvwxyz.', 'Medium text', 10, 100);
     },
     timeout: Timeout.none,
     skip: true,
@@ -105,7 +105,7 @@ Future<void> testMain() async {
     'Build/Layout/Paint large text',
     () async {
       await draw(
-        'largeText',
+        'large_text',
         'Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. '
             'Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. '
             'Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. Abcdef ghijkl mnopqrs tuvwxyz. '
@@ -166,7 +166,7 @@ Future<void> testMain() async {
         });
       }
 
-      await matchGoldenFile('textSize.png', region: region);
+      await matchGoldenFile('web_paragraph.text_size.png', region: region);
       WebParagraphProfiler.log();
     },
     timeout: Timeout.none,

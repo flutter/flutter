@@ -10,7 +10,7 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show clampDouble, precisionErrorTolerance;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/rendering.dart';
 
@@ -199,6 +199,7 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
+  @awaitNotRequired
   Future<void> animateToPage(int page, {required Duration duration, required Curve curve}) {
     assert(_debugCheckPageControllerAttached());
     final position = this.position as _PagePosition;
@@ -243,6 +244,7 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
+  @awaitNotRequired
   Future<void> nextPage({required Duration duration, required Curve curve}) {
     return animateToPage(page!.round() + 1, duration: duration, curve: curve);
   }
@@ -251,6 +253,7 @@ class PageController extends ScrollController {
   ///
   /// The animation lasts for the given duration and follows the given curve.
   /// The returned [Future] resolves when the animation completes.
+  @awaitNotRequired
   Future<void> previousPage({required Duration duration, required Curve curve}) {
     return animateToPage(page!.round() - 1, duration: duration, curve: curve);
   }
@@ -439,9 +442,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   void restoreScrollOffset() {
     if (!hasPixels) {
-      final value =
-          PageStorage.maybeOf(context.storageContext)?.readState(context.storageContext) as double?;
-      if (value != null) {
+      final Object? value = PageStorage.maybeOf(context.storageContext)
+          ?.readState(context.storageContext);
+      // The slot is identified only by the PageStorageKeys above the context,
+      // so another widget under the same keys may have saved a value of a
+      // different type here.
+      if (value is double) {
         _pageToUseOnStartup = value;
       }
     }
@@ -550,6 +556,14 @@ class _ForceImplicitScrollPhysics extends ScrollPhysics {
 
   @override
   final bool allowImplicitScrolling;
+
+  @override
+  bool shouldUpdate(covariant _ForceImplicitScrollPhysics old) {
+    if (allowImplicitScrolling != old.allowImplicitScrolling) {
+      return true;
+    }
+    return super.shouldUpdate(old);
+  }
 }
 
 /// Scroll physics used by a [PageView].
@@ -569,6 +583,11 @@ class PageScrollPhysics extends ScrollPhysics {
   PageScrollPhysics applyTo(ScrollPhysics? ancestor) {
     return PageScrollPhysics(parent: buildParent(ancestor));
   }
+
+  // Selection gestures such as dragging to select text must not scroll a
+  // PageView to an adjacent page, so edge scrolling is disallowed here.
+  @override
+  bool get allowSelectionEdgeScrolling => false;
 
   double _getPage(ScrollMetrics position) {
     if (position is _PagePosition) {

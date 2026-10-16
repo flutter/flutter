@@ -74,6 +74,6 @@ impeller_component("tessellator_unittests") {
     ":tessellator_libtess",
     "../geometry:geometry_asserts",
     "../playground:playground_test",
-    "//flutter/testing",
+    "//flutter/testing:testing_lib",
   ]
 }

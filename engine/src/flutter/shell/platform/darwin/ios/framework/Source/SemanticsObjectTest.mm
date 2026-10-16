@@ -8,7 +8,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSemanticsScrollView.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView_Test.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTouchInterceptingView+Test.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObjectTestMocks.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/TextInputSemanticsObject.h"
@@ -41,6 +41,22 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertNotNil(object);
 }
 
+- (void)testUIFocusSystemMethodsDoNotCrashWhenBridgeIsDead {
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge;
+  SemanticsObject* object;
+  {
+    auto mock_bridge = std::make_unique<flutter::testing::MockAccessibilityBridge>();
+    fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock_bridge.get());
+    bridge = factory.GetWeakPtr();
+    object = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  }
+  // Now bridge is nullptr.
+
+  XCTAssertNil([object parentFocusEnvironment]);
+  XCTAssertNil([object coordinateSpace]);
+  XCTAssertTrue(CGRectEqualToRect([object frame], CGRectZero));
+}
+
 - (void)testSetChildren {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridge());
@@ -51,6 +67,43 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertEqual(parent, child.parent);
   parent.children = @[];
   XCTAssertNil(child.parent);
+}
+
+- (void)testOldParentDoesNotDetachReparentedChild {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* oldParent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* newParent = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:2];
+
+  oldParent.children = @[ child ];
+  oldParent.childrenInHitTestOrder = @[ child ];
+  newParent.children = @[ child ];
+  newParent.childrenInHitTestOrder = @[ child ];
+
+  oldParent.children = @[];
+  oldParent.childrenInHitTestOrder = @[];
+
+  XCTAssertEqual(child.parent, newParent);
+}
+
+- (void)testSetChildrenInHitTestOrderDoesNotModifyParent {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  SemanticsObject* traversalParent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* hitTestParent = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:2];
+
+  traversalParent.children = @[ child ];
+  XCTAssertEqual(child.parent, traversalParent);
+
+  hitTestParent.childrenInHitTestOrder = @[ child ];
+  XCTAssertEqual(child.parent, traversalParent);
+
+  hitTestParent.childrenInHitTestOrder = @[];
+  XCTAssertEqual(child.parent, traversalParent);
 }
 
 - (void)testAccessibilityHitTestFocusAtLeaf {
@@ -264,6 +317,17 @@ const float kFloatCompareEpsilon = 0.001;
   FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
   [object setSemanticsNode:&node];
   XCTAssertEqual([object accessibilityTraits], UIAccessibilityTraitStaticText);
+}
+
+- (void)testPlainSemanticsObjectWithHeadingLevelHasHeaderTrait {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  flutter::SemanticsNode node;
+  node.headingLevel = 2;
+  FlutterSemanticsObject* object = [[FlutterSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  XCTAssertTrue(([object accessibilityTraits] & UIAccessibilityTraitHeader) > 0);
 }
 
 - (void)testNodeWithImplicitScrollIsAnAccessibilityElementWhenItisHidden {
@@ -735,6 +799,90 @@ const float kFloatCompareEpsilon = 0.001;
   XCTAssertTrue(CGRectEqualToRect(container.accessibilityFrame, UIScreen.mainScreen.bounds));
 }
 
+- (void)testRootSemanticsObjectContainerAccessibilityContainerIsBridgeView {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode root;
+  root.id = kRootNodeId;
+
+  FlutterSemanticsObject* rootObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                  uid:kRootNodeId];
+  [rootObject setSemanticsNode:&root];
+
+  SemanticsObjectContainer* container =
+      static_cast<SemanticsObjectContainer*>(rootObject.accessibilityContainer);
+
+  XCTAssertEqual(container.accessibilityContainer, mock->view());
+}
+
+- (void)testBridgeViewIsNilWhileBridgeIsAliveAndViewIsNotLoaded {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isViewLoaded = false;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode root;
+  root.id = kRootNodeId;
+  root.rect = SkRect::MakeXYWH(0, 0, 100, 100);
+
+  FlutterSemanticsObject* rootObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                  uid:kRootNodeId];
+  [rootObject setSemanticsNode:&root];
+
+  XCTAssertNotNil(mock->view());
+  XCTAssertTrue(rootObject.bridge != nullptr);
+  XCTAssertNil(rootObject.bridgeView);
+  XCTAssertTrue(CGRectEqualToRect(rootObject.accessibilityFrame, CGRectZero));
+
+  SemanticsObjectContainer* container =
+      static_cast<SemanticsObjectContainer*>(rootObject.accessibilityContainer);
+  XCTAssertNotNil(container);
+  XCTAssertNil(container.accessibilityContainer);
+}
+
+- (void)testChildSemanticsObjectContainerAccessibilityContainerIsParentContainer {
+  flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
+  mock->isVoiceOverRunningValue = true;
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(mock);
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode root;
+  root.id = kRootNodeId;
+  root.childrenInTraversalOrder.push_back(1);
+
+  flutter::SemanticsNode child;
+  child.id = 1;
+  child.childrenInTraversalOrder.push_back(2);
+
+  flutter::SemanticsNode grandchild;
+  grandchild.id = 2;
+
+  FlutterSemanticsObject* rootObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                  uid:kRootNodeId];
+  [rootObject setSemanticsNode:&root];
+
+  FlutterSemanticsObject* childObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                   uid:1];
+  [childObject setSemanticsNode:&child];
+
+  FlutterSemanticsObject* grandchildObject = [[FlutterSemanticsObject alloc] initWithBridge:bridge
+                                                                                        uid:2];
+  [grandchildObject setSemanticsNode:&grandchild];
+
+  rootObject.children = @[ childObject ];
+  childObject.children = @[ grandchildObject ];
+
+  SemanticsObjectContainer* rootContainer =
+      static_cast<SemanticsObjectContainer*>(rootObject.accessibilityContainer);
+  SemanticsObjectContainer* childContainer =
+      static_cast<SemanticsObjectContainer*>(childObject.accessibilityContainer);
+
+  XCTAssertEqual(childContainer.accessibilityContainer, rootContainer);
+}
+
 - (void)testFlutterSemanticsObjectAttributedStringsDoNotCrashWhenEmpty {
   flutter::testing::MockAccessibilityBridge* mock = new flutter::testing::MockAccessibilityBridge();
   mock->isVoiceOverRunningValue = true;
@@ -1201,6 +1349,29 @@ const float kFloatCompareEpsilon = 0.001;
   [object setSemanticsNode:&node];
   [object accessibilityBridgeDidFinishUpdate];
   XCTAssertEqual([object accessibilityTraits], UIAccessibilityTraitNone);
+}
+
+- (void)testTextInputSemanticsObject_isSecureTextEntry {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  flutter::SemanticsNode node;
+  node.label = "foo";
+  node.flags.isTextField = true;
+  node.flags.isObscured = true;
+
+  TextInputSemanticsObject* object = [[TextInputSemanticsObject alloc] initWithBridge:bridge uid:0];
+  [object setSemanticsNode:&node];
+  [object accessibilityBridgeDidFinishUpdate];
+
+  XCTAssertTrue([object isSecureTextEntry]);
+
+  node.flags.isObscured = false;
+  [object setSemanticsNode:&node];
+  [object accessibilityBridgeDidFinishUpdate];
+
+  XCTAssertFalse([object isSecureTextEntry]);
 }
 
 - (void)testTextInputSemanticsObject_canPerformAction {

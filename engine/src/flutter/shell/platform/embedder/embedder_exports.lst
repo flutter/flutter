@@ -9,10 +9,8 @@
     Flutter*;
     __Flutter*;
     kFlutter*;
-    kDartIsolateSnapshotData;
-    kDartIsolateSnapshotInstructions;
-    kDartVmSnapshotData;
-    kDartVmSnapshotInstructions;
+    kDartSnapshotData;
+    kDartSnapshotText;
     InternalFlutterGpu*;
     kInternalFlutterGpu*;
   local:

@@ -11,15 +11,16 @@
 namespace flutter {
 namespace testing {
 
-bool RenderTextInCanvasSkia(DlCanvas* canvas,
-                            const std::string& text,
-                            const std::string_view& font_fixture,
-                            DlPoint position,
-                            const TextRenderOptions& options) {
+absl::StatusOr<DlRect> RenderTextInCanvasSkia(
+    DlCanvas* canvas,
+    const std::string& text,
+    const std::string_view& font_fixture,
+    DlPoint position,
+    const TextRenderOptions& options) {
   auto c_font_fixture = std::string(font_fixture);
   auto mapping = flutter::testing::OpenFixtureAsSkData(c_font_fixture.c_str());
   if (!mapping) {
-    return false;
+    return absl::NotFoundError("Font fixture not found");
   }
   sk_sp<SkFontMgr> font_mgr = txt::GetDefaultFontManager();
   SkFont sk_font(font_mgr->makeFromData(mapping), options.font_size);
@@ -28,7 +29,7 @@ bool RenderTextInCanvasSkia(DlCanvas* canvas,
   }
   auto blob = SkTextBlob::MakeFromString(text.c_str(), sk_font);
   if (!blob) {
-    return false;
+    return absl::InvalidArgumentError("String could not be converted to Blob");
   }
 
   auto frame = impeller::MakeTextFrameFromTextBlobSkia(blob);
@@ -42,7 +43,7 @@ bool RenderTextInCanvasSkia(DlCanvas* canvas,
   //     options.stroke ? Paint::Style::kStroke : Paint::Style::kFill;
   canvas->DrawText(DlTextImpeller::Make(frame), position.x, position.y,
                    text_paint);
-  return true;
+  return frame->GetBounds().Shift(position);
 }
 }  // namespace testing
 }  // namespace flutter

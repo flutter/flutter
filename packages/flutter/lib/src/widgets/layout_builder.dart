@@ -295,7 +295,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
 }
 
 /// Generic mixin for [RenderObject]s created by an [AbstractLayoutBuilder] with
-/// the the same `LayoutInfoType`.
+/// the same `LayoutInfoType`.
 ///
 /// Provides a [layoutCallback] implementation which, if needed, invokes
 /// [AbstractLayoutBuilder]'s builder callback.
@@ -342,7 +342,7 @@ mixin RenderAbstractLayoutBuilderMixin<LayoutInfoType, ChildType extends RenderO
 }
 
 /// Generic mixin for [RenderObject]s created by an [AbstractLayoutBuilder] with
-/// the the same `LayoutInfoType`.
+/// the same `LayoutInfoType`.
 ///
 /// Use [RenderAbstractLayoutBuilderMixin] instead, which replaces this mixin.
 typedef RenderConstrainedLayoutBuilder<LayoutInfoType, ChildType extends RenderObject> =

@@ -171,6 +171,40 @@ flowchart TD
 Impeller is available under the `--enable-impeller` flag on iOS, Android, and
 macOS Desktop. This flag can be specified to `flutter run`.
 
+### Availability Matrix
+
+> [!NOTE]
+> This assumes availability in stable releases. The Embedder API statuses are tricky.
+
+| Releases | iOS | Android | Embedder API (Metal) | Embedder API (Vulkan) | Embedder API (OpenGL) | macOS | Windows | Linux | Web |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **main** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | ✅ | ✅ | ✅ | 🚫 |
+| **3.47** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | ✅ | ✅ | ✅ | 🚫 |
+| **3.44** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.41** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.38** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.35** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.32** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.29** | ⭐ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.27** | ✅ | ✅ | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.24** | ✅ | 🧪 | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.22** | ✅ | 🧪 | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.19** | ✅ | 🧪 | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.16** | ✅ | 🧪 | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.13** | ✅ | 🚫 | 🧪 | 🚧 | 🚧 | 🧪 | 🚧 | 🚧 | 🚫 |
+| **3.10** | ✅ | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 |
+| **3.70** | 🧪 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 |
+| **3.30** | 🧪 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 |
+| **3.00** | 🧪 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 |
+| **2.10** | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 | 🚫 |
+
+#### Key
+- **⭐ Exclusive** — Only Impeller is available.
+- **✅ Default** — Impeller is the default option, Skia is available.
+- **🧪 Preview** — Can use Impeller with flags/manifest options. But, Skia is the default with no action.
+- **🚧 Experimental** — Skia is the default. Impeller may or may not work. The team is not actively working on this and doesn't recommend using it.
+- **🚫 Unavailable** — Only Skia is available.
+
 If the application needs to be launched with Impeller enabled without using the
 Flutter tool, follow the platform specific steps below.
 
@@ -210,15 +244,37 @@ to your `AndroidManifest.xml` file under the `<application>` tag:
     android:value="opengles" />
 ```
 
-### macOS Desktop
+### macOS
 
-Impeller is in preview on macOS Desktop.
+Impeller is the **default** on macOS.
 
-To your `Info.plist` file, add under the top-level `<dict>` tag:
+To explicitly opt out of using Impeller, add the following to your `Info.plist` file under the top-level `<dict>` tag:
 
 ```xml
   <key>FLTEnableImpeller</key>
-  <true/>
+  <false/>
+```
+
+### Linux
+
+Impeller is the **default** on Linux.
+
+To disable Impeller on Linux when deploying your app, add the following setup to
+your project in `linux/runner/my_application.cc`.
+
+```c
+fl_dart_project_set_enable_impeller(project, FALSE);
+```
+
+### Windows
+
+Impeller is the **default** on Windows.
+
+To disable Impeller on Windows when deploying your app, add the following setup to
+your project in `windows\runner\main.cpp`.
+
+```c++
+project.set_impeller_switch(flutter::ImpellerSwitch::Disabled);
 ```
 
 ### Custom Embedders
@@ -263,4 +319,5 @@ examples, are available](toolkit/interop/README.md).
 * [Android CPU Profiling](/docs/engine/impeller/docs/android_cpu_profile.md)
 * [Android Rendering Backend Selection](/docs/engine/impeller/docs/android.md)
 * [Using Impeller as a Standalone Rendering Library (with OpenGL ES)](/docs/engine/impeller/docs/standalone_gles.md)
+* [Impeller Availability Matrix](#availability-matrix)
 * [Glossary](/docs/engine/impeller/docs/glossary.md)

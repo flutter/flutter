@@ -28,7 +28,7 @@ std::shared_ptr<YUVConversionVK> YUVConversionLibraryVK::GetConversion(
     return nullptr;
   }
   return (conversions_[desc] = std::shared_ptr<YUVConversionVK>(
-              new YUVConversionVK(device_holder->GetDevice(), desc)));
+              new YUVConversionVK(device_holder, desc)));
 }
 
 }  // namespace impeller

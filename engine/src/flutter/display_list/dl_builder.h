@@ -48,6 +48,15 @@ class DisplayListBuilder final : public virtual DlCanvas,
   // |DlCanvas|
   SkImageInfo GetImageInfo() const override;
 
+  /// @brief    Return the number of records currently recorded in the
+  ///           builder.
+  /// @return   The number of records already recorded.
+  size_t GetRecordCount() const;
+
+  /// @brief    Return true if the builder has not yet recorded any commands.
+  /// @return   Whether the builder is empty.
+  bool IsEmpty() const;
+
   // |DlCanvas|
   void Save() override;
 

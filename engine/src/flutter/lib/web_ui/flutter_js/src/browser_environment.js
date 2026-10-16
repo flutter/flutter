@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import { supportsDart2Wasm as defaultSupportsDart2Wasm } from './supports_dart2wasm.js';
+
 /** @type {import("./types").WasmAllowList} */
 export const defaultWasmSupport = {
   "blink": true,
@@ -49,13 +51,22 @@ const hasChromiumBreakIterators = () => {
     (typeof Intl.Segmenter !== "undefined");
 }
 
-const supportsWasmGC = () => {
-  // This attempts to instantiate a wasm module that only will validate if the
-  // final WasmGC spec is implemented in the browser.
-  //
-  // Copied from https://github.com/GoogleChromeLabs/wasm-feature-detect/blob/main/src/detectors/gc/index.js
-  const bytes = [0, 97, 115, 109, 1, 0, 0, 0, 1, 5, 1, 95, 1, 120, 0];
-  return WebAssembly.validate(new Uint8Array(bytes));
+const hasTextCluster = () => {
+  return (typeof window.TextCluster !== "undefined");
+}
+
+const getFirefoxVersion = () => {
+  const match = navigator.userAgent.match(/firefox\/(\d+)/i);
+  return match ? parseInt(match[1], 10) : -1;
+}
+
+const supportsDart2Wasm = () => {
+  // Firefox < 147 has a SpiderMonkey Ion WasmGC compilation bug that breaks dart2wasm builds.
+  // See: https://github.com/flutter/flutter/issues/186619
+  //      https://bugzilla.mozilla.org/show_bug.cgi?id=2006811
+  if (browserEngine === "gecko" && getFirefoxVersion() < 147) return false;
+
+  return window._flutter?.supportsDart2Wasm ?? defaultSupportsDart2Wasm();
 }
 
 const detectWebGLVersion = () => {
@@ -83,7 +94,10 @@ export const browserEnvironment = {
   browserEngine: browserEngine,
   hasImageCodecs: hasImageCodecs(),
   hasChromiumBreakIterators: hasChromiumBreakIterators(),
-  supportsWasmGC: supportsWasmGC(),
+  hasTextCluster: hasTextCluster(),
+  get supportsDart2Wasm() {
+    return supportsDart2Wasm();
+  },
   crossOriginIsolated: window.crossOriginIsolated,
   webGLVersion: detectWebGLVersion(),
   isChromeExtension: isChromeExtension(),

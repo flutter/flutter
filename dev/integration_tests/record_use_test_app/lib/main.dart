@@ -20,16 +20,20 @@ void main() async {
   print('HELLO: $hello');
   print('FRIEND: $friend');
   print('COUNT: $count');
+  // Intentionally missing fontFamily to test that icon tree shaking detects
+  // constant IconData instances with null fontFamily.
+  const dummyIcon = IconData(0x1234);
+  print('ICON: ${dummyIcon.codePoint}');
   runApp(MyApp(hello: hello, friend: friend, count: count));
 }
 
+// In dart2js, 1 and 1.0 are identical numbers, so `isWasm` evaluates to false.
+// In dart2wasm, integer and double representations are distinct, so `isWasm`
+// evaluates to true.
+const bool isWasm = !identical(1, 1.0);
+
 class MyApp extends StatelessWidget {
-  const MyApp({
-    super.key,
-    required this.hello,
-    required this.friend,
-    required this.count,
-  });
+  const MyApp({super.key, required this.hello, required this.friend, required this.count});
 
   final String hello;
   final String friend;
@@ -48,8 +52,19 @@ class MyApp extends StatelessWidget {
               Text('English: hello -> Pirate: $hello', style: const TextStyle(fontSize: 20)),
               Text('English: friend -> Pirate: $friend', style: const TextStyle(fontSize: 20)),
               const SizedBox(height: 20),
-              Text('Loaded translations count: $count',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Loaded translations count: $count',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              // Tests that dual-target web builds (Wasm with JS fallback) retain
+              // the union of icons used by both compilers in the shared font asset.
+              // Wasm compiles with Icons.fastfood and JS compiles with Icons.favorite.
+              const Icon(
+                isWasm ? Icons.fastfood : Icons.favorite,
+                color: Colors.blueGrey,
+                size: 30.0,
+              ),
             ],
           ),
         ),

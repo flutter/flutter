@@ -45,7 +45,9 @@ class HostWindow {
       FlutterWindowsEngine* engine,
       const WindowSizeRequest& preferred_size,
       const WindowConstraints& preferred_constraints,
-      LPCWSTR title);
+      LPCWSTR title,
+      bool sized_to_content,
+      bool resizable);
 
   // Creates a dialog Win32 window with a child view confined to its client
   // area. |window_manager| is a pointer to the window manager that manages the
@@ -64,7 +66,9 @@ class HostWindow {
       const WindowSizeRequest& preferred_size,
       const WindowConstraints& preferred_constraints,
       LPCWSTR title,
-      HWND parent);
+      HWND parent,
+      bool sized_to_content,
+      bool resizable);
 
   // Creates a tooltip Win32 window with a child view confined to its client
   // area. |window_manager| is a pointer to the window manager that manages the
@@ -100,6 +104,32 @@ class HostWindow {
       const WindowConstraints& preferred_constraints,
       GetWindowPositionCallback get_position_callback,
       HWND parent);
+
+  // Creates a satellite Win32 window with a child view confined to its client
+  // area. |window_manager| is a pointer to the window manager that manages the
+  // |HostWindow|. |engine| is a pointer to the engine that manages the window
+  // manager. |preferred_size| is the requested content size, which is required
+  // unless |sized_to_content| is true. |preferred_constraints| are the
+  // constraints set on the window's size. |get_position_callback| is a callback
+  // that determines the initial position of the satellite window; unlike for
+  // tooltips and popups it is invoked only once, for the initial placement.
+  // |parent| is the window this satellite is anchored to, which must be
+  // non-null. |title| is the window title. When |sized_to_content| is true the
+  // window is resized to fit its rendered content after the first frame. When
+  // |resizable| is true the user can resize the window manually.
+  //
+  // A satellite follows its parent's movement, retaining the offset it has from
+  // it, and cannot be minimized on its own.
+  static std::unique_ptr<HostWindow> CreateSatelliteWindow(
+      WindowManager* window_manager,
+      FlutterWindowsEngine* engine,
+      const WindowSizeRequest& preferred_size,
+      const WindowConstraints& preferred_constraints,
+      GetWindowPositionCallback get_position_callback,
+      HWND parent,
+      LPCWSTR title,
+      bool sized_to_content,
+      bool resizable);
 
   // Returns the instance pointer for |hwnd| or nullptr if invalid.
   static HostWindow* GetThisFromHandle(HWND hwnd);
@@ -143,6 +173,9 @@ class HostWindow {
   void UpdateModalStateLayer();
 
  protected:
+  // Returns the archetype of this window.
+  WindowArchetype GetArchetype() const { return archetype_; }
+
   struct HostWindowInitializationParams {
     WindowArchetype archetype;
     DWORD window_style;
@@ -200,6 +233,35 @@ class HostWindow {
       DWORD extended_window_style,
       std::optional<HWND> const& owner_hwnd);
 
+  // Calculates the initial window size, in physical coordinates, of a window
+  // with the specified |window_style| and |extended_window_style|, owned by
+  // |owner_window|. If |sized_to_content| is true, the window is sized to the
+  // smallest size allowed by |constraints|, which gives the view valid metrics
+  // until the window is resized to fit its content after the first frame;
+  // otherwise, the window is sized to |preferred_size|. On error, returns
+  // std::nullopt and logs an error message.
+  static std::optional<Size> GetInitialWindowSize(
+      FlutterWindowsEngine* engine,
+      const WindowSizeRequest& preferred_size,
+      const BoxConstraints& constraints,
+      DWORD window_style,
+      DWORD extended_window_style,
+      std::optional<HWND> const& owner_window,
+      bool sized_to_content);
+
+  // Moves the window so that the origin of its window frame, rather than the
+  // origin of its window rectangle (which includes the invisible drop-shadow
+  // border), lands on the position the window was last placed at. Does nothing
+  // if the window has no drop-shadow border.
+  void AlignOriginWithFrame();
+
+  // Called on the platform thread after this window's view has presented its
+  // first frame, just before the window is shown for the first time. Overridden
+  // by archetypes that must finish their initialization once the view has
+  // rendered, so that the work is not visible to the user. The default
+  // implementation does nothing.
+  virtual void OnFirstFrame();
+
   // Processes and routes salient window messages for mouse handling,
   // size change and DPI. Delegates handling of these to member overloads that
   // inheriting classes can handle.
@@ -211,6 +273,14 @@ class HostWindow {
   // Sets the focus to the child view window of |window|.
   static void FocusRootViewOf(HostWindow* window);
 
+  // Handles a WM_ACTIVATE message for |hwnd| with the given |wparam|. When the
+  // window is being activated, focus its view; if the window is disabled
+  // (e.g. it owns a modal dialog), activation is instead redirected to the
+  // first enabled descendant. Does nothing when the window is being
+  // deactivated, so that a deactivated window does not reactivate itself and
+  // jump back to the top of the z-order.
+  void HandleWindowActivation(HWND hwnd, WPARAM wparam);
+
   // Enables or disables mouse and keyboard input to this window and all its
   // descendants.
   void EnableRecursively(bool enable);
@@ -219,9 +289,6 @@ class HostWindow {
   // is enabled, returns the current window. If no window is enabled, returns
   // `nullptr`.
   HostWindow* FindFirstEnabledDescendant() const;
-
-  // Returns the archetype of this window.
-  WindowArchetype GetArchetype() const { return archetype_; }
 
   // Returns windows owned by this window.
   std::vector<HostWindow*> GetOwnedWindows() const;
@@ -245,6 +312,11 @@ class HostWindow {
   // window is created from an existing top-level native window created by the
   // runner.
   std::unique_ptr<FlutterWindowsViewController> view_controller_;
+
+  // Used to detect whether this window is still alive from tasks that are
+  // posted from the raster thread and run on the platform thread: the window
+  // has been destroyed if a weak pointer to this token can no longer be locked.
+  std::shared_ptr<int> alive_ = std::make_shared<int>(0);
 
   // The window archetype.
   WindowArchetype archetype_ = WindowArchetype::kRegular;

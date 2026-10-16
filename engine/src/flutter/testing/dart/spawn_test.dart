@@ -39,9 +39,8 @@ const String kTestEntrypointRouteName = 'testEntrypoint';
 
 @pragma('vm:entry-point')
 void testEntrypoint() {
-  IsolateNameServer.lookupPortByName(
-    kTestEntrypointRouteName,
-  )!.send(PlatformDispatcher.instance.defaultRouteName);
+  IsolateNameServer.lookupPortByName(kTestEntrypointRouteName)!
+      .send(PlatformDispatcher.instance.defaultRouteName);
 }
 
 void main() {

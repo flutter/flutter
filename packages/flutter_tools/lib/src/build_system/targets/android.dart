@@ -8,7 +8,6 @@ import '../../base/deferred_component.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
-import '../../globals.dart' as globals show xcode;
 import '../../isolated/native_assets/dart_hook_result.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -141,7 +140,7 @@ class ProfileAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AotElfProfile(TargetPlatform.android_arm),
+    AotSnapshotProfile(TargetPlatform.android_arm),
     AotAndroidAssetBundle(),
   ];
 }
@@ -155,7 +154,7 @@ class ReleaseAndroidApplication extends CopyFlutterAotBundle {
 
   @override
   List<Target> get dependencies => const <Target>[
-    AotElfRelease(TargetPlatform.android_arm),
+    AotSnapshotRelease(TargetPlatform.android_arm),
     AotAndroidAssetBundle(),
   ];
 }
@@ -171,21 +170,22 @@ class ReleaseAndroidApplication extends CopyFlutterAotBundle {
 ///
 /// It will produce an 'app.so` in the build directory under a folder named with
 /// the matching Android ABI.
-class AndroidAot extends AotElfBase {
+class AndroidAot extends AotSnapshotBase {
   /// Create an [AndroidAot] implementation for a given [targetPlatform] and [buildMode].
   const AndroidAot(this.targetPlatform, this.buildMode);
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getAndroidArchForName(getNameForTargetPlatform(targetPlatform)).archName;
+    return getCpuArchForName(targetPlatform.getName()).androidArchName;
   }
 
   @override
   String get name =>
       'android_aot_${buildMode.cliName}_'
-      '${getNameForTargetPlatform(targetPlatform)}';
+      '${targetPlatform.getName()}';
 
   /// The specific Android ABI we are building for.
+  @override
   final TargetPlatform targetPlatform;
 
   /// The selected build mode.
@@ -218,7 +218,6 @@ class AndroidAot extends AotElfBase {
     final snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
-      xcode: globals.xcode!,
       processManager: environment.processManager,
       artifacts: environment.artifacts,
     );
@@ -304,13 +303,13 @@ class AndroidAotBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
+    return getCpuArchForName(dependency.targetPlatform.getName()).androidArchName;
   }
 
   @override
   String get name =>
       'android_aot_bundle_${dependency.buildMode.cliName}_'
-      '${getNameForTargetPlatform(dependency.targetPlatform)}';
+      '${dependency.targetPlatform.getName()}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
 
@@ -371,9 +370,8 @@ const androidx64ReleaseBundle = AndroidAotBundle(androidx64Release);
 class AndroidAotDeferredComponentsBundle extends Target {
   /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [BuildInfo.mode].
   ///
-  /// If [components] is not provided, it will be read from the `pubspec.yaml` manifest.
-  AndroidAotDeferredComponentsBundle(this.dependency, {List<DeferredComponent>? components})
-    : _components = components;
+  /// If [_components] is not provided, it will be read from the `pubspec.yaml` manifest.
+  AndroidAotDeferredComponentsBundle(this.dependency, {this._components});
 
   /// The [AndroidAotBundle] instance this bundle rule depends on.
   final AndroidAotBundle dependency;
@@ -382,13 +380,13 @@ class AndroidAotDeferredComponentsBundle extends Target {
 
   /// The name of the produced Android ABI.
   String get _androidAbiName {
-    return getAndroidArchForName(getNameForTargetPlatform(dependency.targetPlatform)).archName;
+    return getCpuArchForName(dependency.targetPlatform.getName()).androidArchName;
   }
 
   @override
   String get name =>
       'android_aot_deferred_components_bundle_${dependency.buildMode.cliName}_'
-      '${getNameForTargetPlatform(dependency.targetPlatform)}';
+      '${dependency.targetPlatform.getName()}';
 
   TargetPlatform get targetPlatform => dependency.targetPlatform;
 
@@ -413,7 +411,9 @@ class AndroidAotDeferredComponentsBundle extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    _components ??= FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[];
+    _components ??=
+        FlutterProject.fromDirectory(environment.projectDir).manifest.deferredComponents ??
+        <DeferredComponent>[];
     final abis = <String>[_androidAbiName];
     final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(
       environment.outputDir,
@@ -427,7 +427,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
       environment,
       _components!,
       generatedLoadingUnits,
-      environment.projectDir.childDirectory('build'),
+      FlutterProject.fromDirectory(environment.projectDir).buildDirectory,
       abis,
       dependency.buildMode,
     );

@@ -7,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   const debugBlue = Color(0xFF0000FF);

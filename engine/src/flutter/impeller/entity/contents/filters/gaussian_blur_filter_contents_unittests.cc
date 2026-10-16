@@ -85,17 +85,17 @@ class GaussianBlurFilterContentsTest : public EntityPlayground {
   /// Create a texture that has been cleared to transparent black.
   std::shared_ptr<Texture> MakeTexture(ISize size) {
     std::shared_ptr<CommandBuffer> command_buffer =
-        GetContentContext()->GetContext()->CreateCommandBuffer();
+        GetContentContext().GetContext()->CreateCommandBuffer();
     if (!command_buffer) {
       return nullptr;
     }
 
-    auto render_target = GetContentContext()->MakeSubpass(
+    auto render_target = GetContentContext().MakeSubpass(
         "Clear Subpass", size, command_buffer,
         [](const ContentContext&, RenderPass&) { return true; });
 
     if (!GetContentContext()
-             ->GetContext()
+             .GetContext()
              ->GetCommandQueue()
              ->Submit(/*buffers=*/{command_buffer})
              .ok()) {
@@ -272,11 +272,11 @@ TEST_P(GaussianBlurFilterContentsTest, RenderCoverageMatchesGetCoverage) {
       /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture)});
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
@@ -304,12 +304,12 @@ TEST_P(GaussianBlurFilterContentsTest,
       /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture)});
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   entity.SetTransform(Matrix::MakeTranslation({100, 200, 0}));
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
 
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
@@ -337,14 +337,14 @@ TEST_P(GaussianBlurFilterContentsTest,
       /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture)});
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   // Rotate around the top left corner, then push it over to (100, 100).
   entity.SetTransform(Matrix::MakeTranslation({400, 100, 0}) *
                       Matrix::MakeRotationZ(Degrees(90.0)));
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
@@ -389,11 +389,11 @@ TEST_P(GaussianBlurFilterContentsTest, TextureContentsWithDestinationRect) {
       /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture_contents)});
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
@@ -425,12 +425,12 @@ TEST_P(GaussianBlurFilterContentsTest,
       /*bounds=*/std::nullopt, FilterContents::BlurStyle::kNormal,
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture_contents)});
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   entity.SetTransform(Matrix::MakeScale({2.0, 2.0, 1.0}));
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
@@ -467,11 +467,11 @@ TEST_P(GaussianBlurFilterContentsTest, TextureContentsWithEffectTransform) {
       /*mask_geometry=*/nullptr);
   contents->SetInputs({FilterInput::Make(texture_contents)});
   contents->SetEffectTransform(effect_transform);
-  std::shared_ptr<ContentContext> renderer = GetContentContext();
+  ContentContext& renderer = GetContentContext();
 
   Entity entity;
   std::optional<Entity> result =
-      contents->GetEntity(*renderer, entity, /*coverage_hint=*/{});
+      contents->GetEntity(renderer, entity, /*coverage_hint=*/{});
   EXPECT_TRUE(result.has_value());
   if (result.has_value()) {
     EXPECT_EQ(result.value().GetBlendMode(), BlendMode::kSrcOver);
@@ -549,8 +549,7 @@ TEST(GaussianBlurFilterContentsTest, LerpHackKernelSamplesSimple) {
           },
   };
 
-  GaussianBlurPipeline::FragmentShader::KernelSamples blur_info =
-      LerpHackKernelSamples(kernel_samples);
+  LerpHackResult blur_info = LerpHackKernelSamples(kernel_samples);
   EXPECT_EQ(blur_info.sample_count, 3);
 
   KernelSample* samples = kernel_samples.samples;
@@ -558,15 +557,17 @@ TEST(GaussianBlurFilterContentsTest, LerpHackKernelSamplesSimple) {
   //////////////////////////////////////////////////////////////////////////////
   // Check output kernel.
 
-  EXPECT_POINT_NEAR(GetUVOffset(blur_info.sample_data[0]),
+  EXPECT_POINT_NEAR(GetUVOffset(blur_info.kernel_samples.sample_data[0]),
                     Point(-1.3333333, 0));
-  EXPECT_FLOAT_EQ(GetCoefficient(blur_info.sample_data[0]), 0.3);
+  EXPECT_FLOAT_EQ(GetCoefficient(blur_info.kernel_samples.sample_data[0]), 0.3);
 
-  EXPECT_POINT_NEAR(GetUVOffset(blur_info.sample_data[1]), Point(0, 0));
-  EXPECT_FLOAT_EQ(GetCoefficient(blur_info.sample_data[1]), 0.4);
+  EXPECT_POINT_NEAR(GetUVOffset(blur_info.kernel_samples.sample_data[1]),
+                    Point(0, 0));
+  EXPECT_FLOAT_EQ(GetCoefficient(blur_info.kernel_samples.sample_data[1]), 0.4);
 
-  EXPECT_POINT_NEAR(GetUVOffset(blur_info.sample_data[2]), Point(1.333333, 0));
-  EXPECT_FLOAT_EQ(GetCoefficient(blur_info.sample_data[2]), 0.3);
+  EXPECT_POINT_NEAR(GetUVOffset(blur_info.kernel_samples.sample_data[2]),
+                    Point(1.333333, 0));
+  EXPECT_FLOAT_EQ(GetCoefficient(blur_info.kernel_samples.sample_data[2]), 0.3);
 
   //////////////////////////////////////////////////////////////////////////////
   // Check output of fast kernel versus original kernel.
@@ -587,11 +588,15 @@ TEST(GaussianBlurFilterContentsTest, LerpHackKernelSamplesSimple) {
     }
   };
   Scalar fast_output =
-      /*1st*/ lerp(GetUVOffset(blur_info.sample_data[0]), data[0], data[1]) *
-          GetCoefficient(blur_info.sample_data[0]) +
-      /*2nd*/ data[2] * GetCoefficient(blur_info.sample_data[1]) +
-      /*3rd*/ lerp(GetUVOffset(blur_info.sample_data[2]), data[3], data[4]) *
-          GetCoefficient(blur_info.sample_data[2]);
+      /*1st*/ lerp(GetUVOffset(blur_info.kernel_samples.sample_data[0]),
+                   data[0], data[1]) *
+          GetCoefficient(blur_info.kernel_samples.sample_data[0]) +
+      /*2nd*/ data[2] *
+          GetCoefficient(blur_info.kernel_samples.sample_data[1]) +
+      /*3rd*/
+      lerp(GetUVOffset(blur_info.kernel_samples.sample_data[2]), data[3],
+           data[4]) *
+          GetCoefficient(blur_info.kernel_samples.sample_data[2]);
 
   EXPECT_NEAR(original_output, fast_output, 0.01);
 }
@@ -606,8 +611,7 @@ TEST(GaussianBlurFilterContentsTest, LerpHackKernelSamplesComplex) {
                                .step_size = 1};
   KernelSamples kernel_samples = GenerateBlurInfo(parameters);
   EXPECT_EQ(kernel_samples.sample_count, 33);
-  GaussianBlurPipeline::FragmentShader::KernelSamples fast_kernel_samples =
-      LerpHackKernelSamples(kernel_samples);
+  LerpHackResult fast_kernel_samples = LerpHackKernelSamples(kernel_samples);
   EXPECT_EQ(fast_kernel_samples.sample_count, 17);
   float data[33];
   srand(0);
@@ -643,8 +647,9 @@ TEST(GaussianBlurFilterContentsTest, LerpHackKernelSamplesComplex) {
 
   Scalar fast_output = 0.0;
   for (int i = 0; i < fast_kernel_samples.sample_count; i++) {
-    fast_output += GetCoefficient(fast_kernel_samples.sample_data[i]) *
-                   sampler(GetUVOffset(fast_kernel_samples.sample_data[i]));
+    fast_output +=
+        GetCoefficient(fast_kernel_samples.kernel_samples.sample_data[i]) *
+        sampler(GetUVOffset(fast_kernel_samples.kernel_samples.sample_data[i]));
   }
 
   EXPECT_NEAR(output, fast_output, 0.1);
@@ -659,8 +664,7 @@ TEST(GaussianBlurFilterContentsTest, ChopHugeBlurs) {
                                .blur_radius = blur_radius,
                                .step_size = 1};
   KernelSamples kernel_samples = GenerateBlurInfo(parameters);
-  GaussianBlurPipeline::FragmentShader::KernelSamples frag_kernel_samples =
-      LerpHackKernelSamples(kernel_samples);
+  LerpHackResult frag_kernel_samples = LerpHackKernelSamples(kernel_samples);
   EXPECT_TRUE(frag_kernel_samples.sample_count <= kGaussianBlurMaxKernelSize);
 }
 

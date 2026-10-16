@@ -231,6 +231,15 @@ class ReactorGLES {
   [[nodiscard]] bool AddOperation(Operation operation, bool defer = false);
 
   //----------------------------------------------------------------------------
+  /// @brief      Whether a reaction can be performed on the current thread.
+  ///
+  ///             If this returns false, queued operations remain valid but
+  ///             cannot be flushed until a worker with a current OpenGL context
+  ///             is available on this thread.
+  ///
+  [[nodiscard]] bool CanReactOnCurrentThread() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Register a cleanup callback that will be invokved with the
   ///             provided user data when the handle is destroyed.
   ///
@@ -305,8 +314,6 @@ class ReactorGLES {
   bool ReactOnce();
 
   bool HasPendingOperations() const;
-
-  bool CanReactOnCurrentThread() const;
 
   bool ConsolidateHandles();
 

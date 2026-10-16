@@ -201,7 +201,7 @@ executable("flutter_desktop_darwin_swift_unittests") {
     "//flutter/shell/platform/darwin/common:test_config",
     "//flutter/shell/platform/darwin/common:swift_testing_config",
   ]
-  sources = [ "framework/Source/ResizeSynchronizerTest.swift" ]
+  sources = [ "framework/Source/ResizeSynchronizerTests.swift" ]
   deps = [
     ":flutter_framework_source",
     "//flutter/shell/platform/darwin/common:swift_testing_main",

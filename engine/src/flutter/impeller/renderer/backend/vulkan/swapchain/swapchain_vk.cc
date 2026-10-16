@@ -50,13 +50,15 @@ std::shared_ptr<SwapchainVK> SwapchainVK::Create(
       AHBSwapchainVK::IsAvailableOnPlatform()) {
     CreateTransactionCB callback =
         android_get_device_api_level() >= 34 ? cb : CreateTransactionCB({});
-    auto ahb_swapchain = std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(
-        context,             //
-        window.GetHandle(),  //
-        callback,            //
-        window.GetSize(),    //
-        enable_msaa          //
-        ));
+    auto surface_control = std::shared_ptr(
+        android::SurfaceControl::Create(window.GetHandle(), "ImpellerSurface"));
+    auto ahb_swapchain =
+        std::shared_ptr<AHBSwapchainVK>(new AHBSwapchainVK(context,           //
+                                                           surface_control,   //
+                                                           callback,          //
+                                                           window.GetSize(),  //
+                                                           enable_msaa        //
+                                                           ));
 
     if (ahb_swapchain->IsValid()) {
       return ahb_swapchain;

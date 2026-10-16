@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "impeller/base/flags.h"
+
 #include "flutter/fml/build_config.h"
 #include "flutter/fml/closure.h"
 #include "flutter/fml/make_copyable.h"
@@ -309,7 +311,8 @@ InferOpenGLPlatformViewCreationCallback(
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
-    bool enable_impeller) {
+    bool enable_impeller,
+    impeller::Flags impeller_flags) {
 #ifdef SHELL_ENABLE_GL
   if (config->type != kOpenGL) {
     return nullptr;
@@ -481,7 +484,7 @@ InferOpenGLPlatformViewCreationCallback(
 
   return fml::MakeCopyable(
       [gl_dispatch_table, fbo_reset_after_present, platform_dispatch_table,
-       enable_impeller,
+       enable_impeller, impeller_flags,
        external_view_embedder =
            std::move(external_view_embedder)](flutter::Shell& shell) mutable {
         std::shared_ptr<flutter::EmbedderExternalViewEmbedder> view_embedder =
@@ -491,8 +494,9 @@ InferOpenGLPlatformViewCreationCallback(
               shell,                   // delegate
               shell.GetTaskRunners(),  // task runners
               std::make_unique<flutter::EmbedderSurfaceGLImpeller>(
-                  gl_dispatch_table, fbo_reset_after_present,
-                  view_embedder),       // embedder_surface
+                  gl_dispatch_table, fbo_reset_after_present, view_embedder,
+                  shell.GetShutdownSafeIOTaskRunner(),
+                  impeller_flags),      // embedder_surface
               platform_dispatch_table,  // embedder platform dispatch table
               view_embedder             // external view embedder
           );
@@ -521,7 +525,8 @@ InferMetalPlatformViewCreationCallback(
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
-    bool enable_impeller) {
+    bool enable_impeller,
+    impeller::Flags impeller_flags) {
   if (config->type != kMetal) {
     return nullptr;
   }
@@ -570,7 +575,7 @@ InferMetalPlatformViewCreationCallback(
           metal_dispatch_table = {
               .present = metal_present,
               .get_texture = metal_get_texture,
-          };
+      };
       impeller::Flags impeller_flags;
       impeller_flags.use_sdfs = shell.GetSettings().impeller_use_sdfs;
       embedder_surface =
@@ -585,7 +590,7 @@ InferMetalPlatformViewCreationCallback(
           metal_dispatch_table = {
               .present = metal_present,
               .get_texture = metal_get_texture,
-          };
+      };
       embedder_surface = std::make_unique<flutter::EmbedderSurfaceMetalSkia>(
           const_cast<flutter::GPUMTLDeviceHandle>(config->metal.device),
           const_cast<flutter::GPUMTLCommandQueueHandle>(
@@ -618,7 +623,8 @@ InferVulkanPlatformViewCreationCallback(
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
-    bool enable_impeller) {
+    bool enable_impeller,
+    impeller::Flags impeller_flags) {
   if (config->type != kVulkan) {
     return nullptr;
   }
@@ -669,7 +675,7 @@ InferVulkanPlatformViewCreationCallback(
                 reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
             .get_next_image = vulkan_get_next_image,
             .present_image = vulkan_present_image_callback,
-        };
+    };
 
     std::unique_ptr<flutter::EmbedderSurfaceVulkanImpeller> embedder_surface =
         std::make_unique<flutter::EmbedderSurfaceVulkanImpeller>(
@@ -682,7 +688,7 @@ InferVulkanPlatformViewCreationCallback(
             static_cast<VkDevice>(config->vulkan.device),
             config->vulkan.queue_family_index,
             static_cast<VkQueue>(config->vulkan.queue), vulkan_dispatch_table,
-            view_embedder);
+            view_embedder, impeller_flags);
 
     return fml::MakeCopyable(
         [embedder_surface = std::move(embedder_surface),
@@ -704,7 +710,7 @@ InferVulkanPlatformViewCreationCallback(
                 reinterpret_cast<PFN_vkGetInstanceProcAddr>(proc_addr),
             .get_next_image = vulkan_get_next_image,
             .present_image = vulkan_present_image_callback,
-        };
+    };
 
     std::unique_ptr<flutter::EmbedderSurfaceVulkan> embedder_surface =
         std::make_unique<flutter::EmbedderSurfaceVulkan>(
@@ -794,7 +800,7 @@ InferSoftwarePlatformViewCreationCallback(
   flutter::EmbedderSurfaceSoftware::SoftwareDispatchTable
       software_dispatch_table = {
           software_present_backing_store,  // required
-      };
+  };
 
   return fml::MakeCopyable(
       [software_dispatch_table, platform_dispatch_table,
@@ -818,7 +824,8 @@ InferPlatformViewCreationCallback(
         platform_dispatch_table,
     std::unique_ptr<flutter::EmbedderExternalViewEmbedder>
         external_view_embedder,
-    bool enable_impeller) {
+    bool enable_impeller,
+    impeller::Flags impeller_flags) {
   if (config == nullptr) {
     return nullptr;
   }
@@ -827,7 +834,7 @@ InferPlatformViewCreationCallback(
     case kOpenGL:
       return InferOpenGLPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller);
+          std::move(external_view_embedder), enable_impeller, impeller_flags);
     case kSoftware:
       return InferSoftwarePlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
@@ -835,11 +842,11 @@ InferPlatformViewCreationCallback(
     case kMetal:
       return InferMetalPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller);
+          std::move(external_view_embedder), enable_impeller, impeller_flags);
     case kVulkan:
       return InferVulkanPlatformViewCreationCallback(
           config, user_data, platform_dispatch_table,
-          std::move(external_view_embedder), enable_impeller);
+          std::move(external_view_embedder), enable_impeller, impeller_flags);
     default:
       return nullptr;
   }
@@ -1700,6 +1707,7 @@ using UniqueLoadedElf = std::unique_ptr<Dart_LoadedElf, LoadedElfDeleter>;
 
 struct _FlutterEngineAOTData {
   UniqueLoadedElf loaded_elf = nullptr;
+  fml::RefPtr<fml::NativeLibrary> native_library = nullptr;
   const uint8_t* vm_snapshot_data = nullptr;
   const uint8_t* vm_snapshot_instrs = nullptr;
   const uint8_t* vm_isolate_data = nullptr;
@@ -1733,15 +1741,17 @@ FlutterEngineResult FlutterEngineCreateAOTData(
       // Dart doesn't implement Dart_LoadELF on Fuchsia
       Dart_LoadedElf* loaded_elf = nullptr;
 #else
-      Dart_LoadedElf* loaded_elf = Dart_LoadELF(
-          source->elf_path,               // file path
-          0,                              // file offset
-          &error,                         // error (out)
-          &aot_data->vm_snapshot_data,    // vm snapshot data (out)
-          &aot_data->vm_snapshot_instrs,  // vm snapshot instr (out)
-          &aot_data->vm_isolate_data,     // vm isolate data (out)
-          &aot_data->vm_isolate_instrs    // vm isolate instr (out)
-      );
+      Dart_LoadedElf* loaded_elf =
+          Dart_LoadELF(source->elf_path,             // file path
+                       0,                            // file offset
+                       &error,                       // error (out)
+                       &aot_data->vm_isolate_data,   // vm isolate data (out)
+                       &aot_data->vm_isolate_instrs  // vm isolate instr (out)
+          );
+      if (loaded_elf != nullptr) {
+        aot_data->vm_snapshot_data = aot_data->vm_isolate_data;
+        aot_data->vm_snapshot_instrs = aot_data->vm_isolate_instrs;
+      }
 #endif
 
       if (loaded_elf == nullptr) {
@@ -1752,6 +1762,45 @@ FlutterEngineResult FlutterEngineCreateAOTData(
 
       *data_out = aot_data.release();
       return kSuccess;
+    }
+    case kFlutterEngineAOTDataSourceTypeDllPath: {
+// TODO(team-windows): Support PE/COFF AOT snapshots for Windows Arm64.
+// See: https://github.com/flutter/flutter/issues/190897
+#if FML_OS_WIN && FML_ARCH_CPU_X86_64
+      if (!source->dll_path || !fml::IsFile(source->dll_path)) {
+        return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Invalid DLL path specified.");
+      }
+
+      auto native_library = fml::NativeLibrary::Create(source->dll_path);
+      if (!native_library) {
+        return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Could not load DLL path specified.");
+      }
+
+      auto aot_data = std::make_unique<_FlutterEngineAOTData>();
+      aot_data->native_library = std::move(native_library);
+      aot_data->vm_snapshot_data =
+          aot_data->native_library->ResolveSymbol("_kDartSnapshotData");
+      aot_data->vm_snapshot_instrs =
+          aot_data->native_library->ResolveSymbol("_kDartSnapshotText");
+      aot_data->vm_isolate_data = aot_data->vm_snapshot_data;
+      aot_data->vm_isolate_instrs = aot_data->vm_snapshot_instrs;
+
+      if (aot_data->vm_snapshot_data == nullptr ||
+          aot_data->vm_snapshot_instrs == nullptr) {
+        return LOG_EMBEDDER_ERROR(
+            kInvalidArguments,
+            "Could not resolve required AOT snapshot symbols from DLL.");
+      }
+
+      *data_out = aot_data.release();
+      return kSuccess;
+#else   // FML_OS_WIN && FML_ARCH_CPU_X86_64
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "DLL AOT data sources are only supported on Windows x64.");
+#endif  // FML_OS_WIN && FML_ARCH_CPU_X86_64
     }
   }
 
@@ -2306,12 +2355,17 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
           on_pre_engine_restart_callback,             //
           channel_update_callback,                    //
           view_focus_change_request_callback,         //
-      };
+  };
+
+  impeller::Flags impeller_flags;
+  impeller_flags.use_sdfs = settings.impeller_use_sdfs;
+  impeller_flags.top_left_default_framebuffer_origin =
+      settings.impeller_top_left_default_framebuffer_origin;
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
       std::move(external_view_embedder_result.value()),
-      settings.enable_impeller);
+      settings.enable_impeller, impeller_flags);
 
   if (!on_create_platform_view) {
     return LOG_EMBEDDER_ERROR(
@@ -2371,6 +2425,29 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       };
       external_texture_resolver = std::make_unique<ExternalTextureResolver>(
           external_texture_metal_callback);
+    }
+  }
+#endif
+#ifdef SHELL_ENABLE_VULKAN
+  if (config->type == kVulkan) {
+    const FlutterVulkanRendererConfig* vulkan_config = &config->vulkan;
+    if (auto callback = SAFE_ACCESS(vulkan_config,
+                                    external_texture_frame_callback, nullptr)) {
+      auto external_texture_vulkan_callback =
+          [frame_callback = callback, user_data](
+              int64_t texture_identifier, size_t width,
+              size_t height) -> std::unique_ptr<FlutterVulkanExternalTexture> {
+        std::unique_ptr<FlutterVulkanExternalTexture> texture =
+            std::make_unique<FlutterVulkanExternalTexture>();
+        texture->struct_size = sizeof(FlutterVulkanExternalTexture);
+        if (!frame_callback(user_data, texture_identifier, width, height,
+                            texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_vulkan_callback);
     }
   }
 #endif
@@ -2750,6 +2827,8 @@ inline flutter::PointerData::DeviceKind ToPointerDataKind(
       return flutter::PointerData::DeviceKind::kStylus;
     case kFlutterPointerDeviceKindTrackpad:
       return flutter::PointerData::DeviceKind::kTrackpad;
+    case kFlutterPointerDeviceKindInvertedStylus:
+      return flutter::PointerData::DeviceKind::kInvertedStylus;
   }
   return flutter::PointerData::DeviceKind::kMouse;
 }

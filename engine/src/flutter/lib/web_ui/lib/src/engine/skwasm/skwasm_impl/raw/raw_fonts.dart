@@ -29,17 +29,6 @@ external TypefaceHandle typefaceCreate(SkDataHandle fontData);
 @Native<Void Function(TypefaceHandle)>(symbol: 'typeface_dispose', isLeaf: true)
 external void typefaceDispose(TypefaceHandle handle);
 
-@Native<Int Function(Pointer<TypefaceHandle>, Int, Pointer<Int32>, Int)>(
-  symbol: 'typefaces_filterCoveredCodePoints',
-  isLeaf: true,
-)
-external int typefacesFilterCoveredCodePoints(
-  Pointer<TypefaceHandle> typefaces,
-  int typefaceCount,
-  Pointer<Int32> codepoints,
-  int codePointCount,
-);
-
 @Native<Void Function(FontCollectionHandle, TypefaceHandle, SkStringHandle)>(
   symbol: 'fontCollection_registerTypeface',
   isLeaf: true,

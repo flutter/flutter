@@ -7,12 +7,19 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
-TEST(FlPlatformChannelTest, ExitResponse) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+class FlPlatformChannelTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override { messenger = fl_mock_binary_messenger_new(); }
 
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ~FlPlatformChannelTest() { g_clear_object(&messenger); }
+
+  FlMockBinaryMessenger* messenger = nullptr;
+};
+
+TEST_F(FlPlatformChannelTest, ExitResponse) {
   fl_mock_binary_messenger_set_json_method_channel(
       messenger, "flutter/platform",
       [](FlMockBinaryMessenger* messenger, GTask* task, const gchar* name,

@@ -18,11 +18,10 @@ import '../base/logger.dart';
 import '../base/net.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
+import '../build_system/tools/asset_transformer.dart';
 import '../build_system/tools/shader_compiler.dart';
-import '../bundle_builder.dart';
 import '../compile.dart';
 import '../devfs.dart';
-import '../device.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
@@ -46,12 +45,11 @@ class ConnectionResult {
   final vm_service.VmService vmService;
 }
 
-typedef VmServiceFactory =
-    Future<vm_service.VmService> Function(
-      Uri, {
-      CompressionOptions compression,
-      required Logger logger,
-    });
+typedef VmServiceFactory = Future<vm_service.VmService> Function(
+  Uri, {
+  CompressionOptions compression,
+  required Logger logger,
+});
 
 /// The web specific DevFS implementation.
 class WebDevFS implements DevFS {
@@ -72,8 +70,6 @@ class WebDevFS implements DevFS {
     required this.expressionCompiler,
     required this.chromiumLauncher,
     required this.nativeNullAssertions,
-    required this.ddcModuleSystem,
-    required this.canaryFeatures,
     required this.webDevServerConfig,
     required this.webRenderer,
     required this.isWasm,
@@ -85,13 +81,18 @@ class WebDevFS implements DevFS {
     required this.logger,
     required this.platform,
     this.testMode = false,
-    Map<String, String> webDefines = const <String, String>{},
-  }) : _webDefines = webDefines {
-    // TODO(srujzs): Remove this assertion when the library bundle format is
-    // supported without canary mode.
-    if (ddcModuleSystem) {
-      assert(canaryFeatures);
-    }
+    this._webDefines = const <String, String>{},
+  }) {
+    _assetTransformer = DevelopmentAssetTransformer(
+      transformer: AssetTransformer(
+        processManager: globals.processManager,
+        fileSystem: fileSystem,
+        dartBinaryPath: globals.artifacts!.getArtifactPath(Artifact.engineDartBinary),
+        buildMode: buildInfo.mode,
+      ),
+      fileSystem: fileSystem,
+      logger: logger,
+    );
   }
 
   final Uri entrypoint;
@@ -104,11 +105,10 @@ class WebDevFS implements DevFS {
   final bool enableDwds;
   final DartDevelopmentServiceConfiguration ddsConfig;
   final bool testMode;
-  final bool ddcModuleSystem;
-  final bool canaryFeatures;
   final ExpressionCompiler? expressionCompiler;
   final ChromiumLauncher? chromiumLauncher;
   final bool nativeNullAssertions;
+  late final DevelopmentAssetTransformer _assetTransformer;
   final WebRendererMode webRenderer;
   final bool isWasm;
   final bool useLocalCanvasKit;
@@ -124,16 +124,15 @@ class WebDevFS implements DevFS {
 
   Dwds get dwds => webAssetServer.dwds;
 
-  /// Whether middleware should be enabled for this web development server.
-  /// Middleware is enabled when using Chrome device or DDC module system.
-  bool get shouldEnableMiddleware => chromiumLauncher != null || ddcModuleSystem;
-
   // A flag to indicate whether we have called `setAssetDirectory` on the target device.
   @override
   bool hasSetAssetDirectory = false;
 
   @override
   bool didUpdateFontManifest = false;
+
+  final Set<String> _shaderPathsToEvict = <String>{};
+  final Set<String> _assetPathsToEvict = <String>{};
 
   Future<DebugConnection>? _cachedExtensionFuture;
   StreamSubscription<void>? _connectedApps;
@@ -193,9 +192,8 @@ class WebDevFS implements DevFS {
   @override
   PackageConfig? lastPackageConfig;
 
-  // We do not evict assets on the web.
   @override
-  Set<String> get assetPathsToEvict => const <String>{};
+  Set<String> get assetPathsToEvict => _assetPathsToEvict;
 
   @override
   Uri get baseUri => webAssetServer.baseUri;
@@ -217,18 +215,25 @@ class WebDevFS implements DevFS {
       isWasm: isWasm,
       useLocalCanvasKit: useLocalCanvasKit,
       testMode: testMode,
-      ddcModuleSystem: ddcModuleSystem,
-      canaryFeatures: canaryFeatures,
       webDevServerConfig: webDevServerConfig,
       useDwdsWebSocketConnection: useDwdsWebSocketConnection,
       fileSystem: fileSystem,
       logger: logger,
       platform: platform,
       crossOriginIsolation: webCrossOriginIsolation,
-      shouldEnableMiddleware: shouldEnableMiddleware,
       webDefines: _webDefines,
     );
     return baseUri;
+  }
+
+  /// Signal that the underlying web asset server is ready to handle requests.
+  ///
+  /// The HTTP server starts listening early during [create] so the port and URI
+  /// are known before compilation. However, incoming HTTP requests are held
+  /// until initial compilation completes and the DWDS connection listener is
+  /// registered so clients do not load incomplete assets or miss connection events.
+  void markReady() {
+    webAssetServer.markReady();
   }
 
   @override
@@ -279,6 +284,8 @@ class WebDevFS implements DevFS {
     String? projectRootPath,
     File? dartPluginRegistrant,
   }) async {
+    _shaderPathsToEvict.clear();
+    _assetPathsToEvict.clear();
     lastPackageConfig = packageConfig;
     final File mainFile = fileSystem.file(mainUri);
     final String outputDirectoryPath = mainFile.parent.path;
@@ -288,11 +295,7 @@ class WebDevFS implements DevFS {
       generator.addFileSystemRoot(outputDirectoryPath);
       final String entrypoint = fileSystem.path.basename(mainFile.path);
       webAssetServer.writeBytes(entrypoint, mainFile.readAsBytesSync());
-      if (ddcModuleSystem) {
-        webAssetServer.writeBytes('ddc_module_loader.js', ddcModuleLoaderJS.readAsBytesSync());
-      } else {
-        webAssetServer.writeBytes('require.js', requireJS.readAsBytesSync());
-      }
+      webAssetServer.writeBytes('ddc_module_loader.js', ddcModuleLoaderJS.readAsBytesSync());
       webAssetServer.writeBytes('flutter.js', flutterJs.readAsBytesSync());
       webAssetServer.writeBytes('stack_trace_mapper.js', stackTraceMapper.readAsBytesSync());
       webAssetServer.writeFile('manifest.json', '{"info":"manifest not generated in run mode."}');
@@ -303,54 +306,69 @@ class WebDevFS implements DevFS {
       webAssetServer.writeFile('version.json', FlutterProject.current().getVersionInfo());
       webAssetServer.writeFile(
         'main.dart.js',
-        ddcModuleSystem
-            ? generateDDCLibraryBundleBootstrapScript(
-                entrypoint: entrypoint,
-                ddcModuleLoaderUrl: 'ddc_module_loader.js',
-                mapperUrl: 'stack_trace_mapper.js',
-                generateLoadingIndicator: shouldEnableMiddleware,
-                isWindows: platform.isWindows,
-              )
-            : generateBootstrapScript(
-                requireUrl: 'require.js',
-                mapperUrl: 'stack_trace_mapper.js',
-                generateLoadingIndicator: shouldEnableMiddleware,
-              ),
+        generateDDCLibraryBundleBootstrapScript(
+          ddcModuleLoaderUrl: 'ddc_module_loader.js',
+          mapperUrl: 'stack_trace_mapper.js',
+          generateLoadingIndicator: true,
+          isWindows: platform.isWindows,
+        ),
       );
       const onLoadEndBootstrap = 'on_load_end_bootstrap.js';
-      if (ddcModuleSystem) {
-        webAssetServer.writeFile(onLoadEndBootstrap, generateDDCLibraryBundleOnLoadEndBootstrap());
-      }
+      webAssetServer.writeFile(onLoadEndBootstrap, generateDDCLibraryBundleOnLoadEndBootstrap());
       webAssetServer.writeFile(
         'main_module.bootstrap.js',
-        ddcModuleSystem
-            ? generateDDCLibraryBundleMainModule(
-                entrypoint: entrypoint,
-                nativeNullAssertions: nativeNullAssertions,
-                onLoadEndBootstrap: onLoadEndBootstrap,
-                isCi: platform.environment.containsKey(kLuciEnvName),
-              )
-            : generateMainModule(
-                entrypoint: entrypoint,
-                nativeNullAssertions: nativeNullAssertions,
-                loaderRootDirectory: baseUri.toString(),
-              ),
+        generateDDCLibraryBundleMainModule(
+          entrypoint: entrypoint,
+          nativeNullAssertions: nativeNullAssertions,
+          onLoadEndBootstrap: onLoadEndBootstrap,
+          isCi: platform.environment.containsKey(kLuciEnvName),
+        ),
       );
-      // TODO(zanderso): refactor the asset code in this and the regular devfs to
-      // be shared.
-      if (bundle != null) {
-        await writeBundle(
-          fileSystem.directory(getAssetBuildDirectory()),
-          bundle.entries,
-          targetPlatform: TargetPlatform.web_javascript,
-          impellerStatus: ImpellerStatus.disabled,
-          processManager: globals.processManager,
+    }
+    var syncedBytes = 0;
+    if (bundle != null) {
+      final String assetDirectory = fileSystem.path.absolute(getAssetBuildDirectory());
+      final Directory assetDir = fileSystem.directory(assetDirectory);
+
+      if (bundleFirstUpload && assetDir.existsSync()) {
+        try {
+          assetDir.deleteSync(recursive: true);
+        } on FileSystemException catch (err) {
+          logger.printWarning(
+            'Failed to clean up asset directory ${assetDir.path}: $err\n'
+            'To clean build artifacts, use the command "flutter clean".',
+          );
+        }
+      }
+      assetDir.createSync(recursive: true);
+
+      final dirtyEntries = <Uri, DevFSContent>{};
+      try {
+        final int bundleSyncedBytes = await DevFS.updateBundle(
+          bundle: bundle,
+          dirtyEntries: dirtyEntries,
+          assetDirectory: assetDirectory,
+          assetTransformer: _assetTransformer,
+          shaderCompiler: shaderCompiler,
           fileSystem: fileSystem,
-          artifacts: globals.artifacts!,
-          logger: logger,
-          projectDir: rootDirectory,
-          buildMode: buildInfo.mode,
+          rootDirectoryPath: rootDirectory.path,
+          assetPathsToEvict: _assetPathsToEvict,
+          shaderPathsToEvict: _shaderPathsToEvict,
+          bundleFirstUpload: bundleFirstUpload,
+          invalidatedFiles: invalidatedFiles,
+          syncAllAssetsOnFirstUpload: true,
+          onFontManifestUpdated: () => didUpdateFontManifest = true,
         );
+        syncedBytes += bundleSyncedBytes;
+        _assetTransformer.pruneDependencies(bundle.entries.keys.toSet());
+      } on Exception catch (err, stackTrace) {
+        logger.printError('Error updating bundle: $err');
+        logger.printTrace('$stackTrace');
+        return UpdateFSReport();
+      }
+      if (dirtyEntries.isNotEmpty) {
+        await LocalDevFSWriter(fileSystem: fileSystem)
+            .write(dirtyEntries, fileSystem.path.toUri(assetDirectory));
       }
     }
     await _validateTemplateFile('index.html');
@@ -365,7 +383,14 @@ class WebDevFS implements DevFS {
     // mapping the file name, this is done via an additional file root and
     // special hard-coded scheme.
     final CompilerOutput? compilerOutput = await generator.recompile(
-      Uri(scheme: 'org-dartlang-app', path: '/${mainUri.pathSegments.last}'),
+      Uri(
+        scheme: 'org-dartlang-app',
+        // An empty String here causes the URI to appear with three slashes and
+        // matches the pattern the infra creates for other modules in the app.
+        // Ex: org-dartlang-app:///main.dart
+        host: '',
+        path: '/${mainUri.pathSegments.last}',
+      ),
       invalidatedFiles,
       outputPath: dillOutputPath,
       packageConfig: packageConfig,
@@ -388,7 +413,10 @@ class WebDevFS implements DevFS {
     // Only update the last compiled time if we successfully compiled.
     lastCompiled = candidateCompileTime;
     // list of sources that needs to be monitored are in [compilerOutput.sources]
-    sources = compilerOutput.sources;
+    sources = <Uri>{
+      ...compilerOutput.sources,
+      ..._assetTransformer.dependencies.values.expand((Set<Uri> uris) => uris),
+    }.toList();
     late File codeFile;
     File manifestFile;
     File sourcemapFile;
@@ -410,29 +438,15 @@ class WebDevFS implements DevFS {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
     webAssetServer.updateModulesAndDigests(modules);
-    if (!bundleFirstUpload && ddcModuleSystem) {
+    if (!bundleFirstUpload) {
       webAssetServer.writeReloadedSources(modules);
     }
     return UpdateFSReport(
       success: true,
-      syncedBytes: codeFile.lengthSync(),
+      syncedBytes: codeFile.lengthSync() + syncedBytes,
       invalidatedSourcesCount: invalidatedFiles.length,
     );
   }
-
-  @visibleForTesting
-  File get requireJS => fileSystem.file(
-    fileSystem.path.join(
-      globals.artifacts!.getArtifactPath(
-        Artifact.engineDartSdkPath,
-        platform: TargetPlatform.web_javascript,
-      ),
-      'lib',
-      'dev_compiler',
-      'amd',
-      'require.js',
-    ),
-  );
 
   @visibleForTesting
   File get ddcModuleLoaderJS => fileSystem.file(
@@ -475,6 +489,8 @@ class WebDevFS implements DevFS {
     // Not used for web compilation.
   }
 
+  // Shaders are not supported during hot reload on the web yet.
+  // See https://github.com/flutter/flutter/issues/137265
   @override
-  Set<String> get shaderPathsToEvict => <String>{};
+  Set<String> get shaderPathsToEvict => _shaderPathsToEvict;
 }

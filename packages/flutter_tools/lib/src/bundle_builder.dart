@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'package:process/process.dart';
 
@@ -11,6 +10,7 @@ import 'asset.dart' hide defaultManifestPath;
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
+import 'base/platform.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
@@ -38,7 +38,7 @@ class BundleBuilder {
     String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
-    @visibleForTesting BuildSystem? buildSystem,
+    BuildSystem? buildSystem,
   }) async {
     project ??= FlutterProject.current();
     mainPath ??= defaultMainPath;
@@ -59,7 +59,7 @@ class BundleBuilder {
           : globals.flutterVersion.engineRevision,
       defines: <String, String>{
         // used by the KernelSnapshot target
-        kTargetPlatform: getNameForTargetPlatform(platform),
+        kTargetPlatform: platform.getName(),
         kTargetFile: mainPath,
         kDeferredComponents: 'false',
         ...buildInfo.toBuildSystemEnvironment(),
@@ -81,7 +81,9 @@ class BundleBuilder {
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
         globals.printError(
           'Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: measurement.fatal ? measurement.stackTrace : null,
+          stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
+              ? measurement.stackTrace
+              : null,
         );
       }
       throwToolExit('Failed to build bundle.');
@@ -139,6 +141,7 @@ Future<void> writeBundle(
   required Logger logger,
   required Directory projectDir,
   required BuildMode buildMode,
+  required Platform platform,
 }) async {
   if (bundleDir.existsSync()) {
     try {
@@ -157,6 +160,7 @@ Future<void> writeBundle(
     logger: logger,
     fileSystem: fileSystem,
     artifacts: artifacts,
+    platform: platform,
   );
 
   final assetTransformer = AssetTransformer(
@@ -188,7 +192,7 @@ Future<void> writeBundle(
               if (entry.value.transformers.isEmpty) {
                 break;
               }
-              final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
+              final AssetTransformationResult result = await assetTransformer.transformAsset(
                 asset: input,
                 outputPath: file.path,
                 workingDirectory: projectDir.path,
@@ -196,10 +200,10 @@ Future<void> writeBundle(
                 logger: logger,
               );
               doCopy = false;
-              if (failure != null) {
+              if (result.failure != null) {
                 throwToolExit(
                   'User-defined transformation of asset "${entry.key}" failed.\n'
-                  '${failure.message}',
+                  '${result.failure!.message}',
                 );
               }
             case AssetKind.font:
@@ -208,17 +212,17 @@ Future<void> writeBundle(
               var inputToCompiler = input;
               if (entry.value.transformers.isNotEmpty) {
                 final transformedShaderSourcePath = '${file.path}.transformed';
-                final AssetTransformationFailure? failure = await assetTransformer.transformAsset(
+                final AssetTransformationResult result = await assetTransformer.transformAsset(
                   asset: inputToCompiler,
                   outputPath: transformedShaderSourcePath,
                   workingDirectory: projectDir.path,
                   transformerEntries: entry.value.transformers,
                   logger: logger,
                 );
-                if (failure != null) {
+                if (result.failure != null) {
                   throwToolExit(
                     'User-defined transformation of shader "${entry.key}" failed.\n'
-                    '${failure.message}',
+                    '${result.failure!.message}',
                   );
                 }
                 inputToCompiler = fileSystem.file(transformedShaderSourcePath);

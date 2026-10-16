@@ -14,7 +14,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 void main() {
   testWidgets('Opacity', (WidgetTester tester) async {
@@ -185,7 +184,7 @@ void main() {
     final offsetLayer = element.renderObject!.debugLayer! as OffsetLayer;
     final ui.Image image = await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
     image.dispose();
-  }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
+  });
 
   testWidgets('Child shows up in the right spot when opacity is disabled', (
     WidgetTester tester,

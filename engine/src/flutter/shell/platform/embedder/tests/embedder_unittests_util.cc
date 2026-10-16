@@ -63,7 +63,9 @@ static sk_sp<SkData> NormalizeImage(const sk_sp<SkImage>& image) {
   return data;
 }
 
-bool RasterImagesAreSame(const sk_sp<SkImage>& a, const sk_sp<SkImage>& b) {
+bool RasterImagesAreSame(const sk_sp<SkImage>& a,
+                         const sk_sp<SkImage>& b,
+                         int allowable_different_pixels) {
   if (!a || !b) {
     return false;
   }
@@ -74,7 +76,26 @@ bool RasterImagesAreSame(const sk_sp<SkImage>& a, const sk_sp<SkImage>& b) {
   sk_sp<SkData> normalized_a = NormalizeImage(a);
   sk_sp<SkData> normalized_b = NormalizeImage(b);
 
-  return normalized_a->equals(normalized_b.get());
+  if (normalized_a->size() != normalized_b->size()) {
+    return false;
+  }
+  using NormalizedPixel = uint64_t;
+  FML_CHECK(normalized_a->size() % sizeof(NormalizedPixel) == 0);
+  int diff_count = 0;
+  for (size_t i = 0; i < normalized_a->size(); i += sizeof(NormalizedPixel)) {
+    const NormalizedPixel* pixel_a =
+        reinterpret_cast<const NormalizedPixel*>(normalized_a->bytes() + i);
+    const NormalizedPixel* pixel_b =
+        reinterpret_cast<const NormalizedPixel*>(normalized_b->bytes() + i);
+    if (*pixel_a != *pixel_b) {
+      diff_count++;
+      if (diff_count > allowable_different_pixels) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 std::string FixtureNameForBackend(EmbedderTestContextType backend,
@@ -151,7 +172,8 @@ bool WriteImageToDisk(const fml::UniqueFD& directory,
 }
 
 bool ImageMatchesFixture(const std::string& fixture_file_name,
-                         const sk_sp<SkImage>& scene_image) {
+                         const sk_sp<SkImage>& scene_image,
+                         int allowable_different_pixels) {
   fml::FileMapping fixture_image_mapping(OpenFixture(fixture_file_name));
 
   FML_CHECK(fixture_image_mapping.GetSize() != 0u)
@@ -176,8 +198,8 @@ bool ImageMatchesFixture(const std::string& fixture_file_name,
       << "Could not create image subset for fixture comparison: "
       << scene_image_subset;
 
-  const auto images_are_same =
-      RasterImagesAreSame(scene_image_subset, fixture_image);
+  const auto images_are_same = RasterImagesAreSame(
+      scene_image_subset, fixture_image, allowable_different_pixels);
 
   // If the images are not the same, this predicate is going to indicate test
   // failure. Dump both the actual image and the expectation to disk to the
@@ -209,8 +231,10 @@ bool ImageMatchesFixture(const std::string& fixture_file_name,
 }
 
 bool ImageMatchesFixture(const std::string& fixture_file_name,
-                         std::future<sk_sp<SkImage>>& scene_image) {
-  return ImageMatchesFixture(fixture_file_name, scene_image.get());
+                         std::future<sk_sp<SkImage>>& scene_image,
+                         int allowable_different_pixels) {
+  return ImageMatchesFixture(fixture_file_name, scene_image.get(),
+                             allowable_different_pixels);
 }
 
 bool SurfacePixelDataMatchesBytes(SkSurface* surface,

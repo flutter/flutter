@@ -4,6 +4,8 @@
 
 #include "impeller/renderer/backend/gles/blit_command_gles.h"
 
+#include <algorithm>
+
 #include "flutter/fml/closure.h"
 #include "impeller/base/validation.h"
 #include "impeller/core/formats.h"
@@ -14,29 +16,6 @@
 #include "impeller/renderer/backend/gles/texture_gles.h"
 
 namespace impeller {
-
-namespace {
-static void FlipImage(uint8_t* buffer,
-                      size_t width,
-                      size_t height,
-                      size_t stride) {
-  if (buffer == nullptr || stride == 0) {
-    return;
-  }
-
-  const auto byte_width = width * stride;
-
-  for (size_t top = 0; top < height; top++) {
-    size_t bottom = height - top - 1;
-    if (top >= bottom) {
-      break;
-    }
-    auto* top_row = buffer + byte_width * top;
-    auto* bottom_row = buffer + byte_width * bottom;
-    std::swap_ranges(top_row, top_row + byte_width, bottom_row);
-  }
-}
-}  // namespace
 
 BlitEncodeGLES::~BlitEncodeGLES() = default;
 
@@ -131,14 +110,19 @@ bool BlitCopyTextureToTextureCommandGLES::Encode(
   gl.Disable(GL_DEPTH_TEST);
   gl.Disable(GL_STENCIL_TEST);
 
+  const auto destination_right =
+      destination_origin.x + source_region.GetWidth();
+  const auto destination_bottom =
+      destination_origin.y + source_region.GetHeight();
+
   gl.BlitFramebuffer(source_region.GetX(),       // srcX0
                      source_region.GetY(),       // srcY0
-                     source_region.GetWidth(),   // srcX1
-                     source_region.GetHeight(),  // srcY1
+                     source_region.GetRight(),   // srcX1
+                     source_region.GetBottom(),  // srcY1
                      destination_origin.x,       // dstX0
                      destination_origin.y,       // dstY0
-                     source_region.GetWidth(),   // dstX1
-                     source_region.GetHeight(),  // dstY1
+                     destination_right,          // dstX1
+                     destination_bottom,         // dstY1
                      GL_COLOR_BUFFER_BIT,        // mask
                      GL_NEAREST                  // filter
   );
@@ -176,12 +160,11 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
 
   if (!tex_descriptor.IsValid() ||
       source.GetRange().length !=
-          BytesPerPixelForPixelFormat(tex_descriptor.format) *
-              destination_region.Area()) {
+          BytesForTextureRegion(tex_descriptor.format,
+                                destination_region.GetWidth(),
+                                destination_region.GetHeight())) {
     return false;
   }
-
-  destination->SetCoordinateSystem(TextureCoordinateSystem::kUploadFromHost);
 
   GLenum texture_type;
   GLenum texture_target;
@@ -197,6 +180,18 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
     case TextureType::kTextureCube:
       texture_type = GL_TEXTURE_CUBE_MAP;
       texture_target = GL_TEXTURE_CUBE_MAP_POSITIVE_X + slice;
+      break;
+    case TextureType::kTexture2DArray:
+      // The Flutter GPU Dart API gates array-texture creation on
+      // GpuContext.doesSupportTextureArrays, so this is a backstop for
+      // contexts without array support (e.g. OpenGL ES 2.0).
+      if (!reactor.GetProcTable().GetCapabilities()->SupportsTextureArrays()) {
+        VALIDATION_LOG
+            << "2D array textures are not supported on this context.";
+        return false;
+      }
+      texture_type = GL_TEXTURE_2D_ARRAY;
+      texture_target = GL_TEXTURE_2D_ARRAY;
       break;
     case TextureType::kTextureExternalOES:
       texture_type = GL_TEXTURE_EXTERNAL_OES;
@@ -221,23 +216,112 @@ bool BlitCopyBufferToTextureCommandGLES::Encode(
     return false;
   }
   const auto& gl = reactor.GetProcTable();
+  // Arm erratum EN_ID 1,792,661: force a binding change before uploading to
+  // a reused shared texture name. See
+  // https://github.com/flutter/flutter/issues/190640.
+  if (gl.GetCapabilities()->NeedsTextureUploadRebind()) {
+    gl.BindTexture(texture_type, 0u);
+  }
   gl.BindTexture(texture_type, gl_handle.value());
   const GLvoid* tex_data =
       source.GetBuffer()->OnGetContents() + source.GetRange().offset;
 
-  // GL_INVALID_OPERATION if the texture array has not been
-  // defined by a previous glTexImage2D operation.
-  if (!texture_gles.IsSliceInitialized(slice)) {
+  // Block-compressed textures cannot be allocated empty and then filled with a
+  // sub-image; glCompressedTexImage2D redefines the entire mip level. Require
+  // the upload to cover the full mip level starting at the origin.
+  if (gles_format->is_compressed) {
+    if (tex_descriptor.type == TextureType::kTexture2DArray) {
+      // TODO(bdero): Support compressed 2D array uploads. The level must be
+      // allocated with glCompressedTexImage3D covering every layer and filled
+      // per layer with glCompressedTexSubImage3D.
+      VALIDATION_LOG << "Compressed 2D array textures are not yet supported "
+                        "on the OpenGLES backend.";
+      return false;
+    }
+    const auto mip_width =
+        std::max<int32_t>(1, tex_descriptor.size.width >> mip_level);
+    const auto mip_height =
+        std::max<int32_t>(1, tex_descriptor.size.height >> mip_level);
+    if (destination_region.GetX() != 0 || destination_region.GetY() != 0 ||
+        destination_region.GetWidth() != mip_width ||
+        destination_region.GetHeight() != mip_height) {
+      VALIDATION_LOG << "Compressed textures must be uploaded as a full mip "
+                        "level starting at the origin.";
+      return false;
+    }
+    gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    gl.CompressedTexImage2D(texture_target,                // target
+                            mip_level,                     // LOD level
+                            gles_format->internal_format,  // internal format
+                            mip_width,                     // width
+                            mip_height,                    // height
+                            0u,                            // border
+                            source.GetRange().length,      // image size
+                            tex_data);                     // data
+    texture_gles.MarkSliceMipLevelInitialized(slice, mip_level);
+    return true;
+  }
+
+  if (tex_descriptor.type == TextureType::kTexture2DArray) {
+    // glTexImage3D allocates this mip level for every layer at once, so the
+    // level's storage is tracked with a single entry (slice 0).
+    if (!texture_gles.IsSliceMipLevelInitialized(0, mip_level)) {
+      const auto level_width =
+          std::max<int32_t>(1, tex_descriptor.size.width >> mip_level);
+      const auto level_height =
+          std::max<int32_t>(1, tex_descriptor.size.height >> mip_level);
+      gl.TexImage3D(
+          /*target=*/texture_target,                         //
+          /*level=*/static_cast<GLint>(mip_level),           //
+          /*internal_format=*/gles_format->internal_format,  //
+          /*width=*/level_width,                             //
+          /*height=*/level_height,                           //
+          /*depth=*/
+          static_cast<GLsizei>(tex_descriptor.array_layer_count),  //
+          /*border=*/0u,                                           //
+          /*format=*/gles_format->external_format,                 //
+          /*type=*/gles_format->type,                              //
+          /*data=*/nullptr                                         //
+      );
+      texture_gles.MarkSliceMipLevelInitialized(0, mip_level);
+    }
+    gl.PixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    gl.TexSubImage3D(
+        /*target=*/texture_target,                  //
+        /*level=*/static_cast<GLint>(mip_level),    //
+        /*xoffset=*/destination_region.GetX(),      //
+        /*yoffset=*/destination_region.GetY(),      //
+        /*zoffset=*/static_cast<GLint>(slice),      //
+        /*width=*/destination_region.GetWidth(),    //
+        /*height=*/destination_region.GetHeight(),  //
+        /*depth=*/1,                                //
+        /*format=*/gles_format->external_format,    //
+        /*type=*/gles_format->type,                 //
+        /*data=*/tex_data);                         //
+    return true;
+  }
+
+  // GL_INVALID_OPERATION if the requested mip level has not been defined by
+  // a previous glTexImage2D operation. Allocate the requested mip lazily on
+  // first write, only for the level the upload is actually targeting. The
+  // snapshot pipeline (single base-level allocation followed by
+  // glGenerateMipmap) keeps its existing GL footprint, and per-level uploads
+  // pay only for the levels they touch.
+  if (!texture_gles.IsSliceMipLevelInitialized(slice, mip_level)) {
+    const auto level_width =
+        std::max<int32_t>(1, tex_descriptor.size.width >> mip_level);
+    const auto level_height =
+        std::max<int32_t>(1, tex_descriptor.size.height >> mip_level);
     gl.TexImage2D(texture_target,                // target
                   mip_level,                     // LOD level
                   gles_format->internal_format,  // internal format
-                  tex_descriptor.size.width,     // width
-                  tex_descriptor.size.height,    // height
+                  level_width,                   // width
+                  level_height,                  // height
                   0u,                            // border
                   gles_format->external_format,  // format
                   gles_format->type,             // type
                   nullptr);                      // data
-    texture_gles.MarkSliceInitialized(slice);
+    texture_gles.MarkSliceMipLevelInitialized(slice, mip_level);
   }
 
   {
@@ -278,8 +362,6 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
     return false;
   }
 
-  TextureCoordinateSystem coord_system = source->GetCoordinateSystem();
-
   GLuint read_fbo = GL_NONE;
   fml::ScopedCleanupClosure delete_fbos(
       [&gl, &read_fbo]() { DeleteFBO(gl, read_fbo, GL_FRAMEBUFFER); });
@@ -293,27 +375,15 @@ bool BlitCopyTextureToBufferCommandGLES::Encode(
   }
 
   DeviceBufferGLES::Cast(*destination)
-      .UpdateBufferData(
-          [&gl,                                                          //
-           this,                                                         //
-           format = gles_format->external_format,                        //
-           type = gles_format->type,                                     //
-           coord_system,                                                 //
-           bytes_per_pixel = BytesPerPixelForPixelFormat(source_format)  //
+      .UpdateBufferData([&gl,                                    //
+                         this,                                   //
+                         format = gles_format->external_format,  //
+                         type = gles_format->type                //
   ](uint8_t* data, size_t length) {
-            gl.ReadPixels(source_region.GetX(), source_region.GetY(),
-                          source_region.GetWidth(), source_region.GetHeight(),
-                          format, type, data + destination_offset);
-            switch (coord_system) {
-              case TextureCoordinateSystem::kUploadFromHost:
-                break;
-              case TextureCoordinateSystem::kRenderToTexture:
-                // The texture is upside down, and must be inverted when copying
-                // byte data out.
-                FlipImage(data + destination_offset, source_region.GetWidth(),
-                          source_region.GetHeight(), bytes_per_pixel);
-            }
-          });
+        gl.ReadPixels(source_region.GetX(), source_region.GetY(),
+                      source_region.GetWidth(), source_region.GetHeight(),
+                      format, type, data + destination_offset);
+      });
 
   return true;
 };
@@ -352,8 +422,6 @@ bool BlitResizeTextureCommandGLES::Encode(const ReactorGLES& reactor) const {
     VALIDATION_LOG << "Texture blit fallback not implemented yet for GLES2.";
     return false;
   }
-
-  destination->SetCoordinateSystem(source->GetCoordinateSystem());
 
   GLuint read_fbo = GL_NONE;
   GLuint draw_fbo = GL_NONE;

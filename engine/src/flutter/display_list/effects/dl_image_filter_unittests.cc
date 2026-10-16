@@ -751,6 +751,24 @@ TEST(DisplayListImageFilter, ColorFilterModifiesTransparencyBounds) {
   TestInvalidBounds(filter, DlMatrix(), input_bounds);
 }
 
+TEST(DisplayListImageFilter, LocalMatrixBounds) {
+  // Inner filter scales by 1.25 about center of 200x100 rect at origin
+  DlRect local_bounds = DlRect::MakeXYWH(0, 0, 200, 100);
+  DlPoint center = local_bounds.GetCenter();
+  DlMatrix scale = DlMatrix::MakeTranslation(center) *
+                   DlMatrix::MakeScale({1.25, 1.25, 1.0}) *
+                   DlMatrix::MakeTranslation(-center);
+  DlMatrixImageFilter inner(scale, DlImageSampling::kLinear);
+  // Local matrix shifts inner filter space by offset: center is (900, 1250)
+  DlPoint offset = DlPoint(800, 1200);
+  DlLocalMatrixImageFilter filter(DlMatrix::MakeTranslation(offset),
+                                  inner.shared());
+  DlRect input_bounds = local_bounds.Shift(offset);
+  // 200x100 scaled by 1.25 about its center is 250x125
+  DlRect expected_output_bounds = input_bounds.Expand(25, 12.5);
+  TestBounds(filter, input_bounds, expected_output_bounds);
+}
+
 TEST(DisplayListImageFilter, LocalImageFilterBounds) {
   auto filter_matrix = DlMatrix::MakeRow(2.0, 0.0, 0.0, 10,   //
                                          0.5, 3.0, 0.0, 15,   //
@@ -866,6 +884,19 @@ TEST(DisplayListImageFilter, LocalImageFilterBounds) {
           }
         }
         {
+          SkRect input_bounds = SkRect::MakeLTRB(20, 20, 80, 80);
+          DlRect dl_rect;
+          if (dl_local_filter->map_local_bounds(ToDlRect(input_bounds),
+                                                dl_rect)) {
+            SkRect sk_rect = sk_local_filter->computeFastBounds(input_bounds);
+            ASSERT_EQ(sk_rect.roundOut(), ToSkIRect(DlIRect::RoundOut(dl_rect)))
+                << desc;
+          } else {
+            ASSERT_TRUE(dl_local_filter->modifies_transparent_black()) << desc;
+            ASSERT_FALSE(sk_local_filter->canComputeFastBounds()) << desc;
+          }
+        }
+        {
           // Test for: Know the outset bounds to get the inset bounds
           // Skia have some bounds calculate error of DilateFilter and
           // MatrixFilter
@@ -904,6 +935,21 @@ TEST(DisplayListImageFilter, RuntimeEffectEquality) {
   DlRuntimeEffectImageFilter filter_c(
       nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>(1));
 
+  EXPECT_NE(filter_a, filter_c);
+}
+
+TEST(DisplayListImageFilter, RuntimeEffectEqualityWithInputSampling) {
+  DlRuntimeEffectImageFilter filter_a(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+  DlRuntimeEffectImageFilter filter_b(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>());
+  DlRuntimeEffectImageFilter filter_c(nullptr, {nullptr},
+                                      std::make_shared<std::vector<uint8_t>>(),
+                                      DlImageSampling::kLinear);
+
+  EXPECT_EQ(filter_a.input_sampling(), DlImageSampling::kNearestNeighbor);
+  EXPECT_EQ(filter_c.input_sampling(), DlImageSampling::kLinear);
+  EXPECT_EQ(filter_a, filter_b);
   EXPECT_NE(filter_a, filter_c);
 }
 

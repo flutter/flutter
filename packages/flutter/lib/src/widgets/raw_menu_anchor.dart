@@ -100,8 +100,10 @@ class RawMenuOverlayInfo {
 /// The `info` describes the anchor's [Rect], the [Size] of the overlay,
 /// the [TapRegion.groupId] used by members of the menu system, and the
 /// `position` argument passed to [MenuController.open].
-typedef RawMenuAnchorOverlayBuilder =
-    Widget Function(BuildContext context, RawMenuOverlayInfo info);
+typedef RawMenuAnchorOverlayBuilder = Widget Function(
+  BuildContext context,
+  RawMenuOverlayInfo info,
+);
 
 /// Signature for the builder function used by [RawMenuAnchor.builder] to build
 /// the widget that the [RawMenuAnchor] surrounds.
@@ -114,15 +116,20 @@ typedef RawMenuAnchorOverlayBuilder =
 /// The `child` is an optional child supplied as the [RawMenuAnchor.child]
 /// attribute. The child is intended to be incorporated in the result of the
 /// function.
-typedef RawMenuAnchorChildBuilder =
-    Widget Function(BuildContext context, MenuController controller, Widget? child);
+typedef RawMenuAnchorChildBuilder = Widget Function(
+  BuildContext context,
+  MenuController controller,
+  Widget? child,
+);
 
 /// Signature for the callback used by [RawMenuAnchor.onOpenRequested] to
 /// intercept requests to open a menu.
 ///
 /// See [RawMenuAnchor.onOpenRequested] for more information.
-typedef RawMenuAnchorOpenRequestedCallback =
-    void Function(Offset? position, VoidCallback showOverlay);
+typedef RawMenuAnchorOpenRequestedCallback = void Function(
+  Offset? position,
+  VoidCallback showOverlay,
+);
 
 /// Signature for the callback used by [RawMenuAnchor.onCloseRequested] to
 /// intercept requests to close a menu.
@@ -313,16 +320,16 @@ class RawMenuAnchor extends StatefulWidget {
   /// This callback can be used to add a delay or a closing animation before the
   /// menu is hidden.
   ///
-  /// This callback is triggered every time [MenuController.close] is called
-  /// while this menu is open.
+  /// This callback is triggered every time [MenuController.close] is called,
+  /// even when the menu overlay is already hidden.
   ///
-  /// This callback is also triggered when a sibling [RawMenuAnchor] is opened
-  /// while this menu is open. In this case, the callback can be used to add a
-  /// delay or a closing animation while the sibling menu opens. When
-  /// implementing this behavior, consider disabling interactions so that the
-  /// closing menu does not interfere with the opening sibling menu. Also
-  /// consider disabling semantics, focus, and hit testing for the closing menu
-  /// for the duration of the closing animation.
+  /// This callback is also triggered when a sibling [RawMenuAnchor] is opened.
+  /// In this case, the callback can be used to add a delay or a closing
+  /// animation while the sibling menu opens. When implementing this behavior,
+  /// consider disabling interactions so that the closing menu does not
+  /// interfere with the opening sibling menu. Also consider disabling
+  /// semantics, focus, and hit testing for the closing menu for the duration of
+  /// the closing animation.
   ///
   /// Pending timers or animations started in a previous call to
   /// [onCloseRequested] should be canceled when this callback is triggered to
@@ -528,6 +535,11 @@ mixin _RawMenuAnchorBaseMixin<T extends StatefulWidget> on State<T> {
     assert(_debugMenuInfo('Disposing of $this'));
     if (isOpen) {
       close(inDispose: true);
+    }
+
+    if (isRoot) {
+      _scrollPosition?.isScrollingNotifier.removeListener(_handleScroll);
+      _scrollPosition = null;
     }
 
     _parent?._removeChild(this);
@@ -797,10 +809,6 @@ class _RawMenuAnchorState extends State<RawMenuAnchor> with _RawMenuAnchorBaseMi
 
   @override
   void handleCloseRequest() {
-    if (!isOpen) {
-      return;
-    }
-
     // Changes in MediaQuery.sizeOf(context) cause RawMenuAnchor to close during
     // didChangeDependencies. When this happens, calling setState during the
     // closing sequence (handleCloseRequest -> onCloseRequested -> hideOverlay)

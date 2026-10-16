@@ -9,6 +9,7 @@ import '../base/version.dart';
 import '../build_info.dart';
 import '../ios/xcodeproj.dart';
 import '../macos/swift_packages.dart';
+import '../platform_plugins.dart';
 import '../project.dart';
 
 /// Encapsulates platform-specific values for Darwin targets ([ios] and [macos]).
@@ -38,11 +39,11 @@ enum FlutterDarwinPlatform {
     required this.binaryName,
     required this.targetPlatform,
     required this.swiftPackagePlatform,
-    required String artifactName,
+    required this._artifactName,
     required this.artifactZip,
     required this.xcframeworkArtifact,
     required this.sdks,
-  }) : _artifactName = artifactName;
+  });
 
   /// The name of the binary file within the [xcframeworkArtifact].
   final String binaryName;
@@ -65,11 +66,18 @@ enum FlutterDarwinPlatform {
   /// A list of supported [XcodeSdk].
   final List<XcodeSdk> sdks;
 
+  String get pluginConfigKey {
+    return switch (this) {
+      ios => IOSPlugin.kConfigKey,
+      macos => MacOSPlugin.kConfigKey,
+    };
+  }
+
   /// Minimum supported version for the platform.
   Version deploymentTarget() {
     return switch (this) {
-      ios => Version(13, 0, null),
-      macos => Version(10, 15, null),
+      ios => Version(15, 0, null),
+      macos => Version(12, 0, null),
     };
   }
 

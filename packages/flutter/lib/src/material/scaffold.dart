@@ -643,10 +643,7 @@ class ScaffoldMessengerState extends State<ScaffoldMessenger> with TickerProvide
 }
 
 class _ScaffoldMessengerScope extends InheritedWidget {
-  const _ScaffoldMessengerScope({
-    required super.child,
-    required ScaffoldMessengerState scaffoldMessengerState,
-  }) : _scaffoldMessengerState = scaffoldMessengerState;
+  const _ScaffoldMessengerScope({required super.child, required this._scaffoldMessengerState});
 
   final ScaffoldMessengerState _scaffoldMessengerState;
 
@@ -2715,7 +2712,7 @@ class ScaffoldState extends State<Scaffold>
   }
 
   // Moves the Floating Action Button to the new Floating Action Button Location.
-  void _moveFloatingActionButton(final FloatingActionButtonLocation newLocation) {
+  void _moveFloatingActionButton(FloatingActionButtonLocation newLocation) {
     FloatingActionButtonLocation? previousLocation = _floatingActionButtonLocation;
     var restartAnimationFrom = 0.0;
     // If the Floating Action Button is moving right now, we need to start from a snapshot of the current transition.

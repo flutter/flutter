@@ -15,7 +15,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../widgets/semantics_tester.dart';
+import 'semantics_tester.dart';
 
 void main() {
   RenderObject getOverlayColor(WidgetTester tester) {
@@ -1469,11 +1469,12 @@ void main() {
           child: Center(
             child: SegmentedButton<int>(
               style: const ButtonStyle(
-                side:
-                    WidgetStateProperty<BorderSide?>.fromMap(<WidgetStatesConstraint, BorderSide?>{
-                      WidgetState.disabled: BorderSide(color: disabledColor),
-                      WidgetState.any: BorderSide(color: enabledColor),
-                    }),
+                side: WidgetStateProperty<BorderSide?>.fromMap(
+                  <WidgetStatesConstraint, BorderSide?>{
+                    WidgetState.disabled: BorderSide(color: disabledColor),
+                    WidgetState.any: BorderSide(color: enabledColor),
+                  },
+                ),
               ),
               // First segment is enabled, second is disabled.
               segments: const <ButtonSegment<int>>[

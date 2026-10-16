@@ -53,6 +53,44 @@ void main() async {
     expect(identical(programA, programB), true);
   });
 
+  // Two FragmentPrograms loaded from different asset paths but built from
+  // the same underlying shader source share an embedded entrypoint name.
+  // Each FragmentProgram registers under a scoped key derived from its
+  // asset path (its `library_id`), so the two coexist in the shared shader
+  // registry without one evicting the other. Without that namespacing the
+  // shader libraries would collide at the bare entrypoint name and the
+  // second load would tear down the first one's pipeline state.
+  //
+  // `no_uniforms.frag.iplr` and `no_uniforms_alt.frag.iplr` are
+  // byte-identical aliases of the same compiled shader, wired up in
+  // `lib/ui/fixtures/shaders/general_shaders/BUILD.gn`. `no_uniforms.frag`
+  // is used so the test does not need to thread sampler or uniform setup
+  // through the FragmentShader to validate it.
+  test('FragmentPrograms from different asset paths do not collide', () async {
+    final FragmentProgram programA = await FragmentProgram.fromAsset('no_uniforms.frag.iplr');
+    final FragmentProgram programB = await FragmentProgram.fromAsset('no_uniforms_alt.frag.iplr');
+
+    expect(identical(programA, programB), isFalse);
+
+    final FragmentShader shaderA = programA.fragmentShader();
+    final FragmentShader shaderB = programB.fragmentShader();
+    expect(shaderA, isNotNull);
+    expect(shaderB, isNotNull);
+
+    // Both shaders must remain usable end to end. Construct a Paint that
+    // uses each and confirm we can build a Picture, which exercises the
+    // pipeline that the shader is registered against.
+    for (final shader in <FragmentShader>[shaderA, shaderB]) {
+      final paint = Paint()..shader = shader;
+      final recorder = PictureRecorder();
+      final canvas = Canvas(recorder);
+      canvas.drawRect(const Rect.fromLTWH(0, 0, 10, 10), paint);
+      final Picture picture = recorder.endRecording();
+      expect(picture, isNotNull);
+      picture.dispose();
+    }
+  });
+
   group('getUniformFloat slots', () {
     late FragmentShader shader;
 
@@ -82,27 +120,20 @@ void main() async {
 
     setUpAll(() async {
       shaderMap = {
-        UniformFloatSlot: (await FragmentProgram.fromAsset(
-          'float_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformVec2Slot: (await FragmentProgram.fromAsset(
-          'vec2_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformVec3Slot: (await FragmentProgram.fromAsset(
-          'vec3_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformVec4Slot: (await FragmentProgram.fromAsset(
-          'vec4_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformMat2Slot: (await FragmentProgram.fromAsset(
-          'mat2_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformMat3Slot: (await FragmentProgram.fromAsset(
-          'mat3_uniform.frag.iplr',
-        )).fragmentShader(),
-        UniformMat4Slot: (await FragmentProgram.fromAsset(
-          'mat4_uniform.frag.iplr',
-        )).fragmentShader(),
+        UniformFloatSlot: (await FragmentProgram.fromAsset('float_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformVec2Slot: (await FragmentProgram.fromAsset('vec2_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformVec3Slot: (await FragmentProgram.fromAsset('vec3_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformVec4Slot: (await FragmentProgram.fromAsset('vec4_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformMat2Slot: (await FragmentProgram.fromAsset('mat2_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformMat3Slot: (await FragmentProgram.fromAsset('mat3_uniform.frag.iplr'))
+            .fragmentShader(),
+        UniformMat4Slot: (await FragmentProgram.fromAsset('mat4_uniform.frag.iplr'))
+            .fragmentShader(),
         UniformArray<UniformFloatSlot>: (await FragmentProgram.fromAsset(
           'float_array_uniform.frag.iplr',
         )).fragmentShader(),
@@ -132,14 +163,14 @@ void main() async {
         final FragmentShader shader = shaderMap[UniformFloatSlot]!;
         const color = Color.fromARGB(255, 255, 0, 0);
         shader.setFloat(0, color.r);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('set using getUniformFloat', () async {
         final FragmentShader shader = shaderMap[UniformFloatSlot]!;
         const color = Color.fromARGB(255, 50, 0, 0);
         shader.getUniformFloat('color_r').set(color.r);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('getUniformFloat offset overflow', () async {
@@ -176,14 +207,14 @@ void main() async {
         const color = Color.fromARGB(255, 255, 255, 0);
         shader.setFloat(0, color.r);
         shader.setFloat(1, color.g);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('set using getUniformVec2', () async {
         final FragmentShader shader = shaderMap[UniformVec2Slot]!;
         const color = Color.fromARGB(255, 50, 50, 0);
         shader.getUniformVec2('color_rg').set(color.r, color.g);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('wrong datatype', () async {
@@ -210,14 +241,14 @@ void main() async {
         // Note: The original test also called getUniformVec3 after setFloat.
         // Assuming this was intentional to test idempotency or a specific interaction.
         shader.getUniformVec3('color_rgb').set(color.r, color.g, color.b);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('set using getUniformVec3', () async {
         final FragmentShader shader = shaderMap[UniformVec3Slot]!;
         const color = Color.fromARGB(255, 42, 67, 12);
         shader.getUniformVec3('color_rgb').set(color.r, color.g, color.b);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('wrong datatype', () async {
@@ -243,14 +274,14 @@ void main() async {
         shader.setFloat(1, color.g);
         shader.setFloat(2, color.b);
         shader.setFloat(3, color.a);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('set using getUniformFloat', () async {
         const color = Color.fromARGB(255, 12, 37, 27);
         final FragmentShader shader = shaderMap[UniformVec4Slot]!;
         shader.getUniformVec4('color_rgba').set(color.r, color.g, color.b, color.a);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('wrong datatype', () async {
@@ -276,14 +307,14 @@ void main() async {
         shader.setFloat(1, color.g);
         shader.setFloat(2, color.b);
         shader.setFloat(3, color.a);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('set using getUniformMat2', () async {
         const color = Color.fromARGB(255, 12, 37, 27);
         final FragmentShader shader = shaderMap[UniformMat2Slot]!;
         shader.getUniformMat2('color_rgba').set(color.r, color.g, color.b, color.a);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('wrong datatype', () async {
@@ -318,7 +349,7 @@ void main() async {
         shader.setFloat(6, cpuColors[2].r);
         shader.setFloat(7, cpuColors[2].g);
         shader.setFloat(8, cpuColors[2].b);
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('set using getUniformMat3', () async {
@@ -342,7 +373,7 @@ void main() async {
           cpuColors[2].g,
           cpuColors[2].b,
         );
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('wrong datatype', () async {
@@ -388,7 +419,7 @@ void main() async {
         shader.setFloat(13, cpuColors[3].g);
         shader.setFloat(14, cpuColors[3].b);
         shader.setFloat(15, cpuColors[3].a);
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('set using getUniformMat4', () async {
@@ -421,7 +452,7 @@ void main() async {
           cpuColors[3].b,
           cpuColors[3].a,
         );
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('wrong datatype', () async {
@@ -440,14 +471,14 @@ void main() async {
     });
 
     group('float array', () {
-      test('set using setFloat', () {
+      test('set using setFloat', () async {
         const color = Color.fromARGB(255, 11, 22, 96);
         final FragmentShader shader = shaderMap[UniformArray<UniformFloatSlot>]!;
         shader.setFloat(0, color.r);
         shader.setFloat(1, color.g);
         shader.setFloat(2, color.b);
         shader.setFloat(3, color.a);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('set using getUniformFloatArray', () async {
@@ -458,7 +489,7 @@ void main() async {
         colorRgba[1].set(color.g);
         colorRgba[2].set(color.b);
         colorRgba[3].set(color.a);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
     });
 
@@ -470,7 +501,7 @@ void main() async {
         shader.setFloat(1, color.g);
         shader.setFloat(2, color.b);
         shader.setFloat(3, color.a);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('set using getUniformVec2Array', () async {
@@ -479,7 +510,7 @@ void main() async {
         final UniformArray<UniformVec2Slot> colorRgba = shader.getUniformVec2Array('color_array');
         colorRgba[0].set(color.r, color.g);
         colorRgba[1].set(color.b, color.a);
-        _expectShaderRendersColor(shader, color);
+        await _expectShaderRendersColor(shader, color);
       });
 
       test('wrong datatype', () async {
@@ -509,7 +540,7 @@ void main() async {
         shader.setFloat(5, cpuColors[1].r);
         shader.setFloat(6, cpuColors[1].g);
         shader.setFloat(7, cpuColors[1].b);
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('set using getUniformVec3Array', () async {
@@ -519,7 +550,7 @@ void main() async {
         final UniformArray<UniformVec3Slot> gpuColors = shader.getUniformVec3Array('color_array');
         gpuColors[0].set(cpuColors[0].r, cpuColors[0].g, cpuColors[0].b);
         gpuColors[1].set(cpuColors[1].r, cpuColors[1].g, cpuColors[1].b);
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('wrong datatype', () async {
@@ -552,7 +583,7 @@ void main() async {
         shader.setFloat(7, cpuColors[1].g);
         shader.setFloat(8, cpuColors[1].b);
         shader.setFloat(9, cpuColors[1].a);
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('set using getUniformVec4Array', () async {
@@ -562,7 +593,7 @@ void main() async {
         final UniformArray<UniformVec4Slot> colors = shader.getUniformVec4Array('color_array');
         colors[0].set(cpuColors[0].r, cpuColors[0].g, cpuColors[0].b, cpuColors[0].a);
         colors[1].set(cpuColors[1].r, cpuColors[1].g, cpuColors[1].b, cpuColors[1].a);
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('wrong datatype', () async {
@@ -592,7 +623,7 @@ void main() async {
         shader.setFloat(5, cpuColors[1].g);
         shader.setFloat(6, cpuColors[1].b);
         shader.setFloat(7, cpuColors[1].a);
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('set using getUniformMat2', () async {
@@ -601,7 +632,7 @@ void main() async {
         final UniformArray<UniformMat2Slot> colors = shader.getUniformMat2Array('colors');
         colors[0].set(cpuColors[0].r, cpuColors[0].g, cpuColors[0].b, cpuColors[0].a);
         colors[1].set(cpuColors[1].r, cpuColors[1].g, cpuColors[1].b, cpuColors[1].a);
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('wrong datatype', () async {
@@ -1035,7 +1066,7 @@ void main() async {
           shader.setFloat(shaderOffset++, cpuColors[colorOffset++].a);
         }
 
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
 
       test('set using getUniform*', () async {
@@ -1172,7 +1203,7 @@ void main() async {
           );
           colorOffset += 4;
         }
-        _expectShaderRendersBarcode(shader, cpuColors);
+        await _expectShaderRendersBarcode(shader, cpuColors);
       });
     });
   });
@@ -1591,6 +1622,11 @@ void main() async {
     final filter_2 = ImageFilter.shader(shader);
     expect(filter, filter_2);
     expect(identical(filter, filter_2), false);
+
+    final filterLowQuality = ImageFilter.shader(shader, filterQuality: FilterQuality.low);
+    expect(filter, isNot(filterLowQuality));
+    expect(filterLowQuality, ImageFilter.shader(shader, filterQuality: FilterQuality.low));
+    expect(identical(filter, filterLowQuality), false);
 
     shader.setFloat(0, 1);
     final filter_3 = ImageFilter.shader(shader);

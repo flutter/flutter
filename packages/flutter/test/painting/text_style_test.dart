@@ -314,6 +314,29 @@ void main() {
     expect(ps7, equals(ui.ParagraphStyle(textDirection: TextDirection.rtl, fontSize: 14.0)));
   });
 
+  test('TextStyle rejects NaN height', () {
+    expect(
+      () => TextStyle(height: double.nan),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'message',
+          contains('TextStyle.height must not be NaN.'),
+        ),
+      ),
+    );
+    expect(
+      () => const TextStyle().getParagraphStyle(height: double.nan),
+      throwsA(
+        isA<AssertionError>().having(
+          (AssertionError error) => error.toString(),
+          'message',
+          contains('TextStyle.height must not be NaN.'),
+        ),
+      ),
+    );
+  });
+
   test('TextStyle using package font', () {
     const s6 = TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');
@@ -532,11 +555,8 @@ void main() {
 
     final ui.TextStyle ts2 = s2.getTextStyle();
 
-    // TODO(matanlurey): Remove when https://github.com/flutter/flutter/issues/112498 is resolved.
-    // The web implementation never includes "dither: ..." as a property, and after #112498 neither
-    // does non-web (as there will no longer be a user-visible "dither" property). So, relax the
-    // test to just check for the color by using a regular expression.
-    expect(ts2.toString(), matches(RegExp(r'background: Paint\(Color\(.*\).*\)')));
+    final expectedPaint = Paint()..color = const Color(0xFF00FF00);
+    expect(ts2.toString(), contains('background: $expectedPaint'));
   });
 
   test('TextStyle background and backgroundColor combos', () {

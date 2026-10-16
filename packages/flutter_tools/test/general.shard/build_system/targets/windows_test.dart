@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -11,9 +13,12 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/common.dart';
 import 'package:flutter_tools/src/build_system/targets/windows.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:standard_message_codec/standard_message_codec.dart';
 
 import '../../../src/common.dart';
 import '../../../src/context.dart';
+import '../../../src/package_config.dart';
 
 void main() {
   testWithoutContext(
@@ -173,6 +178,63 @@ void main() {
   );
 
   testUsingContext(
+    'DebugBundleWindowsAssets bundles assets for the selected flavor',
+    () async {
+      final FileSystem flavorFileSystem = globals.fs;
+      final environment = Environment.test(
+        flavorFileSystem.currentDirectory,
+        artifacts: Artifacts.test(),
+        processManager: FakeProcessManager.any(),
+        fileSystem: flavorFileSystem,
+        logger: BufferLogger.test(),
+        defines: <String, String>{kBuildMode: 'debug', kFlavor: 'strawberry'},
+        engineVersion: '2',
+      );
+
+      environment.buildDir.childFile('app.dill').createSync(recursive: true);
+      environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
+
+      flavorFileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+name: example
+flutter:
+  assets:
+    - assets/common/
+    - path: assets/vanilla/
+      flavors:
+        - vanilla
+    - path: assets/strawberry/
+      flavors:
+        - strawberry
+''');
+
+      flavorFileSystem.file('assets/common/image.png').createSync(recursive: true);
+      flavorFileSystem.file('assets/vanilla/ice-cream.png').createSync(recursive: true);
+      flavorFileSystem.file('assets/strawberry/ice-cream.png').createSync(recursive: true);
+      writePackageConfigFiles(directory: flavorFileSystem.currentDirectory, mainLibName: 'example');
+
+      await const DebugBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
+
+      final Uint8List assetManifestData = environment.outputDir
+          .childDirectory('flutter_assets')
+          .childFile('AssetManifest.bin')
+          .readAsBytesSync();
+      final assetManifest = const StandardMessageCodec().decodeMessage(
+        ByteData.sublistView(assetManifestData),
+      ) as Map<Object?, Object?>;
+
+      expect(assetManifest.containsKey('assets/common/image.png'), isTrue);
+      expect(assetManifest.containsKey('assets/strawberry/ice-cream.png'), isTrue);
+      expect(assetManifest.containsKey('assets/vanilla/ice-cream.png'), isFalse);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
     'ProfileBundleWindowsAssets creates correct bundle structure',
     () async {
       final environment = Environment.test(
@@ -185,14 +247,17 @@ void main() {
       );
 
       environment.buildDir.childFile('app.so').createSync(recursive: true);
+      environment.buildDir.childFile('app.pdb').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotElfProfile(TargetPlatform.windows_x64)).build(environment);
+      await const WindowsAotBundle(AotSnapshotProfile(TargetPlatform.windows_x64))
+          .build(environment);
       await const ProfileBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
       // Depfile is created and so is copied.
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
       expect(fileSystem.file(r'C:\windows\app.so'), exists);
+      expect(fileSystem.file(r'C:\windows\app.pdb'), isNot(exists));
       expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
     },
     overrides: <Type, Generator>{
@@ -214,14 +279,17 @@ void main() {
       );
 
       environment.buildDir.childFile('app.so').createSync(recursive: true);
+      environment.buildDir.childFile('app.pdb').createSync(recursive: true);
       environment.buildDir.childFile('native_assets.json').createSync(recursive: true);
 
-      await const WindowsAotBundle(AotElfRelease(TargetPlatform.windows_x64)).build(environment);
+      await const WindowsAotBundle(AotSnapshotRelease(TargetPlatform.windows_x64))
+          .build(environment);
       await const ReleaseBundleWindowsAssets(TargetPlatform.windows_x64).build(environment);
 
       // Depfile is created and so is copied.
       expect(environment.buildDir.childFile('flutter_assets.d'), exists);
       expect(fileSystem.file(r'C:\windows\app.so'), exists);
+      expect(fileSystem.file(r'C:\windows\app.pdb'), isNot(exists));
       expect(fileSystem.file(r'C:\flutter_assets\kernel_blob.bin').existsSync(), false);
     },
     overrides: <Type, Generator>{

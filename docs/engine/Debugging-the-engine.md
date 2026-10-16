@@ -85,10 +85,6 @@ Add an engine symbol breakpoint via **Debug > Breakpoints > Create Symbolic Brea
 
 You can also set a breakpoint directly with [lldb](https://lldb.llvm.org/tutorial.html) by expanding **Flutter > Runner** in the Runner Project Navigator. Put a breakpoint in `AppDelegate.swift`'s `application(didFinishLaunchingWithOptions:)` (Swift project) or `main.m`'s `main()` (Objective-C project) and start the application by clicking the Run button (CMD + R). Then, set your desired breakpoint in the engine in `lldb` via `breakpoint set -...`.
 
-## Debugging Android builds with gdb
-
-See https://github.com/flutter/flutter/blob/main/engine/src/flutter/sky/tools/flutter_gdb
-
 ## Debugging native engine code on Android with Android Studio
 
 1. Build an unoptimized local engine. i.e. `et build -c host_debug_unopt_arm64 && et build -c android_debug_unopt_arm64`.

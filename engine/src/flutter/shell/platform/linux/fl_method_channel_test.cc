@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 // Included first as it collides with the X11 headers.
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gtest/gtest.h"
 
 #include "flutter/shell/platform/linux/fl_method_codec_private.h"
@@ -10,11 +11,17 @@
 #include "flutter/shell/platform/linux/public/flutter_linux/fl_standard_method_codec.h"
 #include "flutter/shell/platform/linux/testing/fl_mock_binary_messenger.h"
 
-// Checks if invoking a method returns a value.
-TEST(FlMethodChannelTest, InvokeMethod) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
+class FlMethodChannelTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override { messenger = fl_mock_binary_messenger_new(); }
 
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+  ~FlMethodChannelTest() { g_clear_object(&messenger); }
+
+  FlMockBinaryMessenger* messenger = nullptr;
+};
+
+// Checks if invoking a method returns a value.
+TEST_F(FlMethodChannelTest, InvokeMethod) {
   fl_mock_binary_messenger_set_standard_method_channel(
       messenger, "test",
       [](FlMockBinaryMessenger* messenger, GTask* task, const gchar* name,
@@ -57,10 +64,7 @@ TEST(FlMethodChannelTest, InvokeMethod) {
 }
 
 // Checks if a method can be invoked with nullptr for arguments.
-TEST(FlMethodChannelTest, InvokeMethodNullptrArgsMessage) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlMethodChannelTest, InvokeMethodNullptrArgsMessage) {
   fl_mock_binary_messenger_set_standard_method_channel(
       messenger, "test",
       [](FlMockBinaryMessenger* messenger, GTask* task, const gchar* name,
@@ -98,10 +102,7 @@ TEST(FlMethodChannelTest, InvokeMethodNullptrArgsMessage) {
 }
 
 // Checks if an error response from a method call is handled.
-TEST(FlMethodChannelTest, InvokeMethodError) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlMethodChannelTest, InvokeMethodError) {
   fl_mock_binary_messenger_set_standard_method_channel(
       messenger, "test",
       [](FlMockBinaryMessenger* messenger, GTask* task, const gchar* name,
@@ -148,10 +149,7 @@ TEST(FlMethodChannelTest, InvokeMethodError) {
 }
 
 // Checks if a not implemeneted response from a method call is handled.
-TEST(FlMethodChannelTest, InvokeMethodNotImplemented) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlMethodChannelTest, InvokeMethodNotImplemented) {
   fl_mock_binary_messenger_set_standard_method_channel(
       messenger, "test",
       [](FlMockBinaryMessenger* messenger, GTask* task, const gchar* name,
@@ -185,10 +183,7 @@ TEST(FlMethodChannelTest, InvokeMethodNotImplemented) {
 }
 
 // Checks if an engine failure calling a method call is handled.
-TEST(FlMethodChannelTest, InvokeMethodFailure) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlMethodChannelTest, InvokeMethodFailure) {
   fl_mock_binary_messenger_set_error_channel(messenger, "test", 42, "ERROR");
 
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
@@ -216,9 +211,7 @@ TEST(FlMethodChannelTest, InvokeMethodFailure) {
 }
 
 // Checks the shell able to receive and respond to method calls from the engine.
-TEST(FlMethodChannelTest, ReceiveMethodCallRespondSuccess) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
+TEST_F(FlMethodChannelTest, ReceiveMethodCallRespondSuccess) {
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlMethodChannel) channel = fl_method_channel_new(
       FL_BINARY_MESSENGER(messenger), "test", FL_METHOD_CODEC(codec));
@@ -261,9 +254,7 @@ TEST(FlMethodChannelTest, ReceiveMethodCallRespondSuccess) {
 }
 
 // Checks the shell able to receive and respond to method calls from the engine.
-TEST(FlMethodChannelTest, ReceiveMethodCallRespondError) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
+TEST_F(FlMethodChannelTest, ReceiveMethodCallRespondError) {
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlMethodChannel) channel = fl_method_channel_new(
       FL_BINARY_MESSENGER(messenger), "test", FL_METHOD_CODEC(codec));
@@ -312,9 +303,7 @@ TEST(FlMethodChannelTest, ReceiveMethodCallRespondError) {
 }
 
 // Checks the shell able to receive and respond to method calls from the engine.
-TEST(FlMethodChannelTest, ReceiveMethodCallRespondNotImplemented) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
+TEST_F(FlMethodChannelTest, ReceiveMethodCallRespondNotImplemented) {
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
   g_autoptr(FlMethodChannel) channel = fl_method_channel_new(
       FL_BINARY_MESSENGER(messenger), "test", FL_METHOD_CODEC(codec));
@@ -451,9 +440,7 @@ TestMethodCodec* test_method_codec_new() {
 
 // Checks error correctly handled if provide an unsupported arg in a method call
 // response.
-TEST(FlMethodChannelTest, ReceiveMethodCallRespondSuccessError) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
+TEST_F(FlMethodChannelTest, ReceiveMethodCallRespondSuccessError) {
   g_autoptr(TestMethodCodec) codec = test_method_codec_new();
   g_autoptr(FlMethodChannel) channel = fl_method_channel_new(
       FL_BINARY_MESSENGER(messenger), "test", FL_METHOD_CODEC(codec));
@@ -489,9 +476,7 @@ TEST(FlMethodChannelTest, ReceiveMethodCallRespondSuccessError) {
 
 // Checks error correctly handled if provide an unsupported arg in a method call
 // response.
-TEST(FlMethodChannelTest, ReceiveMethodCallRespondErrorError) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
+TEST_F(FlMethodChannelTest, ReceiveMethodCallRespondErrorError) {
   g_autoptr(TestMethodCodec) codec = test_method_codec_new();
   g_autoptr(FlMethodChannel) channel = fl_method_channel_new(
       FL_BINARY_MESSENGER(messenger), "test", FL_METHOD_CODEC(codec));
@@ -526,9 +511,7 @@ TEST(FlMethodChannelTest, ReceiveMethodCallRespondErrorError) {
 // 3. Register a new channel with the same name.
 //
 // This is a regression test to https://github.com/flutter/flutter/issues/90817.
-TEST(FlMethodChannelTest, ReplaceADisposedMethodChannel) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
+TEST_F(FlMethodChannelTest, ReplaceADisposedMethodChannel) {
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
 
   // Register the first channel and test if it works.
@@ -589,9 +572,7 @@ TEST(FlMethodChannelTest, ReplaceADisposedMethodChannel) {
 // 3. Dispose the previous method channel.
 //
 // This is a regression test to https://github.com/flutter/flutter/issues/90817.
-TEST(FlMethodChannelTest, DisposeAReplacedMethodChannel) {
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-
+TEST_F(FlMethodChannelTest, DisposeAReplacedMethodChannel) {
   g_autoptr(FlStandardMethodCodec) codec = fl_standard_method_codec_new();
 
   // Register the first channel and test if it works.
@@ -654,10 +635,7 @@ TEST(FlMethodChannelTest, DisposeAReplacedMethodChannel) {
 }
 
 // Checks invoking a method with a custom type generates an error.
-TEST(FlMethodChannelTest, CustomType) {
-  g_autoptr(GMainLoop) loop = g_main_loop_new(nullptr, 0);
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
+TEST_F(FlMethodChannelTest, CustomType) {
   fl_mock_binary_messenger_set_standard_method_channel(
       messenger, "test",
       [](FlMockBinaryMessenger* messenger, GTask* task, const gchar* name,

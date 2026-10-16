@@ -54,12 +54,11 @@ typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset p
 
 /// Signature used by [TwoDimensionalScrollable] to build the viewport through
 /// which the scrollable content is displayed.
-typedef TwoDimensionalViewportBuilder =
-    Widget Function(
-      BuildContext context,
-      ViewportOffset verticalPosition,
-      ViewportOffset horizontalPosition,
-    );
+typedef TwoDimensionalViewportBuilder = Widget Function(
+  BuildContext context,
+  ViewportOffset verticalPosition,
+  ViewportOffset horizontalPosition,
+);
 
 // The return type of _performEnsureVisible.
 //
@@ -490,6 +489,7 @@ class Scrollable extends StatefulWidget {
   /// If a [Scrollable] enclosing the provided [BuildContext] is a
   /// [TwoDimensionalScrollable], both vertical and horizontal axes will ensure
   /// the target is made visible.
+  @awaitNotRequired
   static Future<void> ensureVisible(
     BuildContext context, {
     double alignment = 0.0,
@@ -686,16 +686,18 @@ class ScrollableState extends State<Scrollable>
         widget.scrollBehavior!.shouldNotify(oldWidget.scrollBehavior!)) {
       return true;
     }
-    ScrollPhysics? newPhysics = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
-    ScrollPhysics? oldPhysics =
+
+    final ScrollPhysics? newPhysics =
+        widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
+    final ScrollPhysics? oldPhysics =
         oldWidget.physics ?? oldWidget.scrollBehavior?.getScrollPhysics(context);
-    do {
-      if (newPhysics?.runtimeType != oldPhysics?.runtimeType) {
-        return true;
-      }
-      newPhysics = newPhysics?.parent;
-      oldPhysics = oldPhysics?.parent;
-    } while (newPhysics != null || oldPhysics != null);
+
+    if (newPhysics?.runtimeType != oldPhysics?.runtimeType) {
+      return true;
+    }
+    if (newPhysics != null && oldPhysics != null && newPhysics.shouldUpdate(oldPhysics)) {
+      return true;
+    }
 
     return widget.controller?.runtimeType != oldWidget.controller?.runtimeType;
   }
@@ -1171,9 +1173,8 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
 /// date with the scroll position when it sends the drag update event to a
 /// selectable.
 class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
-  _ScrollableSelectionContainerDelegate({required this.state, required ScrollPosition position})
-    : _position = position,
-      _autoScroller = EdgeDraggingAutoScroller(
+  _ScrollableSelectionContainerDelegate({required this.state, required this._position})
+    : _autoScroller = EdgeDraggingAutoScroller(
         state,
         velocityScalar: _kDefaultSelectToScrollVelocityScalar,
       ) {
@@ -1302,6 +1303,12 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       return result;
     }
     if (_selectionStartsInScrollable) {
+      // Paged scrollables (like PageView) disallow this; edge scrolling there
+      // flips to an adjacent page instead of revealing more content.
+      if (!(state.resolvedPhysics?.allowSelectionEdgeScrolling ?? true)) {
+        _autoScroller.stopAutoScroll();
+        return result;
+      }
       _autoScroller.startAutoScrollIfNecessary(_dragTargetFromEvent(event));
       if (_autoScroller.scrolling) {
         return SelectionResult.pending;
@@ -1650,13 +1657,11 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
 class _RenderScrollSemantics extends RenderProxyBox {
   _RenderScrollSemantics({
     required ScrollPosition position,
-    required bool allowImplicitScrolling,
+    required this._allowImplicitScrolling,
     required this.axis,
-    required int? semanticChildCount,
+    required this._semanticChildCount,
     RenderBox? child,
   }) : _position = position,
-       _allowImplicitScrolling = allowImplicitScrolling,
-       _semanticChildCount = semanticChildCount,
        super(child) {
     position.addListener(markNeedsSemanticsUpdate);
   }
@@ -1708,10 +1713,11 @@ class _RenderScrollSemantics extends RenderProxyBox {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isSemanticBoundary = true;
+    config
+      ..isSemanticBoundary = true
+      ..hasImplicitScrolling = allowImplicitScrolling;
     if (position.haveDimensions) {
       config
-        ..hasImplicitScrolling = allowImplicitScrolling
         ..scrollPosition = _position.pixels
         ..scrollExtentMax = _position.maxScrollExtent
         ..scrollExtentMin = _position.minScrollExtent

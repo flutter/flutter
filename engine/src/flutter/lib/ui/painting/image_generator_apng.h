@@ -10,16 +10,16 @@
 #include "flutter/fml/endianness.h"
 #include "flutter/fml/logging.h"
 
-#define PNG_FIELD(T, name)                \
- private:                                 \
-  T name;                                 \
-                                          \
- public:                                  \
-  T get_##name() const {                  \
-    return fml::BigEndianToArch<T>(name); \
-  }                                       \
-  void set_##name(T n) {                  \
-    name = fml::BigEndianToArch<T>(n);    \
+#define PNG_FIELD(T, name)                   \
+ private:                                    \
+  T name##_;                                 \
+                                             \
+ public:                                     \
+  T get_##name() const {                     \
+    return fml::BigEndianToArch<T>(name##_); \
+  }                                          \
+  void set_##name(T n) {                     \
+    name##_ = fml::BigEndianToArch<T>(n);    \
   }
 
 namespace flutter {
@@ -53,9 +53,18 @@ class APNGImageGenerator : public ImageGenerator {
 
   static std::unique_ptr<ImageGenerator> MakeFromData(sk_sp<SkData> data);
 
+  /// Computes the CRC of the data in a PNG chunk.
+  static uint32_t ComputeCrc32(const uint8_t* data, size_t length);
+
+  /// Signature at the start of a PNG file.
+  static constexpr std::array<uint8_t, 8> kPngSignature = {137, 80, 78, 71,
+                                                           13,  10, 26, 10};
+
  private:
-  static constexpr uint8_t kPngSignature[8] = {137, 80, 78, 71, 13, 10, 26, 10};
   static constexpr size_t kChunkCrcSize = 4;
+
+  /// The size of the sequence number at the beginning of an fdAT chunk.
+  static constexpr size_t kFrameDataSequenceNumberSize = 4;
 
   enum ChunkType {
     kImageHeaderChunkType = 'IHDR',

@@ -11,17 +11,32 @@
 #include "flutter/shell/platform/linux/testing/mock_settings.h"
 #include "flutter/testing/testing.h"
 
+#include "flutter/shell/platform/linux/testing/linux_test.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-TEST(FlSettingsHandlerTest, AlwaysUse24HourFormat) {
+class FlSettingsHandlerTest : public flutter::testing::LinuxTest {
+ protected:
+  void SetUp() override {
+    messenger = fl_mock_binary_messenger_new();
+    g_clear_object(&engine);
+    engine =
+        fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
+    handler = fl_settings_handler_new(engine);
+  }
+
+  ~FlSettingsHandlerTest() {
+    fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
+    g_clear_object(&handler);
+    g_clear_object(&messenger);
+  }
+
+  FlMockBinaryMessenger* messenger = nullptr;
+  FlSettingsHandler* handler = nullptr;
   ::testing::NiceMock<flutter::testing::MockSettings> settings;
+};
 
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
-
+TEST_F(FlSettingsHandlerTest, AlwaysUse24HourFormat) {
   EXPECT_CALL(settings, fl_settings_get_clock_format(
                             ::testing::Eq<FlSettings*>(settings)))
       .WillOnce(::testing::Return(FL_CLOCK_FORMAT_12H))
@@ -68,18 +83,9 @@ TEST(FlSettingsHandlerTest, AlwaysUse24HourFormat) {
       &called);
   fl_settings_emit_changed(settings);
   EXPECT_TRUE(called);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
-TEST(FlSettingsHandlerTest, PlatformBrightness) {
-  ::testing::NiceMock<flutter::testing::MockSettings> settings;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
-
+TEST_F(FlSettingsHandlerTest, PlatformBrightness) {
   EXPECT_CALL(settings, fl_settings_get_color_scheme(
                             ::testing::Eq<FlSettings*>(settings)))
       .WillOnce(::testing::Return(FL_COLOR_SCHEME_LIGHT))
@@ -124,18 +130,9 @@ TEST(FlSettingsHandlerTest, PlatformBrightness) {
       &called);
   fl_settings_emit_changed(settings);
   EXPECT_TRUE(called);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
-TEST(FlSettingsHandlerTest, TextScaleFactor) {
-  ::testing::NiceMock<flutter::testing::MockSettings> settings;
-
-  g_autoptr(FlMockBinaryMessenger) messenger = fl_mock_binary_messenger_new();
-  g_autoptr(FlEngine) engine =
-      fl_engine_new_with_binary_messenger(FL_BINARY_MESSENGER(messenger));
-  g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
-
+TEST_F(FlSettingsHandlerTest, TextScaleFactor) {
   EXPECT_CALL(settings, fl_settings_get_text_scaling_factor(
                             ::testing::Eq<FlSettings*>(settings)))
       .WillOnce(::testing::Return(1.0))
@@ -180,19 +177,12 @@ TEST(FlSettingsHandlerTest, TextScaleFactor) {
       &called);
   fl_settings_emit_changed(settings);
   EXPECT_TRUE(called);
-
-  fl_binary_messenger_shutdown(FL_BINARY_MESSENGER(messenger));
 }
 
 // MOCK_ENGINE_PROC is leaky by design
 // NOLINTBEGIN(clang-analyzer-core.StackAddressEscape)
-TEST(FlSettingsHandlerTest, AccessibilityFeatures) {
-  g_autoptr(FlDartProject) project = fl_dart_project_new();
-  g_autoptr(FlEngine) engine = fl_engine_new(project);
-
-  g_autoptr(GError) error = nullptr;
-  EXPECT_TRUE(fl_engine_start(engine, &error));
-  EXPECT_EQ(error, nullptr);
+TEST_F(FlSettingsHandlerTest, AccessibilityFeatures) {
+  StartEngine();
 
   std::vector<FlutterAccessibilityFeature> calls;
   fl_engine_get_embedder_api(engine)->UpdateAccessibilityFeatures =
@@ -202,10 +192,6 @@ TEST(FlSettingsHandlerTest, AccessibilityFeatures) {
             calls.push_back(features);
             return kSuccess;
           }));
-
-  g_autoptr(FlSettingsHandler) handler = fl_settings_handler_new(engine);
-
-  ::testing::NiceMock<flutter::testing::MockSettings> settings;
 
   EXPECT_CALL(settings, fl_settings_get_enable_animations(
                             ::testing::Eq<FlSettings*>(settings)))

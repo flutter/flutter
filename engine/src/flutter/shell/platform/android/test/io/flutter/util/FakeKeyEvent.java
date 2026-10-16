@@ -26,6 +26,19 @@ public class FakeKeyEvent extends KeyEvent {
     this.character = character;
   }
 
+  public FakeKeyEvent(
+      int action,
+      int scancode,
+      int code,
+      int repeat,
+      char character,
+      int metaState,
+      int deviceId,
+      int source) {
+    super(0, 0, action, code, repeat, metaState, deviceId, scancode, 0, source);
+    this.character = character;
+  }
+
   private char character = 0;
 
   public final int getUnicodeChar() {

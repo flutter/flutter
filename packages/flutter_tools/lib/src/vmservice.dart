@@ -44,14 +44,18 @@ const kFlutterMemoryInfoServiceName = 'flutterMemoryInfo';
 /// The error response code from an unrecoverable compilation failure.
 const kIsolateReloadBarred = 1005;
 
+/// Used to build RegExp instances which can detect the VM service message.
+final kVMServiceMessageRegExp = RegExp(
+  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
+);
+
 /// Override `WebSocketConnector` in [context] to use a different constructor
 /// for [io.WebSocket]s (used by tests).
-typedef WebSocketConnector =
-    Future<io.WebSocket> Function(
-      String url, {
-      io.CompressionOptions compression,
-      required Logger logger,
-    });
+typedef WebSocketConnector = Future<io.WebSocket> Function(
+  String url, {
+  io.CompressionOptions compression,
+  required Logger logger,
+});
 
 typedef PrintStructuredErrorLogMethod = void Function(vm_service.Event);
 
@@ -80,20 +84,19 @@ typedef ReloadSources = Future<void> Function(String isolateId, {bool force, boo
 
 typedef Restart = Future<void> Function({bool pause});
 
-typedef CompileExpression =
-    Future<String> Function(
-      String isolateId,
-      String expression,
-      List<String> definitions,
-      List<String> definitionTypes,
-      List<String> typeDefinitions,
-      List<String> typeBounds,
-      List<String> typeDefaults,
-      String libraryUri,
-      String? klass,
-      String? method,
-      bool isStatic,
-    );
+typedef CompileExpression = Future<String> Function(
+  String isolateId,
+  String expression,
+  List<String> definitions,
+  List<String> definitionTypes,
+  List<String> typeDefinitions,
+  List<String> typeBounds,
+  List<String> typeDefaults,
+  String libraryUri,
+  String? klass,
+  String? method,
+  bool isStatic,
+);
 
 Future<io.WebSocket> _defaultOpenChannel(
   String url, {
@@ -148,9 +151,7 @@ Future<io.WebSocket> _defaultOpenChannel(
     attempts += 1;
     try {
       socket = await constructor(url, compression: compression, logger: logger);
-    } on io.WebSocketException catch (e) {
-      await handleError(e);
-    } on io.SocketException catch (e) {
+    } on io.IOException catch (e) {
       await handleError(e);
     }
   }
@@ -159,18 +160,17 @@ Future<io.WebSocket> _defaultOpenChannel(
 
 /// Override `VMServiceConnector` in [context] to return a different
 /// [vm_service.VmService] from [connectToVmService] (used by tests).
-typedef VMServiceConnector =
-    Future<FlutterVmService> Function(
-      Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression,
-      Device? device,
-      required Logger logger,
-    });
+typedef VMServiceConnector = Future<FlutterVmService> Function(
+  Uri httpUri, {
+  ReloadSources? reloadSources,
+  Restart? restart,
+  CompileExpression? compileExpression,
+  FlutterProject? flutterProject,
+  PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+  io.CompressionOptions compression,
+  Device? device,
+  required Logger logger,
+});
 
 /// Set up the VM Service client by attaching services for each of the provided
 /// callbacks.
@@ -377,11 +377,54 @@ Future<vm_service.VmService> createVmServiceDelegate(
     compression: compression,
     logger: logger,
   );
+  // Guard against unhandled socket errors on the WebSocket's `done` future.
+  // When a socket reset or low-level connection reset occurs, `channel.done`
+  // can complete with an unhandled SocketException or WebSocketException.
+  unawaited(
+    channel.done.handleError((Object error, StackTrace stackTrace) {
+      logger.printTrace('VM service WebSocket done error: $error\n$stackTrace');
+    }),
+  );
+  // Guard the incoming stream from raising unhandled socket errors into the Zone.
+  // vm_service.VmService's inStream.listen does not provide an onError callback,
+  // so any stream errors (such as SocketException on connection reset) must be handled here.
+  final Stream<Object?> inStream = channel.handleError((Object error, StackTrace stackTrace) {
+    logger.printTrace('VM service WebSocket error: $error\n$stackTrace');
+  });
+  void handleWriteError(Object error, StackTrace stackTrace) {
+    logger.printTrace('Failed to send VM service message: $error\n$stackTrace');
+    try {
+      unawaited(channel.close().handleError((Object _, StackTrace _) {}));
+    } on Exception {
+      // Ignore errors while closing a failed channel.
+    } on StateError {
+      // Ignore errors while closing a failed channel.
+    }
+  }
+
   return vm_service.VmService(
-    channel,
-    channel.add,
+    inStream,
+    (String message) {
+      try {
+        channel.add(message);
+      } on Exception catch (error, stackTrace) {
+        handleWriteError(error, stackTrace);
+      } on StateError catch (error, stackTrace) {
+        handleWriteError(error, stackTrace);
+      }
+    },
     disposeHandler: () async {
-      await channel.close();
+      void logCloseError(Object error, StackTrace stackTrace) {
+        logger.printTrace('Error closing VM service channel: $error\n$stackTrace');
+      }
+
+      try {
+        await channel.close();
+      } on Exception catch (error, stackTrace) {
+        logCloseError(error, stackTrace);
+      } on StateError catch (error, stackTrace) {
+        logCloseError(error, stackTrace);
+      }
     },
   );
 }
@@ -700,6 +743,24 @@ class FlutterVmService {
     );
   }
 
+  /// Reload the Flutter GPU shader library compiled from the shader bundle at
+  /// [assetPath].
+  ///
+  /// Invokes `ext.ui.gpu.reinitializeShaderLibrary`, which the engine registers
+  /// lazily on the first `ShaderLibrary.fromAsset` in debug mode and no-ops if
+  /// no library is registered at [assetPath]. Returns null when the extension is
+  /// not registered (no Flutter GPU shader library has been loaded yet).
+  Future<Map<String, Object?>?> flutterReinitializeShaderLibrary(
+    String assetPath, {
+    required String isolateId,
+  }) {
+    return invokeFlutterExtensionRpcRaw(
+      'ext.ui.gpu.reinitializeShaderLibrary',
+      isolateId: isolateId,
+      args: <String, Object?>{'assetKey': assetPath},
+    );
+  }
+
   /// Exit the application by calling [exit] from `dart:io`.
   ///
   /// This method is only supported by certain embedders. This is
@@ -772,8 +833,7 @@ class FlutterVmService {
     } on vm_service.RPCError catch (err) {
       // If an application is not using the framework or the VM service
       // disappears while handling a request, return null.
-      if (err.code == vm_service.RPCErrorKind.kMethodNotFound.code ||
-          err.isConnectionDisposedException) {
+      if (err.isServiceExtensionUnregisteredError || err.isConnectionDisposedException) {
         return null;
       }
       rethrow;
@@ -828,11 +888,20 @@ class FlutterVmService {
   /// Tell the provided flutter view that the font manifest has been updated
   /// and asset fonts should be reloaded.
   Future<void> reloadAssetFonts({required String isolateId, required String viewId}) async {
-    await callMethodWrapper(
-      kReloadAssetFonts,
-      isolateId: isolateId,
-      args: <String, Object?>{'viewId': viewId},
-    );
+    try {
+      await callMethodWrapper(
+        kReloadAssetFonts,
+        isolateId: isolateId,
+        args: <String, Object?>{'viewId': viewId},
+      );
+    } on vm_service.RPCError catch (e) {
+      if (e.code == vm_service.RPCErrorKind.kMethodNotFound.code) {
+        // Some platforms or embedders (like web) may not implement this VM
+        // service protocol method. Just ignore the error and return.
+        return;
+      }
+      rethrow;
+    }
   }
 
   /// Waits for a signal from the VM service that [extensionName] is registered.
@@ -1000,8 +1069,12 @@ enum Brightness {
 }
 
 /// Process a VM service log event into a string message.
+///
+/// Uses a permissive UTF-8 decoder because app-generated logs may contain
+/// invalid UTF-8 from external sources (Bluetooth devices, network APIs, etc.).
 String processVmServiceMessage(vm_service.Event event) {
-  final String message = utf8.decode(base64.decode(event.bytes!));
+  // Use permissive decoder for app logs that may have invalid UTF-8
+  final String message = utf8AllowMalformed.decode(base64.decode(event.bytes!));
   // Remove extra trailing newlines appended by the vm service.
   if (message.endsWith('\n')) {
     return message.substring(0, message.length - 1);
@@ -1014,4 +1087,13 @@ extension RPCErrorExtension on vm_service.RPCError {
       code == vm_service.RPCErrorKind.kServiceDisappeared.code ||
       code == vm_service.RPCErrorKind.kConnectionDisposed.code ||
       message.contains('Service connection disposed');
+
+  /// DWDS throws an internal error (-32603) when a service extension is called
+  /// but has not been registered yet, due to a null-assertion on the looked up method in JS.
+  /// On native platforms, this throws `kMethodNotFound` (-32601).
+  // TODO(kevmoo): Remove this work-around once https://github.com/dart-lang/sdk/issues/63424 is fixed.
+  bool get isServiceExtensionUnregisteredError =>
+      code == vm_service.RPCErrorKind.kMethodNotFound.code ||
+      (code == vm_service.RPCErrorKind.kInternalError.code &&
+          message.contains('Unexpected null value'));
 }

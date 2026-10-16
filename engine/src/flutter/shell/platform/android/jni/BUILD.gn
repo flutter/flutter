@@ -32,6 +32,14 @@ source_set("jni_mock") {
   deps = [ ":jni" ]
 }
 
+source_set("mock_jni_env") {
+  testonly = true
+
+  sources = [ "mock_jni_env.h" ]
+
+  public_configs = [ "//flutter:config" ]
+}
+
 test_fixtures("jni_fixtures") {
   fixtures = []
 }

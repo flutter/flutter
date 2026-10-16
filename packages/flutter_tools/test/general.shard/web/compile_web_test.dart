@@ -4,12 +4,13 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 import 'package:unified_analytics/unified_analytics.dart';
@@ -23,7 +24,6 @@ import '../../src/throwing_pub.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
-  late TestUsage testUsage;
   late FakeAnalytics fakeAnalytics;
   late BufferLogger logger;
   late FakeFlutterVersion flutterVersion;
@@ -31,7 +31,6 @@ void main() {
 
   setUp(() {
     fileSystem = MemoryFileSystem.test();
-    testUsage = TestUsage();
     logger = BufferLogger.test();
     flutterVersion = FakeFlutterVersion(frameworkVersion: '1.0.0', engineRevision: '9.8.7');
     fakeAnalytics = getInitializedFakeAnalyticsInstance(
@@ -79,6 +78,12 @@ environement:
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildTargets: const BuildTargetsImpl(),
+        cache: FakeCache(fileSystem: fileSystem),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        terminal: FakeTerminal(),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -105,8 +110,7 @@ environement:
           Event.flutterBuildInfo(
             label: 'web-compile',
             buildType: 'web',
-            settings:
-                'dryRun: false; optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
+            settings: 'dryRun: false; optimizationLevel: 0; web-renderer: skwasm,canvaskit; web-target: wasm,js;',
           ),
         ]),
       );
@@ -147,13 +151,19 @@ environement:
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildTargets: const BuildTargetsImpl(),
+        cache: FakeCache(fileSystem: fileSystem),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        terminal: FakeTerminal(),
       );
       await webBuilder.buildWeb(
         flutterProject,
         'target',
         BuildInfo.debug,
         ServiceWorkerStrategy.offlineFirst,
-        compilerConfigs: <WebCompilerConfig>[],
+        compilerConfigs: const <WebCompilerConfig>[],
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -192,13 +202,19 @@ environement:
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildTargets: const BuildTargetsImpl(),
+        cache: FakeCache(fileSystem: fileSystem),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        terminal: FakeTerminal(),
       );
       await webBuilder.buildWeb(
         flutterProject,
         'target',
         BuildInfo.debug,
-        null, // serviceWorkerStrategy is omitted
-        compilerConfigs: <WebCompilerConfig>[],
+        null,
+        compilerConfigs: const <WebCompilerConfig>[],
       );
 
       expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -234,6 +250,12 @@ environement:
         flutterVersion: flutterVersion,
         fileSystem: fileSystem,
         analytics: fakeAnalytics,
+        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildTargets: const BuildTargetsImpl(),
+        cache: FakeCache(fileSystem: fileSystem),
+        config: FakeConfig(),
+        platform: FakePlatform(),
+        terminal: FakeTerminal(),
       );
       await expectLater(
         () async => webBuilder.buildWeb(
@@ -255,7 +277,6 @@ environement:
         logger.errorText,
         contains('Target hello failed: FormatException: illegal character in input string'),
       );
-      expect(testUsage.timings, isEmpty);
       expect(fakeAnalytics.sentEvents, isEmpty);
     },
     overrides: <Type, Generator>{

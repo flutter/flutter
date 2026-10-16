@@ -404,9 +404,9 @@ def invoke_swift_compiler(args, extras_args, build_cache_dir, output_file_map):
       ensure_directory(os.path.join(build_cache_dir, 'PrecompiledHeaders')),
   ]
 
-  # Handle optional -bridge-header flag.
-  if args.bridge_header:
-    swiftc_args.extend(('-import-objc-header', args.bridge_header))
+  # Handle optional -import-objc-header flag.
+  if args.import_objc_header:
+    swiftc_args.extend(('-import-objc-header', args.import_objc_header))
 
   # Handle swift const values extraction.
   swiftc_args.extend(['-emit-const-values'])
@@ -551,7 +551,7 @@ def main(args):
   parser = argparse.ArgumentParser(allow_abbrev=False, add_help=False)
 
   # Required arguments.
-  parser.add_argument('--module-name',
+  parser.add_argument('-module-name',
                       required=True,
                       help='name of the Swift module')
 
@@ -571,7 +571,7 @@ def main(args):
                       required=True,
                       help='path to the generated header file')
 
-  parser.add_argument('--bridge-header',
+  parser.add_argument('-import-objc-header',
                       required=True,
                       help='path to the Objective-C bridge header file')
 
@@ -605,11 +605,10 @@ def main(args):
                       action='store_true',
                       help='enable whole module optimisation')
 
-  # Required arguments (forwarded to the Swift compiler).
   parser.add_argument('-target',
                       required=True,
                       dest='target_triple',
-                      help='generate code for the given target')
+                      help='target triple (e.g. "arm64-apple-ios14.0")')
 
   parser.add_argument('-sdk',
                       required=True,
@@ -656,6 +655,7 @@ def main(args):
                       help='Swift source files to compile')
 
   parsed, extras = parser.parse_known_args(args)
+
   compile_module(parsed, extras, build_signature(os.environ, args))
 
 

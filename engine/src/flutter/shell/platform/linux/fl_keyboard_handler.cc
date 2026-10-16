@@ -4,8 +4,8 @@
 
 #include "flutter/shell/platform/linux/fl_keyboard_handler.h"
 
+#include "flutter/shell/platform/linux/fl_key_mapping.h"
 #include "flutter/shell/platform/linux/fl_keyboard_channel.h"
-#include "flutter/shell/platform/linux/key_mapping.h"
 
 struct _FlKeyboardHandler {
   GObject parent_instance;

@@ -2,17 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <vector>
+
 #include "flutter/impeller/playground/playground_test.h"
 #include "flutter/impeller/renderer/backend/gles/context_gles.h"
 #include "flutter/impeller/renderer/backend/gles/texture_gles.h"
 #include "flutter/testing/testing.h"
 #include "gtest/gtest.h"
 #include "impeller/base/validation.h"
+#include "impeller/core/buffer_view.h"
 #include "impeller/core/formats.h"
+#include "impeller/core/range.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/renderer/backend/gles/handle_gles.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 #include "impeller/renderer/backend/gles/test/mock_gles.h"
+#include "impeller/renderer/blit_pass.h"
+#include "impeller/renderer/command_buffer.h"
+#include "impeller/renderer/command_queue.h"
 
 namespace impeller::testing {
 
@@ -67,6 +74,38 @@ TEST_P(TextureGLESTest, CanSetSyncFence) {
   ASSERT_FALSE(sync_fence.has_value());
 }
 
+TEST_P(TextureGLESTest, TextureDtorDeletesFence) {
+  ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
+  if (!context_gles.GetReactor()
+           ->GetProcTable()
+           .GetDescription()
+           ->GetGlVersion()
+           .IsAtLeast(Version{3, 0, 0})) {
+    GTEST_SKIP() << "GL Version too low to test sync fence.";
+  }
+
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kDevicePrivate;
+  desc.size = {100, 100};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(!!texture);
+
+  HandleGLES fence =
+      context_gles.GetReactor()->CreateHandle(HandleType::kFence);
+  bool fence_collected = false;
+  context_gles.GetReactor()->RegisterCleanupCallback(
+      fence, [&]() { fence_collected = true; });
+  TextureGLES::Cast(*texture).SetFence(fence);
+
+  texture.reset();
+  ASSERT_TRUE(context_gles.GetReactor()->AddOperation(
+      [](const ReactorGLES& reactor) {}));
+  ASSERT_TRUE(context_gles.GetReactor()->React());
+  EXPECT_TRUE(fence_collected);
+}
+
 TEST_P(TextureGLESTest, Binds2DTexture) {
   TextureDescriptor desc;
   desc.storage_mode = StorageMode::kDevicePrivate;
@@ -114,6 +153,62 @@ TEST_P(TextureGLESTest, Leak) {
   ScopedValidationDisable disable_validation;
   handle = TextureGLES::Cast(*texture).GetGLHandle();
   EXPECT_FALSE(handle.has_value());
+}
+
+TEST_P(TextureGLESTest, CanCreateAndUpload2DArrayTexture) {
+  ContextGLES& context_gles = ContextGLES::Cast(*GetContext());
+  if (!context_gles.GetReactor()
+           ->GetProcTable()
+           .GetCapabilities()
+           ->SupportsTextureArrays()) {
+    GTEST_SKIP() << "2D array textures are not supported on this context.";
+  }
+
+  // More than 6 layers, to cover slices beyond the cubemap face range.
+  TextureDescriptor desc;
+  desc.storage_mode = StorageMode::kHostVisible;
+  desc.size = {2, 2};
+  desc.format = PixelFormat::kR8G8B8A8UNormInt;
+  desc.type = TextureType::kTexture2DArray;
+  desc.array_layer_count = 8;
+  desc.mip_count = 1;
+
+  auto texture = GetContext()->GetResourceAllocator()->CreateTexture(desc);
+  ASSERT_TRUE(texture);
+  EXPECT_EQ(static_cast<int>(texture->GetTextureDescriptor().array_layer_count),
+            8);
+  EXPECT_TRUE(texture->IsSliceValid(7));
+  EXPECT_FALSE(texture->IsSliceValid(8));
+
+  // Every layer can be uploaded.
+  std::vector<uint8_t> layer(2u * 2u * 4u, 0xFF);
+  for (size_t slice = 0; slice < static_cast<size_t>(desc.array_layer_count);
+       ++slice) {
+    EXPECT_TRUE(texture->SetContents(layer.data(), layer.size(), slice));
+  }
+  EXPECT_TRUE(context_gles.GetReactor()->React());
+
+  // Every layer can also be uploaded through the blit path.
+  auto staging = GetContext()->GetResourceAllocator()->CreateBufferWithCopy(
+      layer.data(), layer.size());
+  ASSERT_TRUE(staging);
+  auto command_buffer = GetContext()->CreateCommandBuffer();
+  ASSERT_TRUE(command_buffer);
+  auto blit_pass = command_buffer->CreateBlitPass();
+  ASSERT_TRUE(blit_pass);
+  for (size_t slice = 0; slice < static_cast<size_t>(desc.array_layer_count);
+       ++slice) {
+    EXPECT_TRUE(blit_pass->AddCopy(BufferView(staging, Range(0, layer.size())),
+                                   texture, std::nullopt,
+                                   /*label=*/"ArrayLayerUpload",
+                                   /*mip_level=*/0, slice));
+  }
+  EXPECT_TRUE(blit_pass->EncodeCommands());
+  EXPECT_TRUE(GetContext()
+                  ->GetCommandQueue()
+                  ->Submit({std::move(command_buffer)})
+                  .ok());
+  EXPECT_TRUE(context_gles.GetReactor()->React());
 }
 
 TEST_P(TextureGLESTest, CreatingAndBindingEmptyTexturesDoesNotCrash) {

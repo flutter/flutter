@@ -36,8 +36,6 @@ void SurfaceTextureExternalTextureGLImpeller::ProcessFrame(
     // The contents will be initialized later in the call to `Attach` instead of
     // by Impeller.
     texture_->MarkContentsInitialized();
-    texture_->SetCoordinateSystem(
-        impeller::TextureCoordinateSystem::kUploadFromHost);
     auto maybe_handle = texture_->GetGLHandle();
     if (!maybe_handle.has_value()) {
       FML_LOG(ERROR) << "Could not get GL handle from impeller::TextureGLES!";

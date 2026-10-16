@@ -2134,6 +2134,40 @@ void main() {
     expect(closed, equals(<Tag>[Tag.a]));
   });
 
+  testWidgets('Ancestor scroll listener is removed on dispose', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/187853.
+    final scrollController = ScrollController();
+    addTearDown(scrollController.dispose);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: RawMenuAnchor(
+            controller: MenuController(),
+            overlayBuilder: (context, info) => const SizedBox(),
+          ),
+        ),
+      ),
+    );
+
+    final ValueNotifier<bool> notifier = scrollController.position.isScrollingNotifier;
+
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isTrue);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SingleChildScrollView(controller: scrollController, child: const SizedBox()),
+      ),
+    );
+
+    // ignore: invalid_use_of_protected_member
+    expect(notifier.hasListeners, isFalse);
+  });
+
   // Copied from [MenuAnchor] tests.
   //
   // Regression test for https://github.com/flutter/flutter/issues/157606.
@@ -2933,7 +2967,7 @@ void main() {
       await tester.pump();
 
       expect(find.text(Tag.a.a.a.a.text), findsOneWidget);
-      expect(closeRequests, <Tag>[]);
+      expect(closeRequests, <Tag>[Tag.a.a, Tag.a.a.a]);
 
       closeRequests.clear();
 
@@ -3260,14 +3294,13 @@ abstract class Tag {
 
 @immutable
 class NestedTag extends Tag {
-  const NestedTag(String name, {Tag? prefix, this.level = 0})
+  const NestedTag(String name, {this._prefix, this.level = 0})
     : assert(
         // Limit the nesting level to prevent stack overflow.
         level < 9,
         'NestedTag.level must be less than 9 (was $level).',
       ),
-      _name = name,
-      _prefix = prefix;
+      _name = name;
 
   final String _name;
   final Tag? _prefix;
@@ -3307,10 +3340,9 @@ class Button extends StatefulWidget {
     this.focusNode,
     this.autofocus = false,
     this.onFocusChange,
-    String? focusNodeLabel,
+    this._focusNodeLabel,
     BoxConstraints? constraints,
-  }) : _focusNodeLabel = focusNodeLabel,
-       constraints = constraints ?? const BoxConstraints.tightFor(width: 225, height: 32);
+  }) : constraints = constraints ?? const BoxConstraints.tightFor(width: 225, height: 32);
 
   factory Button.text(
     String text, {

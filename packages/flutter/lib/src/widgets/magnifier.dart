@@ -31,12 +31,11 @@ import 'overlay.dart';
 /// The `magnifierInfo` parameter is updated with new [MagnifierInfo] instances
 /// during the lifetime of the built magnifier, e.g. as the user moves their
 /// finger around the text field.
-typedef MagnifierBuilder =
-    Widget? Function(
-      BuildContext context,
-      MagnifierController controller,
-      ValueNotifier<MagnifierInfo> magnifierInfo,
-    );
+typedef MagnifierBuilder = Widget? Function(
+  BuildContext context,
+  MagnifierController controller,
+  ValueNotifier<MagnifierInfo> magnifierInfo,
+);
 
 /// A data class that contains the geometry information of text layouts
 /// and selection gestures, used to position magnifiers.
@@ -106,12 +105,12 @@ class MagnifierInfo {
 class TextMagnifierConfiguration {
   /// Constructs a [TextMagnifierConfiguration] from parts.
   ///
-  /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
+  /// If [_magnifierBuilder] is null, a default [MagnifierBuilder] will be used
   /// that does not build a magnifier.
   const TextMagnifierConfiguration({
-    MagnifierBuilder? magnifierBuilder,
+    this._magnifierBuilder,
     this.shouldDisplayHandlesInMagnifier = true,
-  }) : _magnifierBuilder = magnifierBuilder;
+  });
 
   /// The builder callback that creates the widget that renders the magnifier.
   MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? _none;
@@ -231,6 +230,7 @@ class MagnifierController {
   /// If the magnifier already exists (i.e. [overlayEntry] != null), then [show]
   /// will replace the old overlay without playing an exit animation. Consider
   /// awaiting [hide] first, to animate from the old magnifier to the new one.
+  @awaitNotRequired
   Future<void> show({
     required BuildContext context,
     required WidgetBuilder builder,
@@ -275,6 +275,7 @@ class MagnifierController {
   ///
   ///  * [removeFromOverlay] which removes the [OverlayEntry] from the [Overlay]
   ///    synchronously.
+  @awaitNotRequired
   Future<void> hide({bool removeFromOverlay = true}) async {
     if (overlayEntry == null) {
       return;
@@ -426,6 +427,8 @@ class MagnifierDecoration {
 }
 
 /// A common base class for magnifiers.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=YBRkVCRP1Gw}
 ///
 /// {@tool dartpad}
 /// This sample demonstrates what a magnifier is, and how it can be used.

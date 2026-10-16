@@ -24,7 +24,7 @@ static const constexpr DescriptorPoolSize kDefaultBindingSize =
         .texture_bindings = 256u,  // Texture Bindings
         .storage_bindings = 32,
         .subpass_bindings = 4u  // Subpass Bindings
-    };
+};
 
 DescriptorPoolVK::DescriptorPoolVK(std::weak_ptr<const ContextVK> context)
     : context_(std::move(context)) {}
@@ -80,7 +80,9 @@ fml::StatusOr<vk::DescriptorSet> DescriptorPoolVK::AllocateDescriptorSets(
 
   vk::DescriptorSet set;
   auto result = context_vk.GetDevice().allocateDescriptorSets(&set_info, &set);
-  if (result == vk::Result::eErrorOutOfPoolMemory) {
+  if (result == vk::Result::eErrorOutOfPoolMemory ||
+      // FragmentedPool == OutOfMemory AND most likely due to fragmentation
+      result == vk::Result::eErrorFragmentedPool) {
     // If the pool ran out of memory, we need to create a new pool.
     CreateNewPool(context_vk);
     set_info.setDescriptorPool(pools_.back().get());

@@ -407,7 +407,10 @@ fml::StatusOr<vk::UniquePipeline> MakePipeline(
   for (const ShaderStageBufferLayout& layout : stage_buffer_layouts) {
     vk::VertexInputBindingDescription binding_description;
     binding_description.setBinding(layout.binding);
-    binding_description.setInputRate(vk::VertexInputRate::eVertex);
+    binding_description.setInputRate(layout.input_rate ==
+                                             VertexInputRate::kInstance
+                                         ? vk::VertexInputRate::eInstance
+                                         : vk::VertexInputRate::eVertex);
     binding_description.setStride(layout.stride);
     buffer_descs.push_back(binding_description);
   }

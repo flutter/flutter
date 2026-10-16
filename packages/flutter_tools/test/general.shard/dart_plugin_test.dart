@@ -96,61 +96,55 @@ void main() {
         );
       });
 
-      testWithoutContext(
-        'selects uncontested implementation from direct dependency with additional native implementation',
-        () async {
-          final directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
-          final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
-            <Plugin>[
-              // Following plugin is native only and is not resolved as a dart plugin:
-              Plugin.fromYaml(
-                'url_launcher_linux',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{
-                      'package': 'com.example.url_launcher',
-                      'pluginClass': 'UrlLauncherPluginLinux',
-                    },
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-              Plugin.fromYaml(
-                'url_launcher_macos',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'implements': 'url_launcher',
-                  'platforms': <String, dynamic>{
-                    'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginMacOS'},
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-            ],
-            selectDartPluginsOnly: true,
-          );
-
-          expect(resolutions.length, equals(1));
-          expect(
-            resolutions[0].toMap(),
-            equals(<String, String>{
-              'pluginName': 'url_launcher_macos',
-              'dartClass': 'UrlLauncherPluginMacOS',
-              'platform': 'macos',
-              'dartFileName': 'url_launcher_macos.dart',
+      testWithoutContext('selects uncontested implementation from direct dependency with additional native implementation', () async {
+        final directDependencies = <String>{'url_launcher_linux', 'url_launcher_macos'};
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(<Plugin>[
+          // Following plugin is native only and is not resolved as a dart plugin:
+          Plugin.fromYaml(
+            'url_launcher_linux',
+            '',
+            YamlMap.wrap(<String, dynamic>{
+              'platforms': <String, dynamic>{
+                'linux': <String, dynamic>{
+                  'package': 'com.example.url_launcher',
+                  'pluginClass': 'UrlLauncherPluginLinux',
+                },
+              },
             }),
-          );
-        },
-      );
+            null,
+            <String>[],
+            fileSystem: fs,
+            isDevDependency: false,
+            appDependencies: directDependencies,
+          ),
+          Plugin.fromYaml(
+            'url_launcher_macos',
+            '',
+            YamlMap.wrap(<String, dynamic>{
+              'implements': 'url_launcher',
+              'platforms': <String, dynamic>{
+                'macos': <String, dynamic>{'dartPluginClass': 'UrlLauncherPluginMacOS'},
+              },
+            }),
+            null,
+            <String>[],
+            fileSystem: fs,
+            isDevDependency: false,
+            appDependencies: directDependencies,
+          ),
+        ], selectDartPluginsOnly: true);
+
+        expect(resolutions.length, equals(1));
+        expect(
+          resolutions[0].toMap(),
+          equals(<String, String>{
+            'pluginName': 'url_launcher_macos',
+            'dartClass': 'UrlLauncherPluginMacOS',
+            'platform': 'macos',
+            'dartFileName': 'url_launcher_macos.dart',
+          }),
+        );
+      });
 
       testWithoutContext('selects uncontested implementation from transitive dependency', () async {
         final directDependencies = <String>{'url_launcher_macos'};
@@ -812,59 +806,56 @@ void main() {
         },
       );
 
-      testUsingContext(
-        'selects default Dart implementation without warning, while choosing plugin selection for nativeOrDart',
-        () async {
-          final directDependencies = <String>{'url_launcher'};
-          final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
-            <Plugin>[
-              Plugin.fromYaml(
-                'url_launcher',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{'default_package': 'url_launcher_linux'},
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-              Plugin.fromYaml(
-                'url_launcher_linux',
-                '',
-                YamlMap.wrap(<String, dynamic>{
-                  'implements': 'url_launcher',
-                  'platforms': <String, dynamic>{
-                    'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherLinux'},
-                  },
-                }),
-                null,
-                <String>[],
-                fileSystem: fs,
-                isDevDependency: false,
-                appDependencies: directDependencies,
-              ),
-            ],
-            // Using nativeOrDart plugin selection.
-            selectDartPluginsOnly: false,
-          );
-          expect(resolutions.length, equals(1));
-          // Test avoiding trigger a warning for default plugins, while Dart and native plugins selection is enabled.
-          expect(testLogger.warningText, '');
-          expect(
-            resolutions[0].toMap(),
-            equals(<String, String>{
-              'pluginName': 'url_launcher_linux',
-              'dartClass': 'UrlLauncherLinux',
-              'platform': 'linux',
-              'dartFileName': 'url_launcher_linux.dart',
-            }),
-          );
-        },
-      );
+      testUsingContext('selects default Dart implementation without warning, while choosing plugin selection for nativeOrDart', () async {
+        final directDependencies = <String>{'url_launcher'};
+        final List<PluginInterfaceResolution> resolutions = resolvePlatformImplementation(
+          <Plugin>[
+            Plugin.fromYaml(
+              'url_launcher',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'default_package': 'url_launcher_linux'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+            Plugin.fromYaml(
+              'url_launcher_linux',
+              '',
+              YamlMap.wrap(<String, dynamic>{
+                'implements': 'url_launcher',
+                'platforms': <String, dynamic>{
+                  'linux': <String, dynamic>{'dartPluginClass': 'UrlLauncherLinux'},
+                },
+              }),
+              null,
+              <String>[],
+              fileSystem: fs,
+              isDevDependency: false,
+              appDependencies: directDependencies,
+            ),
+          ],
+          // Using nativeOrDart plugin selection.
+          selectDartPluginsOnly: false,
+        );
+        expect(resolutions.length, equals(1));
+        // Test avoiding trigger a warning for default plugins, while Dart and native plugins selection is enabled.
+        expect(testLogger.warningText, '');
+        expect(
+          resolutions[0].toMap(),
+          equals(<String, String>{
+            'pluginName': 'url_launcher_linux',
+            'dartClass': 'UrlLauncherLinux',
+            'platform': 'linux',
+            'dartFileName': 'url_launcher_linux.dart',
+          }),
+        );
+      });
 
       testUsingContext(
         'provides warning when a plugin references a default plugin which does not exist',
@@ -1156,12 +1147,7 @@ void main() {
             logger: globals.logger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(
-            flutterProject,
-            packageConfig,
-            'package:app/main.dart',
-            mainFile,
-          );
+          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
           expect(
             flutterProject.dartPluginRegistrant.readAsStringSync(),
             '//\n'
@@ -1281,12 +1267,7 @@ void main() {
             throwOnError: false,
           );
           await expectLater(
-            generateMainDartWithPluginRegistrant(
-              flutterProject,
-              packageConfig,
-              'package:app/main.dart',
-              mainFile,
-            ),
+            generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile),
             throwsToolExit(
               message:
                   'Invalid plugin specification url_launcher_macos.\n'
@@ -1324,12 +1305,7 @@ void main() {
             throwOnError: false,
           );
           await expectLater(
-            generateMainDartWithPluginRegistrant(
-              flutterProject,
-              packageConfig,
-              'package:app/main.dart',
-              mainFile,
-            ),
+            generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile),
             throwsToolExit(
               message:
                   'Invalid plugin specification url_launcher_macos.\n'
@@ -1361,12 +1337,7 @@ void main() {
             logger: globals.logger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(
-            flutterProject,
-            packageConfig,
-            'package:app/main.dart',
-            mainFile,
-          );
+          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
           expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
         },
         overrides: <Type, Generator>{
@@ -1401,23 +1372,13 @@ void main() {
             logger: globals.logger,
             throwOnError: false,
           );
-          await generateMainDartWithPluginRegistrant(
-            flutterProject,
-            packageConfig,
-            'package:app/main.dart',
-            mainFile,
-          );
+          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
           expect(flutterProject.dartPluginRegistrant.existsSync(), isTrue);
 
           // No plugins.
           createFakeDartPlugins(flutterProject, flutterManifest, fs, <String, String>{});
 
-          await generateMainDartWithPluginRegistrant(
-            flutterProject,
-            packageConfig,
-            'package:app/main.dart',
-            mainFile,
-          );
+          await generateMainDartWithPluginRegistrant(flutterProject, packageConfig, mainFile);
           expect(flutterProject.dartPluginRegistrant.existsSync(), isFalse);
         },
         overrides: <Type, Generator>{

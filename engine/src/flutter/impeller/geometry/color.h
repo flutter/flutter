@@ -220,6 +220,14 @@ struct Color {
     return {red / alpha, green / alpha, blue / alpha, alpha};
   }
 
+  /// @brief Returns true if any color channel lies outside the standard
+  ///        [0.0, 1.0] sRGB gamut.
+  constexpr bool IsWideGamut() const {
+    return red < -kEhCloseEnough || red > 1.0f + kEhCloseEnough ||
+           green < -kEhCloseEnough || green > 1.0f + kEhCloseEnough ||
+           blue < -kEhCloseEnough || blue > 1.0f + kEhCloseEnough;
+  }
+
   /**
    * @brief Return a color that is linearly interpolated between colors a
    *        and b, according to the value of t.
@@ -259,6 +267,11 @@ struct Color {
   inline uint32_t ToARGB() const {
     std::array<uint8_t, 4> result = ToR8G8B8A8();
     return result[3] << 24 | result[0] << 16 | result[1] << 8 | result[2];
+  }
+
+  template <typename H>
+  friend H AbslHashValue(H h, const Color& c) {
+    return H::combine(std::move(h), c.ToARGB());
   }
 
   static constexpr Color White() { return {1.0f, 1.0f, 1.0f, 1.0f}; }
@@ -915,8 +928,6 @@ constexpr inline Color operator/(T value, const Color& c) {
   auto v = static_cast<Scalar>(value);
   return {v / c.red, v / c.green, v / c.blue, v / c.alpha};
 }
-
-std::string ColorToString(const Color& color);
 
 static_assert(sizeof(Color) == 4 * sizeof(Scalar));
 

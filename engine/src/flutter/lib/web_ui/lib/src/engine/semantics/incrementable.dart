@@ -20,9 +20,11 @@ import 'semantics.dart';
 /// events. This is to prevent the browser from taking over drag gestures. Drag
 /// gestures must be interpreted by the Flutter framework.
 class SemanticIncrementable extends SemanticRole {
-  SemanticIncrementable(SemanticsObject semanticsObject)
-    : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
-      super.blank(EngineSemanticsRole.incrementable, semanticsObject) {
+  SemanticIncrementable(
+    SemanticsObject semanticsObject, [
+    EngineSemanticsRole kind = EngineSemanticsRole.incrementable,
+  ]) : _focusManager = AccessibilityFocusManager(semanticsObject.owner),
+       super.blank(kind, semanticsObject) {
     // The following generic roles can coexist with incrementables. Generic focus
     // management is not used by this role because the root DOM element is not
     // the one being focused on, but the internal `<input>` element.
@@ -120,13 +122,26 @@ class SemanticIncrementable extends SemanticRole {
   void update() {
     super.update();
 
+    final String? ariaLabel = element.getAttribute('aria-label');
+    if (ariaLabel != null && ariaLabel.trim().isNotEmpty) {
+      _element.setAttribute('aria-label', ariaLabel);
+    } else {
+      _element.removeAttribute('aria-label');
+    }
+
     switch (EngineSemantics.instance.gestureMode) {
       case GestureMode.browserGestures:
         _enableBrowserGestureHandling();
-        _updateInputValues();
       case GestureMode.pointerEvents:
         _disableBrowserGestureHandling();
     }
+    // Always sync the input element's value attributes, even while the input
+    // is disabled in pointer-events mode. Otherwise, when semantics is first
+    // enabled by a pointer interaction (e.g. clicking the "Enable
+    // Accessibility" placeholder), the slider's initial update arrives while
+    // the gesture mode is `pointerEvents`.
+    // See https://github.com/flutter/flutter/issues/186472.
+    _updateInputValues();
     _focusManager.changeFocus(semanticsObject.hasFocus);
   }
 
@@ -139,8 +154,6 @@ class SemanticIncrementable extends SemanticRole {
   }
 
   void _updateInputValues() {
-    assert(EngineSemantics.instance.gestureMode == GestureMode.browserGestures);
-
     final bool updateNeeded =
         _pendingResync ||
         semanticsObject.isValueDirty ||

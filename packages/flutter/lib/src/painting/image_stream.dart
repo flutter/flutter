@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// @docImport 'dart:ui';
-///
 /// @docImport 'package:flutter/widgets.dart';
 ///
 /// @docImport 'image_cache.dart';
@@ -172,7 +170,7 @@ class ImageInfo {
 @immutable
 class ImageStreamListener {
   /// Creates a new [ImageStreamListener].
-  const ImageStreamListener(this.onImage, {this.onChunk, this.onError});
+  const ImageStreamListener(this.onImage, {this.onChunk, this.onError, this.reportErrors = true});
 
   /// Callback for getting notified that an image is available.
   ///
@@ -215,11 +213,23 @@ class ImageStreamListener {
   /// If an image stream has no listeners that handled the error when the error
   /// was first encountered, then the error is reported using
   /// [FlutterError.reportError], with the [FlutterErrorDetails.silent] flag set
-  /// to true.
+  /// to true. This report is suppressed if a listener whose [reportErrors] is false has ever been
+  /// registered on the completer.
   final ImageErrorListener? onError;
 
+  /// Whether to report errors to [FlutterError.onError] after this listener
+  /// is removed from the [ImageStreamCompleter].
+  ///
+  /// Defaults to true. When false, errors that arrive after removal are
+  /// silently discarded. This is useful when [FlutterError.onError] is
+  /// configured to report errors to a server.
+  ///
+  /// The [Image] widget sets this to false when an [Image.errorBuilder] is
+  /// provided.
+  final bool reportErrors;
+
   @override
-  int get hashCode => Object.hash(onImage, onChunk, onError);
+  int get hashCode => Object.hash(onImage, onChunk, onError, reportErrors);
 
   @override
   bool operator ==(Object other) {
@@ -229,7 +239,8 @@ class ImageStreamListener {
     return other is ImageStreamListener &&
         other.onImage == onImage &&
         other.onChunk == onChunk &&
-        other.onError == onError;
+        other.onError == onError &&
+        other.reportErrors == reportErrors;
   }
 }
 
@@ -517,6 +528,13 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// that they are being called asynchronously.
   bool _addingInitialListeners = false;
 
+  /// Whether a listener with [ImageStreamListener.reportErrors] set to false
+  /// has ever been added.
+  ///
+  /// When true, [reportError] skips [FlutterError.reportError] for errors
+  /// that arrive after all listeners have been removed.
+  bool _hadErrorListener = false;
+
   /// Adds a listener callback that is called whenever a new concrete [ImageInfo]
   /// object is available or an error is reported. If a concrete image is
   /// already available, or if an error has been already reported, this object
@@ -533,6 +551,10 @@ abstract class ImageStreamCompleter with Diagnosticable {
   ///    automatically removed after first image load or error.
   void addListener(ImageStreamListener listener) {
     _checkDisposed();
+    // Track that a listener opted out of error reporting.
+    if (!listener.reportErrors) {
+      _hadErrorListener = true;
+    }
     _listeners.add(listener);
     if (_currentImage != null) {
       try {
@@ -754,7 +776,9 @@ abstract class ImageStreamCompleter with Diagnosticable {
   /// If no error listeners (listeners with an [ImageStreamListener.onError]
   /// specified) are attached, or if the handlers all rethrow the exception
   /// verbatim (with `throw exception`), a [FlutterError] will be reported using
-  /// [FlutterError.reportError].
+  /// [FlutterError.reportError]. This report is suppressed if
+  /// [ImageStreamListener] whose [ImageStreamListener.reportErrors] is false has ever been registered on
+  /// this completer.
   ///
   /// The `context` should be a string describing where the error was caught, in
   /// a form that will make sense in English when following the word "thrown",
@@ -824,6 +848,12 @@ abstract class ImageStreamCompleter with Diagnosticable {
       }
     }
     if (!handled) {
+      // If a listener with reportErrors=false was previously registered,
+      // the error was intended to be handled. Skip reporting to
+      // FlutterError.onError after the widget is disposed.
+      if (_hadErrorListener) {
+        return;
+      }
       FlutterError.reportError(_currentError!);
     }
   }
@@ -967,12 +997,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// (see [addListener]).
   MultiFrameImageStreamCompleter({
     required Future<ui.Codec> codec,
-    required double scale,
+    required this._scale,
     String? debugLabel,
     Stream<ImageChunkEvent>? chunkEvents,
     InformationCollector? informationCollector,
-  }) : _informationCollector = informationCollector,
-       _scale = scale {
+  }) : _informationCollector = informationCollector {
     this.debugLabel = debugLabel;
     codec.then<void>(
       _handleCodecReady,
@@ -1032,7 +1061,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     if (!hasListeners) {
       return;
     }
-    assert(_nextFrame != null);
+    // A listener can be re-added after this callback was scheduled (for
+    // example when TickerMode toggles during a route transition). That
+    // restarts decoding in addListener, which discards _nextFrame. The
+    // in-flight decode schedules a new callback when it completes.
+    if (_nextFrame == null) {
+      return;
+    }
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
       _emitFrame(
         ImageInfo(image: _nextFrame!.image.clone(), scale: _scale, debugLabel: debugLabel),

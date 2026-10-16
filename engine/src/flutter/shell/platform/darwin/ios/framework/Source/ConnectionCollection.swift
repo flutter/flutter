@@ -11,8 +11,8 @@ import Foundation
 /// This class is not thread-safe. All accesses should happen from the
 /// platform thread.
 @objc(FlutterConnectionCollection)
-public class ConnectionCollection: NSObject {
-  public typealias ConnectionID = Int64
+class ConnectionCollection: NSObject {
+  typealias ConnectionID = Int64
 
   // The connection ID of the most recently used connection, or 0 if none.
   private var counter: ConnectionID = 0
@@ -21,7 +21,7 @@ public class ConnectionCollection: NSObject {
   private var connections: [String: ConnectionID] = [:]
 
   /// Acquires a new connection for the specified channel.
-  @objc public func acquireConnection(forChannel channel: String) -> ConnectionID {
+  @objc func acquireConnection(forChannel channel: String) -> ConnectionID {
     counter += 1
     connections[channel] = counter
     return counter
@@ -31,7 +31,7 @@ public class ConnectionCollection: NSObject {
   ///
   /// Returns the name of the associated channel if successful, otherwise the
   /// empty string.
-  @objc public func cleanupConnection(withID connectionID: ConnectionID) -> String {
+  @objc func cleanupConnection(withID connectionID: ConnectionID) -> String {
     guard
       connectionID > 0,
       let entry = connections.first(where: { $0.value == connectionID })
@@ -42,7 +42,7 @@ public class ConnectionCollection: NSObject {
   }
 
   /// Creates an error connection from an error code.
-  @objc public static func makeErrorConnection(errorCode: Int64) -> ConnectionID {
+  @objc static func makeErrorConnection(errorCode: Int64) -> ConnectionID {
     return abs(errorCode)
   }
 }

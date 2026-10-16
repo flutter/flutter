@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:data_assets/data_assets.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/artifacts.dart';
@@ -38,7 +39,7 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+        kTargetPlatform: TargetPlatform.ios.getName(),
         kIosArchs: 'arm64',
         kSdkRoot: 'path/to/iPhoneOS.sdk',
       },
@@ -52,8 +53,8 @@ void main() {
       fileSystem.currentDirectory,
       defines: <String, String>{
         kBuildMode: BuildMode.profile.cliName,
-        kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android),
-        kAndroidArchs: AndroidArch.arm64_v8a.platformName,
+        kTargetPlatform: TargetPlatform.android.getName(),
+        kAndroidArchs: CpuArch.arm64.androidPlatformName,
       },
       inputs: <String, String>{},
       artifacts: artifacts,
@@ -65,23 +66,15 @@ void main() {
     androidEnvironment.buildDir.createSync(recursive: true);
   });
 
-  testUsingContext(
-    'no dependency on KernelSnapshot',
-    () async {
-      const target = BuildHooks();
-      expect(target.dependencies, isNot(isA<KernelSnapshot>()));
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+  testUsingContext('no dependency on KernelSnapshot', () async {
+    const target = BuildHooks();
+    expect(target.dependencies, isNot(isA<KernelSnapshot>()));
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
-  testUsingContext(
-    'NativeAssets throws error if missing target platform',
-    () async {
-      iosEnvironment.defines.remove(kTargetPlatform);
-      expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
-    },
-    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()},
-  );
+  testUsingContext('NativeAssets throws error if missing target platform', () async {
+    iosEnvironment.defines.remove(kTargetPlatform);
+    expect(const BuildHooks().build(iosEnvironment), throwsA(isA<MissingDefineException>()));
+  }, overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags()});
 
   testUsingContext('NativeAssets defaults to ios archs if missing', () async {
     writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
@@ -115,6 +108,29 @@ void main() {
     },
   );
 
+  testUsingContext(
+    'NativeAssets throws error if sdk root is unrecognized iOS SDK',
+    overrides: <Type, Generator>{FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true)},
+    () async {
+      writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+
+      final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+        packagesWithNativeAssetsResult: <String>['foo'],
+      );
+
+      iosEnvironment.defines[kSdkRoot] = 'path/to/XROS1.0.sdk';
+      expect(
+        BuildHooks(buildRunner: buildRunner).build(iosEnvironment),
+        throwsToolExit(
+          message:
+              'Unsupported iOS SDK root "path/to/XROS1.0.sdk". Expected an iPhoneOS or iPhoneSimulator SDK. '
+              "Flutter only supports building the iOS Runner for iOS; check the target's Base SDK "
+              '(SDKROOT) and Supported Destinations in Xcode.',
+        ),
+      );
+    },
+  );
+
   // The NativeAssets Target should _always_ be creating a yaml an d file.
   // The caching logic depends on this.
   for (final isNativeAssetsEnabled in <bool>[true, false]) {
@@ -140,9 +156,78 @@ void main() {
     );
   }
 
+  bool nativeAssetsLinkingEnabled(BuildMode buildMode) {
+    switch (buildMode) {
+      case BuildMode.debug:
+        return false;
+      case BuildMode.jitRelease:
+      case BuildMode.profile:
+      case BuildMode.release:
+        return true;
+    }
+  }
+
+  for (final buildMode in <BuildMode>[BuildMode.profile, BuildMode.debug]) {
+    final bool linkingEnabled = nativeAssetsLinkingEnabled(buildMode);
+    final testName = linkingEnabled ? 'enabled' : 'disabled';
+    testUsingContext(
+      'NativeAssets depfile filtering avoids circular cycles in Xcode when link hooks are $testName',
+      overrides: <Type, Generator>{
+        FileSystem: () => fileSystem,
+        ProcessManager: () => processManager,
+        FeatureFlags: () =>
+            TestFeatureFlags(isNativeAssetsEnabled: true, isDartDataAssetsEnabled: true),
+      },
+      () async {
+        writePackageConfigFiles(directory: iosEnvironment.projectDir, mainLibName: 'my_app');
+
+        // Force environment to use specified build mode!
+        iosEnvironment.defines[kBuildMode] = buildMode.cliName;
+
+        final String sourceAssetPath = iosEnvironment.fileSystem
+            .file('assets/translations/en.json')
+            .path;
+        iosEnvironment.fileSystem.file(sourceAssetPath).createSync(recursive: true);
+
+        final FlutterNativeAssetsBuildRunner buildRunner = FakeFlutterNativeAssetsBuildRunner(
+          packagesWithNativeAssetsResult: <String>['foo'],
+          buildResult: FakeFlutterNativeAssetsBuilderResult.fromAssets(
+            dependencies: <Uri>[Uri.file(sourceAssetPath)],
+            dataAssets: <DataAsset>[
+              DataAsset(file: Uri.file(sourceAssetPath), name: 'en.json', package: 'my_app'),
+            ],
+          ),
+          linkResult: linkingEnabled
+              ? FakeFlutterNativeAssetsBuilderResult.fromAssets(
+                  dependencies: <Uri>[Uri.file(sourceAssetPath)],
+                )
+              : const FakeFlutterNativeAssetsBuilderResult(),
+        );
+
+        final dartBuildForNative = BuildHooks(buildRunner: buildRunner);
+        await dartBuildForNative.build(iosEnvironment);
+
+        final dartLinkForNative = LinkHooks(buildRunner: buildRunner);
+        await dartLinkForNative.build(iosEnvironment);
+
+        final File depfileFile = iosEnvironment.buildDir.childFile(LinkHooks.depFilename);
+        expect(depfileFile, exists);
+
+        final String contents = depfileFile.readAsStringSync();
+        final List<String> colonSeparated = contents.split(': ');
+        expect(colonSeparated.length, 2);
+
+        final List<String> linkOutputs = _resolvedOutputs(dartLinkForNative, iosEnvironment);
+        // Verify that full source path resolved resolves to empty list after fix!
+        expect(linkOutputs, isNot(contains(sourceAssetPath)));
+      },
+    );
+  }
+
   testUsingContext(
     'NativeAssets with an asset',
     overrides: <Type, Generator>{
+      FeatureFlags: () => TestFeatureFlags(isNativeAssetsEnabled: true),
       ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
         // Create the framework dylib.
         FakeCommand(
@@ -330,6 +415,46 @@ void main() {
       },
     );
   }
+
+  testUsingContext(
+    'createFlutterNativeAssetsBuildRunner includes dev dependencies for release test targets',
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => processManager,
+    },
+    () async {
+      writePackageConfigFiles(directory: androidEnvironment.projectDir, mainLibName: 'my_app');
+      androidEnvironment.defines[kBuildMode] = BuildMode.release.cliName;
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join('lib', 'main.dart');
+      final FlutterNativeAssetsBuildRunner mainRunner = await createFlutterNativeAssetsBuildRunner(
+        androidEnvironment,
+      );
+      expect((mainRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies, isFalse);
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join(
+        'integration_test',
+        'app_test.dart',
+      );
+      final FlutterNativeAssetsBuildRunner integrationTestRunner =
+          await createFlutterNativeAssetsBuildRunner(androidEnvironment);
+      expect(
+        (integrationTestRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies,
+        isTrue,
+      );
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join('test_driver', 'app.dart');
+      final FlutterNativeAssetsBuildRunner driverRunner =
+          await createFlutterNativeAssetsBuildRunner(androidEnvironment);
+      expect((driverRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies, isTrue);
+
+      androidEnvironment.defines[kTargetFile] = fileSystem.path.join('test', 'app_test.dart');
+      final FlutterNativeAssetsBuildRunner testRunner = await createFlutterNativeAssetsBuildRunner(
+        androidEnvironment,
+      );
+      expect((testRunner as FlutterNativeAssetsBuildRunnerImpl).includeDevDependencies, isTrue);
+    },
+  );
 }
 
 List<String> _resolvedOutputs(Target target, Environment environment) {

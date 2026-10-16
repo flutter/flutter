@@ -4,11 +4,15 @@
 
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
@@ -18,6 +22,7 @@ import 'package:test/fake.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 import '../../src/logging_logger.dart';
 import '../../src/package_config.dart';
 import '../../src/throwing_pub.dart';
@@ -255,17 +260,168 @@ environment:
       Pub: ThrowingPub.new,
     },
   );
+
+  testUsingContext(
+    'TestCompiler reuses the generated dart_plugin_registrant across compilations',
+    () async {
+      final Directory fakeDartPlugin = fileSystem.directory('a_plugin');
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: foo
+dependencies:
+  flutter:
+    sdk: flutter
+  a_plugin: 1.0.0
+''');
+      writePackageConfigFiles(
+        directory: fileSystem.currentDirectory,
+        mainLibName: 'foo',
+        packages: <String, String>{'a_plugin': '/a_plugin'},
+      );
+      fakeDartPlugin.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: a_plugin
+flutter:
+  plugin:
+    implements: a
+    platforms:
+      linux:
+        dartPluginClass: APlugin
+environment:
+  sdk: ^3.7.0-0
+  flutter: ">=2.5.0"
+''');
+
+      residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
+        fileSystem.currentDirectory,
+      );
+      final testCompiler = FakeTestCompiler(debugBuild, flutterProject, residentCompiler);
+
+      await testCompiler.compile(Uri.parse('test/foo_test.dart'));
+      await testCompiler.compile(Uri.parse('test/bar_test.dart'));
+
+      final Uri registrantUri = flutterProject.dartPluginRegistrant.absolute.uri;
+      expect(residentCompiler.invalidatedFilesPerCall, hasLength(2));
+      expect(
+        residentCompiler.invalidatedFilesPerCall[0],
+        contains(registrantUri),
+        reason: 'first compile generates the registrant and invalidates it',
+      );
+      expect(
+        residentCompiler.invalidatedFilesPerCall[1],
+        isNot(contains(registrantUri)),
+        reason: 'subsequent compile reuses the cached registrant',
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+      Pub: ThrowingPub.new,
+    },
+  );
+
+  testUsingContext(
+    'TestCompiler regenerates the registrant when language version changes',
+    () async {
+      final Directory fakeDartPlugin = fileSystem.directory('a_plugin');
+      fileSystem.file('pubspec.yaml').writeAsStringSync('''
+name: foo
+dependencies:
+  flutter:
+    sdk: flutter
+  a_plugin: 1.0.0
+''');
+      writePackageConfigFiles(
+        directory: fileSystem.currentDirectory,
+        mainLibName: 'foo',
+        packages: <String, String>{'a_plugin': '/a_plugin'},
+      );
+      fakeDartPlugin.childFile('pubspec.yaml')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: a_plugin
+flutter:
+  plugin:
+    implements: a
+    platforms:
+      linux:
+        dartPluginClass: APlugin
+environment:
+  sdk: ^3.7.0-0
+  flutter: ">=2.5.0"
+''');
+
+      // Two test files with explicit, different language version directives.
+      fileSystem.file('test/old_test.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// @dart = 3.0\nvoid main() {}\n');
+      fileSystem.file('test/new_test.dart')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('// @dart = 3.5\nvoid main() {}\n');
+
+      residentCompiler.compilerOutput = const CompilerOutput('abc.dill', 0, <Uri>[]);
+      final FlutterProject flutterProject = FlutterProject.fromDirectoryTest(
+        fileSystem.currentDirectory,
+      );
+      final testCompiler = FakeTestCompiler(debugBuild, flutterProject, residentCompiler);
+
+      await testCompiler.compile(Uri.parse('test/old_test.dart'));
+      await testCompiler.compile(Uri.parse('test/new_test.dart'));
+
+      final Uri registrantUri = flutterProject.dartPluginRegistrant.absolute.uri;
+      expect(residentCompiler.invalidatedFilesPerCall, hasLength(2));
+      expect(
+        residentCompiler.invalidatedFilesPerCall[0],
+        contains(registrantUri),
+        reason: 'first compile generates the registrant for @dart = 3.0',
+      );
+      expect(
+        residentCompiler.invalidatedFilesPerCall[1],
+        contains(registrantUri),
+        reason: 'language version changed to 3.5, registrant must be regenerated',
+      );
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      Platform: () => linuxPlatform,
+      ProcessManager: () => FakeProcessManager.any(),
+      Logger: () => BufferLogger.test(),
+      Pub: ThrowingPub.new,
+    },
+  );
 }
 
-/// Override the creation of the Resident Compiler to simplify testing.
 class FakeTestCompiler extends TestCompiler {
   FakeTestCompiler(
     super.buildInfo,
     super.flutterProject,
     this.residentCompiler, {
+    Artifacts? artifacts,
+    Config? config,
+    FileSystem? fileSystem,
+    Logger? logger,
+    Platform? platform,
     super.precompiledDillPath,
+    ProcessManager? processManager,
+    ShutdownHooks? shutdownHooks,
     super.testTimeRecorder,
-  });
+    ToolContext? toolContext,
+  }) : super(
+         toolContext:
+             toolContext ??
+             FakeToolContext(
+               artifacts: artifacts ?? FakeArtifacts(),
+               config: config ?? Config.test(),
+               fs: fileSystem ?? (flutterProject?.directory.fileSystem ?? MemoryFileSystem.test()),
+               logger: logger ?? BufferLogger.test(),
+               platform: platform ?? FakePlatform(),
+               processManager: processManager ?? FakeProcessManager.any(),
+               shutdownHooks: shutdownHooks ?? FakeShutdownHooks(),
+             ),
+       );
 
   final FakeResidentCompiler? residentCompiler;
 
@@ -285,6 +441,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 
   CompilerOutput? compilerOutput;
   bool didShutdown = false;
+  final invalidatedFilesPerCall = <List<Uri>>[];
 
   @override
   Future<CompilerOutput?> recompile(
@@ -300,6 +457,7 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
     Uri? nativeAssetsYaml,
     bool recompileRestart = false,
   }) async {
+    invalidatedFilesPerCall.add(invalidatedFiles ?? <Uri>[]);
     if (compilerOutput != null) {
       fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);
     }

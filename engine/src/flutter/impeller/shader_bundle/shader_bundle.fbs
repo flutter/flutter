@@ -8,7 +8,7 @@ namespace impeller.fb.shaderbundle;
 // incremented any time there is a change to this file which changes the
 // resulting flat buffer format.
 enum ShaderBundleFormatVersion:uint32 {
-  kVersion = 1
+  kVersion = 2
 }
 
 enum ShaderStage:byte {
@@ -71,6 +71,13 @@ table ShaderUniformStructField {
   total_size_in_bytes: uint64;
   // Zero indicates that this field is not an array element.
   array_elements: uint64;
+  // The number of components per column. For a vector this is the vector
+  // length; for a matrix this is the row count. Combined with `columns`, this
+  // disambiguates types that share the same `element_size_in_bytes`, e.g.
+  // vec4 and mat2.
+  vec_size: uint64;
+  // The number of columns. 1 for scalars and vectors; N for an NxN matrix.
+  columns: uint64;
 }
 
 table ShaderUniformStruct {

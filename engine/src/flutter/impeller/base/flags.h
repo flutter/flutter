@@ -7,10 +7,18 @@
 
 namespace impeller {
 struct Flags {
-  /// When turned on DrawLine will use the experimental antialiased path.
-  bool antialiased_lines = false;
   /// Use SDFs for rendering.
   bool use_sdfs = false;
+
+  /// Whether the origin of the default framebuffer (framebuffer 0) is the
+  /// top-left of the window rather than OpenGL's usual bottom-left.
+  ///
+  /// Set by embedders whose window surface is created with an inverted Y
+  /// axis, such as ANGLE's EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE. Only
+  /// meaningful for the OpenGL ES backend.
+  bool top_left_default_framebuffer_origin = false;
+
+  bool operator==(const Flags&) const = default;
 };
 }  // namespace impeller
 

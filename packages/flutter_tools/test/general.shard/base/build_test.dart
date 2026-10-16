@@ -12,11 +12,14 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import '../../src/common.dart';
 import '../../src/fake_process_manager.dart';
 
-const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
-
-const kARMCheckCommand = FakeCommand(command: <String>['sysctl', 'hw.optional.arm64'], exitCode: 1);
-
 void main() {
+  const kWhichSysctlCommand = FakeCommand(command: <String>['which', 'sysctl']);
+
+  // x64 host.
+  const kx64CheckCommand = FakeCommand(
+    command: <String>['sysctl', 'hw.optional.arm64'],
+    exitCode: 1,
+  );
   group('GenSnapshot', () {
     late GenSnapshot genSnapshot;
     late Artifacts artifacts;
@@ -67,7 +70,7 @@ void main() {
 
       final int result = await genSnapshot.run(
         snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
-        darwinArch: DarwinArch.arm64,
+        cpuArch: CpuArch.arm64,
         additionalArgs: <String>['--additional_arg'],
       );
       expect(result, 0);
@@ -110,6 +113,7 @@ void main() {
 
     setUp(() async {
       fileSystem = MemoryFileSystem.test();
+      fileSystem.file(r'C:\VS\link.exe').createSync(recursive: true);
       artifacts = Artifacts.test();
       processManager = FakeProcessManager.empty();
       snapshotter = AOTSnapshotter(
@@ -118,6 +122,7 @@ void main() {
         xcode: Xcode.test(processManager: processManager),
         artifacts: artifacts,
         processManager: processManager,
+        windowsLinkerPath: r'C:\VS\link.exe',
       );
     });
 
@@ -127,7 +132,7 @@ void main() {
       expect(
         await snapshotter.build(
           platform: TargetPlatform.ios,
-          darwinArch: DarwinArch.arm64,
+          cpuArch: CpuArch.arm64,
           sdkRoot: 'path/to/sdk',
           buildMode: BuildMode.debug,
           mainPath: 'main.dill',
@@ -184,7 +189,7 @@ void main() {
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
-            '--macho-min-os-version=13.0',
+            '--macho-min-os-version=15.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             '--dwarf-stack-traces',
@@ -194,7 +199,7 @@ void main() {
           ],
         ),
         kWhichSysctlCommand,
-        kARMCheckCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -221,7 +226,7 @@ void main() {
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        darwinArch: DarwinArch.arm64,
+        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         splitDebugInfo: 'foo',
         dartObfuscation: false,
@@ -246,7 +251,7 @@ void main() {
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
-            '--macho-min-os-version=13.0',
+            '--macho-min-os-version=15.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             '--obfuscate',
@@ -254,7 +259,7 @@ void main() {
           ],
         ),
         kWhichSysctlCommand,
-        kARMCheckCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -281,7 +286,7 @@ void main() {
         buildMode: BuildMode.profile,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        darwinArch: DarwinArch.arm64,
+        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         dartObfuscation: true,
       );
@@ -305,14 +310,14 @@ void main() {
             '--snapshot_kind=app-aot-macho-dylib',
             '--macho=$outputPath/App.framework/App',
             '--macho-object=$outputPath/app.o',
-            '--macho-min-os-version=13.0',
+            '--macho-min-os-version=15.0',
             '--macho-rpath=@executable_path/Frameworks,@loader_path/Frameworks',
             '--macho-install-name=@rpath/App.framework/App',
             'main.dill',
           ],
         ),
         kWhichSysctlCommand,
-        kARMCheckCommand,
+        kx64CheckCommand,
         FakeCommand(
           command: <String>[
             'xcrun',
@@ -339,7 +344,7 @@ void main() {
         buildMode: BuildMode.release,
         mainPath: 'main.dill',
         outputPath: outputPath,
-        darwinArch: DarwinArch.arm64,
+        cpuArch: CpuArch.arm64,
         sdkRoot: 'path/to/sdk',
         dartObfuscation: false,
       );
@@ -361,7 +366,6 @@ void main() {
             '--deterministic',
             '--snapshot_kind=app-aot-elf',
             '--elf=build/foo/app.so',
-            '--no-sim-use-hardfp',
             '--no-use-integer-division',
             'main.dill',
           ],
@@ -394,7 +398,6 @@ void main() {
             '--deterministic',
             '--snapshot_kind=app-aot-elf',
             '--elf=build/foo/app.so',
-            '--no-sim-use-hardfp',
             '--no-use-integer-division',
             '--dwarf-stack-traces',
             '--resolve-dwarf-paths',
@@ -430,7 +433,6 @@ void main() {
             '--deterministic',
             '--snapshot_kind=app-aot-elf',
             '--elf=build/foo/app.so',
-            '--no-sim-use-hardfp',
             '--no-use-integer-division',
             '--obfuscate',
             'main.dill',
@@ -465,7 +467,6 @@ void main() {
               '--deterministic',
               '--snapshot_kind=app-aot-elf',
               '--elf=build/foo/app.so',
-              '--no-sim-use-hardfp',
               '--no-use-integer-division',
               'main.dill',
             ],
@@ -513,6 +514,154 @@ void main() {
       );
 
       expect(genSnapshotExitCode, 0);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('builds PE library and PDB for windows-x64', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+      processManager
+        ..addCommand(
+          FakeCommand(
+            command: <String>[
+              artifacts.getArtifactPath(
+                Artifact.genSnapshot,
+                platform: TargetPlatform.windows_x64,
+                mode: BuildMode.release,
+              ),
+              '--deterministic',
+              '--snapshot_kind=app-aot-pecoff-obj',
+              '--coff=build/foo/app.o',
+              '--strip',
+              'main.dill',
+            ],
+          ),
+        )
+        ..addCommand(
+          const FakeCommand(
+            command: <String>[
+              r'C:\VS\link.exe',
+              '/NOLOGO',
+              '/DLL',
+              '/NOENTRY',
+              '/MACHINE:X64',
+              '/DEBUG',
+              '/INCREMENTAL:NO',
+              '/OUT:build/foo/app.so',
+              '/PDB:build/foo/app.pdb',
+              '/EXPORT:_kDartSnapshotData,DATA',
+              '/EXPORT:_kDartSnapshotText,DATA',
+              'build/foo/app.o',
+            ],
+          ),
+        );
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.windows_x64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        outputPath: outputPath,
+        dartObfuscation: false,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('builds windows-x64 split debug info PDB outside output path', () async {
+      final String outputPath = fileSystem.path.join('build', 'foo');
+      final String splitDebugInfoPath = fileSystem.path.join('build', 'symbols');
+      final String stalePdbPath = fileSystem.path.join(outputPath, 'app.pdb');
+      fileSystem.file(stalePdbPath).createSync(recursive: true);
+
+      processManager
+        ..addCommand(
+          FakeCommand(
+            command: <String>[
+              artifacts.getArtifactPath(
+                Artifact.genSnapshot,
+                platform: TargetPlatform.windows_x64,
+                mode: BuildMode.release,
+              ),
+              '--deterministic',
+              '--snapshot_kind=app-aot-pecoff-obj',
+              '--coff=build/foo/app.o',
+              '--strip',
+              '--obfuscate',
+              'main.dill',
+            ],
+          ),
+        )
+        ..addCommand(
+          const FakeCommand(
+            command: <String>[
+              r'C:\VS\link.exe',
+              '/NOLOGO',
+              '/DLL',
+              '/NOENTRY',
+              '/MACHINE:X64',
+              '/DEBUG',
+              '/INCREMENTAL:NO',
+              '/OUT:build/foo/app.so',
+              '/PDB:build/symbols/app.windows-x64.pdb',
+              '/EXPORT:_kDartSnapshotData,DATA',
+              '/EXPORT:_kDartSnapshotText,DATA',
+              'build/foo/app.o',
+            ],
+          ),
+        );
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.windows_x64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        outputPath: outputPath,
+        splitDebugInfo: splitDebugInfoPath,
+        dartObfuscation: true,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(fileSystem.file(stalePdbPath).existsSync(), false);
+      expect(fileSystem.directory(splitDebugInfoPath).existsSync(), true);
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('fails when the Visual Studio linker does not exist', () async {
+      final logger = BufferLogger.test();
+      final snapshotter = AOTSnapshotter(
+        fileSystem: fileSystem,
+        logger: logger,
+        xcode: Xcode.test(processManager: processManager),
+        artifacts: artifacts,
+        processManager: processManager,
+        windowsLinkerPath: r'C:\VS\does-not-exist\link.exe',
+      );
+      processManager.addCommand(
+        FakeCommand(
+          command: <String>[
+            artifacts.getArtifactPath(
+              Artifact.genSnapshot,
+              platform: TargetPlatform.windows_x64,
+              mode: BuildMode.release,
+            ),
+            '--deterministic',
+            '--snapshot_kind=app-aot-pecoff-obj',
+            '--coff=build/foo/app.o',
+            '--strip',
+            'main.dill',
+          ],
+        ),
+      );
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.windows_x64,
+        buildMode: BuildMode.release,
+        mainPath: 'main.dill',
+        outputPath: fileSystem.path.join('build', 'foo'),
+        dartObfuscation: false,
+      );
+
+      expect(genSnapshotExitCode, 1);
+      expect(logger.errorText, contains('Unable to find Visual Studio link.exe'));
       expect(processManager, hasNoRemainingExpectations);
     });
 

@@ -4,13 +4,12 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'package:file/local.dart';
-import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 
+import 'package:convert/convert.dart';
+import 'package:file/local.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart' as platform;
-
 import 'package:process/process.dart';
 
 import 'utils.dart';
@@ -87,7 +86,7 @@ Future<String> gitRevision({
 }
 
 /// Wrapper function to run a subprocess checking exit code and printing stderr and stdout.
-/// [executable] is a string with the script/binary to execute, [args] is the list of flags/arguments
+/// [command] is the script/binary to execute followed by its flags/arguments,
 /// and [workingDirectory] is as string to the working directory where the subprocess will be run.
 Future<void> runProcessWithValidations(
   List<String> command,
@@ -141,7 +140,7 @@ Future<String> getBranchName({
 }
 
 /// Updates the footer of the api documentation with the correct branch and versions.
-/// [footerPath] is the path to the location of the footer js file and [version] is a
+/// [footerFile] is the footer js file and [version] is a
 /// string with the version calculated by the flutter tool.
 Future<void> createFooter(
   File footerFile,
@@ -150,7 +149,8 @@ Future<void> createFooter(
   @visibleForTesting String? branchParam,
   @visibleForTesting String? revisionParam,
 }) async {
-  final String timestamp = timestampParam ?? DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
+  final String timestamp =
+      timestampParam ?? FixedDateTimeFormatter('YYYY-MM-DD hh:mm').encode(DateTime.now());
   final String gitBranch = branchParam ?? await getBranchName();
   final String revision = revisionParam ?? await gitRevision();
   final gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';

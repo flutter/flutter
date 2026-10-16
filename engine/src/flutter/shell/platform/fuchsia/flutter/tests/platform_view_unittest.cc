@@ -107,6 +107,11 @@ class MockPlatformViewDelegate : public flutter::PlatformView::Delegate {
     return settings_;
   }
   // |flutter::PlatformView::Delegate|
+  std::shared_ptr<fml::BasicTaskRunner>
+  OnPlatformViewGetShutdownSafeIOTaskRunner() const {
+    return nullptr;
+  }
+  // |flutter::PlatformView::Delegate|
   void OnPlatformViewDispatchPlatformMessage(
       std::unique_ptr<flutter::PlatformMessage> message) {
     message_ = std::move(message);
@@ -479,8 +484,7 @@ class PlatformViewBuilder {
         std::move(on_create_surface_callback_),
         std::move(on_semantics_node_update_callback_),
         std::move(on_request_announce_callback_),
-        std::move(on_shader_warmup_callback_), [](auto...) {}, [](auto...) {},
-        nullptr);
+        std::move(on_shader_warmup_callback_), [](auto...) {}, nullptr);
   }
 
  private:

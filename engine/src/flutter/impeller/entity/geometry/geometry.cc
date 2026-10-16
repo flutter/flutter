@@ -133,7 +133,7 @@ std::unique_ptr<Geometry> Geometry::MakeRoundSuperellipse(
   return std::make_unique<RoundSuperellipseGeometry>(rect, corner_radius);
 }
 
-bool Geometry::CoversArea(const Matrix& transform, const Rect& rect) const {
+bool Geometry::CoversArea(const Matrix& transform, const IRect& rect) const {
   return false;
 }
 

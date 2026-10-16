@@ -58,8 +58,10 @@ export 'package:flutter/rendering.dart' show AxisDirection;
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 ///  * [NullableIndexedWidgetBuilder], which is similar but may return null.
 ///  * [IndexedWidgetBuilder], which is similar but not nullable.
-typedef TwoDimensionalIndexedWidgetBuilder =
-    Widget? Function(BuildContext context, ChildVicinity vicinity);
+typedef TwoDimensionalIndexedWidgetBuilder = Widget? Function(
+  BuildContext context,
+  ChildVicinity vicinity,
+);
 
 /// A widget through which a portion of larger content can be viewed, typically
 /// in combination with a [TwoDimensionalScrollable].
@@ -533,13 +535,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// The [cacheExtent], if null, defaults to
   /// [RenderAbstractViewport.defaultCacheExtent].
   RenderTwoDimensionalViewport({
-    required ViewportOffset horizontalOffset,
+    required this._horizontalOffset,
     required AxisDirection horizontalAxisDirection,
-    required ViewportOffset verticalOffset,
+    required this._verticalOffset,
     required AxisDirection verticalAxisDirection,
-    required TwoDimensionalChildDelegate delegate,
-    required Axis mainAxis,
-    required TwoDimensionalChildManager childManager,
+    required this._delegate,
+    required this._mainAxis,
+    required this._childManager,
     @Deprecated(
       'Use scrollCacheExtent instead. '
       'This feature was deprecated after v3.41.0-0.0.pre.',
@@ -551,7 +553,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     )
     CacheExtentStyle? cacheExtentStyle,
     ScrollCacheExtent? scrollCacheExtent,
-    Clip clipBehavior = Clip.hardEdge,
+    this._clipBehavior = Clip.hardEdge,
   }) : assert(
          verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up,
          'TwoDimensionalViewport.verticalAxisDirection is not Axis.vertical.',
@@ -561,13 +563,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
              horizontalAxisDirection == AxisDirection.right,
          'TwoDimensionalViewport.horizontalAxisDirection is not Axis.horizontal.',
        ),
-       _childManager = childManager,
-       _horizontalOffset = horizontalOffset,
        _horizontalAxisDirection = horizontalAxisDirection,
-       _verticalOffset = verticalOffset,
        _verticalAxisDirection = verticalAxisDirection,
-       _delegate = delegate,
-       _mainAxis = mainAxis,
        _scrollCacheExtent =
            scrollCacheExtent ??
            (cacheExtent != null
@@ -575,8 +572,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
                    CacheExtentStyle.pixel || null => ScrollCacheExtent.pixels(cacheExtent),
                    CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent),
                  }
-               : const ScrollCacheExtent.pixels(RenderAbstractViewport.defaultCacheExtent)),
-       _clipBehavior = clipBehavior {
+               : const ScrollCacheExtent.pixels(RenderAbstractViewport.defaultCacheExtent)) {
     assert(() {
       _debugDanglingKeepAlives = <RenderBox>[];
       return true;

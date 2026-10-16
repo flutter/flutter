@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@Timeout(Duration(minutes: 10))
+library;
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -39,6 +42,21 @@ void main() {
             'flutter build failed: ${result.exitCode}\n${result.stderr}\n${result.stdout}',
           );
         }
+        final String stdout = result.stdout.join('\n');
+        if (target.first == hostOs) {
+          // Verify that IconTreeShaker detects dummyIcon with null fontFamily.
+          // Icon tree shaking for this icon fails with a trace message, but the overall build succeeds.
+          expect(
+            stdout,
+            contains('Expected to find fontFamily for constant IconData with codepoint: 4660'),
+          );
+        }
+        if (target case ['web', '--wasm']) {
+          // Verify that both wasm (Icons.fastfood: 57946) and js (Icons.favorite: 57947)
+          // codepoints are retained when merging recorded uses.
+          expect(stdout, contains('57946'));
+          expect(stdout, contains('57947'));
+        }
         final Directory buildTargetDir = appRoot
             .childDirectory('build')
             .childDirectory(target.first);
@@ -54,9 +72,9 @@ void main() {
         }
         for (final manifestFile in manifestFiles) {
           final Uint8List manifestData = manifestFile.readAsBytesSync();
-          final manifest =
-              const StandardMessageCodec().decodeMessage(ByteData.sublistView(manifestData))
-                  as Map<Object?, Object?>;
+          final manifest = const StandardMessageCodec().decodeMessage(
+            ByteData.sublistView(manifestData),
+          ) as Map<Object?, Object?>;
           const id1Key = 'packages/record_use_test_package/data/translations.json';
           expect(manifest.containsKey(id1Key), isTrue, reason: 'id1.json should be present');
           final File id1File = manifestFile.parent.childFile(id1Key);

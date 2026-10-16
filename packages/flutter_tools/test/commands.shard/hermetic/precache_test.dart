@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/precache.dart';
@@ -19,6 +20,19 @@ void main() {
   setUp(() {
     cache = FakeCache();
     cache.isUpToDateValue = false;
+  });
+
+  testUsingContext('precache description explains currently enabled platforms', () {
+    final command = PrecacheCommand(
+      cache: cache,
+      logger: BufferLogger.test(),
+      platform: FakePlatform(environment: <String, String>{}),
+      featureFlags: TestFeatureFlags(),
+    );
+
+    expect(command.description, contains('enabled by the current host and Flutter configuration'));
+    expect(command.description, contains('flutter config --list'));
+    expect(command.description, contains('(Not set)'));
   });
 
   testUsingContext('precache should acquire lock', () async {
@@ -59,9 +73,8 @@ void main() {
         featureFlags: TestFeatureFlags(isWebEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -83,9 +96,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--web', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--web', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -106,9 +118,8 @@ void main() {
         featureFlags: TestFeatureFlags(isMacOSEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -130,9 +141,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--macos', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -153,9 +163,8 @@ void main() {
         featureFlags: TestFeatureFlags(isWindowsEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -177,9 +186,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--windows', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -200,9 +208,8 @@ void main() {
         featureFlags: TestFeatureFlags(isLinuxEnabled: true),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -224,9 +231,8 @@ void main() {
         featureFlags: TestFeatureFlags(),
         platform: FakePlatform(environment: <String, String>{}),
       );
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--linux', '--no-android', '--no-ios']);
 
       expect(
         cache.artifacts,
@@ -247,9 +253,8 @@ void main() {
     );
 
     expect(
-      createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--no-android', '--android_gen_snapshot']),
+      createTestCommandRunner(command)
+          .run(const <String>['precache', '--no-android', '--android_gen_snapshot']),
       throwsToolExit(message: '--android_gen_snapshot requires --android'),
     );
   });
@@ -434,9 +439,8 @@ void main() {
         ),
       );
 
-      await createTestCommandRunner(
-        command,
-      ).run(const <String>['precache', '--no-ios', '--no-android', '--macos']);
+      await createTestCommandRunner(command)
+          .run(const <String>['precache', '--no-ios', '--no-android', '--macos']);
 
       expect(
         cache.artifacts,
@@ -491,6 +495,18 @@ void main() {
       }),
     );
   });
+
+  testUsingContext('precache --host-arch overrides cache hostPlatformOverride', () async {
+    final command = PrecacheCommand(
+      cache: cache,
+      logger: BufferLogger.test(),
+      featureFlags: TestFeatureFlags(),
+      platform: FakePlatform(operatingSystem: 'macos', environment: <String, String>{}),
+    );
+    await createTestCommandRunner(command).run(const <String>['precache', '--host-arch=x64']);
+
+    expect(cache.osUtils.hostPlatformOverride, HostPlatform.darwin_x64);
+  });
 }
 
 class FakeCache extends Fake implements Cache {
@@ -527,4 +543,7 @@ class FakeCache extends Fake implements Cache {
 
   @override
   bool includeAllPlatforms = false;
+
+  @override
+  late final OperatingSystemUtils osUtils = FakeOperatingSystemUtils();
 }

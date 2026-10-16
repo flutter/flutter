@@ -21,4 +21,11 @@
             from: "self",
         },
     ],
+    use: [
+        {
+            protocol: [
+                "fuchsia.kernel.VmexResource",
+            ],
+        },
+    ],
 }

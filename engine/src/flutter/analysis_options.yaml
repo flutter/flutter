@@ -7,7 +7,7 @@
 #
 # The reasoning for deviating from the general style must be documented below.
 
-include: ../../../analysis_options.yaml
+include: ../../../analysis_options_common.yaml
 
 analyzer:
   exclude:

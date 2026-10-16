@@ -284,8 +284,7 @@ Or run on an iOS simulator without code signing
           ),
           FakeCommand(
             command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
-            stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
         ]);
 
@@ -458,56 +457,59 @@ Or run on an iOS simulator without code signing
         },
       );
 
-      testWithoutContext('does not use saved provisioning profile if fails to parse plist', () async {
-        final testConfig = Config.test();
-        final fileSystem = MemoryFileSystem.test();
-        final logger = BufferLogger.test();
-        const profileFilePath =
-            '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
-        fileSystem.file(profileFilePath).createSync(recursive: true);
-        testConfig.setValue('ios-signing-profile', profileFilePath);
-        final File profilePlist = fileSystem.file(
-          '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
-        );
+      testWithoutContext(
+        'does not use saved provisioning profile if fails to parse plist',
+        () async {
+          final testConfig = Config.test();
+          final fileSystem = MemoryFileSystem.test();
+          final logger = BufferLogger.test();
+          const profileFilePath =
+              '/path/to/profiles/1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision';
+          fileSystem.file(profileFilePath).createSync(recursive: true);
+          testConfig.setValue('ios-signing-profile', profileFilePath);
+          final File profilePlist = fileSystem.file(
+            '/.tmp_rand0/provisioning_profiles/decoded_profile_1234567a-bcde-89f0-1234-g56hi567j8kl.mobileprovision.plist',
+          );
 
-        final processManager = FakeProcessManager.list(<FakeCommand>[
-          const FakeCommand(command: <String>['which', 'security']),
-          const FakeCommand(command: <String>['which', 'openssl']),
-          const FakeCommand(
-            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
-            stdout: kCertificates,
-          ),
-          FakeCommand(
-            command: <String>[
-              'security',
-              'cms',
-              '-D',
-              '-i',
-              profileFilePath,
-              '-o',
-              profilePlist.path,
-            ],
-            onRun: (List<String> command) => profilePlist.createSync(recursive: true),
-          ),
-        ]);
+          final processManager = FakeProcessManager.list(<FakeCommand>[
+            const FakeCommand(command: <String>['which', 'security']),
+            const FakeCommand(command: <String>['which', 'openssl']),
+            const FakeCommand(
+              command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+              stdout: kCertificates,
+            ),
+            FakeCommand(
+              command: <String>[
+                'security',
+                'cms',
+                '-D',
+                '-i',
+                profileFilePath,
+                '-o',
+                profilePlist.path,
+              ],
+              onRun: (List<String> command) => profilePlist.createSync(recursive: true),
+            ),
+          ]);
 
-        final Map<String, String>? signingConfigs =
-            await getCodeSigningIdentityDevelopmentTeamBuildSetting(
-              buildSettings: <String, String>{},
-              processManager: processManager,
-              platform: FakePlatform(operatingSystem: 'macos'),
-              logger: logger,
-              config: testConfig,
-              terminal: FakeTerminal(),
-              fileSystem: fileSystem,
-              fileSystemUtils: FakeFileSystemUtils(),
-              plistParser: FakePlistParser(),
-            );
+          final Map<String, String>? signingConfigs =
+              await getCodeSigningIdentityDevelopmentTeamBuildSetting(
+                buildSettings: <String, String>{},
+                processManager: processManager,
+                platform: FakePlatform(operatingSystem: 'macos'),
+                logger: logger,
+                config: testConfig,
+                terminal: FakeTerminal(),
+                fileSystem: fileSystem,
+                fileSystemUtils: FakeFileSystemUtils(),
+                plistParser: FakePlistParser(),
+              );
 
-        expect(processManager, hasNoRemainingExpectations);
-        expect(logger.errorText, contains('Failed to parse provisioning profile'));
-        expect(signingConfigs, isNull);
-      });
+          expect(processManager, hasNoRemainingExpectations);
+          expect(logger.errorText, contains('Failed to parse provisioning profile'));
+          expect(signingConfigs, isNull);
+        },
+      );
 
       testWithoutContext(
         'does not uses saved provisioning profile if openssl fails to read cert',
@@ -716,8 +718,7 @@ Or run on an iOS simulator without code signing
             ),
             FakeCommand(
               command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
-              stdout:
-                  'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+              stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
             ),
           ]);
 
@@ -765,8 +766,7 @@ Or run on an iOS simulator without code signing
             FakeCommand(
               command: const <String>['openssl', 'x509', '-subject'],
               stdin: IOSink(controller.sink),
-              stdout:
-                  'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+              stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
               completer: completer,
             ),
           ]);
@@ -823,8 +823,7 @@ Or run on an iOS simulator without code signing
             FakeCommand(
               command: const <String>['openssl', 'x509', '-subject'],
               stdin: IOSink(controller.sink),
-              stdout:
-                  'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+              stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
               completer: completer,
             ),
           ]);
@@ -879,8 +878,7 @@ Or run on an iOS simulator without code signing
             FakeCommand(
               command: const <String>['openssl', 'x509', '-subject'],
               stdin: IOSink(controller.sink),
-              stdout:
-                  'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+              stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
               completer: completer,
             ),
           ]);
@@ -922,14 +920,39 @@ Or run on an iOS simulator without code signing
             stdout: kCertificates,
           ),
           const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+            stdout: 'This is a fake certificate for Profile 1',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout:
+                'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=1111AAAA11/O=Team 1/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '2222BBBB22', '-p'],
+            stdout: 'This is a fake certificate for Profile 2',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout:
+                'subject= /CN=iPhone Developer: Profile 2 (2222BBBB22)/OU=2222BBBB22/O=Team 2/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
+            stdout: 'This is a fake certificate',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+          ),
+          const FakeCommand(
             command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
             stdout: 'This is a fake certificate',
           ),
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(controller.sink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -963,6 +986,10 @@ Or run on an iOS simulator without code signing
             'Developer identity "iPhone Developer: Profile 3 (3333CCCC33)" selected for iOS code signing',
           ),
         );
+        expect(
+          logger.statusText,
+          contains('[3] iPhone Developer: Profile 3 (3333CCCC33) | Team: 4444DDDD44 My Team'),
+        );
         expect(logger.errorText, isEmpty);
         expect(stdin, 'This is a fake certificate');
         expect(developmentTeam, '4444DDDD44');
@@ -987,8 +1014,7 @@ Or run on an iOS simulator without code signing
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(controller.sink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (1111AAAA11)/OU=5555EEEE55/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (1111AAAA11)/OU=5555EEEE55/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1047,8 +1073,7 @@ Or run on an iOS simulator without code signing
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(controller.sink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1104,14 +1129,39 @@ Or run on an iOS simulator without code signing
             stdout: kCertificates,
           ),
           const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+            stdout: 'This is a fake certificate for Profile 1',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout:
+                'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=1111AAAA11/O=Team 1/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '2222BBBB22', '-p'],
+            stdout: 'This is a fake certificate for Profile 2',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout:
+                'subject= /CN=iPhone Developer: Profile 2 (2222BBBB22)/OU=2222BBBB22/O=Team 2/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
+            stdout: 'This is a fake certificate',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+          ),
+          const FakeCommand(
             command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
             stdout: 'This is a fake certificate',
           ),
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(controller.sink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1192,6 +1242,29 @@ Or run on an iOS simulator without code signing
             command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
             stdout: kCertificates,
           ),
+          // Display phase: Profile 1 and 2 succeed, Profile 3 fails.
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+            stdout: 'This is a fake certificate for Profile 1',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout:
+                'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=1111AAAA11/O=Team 1/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '2222BBBB22', '-p'],
+            stdout: 'This is a fake certificate for Profile 2',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout:
+                'subject= /CN=iPhone Developer: Profile 2 (2222BBBB22)/OU=2222BBBB22/O=Team 2/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
+            exitCode: 1,
+          ),
           const FakeCommand(
             command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
             exitCode: 1,
@@ -1239,8 +1312,7 @@ Or run on an iOS simulator without code signing
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(stdinSink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1349,8 +1421,7 @@ Or run on an iOS simulator without code signing
           FakeCommand(
             command: const <String>['openssl', 'x509', '-subject'],
             stdin: IOSink(controller.sink),
-            stdout:
-                'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
             completer: completer,
           ),
         ]);
@@ -1397,7 +1468,7 @@ Or run on an iOS simulator without code signing
     testWithoutContext('cancels if terminal does not have stdin', () async {
       final logger = BufferLogger.test();
       final config = Config.test();
-      final settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings.test(
         config: config,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -1416,7 +1487,7 @@ Or run on an iOS simulator without code signing
     testWithoutContext('cancels if code-signing tools are not found', () async {
       final logger = BufferLogger.test();
       final config = Config.test();
-      final settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings.test(
         config: config,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -1440,7 +1511,7 @@ Or run on an iOS simulator without code signing
         const FakeCommand(command: <String>['which', 'security']),
         const FakeCommand(command: <String>['which', 'openssl']),
       ]);
-      final settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings.test(
         config: config,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -1465,7 +1536,7 @@ Or run on an iOS simulator without code signing
         const FakeCommand(command: <String>['which', 'security']),
         const FakeCommand(command: <String>['which', 'openssl']),
       ]);
-      final settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings.test(
         config: config,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -1492,7 +1563,7 @@ Or run on an iOS simulator without code signing
       final terminal = FakeTerminal();
       terminal.setPrompt(<String>['1', '2', 'q'], 'q');
 
-      final settings = XcodeCodeSigningSettings(
+      final settings = XcodeCodeSigningSettings.test(
         config: config,
         logger: logger,
         platform: FakePlatform(operatingSystem: 'macos'),
@@ -1527,7 +1598,7 @@ Or run on an iOS simulator without code signing
           ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -1567,9 +1638,35 @@ Or run on an iOS simulator without code signing
             command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
             stdout: kCertificates,
           ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+            stdout: 'This is a fake certificate for Profile 1',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout:
+                'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=1111AAAA11/O=Team 1/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '2222BBBB22', '-p'],
+            stdout: 'This is a fake certificate for Profile 2',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout:
+                'subject= /CN=iPhone Developer: Profile 2 (2222BBBB22)/OU=2222BBBB22/O=Team 2/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
+            stdout: 'This is a fake certificate for Profile 3',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+          ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -1608,9 +1705,36 @@ Or run on an iOS simulator without code signing
             command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
             stdout: kCertificates,
           ),
+          // Display phase: look up team info for all 3 identities.
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+            stdout: 'This is a fake certificate for Profile 1',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout:
+                'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=1111AAAA11/O=Team 1/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '2222BBBB22', '-p'],
+            stdout: 'This is a fake certificate for Profile 2',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout:
+                'subject= /CN=iPhone Developer: Profile 2 (2222BBBB22)/OU=2222BBBB22/O=Team 2/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
+            stdout: 'This is a fake certificate for Profile 3',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US',
+          ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -1627,6 +1751,81 @@ Or run on an iOS simulator without code signing
         expect(config.getValue('ios-signing-profile'), isNull);
         expect(processManager, hasNoRemainingExpectations);
       });
+
+      testWithoutContext('displays team name and team ID alongside each identity', () async {
+        final logger = BufferLogger.test();
+        final config = Config.test();
+        final terminal = FakeTerminal();
+        terminal.setPrompt(<String>['1', '2', 'q'], '1');
+        unawaited(
+          terminal.promptCompleter.future.whenComplete(() {
+            terminal.setPrompt(<String>['1', '2', '3', 'q'], '1');
+          }),
+        );
+
+        final processManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(command: <String>['which', 'security']),
+          const FakeCommand(command: <String>['which', 'openssl']),
+          const FakeCommand(
+            command: <String>['security', 'find-identity', '-p', 'codesigning', '-v'],
+            stdout: kCertificates,
+          ),
+          // Display phase: look up team info for all 3 identities.
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
+            stdout: 'This is a fake certificate for Profile 1',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout: 'subject=UID=X, CN=iPhone Developer: Profile 1 (1111AAAA11), OU=TEAM1ID, O=Acme Corp Ltd., C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '2222BBBB22', '-p'],
+            stdout: 'This is a fake certificate for Profile 2',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            stdout: 'subject= /CN=iPhone Developer: Profile 2 (2222BBBB22)/OU=TEAM2ID/O=Example Inc/C=US',
+          ),
+          const FakeCommand(
+            command: <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
+            stdout: 'This is a fake certificate for Profile 3',
+          ),
+          const FakeCommand(
+            command: <String>['openssl', 'x509', '-subject'],
+            // No O= field — team name should be omitted from display.
+            stdout: 'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=TEAM3ID/C=US',
+          ),
+        ]);
+
+        final settings = XcodeCodeSigningSettings.test(
+          config: config,
+          logger: logger,
+          platform: FakePlatform(operatingSystem: 'macos'),
+          fileSystem: MemoryFileSystem.test(),
+          fileSystemUtils: FakeFileSystemUtils(),
+          processUtils: ProcessUtils(processManager: processManager, logger: logger),
+          terminal: terminal,
+          plistParser: FakePlistParser(),
+        );
+        await settings.selectSettings();
+
+        // Profile 1 and 2 show team name + ID; Profile 3 (no O= field) shows only team ID.
+        expect(
+          logger.statusText,
+          contains('[1] iPhone Developer: Profile 1 (1111AAAA11) | Team: TEAM1ID Acme Corp Ltd.'),
+        );
+        expect(
+          logger.statusText,
+          contains('[2] iPhone Developer: Profile 2 (2222BBBB22) | Team: TEAM2ID Example Inc'),
+        );
+        expect(
+          logger.statusText,
+          contains('[3] iPhone Developer: Profile 3 (3333CCCC33) | Team: TEAM3ID'),
+        );
+        expect(config.getValue('ios-signing-cert'), 'iPhone Developer: Profile 1 (1111AAAA11)');
+        expect(processManager, hasNoRemainingExpectations);
+      });
     });
 
     group('with manual code signing style', () {
@@ -1641,7 +1840,7 @@ Or run on an iOS simulator without code signing
           const FakeCommand(command: <String>['which', 'openssl']),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -1743,12 +1942,11 @@ Or run on an iOS simulator without code signing
               '-inform',
               'DER',
             ],
-            stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -1852,12 +2050,11 @@ Or run on an iOS simulator without code signing
                 '-inform',
                 'DER',
               ],
-              stdout:
-                  'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+              stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
             ),
           ]);
 
-          final settings = XcodeCodeSigningSettings(
+          final settings = XcodeCodeSigningSettings.test(
             config: config,
             logger: logger,
             platform: FakePlatform(operatingSystem: 'macos'),
@@ -2003,8 +2200,7 @@ Or run on an iOS simulator without code signing
               '-inform',
               'DER',
             ],
-            stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: No matching (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: No matching (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
           FakeCommand(
             command: <String>[
@@ -2016,8 +2212,7 @@ Or run on an iOS simulator without code signing
               '-inform',
               'DER',
             ],
-            stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
           FakeCommand(
             command: <String>[
@@ -2054,12 +2249,11 @@ Or run on an iOS simulator without code signing
               '-inform',
               'DER',
             ],
-            stdout:
-                'subject= /UID=A123BC4D5E/CN=Apple Development: No match (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+            stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: No match (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
           ),
         ]);
 
-        final settings = XcodeCodeSigningSettings(
+        final settings = XcodeCodeSigningSettings.test(
           config: config,
           logger: logger,
           platform: FakePlatform(operatingSystem: 'macos'),
@@ -2125,12 +2319,11 @@ Or run on an iOS simulator without code signing
       ),
       FakeCommand(
         command: <String>['openssl', 'x509', '-subject', '-in', cert.path, '-inform', 'DER'],
-        stdout:
-            'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
+        stdout: 'subject= /UID=A123BC4D5E/CN=Apple Development: Company Development (12ABCD234E)/OU=ABCDE1F2DH/O=Company LLC/C=US',
       ),
     ]);
 
-    final settings = XcodeCodeSigningSettings(
+    final settings = XcodeCodeSigningSettings.test(
       config: config,
       logger: logger,
       platform: FakePlatform(operatingSystem: 'macos'),
@@ -2156,7 +2349,7 @@ Or run on an iOS simulator without code signing
     final fileSystem = MemoryFileSystem.test();
     config.setValue('ios-signing-cert', 'Apple Development: Company Development (12ABCD234E)');
 
-    final settings = XcodeCodeSigningSettings(
+    final settings = XcodeCodeSigningSettings.test(
       config: config,
       logger: logger,
       platform: FakePlatform(operatingSystem: 'macos'),
@@ -2173,6 +2366,25 @@ Or run on an iOS simulator without code signing
     expect(await settings.getIdentityFromCertFromConfig(validCodeSigningIdentities), isNotNull);
     expect(logger.errorText, isEmpty);
     expect(logger.warningText, isEmpty);
+  });
+
+  testWithoutContext('fromContexts constructor initializes dependencies', () {
+    final appleContext = FakeAppleContext(plistParser: FakePlistParser());
+    final toolContext = FakeToolContext(
+      config: Config.test(),
+      fs: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      platform: FakePlatform(operatingSystem: 'macos'),
+      processManager: FakeProcessManager.empty(),
+      terminal: FakeTerminal(),
+    );
+
+    final settings = XcodeCodeSigningSettings.fromContexts(
+      appleContext: appleContext,
+      toolContext: toolContext,
+    );
+
+    expect(settings, isNotNull);
   });
 }
 

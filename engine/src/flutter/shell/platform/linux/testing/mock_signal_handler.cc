@@ -9,18 +9,18 @@ namespace testing {
 
 SignalHandler::SignalHandler(gpointer instance,
                              const gchar* name,
-                             GCallback callback)
-    : instance_(instance) {
+                             GCallback callback) {
   id_ = g_signal_connect_data(instance, name, callback, this, nullptr,
                               G_CONNECT_SWAPPED);
-  g_object_add_weak_pointer(G_OBJECT(instance), &instance_);
+  g_weak_ref_init(&instance_, instance);
 }
 
 SignalHandler::~SignalHandler() {
-  if (instance_) {
-    g_signal_handler_disconnect(instance_, id_);
-    g_object_remove_weak_pointer(G_OBJECT(instance_), &instance_);
+  g_autoptr(GObject) instance = G_OBJECT(g_weak_ref_get(&instance_));
+  if (instance != nullptr) {
+    g_signal_handler_disconnect(instance, id_);
   }
+  g_weak_ref_clear(&instance_);
 }
 
 }  // namespace testing

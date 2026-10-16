@@ -40,6 +40,7 @@ template("fuchsia_archive") {
   }
 
   _component_target = target_name + "__component"
+
   fuchsia_component(_component_target) {
     forward_variables_from(invoker,
                            [
@@ -59,7 +60,7 @@ template("fuchsia_archive") {
         resources += [
           {
             path = resource.path
-            dest = "data/${resource.dest}"
+            dest = resource.dest
           },
         ]
       }
@@ -85,8 +86,13 @@ template("fuchsia_archive") {
 
   _package_target = target_name + "__package"
   _package_name = target_name
+
   fuchsia_package(_package_target) {
-    forward_variables_from(invoker, [ "testonly" ])
+    forward_variables_from(invoker,
+                           [
+                             "subpackages",
+                             "testonly",
+                           ])
     package_name = _package_name
     deps = [ ":$_component_target" ]
   }
@@ -94,6 +100,7 @@ template("fuchsia_archive") {
   # TODO(zijiehe): http://crbug.com/368608542, prefer using
   # gn-sdk/build_id_dir.gni
   _build_id_target = target_name + "__build_id"
+
   fuchsia_debug_symbols(_build_id_target) {
     forward_variables_from(invoker,
                            [
@@ -136,6 +143,7 @@ template("fuchsia_test_archive") {
   if (defined(invoker.gen_cml_file) && invoker.gen_cml_file) {
     _cml_file = "$root_out_dir/${target_name}.cml"
     _interpolate_cml_target = "${target_name}_interpolate_cml"
+
     action(_interpolate_cml_target) {
       testonly = true
       script = "//flutter/tools/fuchsia/interpolate_test_suite.py"
@@ -159,6 +167,7 @@ template("fuchsia_test_archive") {
                              "binary",
                              "libraries",
                              "resources",
+                             "subpackages",
                            ])
     testonly = true
     if (defined(_cml_file)) {

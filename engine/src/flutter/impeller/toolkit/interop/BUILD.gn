@@ -95,12 +95,25 @@ impeller_component("interop") {
   ]
 }
 
-impeller_component("library") {
+impeller_component("shared_library") {
   target_type = "shared_library"
 
   output_name = "impeller"
 
   deps = [ ":interop" ]
+}
+
+impeller_component("static_library") {
+  target_type = "static_library"
+
+  complete_static_lib = true
+
+  output_name = "impeller"
+
+  deps = [ ":interop" ]
+  if (use_flutter_cxx) {
+    deps += [ "//flutter/third_party/libcxx" ]
+  }
 }
 
 impeller_component("example_gl") {
@@ -185,7 +198,14 @@ zip_bundle("sdk") {
   }
 
   output = "${zip_out_dir}/impeller_sdk.zip"
-  deps = [ ":library" ]
+
+  deps = [
+    ":shared_library",
+    ":static_library",
+  ]
+  if (is_linux || is_mac || is_win) {
+    deps += [ "//flutter/impeller/compiler:impellerc" ]
+  }
 
   files = [
     {
@@ -237,6 +257,40 @@ zip_bundle("sdk") {
       {
         source = "$root_build_dir/impeller.dll.lib"
         destination = "lib/impeller.dll.lib"
+      },
+    ]
+  }
+
+  if (is_mac || is_linux || is_android || is_qnx) {
+    files += [
+      {
+        source =
+            "$root_build_dir/obj/flutter/impeller/toolkit/interop/libimpeller.a"
+        destination = "lib/libimpeller.a"
+      },
+    ]
+  } else if (is_win) {
+    files += [
+      {
+        source =
+            "$root_build_dir/obj/flutter/impeller/toolkit/interop/impeller.lib"
+        destination = "lib/impeller.lib"
+      },
+    ]
+  }
+
+  if (is_mac || is_linux) {
+    files += [
+      {
+        source = "$root_build_dir/impellerc"
+        destination = "bin/impellerc"
+      },
+    ]
+  } else if (is_win) {
+    files += [
+      {
+        source = "$root_build_dir/impellerc.exe"
+        destination = "bin/impellerc.exe"
       },
     ]
   }

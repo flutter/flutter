@@ -102,7 +102,7 @@ std::optional<Rect> SuperellipseGeometry::GetCoverage(
 }
 
 bool SuperellipseGeometry::CoversArea(const Matrix& transform,
-                                      const Rect& rect) const {
+                                      const IRect& rect) const {
   return false;
 }
 

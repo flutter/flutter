@@ -1146,9 +1146,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('semantics node cant be keyboard focusable but accessibility unfocusable', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('accessibilityBlockType also blocks keyboard focus', (WidgetTester tester) async {
     await tester.pumpWidget(
       Semantics(
         container: true,
@@ -1160,13 +1158,42 @@ void main() {
         child: const SizedBox(width: 10, height: 10),
       ),
     );
-    final Object? exception = tester.takeException();
-    expect(exception, isFlutterError);
-    final error = exception! as FlutterError;
-    expect(
-      error.message,
-      startsWith('A node that is keyboard focusable cannot be set to accessibility unfocusable'),
-    );
+
+    final SemanticsNode node = tester.getSemantics(find.byType(Semantics));
+    expect(node.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, true);
+    expect(node.getSemanticsData().flagsCollection.isFocused, Tristate.none);
+  });
+
+  testWidgets('Updating accessibilityFocusBlockType on parent updates children semantics', (
+    WidgetTester tester,
+  ) async {
+    Widget buildFrame(AccessibilityFocusBlockType blockType) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Semantics(
+          container: true,
+          accessibilityFocusBlockType: blockType,
+          child: Semantics(
+            container: true,
+            label: 'child',
+            child: const SizedBox(width: 10, height: 10),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(AccessibilityFocusBlockType.none));
+
+    SemanticsNode child = tester.semantics.find(find.bySemanticsLabel('child'));
+    expect(child.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, false);
+    expect(child.parent!.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, false);
+
+    // Rebuild with blockSubtree
+    await tester.pumpWidget(buildFrame(AccessibilityFocusBlockType.blockSubtree));
+
+    child = tester.semantics.find(find.bySemanticsLabel('child'));
+    expect(child.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, true);
+    expect(child.parent!.getSemanticsData().flagsCollection.isAccessibilityFocusBlocked, true);
   });
 
   testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {
@@ -2464,6 +2491,60 @@ void main() {
     await tester.pumpAndSettle();
     expect(label10, matchesSemantics(isHidden: false)); // ignore: avoid_redundant_argument_values
   });
+
+  testWidgets(
+    'explicit sibling semantics nodes in siblingMergeGroups update geometry on layout resize',
+    (WidgetTester tester) async {
+      final semantics = SemanticsTester(tester);
+      var width = 200.0;
+      Widget buildFrame() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: width,
+              height: 100.0,
+              child: _SiblingGroupWidget(
+                child: Semantics(
+                  label: 'sibling',
+                  child: const SizedBox(width: 50.0, height: 50.0),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildFrame());
+      final Rect initialRect = find.semantics.byLabel('sibling').evaluate().first.rect;
+
+      width = 400.0;
+      await tester.pumpWidget(buildFrame());
+      final Rect updatedRect = find.semantics.byLabel('sibling').evaluate().first.rect;
+
+      expect(initialRect, isNot(updatedRect));
+      semantics.dispose();
+    },
+  );
+}
+
+class _SiblingGroupWidget extends SingleChildRenderObjectWidget {
+  const _SiblingGroupWidget({super.child});
+
+  @override
+  _RenderSiblingGroup createRenderObject(BuildContext context) => _RenderSiblingGroup();
+}
+
+class _RenderSiblingGroup extends RenderProxyBox {
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.childConfigurationsDelegate = (List<SemanticsConfiguration> childConfigs) {
+      final builder = ChildSemanticsConfigurationsResultBuilder();
+      builder.markAsSiblingMergeGroup(childConfigs);
+      return builder.build();
+    };
+  }
 }
 
 class CustomSortKey extends OrdinalSortKey {

@@ -40,8 +40,7 @@ class PortableUITest : public ::loop_fixture::RealLoop {
   static constexpr auto kFlutterJitRunnerRef =
       component_testing::ChildRef{kFlutterJitRunner};
   static constexpr auto kFlutterJitRunnerUrl =
-      "fuchsia-pkg://fuchsia.com/oot_flutter_jit_runner#meta/"
-      "flutter_jit_runner.cm";
+      "flutter_jit_runner#meta/flutter_jit_runner.cm";
   static constexpr auto kFlutterRunnerEnvironment = "flutter_runner_env";
 
   void SetUp(bool build_realm = true);

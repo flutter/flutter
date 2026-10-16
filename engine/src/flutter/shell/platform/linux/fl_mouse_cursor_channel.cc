@@ -36,7 +36,8 @@ static FlMethodResponse* activate_system_cursor(FlMouseCursorChannel* self,
 
   FlValue* kind_value = fl_value_lookup_string(args, kKindKey);
   const gchar* kind = nullptr;
-  if (fl_value_get_type(kind_value) == FL_VALUE_TYPE_STRING) {
+  if (kind_value != nullptr &&
+      fl_value_get_type(kind_value) == FL_VALUE_TYPE_STRING) {
     kind = fl_value_get_string(kind_value);
   }
 

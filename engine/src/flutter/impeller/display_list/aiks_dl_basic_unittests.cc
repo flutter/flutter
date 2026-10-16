@@ -10,6 +10,7 @@
 #include "display_list/effects/dl_image_filter.h"
 #include "display_list/effects/dl_mask_filter.h"
 #include "flutter/impeller/display_list/aiks_unittests.h"
+#include "flutter/impeller/geometry/constants.h"
 
 #include "flutter/display_list/dl_blend_mode.h"
 #include "flutter/display_list/dl_builder.h"
@@ -482,8 +483,8 @@ TEST_P(AiksTest, CanRenderRoundedRectWithUniformRadii) {
   Scalar bottom_left = 60.f;
   Scalar bottom_right = 80.f;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("top_left", &top_left, 0, 250);
       ImGui::SliderFloat("top_right", &top_right, 0, 250);
       ImGui::SliderFloat("bottom_left", &bottom_left, 0, 250);
@@ -738,8 +739,8 @@ TEST_P(AiksTest, DrawThinStrokedCircle) {
     static float stroked_alpha = 255.0;
     static float stroked_scale[2] = {1.0, 1.0};
 
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("Stroked Radius", &stroked_radius, 0, 500);
       ImGui::SliderFloat("Stroked Width", &stroke_width, 0, 500);
       ImGui::SliderFloat("Stroked Width Fine", &stroke_width_fine, 0, 5);
@@ -1909,6 +1910,12 @@ TEST_P(AiksTest,
 
 // This makes sure the WideGamut named tests use 10-bit wide gamut pixel format.
 TEST_P(AiksTest, FormatWideGamut) {
+  // Must be called before any methods that use the context to ensure that
+  // this test is always run with wide gamut support.
+  if (!EnsureContextSupportsWideGamut()) {
+    GTEST_SKIP() << "This backend doesn't yet support wide gamut.";
+  }
+
   EXPECT_EQ(GetContext()->GetCapabilities()->GetDefaultColorFormat(),
             PixelFormat::kB10G10R10A10XR);
 }
@@ -2322,9 +2329,17 @@ TEST_P(AiksTest, PipelineBlendSingleParameter) {
 // exceed the max texture size. See
 // https://github.com/flutter/flutter/issues/128912
 TEST_P(AiksTest, MassiveScalingMatrixImageFilter) {
-  if (GetBackend() == PlaygroundBackend::kVulkan) {
-    GTEST_SKIP() << "Swiftshader is running out of memory on this example.";
+  switch (GetBackend()) {
+    case PlaygroundBackend::kMetal:
+    case PlaygroundBackend::kMetalSDF:
+      break;
+    case PlaygroundBackend::kOpenGLES:
+    case PlaygroundBackend::kOpenGLESSDF:
+    case PlaygroundBackend::kVulkan:
+      GTEST_SKIP() << "Platform is running out of memory on this example "
+                   << "(see https://github.com/flutter/flutter/issues/189286).";
   }
+
   DisplayListBuilder builder(DlRect::MakeSize(DlSize(1000, 1000)));
 
   auto filter = DlImageFilter::MakeMatrix(
@@ -2349,8 +2364,8 @@ TEST_P(AiksTest, NoDimplesInRRectPath) {
   Scalar corner = 1.f;
   bool stroked = true;
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderFloat("width", &width, 0, 200);
       ImGui::SliderFloat("height", &height, 0, 200);
       ImGui::SliderFloat("corner", &corner, 0, 1);
@@ -2429,8 +2444,8 @@ TEST_P(AiksTest, PerspectiveRectangle) {
   bool diff_clip = false;
 
   auto callback = [&]() -> sk_sp<DisplayList> {
-    if (AiksTest::ImGuiBegin("Controls", nullptr,
-                             ImGuiWindowFlags_AlwaysAutoResize)) {
+    if (IsPlaygroundEnabled()) {
+      ImGui::Begin("Controls", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
       ImGui::SliderInt("perspective%", &perspective, 0, 100);
       ImGui::Checkbox("use clip", &use_clip);
       if (use_clip) {
@@ -2472,6 +2487,338 @@ TEST_P(AiksTest, PerspectiveRectangle) {
     return builder.Build();
   };
   ASSERT_TRUE(OpenPlaygroundHere(callback));
+}
+
+TEST_P(AiksTest, CanRenderFilledRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  // Square
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 100, 100), /*radius=*/20),
+      paint);
+  // Tall
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(200, 50, 60, 140), /*radius=*/20),
+      paint);
+  // Wide
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(310, 50, 140, 60), /*radius=*/20),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderAsymmetricRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 440, 440), /*radii=*/
+          {
+              .top_left = Size(60.0f, 240.0f),
+              .top_right = Size(200.0f, 40.0f),
+              .bottom_left = Size(180.0f, 20.0f),
+              .bottom_right = Size(40.0f, 200.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(550, 50, 440, 440), /*radii=*/
+          {
+              .top_left = Size(240.0f, 40.0f),
+              .top_right = Size(40.0f, 240.0f),
+              .bottom_left = Size(40.0f, 240.0f),
+              .bottom_right = Size(240.0f, 40.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(50, 550, 400, 400), /*radii=*/
+          {
+              .top_left = Size(240.0f, 240.0f),
+              .top_right = Size(40.0f, 40.0f),
+              .bottom_left = Size(40.0f, 40.0f),
+              .bottom_right = Size(40.0f, 40.0f),
+          }),
+      paint);
+
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadii(
+          /*rect=*/DlRect::MakeXYWH(550, 550, 400, 400), /*radii=*/
+          {
+              .top_left = Size(240.0f, 240.0f),
+              .top_right = Size(40.0f, 40.0f),
+              .bottom_left = Size(40.0f, 40.0f),
+              .bottom_right = Size(240.0f, 240.0f),
+          }),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderStrokedRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(5.0f);
+
+  // Square
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 100, 100), /*radius=*/20),
+      paint);
+  // Tall
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(200, 50, 60, 140), /*radius=*/20),
+      paint);
+  // Wide
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(310, 50, 140, 60), /*radius=*/20),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderSmallRadiusRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  // Square
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 100, 100), /*radius=*/2),
+      paint);
+  // Tall
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(200, 50, 60, 140), /*radius=*/2),
+      paint);
+  // Wide
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(310, 50, 140, 60), /*radius=*/2),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderThickStrokedRoundSuperellipses) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue().withAlphaF(0.5));
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(40.0f);
+
+  // Square
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(50, 50, 100, 100), /*radius=*/30),
+      paint);
+  // Tall
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(200, 50, 60, 140), /*radius=*/30),
+      paint);
+  // Wide
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(310, 50, 140, 60), /*radius=*/30),
+      paint);
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderRoundSuperellipseGrid) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+
+  DlScalar radii[] = {10.0f, 30.0f, 50.0f};
+
+  for (int row = 0; row < 3; row++) {
+    DlScalar y = 50.0f + row * 170.0f;
+    DlScalar radius = radii[row];
+
+    // Square
+    builder.DrawRoundSuperellipse(
+        DlRoundSuperellipse::MakeRectRadius(
+            /*rect=*/DlRect::MakeXYWH(50, y, 100, 100), /*radius=*/radius),
+        paint);
+    // Tall
+    builder.DrawRoundSuperellipse(
+        DlRoundSuperellipse::MakeRectRadius(
+            /*rect=*/DlRect::MakeXYWH(200, y, 60, 140), /*radius=*/radius),
+        paint);
+    // Wide
+    builder.DrawRoundSuperellipse(
+        DlRoundSuperellipse::MakeRectRadius(
+            /*rect=*/DlRect::MakeXYWH(310, y, 140, 60), /*radius=*/radius),
+        paint);
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderTransformedRoundSuperellipse) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kWhite(), DlBlendMode::kSrc);
+
+  builder.Save();
+  builder.Translate(200, 200);
+  builder.Rotate(45.0f);
+  builder.Scale(1.5f, 0.8f);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kBlue());
+  builder.DrawRoundSuperellipse(
+      DlRoundSuperellipse::MakeRectRadius(
+          /*rect=*/DlRect::MakeXYWH(-70, -30, 140, 60), /*radius=*/20),
+      paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CompareAntiAliasAndNonAntiAlias) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  DlPaint paint;
+  paint.setColor(DlColor::kWhite());
+
+  DlRect bounds = DlRect::MakeXYWH(75, 75, 50, 50);
+
+  // --- Left Half: Zoom-in on the top-left corner WITH anti-aliasing (SDF) ---
+  DlPaint layer_paint_left;
+  layer_paint_left.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({200, 300}) * DlMatrix::MakeScale({8, 8, 1}) *
+          DlMatrix::MakeTranslation({-100, -100}),
+      DlImageSampling::kNearestNeighbor));
+  builder.SaveLayer(bounds, &layer_paint_left);
+
+  paint.setAntiAlias(true);
+  builder.DrawRoundRect(
+      DlRoundRect::MakeRectRadius(DlRect::MakeXYWH(100, 100, 200, 200), 50.0f),
+      paint);
+  builder.Restore();
+
+  // --- Right Half: Zoom-in on the top-left corner WITHOUT anti-aliasing ---
+  DlPaint layer_paint_right;
+  layer_paint_right.setImageFilter(DlImageFilter::MakeMatrix(
+      DlMatrix::MakeTranslation({600, 300}) * DlMatrix::MakeScale({8, 8, 1}) *
+          DlMatrix::MakeTranslation({-100, -100}),
+      DlImageSampling::kNearestNeighbor));
+  builder.SaveLayer(bounds, &layer_paint_right);
+
+  paint.setAntiAlias(false);
+  builder.DrawRoundRect(
+      DlRoundRect::MakeRectRadius(DlRect::MakeXYWH(100, 100, 200, 200), 50.0f),
+      paint);
+  builder.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CompareDiffRoundRectAndRoundRect) {
+  DisplayListBuilder builder;
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  DlRect outer_rect = DlRect::MakeXYWH(0, 0, 100, 100);
+  DlRoundingRadii outer_radii = {.top_left = DlSize(5.0f),
+                                 .top_right = DlSize(10.0f),
+                                 .bottom_left = DlSize(20.0f),
+                                 .bottom_right = DlSize(50.0f)};
+  DlRoundRect outer_rrect = DlRoundRect::MakeRectRadii(outer_rect, outer_radii);
+
+  DlScalar inner_inset = 5.0f;
+  DlRect inner_rect = outer_rect.Expand(-inner_inset);
+  DlRoundingRadii inner_radii = {
+      .top_left = DlSize(outer_radii.top_left.width - inner_inset),
+      .top_right = DlSize(outer_radii.top_right.width - inner_inset),
+      .bottom_left = DlSize(outer_radii.bottom_left.width - inner_inset),
+      .bottom_right = DlSize(outer_radii.bottom_right.width - inner_inset)};
+  DlRoundRect inner_rrect = DlRoundRect::MakeRectRadii(inner_rect, inner_radii);
+
+  builder.Translate(50, 50);
+
+  // Draw DiffRoundRect.
+  builder.DrawDiffRoundRect(outer_rrect, inner_rrect,
+                            DlPaint().setColor(DlColor::kSkyBlue()));
+
+  // Draw simalated DiffRoundRect by drawing the outer RoundRect and clearing
+  // the inner RoundRect.
+  builder.Translate(200, 0);
+  builder.DrawRoundRect(outer_rrect, DlPaint().setColor(DlColor::kSkyBlue()));
+  builder.DrawRoundRect(inner_rrect,
+                        DlPaint().setBlendMode(DlBlendMode::kClear));
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(AiksTest, CanRenderLinesWithCapsAnglesAndAlphas) {
+  DisplayListBuilder builder;
+  builder.Scale(GetContentScale().x, GetContentScale().y);
+  builder.DrawColor(DlColor::kBlack(), DlBlendMode::kSrc);
+
+  const float line_length = 30.0f;
+  const float stroke_width = 10.0f;
+  const float spacing = 50.0f;
+
+  const std::vector<flutter::DlStrokeCap> caps = {
+      flutter::DlStrokeCap::kButt,
+      flutter::DlStrokeCap::kSquare,
+      flutter::DlStrokeCap::kRound,
+  };
+  const std::vector<float> alphas = {1.0f, 0.75f, 0.5f, 0.25f};
+  const std::vector<Radians> angles = {
+      Degrees(0.0f),  Degrees(3.0f),  Degrees(30.0f), Degrees(45.0f),
+      Degrees(60.0f), Degrees(87.0f), Degrees(90.0f),
+  };
+
+  DlPaint paint;
+  paint.setDrawStyle(DlDrawStyle::kStroke);
+  paint.setStrokeWidth(stroke_width);
+
+  for (const DlStrokeCap cap : caps) {
+    builder.Translate(spacing, 0.0f);
+    paint.setStrokeCap(cap);
+
+    for (const float alpha : alphas) {
+      builder.Translate(spacing, 0.0f);
+      paint.setColor(DlColor::kWhite().withAlphaF(alpha));
+
+      builder.Save();
+      for (const Radians angle : angles) {
+        builder.Translate(0.0f, spacing);
+        builder.DrawLine(DlPoint(0.0f, 0.0f),
+                         DlPoint(cos(angle.radians) * line_length,
+                                 sin(angle.radians) * line_length),
+                         paint);
+      }
+      builder.Restore();
+    }
+  }
+
+  ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
 }
 
 }  // namespace testing

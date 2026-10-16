@@ -96,7 +96,7 @@ std::optional<Rect> CircleGeometry::GetCoverage(const Matrix& transform) const {
 }
 
 bool CircleGeometry::CoversArea(const Matrix& transform,
-                                const Rect& rect) const {
+                                const IRect& rect) const {
   return false;
 }
 

@@ -25,7 +25,7 @@ class EllipseGeometry final : public Geometry {
   ~EllipseGeometry() override = default;
 
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
   // |Geometry|
   bool IsAxisAlignedRect() const override;

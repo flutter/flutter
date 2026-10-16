@@ -18,4 +18,5 @@ ${ENGINE_PATH}/src/out/${VARIANT}/ui_benchmarks --benchmark_format=json > ${ENGI
 ${ENGINE_PATH}/src/out/${VARIANT}/display_list_builder_benchmarks --benchmark_format=json > ${ENGINE_PATH}/src/out/${VARIANT}/display_list_builder_benchmarks.json
 ${ENGINE_PATH}/src/out/${VARIANT}/display_list_region_benchmarks --benchmark_format=json > ${ENGINE_PATH}/src/out/${VARIANT}/display_list_region_benchmarks.json
 ${ENGINE_PATH}/src/out/${VARIANT}/display_list_transform_benchmarks --benchmark_format=json > ${ENGINE_PATH}/src/out/${VARIANT}/display_list_transform_benchmarks.json
+${ENGINE_PATH}/src/out/${VARIANT}/primitive_rendering_benchmarks --benchmark_format=json > ${ENGINE_PATH}/src/out/${VARIANT}/primitive_rendering_benchmarks.json
 ${ENGINE_PATH}/src/out/${VARIANT}/geometry_benchmarks --benchmark_format=json > ${ENGINE_PATH}/src/out/${VARIANT}/geometry_benchmarks.json

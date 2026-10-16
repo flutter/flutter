@@ -18,7 +18,7 @@ KHRSwapchainImageVK::KHRSwapchainImageVK(TextureDescriptor desc,
   view_info.subresourceRange.baseMipLevel = 0u;
   view_info.subresourceRange.baseArrayLayer = 0u;
   view_info.subresourceRange.levelCount = desc.mip_count;
-  view_info.subresourceRange.layerCount = ToArrayLayerCount(desc.type);
+  view_info.subresourceRange.layerCount = ToArrayLayerCount(desc);
 
   auto [view_result, view] = device.createImageViewUnique(view_info);
   if (view_result != vk::Result::eSuccess) {
@@ -46,7 +46,10 @@ vk::ImageView KHRSwapchainImageVK::GetImageView() const {
 }
 
 // |TextureSourceVK|
-vk::ImageView KHRSwapchainImageVK::GetRenderTargetView() const {
+vk::ImageView KHRSwapchainImageVK::GetRenderTargetView(
+    uint32_t mip_level,
+    uint32_t array_layer) const {
+  // Swapchain images are always a single 2D mip and layer.
   return image_view_.get();
 }
 

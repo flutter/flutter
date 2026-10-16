@@ -26,6 +26,12 @@ class EmbedderSurface {
 
   virtual sk_sp<GrDirectContext> CreateResourceContext() const;
 
+  /// Release any platform specific resources associated with the graphics
+  /// context created by `CreateResourceContext`.
+  ///
+  /// @see `PlatformView::ReleaseResourceContext`
+  virtual void ReleaseResourceContext() const;
+
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderSurface);
 };

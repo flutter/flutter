@@ -138,4 +138,18 @@ void main() {
       );
     },
   );
+
+  testWidgets('Title does not crash at zero area', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(
+            child: Title(color: const Color(0xFFFFFFFF), child: const Placeholder()),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Title)), Size.zero);
+  });
 }

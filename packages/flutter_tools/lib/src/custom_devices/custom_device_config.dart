@@ -135,7 +135,7 @@ class CustomDeviceConfig {
 
     late TargetPlatform? platform;
     try {
-      platform = archString == null ? null : getTargetPlatformForName(archString);
+      platform = archString == null ? null : TargetPlatform.fromName(archString);
     } on UnsupportedError {
       throw const CustomDeviceRevivalException.fromDescriptions(
         _kPlatform,
@@ -523,7 +523,7 @@ class CustomDeviceConfig {
       _kId: id,
       _kLabel: label,
       _kSdkNameAndVersion: sdkNameAndVersion,
-      _kPlatform: platform == null ? null : getNameForTargetPlatform(platform!),
+      _kPlatform: platform?.getName(),
       _kEnabled: enabled,
       _kPingCommand: pingCommand,
       _kPingSuccessRegex: pingSuccessRegex?.pattern,

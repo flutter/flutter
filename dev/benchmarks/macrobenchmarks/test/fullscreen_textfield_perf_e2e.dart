@@ -16,7 +16,7 @@ void main() {
     body: (WidgetController controller) async {
       final Finder textfield = find.byKey(const ValueKey<String>('fullscreen-textfield'));
       await controller.tap(textfield);
-      await Future<void>.delayed(const Duration(milliseconds: 5000));
+      await Future<void>.delayed(const Duration(seconds: 10));
     },
   );
 }

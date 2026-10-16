@@ -4,6 +4,11 @@
 
 #include "impeller/renderer/backend/gles/capabilities_gles.h"
 
+#include <algorithm>
+#include <charconv>
+#include <string>
+
+#include "impeller/base/strings.h"
 #include "impeller/core/formats.h"
 #include "impeller/renderer/backend/gles/proc_table_gles.h"
 
@@ -28,6 +33,63 @@ static const constexpr char* kMultisampledRenderToTexture2Ext =
 
 // https://registry.khronos.org/OpenGL/extensions/OES/OES_element_index_uint.txt
 static const constexpr char* kElementIndexUintExt = "GL_OES_element_index_uint";
+
+// The BC family spans three separate OpenGL ES extensions: S3TC (BC1-BC3),
+// RGTC (BC5), and BPTC (BC7). All three are required to report kBC support.
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_compression_s3tc.txt
+static const constexpr char* kTextureCompressionS3TCExt =
+    "GL_EXT_texture_compression_s3tc";
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_compression_rgtc.txt
+static const constexpr char* kTextureCompressionRGTCExt =
+    "GL_EXT_texture_compression_rgtc";
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_compression_bptc.txt
+static const constexpr char* kTextureCompressionBPTCExt =
+    "GL_EXT_texture_compression_bptc";
+
+// https://registry.khronos.org/OpenGL/extensions/KHR/KHR_texture_compression_astc_hdr.txt
+static const constexpr char* kTextureCompressionAstcLdrExt =
+    "GL_KHR_texture_compression_astc_ldr";
+// https://registry.khronos.org/OpenGL/extensions/OES/OES_texture_compression_astc.txt
+static const constexpr char* kTextureCompressionAstcOesExt =
+    "GL_OES_texture_compression_astc";
+// https://registry.khronos.org/OpenGL/extensions/KHR/KHR_texture_compression_astc_hdr.txt
+static const constexpr char* kTextureCompressionAstcHdrExt =
+    "GL_KHR_texture_compression_astc_hdr";
+
+// https://registry.khronos.org/OpenGL/extensions/APPLE/APPLE_texture_max_level.txt
+static const constexpr char* kAppleTextureMaxLevelExt =
+    "GL_APPLE_texture_max_level";
+
+// https://registry.khronos.org/OpenGL/extensions/EXT/EXT_texture_filter_anisotropic.txt
+static const constexpr char* kTextureFilterAnisotropicExt =
+    "GL_EXT_texture_filter_anisotropic";
+
+static bool MaliDriverNeedsTextureUploadRebind(const std::string& version) {
+  // Arm's version string includes a driver release, for example:
+  // "OpenGL ES 3.2 v1.r18p0-01rel0...". If it is unavailable, retain the
+  // workaround rather than assuming that the driver has been fixed.
+  const auto marker = version.find(" v1.r");
+  if (marker == std::string::npos) {
+    return true;
+  }
+  const char* end = version.data() + version.size();
+  unsigned int release = 0;
+  const auto release_result =
+      std::from_chars(version.data() + marker + 5, end, release);
+  if (release_result.ec != std::errc{} || release_result.ptr == end ||
+      *release_result.ptr != 'p') {
+    return true;
+  }
+  unsigned int patch = 0;
+  const auto patch_result = std::from_chars(release_result.ptr + 1, end, patch);
+  if (patch_result.ec != std::errc{} ||
+      (patch_result.ptr != end && *patch_result.ptr != '-')) {
+    return true;
+  }
+  // Arm erratum EN_ID 1,792,661 affects Bifrost/Valhall r17p0-r23p0 and was
+  // fixed in r24p0. OEM backports within that range cannot be detected.
+  return release >= 17 && release < 24;
+}
 
 CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   {
@@ -147,10 +209,87 @@ CapabilitiesGLES::CapabilitiesGLES(const ProcTableGLES& gl) {
   }
   is_es_ = desc->IsES();
   is_angle_ = desc->IsANGLE();
+  needs_texture_upload_rebind_ =
+      is_es_ && !is_angle_ &&
+      (HasPrefix(desc->GetRenderer(), "Mali-G") ||
+       HasPrefix(desc->GetRenderer(), "Immortalis-G")) &&
+      MaliDriverNeedsTextureUploadRebind(desc->GetGlVersionString());
+
+  // ETC2 and EAC are mandatory in OpenGL ES 3.0. BC and ASTC are gated behind
+  // extensions and are not present on most mobile or desktop GLES. The whole BC
+  // family requires S3TC, RGTC, and BPTC to all be present.
+  supports_texture_compression_bc_ =
+      desc->HasExtension(kTextureCompressionS3TCExt) &&
+      desc->HasExtension(kTextureCompressionRGTCExt) &&
+      desc->HasExtension(kTextureCompressionBPTCExt);
+  // Either extension is sufficient: both expose the same LDR 2D ASTC internal
+  // formats this backend uses. KHR is the common one; OES is a superset that
+  // also adds HDR and 3D, which are not used here.
+  supports_texture_compression_astc_ =
+      desc->HasExtension(kTextureCompressionAstcLdrExt) ||
+      desc->HasExtension(kTextureCompressionAstcOesExt);
+  // HDR reuses the same internal formats as LDR, gated by a separate extension.
+  // The OES extension is a superset that also covers HDR.
+  supports_texture_compression_astc_hdr_ =
+      desc->HasExtension(kTextureCompressionAstcHdrExt) ||
+      desc->HasExtension(kTextureCompressionAstcOesExt);
+  supports_texture_compression_etc2_ =
+      desc->IsES() && desc->GetGlVersion().major_version >= 3;
+
+  // GL_TEXTURE_MAX_LEVEL is core on desktop GL and ES 3.0+, and available on
+  // ES 2.0 through GL_APPLE_texture_max_level.
+  supports_texture_max_level_ = !desc->IsES() ||
+                                desc->GetGlVersion().major_version >= 3 ||
+                                desc->HasExtension(kAppleTextureMaxLevelExt);
+
+  // 2D array textures (GL_TEXTURE_2D_ARRAY, sampled as sampler2DArray) need the
+  // 3D texture upload entry points. These are core on desktop GL 3.0 and
+  // OpenGL ES 3.0, and reachable below them via GL_EXT_texture_array (desktop
+  // GL 2.x) or GL_NV_texture_array (OpenGL ES 2.0). Gate on the resolved procs
+  // rather than the version so a context that advertises an extension but does
+  // not actually provide the entry points is treated as unsupported, and so
+  // ES 2.0 devices that do expose them are supported.
+  supports_texture_array_ = gl.TexImage3D.IsAvailable() &&
+                            gl.TexSubImage3D.IsAvailable() &&
+                            gl.CompressedTexSubImage3D.IsAvailable();
+
+  // Anisotropic filtering is not part of any core GL or GLES version; it is
+  // always gated on GL_EXT_texture_filter_anisotropic. The query and the
+  // texture parameter are applied with core ES 2.0 entry points (GetFloatv
+  // and TexParameterfv), so only the extension check is needed here.
+  if (desc->HasExtension(kTextureFilterAnisotropicExt)) {
+    GLfloat value = 1.0f;
+    gl.GetFloatv(IMPELLER_GL_MAX_TEXTURE_MAX_ANISOTROPY, &value);
+    // The extension guarantees a maximum of at least 2. The limit is a float
+    // but is always an integer in practice, so floor it.
+    max_sampler_anisotropy_ = static_cast<uint32_t>(std::max(value, 2.0f));
+  }
+}
+
+bool CapabilitiesGLES::NeedsTextureUploadRebind() const {
+  return needs_texture_upload_rebind_;
 }
 
 bool CapabilitiesGLES::IsES() const {
   return is_es_;
+}
+
+bool CapabilitiesGLES::SupportsFramebufferRenderMipmap() const {
+  // Rendering into a non-zero mip level is not yet supported on the GLES
+  // backend. The texture storage path allocates levels with mutable, lazily
+  // allocated glTexImage2D storage, which yields an incomplete framebuffer
+  // when a non-base mip level is attached. Until that is reworked, do not
+  // advertise the capability so callers fall back instead of failing to
+  // create the framebuffer. Rendering into a cube map face is unaffected.
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsTextureMaxLevel() const {
+  return supports_texture_max_level_;
+}
+
+bool CapabilitiesGLES::SupportsTextureArrays() const {
+  return supports_texture_array_;
 }
 
 size_t CapabilitiesGLES::GetMaxTextureUnits(ShaderStage stage) const {
@@ -234,7 +373,29 @@ bool CapabilitiesGLES::Supports32BitPrimitiveIndices() const {
   return supports_32bit_primitive_indices_;
 }
 
+bool CapabilitiesGLES::SupportsManuallyMippedTextures() const {
+  // Without GL_TEXTURE_MAX_LEVEL the sampled mip range cannot be bounded to
+  // the levels the texture declares, so a hand-uploaded chain is mipmap
+  // incomplete and samples as black.
+  return supports_texture_max_level_;
+}
+
 bool CapabilitiesGLES::SupportsExtendedRangeFormats() const {
+  return false;
+}
+
+bool CapabilitiesGLES::SupportsTextureCompression(
+    CompressedTextureFamily family) const {
+  switch (family) {
+    case CompressedTextureFamily::kBC:
+      return supports_texture_compression_bc_;
+    case CompressedTextureFamily::kETC2:
+      return supports_texture_compression_etc2_;
+    case CompressedTextureFamily::kASTC:
+      return supports_texture_compression_astc_;
+    case CompressedTextureFamily::kASTCHDR:
+      return supports_texture_compression_astc_hdr_;
+  }
   return false;
 }
 
@@ -244,6 +405,10 @@ PixelFormat CapabilitiesGLES::GetDefaultGlyphAtlasFormat() const {
 
 ISize CapabilitiesGLES::GetMaximumRenderPassAttachmentSize() const {
   return max_texture_size;
+}
+
+uint32_t CapabilitiesGLES::GetMaxSamplerAnisotropy() const {
+  return max_sampler_anisotropy_;
 }
 
 size_t CapabilitiesGLES::GetMinimumUniformAlignment() const {

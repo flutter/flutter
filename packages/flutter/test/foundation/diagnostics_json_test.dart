@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -18,12 +18,12 @@ void main() {
   });
 
   test('StatefulElement diagnostics are stateful', () {
-    final Element element = StatefulElement(const Tooltip(message: 'foo'));
+    final Element element = StatefulElement(const _TestStatefulWidget());
 
     final Map<String, Object?> json = element.toDiagnosticsNode().toJsonMap(
       const DiagnosticsSerializationDelegate(),
     );
-    expect(json['widgetRuntimeType'], 'Tooltip');
+    expect(json['widgetRuntimeType'], '_TestStatefulWidget');
     expect(json['stateful'], isTrue);
   });
 
@@ -318,15 +318,18 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   }
 }
 
-typedef NodeDelegator =
-    DiagnosticsSerializationDelegate Function(
-      DiagnosticsNode node,
-      TestDiagnosticsSerializationDelegate delegate,
-    );
-typedef NodeTruncator =
-    List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode? owner);
-typedef NodeFilter =
-    List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode owner);
+typedef NodeDelegator = DiagnosticsSerializationDelegate Function(
+  DiagnosticsNode node,
+  TestDiagnosticsSerializationDelegate delegate,
+);
+typedef NodeTruncator = List<DiagnosticsNode> Function(
+  List<DiagnosticsNode> nodes,
+  DiagnosticsNode? owner,
+);
+typedef NodeFilter = List<DiagnosticsNode> Function(
+  List<DiagnosticsNode> nodes,
+  DiagnosticsNode owner,
+);
 
 class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDelegate {
   const TestDiagnosticsSerializationDelegate({
@@ -393,5 +396,19 @@ class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDe
       nodeTruncator: nodeTruncator,
       nodeDelegator: nodeDelegator,
     );
+  }
+}
+
+class _TestStatefulWidget extends StatefulWidget {
+  const _TestStatefulWidget();
+
+  @override
+  State<_TestStatefulWidget> createState() => _TestStatefulWidgetState();
+}
+
+class _TestStatefulWidgetState extends State<_TestStatefulWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
   }
 }

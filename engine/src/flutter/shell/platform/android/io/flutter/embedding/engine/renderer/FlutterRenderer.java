@@ -785,9 +785,9 @@ public class FlutterRenderer implements TextureRegistry {
     }
 
     @RequiresApi(API_LEVELS.API_33)
-    private void waitOnFence(Image image) {
-      try {
-        SyncFence fence = image.getFence();
+    @VisibleForTesting
+    void waitOnFence(Image image) {
+      try (SyncFence fence = image.getFence()) {
         fence.awaitForever();
       } catch (IOException e) {
         // Drop.
@@ -1066,8 +1066,7 @@ public class FlutterRenderer implements TextureRegistry {
 
     @RequiresApi(API_LEVELS.API_33)
     private void waitOnFence(Image image) {
-      try {
-        SyncFence fence = image.getFence();
+      try (SyncFence fence = image.getFence()) {
         fence.awaitForever();
       } catch (IOException e) {
         // Drop.
@@ -1361,6 +1360,13 @@ public class FlutterRenderer implements TextureRegistry {
 
   @VisibleForTesting
   /* package */ void scheduleEngineFrame() {
+    if (!flutterJNI.isAttached()) {
+      // Texture producers deliver frames asynchronously, so a frame can arrive after the engine
+      // has been detached (for example, an ImageReader callback that was already queued on the
+      // platform thread when the Activity was destroyed). There is no engine left to draw the
+      // frame, and asking a detached FlutterJNI to schedule one throws, so drop the request.
+      return;
+    }
     flutterJNI.scheduleFrame();
   }
 

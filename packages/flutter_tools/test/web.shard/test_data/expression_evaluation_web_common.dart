@@ -46,10 +46,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         additionalCommandArgs: <String>[
           '--verbose',
           '--no-web-resources-cdn',
-          if (useDDCLibraryBundleFormat)
-            '--web-experimental-hot-reload'
-          else
-            '--no-web-experimental-hot-reload',
+          if (!useDDCLibraryBundleFormat) '--no-web-experimental-hot-reload',
         ],
       );
     }
@@ -141,10 +138,7 @@ Future<void> testAll({required bool useDDCLibraryBundleFormat}) async {
         additionalCommandArgs: <String>[
           '--verbose',
           '--no-web-resources-cdn',
-          if (useDDCLibraryBundleFormat)
-            '--web-experimental-hot-reload'
-          else
-            '--no-web-experimental-hot-reload',
+          if (!useDDCLibraryBundleFormat) '--no-web-experimental-hot-reload',
         ],
       );
     }

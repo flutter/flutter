@@ -71,9 +71,10 @@ template("flutter_snapshot") {
 
   compiled_action(snapshot_target) {
     if (target_cpu == "x86" && host_os == "linux") {
-      # By default Dart will create a 32-bit gen_snapshot host binary if the target
-      # platform is 32-bit.  Override this to create a 64-bit gen_snapshot for x86
-      # targets because some host platforms may not support 32-bit binaries.
+      # By default Dart will create a 32-bit gen_snapshot host binary if the
+      # target platform is 32-bit. Override this to create a 64-bit gen_snapshot
+      # for x86 targets because some host platforms may not support 32-bit
+      # binaries.
       tool = "$dart_src/runtime/bin:gen_snapshot_host_targeting_host"
       toolchain = "//build/toolchain/$host_os:clang_x64"
     } else {
@@ -99,7 +100,7 @@ template("flutter_snapshot") {
         outputs += [ snapshot_assembly ]
         args += [
           "--snapshot_kind=app-aot-assembly",
-          "--assembly=" + rebase_path(snapshot_assembly),
+          "--assembly=" + rebase_path(snapshot_assembly, root_build_dir),
         ]
       } else if (is_android) {
         if (defined(invoker.output_aot_lib)) {
@@ -111,7 +112,7 @@ template("flutter_snapshot") {
         outputs += [ libapp ]
         args += [
           "--snapshot_kind=app-aot-elf",
-          "--elf=" + rebase_path(libapp),
+          "--elf=" + rebase_path(libapp, root_build_dir),
         ]
       } else {
         assert(false)
@@ -134,16 +135,14 @@ template("flutter_snapshot") {
         isolate_snapshot_instructions,
       ]
       args += [
-        "--snapshot_kind=app-jit",
-        "--load_vm_snapshot_data=" + rebase_path(vm_snapshot_data),
-        "--load_isolate_snapshot_data=" + rebase_path(snapshot_data),
-        "--isolate_snapshot_data=" + rebase_path(isolate_snapshot_data),
-        "--isolate_snapshot_instructions=" +
-            rebase_path(isolate_snapshot_instructions),
+        "--snapshot_kind=app",
+        "--snapshot_data=" + rebase_path(isolate_snapshot_data, root_build_dir),
+        "--snapshot_text=" +
+            rebase_path(isolate_snapshot_instructions, root_build_dir),
       ]
     }
 
-    args += [ rebase_path(kernel_output) ]
+    args += [ rebase_path(kernel_output, root_build_dir) ]
   }
 
   group(target_name) {

@@ -20,7 +20,11 @@ impeller_component("playground") {
   ]
 
   deps = [
+    "../entity",
     "../renderer/backend",
+    "//flutter/impeller/testing:golden_digest_manager",
+    "//flutter/impeller/testing:screenshot",
+    "//flutter/impeller/typographer/backends/skia:typographer_skia_backend",
     "//flutter/testing:test_swiftshader_utils",
   ]
 
@@ -70,6 +74,8 @@ impeller_component("playground") {
       "AppKit.framework",
       "QuartzCore.framework",
     ]
+
+    deps += [ "//flutter/impeller/testing:metal_screenshot" ]
   }
 }
 
@@ -85,6 +91,35 @@ impeller_component("playground_test") {
 
   public_deps = [
     ":playground",
+    "//flutter/impeller/testing:golden_digest_manager",
+    "//flutter/testing:testing_lib",
+  ]
+}
+
+impeller_component("pipeline_variant_recorder") {
+  testonly = true
+
+  sources = [
+    "pipeline_variant_recorder.cc",
+    "pipeline_variant_recorder.h",
+  ]
+
+  public_deps = [
+    "../entity",
+    "../renderer",
+  ]
+
+  deps = [ "//flutter/fml" ]
+}
+
+impeller_component("pipeline_variant_recorder_unittests") {
+  testonly = true
+
+  sources = [ "pipeline_variant_recorder_unittests.cc" ]
+
+  deps = [
+    ":pipeline_variant_recorder",
+    "../renderer/testing:mocks",
     "//flutter/testing:testing_lib",
   ]
 }

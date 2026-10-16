@@ -5,17 +5,20 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/error_handling_io.dart';
 import 'package:flutter_tools/src/base/exit.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/fakes.dart';
+import '../../src/fake_process_manager.dart';
+import '../../src/fakes.dart' hide FakeProcess;
 
 void main() {
   group('process exceptions', () {
@@ -106,6 +109,44 @@ void main() {
       expect(logger.statusText, equals('match\n'));
       expect(logger.errorText, equals('match\n'));
     });
+
+    testWithoutContext(
+      'Command output tolerates malformed UTF-8 bytes followed by a newline.',
+      () async {
+        final invalidUtf8Bytes = <int>[0xFF, 0xFE, 0xFD, 0x0A, 0x68, 0x65, 0x6C, 0x6C, 0x6F];
+        processManager.addCommand(
+          FakeCommand(
+            command: const <String>['command'],
+            process: FakeProcess(stdout: invalidUtf8Bytes, stderr: invalidUtf8Bytes),
+          ),
+        );
+
+        await processUtils.stream(<String>['command']);
+
+        expect(logger.statusText, contains('hello'));
+        expect(logger.errorText, contains('hello'));
+        expect(logger.statusText, contains('\uFFFD'));
+        expect(logger.errorText, contains('\uFFFD'));
+      },
+    );
+
+    testWithoutContext(
+      'Command output tolerates malformed UTF-8 sequences within a line.',
+      () async {
+        final fakeProcess = FakeProcess(
+          stdout: <int>[0x61, 0x62, 0xc3, 0x28, 0x63, 0x64], // 'ab' + malformed + 'cd'
+          stderr: <int>[0x61, 0x62, 0xc3, 0x28, 0x63, 0x64],
+        );
+        processManager.addCommand(
+          FakeCommand(command: const <String>['command'], process: fakeProcess),
+        );
+
+        await processUtils.stream(<String>['command']);
+
+        expect(logger.statusText, equals('ab\uFFFD(cd\n'));
+        expect(logger.errorText, equals('ab\uFFFD(cd\n'));
+      },
+    );
   });
 
   group('run', () {
@@ -157,6 +198,24 @@ void main() {
         ),
         throwsProcessException(),
       );
+    });
+
+    testWithoutContext(' decodes output with the given encoding', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(
+          command: <String>['tree'],
+          // Fails the command match unless this encoding is passed to the
+          // process manager.
+          encoding: utf8,
+          stdout: '├── a\n└── b',
+          stderr: '│',
+        ),
+      );
+
+      final RunResult result = await processUtils.run(<String>['tree'], encoding: utf8);
+
+      expect(result.stdout, '├── a\n└── b');
+      expect(result.stderr, '│');
     });
   });
 
@@ -416,62 +475,294 @@ void main() {
       );
     });
 
-    testUsingContext(
-      'prints analytics welcome message',
-      () async {
-        setExitFunctionForTests((int exitCode) {});
-        final shutdownHooks = ShutdownHooks();
-        await exitWithHooks(0, shutdownHooks: shutdownHooks);
-        expect(logger.statusText, contains(analytics.getConsentMessage));
-      },
-      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
-    );
+    testUsingContext('prints analytics welcome message', () async {
+      setExitFunctionForTests((int exitCode) {});
+      final shutdownHooks = ShutdownHooks();
+      await exitWithHooks(0, shutdownHooks: shutdownHooks);
+      expect(logger.statusText, contains(analytics.getConsentMessage));
+    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+
+    testUsingContext('does not print analytics welcome message if Analytics instance indicates it should not be printed', () async {
+      setExitFunctionForTests((int exitCode) {});
+
+      analytics.clientShowedMessage();
+
+      final shutdownHooks = ShutdownHooks();
+      await exitWithHooks(0, shutdownHooks: shutdownHooks);
+      expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
+    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+
+    testUsingContext('[sync] exceptions thrown from a hook do not crash the tool', () async {
+      setExitFunctionForTests((int exitCode) {});
+
+      final shutdownHooks = ShutdownHooks();
+      shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
+      await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+      expect(
+        logger.warningText,
+        stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+      );
+    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+
+    testUsingContext('[async] exceptions thrown from a hook do not crash the tool', () async {
+      setExitFunctionForTests((int exitCode) {});
+
+      final shutdownHooks = ShutdownHooks();
+      shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
+      await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
+      expect(
+        logger.warningText,
+        stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+      );
+    }, overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger});
+  });
+
+  group('Environment variable propagation', () {
+    late Analytics analytics;
+    late FakeProcessManager fakeProcessManager;
+    late ProcessUtils processUtils;
+
+    const expectedEnvWithDefaultTool = <String, String>{
+      'DASH__SUPPRESS_ANALYTICS': 'true',
+      'DASH__TOOL': 'flutter-tool',
+    };
+
+    const expectedEnvWithParentTool = <String, String>{
+      'DASH__SUPPRESS_ANALYTICS': 'true',
+      'DASH__TOOL': 'parent-tool',
+    };
+
+    const expectedEnvNotSuppressed = <String, String>{
+      'DASH__SUPPRESS_ANALYTICS': 'false',
+      'DASH__TOOL': 'flutter-tool',
+    };
+
+    ProcessUtils createProcessUtils({
+      Map<String, String> platformEnvironment = const <String, String>{},
+    }) {
+      return ProcessUtils(
+        processManager: ErrorHandlingProcessManager(
+          delegate: fakeProcessManager,
+          platform: FakePlatform(environment: platformEnvironment),
+          analytics: () => analytics,
+        ),
+        logger: BufferLogger.test(),
+      );
+    }
+
+    // A fake [Analytics] in its first-run state: the consent message has not
+    // been shown, so `okToSend` is false for its lifetime.
+    Analytics createFirstRunAnalytics() {
+      final fakeFlutterVersion = FakeFlutterVersion();
+      final fileSystem = MemoryFileSystem.test();
+      return Analytics.fake(
+        tool: DashTool.flutterTool,
+        homeDirectory: fileSystem.currentDirectory,
+        dartVersion: fakeFlutterVersion.dartSdkVersion,
+        fs: fileSystem,
+        flutterChannel: fakeFlutterVersion.channel,
+        flutterVersion: fakeFlutterVersion.getVersionString(),
+      );
+    }
+
+    setUp(() {
+      // An already-onboarded instance (consent message shown, telemetry
+      // enabled), so `okToSend` is true unless a test changes that. This way,
+      // tests that expect suppression exercise exactly one cause.
+      analytics = getInitializedFakeAnalyticsInstance(
+        fs: MemoryFileSystem.test(),
+        fakeFlutterVersion: FakeFlutterVersion(),
+      );
+      fakeProcessManager = FakeProcessManager.empty();
+      processUtils = createProcessUtils();
+    });
 
     testUsingContext(
-      'does not print analytics welcome message if Analytics instance indicates it should not be printed',
+      'propagates DASH__SUPPRESS_ANALYTICS and DASH__TOOL when running a command',
       () async {
-        setExitFunctionForTests((int exitCode) {});
-
-        analytics.clientShowedMessage();
-
-        final shutdownHooks = ShutdownHooks();
-        await exitWithHooks(0, shutdownHooks: shutdownHooks);
-        expect(logger.statusText, isNot(contains(analytics.getConsentMessage)));
-      },
-      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
-    );
-
-    testUsingContext(
-      '[sync] exceptions thrown from a hook do not crash the tool',
-      () async {
-        setExitFunctionForTests((int exitCode) {});
-
-        final shutdownHooks = ShutdownHooks();
-        shutdownHooks.addShutdownHook(() => throw StateError('CRASH'));
-        await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
-        expect(
-          logger.warningText,
-          stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithDefaultTool),
         );
+
+        await analytics.setTelemetry(false);
+
+        expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+      overrides: <Type, Generator>{Analytics: () => analytics},
     );
 
     testUsingContext(
-      '[async] exceptions thrown from a hook do not crash the tool',
+      'preserves parent DASH__TOOL if already specified in the environment',
       () async {
-        setExitFunctionForTests((int exitCode) {});
-
-        final shutdownHooks = ShutdownHooks();
-        shutdownHooks.addShutdownHook(() async => throw StateError('CRASH'));
-        await expectLater(exitWithHooks(0, shutdownHooks: shutdownHooks), completes);
-        expect(
-          logger.warningText,
-          stringContainsInOrder(<String>['One or more uncaught errors occurred', 'CRASH']),
+        final ProcessUtils localProcessUtils = createProcessUtils(
+          platformEnvironment: const <String, String>{'DASH__TOOL': 'parent-tool'},
         );
+
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithParentTool),
+        );
+
+        await analytics.setTelemetry(false);
+
+        expect((await localProcessUtils.run(<String>['whoohoo'])).exitCode, 0);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
       },
-      overrides: <Type, Generator>{Analytics: () => analytics, Logger: () => logger},
+      overrides: <Type, Generator>{Analytics: () => analytics},
     );
+
+    testWithoutContext('sets DASH__SUPPRESS_ANALYTICS to false when analytics can be sent and suppression is not requested', () async {
+      expect(analytics.okToSend, isTrue);
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvNotSuppressed),
+      );
+
+      expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext(
+      'sets DASH__SUPPRESS_ANALYTICS to true during the first run even though telemetry is enabled',
+      () async {
+        analytics = createFirstRunAnalytics();
+        expect(analytics.telemetryEnabled, isTrue);
+        expect(analytics.shouldShowMessage, isTrue);
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithDefaultTool),
+        );
+
+        expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext('keeps DASH__SUPPRESS_ANALYTICS true for the rest of the first run after the consent message is shown', () async {
+      analytics = createFirstRunAnalytics();
+      analytics.clientShowedMessage();
+      expect(analytics.telemetryEnabled, isTrue);
+      expect(analytics.shouldShowMessage, isFalse);
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithDefaultTool),
+      );
+
+      expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext(
+      'sets DASH__SUPPRESS_ANALYTICS to true when analytics are suppressed for this invocation',
+      () async {
+        expect(analytics.okToSend, isTrue);
+        analytics.suppressTelemetry();
+        expect(analytics.telemetryEnabled, isTrue);
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithDefaultTool),
+        );
+
+        expect((await processUtils.run(<String>['whoohoo'])).exitCode, 0);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'preserves inherited DASH__SUPPRESS_ANALYTICS=true from the parent process',
+      () async {
+        final ProcessUtils localProcessUtils = createProcessUtils(
+          platformEnvironment: const <String, String>{'DASH__SUPPRESS_ANALYTICS': 'true'},
+        );
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithDefaultTool),
+        );
+
+        expect((await localProcessUtils.run(<String>['whoohoo'])).exitCode, 0);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'preserves inherited DASH__SUPPRESS_ANALYTICS=true when starting a process',
+      () async {
+        final ProcessUtils localProcessUtils = createProcessUtils(
+          platformEnvironment: const <String, String>{'DASH__SUPPRESS_ANALYTICS': 'true'},
+        );
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithDefaultTool),
+        );
+
+        final Process process = await localProcessUtils.start(<String>['whoohoo']);
+
+        expect(await process.exitCode, 0);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext('preserves DASH__SUPPRESS_ANALYTICS=true supplied by the caller', () async {
+      fakeProcessManager.addCommand(
+        const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithDefaultTool),
+      );
+
+      final RunResult result = await processUtils.run(
+        <String>['whoohoo'],
+        environment: const <String, String>{'DASH__SUPPRESS_ANALYTICS': 'true'},
+      );
+
+      expect(result.exitCode, 0);
+      expect(fakeProcessManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext(
+      'inherited DASH__SUPPRESS_ANALYTICS=true takes precedence over a caller-supplied false',
+      () async {
+        final ProcessUtils localProcessUtils = createProcessUtils(
+          platformEnvironment: const <String, String>{'DASH__SUPPRESS_ANALYTICS': 'true'},
+        );
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithDefaultTool),
+        );
+
+        final RunResult result = await localProcessUtils.run(
+          <String>['whoohoo'],
+          environment: const <String, String>{'DASH__SUPPRESS_ANALYTICS': 'false'},
+        );
+
+        expect(result.exitCode, 0);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    testWithoutContext(
+      'inherited DASH__SUPPRESS_ANALYTICS=false is overridden when telemetry is disabled',
+      () async {
+        final ProcessUtils localProcessUtils = createProcessUtils(
+          platformEnvironment: const <String, String>{'DASH__SUPPRESS_ANALYTICS': 'false'},
+        );
+        fakeProcessManager.addCommand(
+          const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvWithDefaultTool),
+        );
+
+        await analytics.setTelemetry(false);
+
+        expect((await localProcessUtils.run(<String>['whoohoo'])).exitCode, 0);
+        expect(fakeProcessManager, hasNoRemainingExpectations);
+      },
+    );
+
+    for (final value in <String>['TRUE', '1', '']) {
+      testWithoutContext(
+        'does not treat inherited DASH__SUPPRESS_ANALYTICS="$value" as a suppression request',
+        () async {
+          final ProcessUtils localProcessUtils = createProcessUtils(
+            platformEnvironment: <String, String>{'DASH__SUPPRESS_ANALYTICS': value},
+          );
+          fakeProcessManager.addCommand(
+            const FakeCommand(command: <String>['whoohoo'], environment: expectedEnvNotSuppressed),
+          );
+
+          expect((await localProcessUtils.run(<String>['whoohoo'])).exitCode, 0);
+          expect(fakeProcessManager, hasNoRemainingExpectations);
+        },
+      );
+    }
   });
 }
 

@@ -12,10 +12,12 @@ import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/bundle.dart' hide defaultManifestPath;
 import 'package:flutter_tools/src/bundle_builder.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
@@ -61,6 +63,47 @@ void main() {
     overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem.test(),
       ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
+    'BundleBuilder propagates local engine options to build system Environment',
+    () async {
+      late Environment capturedEnvironment;
+      final BuildSystem buildSystem = TestBuildSystem.all(BuildResult(success: true), (
+        Target target,
+        Environment environment,
+      ) {
+        capturedEnvironment = environment;
+        environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
+        environment.outputDir.childFile('isolate_snapshot_data').createSync();
+        environment.outputDir.childFile('vm_snapshot_data').createSync();
+        environment.outputDir.childFile('LICENSE').createSync(recursive: true);
+      });
+
+      await BundleBuilder().build(
+        platform: TargetPlatform.ios,
+        buildInfo: BuildInfo.debug,
+        project: FlutterProject.fromDirectoryTest(globals.fs.currentDirectory),
+        mainPath: globals.fs.path.join('lib', 'main.dart'),
+        assetDirPath: 'example',
+        depfilePath: 'example.d',
+        buildSystem: buildSystem,
+      );
+
+      expect(capturedEnvironment.artifacts.usesLocalArtifacts, isTrue);
+      expect(capturedEnvironment.artifacts.localEngineInfo, isNotNull);
+      expect(capturedEnvironment.artifacts.localEngineInfo?.localTargetName, 'ios_debug');
+      expect(capturedEnvironment.artifacts.localEngineInfo?.localHostName, 'host_debug');
+      expect(capturedEnvironment.engineVersion, isNull);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+      Artifacts: () => Artifacts.testLocalEngine(
+        localEngine: 'engine/src/out/ios_debug',
+        localEngineHost: 'engine/src/out/host_debug',
+      ),
     },
   );
 
@@ -126,6 +169,7 @@ void main() {
         logger: BufferLogger.test(),
         projectDir: fileSystem.currentDirectory,
         buildMode: BuildMode.debug,
+        platform: FakePlatform(),
       );
 
       final File outputAssetFile = fileSystem.file('build/flutter_assets/my-asset.txt');
@@ -264,6 +308,38 @@ void main() {
       ),
       'build/95b595cca01caa5f0ca0a690339dd7f6.cache.dill.track.dill',
     );
+  });
+
+  testWithoutContext('TargetModel isolates getDefaultCachedKernelPath hash', () {
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final config = Config.test();
+
+    final String pathWithFlutter = getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      fileSystem: fileSystem,
+      config: config,
+      targetModel: TargetModel.flutter,
+    );
+
+    final String pathWithDartdevc = getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      fileSystem: fileSystem,
+      config: config,
+      targetModel: TargetModel.dartdevc,
+    );
+
+    final String pathWithoutTarget = getDefaultCachedKernelPath(
+      trackWidgetCreation: true,
+      dartDefines: <String>[],
+      fileSystem: fileSystem,
+      config: config,
+    );
+
+    expect(pathWithFlutter, isNot(pathWithDartdevc));
+    expect(pathWithFlutter, isNot(pathWithoutTarget));
+    expect(pathWithDartdevc, isNot(pathWithoutTarget));
   });
 
   testUsingContext(

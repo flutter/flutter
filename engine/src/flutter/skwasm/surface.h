@@ -12,6 +12,7 @@
 #include <emscripten/threading.h>
 #include <webgl/webgl1.h>
 #include <cassert>
+#include <optional>
 #include "export.h"
 #include "render_context.h"
 #include "wrappers.h"
@@ -80,6 +81,7 @@ class Surface {
 
   // Other
   void SetResourceCacheLimit(int bytes);
+  void SetResourceCacheLimitOnWorker(int bytes);
   std::unique_ptr<TextureSourceWrapper> CreateTextureSourceWrapper(
       SkwasmObject textureSource);
 
@@ -89,6 +91,8 @@ class Surface {
   void RecreateSurface();
 
   CallbackHandler* callback_handler_ = nullptr;
+
+  // Main thread only
   uint32_t current_callback_id_ = 0;
 
   int canvas_width_ = 0;
@@ -97,6 +101,10 @@ class Surface {
   EMSCRIPTEN_WEBGL_CONTEXT_HANDLE gl_context_ = 0;
   std::unique_ptr<RenderContext> render_context_;
   uint32_t context_lost_callback_id_ = 0;
+
+  // Worker thread only: the desired resource cache limit for the surface,
+  // reapplied whenever the render context is (re)created.
+  std::optional<int> resource_cache_limit_;
 
   bool is_initialized_ = false;
 };

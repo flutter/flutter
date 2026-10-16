@@ -528,6 +528,17 @@ void platformMessagePortResponseTest() async {
   }
 }
 
+/// Responds to a port that has already been closed, simulating an isolate
+/// that exits before the platform replies.
+@pragma('vm:entry-point')
+void platformMessagePortResponseClosedPortTest() {
+  final receivePort = ReceivePort();
+  final int nativePort = receivePort.sendPort.nativePort;
+  receivePort.close();
+  _callPlatformMessageResponseDartPort(nativePort);
+  _finishCallResponse(true);
+}
+
 @pragma('vm:entry-point')
 void platformMessageResponseTest() {
   _callPlatformMessageResponseDart((ByteData? result) {
@@ -810,11 +821,18 @@ void convertPaintToDlPaint() {
   paint.colorFilter = ColorFilter.mode(Color.fromARGB(0x55, 0x66, 0x77, 0x88), BlendMode.xor);
   paint.maskFilter = MaskFilter.blur(BlurStyle.inner, .75);
   paint.style = PaintingStyle.stroke;
+  paint.isAntiAlias = false;
   _convertPaintToDlPaint(paint);
 }
 
 @pragma('vm:external-name', 'ConvertPaintToDlPaint')
 external void _convertPaintToDlPaint(Paint paint);
+
+@pragma('vm:entry-point')
+void convertDefaultPaintToDlPaint() {
+  Paint paint = Paint();
+  _convertPaintToDlPaint(paint);
+}
 
 /// Hooks for platform_configuration_unittests.cc
 @pragma('vm:entry-point')

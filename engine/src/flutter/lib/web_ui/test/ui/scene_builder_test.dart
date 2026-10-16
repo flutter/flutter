@@ -41,8 +41,7 @@ Future<void> testMain() async {
       final sceneBuilder = ui.SceneBuilder();
       final transform = Matrix4.identity();
 
-      // The html renderer expects the top-level transform to just be a scaling
-      // matrix for the device pixel ratio, so just push the identity matrix.
+      // Push the identity matrix.
       sceneBuilder.pushTransform(transform.toFloat64());
       transform.translate(150, 150);
       transform.rotate(kUnitZ, math.pi / 3);
@@ -642,7 +641,7 @@ Future<void> testMain() async {
       );
     });
 
-    test('push pop balance enfocement is consistent', () async {
+    test('push pop balance enforcement is consistent', () async {
       final sceneBuilder = ui.SceneBuilder();
       // Normally pop() must follow a previously non-popped layer push. However,
       // the Flutter engine chooses to be lenient and allows calling pop() with
@@ -663,7 +662,7 @@ ui.Picture drawPicture(void Function(ui.Canvas) drawCommands) {
   return recorder.endRecording();
 }
 
-ui.Scene backdropBlurWithTileMode(ui.TileMode? tileMode, final double rectSize, final int count) {
+ui.Scene backdropBlurWithTileMode(ui.TileMode? tileMode, double rectSize, int count) {
   final double imgSize = rectSize * count;
 
   const white = ui.Color(0xFFFFFFFF);

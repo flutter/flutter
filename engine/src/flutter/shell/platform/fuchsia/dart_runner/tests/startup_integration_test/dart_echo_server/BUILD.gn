@@ -16,7 +16,8 @@ dart_library("lib") {
   sources = [ "main.dart" ]
 }
 
-# Dart component that serves the test Echo FIDL protocol, built using the Dart AOT runner
+# Dart component that serves the test Echo FIDL protocol, built using the Dart
+# AOT runner
 dart_component("aot_component") {
   testonly = true
 
@@ -27,7 +28,8 @@ dart_component("aot_component") {
   deps = [ ":lib" ]
 }
 
-# Dart component that serves the test Echo FIDL protocol, built using the Dart AOT runner
+# Dart component that serves the test Echo FIDL protocol, built using the Dart
+# AOT runner
 dart_component("jit_component") {
   testonly = true
 
@@ -42,26 +44,12 @@ fuchsia_package("aot_echo_package") {
   testonly = true
 
   package_name = "dart_aot_echo_server"
-  deps = [
-    ":aot_component",
-
-    # "OOT" copy of the runner used by tests, to avoid conflicting with the
-    # runners in the base fuchsia image.
-    # TODO(fxbug.dev/106575): Fix this with subpackages.
-    "//flutter/shell/platform/fuchsia/dart_runner:oot_dart_aot_runner",
-  ]
+  deps = [ ":aot_component" ]
 }
 
 fuchsia_package("jit_echo_package") {
   testonly = true
 
   package_name = "dart_jit_echo_server"
-  deps = [
-    ":jit_component",
-
-    # "OOT" copy of the runner used by tests, to avoid conflicting with the
-    # runners in the base fuchsia image.
-    # TODO(fxbug.dev/106575): Fix this with subpackages.
-    "//flutter/shell/platform/fuchsia/dart_runner:oot_dart_jit_runner",
-  ]
+  deps = [ ":jit_component" ]
 }

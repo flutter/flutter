@@ -61,10 +61,15 @@ class BrightnessPreview extends MultiPreview {
   ];
 }
 
+final class MyThemeData extends PreviewThemeData {
+  const MyThemeData();
+  @override
+  Widget apply(BuildContext context, Widget child) => child;
+}
 
 class ClassDeclaration extends StatelessWidget {
   @BrightnessPreview(new Object())
-  @Preview(theme: () => PreviewThemeData())
+  @Preview(theme: () => MyThemeData())
   ClassDeclaration();
 
   @override

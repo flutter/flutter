@@ -104,6 +104,15 @@ class PluginRegistrarWindows : public PluginRegistrar {
     }
   }
 
+  // Retrieves the DXGI adapter used for rendering. Returns true if the adapter
+  // was successfully retrieved, or false if an error occured.
+  // The caller must provide a valid pointer to an IDXGIAdapter* and is
+  // responsible for releasing the adapter.
+  bool GetGraphicsAdapter(IDXGIAdapter** adapter_out) {
+    return FlutterDesktopPluginRegistrarGetGraphicsAdapter(registrar(),
+                                                           adapter_out);
+  }
+
  private:
   // A FlutterDesktopWindowProcCallback implementation that forwards back to
   // a PluginRegistarWindows instance provided as |user_data|.

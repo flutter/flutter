@@ -27,6 +27,7 @@ static constexpr const size_t kMaxPendingPresents = 2u;
 
 struct AHBFrameSynchronizerVK {
   vk::UniqueFence acquire;
+  bool acquire_fence_pending = false;
   vk::UniqueSemaphore render_ready = {};
   std::shared_ptr<ExternalSemaphoreVK> present_ready;
   std::shared_ptr<CommandBuffer> final_cmd_buffer;
@@ -139,6 +140,8 @@ class AHBSwapchainImplVK final
       bool enable_msaa);
 
   bool Present(const std::shared_ptr<AHBTextureSourceVK>& texture);
+
+  void WaitIdle() const;
 
   vk::UniqueSemaphore CreateRenderReadySemaphore(
       const std::shared_ptr<fml::UniqueFD>& fd) const;

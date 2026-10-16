@@ -50,8 +50,8 @@ void testMain() {
     debugIsIOS15 = false;
 
     expect(canonicalizeFontFamily('sans-serif'), 'sans-serif');
-    expect(canonicalizeFontFamily('foo'), '"foo", -apple-system, BlinkMacSystemFont, sans-serif');
-    expect(canonicalizeFontFamily('.SF Pro Text'), '-apple-system, BlinkMacSystemFont');
+    expect(canonicalizeFontFamily('foo'), '"foo",-apple-system,BlinkMacSystemFont,sans-serif');
+    expect(canonicalizeFontFamily('.SF Pro Text'), '-apple-system,BlinkMacSystemFont');
 
     ui_web.browser.debugOperatingSystemOverride = null;
     debugIsIOS15 = null;
@@ -62,8 +62,65 @@ void testMain() {
     debugIsIOS15 = true;
 
     expect(canonicalizeFontFamily('sans-serif'), 'sans-serif');
-    expect(canonicalizeFontFamily('foo'), '"foo", BlinkMacSystemFont, sans-serif');
+    expect(canonicalizeFontFamily('foo'), '"foo",BlinkMacSystemFont,sans-serif');
     expect(canonicalizeFontFamily('.SF Pro Text'), 'BlinkMacSystemFont');
+
+    ui_web.browser.debugOperatingSystemOverride = null;
+    debugIsIOS15 = null;
+  });
+
+  test('canonicalizes with fallback font families on Linux', () {
+    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.linux;
+    debugIsIOS15 = false;
+
+    expect(canonicalizeFontFamily('sans-serif', <String>['Roboto']), 'sans-serif');
+    expect(canonicalizeFontFamily('Roboto', <String>['sans-serif']), '"Roboto",sans-serif');
+    expect(
+      canonicalizeFontFamily('Roboto', ['sans-serif', 'Roboto', 'Helvetica']),
+      '"Roboto",sans-serif,"Roboto","Helvetica"',
+    );
+    expect(
+      canonicalizeFontFamily('Random Font Name', <String>['Roboto']),
+      '"Random Font Name","Roboto",Arial,sans-serif',
+    );
+
+    ui_web.browser.debugOperatingSystemOverride = null;
+    debugIsIOS15 = null;
+  });
+
+  test('canonicalizes with fallback font families on iOS 15', () {
+    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.iOs;
+    debugIsIOS15 = true;
+
+    expect(canonicalizeFontFamily('sans-serif', <String>['Roboto']), 'sans-serif');
+    expect(canonicalizeFontFamily('Roboto', <String>['sans-serif']), '"Roboto",sans-serif');
+    expect(
+      canonicalizeFontFamily('Roboto', ['sans-serif', 'Roboto', 'Helvetica']),
+      '"Roboto",sans-serif,"Roboto","Helvetica"',
+    );
+    expect(
+      canonicalizeFontFamily('Random Font Name', <String>['Roboto']),
+      '"Random Font Name","Roboto",BlinkMacSystemFont,sans-serif',
+    );
+
+    ui_web.browser.debugOperatingSystemOverride = null;
+    debugIsIOS15 = null;
+  });
+
+  test('canonicalizes with fallback font families on MacOS', () {
+    ui_web.browser.debugOperatingSystemOverride = ui_web.OperatingSystem.macOs;
+    debugIsIOS15 = false;
+
+    expect(canonicalizeFontFamily('sans-serif', <String>['Roboto']), 'sans-serif');
+    expect(canonicalizeFontFamily('Roboto', <String>['sans-serif']), '"Roboto",sans-serif');
+    expect(
+      canonicalizeFontFamily('Roboto', ['sans-serif', 'Roboto', 'Helvetica']),
+      '"Roboto",sans-serif,"Roboto","Helvetica"',
+    );
+    expect(
+      canonicalizeFontFamily('Random Font Name', <String>['Roboto']),
+      '"Random Font Name","Roboto",-apple-system,BlinkMacSystemFont,sans-serif',
+    );
 
     ui_web.browser.debugOperatingSystemOverride = null;
     debugIsIOS15 = null;

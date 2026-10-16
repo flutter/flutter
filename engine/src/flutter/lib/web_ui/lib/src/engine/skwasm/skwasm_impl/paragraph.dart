@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:js_interop';
+import 'dart:typed_data';
 
 import 'package:ui/src/engine.dart';
 import 'package:ui/src/engine/skwasm/skwasm_impl.dart';
@@ -143,8 +144,8 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
             missingCodePointCount,
           );
           assert(missingCodePointCount == returnedCodePointCount);
-          renderer.fontCollection.fontFallbackManager!.addMissingCodePoints(
-            List<int>.generate(missingCodePointCount, (int index) => codePointBuffer[index]),
+          FallbackFontService.instance.addMissingCodePoints(
+            codePointBuffer.toUint32List(missingCodePointCount),
           );
         });
       }
@@ -246,10 +247,30 @@ class SkwasmParagraph extends SkwasmObjectWrapper<RawParagraph> implements ui.Pa
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    final int offset = position.offset;
-    for (final SkwasmLineMetrics metrics in computeLineMetrics()) {
-      if (offset >= metrics.startIndex && offset <= metrics.endIndex) {
-        return ui.TextRange(start: metrics.startIndex, end: metrics.endIndex);
+    final List<SkwasmLineMetrics> metrics = computeLineMetrics();
+    final ui.TextRange line = _lineBoundaryAtOffset(metrics, position.offset);
+
+    // A line's endIndex equals the next line's startIndex at a soft wrap, so
+    // the lookup above cannot tell the two apart on its own and always answers
+    // with the earlier line, as if the affinity were upstream. A downstream
+    // position sitting exactly on that seam belongs to the next line instead.
+    // This mirrors the native implementation in `lib/ui/text.dart`.
+    final ui.TextRange nextLine = _lineBoundaryAtOffset(metrics, position.offset + 1);
+    if (nextLine.isValid &&
+        position.affinity == ui.TextAffinity.downstream &&
+        line != nextLine &&
+        position.offset == line.end &&
+        line.end == nextLine.start) {
+      return nextLine;
+    }
+    return line;
+  }
+
+  // The line containing [offset], treating both line bounds as inclusive.
+  static ui.TextRange _lineBoundaryAtOffset(List<SkwasmLineMetrics> metrics, int offset) {
+    for (final line in metrics) {
+      if (offset >= line.startIndex && offset <= line.endIndex) {
+        return ui.TextRange(start: line.startIndex, end: line.endIndex);
       }
     }
     return ui.TextRange.empty;
@@ -725,6 +746,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
     ui.StrutStyle? strutStyle,
     String? ellipsis,
     ui.Locale? locale,
+    ui.Hyphens? hyphens,
   }) : _textAlign = textAlign,
        _textDirection = textDirection,
        _maxLines = maxLines,
@@ -736,7 +758,8 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
        _fontStyle = fontStyle,
        _strutStyle = strutStyle,
        _ellipsis = ellipsis,
-       _locale = locale;
+       _locale = locale,
+       _hyphens = hyphens;
 
   (ParagraphStyleHandle, SkwasmNativeTextStyle) createNative() {
     final ParagraphStyleHandle handle = paragraphStyleCreate();
@@ -819,6 +842,8 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
     }
     paragraphStyleSetTextStyle(handle, textStyleHandle);
     paragraphStyleSetApplyRoundingHack(handle, false);
+    // Like the native engine, render soft hyphens unless they are hidden.
+    paragraphStyleSetRenderSoftHyphens(handle, _hyphens != ui.Hyphens.hidden);
     return (handle, textStyle);
   }
 
@@ -834,6 +859,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
   final ui.StrutStyle? _strutStyle;
   final String? _ellipsis;
   final ui.Locale? _locale;
+  final ui.Hyphens? _hyphens;
 
   @override
   bool operator ==(Object other) {
@@ -855,7 +881,8 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
         other._textHeightBehavior == _textHeightBehavior &&
         other._strutStyle == _strutStyle &&
         other._ellipsis == _ellipsis &&
-        other._locale == _locale;
+        other._locale == _locale &&
+        other._hyphens == _hyphens;
   }
 
   @override
@@ -873,6 +900,7 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
       _strutStyle,
       _ellipsis,
       _locale,
+      _hyphens,
     );
   }
 
@@ -895,7 +923,8 @@ class SkwasmParagraphStyle implements ui.ParagraphStyle {
           'height: ${height != null ? "${height.toStringAsFixed(1)}x" : "unspecified"}, '
           'strutStyle: ${_strutStyle ?? "unspecified"}, '
           'ellipsis: ${_ellipsis != null ? '"$_ellipsis"' : "unspecified"}, '
-          'locale: ${_locale ?? "unspecified"}'
+          'locale: ${_locale ?? "unspecified"}, '
+          'hyphens: ${_hyphens ?? "unspecified"}'
           ')';
       return true;
     }());
@@ -978,16 +1007,14 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
       text = '';
       jsText = ''.toJS;
     } else {
-      final codeUnitList = List<int>.generate(outSize.value, (int index) => utf8Data[index]);
-      text = utf8.decode(codeUnitList);
+      text = utf8.decode(utf8Data.toUint8List(outSize.value));
       jsText = _utf8Decoder.decode(
         // In an ideal world we would just use a subview of wasm memory rather
         // than a slice, but the TextDecoder API doesn't work on shared buffer
         // sources yet.
         // See https://bugs.chromium.org/p/chromium/issues/detail?id=1012656
-        JSUint8Array(
-          skwasmInstance.wasmMemory.buffer,
-        ).slice(utf8Data.address, utf8Data.address + outSize.value),
+        JSUint8Array(skwasmInstance.wasmMemory.buffer)
+            .slice(utf8Data.address, utf8Data.address + outSize.value),
       );
     }
 
@@ -1089,5 +1116,31 @@ class SkwasmParagraphBuilder extends SkwasmObjectWrapper<RawParagraphBuilder>
     textStyle.applyToNative(nativeStyle);
     textStyleStack.add(nativeStyle);
     paragraphBuilderPushStyle(handle, nativeStyle.handle);
+  }
+}
+
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+extension on Pointer<Uint8> {
+  Uint8List toUint8List(int length) {
+    final list = Uint8List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i];
+    }
+    return list;
+  }
+}
+
+/// Using a specialized local extension rather than a generic List<int>.generate
+/// prevents dart2wasm from dynamically boxing the primitive integers into
+/// heap-allocated objects ($BoxedInt / struct allocations) during copy blocks.
+extension on Pointer<Uint32> {
+  Uint32List toUint32List(int length) {
+    final list = Uint32List(length);
+    for (int i = length - 1; i >= 0; i--) {
+      list[i] = this[i];
+    }
+    return list;
   }
 }

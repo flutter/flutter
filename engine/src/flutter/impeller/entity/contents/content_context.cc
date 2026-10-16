@@ -14,6 +14,7 @@
 #include "impeller/core/formats.h"
 #include "impeller/core/texture_descriptor.h"
 #include "impeller/entity/contents/framebuffer_blend_contents.h"
+#include "impeller/entity/contents/pipeline_variant_recording.h"
 #include "impeller/entity/contents/pipelines.h"
 #include "impeller/entity/contents/text_shadow_cache.h"
 #include "impeller/entity/entity.h"
@@ -42,6 +43,7 @@ class GenericVariants {
         return;
       }
     }
+    IMPELLER_RECORD_PIPELINE_VARIANT(options, pipeline.get());
     pipelines_.push_back(std::make_pair(p_key, std::move(pipeline)));
   }
 
@@ -161,8 +163,7 @@ template <class RenderPipelineHandleT>
 RenderPipelineHandleT* CreateIfNeeded(
     const ContentContext* context,
     Variants<RenderPipelineHandleT>& container,
-    ContentContextOptions opts,
-    PipelineCompileQueue* compile_queue) {
+    ContentContextOptions opts) {
   if (!context->IsValid()) {
     return nullptr;
   }
@@ -170,6 +171,8 @@ RenderPipelineHandleT* CreateIfNeeded(
   if (RenderPipelineHandleT* found = container.Get(opts)) {
     return found;
   }
+
+  IMPELLER_PIPELINE_VARIANT_LAZY_SCOPE(context);
 
   RenderPipelineHandleT* default_handle =
       container.GetDefault(*context->GetContext());
@@ -181,7 +184,7 @@ RenderPipelineHandleT* CreateIfNeeded(
   FML_CHECK(default_handle != nullptr);
 
   const std::shared_ptr<Pipeline<PipelineDescriptor>>& pipeline =
-      default_handle->WaitAndGet(compile_queue);
+      default_handle->WaitAndGet();
   if (!pipeline) {
     return nullptr;
   }
@@ -202,14 +205,11 @@ template <class TypedPipeline>
 PipelineRef GetPipeline(const ContentContext* context,
                         Variants<TypedPipeline>& container,
                         ContentContextOptions opts) {
-  auto compile_queue =
-      context->GetContext()->GetPipelineLibrary()->GetPipelineCompileQueue();
-  TypedPipeline* pipeline =
-      CreateIfNeeded(context, container, opts, compile_queue);
+  TypedPipeline* pipeline = CreateIfNeeded(context, container, opts);
   if (!pipeline) {
     return raw_ptr<Pipeline<PipelineDescriptor>>();
   }
-  return raw_ptr(pipeline->WaitAndGet(compile_queue));
+  return raw_ptr(pipeline->WaitAndGet());
 }
 
 }  // namespace
@@ -231,7 +231,6 @@ struct ContentContext::Pipelines {
   Variants<BlendSaturationPipeline> blend_saturation;
   Variants<BlendScreenPipeline> blend_screen;
   Variants<BlendSoftLightPipeline> blend_softlight;
-  Variants<BorderMaskBlurPipeline> border_mask_blur;
   Variants<CirclePipeline> circle;
   Variants<ClipPipeline> clip;
   Variants<ColorMatrixColorFilterPipeline> color_matrix_color_filter;
@@ -265,7 +264,6 @@ struct ContentContext::Pipelines {
   Variants<FramebufferBlendSoftLightPipeline> framebuffer_blend_softlight;
   Variants<GaussianBlurPipeline> gaussian_blur;
   Variants<GlyphAtlasPipeline> glyph_atlas;
-  Variants<LinePipeline> line;
   Variants<LinearGradientFillPipeline> linear_gradient_fill;
   Variants<LinearGradientSSBOFillPipeline> linear_gradient_ssbo_fill;
   Variants<LinearGradientUniformFillPipeline> linear_gradient_uniform_fill;
@@ -305,6 +303,8 @@ struct ContentContext::Pipelines {
   Variants<VerticesUber1Shader> vertices_uber_1_;
   Variants<VerticesUber2Shader> vertices_uber_2_;
   Variants<UberSDFPipeline> uber_sdf;
+  Variants<UberSDFSSBOPipeline> uber_sdf_ssbo;
+  Variants<ComplexRSEPipeline> complex_rse;
   Variants<YUVToRGBFilterPipeline> yuv_to_rgb_filter;
 
 // Web doesn't support external texture OpenGL extensions
@@ -565,11 +565,14 @@ ContentContext::ContentContext(
       data_host_buffer_(HostBuffer::Create(
           context_->GetResourceAllocator(),
           context_->GetIdleWaiter(),
-          context_->GetCapabilities()->GetMinimumUniformAlignment())),
+          context_->GetCapabilities()->GetMinimumUniformAlignment(),
+          context_->GetSubmissionTracker())),
       text_shadow_cache_(std::make_unique<TextShadowCache>()) {
   if (!context_ || !context_->IsValid()) {
     return;
   }
+
+  IMPELLER_PIPELINE_VARIANT_WARMING_SCOPE(this);
 
   // On most backends, indexes and other data can be allocated into the same
   // buffers. However, some backends (namely WebGL) require indexes used in
@@ -579,7 +582,8 @@ ContentContext::ContentContext(
       context_->GetCapabilities()->NeedsPartitionedHostBuffer()
           ? HostBuffer::Create(
                 context_->GetResourceAllocator(), context_->GetIdleWaiter(),
-                context_->GetCapabilities()->GetMinimumUniformAlignment())
+                context_->GetCapabilities()->GetMinimumUniformAlignment(),
+                context_->GetSubmissionTracker())
           : data_host_buffer_;
   {
     TextureDescriptor desc;
@@ -634,10 +638,14 @@ ContentContext::ContentContext(
     pipelines_->solid_fill.CreateDefault(*context_, options);
     pipelines_->texture.CreateDefault(*context_, options);
     pipelines_->fast_gradient.CreateDefault(*context_, options);
-    pipelines_->line.CreateDefault(*context_, options);
     pipelines_->circle.CreateDefault(*context_, options);
     if (context_->GetFlags().use_sdfs) {
-      pipelines_->uber_sdf.CreateDefault(*context_, options);
+      if (context_->GetCapabilities()->SupportsSSBO()) {
+        pipelines_->uber_sdf_ssbo.CreateDefault(*context_, options);
+      } else {
+        pipelines_->uber_sdf.CreateDefault(*context_, options);
+      }
+      pipelines_->complex_rse.CreateDefault(*context_, options);
     }
 
     if (context_->GetCapabilities()->SupportsSSBO()) {
@@ -712,8 +720,6 @@ ContentContext::ContentContext(
                                             {supports_decal});
     pipelines_->gaussian_blur.CreateDefault(
         *context_, options_no_msaa_no_depth_stencil, {supports_decal});
-    pipelines_->border_mask_blur.CreateDefault(*context_,
-                                               options_trianglestrip);
     pipelines_->color_matrix_color_filter.CreateDefault(*context_,
                                                         options_trianglestrip);
     pipelines_->shadow_vertices_.CreateDefault(*context_, options);
@@ -876,7 +882,9 @@ ContentContext::ContentContext(
   InitializeCommonlyUsedShadersIfNeeded();
 }
 
-ContentContext::~ContentContext() = default;
+ContentContext::~ContentContext() {
+  IMPELLER_REPORT_PIPELINE_VARIANTS(this, context_);
+}
 
 bool ContentContext::IsValid() const {
   return is_valid_;
@@ -1163,11 +1171,6 @@ PipelineRef ContentContext::GetGaussianBlurPipeline(
   return GetPipeline(this, pipelines_->gaussian_blur, opts);
 }
 
-PipelineRef ContentContext::GetBorderMaskBlurPipeline(
-    ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->border_mask_blur, opts);
-}
-
 PipelineRef ContentContext::GetMorphologyFilterPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->morphology_filter, opts);
@@ -1205,6 +1208,16 @@ PipelineRef ContentContext::GetYUVToRGBFilterPipeline(
 PipelineRef ContentContext::GetUberSDFPipeline(
     ContentContextOptions opts) const {
   return GetPipeline(this, pipelines_->uber_sdf, opts);
+}
+
+PipelineRef ContentContext::GetUberSDFSSBOPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->uber_sdf_ssbo, opts);
+}
+
+PipelineRef ContentContext::GetComplexRSEPipeline(
+    ContentContextOptions opts) const {
+  return GetPipeline(this, pipelines_->complex_rse, opts);
 }
 
 PipelineRef ContentContext::GetPorterDuffPipeline(
@@ -1532,10 +1545,6 @@ PipelineRef ContentContext::GetCirclePipeline(
   return GetPipeline(this, pipelines_->circle, opts);
 }
 
-PipelineRef ContentContext::GetLinePipeline(ContentContextOptions opts) const {
-  return GetPipeline(this, pipelines_->line, opts);
-}
-
 #ifdef IMPELLER_ENABLE_OPENGLES
 
 #if !defined(FML_OS_EMSCRIPTEN)
@@ -1597,6 +1606,12 @@ void ContentContext::RemoveCachedTexture(const flutter::DlImage* image) const {
 
 void ContentContext::ClearCachedTextures() const {
   texture_cache_.clear();
+}
+
+void ContentContext::ClearRenderTargetCache() const {
+  if (render_target_cache_) {
+    render_target_cache_->Clear();
+  }
 }
 
 }  // namespace impeller

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -493,6 +494,22 @@ void main() {
       );
       await terminalHandler.processTerminalInput('o');
       await terminalHandler.processTerminalInput('O');
+    });
+
+    testWithoutContext('o,O - debugTogglePlatform with null vmService does not crash', () async {
+      for (final key in <String>['o', 'O']) {
+        final TerminalHandler terminalHandler = setUpTerminalHandler(
+          <FakeVmServiceRequest>[],
+          nullVmService: true,
+        );
+        await terminalHandler.processTerminalInput(key);
+
+        expect(
+          terminalHandler.logger.statusText,
+          contains('Platform toggle is not supported for this device.'),
+          reason: 'Expected message when pressing "$key"',
+        );
+      }
     });
 
     testWithoutContext('p - debugToggleDebugPaintSizeEnabled', () async {
@@ -1166,77 +1183,68 @@ void main() {
     },
   );
 
-  testWithoutContext(
-    's, does not take a screenshot on a device that does not support screenshot or the service protocol',
-    () async {
-      final logger = BufferLogger.test();
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[],
-        logger: logger,
-        supportsServiceProtocol: false,
-        fileSystem: fileSystem,
-      );
+  testWithoutContext('s, does not take a screenshot on a device that does not support screenshot or the service protocol', () async {
+    final logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[],
+      logger: logger,
+      supportsServiceProtocol: false,
+      fileSystem: fileSystem,
+    );
 
-      await terminalHandler.processTerminalInput('s');
+    await terminalHandler.processTerminalInput('s');
 
-      expect(logger.statusText, '\n');
-      expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
-    },
-  );
+    expect(logger.statusText, '\n');
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
+  });
 
-  testWithoutContext(
-    's, does not take a screenshot on a web device that does not support screenshot or the service protocol',
-    () async {
-      final logger = BufferLogger.test();
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[],
-        logger: logger,
-        supportsServiceProtocol: false,
-        web: true,
-        fileSystem: fileSystem,
-      );
+  testWithoutContext('s, does not take a screenshot on a web device that does not support screenshot or the service protocol', () async {
+    final logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[],
+      logger: logger,
+      supportsServiceProtocol: false,
+      web: true,
+      fileSystem: fileSystem,
+    );
 
-      await terminalHandler.processTerminalInput('s');
+    await terminalHandler.processTerminalInput('s');
 
-      expect(logger.statusText, '\n');
-      expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
-    },
-  );
+    expect(logger.statusText, '\n');
+    expect(fileSystem.currentDirectory.childFile('flutter_01.png'), isNot(exists));
+  });
 
-  testWithoutContext(
-    's, bails taking screenshot on debug device if dwds.screenshot throws RpcError, restoring banner',
-    () async {
-      final logger = BufferLogger.test();
-      final FileSystem fileSystem = MemoryFileSystem.test();
-      final TerminalHandler terminalHandler = setUpTerminalHandler(
-        <FakeVmServiceRequest>[
-          listViews,
-          FakeVmServiceRequest(
-            method: 'ext.flutter.debugAllowBanner',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'false'},
-          ),
-          FakeVmServiceRequest(
-            method: 'ext.dwds.screenshot',
-            // Failed response,
-            error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
-          ),
-          FakeVmServiceRequest(
-            method: 'ext.flutter.debugAllowBanner',
-            args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'true'},
-          ),
-        ],
-        logger: logger,
-        web: true,
-        fileSystem: fileSystem,
-      );
+  testWithoutContext('s, bails taking screenshot on debug device if dwds.screenshot throws RpcError, restoring banner', () async {
+    final logger = BufferLogger.test();
+    final FileSystem fileSystem = MemoryFileSystem.test();
+    final TerminalHandler terminalHandler = setUpTerminalHandler(
+      <FakeVmServiceRequest>[
+        listViews,
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'false'},
+        ),
+        FakeVmServiceRequest(
+          method: 'ext.dwds.screenshot',
+          // Failed response,
+          error: FakeRPCError(code: vm_service.RPCErrorKind.kInternalError.code),
+        ),
+        FakeVmServiceRequest(
+          method: 'ext.flutter.debugAllowBanner',
+          args: <String, Object?>{'isolateId': fakeUnpausedIsolate.id, 'enabled': 'true'},
+        ),
+      ],
+      logger: logger,
+      web: true,
+      fileSystem: fileSystem,
+    );
 
-      await terminalHandler.processTerminalInput('s');
+    await terminalHandler.processTerminalInput('s');
 
-      expect(logger.errorText, contains('Error'));
-    },
-  );
+    expect(logger.errorText, contains('Error'));
+  });
 
   testWithoutContext(
     's, bails taking screenshot on debug device if debugAllowBanner during second request',
@@ -1277,6 +1285,12 @@ void main() {
     final residentRunner = FakeResidentRunner(
       FlutterDevice(
         FakeDevice(),
+        toolContext: FakeToolContext(
+          artifacts: Artifacts.test(),
+          fs: fs,
+          logger: testLogger,
+          processInfo: processInfo,
+        ),
         targetPlatform: .unsupported,
         buildInfo: BuildInfo.debug,
         generator: FakeResidentCompiler(),
@@ -1637,6 +1651,7 @@ TerminalHandler setUpTerminalHandler(
   bool web = false,
   bool fatalReloadError = false,
   bool supportsScreenshot = false,
+  bool nullVmService = false,
   int reloadExitCode = 0,
   BuildMode buildMode = BuildMode.debug,
   Logger? logger,
@@ -1649,6 +1664,12 @@ TerminalHandler setUpTerminalHandler(
   final processInfo = ProcessInfo.test(MemoryFileSystem.test());
   final device = FlutterDevice(
     FakeDevice()..supportsScreenshot = supportsScreenshot,
+    toolContext: FakeToolContext(
+      artifacts: Artifacts.test(),
+      fs: localFileSystem,
+      logger: testLogger,
+      processInfo: processInfo,
+    ),
     buildInfo: BuildInfo(
       buildMode,
       '',
@@ -1659,7 +1680,7 @@ TerminalHandler setUpTerminalHandler(
     developmentShaderCompiler: const FakeShaderCompiler(),
     targetPlatform: web ? TargetPlatform.web_javascript : TargetPlatform.android_arm,
   );
-  device.vmService = FakeVmServiceHost(requests: requests).vmService;
+  device.vmService = nullVmService ? null : FakeVmServiceHost(requests: requests).vmService;
   final residentRunner = FakeResidentRunner(device, testLogger, localFileSystem)
     ..supportsServiceProtocol = supportsServiceProtocol
     ..supportsRestart = supportsRestart
@@ -1770,4 +1791,7 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
   Future<DevFSContent> recompileShader(DevFSContent inputShader) {
     throw UnimplementedError();
   }
+
+  @override
+  bool areDependenciesModified(DevFSContent shaderContent) => false;
 }

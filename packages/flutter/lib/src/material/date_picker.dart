@@ -219,10 +219,10 @@ Future<DateTime?> showDatePicker({
   String? fieldLabelText,
   TextInputType? keyboardType,
   Offset? anchorPoint,
-  final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
-  final Icon? switchToInputEntryModeIcon,
-  final Icon? switchToCalendarEntryModeIcon,
-  final CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
+  ValueChanged<DatePickerEntryMode>? onDatePickerModeChange,
+  Icon? switchToInputEntryModeIcon,
+  Icon? switchToCalendarEntryModeIcon,
+  CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
   initialDate = initialDate == null ? null : calendarDelegate.dateOnly(initialDate);
   firstDate = calendarDelegate.dateOnly(firstDate);
@@ -735,9 +735,9 @@ class _DatePickerDialogState extends State<DatePickerDialog> with RestorationMix
     // Constrain the textScaleFactor to the largest supported value to prevent
     // layout issues.
     final double textScaleFactor =
-        MediaQuery.textScalerOf(
-          context,
-        ).clamp(maxScaleFactor: _kMaxTextScaleFactor).scale(_fontSizeToScale) /
+        MediaQuery.textScalerOf(context)
+            .clamp(maxScaleFactor: _kMaxTextScaleFactor)
+            .scale(_fontSizeToScale) /
         _fontSizeToScale;
     final Size dialogSize = _dialogSize(context) * textScaleFactor;
     final DialogThemeData dialogTheme = theme.dialogTheme;
@@ -939,13 +939,12 @@ class _DatePickerHeader extends StatelessWidget {
       entryModeButton != null ? _kMaxHeaderWithEntryTextScaleFactor : _kMaxHeaderTextScaleFactor,
     );
     final double textScaleFactor =
-        MediaQuery.textScalerOf(
-          context,
-        ).clamp(maxScaleFactor: maxHeaderTextScaleFactor).scale(_fontSizeToScale) /
+        MediaQuery.textScalerOf(context)
+            .clamp(maxScaleFactor: maxHeaderTextScaleFactor)
+            .scale(_fontSizeToScale) /
         _fontSizeToScale;
-    final double scaledFontSize = MediaQuery.textScalerOf(
-      context,
-    ).scale(titleStyle?.fontSize ?? 32);
+    final double scaledFontSize = MediaQuery.textScalerOf(context)
+        .scale(titleStyle?.fontSize ?? 32);
     final headerScaleFactor = textScaleFactor > 1 ? textScaleFactor : 1.0;
 
     final help = Text(
@@ -1059,8 +1058,11 @@ class _DatePickerHeader extends StatelessWidget {
 ///
 /// See [showDateRangePicker], which has a [SelectableDayForRangePredicate]
 /// parameter used to specify allowable days in the date range picker.
-typedef SelectableDayForRangePredicate =
-    bool Function(DateTime day, DateTime? selectedStartDay, DateTime? selectedEndDay);
+typedef SelectableDayForRangePredicate = bool Function(
+  DateTime day,
+  DateTime? selectedStartDay,
+  DateTime? selectedEndDay,
+);
 
 /// Shows a full screen modal dialog containing a Material Design date range
 /// picker.
@@ -1190,8 +1192,8 @@ Future<DateTimeRange?> showDateRangePicker({
   TransitionBuilder? builder,
   Offset? anchorPoint,
   TextInputType keyboardType = TextInputType.datetime,
-  final Icon? switchToInputEntryModeIcon,
-  final Icon? switchToCalendarEntryModeIcon,
+  Icon? switchToInputEntryModeIcon,
+  Icon? switchToCalendarEntryModeIcon,
   SelectableDayForRangePredicate? selectableDayPredicate,
   CalendarDelegate<DateTime> calendarDelegate = const GregorianCalendarDelegate(),
 }) async {
@@ -1339,7 +1341,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.initialDateRange,
     required this.firstDate,
     required this.lastDate,
-    DateTime? currentDate,
+    this._currentDate,
     this.initialEntryMode = DatePickerEntryMode.calendar,
     this.helpText,
     this.cancelText,
@@ -1358,7 +1360,7 @@ class DateRangePickerDialog extends StatefulWidget {
     this.switchToCalendarEntryModeIcon,
     this.selectableDayPredicate,
     this.calendarDelegate = const GregorianCalendarDelegate(),
-  }) : _currentDate = currentDate;
+  });
 
   /// The date range that the date range picker starts with when it opens.
   ///
@@ -3164,9 +3166,9 @@ class _InputDateRangePickerDialog extends StatelessWidget {
     );
 
     final double textScaleFactor =
-        MediaQuery.textScalerOf(
-          context,
-        ).clamp(maxScaleFactor: _kMaxRangeTextScaleFactor).scale(_fontSizeToScale) /
+        MediaQuery.textScalerOf(context)
+            .clamp(maxScaleFactor: _kMaxRangeTextScaleFactor)
+            .scale(_fontSizeToScale) /
         _fontSizeToScale;
     final Size dialogSize =
         (useMaterial3 ? _inputPortraitDialogSizeM3 : _inputPortraitDialogSizeM2) * textScaleFactor;

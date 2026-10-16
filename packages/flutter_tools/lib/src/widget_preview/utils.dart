@@ -5,12 +5,10 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
-import 'package:analyzer/source/source.dart';
 import 'package:collection/collection.dart';
 
 import 'dependency_graph.dart';
@@ -61,24 +59,17 @@ extension AnnotationExtension on Annotation {
 
 /// Convenience getters for examining [String] paths.
 extension StringExtension on String {
+  static final RegExp _pathSeparator = RegExp(r'[/\\]');
+
   bool get isDartFile => endsWith('.dart');
   bool get isPubspec => endsWith('pubspec.yaml');
   bool get doesContainDartTool => contains('.dart_tool');
+  bool get doesContainWidgetPreview => split(_pathSeparator).contains('.widget_preview');
 }
 
 extension LibraryElementExtension on LibraryElement {
   /// Convenience method to package path and [uri] into a [PreviewPath]
   PreviewPath toPreviewPath() => (path: firstFragment.source.fullName, uri: uri);
-}
-
-extension ParsedUnitResultExtension on ParsedUnitResult {
-  /// Convenience method to package [path] and [uri] into a [PreviewPath]
-  PreviewPath toPreviewPath() => (path: path, uri: uri);
-}
-
-extension SourceExtension on Source {
-  /// Convenience method to package [fullName] and [uri] into a [PreviewPath]
-  PreviewPath toPreviewPath() => (path: fullName, uri: uri);
 }
 
 /// Used to protect global state accessed in blocks containing calls to

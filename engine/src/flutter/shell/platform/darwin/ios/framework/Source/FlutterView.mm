@@ -8,12 +8,12 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSceneLifeCycle_Internal.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSharedApplication.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/SemanticsObject.h"
+#import "flutter/shell/platform/darwin/ios/rendering_api_selection.h"
 
 FLUTTER_ASSERT_ARC
 
 @interface FlutterView ()
 @property(nonatomic, weak) id<FlutterViewEngineDelegate> delegate;
-@property(nonatomic, weak) UIWindowScene* previousScene;
 @end
 
 @implementation FlutterAutoResizeLayoutConstraint
@@ -191,8 +191,7 @@ static void PrintWideGamutWarningOnce() {
 }
 
 + (Class)layerClass {
-  return flutter::GetCoreAnimationLayerClassForRenderingAPI(
-      flutter::GetRenderingAPIForProcess(/*force_software=*/false));
+  return flutter::GetCoreAnimationLayerClass();
 }
 
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {
@@ -312,37 +311,5 @@ static void PrintWideGamutWarningOnce() {
   // the focus engine should only interact with the designated focus items
   // (SemanticsObjects).
   return nil;
-}
-
-- (void)willMoveToWindow:(UIWindow*)newWindow {
-  // When a FlutterView moves windows, it may also be moving scenes. Add/remove the FlutterEngine
-  // from the FlutterSceneLifeCycleProvider.sceneLifeCycleDelegate if it changes scenes.
-  UIWindowScene* newScene = newWindow.windowScene;
-  UIWindowScene* currentScene = self.window.windowScene;
-
-  if (newScene == currentScene) {
-    return;
-  }
-
-  // Remove the engine from the previous scene if it's no longer in that window and scene.
-  FlutterPluginSceneLifeCycleDelegate* previousSceneLifeCycleDelegate =
-      [FlutterPluginSceneLifeCycleDelegate fromScene:self.previousScene];
-  if (previousSceneLifeCycleDelegate) {
-    [previousSceneLifeCycleDelegate removeFlutterManagedEngine:(FlutterEngine*)self.delegate];
-    self.previousScene = nil;
-  }
-
-  if (newScene) {
-    // Add the engine to the new scene's lifecycle delegate.
-    FlutterPluginSceneLifeCycleDelegate* newSceneLifeCycleDelegate =
-        [FlutterPluginSceneLifeCycleDelegate fromScene:newScene];
-    if (newSceneLifeCycleDelegate) {
-      [newSceneLifeCycleDelegate addFlutterManagedEngine:(FlutterEngine*)self.delegate];
-    }
-  } else {
-    // If the view is being removed from a window, store the current scene to remove the engine
-    // from it later when the view is added to a new window.
-    self.previousScene = currentScene;
-  }
 }
 @end

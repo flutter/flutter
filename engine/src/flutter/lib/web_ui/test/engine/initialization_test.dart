@@ -31,79 +31,71 @@ void main() {
 }
 
 void testMain() {
-  test(
-    'bootstrapEngine calls _flutter.loader.didCreateEngineInitializer callback',
-    () async {
-      JSAny? engineInitializer;
+  test('bootstrapEngine calls _flutter.loader.didCreateEngineInitializer callback', () async {
+    JSAny? engineInitializer;
 
-      void didCreateEngineInitializerMock(JSAny? obj) {
-        engineInitializer = obj;
-      }
+    void didCreateEngineInitializerMock(JSAny? obj) {
+      engineInitializer = obj;
+    }
 
-      // Prepare the DOM for: _flutter.loader.didCreateEngineInitializer
-      didCreateEngineInitializer = didCreateEngineInitializerMock.toJS;
+    // Prepare the DOM for: _flutter.loader.didCreateEngineInitializer
+    didCreateEngineInitializer = didCreateEngineInitializerMock.toJS;
 
-      // Reset the engine
-      engine.debugResetEngineInitializationState();
+    // Reset the engine
+    engine.debugResetEngineInitializationState();
 
-      await ui_web.bootstrapEngine(registerPlugins: () {}, runApp: () {});
+    await ui_web.bootstrapEngine(registerPlugins: () {}, runApp: () {});
 
-      // Check that the object we captured is actually a loader
-      expect(engineInitializer, isNotNull);
-      expect(
-        (engineInitializer! as JSObject).has('initializeEngine'),
-        isTrue,
-        reason: 'Missing FlutterEngineInitializer method: initializeEngine.',
-      );
-      expect(
-        (engineInitializer! as JSObject).has('autoStart'),
-        isTrue,
-        reason: 'Missing FlutterEngineInitializer method: autoStart.',
-      );
-      // https://github.com/flutter/flutter/issues/160096
-    },
-    skip: ui_web.browser.isFirefox,
-  );
+    // Check that the object we captured is actually a loader
+    expect(engineInitializer, isNotNull);
+    expect(
+      (engineInitializer! as JSObject).has('initializeEngine'),
+      isTrue,
+      reason: 'Missing FlutterEngineInitializer method: initializeEngine.',
+    );
+    expect(
+      (engineInitializer! as JSObject).has('autoStart'),
+      isTrue,
+      reason: 'Missing FlutterEngineInitializer method: autoStart.',
+    );
+    // https://github.com/flutter/flutter/issues/160096
+  }, skip: ui_web.browser.isFirefox);
 
-  test(
-    'bootstrapEngine does auto-start when _flutter.loader.didCreateEngineInitializer does not exist',
-    () async {
-      loader = null;
+  test('bootstrapEngine does auto-start when _flutter.loader.didCreateEngineInitializer does not exist', () async {
+    loader = null;
 
-      var pluginsRegistered = false;
-      var appRan = false;
-      void registerPluginsMock() {
-        pluginsRegistered = true;
-      }
+    var pluginsRegistered = false;
+    var appRan = false;
+    void registerPluginsMock() {
+      pluginsRegistered = true;
+    }
 
-      void runAppMock() {
-        appRan = true;
-      }
+    void runAppMock() {
+      appRan = true;
+    }
 
-      // Reset the engine
-      engine.debugResetEngineInitializationState();
+    // Reset the engine
+    engine.debugResetEngineInitializationState();
 
-      await ui_web.bootstrapEngine(registerPlugins: registerPluginsMock, runApp: runAppMock);
+    await ui_web.bootstrapEngine(registerPlugins: registerPluginsMock, runApp: runAppMock);
 
-      // Check that the object we captured is actually a loader
-      expect(
-        pluginsRegistered,
-        isTrue,
-        reason: 'Plugins should be immediately registered in autoStart mode.',
-      );
-      expect(appRan, isTrue, reason: 'App should run immediately in autoStart mode');
+    // Check that the object we captured is actually a loader
+    expect(
+      pluginsRegistered,
+      isTrue,
+      reason: 'Plugins should be immediately registered in autoStart mode.',
+    );
+    expect(appRan, isTrue, reason: 'App should run immediately in autoStart mode');
 
-      // After starting the engine, the meta-generator tag should be on the page
-      final DomElement? meta = domDocument.querySelector('meta[name=generator][content=Flutter]');
-      expect(
-        meta,
-        isNotNull,
-        reason: 'The generator meta-tag should be added when Flutter initializes its UI.',
-      );
-      // https://github.com/flutter/flutter/issues/160096
-    },
-    skip: ui_web.browser.isFirefox,
-  );
+    // After starting the engine, the meta-generator tag should be on the page
+    final DomElement? meta = domDocument.querySelector('meta[name=generator][content=Flutter]');
+    expect(
+      meta,
+      isNotNull,
+      reason: 'The generator meta-tag should be added when Flutter initializes its UI.',
+    );
+    // https://github.com/flutter/flutter/issues/160096
+  }, skip: ui_web.browser.isFirefox);
 
   // We cannot test anymore, because by now the engine has registered some stuff that can't be rewound back.
   // Like the `ext.flutter.disassemble` developer extension.

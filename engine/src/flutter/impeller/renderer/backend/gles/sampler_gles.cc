@@ -4,7 +4,8 @@
 
 #include "impeller/renderer/backend/gles/sampler_gles.h"
 
-#include "impeller/base/validation.h"
+#include <algorithm>
+
 #include "impeller/core/formats.h"
 #include "impeller/core/sampler_descriptor.h"
 #include "impeller/renderer/backend/gles/formats_gles.h"
@@ -70,13 +71,6 @@ static GLint ToAddressMode(SamplerAddressMode mode,
 
 bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
                                         const ProcTableGLES& gl) const {
-  if (texture.NeedsMipmapGeneration()) {
-    VALIDATION_LOG
-        << "Texture mip count is > 1, but the mipmap has not been generated. "
-           "Texture can not be sampled safely.";
-    return false;
-  }
-
   auto target = ToTextureTarget(texture.GetTextureDescriptor().type);
 
   if (!target.has_value()) {
@@ -97,6 +91,20 @@ bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
   gl.TexParameteri(*target, GL_TEXTURE_MIN_FILTER, min_filter);
   gl.TexParameteri(*target, GL_TEXTURE_MAG_FILTER, mag_filter);
 
+  // Bound the sampled mip range to the levels the texture declares. GLES leaves
+  // GL_TEXTURE_MAX_LEVEL at its default of 1000, so a texture sampled with a
+  // mipmap filter reads as black unless every level down to 1x1 is defined.
+  // Metal and Vulkan allocate exactly mip_count levels, and clamping here gives
+  // the same behavior for a partial, manually uploaded mip chain. The parameter
+  // is unavailable on ES 2.0 without GL_APPLE_texture_max_level, and external
+  // textures have no mip levels, so it is skipped in those cases.
+  if (*target != GL_TEXTURE_EXTERNAL_OES &&
+      gl.GetCapabilities()->SupportsTextureMaxLevel()) {
+    const GLint max_level =
+        static_cast<GLint>(texture.GetTextureDescriptor().mip_count) - 1;
+    gl.TexParameteri(*target, GL_TEXTURE_MAX_LEVEL, max_level);
+  }
+
   const auto supports_decal_mode =
       gl.GetCapabilities()->SupportsDecalSamplerAddressMode();
 
@@ -113,6 +121,19 @@ bool SamplerGLES::ConfigureBoundTexture(const TextureGLES& texture,
     // Transparent black.
     const GLfloat border_color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     gl.TexParameterfv(*target, IMPELLER_GL_TEXTURE_BORDER_COLOR, border_color);
+  }
+
+  // Anisotropy is a per-texture parameter in GLES, so it must be written on
+  // every configuration (including resetting it back to 1) to prevent a
+  // previously configured value from leaking into this sampler's state. The
+  // parameter only exists when GL_EXT_texture_filter_anisotropic is present;
+  // it is applied with TexParameterfv, which is core ES 2.0.
+  const uint32_t max_anisotropy =
+      gl.GetCapabilities()->GetMaxSamplerAnisotropy();
+  if (max_anisotropy > 1) {
+    const GLfloat anisotropy[1] = {static_cast<GLfloat>(
+        std::clamp<uint32_t>(desc.max_anisotropy, 1u, max_anisotropy))};
+    gl.TexParameterfv(*target, IMPELLER_GL_TEXTURE_MAX_ANISOTROPY, anisotropy);
   }
 
   return true;

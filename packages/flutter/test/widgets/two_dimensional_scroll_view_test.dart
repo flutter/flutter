@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// @docImport 'package:flutter/material.dart';
+library;
+
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/gestures/monodrag.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'editable_text_tester.dart';
@@ -20,62 +23,60 @@ Widget? _testChildBuilder(BuildContext context, ChildVicinity vicinity) {
 
 void main() {
   group('TwoDimensionalScrollView', () {
-    testWidgets(
-      'asserts the axis directions do not conflict with one another',
-      (WidgetTester tester) async {
-        final exceptions = <Object>[];
-        final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-        FlutterError.onError = (FlutterErrorDetails details) {
-          exceptions.add(details.exception);
-        };
-        // Horizontal wrong
-        late final TwoDimensionalChildBuilderDelegate delegate1;
-        addTearDown(() => delegate1.dispose());
-        await tester.pumpWidget(
-          MaterialApp(
-            home: SimpleBuilderTableView(
-              delegate: delegate1 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
-              horizontalDetails: const ScrollableDetails.vertical(),
-              // Horizontal has default const ScrollableDetails.horizontal()
-            ),
+    testWidgets('asserts the axis directions do not conflict with one another', (
+      WidgetTester tester,
+    ) async {
+      final exceptions = <Object>[];
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        exceptions.add(details.exception);
+      };
+      // Horizontal wrong
+      late final TwoDimensionalChildBuilderDelegate delegate1;
+      addTearDown(() => delegate1.dispose());
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SimpleBuilderTableView(
+            delegate: delegate1 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
+            horizontalDetails: const ScrollableDetails.vertical(),
+            // Horizontal has default const ScrollableDetails.horizontal()
           ),
-        );
+        ),
+      );
 
-        // Vertical wrong
-        late final TwoDimensionalChildBuilderDelegate delegate2;
-        addTearDown(() => delegate2.dispose());
-        await tester.pumpWidget(
-          MaterialApp(
-            home: SimpleBuilderTableView(
-              delegate: delegate2 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
-              verticalDetails: const ScrollableDetails.horizontal(),
-              // Horizontal has default const ScrollableDetails.horizontal()
-            ),
+      // Vertical wrong
+      late final TwoDimensionalChildBuilderDelegate delegate2;
+      addTearDown(() => delegate2.dispose());
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SimpleBuilderTableView(
+            delegate: delegate2 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
+            verticalDetails: const ScrollableDetails.horizontal(),
+            // Horizontal has default const ScrollableDetails.horizontal()
           ),
-        );
+        ),
+      );
 
-        // Both wrong
-        late final TwoDimensionalChildBuilderDelegate delegate3;
-        addTearDown(() => delegate3.dispose());
-        await tester.pumpWidget(
-          MaterialApp(
-            home: SimpleBuilderTableView(
-              delegate: delegate3 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
-              verticalDetails: const ScrollableDetails.horizontal(),
-              horizontalDetails: const ScrollableDetails.vertical(),
-            ),
+      // Both wrong
+      late final TwoDimensionalChildBuilderDelegate delegate3;
+      addTearDown(() => delegate3.dispose());
+      await tester.pumpWidget(
+        TestWidgetsApp(
+          home: SimpleBuilderTableView(
+            delegate: delegate3 = TwoDimensionalChildBuilderDelegate(builder: (_, _) => null),
+            verticalDetails: const ScrollableDetails.horizontal(),
+            horizontalDetails: const ScrollableDetails.vertical(),
           ),
-        );
+        ),
+      );
 
-        FlutterError.onError = oldHandler;
-        expect(exceptions.length, 3);
-        for (final exception in exceptions) {
-          expect(exception, isAssertionError);
-          expect((exception as AssertionError).message, contains('are not Axis'));
-        }
-      },
-      variant: TargetPlatformVariant.all(),
-    );
+      FlutterError.onError = oldHandler;
+      expect(exceptions.length, 3);
+      for (final exception in exceptions) {
+        expect(exception, isAssertionError);
+        expect((exception as AssertionError).message, contains('are not Axis'));
+      }
+    }, variant: TargetPlatformVariant.all());
 
     testWidgets(
       'ScrollableDetails.controller can set initial scroll positions, modify within bounds',
@@ -88,7 +89,7 @@ void main() {
         addTearDown(() => delegate.dispose());
 
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SimpleBuilderTableView(
               verticalDetails: ScrollableDetails.vertical(controller: verticalController),
               horizontalDetails: ScrollableDetails.horizontal(controller: horizontalController),
@@ -142,7 +143,7 @@ void main() {
           late final TwoDimensionalChildBuilderDelegate delegate;
           addTearDown(() => delegate.dispose());
 
-          return MaterialApp(
+          return TestWidgetsApp(
             home: PrimaryScrollController(
               controller: controller,
               child: SimpleBuilderTableView(
@@ -329,7 +330,7 @@ void main() {
         late final TwoDimensionalChildBuilderDelegate delegate1;
         addTearDown(() => delegate1.dispose());
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SimpleBuilderTableView(
               delegate: delegate1 = TwoDimensionalChildBuilderDelegate(
                 builder: (BuildContext context, ChildVicinity vicinity) {
@@ -351,7 +352,7 @@ void main() {
         late final TwoDimensionalChildBuilderDelegate delegate2;
         addTearDown(() => delegate2.dispose());
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: SimpleBuilderTableView(
               verticalDetails: const ScrollableDetails.vertical(reverse: true),
               horizontalDetails: const ScrollableDetails.horizontal(reverse: true),
@@ -379,7 +380,7 @@ void main() {
         late final TwoDimensionalChildBuilderDelegate delegate;
         addTearDown(() => delegate.dispose());
         await tester.pumpWidget(
-          MaterialApp(
+          TestWidgetsApp(
             home: Stack(
               children: <Widget>[
                 Positioned.fill(
@@ -948,15 +949,14 @@ void main() {
       WidgetTester tester,
     ) async {
       late final TwoDimensionalChildBuilderDelegate delegate;
-      final scaffoldKey = GlobalKey<ScaffoldState>();
+      final overlayKey = GlobalKey<_DrawerLikeContainerState>();
       addTearDown(() => delegate.dispose());
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            key: scaffoldKey,
-            drawer: Container(),
-            body: Column(
+        TestWidgetsApp(
+          home: _DrawerLikeContainer(
+            key: overlayKey,
+            child: Column(
               children: <Widget>[
                 const TestTextField(),
                 Expanded(
@@ -986,7 +986,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.testTextInput.isVisible, isFalse);
-      scaffoldKey.currentState!.openDrawer();
+      overlayKey.currentState!.showOverlay();
       await tester.pumpAndSettle();
 
       expect(tester.testTextInput.isVisible, isFalse);
@@ -996,7 +996,7 @@ void main() {
       late final TwoDimensionalChildBuilderDelegate delegate;
       addTearDown(() => delegate.dispose());
       await tester.pumpWidget(
-        MaterialApp(
+        TestWidgetsApp(
           home: SimpleBuilderTableView(
             cacheExtent: 1.0,
             cacheExtentStyle: CacheExtentStyle.viewport,
@@ -1017,4 +1017,36 @@ void main() {
       expect(viewport.cacheExtentStyle, CacheExtentStyle.viewport);
     });
   });
+}
+
+/// A simple container that can show an overlay on top of its child,
+/// used to simulate the effect of opening a drawer without depending
+/// on [Scaffold] from the Material library.
+class _DrawerLikeContainer extends StatefulWidget {
+  const _DrawerLikeContainer({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<_DrawerLikeContainer> createState() => _DrawerLikeContainerState();
+}
+
+class _DrawerLikeContainerState extends State<_DrawerLikeContainer> {
+  bool _showOverlay = false;
+
+  void showOverlay() {
+    setState(() {
+      _showOverlay = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        widget.child,
+        if (_showOverlay) Positioned.fill(child: Container(color: const Color(0x88000000))),
+      ],
+    );
+  }
 }

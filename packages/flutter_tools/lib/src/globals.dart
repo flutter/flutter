@@ -49,7 +49,6 @@ import 'persistent_tool_state.dart';
 import 'pre_run_validator.dart';
 import 'project.dart';
 import 'reporting/crash_reporting.dart';
-import 'reporting/reporting.dart';
 import 'runner/local_engine.dart';
 import 'version.dart';
 
@@ -73,7 +72,6 @@ Signals get signals => context.get<Signals>() ?? LocalSignals.instance;
 AndroidStudio? get androidStudio => context.get<AndroidStudio>();
 AndroidSdk? get androidSdk => context.get<AndroidSdk>();
 FlutterVersion get flutterVersion => context.get<FlutterVersion>()!;
-Usage get flutterUsage => context.get<Usage>()!;
 XcodeProjectInterpreter? get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 XCDevice? get xcdevice => context.get<XCDevice>();
 Xcode? get xcode => context.get<Xcode>();
@@ -285,11 +283,6 @@ CustomDevicesConfig get customDevicesConfig => context.get<CustomDevicesConfig>(
 
 PreRunValidator get preRunValidator =>
     context.get<PreRunValidator>() ?? const NoOpPreRunValidator();
-
-// Used to build RegExp instances which can detect the VM service message.
-final kVMServiceMessageRegExp = RegExp(
-  r'The Dart VM service is listening on ((http|//)[a-zA-Z0-9:/=_\-\.\[\]]+)',
-);
 
 /// Contains information about the JRE/JDK to use for Java-dependent operations.
 ///

@@ -5,9 +5,11 @@
 #ifndef FLUTTER_LIB_GPU_RENDER_PASS_H_
 #define FLUTTER_LIB_GPU_RENDER_PASS_H_
 
+#include <array>
 #include <cstdint>
 #include <map>
 #include <memory>
+#include "flutter/lib/gpu/binding_set.h"
 #include "flutter/lib/gpu/command_buffer.h"
 #include "flutter/lib/gpu/export.h"
 #include "flutter/lib/ui/dart_wrapper.h"
@@ -53,9 +55,40 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
 
   void SetPipeline(fml::RefPtr<RenderPipeline> pipeline);
 
+  /// Set the face culling mode for subsequent draws.
+  void SetCullMode(impeller::CullMode mode);
+
+  /// Set the front-face winding order for subsequent draws.
+  void SetWindingOrder(impeller::WindingOrder order);
+
+  /// Set the primitive topology for subsequent draws.
+  void SetPrimitiveType(impeller::PrimitiveType type);
+
+  /// Set the polygon fill mode for subsequent draws.
+  void SetPolygonMode(impeller::PolygonMode mode);
+
+  /// The number of binding set slots a pass can hold at once. Mirrors
+  /// `RenderPass.maxBindingSets` in `gpu/lib/src/render_pass.dart`.
+  static constexpr size_t kMaxBindingSets = 4;
+
+  /// Puts [set] in [slot], replacing whatever was there. Passing a null set
+  /// empties the slot. Out of range slots are ignored.
+  void BindSet(size_t slot, fml::RefPtr<BindingSet> set);
+
   void ClearBindings();
 
-  bool Draw();
+  /// Append a draw to the underlying render pass. [element_count] is the
+  /// vertex count for a non-indexed draw, or the index count when
+  /// [indexed] is true. [instance_count] is the number of instances to draw.
+  bool Draw(size_t element_count, size_t instance_count, bool indexed);
+
+  /// Whether the next draw must rebuild its backend pipeline. Exposed for
+  /// testing the memoization's dirty tracking.
+  bool IsPipelineStateDirtyForTesting() const;
+
+  /// Clears the pipeline dirty flag without building a pipeline, so tests
+  /// can observe which mutations re-dirty it.
+  void ClearPipelineStateDirtyForTesting();
 
   struct BufferAndUniformSlot {
     impeller::ShaderUniformSlot slot;
@@ -74,24 +107,50 @@ class RenderPass : public RefCountedDartWrappable<RenderPass> {
   BufferUniformMap fragment_uniform_bindings;
   TextureUniformMap fragment_texture_bindings;
 
-  impeller::BufferView vertex_buffer;
+  // Binding sets replayed by every draw, in slot order. Individual binds are
+  // replayed after these, so a bind that collides with a set member wins.
+  std::array<fml::RefPtr<BindingSet>, kMaxBindingSets> binding_sets;
+
+  // Vertex buffers indexed by binding slot. Mirrors
+  // `impeller::kMaxVertexBuffers`; Impeller's HAL caps vertex buffer
+  // bindings at 16 per draw, and index `i` here corresponds to the binding
+  // declared at slot `i` in the active VertexLayout. Devices may impose a
+  // lower per-pipeline limit on the total attribute count across all bound
+  // buffers.
+  static constexpr size_t kMaxVertexBufferSlots = 16;
+  std::array<impeller::BufferView, kMaxVertexBufferSlots> vertex_buffers;
+  // Highest slot index that has been bound on this pass (plus one).
+  size_t vertex_buffer_count = 0;
   impeller::BufferView index_buffer;
   impeller::IndexType index_buffer_type = impeller::IndexType::kNone;
-  size_t element_count = 0;
 
   uint32_t stencil_reference = 0;
   std::optional<impeller::IRect32> scissor;
   std::optional<impeller::Viewport> viewport;
 
-  // Helper flag to determine whether the vertex_count should override the
-  // element count. The index count takes precedent.
-  bool has_index_buffer = false;
-
  private:
   /// Lookup an Impeller pipeline by building a descriptor based on the current
-  /// command state.
+  /// command state, or return the memoized pipeline when that state is
+  /// unchanged since the last draw. Returns null (after a validation log)
+  /// when a stage function cannot be resolved or the backend fails to build
+  /// the pipeline.
   std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
   GetOrCreatePipeline();
+
+  // The non-dirtying counterpart of GetColorAttachmentDescriptor, for the
+  // pipeline rebuild itself.
+  impeller::ColorAttachmentDescriptor& ColorAttachmentDescriptorAt(
+      size_t color_attachment_index);
+
+  // The result of building a pipeline for the current pipeline-affecting
+  // state, null when that build failed (memoized so a broken pipeline is
+  // reported once, not per draw). Every mutable-state accessor above marks
+  // the state dirty; consecutive draws with unchanged state reuse this
+  // directly, skipping the descriptor rebuild, hash, and pipeline-library
+  // lookup.
+  std::shared_ptr<impeller::Pipeline<impeller::PipelineDescriptor>>
+      memoized_pipeline_;
+  bool pipeline_state_dirty_ = true;
 
   impeller::RenderTarget render_target_;
   std::shared_ptr<impeller::RenderPass> render_pass_;
@@ -134,7 +193,9 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetColorAttachment(
     float clear_color_b,
     float clear_color_a,
     flutter::gpu::Texture* texture,
-    Dart_Handle resolve_texture_wrapper);
+    Dart_Handle resolve_texture_wrapper,
+    int mip_level,
+    int slice);
 
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
@@ -145,7 +206,9 @@ extern Dart_Handle InternalFlutterGpu_RenderPass_SetDepthStencilAttachment(
     int stencil_load_action,
     int stencil_store_action,
     int stencil_clear_value,
-    flutter::gpu::Texture* texture);
+    flutter::gpu::Texture* texture,
+    int mip_level,
+    int slice);
 
 FLUTTER_GPU_EXPORT
 extern Dart_Handle InternalFlutterGpu_RenderPass_Begin(
@@ -163,7 +226,7 @@ extern void InternalFlutterGpu_RenderPass_BindVertexBufferDevice(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int vertex_count);
+    int slot);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
@@ -171,14 +234,22 @@ extern void InternalFlutterGpu_RenderPass_BindIndexBufferDevice(
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes,
-    int index_type,
-    int index_count);
+    int index_type);
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_BindUniformDevice(
     flutter::gpu::RenderPass* wrapper,
     flutter::gpu::Shader* shader,
     Dart_Handle uniform_name_handle,
+    flutter::gpu::DeviceBuffer* device_buffer,
+    int offset_in_bytes,
+    int length_in_bytes);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_BindUniformDeviceIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    int uniform_struct_index,
     flutter::gpu::DeviceBuffer* device_buffer,
     int offset_in_bytes,
     int length_in_bytes);
@@ -193,7 +264,27 @@ extern bool InternalFlutterGpu_RenderPass_BindTexture(
     int mag_filter,
     int mip_filter,
     int width_address_mode,
-    int height_address_mode);
+    int height_address_mode,
+    int max_anisotropy);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_BindTextureIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::Shader* shader,
+    int uniform_texture_index,
+    flutter::gpu::Texture* texture,
+    int min_filter,
+    int mag_filter,
+    int mip_filter,
+    int width_address_mode,
+    int height_address_mode,
+    int max_anisotropy);
+
+FLUTTER_GPU_EXPORT
+extern void InternalFlutterGpu_RenderPass_BindSet(
+    flutter::gpu::RenderPass* wrapper,
+    flutter::gpu::BindingSet* binding_set,
+    int slot);
 
 FLUTTER_GPU_EXPORT
 extern void InternalFlutterGpu_RenderPass_ClearBindings(
@@ -282,7 +373,15 @@ extern void InternalFlutterGpu_RenderPass_SetPolygonMode(
 
 FLUTTER_GPU_EXPORT
 extern bool InternalFlutterGpu_RenderPass_Draw(
-    flutter::gpu::RenderPass* wrapper);
+    flutter::gpu::RenderPass* wrapper,
+    int vertex_count,
+    int instance_count);
+
+FLUTTER_GPU_EXPORT
+extern bool InternalFlutterGpu_RenderPass_DrawIndexed(
+    flutter::gpu::RenderPass* wrapper,
+    int index_count,
+    int instance_count);
 
 }  // extern "C"
 

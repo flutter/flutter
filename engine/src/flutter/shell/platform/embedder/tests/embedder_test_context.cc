@@ -125,6 +125,11 @@ void EmbedderTestContext::AddNativeCallback(const char* name,
   native_resolver_->AddNativeCallback({name}, function);
 }
 
+void EmbedderTestContext::AddFfiNativeCallback(const char* name,
+                                               void* function) {
+  native_resolver_->AddFfiNativeCallback({name}, function);
+}
+
 void EmbedderTestContext::SetSemanticsUpdateCallback2(
     SemanticsUpdateCallback2 update_semantics_callback) {
   update_semantics_callback2_ = std::move(update_semantics_callback);

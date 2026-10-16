@@ -43,8 +43,8 @@ void main() {
 }
 
 class TestRenderSliverFloatingPersistentHeader extends RenderSliverFloatingPersistentHeader {
-  TestRenderSliverFloatingPersistentHeader({required RenderBox child})
-    : super(child: child, vsync: null, showOnScreenConfiguration: null);
+  TestRenderSliverFloatingPersistentHeader({required RenderBox super.child})
+    : super(vsync: null, showOnScreenConfiguration: null);
 
   @override
   double get maxExtent => 200;
@@ -55,8 +55,8 @@ class TestRenderSliverFloatingPersistentHeader extends RenderSliverFloatingPersi
 
 class TestRenderSliverFloatingPinnedPersistentHeader
     extends RenderSliverFloatingPinnedPersistentHeader {
-  TestRenderSliverFloatingPinnedPersistentHeader({required RenderBox child})
-    : super(child: child, vsync: null, showOnScreenConfiguration: null);
+  TestRenderSliverFloatingPinnedPersistentHeader({required RenderBox super.child})
+    : super(vsync: null, showOnScreenConfiguration: null);
 
   @override
   double get maxExtent => 200;

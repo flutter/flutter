@@ -17,6 +17,29 @@ void main(List<String> arguments) {
   ).run();
 }
 
+enum XcodeBuildCommand {
+  build('build', true),
+  prepare('prepare', true),
+  thin('thin'),
+  embed('embed', true),
+  embedAndThin('embed_and_thin', true),
+  buildAddToApp('build-add-to-app'),
+  testVmServiceBonjourService('test_vm_service_bonjour_service');
+
+  const XcodeBuildCommand(this.command, [this.requiresGeneratedXcconfigImport = false]);
+  final String command;
+  final bool requiresGeneratedXcconfigImport;
+
+  static XcodeBuildCommand? tryParse(String command) {
+    for (final XcodeBuildCommand value in values) {
+      if (value.command == command) {
+        return value;
+      }
+    }
+    return null;
+  }
+}
+
 /// Container for script arguments and environment variables.
 ///
 /// All interactions with the platform are broken into individual methods that
@@ -43,45 +66,71 @@ class Context {
       exit(-1);
     }
 
-    final String subCommand = validateCommand(arguments[0]);
+    final XcodeBuildCommand subCommand = validateCommand(arguments[0]);
     final String? platformName = arguments.length < 2 ? null : arguments[1];
     final TargetPlatform platform = parsePlatform(platformName);
+    if (subCommand.requiresGeneratedXcconfigImport) {
+      validateGeneratedBuildSettings(platform);
+    }
     switch (subCommand) {
-      case 'build':
+      case XcodeBuildCommand.build:
         buildApp(platform, 'build');
-      case 'prepare':
+      case XcodeBuildCommand.prepare:
         unpackFor(platform, 'prepare');
-      case 'build-add-to-app':
+      case XcodeBuildCommand.buildAddToApp:
         buildForNativeApp(platform);
-      case 'thin':
+      case XcodeBuildCommand.thin:
         // No-op, thinning is handled during the bundle asset assemble build target.
         break;
-      case 'embed':
-      case 'embed_and_thin':
+      case XcodeBuildCommand.embed:
+      case XcodeBuildCommand.embedAndThin:
         // Thinning is handled during the bundle asset assemble build target, so just embed.
         embedFlutterFrameworks(platform);
-      case 'test_vm_service_bonjour_service':
+      case XcodeBuildCommand.testVmServiceBonjourService:
         // Exposed for integration testing only.
         addVmServiceBonjourService();
     }
   }
 
+  /// If any of these are missing from the environment, the Xcode project's
+  /// build configurations are not correctly including the generated xcconfig,
+  /// and the build would otherwise continue in a broken state (no app version,
+  /// dropped dart-defines, wrong target, etc).
+  static const List<String> requiredGeneratedBuildSettings = <String>[
+    'FLUTTER_ROOT',
+    'FLUTTER_BUILD_DIR',
+    'FLUTTER_BUILD_NAME',
+    'FLUTTER_BUILD_NUMBER',
+  ];
+
+  void validateGeneratedBuildSettings(TargetPlatform platform) {
+    final bool hasMissingSettings = requiredGeneratedBuildSettings.any(
+      (String setting) => environment[setting] == null,
+    );
+    if (!hasMissingSettings) {
+      return;
+    }
+    final includeDirective = platform == TargetPlatform.macos
+        ? '#include "ephemeral/Flutter-Generated.xcconfig"'
+        : '#include "Generated.xcconfig"';
+    echoXcodeError(
+      'Missing Flutter build settings. Run "flutter build ${platform.name} --config-only" '
+      'to regenerate the Flutter xcconfig files, and verify the build configuration for '
+      'the current scheme includes $includeDirective.',
+    );
+    exitApp(-1);
+  }
+
   /// Validates the command argument matches one of the possible commands.
   /// Returns null if not.
-  String validateCommand(String command) {
-    switch (command) {
-      case 'build':
-      case 'prepare':
-      case 'thin':
-      case 'embed':
-      case 'embed_and_thin':
-      case 'build-add-to-app':
-      case 'test_vm_service_bonjour_service':
-        return command;
-      default:
-        echoXcodeError(incompatibleErrorMessage);
-        exit(-1);
+  XcodeBuildCommand validateCommand(String command) {
+    final XcodeBuildCommand? parsedCommand = XcodeBuildCommand.tryParse(command);
+    if (parsedCommand == null) {
+      echoXcodeError(incompatibleErrorMessage);
+      exit(-1);
     }
+
+    return parsedCommand;
   }
 
   /// Converts the [platformName] argument to a [TargetPlatform]. If there is

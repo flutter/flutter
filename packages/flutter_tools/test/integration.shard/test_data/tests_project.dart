@@ -43,10 +43,10 @@ class TestsProject extends Project {
   ''';
 
   @override
-  Future<void> setUpIn(Directory dir) {
+  Future<void> setUpIn(Directory dir, {bool generateMain = true}) {
     this.dir = dir;
     writeFile(testFilePath, testContent);
-    return super.setUpIn(dir);
+    return super.setUpIn(dir, generateMain: generateMain);
   }
 
   String get testFilePath => fileSystem.path.join(dir.path, 'test', 'test.dart');

@@ -4,7 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import '../../base/file_system.dart';
 import '../../base/project_migrator.dart';
 import '../../project.dart';
 import '../gradle_utils.dart';
@@ -36,12 +35,12 @@ class MinSdkVersionMigration extends ProjectMigrator {
     if (_project.isModule) {
       return;
     }
-    try {
-      processFileLines(_project.appGradleFile);
-    } on FileSystemException {
+    if (!_project.appGradleFile.existsSync()) {
       // Skip if we cannot find the app level build.gradle file.
       logger.printTrace(appGradleNotFoundWarning);
+      return;
     }
+    processFileLines(_project.appGradleFile);
   }
 
   @override

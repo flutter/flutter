@@ -76,7 +76,7 @@ An **emergency** that needs to be addressed ASAP as there is no reasonable
 workaround.
 
 P0s are worked on actively, with an update shared with the core team at least
-once a week, and supercede _all_ other priorities (i.e. are a "stop work" order
+once a week, and supersede _all_ other priorities (i.e. are a "stop work" order
 on other issues).
 
 Examples might include:

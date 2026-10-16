@@ -18,7 +18,7 @@ class CoverGeometry final : public Geometry {
   ~CoverGeometry() override = default;
 
   // |Geometry|
-  bool CoversArea(const Matrix& transform, const Rect& rect) const override;
+  bool CoversArea(const Matrix& transform, const IRect& rect) const override;
 
   bool CanApplyMaskFilter() const override;
 

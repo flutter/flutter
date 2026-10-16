@@ -37,6 +37,26 @@ void main() {
     imageCache.maximumSize = originalCacheSize;
   });
 
+  testWidgets('Image does not crash at zero area', (WidgetTester tester) async {
+    final provider = _TestImageProvider();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: SizedBox.shrink(child: Image(image: provider)),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Image)), Size.zero);
+    final ui.Image testImage = await createTestImage(width: 10, height: 10);
+    provider.complete(testImage);
+    await tester.pump();
+    expect(tester.getSize(find.byType(Image)), Size.zero);
+    imageCache.clear();
+    imageCache.clearLiveImages();
+    await tester.pump();
+  });
+
   testWidgets('Verify Image does not use disposed handles', (WidgetTester tester) async {
     final ui.Image image100x100 = (await tester.runAsync(
       () async => createTestImage(width: 100, height: 100),
@@ -2610,27 +2630,18 @@ void main() {
 
   Future<void> testRotatedImage(WidgetTester tester, bool isAntiAlias) async {
     final Key key = UniqueKey();
+    final imageProvider = MemoryImage(Uint8List.fromList(kBlueRectPng));
+    await precacheTestImage(imageProvider);
+
     await tester.pumpWidget(
       RepaintBoundary(
         key: key,
         child: Transform.rotate(
           angle: math.pi / 180,
-          child: Image.memory(Uint8List.fromList(kBlueRectPng), isAntiAlias: isAntiAlias),
+          child: Image(image: imageProvider, isAntiAlias: isAntiAlias),
         ),
       ),
     );
-
-    // precacheImage is needed, or the image in the golden file will be empty.
-    if (!kIsWeb) {
-      final Finder allImages = find.byType(Image);
-      for (final Element e in allImages.evaluate()) {
-        await tester.runAsync(() async {
-          final image = e.widget as Image;
-          await precacheImage(image.image, e);
-        });
-      }
-      await tester.pumpAndSettle();
-    }
 
     await expectLater(
       find.byKey(key),
@@ -2638,63 +2649,34 @@ void main() {
     );
   }
 
-  testWidgets(
-    'Rotated images',
-    (WidgetTester tester) async {
-      await testRotatedImage(tester, true);
-      await testRotatedImage(tester, false);
-    },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
-  );
+  testWidgets('Rotated images', (WidgetTester tester) async {
+    await testRotatedImage(tester, true);
+    await testRotatedImage(tester, false);
+  });
 
-  testWidgets(
-    'Image opacity',
-    (WidgetTester tester) async {
-      final Key key = UniqueKey();
-      await tester.pumpWidget(
-        RepaintBoundary(
-          key: key,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            textDirection: TextDirection.ltr,
-            children: <Widget>[
-              Image.memory(
-                Uint8List.fromList(kBlueRectPng),
-                opacity: const AlwaysStoppedAnimation<double>(0.25),
-              ),
-              Image.memory(
-                Uint8List.fromList(kBlueRectPng),
-                opacity: const AlwaysStoppedAnimation<double>(0.5),
-              ),
-              Image.memory(
-                Uint8List.fromList(kBlueRectPng),
-                opacity: const AlwaysStoppedAnimation<double>(0.75),
-              ),
-              Image.memory(
-                Uint8List.fromList(kBlueRectPng),
-                opacity: const AlwaysStoppedAnimation<double>(1.0),
-              ),
-            ],
-          ),
+  testWidgets('Image opacity', (WidgetTester tester) async {
+    final Key key = UniqueKey();
+    final imageProvider = MemoryImage(Uint8List.fromList(kBlueRectPng));
+    await precacheTestImage(imageProvider);
+
+    await tester.pumpWidget(
+      RepaintBoundary(
+        key: key,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          textDirection: TextDirection.ltr,
+          children: <Widget>[
+            Image(image: imageProvider, opacity: const AlwaysStoppedAnimation<double>(0.25)),
+            Image(image: imageProvider, opacity: const AlwaysStoppedAnimation<double>(0.5)),
+            Image(image: imageProvider, opacity: const AlwaysStoppedAnimation<double>(0.75)),
+            Image(image: imageProvider, opacity: const AlwaysStoppedAnimation<double>(1.0)),
+          ],
         ),
-      );
+      ),
+    );
 
-      // precacheImage is needed, or the image in the golden file will be empty.
-      if (!kIsWeb) {
-        final Finder allImages = find.byType(Image);
-        for (final Element e in allImages.evaluate()) {
-          await tester.runAsync(() async {
-            final image = e.widget as Image;
-            await precacheImage(image.image, e);
-          });
-        }
-        await tester.pumpAndSettle();
-      }
-
-      await expectLater(find.byKey(key), matchesGoldenFile('transparent_image.png'));
-    },
-    skip: kIsWeb, // https://github.com/flutter/flutter/issues/87933.
-  );
+    await expectLater(find.byKey(key), matchesGoldenFile('transparent_image.png'));
+  });
 
   testWidgets(
     'Reports image size when painted',
@@ -2924,6 +2906,62 @@ void main() {
     );
   });
 
+  testWidgets('Image.network forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.network(
+          'https://example.com/test.png',
+          cacheWidth: 100,
+          cacheHeight: 100,
+          useLogicalCacheSize: flag,
+        ).image,
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
+      );
+    }
+  });
+
+  testWidgets('Image.asset forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.asset(
+          'asset.png',
+          cacheWidth: 100,
+          cacheHeight: 100,
+          useLogicalCacheSize: flag,
+        ).image,
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
+      );
+    }
+  });
+
+  testWidgets('Image.memory forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    final bytes = Uint8List.fromList(kTransparentImage);
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.memory(bytes, cacheWidth: 100, cacheHeight: 100, useLogicalCacheSize: flag).image,
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
+      );
+    }
+  });
+
+  testWidgets('Image.file forwards useLogicalCacheSize to ResizeImage', (
+    WidgetTester tester,
+  ) async {
+    final file = File.fromUri(Uri.parse('/home/flutter/dash.png'));
+    for (final flag in <bool>[false, true]) {
+      expect(
+        Image.file(file, cacheWidth: 100, cacheHeight: 100, useLogicalCacheSize: flag).image,
+        isA<ResizeImage>().having((r) => r.useLogicalSize, 'useLogicalSize', flag),
+      );
+    }
+  }, skip: kIsWeb); // Image.file is not supported on Flutter Web.
+
   testWidgets(
     'Animated GIFs do not require layout for subsequent frames',
     experimentalLeakTesting: LeakTesting.settings
@@ -3041,70 +3079,91 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'errorBuilder prevents FlutterError report only if errorBuilder is non-null when widget is disposed',
-    (WidgetTester tester) async {
-      // This test verifies that if an errorBuilder is provided, FlutterError.reportError
-      // is called, only if the errorBuilder stays present when the widget is unmounted.
+  testWidgets('errorBuilder prevents FlutterError report even if errorBuilder is later removed', (
+    WidgetTester tester,
+  ) async {
+    // Originally verified that errors were reported when errorBuilder was removed
+    // before the widget is disposed. With the reportErrors fix for
+    // https://github.com/flutter/flutter/issues/81931, the completer remembers
+    // that an error handler was once present, so errors are no longer reported.
 
-      // 1. Setup: Capture FlutterError reports
-      final reportedErrors = <FlutterErrorDetails>[];
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      FlutterError.onError = reportedErrors.add;
-      addTearDown(() {
-        FlutterError.onError = oldHandler;
-      }); // Ensure handler is restored
-
-      final provider = _TestImageProvider();
-      final testException = Exception('Network failed');
-      final StackTrace testStack = StackTrace.current;
-
-      // Function to build the widget with the Image
-      Widget buildImage({required bool hasErrorBuilder}) {
-        return Directionality(
-          textDirection: TextDirection.ltr,
-          child: Image(
-            image: provider,
-            errorBuilder: hasErrorBuilder
-                ? (_, _, _) => const SizedBox(width: 10, height: 10)
-                : null,
-          ),
-        );
-      }
-
-      // 2. Pump the widget with an errorBuilder
-      await tester.pumpWidget(buildImage(hasErrorBuilder: true));
-      expect(find.byType(Image), findsOneWidget);
-      expect(reportedErrors, isEmpty); // No errors yet
-
-      // 3. Update the widget with no errorBuilder
-      await tester.pumpWidget(buildImage(hasErrorBuilder: false));
-      expect(find.byType(Image), findsOneWidget);
-      expect(reportedErrors, isEmpty); // No errors yet
-
-      // 4. Remove the Image widget from the tree.
-      await tester.pumpWidget(const SizedBox.shrink());
-      expect(find.byType(Image), findsNothing);
-
-      // 5. Now, make the image provider fail *after* the widget state is disposed.
-      provider.fail(testException, testStack);
-
-      // 5. Allow asynchronous error propagation to complete robustly.
-      await tester.pumpAndSettle();
-      // Restore the handler now in case `expect`s in step 6 fail.
+    // 1. Setup: Capture FlutterError reports
+    final reportedErrors = <FlutterErrorDetails>[];
+    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+    FlutterError.onError = reportedErrors.add;
+    addTearDown(() {
       FlutterError.onError = oldHandler;
+    }); // Ensure handler is restored
 
-      // 6. Verify that a FlutterError was reported via the onError handler
-      expect(
-        reportedErrors,
-        isNotEmpty,
-        reason:
-            'FlutterError.onError should be called when an errorBuilder was not provided eventually.',
+    final provider = _TestImageProvider();
+    final testException = Exception('Network failed');
+    final StackTrace testStack = StackTrace.current;
+
+    // Function to build the widget with the Image
+    Widget buildImage({required bool hasErrorBuilder}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Image(
+          image: provider,
+          errorBuilder: hasErrorBuilder ? (_, _, _) => const SizedBox(width: 10, height: 10) : null,
+        ),
       );
-      // Also check takeException as a standard backup.
-      expect(tester.takeException(), isNull);
-    },
-  );
+    }
+
+    // 2. Pump the widget with an errorBuilder
+    await tester.pumpWidget(buildImage(hasErrorBuilder: true));
+    expect(find.byType(Image), findsOneWidget);
+    expect(reportedErrors, isEmpty); // No errors yet
+
+    // 3. Update the widget with no errorBuilder
+    await tester.pumpWidget(buildImage(hasErrorBuilder: false));
+    expect(find.byType(Image), findsOneWidget);
+    expect(reportedErrors, isEmpty); // No errors yet
+
+    // 4. Remove the Image widget from the tree.
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(find.byType(Image), findsNothing);
+
+    // 5. Now, make the image provider fail *after* the widget state is disposed.
+    provider.fail(testException, testStack);
+
+    // 5. Allow asynchronous error propagation to complete robustly.
+    await tester.pumpAndSettle();
+    // Restore the handler now in case `expect`s in step 6 fail.
+    FlutterError.onError = oldHandler;
+
+    // 6. Verify error reporting behavior.
+    expect(
+      reportedErrors,
+      isEmpty,
+      reason: 'reportErrors was set to false when errorBuilder was present, so errors are not reported.',
+    );
+    // Also check takeException as a standard backup.
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('RawImage forwards default blendMode to RenderImage', (WidgetTester tester) async {
+    final ui.Image image = await createTestImage(width: 10, height: 10);
+    addTearDown(image.dispose);
+
+    await tester.pumpWidget(RawImage(image: image));
+
+    final RenderImage renderImage = tester.renderObject(find.byType(RawImage));
+    expect(renderImage.blendMode, BlendMode.srcOver);
+  });
+
+  testWidgets('RawImage forwards custom blendMode to RenderImage', (WidgetTester tester) async {
+    final ui.Image image = await createTestImage(width: 10, height: 10);
+    addTearDown(image.dispose);
+
+    await tester.pumpWidget(RawImage(image: image, blendMode: BlendMode.plus));
+
+    final RenderImage renderImage = tester.renderObject(find.byType(RawImage));
+    expect(renderImage.blendMode, BlendMode.plus);
+
+    await tester.pumpWidget(RawImage(image: image, blendMode: BlendMode.multiply));
+    expect(renderImage.blendMode, BlendMode.multiply);
+  });
 }
 
 @immutable
@@ -3307,6 +3366,6 @@ enum _DisableMethod {
   /// Use [TickerMode.enabled].
   tickerMode,
 
-  /// Use [MedaiQueryData.disableAnimations].
+  /// Use [MediaQueryData.disableAnimations].
   mediaQuery,
 }

@@ -127,20 +127,20 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 30,
+          "uniform_registers_used": 28,
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": null,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.03125,
-              0.03125,
-              0.03125,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               4.0,
               0.0
@@ -157,9 +157,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.03125,
-              0.03125,
-              0.03125,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               4.0,
               0.0
@@ -168,9 +168,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.03125,
-              0.03125,
-              0.03125,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               4.0,
               0.0
@@ -178,81 +178,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 22,
-          "work_registers_used": 10
-        }
-      }
-    }
-  },
-  "flutter/impeller/entity/border_mask_blur.frag.vkspv": {
-    "Mali-G78": {
-      "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/border_mask_blur.frag.vkspv",
-      "has_side_effects": false,
-      "has_uniform_computation": true,
-      "modifies_coverage": false,
-      "reads_color_buffer": false,
-      "type": "Fragment",
-      "uses_late_zs_test": false,
-      "uses_late_zs_update": false,
-      "variants": {
-        "Main": {
-          "fp16_arithmetic": 88,
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "arith_total",
-              "arith_fma"
-            ],
-            "longest_path_cycles": [
-              0.824999988079071,
-              0.824999988079071,
-              0.234375,
-              0.25,
-              0.0,
-              0.25,
-              0.25
-            ],
-            "pipelines": [
-              "arith_total",
-              "arith_fma",
-              "arith_cvt",
-              "arith_sfu",
-              "load_store",
-              "varying",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "arith_total",
-              "arith_fma"
-            ],
-            "shortest_path_cycles": [
-              0.824999988079071,
-              0.824999988079071,
-              0.234375,
-              0.25,
-              0.0,
-              0.25,
-              0.25
-            ],
-            "total_bound_pipelines": [
-              "arith_total",
-              "arith_fma"
-            ],
-            "total_cycles": [
-              0.824999988079071,
-              0.824999988079071,
-              0.234375,
-              0.25,
-              0.0,
-              0.25,
-              0.25
-            ]
-          },
-          "stack_spill_bytes": 0,
-          "thread_occupancy": 100,
-          "uniform_registers_used": 16,
-          "work_registers_used": 16
+          "uniform_registers_used": 20,
+          "work_registers_used": 9
         }
       }
     }
@@ -649,6 +576,79 @@
       }
     }
   },
+  "flutter/impeller/entity/complex_rse.frag.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/complex_rse.frag.vkspv",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 31,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "arith_total",
+              "arith_sfu"
+            ],
+            "longest_path_cycles": [
+              4.25,
+              3.637500047683716,
+              3.53125,
+              4.25,
+              0.0,
+              0.25,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_cvt"
+            ],
+            "shortest_path_cycles": [
+              0.65625,
+              0.515625,
+              0.65625,
+              0.375,
+              0.0,
+              0.25,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "arith_total",
+              "arith_sfu"
+            ],
+            "total_cycles": [
+              4.3125,
+              3.737499952316284,
+              3.799999952316284,
+              4.3125,
+              0.0,
+              0.25,
+              0.0
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 128,
+          "work_registers_used": 32
+        }
+      }
+    }
+  },
   "flutter/impeller/entity/conical_gradient_fill_conical.frag.vkspv": {
     "Mali-G78": {
       "core": "Mali-G78",
@@ -671,7 +671,7 @@
             ],
             "longest_path_cycles": [
               0.675000011920929,
-              0.46875,
+              0.484375,
               0.675000011920929,
               0.1875,
               0.0,
@@ -705,9 +705,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.862500011920929,
+              0.84375,
               0.59375,
-              0.862500011920929,
+              0.84375,
               0.3125,
               0.0,
               0.25,
@@ -743,8 +743,8 @@
               "arith_fma"
             ],
             "longest_path_cycles": [
-              0.328125,
-              0.328125,
+              0.34375,
+              0.34375,
               0.296875,
               0.125,
               0.0,
@@ -761,12 +761,14 @@
               "texture"
             ],
             "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_fma",
               "varying"
             ],
             "shortest_path_cycles": [
-              0.234375,
-              0.234375,
-              0.203125,
+              0.25,
+              0.25,
+              0.1875,
               0.125,
               0.0,
               0.25,
@@ -777,9 +779,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.421875,
+              0.40625,
               0.359375,
-              0.421875,
+              0.40625,
               0.125,
               0.0,
               0.25,
@@ -816,7 +818,7 @@
             ],
             "longest_path_cycles": [
               0.421875,
-              0.328125,
+              0.34375,
               0.421875,
               0.125,
               0.0,
@@ -849,9 +851,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.546875,
+              0.53125,
               0.359375,
-              0.546875,
+              0.53125,
               0.125,
               0.0,
               0.25,
@@ -1064,9 +1066,9 @@
               "load_store"
             ],
             "total_cycles": [
-              1.2625000476837158,
+              1.21875,
               0.75,
-              1.2625000476837158,
+              1.21875,
               0.4375,
               4.0,
               0.25,
@@ -1136,9 +1138,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.862500011920929,
+              0.8125,
               0.5,
-              0.862500011920929,
+              0.8125,
               0.3125,
               4.0,
               0.25,
@@ -1206,9 +1208,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.9375,
+              0.887499988079071,
               0.515625,
-              0.9375,
+              0.887499988079071,
               0.25,
               4.0,
               0.25,
@@ -1536,20 +1538,20 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 30,
+          "uniform_registers_used": 28,
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": null,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -1566,9 +1568,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -1577,9 +1579,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -1587,8 +1589,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 22,
-          "work_registers_used": 8
+          "uniform_registers_used": 20,
+          "work_registers_used": 7
         }
       }
     }
@@ -1648,20 +1650,20 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 30,
+          "uniform_registers_used": 28,
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": null,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -1678,9 +1680,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -1689,9 +1691,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -1699,8 +1701,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 22,
-          "work_registers_used": 8
+          "uniform_registers_used": 20,
+          "work_registers_used": 7
         }
       }
     }
@@ -1759,11 +1761,11 @@
               "load_store"
             ],
             "total_cycles": [
-              0.4375,
+              0.453125,
               0.15625,
-              0.4375,
+              0.453125,
               0.0625,
-              1.0,
+              2.0,
               0.25,
               0.25
             ]
@@ -1898,7 +1900,7 @@
     "Mali-G78": {
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/gles/advanced_blend.vert.gles",
-      "has_uniform_computation": true,
+      "has_uniform_computation": false,
       "type": "Vertex",
       "variants": {
         "Position": {
@@ -1909,8 +1911,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -1928,8 +1930,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -1939,8 +1941,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -1953,16 +1955,16 @@
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": null,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.03125,
-              0.03125,
-              0.03125,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               4.0,
               0.0
@@ -1979,9 +1981,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.03125,
-              0.03125,
-              0.03125,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               4.0,
               0.0
@@ -1990,9 +1992,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.03125,
-              0.03125,
-              0.03125,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               4.0,
               0.0
@@ -2000,8 +2002,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 10,
-          "work_registers_used": 10
+          "uniform_registers_used": 8,
+          "work_registers_used": 9
         }
       }
     },
@@ -2018,7 +2020,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              3.299999952316284,
+              2.640000104904175,
               7.0,
               0.0
             ],
@@ -2031,7 +2033,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              3.299999952316284,
+              2.640000104904175,
               7.0,
               0.0
             ],
@@ -2039,132 +2041,14 @@
               "load_store"
             ],
             "total_cycles": [
-              3.3333332538604736,
+              2.6666667461395264,
               7.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
           "uniform_registers_used": 6,
-          "work_registers_used": 3
-        }
-      }
-    }
-  },
-  "flutter/impeller/entity/gles/border_mask_blur.frag.gles": {
-    "Mali-G78": {
-      "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/gles/border_mask_blur.frag.gles",
-      "has_side_effects": false,
-      "has_uniform_computation": true,
-      "modifies_coverage": false,
-      "reads_color_buffer": false,
-      "type": "Fragment",
-      "uses_late_zs_test": false,
-      "uses_late_zs_update": false,
-      "variants": {
-        "Main": {
-          "fp16_arithmetic": 81,
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "arith_total",
-              "arith_fma"
-            ],
-            "longest_path_cycles": [
-              0.9375,
-              0.9375,
-              0.296875,
-              0.25,
-              0.0,
-              0.25,
-              0.25
-            ],
-            "pipelines": [
-              "arith_total",
-              "arith_fma",
-              "arith_cvt",
-              "arith_sfu",
-              "load_store",
-              "varying",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "arith_total",
-              "arith_fma"
-            ],
-            "shortest_path_cycles": [
-              0.9375,
-              0.9375,
-              0.265625,
-              0.25,
-              0.0,
-              0.25,
-              0.25
-            ],
-            "total_bound_pipelines": [
-              "arith_total",
-              "arith_fma"
-            ],
-            "total_cycles": [
-              0.9375,
-              0.9375,
-              0.296875,
-              0.25,
-              0.0,
-              0.25,
-              0.25
-            ]
-          },
-          "stack_spill_bytes": 0,
-          "thread_occupancy": 100,
-          "uniform_registers_used": 10,
-          "work_registers_used": 29
-        }
-      }
-    },
-    "Mali-T880": {
-      "core": "Mali-T880",
-      "filename": "flutter/impeller/entity/gles/border_mask_blur.frag.gles",
-      "has_uniform_computation": false,
-      "type": "Fragment",
-      "variants": {
-        "Main": {
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "arithmetic"
-            ],
-            "longest_path_cycles": [
-              8.579999923706055,
-              1.0,
-              1.0
-            ],
-            "pipelines": [
-              "arithmetic",
-              "load_store",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "arithmetic"
-            ],
-            "shortest_path_cycles": [
-              8.579999923706055,
-              1.0,
-              1.0
-            ],
-            "total_bound_pipelines": [
-              "arithmetic"
-            ],
-            "total_cycles": [
-              9.0,
-              1.0,
-              1.0
-            ]
-          },
-          "thread_occupancy": 100,
-          "uniform_registers_used": 1,
-          "work_registers_used": 3
+          "work_registers_used": 2
         }
       }
     }
@@ -2302,8 +2186,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -2321,8 +2205,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -2332,8 +2216,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -2342,7 +2226,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 20,
+          "uniform_registers_used": 22,
           "work_registers_used": 32
         },
         "Varying": {
@@ -2411,7 +2295,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.640000104904175,
+              2.9700000286102295,
               4.0,
               0.0
             ],
@@ -2424,7 +2308,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.640000104904175,
+              2.9700000286102295,
               4.0,
               0.0
             ],
@@ -2432,13 +2316,13 @@
               "load_store"
             ],
             "total_cycles": [
-              2.6666667461395264,
+              3.0,
               4.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 5,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -2577,8 +2461,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.109375,
-              0.109375,
+              0.125,
+              0.125,
               0.0,
               0.0,
               2.0,
@@ -2596,8 +2480,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.109375,
-              0.109375,
+              0.125,
+              0.125,
               0.0,
               0.0,
               2.0,
@@ -2607,8 +2491,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.109375,
-              0.109375,
+              0.125,
+              0.125,
               0.0,
               0.0,
               2.0,
@@ -2617,7 +2501,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 18,
+          "uniform_registers_used": 20,
           "work_registers_used": 32
         }
       }
@@ -2786,6 +2670,124 @@
       }
     }
   },
+  "flutter/impeller/entity/gles/complex_rse.frag.gles": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/gles/complex_rse.frag.gles",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 31,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "arith_total",
+              "arith_sfu"
+            ],
+            "longest_path_cycles": [
+              4.25,
+              4.074999809265137,
+              3.53125,
+              4.25,
+              0.0,
+              0.25,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_cvt"
+            ],
+            "shortest_path_cycles": [
+              0.824999988079071,
+              0.59375,
+              0.824999988079071,
+              0.375,
+              0.0,
+              0.25,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "arith_total",
+              "arith_sfu"
+            ],
+            "total_cycles": [
+              4.3125,
+              4.1875,
+              3.987499952316284,
+              4.3125,
+              0.0,
+              0.25,
+              0.0
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 64,
+          "work_registers_used": 32
+        }
+      }
+    },
+    "Mali-T880": {
+      "core": "Mali-T880",
+      "filename": "flutter/impeller/entity/gles/complex_rse.frag.gles",
+      "has_uniform_computation": false,
+      "type": "Fragment",
+      "variants": {
+        "Main": {
+          "has_stack_spilling": true,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "arithmetic"
+            ],
+            "longest_path_cycles": [
+              54.119998931884766,
+              5.0,
+              2.0
+            ],
+            "pipelines": [
+              "arithmetic",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arithmetic"
+            ],
+            "shortest_path_cycles": [
+              10.229999542236328,
+              1.0,
+              2.0
+            ],
+            "total_bound_pipelines": [
+              "arithmetic"
+            ],
+            "total_cycles": [
+              56.33333206176758,
+              5.0,
+              2.0
+            ]
+          },
+          "thread_occupancy": 100,
+          "uniform_registers_used": 11,
+          "work_registers_used": 4
+        }
+      }
+    }
+  },
   "flutter/impeller/entity/gles/conical_gradient_fill_conical.frag.gles": {
     "Mali-G78": {
       "core": "Mali-G78",
@@ -2884,7 +2886,7 @@
               "arithmetic"
             ],
             "shortest_path_cycles": [
-              3.630000114440918,
+              3.9600000381469727,
               1.0,
               0.0
             ],
@@ -2892,7 +2894,7 @@
               "arithmetic"
             ],
             "total_cycles": [
-              13.0,
+              12.666666984558105,
               1.0,
               1.0
             ]
@@ -2990,7 +2992,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              7.260000228881836,
+              6.929999828338623,
               1.0,
               1.0
             ],
@@ -3011,13 +3013,13 @@
               "arithmetic"
             ],
             "total_cycles": [
-              8.0,
+              7.666666507720947,
               1.0,
               1.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 7,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -3107,7 +3109,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              8.25,
+              7.920000076293945,
               1.0,
               1.0
             ],
@@ -3128,13 +3130,13 @@
               "arithmetic"
             ],
             "total_cycles": [
-              9.666666984558105,
+              9.333333015441895,
               1.0,
               1.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 7,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -3312,9 +3314,9 @@
               "load_store"
             ],
             "total_cycles": [
-              1.21875,
+              1.1875,
               0.737500011920929,
-              1.21875,
+              1.1875,
               0.375,
               4.0,
               0.25,
@@ -3324,7 +3326,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 26,
-          "work_registers_used": 23
+          "work_registers_used": 22
         }
       }
     },
@@ -3429,9 +3431,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.887499988079071,
+              0.862500011920929,
               0.5,
-              0.887499988079071,
+              0.862500011920929,
               0.25,
               4.0,
               0.25,
@@ -3441,7 +3443,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 18,
-          "work_registers_used": 23
+          "work_registers_used": 22
         }
       }
     },
@@ -3544,9 +3546,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.90625,
+              0.875,
               0.5,
-              0.90625,
+              0.875,
               0.1875,
               4.0,
               0.25,
@@ -3556,7 +3558,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 18,
-          "work_registers_used": 23
+          "work_registers_used": 22
         }
       }
     },
@@ -3601,7 +3603,7 @@
           },
           "thread_occupancy": 100,
           "uniform_registers_used": 5,
-          "work_registers_used": 3
+          "work_registers_used": 4
         }
       }
     }
@@ -3856,8 +3858,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -3875,8 +3877,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -3886,8 +3888,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -3896,7 +3898,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 20,
+          "uniform_registers_used": 22,
           "work_registers_used": 32
         },
         "Varying": {
@@ -3992,7 +3994,7 @@
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 5,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -4002,7 +4004,7 @@
     "Mali-G78": {
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/gles/filter_position.vert.gles",
-      "has_uniform_computation": true,
+      "has_uniform_computation": false,
       "type": "Vertex",
       "variants": {
         "Position": {
@@ -4013,8 +4015,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4032,8 +4034,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4043,8 +4045,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4057,16 +4059,16 @@
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": null,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -4083,9 +4085,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -4094,9 +4096,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -4104,8 +4106,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 10,
-          "work_registers_used": 8
+          "uniform_registers_used": 8,
+          "work_registers_used": 7
         }
       }
     },
@@ -4159,7 +4161,7 @@
     "Mali-G78": {
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/gles/filter_position_uv.vert.gles",
-      "has_uniform_computation": true,
+      "has_uniform_computation": false,
       "type": "Vertex",
       "variants": {
         "Position": {
@@ -4170,8 +4172,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4189,8 +4191,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4200,8 +4202,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4214,16 +4216,16 @@
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": null,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -4240,9 +4242,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -4251,9 +4253,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -4261,8 +4263,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 10,
-          "work_registers_used": 8
+          "uniform_registers_used": 8,
+          "work_registers_used": 7
         }
       }
     },
@@ -4279,7 +4281,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               5.0,
               0.0
             ],
@@ -4292,7 +4294,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               5.0,
               0.0
             ],
@@ -4300,7 +4302,7 @@
               "load_store"
             ],
             "total_cycles": [
-              3.0,
+              2.6666667461395264,
               5.0,
               0.0
             ]
@@ -4442,7 +4444,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 100,
+          "fp16_arithmetic": 42,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -4450,10 +4452,10 @@
               "texture"
             ],
             "longest_path_cycles": [
+              0.1875,
               0.109375,
-              0.03125,
-              0.109375,
-              0.0,
+              0.1875,
+              0.125,
               0.0,
               0.25,
               0.25
@@ -4485,10 +4487,10 @@
               "texture"
             ],
             "total_cycles": [
+              0.21875,
+              0.171875,
+              0.21875,
               0.125,
-              0.0625,
-              0.125,
-              0.0,
               0.0,
               0.25,
               0.25
@@ -4496,8 +4498,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 6,
-          "work_registers_used": 19
+          "uniform_registers_used": 8,
+          "work_registers_used": 20
         }
       }
     },
@@ -4511,12 +4513,10 @@
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
-              "arithmetic",
-              "load_store",
-              "texture"
+              "arithmetic"
             ],
             "longest_path_cycles": [
-              1.0,
+              1.9800000190734863,
               1.0,
               1.0
             ],
@@ -4539,7 +4539,7 @@
               "arithmetic"
             ],
             "total_cycles": [
-              2.6666667461395264,
+              4.0,
               1.0,
               1.0
             ]
@@ -4566,8 +4566,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4585,8 +4585,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4596,8 +4596,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4606,7 +4606,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 20,
+          "uniform_registers_used": 22,
           "work_registers_used": 32
         },
         "Varying": {
@@ -4702,7 +4702,7 @@
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 5,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -4723,8 +4723,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4742,8 +4742,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4753,8 +4753,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -4832,7 +4832,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              3.299999952316284,
+              3.630000114440918,
               4.0,
               0.0
             ],
@@ -4845,7 +4845,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              3.299999952316284,
+              3.630000114440918,
               4.0,
               0.0
             ],
@@ -4853,286 +4853,14 @@
               "load_store"
             ],
             "total_cycles": [
-              3.3333332538604736,
+              3.6666667461395264,
               4.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 8,
-          "work_registers_used": 2
-        }
-      }
-    }
-  },
-  "flutter/impeller/entity/gles/line.frag.gles": {
-    "Mali-G78": {
-      "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/gles/line.frag.gles",
-      "has_side_effects": false,
-      "has_uniform_computation": true,
-      "modifies_coverage": false,
-      "reads_color_buffer": false,
-      "type": "Fragment",
-      "uses_late_zs_test": false,
-      "uses_late_zs_update": false,
-      "variants": {
-        "Main": {
-          "fp16_arithmetic": 3,
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "varying"
-            ],
-            "longest_path_cycles": [
-              0.265625,
-              0.25,
-              0.265625,
-              0.0625,
-              0.0,
-              1.75,
-              0.25
-            ],
-            "pipelines": [
-              "arith_total",
-              "arith_fma",
-              "arith_cvt",
-              "arith_sfu",
-              "load_store",
-              "varying",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "varying"
-            ],
-            "shortest_path_cycles": [
-              0.171875,
-              0.171875,
-              0.109375,
-              0.0,
-              0.0,
-              1.75,
-              0.0
-            ],
-            "total_bound_pipelines": [
-              "varying"
-            ],
-            "total_cycles": [
-              0.34375,
-              0.265625,
-              0.34375,
-              0.0625,
-              0.0,
-              1.75,
-              1.0
-            ]
-          },
-          "stack_spill_bytes": 0,
-          "thread_occupancy": 100,
-          "uniform_registers_used": 4,
-          "work_registers_used": 24
-        }
-      }
-    },
-    "Mali-T880": {
-      "core": "Mali-T880",
-      "filename": "flutter/impeller/entity/gles/line.frag.gles",
-      "has_uniform_computation": false,
-      "type": "Fragment",
-      "variants": {
-        "Main": {
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "longest_path_cycles": [
-              4.619999885559082,
-              5.0,
-              2.0
-            ],
-            "pipelines": [
-              "arithmetic",
-              "load_store",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "shortest_path_cycles": [
-              2.309999942779541,
-              5.0,
-              0.0
-            ],
-            "total_bound_pipelines": [
-              "arithmetic"
-            ],
-            "total_cycles": [
-              6.0,
-              5.0,
-              4.0
-            ]
-          },
-          "thread_occupancy": 100,
-          "uniform_registers_used": 1,
+          "uniform_registers_used": 9,
           "work_registers_used": 3
-        }
-      }
-    }
-  },
-  "flutter/impeller/entity/gles/line.vert.gles": {
-    "Mali-G78": {
-      "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/gles/line.vert.gles",
-      "has_uniform_computation": false,
-      "type": "Vertex",
-      "variants": {
-        "Position": {
-          "fp16_arithmetic": 0,
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "longest_path_cycles": [
-              0.140625,
-              0.140625,
-              0.0,
-              0.0,
-              2.0,
-              0.0
-            ],
-            "pipelines": [
-              "arith_total",
-              "arith_fma",
-              "arith_cvt",
-              "arith_sfu",
-              "load_store",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "shortest_path_cycles": [
-              0.140625,
-              0.140625,
-              0.0,
-              0.0,
-              2.0,
-              0.0
-            ],
-            "total_bound_pipelines": [
-              "load_store"
-            ],
-            "total_cycles": [
-              0.140625,
-              0.140625,
-              0.0,
-              0.0,
-              2.0,
-              0.0
-            ]
-          },
-          "stack_spill_bytes": 0,
-          "thread_occupancy": 100,
-          "uniform_registers_used": 20,
-          "work_registers_used": 32
-        },
-        "Varying": {
-          "fp16_arithmetic": null,
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "longest_path_cycles": [
-              0.09375,
-              0.0,
-              0.09375,
-              0.0,
-              10.0,
-              0.0
-            ],
-            "pipelines": [
-              "arith_total",
-              "arith_fma",
-              "arith_cvt",
-              "arith_sfu",
-              "load_store",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "shortest_path_cycles": [
-              0.09375,
-              0.0,
-              0.09375,
-              0.0,
-              10.0,
-              0.0
-            ],
-            "total_bound_pipelines": [
-              "load_store"
-            ],
-            "total_cycles": [
-              0.09375,
-              0.0,
-              0.09375,
-              0.0,
-              10.0,
-              0.0
-            ]
-          },
-          "stack_spill_bytes": 0,
-          "thread_occupancy": 100,
-          "uniform_registers_used": 8,
-          "work_registers_used": 19
-        }
-      }
-    },
-    "Mali-T880": {
-      "core": "Mali-T880",
-      "filename": "flutter/impeller/entity/gles/line.vert.gles",
-      "has_uniform_computation": false,
-      "type": "Vertex",
-      "variants": {
-        "Main": {
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "longest_path_cycles": [
-              2.640000104904175,
-              12.0,
-              0.0
-            ],
-            "pipelines": [
-              "arithmetic",
-              "load_store",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "shortest_path_cycles": [
-              2.640000104904175,
-              12.0,
-              0.0
-            ],
-            "total_bound_pipelines": [
-              "load_store"
-            ],
-            "total_cycles": [
-              2.6666667461395264,
-              12.0,
-              0.0
-            ]
-          },
-          "thread_occupancy": 100,
-          "uniform_registers_used": 5,
-          "work_registers_used": 2
         }
       }
     }
@@ -5150,7 +4878,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 4,
+          "fp16_arithmetic": 13,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -5158,9 +4886,9 @@
               "arith_cvt"
             ],
             "longest_path_cycles": [
-              0.40625,
-              0.296875,
-              0.40625,
+              0.375,
+              0.265625,
+              0.375,
               0.125,
               0.0,
               0.25,
@@ -5179,9 +4907,9 @@
               "varying"
             ],
             "shortest_path_cycles": [
-              0.203125,
-              0.1875,
-              0.203125,
+              0.21875,
+              0.171875,
+              0.21875,
               0.125,
               0.0,
               0.25,
@@ -5192,9 +4920,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.53125,
-              0.328125,
-              0.53125,
+              0.46875,
+              0.296875,
+              0.46875,
               0.125,
               0.0,
               0.25,
@@ -5221,7 +4949,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              7.260000228881836,
+              6.929999828338623,
               1.0,
               1.0
             ],
@@ -5234,21 +4962,21 @@
               "arithmetic"
             ],
             "shortest_path_cycles": [
-              2.309999942779541,
-              1.0,
+              1.649999976158142,
+              0.0,
               0.0
             ],
             "total_bound_pipelines": [
               "arithmetic"
             ],
             "total_cycles": [
-              8.0,
+              7.666666507720947,
               1.0,
               1.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 4,
+          "uniform_registers_used": 3,
           "work_registers_used": 2
         }
       }
@@ -5307,9 +5035,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.8125,
+              0.78125,
               0.453125,
-              0.8125,
+              0.78125,
               0.1875,
               4.0,
               0.25,
@@ -5357,8 +5085,8 @@
               "arithmetic"
             ],
             "total_cycles": [
-              9.666666984558105,
-              4.0,
+              10.333333015441895,
+              5.0,
               0.0
             ]
           },
@@ -5726,7 +5454,7 @@
     "Mali-G78": {
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/gles/porter_duff_blend.vert.gles",
-      "has_uniform_computation": true,
+      "has_uniform_computation": false,
       "type": "Vertex",
       "variants": {
         "Position": {
@@ -5737,8 +5465,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -5756,8 +5484,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -5767,8 +5495,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -5781,16 +5509,16 @@
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": null,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.109375,
-              0.015625,
-              0.109375,
+              0.03125,
+              0.0,
+              0.03125,
               0.0,
               4.0,
               0.0
@@ -5807,9 +5535,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.109375,
-              0.015625,
-              0.109375,
+              0.03125,
+              0.0,
+              0.03125,
               0.0,
               4.0,
               0.0
@@ -5818,9 +5546,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.109375,
-              0.015625,
-              0.109375,
+              0.03125,
+              0.0,
+              0.03125,
               0.0,
               4.0,
               0.0
@@ -5828,7 +5556,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 10,
+          "uniform_registers_used": 8,
           "work_registers_used": 9
         }
       }
@@ -5846,7 +5574,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               7.0,
               0.0
             ],
@@ -5859,7 +5587,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               7.0,
               0.0
             ],
@@ -5867,7 +5595,7 @@
               "load_store"
             ],
             "total_cycles": [
-              3.0,
+              2.6666667461395264,
               7.0,
               0.0
             ]
@@ -5900,9 +5628,9 @@
               "arith_cvt"
             ],
             "longest_path_cycles": [
-              0.4375,
-              0.3125,
-              0.4375,
+              0.34375,
+              0.296875,
+              0.34375,
               0.1875,
               0.0,
               0.25,
@@ -5921,9 +5649,9 @@
               "varying"
             ],
             "shortest_path_cycles": [
-              0.234375,
+              0.21875,
               0.203125,
-              0.234375,
+              0.21875,
               0.1875,
               0.0,
               0.25,
@@ -5934,9 +5662,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.5625,
-              0.34375,
-              0.5625,
+              0.46875,
+              0.328125,
+              0.46875,
               0.1875,
               0.0,
               0.25,
@@ -5963,7 +5691,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              7.260000228881836,
+              6.599999904632568,
               1.0,
               1.0
             ],
@@ -5984,7 +5712,7 @@
               "arithmetic"
             ],
             "total_cycles": [
-              8.0,
+              7.333333492279053,
               1.0,
               1.0
             ]
@@ -6049,9 +5777,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.800000011920929,
+              0.762499988079071,
               0.375,
-              0.800000011920929,
+              0.762499988079071,
               0.25,
               4.0,
               0.25,
@@ -6061,7 +5789,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 10,
-          "work_registers_used": 21
+          "work_registers_used": 20
         }
       }
     },
@@ -6099,14 +5827,14 @@
               "arithmetic"
             ],
             "total_cycles": [
-              10.0,
-              4.0,
+              10.333333015441895,
+              5.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
           "uniform_registers_used": 2,
-          "work_registers_used": 3
+          "work_registers_used": 2
         }
       }
     }
@@ -6116,7 +5844,7 @@
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/gles/rrect_blur.frag.gles",
       "has_side_effects": false,
-      "has_uniform_computation": true,
+      "has_uniform_computation": false,
       "modifies_coverage": false,
       "reads_color_buffer": false,
       "type": "Fragment",
@@ -6132,8 +5860,8 @@
               "arith_fma"
             ],
             "longest_path_cycles": [
-              0.625,
-              0.625,
+              0.71875,
+              0.71875,
               0.21875,
               0.5,
               0.0,
@@ -6154,8 +5882,8 @@
               "arith_fma"
             ],
             "shortest_path_cycles": [
-              0.625,
-              0.625,
+              0.71875,
+              0.71875,
               0.1875,
               0.5,
               0.0,
@@ -6167,8 +5895,8 @@
               "arith_fma"
             ],
             "total_cycles": [
-              0.625,
-              0.625,
+              0.71875,
+              0.71875,
               0.21875,
               0.5,
               0.0,
@@ -6178,8 +5906,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 18,
-          "work_registers_used": 23
+          "uniform_registers_used": 20,
+          "work_registers_used": 25
         }
       }
     },
@@ -6244,8 +5972,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -6263,8 +5991,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -6274,8 +6002,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -6284,7 +6012,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 20,
+          "uniform_registers_used": 22,
           "work_registers_used": 32
         },
         "Varying": {
@@ -6353,7 +6081,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.640000104904175,
+              2.9700000286102295,
               4.0,
               0.0
             ],
@@ -6366,7 +6094,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.640000104904175,
+              2.9700000286102295,
               4.0,
               0.0
             ],
@@ -6374,13 +6102,13 @@
               "load_store"
             ],
             "total_cycles": [
-              2.6666667461395264,
+              3.0,
               4.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 5,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -6404,11 +6132,11 @@
           "performance": {
             "longest_path_bound_pipelines": [
               "arith_total",
-              "arith_sfu"
+              "arith_fma"
             ],
             "longest_path_cycles": [
-              1.3125,
-              1.2625000476837158,
+              1.3624999523162842,
+              1.3624999523162842,
               0.5625,
               1.3125,
               0.0,
@@ -6429,8 +6157,8 @@
               "arith_fma"
             ],
             "shortest_path_cycles": [
-              1.125,
-              1.125,
+              1.21875,
+              1.21875,
               0.484375,
               0.9375,
               0.0,
@@ -6442,8 +6170,8 @@
               "arith_fma"
             ],
             "total_cycles": [
-              1.4249999523162842,
-              1.4249999523162842,
+              1.5125000476837158,
+              1.5125000476837158,
               0.737500011920929,
               1.375,
               0.0,
@@ -6453,7 +6181,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 48,
+          "uniform_registers_used": 50,
           "work_registers_used": 26
         }
       }
@@ -6519,8 +6247,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -6538,8 +6266,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -6549,8 +6277,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -6559,7 +6287,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 20,
+          "uniform_registers_used": 22,
           "work_registers_used": 32
         },
         "Varying": {
@@ -6628,7 +6356,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.640000104904175,
+              2.9700000286102295,
               4.0,
               0.0
             ],
@@ -6641,7 +6369,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.640000104904175,
+              2.9700000286102295,
               4.0,
               0.0
             ],
@@ -6649,13 +6377,13 @@
               "load_store"
             ],
             "total_cycles": [
-              2.6666667461395264,
+              3.0,
               4.0,
               0.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 5,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -6794,8 +6522,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -6813,8 +6541,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -6824,8 +6552,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -6834,7 +6562,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 20,
+          "uniform_registers_used": 22,
           "work_registers_used": 32
         },
         "Varying": {
@@ -6930,7 +6658,7 @@
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 5,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -7069,8 +6797,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -7088,8 +6816,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -7099,8 +6827,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -7109,7 +6837,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 20,
+          "uniform_registers_used": 22,
           "work_registers_used": 32
         }
       }
@@ -7154,7 +6882,7 @@
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 5,
+          "uniform_registers_used": 6,
           "work_registers_used": 2
         }
       }
@@ -7291,17 +7019,17 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 2,
+          "fp16_arithmetic": 0,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "arith_total",
-              "arith_cvt"
+              "arith_fma"
             ],
             "longest_path_cycles": [
-              0.484375,
-              0.46875,
-              0.484375,
+              0.453125,
+              0.453125,
+              0.40625,
               0.375,
               0.0,
               0.25,
@@ -7334,9 +7062,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.578125,
               0.5,
-              0.578125,
+              0.484375,
+              0.5,
               0.375,
               0.0,
               0.25,
@@ -7363,7 +7091,7 @@
               "arithmetic"
             ],
             "longest_path_cycles": [
-              7.920000076293945,
+              7.260000228881836,
               1.0,
               1.0
             ],
@@ -7384,13 +7112,13 @@
               "arithmetic"
             ],
             "total_cycles": [
-              8.666666984558105,
+              8.0,
               1.0,
               1.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 4,
+          "uniform_registers_used": 3,
           "work_registers_used": 2
         }
       }
@@ -7450,9 +7178,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.925000011920929,
+              0.887499988079071,
               0.625,
-              0.925000011920929,
+              0.887499988079071,
               0.4375,
               4.0,
               0.25,
@@ -7993,7 +7721,7 @@
     "Mali-G78": {
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/gles/texture_fill.vert.gles",
-      "has_uniform_computation": true,
+      "has_uniform_computation": false,
       "type": "Vertex",
       "variants": {
         "Position": {
@@ -8004,8 +7732,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -8023,8 +7751,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -8034,8 +7762,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -8048,16 +7776,16 @@
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": null,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -8074,9 +7802,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -8085,9 +7813,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -8095,8 +7823,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 10,
-          "work_registers_used": 8
+          "uniform_registers_used": 8,
+          "work_registers_used": 7
         }
       }
     },
@@ -8113,7 +7841,7 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               5.0,
               0.0
             ],
@@ -8126,7 +7854,7 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              2.9700000286102295,
+              2.640000104904175,
               5.0,
               0.0
             ],
@@ -8134,7 +7862,7 @@
               "load_store"
             ],
             "total_cycles": [
-              3.0,
+              2.6666667461395264,
               5.0,
               0.0
             ]
@@ -8274,7 +8002,7 @@
     "Mali-G78": {
       "core": "Mali-G78",
       "filename": "flutter/impeller/entity/gles/texture_uv_fill.vert.gles",
-      "has_uniform_computation": true,
+      "has_uniform_computation": false,
       "type": "Vertex",
       "variants": {
         "Position": {
@@ -8285,8 +8013,8 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -8304,8 +8032,8 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -8315,8 +8043,8 @@
               "load_store"
             ],
             "total_cycles": [
-              0.140625,
-              0.140625,
+              0.15625,
+              0.15625,
               0.0,
               0.0,
               2.0,
@@ -8336,9 +8064,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.078125,
-              0.078125,
-              0.015625,
+              0.0625,
+              0.0625,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -8355,9 +8083,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.078125,
-              0.078125,
-              0.015625,
+              0.0625,
+              0.0625,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -8366,9 +8094,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.078125,
-              0.078125,
-              0.015625,
+              0.0625,
+              0.0625,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -8376,7 +8104,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 16,
+          "uniform_registers_used": 14,
           "work_registers_used": 9
         }
       }
@@ -8563,7 +8291,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 35,
+          "fp16_arithmetic": 25,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -8571,9 +8299,9 @@
               "arith_cvt"
             ],
             "longest_path_cycles": [
-              0.421875,
+              0.390625,
               0.328125,
-              0.421875,
+              0.390625,
               0.0,
               0.0,
               0.25,
@@ -8605,9 +8333,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.546875,
+              0.484375,
               0.359375,
-              0.546875,
+              0.484375,
               0.0,
               0.0,
               0.25,
@@ -8617,7 +8345,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 20,
-          "work_registers_used": 22
+          "work_registers_used": 21
         }
       }
     },
@@ -8655,7 +8383,7 @@
               "arithmetic"
             ],
             "total_cycles": [
-              9.666666984558105,
+              9.333333015441895,
               1.0,
               1.0
             ]
@@ -8680,7 +8408,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 54,
+          "fp16_arithmetic": 33,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -8688,13 +8416,13 @@
               "arith_fma"
             ],
             "longest_path_cycles": [
-              2.34375,
-              2.34375,
-              0.28125,
-              1.4375,
+              3.96875,
+              3.96875,
+              2.112499952316284,
+              3.9375,
               0.0,
               0.25,
-              0.0
+              0.25
             ],
             "pipelines": [
               "arith_total",
@@ -8707,13 +8435,13 @@
             ],
             "shortest_path_bound_pipelines": [
               "arith_total",
-              "arith_fma"
+              "arith_cvt"
             ],
             "shortest_path_cycles": [
-              0.4375,
-              0.4375,
-              0.0625,
-              0.375,
+              0.328125,
+              0.3125,
+              0.328125,
+              0.125,
               0.0,
               0.25,
               0.0
@@ -8723,18 +8451,18 @@
               "arith_fma"
             ],
             "total_cycles": [
-              5.34375,
-              5.34375,
-              1.0625,
-              3.125,
+              13.125,
+              13.125,
+              5.03125,
+              12.1875,
               0.0,
               0.25,
-              0.0
+              0.25
             ]
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 26,
+          "uniform_registers_used": 58,
           "work_registers_used": 32
         }
       }
@@ -8742,19 +8470,19 @@
     "Mali-T880": {
       "core": "Mali-T880",
       "filename": "flutter/impeller/entity/gles/uber_sdf.frag.gles",
-      "has_uniform_computation": false,
+      "has_uniform_computation": true,
       "type": "Fragment",
       "variants": {
         "Main": {
-          "has_stack_spilling": false,
+          "has_stack_spilling": true,
           "performance": {
             "longest_path_bound_pipelines": [
               "arithmetic"
             ],
             "longest_path_cycles": [
-              32.34000015258789,
-              1.0,
-              2.0
+              50.81999969482422,
+              7.0,
+              3.0
             ],
             "pipelines": [
               "arithmetic",
@@ -8766,21 +8494,21 @@
             ],
             "shortest_path_cycles": [
               5.28000020980835,
-              1.0,
-              2.0
+              3.0,
+              0.0
             ],
             "total_bound_pipelines": [
               "arithmetic"
             ],
             "total_cycles": [
-              52.0,
-              1.0,
-              2.0
+              109.66666412353516,
+              7.0,
+              17.0
             ]
           },
           "thread_occupancy": 100,
-          "uniform_registers_used": 3,
-          "work_registers_used": 3
+          "uniform_registers_used": 9,
+          "work_registers_used": 4
         }
       }
     }
@@ -9147,7 +8875,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 100,
+          "fp16_arithmetic": 33,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -9155,10 +8883,10 @@
               "texture"
             ],
             "longest_path_cycles": [
-              0.078125,
-              0.03125,
-              0.078125,
-              0.0,
+              0.140625,
+              0.109375,
+              0.140625,
+              0.125,
               0.0,
               0.25,
               0.25
@@ -9177,9 +8905,9 @@
               "texture"
             ],
             "shortest_path_cycles": [
-              0.0625,
+              0.078125,
               0.03125,
-              0.0625,
+              0.078125,
               0.0,
               0.0,
               0.25,
@@ -9190,10 +8918,10 @@
               "texture"
             ],
             "total_cycles": [
-              0.09375,
-              0.0625,
-              0.09375,
-              0.0,
+              0.171875,
+              0.140625,
+              0.171875,
+              0.125,
               0.0,
               0.25,
               0.25
@@ -9201,8 +8929,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 8,
-          "work_registers_used": 6
+          "uniform_registers_used": 10,
+          "work_registers_used": 7
         }
       }
     }
@@ -9431,188 +9159,6 @@
       }
     }
   },
-  "flutter/impeller/entity/line.frag.vkspv": {
-    "Mali-G78": {
-      "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/line.frag.vkspv",
-      "has_side_effects": false,
-      "has_uniform_computation": true,
-      "modifies_coverage": false,
-      "reads_color_buffer": false,
-      "type": "Fragment",
-      "uses_late_zs_test": false,
-      "uses_late_zs_update": false,
-      "variants": {
-        "Main": {
-          "fp16_arithmetic": 25,
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "varying"
-            ],
-            "longest_path_cycles": [
-              0.25,
-              0.234375,
-              0.25,
-              0.25,
-              0.0,
-              1.75,
-              0.25
-            ],
-            "pipelines": [
-              "arith_total",
-              "arith_fma",
-              "arith_cvt",
-              "arith_sfu",
-              "load_store",
-              "varying",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "varying"
-            ],
-            "shortest_path_cycles": [
-              0.1875,
-              0.15625,
-              0.125,
-              0.1875,
-              0.0,
-              1.75,
-              0.0
-            ],
-            "total_bound_pipelines": [
-              "varying"
-            ],
-            "total_cycles": [
-              0.328125,
-              0.25,
-              0.328125,
-              0.25,
-              0.0,
-              1.75,
-              1.0
-            ]
-          },
-          "stack_spill_bytes": 0,
-          "thread_occupancy": 100,
-          "uniform_registers_used": 4,
-          "work_registers_used": 18
-        }
-      }
-    }
-  },
-  "flutter/impeller/entity/line.vert.vkspv": {
-    "Mali-G78": {
-      "core": "Mali-G78",
-      "filename": "flutter/impeller/entity/line.vert.vkspv",
-      "has_uniform_computation": true,
-      "type": "Vertex",
-      "variants": {
-        "Position": {
-          "fp16_arithmetic": 0,
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "longest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
-              0.0,
-              2.0,
-              0.0
-            ],
-            "pipelines": [
-              "arith_total",
-              "arith_fma",
-              "arith_cvt",
-              "arith_sfu",
-              "load_store",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "shortest_path_cycles": [
-              0.125,
-              0.125,
-              0.0,
-              0.0,
-              2.0,
-              0.0
-            ],
-            "total_bound_pipelines": [
-              "load_store"
-            ],
-            "total_cycles": [
-              0.125,
-              0.125,
-              0.0,
-              0.0,
-              2.0,
-              0.0
-            ]
-          },
-          "stack_spill_bytes": 0,
-          "thread_occupancy": 100,
-          "uniform_registers_used": 28,
-          "work_registers_used": 32
-        },
-        "Varying": {
-          "fp16_arithmetic": null,
-          "has_stack_spilling": false,
-          "performance": {
-            "longest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "longest_path_cycles": [
-              0.046875,
-              0.0,
-              0.046875,
-              0.0,
-              10.0,
-              0.0
-            ],
-            "pipelines": [
-              "arith_total",
-              "arith_fma",
-              "arith_cvt",
-              "arith_sfu",
-              "load_store",
-              "texture"
-            ],
-            "shortest_path_bound_pipelines": [
-              "load_store"
-            ],
-            "shortest_path_cycles": [
-              0.046875,
-              0.0,
-              0.046875,
-              0.0,
-              10.0,
-              0.0
-            ],
-            "total_bound_pipelines": [
-              "load_store"
-            ],
-            "total_cycles": [
-              0.046875,
-              0.0,
-              0.046875,
-              0.0,
-              10.0,
-              0.0
-            ]
-          },
-          "stack_spill_bytes": 0,
-          "thread_occupancy": 100,
-          "uniform_registers_used": 20,
-          "work_registers_used": 22
-        }
-      }
-    }
-  },
   "flutter/impeller/entity/linear_gradient_fill.frag.vkspv": {
     "Mali-G78": {
       "core": "Mali-G78",
@@ -9626,17 +9172,19 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 28,
+          "fp16_arithmetic": 35,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "arith_total",
-              "arith_cvt"
+              "arith_cvt",
+              "varying",
+              "texture"
             ],
             "longest_path_cycles": [
-              0.296875,
+              0.25,
               0.234375,
-              0.296875,
+              0.25,
               0.0625,
               0.0,
               0.25,
@@ -9655,9 +9203,9 @@
               "varying"
             ],
             "shortest_path_cycles": [
-              0.171875,
+              0.1875,
               0.140625,
-              0.171875,
+              0.1875,
               0.0625,
               0.0,
               0.25,
@@ -9668,9 +9216,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.390625,
+              0.34375,
               0.265625,
-              0.390625,
+              0.34375,
               0.0625,
               0.0,
               0.25,
@@ -9679,8 +9227,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 18,
-          "work_registers_used": 7
+          "uniform_registers_used": 16,
+          "work_registers_used": 6
         }
       }
     }
@@ -9809,9 +9357,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.84375,
+              0.800000011920929,
               0.34375,
-              0.84375,
+              0.800000011920929,
               0.25,
               4.0,
               0.25,
@@ -9821,7 +9369,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 14,
-          "work_registers_used": 18
+          "work_registers_used": 19
         }
       }
     }
@@ -10096,20 +9644,20 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 30,
+          "uniform_registers_used": 28,
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": null,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.078125,
-              0.015625,
-              0.078125,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               4.0,
               0.0
@@ -10126,9 +9674,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.078125,
-              0.015625,
-              0.078125,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               4.0,
               0.0
@@ -10137,9 +9685,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.078125,
-              0.015625,
-              0.078125,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               4.0,
               0.0
@@ -10147,7 +9695,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 22,
+          "uniform_registers_used": 20,
           "work_registers_used": 8
         }
       }
@@ -10166,17 +9714,17 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 16,
+          "fp16_arithmetic": 21,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "arith_total",
-              "arith_cvt"
+              "arith_fma"
             ],
             "longest_path_cycles": [
-              0.328125,
-              0.25,
-              0.328125,
+              0.265625,
+              0.265625,
+              0.234375,
               0.125,
               0.0,
               0.25,
@@ -10195,9 +9743,9 @@
               "varying"
             ],
             "shortest_path_cycles": [
-              0.203125,
-              0.15625,
-              0.203125,
+              0.171875,
+              0.171875,
+              0.171875,
               0.125,
               0.0,
               0.25,
@@ -10208,9 +9756,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.421875,
-              0.28125,
-              0.421875,
+              0.328125,
+              0.296875,
+              0.328125,
               0.125,
               0.0,
               0.25,
@@ -10219,8 +9767,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 16,
-          "work_registers_used": 8
+          "uniform_registers_used": 14,
+          "work_registers_used": 7
         }
       }
     }
@@ -10349,9 +9897,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.875,
+              0.824999988079071,
               0.375,
-              0.875,
+              0.824999988079071,
               0.3125,
               4.0,
               0.25,
@@ -10361,7 +9909,7 @@
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
           "uniform_registers_used": 12,
-          "work_registers_used": 18
+          "work_registers_used": 19
         }
       }
     }
@@ -10387,8 +9935,8 @@
               "arith_fma"
             ],
             "longest_path_cycles": [
-              0.625,
-              0.625,
+              0.71875,
+              0.71875,
               0.1875,
               0.5,
               0.0,
@@ -10409,8 +9957,8 @@
               "arith_fma"
             ],
             "shortest_path_cycles": [
-              0.625,
-              0.625,
+              0.71875,
+              0.71875,
               0.1875,
               0.5,
               0.0,
@@ -10422,8 +9970,8 @@
               "arith_fma"
             ],
             "total_cycles": [
-              0.625,
-              0.625,
+              0.71875,
+              0.71875,
               0.1875,
               0.5,
               0.0,
@@ -10433,8 +9981,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 18,
-          "work_registers_used": 11
+          "uniform_registers_used": 20,
+          "work_registers_used": 13
         }
       }
     }
@@ -10569,11 +10117,11 @@
           "performance": {
             "longest_path_bound_pipelines": [
               "arith_total",
-              "arith_sfu"
+              "arith_fma"
             ],
             "longest_path_cycles": [
-              1.3125,
-              1.2625000476837158,
+              1.3624999523162842,
+              1.3624999523162842,
               0.53125,
               1.3125,
               0.0,
@@ -10594,8 +10142,8 @@
               "arith_fma"
             ],
             "shortest_path_cycles": [
-              1.125,
-              1.125,
+              1.21875,
+              1.21875,
               0.484375,
               0.9375,
               0.0,
@@ -10607,8 +10155,8 @@
               "arith_fma"
             ],
             "total_cycles": [
-              1.4249999523162842,
-              1.4249999523162842,
+              1.5125000476837158,
+              1.5125000476837158,
               0.699999988079071,
               1.375,
               0.0,
@@ -10618,7 +10166,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 48,
+          "uniform_registers_used": 50,
           "work_registers_used": 28
         }
       }
@@ -11149,9 +10697,9 @@
               "arith_fma"
             ],
             "longest_path_cycles": [
-              0.40625,
-              0.40625,
-              0.359375,
+              0.421875,
+              0.421875,
+              0.28125,
               0.3125,
               0.0,
               0.25,
@@ -11168,13 +10716,12 @@
             ],
             "shortest_path_bound_pipelines": [
               "arith_total",
-              "arith_fma",
-              "arith_sfu"
+              "arith_fma"
             ],
             "shortest_path_cycles": [
-              0.3125,
-              0.3125,
-              0.234375,
+              0.328125,
+              0.328125,
+              0.21875,
               0.3125,
               0.0,
               0.25,
@@ -11182,12 +10729,12 @@
             ],
             "total_bound_pipelines": [
               "arith_total",
-              "arith_cvt"
+              "arith_fma"
             ],
             "total_cycles": [
               0.453125,
-              0.4375,
               0.453125,
+              0.375,
               0.3125,
               0.0,
               0.25,
@@ -11327,9 +10874,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.887499988079071,
+              0.84375,
               0.625,
-              0.887499988079071,
+              0.84375,
               0.5,
               4.0,
               0.25,
@@ -11688,20 +11235,20 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 30,
+          "uniform_registers_used": 28,
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": null,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -11718,9 +11265,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -11729,9 +11276,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.015625,
-              0.015625,
-              0.015625,
+              0.0,
+              0.0,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -11739,8 +11286,8 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 22,
-          "work_registers_used": 8
+          "uniform_registers_used": 20,
+          "work_registers_used": 7
         }
       }
     }
@@ -11873,7 +11420,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 40,
+          "uniform_registers_used": 38,
           "work_registers_used": 32
         },
         "Varying": {
@@ -11884,9 +11431,9 @@
               "load_store"
             ],
             "longest_path_cycles": [
-              0.078125,
-              0.078125,
-              0.015625,
+              0.0625,
+              0.0625,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -11903,9 +11450,9 @@
               "load_store"
             ],
             "shortest_path_cycles": [
-              0.078125,
-              0.078125,
-              0.015625,
+              0.0625,
+              0.0625,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -11914,9 +11461,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.078125,
-              0.078125,
-              0.015625,
+              0.0625,
+              0.0625,
+              0.0,
               0.0,
               3.0,
               0.0
@@ -11924,7 +11471,7 @@
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 32,
+          "uniform_registers_used": 30,
           "work_registers_used": 9
         }
       }
@@ -12016,7 +11563,7 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 72,
+          "fp16_arithmetic": 36,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
@@ -12024,9 +11571,9 @@
               "arith_cvt"
             ],
             "longest_path_cycles": [
-              0.375,
+              0.328125,
               0.1875,
-              0.375,
+              0.328125,
               0.0625,
               0.0,
               0.25,
@@ -12058,9 +11605,9 @@
               "arith_cvt"
             ],
             "total_cycles": [
-              0.4375,
+              0.390625,
               0.21875,
-              0.4375,
+              0.390625,
               0.0625,
               0.0,
               0.25,
@@ -12088,21 +11635,21 @@
       "uses_late_zs_update": false,
       "variants": {
         "Main": {
-          "fp16_arithmetic": 54,
+          "fp16_arithmetic": 36,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "arith_total",
-              "arith_fma"
+              "arith_sfu"
             ],
             "longest_path_cycles": [
-              2.28125,
-              2.28125,
-              0.265625,
-              1.4375,
+              3.875,
+              3.5625,
+              2.325000047683716,
+              3.875,
               0.0,
               0.25,
-              0.0
+              0.25
             ],
             "pipelines": [
               "arith_total",
@@ -12115,13 +11662,14 @@
             ],
             "shortest_path_bound_pipelines": [
               "arith_total",
-              "arith_sfu"
+              "arith_fma",
+              "arith_cvt"
             ],
             "shortest_path_cycles": [
-              0.375,
-              0.359375,
-              0.078125,
-              0.375,
+              0.296875,
+              0.296875,
+              0.296875,
+              0.125,
               0.0,
               0.25,
               0.0
@@ -12131,18 +11679,91 @@
               "arith_fma"
             ],
             "total_cycles": [
-              5.262499809265137,
-              5.262499809265137,
-              1.0499999523162842,
-              3.125,
+              12.25,
+              12.25,
+              5.46875,
+              12.125,
               0.0,
+              0.25,
+              0.25
+            ]
+          },
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 62,
+          "work_registers_used": 32
+        }
+      }
+    }
+  },
+  "flutter/impeller/entity/uber_sdf_ssbo.frag.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/entity/uber_sdf_ssbo.frag.vkspv",
+      "has_side_effects": false,
+      "has_uniform_computation": true,
+      "modifies_coverage": false,
+      "reads_color_buffer": false,
+      "type": "Fragment",
+      "uses_late_zs_test": false,
+      "uses_late_zs_update": false,
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": 36,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              null
+            ],
+            "longest_path_cycles": [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "varying",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt"
+            ],
+            "shortest_path_cycles": [
+              0.296875,
+              0.296875,
+              0.296875,
+              0.125,
+              0.0,
+              0.25,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "arith_total",
+              "arith_fma"
+            ],
+            "total_cycles": [
+              12.3125,
+              12.3125,
+              5.78125,
+              12.125,
+              4.0,
               0.25,
               0.0
             ]
           },
           "stack_spill_bytes": 0,
           "thread_occupancy": 100,
-          "uniform_registers_used": 26,
+          "uniform_registers_used": 62,
           "work_registers_used": 32
         }
       }
@@ -12363,6 +11984,68 @@
           "thread_occupancy": 100,
           "uniform_registers_used": 12,
           "work_registers_used": 6
+        }
+      }
+    }
+  },
+  "flutter/impeller/renderer/compute_3d_test.comp.vkspv": {
+    "Mali-G78": {
+      "core": "Mali-G78",
+      "filename": "flutter/impeller/renderer/compute_3d_test.comp.vkspv",
+      "has_uniform_computation": true,
+      "type": "Compute",
+      "variants": {
+        "Main": {
+          "fp16_arithmetic": null,
+          "has_stack_spilling": false,
+          "performance": {
+            "longest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "longest_path_cycles": [
+              0.125,
+              0.0,
+              0.0625,
+              0.125,
+              1.0,
+              0.0
+            ],
+            "pipelines": [
+              "arith_total",
+              "arith_fma",
+              "arith_cvt",
+              "arith_sfu",
+              "load_store",
+              "texture"
+            ],
+            "shortest_path_bound_pipelines": [
+              "load_store"
+            ],
+            "shortest_path_cycles": [
+              0.125,
+              0.0,
+              0.0625,
+              0.125,
+              1.0,
+              0.0
+            ],
+            "total_bound_pipelines": [
+              "load_store"
+            ],
+            "total_cycles": [
+              0.125,
+              0.0,
+              0.0625,
+              0.125,
+              1.0,
+              0.0
+            ]
+          },
+          "shared_storage_used": 0,
+          "stack_spill_bytes": 0,
+          "thread_occupancy": 100,
+          "uniform_registers_used": 4,
+          "work_registers_used": 7
         }
       }
     }

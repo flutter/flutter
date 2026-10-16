@@ -1,5 +1,5 @@
 bsd2 clause
-(?s)Redistribution and use in.*1\. Redistributions
+(?s)All rights reserved.\s+Redistribution and use in.*1\. Redistributions
 (?s)Copyright[^\n]*
 All rights reserved.
 

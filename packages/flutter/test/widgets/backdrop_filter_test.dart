@@ -110,4 +110,16 @@ void main() {
     expect(layers.length, 2);
     expect(layers[0].backdropKey, layers[1].backdropKey);
   });
+
+  testWidgets('BackdropFilter does not crash at zero area', (WidgetTester tester) async {
+    tester.view.physicalSize = Size.zero;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40))),
+      ),
+    );
+    expect(tester.getSize(find.byType(BackdropFilter)), Size.zero);
+  });
 }

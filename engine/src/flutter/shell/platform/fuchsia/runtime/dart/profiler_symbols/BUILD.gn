@@ -20,15 +20,16 @@ template("generate_dart_profiler_symbols") {
 
     script = "dart_profiler_symbols.dart"
 
-    packages = rebase_path("$dart_src/.dart_tool/package_config.json")
+    packages = "$dart_src/.dart_tool/package_config.json"
 
     args = [
       "--nm",
-      rebase_path("$buildtools_path/${host_os}-${host_cpu}/clang/bin/llvm-nm"),
+      rebase_path("$buildtools_path/${host_os}-${host_cpu}/clang/bin/llvm-nm",
+                  root_build_dir),
       "--binary",
-      rebase_path(invoker.library_path),
+      rebase_path(invoker.library_path, root_build_dir),
       "--output",
-      rebase_path(invoker.output),
+      rebase_path(invoker.output, root_build_dir),
     ]
   }
 }

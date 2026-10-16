@@ -367,6 +367,55 @@ void main() {
     await tester.pumpWidget(SizedBox(child: widget));
   });
 
+  testWidgets('Safe to deactivate and re-activate OverlayPortal', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    final Widget portal = OverlayPortal(
+      key: key,
+      controller: controller1,
+      overlayChildBuilder: (BuildContext context) => const SizedBox(),
+      child: const SizedBox(),
+    );
+
+    var children = <Widget>[portal, const SizedBox()];
+    late StateSetter setState;
+
+    late final OverlayEntry overlayEntry;
+    addTearDown(
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return StatefulBuilder(
+                  builder: (BuildContext context, StateSetter setter) {
+                    setState = setter;
+                    return Column(children: children);
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    controller1.show();
+    await tester.pump();
+
+    setState(() {
+      children = <Widget>[const SizedBox(), portal];
+    });
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Safe to hide overlay child and remove OverlayPortal in the same frame', (
     WidgetTester tester,
   ) async {
@@ -612,6 +661,106 @@ void main() {
     expect(tester.getSize(find.byType(Overlay)), size);
     expect(tester.takeException(), isNull);
   });
+
+  for (final bounded in <bool>[false, true]) {
+    for (final useLayoutBuilder in <bool>[false, true]) {
+      for (final tightAnchor in <bool>[false, true]) {
+        testWidgets('OverlayPortal opens in a shrink-wrapped Overlay '
+            '(bounded: $bounded, layoutBuilder: $useLayoutBuilder, tightAnchor: $tightAnchor)', (
+          WidgetTester tester,
+        ) async {
+          // Regression test for https://github.com/flutter/flutter/issues/192861.
+          final controller = OverlayPortalController();
+          const overlayChildKey = ValueKey<String>('overlay child');
+          const anchorDimension = 40.0;
+          double dimension = 100;
+          OverlayChildLayoutInfo? layoutInfo;
+
+          Widget portal = useLayoutBuilder
+              ? OverlayPortal.overlayChildLayoutBuilder(
+                  controller: controller,
+                  overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) {
+                    layoutInfo = info;
+                    return const SizedBox(key: overlayChildKey);
+                  },
+                  child: const SizedBox.square(dimension: anchorDimension),
+                )
+              : OverlayPortal(
+                  controller: controller,
+                  overlayChildBuilder: (BuildContext context) =>
+                      const SizedBox(key: overlayChildKey),
+                  child: const SizedBox.square(dimension: anchorDimension),
+                );
+          if (tightAnchor) {
+            // Tight constraints make the layout surrogate its own relayout
+            // boundary instead of a shallower ancestor, so layout starts at
+            // the surrogate and it lays out the deferred child from the
+            // theater's cached constraints.
+            portal = SizedBox.square(dimension: anchorDimension, child: portal);
+          }
+
+          final overlayEntry = OverlayEntry(
+            canSizeOverlay: true,
+            builder: (BuildContext context) {
+              return SizedBox.square(
+                dimension: dimension,
+                child: Center(child: portal),
+              );
+            },
+          );
+          addTearDown(
+            () => overlayEntry
+              ..remove()
+              ..dispose(),
+          );
+          final Widget overlay = Overlay(
+            alwaysSizeToContent: bounded,
+            initialEntries: <OverlayEntry>[overlayEntry],
+          );
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: bounded ? Center(child: overlay) : UnconstrainedBox(child: overlay),
+            ),
+          );
+          expect(tester.getSize(find.byType(Overlay)), const Size.square(100));
+          expect(find.byKey(overlayChildKey), findsNothing);
+
+          controller.show();
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+          expect(tester.getSize(find.byKey(overlayChildKey)), const Size.square(100));
+          if (useLayoutBuilder) {
+            expect(layoutInfo?.overlaySize, const Size.square(100));
+            expect(layoutInfo?.childSize, const Size.square(anchorDimension));
+          }
+          verifyTreeIsClean();
+
+          dimension = 200;
+          overlayEntry.markNeedsBuild();
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+          expect(tester.getSize(find.byType(Overlay)), const Size.square(200));
+          expect(tester.getSize(find.byKey(overlayChildKey)), const Size.square(200));
+          if (useLayoutBuilder) {
+            expect(layoutInfo?.overlaySize, const Size.square(200));
+            expect(layoutInfo?.childSize, const Size.square(anchorDimension));
+          }
+          verifyTreeIsClean();
+
+          controller.hide();
+          await tester.pump();
+          expect(find.byKey(overlayChildKey), findsNothing);
+
+          controller.show();
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+          expect(tester.getSize(find.byKey(overlayChildKey)), const Size.square(200));
+          verifyTreeIsClean();
+        });
+      }
+    }
+  }
 
   testWidgets('show/hide works', (WidgetTester tester) async {
     late final OverlayEntry overlayEntry;
@@ -966,7 +1115,7 @@ void main() {
         'OverlayPortal widgets require an Overlay widget ancestor.\n'
         'An overlay lets widgets float on top of other widget children.\n'
         'To introduce an Overlay widget, you can either directly include one, or use a widget '
-        'that contains an Overlay itself, such as a Navigator, WidgetApp, MaterialApp, or CupertinoApp.\n'
+        'that contains an Overlay itself, such as a Navigator or WidgetsApp.\n'
         'The specific widget that could not find a Overlay ancestor was:\n',
       ),
     );
@@ -1038,6 +1187,59 @@ void main() {
     await tester.pump();
     expect(layoutCount, 2);
     verifyTreeIsClean();
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/174133.
+  // [Table] defers adopting its render-object children until every row has been
+  // mounted. An [OverlayPortal] cell can mount its overlay child in that window,
+  // before the portal's layout-surrogate render object has been adopted by its
+  // parent.
+  testWidgets('OverlayPortal child inside a TableRow does not crash', (WidgetTester tester) async {
+    // Exercise the pre-mount show path while the layout surrogate is still
+    // waiting to be adopted by its parent.
+    final controller = OverlayPortalController()..show();
+    const overlayKey = Key('overlay-child');
+    late final OverlayEntry overlayEntry;
+    addTearDown(
+      () => overlayEntry
+        ..remove()
+        ..dispose(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            overlayEntry = OverlayEntry(
+              builder: (BuildContext context) {
+                return Table(
+                  children: <TableRow>[
+                    TableRow(
+                      children: <Widget>[
+                        OverlayPortal(
+                          controller: controller,
+                          overlayChildBuilder: (BuildContext context) => const Align(
+                            alignment: Alignment.topLeft,
+                            child: SizedBox(key: overlayKey, width: 10, height: 10),
+                          ),
+                          child: const SizedBox(width: 10, height: 10),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(overlayKey), findsOneWidget);
+    // Confirm the overlay child actually completed layout. The depth-invariant
+    // restoration must hold for the deferred-layout box to be laid out.
+    expect(tester.getSize(find.byKey(overlayKey)), const Size(10, 10));
   });
 
   testWidgets('adding/removing overlay child does not redirty overlay more than once', (
@@ -3140,6 +3342,60 @@ void main() {
         ),
       );
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/189902 and
+    // https://github.com/flutter/flutter/issues/187198.
+    testWidgets('toggling an overlay child does not leave a parentless attached semantics node', (
+      WidgetTester tester,
+    ) async {
+      final controller = OverlayPortalController();
+      final siblingController = OverlayPortalController();
+
+      // A second anchor is required: the fragment whose conflict changes is the
+      // sibling's, not the one belonging to the portal being toggled.
+      final Widget sibling = OverlayPortal.overlayChildLayoutBuilder(
+        controller: siblingController,
+        overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) =>
+            const SizedBox.shrink(),
+        child: Semantics(explicitChildNodes: true, child: const Text('sibling')),
+      );
+
+      Widget portal = OverlayPortal.overlayChildLayoutBuilder(
+        controller: controller,
+        overlayChildBuilder: (BuildContext context, OverlayChildLayoutInfo info) =>
+            const Align(alignment: Alignment.topLeft, child: Text('overlay child')),
+        child: Semantics(explicitChildNodes: true, child: const Text('anchor')),
+      );
+      portal = Overlay.wrap(child: ExcludeSemantics(child: portal));
+      portal = SizedBox(width: 200, height: 100, child: portal);
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay.wrap(
+            child: Semantics(container: true, child: Column(children: <Widget>[sibling, portal])),
+          ),
+        ),
+      );
+
+      // Showing the overlay child gives the sibling anchor a sibling conflict,
+      // and hiding it takes that conflict away again. The conflict feeds
+      // shouldFormSemanticsNode, so the sibling's fragment stops producing a
+      // node of its own while keeping the one it cached. Its children are taken
+      // by an ancestor while it is out of the tree, and it used to be handed
+      // back in still holding them, leaving a SemanticsNode that was attached
+      // but had no parent. That only becomes observable on the second round
+      // trip.
+      for (var i = 0; i < 2; i += 1) {
+        controller.show();
+        await tester.pumpAndSettle();
+        expect(find.text('overlay child'), findsOneWidget);
+
+        controller.hide();
+        await tester.pumpAndSettle();
+        expect(find.text('overlay child'), findsNothing);
+      }
+    });
   });
 
   testWidgets(
@@ -3232,6 +3488,60 @@ void main() {
     expect(tester.getSize(find.byType(OverlayPortal)), Size.zero);
     controller.show();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/180569.
+  testWidgets(
+    'OverlayPortal does not throw when reparenting and overlay child requests re-layout',
+    (WidgetTester tester) async {
+      late StateSetter setState;
+      late final OverlayEntry entry;
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+
+      final portal = OverlayPortal(
+        key: GlobalKey(debugLabel: 'OverlayPortal'),
+        controller: OverlayPortalController()..show(),
+        overlayChildBuilder: (BuildContext context) => const MetaData(),
+        child: const Placeholder(),
+      );
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry = OverlayEntry(
+                builder: (BuildContext context) {
+                  return LayoutBuilder(
+                    builder: (BuildContext context, BoxConstraints constraints) {
+                      return StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setter) {
+                          setState = setter;
+                          // This subtree re-inflates whenever it rebuilds,
+                          // because of the new GlobalKey.
+                          return KeyedSubtree(key: GlobalKey(), child: portal);
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      // Overlay child calls markNeedsLayout.
+      tester.renderObject(find.byType(MetaData)).markNeedsLayout();
+      // Triggers reparent.
+      setState(() {});
+
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
 
 class OverlayStatefulEntry extends OverlayEntry {

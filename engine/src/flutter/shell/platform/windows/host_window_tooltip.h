@@ -6,13 +6,12 @@
 #define FLUTTER_SHELL_PLATFORM_WINDOWS_HOST_WINDOW_TOOLTIP_H_
 
 #include <cstdint>
-#include "host_window.h"
+#include "host_window_sized.h"
 #include "shell/platform/windows/flutter_windows_view.h"
 #include "shell/platform/windows/window_manager.h"
 
 namespace flutter {
-class HostWindowTooltip : public HostWindow,
-                          private FlutterWindowsViewSizingDelegate {
+class HostWindowTooltip : public HostWindowSized {
  public:
   // Creates a tooltip window.
   HostWindowTooltip(WindowManager* window_manager,
@@ -25,29 +24,23 @@ class HostWindowTooltip : public HostWindow,
   // of the tooltip.
   void UpdatePosition();
 
+  ~HostWindowTooltip() override;
+
  protected:
+  void ApplyContentSize(int32_t physical_width,
+                        int32_t physical_height) override;
+
   LRESULT HandleMessage(HWND hwnd,
                         UINT message,
                         WPARAM wparam,
                         LPARAM lparam) override;
 
  private:
-  void DidUpdateViewSize(int32_t width, int32_t height) override;
   WindowRect GetWorkArea() const override;
 
   GetWindowPositionCallback get_position_callback_;
   HWND parent_;
   Isolate isolate_;
-
-  // Used to track whether the view is still in tasks scheduled from raster
-  // thread.
-  std::shared_ptr<int> view_alive_;
-
-  // The current width of the tooltip.
-  int width_ = 0;
-
-  // The current height of the tooltip.
-  int height_ = 0;
 };
 }  // namespace flutter
 

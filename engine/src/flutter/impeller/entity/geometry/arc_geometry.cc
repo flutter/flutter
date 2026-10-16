@@ -77,7 +77,7 @@ std::optional<Rect> ArcGeometry::GetCoverage(const Matrix& transform) const {
       transform);
 }
 
-bool ArcGeometry::CoversArea(const Matrix& transform, const Rect& rect) const {
+bool ArcGeometry::CoversArea(const Matrix& transform, const IRect& rect) const {
   return false;
 }
 

@@ -149,11 +149,7 @@ void main() {
   ) : in_v_norm;
 
   uv.x = out_u_norm;
-  #ifdef IMPELLER_TARGET_OPENGLES
-  uv.y = 1.0 - out_v_norm;
-  #else
   uv.y = out_v_norm;
-  #endif
 
   frag_color = texture(u_texture, uv);
 }

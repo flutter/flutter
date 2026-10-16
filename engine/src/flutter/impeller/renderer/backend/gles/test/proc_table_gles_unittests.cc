@@ -47,6 +47,40 @@ TEST(ProcTableGLES, CheckFrameBufferStatusDebugOnly) {
   mock_gles->GetProcTable().CheckFramebufferStatusDebug(0);
 }
 
+TEST(ProcTableGLES, GLES2VertexAttribDivisor) {
+  const auto extensions = std::vector<const char*>{"GL_EXT_instanced_arrays"};
+  auto mock_gles = MockGLES::Init(extensions);
+  EXPECT_TRUE(mock_gles->GetProcTable().VertexAttribDivisorEXT.IsAvailable());
+}
+
+TEST(ProcTableGLES, GLES3VertexAttribDivisor) {
+  auto mock_gles = MockGLES::Init();
+  EXPECT_FALSE(mock_gles->GetProcTable().VertexAttribDivisorEXT.IsAvailable());
+  EXPECT_TRUE(mock_gles->GetProcTable().VertexAttribDivisor.IsAvailable());
+}
+
+TEST(ProcTableGLES, GLES2WithoutExtensionsHasNoInstancingProcs) {
+  auto mock_gles = MockGLES::Init(std::nullopt, "OpenGL ES 2.0");
+  EXPECT_UNAVAILABLE(VertexAttribDivisor);
+  EXPECT_UNAVAILABLE(DrawArraysInstanced);
+  EXPECT_UNAVAILABLE(DrawElementsInstanced);
+  EXPECT_UNAVAILABLE(VertexAttribDivisorEXT);
+  EXPECT_UNAVAILABLE(DrawArraysInstancedEXT);
+  EXPECT_UNAVAILABLE(DrawElementsInstancedEXT);
+}
+
+TEST(ProcTableGLES, GLES2WithExtensionsHasOnlyExtInstancingProcs) {
+  const auto extensions = std::vector<const char*>{"GL_EXT_instanced_arrays",
+                                                   "GL_EXT_draw_instanced"};
+  auto mock_gles = MockGLES::Init(extensions, "OpenGL ES 2.0");
+  EXPECT_UNAVAILABLE(VertexAttribDivisor);
+  EXPECT_UNAVAILABLE(DrawArraysInstanced);
+  EXPECT_UNAVAILABLE(DrawElementsInstanced);
+  EXPECT_AVAILABLE(VertexAttribDivisorEXT);
+  EXPECT_AVAILABLE(DrawArraysInstancedEXT);
+  EXPECT_AVAILABLE(DrawElementsInstancedEXT);
+}
+
 TEST(GLErrorToString, ReturnsCorrectStringForKnownErrors) {
   EXPECT_EQ(GLErrorToString(GL_NO_ERROR), "GL_NO_ERROR");
   EXPECT_EQ(GLErrorToString(GL_INVALID_ENUM), "GL_INVALID_ENUM");

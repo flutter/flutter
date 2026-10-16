@@ -16,7 +16,6 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/utils.dart';
 import '../device.dart';
-import '../globals.dart' as globals;
 import '../native_assets.dart';
 import '../project.dart';
 import '../resident_runner.dart';
@@ -103,6 +102,7 @@ class FlutterTesterTestDevice extends TestDevice {
         '--vm-service-port=${debuggingOptions.enableDds ? 0 : debuggingOptions.hostVmServicePort}',
         if (debuggingOptions.startPaused) '--start-paused',
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+        if (debuggingOptions.disableServiceOriginCheck) '--disable-service-origin-check',
       ] else
         '--disable-vm-service',
       if (host!.type == InternetAddressType.IPv6) '--ipv6',
@@ -305,7 +305,7 @@ class FlutterTesterTestDevice extends TestDevice {
             (String line) async {
               logger.printTrace('test $id: Shell: $line');
 
-              final Match? match = globals.kVMServiceMessageRegExp.firstMatch(line);
+              final Match? match = kVMServiceMessageRegExp.firstMatch(line);
               if (match != null) {
                 try {
                   final Uri uri = Uri.parse(match[1]!);

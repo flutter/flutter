@@ -6,6 +6,8 @@
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_FLUTTERENGINE_INTERNAL_H_
 
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner+FML.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterFMLTaskRunner.h"
 
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/task_runner.h"
@@ -28,21 +30,16 @@
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterEngine+TaskRunners.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 @interface FlutterEngine () <FlutterViewEngineDelegate>
-
-// Indicates whether this engine has **ever** been manually registered to a scene.
-@property(nonatomic, assign) BOOL manuallyRegisteredToScene;
 
 - (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics;
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet;
 - (BOOL)platformViewShouldAcceptTouchAtTouchBeganLocation:(flutter::PointData)location
                                                    viewId:(uint64_t)viewId;
-
-- (fml::RefPtr<fml::TaskRunner>)platformTaskRunner;
-- (fml::RefPtr<fml::TaskRunner>)uiTaskRunner;
-- (fml::RefPtr<fml::TaskRunner>)rasterTaskRunner;
 
 - (void)installFirstFrameCallback:(void (^)(void))block;
 - (void)enableSemantics:(BOOL)enabled withFlags:(int64_t)flags;
@@ -59,15 +56,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)launchEngine:(nullable NSString*)entrypoint
           libraryURI:(nullable NSString*)libraryOrNil
       entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
+/**
+ * Creates the shell, adopting the calling thread as this engine's platform thread.
+ *
+ * Must be called on the main thread; see the `FlutterEngine` class documentation.
+ */
 - (BOOL)createShell:(nullable NSString*)entrypoint
          libraryURI:(nullable NSString*)libraryOrNil
-       initialRoute:(nullable NSString*)initialRoute;
+       initialRoute:(nullable NSString*)initialRoute NS_SWIFT_UI_ACTOR;
 - (void)attachView;
 - (void)notifyLowMemory;
-
-/// Blocks until the first frame is presented or the timeout is exceeded, then invokes callback.
-- (void)waitForFirstFrameSync:(NSTimeInterval)timeout
-                     callback:(NS_NOESCAPE void (^)(BOOL didTimeout))callback;
 
 /// Asynchronously waits until the first frame is presented or the timeout is exceeded, then invokes
 /// callback.
@@ -78,11 +76,15 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * This results in a faster creation time and a smaller memory footprint engine.
  * This should only be called on a FlutterEngine that is running.
+ *
+ * The spawned engine shares this engine's task runners, so this must be called on this engine's
+ * platform thread, which is always the main thread.
  */
 - (FlutterEngine*)spawnWithEntrypoint:(nullable NSString*)entrypoint
                            libraryURI:(nullable NSString*)libraryURI
                          initialRoute:(nullable NSString*)initialRoute
-                       entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs;
+                       entrypointArgs:(nullable NSArray<NSString*>*)entrypointArgs
+    NS_SWIFT_UI_ACTOR;
 
 /**
  * Dispatches the given key event data to the framework through the engine.
@@ -93,7 +95,6 @@ NS_ASSUME_NONNULL_BEGIN
             userData:(nullable void*)userData;
 
 @property(nonatomic, readonly) FlutterDartProject* project;
-
 /**
  * Returns the engine handle. Used in FlutterEngineTest.
  */

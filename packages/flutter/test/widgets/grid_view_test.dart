@@ -497,6 +497,7 @@ void main() {
       ),
     );
 
+    expect(tester.getSize(find.byType(GridView)), Size.zero);
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsNothing);
   });

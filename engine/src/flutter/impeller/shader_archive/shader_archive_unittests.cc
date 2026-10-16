@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "flutter/fml/mapping.h"
 #include "flutter/testing/testing.h"
@@ -75,6 +76,26 @@ TEST(ShaderArchiveTest, ReturnsErrorOnInvalidVersion) {
          << static_cast<uint32_t>(fb::ShaderArchiveFormatVersion::kVersion)
          << ", Got: 4294967295";
   ASSERT_EQ(library.status().message(), stream.str());
+}
+
+TEST(ShaderArchiveTest, RejectsCorruptBufferWithValidIdentifier) {
+  // Construct a buffer with a valid "SHAR" file identifier at bytes 4-7
+  // but a root table offset that points beyond the buffer. This passes
+  // the identifier check but fails FlatBuffer structural verification.
+  auto data = std::make_shared<std::vector<uint8_t>>(32, 0);
+  (*data)[4] = 'S';
+  (*data)[5] = 'H';
+  (*data)[6] = 'A';
+  (*data)[7] = 'R';
+  // Root offset (little-endian uint32 at offset 0) pointing out of bounds.
+  (*data)[0] = 0xFF;
+  (*data)[1] = 0xFF;
+
+  auto mapping = std::make_shared<fml::NonOwnedMapping>(
+      data->data(), data->size(), [data](auto, auto) {});
+  auto archive = ShaderArchive::Create(mapping);
+  ASSERT_FALSE(archive.ok());
+  EXPECT_EQ(archive.status().code(), absl::StatusCode::kInvalidArgument);
 }
 
 }  // namespace testing

@@ -3,20 +3,20 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
-import 'package:file/file.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/build_targets.dart';
+import 'package:flutter_tools/src/context/tool_context.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/drive/web_driver_service.dart';
+import 'package:flutter_tools/src/isolated/build_targets.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/web/chrome_constants.dart';
 import 'package:flutter_tools/src/web/devfs_config.dart';
 import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:test/fake.dart';
@@ -25,10 +25,18 @@ import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
+import '../../src/test_build_system.dart';
 
-const kChromeArgs = <String>[
+final kChromeArgs = <String>[
   '--bwsi',
   '--disable-background-timer-throttling',
+  '--disable-renderer-backgrounding',
+  '--disable-background-networking',
+  '--disable-sync',
+  '--disable-client-side-phishing-detection',
+  '--disable-notifications',
+  ...kGcmDisabledFlags,
   '--disable-default-apps',
   '--disable-extensions',
   '--disable-popup-blocking',
@@ -36,9 +44,14 @@ const kChromeArgs = <String>[
   '--no-default-browser-check',
   '--no-sandbox',
   '--no-first-run',
+  '--password-store=basic',
+  if (io.Platform.isMacOS) '--use-mock-keychain',
+  '--disable-search-engine-choice-screen',
 ];
 
 void main() {
+  late FakeWebRunnerFactory fakeWebRunnerFactory;
+
   testWithoutContext('getDesiredCapabilities Chrome with headless on', () {
     final expected = <String, dynamic>{
       'acceptInsecureCerts': true,
@@ -49,7 +62,16 @@ void main() {
       },
       'goog:chromeOptions': <String, dynamic>{
         'w3c': true,
-        'args': <String>[...kChromeArgs, '--headless'],
+        'args': <String>[
+          ...kChromeArgs,
+          '--headless',
+          if (io.Platform.isLinux) ...<String>[
+            '--use-gl=angle',
+            '--use-angle=swiftshader',
+            '--enable-unsafe-swiftshader',
+            '--disable-gpu-sandbox',
+          ],
+        ],
         'perfLoggingPrefs': <String, String>{
           'traceCategories':
               'devtools.timeline,'
@@ -59,7 +81,7 @@ void main() {
       },
     };
 
-    expect(getDesiredCapabilities(Browser.chrome, true), expected);
+    expect(getDesiredCapabilities(Browser.chrome, true, platform: const LocalPlatform()), expected);
   });
 
   testWithoutContext('getDesiredCapabilities Chrome with headless off', () {
@@ -84,7 +106,15 @@ void main() {
       },
     };
 
-    expect(getDesiredCapabilities(Browser.chrome, false, chromeBinary: chromeBinary), expected);
+    expect(
+      getDesiredCapabilities(
+        Browser.chrome,
+        false,
+        platform: const LocalPlatform(),
+        chromeBinary: chromeBinary,
+      ),
+      expected,
+    );
   });
 
   testWithoutContext('getDesiredCapabilities Chrome with browser flags', () {
@@ -118,7 +148,12 @@ void main() {
     };
 
     expect(
-      getDesiredCapabilities(Browser.chrome, false, webBrowserFlags: webBrowserFlags),
+      getDesiredCapabilities(
+        Browser.chrome,
+        false,
+        platform: const LocalPlatform(),
+        webBrowserFlags: webBrowserFlags,
+      ),
       expected,
     );
   });
@@ -143,7 +178,10 @@ void main() {
       },
     };
 
-    expect(getDesiredCapabilities(Browser.firefox, true), expected);
+    expect(
+      getDesiredCapabilities(Browser.firefox, true, platform: const LocalPlatform()),
+      expected,
+    );
   });
 
   testWithoutContext('getDesiredCapabilities Firefox with headless off', () {
@@ -166,7 +204,10 @@ void main() {
       },
     };
 
-    expect(getDesiredCapabilities(Browser.firefox, false), expected);
+    expect(
+      getDesiredCapabilities(Browser.firefox, false, platform: const LocalPlatform()),
+      expected,
+    );
   });
 
   testWithoutContext('getDesiredCapabilities Firefox with browser flags', () {
@@ -191,7 +232,12 @@ void main() {
     };
 
     expect(
-      getDesiredCapabilities(Browser.firefox, false, webBrowserFlags: webBrowserFlags),
+      getDesiredCapabilities(
+        Browser.firefox,
+        false,
+        platform: const LocalPlatform(),
+        webBrowserFlags: webBrowserFlags,
+      ),
       expected,
     );
   });
@@ -199,13 +245,16 @@ void main() {
   testWithoutContext('getDesiredCapabilities Edge', () {
     final expected = <String, dynamic>{'acceptInsecureCerts': true, 'browserName': 'edge'};
 
-    expect(getDesiredCapabilities(Browser.edge, false), expected);
+    expect(getDesiredCapabilities(Browser.edge, false, platform: const LocalPlatform()), expected);
   });
 
   testWithoutContext('getDesiredCapabilities macOS Safari', () {
     final expected = <String, dynamic>{'browserName': 'safari'};
 
-    expect(getDesiredCapabilities(Browser.safari, false), expected);
+    expect(
+      getDesiredCapabilities(Browser.safari, false, platform: const LocalPlatform()),
+      expected,
+    );
   });
 
   testWithoutContext('getDesiredCapabilities iOS Safari', () {
@@ -215,7 +264,10 @@ void main() {
       'safari:useSimulator': true,
     };
 
-    expect(getDesiredCapabilities(Browser.iosSafari, false), expected);
+    expect(
+      getDesiredCapabilities(Browser.iosSafari, false, platform: const LocalPlatform()),
+      expected,
+    );
   });
 
   testWithoutContext('getDesiredCapabilities android chrome', () {
@@ -234,13 +286,30 @@ void main() {
     };
 
     expect(
-      getDesiredCapabilities(Browser.androidChrome, false, webBrowserFlags: webBrowserFlags),
+      getDesiredCapabilities(
+        Browser.androidChrome,
+        false,
+        platform: const LocalPlatform(),
+        webBrowserFlags: webBrowserFlags,
+      ),
       expected,
     );
   });
 
+  testUsingContext('WebDriverService starts and stops an app', () async {
+    final WebDriverService service = setUpDriverService();
+    final device = FakeDevice();
+    await service.start(
+      BuildInfo.profile,
+      device,
+      DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+    );
+    await service.stop();
+    expect(FakeResidentRunner.instance.callLog, <String>['run', 'exitApp', 'cleanupAtFinish']);
+  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+
   testUsingContext(
-    'WebDriverService starts and stops an app',
+    'WebDriverService forwards platform args to the web runner',
     () async {
       final WebDriverService service = setUpDriverService();
       final device = FakeDevice();
@@ -248,72 +317,90 @@ void main() {
         BuildInfo.profile,
         device,
         DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+        platformArgs: <String, Object>{'no-launch-chrome': true},
       );
       await service.stop();
-      expect(FakeResidentRunner.instance.callLog, <String>['run', 'exitApp', 'cleanupAtFinish']);
+      expect(fakeWebRunnerFactory.lastPlatformArgs, <String, Object?>{'no-launch-chrome': true});
     },
-    overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
+    overrides: <Type, Generator>{
+      WebRunnerFactory: () => fakeWebRunnerFactory = FakeWebRunnerFactory(),
+    },
   );
 
   testUsingContext(
-    'WebDriverService can start an app with a launch url provided',
+    'WebDriverService forwards web-defines to the web runner',
     () async {
       final WebDriverService service = setUpDriverService();
       final device = FakeDevice();
-      const testUrl = 'http://localhost:1234/test';
       await service.start(
         BuildInfo.profile,
         device,
-        DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: testUrl, ipv6: true),
+        DebuggingOptions.enabled(BuildInfo.profile, ipv6: true),
+        webDefines: <String, String>{'VERSION': 'v1.2.3'},
       );
       await service.stop();
-      expect(service.webUri, Uri.parse(testUrl));
+      expect(fakeWebRunnerFactory.lastWebDefines, <String, String>{'VERSION': 'v1.2.3'});
     },
-    overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
+    overrides: <Type, Generator>{
+      WebRunnerFactory: () => fakeWebRunnerFactory = FakeWebRunnerFactory(),
+    },
   );
 
-  testUsingContext(
-    'WebDriverService starts an app with provided web headers',
-    () async {
-      final WebDriverService service = setUpDriverService();
-      final device = FakeDevice();
-      final webHeaders = <String, String>{'test-header': 'test-value'};
-      final webDevServerConfig = WebDevServerConfig(headers: webHeaders);
-      await service.start(
+  testUsingContext('WebDriverService can start an app with a launch url provided', () async {
+    final WebDriverService service = setUpDriverService();
+    final device = FakeDevice();
+    const testUrl = 'http://localhost:1234/test';
+    await service.start(
+      BuildInfo.profile,
+      device,
+      DebuggingOptions.enabled(
+        BuildInfo.profile,
+        webConfig: const WebDebugConfig(launchUrl: testUrl),
+        ipv6: true,
+      ),
+    );
+    await service.stop();
+    expect(service.webUri, Uri.parse(testUrl));
+  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+
+  testUsingContext('WebDriverService starts an app with provided web headers', () async {
+    final WebDriverService service = setUpDriverService();
+    final device = FakeDevice();
+    final webHeaders = <String, String>{'test-header': 'test-value'};
+    final webDevServerConfig = WebDevServerConfig(headers: webHeaders);
+    await service.start(
+      BuildInfo.profile,
+      device,
+      DebuggingOptions.enabled(
+        BuildInfo.profile,
+        webConfig: WebDebugConfig(devServerConfig: webDevServerConfig),
+        ipv6: true,
+      ),
+    );
+    await service.stop();
+    expect(
+      FakeResidentRunner.instance.debuggingOptions.webConfig.devServerConfig?.headers,
+      equals(webHeaders),
+    );
+  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
+
+  testUsingContext('WebDriverService will throw when an invalid launch url is provided', () async {
+    final WebDriverService service = setUpDriverService();
+    final device = FakeDevice();
+    const invalidTestUrl = '::INVALID_URL::';
+    await expectLater(
+      service.start(
         BuildInfo.profile,
         device,
         DebuggingOptions.enabled(
           BuildInfo.profile,
-          webDevServerConfig: webDevServerConfig,
+          webConfig: const WebDebugConfig(launchUrl: invalidTestUrl),
           ipv6: true,
         ),
-      );
-      await service.stop();
-      expect(
-        FakeResidentRunner.instance.debuggingOptions.webDevServerConfig?.headers,
-        equals(webHeaders),
-      );
-    },
-    overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
-  );
-
-  testUsingContext(
-    'WebDriverService will throw when an invalid launch url is provided',
-    () async {
-      final WebDriverService service = setUpDriverService();
-      final device = FakeDevice();
-      const invalidTestUrl = '::INVALID_URL::';
-      await expectLater(
-        service.start(
-          BuildInfo.profile,
-          device,
-          DebuggingOptions.enabled(BuildInfo.profile, webLaunchUrl: invalidTestUrl, ipv6: true),
-        ),
-        throwsA(isA<FormatException>()),
-      );
-    },
-    overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()},
-  );
+      ),
+      throwsA(isA<FormatException>()),
+    );
+  }, overrides: <Type, Generator>{WebRunnerFactory: () => FakeWebRunnerFactory()});
 
   testUsingContext(
     'WebDriverService forwards exception when run future fails before app starts',
@@ -339,28 +426,28 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   FakeWebRunnerFactory({this.doResolveToError = false});
 
   final bool doResolveToError;
+  Map<String, Object?>? lastPlatformArgs;
+  Map<String, String>? lastWebDefines;
 
   @override
   ResidentRunner createWebRunner(
     FlutterDevice device, {
-    String? target,
-    bool? stayResident,
-    FlutterProject? flutterProject,
-    bool? ipv6,
+    required Analytics analytics,
+    required BuildSystem buildSystem,
+    required BuildTargets buildTargets,
     required DebuggingOptions debuggingOptions,
-    UrlTunneller? urlTunneller,
-    Logger? logger,
-    Terminal? terminal,
-    Platform? platform,
-    OutputPreferences? outputPreferences,
-    FileSystem? fileSystem,
-    SystemClock? systemClock,
-    Usage? usage,
-    Analytics? analytics,
+    required FlutterProject flutterProject,
+    required bool stayResident,
+    required ToolContext toolContext,
     bool machine = false,
+    Map<String, Object?> platformArgs = const <String, Object?>{},
+    String? target,
+    UrlTunneller? urlTunneller,
     Map<String, String> webDefines = const <String, String>{},
   }) {
     expect(stayResident, isTrue);
+    lastPlatformArgs = platformArgs;
+    lastWebDefines = webDefines;
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
       debuggingOptions: debuggingOptions,
@@ -415,14 +502,12 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 }
 
 WebDriverService setUpDriverService() {
-  final logger = BufferLogger.test();
   return WebDriverService(
-    logger: logger,
-    terminal: Terminal.test(),
-    platform: FakePlatform(),
-    outputPreferences: OutputPreferences.test(),
-    processUtils: ProcessUtils(logger: logger, processManager: FakeProcessManager.any()),
+    analytics: const NoOpAnalytics(),
+    buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    buildTargets: const BuildTargetsImpl(),
     dartSdkPath: 'dart',
+    toolContext: const DelegatingToolContext(),
   );
 }
 

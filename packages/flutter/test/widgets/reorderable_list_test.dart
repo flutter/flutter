@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'list_tile_tester.dart';
 import 'semantics_tester.dart';
-import 'widgets_app_tester.dart';
 
 const _kRedColor = Color(0xFFFF0000);
 const _kGreenColor = Color(0xFF00FF00);

@@ -11,7 +11,6 @@
 #include <fuchsia/memorypressure/cpp/fidl.h>
 #include <fuchsia/metrics/cpp/fidl.h>
 #include <fuchsia/net/interfaces/cpp/fidl.h>
-#include <fuchsia/sysmem/cpp/fidl.h>
 #include <fuchsia/tracing/provider/cpp/fidl.h>
 #include <fuchsia/ui/app/cpp/fidl.h>
 #include <fuchsia/ui/display/singleton/cpp/fidl.h>
@@ -132,13 +131,11 @@ constexpr auto kMockTouchInputListenerRef = ChildRef{kMockTouchInputListener};
 
 constexpr auto kTouchInputView = "touch-input-view";
 constexpr auto kTouchInputViewRef = ChildRef{kTouchInputView};
-constexpr auto kTouchInputViewUrl =
-    "fuchsia-pkg://fuchsia.com/touch-input-view#meta/touch-input-view.cm";
+constexpr auto kTouchInputViewUrl = "touch-input-view#meta/touch-input-view.cm";
 constexpr auto kEmbeddingFlutterView = "embedding-flutter-view";
 constexpr auto kEmbeddingFlutterViewRef = ChildRef{kEmbeddingFlutterView};
 constexpr auto kEmbeddingFlutterViewUrl =
-    "fuchsia-pkg://fuchsia.com/embedding-flutter-view#meta/"
-    "embedding-flutter-view.cm";
+    "embedding-flutter-view#meta/embedding-flutter-view.cm";
 
 bool CompareDouble(double f0, double f1, double epsilon) {
   return std::abs(f0 - f1) <= epsilon;

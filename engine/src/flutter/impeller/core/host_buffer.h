@@ -10,9 +10,12 @@
 #include <functional>
 #include <memory>
 #include <type_traits>
+#include <utility>
+#include <vector>
 
 #include "impeller/core/allocator.h"
 #include "impeller/core/buffer_view.h"
+#include "impeller/core/gpu_submission_tracker.h"
 
 namespace impeller {
 
@@ -23,12 +26,19 @@ static const constexpr size_t kHostBufferArenaSize = 4u;
 /// allocations.
 ///
 /// These are reset per-frame.
+///
+/// The buffers of an arena entry are reused kHostBufferArenaSize resets
+/// after they were written. Nothing guarantees that few frames are in
+/// flight, so with a [GpuSubmissionTracker] the reuse is made safe. Entries
+/// whose GPU work has not completed by the time they come up for reuse are
+/// kept alive off to the side and replaced with fresh allocations.
 class HostBuffer {
  public:
   static std::shared_ptr<HostBuffer> Create(
       const std::shared_ptr<Allocator>& allocator,
       const std::shared_ptr<const IdleWaiter>& idle_waiter,
-      size_t minimum_uniform_alignment);
+      size_t minimum_uniform_alignment,
+      std::shared_ptr<const GpuSubmissionTracker> submission_tracker = nullptr);
 
   ~HostBuffer();
 
@@ -157,9 +167,11 @@ class HostBuffer {
 
   [[nodiscard]] BufferView Emplace(const void* buffer, size_t length);
 
-  explicit HostBuffer(const std::shared_ptr<Allocator>& allocator,
-                      const std::shared_ptr<const IdleWaiter>& idle_waiter,
-                      size_t minimum_uniform_alignment);
+  explicit HostBuffer(
+      const std::shared_ptr<Allocator>& allocator,
+      const std::shared_ptr<const IdleWaiter>& idle_waiter,
+      size_t minimum_uniform_alignment,
+      std::shared_ptr<const GpuSubmissionTracker> submission_tracker);
 
   HostBuffer(const HostBuffer&) = delete;
 
@@ -167,8 +179,16 @@ class HostBuffer {
 
   std::shared_ptr<Allocator> allocator_;
   std::shared_ptr<const IdleWaiter> idle_waiter_;
+  std::shared_ptr<const GpuSubmissionTracker> submission_tracker_;
   std::array<std::vector<std::shared_ptr<DeviceBuffer>>, kHostBufferArenaSize>
       device_buffers_;
+  // Per-entry id of the last GPU submission that may reference the entry's
+  // buffers.
+  std::array<uint64_t, kHostBufferArenaSize> entry_stamps_ = {};
+  // Buffers pulled out of reuse because the GPU had not completed with them,
+  // keyed by the submission id to outlive.
+  std::vector<std::pair<uint64_t, std::vector<std::shared_ptr<DeviceBuffer>>>>
+      retired_buffers_;
   size_t current_buffer_ = 0u;
   size_t offset_ = 0u;
   size_t frame_index_ = 0u;

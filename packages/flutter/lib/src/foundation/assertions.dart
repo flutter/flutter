@@ -31,8 +31,9 @@ export 'stack_frame.dart' show StackFrame;
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
 
 /// Signature for [DiagnosticPropertiesBuilder] transformer.
-typedef DiagnosticPropertiesTransformer =
-    Iterable<DiagnosticsNode> Function(Iterable<DiagnosticsNode> properties);
+typedef DiagnosticPropertiesTransformer = Iterable<DiagnosticsNode> Function(
+  Iterable<DiagnosticsNode> properties,
+);
 
 /// Signature for [FlutterErrorDetails.informationCollector] callback
 /// and other callbacks that collect information describing an error.

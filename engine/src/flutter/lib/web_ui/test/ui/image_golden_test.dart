@@ -15,6 +15,7 @@ import 'package:ui/ui.dart' as ui;
 import 'package:web_engine_tester/golden_tester.dart';
 
 import '../common/fake_asset_manager.dart';
+import '../common/rendering.dart';
 import '../common/test_initialization.dart';
 import 'utils.dart';
 
@@ -118,6 +119,41 @@ Future<void> testMain() async {
         await drawPictureUsingCurrentRenderer(recorder.endRecording());
 
         await matchGoldenFile('${name}_canvas_drawImage.png', region: drawRegion);
+      });
+
+      test('drawImage preserves image when image is disposed before rasterization', () async {
+        final ui.Image image = await generateImage();
+        // Remove from the suite's automatic tearDown disposal list because this
+        // test explicitly exercises manual disposal of [image].
+        images.remove(image);
+
+        // Record drawing operations to the canvas before disposing the image.
+        final recorder = ui.PictureRecorder();
+        final canvas = ui.Canvas(recorder, drawRegion);
+        canvas.drawImage(image, const ui.Offset(10, 10), ui.Paint());
+        final ui.Picture picture = recorder.endRecording();
+
+        // Dispose the image immediately after recording. The picture tracker
+        // should retain the underlying ImageSource until rasterization/picture disposal.
+        image.dispose();
+
+        // Build and rasterize the scene.
+        final sceneBuilder = ui.SceneBuilder();
+        sceneBuilder.addPicture(ui.Offset.zero, picture);
+        final ui.Scene scene = sceneBuilder.build();
+        await renderScene(scene);
+        await matchGoldenFile('${name}_disposed_before_rasterization.png', region: drawRegion);
+
+        // If the image is backed by an ImageSource (DOM texture), disposing both the
+        // picture and scene drops the final references and closes the underlying source.
+        // Images not backed by ImageSource (e.g. created via toImage or raw pixel buffers)
+        // have null imageSource and are managed purely by the native backend.
+        picture.dispose();
+        scene.dispose();
+        final ImageSource? source = (image as EngineImage).imageSource;
+        if (source != null) {
+          expect(source.debugIsClosed, isTrue);
+        }
       });
 
       test('drawImageRect', () async {
@@ -438,7 +474,7 @@ Future<void> testMain() async {
 
       expect(bitmap.width, 150);
       expect(bitmap.height, 150);
-      final ui.Image uiImage = await renderer.createImageFromImageBitmap(bitmap);
+      final ui.Image uiImage = renderer.createImageFromImageBitmap(bitmap);
 
       if (isSkwasm && isMultiThreaded) {
         // Multi-threaded skwasm transfers the bitmap to the web worker, so it should be
@@ -553,4 +589,43 @@ Future<void> testMain() async {
       return info.image;
     });
   }
+
+  test('drawImageRect_downscale_text', () async {
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder, const ui.Rect.fromLTWH(0, 0, 200, 200));
+
+    final paint = ui.Paint()
+      ..color = const ui.Color(0xFF00FF00)
+      ..strokeWidth = 1.0;
+    for (double i = 0; i < 200; i += 20) {
+      canvas.drawLine(ui.Offset(i, 0), ui.Offset(i, 200), paint);
+      canvas.drawLine(ui.Offset(0, i), ui.Offset(200, i), paint);
+    }
+
+    final builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontSize: 30));
+    builder.pushStyle(ui.TextStyle(color: const ui.Color(0xFF000000)));
+    builder.addText('Flutter Web');
+    final ui.Paragraph paragraph = builder.build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 200));
+    canvas.drawParagraph(paragraph, const ui.Offset(10, 80));
+
+    final ui.Image image = recorder.endRecording().toImageSync(200, 200);
+
+    final recorder2 = ui.PictureRecorder();
+    final canvas2 = ui.Canvas(recorder2, const ui.Rect.fromLTWH(0, 0, 100, 100));
+
+    canvas2.drawImageRect(
+      image,
+      const ui.Rect.fromLTWH(0, 0, 200, 200),
+      const ui.Rect.fromLTWH(10, 10, 50, 50),
+      ui.Paint()..filterQuality = ui.FilterQuality.medium,
+    );
+
+    await drawPictureUsingCurrentRenderer(recorder2.endRecording());
+
+    await matchGoldenFile(
+      'canvas_drawImageRect_downscale_text.png',
+      region: const ui.Rect.fromLTWH(0, 0, 100, 100),
+    );
+  });
 }

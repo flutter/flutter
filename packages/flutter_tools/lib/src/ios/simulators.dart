@@ -13,6 +13,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
@@ -36,9 +37,7 @@ import 'plist_parser.dart';
 const iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
-  IOSSimulators({required IOSSimulatorUtils iosSimulatorUtils})
-    : _iosSimulatorUtils = iosSimulatorUtils,
-      super('iOS simulators');
+  IOSSimulators({required this._iosSimulatorUtils}) : super('iOS simulators');
 
   final IOSSimulatorUtils _iosSimulatorUtils;
 
@@ -63,16 +62,20 @@ class IOSSimulatorUtils {
     required Xcode xcode,
     required Logger logger,
     required ProcessManager processManager,
+    required this._operatingSystemUtils,
   }) : _simControl = SimControl(logger: logger, processManager: processManager, xcode: xcode),
        _xcode = xcode;
 
   final SimControl _simControl;
   final Xcode _xcode;
+  final OperatingSystemUtils _operatingSystemUtils;
 
   Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!_xcode.isInstalledAndMeetsVersionCheck || !_xcode.isSimctlInstalled) {
       return <IOSSimulator>[];
     }
+
+    final cpuArch = CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
 
     final List<BootedSimDevice> connected = await _simControl.getConnectedDevices();
     return connected
@@ -93,6 +96,7 @@ class IOSSimulatorUtils {
             simControl: _simControl,
             simulatorCategory: device.category,
             logger: _simControl._logger,
+            cpuArch: cpuArch,
           );
         })
         .whereType<IOSSimulator>()
@@ -110,9 +114,8 @@ class IOSSimulatorUtils {
 
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
-  SimControl({required Logger logger, required ProcessManager processManager, required Xcode xcode})
+  SimControl({required Logger logger, required ProcessManager processManager, required this._xcode})
     : _logger = logger,
-      _xcode = xcode,
       _processUtils = ProcessUtils(processManager: processManager, logger: logger);
 
   final Logger _logger;
@@ -162,7 +165,13 @@ class SimControl {
       '--json',
     ];
     _logger.printTrace(command.join(' '));
-    final RunResult results = await _processUtils.run(command);
+    final RunResult results;
+    try {
+      results = await _processUtils.run(command);
+    } on Exception catch (exception) {
+      _logger.printError('Error executing simctl:\n$exception');
+      return <String, Map<String, Object?>>{};
+    }
     if (results.exitCode != 0) {
       _logger.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, Object?>>{};
@@ -185,6 +194,11 @@ class SimControl {
 
   /// Returns all the connected simulator devices.
   Future<List<BootedSimDevice>> getConnectedDevices() async {
+    if (!_xcode.isSimctlInstalled) {
+      _logger.printTrace('Skipping iOS simulator discovery because simctl is not available.');
+      return <BootedSimDevice>[];
+    }
+
     final Map<String, Object?> devicesSection = await _listBootedDevices();
 
     return <BootedSimDevice>[
@@ -346,10 +360,10 @@ class IOSSimulator extends Device {
     super.id, {
     required this.name,
     required this.simulatorCategory,
-    required SimControl simControl,
+    required this._simControl,
+    required this._cpuArch,
     required super.logger,
-  }) : _simControl = simControl,
-       super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
+  }) : super(category: Category.mobile, platformType: PlatformType.ios, ephemeral: true);
 
   @override
   final String name;
@@ -357,6 +371,8 @@ class IOSSimulator extends Device {
   final String simulatorCategory;
 
   final SimControl _simControl;
+
+  final CpuArch _cpuArch;
 
   @override
   DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
@@ -384,7 +400,10 @@ class IOSSimulator extends Device {
   @override
   bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
 
-  final _logReaders = <IOSApp?, DeviceLogReader>{};
+  @override
+  Future<CpuArch> get cpuArch async => _cpuArch;
+
+  final _logReaders = <IOSApp?, _IOSSimulatorLogReader>{};
   _IOSSimulatorDevicePortForwarder? _portForwarder;
 
   @override
@@ -477,13 +496,25 @@ class IOSSimulator extends Device {
 
     ProtocolDiscovery? vmServiceDiscovery;
     if (debuggingOptions.debuggingEnabled) {
+      final _IOSSimulatorLogReader logReader = getLogReader(app: package);
       vmServiceDiscovery = ProtocolDiscovery.vmService(
-        getLogReader(app: package),
+        logReader,
         ipv6: debuggingOptions.ipv6,
         hostPort: debuggingOptions.hostVmServicePort,
         devicePort: debuggingOptions.deviceVmServicePort,
         logger: globals.logger,
       );
+      // Launch the app only after the log stream is ready; otherwise the
+      // Dart VM Service URL it logs on startup can be missed.
+      const warningDelay = Duration(seconds: 30);
+      final timer = Timer(warningDelay, () {
+        globals.printError(
+          'The iOS simulator log stream did not start after ${warningDelay.inSeconds} seconds. '
+          'This is taking much longer than expected...',
+        );
+      });
+      await logReader._ready.future;
+      timer.cancel();
     }
 
     // Launch the updated application in the simulator.
@@ -611,7 +642,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({covariant IOSApp? app, bool includePastLogs = false}) {
+  _IOSSimulatorLogReader getLogReader({covariant IOSApp? app, bool includePastLogs = false}) {
     assert(!includePastLogs, 'Past log reading not supported on iOS simulators.');
     return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
   }
@@ -653,8 +684,11 @@ class IOSSimulator extends Device {
       appId: appId,
       deviceVmservicePort: filterDevicePort,
       hostVmservicePort: expectedHostPort,
-      usesIpv6: ipv6,
+      // Do not throw on error since DelegateVMServiceDiscoveryForAttach falls
+      // back to log-based protocol discovery.
+      throwOnError: false,
       useDeviceIPAsHost: false,
+      usesIpv6: ipv6,
     );
 
     return DelegateVMServiceDiscoveryForAttach(<VMServiceDiscoveryForAttach>[
@@ -772,6 +806,7 @@ Future<Process> launchDeviceUnifiedLogging(IOSSimulator device, String? appName)
       'senderImagePath ENDSWITH "/Flutter"',
       'senderImagePath ENDSWITH "/libswiftCore.dylib"',
       'processImageUUID == senderImageUUID',
+      'eventMessage CONTAINS "UIScene life cycle is required"',
       'eventMessage CONTAINS "`UIScene` lifecycle will soon be required"',
       'eventMessage CONTAINS "This process does not adopt UIScene lifecycle."',
     ]),
@@ -813,7 +848,17 @@ Future<Process?> launchSystemLogTool(IOSSimulator device) async {
 }
 
 class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
-  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '');
+  _IOSSimulatorLogReader(this.device, IOSApp? app) : _appName = app?.name?.replaceAll('.app', '') {
+    final uisceneCrashInterceptor = LogInterceptor(
+      identifier: 'uiscene_crash',
+      pattern: RegExp(r'UIScene life\s?cycle is required'),
+      action: (String message) {
+        throwToolExit(kUISceneMigrationRequiredError);
+      },
+      excludeFromStream: false,
+    );
+    addLogInterceptor(uisceneCrashInterceptor);
+  }
 
   final IOSSimulator device;
 
@@ -823,6 +868,14 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     onListen: _start,
     onCancel: _stop,
   );
+
+  /// Completes once the log stream is ready to deliver events, or has exited.
+  ///
+  /// `log stream` is ready once it prints its first line (a "Filtering the log
+  /// data using ..." header).
+  ///
+  /// Recreated on every listen, since each one starts a new `log stream`.
+  var _ready = Completer<void>();
 
   @override
   @visibleForTesting
@@ -839,10 +892,18 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
   String get name => device.name;
 
   Future<void> _start() async {
+    // Use a local so that a previous process exiting late cannot complete it.
+    _ready = Completer<void>();
+    final Completer<void> ready = _ready;
     // Unified logging iOS 11 and greater (introduced in iOS 10).
     if (await device.sdkMajorVersion >= 11) {
       _deviceProcess = await launchDeviceUnifiedLogging(device, _appName);
-      _deviceProcess?.stdout.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
+      _deviceProcess?.stdout.transform(utf8LineDecoder).listen((String line) {
+        if (!ready.isCompleted) {
+          ready.complete();
+        }
+        _onUnifiedLoggingLine(line);
+      });
       _deviceProcess?.stderr.transform(utf8LineDecoder).listen(_onUnifiedLoggingLine);
     } else {
       // Fall back to syslog parsing.
@@ -864,6 +925,9 @@ class _IOSSimulatorLogReader extends SharedIOSDeviceLogReader {
     // cleanup in the callback.
     unawaited(
       _deviceProcess?.exitCode.whenComplete(() {
+        if (!ready.isCompleted) {
+          ready.complete();
+        }
         if (_linesController.hasListener) {
           _linesController.close();
         }

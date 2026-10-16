@@ -43,21 +43,26 @@ executable("flutter_shell_native_unittests") {
   visibility = [ "*" ]
   testonly = true
   sources = [
+    "android_context_dynamic_impeller_unittests.cc",
     "android_context_gl_impeller_unittests.cc",
+    "android_image_generator_unittests.cc",
     "android_shell_holder_unittests.cc",
     "apk_asset_provider_unittests.cc",
     "flutter_shell_native_unittests.cc",
     "image_lru_unittests.cc",
+    "platform_view_android_jni_impl_unittests.cc",
     "platform_view_android_unittests.cc",
   ]
   if (!slimpeller) {
     sources += [ "android_context_gl_unittests.cc" ]
   }
   public_configs = [ "//flutter:config" ]
+  defines = [ "TESTING" ]
   deps = [
     ":flutter_shell_native_src",
     "//flutter/fml",
     "//flutter/shell/platform/android/jni:jni_mock",
+    "//flutter/shell/platform/android/jni:mock_jni_env",
     "//flutter/third_party/googletest:gmock",
     "//flutter/third_party/googletest:gtest",
   ]
@@ -202,7 +207,7 @@ action("gen_android_build_config_java") {
 
   args = [
     "--out",
-    rebase_path(build_config_java),
+    rebase_path(build_config_java, root_build_dir),
     "--runtime-mode",
     flutter_runtime_mode,
   ]
@@ -237,6 +242,7 @@ android_java_sources = [
   "io/flutter/embedding/android/FlutterTextureView.java",
   "io/flutter/embedding/android/FlutterView.java",
   "io/flutter/embedding/android/FlutterViewDelegate.java",
+  "io/flutter/embedding/android/IntentUtils.java",
   "io/flutter/embedding/android/KeyChannelResponder.java",
   "io/flutter/embedding/android/KeyData.java",
   "io/flutter/embedding/android/KeyEmbedderResponder.java",
@@ -250,7 +256,6 @@ android_java_sources = [
   "io/flutter/embedding/engine/FlutterEngine.java",
   "io/flutter/embedding/engine/FlutterEngineCache.java",
   "io/flutter/embedding/engine/FlutterEngineConnectionRegistry.java",
-  "io/flutter/embedding/engine/FlutterEngineFlags.java",
   "io/flutter/embedding/engine/FlutterEngineGroup.java",
   "io/flutter/embedding/engine/FlutterEngineGroupCache.java",
   "io/flutter/embedding/engine/FlutterJNI.java",
@@ -262,6 +267,8 @@ android_java_sources = [
   "io/flutter/embedding/engine/dart/PlatformTaskQueue.java",
   "io/flutter/embedding/engine/deferredcomponents/DeferredComponentManager.java",
   "io/flutter/embedding/engine/deferredcomponents/PlayStoreDeferredComponentManager.java",
+  "io/flutter/embedding/engine/flags/FlutterEngineFlags.java",
+  "io/flutter/embedding/engine/flags/FlutterEngineFlagsProvider.java",
   "io/flutter/embedding/engine/image/BitmapMetadataReader.java",
   "io/flutter/embedding/engine/image/ExifMetadataReader.java",
   "io/flutter/embedding/engine/image/FlutterImageDecoder.java",
@@ -354,6 +361,7 @@ android_java_sources = [
   "io/flutter/plugin/platform/PlatformPlugin.java",
   "io/flutter/plugin/platform/PlatformView.java",
   "io/flutter/plugin/platform/PlatformViewFactory.java",
+  "io/flutter/plugin/platform/PlatformViewGestureTracker.java",
   "io/flutter/plugin/platform/PlatformViewRegistry.java",
   "io/flutter/plugin/platform/PlatformViewRegistryImpl.java",
   "io/flutter/plugin/platform/PlatformViewRenderTarget.java",
@@ -377,12 +385,27 @@ android_java_sources = [
   "io/flutter/util/TraceSection.java",
   "io/flutter/util/ViewUtils.java",
   "io/flutter/view/AccessibilityBridge.java",
+  "io/flutter/view/AccessibilityNodeConfigurator.java",
   "io/flutter/view/AccessibilityStringBuilder.java",
   "io/flutter/view/AccessibilityViewEmbedder.java",
+  "io/flutter/view/BaseRoleConfigurator.java",
+  "io/flutter/view/ClassNameRoleConfigurator.java",
+  "io/flutter/view/ComboBoxRoleConfigurator.java",
   "io/flutter/view/FlutterCallbackInformation.java",
+  "io/flutter/view/MenuRoleConfigurator.java",
+  "io/flutter/view/ProgressBarRoleConfigurator.java",
+  "io/flutter/view/RoleConfiguratorFactory.java",
+  "io/flutter/view/SliderRoleConfigurator.java",
   "io/flutter/view/TextureRegistry.java",
   "io/flutter/view/VsyncWaiter.java",
 ]
+
+if (flutter_runtime_mode == "release" ||
+    flutter_runtime_mode == "jit_release") {
+  android_java_sources += [ "release/io/flutter/embedding/engine/flags/FlutterEngineFlagsProviderImpl.java" ]
+} else {
+  android_java_sources += [ "debug/io/flutter/embedding/engine/flags/FlutterEngineFlagsProviderImpl.java" ]
+}
 
 embedding_dependencies_jars = [
   "//flutter/third_party/android_embedding_dependencies/lib/activity-1.8.1.jar",
@@ -427,14 +450,15 @@ action("check_imports") {
 
   stamp_file = "$root_out_dir/check_android_imports"
 
-  # File does not actually get created, but GN expects us to have an output here.
+  # File does not actually get created, but GN expects us to have an output
+  # here.
   outputs = [ stamp_file ]
 
   args = [
            "--stamp",
-           rebase_path(stamp_file),
+           rebase_path(stamp_file, root_build_dir),
            "--files",
-         ] + rebase_path(android_java_sources)
+         ] + rebase_path(android_java_sources, root_build_dir)
 }
 
 action("flutter_shell_java") {
@@ -462,7 +486,7 @@ action("flutter_shell_java") {
              lambda_jar,
            ] + embedding_dependencies_jars
 
-  _rebased_current_path = rebase_path(".")
+  _rebased_current_path = rebase_path(".", root_build_dir)
   _rebased_jar_path = rebase_path(jar_path, root_build_dir)
   _rebased_source_jar_path = rebase_path(source_jar_path, root_build_dir)
   _rebased_depfile = rebase_path(depfile, root_build_dir)
@@ -611,7 +635,7 @@ action("pom_libflutter") {
 
   args = [
     "--destination",
-    rebase_path(root_build_dir),
+    rebase_path(root_build_dir, root_build_dir),
     "--engine-version",
     engine_version,
     "--engine-artifact-id",
@@ -635,7 +659,7 @@ action("pom_content_hash_libflutter") {
 
   args = [
     "--destination",
-    rebase_path(hash_dir),
+    rebase_path(hash_dir, root_build_dir),
     "--engine-version",
     content_hash,
     "--engine-artifact-id",
@@ -657,7 +681,7 @@ action("pom_embedding") {
 
   args = [
     "--destination",
-    rebase_path(root_build_dir),
+    rebase_path(root_build_dir, root_build_dir),
     "--engine-version",
     engine_version,
     "--engine-artifact-id",
@@ -682,7 +706,7 @@ action("pom_content_hash_embedding") {
 
   args = [
     "--destination",
-    rebase_path(hash_dir),
+    rebase_path(hash_dir, root_build_dir),
     "--engine-version",
     content_hash,
     "--engine-artifact-id",
@@ -690,11 +714,6 @@ action("pom_content_hash_embedding") {
     "--include-embedding-dependencies",
     "true",
   ]
-}
-
-# TODO(jsimmons): remove this placeholder when it is no longer used by the LUCI recipes
-group("robolectric_tests") {
-  deps = [ ":android_jar" ]
 }
 
 zip_bundle("android_symbols") {
@@ -728,13 +747,13 @@ action("gen_android_javadoc") {
   outputs = [ "$target_gen_dir/javadocs" ]
   args = [
     "--out-dir",
-    rebase_path(outputs[0]),
+    rebase_path(outputs[0], root_build_dir),
     "--android-source-root",
-    rebase_path("."),
+    rebase_path(".", root_build_dir),
     "--build-config-path",
-    rebase_path(target_gen_dir),
+    rebase_path(target_gen_dir, root_build_dir),
     "--src-dir",
-    rebase_path("//"),
+    rebase_path("//", root_build_dir),
     "--quiet",
   ]
 
@@ -773,9 +792,9 @@ if (target_cpu != "x86") {
     gen_snapshot_dest = "gen_snapshot"
 
     if (host_os == "mac") {
-      gen_snapshot_src = rebase_path("$root_out_dir/universal/gen_snapshot")
+      gen_snapshot_src = "$root_out_dir/universal/gen_snapshot"
     } else if (host_os == "win") {
-      gen_snapshot_src = rebase_path("$root_out_dir/gen_snapshot.exe")
+      gen_snapshot_src = "$root_out_dir/gen_snapshot.exe"
       gen_snapshot_dest = "gen_snapshot.exe"
     }
 
@@ -818,8 +837,7 @@ if (host_os == "linux" &&
         get_label_info(
             "$dart_src/runtime/bin:analyze_snapshot($host_toolchain)",
             "root_out_dir")
-    analyze_snapshot_path =
-        rebase_path("$analyze_snapshot_out_dir/$analyze_snapshot_bin")
+    analyze_snapshot_path = "$analyze_snapshot_out_dir/$analyze_snapshot_bin"
 
     if (host_os == "linux") {
       output = "$android_zip_archive_dir/analyze-snapshot-linux-x64.zip"
@@ -828,7 +846,7 @@ if (host_os == "linux" &&
     } else if (host_os == "win") {
       output = "$android_zip_archive_dir/analyze-snapshot-windows-x64.zip"
       analyze_snapshot_bin = "analyze-snapshot.exe"
-      analyze_snapshot_path = rebase_path("$root_out_dir/$analyze_snapshot_bin")
+      analyze_snapshot_path = "$root_out_dir/$analyze_snapshot_bin"
     }
 
     files = [
@@ -888,17 +906,17 @@ action("embedding_jars") {
       args += [
         "-i",
         "${name}.jar",
-        rebase_path("${base_name}.jar"),
+        rebase_path("${base_name}.jar", root_build_dir),
         "-i",
         "${name}-sources.jar",
-        rebase_path("${base_name}-sources.jar"),
+        rebase_path("${base_name}-sources.jar", root_build_dir),
       ]
     } else {
       outputs += [ "${base_name}.${extension}" ]
       args += [
         "-i",
-        rebase_path(source),
-        rebase_path("${base_name}.${extension}"),
+        rebase_path(source, root_build_dir),
+        rebase_path("${base_name}.${extension}", root_build_dir),
       ]
     }
   }
@@ -922,17 +940,17 @@ action("embedding_jars") {
       args += [
         "-i",
         "${name}.jar",
-        rebase_path("${hash_base_name}.jar"),
+        rebase_path("${hash_base_name}.jar", root_build_dir),
         "-i",
         "${name}-sources.jar",
-        rebase_path("${hash_base_name}-sources.jar"),
+        rebase_path("${hash_base_name}-sources.jar", root_build_dir),
       ]
     } else {
       outputs += [ "${hash_base_name}.${extension}" ]
       args += [
         "-i",
-        rebase_path(source),
-        rebase_path("${hash_base_name}.${extension}"),
+        rebase_path(source, root_build_dir),
+        rebase_path("${hash_base_name}.${extension}", root_build_dir),
       ]
     }
   }
@@ -971,8 +989,8 @@ action("abi_jars") {
     outputs += [ "${base_name}.${extension}" ]
     args += [
       "-i",
-      rebase_path(source),
-      rebase_path("${base_name}.${extension}"),
+      rebase_path(source, root_build_dir),
+      rebase_path("${base_name}.${extension}", root_build_dir),
     ]
   }
 
@@ -990,8 +1008,8 @@ action("abi_jars") {
     outputs += [ "${hash_base_name}.${extension}" ]
     args += [
       "-i",
-      rebase_path(source),
-      rebase_path("${hash_base_name}.${extension}"),
+      rebase_path(source, root_build_dir),
+      rebase_path("${hash_base_name}.${extension}", root_build_dir),
     ]
   }
 }
