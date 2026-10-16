@@ -1050,5 +1050,28 @@ TEST(DisplayListImageFilter, RuntimeEffectSaveLayerMarksClippedContent) {
   EXPECT_EQ(display_list->GetBounds(), layer_bounds);
 }
 
+TEST(
+    DisplayListImageFilter,
+    RuntimeEffectSaveLayerPreservesCallerBoundsWhenChildDisjointFromOuterClip) {
+  auto filter = DlImageFilter::MakeRuntimeEffect(
+      nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>());
+  DlPaint save_paint;
+  save_paint.setImageFilter(filter);
+
+  DlRect outer_clip = DlRect::MakeLTRB(0, 0, 400, 300);
+  DlRect layer_bounds = DlRect::MakeLTRB(0, 0, 400, 800);
+  DlRect child_bounds = DlRect::MakeLTRB(50, 600, 150, 700);
+
+  DisplayListBuilder builder(outer_clip, /*prepare_rtree=*/true);
+  builder.SaveLayer(layer_bounds, &save_paint);
+  builder.DrawRect(child_bounds, DlPaint());
+  builder.Restore();
+  auto display_list = builder.Build();
+
+  EXPECT_EQ(display_list->GetBounds(), outer_clip);
+  ASSERT_TRUE(display_list->has_rtree());
+  EXPECT_EQ(display_list->rtree()->bounds(), outer_clip);
+}
+
 }  // namespace testing
 }  // namespace flutter

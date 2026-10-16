@@ -711,7 +711,7 @@ void DisplayListBuilder::RestoreLayer() {
     if (!content_bounds.IsEmpty()) {
       DlRect device_bounds;
       bool has_device_bounds = parent_info().global_state.mapAndClipRect(
-          content_bounds, &device_bounds);
+          user_bounds, &device_bounds);
       DlIRect unused;
       if (current_layer().filter && has_device_bounds &&
           current_layer().filter->get_input_device_bounds(
