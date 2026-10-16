@@ -4,9 +4,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:package_config/package_config_types.dart';
-import 'package:process/process.dart';
 
-import '../artifacts.dart';
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/config.dart';
@@ -866,14 +864,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     required String packageConfigPath,
     FlutterHookResult? flutterHookResult,
   }) async {
-    final ToolContext(
-      :Artifacts artifacts,
-      :Config config,
-      :FileSystem fs,
-      :Logger logger,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = _toolContext;
+    final ToolContext(:Config config, :FileSystem fs) = _toolContext;
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build(
       flutterHookResult: flutterHookResult,
@@ -889,15 +880,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
       await writeBundle(
         fs.directory(fs.path.join(getBuildDirectory(config, fs), 'unit_test_assets')),
         assetBundle.entries,
-        targetPlatform: TargetPlatform.tester,
-        impellerStatus: impellerStatus,
-        processManager: processManager,
-        fileSystem: fs,
-        artifacts: artifacts,
-        logger: logger,
-        projectDir: fs.currentDirectory,
         buildMode: buildMode,
-        platform: platform,
+        impellerStatus: impellerStatus,
+        projectDir: fs.currentDirectory,
+        targetPlatform: TargetPlatform.tester,
+        toolContext: _toolContext,
       );
 
       final File cachedFlavorFile = fs.file(
