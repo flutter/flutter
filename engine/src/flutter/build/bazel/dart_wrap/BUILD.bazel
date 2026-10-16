@@ -31,6 +31,11 @@ _GN_ARGS = {
     "dart_sdk_verification_hash": '"%s"' % _DART_REVISION[:10],
     "dart_target_arch": '"x64"',
     "dart_version_git_info": "false",
+    # No LTO in either mode: every host builder in ci/builders passes
+    # tools/gn --no-lto (so does et's local_engine.json), and the Bazel
+    # toolchain compiles the engine without it, so a -c opt build is one
+    # build without LTO rather than an engine without and a VM with.
+    "enable_lto": "false",
     "host_cpu": '"x64"',
     "host_os": '"linux"',
     "is_clang": "true",
@@ -42,16 +47,10 @@ _GN_ARGS = {
     "target_cpu": '"x64"',
     "target_os": '"linux"',
 } | select({
-    # -c opt is an optimized build (tools/gn without --unoptimized), which
-    # also enables LTO; anything else is --unoptimized.
-    "//engine/src/flutter/build/bazel:optimized": {
-        "enable_lto": "true",
-        "is_debug": "false",
-    },
-    "//conditions:default": {
-        "enable_lto": "false",
-        "is_debug": "true",
-    },
+    # -c opt is an optimized build (tools/gn without --unoptimized);
+    # anything else is --unoptimized.
+    "//engine/src/flutter/build/bazel:optimized": {"is_debug": "false"},
+    "//conditions:default": {"is_debug": "true"},
 }) | select({
     "//engine/src/flutter/common:runtime_mode_debug": {"dart_runtime_mode": '"develop"'},
     "//engine/src/flutter/common:runtime_mode_jit_release": {"dart_runtime_mode": '"release"'},

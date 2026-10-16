@@ -50,6 +50,8 @@ _GN_ARGS = {
     "angle_vulkan_loader_dir": '"//flutter/third_party/vulkan-deps/vulkan-loader/src"',
     "angle_vulkan_tools_dir": '"//flutter/third_party/vulkan-deps/vulkan-tools/src"',
     "buildtools_path": '"//flutter/buildtools"',
+    # No LTO in either mode, as in dart_wrap: the CI host builders' --no-lto.
+    "enable_lto": "false",
     "host_cpu": '"x64"',
     "host_os": '"linux"',
     "is_clang": "true",
@@ -67,14 +69,8 @@ _GN_ARGS = {
     "target_os": '"linux"',
 } | select({
     # As in dart_wrap: -c opt is tools/gn without --unoptimized.
-    "//engine/src/flutter/build/bazel:optimized": {
-        "enable_lto": "true",
-        "is_debug": "false",
-    },
-    "//conditions:default": {
-        "enable_lto": "false",
-        "is_debug": "true",
-    },
+    "//engine/src/flutter/build/bazel:optimized": {"is_debug": "false"},
+    "//conditions:default": {"is_debug": "true"},
 })
 
 gn_build(
