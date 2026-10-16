@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include <algorithm>
+#include <array>
 #include <cstring>
 #include <memory>
 #include <optional>
@@ -51,6 +52,7 @@
 #include "impeller/geometry/vector.h"
 #include "impeller/playground/playground.h"
 #include "impeller/playground/widgets.h"
+#include "impeller/playground/yuv_test_textures.h"
 #include "impeller/renderer/command.h"
 #include "impeller/renderer/pipeline_descriptor.h"
 #include "impeller/renderer/render_pass.h"
@@ -1641,84 +1643,6 @@ TEST_P(EntityTest, SrgbToLinearFilter) {
   ASSERT_TRUE(OpenPlaygroundHere(callback));
 }
 
-static Vector3 RGBToYUV(Vector3 rgb, YUVColorSpace yuv_color_space) {
-  Vector3 yuv;
-  switch (yuv_color_space) {
-    case YUVColorSpace::kBT601FullRange:
-      yuv.x = rgb.x * 0.299 + rgb.y * 0.587 + rgb.z * 0.114;
-      yuv.y = rgb.x * -0.169 + rgb.y * -0.331 + rgb.z * 0.5 + 0.5;
-      yuv.z = rgb.x * 0.5 + rgb.y * -0.419 + rgb.z * -0.081 + 0.5;
-      break;
-    case YUVColorSpace::kBT601LimitedRange:
-      yuv.x = rgb.x * 0.257 + rgb.y * 0.516 + rgb.z * 0.100 + 0.063;
-      yuv.y = rgb.x * -0.145 + rgb.y * -0.291 + rgb.z * 0.439 + 0.5;
-      yuv.z = rgb.x * 0.429 + rgb.y * -0.368 + rgb.z * -0.071 + 0.5;
-      break;
-  }
-  return yuv;
-}
-
-static std::vector<std::shared_ptr<Texture>> CreateTestYUVTextures(
-    Context* context,
-    YUVColorSpace yuv_color_space) {
-  Vector3 red = {244.0 / 255.0, 67.0 / 255.0, 54.0 / 255.0};
-  Vector3 green = {76.0 / 255.0, 175.0 / 255.0, 80.0 / 255.0};
-  Vector3 blue = {33.0 / 255.0, 150.0 / 255.0, 243.0 / 255.0};
-  Vector3 white = {1.0, 1.0, 1.0};
-  Vector3 red_yuv = RGBToYUV(red, yuv_color_space);
-  Vector3 green_yuv = RGBToYUV(green, yuv_color_space);
-  Vector3 blue_yuv = RGBToYUV(blue, yuv_color_space);
-  Vector3 white_yuv = RGBToYUV(white, yuv_color_space);
-  std::vector<Vector3> yuvs{red_yuv, green_yuv, blue_yuv, white_yuv};
-  std::vector<uint8_t> y_data;
-  std::vector<uint8_t> uv_data;
-  for (int i = 0; i < 4; i++) {
-    auto yuv = yuvs[i];
-    uint8_t y = std::round(yuv.x * 255.0);
-    uint8_t u = std::round(yuv.y * 255.0);
-    uint8_t v = std::round(yuv.z * 255.0);
-    for (int j = 0; j < 16; j++) {
-      y_data.push_back(y);
-    }
-    for (int j = 0; j < 8; j++) {
-      uv_data.push_back(j % 2 == 0 ? u : v);
-    }
-  }
-  auto cmd_buffer = context->CreateCommandBuffer();
-  auto blit_pass = cmd_buffer->CreateBlitPass();
-
-  impeller::TextureDescriptor y_texture_descriptor;
-  y_texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
-  y_texture_descriptor.format = PixelFormat::kR8UNormInt;
-  y_texture_descriptor.size = {8, 8};
-  auto y_texture =
-      context->GetResourceAllocator()->CreateTexture(y_texture_descriptor);
-  auto y_mapping = std::make_shared<fml::DataMapping>(y_data);
-  auto y_mapping_buffer =
-      context->GetResourceAllocator()->CreateBufferWithCopy(*y_mapping);
-
-  blit_pass->AddCopy(DeviceBuffer::AsBufferView(y_mapping_buffer), y_texture);
-
-  impeller::TextureDescriptor uv_texture_descriptor;
-  uv_texture_descriptor.storage_mode = impeller::StorageMode::kHostVisible;
-  uv_texture_descriptor.format = PixelFormat::kR8G8UNormInt;
-  uv_texture_descriptor.size = {4, 4};
-  auto uv_texture =
-      context->GetResourceAllocator()->CreateTexture(uv_texture_descriptor);
-  auto uv_mapping = std::make_shared<fml::DataMapping>(uv_data);
-  auto uv_mapping_buffer =
-      context->GetResourceAllocator()->CreateBufferWithCopy(*uv_mapping);
-
-  blit_pass->AddCopy(DeviceBuffer::AsBufferView(uv_mapping_buffer), uv_texture);
-
-  if (!blit_pass->EncodeCommands() ||
-      !context->GetCommandQueue()->Submit({cmd_buffer}).ok()) {
-    FML_DLOG(ERROR) << "Could not copy contents into Y/UV texture.";
-  }
-
-  return {y_texture, uv_texture};
-}
-
 TEST_P(EntityTest, YUVToRGBFilter) {
   if (GetParam() != PlaygroundBackend::kMetal &&
       GetParam() != PlaygroundBackend::kMetalSDF) {
@@ -1728,15 +1652,19 @@ TEST_P(EntityTest, YUVToRGBFilter) {
     GTEST_SKIP() << "YUV to RGB filter is only supported on Metal backends.";
   }
 
+  constexpr std::array<YUVColorSpace, 2> kColorSpaces = {
+      YUVColorSpace::kBT601FullRange, YUVColorSpace::kBT601LimitedRange};
+  std::array<TestYUVTextures, kColorSpaces.size()> textures;
+  for (size_t i = 0; i < kColorSpaces.size(); i++) {
+    auto result = CreateTestYUVTextures(*GetContext(), kColorSpaces[i]);
+    ABSL_ASSERT_OK(result);
+    textures[i] = std::move(result).value();
+  }
+
   auto callback = [&](ContentContext& context, RenderPass& pass) -> bool {
-    YUVColorSpace yuv_color_space_array[2]{YUVColorSpace::kBT601FullRange,
-                                           YUVColorSpace::kBT601LimitedRange};
-    for (int i = 0; i < 2; i++) {
-      auto yuv_color_space = yuv_color_space_array[i];
-      auto textures =
-          CreateTestYUVTextures(GetContext().get(), yuv_color_space);
+    for (size_t i = 0; i < kColorSpaces.size(); i++) {
       auto filter_contents = FilterContents::MakeYUVToRGBFilter(
-          textures[0], textures[1], yuv_color_space);
+          textures[i].y, textures[i].uv, kColorSpaces[i]);
       Entity filter_entity;
       filter_entity.SetContents(filter_contents);
       auto snapshot =
