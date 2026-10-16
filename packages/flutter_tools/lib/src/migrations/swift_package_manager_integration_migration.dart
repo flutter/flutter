@@ -25,7 +25,6 @@ import '../macos/swift_package_manager.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../reporting/crash_reporting.dart';
-import '../version.dart';
 
 /// Swift Package Manager integration requires changes to the Xcode project's
 /// project.pbxproj and xcscheme. This class handles making those changes.
@@ -37,12 +36,11 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
     required this._analytics,
     required this._plistParser,
     required this._reportCrashes,
-    required ToolContext toolContext,
+    required this._toolContext,
     required this._xcodeProjectInterpreter,
   }) : _xcodeProject = project,
        _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-       _toolContext = toolContext,
-       super(toolContext.logger);
+       super(_toolContext.logger);
 
   final XcodeBasedProject _xcodeProject;
   final FlutterDarwinPlatform _platform;
@@ -96,10 +94,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// Existing macOS identifier for Runner PBXProject.
   static const _macosProjectIdentifier = '33CC10E52044A3C60003C045';
 
-  File get backupProjectSettings {
-    final FileSystem fs = _toolContext.fs;
-    return fs.directory(_xcodeProjectInfoFile.parent).childFile('project.pbxproj.backup');
-  }
+  File get backupProjectSettings =>
+      _toolContext.fs.directory(_xcodeProjectInfoFile.parent).childFile('project.pbxproj.backup');
 
   String get _runnerFrameworksBuildPhaseIdentifier {
     return _platform == FlutterDarwinPlatform.ios
@@ -140,10 +136,8 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// If the app is not an example app or the plugin cannot be found, this will return null.
   late final ({String name, String path})? _examplePlugin;
 
-  String _flutterVersionString() {
-    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
-    return flutterVersion.getVersionString(redactUnknownBranches: true);
-  }
+  String _flutterVersionString() =>
+      _toolContext.flutterVersion.getVersionString(redactUnknownBranches: true);
 
   void restoreFromBackup(SchemeInfo? schemeInfo) {
     if (backupProjectSettings.existsSync()) {
