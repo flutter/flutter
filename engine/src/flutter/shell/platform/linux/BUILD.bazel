@@ -278,7 +278,7 @@ gn_copy(
 
 flutter_display_test(
     name = "flutter_linux_unittests",
-    size = "small",
+    size = "medium",
     srcs = [
         "fl_accessibility_handler_test.cc",
         "fl_accessible_node_test.cc",
@@ -370,6 +370,7 @@ flutter_display_test(
     ],
     data = [":flutter_linux_gschemas"],
     env = {"G_DEBUG": "fatal-criticals"},
+    gtest_parallel = True,
     local_defines = FLUTTER_LOCAL_DEFINES + [
         "FLUTTER_ENGINE_NO_PROTOTYPES",
         # Set flag to allow public headers to be directly included

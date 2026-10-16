@@ -2508,6 +2508,57 @@ flutter_display_test(
       expect(output, isNot(contains('args')));
     });
 
+    test('a suite run_tests.py puts through gtest-parallel becomes a flutter_cc_test', () async {
+      // ui_unittests (gtestParallelSuites, with testRuns' runnerArgs): the
+      // macro that runs the binary through the runner, with run_tests.py's
+      // --timeout=90 for the runner and the GPU backends beside the binary.
+      final GnFileEvaluation evaluation = await evaluate('''
+executable("ui_unittests") {
+  testonly = true
+  sources = [ "ui_unittests.cc" ]
+  deps = [ "//flutter/testing" ]
+}
+''');
+      final String output = emitBuildFile(evaluation, gnPackage: '//flutter/lib/ui');
+      expect(
+        output,
+        contains(
+          'load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends")',
+        ),
+      );
+      expect(
+        output,
+        contains('''
+flutter_cc_test(
+    name = "ui_unittests",
+    size = "medium",
+    srcs = ["ui_unittests.cc"],
+    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    data = [":gpu_test_backends"],
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    runner_args = ["--timeout=90"],
+    deps = [
+        "//engine/src:include_root",
+        "//engine/src/flutter/testing",
+    ],
+)
+'''),
+      );
+      expect(output, isNot(contains('\ncc_test(')));
+      // The GTK shell's suite: a display test, under the runner.
+      final GnFileEvaluation gtk = await evaluate('''
+executable("flutter_linux_unittests") {
+  testonly = true
+  sources = [ "test.cc" ]
+}
+''');
+      final String gtkOutput = emitBuildFile(gtk, gnPackage: '//flutter/shell/platform/linux');
+      expect(gtkOutput, contains('flutter_display_test(\n    name = "flutter_linux_unittests",'));
+      expect(gtkOutput, contains('    gtest_parallel = True,\n'));
+      expect(gtkOutput, contains('    session_bus = True,\n'));
+      expect(gtkOutput, contains('    env = {"G_DEBUG": "fatal-criticals"},\n'));
+    });
+
     test('all_dependent_configs cross private deps; engine code gets FLUTTER_COPTS', () async {
       final String output = await convert('''
 config("vulkan_public") {

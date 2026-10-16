@@ -4,9 +4,9 @@
 
 # Generated from //flutter/runtime/BUILD.gn by gn_to_bazel; do not edit.
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends", "flutter_test_fixtures")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -148,7 +148,7 @@ flutter_gpu_test_backends(
     name = "gpu_test_backends",
 )
 
-cc_test(
+flutter_cc_test(
     name = "runtime_unittests",
     size = "small",
     srcs = [
@@ -199,7 +199,7 @@ flutter_test_fixtures(
     use_target_as_artifact_prefix = True,
 )
 
-cc_test(
+flutter_cc_test(
     name = "no_dart_plugin_registrant_unittests",
     size = "small",
     srcs = ["no_dart_plugin_registrant_unittests.cc"],
@@ -224,7 +224,7 @@ flutter_test_fixtures(
     use_target_as_artifact_prefix = True,
 )
 
-cc_test(
+flutter_cc_test(
     name = "dart_plugin_registrant_unittests",
     size = "small",
     srcs = ["dart_plugin_registrant_unittests.cc"],

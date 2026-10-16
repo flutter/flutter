@@ -442,6 +442,158 @@ source_tree_files = rule(
 )
 
 # ---------------------------------------------------------------------------
+# Suites under gtest-parallel, as run_tests.py runs them
+# ---------------------------------------------------------------------------
+
+# testing/run_tests.py runs every suite of its run_cc_tests list through
+# gtest-parallel (flutter/third_party/gtest-parallel, @gtest_parallel): the
+# runner lists the suite's tests and runs each in a process of its own,
+# every test twice (--repeat=2), on as many workers as the machine has
+# cores. Here the same runner, under the synced Python, through
+# testing/gtest_parallel_run.sh, which adds the repeat and translates
+# Bazel's sharding and output conventions.
+#
+# run_tests.py runs the suites one after another, each with the whole
+# machine; Bazel runs tests side by side, and twenty-seven suites each
+# starting a worker per core thrash (a 50 ms test took 5 s, and the
+# display-list suite ran past its timeout). Each suite therefore gets a
+# budget Bazel schedules by -- the `cpu:N` tag reserves N of the local
+# CPUs -- and the runner the same N workers: the same per-test processes and
+# repeats as run_tests.py's, three suites at a time on a 24-core host rather
+# than one.
+_GTEST_PARALLEL_WORKERS = 8
+
+_GTEST_PARALLEL_ATTRS = {
+    "runner_args": attr.string_list(
+        doc = "gtest-parallel's own options (run_tests.py's --timeout=90 for ui_unittests), ahead of the " +
+              "binary; `args` are the binary's, after `--`.",
+    ),
+    "_gtest_parallel_wrapper": attr.label(
+        default = "//engine/src/flutter/testing:gtest_parallel_run.sh",
+        allow_single_file = True,
+    ),
+    "_gtest_parallel": attr.label(
+        default = "@gtest_parallel//:gtest_parallel",
+        allow_files = True,
+    ),
+    "_python": attr.label(
+        default = "@cpython3//:bin/python3",
+        allow_single_file = True,
+        executable = True,
+        cfg = "exec",
+    ),
+    "_python_runtime": attr.label(default = "@cpython3//:runtime"),
+}
+
+def _gtest_parallel_words(ctx):
+    """The launcher's words ahead of the binary -- the wrapper, Python, the runner, its options -- and their runfiles."""
+    runner = [f for f in ctx.files._gtest_parallel if f.basename == "gtest-parallel"]
+    if len(runner) != 1:
+        fail("%s: @gtest_parallel//:gtest_parallel should hold the gtest-parallel script" % ctx.label)
+    words = [ctx.file._gtest_parallel_wrapper.short_path, ctx.file._python.short_path, runner[0].short_path] + ctx.attr.runner_args
+    runfiles = ctx.runfiles(
+        files = [ctx.file._gtest_parallel_wrapper, ctx.file._python] + ctx.files._gtest_parallel,
+        transitive_files = ctx.attr._python_runtime[DefaultInfo].files,
+    )
+    return words, runfiles
+
+def _launcher_line(words):
+    # One `exec` line: the words quoted, then the test's own arguments.
+    return "#!/bin/bash\nexec " + " ".join(["'" + w.replace("'", "'\\''") + "'" for w in words]) + " \"$@\"\n"
+
+def _gtest_parallel_test_impl(ctx):
+    launcher = ctx.actions.declare_file(ctx.label.name + ".sh")
+    words, runfiles = _gtest_parallel_words(ctx)
+    ctx.actions.write(
+        output = launcher,
+        content = _launcher_line(words + [ctx.executable.binary.short_path, "--"]),
+        is_executable = True,
+    )
+    runfiles = runfiles.merge(ctx.runfiles(files = [ctx.executable.binary] + ctx.files.data))
+    runfiles = runfiles.merge(ctx.attr.binary[DefaultInfo].default_runfiles)
+    for target in ctx.attr.data:
+        runfiles = runfiles.merge(target[DefaultInfo].default_runfiles)
+    return [
+        DefaultInfo(executable = launcher, runfiles = runfiles),
+        RunEnvironmentInfo(environment = dict(ctx.attr.env)),
+    ]
+
+_gtest_parallel_test = rule(
+    implementation = _gtest_parallel_test_impl,
+    test = True,
+    doc = "Runs a googletest binary through gtest-parallel as testing/run_tests.py does: a process per test, " +
+          "every test twice.",
+    attrs = {
+        "binary": attr.label(
+            mandatory = True,
+            executable = True,
+            cfg = "target",
+            doc = "The test binary.",
+        ),
+        "data": attr.label_list(
+            allow_files = True,
+            doc = "Runfiles of the test, besides the binary's.",
+        ),
+        "env": attr.string_dict(
+            doc = "Environment of the test (run_tests.py's extra_env).",
+        ),
+    } | _GTEST_PARALLEL_ATTRS,
+)
+
+def flutter_cc_test(name, size = None, timeout = None, shard_count = None, flaky = None, args = [], runner_args = [], data = [], env = {}, tags = [], visibility = None, **kwargs):
+    """A googletest suite of the engine, run as testing/run_tests.py runs it: through gtest-parallel.
+
+    The binary is a cc_binary (`<name>_binary`, in this package, so that the
+    GPU test backends copied beside it are found) and the test target runs
+    it through gtest-parallel: each test in a process of its own, every
+    test twice (--repeat=2), a worker per core -- run_tests.py's
+    run_cc_tests, where every engine suite passes through the runner with
+    those flags. A test that leaks state into its process or fails the
+    second time round fails here as it does there.
+
+    Args:
+      name: name of the test; the binary is `<name>_binary`.
+      size: the test's size.
+      timeout: the test's timeout.
+      shard_count: the test's shards, which gtest-parallel splits
+        (--shard_count/--shard_index from Bazel's variables).
+      flaky: the test's flaky attribute.
+      args: arguments of the binary (after gtest-parallel's `--`).
+      runner_args: gtest-parallel's own options (`--timeout=90`).
+      data: runfiles of the test.
+      env: environment of the test.
+      tags: tags of the test.
+      visibility: visibility of the test.
+      **kwargs: the binary's attributes (cc_test's: srcs, deps, copts, ...).
+    """
+    cc_binary(
+        name = name + "_binary",
+        testonly = True,
+        visibility = ["//visibility:private"],
+        **kwargs
+    )
+    _gtest_parallel_test(
+        name = name,
+        binary = ":" + name + "_binary",
+        size = size,
+        timeout = timeout,
+        shard_count = shard_count,
+        flaky = flaky,
+        args = args,
+        runner_args = _gtest_parallel_runner_args(runner_args),
+        data = data,
+        env = env,
+        tags = _gtest_parallel_tags(tags),
+        visibility = visibility,
+    )
+
+def _gtest_parallel_runner_args(runner_args):
+    return ["--workers=%d" % _GTEST_PARALLEL_WORKERS] + runner_args
+
+def _gtest_parallel_tags(tags):
+    return tags + ["cpu:%d" % _GTEST_PARALLEL_WORKERS]
+
+# ---------------------------------------------------------------------------
 # Suites that open a window
 # ---------------------------------------------------------------------------
 
@@ -450,12 +602,21 @@ def _display_test_impl(ctx):
     # under `bazel test` and `bazel run` alike, so short paths resolve as
     # they are.
     launcher = ctx.actions.declare_file(ctx.label.name + ".sh")
+    words = [ctx.file._wrapper.short_path]
+    runfiles = ctx.runfiles(files = [ctx.file._wrapper, ctx.executable.binary] + ctx.files.data)
+    if ctx.attr.gtest_parallel:
+        # Under the display, gtest-parallel and its processes (run_tests.py
+        # starts its Xvfb around the whole run).
+        gtest_parallel_words, gtest_parallel_runfiles = _gtest_parallel_words(ctx)
+        words += gtest_parallel_words + [ctx.executable.binary.short_path, "--"]
+        runfiles = runfiles.merge(gtest_parallel_runfiles)
+    else:
+        words.append(ctx.executable.binary.short_path)
     ctx.actions.write(
         output = launcher,
-        content = "#!/bin/bash\nexec \"%s\" \"%s\" \"$@\"\n" % (ctx.file._wrapper.short_path, ctx.executable.binary.short_path),
+        content = _launcher_line(words),
         is_executable = True,
     )
-    runfiles = ctx.runfiles(files = [ctx.file._wrapper, ctx.executable.binary] + ctx.files.data)
     runfiles = runfiles.merge(ctx.attr.binary[DefaultInfo].default_runfiles)
     for target in ctx.attr.data:
         runfiles = runfiles.merge(target[DefaultInfo].default_runfiles)
@@ -505,14 +666,18 @@ _display_test = rule(
                   "has one: what GTK's accessibility bridge needs, and what run_tests.py's run inherits from the " +
                   "session it runs in.",
         ),
+        "gtest_parallel": attr.bool(
+            doc = "Run the binary through gtest-parallel under the display, as run_tests.py runs the suites of its " +
+                  "run_cc_tests list (the Linux shell's); the Impeller suites run whole.",
+        ),
         "_wrapper": attr.label(
             default = "//engine/src/flutter/testing:xvfb_run.sh",
             allow_single_file = True,
         ),
-    },
+    } | _GTEST_PARALLEL_ATTRS,
 )
 
-def flutter_display_test(name, size = None, timeout = None, shard_count = None, flaky = None, args = [], data = [], env = {}, vulkan_validation = True, session_bus = False, tags = [], visibility = None, **kwargs):
+def flutter_display_test(name, size = None, timeout = None, shard_count = None, flaky = None, args = [], runner_args = [], data = [], env = {}, vulkan_validation = True, session_bus = False, gtest_parallel = False, tags = [], visibility = None, **kwargs):
     """A test suite that opens a window: the Impeller playground's (GLFW on X11).
 
     testing/run_tests.py starts an Xvfb for the Linux suites; here the binary
@@ -527,10 +692,11 @@ def flutter_display_test(name, size = None, timeout = None, shard_count = None, 
       timeout: the test's timeout.
       shard_count: the test's shards; xvfb_run.sh hands Bazel's shard
         variables to googletest under the GTEST_* names it reads, so a shard
-        runs its share of the suite's tests (run_tests.py's gtest-parallel,
-        in Bazel's form).
+        runs its share of the suite's tests (with `gtest_parallel`, the
+        runner splits the suite instead).
       flaky: the test's flaky attribute.
       args: arguments of the binary.
+      runner_args: gtest-parallel's own options, with `gtest_parallel`.
       data: runfiles of the test.
       env: environment of the test.
       vulkan_validation: run_tests.py's vulkan_validation_env: SwiftShader as
@@ -539,6 +705,10 @@ def flutter_display_test(name, size = None, timeout = None, shard_count = None, 
       session_bus: a D-Bus session bus of the test's own unless the
         environment has one (GTK's accessibility bridge needs it; see
         xvfb_run.sh).
+      gtest_parallel: run the binary through gtest-parallel under the
+        display, as flutter_cc_test does without one: run_tests.py's
+        run_cc_tests suites (the Linux shell's); the Impeller suites, which
+        their builder runs whole, keep the default.
       tags: tags of the test.
       visibility: visibility of the test.
       **kwargs: the binary's attributes (cc_test's: srcs, deps, copts, ...).
@@ -557,11 +727,13 @@ def flutter_display_test(name, size = None, timeout = None, shard_count = None, 
         shard_count = shard_count,
         flaky = flaky,
         args = args,
+        runner_args = _gtest_parallel_runner_args(runner_args) if gtest_parallel else runner_args,
         data = data,
         env = env,
         vulkan_validation = vulkan_validation,
         session_bus = session_bus,
-        tags = tags,
+        gtest_parallel = gtest_parallel,
+        tags = _gtest_parallel_tags(tags) if gtest_parallel else tags,
         visibility = visibility,
     )
 

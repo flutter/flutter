@@ -52,6 +52,7 @@ use_repo(
     "glslang",
     "gn",
     "googletest",
+    "gtest_parallel",
     "harfbuzz",
     "icu",
     "imgui",

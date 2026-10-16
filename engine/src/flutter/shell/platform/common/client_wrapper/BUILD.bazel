@@ -4,9 +4,9 @@
 
 # Generated from //flutter/shell/platform/common/client_wrapper/BUILD.gn by gn_to_bazel; do not edit.
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_test_fixtures")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -72,7 +72,7 @@ flutter_test_fixtures(
     name = "client_wrapper_fixtures",
 )
 
-cc_test(
+flutter_cc_test(
     name = "client_wrapper_unittests",
     size = "small",
     srcs = [

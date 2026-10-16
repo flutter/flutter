@@ -125,6 +125,8 @@ exports_files([
     "fixtures_location.cc",
     # The display wrapper of flutter_display_test (testing.bzl).
     "xvfb_run.sh",
+    # The gtest-parallel wrapper of flutter_cc_test (testing.bzl).
+    "gtest_parallel_run.sh",
 ])
 
 selects.config_setting_group(
