@@ -43,12 +43,7 @@ final _localSwiftPackageReferenceExpr = RegExp(
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
-  factory XcodeProjectInterpreter({
-    required Analytics analytics,
-    required ToolContext toolContext,
-  }) {
-    return XcodeProjectInterpreter._(analytics: analytics, toolContext: toolContext);
-  }
+  XcodeProjectInterpreter({required this._analytics, required this._toolContext});
 
   XcodeProjectInterpreter._({
     required this._analytics,
