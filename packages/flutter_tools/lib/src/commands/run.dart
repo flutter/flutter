@@ -49,9 +49,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     required super.verboseHelp,
     super.outputPreferences,
   }) {
-    enableUsesTargetOption();
-    enableUsesPubOption();
-    enableUsesFatalWarnings();
     registerOptionBundles(const <OptionBundle>[
       BuildModeOptionsBundle(defaultToRelease: false),
       VmServicePortOptionsBundle(),

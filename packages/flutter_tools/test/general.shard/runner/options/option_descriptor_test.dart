@@ -899,6 +899,29 @@ void main() {
         expect(hiddenCommand.argParser.options['output-dill']!.hide, isTrue);
       },
     );
+
+    testWithoutContext(
+      'SafeArgResults.hasOption checks descriptor identity on argParser',
+      () async {
+        final commandWithCustomFatalWarnings = _FakeCommand(
+          name: 'custom-fatal-warnings',
+          description: 'Registers a custom --fatal-warnings flag',
+        );
+        commandWithCustomFatalWarnings.argParser.addFlag(
+          'fatal-warnings',
+          defaultsTo: true,
+          help: 'Treat warning level issues as fatal.',
+        );
+        expect(commandWithCustomFatalWarnings.hasOption(CommonOptions.fatalWarnings), isFalse);
+
+        final commandWithCommonFatalWarnings = _FakeCommand(
+          name: 'common-fatal-warnings',
+          description: 'Registers CommonOptions.fatalWarnings',
+        );
+        CommonOptions.fatalWarnings.addTo(commandWithCommonFatalWarnings.argParser);
+        expect(commandWithCommonFatalWarnings.hasOption(CommonOptions.fatalWarnings), isTrue);
+      },
+    );
   });
 }
 

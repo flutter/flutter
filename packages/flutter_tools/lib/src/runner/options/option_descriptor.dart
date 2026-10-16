@@ -92,6 +92,9 @@ abstract class OptionDescriptor<T> {
     return target != null && target.options.contains(name);
   }
 
+  /// Checks if this specific [OptionDescriptor] is registered on [parser].
+  bool isRegisteredOnParser(ArgParser parser) => identical(_parserRegistry[parser]?[name], this);
+
   /// Checks if this option was explicitly parsed (alias for [wasProvided]).
   bool wasParsed(ArgResults? results, {ArgResults? globalResults}) =>
       wasProvided(results, globalResults: globalResults);

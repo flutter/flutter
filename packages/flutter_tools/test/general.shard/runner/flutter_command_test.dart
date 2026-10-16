@@ -2254,7 +2254,6 @@ class FakeDeprecatedCommand extends FlutterCommand {
 
 class FakeTargetCommand extends FlutterCommand {
   FakeTargetCommand() {
-    enableUsesTargetOption();
     CommonOptions.target.addTo(argParser);
   }
 
@@ -2381,7 +2380,6 @@ class FakeFeature extends Feature {
 
 class DummyFlutterCommandWithPub extends FlutterCommand {
   DummyFlutterCommandWithPub() {
-    enableUsesPubOption();
     CommonOptions.pub.addTo(argParser);
   }
 

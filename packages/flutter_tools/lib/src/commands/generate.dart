@@ -7,7 +7,6 @@ import '../runner/flutter_command.dart';
 
 class GenerateCommand extends FlutterCommand {
   GenerateCommand({required ToolContext super.toolContext}) : _toolContext = toolContext {
-    enableUsesTargetOption();
     CommonOptions.target.addTo(argParser);
   }
 

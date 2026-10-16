@@ -26,7 +26,6 @@ import '../runner/flutter_command.dart';
 /// https://microsoft.github.io/debug-adapter-protocol/.
 class DebugAdapterCommand extends FlutterCommand {
   DebugAdapterCommand({required super.toolContext, super.verboseHelp}) : hidden = !verboseHelp {
-    enableUsesIpv6Flag();
     DebuggingOptionDescriptors.ipv6.addTo(argParser, verboseHelp: verboseHelp);
     registerOptionBundle(const DdsAndDevToolsOptionsBundle(includeDevTools: false));
     argParser.addFlag(

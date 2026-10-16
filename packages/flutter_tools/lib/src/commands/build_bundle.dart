@@ -29,8 +29,6 @@ class BuildBundleCommand extends BuildSubCommand {
          outputPreferences: toolContext.outputPreferences,
          toolContext: toolContext,
        ) {
-    enableUsesTargetOption();
-    enableUsesPubOption();
     registerOptionBundles(const <OptionBundle>[
       FilesystemOptionsBundle(),
       BuildModeOptionsBundle(defaultToRelease: false),

@@ -87,7 +87,6 @@ class AnalyzeCommand extends FlutterCommand {
     );
     argParser.addFlag('plugins', defaultsTo: true, help: 'Whether to enable analyzer plugins.');
 
-    enableUsesPubOption();
     CommonOptions.pub.addTo(argParser);
 
     // Not used by analyze --watch

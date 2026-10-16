@@ -25,6 +25,11 @@ extension SafeArgResults on FlutterCommand {
       descriptor.wasProvided(argResults, globalResults: globalResults);
 
   /// Returns whether [descriptor] is registered on this command (or globally).
-  bool hasOption(OptionDescriptor<Object?> descriptor) =>
-      descriptor.isRegistered(argResults, globalResults: globalResults);
+  bool hasOption(OptionDescriptor<Object?> descriptor) => switch (descriptor.scope) {
+    OptionScope.local => descriptor.isRegisteredOnParser(argParser),
+    OptionScope.global => descriptor.isRegistered(argResults, globalResults: globalResults),
+    OptionScope.any =>
+      descriptor.isRegisteredOnParser(argParser) ||
+          descriptor.isRegistered(argResults, globalResults: globalResults),
+  };
 }

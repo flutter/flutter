@@ -278,45 +278,9 @@ abstract class FlutterCommand extends Command<void> {
 
   var _requiresPubspecYaml = false;
 
-  /// Whether this command uses the 'target' option.
-  var _usesTargetOption = false;
-
-  /// Enables the target option flag behavior on this command.
-  void enableUsesTargetOption() {
-    _usesTargetOption = true;
-  }
-
-  var _usesPubOption = false;
-
-  /// Enables the pub option flag behavior on this command.
-  void enableUsesPubOption() {
-    _usesPubOption = true;
-  }
-
-  var _usesPortOption = false;
-
-  /// Enables the VM service port option behavior on this command.
-  void enableUsesPortOption() {
-    _usesPortOption = true;
-  }
-
-  var _usesIpv6Flag = false;
-
-  /// Enables the IPv6 flag behavior on this command.
-  void enableUsesIpv6Flag() {
-    _usesIpv6Flag = true;
-  }
-
-  var _usesFatalWarnings = false;
-
-  /// Enables the fatal warnings flag behavior on this command.
-  void enableUsesFatalWarnings() {
-    _usesFatalWarnings = true;
-  }
-
   DeprecationBehavior get deprecationBehavior => DeprecationBehavior.none;
 
-  bool get shouldRunPub => _usesPubOption && getValue(CommonOptions.pub);
+  bool get shouldRunPub => hasOption(CommonOptions.pub) && getValue(CommonOptions.pub);
 
   bool get outputMachineFormat => getValue(CommonOptions.machine);
 
@@ -448,7 +412,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int? get hostVmservicePort {
-    if (!_usesPortOption || !_hostVmServicePortProvided) {
+    if (!_hostVmServicePortProvided) {
       return null;
     }
     if (wasParsed(DebuggingOptionDescriptors.vmServicePort) &&
@@ -471,8 +435,11 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// If no port is set, returns null.
   int? get deviceVmservicePort {
+    if (!hasOption(DebuggingOptionDescriptors.deviceVmservicePort)) {
+      return null;
+    }
     final String? devicePort = getValue(DebuggingOptionDescriptors.deviceVmservicePort);
-    if (!_usesPortOption || devicePort == null) {
+    if (devicePort == null) {
       return null;
     }
     try {
@@ -485,7 +452,8 @@ abstract class FlutterCommand extends Command<void> {
   Future<bool> get disablePortPublication async =>
       !getValue(DebuggingOptionDescriptors.publishPort);
 
-  bool? get ipv6 => _usesIpv6Flag ? getValue(DebuggingOptionDescriptors.ipv6) : null;
+  bool? get ipv6 =>
+      hasOption(DebuggingOptionDescriptors.ipv6) ? getValue(DebuggingOptionDescriptors.ipv6) : null;
 
   /// Whether it is safe for this command to use a cached pub invocation.
   bool get cachePubGet => true;
@@ -864,7 +832,7 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        if (_usesFatalWarnings) {
+        if (hasOption(CommonOptions.fatalWarnings)) {
           _logger.fatalWarnings = getValue(CommonOptions.fatalWarnings);
         }
         _printDeprecationWarning();
@@ -886,7 +854,7 @@ abstract class FlutterCommand extends Command<void> {
           if (commandPath != null) {
             _sendPostUsage(commandPath, commandResult, startTime, endTime);
           }
-          if (_usesFatalWarnings) {
+          if (hasOption(CommonOptions.fatalWarnings)) {
             _logger.checkForFatalLogs();
           }
         }
@@ -1349,7 +1317,7 @@ abstract class FlutterCommand extends Command<void> {
       }
     }
 
-    if (_usesTargetOption) {
+    if (hasOption(CommonOptions.target)) {
       final String targetPath = targetFile;
       if (!_fs.isFileSync(targetPath)) {
         throwToolExit(_userMessages.flutterTargetFileMissing(targetPath));
