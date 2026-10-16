@@ -3657,6 +3657,58 @@ cc_library(
     );
   });
 
+  group('mirrored lists', () {
+    test('agreeing lists pass; a test added to GN alone is reported', () {
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/testing/dart/BUILD.gn': r'''
+tests = [
+  "a_test.dart",
+  "b_test.dart",
+]
+foreach(test, tests) {
+  flutter_frontend_server("compile_$test") {
+    main_dart = test
+  }
+}
+''',
+        'flutter/testing/dart/BUILD.bazel': '''
+flutter_dart_tests(
+    name = "dart",
+    tests = [
+        "a_test.dart",  # a comment
+        "b_test.dart",
+    ],
+    vm_service = False,
+)
+''',
+      });
+      const lists = <String, MirroredList>{'//flutter/testing/dart': MirroredList('tests')};
+      expect(mirroredListMismatches(tree, lists), isEmpty);
+      File(
+        p.join(tree.root, 'flutter/testing/dart/BUILD.gn'),
+      ).writeAsStringSync('tests = [\n  "a_test.dart",\n  "b_test.dart",\n  "c_test.dart",\n]\n');
+      final reloaded = GnSourceTree(tree.root, gnBinary: gnBinary);
+      final List<String> messages = mirroredListMismatches(reloaded, lists);
+      expect(messages, hasLength(1));
+      expect(messages.single, contains('missing c_test.dart'));
+      expect(messages.single, contains('hand-written'));
+    });
+
+    test('the Starlark list is read strictly', () {
+      expect(bazelListAttribute('x(\n    tests = ["a.dart", "b.dart"],\n)\n', 'tests'), <String>[
+        'a.dart',
+        'b.dart',
+      ]);
+      expect(
+        bazelListAttribute('tests = [\n    "a.dart",\n]\ntests = ["b.dart"]\n', 'tests'),
+        isNull,
+      );
+      expect(bazelListAttribute('tests = ["a.dart"] + more\n', 'tests'), <String>['a.dart']);
+      expect(bazelListAttribute('tests = [name + ".dart"]\n', 'tests'), isNull);
+      expect(bazelListAttribute('srcs = ["a.dart"]\n', 'tests'), isNull);
+    });
+  });
+
   group('round trip', () {
     // The checked-in files the converter generates (see the manifest); a
     // difference means the GN file changed without regenerating, or the

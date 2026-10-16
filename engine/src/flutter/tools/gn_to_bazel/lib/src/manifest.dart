@@ -14,6 +14,7 @@
 library;
 
 import 'bazel_mapping.dart';
+import 'mirrored_lists.dart';
 
 /// One generated file.
 final class ConvertedFile {
@@ -953,6 +954,17 @@ ConvertedFile? manifestEntry(String gnPackage) {
 
 /// The hand-written packages of the main repository whose files a generated
 /// file may name (the generated packages are [convertedFiles]).
+/// Hand-written files that repeat a list of their GN file: the Dart test
+/// packages' `tests` (GN's `foreach` over it, which the evaluator does not
+/// unroll). The converter checks that the two lists agree in every run
+/// (mirroredListMismatches), so that a test added to GN's list is missed by
+/// no one. GN package to the list's name.
+const Map<String, MirroredList> mirroredLists = <String, MirroredList>{
+  '//flutter/testing/dart': MirroredList('tests'),
+  '//flutter/testing/dart/vm_service': MirroredList('tests'),
+  '//flutter/testing/smoke_test_failure': MirroredList('tests'),
+};
+
 const Set<String> handWrittenPackages = <String>{
   'engine/src',
   'engine/src/flutter',

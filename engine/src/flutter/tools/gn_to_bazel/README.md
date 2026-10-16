@@ -32,7 +32,11 @@ fails on a difference. The output is piped through `buildifier` when one is
 on `PATH` (or named by `--buildifier`; `--buildifier=none` for none); the
 emitter already writes buildifier's format, so the result is the same either
 way. `--depfile` writes the GN files read (the inputs and every imported
-`.gni`), one per line.
+`.gni`), one per line. A run over the manifest also checks the hand-written
+files that repeat a list of their GN file (`mirroredLists`: the Dart test
+packages' `tests`, GN's `foreach` over it being what keeps those files
+hand-written) against the GN assignment, and fails on a test the two do not
+both name -- the one way a test added to GN's list could go missing here.
 
 By default the converter assumes the Linux x64 host build: GN conditions on
 `is_linux`, `is_win`, `enable_backtrace` and so on are decided the way GN
