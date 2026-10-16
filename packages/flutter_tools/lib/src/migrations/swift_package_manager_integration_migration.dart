@@ -32,72 +32,27 @@ import '../version.dart';
 class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   SwiftPackageManagerIntegrationMigration(
     XcodeBasedProject project,
-    FlutterDarwinPlatform platform,
-    BuildInfo buildInfo, {
-    required this._xcodeProjectInterpreter,
-    required Logger logger,
-    required this._fileSystem,
-    required this._plistParser,
-    required this._config,
+    this._platform,
+    this._buildInfo, {
     required this._analytics,
-    required this._hostPlatform,
-    required this._operatingSystemUtils,
-    required this._flutterVersion,
+    required this._plistParser,
     required this._reportCrashes,
-  }) : _xcodeProject = project,
-       _platform = platform,
-       _buildInfo = buildInfo,
-       _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
-       super(logger);
-
-  factory SwiftPackageManagerIntegrationMigration.fromToolContext(
-    XcodeBasedProject project,
-    FlutterDarwinPlatform platform,
-    BuildInfo buildInfo, {
-    required Analytics analytics,
-    required PlistParser plistParser,
-    required bool reportCrashes,
     required ToolContext toolContext,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
-  }) {
-    final ToolContext(
-      :Config config,
-      :FileSystem fs,
-      :FlutterVersion flutterVersion,
-      :Logger logger,
-      :OperatingSystemUtils os,
-      platform: Platform hostPlatform,
-    ) = toolContext;
-    return SwiftPackageManagerIntegrationMigration(
-      project,
-      platform,
-      buildInfo,
-      analytics: analytics,
-      config: config,
-      fileSystem: fs,
-      flutterVersion: flutterVersion,
-      hostPlatform: hostPlatform,
-      logger: logger,
-      operatingSystemUtils: os,
-      plistParser: plistParser,
-      reportCrashes: reportCrashes,
-      xcodeProjectInterpreter: xcodeProjectInterpreter,
-    );
-  }
+    required this._xcodeProjectInterpreter,
+  }) : _xcodeProject = project,
+       _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
+       _toolContext = toolContext,
+       super(toolContext.logger);
 
   final XcodeBasedProject _xcodeProject;
   final FlutterDarwinPlatform _platform;
   final BuildInfo _buildInfo;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
-  final FileSystem _fileSystem;
   final File _xcodeProjectInfoFile;
   final PlistParser _plistParser;
-  final Config _config;
   final Analytics _analytics;
-  final Platform _hostPlatform;
-  final OperatingSystemUtils _operatingSystemUtils;
-  final FlutterVersion _flutterVersion;
   final bool _reportCrashes;
+  final ToolContext _toolContext;
 
   /// New identifier for FlutterGeneratedPluginSwiftPackage PBXBuildFile.
   static const _flutterPluginsSwiftPackageBuildFileIdentifier = '78A318202AECB46A00862997';
@@ -141,8 +96,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// Existing macOS identifier for Runner PBXProject.
   static const _macosProjectIdentifier = '33CC10E52044A3C60003C045';
 
-  File get backupProjectSettings =>
-      _fileSystem.directory(_xcodeProjectInfoFile.parent).childFile('project.pbxproj.backup');
+  File get backupProjectSettings {
+    final FileSystem fs = _toolContext.fs;
+    return fs.directory(_xcodeProjectInfoFile.parent).childFile('project.pbxproj.backup');
+  }
 
   String get _runnerFrameworksBuildPhaseIdentifier {
     return _platform == FlutterDarwinPlatform.ios
@@ -183,7 +140,10 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
   /// If the app is not an example app or the plugin cannot be found, this will return null.
   late final ({String name, String path})? _examplePlugin;
 
-  String _flutterVersionString() => _flutterVersion.getVersionString(redactUnknownBranches: true);
+  String _flutterVersionString() {
+    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
+    return flutterVersion.getVersionString(redactUnknownBranches: true);
+  }
 
   void restoreFromBackup(SchemeInfo? schemeInfo) {
     if (backupProjectSettings.existsSync()) {
@@ -217,6 +177,12 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       return;
     }
 
+    final ToolContext(
+      :Config config,
+      :FileSystem fs,
+      :OperatingSystemUtils os,
+      platform: Platform hostPlatform,
+    ) = _toolContext;
     Status? migrationStatus;
     SchemeInfo? schemeInfo;
     var optionalOnly = false;
@@ -227,7 +193,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
 
       _examplePlugin = await _loadPluginFromExampleProject(
         xcodeProject: _xcodeProject,
-        fileSystem: _fileSystem,
+        fileSystem: fs,
         logger: logger,
         platform: _platform,
       );
@@ -282,9 +248,7 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
       try {
         await _xcodeProjectInterpreter.getInfo(
           _xcodeProject,
-          buildDirectory: _fileSystem.directory(
-            _platform.buildDirectory(config: _config, fileSystem: _fileSystem),
-          ),
+          buildDirectory: fs.directory(_platform.buildDirectory(config: config, fileSystem: fs)),
         );
       } on Exception catch (e, stackTrace) {
         // Send error to crash reporter.
@@ -292,9 +256,9 @@ class SwiftPackageManagerIntegrationMigration extends ProjectMigrator {
           try {
             await asyncGuard(() async {
               final crashReportSender = CrashReportSender(
-                platform: _hostPlatform,
+                platform: hostPlatform,
                 logger: logger,
-                operatingSystemUtils: _operatingSystemUtils,
+                operatingSystemUtils: os,
                 analytics: _analytics,
               );
               await crashReportSender.sendReport(

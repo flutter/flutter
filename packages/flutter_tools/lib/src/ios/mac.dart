@@ -163,7 +163,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     RemoveBitcodeMigration(app.project, logger),
     XcodeThinBinaryBuildPhaseInputPathsMigration(app.project, logger),
     UIApplicationMainDeprecationMigration(app.project, logger),
-    SwiftPackageManagerIntegrationMigration.fromToolContext(
+    SwiftPackageManagerIntegrationMigration(
       app.project,
       darwinPlatform,
       buildInfo,
