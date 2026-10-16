@@ -34,7 +34,8 @@ extern void skwasm_dispatchRenderPictures(unsigned long thread_id,
                                           Skwasm::Surface* surface,
                                           sk_sp<flutter::DisplayList>* pictures,
                                           int count,
-                                          uint32_t callback_id);
+                                          uint32_t callback_id,
+                                          bool capture_image_bitmaps);
 extern uint32_t skwasm_getGlContextForCanvas(SkwasmObject canvas,
                                              bool antialias,
                                              Skwasm::Surface* surface);

@@ -14,10 +14,19 @@ import 'package:ui/ui.dart' as ui;
 /// so directly rendering to several [Surface]s is how we can achieve 60 fps on
 /// these browsers.
 class MultiSurfaceRasterizer extends Rasterizer {
-  MultiSurfaceRasterizer(OnscreenSurface Function(OnscreenCanvasProvider) onscreenSurfaceCreateFn)
-    : _surfaceProvider = OnscreenSurfaceProvider(OnscreenCanvasProvider(), onscreenSurfaceCreateFn);
+  MultiSurfaceRasterizer(
+    OnscreenSurface Function(OnscreenCanvasProvider) onscreenSurfaceCreateFn, {
+    OffscreenSurface Function(OffscreenCanvasProvider)? offscreenSurfaceCreateFn,
+  }) : _surfaceProvider = OnscreenSurfaceProvider(
+         OnscreenCanvasProvider(),
+         onscreenSurfaceCreateFn,
+       ),
+       _pictureToImageSurfaceProvider = offscreenSurfaceCreateFn == null
+           ? null
+           : OffscreenSurfaceProvider(OffscreenCanvasProvider(), offscreenSurfaceCreateFn);
 
   final OnscreenSurfaceProvider _surfaceProvider;
+  final OffscreenSurfaceProvider? _pictureToImageSurfaceProvider;
 
   @override
   @visibleForTesting
@@ -36,21 +45,23 @@ class MultiSurfaceRasterizer extends Rasterizer {
 
   @override
   void dispose() {
-    for (final MultiSurfaceViewRasterizer viewRasterizer in _viewRasterizers.values) {
+    for (final MultiSurfaceViewRasterizer viewRasterizer in _viewRasterizers.values.toList()) {
       viewRasterizer.dispose();
     }
     _viewRasterizers.clear();
     _surfaceProvider.dispose();
+    _pictureToImageSurfaceProvider?.dispose();
   }
 
   @override
   void setResourceCacheMaxBytes(int bytes) {
     _surfaceProvider.setSkiaResourceCacheMaxBytes(bytes);
+    _pictureToImageSurfaceProvider?.setSkiaResourceCacheMaxBytes(bytes);
   }
 
   @override
   Surface createPictureToImageSurface() {
-    return _surfaceProvider.createSurface();
+    return _pictureToImageSurfaceProvider?.createSurface() ?? _surfaceProvider.createSurface();
   }
 }
 
@@ -59,6 +70,15 @@ class MultiSurfaceViewRasterizer extends ViewRasterizer {
 
   final MultiSurfaceRasterizer rasterizer;
   final OnscreenSurfaceProvider surfaceProvider;
+
+  @override
+  void dispose() {
+    if (isDisposed) {
+      return;
+    }
+    super.dispose();
+    rasterizer._viewRasterizers.remove(view);
+  }
 
   @override
   late final DisplayCanvasFactory<OnscreenSurface> displayFactory =

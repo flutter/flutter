@@ -4,6 +4,7 @@
 
 _skia_root = "//flutter/third_party/skia"
 
+import("//build/toolchain/wasm.gni")
 import("$_skia_root/gn/shared_sources.gni")
 import("$_skia_root/gn/skia.gni")
 import("$_skia_root/gn/toolchain/wasm.gni")
@@ -685,6 +686,11 @@ skia_component("skia") {
   sources += skia_sksl_core_module_sources
   sources += skia_pathops_sources
   sources += skia_ports_sources
+  if (is_wasm && wasm_use_workers) {
+    # POSIX semaphores are stubs in Wasm Workers builds without pthreads.
+    sources -= [ "$_skia_root/src/core/SkSemaphore.cpp" ]
+    sources += [ "SkSemaphore_wasm.cpp" ]
+  }
   sources += [
     "$_skia_root/src/android/SkAndroidFrameworkUtils.cpp",
     "$_skia_root/src/android/SkAnimatedImage.cpp",
