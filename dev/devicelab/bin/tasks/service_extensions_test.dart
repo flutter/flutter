@@ -119,7 +119,10 @@ void main() {
           'text': 'flutter drive lib/xxx.dart',
         },
       );
-      expect(tapResponse.json?['isError'] == false);
+      expect(
+        tapResponse.json?['isError'] == false,
+        'Failed to tap button via Flutter Driver. Response: ${tapResponse.json}',
+      );
 
       final Event navigationEvent = await navigationFuture;
       // validate the fields
