@@ -313,11 +313,11 @@ void main() {
           ),
           tabBuilder: (BuildContext context, int index) {
             // For 1-indexed readability.
-            final int localIndex = index + 1;
+            ++index;
             return CupertinoTabView(
               builder: (BuildContext context) {
                 return CupertinoPageScaffold(
-                  navigationBar: CupertinoNavigationBar(middle: Text('Page 1 of tab $localIndex')),
+                  navigationBar: CupertinoNavigationBar(middle: Text('Page 1 of tab $index')),
                   child: Center(
                     child: CupertinoButton(
                       child: const Text('Next'),
@@ -327,7 +327,7 @@ void main() {
                             builder: (BuildContext context) {
                               return CupertinoPageScaffold(
                                 navigationBar: CupertinoNavigationBar(
-                                  middle: Text('Page 2 of tab $localIndex'),
+                                  middle: Text('Page 2 of tab $index'),
                                 ),
                                 child: Center(
                                   child: CupertinoButton(
