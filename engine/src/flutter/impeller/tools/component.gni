@@ -24,6 +24,7 @@ template("impeller_component") {
     if (defined(invoker.target_type)) {
       target_type = invoker.target_type
     }
+
     target(target_type, target_name) {
       forward_variables_from(invoker, "*")
 

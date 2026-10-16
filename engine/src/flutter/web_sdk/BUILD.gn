@@ -39,7 +39,8 @@ sdk_rewriter("web_ui_library_sources") {
   input_dir = "//flutter/lib/web_ui/lib/"
   output_dir = "$root_out_dir/flutter_web_sdk/lib/ui/"
 
-  # exclude everything in the engine directory, it will be a separate internal library
+  # exclude everything in the engine directory, it will be a separate internal
+  # library
   exclude_pattern = rebase_path("//flutter/lib/web_ui/lib/src")
 }
 
@@ -203,6 +204,7 @@ template("_compile_platform") {
          "summary_only must be defined for $target_name")
   assert(defined(invoker.output_dill),
          "output_dill must be defined for $target_name")
+
   _kernel_worker(target_name) {
     inputs = [ "sdk_rewriter.dart" ] + web_ui_sources
 
