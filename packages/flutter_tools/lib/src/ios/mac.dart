@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context_runner.dart';
 import '../darwin/darwin.dart';
 import '../device.dart';
 import '../features.dart';
@@ -143,16 +144,11 @@ Future<XcodeBuildResult> buildXcodeProject({
       app.project,
       darwinPlatform,
       buildInfo,
-      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-      logger: globals.logger,
-      fileSystem: globals.fs,
-      plistParser: globals.plistParser,
-      config: globals.config,
       analytics: globals.analytics,
-      hostPlatform: globals.platform,
-      operatingSystemUtils: globals.os,
-      flutterVersion: globals.flutterVersion,
+      plistParser: globals.plistParser,
       reportCrashes: !await globals.isRunningOnBot,
+      toolContext: const GlobalToolContext(),
+      xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
     ),
     SwiftPackageManagerGitignoreMigration(project, globals.logger),
     MetalAPIValidationMigrator.ios(app.project, globals.logger),

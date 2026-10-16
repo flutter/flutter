@@ -383,6 +383,8 @@ class ToolDependencies {
         plistParser ??
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
 
+    late final ToolContext finalToolContext;
+
     final FlutterProjectFactory finalProjectFactory =
         projectFactory ??
         FlutterProjectFactory(
@@ -390,6 +392,7 @@ class ToolDependencies {
           fileSystem: finalFS,
           logger: finalLogger,
           plistParser: finalPlistParser,
+          toolContextBuilder: () => finalToolContext,
           xcode: finalXcode,
           xcodeProjectInterpreter: finalXcodeProjectInterpreter,
         );
@@ -510,7 +513,7 @@ class ToolDependencies {
           xcode: finalXcode,
         );
 
-    final finalToolContext = ToolContext(
+    finalToolContext = ToolContext(
       artifacts: finalArtifacts,
       botDetector: finalBotDetector,
       cache: finalCache,

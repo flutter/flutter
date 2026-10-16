@@ -23,6 +23,8 @@ import 'base/yaml.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cmake_project.dart';
+import 'context/tool_context.dart';
+import 'context_runner.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
@@ -60,6 +62,8 @@ class FlutterProjectFactory {
     required this._logger,
     this._featureFlags,
     this._plistParser,
+    this._toolContext,
+    this._toolContextBuilder,
     this._xcode,
     this._xcodeProjectInterpreter,
   });
@@ -68,6 +72,8 @@ class FlutterProjectFactory {
   final FileSystem _fileSystem;
   final Logger _logger;
   final PlistParser? _plistParser;
+  final ToolContext? _toolContext;
+  final ToolContext? Function()? _toolContextBuilder;
   final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
@@ -77,6 +83,7 @@ class FlutterProjectFactory {
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
+    final ToolContext? resolvedToolContext = _toolContext ?? _toolContextBuilder?.call();
     final File pubspec = directory.childFile(bundle.defaultManifestPath);
     if (!pubspec.existsSync()) {
       final FlutterManifest manifest = FlutterProject._readManifest(
@@ -96,6 +103,7 @@ class FlutterProjectFactory {
         featureFlags: _featureFlags,
         plistParser: _plistParser,
         projectFactory: this,
+        toolContext: resolvedToolContext,
         xcode: _xcode,
         xcodeProjectInterpreter: _xcodeProjectInterpreter,
       );
@@ -118,6 +126,7 @@ class FlutterProjectFactory {
         featureFlags: _featureFlags,
         plistParser: _plistParser,
         projectFactory: this,
+        toolContext: resolvedToolContext,
         xcode: _xcode,
         xcodeProjectInterpreter: _xcodeProjectInterpreter,
       );
@@ -149,6 +158,7 @@ class FlutterProject {
     this._featureFlags,
     this._plistParser,
     this._projectFactory,
+    this._toolContext,
     this._xcode,
     this._xcodeProjectInterpreter,
   }) {
@@ -158,6 +168,7 @@ class FlutterProject {
   final FeatureFlags? _featureFlags;
   final PlistParser? _plistParser;
   final FlutterProjectFactory? _projectFactory;
+  final ToolContext? _toolContext;
   final Xcode? _xcode;
   final XcodeProjectInterpreter? _xcodeProjectInterpreter;
 
@@ -521,6 +532,7 @@ class FlutterProject {
     featureFlags: _featureFlags,
     plistParser: _plistParser,
     projectFactory: _projectFactory,
+    toolContext: _toolContext,
     xcode: _xcode,
     xcodeProjectInterpreter: _xcodeProjectInterpreter,
   );
@@ -694,21 +706,18 @@ class FlutterProject {
     }
     if (iosPlatform) {
       await ios.ensureReadyForPlatformSpecificTooling(
-        cache: globals.cache,
-        config: globals.config,
-        fileSystemUtils: globals.fsUtils,
-        platform: globals.platform,
-        plistParser: globals.plistParser,
-        processManager: globals.processManager,
+        plistParser: _plistParser ?? globals.plistParser,
         templateRenderer: globals.templateRenderer,
-        terminal: globals.terminal,
+        toolContext: _toolContext ?? const GlobalToolContext(),
       );
     }
     if (linuxPlatform) {
       await linux.ensureReadyForPlatformSpecificTooling();
     }
     if (macOSPlatform) {
-      await macos.ensureReadyForPlatformSpecificTooling(cache: globals.cache);
+      await macos.ensureReadyForPlatformSpecificTooling(
+        toolContext: _toolContext ?? const GlobalToolContext(),
+      );
     }
     if (windowsPlatform) {
       await windows.ensureReadyForPlatformSpecificTooling();
