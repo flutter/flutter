@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -18,37 +17,9 @@ import '../convert.dart';
 
 /// Encapsulates information about the installed copy of Visual Studio, if any.
 class VisualStudio {
-  VisualStudio({
-    required this._fileSystem,
-    required ProcessManager processManager,
-    required this._platform,
-    required Logger logger,
-    required this._osUtils,
-  }) : _processUtils = ProcessUtils(processManager: processManager, logger: logger),
-       _logger = logger;
+  VisualStudio({required this._toolContext});
 
-  factory VisualStudio.fromContext(ToolContext toolContext) {
-    final ToolContext(
-      :FileSystem fs,
-      :Logger logger,
-      :OperatingSystemUtils os,
-      :Platform platform,
-      :ProcessManager processManager,
-    ) = toolContext;
-    return VisualStudio(
-      fileSystem: fs,
-      processManager: processManager,
-      platform: platform,
-      logger: logger,
-      osUtils: os,
-    );
-  }
-
-  final FileSystem _fileSystem;
-  final Platform _platform;
-  final ProcessUtils _processUtils;
-  final Logger _logger;
-  final OperatingSystemUtils _osUtils;
+  final ToolContext _toolContext;
 
   /// Matches the description property from the vswhere.exe JSON output.
   final _vswhereDescriptionProperty = RegExp(r'\s*"description"\s*:\s*".*"\s*,?');
@@ -131,7 +102,7 @@ class VisualStudio {
     if (sdkLocation == null) {
       return null;
     }
-    final Directory sdkIncludeDirectory = _fileSystem
+    final Directory sdkIncludeDirectory = _toolContext.fs
         .directory(sdkLocation)
         .childDirectory('Include');
     if (!sdkIncludeDirectory.existsSync()) {
@@ -179,7 +150,7 @@ class VisualStudio {
       return null;
     }
 
-    return _fileSystem.path.joinAll(<String>[
+    return _toolContext.fs.path.joinAll(<String>[
       details.installationPath!,
       'Common7',
       'IDE',
@@ -230,9 +201,10 @@ class VisualStudio {
       return null;
     }
 
-    final arch = _osUtils.hostPlatform == HostPlatform.windows_arm64 ? 'arm64' : 'x64';
+    final ToolContext(:FileSystem fs, :OperatingSystemUtils os) = _toolContext;
+    final arch = os.hostPlatform == HostPlatform.windows_arm64 ? 'arm64' : 'x64';
 
-    return _fileSystem.path.joinAll(<String>[
+    return fs.path.joinAll(<String>[
       details.installationPath!,
       'VC',
       'Tools',
@@ -253,9 +225,10 @@ class VisualStudio {
       return null;
     }
 
-    final arch = _osUtils.hostPlatform == HostPlatform.windows_arm64 ? 'arm64' : '64';
+    final ToolContext(:FileSystem fs, :OperatingSystemUtils os) = _toolContext;
+    final arch = os.hostPlatform == HostPlatform.windows_arm64 ? 'arm64' : '64';
 
-    return _fileSystem.path.joinAll(<String>[
+    return fs.path.joinAll(<String>[
       details.installationPath!,
       'VC',
       'Auxiliary',
@@ -275,11 +248,12 @@ class VisualStudio {
   /// itself.
   String get _vswherePath {
     const programFilesEnv = 'PROGRAMFILES(X86)';
-    if (!_platform.environment.containsKey(programFilesEnv)) {
+    final ToolContext(:FileSystem fs, :Platform platform) = _toolContext;
+    if (!platform.environment.containsKey(programFilesEnv)) {
       throwToolExit('%$programFilesEnv% environment variable not found.');
     }
-    return _fileSystem.path.join(
-      _platform.environment[programFilesEnv]!,
+    return fs.path.join(
+      platform.environment[programFilesEnv]!,
       'Microsoft Visual Studio',
       'Installer',
       'vswhere.exe',
@@ -366,7 +340,7 @@ class VisualStudio {
       // Ignore replacement characters as vswhere.exe is known to output them.
       // See: https://github.com/flutter/flutter/issues/102451
       const Encoding encoding = Utf8Codec(reportErrors: false);
-      final RunResult whereResult = _processUtils.runSync(<String>[
+      final RunResult whereResult = _toolContext.processUtils.runSync(<String>[
         _vswherePath,
         ...defaultArguments,
         ...?additionalArguments,
@@ -391,7 +365,7 @@ class VisualStudio {
     final installationPath = installations[0]['installationPath'] as String?;
     String? msvcVersion;
     if (installationPath != null) {
-      final Directory installationDir = _fileSystem.directory(installationPath);
+      final Directory installationDir = _toolContext.fs.directory(installationPath);
       final Directory msvcDir = installationDir
           .childDirectory('VC')
           .childDirectory('Tools')
@@ -410,6 +384,7 @@ class VisualStudio {
   List<Map<String, dynamic>>? _tryDecodeVswhereJson(String vswhereJson) {
     List<dynamic>? result;
     FormatException? originalError;
+    final Logger logger = _toolContext.logger;
     try {
       // Some versions of vswhere.exe are known to encode their output incorrectly,
       // resulting in invalid JSON in the 'description' property when interpreted
@@ -421,7 +396,7 @@ class VisualStudio {
         // See: https://github.com/flutter/flutter/issues/106601
         vswhereJson = vswhereJson.replaceFirst(_vswhereDescriptionProperty, '');
 
-        _logger.printTrace(
+        logger.printTrace(
           'Failed to decode vswhere.exe JSON output. $error'
           'Retrying after removing the unused description property:\n$vswhereJson',
         );
@@ -432,7 +407,7 @@ class VisualStudio {
     } on FormatException {
       // Removing the description property didn't help.
       // Report the original decoding error on the unprocessed JSON.
-      _logger.printWarning(
+      logger.printWarning(
         'Warning: Unexpected vswhere.exe JSON output. $originalError'
         'To see the full JSON, run flutter doctor -vv.',
       );
@@ -480,7 +455,7 @@ class VisualStudio {
   /// registry doesn't contain that information.
   String? _getWindows10SdkLocation() {
     try {
-      final RunResult result = _processUtils.runSync(<String>[
+      final RunResult result = _toolContext.processUtils.runSync(<String>[
         'reg',
         'query',
         _windows10SdkRegistryPath,
