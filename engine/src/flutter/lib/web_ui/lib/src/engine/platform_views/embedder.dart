@@ -256,13 +256,21 @@ class PlatformViewEmbedder {
     head.style.transform = float64ListToCssTransform(headTransform.storage);
   }
 
-  /// Sets the transform origin to the top-left corner of the element.
+  /// Sets the transform origin and anchors the element to the top-left corner.
   ///
   /// By default, the transform origin is the center of the element, but
   /// Flutter assumes the transform origin is the top-left point.
+  ///
+  /// The element must be anchored at (0, 0) of the scene host. Without an explicit
+  /// left/top, `position: absolute` elements fall back to their static position.
+  /// In RTL documents (`dir="rtl"`), the static position starts at the right edge
+  /// of the containing block, misaligning the transform matrix.
   void _resetAnchor(DomElement element) {
-    element.style.transformOrigin = '0 0 0';
-    element.style.position = 'absolute';
+    element.style
+      ..transformOrigin = '0 0 0'
+      ..position = 'absolute'
+      ..top = '0'
+      ..left = '0';
   }
 
   /// Optimizes the scene to use the fewest possible canvases. This sets up
