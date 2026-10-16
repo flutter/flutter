@@ -260,21 +260,27 @@ void main() {
 
       for (final (String description, Map<String, Object?> overrides, String expectedParam)
           in invalidCases) {
-        test('throws RpcException on $description', () async {
+        test('throws RpcException on $description for build and assemble', () async {
           final service = LinuxBuildService();
           final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
           final ExtensionRpcHandler buildHandler = handlers['build']!;
+          final ExtensionRpcHandler assembleHandler = handlers['assemble']!;
 
-          await expectLater(
-            () => buildHandler(<String, Object?>{...validParams, ...overrides}),
-            throwsA(
-              isA<Exception>().having(
-                (Exception e) => e.toString(),
-                'toString',
-                contains('Missing or invalid "$expectedParam" parameter.'),
+          for (final handler in <ExtensionRpcHandler>[buildHandler, assembleHandler]) {
+            await expectLater(
+              () => handler(<String, Object?>{...validParams, ...overrides}),
+              throwsA(
+                isA<Exception>().having(
+                  (Exception e) => e.toString(),
+                  'toString',
+                  allOf(
+                    contains('-32602'),
+                    contains('Missing or invalid "$expectedParam" parameter.'),
+                  ),
+                ),
               ),
-            ),
-          );
+            );
+          }
         });
       }
     });
