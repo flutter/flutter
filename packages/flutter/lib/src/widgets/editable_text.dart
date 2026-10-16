@@ -2216,21 +2216,21 @@ class EditableText extends StatefulWidget {
       final showShareBeforeSelectAll = defaultTargetPlatform == TargetPlatform.android;
 
       resultButtonItem.addAll(<ContextMenuButtonItem>[
-        if (onCut != null) ContextMenuButtonItem(onPressed: onCut, type: ContextMenuButtonType.cut),
+        if (onCut != null) ContextMenuButtonItem(onPressed: onCut, kind: ContextMenuButtonKind.cut),
         if (onCopy != null)
-          ContextMenuButtonItem(onPressed: onCopy, type: ContextMenuButtonType.copy),
+          ContextMenuButtonItem(onPressed: onCopy, kind: ContextMenuButtonKind.copy),
         if (onPaste != null)
-          ContextMenuButtonItem(onPressed: onPaste, type: ContextMenuButtonType.paste),
+          ContextMenuButtonItem(onPressed: onPaste, kind: ContextMenuButtonKind.paste),
         if (onShare != null && showShareBeforeSelectAll)
-          ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+          ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
         if (onSelectAll != null)
-          ContextMenuButtonItem(onPressed: onSelectAll, type: ContextMenuButtonType.selectAll),
+          ContextMenuButtonItem(onPressed: onSelectAll, kind: ContextMenuButtonKind.selectAll),
         if (onLookUp != null)
-          ContextMenuButtonItem(onPressed: onLookUp, type: ContextMenuButtonType.lookUp),
+          ContextMenuButtonItem(onPressed: onLookUp, kind: ContextMenuButtonKind.lookUp),
         if (onSearchWeb != null)
-          ContextMenuButtonItem(onPressed: onSearchWeb, type: ContextMenuButtonType.searchWeb),
+          ContextMenuButtonItem(onPressed: onSearchWeb, kind: ContextMenuButtonKind.searchWeb),
         if (onShare != null && !showShareBeforeSelectAll)
-          ContextMenuButtonItem(onPressed: onShare, type: ContextMenuButtonType.share),
+          ContextMenuButtonItem(onPressed: onShare, kind: ContextMenuButtonKind.share),
       ]);
     }
 
@@ -2239,7 +2239,7 @@ class EditableText extends StatefulWidget {
       resultButtonItem.add(
         ContextMenuButtonItem(
           onPressed: onLiveTextInput,
-          type: ContextMenuButtonType.liveTextInput,
+          kind: ContextMenuButtonKind.liveTextInput,
         ),
       );
     }
@@ -3181,28 +3181,28 @@ class EditableTextState extends State<EditableText>
           onPressed: () {
             cutSelection(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.cut,
+          kind: ContextMenuButtonKind.cut,
         ),
       if (toolbarOptions.copy && copyEnabled)
         ContextMenuButtonItem(
           onPressed: () {
             copySelection(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.copy,
+          kind: ContextMenuButtonKind.copy,
         ),
       if (toolbarOptions.paste && pasteEnabled)
         ContextMenuButtonItem(
           onPressed: () async {
             await _pasteTextWithReporting(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.paste,
+          kind: ContextMenuButtonKind.paste,
         ),
       if (toolbarOptions.selectAll && selectAllEnabled)
         ContextMenuButtonItem(
           onPressed: () {
             selectAll(SelectionChangedCause.toolbar);
           },
-          type: ContextMenuButtonType.selectAll,
+          kind: ContextMenuButtonKind.selectAll,
         ),
     ];
   }
