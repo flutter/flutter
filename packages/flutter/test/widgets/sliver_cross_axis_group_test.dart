@@ -625,53 +625,80 @@ void main() {
     );
   });
 
-  testWidgets(
-    'Expanded slivers are laid out with zero extent when constrained slivers use it all up',
-    (WidgetTester tester) async {
-      final errors = <FlutterErrorDetails>[];
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
-
-      final items = List<int>.generate(20, (int i) => i);
-      await tester.pumpWidget(
-        _buildSliverCrossAxisGroup(
-          slivers: <Widget>[
-            SliverConstrainedCrossAxis(
-              maxExtent: 200,
-              sliver: _buildSliverList(
-                itemMainAxisExtent: 300,
-                items: items,
-                label: (int item) => Text('Group 0 Tile $item'),
-              ),
+  testWidgets('Flexible slivers get zero extent when constrained slivers use all space', (
+    WidgetTester tester,
+  ) async {
+    final items = List<int>.generate(20, (int i) => i);
+    await tester.pumpWidget(
+      _buildSliverCrossAxisGroup(
+        slivers: <Widget>[
+          SliverConstrainedCrossAxis(
+            maxExtent: 200,
+            sliver: _buildSliverList(
+              itemMainAxisExtent: 300,
+              items: items,
+              label: (int item) => Text('Group 0 Tile $item'),
             ),
-            SliverConstrainedCrossAxis(
-              maxExtent: 100,
-              sliver: _buildSliverList(
-                itemMainAxisExtent: 200,
-                items: items,
-                label: (int item) => Text('Group 1 Tile $item'),
-              ),
-            ),
-            _buildSliverList(
+          ),
+          SliverConstrainedCrossAxis(
+            maxExtent: 100,
+            sliver: _buildSliverList(
               itemMainAxisExtent: 200,
               items: items,
-              label: (int item) => Text('Group 2 Tile $item'),
+              label: (int item) => Text('Group 1 Tile $item'),
             ),
-          ],
-        ),
-      );
-      await tester.pumpAndSettle();
-      FlutterError.onError = oldHandler;
-      expect(errors, isEmpty);
+          ),
+          _buildSliverList(
+            itemMainAxisExtent: 200,
+            items: items,
+            label: (int item) => Text('Group 2 Tile $item'),
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      final List<RenderSliverList> renderSlivers = tester
-          .renderObjectList<RenderSliverList>(find.byType(SliverList))
-          .toList();
-      expect(renderSlivers[0].constraints.crossAxisExtent, equals(200));
-      expect(renderSlivers[1].constraints.crossAxisExtent, equals(100));
-      expect(renderSlivers[2].constraints.crossAxisExtent, equals(0));
-    },
-  );
+    final List<RenderSliverList> renderSlivers = tester
+        .renderObjectList<RenderSliverList>(find.byType(SliverList))
+        .toList();
+    expect(renderSlivers[0].constraints.crossAxisExtent, equals(200));
+    expect(renderSlivers[1].constraints.crossAxisExtent, equals(100));
+    expect(renderSlivers[2].constraints.crossAxisExtent, equals(0));
+  });
+
+  testWidgets('Flexible slivers around a constrained sliver that uses all space', (
+    WidgetTester tester,
+  ) async {
+    final items = List<int>.generate(20, (int i) => i);
+    await tester.pumpWidget(
+      _buildSliverCrossAxisGroup(
+        slivers: <Widget>[
+          const SliverToBoxAdapter(child: SizedBox(height: 400)),
+          SliverConstrainedCrossAxis(
+            maxExtent: VIEWPORT_WIDTH,
+            sliver: _buildSliverList(items: items, label: (int item) => Text('Tile $item')),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 400)),
+        ],
+      ),
+    );
+
+    final RenderSliverCrossAxisGroup group = tester.renderObject(find.byType(SliverCrossAxisGroup));
+    final children = <RenderSliver>[];
+    for (RenderSliver? c = group.firstChild; c != null; c = group.childAfter(c)) {
+      children.add(c);
+    }
+    expect(children.map((RenderSliver c) => c.constraints.crossAxisExtent), <double>[
+      0,
+      VIEWPORT_WIDTH,
+      0,
+    ]);
+    expect(
+      children.map((RenderSliver c) => (c.parentData! as SliverPhysicalParentData).paintOffset.dx),
+      <double>[0, 0, VIEWPORT_WIDTH],
+    );
+    expect(tester.getSize(find.text('Tile 0')).width, VIEWPORT_WIDTH);
+  });
 
   testWidgets('applyPaintTransform is implemented properly', (WidgetTester tester) async {
     await tester.pumpWidget(
