@@ -17,8 +17,8 @@ int __wrap_sem_init(sem_t* sem, int pshared, unsigned int value) {
     errno = EINVAL;
     return -1;
   }
-  auto* count = reinterpret_cast<volatile int*>(sem);
-  *count = static_cast<int>(value);
+  __c11_atomic_store(reinterpret_cast<_Atomic(int)*>(sem),
+                     static_cast<int>(value), __ATOMIC_RELAXED);
   return 0;
 }
 
@@ -74,7 +74,8 @@ int __wrap_sem_wait(sem_t* sem) {
     return -1;
   }
   auto* count = reinterpret_cast<int*>(sem);
-  const bool can_block = emscripten_wasm_worker_self_id() != 0;
+  static thread_local const bool can_block =
+      emscripten_wasm_worker_self_id() != 0;
   for (;;) {
     int cur = __c11_atomic_load(reinterpret_cast<_Atomic(int)*>(count),
                                 __ATOMIC_RELAXED);
