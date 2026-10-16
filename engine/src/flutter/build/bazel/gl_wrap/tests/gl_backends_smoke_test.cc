@@ -36,13 +36,12 @@ TEST(GlBackendsSmokeTest, AngleRendersWithSwiftShader) {
   ASSERT_NE(extensions, nullptr);
   ASSERT_TRUE(HasExtension(extensions, "EGL_ANGLE_platform_angle_vulkan"))
       << extensions;
-  ASSERT_TRUE(HasExtension(
-      extensions, "EGL_ANGLE_platform_angle_device_type_swiftshader"))
+  ASSERT_TRUE(HasExtension(extensions,
+                           "EGL_ANGLE_platform_angle_device_type_swiftshader"))
       << extensions;
 
-  auto get_platform_display =
-      reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
-          eglGetProcAddress("eglGetPlatformDisplayEXT"));
+  auto get_platform_display = reinterpret_cast<PFNEGLGETPLATFORMDISPLAYEXTPROC>(
+      eglGetProcAddress("eglGetPlatformDisplayEXT"));
   ASSERT_NE(get_platform_display, nullptr);
   const EGLint display_attributes[] = {
       EGL_PLATFORM_ANGLE_TYPE_ANGLE,
@@ -64,10 +63,18 @@ TEST(GlBackendsSmokeTest, AngleRendersWithSwiftShader) {
       << "eglInitialize failed: 0x" << std::hex << eglGetError();
 
   const EGLint config_attributes[] = {
-      EGL_SURFACE_TYPE,    EGL_PBUFFER_BIT, EGL_RENDERABLE_TYPE,
-      EGL_OPENGL_ES2_BIT,  EGL_RED_SIZE,    8,
-      EGL_GREEN_SIZE,      8,               EGL_BLUE_SIZE,
-      8,                   EGL_ALPHA_SIZE,  8,
+      EGL_SURFACE_TYPE,
+      EGL_PBUFFER_BIT,
+      EGL_RENDERABLE_TYPE,
+      EGL_OPENGL_ES2_BIT,
+      EGL_RED_SIZE,
+      8,
+      EGL_GREEN_SIZE,
+      8,
+      EGL_BLUE_SIZE,
+      8,
+      EGL_ALPHA_SIZE,
+      8,
       EGL_NONE,
   };
   EGLConfig config = nullptr;
@@ -75,8 +82,7 @@ TEST(GlBackendsSmokeTest, AngleRendersWithSwiftShader) {
   ASSERT_TRUE(
       eglChooseConfig(display, config_attributes, &config, 1, &config_count));
   ASSERT_EQ(config_count, 1);
-  const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
-                                       EGL_NONE};
+  const EGLint context_attributes[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
   EGLContext context =
       eglCreateContext(display, config, EGL_NO_CONTEXT, context_attributes);
   ASSERT_NE(context, EGL_NO_CONTEXT);
@@ -86,7 +92,8 @@ TEST(GlBackendsSmokeTest, AngleRendersWithSwiftShader) {
   ASSERT_NE(surface, EGL_NO_SURFACE);
   ASSERT_TRUE(eglMakeCurrent(display, surface, surface, context));
 
-  const auto* renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+  const auto* renderer =
+      reinterpret_cast<const char*>(glGetString(GL_RENDERER));
   ASSERT_NE(renderer, nullptr);
   EXPECT_NE(std::string(renderer).find("SwiftShader"), std::string::npos)
       << renderer;
