@@ -47,10 +47,9 @@ Future<Stream<String>> startWidgetPreview({
   Uri? dtdUri,
   bool useWebServer = false,
   Uri? devToolsServerAddress,
-  bool legacyPreviewDetection = false,
   ProcessManager processManager = _processManager, // Allow overriding for testing if needed
 }) async {
-  if (dtdUri != null && !legacyPreviewDetection) {
+  if (dtdUri != null) {
     final analysisServer = AnalysisServer(
       globals.artifacts!.getArtifactPath(Artifact.engineDartSdkPath),
       <String>[tempDir.path],
@@ -80,7 +79,6 @@ Future<Stream<String>> startWidgetPreview({
     if (dtdUri != null) '--${WidgetPreviewStartCommand.kDtdUrl}=$dtdUri',
     if (devToolsServerAddress != null)
       '--${FlutterCommand.kDevToolsServerAddress}=$devToolsServerAddress',
-    if (legacyPreviewDetection) '--legacy-preview-detection',
   ], workingDirectory: tempDir.path);
 
   addTearDown(() async {
@@ -137,7 +135,6 @@ Future<Stream<String>> runWidgetPreview({
   Uri? dtdUri,
   bool useWebServer = false,
   Uri? devToolsServerAddress,
-  bool legacyPreviewDetection = false,
   ProcessManager processManager = _processManager,
 }) async {
   expect(expectedMessages, isNotEmpty);
@@ -147,7 +144,6 @@ Future<Stream<String>> runWidgetPreview({
     dtdUri: dtdUri,
     useWebServer: useWebServer,
     devToolsServerAddress: devToolsServerAddress,
-    legacyPreviewDetection: legacyPreviewDetection,
     processManager: processManager,
   );
 
