@@ -1,0 +1,27 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:bazel_tools: the generators and checks that keep the Bazel workspace
+# in step with DEPS and the GN build. A Dart package with no GN build file;
+# its tests are run_tests.py's (--type dart-host).
+
+load("//engine/src/flutter/build/bazel/dart:package_test.bzl", "dart_package_test")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)
+
+# The tests parse the checkout's DEPS and check the generated files against
+# it.
+dart_package_test(
+    name = "tests",
+    data = [
+        "//:.bazelignore",
+        "//:DEPS",
+        "//engine/src/flutter/build/bazel:deps.lock.bzl",
+    ],
+)

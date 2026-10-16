@@ -353,6 +353,87 @@ and the launcher, once the run has passed, fails it with the offending
 lines if its merged output contains the string; in `fastbuild` and `dbg` the
 list is empty and the launcher `exec`s the tester as before.
 
+## The Dart packages' own tests (`--type dart-host`)
+
+`testing/run_tests.py --type dart-host` runs `dart test --reporter=expanded`
+in thirteen Dart packages of the tree (`build_dart_host_test_list`: `ci`,
+`flutter_frontend_server`, `testing/skia_gold_client`, `tools/api_check`,
+`tools/bazel_tools`, `tools/build_bucket_golden_scraper`, `tools/clang_tidy`,
+`tools/engine_tool`, `tools/githooks`, `tools/header_guard_check`,
+`tools/pkg/engine_build_configs`, `tools/pkg/engine_repo_tools`,
+`tools/pkg/git_repo_tools`), each from its own directory in the checkout,
+with the build directory's copy of the prebuilt Dart SDK and
+`FLUTTER_BUILD_DIRECTORY` set. They are pure Dart -- the engine's tools and
+their libraries -- and most of what they test is in the package; a few read
+the tree (the builder configurations, `.ci.yaml`, dart:ui's API, `DEPS`) and
+`flutter_frontend_server`'s compiles its fixture with the frontend server
+and the engine's platform kernel out of the build directory.
+
+`dart_package_test` (`build/bazel/dart/package_test.bzl`) runs the same
+suite from a runfiles tree shaped like the checkout. Declared in the
+package's own BUILD file, it stages the package's files at their paths under
+`engine/src/flutter` (`srcs`, every file of the directory but the
+`.dart_tool` caches), the engine's package configuration (the one `gclient
+sync` wrote, which names every package by a path relative to itself), the
+packages of the pub workspace that live in synced trees at the paths the
+configuration names them by (`package_trees`: `@dart//:host_package_sources`
+-- package:test and everything below it, the analyzer included -- and
+`@io`, `@node_preamble`, `@process`, `@process_runner`; the same staging as
+`dart_package_root`'s, through runfiles symlinks), the in-tree packages the
+tests import (`deps`: each package's `dart_sources` filegroup, which nests
+the `dart_sources` of the in-tree packages it imports, so a dependency's
+dependencies come along) and what the tests read (`data`). The working
+directory is the package's, so `Engine.findWithin()` -- the tools' way to
+the checkout, a walk up to a `src` directory holding `flutter` -- finds the
+runfiles' `engine/src` as it finds the checkout's.
+
+The launcher runs package:test's own entry point on the VM --
+`dart --packages=<the configuration> .../pkgs/test/bin/test.dart
+--reporter=expanded` -- which is what `dart test` delegates to once pub has
+checked the workspace's resolution. That check wants every `pubspec.yaml`
+of the workspace's hundred packages, the lock file, the members'
+`workspace_ref.json` files and the pub cache the configuration recorded, and
+re-resolves (rewriting `package_config.json`) when any of it disagrees; the
+runner reads only the configuration, so the tree stays what was declared
+and the run does not depend on pub's freshness heuristics. The outcome is
+the same runner over the same files: each package's `+N` count is
+`run_tests.py`'s (`engine_tool` 236, `engine_build_configs` 84,
+`bazel_tools` 36, `skia_gold_client` 33, `header_guard_check` 23, ...).
+
+`FLUTTER_BUILD_DIRECTORY` is a directory of the runfiles tree named as GN
+names a build directory for the mode (`host_debug_unopt` in `fastbuild`,
+`host_release` under `-c opt --runtime_mode=release`, ...), holding
+`build_directory`'s files -- for `flutter_frontend_server`,
+`gen/frontend_server_aot.dart.snapshot` from the prebuilt SDK and
+`flutter_patched_sdk/` from `lib/snapshot`, whose platform is a product
+build in the release modes, which the test's expected output follows by
+reading the directory's name -- and empty for every other package, since
+`run_tests.py` sets the variable for every run.
+
+What each package's tests read is declared beside it: `ci/builders/**/*.json`
+(`//engine/src/flutter/ci:builder_configs`) and `.ci.yaml` for
+`engine_build_configs` and `engine_tool`; `bin/et` and the checkout's
+`.gclient` for `engine_tool` (whose `et fetch` runs gclient from its
+directory); `DEPS`, `.bazelignore` and `deps.lock.bzl` for `bazel_tools`,
+which regenerates them and compares; dart:ui's sources, the web engine's,
+`embedder.h`, the headers behind dart:ui and the Java and Swift files that
+mirror its enums for `api_check`. The repository root has a `BUILD.bazel`
+for the three checkout-level files. One read escapes the tree: `bin/et`
+resolves its own location with `realpath`, which follows the runfiles
+symlink to the checkout, so `engine_tool`'s entry-point test runs the
+checkout's copy of the package on the checkout's prebuilt SDK.
+
+Eleven of the thirteen packages are here, under
+`//engine/src/flutter:dart_host_tests`. The two that are not run with
+`dart test` in the checkout, as before: `ci`, whose `format_test.dart`
+writes files into the checkout, adds them to the git index and runs
+`ci/format.sh` over the working tree (a test of the checkout and its git
+repository, which no runfiles tree holds and a sandboxed test must not
+touch), and `clang_tidy`, whose tests read a GN build directory's
+`compile_commands.json` and expect more than a thousand entries in it (a
+test of the tool against GN's compilation database, which a Bazel build
+does not write). Their BUILD files say so.
+
 ## Wrapped GN builds: the GPU test backends
 
 The host suites render through ANGLE (OpenGL ES on Vulkan) and SwiftShader

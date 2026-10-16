@@ -1,0 +1,19 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# package:engine_repo_tools: how the engine's Dart tools find the checkout
+# (Engine.findWithin). A Dart package with no GN build file; its tests are
+# run_tests.py's (--type dart-host).
+
+load("//engine/src/flutter/build/bazel/dart:package_test.bzl", "dart_package_test")
+
+package(default_visibility = ["//visibility:public"])
+
+# The library, for the packages and kernel compiles that import it.
+filegroup(
+    name = "dart_sources",
+    srcs = glob(["lib/**/*.dart"]),
+)
+
+dart_package_test(name = "tests")
