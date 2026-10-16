@@ -595,7 +595,11 @@ abstract class FocusTraversalPolicy with Diagnosticable {
       final FocusNode? firstFocus = forward
           ? findFirstFocus(currentNode)
           : findLastFocus(currentNode);
-      if (firstFocus != null) {
+      // If the scope has nothing that can be focused, findFirstFocus/findLastFocus
+      // falls back to the current node, which would leave the focus where it is.
+      // Fall through instead, so that the traversal continues in the enclosing
+      // scope according to the edge behavior of this scope.
+      if (firstFocus != null && nearestScope.traversalDescendants.isNotEmpty) {
         return _requestTabTraversalFocus(
           firstFocus,
           alignmentPolicy: forward
@@ -607,6 +611,29 @@ abstract class FocusTraversalPolicy with Diagnosticable {
     }
     focusedChild ??= nearestScope;
     final List<FocusNode> sortedNodes = _sortAllDescendants(nearestScope, focusedChild);
+    if (sortedNodes.isEmpty) {
+      // There is nothing to move the focus to in this scope, so the focus would
+      // be trapped here. This happens, for instance, when a nested Navigator
+      // shows a route that has no focusable widget in it: the route scope takes
+      // the focus, but the traversal can never leave it.
+      switch (nearestScope.traversalEdgeBehavior) {
+        case TraversalEdgeBehavior.parentScope:
+          final FocusScopeNode? parentScope = nearestScope.enclosingScope;
+          if (parentScope != null && parentScope != FocusManager.instance.rootScope) {
+            // The empty scope is deliberately not unfocused here, because the
+            // parent scope needs it as its focused child to know where the
+            // traversal left off.
+            return forward ? parentScope.nextFocus() : parentScope.previousFocus();
+          }
+          return false;
+        case TraversalEdgeBehavior.leaveFlutterView:
+          focusedChild.unfocus();
+          return false;
+        case TraversalEdgeBehavior.closedLoop:
+        case TraversalEdgeBehavior.stop:
+          return false;
+      }
+    }
     assert(sortedNodes.contains(focusedChild));
 
     if (forward && focusedChild == sortedNodes.last) {
