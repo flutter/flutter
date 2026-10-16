@@ -37,6 +37,7 @@ class ExtensionManager {
   bool get isInitialized => _isInitialized;
   var _isInitialized = false;
   var _entryPointsSpawned = false;
+  var _initializedConnectionCount = 0;
   Future<void>? _initFuture;
   final _diagnosticsExtensions = <DiagnosticsExtension>[];
   final _configurationExtensions = <ConfigurationExtension>[];
@@ -44,16 +45,12 @@ class ExtensionManager {
 
   /// Ensures entrypoints are initialized; idempotent once connections are active.
   ///
-  /// If a previous initialization completed with zero active connections (for
-  /// example, before `pub.get()` generated `.dart_tool/package_config.json`),
-  /// subsequent calls re-run initialization so newly resolved project extensions
-  /// are discovered.
+  /// If new connections have been registered in [_discovery] since the previous
+  /// initialization (for example, after `pub.get()` generated
+  /// `.dart_tool/package_config.json`), subsequent calls re-run initialization
+  /// so newly resolved project extensions are discovered.
   Future<void> ensureInitialized() {
-    if (_isInitialized &&
-        (_discovery.connections.isEmpty ||
-            (_diagnosticsExtensions.isEmpty &&
-                _configurationExtensions.isEmpty &&
-                _deviceExtensions.isEmpty))) {
+    if (_isInitialized && _discovery.connections.length != _initializedConnectionCount) {
       _isInitialized = false;
       _initFuture = null;
     }
@@ -129,6 +126,7 @@ class ExtensionManager {
         _deviceExtensions.add(client);
       }
     }
+    _initializedConnectionCount = _discovery.connections.length;
     _isInitialized = true;
   }
 
@@ -167,6 +165,7 @@ class ExtensionManager {
     _deviceExtensions.clear();
     _isInitialized = false;
     _entryPointsSpawned = false;
+    _initializedConnectionCount = 0;
     _initFuture = null;
     await _discovery.dispose();
   }

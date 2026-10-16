@@ -23,17 +23,17 @@ final class _FakeDeviceService extends DeviceService {
       false;
 
   @override
-  Future<bool> launchApp(
-    String deviceId,
-    String executablePath, {
-    Map<String, Object?>? debuggingOptions,
+  Future<bool> launchApp({
+    required String deviceId,
+    required String executablePath,
+    ExtensionDebuggingOptions? debuggingOptions,
   }) async => false;
 
   @override
-  Future<String?> getVmServiceUri(String deviceId) async => null;
+  Future<Uri?> getVmServiceUri({required String deviceId}) async => null;
 
   @override
-  Future<bool> stopApp(String deviceId) async => false;
+  Future<bool> stopApp({required String deviceId}) async => false;
 }
 
 void _dummyExtensionEntryPoint(SendPort sendPort) {
@@ -105,6 +105,28 @@ void main() {
 
         await manager.ensureInitialized();
         expect(manager.deviceExtensions, hasLength(1));
+
+        await manager.dispose();
+      },
+    );
+
+    test(
+      'ExtensionManager.ensureInitialized is idempotent when connections do not change',
+      () async {
+        final logger = BufferLogger.test();
+        final manager = ExtensionManager(
+          hostPlatform: HostPlatform.linux_x64,
+          logger: logger,
+          entryPoints: <ExtensionEntryPoint>[_dummyExtensionEntryPoint],
+          featureFlags: TestFeatureFlags(isToolExtensionsEnabled: true),
+        );
+
+        final Future<void> firstInit = manager.ensureInitialized();
+        await firstInit;
+        expect(manager.connections, hasLength(1));
+
+        final Future<void> secondInit = manager.ensureInitialized();
+        expect(identical(firstInit, secondInit), isTrue);
 
         await manager.dispose();
       },

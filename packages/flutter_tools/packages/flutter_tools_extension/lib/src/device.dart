@@ -61,17 +61,17 @@ abstract base class DeviceService extends ToolExtensionService {
   Future<bool> isSupportedForProject({required String deviceId, required Uri projectRoot});
 
   /// Launches the application at [executablePath] on the device with [deviceId].
-  Future<bool> launchApp(
-    String deviceId,
-    String executablePath, {
-    Map<String, Object?>? debuggingOptions,
+  Future<bool> launchApp({
+    required String deviceId,
+    required String executablePath,
+    ExtensionDebuggingOptions? debuggingOptions,
   });
 
   /// Returns the VM Service URI for a running application on [deviceId], if available.
-  Future<String?> getVmServiceUri(String deviceId);
+  Future<Uri?> getVmServiceUri({required String deviceId});
 
   /// Stops a running application on [deviceId].
-  Future<bool> stopApp(String deviceId);
+  Future<bool> stopApp({required String deviceId});
 
   @override
   Future<Map<String, ExtensionRpcHandler>> initialize() async {
@@ -103,29 +103,41 @@ abstract base class DeviceService extends ToolExtensionService {
       deviceIdParam: final String deviceId,
       executablePathParam: final String executablePath,
     }) {
-      final Map<String, Object?>? debuggingOptions = switch (params[debuggingOptionsParam]) {
-        final Map<String, Object?> options => options,
+      final ExtensionDebuggingOptions? debuggingOptions = switch (params[debuggingOptionsParam]) {
+        final Map<String, Object?> options => () {
+          try {
+            return ExtensionDebuggingOptions.fromJson(options);
+          } on FormatException catch (e) {
+            throw RpcException.invalidParams(
+              'Invalid "$debuggingOptionsParam" parameter for $launchAppMethod: ${e.message}',
+            );
+          }
+        }(),
         null => null,
         _ => throw RpcException.invalidParams(
           'Invalid "$debuggingOptionsParam" parameter for $launchAppMethod.',
         ),
       };
-      return launchApp(deviceId, executablePath, debuggingOptions: debuggingOptions);
+      return launchApp(
+        deviceId: deviceId,
+        executablePath: executablePath,
+        debuggingOptions: debuggingOptions,
+      );
     }
     throw RpcException.invalidParams('Invalid or missing parameters for $launchAppMethod.');
   }
 
   Future<Map<String, Object?>> _getVmServiceUriRpc(Map<String, Object?> params) async {
     if (params case {deviceIdParam: final String deviceId}) {
-      final String? uri = await getVmServiceUri(deviceId);
-      return <String, Object?>{vmServiceUriKey: uri};
+      final Uri? uri = await getVmServiceUri(deviceId: deviceId);
+      return <String, Object?>{vmServiceUriKey: uri?.toString()};
     }
     throw RpcException.invalidParams('Invalid or missing parameters for $getVmServiceUriMethod.');
   }
 
   Future<bool> _stopAppRpc(Map<String, Object?> params) async {
     if (params case {deviceIdParam: final String deviceId}) {
-      return stopApp(deviceId);
+      return stopApp(deviceId: deviceId);
     }
     throw RpcException.invalidParams('Invalid or missing parameters for $stopAppMethod.');
   }

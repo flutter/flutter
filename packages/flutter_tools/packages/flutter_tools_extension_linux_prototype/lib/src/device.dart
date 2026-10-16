@@ -16,9 +16,12 @@ final class LinuxDeviceService extends DeviceService {
   /// Identifier of the prototype Linux target device.
   static const String customLinuxDeviceId = 'custom_linux_device';
 
+  static const Duration _launchWaitTimeout = Duration(seconds: 5);
+  static const Duration _vmServiceDiscoveryTimeout = Duration(seconds: 10);
+
   final _runningProcesses = <String, Process>{};
-  final _vmServiceUriCompleters = <String, Completer<String?>>{};
-  final _discoveredUris = <String, String?>{};
+  final _vmServiceUriCompleters = <String, Completer<Uri?>>{};
+  final _discoveredUris = <String, Uri?>{};
 
   @override
   Future<List<TargetDevice>> getDevices() async {
@@ -44,10 +47,10 @@ final class LinuxDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> launchApp(
-    String deviceId,
-    String executablePath, {
-    Map<String, Object?>? debuggingOptions,
+  Future<bool> launchApp({
+    required String deviceId,
+    required String executablePath,
+    ExtensionDebuggingOptions? debuggingOptions,
   }) async {
     if (deviceId != customLinuxDeviceId) {
       return false;
@@ -59,9 +62,9 @@ final class LinuxDeviceService extends DeviceService {
     }
 
     // Stop any existing process for this device.
-    await stopApp(deviceId);
+    await stopApp(deviceId: deviceId);
 
-    final uriCompleter = Completer<String?>();
+    final uriCompleter = Completer<Uri?>();
     _vmServiceUriCompleters[deviceId] = uriCompleter;
     _discoveredUris[deviceId] = null;
 
@@ -77,20 +80,23 @@ final class LinuxDeviceService extends DeviceService {
         r'The Dart VM service is listening on (http://127\.0\.0\.1:\d+/[a-zA-Z0-9_-]+/?)',
       );
 
-      void parseLine(String line) {
-        stdout.writeln('[App] $line');
+      void checkVmServiceUri(String line) {
         final Match? match = vmServiceRegExp.firstMatch(line);
         if (match != null && !uriCompleter.isCompleted) {
-          final String? uri = match.group(1);
+          final String? uriStr = match.group(1);
+          final Uri? uri = uriStr != null ? Uri.tryParse(uriStr) : null;
           _discoveredUris[deviceId] = uri;
           uriCompleter.complete(uri);
         }
       }
 
-      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(parseLine);
+      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
+        stdout.writeln('[App] $line');
+        checkVmServiceUri(line);
+      });
       process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
         stderr.writeln('[App Error] $line');
-        parseLine(line);
+        checkVmServiceUri(line);
       });
 
       unawaited(
@@ -103,10 +109,7 @@ final class LinuxDeviceService extends DeviceService {
       );
 
       // Wait briefly to see if the process crashes immediately or outputs the URI.
-      await Future.any<Object?>(<Future<Object?>>[
-        uriCompleter.future,
-        Future<void>.delayed(const Duration(seconds: 5)),
-      ]);
+      await uriCompleter.future.timeout(_launchWaitTimeout, onTimeout: () => null);
 
       return _runningProcesses.containsKey(deviceId);
     } on ProcessException catch (e) {
@@ -119,14 +122,14 @@ final class LinuxDeviceService extends DeviceService {
   }
 
   @override
-  Future<String?> getVmServiceUri(String deviceId) async {
+  Future<Uri?> getVmServiceUri({required String deviceId}) async {
     if (_discoveredUris[deviceId] != null) {
       return _discoveredUris[deviceId];
     }
-    final Completer<String?>? completer = _vmServiceUriCompleters[deviceId];
+    final Completer<Uri?>? completer = _vmServiceUriCompleters[deviceId];
     if (completer != null) {
       return completer.future.timeout(
-        const Duration(seconds: 10),
+        _vmServiceDiscoveryTimeout,
         onTimeout: () => _discoveredUris[deviceId],
       );
     }
@@ -134,7 +137,7 @@ final class LinuxDeviceService extends DeviceService {
   }
 
   @override
-  Future<bool> stopApp(String deviceId) async {
+  Future<bool> stopApp({required String deviceId}) async {
     final Process? process = _runningProcesses.remove(deviceId);
     _vmServiceUriCompleters.remove(deviceId);
     _discoveredUris.remove(deviceId);
@@ -149,7 +152,7 @@ final class LinuxDeviceService extends DeviceService {
   @override
   Future<void> shutdown() async {
     for (final String deviceId in _runningProcesses.keys.toList()) {
-      await stopApp(deviceId);
+      await stopApp(deviceId: deviceId);
     }
   }
 }

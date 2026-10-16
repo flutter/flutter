@@ -4,6 +4,8 @@
 
 import 'package:meta/meta.dart';
 
+import 'build.dart';
+
 /// A description of the kind of workflow the device supports.
 enum Category {
   /// Web browser target workflow.
@@ -58,7 +60,10 @@ class TargetDevice {
       category: Category.fromString(json[categoryKey] as String? ?? '') ?? Category.desktop,
       id: json[idKey] as String? ?? '',
       name: json[nameKey] as String? ?? '',
-      buildTarget: json[buildTargetKey] as String?,
+      buildTarget: switch (json[buildTargetKey]) {
+        final String value => value,
+        _ => null,
+      },
       ephemeral: json[ephemeralKey] as bool? ?? true,
       isSupported: json[isSupportedKey] as bool? ?? true,
       sdkNameAndVersion: json[sdkNameAndVersionKey] as String?,
@@ -177,4 +182,72 @@ class TargetDevice {
     sdkNameAndVersion,
     targetPlatform,
   );
+}
+
+/// Debugging and build mode options passed when launching an application on a
+/// tool extension target device.
+@immutable
+class ExtensionDebuggingOptions {
+  const ExtensionDebuggingOptions({required this.buildMode, this.debuggingEnabled = false});
+
+  /// Deserializes [ExtensionDebuggingOptions] from a JSON-serializable map.
+  ///
+  /// Throws a [FormatException] if required fields are missing or invalid.
+  factory ExtensionDebuggingOptions.fromJson(Map<String, Object?> json) {
+    final BuildMode buildMode = switch (json[buildModeKey]) {
+      final String modeName => () {
+        try {
+          return BuildMode.fromCliName(modeName);
+        } on ArgumentError catch (e) {
+          throw FormatException('Invalid "$buildModeKey": ${e.message}', json);
+        }
+      }(),
+      _ => throw FormatException(
+        'Missing or invalid "$buildModeKey" in ExtensionDebuggingOptions.',
+        json,
+      ),
+    };
+    final bool debuggingEnabled = switch (json[debuggingEnabledKey]) {
+      final bool enabled => enabled,
+      null => false,
+      _ => throw FormatException(
+        'Invalid "$debuggingEnabledKey" in ExtensionDebuggingOptions.',
+        json,
+      ),
+    };
+    return ExtensionDebuggingOptions(buildMode: buildMode, debuggingEnabled: debuggingEnabled);
+  }
+
+  /// Map key for [buildMode].
+  static const String buildModeKey = 'buildMode';
+
+  /// Map key for [debuggingEnabled].
+  static const String debuggingEnabledKey = 'debuggingEnabled';
+
+  /// The compilation mode for the application launch.
+  final BuildMode buildMode;
+
+  /// Whether debugging and VM Service discovery are enabled for this launch.
+  final bool debuggingEnabled;
+
+  /// Serializes the debugging options to a JSON-serializable map.
+  Map<String, Object?> toMap() => <String, Object?>{
+    buildModeKey: buildMode.cliName,
+    debuggingEnabledKey: debuggingEnabled,
+  };
+
+  @override
+  String toString() =>
+      'ExtensionDebuggingOptions(buildMode: $buildMode, debuggingEnabled: $debuggingEnabled)';
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other is ExtensionDebuggingOptions &&
+            other.buildMode == buildMode &&
+            other.debuggingEnabled == debuggingEnabled);
+  }
+
+  @override
+  int get hashCode => Object.hash(buildMode, debuggingEnabled);
 }

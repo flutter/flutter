@@ -620,7 +620,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         final String data = await device.vmService!.flutterDebugDumpApp(
           isolateId: view.uiIsolate!.id!,
@@ -637,7 +640,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         final String data = await device.vmService!.flutterDebugDumpRenderTree(
           isolateId: view.uiIsolate!.id!,
@@ -654,7 +660,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         final String data = await device.vmService!.flutterDebugDumpLayerTree(
           isolateId: view.uiIsolate!.id!,
@@ -670,7 +679,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         final String data = await device.vmService!.flutterDebugDumpFocusTree(
           isolateId: view.uiIsolate!.id!,
@@ -689,7 +701,10 @@ abstract class ResidentHandlers {
       return false;
     }
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         final String data = await device.vmService!.flutterDebugDumpSemanticsTreeInTraversalOrder(
           isolateId: view.uiIsolate!.id!,
@@ -853,7 +868,10 @@ abstract class ResidentHandlers {
     if (!supportsServiceProtocol || !isRunningDebug) {
       return false;
     }
-    final FlutterVmService? vmService = flutterDevices.firstOrNull?.vmService;
+    final FlutterDevice? firstDeviceWithService = flutterDevices
+        .where((FlutterDevice? d) => d?.vmService != null)
+        .firstOrNull;
+    final FlutterVmService? vmService = firstDeviceWithService?.vmService;
     if (vmService == null) {
       logger.printStatus('Platform toggle is not supported for this device.', emphasis: true);
       return false;
@@ -864,7 +882,10 @@ abstract class ResidentHandlers {
     );
     final String to = nextPlatform(from);
     for (final FlutterDevice? device in flutterDevices) {
-      final List<FlutterView> views = await device!.vmService!.getFlutterViews();
+      if (device!.vmService == null) {
+        continue;
+      }
+      final List<FlutterView> views = await device.vmService!.getFlutterViews();
       for (final view in views) {
         await device.vmService!.flutterPlatformOverride(
           platform: to,
@@ -1224,10 +1245,17 @@ abstract class ResidentRunner extends ResidentHandlers {
   void writeVmServiceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
-        final address = flutterDevices.first.vmService!.wsAddress.toString();
+        final FlutterVmService? vmService = flutterDevices
+            .map((FlutterDevice d) => d.vmService)
+            .whereType<FlutterVmService>()
+            .firstOrNull;
+        final Uri? wsAddress = vmService?.wsAddress;
+        if (wsAddress == null) {
+          return;
+        }
         final File vmserviceOutFile = fileSystem.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
-        vmserviceOutFile.writeAsStringSync(address);
+        vmserviceOutFile.writeAsStringSync(wsAddress.toString());
       } on FileSystemException {
         logger.printError(
           'Failed to write vmservice-out-file at ${debuggingOptions.vmserviceOutFile}',

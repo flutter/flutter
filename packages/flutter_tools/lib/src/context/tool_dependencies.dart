@@ -643,6 +643,7 @@ class ToolDependencies {
           windowsWorkflow: finalWindowsWorkflow,
           customDevicesConfig: finalCustomDevicesConfig,
           nativeAssetsBuilder: finalNativeAssetsBuilder,
+          extensionBuildManager: extensionBuildManager,
           extensionManager: extensionManager,
         );
 

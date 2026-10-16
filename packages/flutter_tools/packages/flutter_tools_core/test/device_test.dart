@@ -93,5 +93,56 @@ void main() {
       expect(device1, isNot(equals(device2)));
       expect(device1.hashCode, isNot(equals(device2.hashCode)));
     });
+
+    test('fromJson ignores non-string buildTarget', () {
+      final device = TargetDevice.fromJson(const <String, Object?>{
+        'id': 'device_1',
+        'name': 'Device 1',
+        'category': 'desktop',
+        'buildTarget': 123,
+      });
+      expect(device.buildTarget, isNull);
+    });
+  });
+
+  group('ExtensionDebuggingOptions', () {
+    test('serializes and deserializes correctly', () {
+      const options = ExtensionDebuggingOptions(buildMode: .debug, debuggingEnabled: true);
+      final Map<String, Object?> map = options.toMap();
+      expect(map['buildMode'], 'debug');
+      expect(map['debuggingEnabled'], isTrue);
+
+      final parsed = ExtensionDebuggingOptions.fromJson(map);
+      expect(parsed, equals(options));
+      expect(parsed.hashCode, equals(options.hashCode));
+      expect(parsed.toString(), contains('buildMode: debug'));
+      expect(parsed.toString(), contains('debuggingEnabled: true'));
+    });
+
+    test('defaults debuggingEnabled to false and validates fields', () {
+      final parsed = ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+        'buildMode': 'release',
+      });
+      expect(parsed.buildMode, BuildMode.release);
+      expect(parsed.debuggingEnabled, isFalse);
+
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{}),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'invalid_mode',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+      expect(
+        () => ExtensionDebuggingOptions.fromJson(const <String, Object?>{
+          'buildMode': 'debug',
+          'debuggingEnabled': 'not_a_bool',
+        }),
+        throwsA(isA<FormatException>()),
+      );
+    });
   });
 }

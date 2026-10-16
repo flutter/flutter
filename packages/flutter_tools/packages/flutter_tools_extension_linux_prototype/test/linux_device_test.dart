@@ -75,7 +75,29 @@ void main() {
           isA<Object>().having(
             (Object e) => e.toString(),
             'toString',
-            contains('Invalid or missing parameters for ${DeviceService.launchAppMethod}.'),
+            allOf(
+              contains('-32602'),
+              contains('Invalid or missing parameters for ${DeviceService.launchAppMethod}.'),
+            ),
+          ),
+        ),
+      );
+      await expectLater(
+        launchAppHandler(<String, Object?>{
+          DeviceService.deviceIdParam: LinuxDeviceService.customLinuxDeviceId,
+          DeviceService.executablePathParam: '/nonexistent/app',
+          DeviceService.debuggingOptionsParam: <String, Object?>{'buildMode': 'invalid_mode'},
+        }),
+        throwsA(
+          isA<Object>().having(
+            (Object e) => e.toString(),
+            'toString',
+            allOf(
+              contains('-32602'),
+              contains(
+                'Invalid "${DeviceService.debuggingOptionsParam}" parameter for ${DeviceService.launchAppMethod}',
+              ),
+            ),
           ),
         ),
       );
@@ -93,7 +115,10 @@ void main() {
           isA<Object>().having(
             (Object e) => e.toString(),
             'toString',
-            contains('Invalid or missing parameters for ${DeviceService.getVmServiceUriMethod}.'),
+            allOf(
+              contains('-32602'),
+              contains('Invalid or missing parameters for ${DeviceService.getVmServiceUriMethod}.'),
+            ),
           ),
         ),
       );
@@ -111,10 +136,59 @@ void main() {
           isA<Object>().having(
             (Object e) => e.toString(),
             'toString',
-            contains('Invalid or missing parameters for ${DeviceService.stopAppMethod}.'),
+            allOf(
+              contains('-32602'),
+              contains('Invalid or missing parameters for ${DeviceService.stopAppMethod}.'),
+            ),
           ),
         ),
       );
     });
+
+    test(
+      'launchApp, getVmServiceUri, and stopApp manage process lifecycle and parse VM Service URI',
+      () async {
+        if (!Platform.isLinux && !Platform.isMacOS) {
+          return;
+        }
+        final Directory tempDir = Directory.systemTemp.createTempSync('linux_device_launch_test.');
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+
+        final scriptFile = File('${tempDir.path}/fake_app.sh');
+        scriptFile.writeAsStringSync('''
+#!/bin/sh
+echo "The Dart VM service is listening on http://127.0.0.1:45678/abc123def456/"
+sleep 30
+''');
+        await Process.run('chmod', <String>['+x', scriptFile.path]);
+
+        final service = LinuxDeviceService();
+        addTearDown(service.shutdown);
+
+        final bool launched = await service.launchApp(
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+          executablePath: scriptFile.path,
+          debuggingOptions: const ExtensionDebuggingOptions(
+            buildMode: .debug,
+            debuggingEnabled: true,
+          ),
+        );
+        expect(launched, isTrue);
+
+        final Uri? vmServiceUri = await service.getVmServiceUri(
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+        );
+        expect(vmServiceUri, Uri.parse('http://127.0.0.1:45678/abc123def456/'));
+
+        final bool stopped = await service.stopApp(
+          deviceId: LinuxDeviceService.customLinuxDeviceId,
+        );
+        expect(stopped, isTrue);
+        expect(
+          await service.getVmServiceUri(deviceId: LinuxDeviceService.customLinuxDeviceId),
+          isNull,
+        );
+      },
+    );
   });
 }

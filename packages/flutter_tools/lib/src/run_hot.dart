@@ -1386,6 +1386,10 @@ Future<ReassembleResult> _defaultReassembleHelper(
       return ReassembleResult(reassembleViews, failedReassemble, shouldReportReloadTime);
     }
   }
+  if (reassembleViews.isEmpty) {
+    logger.printTrace('Skipping reassemble because no views are available.');
+    return ReassembleResult(reassembleViews, failedReassemble, shouldReportReloadTime);
+  }
   assert(reassembleViews.isNotEmpty);
 
   logger.printTrace('Reassembling application');
