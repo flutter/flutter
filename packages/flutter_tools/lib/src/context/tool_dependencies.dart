@@ -393,44 +393,6 @@ class ToolDependencies {
 
     final finalNativeAssetsBuilder = nativeAssetsBuilder;
 
-    // 11. AppleContext Dependencies
-    final XcodeProjectInterpreter finalXcodeProjectInterpreter =
-        xcodeProjectInterpreter ??
-        XcodeProjectInterpreter(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          analytics: finalAnalytics,
-        );
-
-    final Xcode finalXcode =
-        xcode ??
-        Xcode(
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          fileSystem: finalFS,
-          flutterRoot: finalCache.flutterRoot,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          userMessages: finalUserMessages,
-        );
-
-    final CocoaPods finalCocoaPods =
-        cocoaPods ??
-        CocoaPods(
-          fileSystem: finalFS,
-          processManager: finalProcessManager,
-          logger: finalLogger,
-          platform: finalPlatform,
-          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
-          analytics: finalAnalytics,
-          cache: finalCache,
-        );
-
-    final CocoaPodsValidator finalCocoapodsValidator =
-        cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
-
     // Artifacts will be updated later if a local engine is used.
     final Artifacts finalArtifacts = switch (artifacts) {
       final DeferredArtifacts deferredArtifacts => deferredArtifacts,
@@ -444,6 +406,61 @@ class ToolDependencies {
         ),
       ),
     };
+
+    final finalToolContext = ToolContext(
+      artifacts: finalArtifacts,
+      botDetector: finalBotDetector,
+      cache: finalCache,
+      config: finalConfig,
+      customDevicesConfig: finalCustomDevicesConfig,
+      flutterVersion: finalFlutterVersion,
+      fs: finalFS,
+      git: finalGit,
+      localEngineLocator: finalLocalEngineLocator,
+      logger: finalLogger,
+      nativeAssetsBuilder: finalNativeAssetsBuilder,
+      os: finalOS,
+      outputPreferences: finalOutputPreferences,
+      persistentToolState: finalPersistentToolState,
+      platform: finalPlatform,
+      preRunValidator: finalPreRunValidator,
+      processInfo: finalProcessInfo,
+      processManager: finalProcessManager,
+      processUtils: finalProcessUtils,
+      projectFactory: finalProjectFactory,
+      shutdownHooks: finalShutdownHooks,
+      signals: LocalSignals.instance,
+      stdio: finalStdio,
+      systemClock: finalSystemClock,
+      terminal: finalTerminal,
+      userMessages: finalUserMessages,
+    );
+
+    // 11. AppleContext Dependencies
+    final XcodeProjectInterpreter finalXcodeProjectInterpreter =
+        xcodeProjectInterpreter ??
+        XcodeProjectInterpreter(
+          platform: finalPlatform,
+          processManager: finalProcessManager,
+          logger: finalLogger,
+          fileSystem: finalFS,
+          analytics: finalAnalytics,
+        );
+
+    final Xcode finalXcode =
+        xcode ??
+        Xcode(toolContext: finalToolContext, xcodeProjectInterpreter: finalXcodeProjectInterpreter);
+
+    final CocoaPods finalCocoaPods =
+        cocoaPods ??
+        CocoaPods(
+          analytics: finalAnalytics,
+          toolContext: finalToolContext,
+          xcodeProjectInterpreter: finalXcodeProjectInterpreter,
+        );
+
+    final CocoaPodsValidator finalCocoapodsValidator =
+        cocoapodsValidator ?? CocoaPodsValidator(finalCocoaPods, finalUserMessages);
 
     final XCDevice finalXCDevice =
         xcdevice ??
@@ -500,35 +517,6 @@ class ToolDependencies {
     final PlistParser finalPlistParser =
         plistParser ??
         PlistParser(fileSystem: finalFS, processManager: finalProcessManager, logger: finalLogger);
-
-    final finalToolContext = ToolContext(
-      artifacts: finalArtifacts,
-      botDetector: finalBotDetector,
-      cache: finalCache,
-      config: finalConfig,
-      customDevicesConfig: finalCustomDevicesConfig,
-      flutterVersion: finalFlutterVersion,
-      fs: finalFS,
-      git: finalGit,
-      localEngineLocator: finalLocalEngineLocator,
-      logger: finalLogger,
-      nativeAssetsBuilder: finalNativeAssetsBuilder,
-      os: finalOS,
-      outputPreferences: finalOutputPreferences,
-      persistentToolState: finalPersistentToolState,
-      platform: finalPlatform,
-      preRunValidator: finalPreRunValidator,
-      processInfo: finalProcessInfo,
-      processManager: finalProcessManager,
-      processUtils: finalProcessUtils,
-      projectFactory: finalProjectFactory,
-      shutdownHooks: finalShutdownHooks,
-      signals: LocalSignals.instance,
-      stdio: finalStdio,
-      systemClock: finalSystemClock,
-      terminal: finalTerminal,
-      userMessages: finalUserMessages,
-    );
 
     // 12. AndroidContext Dependencies
     final AndroidSdk? Function() finalAndroidSdkBuilder =
@@ -630,25 +618,16 @@ class ToolDependencies {
     final DeviceManager finalDeviceManager =
         deviceManager ??
         FlutterDeviceManager(
-          logger: finalLogger,
-          platform: finalPlatform,
-          processManager: finalProcessManager,
-          fileSystem: finalFS,
           androidSdkBuilder: () => finalAndroidContext.androidSdk,
+          androidWorkflow: finalAndroidWorkflow,
+          extensionManager: extensionManager,
           featureFlags: finalFeatureFlags,
           iosSimulatorUtils: finalIOSSimulatorUtils,
-          xcDevice: finalXCDevice,
-          androidWorkflow: finalAndroidWorkflow,
           iosWorkflow: finalIOSWorkflow,
-          flutterVersion: finalFlutterVersion,
-          artifacts: finalArtifacts,
           macOSWorkflow: finalMacOSWorkflow,
-          userMessages: finalUserMessages,
-          operatingSystemUtils: finalOS,
+          toolContext: finalToolContext,
           windowsWorkflow: finalWindowsWorkflow,
-          customDevicesConfig: finalCustomDevicesConfig,
-          nativeAssetsBuilder: finalNativeAssetsBuilder,
-          extensionManager: extensionManager,
+          xcDevice: finalXCDevice,
         );
 
     return ToolDependencies(

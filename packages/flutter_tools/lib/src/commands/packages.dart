@@ -11,11 +11,9 @@ import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
-import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/config.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -606,22 +604,5 @@ class PackagesGetCommand extends FlutterCommand {
 }
 
 Pub _createPub(ToolContext toolContext) {
-  final ToolContext(
-    :BotDetector botDetector,
-    :Cache cache,
-    :FileSystem fs,
-    :Logger logger,
-    :Platform platform,
-    :ProcessManager processManager,
-    :Stdio stdio,
-  ) = toolContext;
-  return Pub(
-    botDetector: botDetector,
-    cache: cache,
-    fileSystem: fs,
-    logger: logger,
-    platform: platform,
-    processManager: processManager,
-    stdio: stdio,
-  );
+  return Pub(stdio: toolContext.stdio, toolContext: toolContext);
 }

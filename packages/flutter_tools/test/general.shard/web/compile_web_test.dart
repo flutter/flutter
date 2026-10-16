@@ -72,18 +72,20 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
-        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
-        cache: FakeCache(fileSystem: fileSystem),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        terminal: FakeTerminal(),
+        toolContext: FakeToolContext(
+          artifacts: FakeArtifacts(fileSystem: fileSystem),
+          cache: FakeCache(fileSystem: fileSystem),
+          config: FakeConfig(),
+          flutterVersion: flutterVersion,
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+          terminal: FakeTerminal(),
+        ),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -145,18 +147,20 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
-        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
-        cache: FakeCache(fileSystem: fileSystem),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        terminal: FakeTerminal(),
+        toolContext: FakeToolContext(
+          artifacts: FakeArtifacts(fileSystem: fileSystem),
+          cache: FakeCache(fileSystem: fileSystem),
+          config: FakeConfig(),
+          flutterVersion: flutterVersion,
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+          terminal: FakeTerminal(),
+        ),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -196,18 +200,20 @@ environement:
       });
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
-        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
-        cache: FakeCache(fileSystem: fileSystem),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        terminal: FakeTerminal(),
+        toolContext: FakeToolContext(
+          artifacts: FakeArtifacts(fileSystem: fileSystem),
+          cache: FakeCache(fileSystem: fileSystem),
+          config: FakeConfig(),
+          flutterVersion: flutterVersion,
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+          terminal: FakeTerminal(),
+        ),
       );
       await webBuilder.buildWeb(
         flutterProject,
@@ -244,18 +250,20 @@ environement:
       );
 
       final webBuilder = WebBuilder(
-        logger: logger,
-        processManager: FakeProcessManager.any(),
-        buildSystem: buildSystem,
-        flutterVersion: flutterVersion,
-        fileSystem: fileSystem,
         analytics: fakeAnalytics,
-        artifacts: FakeArtifacts(fileSystem: fileSystem),
+        buildSystem: buildSystem,
         buildTargets: const BuildTargetsImpl(),
-        cache: FakeCache(fileSystem: fileSystem),
-        config: FakeConfig(),
-        platform: FakePlatform(),
-        terminal: FakeTerminal(),
+        toolContext: FakeToolContext(
+          artifacts: FakeArtifacts(fileSystem: fileSystem),
+          cache: FakeCache(fileSystem: fileSystem),
+          config: FakeConfig(),
+          flutterVersion: flutterVersion,
+          fs: fileSystem,
+          logger: logger,
+          platform: FakePlatform(),
+          processManager: FakeProcessManager.any(),
+          terminal: FakeTerminal(),
+        ),
       );
       await expectLater(
         () async => webBuilder.buildWeb(

@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 
@@ -20,7 +19,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
@@ -165,28 +163,22 @@ const kMaxRetryTime = Duration(seconds: 10);
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
-    required this._analytics,
+    required Analytics analytics,
     required AndroidStudio? androidStudio,
-    required this._artifacts,
-    required this._cache,
-    required FileSystem fileSystem,
     required GradleUtils gradleUtils,
     required Java? java,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    required this._toolContext,
+    required ToolContext toolContext,
     AndroidSdk? androidSdk,
-  }) : _androidContext = AndroidContext(
-         androidSdkBuilder: () => androidSdk,
-         androidStudioBuilder: () => androidStudio,
-         gradleUtilsBuilder: () => gradleUtils,
-         javaBuilder: () => java,
-       ),
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  }) : this.fromContexts(
+         analytics: analytics,
+         androidContext: AndroidContext(
+           androidSdkBuilder: () => androidSdk,
+           androidStudioBuilder: () => androidStudio,
+           gradleUtilsBuilder: () => gradleUtils,
+           javaBuilder: () => java,
+         ),
+         toolContext: toolContext,
+       );
 
   AndroidGradleBuilder.fromContexts({
     required this._analytics,

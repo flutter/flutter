@@ -13,18 +13,11 @@ class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(
     super.argResults,
     List<Directory> repoPackages, {
-    required super.artifacts,
-    required super.cache,
-    required super.fileSystem,
-    required super.logger,
-    required super.platform,
-    required super.processManager,
-    required this.shutdownHooks,
     required super.suppressAnalytics,
-    required super.terminal,
+    required super.toolContext,
   }) : super(repoPackages: repoPackages);
 
-  final ShutdownHooks shutdownHooks;
+  ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
 
   String? analysisTarget;
   bool firstAnalysis = true;

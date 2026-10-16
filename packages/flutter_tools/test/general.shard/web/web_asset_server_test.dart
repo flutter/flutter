@@ -24,6 +24,7 @@ import 'package:shelf/shelf.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/fakes.dart';
 
 const kTransparentImage = <int>[
   0x89,
@@ -364,15 +365,17 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: true,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
@@ -394,15 +397,17 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
           testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
         );
 
         expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], isNull);
@@ -423,15 +428,17 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: true,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.skwasm,
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], ['same-origin']);
@@ -453,15 +460,17 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
           testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
         );
 
         expect(server.defaultResponseHeaders['Cross-Origin-Opener-Policy'], isNull);
@@ -482,15 +491,17 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost', baseHref: '/preview/'),
+        webDevServerConfig: const WebDevServerConfig(baseHref: '/preview/'),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       expect(server.basePath, 'preview');
@@ -509,15 +520,17 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       expect(server.basePath, isEmpty);
@@ -536,15 +549,17 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       var serverReady = false;
@@ -567,15 +582,17 @@ void main() {
         Uri.base,
         null,
         crossOriginIsolation: false,
-        webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+        webDevServerConfig: const WebDevServerConfig(),
         webRenderer: WebRendererMode.canvaskit,
         isWasm: false,
         useLocalCanvasKit: false,
         testMode: true,
-        fileSystem: fileSystem,
-        logger: BufferLogger.test(),
-        platform: platform,
-        cache: Cache.test(processManager: FakeProcessManager.any()),
+        toolContext: FakeToolContext(
+          cache: Cache.test(processManager: FakeProcessManager.any()),
+          fs: fileSystem,
+          logger: BufferLogger.test(),
+          platform: platform,
+        ),
       );
 
       var server2Ready = false;
@@ -606,14 +623,16 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: true,
           useLocalCanvasKit: false,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
         );
 
         final client = HttpClient();
@@ -661,15 +680,17 @@ void main() {
           Uri.base,
           null,
           crossOriginIsolation: false,
-          webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+          webDevServerConfig: const WebDevServerConfig(),
           webRenderer: WebRendererMode.canvaskit,
           isWasm: false,
           useLocalCanvasKit: false,
           testMode: true,
-          fileSystem: fileSystem,
-          logger: BufferLogger.test(),
-          platform: platform,
-          cache: Cache.test(processManager: FakeProcessManager.any()),
+          toolContext: FakeToolContext(
+            cache: Cache.test(processManager: FakeProcessManager.any()),
+            fs: fileSystem,
+            logger: BufferLogger.test(),
+            platform: platform,
+          ),
         );
 
         // Project source file exists in assets/ directory.
@@ -741,15 +762,17 @@ void main() {
             Uri.base,
             null,
             crossOriginIsolation: false,
-            webDevServerConfig: const WebDevServerConfig(host: 'localhost'),
+            webDevServerConfig: const WebDevServerConfig(),
             webRenderer: WebRendererMode.canvaskit,
             isWasm: false,
             useLocalCanvasKit: false,
             testMode: true,
-            fileSystem: windowsFileSystem,
-            logger: BufferLogger.test(),
-            platform: windowsPlatform,
-            cache: Cache.test(processManager: FakeProcessManager.any()),
+            toolContext: FakeToolContext(
+              cache: Cache.test(processManager: FakeProcessManager.any()),
+              fs: windowsFileSystem,
+              logger: BufferLogger.test(),
+              platform: windowsPlatform,
+            ),
           );
 
           // Project source file exists in assets/ directory.
@@ -922,7 +945,6 @@ void main() {
               null,
               crossOriginIsolation: false,
               webDevServerConfig: WebDevServerConfig(
-                host: 'localhost',
                 proxy: <ProxyRule>[
                   PrefixProxyRule(
                     prefix: '/get',
@@ -933,10 +955,12 @@ void main() {
               webRenderer: webRenderer,
               isWasm: isWasm,
               useLocalCanvasKit: false,
-              fileSystem: fileSystem,
-              logger: logger,
-              platform: platform,
-              cache: Cache.test(processManager: FakeProcessManager.any()),
+              toolContext: FakeToolContext(
+                cache: Cache.test(processManager: FakeProcessManager.any()),
+                fs: fileSystem,
+                logger: logger,
+                platform: platform,
+              ),
             );
             server.markReady();
 

@@ -740,12 +740,7 @@ void main() {
             },
           ),
         );
-        await precacheArtifacts(
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          platform: fakePlatform,
-          processUtils: globals.processUtils,
-        );
+        await precacheArtifacts(toolContext: DelegatingToolContext(platform: fakePlatform));
         expect(processManager, hasNoRemainingExpectations);
       },
       overrides: <Type, Generator>{

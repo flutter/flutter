@@ -399,10 +399,12 @@ void main() {
     () async {
       final logger = BufferLogger.test();
       final device = FakeMacOSDevice(
-        fileSystem: MemoryFileSystem.test(),
-        processManager: FakeProcessManager.any(),
-        operatingSystemUtils: FakeOperatingSystemUtils(),
-        logger: logger,
+        toolContext: FakeToolContext(
+          fs: MemoryFileSystem.test(),
+          logger: logger,
+          os: FakeOperatingSystemUtils(),
+          processManager: FakeProcessManager.any(),
+        ),
       );
 
       final package = FakeApplicationPackage();
@@ -655,13 +657,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
 }
 
 class FakeMacOSDevice extends MacOSDevice {
-  FakeMacOSDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-    super.flutterRoot = '',
-  });
+  FakeMacOSDevice({required super.toolContext});
 
   @override
   String get name => 'dummy';

@@ -301,10 +301,7 @@ class ResidentWebRunner extends ResidentRunner {
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
           webCrossOriginIsolation: crossOriginIsolation,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
-          cache: cache,
+          toolContext: toolContext,
           webDefines: _webDefines,
         );
         Uri url = await flutterDevice!.devFS!.create();
@@ -323,18 +320,10 @@ class ResidentWebRunner extends ResidentRunner {
           cacheInitialDillCompilation();
         } else {
           final webBuilder = WebBuilder(
-            logger: logger,
-            processManager: processManager,
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            flutterVersion: flutterVersion,
             analytics: analytics,
-            artifacts: artifacts,
+            buildSystem: buildSystem,
             buildTargets: buildTargets,
-            cache: cache,
-            config: config,
-            platform: platform,
-            terminal: terminal,
+            toolContext: toolContext,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -491,18 +480,10 @@ class ResidentWebRunner extends ResidentRunner {
         report = null;
         try {
           final webBuilder = WebBuilder(
-            logger: logger,
-            processManager: processManager,
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            flutterVersion: flutterVersion,
             analytics: analytics,
-            artifacts: artifacts,
+            buildSystem: buildSystem,
             buildTargets: buildTargets,
-            cache: cache,
-            config: config,
-            platform: platform,
-            terminal: terminal,
+            toolContext: toolContext,
           );
           await webBuilder.buildWeb(
             flutterProject,

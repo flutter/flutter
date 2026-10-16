@@ -541,16 +541,13 @@ flutter:
       },
       overrides: <Type, Generator>{
         Pub: () => Pub(
-          cache: Cache.test(
-            flutterRoot: getFlutterRoot(),
-            fileSystem: globals.fs,
-            processManager: globals.processManager,
+          toolContext: DelegatingToolContext(
+            cache: Cache.test(
+              flutterRoot: getFlutterRoot(),
+              fileSystem: globals.fs,
+              processManager: globals.processManager,
+            ),
           ),
-          fileSystem: globals.fs,
-          logger: globals.logger,
-          processManager: globals.processManager,
-          botDetector: globals.botDetector,
-          platform: globals.platform,
         ),
       },
     );

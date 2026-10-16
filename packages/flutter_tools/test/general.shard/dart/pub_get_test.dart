@@ -805,12 +805,14 @@ exit code: 66
     // Intentionally not using pub.test to simulate a real environment, but
     // we are using non-inherited I/O to avoid printing to the console.
     final pub = Pub(
-      cache: Cache.test(flutterRoot: '', processManager: processManager),
-      platform: FakePlatform(),
-      fileSystem: fileSystem,
-      logger: logger,
-      botDetector: const FakeBotDetector(false),
-      processManager: processManager,
+      toolContext: FakeToolContext(
+        botDetector: const FakeBotDetector(false),
+        cache: Cache.test(flutterRoot: '', processManager: processManager),
+        fs: fileSystem,
+        logger: logger,
+        platform: FakePlatform(),
+        processManager: processManager,
+      ),
     );
 
     await expectLater(

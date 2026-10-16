@@ -20,6 +20,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../git.dart';
 import '../project.dart';
@@ -109,15 +110,15 @@ enum PubOutputMode {
 /// A handle for interacting with the pub tool.
 abstract class Pub {
   /// Create a default [Pub] instance.
-  factory Pub({
-    required BotDetector botDetector,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    required Cache cache,
-    Stdio? stdio,
-  }) {
+  factory Pub({required ToolContext toolContext, Stdio? stdio}) {
+    final ToolContext(
+      :BotDetector botDetector,
+      :Cache cache,
+      fs: FileSystem fileSystem,
+      :Logger logger,
+      :Platform platform,
+      :ProcessManager processManager,
+    ) = toolContext;
     if (stdio != null) {
       return _DefaultPub.test(
         botDetector: botDetector,
