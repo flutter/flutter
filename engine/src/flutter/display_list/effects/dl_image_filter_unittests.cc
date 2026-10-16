@@ -12,6 +12,7 @@
 #include "flutter/display_list/geometry/dl_geometry_conversions.h"
 #include "flutter/display_list/testing/dl_test_equality.h"
 #include "flutter/display_list/utils/dl_comparable.h"
+#include "flutter/display_list/utils/dl_receiver_utils.h"
 #include "flutter/testing/display_list_testing.h"
 #include "gtest/gtest.h"
 
@@ -990,6 +991,27 @@ TEST(DisplayListImageFilter, RuntimeEffectModifiesTransparentBlack) {
   EXPECT_FALSE(filter_a.modifies_transparent_black());
 }
 
+namespace {
+
+class SaveLayerOptionsReceiver final : public IgnoreAttributeDispatchHelper,
+                                       public IgnoreClipDispatchHelper,
+                                       public IgnoreTransformDispatchHelper,
+                                       public IgnoreDrawDispatchHelper {
+ public:
+  void saveLayer(const DlRect& bounds,
+                 const SaveLayerOptions options,
+                 const DlImageFilter* backdrop,
+                 std::optional<int64_t> backdrop_id) override {
+    recorded_bounds.push_back(bounds);
+    recorded_options.push_back(options);
+  }
+
+  std::vector<DlRect> recorded_bounds;
+  std::vector<SaveLayerOptions> recorded_options;
+};
+
+}  // namespace
+
 TEST(DisplayListImageFilter, RuntimeEffectSaveLayerPreservesCallerBounds) {
   auto filter = DlImageFilter::MakeRuntimeEffect(
       nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>());
@@ -1014,6 +1036,12 @@ TEST(DisplayListImageFilter, RuntimeEffectSaveLayerPreservesCallerBounds) {
   EXPECT_FALSE(display_list->root_is_unbounded());
   ASSERT_TRUE(display_list->has_rtree());
   EXPECT_EQ(display_list->rtree()->bounds(), layer_bounds);
+
+  SaveLayerOptionsReceiver receiver;
+  display_list->Dispatch(receiver);
+  ASSERT_EQ(receiver.recorded_bounds.size(), 1u);
+  EXPECT_EQ(receiver.recorded_bounds[0], layer_bounds);
+  EXPECT_FALSE(receiver.recorded_options[0].content_is_clipped());
 }
 
 TEST(DisplayListImageFilter, RuntimeEffectEmptySaveLayerRemainsEmpty) {
@@ -1048,6 +1076,12 @@ TEST(DisplayListImageFilter, RuntimeEffectSaveLayerMarksClippedContent) {
   auto display_list = builder.Build();
 
   EXPECT_EQ(display_list->GetBounds(), layer_bounds);
+
+  SaveLayerOptionsReceiver receiver;
+  display_list->Dispatch(receiver);
+  ASSERT_EQ(receiver.recorded_bounds.size(), 1u);
+  EXPECT_EQ(receiver.recorded_bounds[0], layer_bounds);
+  EXPECT_TRUE(receiver.recorded_options[0].content_is_clipped());
 }
 
 TEST(

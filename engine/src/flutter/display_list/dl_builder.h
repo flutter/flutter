@@ -712,13 +712,15 @@ class DisplayListBuilder final : public virtual DlCanvas,
   }
 
   void RestoreLayer();
-  void TransferLayerBounds(const DlRect& content_bounds);
+  void TransferLayerBounds(
+      const DlRect& content_bounds,
+      std::optional<DlRect> unbounded_input_device_bounds);
   bool AdjustRTreeRects(RTreeData& data,
                         const DlImageFilter& filter,
                         const DlMatrix& matrix,
                         const DlRect& clip,
                         size_t rect_index,
-                        bool filter_has_unbounded_input);
+                        std::optional<DlRect> unbounded_input_device_bounds);
 
   // This flag indicates whether or not the current rendering attributes
   // are compatible with rendering ops applying an inherited opacity.
