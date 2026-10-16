@@ -34,7 +34,6 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
-import '../runner/flutter_command_runner.dart';
 import '../vmservice.dart';
 import 'daemon.dart';
 
@@ -70,71 +69,63 @@ class AttachCommand extends FlutterCommand {
     required ToolContext super.toolContext,
     required this._xcode,
     HotRunnerFactory? hotRunnerFactory,
-    bool verboseHelp = false,
+    super.verboseHelp = false,
   }) : _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
        _toolContext = toolContext {
-    addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false, excludeRelease: true);
-    usesTargetOption();
-    usesPortOptions(verboseHelp: verboseHelp);
-    usesIpv6Flag(verboseHelp: verboseHelp);
-    usesFilesystemOptions(hide: !verboseHelp);
-    usesFuchsiaOptions(hide: !verboseHelp);
-    usesDartDefineOption();
-    usesDeviceUserOption();
-    addEnableExperimentation(hide: !verboseHelp);
-    usesInitializeFromDillOption(hide: !verboseHelp);
-    usesNativeAssetsOption(hide: !verboseHelp);
-    argParser
-      ..addOption(
-        'debug-port',
-        hide: !verboseHelp,
-        help:
-            '(deprecated) Device port where the Dart VM Service is listening. Requires '
-            '"--disable-service-auth-codes" to also be provided to the Flutter '
-            'application at launch, otherwise this command will fail to connect to '
-            'the application. In general, "--debug-url" should be used instead.',
-      )
-      ..addOption(
-        'debug-url',
-        aliases: <String>['debug-uri'], // supported for historical reasons
-        help: 'The URL at which the Dart VM Service is listening.',
-      )
-      ..addOption(
-        'app-id',
-        help:
-            'The package name (Android) or bundle identifier (iOS) for the app. '
-            'This can be specified to avoid being prompted if multiple Dart VM Service ports '
-            'are advertised.\n'
-            'If you have multiple devices or emulators running, you should include the '
-            'device hostname as well, e.g. "com.example.myApp@my-iphone".\n'
-            'This parameter is case-insensitive.',
-      )
-      ..addOption(
-        'pid-file',
-        help:
-            'Specify a file to write the process ID to. '
-            'You can send SIGUSR1 to trigger a hot reload '
-            'and SIGUSR2 to trigger a hot restart. '
-            'The file is created when the signal handlers '
-            'are hooked and deleted when they are removed.',
-      )
-      ..addFlag(
-        'report-ready',
-        help:
-            'Print "ready" to the console after handling a keyboard command.\n'
-            'This is primarily useful for tests and other automation, but consider '
-            'using "--machine" instead.',
-        hide: !verboseHelp,
-      )
-      ..addOption('project-root', hide: !verboseHelp, help: 'Normally used only in run target.');
-    addMachineOutputFlag(verboseHelp: verboseHelp);
-    usesTrackWidgetCreation(verboseHelp: verboseHelp);
-    addDdsOptions(verboseHelp: verboseHelp);
-    addDevToolsOptions(verboseHelp: verboseHelp);
-    usesDeviceTimeoutOption();
-    usesDeviceConnectionOption();
-    usesAdbLogFilteringOption(hide: !verboseHelp);
+    enableUsesTargetOption();
+    registerOptionBundles(const <OptionBundle>[
+      BuildModeOptionsBundle(defaultToRelease: false, excludeRelease: true),
+      VmServicePortOptionsBundle(),
+      FilesystemOptionsBundle(),
+      DeviceDiscoveryOptionsBundle(includeDeviceUser: true),
+      ResidentCompilerOptionsBundle(),
+      DdsAndDevToolsOptionsBundle(),
+    ]);
+    argParser.addDescriptors(const <OptionDescriptor<Object?>>[
+      CommonOptions.target,
+      DebuggingOptionDescriptors.fuchsiaTargetModel,
+      DebuggingOptionDescriptors.fuchsiaModule,
+      CommonOptions.dartDefines,
+      CommonOptions.dartDefineFromFile,
+      CommonOptions.enableExperiment,
+      _debugPort,
+      _debugUrl,
+      _appId,
+      DebuggingOptionDescriptors.pidFile,
+      DebuggingOptionDescriptors.reportReady,
+      DebuggingOptionDescriptors.projectRoot,
+      CommonOptions.machine,
+      BuildInfoOptions.trackWidgetCreation,
+      DebuggingOptionDescriptors.adbLogFiltering,
+    ], verboseHelp: verboseHelp);
   }
+
+  static const _debugPort = StringOptionDescriptor(
+    name: 'debug-port',
+    verboseOnly: true,
+    help:
+        '(deprecated) Device port where the Dart VM Service is listening. Requires '
+        '"--disable-service-auth-codes" to also be provided to the Flutter '
+        'application at launch, otherwise this command will fail to connect to '
+        'the application. In general, "--debug-url" should be used instead.',
+  );
+
+  static const _debugUrl = StringOptionDescriptor(
+    name: 'debug-url',
+    aliases: <String>['debug-uri'], // supported for historical reasons
+    help: 'The URL at which the Dart VM Service is listening.',
+  );
+
+  static const _appId = StringOptionDescriptor(
+    name: 'app-id',
+    help:
+        'The package name (Android) or bundle identifier (iOS) for the app. '
+        'This can be specified to avoid being prompted if multiple Dart VM Service ports '
+        'are advertised.\n'
+        'If you have multiple devices or emulators running, you should include the '
+        'device hostname as well, e.g. "com.example.myApp@my-iphone".\n'
+        'This parameter is case-insensitive.',
+  );
 
   final HotRunnerFactory _hotRunnerFactory;
   final ToolContext _toolContext;
@@ -172,18 +163,19 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   bool get refreshWirelessDevices => true;
 
   int? get debugPort {
-    if (argResults!['debug-port'] == null) {
+    final String? port = getValue(_debugPort);
+    if (port == null) {
       return null;
     }
     try {
-      return int.parse(stringArg('debug-port')!);
+      return int.parse(port);
     } on Exception catch (error) {
       throwToolExit('Invalid port for `--debug-port`: $error');
     }
   }
 
   Uri? get debugUri {
-    final String? debugUrl = stringArg('debug-url');
+    final String? debugUrl = getValue(_debugUrl);
     if (debugUrl == null) {
       return null;
     }
@@ -197,11 +189,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     return uri;
   }
 
-  String? get appId {
-    return stringArg('app-id');
-  }
+  String? get appId => getValue(_appId);
 
-  String? get userIdentifier => stringArg(FlutterOptions.kDeviceUser);
+  String? get userIdentifier => getValue(CommonOptions.deviceUser);
 
   @override
   Future<void> validateCommand() async {
@@ -221,7 +211,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     if (!_isIOSDevice(targetDevice) &&
         debugPort == null &&
         debugUri == null &&
-        argResults!.wasParsed(FlutterCommand.ipv6Flag)) {
+        wasParsed(DebuggingOptionDescriptors.ipv6)) {
       throwToolExit(
         'When the --debug-port or --debug-url is unknown, this command determines '
         'the value of --ipv6 on its own.',
@@ -229,7 +219,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     }
     if (debugPort == null &&
         debugUri == null &&
-        argResults!.wasParsed(FlutterCommand.vmServicePortOption)) {
+        wasParsed(DebuggingOptionDescriptors.vmServicePort)) {
       throwToolExit(
         'When the --debug-port or --debug-url is unknown, this command does not use '
         'the value of --vm-service-port.',
@@ -242,7 +232,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     if (userIdentifier != null) {
       final Device? device = await findTargetDevice();
       if (device is! AndroidDevice) {
-        throwToolExit('--${FlutterOptions.kDeviceUser} is only supported for Android');
+        throwToolExit('--${CommonOptions.deviceUser.name} is only supported for Android');
       }
     }
   }
@@ -255,7 +245,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       throwToolExit('Did not find any valid target devices.');
     }
 
-    final bool machineMode = boolArg(FlutterGlobalOptions.kMachineFlag);
+    final bool machineMode = getValue(CommonOptions.machine);
 
     try {
       await (machineMode ? _attachDaemon(device: device) : _attach(device: device));
@@ -297,8 +287,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
                 terminal: terminal,
                 signals: signals,
                 processInfo: processInfo,
-                reportReady: boolArg('report-ready'),
-                pidFile: stringArg('pid-file'),
+                reportReady: getValue(DebuggingOptionDescriptors.reportReady),
+                pidFile: getValue(DebuggingOptionDescriptors.pidFile),
               )
               ..registerSignalHandlers()
               ..setupTerminal();
@@ -368,7 +358,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       toolContext: toolContext,
       buildInfo: buildInfo,
       target: targetFile,
-      targetModelOverride: TargetModel(stringArg('target-model')!),
+      targetModelOverride: TargetModel(getValue(DebuggingOptionDescriptors.fuchsiaTargetModel)),
       userIdentifier: userIdentifier,
     );
     flutterDevice.vmServiceUri = vmServiceUri;
@@ -380,11 +370,12 @@ known, it can be explicitly provided to attach via the command-line, e.g.
       devToolsServerAddress: devToolsServerAddress,
       usingCISystem: usingCISystem,
       debugLogsDirectoryPath: debugLogsDirectoryPath,
-      enableDevTools: boolArg(FlutterCommand.kEnableDevTools),
+      enableDevTools: getValue(DebuggingOptionDescriptors.enableDevTools),
       ipv6: ipv6!,
-      printDtd: boolArg(FlutterGlobalOptions.kPrintDtd, global: true),
+      printDtd: getValue(CommonOptions.printDtd),
       adbLogFiltering:
-          argParser.options.containsKey('adb-log-filtering') && boolArg('adb-log-filtering'),
+          hasOption(DebuggingOptionDescriptors.adbLogFiltering) &&
+          getValue(DebuggingOptionDescriptors.adbLogFiltering),
     );
 
     return buildInfo.isDebug
@@ -392,9 +383,9 @@ known, it can be explicitly provided to attach via the command-line, e.g.
             flutterDevices,
             target: targetFile,
             debuggingOptions: debuggingOptions,
-            projectRootPath: stringArg('project-root'),
-            dillOutputPath: stringArg('output-dill'),
-            nativeAssetsYamlFile: stringArg(FlutterOptions.kNativeAssetsYamlFile),
+            projectRootPath: getValue(DebuggingOptionDescriptors.projectRoot),
+            dillOutputPath: getValue(BuildInfoOptions.outputDill),
+            nativeAssetsYamlFile: getValue(BuildInfoOptions.nativeAssetsYamlFile),
             analytics: analytics,
             buildSystem: _buildSystem,
             buildTargets: _buildTargets,
@@ -437,7 +428,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
     final VMServiceDiscoveryForAttach vmServiceDiscovery = device.getVMServiceDiscoveryForAttach(
       appId: appId,
-      fuchsiaModule: stringArg('module'),
+      fuchsiaModule: getValue(DebuggingOptionDescriptors.fuchsiaModule),
       filterDevicePort: devicePort,
       expectedHostPort: hostVmservicePort,
       ipv6: usesIpv6,
