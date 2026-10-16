@@ -9,6 +9,7 @@
 /// and service handler interfaces implemented by extension authors.
 library flutter_tools_extension;
 
+export 'src/artifacts.dart';
 export 'src/build.dart';
 export 'src/config.dart';
 export 'src/device.dart';
