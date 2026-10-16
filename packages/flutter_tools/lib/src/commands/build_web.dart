@@ -2,20 +2,40 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:process/process.dart';
+
+import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/file_system.dart';
+import '../base/platform.dart';
+import '../base/terminal.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../cache.dart';
+import '../context/tool_context.dart';
 import '../features.dart';
-import '../globals.dart' as globals;
+import '../isolated/build_targets.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 import '../web/compile.dart';
+import '../web/content_hash.dart';
 import '../web/web_constants.dart';
 import '../web/web_options.dart';
 import '../web_template.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
-  BuildWebCommand({required super.logger, required this._fileSystem, required super.verboseHelp}) {
+  BuildWebCommand({
+    required this.buildSystem,
+    required this.featureFlags,
+    required ToolContext toolContext,
+    required super.verboseHelp,
+  }) : super(
+         logger: toolContext.logger,
+         outputPreferences: toolContext.outputPreferences,
+         toolContext: toolContext,
+       ) {
     registerOptionBundles(const <OptionBundle>[
       CommonBuildOptionsBundle(),
       BuildModeOptionsBundle(),
@@ -24,7 +44,11 @@ class BuildWebCommand extends BuildSubCommand {
     ]);
   }
 
-  final FileSystem _fileSystem;
+  final BuildSystem buildSystem;
+  final FeatureFlags featureFlags;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
@@ -77,6 +101,7 @@ class BuildWebCommand extends BuildSubCommand {
     }
     final bool? minifyJs = getValue(WebOptions.minifyJs);
     final bool? minifyWasm = getValue(WebOptions.minifyWasm);
+    final bool? deprecatedJsInterop = getValue(WebOptions.deprecatedJsInterop);
 
     final List<WebCompilerConfig> compilerConfigs;
 
@@ -86,7 +111,7 @@ class BuildWebCommand extends BuildSubCommand {
           'Do not attempt to set a web renderer when using "--${FlutterOptions.kWebWasmFlag}"',
         );
       }
-      globals.logger.printBox(title: 'New feature', '''
+      logger.printBox(title: 'New feature', '''
   WebAssembly compilation is new. Understand the details before deploying to production.
   $kWasmMoreInfo''');
 
@@ -108,6 +133,7 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           webContentHash: webContentHash,
+          deprecatedJsInterop: deprecatedJsInterop,
         ),
       ];
     } else {
@@ -121,6 +147,7 @@ class BuildWebCommand extends BuildSubCommand {
           optimizationLevel: jsOptimizationLevel,
           sourceMaps: sourceMaps,
           webContentHash: webContentHash,
+          deprecatedJsInterop: deprecatedJsInterop,
           renderer: webRenderer,
         ),
 
@@ -133,6 +160,8 @@ class BuildWebCommand extends BuildSubCommand {
             minify: minifyWasm,
             enableWasmDeferredLoading: getValue(WebOptions.enableWasmDeferredLoading),
             dryRun: true,
+            // dart2js already reports deprecated JS interop imports as errors.
+            omitDeprecatedJsInteropFindings: deprecatedJsInterop == false,
           ),
       ];
     }
@@ -158,7 +187,7 @@ class BuildWebCommand extends BuildSubCommand {
         'To configure this project for the web, run flutter create . --platforms web',
       );
     }
-    final File indexHtmlFile = _fileSystem.file(project.web.indexFile.path);
+    final File indexHtmlFile = toolContext.fs.file(project.web.indexFile.path);
     if (indexHtmlFile.existsSync()) {
       final String indexHtmlContent = indexHtmlFile.readAsStringSync();
       if (!indexHtmlContent.contains(kBaseHrefPlaceholder) && baseHref != null) {
@@ -168,7 +197,11 @@ class BuildWebCommand extends BuildSubCommand {
         );
       }
       if (webContentHash) {
-        _validateIndexHtmlForContentHash(indexHtmlFile);
+        final File bootstrapJsFile = project.web.directory.childFile('flutter_bootstrap.js');
+        _validateIndexHtmlForContentHash(
+          indexHtmlFile,
+          bootstrapJsFile: bootstrapJsFile.existsSync() ? bootstrapJsFile : null,
+        );
       }
     }
 
@@ -176,13 +209,29 @@ class BuildWebCommand extends BuildSubCommand {
 
     final Map<String, String> webDefines = extractWebDefines();
 
+    final ToolContext(
+      :Artifacts artifacts,
+      :Cache cache,
+      :Config config,
+      :FileSystem fs,
+      :FlutterVersion flutterVersion,
+      :Platform platform,
+      :ProcessManager processManager,
+      :Terminal terminal,
+    ) = toolContext;
     final webBuilder = WebBuilder(
-      logger: globals.logger,
-      processManager: globals.processManager,
-      buildSystem: globals.buildSystem,
-      fileSystem: globals.fs,
-      flutterVersion: globals.flutterVersion,
-      analytics: globals.analytics,
+      logger: logger,
+      processManager: processManager,
+      buildSystem: buildSystem,
+      fileSystem: fs,
+      flutterVersion: flutterVersion,
+      analytics: analytics,
+      artifacts: artifacts,
+      buildTargets: const BuildTargetsImpl(),
+      cache: cache,
+      config: config,
+      platform: platform,
+      terminal: terminal,
     );
     await webBuilder.buildWeb(
       project,
@@ -202,17 +251,16 @@ class BuildWebCommand extends BuildSubCommand {
         '\nServing tip: Configure your web host to serve "index.html" and "flutter_bootstrap.js"\n'
         'with "Cache-Control: no-cache" (or revalidation) so browser clients immediately pick up new deployments.\n'
         'Hashed entrypoint files (*.<hash>.*) can be served with long-term immutable caching (e.g. "Cache-Control: max-age=31536000, immutable").\n'
+        'When "--no-web-resources-cdn" is used, bundled "canvaskit/**" files are not content-hashed ("urlHashed: false" in "precache_manifest.json") and should not be served with "immutable" caching.\n'
         'See https://docs.flutter.dev/deployment/web for caching guidance.',
       );
     }
     return FlutterCommandResult.success();
   }
 
-  static final RegExp _htmlCommentRegex = RegExp(r'<!--[\s\S]*?-->');
-
-  void _validateIndexHtmlForContentHash(File indexHtmlFile) {
+  void _validateIndexHtmlForContentHash(File indexHtmlFile, {File? bootstrapJsFile}) {
     final String indexHtmlContent = indexHtmlFile.readAsStringSync();
-    final String uncommentedContent = indexHtmlContent.replaceAll(_htmlCommentRegex, '');
+    final String uncommentedContent = stripHtmlAndJsComments(indexHtmlContent);
     if (uncommentedContent.contains('main.dart.js') ||
         uncommentedContent.contains('loadEntrypoint')) {
       throwToolExit(
@@ -222,6 +270,37 @@ class BuildWebCommand extends BuildSubCommand {
         'which automatically resolves content-hashed entrypoints. '
         'Please update web/index.html or run "flutter create . --platforms web" to migrate.',
       );
+    }
+    if (!uncommentedContent.contains('flutter_bootstrap.js') &&
+        !uncommentedContent.contains('{{flutter_bootstrap_js}}') &&
+        !uncommentedContent.contains('{{flutter_build_config}}')) {
+      throwToolExit(
+        'Cannot build with "--web-content-hash" because web/index.html does not '
+        'reference "flutter_bootstrap.js", "{{flutter_bootstrap_js}}", or "{{flutter_build_config}}".\n'
+        'Modern Flutter Web applications use the templated "flutter_bootstrap.js" loader script '
+        'which automatically resolves content-hashed entrypoints. '
+        'Please update web/index.html or run "flutter create . --platforms web" to migrate.',
+      );
+    }
+    if (bootstrapJsFile != null) {
+      final String bootstrapContent = bootstrapJsFile.readAsStringSync();
+      final String uncommentedBootstrap = stripHtmlAndJsComments(bootstrapContent);
+      if (uncommentedBootstrap.contains('main.dart.js') ||
+          uncommentedBootstrap.contains('loadEntrypoint')) {
+        throwToolExit(
+          'Cannot build with "--web-content-hash" because web/flutter_bootstrap.js contains '
+          'direct references to "main.dart.js" or the deprecated "FlutterLoader.loadEntrypoint" API.\n'
+          'Please update web/flutter_bootstrap.js to use "{{flutter_build_config}}" and '
+          '"_flutter.loader.load()".',
+        );
+      }
+      if (!uncommentedBootstrap.contains('{{flutter_build_config}}')) {
+        throwToolExit(
+          'Cannot build with "--web-content-hash" because web/flutter_bootstrap.js does not '
+          'contain the "{{flutter_build_config}}" placeholder required to inject content-hashed '
+          'entrypoint and manifest filenames.',
+        );
+      }
     }
   }
 }

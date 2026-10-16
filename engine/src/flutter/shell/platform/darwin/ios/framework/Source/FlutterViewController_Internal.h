@@ -67,6 +67,7 @@ extern NSNotificationName const FlutterViewControllerShowHomeIndicator;
 
 - (BOOL)supportsShowingSystemContextMenu;
 - (BOOL)stateIsActive;
+- (BOOL)stateIsForeground;
 - (BOOL)stateIsBackground;
 
 /**
