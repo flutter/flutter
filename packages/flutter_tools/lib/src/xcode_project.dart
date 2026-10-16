@@ -26,6 +26,7 @@ import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'bundle.dart' as bundle;
 import 'cache.dart';
+import 'context/tool_context.dart';
 import 'convert.dart';
 import 'darwin/darwin.dart';
 import 'features.dart';
@@ -979,27 +980,16 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     return productName ?? XcodeBasedProject._defaultHostAppName;
   }
 
-  // TODO(bkonyi): Take a ToolContext instead of individual dependencies once
-  // FlutterProject is migrated to ToolContext.
   Future<void> ensureReadyForPlatformSpecificTooling({
-    required Cache cache,
-    required Config config,
-    required FileSystemUtils fileSystemUtils,
-    required Platform platform,
     required PlistParser plistParser,
-    required ProcessManager processManager,
     required TemplateRenderer templateRenderer,
-    required AnsiTerminal terminal,
+    required ToolContext toolContext,
   }) async {
+    final Cache cache = toolContext.cache;
     await _regenerateModuleFromTemplateIfNeeded(
-      cache: cache,
-      config: config,
-      fileSystemUtils: fileSystemUtils,
-      platform: platform,
       plistParser: plistParser,
-      processManager: processManager,
       templateRenderer: templateRenderer,
-      terminal: terminal,
+      toolContext: toolContext,
     );
     await _updateLLDBIfNeeded(cache: cache, templateRenderer: templateRenderer);
     if (!_flutterLibRoot.existsSync()) {
@@ -1133,18 +1123,14 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   }
 
   Future<void> _regenerateModuleFromTemplateIfNeeded({
-    required Cache cache,
-    required Config config,
-    required FileSystemUtils fileSystemUtils,
-    required Platform platform,
     required PlistParser plistParser,
-    required ProcessManager processManager,
     required TemplateRenderer templateRenderer,
-    required AnsiTerminal terminal,
+    required ToolContext toolContext,
   }) async {
     if (!isModule) {
       return;
     }
+    final ToolContext(:Cache cache, :FileSystemUtils fileSystemUtils) = toolContext;
     final bool pubspecChanged = fileSystemUtils.isOlderThanReference(
       entity: ephemeralModuleDirectory,
       referenceFile: parent.pubspecFile,
@@ -1158,38 +1144,26 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
     await _overwriteFromTemplate(
       _fileSystem.path.join('module', 'ios', 'library'),
       ephemeralModuleDirectory,
-      config: config,
-      fileSystemUtils: fileSystemUtils,
-      platform: platform,
       plistParser: plistParser,
-      processManager: processManager,
       templateRenderer: templateRenderer,
-      terminal: terminal,
+      toolContext: toolContext,
     );
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
       await _overwriteFromTemplate(
         _fileSystem.path.join('module', 'ios', 'host_app_ephemeral'),
         ephemeralModuleDirectory,
-        config: config,
-        fileSystemUtils: fileSystemUtils,
-        platform: platform,
         plistParser: plistParser,
-        processManager: processManager,
         templateRenderer: templateRenderer,
-        terminal: terminal,
+        toolContext: toolContext,
       );
       if (hasPlugins(parent)) {
         await _overwriteFromTemplate(
           _fileSystem.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
           ephemeralModuleDirectory,
-          config: config,
-          fileSystemUtils: fileSystemUtils,
-          platform: platform,
           plistParser: plistParser,
-          processManager: processManager,
           templateRenderer: templateRenderer,
-          terminal: terminal,
+          toolContext: toolContext,
         );
       }
     }
@@ -1245,14 +1219,17 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   Future<void> _overwriteFromTemplate(
     String path,
     Directory target, {
-    required Config config,
-    required FileSystemUtils fileSystemUtils,
-    required Platform platform,
     required PlistParser plistParser,
-    required ProcessManager processManager,
     required TemplateRenderer templateRenderer,
-    required AnsiTerminal terminal,
+    required ToolContext toolContext,
   }) async {
+    final ToolContext(
+      :Config config,
+      :FileSystemUtils fileSystemUtils,
+      :Platform platform,
+      :ProcessManager processManager,
+      :AnsiTerminal terminal,
+    ) = toolContext;
     final Template template = await Template.fromName(
       path,
       fileSystem: _fileSystem,
@@ -1345,8 +1322,9 @@ class MacOSProject extends XcodeBasedProject {
   /// scheme's target.
   File get nameFile => ephemeralDirectory.childFile('.app_filename');
 
-  Future<void> ensureReadyForPlatformSpecificTooling({required Cache cache}) async {
+  Future<void> ensureReadyForPlatformSpecificTooling({required ToolContext toolContext}) async {
     // TODO(stuartmorgan): Add create-from-template logic here.
+    final Cache cache = toolContext.cache;
     await _updateGeneratedXcodeConfigIfNeeded(cache: cache);
   }
 

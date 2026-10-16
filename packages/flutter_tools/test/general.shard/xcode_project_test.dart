@@ -381,15 +381,17 @@ void main() {
           expect(project.lldbHelperPythonFile, isNot(exists));
 
           await project.ensureReadyForPlatformSpecificTooling(
-            cache: FakeCache(olderThanToolsStamp: true)
-              ..filesOlderThanToolsStamp['Generated.xcconfig'] = false,
-            config: Config.test(),
-            fileSystemUtils: FileSystemUtils(fileSystem: fs, platform: FakePlatform()),
-            platform: FakePlatform(),
             plistParser: FakePlistParser(),
-            processManager: FakeProcessManager.empty(),
             templateRenderer: const MustacheTemplateRenderer(),
-            terminal: FakeTerminal(),
+            toolContext: FakeToolContext(
+              cache: FakeCache(olderThanToolsStamp: true)
+                ..filesOlderThanToolsStamp['Generated.xcconfig'] = false,
+              config: Config.test(),
+              fs: fs,
+              platform: FakePlatform(),
+              processManager: FakeProcessManager.empty(),
+              terminal: FakeTerminal(),
+            ),
           );
 
           expect(project.lldbInitFile, exists);
@@ -409,15 +411,17 @@ void main() {
           project.lldbHelperPythonFile.writeAsStringSync('old');
 
           await project.ensureReadyForPlatformSpecificTooling(
-            cache: FakeCache(olderThanToolsStamp: true)
-              ..filesOlderThanToolsStamp['Generated.xcconfig'] = false,
-            config: Config.test(),
-            fileSystemUtils: FileSystemUtils(fileSystem: fs, platform: FakePlatform()),
-            platform: FakePlatform(),
             plistParser: FakePlistParser(),
-            processManager: FakeProcessManager.empty(),
             templateRenderer: const MustacheTemplateRenderer(),
-            terminal: FakeTerminal(),
+            toolContext: FakeToolContext(
+              cache: FakeCache(olderThanToolsStamp: true)
+                ..filesOlderThanToolsStamp['Generated.xcconfig'] = false,
+              config: Config.test(),
+              fs: fs,
+              platform: FakePlatform(),
+              processManager: FakeProcessManager.empty(),
+              terminal: FakeTerminal(),
+            ),
           );
 
           expect(project.lldbInitFile.readAsStringSync(), contains('Generated file, do not edit.'));

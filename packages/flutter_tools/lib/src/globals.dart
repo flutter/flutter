@@ -32,6 +32,7 @@ import 'base/user_messages.dart';
 import 'build_system/build_system.dart';
 import 'build_system/build_targets.dart';
 import 'cache.dart';
+import 'context_runner.dart';
 import 'custom_devices/custom_devices_config.dart';
 import 'device.dart';
 import 'doctor.dart';
@@ -282,6 +283,7 @@ FlutterProjectFactory get projectFactory {
         fileSystem: fs,
         logger: logger,
         plistParser: plistParser,
+        toolContext: const GlobalToolContext(),
         xcode: xcode,
         xcodeProjectInterpreter: xcodeProjectInterpreter,
       );

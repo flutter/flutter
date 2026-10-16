@@ -142,7 +142,7 @@ Future<void> buildMacOS({
     FlutterApplicationMigration(flutterProject.macos, logger, plistParser: plistParser),
     NSApplicationMainDeprecationMigration(flutterProject.macos, logger),
     SecureRestorableStateMigration(flutterProject.macos, logger),
-    SwiftPackageManagerIntegrationMigration.fromToolContext(
+    SwiftPackageManagerIntegrationMigration(
       flutterProject.macos,
       darwinPlatform,
       buildInfo,
