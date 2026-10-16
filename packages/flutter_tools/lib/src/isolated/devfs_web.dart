@@ -330,7 +330,9 @@ class WebDevFS implements DevFS {
     }
     var syncedBytes = 0;
     if (bundle != null) {
-      final String assetDirectory = fileSystem.path.absolute(getAssetBuildDirectory());
+      final String assetDirectory = fileSystem.path.absolute(
+        getAssetBuildDirectory(globals.config, fileSystem),
+      );
       final Directory assetDir = fileSystem.directory(assetDirectory);
 
       if (bundleFirstUpload && assetDir.existsSync()) {

@@ -458,8 +458,7 @@ abstract class DeviceDiscovery {
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
 /// and removals.
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
-  PollingDeviceDiscovery(this.name, {ToolContext? toolContext})
-    : _toolContext = toolContext; // ignore: prefer_initializing_formals
+  PollingDeviceDiscovery(this.name, {this._toolContext});
 
   static const _pollingInterval = Duration(seconds: 4);
   static const _pollingTimeout = Duration(seconds: 30);
@@ -606,12 +605,11 @@ abstract class Device {
   Device(
     this.id, {
     required Logger logger,
-    ToolContext? toolContext,
+    this._toolContext,
     required this.category,
     required this.platformType,
     required this.ephemeral,
-  }) : _toolContext = toolContext, // ignore: prefer_initializing_formals
-       dds = DartDevelopmentService(logger: logger);
+  }) : dds = DartDevelopmentService(logger: logger);
 
   final String id;
   final ToolContext? _toolContext;

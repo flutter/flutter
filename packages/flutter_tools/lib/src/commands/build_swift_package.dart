@@ -8,6 +8,7 @@ import 'package:unified_analytics/unified_analytics.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/config.dart';
 import '../base/error_handling_io.dart';
 import '../base/file_system.dart';
 import '../base/fingerprint.dart';
@@ -1578,9 +1579,10 @@ class CocoaPodPluginDependencies {
   @visibleForTesting
   /// Wrap [processPodsIfNeeded] in a method to be overwritten in tests.
   Future<void> processPods(XcodeBasedProject xcodeProject, BuildInfo buildInfo) async {
+    final ToolContext(:Config config, fs: FileSystem fileSystem) = _utils.toolContext;
     await processPodsIfNeeded(
       xcodeProject,
-      _targetPlatform.buildDirectory(),
+      _targetPlatform.buildDirectory(config: config, fileSystem: fileSystem),
       buildInfo.mode,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
       // SwiftPM. Since "flutter build swift-package" builds Swift packages and CocoaPods

@@ -421,11 +421,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         xcode: globals.xcode!,
       ),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        fileSystem: globals.fs,
         analytics: globals.analytics,
+        toolContext: const GlobalToolContext(),
       ),
     },
   );

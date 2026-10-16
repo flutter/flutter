@@ -181,7 +181,9 @@ Future<List<String>> _xcodeBuildSettingsLines({
   }
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
-  xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory()}');
+  xcodeBuildSettings.add(
+    'FLUTTER_BUILD_DIR=${buildDirOverride ?? getBuildDirectory(globals.config, globals.fs)}',
+  );
 
   final String buildName =
       parsedBuildName(manifest: project.manifest, buildInfo: buildInfo) ?? '1.0.0';
