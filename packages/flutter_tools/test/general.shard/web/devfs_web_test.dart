@@ -740,6 +740,22 @@ void main() {
     expect((await response.read().toList()).first, source.readAsBytesSync());
   }, overrides: <Type, Generator>{Platform: () => linux});
 
+  runInTestbed('does not serve non-Dart files from project root', () async {
+    final files = <String, String>{
+      '.env': 'env_secret',
+      'pubspec.yaml': 'pubspec_secret',
+      '.dart_tool/package_config.json': 'package_config_secret',
+    };
+
+    for (final MapEntry(:String key, :String value) in files.entries) {
+      globals.fs.file(key)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(value);
+
+      expect(await webAssetServer.dartSourceContents(key), isNull);
+    }
+  });
+
   runInTestbed('serves asset files from filesystem with known mime type', () async {
     final String path = globals.fs.path.join('build', 'flutter_assets', 'foo.png');
     final File source = globals.fs.file(path)
@@ -1354,6 +1370,8 @@ void main() {
         enableDwds: true,
         ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
         entrypoint: Uri.base,
+        // If this is any other value, we will do a real IP lookup inside FakeAsync.
+        webDevServerConfig: const WebDevServerConfig(host: webDevAnyHostDefault),
       );
       final firstConnection = FakeAppConnection();
       final secondConnection = FakeAppConnection();
@@ -1388,7 +1406,7 @@ void main() {
     });
   }, overrides: <Type, Generator>{Artifacts: Artifacts.test});
 
-  runInTestbed('Can start web server with hostname any', () async {
+  runInTestbed('Can start web server with default hostname', () async {
     final String path = globals.fs.path.join('lib', 'main.dart');
     final File outputFile = globals.fs.file(path)..createSync(recursive: true);
     outputFile.parent.childFile('a.sources').writeAsStringSync('');
@@ -1405,6 +1423,29 @@ void main() {
 
     final Uri uri = await webDevFS.create();
     expect(uri.host, 'localhost');
+    expect(webDevFS.webAssetServer.internetAddress.isLoopback, isTrue);
+    await webDevFS.destroy();
+  });
+
+  runInTestbed('Can start web server with hostname any', () async {
+    final String path = globals.fs.path.join('lib', 'main.dart');
+    final File outputFile = globals.fs.file(path)..createSync(recursive: true);
+    outputFile.parent.childFile('a.sources').writeAsStringSync('');
+    outputFile.parent.childFile('a.json').writeAsStringSync('{}');
+    outputFile.parent.childFile('a.map').writeAsStringSync('{}');
+
+    final WebDevFS webDevFS = createWebDevFS(
+      useSseForDebugProxy: true,
+      useSseForDebugBackend: true,
+      useSseForInjectedClient: true,
+      ddsConfig: const DartDevelopmentServiceConfiguration(enable: false),
+      entrypoint: Uri.base,
+      webDevServerConfig: const WebDevServerConfig(host: webDevAnyHostDefault),
+    );
+
+    final Uri uri = await webDevFS.create();
+    expect(uri.host, 'localhost');
+    expect(webDevFS.webAssetServer.internetAddress, InternetAddress.anyIPv4);
     await webDevFS.destroy();
   });
 
