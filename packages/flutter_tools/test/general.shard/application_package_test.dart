@@ -772,35 +772,35 @@ void main() {
       expect(iosApp.applicationPackage.path, fileSystem.file('app.ipa').path);
     });
 
-    testUsingContext('returns null when there is no ios or .ios directory', () async {
+    testWithoutContext('returns null when there is no ios or .ios directory', () async {
       fileSystem.file('pubspec.yaml').createSync();
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
         null,
         toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
-    }, overrides: overrides);
+    });
 
-    testUsingContext('returns null when there is no Runner.xcodeproj', () async {
+    testWithoutContext('returns null when there is no Runner.xcodeproj', () async {
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.file('ios/FooBar.xcodeproj').createSync(recursive: true);
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
         null,
         toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
       expect(logger.errorText, contains('Expected ios/Runner.xcodeproj but this file is missing.'));
-    }, overrides: overrides);
+    });
 
-    testUsingContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
+    testWithoutContext('returns null when there is no Runner.xcodeproj/project.pbxproj', () async {
       fileSystem.file('pubspec.yaml').createSync();
       fileSystem.directory('ios/Runner.xcodeproj').createSync(recursive: true);
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
         null,
         toolContext: toolContext,
       ) as BuildableIOSApp?;
@@ -810,25 +810,25 @@ void main() {
         logger.errorText,
         contains('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.'),
       );
-    }, overrides: overrides);
+    });
 
-    testUsingContext('returns null when there with no product identifier', () async {
+    testWithoutContext('returns null when there with no product identifier', () async {
       fileSystem.file('pubspec.yaml').createSync();
       final Directory project = fileSystem.directory('ios/Runner.xcodeproj')
         ..createSync(recursive: true);
       project.childFile('project.pbxproj').createSync();
       final iosApp = await IOSApp.fromIosProject(
-        FlutterProject.fromDirectory(fileSystem.currentDirectory).ios,
+        FlutterProject.fromDirectoryTest(fileSystem.currentDirectory).ios,
         null,
         toolContext: toolContext,
       ) as BuildableIOSApp?;
 
       expect(iosApp, null);
-    }, overrides: overrides);
+    });
 
     testUsingContext('handles project paths with periods in app name', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Name.With.Dots',
         fileSystem: fileSystem,
@@ -844,9 +844,9 @@ void main() {
       );
     }, overrides: overrides);
 
-    testUsingContext('returns project app icon dirname', () async {
+    testWithoutContext('returns project app icon dirname', () async {
       final iosApp = BuildableIOSApp(
-        IosProject.fromFlutter(FlutterProject.fromDirectory(fileSystem.currentDirectory)),
+        IosProject.fromFlutter(FlutterProject.fromDirectoryTest(fileSystem.currentDirectory)),
         'com.foo.bar',
         'Runner',
         fileSystem: fileSystem,
@@ -858,7 +858,7 @@ void main() {
         'AppIcon.appiconset',
       );
       expect(iosApp.projectAppIconDirName, fileSystem.path.join('ios', iconDirSuffix));
-    }, overrides: overrides);
+    });
 
     testUsingContext('returns template app icon dirname for Contents.json', () async {
       final iosApp = BuildableIOSApp(
