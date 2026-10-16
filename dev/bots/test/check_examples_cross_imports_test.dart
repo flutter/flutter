@@ -372,6 +372,99 @@ void main() {
       expect(success, isFalse);
     });
 
+    test('unknown $libraryName cross import of MaterialUI', () async {
+      final dartFile = '$libraryName/foo.dart';
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        {dartFile},
+        inDirectory: examplesFilesDirectory,
+        importString: "import 'package:material_ui/material_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of MaterialUI. Refactor it or move it to the MaterialUI examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('unknown $libraryName cross import of both Material and MaterialUI', () async {
+      final dartFile = '$libraryName/foo.dart';
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        {dartFile},
+        inDirectory: examplesFilesDirectory,
+        importString:
+            "import 'package:flutter/material.dart';\n"
+            "import 'package:material_ui/material_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of Material. Refactor it or move it to the Material examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+        '╔═╡ERROR #2╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of MaterialUI. Refactor it or move it to the MaterialUI examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
+    test('unknown $libraryName cross import of CupertinoUI', () async {
+      final dartFile = '$libraryName/foo.dart';
+
+      final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(
+        libraryName,
+        checker.examplesDirectory,
+      );
+
+      buildKnownCrossImportExamplesFiles();
+      writeImportInFiles(
+        {dartFile},
+        inDirectory: examplesFilesDirectory,
+        importString: "import 'package:cupertino_ui/cupertino_ui.dart';",
+      );
+
+      bool? success;
+      final String result = await capture(() async {
+        success = checker.check();
+      }, shouldHaveErrors: true);
+      final String lines = <String>[
+        '╔═╡ERROR #1╞════════════════════════════════════════════════════════════════════',
+        '║ The following file in $libraryName has a disallowed import of CupertinoUI. Refactor it or move it to the CupertinoUI examples.',
+        '║   $dartFile',
+        '╚═══════════════════════════════════════════════════════════════════════════════',
+      ].join('\n');
+      expect(result, equals('$lines\n'));
+      expect(success, isFalse);
+    });
+
     test('unknown $libraryName cross import of Cupertino', () async {
       final dartFile = '$libraryName/foo.dart';
       final Directory examplesFilesDirectory = checkerDirectories.examplesFilesDirectoryFor(

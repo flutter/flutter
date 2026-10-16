@@ -578,7 +578,7 @@ void main() {
             widgetsDir.childFile('showGeneralDialog.html').writeAsStringSync('''
 <pre id="longSnippet1">
   <code class="language-dart">
-    import &#39;package:flutter&#47;material.dart&#39;;
+    import &#39;package:material_ui&#47;material_ui.dart&#39;;
   </code>
 </pre>
 ''');

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // #region body
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Flutter code sample for [RawScrollbar].
 
