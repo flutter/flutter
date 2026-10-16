@@ -17,14 +17,14 @@ final class LinuxCleanService extends CleanService {
   Future<void> clean(CleanEnvironment environment) async {
     final linuxBuildDir = Directory.fromUri(environment.buildDir.resolve('linux/'));
     if (linuxBuildDir.existsSync()) {
-      linuxBuildDir.deleteSync(recursive: true);
+      await linuxBuildDir.delete(recursive: true);
     }
 
     final linuxEphemeralDir = Directory.fromUri(
       environment.projectRoot.resolve('linux/flutter/ephemeral/'),
     );
     if (linuxEphemeralDir.existsSync()) {
-      linuxEphemeralDir.deleteSync(recursive: true);
+      await linuxEphemeralDir.delete(recursive: true);
     }
   }
 }

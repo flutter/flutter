@@ -55,19 +55,21 @@ class ExtensionCleanManager {
 
     final Status status = _logger.startProgress('Cleaning extension build artifacts...');
     try {
-      for (final connection in cleanExtensions) {
-        try {
-          await connection.sendRequest(
-            CleanService.cleanMethod,
-            params: <String, Object?>{CleanService.environmentParam: environment.toMap()},
-            // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
-            // https://github.com/flutter/flutter/issues/193955.
-            timeout: null,
-          );
-        } on Object catch (e) {
-          _logger.printError('Failed to clean extension artifacts: $e');
-        }
-      }
+      await Future.wait(
+        cleanExtensions.map((ExtensionConnection connection) async {
+          try {
+            await connection.sendRequest(
+              CleanService.cleanMethod,
+              params: <String, Object?>{CleanService.environmentParam: environment.toMap()},
+              // TODO(bkonyi): Support heartbeat / liveness monitoring for long-running RPCs,
+              // https://github.com/flutter/flutter/issues/193955.
+              timeout: null,
+            );
+          } on Object catch (e) {
+            _logger.printError('Failed to clean extension artifacts: $e');
+          }
+        }),
+      );
     } finally {
       status.stop();
     }
