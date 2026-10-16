@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
+import 'package:ui/src/engine.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../common/test_initialization.dart';
@@ -230,4 +233,72 @@ Future<void> testMain() async {
     expect(lines[1].descent, closeTo(raw.descent, 1e-3));
     expect(paragraph.height, closeTo(_scaledHeight + scaled.ascent + raw.descent, 1e-3));
   });
+
+  test('TextHeightBehavior positions first-line placeholders against the reverted ascent', () {
+    final builder = ui.ParagraphBuilder(
+      _style(
+        height: _heightMultiplier,
+        textHeightBehavior: const ui.TextHeightBehavior(applyHeightToFirstAscent: false),
+      ),
+    );
+    builder.addText('x');
+    builder.addPlaceholder(
+      10,
+      10,
+      ui.PlaceholderAlignment.aboveBaseline,
+      baseline: ui.TextBaseline.alphabetic,
+    );
+    final ui.Paragraph paragraph = builder.build()
+      ..layout(const ui.ParagraphConstraints(width: 500));
+    final ui.TextBox box = paragraph.getBoxesForPlaceholders().single;
+    expect(box.bottom, closeTo(paragraph.alphabeticBaseline, 1e-3));
+  });
+
+  test('TextHeightBehavior bounds background rects by reverted first ascent and last descent', () {
+    final double originalDpr = EngineFlutterDisplay.instance.devicePixelRatio;
+    try {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(1.0);
+
+      final builder = ui.ParagraphBuilder(
+        _style(height: _heightMultiplier, textHeightBehavior: _noFirstAscentNoLastDescent),
+      );
+      builder.pushStyle(ui.TextStyle(background: ui.Paint()..color = const ui.Color(0xFFFF0000)));
+      builder.addText('Hello\nWorld');
+      final paragraph =
+          (builder.build()..layout(const ui.ParagraphConstraints(width: 500))) as WebParagraph;
+      final List<ui.LineMetrics> lines = paragraph.computeLineMetrics();
+      expect(lines, hasLength(2));
+
+      final canvas = _RecordingCanvas();
+      paragraph.paint(canvas, ui.Offset.zero);
+
+      expect(canvas.drawnRects, hasLength(2));
+      // Line 0 background uses raw ascent (top == 0) and scaled descent.
+      expect(canvas.drawnRects[0].top, closeTo(0.0, 1e-3));
+      expect(canvas.drawnRects[0].bottom, closeTo(lines[0].height.roundToDouble(), 1e-3));
+      // Line 1 background uses scaled ascent and raw descent (bottom == paragraph.height).
+      expect(canvas.drawnRects[1].top, closeTo(lines[0].height.roundToDouble(), 1e-3));
+      expect(canvas.drawnRects[1].bottom, closeTo(paragraph.height.roundToDouble(), 1e-3));
+    } finally {
+      EngineFlutterDisplay.instance.debugOverrideDevicePixelRatio(originalDpr);
+    }
+  });
+}
+
+class _RecordingCanvas implements ui.Canvas {
+  final List<ui.Rect> drawnRects = <ui.Rect>[];
+
+  @override
+  Float64List getTransform() => Matrix4.identity().toFloat64();
+
+  @override
+  void drawRect(ui.Rect rect, ui.Paint paint) {
+    drawnRects.add(rect);
+  }
+
+  @override
+  void drawImageRect(ui.Image image, ui.Rect src, ui.Rect dst, ui.Paint paint) {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

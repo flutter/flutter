@@ -202,10 +202,6 @@ class TextLayout {
     // but it only makes sense if we have one line
     paragraph.alphabeticBaseline = lines.first.fontBoundingBoxAscent;
     paragraph.ideographicBaseline = lines.first.height;
-    // We only know now which line is the last and we need this information for later
-    if (lines.isNotEmpty) {
-      lines.last.lastLine = true;
-    }
   }
 
   double addLine(
@@ -214,8 +210,6 @@ class TextLayout {
     ClusterRange hardlineClusterRange,
     double top, {
     required bool isSyntheticEmptyLine,
-    // No isFirstLine parameter is needed because the first line is determined
-    // directly inside _finishLine via lines.isEmpty before line is appended.
     required bool isLastLine,
   }) {
     assert(contentClusterRange.end == whitespaceClusterRange.start);
@@ -513,8 +507,16 @@ class TextLayout {
       isFirstLine: lines.isEmpty,
       isLastLine: isLastLine,
     );
+    // Position placeholders after TextHeightBehavior potentially reverts the
+    // first line's ascent.
+    for (final LineBlock block in line.visualBlocks) {
+      if (block is PlaceholderBlock) {
+        block.positionInLine(line.fontBoundingBoxAscent);
+      }
+    }
     line.advance = ui.Rect.fromLTWH(0, top, width, line.height);
     line.trailingSpacesWidth = trailingSpacesWidth;
+    line.lastLine = isLastLine;
     lines.add(line);
     return line.advance.height;
   }
@@ -1410,10 +1412,19 @@ class PlaceholderBlock extends LineBlock {
         ascent = lineAscent - diff;
         descent = lineDescent - diff;
     }
-    final double top = lineAscent - ascent;
+  }
+
+  /// Positions the placeholder vertically within the line once the final
+  /// [lineAscent] is known.
+  void positionInLine(double lineAscent) {
     // The advance needs to be calculated relative to the line. In order to do that, we need to start
     // from the span's own advance within the line.
-    advance = ui.Rect.fromLTWH(spanShiftFromLineStart, top, span.width, span.height);
+    advance = ui.Rect.fromLTWH(
+      spanShiftFromLineStart,
+      lineAscent - ascent,
+      span.width,
+      span.height,
+    );
   }
 
   // TODO(jlavrova): Why are we using separate properties instead of `rawFontBoundingBoxAscent` and `rawFontBoundingBoxDescent`?
@@ -1514,6 +1525,14 @@ class TextLine {
   /// Unscaled font descent (without height multipliers) so [ui.TextHeightBehavior]
   /// can revert the last line's descent.
   double rawFontBoundingBoxDescent = 0.0;
+
+  /// True when [ui.TextHeightBehavior.applyHeightToFirstAscent] is false on the
+  /// first line, causing the line and its backgrounds to use unscaled ascent.
+  bool usesRawAscent = false;
+
+  /// True when [ui.TextHeightBehavior.applyHeightToLastDescent] is false on the
+  /// last line, causing the line and its backgrounds to use unscaled descent.
+  bool usesRawDescent = false;
   bool _hasLineMetrics = false;
 
   double paintBoundsAscent = 0.0;
@@ -1552,13 +1571,15 @@ class TextLine {
     if (textHeightBehavior == null) {
       return;
     }
+    usesRawAscent = isFirstLine && !textHeightBehavior.applyHeightToFirstAscent;
+    usesRawDescent = isLastLine && !textHeightBehavior.applyHeightToLastDescent;
     // Strip the height multiplier from the first line's ascent when disabled.
-    if (isFirstLine && !textHeightBehavior.applyHeightToFirstAscent) {
+    if (usesRawAscent) {
       fontBoundingBoxAscent = rawFontBoundingBoxAscent;
     }
     // Strip the height multiplier from the last line's descent when disabled.
     // A single-line paragraph is both first and last, so both branches apply.
-    if (isLastLine && !textHeightBehavior.applyHeightToLastDescent) {
+    if (usesRawDescent) {
       fontBoundingBoxDescent = rawFontBoundingBoxDescent;
     }
   }
