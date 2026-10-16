@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// A single metric comparison entry between baseline and current.
+import 'dart:math' as math;
+
+/// The comparison of a single metric between a baseline run and the current run.
 class MetricComparison {
-  MetricComparison({
+  /// Creates a comparison of [metricKey] between [baseline] and [current].
+  const MetricComparison({
     required this.metricKey,
     required this.baseline,
     required this.current,
@@ -12,290 +15,153 @@ class MetricComparison {
     required this.isRegression,
   });
 
+  /// The flattened metric key, such as `draw_rect.canvaskit.totalUiFrame.average`.
   final String metricKey;
-  final double? baseline;
-  final double? current;
+
+  /// The value of the metric in the baseline run.
+  final double baseline;
+
+  /// The value of the metric in the current run.
+  final double current;
+
+  /// The change from [baseline] to [current], as a percentage of [baseline].
+  ///
+  /// Positive values are slowdowns. This is [double.infinity] when [baseline]
+  /// is zero and [current] is not.
   final double deltaPercent;
+
+  /// Whether [deltaPercent] exceeds the regression threshold.
   final bool isRegression;
 }
 
-/// Aggregated comparison results across all evaluated metrics.
-///
-/// [metrics] is always sorted alphabetically by [MetricComparison.metricKey].
+/// The result of [compareResults].
 class BenchmarkComparison {
-  /// Creates a comparison from [metrics] in any order.
-  ///
-  /// The given [metrics] are copied and sorted alphabetically by
-  /// [MetricComparison.metricKey]; the input list is not modified.
-  factory BenchmarkComparison({
-    required List<MetricComparison> metrics,
-    required double? regressionThreshold,
-    List<String> missingMetrics = const <String>[],
-  }) {
-    final sortedMetrics = List<MetricComparison>.of(metrics)
-      ..sort((MetricComparison a, MetricComparison b) => a.metricKey.compareTo(b.metricKey));
-    return BenchmarkComparison._(
-      metrics: List<MetricComparison>.unmodifiable(sortedMetrics),
-      regressionThreshold: regressionThreshold,
-      missingMetrics: missingMetrics,
-    );
-  }
+  /// Creates a comparison of [metrics].
+  const BenchmarkComparison(this.metrics);
 
-  BenchmarkComparison._({
-    required this.metrics,
-    required this.regressionThreshold,
-    required this.missingMetrics,
-  });
-
-  /// The evaluated metrics, sorted alphabetically by [MetricComparison.metricKey].
+  /// The compared metrics, which [compareResults] sorts by
+  /// [MetricComparison.metricKey].
   final List<MetricComparison> metrics;
-  final double? regressionThreshold;
-  final List<String> missingMetrics;
 
+  /// Whether any of the [metrics] is a regression.
   bool get hasRegressions => metrics.any((MetricComparison m) => m.isRegression);
 }
 
-/// Compares [current] metrics against [baseline] metrics.
+/// Compares the `.average` metrics in [current] against those in [baseline].
 ///
-/// Accepts flattened TaskResult.data metric maps (e.g.
-/// `'draw_rect.canvaskit.totalUiFrame.average': 123.4`) where keys are fully
-/// qualified metric paths mapped to numeric values.
+/// Both maps are flattened `TaskResult.data` maps, such as
+/// `{'draw_rect.canvaskit.totalUiFrame.average': 123.4}`. Only keys that end
+/// in `.average` and appear in both maps are compared; all other keys are
+/// ignored. The resulting metrics are sorted by key.
 ///
-/// Evaluates all numeric metrics whose keys end in `.average`.
+/// All metrics are durations or counts, so higher is worse. A metric is a
+/// regression if [regressionThreshold] is non-null and the metric's
+/// [MetricComparison.deltaPercent] is greater than it, so speedups are never
+/// regressions.
 ///
-/// [regressionThreshold] is a percentage (e.g. 5.0 for 5%). If provided, it must be
-/// a finite, non-negative number (`regressionThreshold >= 0.0`); throws an
-/// [ArgumentError] if [regressionThreshold] is negative or non-finite.
-///
-/// Directionality: All benchmark metrics are durations (microseconds) or counts
-/// where higher is worse. A regression occurs if `regressionThreshold != null`,
-/// `deltaPercent > 0.0`, and `deltaPercent > regressionThreshold`. Speedups (`deltaPercent < 0`)
-/// or changes with zero delta are never regressions.
-///
-/// Metric ordering: [BenchmarkComparison.metrics] is sorted alphabetically by [MetricComparison.metricKey].
-///
-/// Missing metrics: If a metric key ending in `.average` is present in [baseline]
-/// but absent from [current]:
-/// - When [failOnMissingBaseline] is `true` (default): it is recorded in
-///   [BenchmarkComparison.missingMetrics], added to [BenchmarkComparison.metrics]
-///   with `current: null`, `deltaPercent: double.infinity`, and `isRegression: true`,
-///   causing [BenchmarkComparison.hasRegressions] to be `true`.
-/// - When [failOnMissingBaseline] is `false`: it is recorded in
-///   [BenchmarkComparison.missingMetrics] and added to [BenchmarkComparison.metrics]
-///   with `current: null`, `deltaPercent: double.infinity`, and `isRegression: false`,
-///   allowing partial benchmark suite comparisons without triggering regression failure.
-///
-/// New metrics: If a metric key ending in `.average` is present in [current] but
-/// absent from [baseline], it is added to [BenchmarkComparison.metrics] with
-/// `baseline: null`, `deltaPercent: 0.0`, and `isRegression: false`.
-///
-/// Zero-baseline handling:
-/// - If `baseline == 0.0` and `current > 0.0`: `deltaPercent` is `double.infinity`,
-///   flagged as `isRegression = (regressionThreshold != null)`.
-/// - If `baseline == 0.0` and `current == 0.0`: `deltaPercent` is `0.0`, `isRegression = false`.
-///
-/// Metric key validation and non-finite values:
-/// - Non-numeric keys/values (e.g. `scoreKeys`, string metadata) are ignored only
-///   when their key does not end in `.average`.
-/// - Any key ending in `.average` whose value is `null`, not a `num`, not finite
-///   (`double.nan`, `double.infinity`), or negative eagerly throws a [FormatException].
-/// - Valid numeric values are converted using `(val as num).toDouble()` to handle both `int` and `double`.
+/// Throws an [ArgumentError] if [regressionThreshold] is negative or not
+/// finite, and a [FormatException] if a compared value is not a finite,
+/// non-negative number.
 BenchmarkComparison compareResults({
   required Map<String, dynamic> current,
   required Map<String, dynamic> baseline,
   double? regressionThreshold,
-  bool failOnMissingBaseline = true,
 }) {
-  if (regressionThreshold != null) {
-    if (regressionThreshold < 0.0 || !regressionThreshold.isFinite) {
-      throw ArgumentError('regressionThreshold must be a non-negative finite number.');
-    }
+  if (regressionThreshold != null && (regressionThreshold < 0 || !regressionThreshold.isFinite)) {
+    throw ArgumentError.value(
+      regressionThreshold,
+      'regressionThreshold',
+      'must be a finite, non-negative number',
+    );
   }
 
-  final metrics = <MetricComparison>[];
-  final missingMetricsList = <String>[];
-
-  double getNumericValue(Map<String, dynamic> map, String key) {
-    final dynamic val = map[key];
-    if (val == null) {
-      throw FormatException('Value for $key is null.');
+  double read(Map<String, dynamic> values, String key) {
+    final Object? value = values[key];
+    if (value is! num || !value.isFinite || value < 0) {
+      throw FormatException('Expected a finite, non-negative number for $key, but got $value.');
     }
-    if (val is! num) {
-      throw FormatException('Value for $key is not a num: $val');
-    }
-    final double doubleVal = val.toDouble();
-    if (!doubleVal.isFinite || doubleVal < 0) {
-      throw FormatException('Value for $key is not finite or negative: $doubleVal');
-    }
-    return doubleVal;
+    return value.toDouble();
   }
 
-  final Set<String> baselineKeys = baseline.keys
-      .where((String k) => k.endsWith('.average'))
-      .toSet();
-  final Set<String> currentKeys = current.keys.where((String k) => k.endsWith('.average')).toSet();
+  final List<String> keys =
+      baseline.keys
+          .where((String key) => key.endsWith('.average') && current.containsKey(key))
+          .toList()
+        ..sort();
+  return BenchmarkComparison(<MetricComparison>[
+    for (final key in keys)
+      _compareMetric(key, read(baseline, key), read(current, key), regressionThreshold),
+  ]);
+}
 
-  final allKeys = <String>{...baselineKeys, ...currentKeys};
-
-  for (final key in allKeys) {
-    if (baselineKeys.contains(key) && currentKeys.contains(key)) {
-      final double b = getNumericValue(baseline, key);
-      final double c = getNumericValue(current, key);
-
-      var deltaPercent = 0.0;
-      var isRegression = false;
-
-      if (b == 0.0 && c > 0.0) {
-        deltaPercent = double.infinity;
-        isRegression = regressionThreshold != null;
-      } else if (b == 0.0 && c == 0.0) {
-        deltaPercent = 0.0;
-        isRegression = false;
-      } else {
-        deltaPercent = ((c - b) / b) * 100.0;
-        if (regressionThreshold != null &&
-            deltaPercent > 0.0 &&
-            deltaPercent > regressionThreshold) {
-          isRegression = true;
-        }
-      }
-
-      metrics.add(
-        MetricComparison(
-          metricKey: key,
-          baseline: b,
-          current: c,
-          deltaPercent: deltaPercent,
-          isRegression: isRegression,
-        ),
-      );
-    } else if (baselineKeys.contains(key) && !currentKeys.contains(key)) {
-      missingMetricsList.add(key);
-      metrics.add(
-        MetricComparison(
-          metricKey: key,
-          baseline: getNumericValue(baseline, key),
-          current: null,
-          deltaPercent: double.infinity,
-          isRegression: failOnMissingBaseline,
-        ),
-      );
-    } else if (!baselineKeys.contains(key) && currentKeys.contains(key)) {
-      metrics.add(
-        MetricComparison(
-          metricKey: key,
-          baseline: null,
-          current: getNumericValue(current, key),
-          deltaPercent: 0.0,
-          isRegression: false,
-        ),
-      );
-    }
-  }
-
-  return BenchmarkComparison(
-    metrics: metrics,
-    regressionThreshold: regressionThreshold,
-    missingMetrics: missingMetricsList,
+MetricComparison _compareMetric(
+  String key,
+  double baseline,
+  double current,
+  double? regressionThreshold,
+) {
+  final double deltaPercent = baseline == 0
+      ? (current == 0 ? 0.0 : double.infinity)
+      : (current - baseline) / baseline * 100;
+  return MetricComparison(
+    metricKey: key,
+    baseline: baseline,
+    current: current,
+    deltaPercent: deltaPercent,
+    isRegression: regressionThreshold != null && deltaPercent > regressionThreshold,
   );
 }
 
-/// Formats the comparison results into a clean ANSI/ASCII table.
+/// Formats [comparison] as a table for terminal output.
 ///
-/// The table starts with a header row naming the columns (`Metric`,
-/// `Baseline`, `Current`, `Delta` and `Status`), followed by a separator line
-/// of `-` characters and one row per metric. Columns are separated by two
-/// spaces and padded to the width of their widest cell or header: `Metric` and
-/// `Status` are left-aligned, while the numeric `Baseline`, `Current` and
-/// `Delta` columns are right-aligned. Lines have no trailing whitespace.
+/// The table has a header row, a separator row, and one row per metric, with
+/// the columns `Metric`, `Baseline`, `Current`, `Delta` and `Status` two spaces
+/// apart and the numeric columns right-aligned. An infinite delta renders as
+/// `N/A`. The status is `FAIL` for regressions and `PASS` otherwise.
 ///
-/// Rows are ordered alphabetically by metricKey (inherited from [comparison.metrics]).
+/// If [enableAnsi] is true, the status is colored red or green; pass false
+/// when the output is not a terminal.
 ///
-/// Missing or null numeric values (such as `baseline == null` for new metrics,
-/// `current == null` for missing baseline metrics) and infinite deltas
-/// (`deltaPercent == double.infinity`) render as `'N/A'`.
-///
-/// Status label evaluates strictly based on [MetricComparison.isRegression]:
-/// prints `'FAIL'` if `isRegression` is `true`, and `'PASS'` otherwise.
-///
-/// [enableAnsi] controls whether ANSI color/style escape codes are emitted.
-/// Set to `false` for plain ASCII output suitable for headless CI environments (LUCI / Cocoon)
-/// or log redirects. When enabled, only the status label is wrapped in color
-/// codes, and those codes are not counted towards column widths.
-///
-/// An empty [comparison.metrics] list produces an empty string (no header).
+/// Returns an empty string if [comparison] has no metrics.
 String formatAnsiSummaryTable(BenchmarkComparison comparison, {bool enableAnsi = true}) {
   if (comparison.metrics.isEmpty) {
     return '';
   }
-  const header = <String>['Metric', 'Baseline', 'Current', 'Delta', 'Status'];
   final rows = <List<String>>[
+    <String>['Metric', 'Baseline', 'Current', 'Delta', 'Status'],
     for (final MetricComparison m in comparison.metrics)
       <String>[
         m.metricKey,
-        m.baseline?.toStringAsFixed(1) ?? 'N/A',
-        m.current?.toStringAsFixed(1) ?? 'N/A',
-        if (m.deltaPercent == double.infinity) 'N/A' else '${m.deltaPercent.toStringAsFixed(1)}%',
+        m.baseline.toStringAsFixed(1),
+        m.current.toStringAsFixed(1),
+        if (m.deltaPercent.isFinite) '${m.deltaPercent.toStringAsFixed(1)}%' else 'N/A',
         if (m.isRegression) 'FAIL' else 'PASS',
       ],
   ];
   final widths = <int>[
-    for (var column = 0; column < header.length; column++)
-      rows.fold<int>(
-        header[column].length,
-        (int width, List<String> row) => row[column].length > width ? row[column].length : width,
-      ),
+    for (var column = 0; column < rows.first.length; column++)
+      rows.map((List<String> row) => row[column].length).reduce(math.max),
   ];
 
-  // Pads the Metric column on the right and the numeric columns on the left.
-  // The Status column is last, so it is left unpadded.
-  String formatCells(List<String> cells, String status) => <String>[
-    cells[0].padRight(widths[0]),
-    cells[1].padLeft(widths[1]),
-    cells[2].padLeft(widths[2]),
-    cells[3].padLeft(widths[3]),
-    status,
-  ].join('  ');
-
-  final buffer = StringBuffer()
-    ..writeln(formatCells(header, header[4]))
-    ..writeln(widths.map((int width) => '-' * width).join('  '));
+  final buffer = StringBuffer();
   for (var i = 0; i < rows.length; i++) {
     final List<String> row = rows[i];
+    // The status column is last, so it is left unpadded to avoid trailing
+    // whitespace, and colors do not affect the alignment.
     String status = row[4];
-    if (enableAnsi) {
-      final color = comparison.metrics[i].isRegression ? '\x1B[31m' : '\x1B[32m';
-      const reset = '\x1B[0m';
-      status = '$color$status$reset';
+    if (enableAnsi && i > 0) {
+      status = '${comparison.metrics[i - 1].isRegression ? '\x1B[31m' : '\x1B[32m'}$status\x1B[0m';
     }
-    buffer.writeln(formatCells(row, status));
+    buffer.writeln(
+      <String>[
+        row[0].padRight(widths[0]),
+        for (var column = 1; column < 4; column++) row[column].padLeft(widths[column]),
+        status,
+      ].join('  '),
+    );
+    if (i == 0) {
+      buffer.writeln(widths.map((int width) => '-' * width).join('  '));
+    }
   }
   return buffer.toString();
-}
-
-/// Formats raw benchmark profiles and metadata into standardized structured JSON (#180821).
-///
-/// Emits a map with the following explicit schema:
-/// ```json
-/// {
-///   "timestamp": "<ISO-8601 UTC string>",
-///   "metadata": { ... },
-///   "benchmarks": [ ... ]
-/// }
-/// ```
-/// An optional [timestamp] parameter allows deterministic unit testing by overriding
-/// `DateTime.now().toUtc()`. The timestamp is always normalized to UTC via `(timestamp?.toUtc() ?? DateTime.now().toUtc()).toIso8601String()`.
-Map<String, dynamic> formatStructuredJson({
-  required List<Map<String, dynamic>> profiles,
-  required Map<String, dynamic> metadata,
-  DateTime? timestamp,
-}) {
-  final benchmarksMap = <String, dynamic>{};
-  profiles.forEach(benchmarksMap.addAll);
-
-  return <String, dynamic>{
-    'timestamp': (timestamp?.toUtc() ?? DateTime.now().toUtc()).toIso8601String(),
-    'metadata': metadata,
-    'benchmarks': benchmarksMap,
-  };
 }
