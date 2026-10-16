@@ -26,17 +26,17 @@ final class _PackedTextStyle extends Struct {
   @Uint32()
   external int _color;
 
-  @Int32()
-  external int _decoration;
-
   @Uint32()
   external int _decorationColor;
 
-  @Int32()
-  external int _fontWeight;
-
   @Uint32()
   external int _presentMask;
+
+  @Uint16()
+  external int _fontWeight;
+
+  @Uint8()
+  external int _decoration;
 
   @Uint8()
   external int _decorationStyle;
@@ -95,9 +95,9 @@ final class _PackedTextStyle extends Struct {
         _wordSpacing == other._wordSpacing &&
         _height == other._height &&
         _color == other._color &&
-        _decoration == other._decoration &&
         _decorationColor == other._decorationColor &&
         _fontWeight == other._fontWeight &&
+        _decoration == other._decoration &&
         _decorationStyle == other._decorationStyle &&
         _fontStyle == other._fontStyle &&
         _textBaseline == other._textBaseline &&
@@ -113,9 +113,9 @@ final class _PackedTextStyle extends Struct {
     _wordSpacing,
     _height,
     _color,
-    _decoration,
     _decorationColor,
     _fontWeight,
+    _decoration,
     _decorationStyle,
     _fontStyle,
     _textBaseline,
@@ -280,10 +280,7 @@ final class _PackedParagraphStyle extends Struct {
   @Int32()
   external int _maxLines;
 
-  @Int32()
-  external int _textHeightBehavior;
-
-  @Int32()
+  @Uint16()
   external int _fontWeight;
 
   @Uint16()
@@ -294,6 +291,9 @@ final class _PackedParagraphStyle extends Struct {
 
   @Uint8()
   external int _textDirection;
+
+  @Uint8()
+  external int _textHeightBehavior;
 
   @Uint8()
   external int _fontStyle;
@@ -332,10 +332,10 @@ final class _PackedParagraphStyle extends Struct {
         _fontSize == other._fontSize &&
         _height == other._height &&
         _maxLines == other._maxLines &&
-        _textHeightBehavior == other._textHeightBehavior &&
         _fontWeight == other._fontWeight &&
         _textAlign == other._textAlign &&
         _textDirection == other._textDirection &&
+        _textHeightBehavior == other._textHeightBehavior &&
         _fontStyle == other._fontStyle &&
         _hyphens == other._hyphens;
   }
@@ -346,10 +346,10 @@ final class _PackedParagraphStyle extends Struct {
     _fontSize,
     _height,
     _maxLines,
-    _textHeightBehavior,
     _fontWeight,
     _textAlign,
     _textDirection,
+    _textHeightBehavior,
     _fontStyle,
     _hyphens,
   );
@@ -464,7 +464,7 @@ final class _PackedStrutStyle extends Struct {
   @Double()
   external double _leading;
 
-  @Int32()
+  @Uint16()
   external int _fontWeight;
 
   @Uint16()

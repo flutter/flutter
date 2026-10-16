@@ -6,7 +6,7 @@ import("//flutter/build/dart/dart.gni")
 import("//flutter/common/config.gni")
 import("$dart_src/build/dart/dart_action.gni")
 
-template("cpp_data_generator") {
+template("dart_data_to_cpp") {
   assert(defined(invoker.input), "Must pass 'input'")
   assert(defined(invoker.cpp_out), "Must pass 'cpp_out'")
   assert(defined(invoker.dart_out), "Must pass 'dart_out'")
@@ -15,13 +15,13 @@ template("cpp_data_generator") {
     packages = "//flutter/.dart_tool/package_config.json"
     pool = "//build/toolchain:toolchain_pool"
 
-    script = "//flutter/tools/cpp_data_generator/bin/main.dart"
+    script = "//flutter/tools/dart_data_to_cpp/bin/main.dart"
 
     inputs = [
-      "//flutter/tools/cpp_data_generator/lib/cpp_data_generator.dart",
-      "//flutter/tools/cpp_data_generator/lib/src/cpp_generator.dart",
-      "//flutter/tools/cpp_data_generator/lib/src/dart_generator.dart",
-      "//flutter/tools/cpp_data_generator/lib/src/parser.dart",
+      "//flutter/tools/dart_data_to_cpp/lib/dart_data_to_cpp.dart",
+      "//flutter/tools/dart_data_to_cpp/lib/src/cpp_generator.dart",
+      "//flutter/tools/dart_data_to_cpp/lib/src/dart_generator.dart",
+      "//flutter/tools/dart_data_to_cpp/lib/src/parser.dart",
       invoker.input,
       invoker.cpp_out,
       invoker.dart_out,

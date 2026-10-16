@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-name: cpp_data_generator
+name: dart_data_to_cpp
 publish_to: none
 
 # Required for workspace support.

@@ -8,7 +8,7 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:args/args.dart';
-import 'package:cpp_data_generator/cpp_data_generator.dart';
+import 'package:dart_data_to_cpp/dart_data_to_cpp.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:path/path.dart' as path;
 

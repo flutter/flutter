@@ -1604,19 +1604,20 @@ extension type const _NativeColor(Color value) implements _NativeType<Color, Uin
   static Color decode(int raw) => Color(raw);
 }
 
-extension type const _NativeFontWeight(FontWeight value) implements _NativeType<FontWeight, Int32> {
+extension type const _NativeFontWeight(FontWeight value)
+    implements _NativeType<FontWeight, Uint16> {
   int encode() => value.value;
   static FontWeight decode(int raw) => FontWeight(raw);
 }
 
 extension type const _NativeTextDecoration(TextDecoration value)
-    implements _NativeType<TextDecoration, Int32> {
+    implements _NativeType<TextDecoration, Uint8> {
   int encode() => value._mask;
   static TextDecoration decode(int raw) => TextDecoration._(raw);
 }
 
 extension type const _NativeTextHeightBehavior(TextHeightBehavior value)
-    implements _NativeType<TextHeightBehavior, Int32> {
+    implements _NativeType<TextHeightBehavior, Uint8> {
   int encode() =>
       (value.applyHeightToFirstAscent ? 0 : 1 << 0) |
       (value.applyHeightToLastDescent ? 0 : 1 << 1) |
@@ -1772,7 +1773,7 @@ class TextStyle {
        );
 
   /// This constructor describes the C++ interface of this Dart type. It is used by
-  /// `tools/cpp_data_generator` to generate the C++ struct (`flutter::TextStyle`),
+  /// `tools/dart_data_to_cpp` to generate the C++ struct (`flutter::TextStyle`),
   /// and the FFI glue code.
   ///
   /// ### Adding a new primitive field (fixed-size data, passed to C++ by value)
@@ -1780,7 +1781,7 @@ class TextStyle {
   ///  - Add the new parameter and its default value to `TextStyle._` following existing
   ///    examples, and forward it from `TextStyle` to `TextStyle._` and `_encodeTextStyleFfi`.
   ///  - No need to update `TextStyle.operator ==` and `TextStyle.hashCode`.
-  ///  - Run `tools/cpp_data_generator` (or rebuild the engine) to regenerate
+  ///  - Run `tools/dart_data_to_cpp` (or rebuild the engine) to regenerate
   ///    `text_styles.g.h` and `text_styles.g.dart`.
   ///  - Use the primitive value in `flutter::TextStyle` from C++ code.
   ///
@@ -1790,7 +1791,7 @@ class TextStyle {
   ///    following existing examples, and forward it from `TextStyle` to `TextStyle._`
   ///    and `_encodeTextStyleFfi`.
   ///  - Update `TextStyle.operator ==` and `TextStyle.hashCode` to include `_yourField`.
-  ///  - Run `tools/cpp_data_generator` (or rebuild the engine) to regenerate
+  ///  - Run `tools/dart_data_to_cpp` (or rebuild the engine) to regenerate
   ///    `text_styles.g.h` and `text_styles.g.dart`.
   ///  - In C++, convert the Dart_Handle in `flutter::TextStyle` to the desired native
   ///    representation. See the existing examples in `ParagraphBuilder::pushStyle`.

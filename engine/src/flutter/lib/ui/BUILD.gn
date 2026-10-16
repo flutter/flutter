@@ -6,13 +6,13 @@ import("//flutter/common/config.gni")
 import("//flutter/impeller/tools/impeller.gni")
 import("//flutter/shell/config.gni")
 import("//flutter/testing/testing.gni")
-import("//flutter/tools/cpp_data_generator/cpp_data_generator.gni")
+import("//flutter/tools/dart_data_to_cpp/dart_data_to_cpp.gni")
 
 if (is_fuchsia) {
   import("//flutter/tools/fuchsia/gn-sdk/src/gn_configs.gni")
 }
 
-cpp_data_generator("generate_text_styles") {
+dart_data_to_cpp("generate_text_styles") {
   input = "text.dart"
   cpp_out = "text/text_styles.g.h"
   dart_out = "text_styles.g.dart"

@@ -25,10 +25,10 @@ class TextStyle {
   double word_spacing = {};
   double height = {};
   uint32_t color = {};
-  int32_t decoration = {};
   uint32_t decoration_color = {};
-  int32_t font_weight = {};
   uint32_t present_mask = {};
+  uint16_t font_weight = {};
+  uint8_t decoration = {};
   uint8_t decoration_style = {};
   uint8_t font_style = {};
   uint8_t text_baseline = {};
@@ -78,11 +78,11 @@ class ParagraphStyle {
   double font_size = {};
   double height = {};
   int32_t max_lines = {};
-  int32_t text_height_behavior = {};
-  int32_t font_weight = {};
+  uint16_t font_weight = {};
   uint16_t present_mask = {};
   uint8_t text_align = {};
   uint8_t text_direction = {};
+  uint8_t text_height_behavior = {};
   uint8_t font_style = {};
   uint8_t hyphens = {};
   Dart_Handle font_family = {};
@@ -114,7 +114,7 @@ class StrutStyle {
   double font_size = {};
   double height = {};
   double leading = {};
-  int32_t font_weight = {};
+  uint16_t font_weight = {};
   uint16_t present_mask = {};
   uint8_t leading_distribution = {};
   uint8_t font_style = {};

@@ -9,7 +9,7 @@ import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/file_system/overlay_file_system.dart';
 import 'package:analyzer/file_system/physical_file_system.dart';
-import 'package:cpp_data_generator/cpp_data_generator.dart';
+import 'package:dart_data_to_cpp/dart_data_to_cpp.dart';
 import 'package:engine_repo_tools/engine_repo_tools.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -44,7 +44,7 @@ void main() {
     final String virtualPath = path.join(
       flutterRoot,
       'tools',
-      'cpp_data_generator',
+      'dart_data_to_cpp',
       'test',
       '_virtual_input.dart',
     );
