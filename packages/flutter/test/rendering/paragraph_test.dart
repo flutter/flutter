@@ -773,6 +773,7 @@ void main() {
     final result = SemanticsNode();
     final truncatedChild = SemanticsNode();
     truncatedChild.tags = <SemanticsTag>{const PlaceholderSpanIndexSemanticsTag(0)};
+    paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
     paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[
       truncatedChild,
     ]);
@@ -799,6 +800,7 @@ void main() {
     layout(paragraph);
 
     final node = SemanticsNode();
+    paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     final children = <SemanticsNode>[];
     node.visitChildren((SemanticsNode child) {
@@ -819,6 +821,7 @@ void main() {
     );
     layout(paragraph);
     final node = SemanticsNode();
+    paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.attributedLabel.string, '');
     expect(node.attributedLabel.attributes.length, 0);
@@ -838,6 +841,7 @@ void main() {
 
     var failed = false;
     try {
+      paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
       paragraph.assembleSemanticsNode(SemanticsNode(), SemanticsConfiguration(), <SemanticsNode>[]);
     } on AssertionError catch (e) {
       failed = true;
@@ -862,6 +866,7 @@ void main() {
     layout(paragraph);
 
     final node = SemanticsNode();
+    paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.childrenCount, 2);
   });
@@ -887,6 +892,7 @@ void main() {
     layout(paragraph);
 
     final node = SemanticsNode();
+    paragraph.describeSemanticsConfiguration(SemanticsConfiguration());
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(node.childrenCount, 2);
   });
