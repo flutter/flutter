@@ -709,11 +709,14 @@ void DisplayListBuilder::RestoreLayer() {
   if (layer_op->options.bounds_from_caller()) {
     DlRect user_bounds = layer_op->rect;
     if (!content_bounds.IsEmpty()) {
+      DlRect device_bounds;
+      bool has_device_bounds = parent_info().global_state.mapAndClipRect(
+          content_bounds, &device_bounds);
       DlIRect unused;
-      if (current_layer().filter &&
+      if (current_layer().filter && has_device_bounds &&
           current_layer().filter->get_input_device_bounds(
-              DlIRect::RoundOut(content_bounds), DlMatrix(), unused) ==
-              nullptr) {
+              DlIRect::RoundOut(device_bounds),
+              parent_info().global_state.matrix(), unused) == nullptr) {
         if (!user_bounds.Contains(content_bounds)) {
           layer_op->options = layer_op->options.with_content_is_clipped();
         }
@@ -805,16 +808,18 @@ void DisplayListBuilder::TransferLayerBounds(const DlRect& content_bounds) {
   const DlRect clip = parent_info().global_state.GetDeviceCullCoverage();
   const DlMatrix matrix = parent_info().global_state.matrix();
 
-  DlIRect unused;
-  const bool filter_has_unbounded_input =
-      !content_bounds.IsEmpty() &&
-      filter->get_input_device_bounds(DlIRect::RoundOut(content_bounds), matrix,
-                                      unused) == nullptr;
   DlRect layer_clip = clip;
-  if (filter_has_unbounded_input) {
-    if (!parent_info().global_state.mapAndClipRect(content_bounds,
-                                                   &layer_clip)) {
-      layer_clip = DlRect();
+  bool filter_has_unbounded_input = false;
+  if (!content_bounds.IsEmpty()) {
+    DlRect device_bounds;
+    if (parent_info().global_state.mapAndClipRect(content_bounds,
+                                                  &device_bounds)) {
+      DlIRect unused;
+      if (filter->get_input_device_bounds(DlIRect::RoundOut(device_bounds),
+                                          matrix, unused) == nullptr) {
+        filter_has_unbounded_input = true;
+        layer_clip = device_bounds;
+      }
     }
   }
 
