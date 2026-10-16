@@ -929,13 +929,6 @@ class FlutterVmService {
         }
       }
     });
-    unawaited(
-      service.onDone.whenComplete(() {
-        if (!isolatePaused.isCompleted) {
-          isolatePaused.complete();
-        }
-      }),
-    );
 
     try {
       // getFlutterViews() polls until the engine registers a view, which only
@@ -953,7 +946,10 @@ class FlutterVmService {
           pausedIsolateIds.contains(isolateId)) {
         return;
       }
-      await isolatePaused.future;
+      // VmService.dispose() completes service.onDone without closing its
+      // broadcast event StreamControllers (such as onDebugEvent), so race
+      // isolatePaused.future against service.onDone only when waiting is needed.
+      await Future.any(<Future<void>>[isolatePaused.future, service.onDone]);
     } on vm_service.RPCError catch (e) {
       if (!e.isConnectionDisposedException) {
         rethrow;
