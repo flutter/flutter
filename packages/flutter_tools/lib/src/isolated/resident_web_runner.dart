@@ -314,17 +314,12 @@ class ResidentWebRunner extends ResidentRunner {
         if (debuggingOptions.buildInfo.isDebug && !useWasm) {
           await runSourceGenerators();
           final UpdateFSReport report = await _updateDevFS(fullRestart: true, resetCompiler: true);
-          if (debuggingOptions.buildInfo.deprecatedJsInterop case final bool deprecatedJsInterop) {
-            analytics.send(
-              Event.flutterBuildInfo(
-                label: 'web-compile',
-                buildType: 'web',
-                command: 'run',
-                settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
-                error: report.success ? null : 'ddc-compile-failure',
-              ),
-            );
-          }
+          sendDdcCompileAnalytics(
+            deprecatedJsInterop: debuggingOptions.buildInfo.deprecatedJsInterop,
+            command: 'run',
+            succeeded: report.success,
+            analytics: analytics,
+          );
           if (!report.success) {
             logger.printError('Failed to compile application.');
             appFailedToStart();

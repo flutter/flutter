@@ -20,13 +20,18 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 
 void main() {
+  late FakeAnalytics fakeAnalytics;
+
+  setUp(() {
+    fakeAnalytics = getInitializedFakeAnalyticsInstance(
+      fs: MemoryFileSystem.test(),
+      fakeFlutterVersion: FakeFlutterVersion(),
+    );
+  });
+
   testUsingContext('web test compiler issues valid compile command', () async {
     final logger = BufferLogger.test();
     final fileSystem = MemoryFileSystem.test();
-    final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
-      fs: fileSystem,
-      fakeFlutterVersion: FakeFlutterVersion(),
-    );
     fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);
     fileSystem.file('build/out').createSync(recursive: true);
     fileSystem.file('build/build/out.sources').createSync(recursive: true);
@@ -86,7 +91,6 @@ void main() {
       ),
     ]);
     final compiler = WebTestCompiler(
-      analytics: fakeAnalytics,
       toolContext: FakeToolContext(
         artifacts: Artifacts.test(),
         config: config,
@@ -116,7 +120,7 @@ void main() {
 
     expect(processManager.hasRemainingExpectations, isFalse);
     expect(fakeAnalytics.sentEvents, isEmpty);
-  });
+  }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
 
   for (final deprecatedJsInterop in <bool>[true, false]) {
     for (final succeeds in <bool>[true, false]) {
@@ -124,10 +128,6 @@ void main() {
           'deprecatedJsInterop: $deprecatedJsInterop (succeeds: $succeeds)', () async {
         final logger = BufferLogger.test();
         final fileSystem = MemoryFileSystem.test();
-        final FakeAnalytics fakeAnalytics = getInitializedFakeAnalyticsInstance(
-          fs: fileSystem,
-          fakeFlutterVersion: FakeFlutterVersion(),
-        );
         fileSystem.file('project/test/fake_test.dart').createSync(recursive: true);
         if (succeeds) {
           fileSystem.file('build/out').createSync(recursive: true);
@@ -196,7 +196,6 @@ void main() {
           ),
         ]);
         final compiler = WebTestCompiler(
-          analytics: fakeAnalytics,
           toolContext: FakeToolContext(
             artifacts: Artifacts.test(),
             config: config,
@@ -232,7 +231,7 @@ void main() {
             error: succeeds ? null : 'ddc-compile-failure',
           ),
         ]);
-      });
+      }, overrides: <Type, Generator>{Analytics: () => fakeAnalytics});
     }
   }
 

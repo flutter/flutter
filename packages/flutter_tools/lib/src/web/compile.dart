@@ -19,6 +19,7 @@ import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../compile.dart' show kDdcCanaryFeatures;
 import '../flutter_plugins.dart';
+import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -327,4 +328,26 @@ String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) 
     return formatValues(values);
   }
   return result;
+}
+
+/// Sends an [Event.flutterBuildInfo] event for a DDC web compilation when
+/// `--[no-]deprecated-js-interop` (`[deprecatedJsInterop]`) was explicitly set.
+void sendDdcCompileAnalytics({
+  required bool? deprecatedJsInterop,
+  required String command,
+  required bool succeeded,
+  Analytics? analytics,
+}) {
+  if (deprecatedJsInterop == null) {
+    return;
+  }
+  (analytics ?? globals.analytics).send(
+    Event.flutterBuildInfo(
+      label: 'web-compile',
+      buildType: 'web',
+      command: command,
+      settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+      error: succeeded ? null : 'ddc-compile-failure',
+    ),
+  );
 }
