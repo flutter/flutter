@@ -2224,8 +2224,7 @@ bool Canvas::AttemptBlurredTextOptimization(
   //              https://github.com/flutter/flutter/issues/133297
   std::shared_ptr<FilterContents> filter =
       paint.mask_blur_descriptor->CreateMaskBlur(
-          FilterInput::Make(text_contents),
-          /*is_solid_color=*/true, GetCurrentTransform());
+          FilterInput::Make(text_contents), GetCurrentTransform());
 
   TextFrameFingerprint fingerprint = ComputeTextFrameFingerprint(*text_frame);
   TextShadowCache::TextShadowCacheKey cache_key(
