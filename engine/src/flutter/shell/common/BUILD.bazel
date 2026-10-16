@@ -5,9 +5,9 @@
 # Generated from //flutter/shell/common/BUILD.gn by gn_to_bazel; do not edit.
 # Not converted: shell_benchmarks.
 
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
-load("//engine/src/flutter/testing:testing.bzl", "flutter_gpu_test_backends", "flutter_test_fixtures")
+load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -250,7 +250,7 @@ flutter_gpu_test_backends(
     name = "gpu_test_backends",
 )
 
-cc_test(
+flutter_cc_test(
     name = "shell_unittests",
     size = "medium",
     srcs = [

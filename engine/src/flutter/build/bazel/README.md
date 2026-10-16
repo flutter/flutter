@@ -459,8 +459,9 @@ runs it through gtest-parallel, and Bazel's form of that is `shard_count`
 (`testShardCounts` in bazel_mapping.dart: ten shards), which works because
 `xvfb_run.sh` hands Bazel's `TEST_TOTAL_SHARDS`/`TEST_SHARD_INDEX`/
 `TEST_SHARD_STATUS_FILE` to googletest under the `GTEST_*` names the
-in-tree copy reads -- a plain `cc_test` suite has no such wrapper, and the
-converter refuses to shard one. The test's environment is `run_tests.py`'s
+in-tree copy reads (a suite under gtest-parallel, below, is split by the
+runner instead; a plain `cc_test` has no wrapper, and the converter
+refuses to shard one). The test's environment is `run_tests.py`'s
 `vulkan_validation_env` as well (`vulkan_validation = True`): the loader is
 pointed at the copied SwiftShader manifest (`VK_ICD_FILENAMES`) and layer
 directory (`VK_LAYER_PATH`), with the Khronos layer enabled
@@ -491,6 +492,40 @@ back. The compiled GSettings schemas the suite reads (`testing/gschemas`,
 GN's `copy()` to `assets/<name>/gschemas.compiled`) are a `gn_copy` with
 `outs` and the test's `data`: a `copy()` of the same file among a binary's
 deps is run-time data, which GN's dependency only ordered.
+
+### The harness: gtest-parallel
+
+`run_tests.py --type engine` does not run a suite's binary once. Every suite
+of its `run_cc_tests` list goes through gtest-parallel
+(`flutter/third_party/gtest-parallel`, a DEPS tree; `@gtest_parallel` here)
+with `--repeat=2`: the runner lists the suite's tests and runs each in a
+process of its own, every test twice, on as many workers as the machine has
+cores -- a test that leaks state into its process, or fails the second time
+round, fails there, and a single-process run would not see it. The
+twenty-seven suites of that list on a Linux host (`gtestParallelSuites` in
+bazel_mapping.dart; every suite `bazel test //engine/src/flutter/...` has
+except the two Impeller ones, whose builders run the binaries whole, and the
+smoke tests of the Bazel setup itself) are therefore `flutter_cc_test`
+(testing.bzl) -- a `cc_binary` and a test target that runs it through
+`testing/gtest_parallel_run.sh` under the synced Python -- or, for the GTK
+shell's, `flutter_display_test(gtest_parallel = True)`, the runner under the
+display. The wrapper adds `--repeat=2`, hands Bazel's shards to the runner
+(`--shard_count`/`--shard_index`; the `GTEST_*` names an outer wrapper set
+are dropped, or each test's process would shard again), keeps the per-test
+logs under the test's undeclared outputs (`gtest-parallel-logs/`) and the
+runner's timing cache under `TEST_TMPDIR`. The runner's own options come from
+`testRuns` (`runnerArgs`: `ui_unittests`' `--timeout=90`, `run_tests.py`'s
+"the image release unit test can take a while"); a suite's arguments
+(`flow_unittests`' golden directory and font, after `run_tests.py`'s `--`)
+follow the binary. A suite's log is then gtest-parallel's: a line per run
+(`[N/M] Suite.Test (ms)`, `M` twice the suite's tests) and the failed runs'
+output in full. One scheduling difference: `run_tests.py` runs the suites
+one after another, each with a worker per core, while Bazel runs tests side
+by side -- twenty-seven suites each starting twenty-four workers thrashed
+the machine (a 50 ms test took 5 s; the display-list suite ran past its
+timeout) -- so each suite reserves eight CPUs from Bazel (`tags = ["cpu:8"]`)
+and gives the runner the same eight workers: the same processes and
+repeats, three suites at a time on a 24-core host.
 
 ## Impeller's shader pipeline
 
