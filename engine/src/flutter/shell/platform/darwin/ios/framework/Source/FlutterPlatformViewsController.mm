@@ -1054,6 +1054,7 @@ static CGRect GetCGRectFromDlRect(const DlRect& clipDlRect) {
 
 - (std::vector<UIView*>)computeViewsToDisposeWithCompositionOrder:
     (const std::vector<int64_t>&)compositionOrder {
+  FML_DCHECK([[NSThread currentThread] isMainThread]);
   std::vector<UIView*> views;
   if (self.viewsToDispose.empty()) {
     return views;
