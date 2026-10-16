@@ -1405,17 +1405,17 @@ void _canvasTests() {
   });
 
   test('drawParagraph', () {
-    final builder = CkParagraphBuilder(CkParagraphStyle());
+    final builder = EngineParagraphBuilder(EngineParagraphStyle());
     builder.addText('Hello');
-    final CkParagraph paragraph = builder.build();
+    final EngineParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 100));
-    canvas.drawParagraph(paragraph.skiaObject, 10, 20);
+    canvas.drawParagraph((paragraph.backendParagraph as CkParagraph).skiaObject, 10, 20);
   });
 
   test('Paragraph converts caret position to character position', () {
-    final builder = CkParagraphBuilder(CkParagraphStyle());
+    final builder = EngineParagraphBuilder(EngineParagraphStyle());
     builder.addText('Hello there');
-    final CkParagraph paragraph = builder.build();
+    final EngineParagraph paragraph = builder.build();
     paragraph.layout(const ui.ParagraphConstraints(width: 100));
     ui.TextRange range = paragraph.getWordBoundary(
       const ui.TextPosition(offset: 5, affinity: ui.TextAffinity.upstream),
@@ -1429,9 +1429,9 @@ void _canvasTests() {
   });
 
   test('Paragraph dispose', () {
-    final builder = CkParagraphBuilder(CkParagraphStyle());
+    final builder = EngineParagraphBuilder(EngineParagraphStyle());
     builder.addText('Hello');
-    final CkParagraph paragraph = builder.build();
+    final EngineParagraph paragraph = builder.build();
 
     paragraph.dispose();
     expect(paragraph.debugDisposed, true);
