@@ -477,6 +477,46 @@ Future<void> testMain() async {
     expect(frame.image.height, 1);
   });
 
+  // CanvasKit Chromium has no fallback: ImageDecoder is always used.
+  if (!browserSupportsCanvaskitChromium) {
+    // Regression test for https://github.com/flutter/flutter/issues/194067.
+    test('decodes a Uint8List view into a larger buffer without ImageDecoder', () async {
+      browserSupportsImageDecoder = false;
+      addTearDown(debugResetBrowserSupportsImageDecoder);
+
+      final HttpFetchResponse response = await httpFetch('/test_images/2x2.png');
+      final Uint8List png = (await response.payload.asByteBuffer()).asUint8List();
+      // The PNG with junk bytes before and after it in its backing buffer,
+      // like an image embedded in a larger file.
+      const padding = 8;
+      final backing = Uint8List(png.length + 2 * padding)
+        ..fillRange(0, padding, 0xAB)
+        ..setAll(padding, png)
+        ..fillRange(padding + png.length, png.length + 2 * padding, 0xCD);
+      final view = Uint8List.sublistView(backing, padding, padding + png.length);
+
+      Future<ui.Image> decode(Uint8List bytes) async {
+        final ui.Codec codec = await renderer.instantiateImageCodec(bytes);
+        final ui.Image image = (await codec.getNextFrame()).image;
+        codec.dispose();
+        return image;
+      }
+
+      final ui.Image expected = await decode(Uint8List.fromList(png));
+      addTearDown(expected.dispose);
+      final ui.Image image = await decode(view);
+      addTearDown(image.dispose);
+      expect(image.width, expected.width);
+      expect(image.height, expected.height);
+      final ByteData expectedPixels = (await expected.toByteData())!;
+      final ByteData pixels = (await image.toByteData())!;
+      expect(
+        pixels.buffer.asUint8List(pixels.offsetInBytes, 4),
+        expectedPixels.buffer.asUint8List(expectedPixels.offsetInBytes, 4),
+      );
+    });
+  }
+
   test('isAvif', () {
     expect(isAvif(Uint8List.fromList(<int>[])), isFalse);
     expect(isAvif(Uint8List.fromList(<int>[1, 2, 3])), isFalse);
