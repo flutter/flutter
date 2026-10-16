@@ -25,6 +25,7 @@ import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../compile.dart' show kDdcCanaryFeatures;
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
@@ -212,14 +213,14 @@ class WebAssetServer implements AssetReader {
     required WebRendererMode webRenderer,
     required bool isWasm,
     required bool useLocalCanvasKit,
+    required ToolContext toolContext,
     bool testMode = false,
     DwdsLauncher dwdsLauncher = Dwds.start,
     bool useDwdsWebSocketConnection = false,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
     Map<String, String> webDefines = const <String, String>{},
   }) async {
+    final ToolContext(:Cache cache, fs: FileSystem fileSystem, :Logger logger, :Platform platform) =
+        toolContext;
     final String hostname = webDevServerConfig.host;
     final int port = webDevServerConfig.port;
     final HttpsConfig? httpsConfig = webDevServerConfig.https;
@@ -313,7 +314,7 @@ class WebAssetServer implements AssetReader {
         entrypoint,
         fileSystem: fileSystem,
         platform: platform,
-        flutterRoot: Cache.flutterRoot,
+        flutterRoot: cache.flutterRoot,
         webBuildDirectory: getWebBuildDirectory(config: globals.config, fileSystem: fileSystem),
         basePath: server.basePath,
         needsCoopCoep: crossOriginIsolation,

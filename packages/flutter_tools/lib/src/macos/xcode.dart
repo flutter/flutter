@@ -18,6 +18,7 @@ import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../ios/xcodeproj.dart';
 import '../xcode_project.dart';
 
@@ -46,17 +47,7 @@ String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
 
 /// A utility class for interacting with Xcode command line tools.
 class Xcode {
-  Xcode({
-    required this._platform,
-    required ProcessManager processManager,
-    required Logger logger,
-    required this._fileSystem,
-    required this._xcodeProjectInterpreter,
-    required UserMessages userMessages,
-    this._flutterRoot,
-  }) : _userMessage = userMessages,
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
-       _logger = logger;
+  Xcode({required this._toolContext, required this._xcodeProjectInterpreter});
 
   /// Create an [Xcode] for testing.
   ///
@@ -68,39 +59,38 @@ class Xcode {
     XcodeProjectInterpreter? xcodeProjectInterpreter,
     Platform? platform,
     FileSystem? fileSystem,
-    String? flutterRoot,
+    String flutterRoot = '',
     Logger? logger,
   }) {
     platform ??= FakePlatform(operatingSystem: 'macos', environment: <String, String>{});
     logger ??= BufferLogger.test();
+    fileSystem ??= MemoryFileSystem.test();
     return Xcode(
-      platform: platform,
-      processManager: processManager,
-      fileSystem: fileSystem ?? MemoryFileSystem.test(),
-      userMessages: UserMessages(),
-      flutterRoot: flutterRoot,
-      logger: logger,
+      toolContext: _XcodeTestToolContext(
+        fs: fileSystem,
+        flutterRoot: flutterRoot,
+        logger: logger,
+        platform: platform,
+        processManager: processManager,
+      ),
       xcodeProjectInterpreter:
           xcodeProjectInterpreter ?? XcodeProjectInterpreter.test(processManager: processManager),
     );
   }
 
-  final Platform _platform;
-  final ProcessUtils _processUtils;
-  final FileSystem _fileSystem;
+  final ToolContext _toolContext;
   final XcodeProjectInterpreter _xcodeProjectInterpreter;
-  final UserMessages _userMessage;
-  final String? _flutterRoot;
-  final Logger _logger;
+
+  String get flutterRoot => _toolContext.cache.flutterRoot;
 
   bool get isInstalledAndMeetsVersionCheck =>
-      _platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
+      _toolContext.platform.isMacOS && isInstalled && isRequiredVersionSatisfactory;
 
   String? _xcodeSelectPath;
   String? get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath = _processUtils
+        _xcodeSelectPath = _toolContext.processUtils
             .runSync(<String>['/usr/bin/xcode-select', '--print-path'])
             .stdout
             .trim();
@@ -117,13 +107,14 @@ class Xcode {
     // If the Xcode Select Path is /Applications/Xcode.app/Contents/Developer,
     // the path to Xcode App is /Applications/Xcode.app
 
+    final UserMessages userMessages = _toolContext.userMessages;
     final String? pathToXcode = xcodeSelectPath;
     if (pathToXcode == null || pathToXcode.isEmpty) {
-      throwToolExit(_userMessage.xcodeMissing);
+      throwToolExit(userMessages.xcodeMissing);
     }
     final int index = pathToXcode.indexOf('.app');
     if (index == -1) {
-      throwToolExit(_userMessage.xcodeMissing);
+      throwToolExit(userMessages.xcodeMissing);
     }
     return pathToXcode.substring(0, index + 4);
   }
@@ -131,15 +122,11 @@ class Xcode {
   /// Path to script to automate debugging through Xcode. Used in xcode_debug.dart.
   /// Located in this file to make it easily overrideable in google3.
   String get xcodeAutomationScriptPath {
-    final String flutterRoot = _flutterRoot ?? Cache.flutterRoot!;
-    final String flutterToolsAbsolutePath = _fileSystem.path.join(
-      flutterRoot,
-      'packages',
-      'flutter_tools',
-    );
+    final FileSystem fs = _toolContext.fs;
+    final String flutterToolsAbsolutePath = fs.path.join(flutterRoot, 'packages', 'flutter_tools');
 
     final filePath = '$flutterToolsAbsolutePath/bin/xcode_debug.js';
-    if (!_fileSystem.file(filePath).existsSync()) {
+    if (!fs.file(filePath).existsSync()) {
       throwToolExit('Unable to find Xcode automation script at $filePath');
     }
     return filePath;
@@ -159,7 +146,10 @@ class Xcode {
   bool get eulaSigned {
     if (_eulaSigned == null) {
       try {
-        final RunResult result = _processUtils.runSync(<String>[...xcrunCommand(), 'clang']);
+        final RunResult result = _toolContext.processUtils.runSync(<String>[
+          ...xcrunCommand(),
+          'clang',
+        ]);
         if (result.stdout.contains('license')) {
           _eulaSigned = false;
         } else if (result.stderr.contains('license')) {
@@ -180,7 +170,7 @@ class Xcode {
   bool get isSimctlInstalled {
     // This command will error if additional components need to be installed in
     // xcode 9.2 and above.
-    _isSimctlInstalled ??= _processUtils.exitsHappySync(<String>[
+    _isSimctlInstalled ??= _toolContext.processUtils.exitsHappySync(<String>[
       ...xcrunCommand(),
       'simctl',
       'list',
@@ -200,7 +190,7 @@ class Xcode {
         _isDevicectlInstalled = false;
         return _isDevicectlInstalled!;
       }
-      _isDevicectlInstalled = _processUtils.exitsHappySync(<String>[
+      _isDevicectlInstalled = _toolContext.processUtils.exitsHappySync(<String>[
         ...xcrunCommand(),
         'devicectl',
         '--version',
@@ -247,11 +237,15 @@ class Xcode {
   Future<RunResult> strip(List<String> args) => _run('strip', args);
 
   Future<RunResult> _run(String command, List<String> args) {
-    return _processUtils.run(<String>[...xcrunCommand(), command, ...args], throwOnError: true);
+    return _toolContext.processUtils.run(<String>[
+      ...xcrunCommand(),
+      command,
+      ...args,
+    ], throwOnError: true);
   }
 
   Future<String> sdkLocation(EnvironmentType environmentType) async {
-    final RunResult runResult = await _processUtils.run(<String>[
+    final RunResult runResult = await _toolContext.processUtils.run(<String>[
       ...xcrunCommand(),
       '--sdk',
       getSDKNameForIOSEnvironmentType(environmentType),
@@ -268,33 +262,77 @@ class Xcode {
     if (selectPath == null) {
       return null;
     }
-    final String deviceHubPath = _fileSystem.path.join(
-      _fileSystem.path.dirname(selectPath),
+    final FileSystem fs = _toolContext.fs;
+    final String deviceHubPath = fs.path.join(
+      fs.path.dirname(selectPath),
       'Applications',
       'DeviceHub.app',
     );
-    if (_fileSystem.directory(deviceHubPath).existsSync()) {
+    if (fs.directory(deviceHubPath).existsSync()) {
       return deviceHubPath;
     }
-    final String simulatorPath = _fileSystem.path.join(selectPath, 'Applications', 'Simulator.app');
-    return _fileSystem.directory(simulatorPath).existsSync() ? simulatorPath : null;
+    final String simulatorPath = fs.path.join(selectPath, 'Applications', 'Simulator.app');
+    return fs.directory(simulatorPath).existsSync() ? simulatorPath : null;
   }
 
   /// Gets the version number of the platform for the selected SDK.
   Future<Version?> sdkPlatformVersion(EnvironmentType environmentType) async {
-    final RunResult runResult = await _processUtils.run(<String>[
+    final ToolContext(:Logger logger, :ProcessUtils processUtils) = _toolContext;
+    final RunResult runResult = await processUtils.run(<String>[
       ...xcrunCommand(),
       '--sdk',
       getSDKNameForIOSEnvironmentType(environmentType),
       '--show-sdk-platform-version',
     ]);
     if (runResult.exitCode != 0) {
-      _logger.printError('Could not find SDK Platform Version: ${runResult.stderr}');
+      logger.printError('Could not find SDK Platform Version: ${runResult.stderr}');
       return null;
     }
     final String versionString = runResult.stdout.trim();
     return Version.parse(versionString);
   }
+}
+
+class _XcodeTestToolContext implements ToolContext {
+  _XcodeTestToolContext({
+    required this.fs,
+    required String flutterRoot,
+    required this.logger,
+    required this.platform,
+    required this.processManager,
+  }) : cache = Cache.test(
+         fileSystem: fs,
+         flutterRoot: flutterRoot,
+         logger: logger,
+         platform: platform,
+         processManager: processManager,
+       ),
+       processUtils = ProcessUtils(logger: logger, processManager: processManager),
+       userMessages = UserMessages();
+
+  @override
+  final Cache cache;
+
+  @override
+  final FileSystem fs;
+
+  @override
+  final Logger logger;
+
+  @override
+  final Platform platform;
+
+  @override
+  final ProcessManager processManager;
+
+  @override
+  final ProcessUtils processUtils;
+
+  @override
+  final UserMessages userMessages;
+
+  @override
+  Object? noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// Determines the iOS [EnvironmentType] from [sdkroot].

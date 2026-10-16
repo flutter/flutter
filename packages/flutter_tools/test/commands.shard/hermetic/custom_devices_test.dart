@@ -204,6 +204,10 @@ CustomDevicesCommand createCustomDevicesCommand({
           fileSystem: fileSystem,
           directory: fileSystem.directory('/'),
           logger: logger,
+          cache: Cache.test(
+            processManager: processManager,
+            flutterRoot: platform.isWindows ? windowsFlutterRoot : linuxFlutterRoot,
+          ),
         );
 
   final operatingSystemUtils = FakeOperatingSystemUtils(
@@ -293,10 +297,6 @@ void main() {
   });
 
   group('linux', () {
-    setUp(() {
-      Cache.flutterRoot = linuxFlutterRoot;
-    });
-
     testWithoutContext(
       'custom-devices command shows config file in help when feature is enabled',
       () async {
@@ -396,6 +396,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
 
         expect(
@@ -488,6 +492,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
 
         expect(
@@ -579,6 +587,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
 
         expect(
@@ -675,6 +687,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
 
         expect(
@@ -754,6 +770,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
 
         expect(
@@ -813,6 +833,7 @@ void main() {
         fileSystem: fs,
         directory: fs.directory('/'),
         logger: BufferLogger.test(),
+        cache: Cache.test(processManager: FakeProcessManager.any(), flutterRoot: linuxFlutterRoot),
       );
 
       config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid'));
@@ -847,6 +868,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
         );
         config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid2'));
         final Uint8List contentsBefore = fs.file('.flutter_custom_devices.json').readAsBytesSync();
@@ -920,7 +945,15 @@ void main() {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
 
-      CustomDevicesConfig.test(fileSystem: fs, directory: fs.directory('/'), logger: logger)
+      CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: logger,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
+        )
         ..add(
           CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', enabled: true),
         )
@@ -951,7 +984,15 @@ void main() {
       final fs = MemoryFileSystem.test();
       final logger = BufferLogger.test();
 
-      CustomDevicesConfig.test(fileSystem: fs, directory: fs.directory('/'), logger: logger)
+      CustomDevicesConfig.test(
+          fileSystem: fs,
+          directory: fs.directory('/'),
+          logger: logger,
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: linuxFlutterRoot,
+          ),
+        )
         ..add(
           CustomDeviceConfig.exampleUnix.copyWith(id: 'testid', label: 'testlabel', enabled: true),
         )
@@ -1033,10 +1074,6 @@ void main() {
   });
 
   group('windows', () {
-    setUp(() {
-      Cache.flutterRoot = windowsFlutterRoot;
-    });
-
     testWithoutContext(
       'custom-devices add command correctly adds ssh device config on windows',
       () async {
@@ -1070,6 +1107,10 @@ void main() {
           fileSystem: fs,
           directory: fs.directory('/'),
           logger: BufferLogger.test(),
+          cache: Cache.test(
+            processManager: FakeProcessManager.any(),
+            flutterRoot: windowsFlutterRoot,
+          ),
         );
 
         expect(

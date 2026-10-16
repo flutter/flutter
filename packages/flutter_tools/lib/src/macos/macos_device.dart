@@ -4,12 +4,12 @@
 
 import 'package:process/process.dart';
 
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
+import '../cache.dart';
+import '../context/tool_context.dart';
 import '../desktop_device.dart';
 import '../device.dart';
 import '../project.dart';
@@ -19,19 +19,18 @@ import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends DesktopDevice {
-  MacOSDevice({
-    required super.processManager,
-    required super.logger,
-    required super.fileSystem,
-    required super.operatingSystemUtils,
-  }) : _processManager = processManager,
-       _logger = logger,
-       _operatingSystemUtils = operatingSystemUtils,
-       super('macos', platformType: PlatformType.macos, ephemeral: false);
+  MacOSDevice({required this._toolContext})
+    : super(
+        'macos',
+        ephemeral: false,
+        fileSystem: _toolContext.fs,
+        logger: _toolContext.logger,
+        operatingSystemUtils: _toolContext.os,
+        platformType: PlatformType.macos,
+        processManager: _toolContext.processManager,
+      );
 
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final OperatingSystemUtils _operatingSystemUtils;
+  final ToolContext _toolContext;
 
   @override
   Future<bool> isSupported() async => true;
@@ -46,15 +45,11 @@ class MacOSDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.darwin;
 
   @override
-  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_operatingSystemUtils.hostPlatform);
+  Future<CpuArch> get cpuArch async => CpuArch.fromHostPlatform(_toolContext.os.hostPlatform);
 
   @override
-  Future<String> get targetPlatformDisplayName async {
-    if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
-      return 'darwin-arm64';
-    }
-    return 'darwin-x64';
-  }
+  Future<String> get targetPlatformDisplayName async =>
+      _toolContext.os.hostPlatform == HostPlatform.darwin_arm64 ? 'darwin-arm64' : 'darwin-x64';
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
@@ -67,11 +62,13 @@ class MacOSDevice extends DesktopDevice {
     String? mainPath,
     bool usingCISystem = false,
   }) async {
+    final ToolContext(:Cache cache, :Logger logger) = _toolContext;
     await buildMacOS(
       flutterProject: FlutterProject.current(),
       buildInfo: buildInfo,
+      flutterRoot: cache.flutterRoot,
       targetOverride: mainPath,
-      verboseLogging: _logger.isVerbose,
+      verboseLogging: logger.isVerbose,
       usingCISystem: usingCISystem,
     );
   }
@@ -83,42 +80,32 @@ class MacOSDevice extends DesktopDevice {
 
   @override
   void onAttached(covariant MacOSApp package, BuildInfo buildInfo, Process process) {
+    final ToolContext(:Logger logger, :ProcessManager processManager) = _toolContext;
     // Bring app to foreground. Ideally this would be done post-launch rather
     // than post-attach, since this won't run for release builds, but there's
     // no general-purpose way of knowing when a process is far enough along in
     // the launch process for 'open' to foreground it.
     final String? applicationBundle = package.applicationBundle(buildInfo);
     if (applicationBundle == null) {
-      _logger.printError('Failed to foreground app; application bundle not found');
+      logger.printError('Failed to foreground app; application bundle not found');
       return;
     }
-    _processManager.run(<String>['open', applicationBundle]).then((ProcessResult result) {
+    processManager.run(<String>['open', applicationBundle]).then((ProcessResult result) {
       if (result.exitCode != 0) {
-        _logger.printError('Failed to foreground app; open returned ${result.exitCode}');
+        logger.printError('Failed to foreground app; open returned ${result.exitCode}');
       }
     });
   }
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {
-  MacOSDevices({
-    required this._platform,
-    required this._macOSWorkflow,
-    required this._processManager,
-    required this._logger,
-    required this._fileSystem,
-    required this._operatingSystemUtils,
-  }) : super('macOS devices');
+  MacOSDevices({required this._macOSWorkflow, required this._toolContext}) : super('macOS devices');
 
   final MacOSWorkflow _macOSWorkflow;
-  final Platform _platform;
-  final ProcessManager _processManager;
-  final Logger _logger;
-  final FileSystem _fileSystem;
-  final OperatingSystemUtils _operatingSystemUtils;
+  final ToolContext _toolContext;
 
   @override
-  bool get supportsPlatform => _platform.isMacOS;
+  bool get supportsPlatform => _toolContext.platform.isMacOS;
 
   @override
   bool get canListAnything => _macOSWorkflow.canListDevices;
@@ -131,14 +118,7 @@ class MacOSDevices extends PollingDeviceDiscovery {
     if (!canListAnything) {
       return const <Device>[];
     }
-    return <Device>[
-      MacOSDevice(
-        processManager: _processManager,
-        logger: _logger,
-        fileSystem: _fileSystem,
-        operatingSystemUtils: _operatingSystemUtils,
-      ),
-    ];
+    return <Device>[MacOSDevice(toolContext: _toolContext)];
   }
 
   @override

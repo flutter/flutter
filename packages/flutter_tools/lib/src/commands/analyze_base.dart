@@ -20,19 +20,15 @@ import '../base/platform.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 
 /// Common behavior for `flutter analyze` and `flutter analyze --watch`
 abstract class AnalyzeBase {
   AnalyzeBase(
     this.argResults, {
-    required this.artifacts,
-    required this.fileSystem,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
     required this.repoPackages,
     required this.suppressAnalytics,
-    required this.terminal,
+    required this.toolContext,
   });
 
   /// The parsed argument results for execution.
@@ -40,22 +36,26 @@ abstract class AnalyzeBase {
   @protected
   final List<Directory> repoPackages;
   @protected
-  final FileSystem fileSystem;
-  @protected
-  final Logger logger;
-  @protected
-  final ProcessManager processManager;
-  @protected
-  final Platform platform;
-  @protected
-  final Terminal terminal;
-  @protected
-  final Artifacts artifacts;
-  @protected
   final bool suppressAnalytics;
+  @protected
+  final ToolContext toolContext;
+  @protected
+  Artifacts get artifacts => toolContext.artifacts;
+  @protected
+  Cache get cache => toolContext.cache;
+  @protected
+  FileSystem get fileSystem => toolContext.fs;
+  @protected
+  Logger get logger => toolContext.logger;
+  @protected
+  ProcessManager get processManager => toolContext.processManager;
+  @protected
+  Platform get platform => toolContext.platform;
+  @protected
+  Terminal get terminal => toolContext.terminal;
 
   @protected
-  String get flutterRoot => fileSystem.path.absolute(Cache.flutterRoot!);
+  String get flutterRoot => fileSystem.path.absolute(cache.flutterRoot);
 
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
@@ -150,13 +150,12 @@ class PackageDependency {
   }
 
   bool get hasConflict => values.length > 1;
-  bool hasConflictAffectingFlutterRepo(FileSystem fileSystem) {
-    final String? flutterRoot = Cache.flutterRoot;
-    assert(flutterRoot != null && fileSystem.path.isAbsolute(flutterRoot));
+  bool hasConflictAffectingFlutterRepo(FileSystem fileSystem, String flutterRoot) {
+    assert(fileSystem.path.isAbsolute(flutterRoot));
     for (final List<String> targetSources in values.values) {
       for (final source in targetSources) {
         assert(fileSystem.path.isAbsolute(source));
-        if (fileSystem.path.isWithin(flutterRoot!, source)) {
+        if (fileSystem.path.isWithin(flutterRoot, source)) {
           return true;
         }
       }
@@ -210,6 +209,7 @@ class PackageDependencyTracker {
   void checkForConflictingDependencies(
     Iterable<Directory> pubSpecDirectories, {
     required FileSystem fileSystem,
+    required String flutterRoot,
   }) {
     for (final directory in pubSpecDirectories) {
       final String pubSpecYamlPath = fileSystem.path.join(directory.path, 'pubspec.yaml');
@@ -241,7 +241,7 @@ class PackageDependencyTracker {
       message.writeln(
         'Make sure you have run "pub upgrade" in all the directories mentioned above.',
       );
-      if (hasConflictsAffectingFlutterRepo(fileSystem)) {
+      if (hasConflictsAffectingFlutterRepo(fileSystem, flutterRoot)) {
         message.writeln(
           'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
           'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '
@@ -260,9 +260,10 @@ class PackageDependencyTracker {
     return packages.values.any((PackageDependency dependency) => dependency.hasConflict);
   }
 
-  bool hasConflictsAffectingFlutterRepo(FileSystem fileSystem) {
+  bool hasConflictsAffectingFlutterRepo(FileSystem fileSystem, String flutterRoot) {
     return packages.values.any(
-      (PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo(fileSystem),
+      (PackageDependency dependency) =>
+          dependency.hasConflictAffectingFlutterRepo(fileSystem, flutterRoot),
     );
   }
 

@@ -13,17 +13,11 @@ class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(
     super.argResults,
     List<Directory> repoPackages, {
-    required super.artifacts,
-    required super.fileSystem,
-    required super.logger,
-    required super.platform,
-    required super.processManager,
-    required this.shutdownHooks,
     required super.suppressAnalytics,
-    required super.terminal,
+    required super.toolContext,
   }) : super(repoPackages: repoPackages);
 
-  final ShutdownHooks shutdownHooks;
+  ShutdownHooks get shutdownHooks => toolContext.shutdownHooks;
 
   String? analysisTarget;
   bool firstAnalysis = true;
@@ -39,7 +33,11 @@ class AnalyzeContinuously extends AnalyzeBase {
 
     if (isFlutterRepo) {
       final dependencies = PackageDependencyTracker();
-      dependencies.checkForConflictingDependencies(repoPackages, fileSystem: fileSystem);
+      dependencies.checkForConflictingDependencies(
+        repoPackages,
+        fileSystem: fileSystem,
+        flutterRoot: flutterRoot,
+      );
 
       directories = <String>[flutterRoot];
       analysisTarget = 'Flutter repository';

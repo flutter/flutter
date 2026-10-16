@@ -8,7 +8,6 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
-import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:xml/xml.dart';
 
@@ -20,7 +19,6 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/project_migrator.dart';
 import '../base/terminal.dart';
@@ -165,41 +163,37 @@ const kMaxRetryTime = Duration(seconds: 10);
 /// An implementation of the [AndroidBuilder] that delegates to gradle.
 class AndroidGradleBuilder implements AndroidBuilder {
   AndroidGradleBuilder({
-    required this._analytics,
+    required Analytics analytics,
     required AndroidStudio? androidStudio,
-    required this._artifacts,
-    required FileSystem fileSystem,
     required GradleUtils gradleUtils,
     required Java? java,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    required this._toolContext,
+    required ToolContext toolContext,
     AndroidSdk? androidSdk,
-  }) : _androidContext = AndroidContext(
-         androidSdkBuilder: () => androidSdk,
-         androidStudioBuilder: () => androidStudio,
-         gradleUtilsBuilder: () => gradleUtils,
-         javaBuilder: () => java,
-       ),
-       _fileSystem = fileSystem,
-       _logger = logger,
-       _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+  }) : this.fromContexts(
+         analytics: analytics,
+         androidContext: AndroidContext(
+           androidSdkBuilder: () => androidSdk,
+           androidStudioBuilder: () => androidStudio,
+           gradleUtilsBuilder: () => gradleUtils,
+           javaBuilder: () => java,
+         ),
+         toolContext: toolContext,
+       );
 
   AndroidGradleBuilder.fromContexts({
     required this._analytics,
     required this._androidContext,
-    required ToolContext toolContext,
-  }) : _artifacts = toolContext.artifacts,
-       _fileSystem = toolContext.fs,
-       _logger = toolContext.logger,
-       _fileSystemUtils = toolContext.fileSystemUtils,
-       _processUtils = toolContext.processUtils,
-       _toolContext = toolContext;
+    required this._toolContext,
+  }) : _artifacts = _toolContext.artifacts,
+       _cache = _toolContext.cache,
+       _fileSystem = _toolContext.fs,
+       _logger = _toolContext.logger,
+       _fileSystemUtils = _toolContext.fileSystemUtils,
+       _processUtils = _toolContext.processUtils;
 
   final Analytics _analytics;
   final AndroidContext _androidContext;
+  final Cache _cache;
   late final Java? _java = _androidContext.java;
   final Logger _logger;
   final FileSystem _fileSystem;
@@ -553,6 +547,7 @@ To fix this, you can either:
       analytics: _analytics,
       androidSdk: _androidSdk,
       buildInfo: androidBuildInfo.buildInfo,
+      cache: _cache,
       fileSystemUtils: _fileSystemUtils,
       logger: _logger,
     );
@@ -883,7 +878,7 @@ To fix this, you can either:
     final String aarTask = getAarTaskFor(buildInfo);
     final Status status = _logger.startProgress("Running Gradle task '$aarTask'...");
 
-    final String flutterRoot = _fileSystem.path.absolute(Cache.flutterRoot!);
+    final String flutterRoot = _fileSystem.path.absolute(_cache.flutterRoot);
     final String initScript = _fileSystem.path.join(
       flutterRoot,
       'packages',

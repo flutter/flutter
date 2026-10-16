@@ -8,7 +8,6 @@ import 'package:process/process.dart';
 
 import '../android/android_builder.dart';
 import '../android/gradle.dart';
-import '../artifacts.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -17,7 +16,6 @@ import '../base/platform.dart';
 import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
 import '../context/tool_context.dart';
@@ -25,7 +23,6 @@ import '../experimental/extension_build_manager.dart';
 import '../features.dart';
 import '../macos/xcode.dart';
 import '../runner/flutter_command.dart';
-import '../version.dart';
 import '../windows/visual_studio.dart';
 import 'build_aar.dart';
 import 'build_apk.dart';
@@ -55,9 +52,6 @@ class BuildCommand extends FlutterCommand {
   }) : _appleContext = appleContext,
        super(toolContext: toolContext, verboseHelp: verboseHelp) {
     final ToolContext(
-      :Artifacts artifacts,
-      :Cache cache,
-      :FlutterVersion flutterVersion,
       fs: FileSystem fileSystem,
       :Logger logger,
       os: OperatingSystemUtils osUtils,
@@ -134,17 +128,11 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(
       BuildSwiftPackage(
         analytics: analytics,
-        artifacts: artifacts,
         buildSystem: buildSystem,
-        cache: cache,
         codesign: codesign,
         featureFlags: featureFlags,
-        fileSystem: fileSystem,
-        flutterVersion: flutterVersion,
-        logger: logger,
-        platform: platform,
-        processManager: processManager,
         templateRenderer: templateRenderer,
+        toolContext: toolContext,
         verboseHelp: verboseHelp,
         xcode: xcode,
       ),

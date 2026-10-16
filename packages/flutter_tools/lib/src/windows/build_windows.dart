@@ -13,7 +13,6 @@ import '../base/project_migrator.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../cmake.dart';
 import '../cmake_project.dart';
 import '../convert.dart';
@@ -34,6 +33,7 @@ Future<void> buildWindows(
   WindowsProject windowsProject,
   BuildInfo buildInfo,
   TargetPlatform targetPlatform, {
+  required String flutterRoot,
   String? target,
   VisualStudio? visualStudioOverride,
   SizeAnalyzer? sizeAnalyzer,
@@ -78,7 +78,7 @@ Future<void> buildWindows(
   await migration.run();
 
   // Ensure that necessary ephemeral files are generated and up to date.
-  _writeGeneratedFlutterConfig(windowsProject, buildInfo, target);
+  _writeGeneratedFlutterConfig(windowsProject, buildInfo, target, flutterRoot: flutterRoot);
   createPluginSymlinks(windowsProject.parent);
 
   final VisualStudio visualStudio =
@@ -275,10 +275,11 @@ Future<void> _runBuild(
 void _writeGeneratedFlutterConfig(
   WindowsProject windowsProject,
   BuildInfo buildInfo,
-  String? target,
-) {
+  String? target, {
+  required String flutterRoot,
+}) {
   final environment = <String, String>{
-    'FLUTTER_ROOT': Cache.flutterRoot!,
+    'FLUTTER_ROOT': flutterRoot,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,
     'PROJECT_DIR': windowsProject.parent.directory.path,
     'FLUTTER_TARGET': ?target,
@@ -292,13 +293,7 @@ void _writeGeneratedFlutterConfig(
     environment['LOCAL_ENGINE'] = localEngineInfo.localTargetName;
     environment['LOCAL_ENGINE_HOST'] = localEngineInfo.localHostName;
   }
-  writeGeneratedCmakeConfig(
-    Cache.flutterRoot!,
-    windowsProject,
-    buildInfo,
-    environment,
-    globals.logger,
-  );
+  writeGeneratedCmakeConfig(flutterRoot, windowsProject, buildInfo, environment, globals.logger);
 }
 
 // Works around the Visual Studio 17.1.0 CMake bug described in

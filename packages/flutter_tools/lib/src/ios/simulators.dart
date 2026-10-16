@@ -578,6 +578,7 @@ class IOSSimulator extends Device {
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,
       buildInfo: buildInfo,
+      flutterRoot: _simControl._xcode.flutterRoot,
       targetOverride: mainPath,
       environmentType: EnvironmentType.simulator,
       deviceID: id,

@@ -21,6 +21,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/ios.dart';
 import '../build_system/targets/macos.dart';
 import '../cache.dart';
+import '../context/tool_context.dart';
 import '../convert.dart';
 import '../darwin/darwin.dart';
 import '../features.dart';
@@ -60,21 +61,15 @@ const String _kCodesignIdentityFile = '.codesign_identity';
 /// Create a swift package that can be used to embed a Flutter app inside a native iOS or macOS app.
 class BuildSwiftPackage extends BuildSubCommand {
   BuildSwiftPackage({
-    required super.logger,
     required this._analytics,
-    required this._artifacts,
     required this._buildSystem,
-    required this._cache,
-    required this._featureFlags,
-    required this._fileSystem,
-    required this._flutterVersion,
-    required this._platform,
-    required this._processManager,
-    required this._templateRenderer,
-    required this._xcode,
     required this._codesign,
+    required this._featureFlags,
+    required this._templateRenderer,
+    required ToolContext super.toolContext,
     required super.verboseHelp,
-  }) {
+    required this._xcode,
+  }) : super(logger: toolContext.logger, outputPreferences: toolContext.outputPreferences) {
     registerOptionBundle(const DarwinAddToAppOptionsBundle());
     argParser.addDescriptors(const <OptionDescriptor<Object?>>[
       BuildInfoOptions.flavor,
@@ -116,18 +111,19 @@ class BuildSwiftPackage extends BuildSubCommand {
 
   static const availableBuildModes = <BuildMode>[.debug, .profile, .release];
 
-  final Platform _platform;
   final BuildSystem _buildSystem;
-  final FileSystem _fileSystem;
-  final Artifacts _artifacts;
-  final ProcessManager _processManager;
   final Xcode? _xcode;
-  final Cache _cache;
   final Analytics _analytics;
   final TemplateRenderer _templateRenderer;
-  final FlutterVersion _flutterVersion;
   final FeatureFlags _featureFlags;
   final DarwinAddToAppCodesigning _codesign;
+
+  @override
+  ToolContext get toolContext => super.toolContext!;
+
+  Platform get _platform => toolContext.platform;
+  FileSystem get _fileSystem => toolContext.fs;
+  Cache get _cache => toolContext.cache;
 
   @override
   bool get supported => _platform.isMacOS;
@@ -213,17 +209,11 @@ class BuildSwiftPackage extends BuildSubCommand {
 
   late BuildSwiftPackageUtils utils = BuildSwiftPackageUtils(
     analytics: _analytics,
-    artifacts: _artifacts,
     buildSystem: _buildSystem,
-    cache: _cache,
-    fileSystem: _fileSystem,
-    flutterRoot: Cache.flutterRoot!,
-    flutterVersion: _flutterVersion,
-    logger: logger,
-    platform: _platform,
-    processManager: _processManager,
+    flutterRoot: _cache.flutterRoot,
     project: project,
     templateRenderer: _templateRenderer,
+    toolContext: toolContext,
     xcode: _xcode!,
   );
   late final pluginRegistrant = FlutterPluginRegistrantSwiftPackage(
@@ -285,7 +275,7 @@ class BuildSwiftPackage extends BuildSubCommand {
     )..createSync(recursive: true);
     final Directory pluginsDirectory = flutterIntegrationPackage.childDirectory(_kFlutterPlugins);
 
-    await project.regeneratePlatformSpecificTooling(releaseMode: false);
+    await project.regeneratePlatformSpecificTooling(cache: _cache, releaseMode: false);
 
     final List<BuildInfo> buildInfos = await _getBuildInfos();
     if (buildInfos.isEmpty) {
@@ -1575,6 +1565,7 @@ class CocoaPodPluginDependencies {
       xcodeProject,
       _targetPlatform.buildDirectory(),
       buildInfo.mode,
+      flutterRoot: _utils.flutterRoot,
       // Normal module builds (like when running "flutter build ios" with a module), do not support
       // SwiftPM. Since "flutter build swift-package" builds Swift packages and CocoaPods
       // separately, we need to force SwiftPM to be enabled so that CocoaPods will skip processing
@@ -2149,31 +2140,27 @@ Future<void> _produceXCFramework({
 class BuildSwiftPackageUtils {
   BuildSwiftPackageUtils({
     required this.analytics,
-    required this.artifacts,
     required this.buildSystem,
-    required this.cache,
-    required this.fileSystem,
     required this.flutterRoot,
-    required this.flutterVersion,
-    required this.logger,
-    required this.platform,
-    required this.processManager,
     required this.project,
     required this.templateRenderer,
+    required this.toolContext,
     required this.xcode,
   });
 
   final Analytics analytics;
-  final Artifacts artifacts;
   final BuildSystem buildSystem;
-  final Cache cache;
-  final FileSystem fileSystem;
   final String flutterRoot;
-  final FlutterVersion flutterVersion;
-  final Logger logger;
-  final Platform platform;
-  final ProcessManager processManager;
   final FlutterProject project;
   final TemplateRenderer templateRenderer;
+  final ToolContext toolContext;
   final Xcode xcode;
+
+  Artifacts get artifacts => toolContext.artifacts;
+  Cache get cache => toolContext.cache;
+  FileSystem get fileSystem => toolContext.fs;
+  FlutterVersion get flutterVersion => toolContext.flutterVersion;
+  Logger get logger => toolContext.logger;
+  Platform get platform => toolContext.platform;
+  ProcessManager get processManager => toolContext.processManager;
 }

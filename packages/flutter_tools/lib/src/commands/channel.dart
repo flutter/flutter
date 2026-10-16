@@ -15,8 +15,7 @@ import '../version.dart';
 import 'upgrade.dart' show precacheArtifacts;
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({required ToolContext super.toolContext, super.verboseHelp = false})
-    : _toolContext = toolContext {
+  ChannelCommand({required ToolContext super.toolContext, super.verboseHelp = false}) {
     argParser.addFlag(
       'all',
       abbr: 'a',
@@ -38,10 +37,8 @@ class ChannelCommand extends FlutterCommand {
     );
   }
 
-  final ToolContext _toolContext;
-
   @override
-  ToolContext get toolContext => _toolContext;
+  ToolContext get toolContext => super.toolContext!;
 
   @override
   String get name => 'channel';
@@ -86,9 +83,8 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<void> _listChannels({required bool showAll, required bool verbose}) async {
-    final FlutterVersion flutterVersion = _toolContext.flutterVersion;
-    final Logger logger = _toolContext.logger;
-    final Git git = _toolContext.git;
+    final ToolContext(:Cache cache, :FlutterVersion flutterVersion, :Git git, :Logger logger) =
+        toolContext;
 
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = flutterVersion.channel; // limited to known branch names
@@ -105,7 +101,7 @@ class ChannelCommand extends FlutterCommand {
     logger.printStatus('Flutter channels:');
     final int result = await git.stream(
       <String>['branch', '-r'],
-      workingDirectory: Cache.flutterRoot,
+      workingDirectory: cache.flutterRoot,
       mapFunction: (String line) {
         rawOutput.add(line);
         return null;
@@ -171,9 +167,7 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<void> _switchChannel(String branchName) async {
-    final Logger logger = _toolContext.logger;
-    final Git git = _toolContext.git;
-    final Cache cache = _toolContext.cache;
+    final ToolContext(:Cache cache, :Git git, :Logger logger) = toolContext;
 
     logger.printStatus("Switching to flutter channel '$branchName'...");
     if (kObsoleteBranches.containsKey(branchName)) {
@@ -188,13 +182,7 @@ class ChannelCommand extends FlutterCommand {
     }
     await _checkout(branchName, git: git, cache: cache, force: boolArg('force'));
     if (boolArg('cache-artifacts')) {
-      await precacheArtifacts(
-        workingDirectory: Cache.flutterRoot,
-        logger: logger,
-        processUtils: _toolContext.processUtils,
-        fileSystem: _toolContext.fs,
-        platform: _toolContext.platform,
-      );
+      await precacheArtifacts(toolContext: toolContext, workingDirectory: cache.flutterRoot);
     }
     logger.printStatus("Successfully switched to flutter channel '$branchName'.");
     logger.printStatus(
@@ -204,9 +192,9 @@ class ChannelCommand extends FlutterCommand {
 
   static Future<void> upgradeChannel(
     FlutterVersion currentVersion, {
-    required Logger logger,
+    required Cache cache,
     required Git git,
-    Cache? cache,
+    required Logger logger,
   }) async {
     final String channel = currentVersion.channel;
     if (kObsoleteBranches.containsKey(channel)) {
@@ -218,12 +206,13 @@ class ChannelCommand extends FlutterCommand {
 
   static Future<void> _checkout(
     String branchName, {
+    required Cache cache,
     required Git git,
-    Cache? cache,
     bool force = false,
   }) async {
+    final String flutterRoot = cache.flutterRoot;
     // Get latest refs from upstream.
-    RunResult runResult = await git.run(<String>['fetch'], workingDirectory: Cache.flutterRoot);
+    RunResult runResult = await git.run(<String>['fetch'], workingDirectory: flutterRoot);
 
     if (runResult.processResult.exitCode == 0) {
       runResult = await git.run(<String>[
@@ -231,7 +220,7 @@ class ChannelCommand extends FlutterCommand {
         '--verify',
         '--quiet',
         'refs/heads/$branchName',
-      ], workingDirectory: Cache.flutterRoot);
+      ], workingDirectory: flutterRoot);
       if (runResult.processResult.exitCode == 0) {
         // branch already exists, try just switching to it
         runResult = await git.run(<String>[
@@ -239,7 +228,7 @@ class ChannelCommand extends FlutterCommand {
           if (force) '-f',
           branchName,
           '--',
-        ], workingDirectory: Cache.flutterRoot);
+        ], workingDirectory: flutterRoot);
       } else {
         // branch does not exist, we have to create it
         runResult = await git.run(<String>[
@@ -249,7 +238,7 @@ class ChannelCommand extends FlutterCommand {
           '-b',
           branchName,
           'origin/$branchName',
-        ], workingDirectory: Cache.flutterRoot);
+        ], workingDirectory: flutterRoot);
       }
     }
     if (runResult.processResult.exitCode != 0) {

@@ -23,7 +23,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/build_targets.dart';
-import '../cache.dart';
 import '../context/tool_context.dart';
 import '../dart/language_version.dart';
 import '../dart/package_map.dart';
@@ -302,9 +301,7 @@ class ResidentWebRunner extends ResidentRunner {
           rootDirectory: fileSystem.directory(projectRootPath),
           useDwdsWebSocketConnection: useDwdsWebSocketConnection,
           webCrossOriginIsolation: crossOriginIsolation,
-          fileSystem: fileSystem,
-          logger: logger,
-          platform: platform,
+          toolContext: toolContext,
           webDefines: _webDefines,
         );
         Uri url = await flutterDevice!.devFS!.create();
@@ -323,18 +320,10 @@ class ResidentWebRunner extends ResidentRunner {
           cacheInitialDillCompilation();
         } else {
           final webBuilder = WebBuilder(
-            logger: logger,
-            processManager: processManager,
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            flutterVersion: flutterVersion,
             analytics: analytics,
-            artifacts: artifacts,
+            buildSystem: buildSystem,
             buildTargets: buildTargets,
-            cache: cache,
-            config: config,
-            platform: platform,
-            terminal: terminal,
+            toolContext: toolContext,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -491,18 +480,10 @@ class ResidentWebRunner extends ResidentRunner {
         report = null;
         try {
           final webBuilder = WebBuilder(
-            logger: logger,
-            processManager: processManager,
-            buildSystem: buildSystem,
-            fileSystem: fileSystem,
-            flutterVersion: flutterVersion,
             analytics: analytics,
-            artifacts: artifacts,
+            buildSystem: buildSystem,
             buildTargets: buildTargets,
-            cache: cache,
-            config: config,
-            platform: platform,
-            terminal: terminal,
+            toolContext: toolContext,
           );
           await webBuilder.buildWeb(
             flutterProject,
@@ -728,7 +709,7 @@ class ResidentWebRunner extends ResidentRunner {
       final LanguageVersion languageVersion = determineLanguageVersion(
         fileSystem.file(mainUri),
         packageConfig[flutterProject.manifest.appName],
-        Cache.flutterRoot!,
+        cache.flutterRoot,
       );
 
       final String entrypoint = main_dart.generateMainDartFile(
@@ -893,6 +874,7 @@ class ResidentWebRunner extends ResidentRunner {
             },
             device: device,
             flutterProject: flutterProject,
+            flutterVersion: flutterVersion,
             printStructuredErrorLogMethod: printStructuredErrorLog,
             vmService: _vmService.service,
           );

@@ -1171,6 +1171,7 @@ String getGradleVersionFor(String agpV) {
 /// If [requireAndroidSdk] is true (the default) and no Android SDK is found,
 /// this will fail with a [ToolExit].
 void updateLocalProperties({
+  required Cache cache,
   required FlutterProject project,
   Analytics? analytics,
   AndroidSdk? androidSdk,
@@ -1216,7 +1217,7 @@ void updateLocalProperties({
     changeIfNecessary('sdk.dir', fsUtils.escapePath(androidSdk.directory.path));
   }
 
-  changeIfNecessary('flutter.sdk', fsUtils.escapePath(Cache.flutterRoot!));
+  changeIfNecessary('flutter.sdk', fsUtils.escapePath(cache.flutterRoot));
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
     final String? buildName = validatedBuildNameForPlatform(

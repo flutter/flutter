@@ -127,6 +127,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     await buildLinux(
       project.linux,
       buildInfo,
+      flutterRoot: toolContext.cache.flutterRoot,
       target: targetFile,
       sizeAnalyzer: SizeAnalyzer(fileSystem: fs, logger: logger, analytics: analytics),
       needCrossBuild: needCrossBuild,

@@ -9,6 +9,7 @@ import 'package:package_config/package_config_types.dart';
 
 import '../../../base/platform.dart';
 import '../../../build_info.dart';
+import '../../../cache.dart';
 import '../../../globals.dart' as globals;
 import '../../../native_assets.dart';
 import '../../../project.dart';
@@ -16,7 +17,9 @@ import '../dart_hook_result.dart';
 import '../native_assets.dart';
 
 class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBuilder {
-  const TestCompilerNativeAssetsBuilderImpl();
+  const TestCompilerNativeAssetsBuilderImpl({required this.cache});
+
+  final Cache cache;
 
   @override
   Future<Uri?> build(BuildInfo buildInfo) async =>
@@ -24,7 +27,7 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 
   @override
   Future<TestCompilerNativeAssetsBuildResult> buildWithHookResult(BuildInfo buildInfo) =>
-      testCompilerBuildNativeAssets(buildInfo);
+      testCompilerBuildNativeAssets(buildInfo, flutterRoot: cache.flutterRoot);
 
   @override
   String windowsBuildDirectory(FlutterProject project) {
@@ -34,8 +37,9 @@ class TestCompilerNativeAssetsBuilderImpl implements TestCompilerNativeAssetsBui
 }
 
 Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
-  BuildInfo buildInfo,
-) async {
+  BuildInfo buildInfo, {
+  required String flutterRoot,
+}) async {
   if (!buildInfo.buildNativeAssets) {
     return (nativeAssetsManifest: null, flutterHookResult: null);
   }
@@ -53,8 +57,9 @@ Future<TestCompilerNativeAssetsBuildResult> testCompilerBuildNativeAssets(
     globals.logger,
     globals.platform,
     runPackageName,
-    includeDevDependencies: true,
     pubspecPath,
+    includeDevDependencies: true,
+    flutterRoot: flutterRoot,
   );
 
   if (!globals.platform.isMacOS && !globals.platform.isLinux && !globals.platform.isWindows) {

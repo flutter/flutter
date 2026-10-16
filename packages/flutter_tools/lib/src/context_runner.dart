@@ -67,6 +67,7 @@ import 'reporting/unified_analytics.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'runner/local_engine.dart';
+import 'template.dart';
 import 'version.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
@@ -183,44 +184,12 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         config: globals.config,
       ),
       AndroidBuilder: () => AndroidGradleBuilder(
-        java: globals.java,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        fileSystem: globals.fs,
-        artifacts: globals.artifacts!,
         analytics: globals.analytics,
-        gradleUtils: globals.gradleUtils!,
-        platform: globals.platform,
-        androidStudio: globals.androidStudio,
         androidSdk: globals.androidSdk,
-        toolContext: ToolContext(
-          artifacts: globals.artifacts!,
-          botDetector: globals.botDetector,
-          cache: globals.cache,
-          config: globals.config,
-          customDevicesConfig: globals.customDevicesConfig,
-          flutterVersion: globals.flutterVersion,
-          fs: globals.fs,
-          git: globals.git,
-          localEngineLocator: globals.localEngineLocator!,
-          logger: globals.logger,
-          nativeAssetsBuilder: globals.nativeAssetsBuilder,
-          os: globals.os,
-          outputPreferences: globals.outputPreferences,
-          persistentToolState: globals.persistentToolState!,
-          platform: globals.platform,
-          preRunValidator: globals.preRunValidator,
-          processInfo: globals.processInfo,
-          processManager: globals.processManager,
-          processUtils: globals.processUtils,
-          projectFactory: globals.projectFactory,
-          shutdownHooks: globals.shutdownHooks,
-          signals: globals.signals,
-          stdio: globals.stdio,
-          systemClock: globals.systemClock,
-          terminal: globals.terminal,
-          userMessages: globals.userMessages,
-        ),
+        androidStudio: globals.androidStudio,
+        gradleUtils: globals.gradleUtils!,
+        java: globals.java,
+        toolContext: const GlobalToolContext(),
       ),
       AndroidLicenseValidator: () => AndroidLicenseValidator(
         platform: globals.platform,
@@ -264,6 +233,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         return AssetBundleFactory.defaultInstance(
           logger: globals.logger,
           fileSystem: globals.fs,
+          flutterRoot: globals.cache.flutterRoot,
           platform: globals.platform,
         );
       },
@@ -281,12 +251,9 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         stdio: globals.stdio,
       ),
       CocoaPods: () => CocoaPods(
-        fileSystem: globals.fs,
-        processManager: globals.processManager,
-        logger: globals.logger,
-        platform: globals.platform,
-        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
         analytics: globals.analytics,
+        toolContext: const GlobalToolContext(),
+        xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
       ),
       CocoaPodsValidator: () => CocoaPodsValidator(globals.cocoaPods!, globals.userMessages),
       Config: () => Config(
@@ -296,6 +263,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       CustomDevicesConfig: () => CustomDevicesConfig(
+        cache: globals.cache,
         fileSystem: globals.fs,
         logger: globals.logger,
         platform: globals.platform,
@@ -312,8 +280,13 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         botDetector: globals.botDetector,
       ),
-      Doctor: () => Doctor(logger: globals.logger, clock: globals.systemClock),
-      DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
+      Doctor: () =>
+          Doctor(cache: globals.cache, logger: globals.logger, clock: globals.systemClock),
+      DoctorValidatorsProvider: () => DoctorValidatorsProvider.create(
+        cache: globals.cache,
+        featureFlags: featureFlags,
+        platform: globals.platform,
+      ),
       EmulatorManager: () => EmulatorManager(
         javaBuilder: () => globals.java,
         androidSdkBuilder: () => globals.androidSdk,
@@ -339,7 +312,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         platform: globals.platform,
       ),
       FlutterVersion: () =>
-          FlutterVersion(fs: globals.fs, flutterRoot: Cache.flutterRoot!, git: globals.git),
+          FlutterVersion(fs: globals.fs, flutterRoot: globals.cache.flutterRoot, git: globals.git),
       Git: () => Git(currentPlatform: globals.platform, runProcessWith: globals.processUtils),
       GradleUtils: () => GradleUtils(
         operatingSystemUtils: globals.os,
@@ -372,7 +345,7 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
         logger: globals.logger,
         platform: globals.platform,
         fileSystem: globals.fs,
-        flutterRoot: Cache.flutterRoot!,
+        flutterRoot: globals.cache.flutterRoot,
       ),
       Logger: () => globals.platform.isWindows
           ? WindowsStdoutLogger(
@@ -412,15 +385,10 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       ),
       ProcessUtils: () =>
           ProcessUtils(processManager: globals.processManager, logger: globals.logger),
-      Pub: () => Pub(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-        processManager: globals.processManager,
-        botDetector: globals.botDetector,
-        platform: globals.platform,
-      ),
+      Pub: () => Pub(toolContext: const GlobalToolContext()),
       Stdio: () => Stdio(),
       SystemClock: () => const SystemClock(),
+      TemplatePathProvider: () => TemplatePathProvider(flutterRoot: globals.cache.flutterRoot),
       UserMessages: () => UserMessages(),
       VisualStudioValidator: () => VisualStudioValidator(
         userMessages: globals.userMessages,
@@ -436,12 +404,8 @@ Future<T> runInContext<T>(FutureOr<T> Function() runner, {Map<Type, Generator>? 
       WindowsWorkflow: () =>
           WindowsWorkflow(featureFlags: featureFlags, platform: globals.platform),
       Xcode: () => Xcode(
-        logger: globals.logger,
-        processManager: globals.processManager,
-        platform: globals.platform,
-        fileSystem: globals.fs,
+        toolContext: const GlobalToolContext(),
         xcodeProjectInterpreter: globals.xcodeProjectInterpreter!,
-        userMessages: globals.userMessages,
       ),
       XCDevice: () => XCDevice(
         processManager: globals.processManager,
