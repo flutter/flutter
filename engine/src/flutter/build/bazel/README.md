@@ -73,7 +73,11 @@ toolchain is assembled from the same pieces GN uses for that platform:
 `cc_toolchain_config.bzl` reproduces GN's toolchain-wide flags (warnings,
 visibility, `-std=c++20`, `-fno-exceptions -fno-rtti`, the linker hardening
 flags, defines). `-c dbg` corresponds to GN's unoptimized builds (`-O0 -g2
--D_DEBUG`) and `-c opt` to optimized ones (`-O2 -DNDEBUG`, dead stripping).
+-D_DEBUG`) and `-c opt` to optimized ones (`-O2 -DNDEBUG`, dead stripping)
+without LTO -- `tools/gn --no-lto`, which every host builder in
+`ci/builders` and `et`'s `local_engine.json` pass; the wrapped GN builds
+set `enable_lto = false` in both modes for the same reason, so an optimized
+build is one build without LTO rather than an engine without and a VM with.
 There is no component build: `.bazelrc` sets `--force_pic` and
 `--dynamic_mode=off`, as GN links everything statically with `-fPIC`.
 
