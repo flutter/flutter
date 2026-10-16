@@ -295,6 +295,9 @@ final class _PackedParagraphStyle extends Struct {
   @Uint8()
   external int fontStyle;
 
+  @Uint8()
+  external int hyphens;
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
@@ -309,7 +312,8 @@ final class _PackedParagraphStyle extends Struct {
         presentMask == other.presentMask &&
         textAlign == other.textAlign &&
         textDirection == other.textDirection &&
-        fontStyle == other.fontStyle;
+        fontStyle == other.fontStyle &&
+        hyphens == other.hyphens;
   }
 
   @override
@@ -323,6 +327,7 @@ final class _PackedParagraphStyle extends Struct {
     textAlign,
     textDirection,
     fontStyle,
+    hyphens,
   );
 }
 
@@ -339,6 +344,7 @@ _EncodedParagraphStyle _encodeParagraphStyleFfi({
   required _NativeTextHeightBehavior? textHeightBehavior,
   required _NativeFontWeight? fontWeight,
   required _NativeEnum<FontStyle>? fontStyle,
+  required _NativeEnum<Hyphens>? hyphens,
   required _NativeHandle<String>? fontFamily,
   required _NativeStrutStyle? strutStyle,
   required _NativeHandle<String>? ellipsis,
@@ -395,17 +401,23 @@ _EncodedParagraphStyle _encodeParagraphStyleFfi({
     fontStyle = const .new(.normal);
   }
   packed.fontStyle = fontStyle.value.index;
-  if (fontFamily != null) {
+  if (hyphens != null) {
     mask |= 1 << 8;
+  } else {
+    hyphens = const .new(.manual);
   }
-  if (strutStyle != null) {
+  packed.hyphens = hyphens.value.index;
+  if (fontFamily != null) {
     mask |= 1 << 9;
   }
-  if (ellipsis != null) {
+  if (strutStyle != null) {
     mask |= 1 << 10;
   }
-  if (locale != null) {
+  if (ellipsis != null) {
     mask |= 1 << 11;
+  }
+  if (locale != null) {
+    mask |= 1 << 12;
   }
   packed.presentMask = mask;
   return _EncodedParagraphStyle(<Object?>[
@@ -431,10 +443,11 @@ String _paragraphStyleToString(ParagraphStyle s) {
       'textHeightBehavior: ${(mask & (1 << 5)) != 0 ? _NativeTextHeightBehavior.decode(packed.textHeightBehavior) : "unspecified"}, '
       'fontWeight: ${(mask & (1 << 6)) != 0 ? _NativeFontWeight.decode(packed.fontWeight) : "unspecified"}, '
       'fontStyle: ${(mask & (1 << 7)) != 0 ? FontStyle.values[packed.fontStyle] : "unspecified"}, '
-      'fontFamily: ${(mask & (1 << 8)) != 0 ? s._fontFamily : "unspecified"}, '
-      'strutStyle: ${(mask & (1 << 9)) != 0 ? s._strutStyle : "unspecified"}, '
-      'ellipsis: ${(mask & (1 << 10)) != 0 ? s._ellipsis : "unspecified"}, '
-      'locale: ${(mask & (1 << 11)) != 0 ? s._locale : "unspecified"}'
+      'hyphens: ${(mask & (1 << 8)) != 0 ? Hyphens.values[packed.hyphens] : "unspecified"}, '
+      'fontFamily: ${(mask & (1 << 9)) != 0 ? s._fontFamily : "unspecified"}, '
+      'strutStyle: ${(mask & (1 << 10)) != 0 ? s._strutStyle : "unspecified"}, '
+      'ellipsis: ${(mask & (1 << 11)) != 0 ? s._ellipsis : "unspecified"}, '
+      'locale: ${(mask & (1 << 12)) != 0 ? s._locale : "unspecified"}'
       ')';
 }
 

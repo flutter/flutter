@@ -1335,6 +1335,7 @@ class _TextStyleProxy implements TextStyle {
     String? ellipsis,
     int? maxLines,
     ui.TextHeightBehavior? textHeightBehavior,
+    Hyphens? hyphens,
     Locale? locale,
     String? fontFamily,
     double? fontSize,

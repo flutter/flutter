@@ -83,6 +83,7 @@ class ParagraphStyle {
   uint8_t text_align;
   uint8_t text_direction;
   uint8_t font_style;
+  uint8_t hyphens;
   Dart_Handle font_family;
   Dart_Handle strut_style;
   Dart_Handle ellipsis;
@@ -98,10 +99,11 @@ class ParagraphStyle {
   }
   bool has_font_weight() const { return (present_mask & (1u << 6)) != 0; }
   bool has_font_style() const { return (present_mask & (1u << 7)) != 0; }
-  bool has_font_family() const { return (present_mask & (1u << 8)) != 0; }
-  bool has_strut_style() const { return (present_mask & (1u << 9)) != 0; }
-  bool has_ellipsis() const { return (present_mask & (1u << 10)) != 0; }
-  bool has_locale() const { return (present_mask & (1u << 11)) != 0; }
+  bool has_hyphens() const { return (present_mask & (1u << 8)) != 0; }
+  bool has_font_family() const { return (present_mask & (1u << 9)) != 0; }
+  bool has_strut_style() const { return (present_mask & (1u << 10)) != 0; }
+  bool has_ellipsis() const { return (present_mask & (1u << 11)) != 0; }
+  bool has_locale() const { return (present_mask & (1u << 12)) != 0; }
 };
 static_assert(std::is_standard_layout_v<ParagraphStyle>);
 static_assert(std::is_trivially_copyable_v<ParagraphStyle>);
@@ -213,9 +215,9 @@ struct DartConverter<flutter::ParagraphStyle> {
     void* data = nullptr;
     intptr_t length = 0;
     Dart_TypedDataAcquireData(bytes_handle, &type, &data, &length);
-    std::memcpy(&result, data,
-                offsetof(flutter::ParagraphStyle, font_style) +
-                    sizeof(result.font_style));
+    std::memcpy(
+        &result, data,
+        offsetof(flutter::ParagraphStyle, hyphens) + sizeof(result.hyphens));
     Dart_TypedDataReleaseData(bytes_handle);
     if (result.has_font_family()) {
       result.font_family = Dart_ListGetAt(handle, 2);

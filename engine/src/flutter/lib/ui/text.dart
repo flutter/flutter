@@ -1307,6 +1307,20 @@ enum TextAlign {
   end,
 }
 
+/// The behavior of soft hyphens (U+00AD) at a line break.
+///
+/// This does not change where lines break, since Flutter always treats U+00AD
+/// as a line-break opportunity.
+enum Hyphens {
+  /// A hyphen glyph is rendered at the end of a line that breaks on a soft
+  /// hyphen (U+00AD). Soft hyphens elsewhere remain invisible.
+  manual,
+
+  /// No hyphen glyph is rendered for soft hyphens. The line still breaks at
+  /// U+00AD; only the glyph is suppressed.
+  hidden,
+}
+
 /// A horizontal line used for aligning text.
 enum TextBaseline {
   /// The horizontal line used to align the bottom of glyphs for alphabetic characters.
@@ -1932,6 +1946,9 @@ class ParagraphStyle {
   ///   considered equivalent and turn off this behavior.
   ///
   /// * `locale`: The locale used to select region-specific glyphs.
+  ///
+  /// * `hyphens`: Whether to render a hyphen glyph for soft hyphens (U+00AD)
+  ///   that fall at a line break. Defaults to [Hyphens.manual].
   ParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
@@ -1945,6 +1962,7 @@ class ParagraphStyle {
     StrutStyle? strutStyle,
     String? ellipsis,
     Locale? locale,
+    Hyphens? hyphens,
   }) : this._(
          textAlign: textAlign == null ? null : .new(textAlign),
          textDirection: textDirection == null ? null : .new(textDirection),
@@ -1958,6 +1976,7 @@ class ParagraphStyle {
          strutStyle: strutStyle == null ? null : .new(strutStyle),
          ellipsis: ellipsis == null ? null : .new(ellipsis),
          locale: locale == null ? null : .new(locale),
+         hyphens: hyphens == null ? null : .new(hyphens),
        );
 
   // See the instructions above the TextStyle._ constructor declaration.
@@ -1971,6 +1990,7 @@ class ParagraphStyle {
     _NativeTextHeightBehavior? textHeightBehavior = const .new(.new()),
     _NativeFontWeight? fontWeight = const .new(.normal),
     _NativeEnum<FontStyle>? fontStyle = const .new(.normal),
+    _NativeEnum<Hyphens>? hyphens = const .new(.manual),
     this._fontFamily,
     this._strutStyle,
     this._ellipsis,
@@ -1988,6 +2008,7 @@ class ParagraphStyle {
          strutStyle: _strutStyle,
          ellipsis: _ellipsis,
          locale: _locale,
+         hyphens: hyphens,
        );
 
   final _EncodedParagraphStyle _encoded;

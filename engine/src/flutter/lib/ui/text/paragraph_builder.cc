@@ -193,6 +193,11 @@ ParagraphBuilder::ParagraphBuilder(const ParagraphStyle& in) {
   if (in.has_locale()) {
     style.locale = tonic::DartConverter<std::string>::FromDart(in.locale);
   }
+  if (in.has_hyphens()) {
+    // Hyphens.manual (0) renders the soft hyphen glyph; Hyphens.hidden (1)
+    // suppresses it.
+    style.render_soft_hyphens = in.hyphens == 0;
+  }
 
   FontCollection& font_collection = UIDartState::Current()
                                         ->platform_configuration()

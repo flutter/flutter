@@ -90,7 +90,8 @@ source_set("runtime") {
   ]
 
   if (is_ios && flutter_runtime_mode == "debug") {
-    # These contain references to private APIs and this TU must only be compiled in debug runtime modes.
+    # These contain references to private APIs and this TU must only be compiled
+    # in debug runtime modes.
     sources += [ "ptrace_check.cc" ]
   }
 

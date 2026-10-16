@@ -32,6 +32,10 @@ Before you get started, we encourage you to read these documents which describe 
 2. [Values](./docs/about/Values.md),
    which talks about what we care most about.
 
+3. [AI contribution guidelines](CONTRIBUTING.ai.md),
+   which describes our policies on using AI assistants when filing or
+   triaging issues, submitting pull requests, and reviewing code.
+
 Helping out in the issue database
 ---------------------------------
 
@@ -53,10 +57,6 @@ If you want to help us triage, you are very welcome to do so!
    do the other steps, e.g. trying to reproduce the problem and asking for people to
    provide enough details that you can reproduce the problem, pointing out duplicates,
    and so on. Chat on the #hackers-triage channel to let us know what you're up to!
-
-   * **Do not** run an unsupervised agent that posts triage comments to the issue database.
-     Any automated agent needs to be approved in advance, after discussion with the
-     Flutter team.
 
 4. Familiarize yourself with our
    [issue hygiene](./docs/contributing/issue_hygiene/README.md) wiki page,
