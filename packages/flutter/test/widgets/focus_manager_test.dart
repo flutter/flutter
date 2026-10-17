@@ -1012,6 +1012,27 @@ void main() {
       );
     });
 
+    testWidgets('detached node has no ancestors', (WidgetTester tester) async {
+      final outer = FocusNode(debugLabel: 'outer');
+      addTearDown(outer.dispose);
+      final inner = FocusNode(debugLabel: 'inner');
+      addTearDown(inner.dispose);
+
+      await tester.pumpWidget(
+        Focus(
+          focusNode: outer,
+          child: Focus(focusNode: inner, child: const SizedBox()),
+        ),
+      );
+      expect(inner.ancestors, contains(outer));
+
+      // Remove the inner Focus widget; its node is detached.
+      await tester.pumpWidget(Focus(focusNode: outer, child: const SizedBox()));
+
+      expect(inner.parent, isNull);
+      expect(inner.ancestors, isEmpty);
+    });
+
     testWidgets('Can move focus between scopes and keep focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
       final scope1 = FocusScopeNode();
