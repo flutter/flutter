@@ -3567,4 +3567,48 @@ String helloNameAndAge({required String name, required int age}) {
       ),
     );
   });
+
+  testWithoutContext('throws an exception when an optional parameter name is invalid', () {
+    // Regression test for https://github.com/flutter/flutter/issues/193327.
+    const en = '''
+{
+  "balance": "Balance: {amount}",
+  "@balance": {
+    "placeholders": {
+      "amount": {
+        "type": "double",
+        "format": "compactCurrency",
+        "optionalParameters": {
+          "decimalDigits": 2
+        }
+      }
+    }
+  }
+}''';
+    const es = r'''
+{
+  "balance": "Saldo: {amount}",
+  "@balance": {
+    "placeholders": {
+      "amount": {
+        "type": "double",
+        "format": "compactCurrency",
+        "optionalParameters": {
+          "decimalDigits: 2);\n print('injected');\n intl.NumberFormat.compactCurrency(\n locale": "es"
+        }
+      }
+    }
+  }
+}''';
+    expect(
+      () => setupLocalizations(<String, String>{'en': en, 'es': es}),
+      throwsA(
+        isA<L10nException>().having(
+          (L10nException e) => e.message,
+          'message',
+          contains('Invalid optional parameter name'),
+        ),
+      ),
+    );
+  });
 }
