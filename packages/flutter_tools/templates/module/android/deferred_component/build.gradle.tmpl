@@ -27,18 +27,20 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    sourceSets {
-        applicationVariants.all { variant ->
-            main.assets.srcDirs += project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_assets")
-            main.jniLibs.srcDirs += project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}/deferred_libs")
-        }
-    }
-
     defaultConfig {
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+    }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        // addStaticSourceDirectory takes a path, so the build directory is resolved here.
+        def flutterIntermediates = project.layout.buildDirectory.dir("intermediates/flutter/${variant.name}").get().asFile
+        variant.sources.assets?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_assets").path)
+        variant.sources.jniLibs?.addStaticSourceDirectory(new File(flutterIntermediates, "deferred_libs").path)
     }
 }
 

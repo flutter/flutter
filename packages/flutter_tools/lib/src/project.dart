@@ -751,9 +751,14 @@ class AndroidProject extends FlutterProjectPlatform {
   /// - `id "org.jetbrains.kotlin.android"`
   /// - `id("org.jetbrains.kotlin.android")`
   /// - `id ( "org.jetbrains.kotlin.android" )`
+  /// - `kotlin("android")`
+  /// - `alias(libs.plugins.kotlin.android)`, a version catalog alias that the
+  ///   Flutter Gradle Plugin also detects
   static final _declarativeKotlinPluginPatterns = <RegExp>[
     RegExp('^\\s*id\\s*\\(?\\s*[\'"]kotlin-android[\'"]\\s*\\)?\\s*\$'),
     RegExp('^\\s*id\\s*\\(?\\s*[\'"]org.jetbrains.kotlin.android[\'"]\\s*\\)?\\s*\$'),
+    RegExp(r'^\s*kotlin\s*\(\s*"android"\s*\)\s*$'),
+    RegExp(r'^\s*alias\s*\(\s*libs\.plugins\.kotlin\.android\s*\)\s*$'),
   ];
 
   /// Pattern used to find the assignment of the "group" property in Gradle.
@@ -848,17 +853,29 @@ class AndroidProject extends FlutterProjectPlatform {
     return false;
   }
 
-  /// True, if the app project is using Kotlin.
-  bool get isKotlin {
-    if (appGradleFile.existsSync()) {
-      if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+  /// True, if the app Gradle build file applies the `kotlin-android`
+  /// (`org.jetbrains.kotlin.android`) plugin.
+  bool get appliesKotlinAndroidPlugin {
+    if (!appGradleFile.existsSync()) {
+      return false;
+    }
+    if (firstMatchInFile(appGradleFile, _imperativeKotlinPluginPattern) != null) {
+      return true;
+    }
+    for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
+      if (firstMatchInFile(appGradleFile, pattern) != null) {
         return true;
       }
-      for (final RegExp pattern in _declarativeKotlinPluginPatterns) {
-        if (firstMatchInFile(appGradleFile, pattern) != null) {
-          return true;
-        }
-      }
+    }
+    return false;
+  }
+
+  /// True, if the app project is using Kotlin.
+  bool get isKotlin {
+    if (appliesKotlinAndroidPlugin) {
+      return true;
+    }
+    if (appGradleFile.existsSync()) {
       try {
         final String content = appGradleFile.readAsStringSync();
         if (_kotlinCompilerOptionsPattern.hasMatch(content)) {

@@ -13,12 +13,42 @@ android.newDsl=false''';
 // Gradle Properties are case sensitive so the AGP config must be this exact flag
 final RegExp _newDslRegex = RegExp(r'^\s*android\.newDsl(?=[ \t=:])', multiLine: true);
 
+/// Captures the value of each `android.builtInKotlin` entry. A properties file
+/// separates a key from its value with `=`, `:` or whitespace.
+final RegExp _builtInKotlinValueRegex = RegExp(
+  r'^[ \t]*android\.builtInKotlin(?:[ \t]*[=:][ \t]*|[ \t]+)(.*?)[ \t]*$',
+  multiLine: true,
+);
+
+/// Whether [gradleProperties], the content of the project's `gradle.properties`
+/// file, enables built-in Kotlin, and the app does not apply the
+/// `kotlin-android` plugin.
+///
+/// The `kotlin-android` plugin fails to apply when `android.newDsl` is enabled,
+/// so only these projects can build without the `android.newDsl=false` opt-out.
+///
+/// The last `android.builtInKotlin` entry decides, read the way the Flutter
+/// Gradle Plugin's `FlutterPluginUtils.isBuiltInKotlinEnabled` reads it: Kotlin's
+/// `String.toBoolean()`, which is `true` only for `true`, ignoring case.
+/// Without an entry this returns false: `DisableBuiltInKotlinMigration` adds
+/// `android.builtInKotlin=false` to such projects.
+bool usesBuiltInKotlinWithoutKotlinAndroidPlugin(AndroidProject project, String gradleProperties) {
+  final RegExpMatch? lastEntry = _builtInKotlinValueRegex.allMatches(gradleProperties).lastOrNull;
+  final bool builtInKotlin = lastEntry != null && lastEntry.group(1)!.toLowerCase() == 'true';
+  return builtInKotlin && !project.appliesKotlinAndroidPlugin;
+}
+
 /// Migrate from enabled new DSL by default to disabled new DSL by default.
+///
+/// Projects for which [usesBuiltInKotlinWithoutKotlinAndroidPlugin] is true
+/// are skipped; `RemoveNewDslOptOutMigration` handles them.
 /// For more details see: https://developer.android.com/build/releases/agp-9-0-0-release-notes#android-gradle-plugin-changed-dsl
 class DisableNewDslMigration extends ProjectMigrator {
   DisableNewDslMigration(AndroidProject project, super.logger)
-    : _gradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
+    : _project = project,
+      _gradlePropertiesFile = project.hostAppGradleRoot.childFile('gradle.properties');
 
+  final AndroidProject _project;
   final File _gradlePropertiesFile;
 
   @override
@@ -48,6 +78,14 @@ class DisableNewDslMigration extends ProjectMigrator {
     if (contents.contains(_newDslRegex)) {
       logger.printTrace(
         'The developer has already configured the new DSL flag, skipping migration.',
+      );
+      return;
+    }
+
+    if (usesBuiltInKotlinWithoutKotlinAndroidPlugin(_project, contents)) {
+      logger.printTrace(
+        'The project uses built-in Kotlin without the kotlin-android plugin, '
+        'skipping the new DSL opt-out.',
       );
       return;
     }
