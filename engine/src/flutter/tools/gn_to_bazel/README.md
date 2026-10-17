@@ -194,8 +194,11 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    `deps`, test executables to `cc_test`, `shared_library` to a
    `cc_binary(linkshared = True)` named after the file GN produces
    (`lib<output_name>.so`, which Bazel requires of a shared binary) with an
-   `alias` under the GN name, the C++ runtime in its `deps` (GN's default
-   deps; Bazel's `link_extra_libs` reaches executables only) and any
+   `alias` under the GN name -- an executable with an `output_name` of its
+   own (`_font-subset`, producing `font-subset`) the same way, since a
+   `cc_binary`'s file is its name -- the C++ runtime in a shared library's
+   `deps` (GN's default deps; Bazel's `link_extra_libs` reaches executables
+   only) and any
    `cc_library` of the same file that would declare the same `.so` made
    `linkstatic`, `config` to a header-only
    `cc_library` carrying the defines, include directories and link flags that
@@ -325,8 +328,8 @@ executables stay binaries; `displayTests` and
 bus, which the run inherited from the bot), and which executables need the GPU test backends next
 to them (`gpuBackendTests`: suites, and `flutter_tester_opengles`, an
 ordinary executable that the Dart suites run and that carries them as
-runfiles). An executable whose `output_name` is its own name converts (the
-file Bazel produces anyway); one that renames its output does not yet.
+runfiles). A test executable's `output_name` must be its own name (the
+file Bazel produces anyway); a binary's names the rule, as above.
 Extending the converter's coverage means adding to these tables.
 
 ### Strict mode
