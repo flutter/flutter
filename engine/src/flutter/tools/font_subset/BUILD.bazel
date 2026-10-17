@@ -1,0 +1,60 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Generated from //flutter/tools/font_subset/BUILD.gn by gn_to_bazel; do not edit.
+# Not converted: font_entitlement_config, font_subset.
+
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("//engine/src/flutter/build/bazel:checkout_script_test.bzl", "checkout_script_test")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_binary(
+    name = "font-subset",
+    srcs = [
+        "hb_wrappers.h",
+        "main.cc",
+    ],
+    copts = CHROMIUM_CODE_COPTS,
+    local_defines = FLUTTER_LOCAL_DEFINES,
+    deps = [
+        "//engine/src:include_root",
+        "@harfbuzz//:harfbuzz_subset",
+    ],
+)
+
+alias(
+    name = "_font-subset",
+    actual = ":font-subset",
+)
+
+# What GN has no words for; maintained in the converter's manifest
+# (tools/gn_to_bazel/lib/src/manifest.dart).
+
+# GN's zip_bundle("font_subset") -- the binary in
+# `<full_target_platform_name>/font-subset.zip` -- for this host, until the
+# converter reads the template: the archive test.py checks.
+zip_bundle(
+    name = "font_subset",
+    files = {"font-subset": ":font-subset"},
+    output = "linux-x64/font-subset.zip",
+)
+
+# run_tests.py --type font-subset: `python3 test.py --variant <build
+# directory>` from this directory, against the binary and the archive at
+# their places in the build directory.
+checkout_script_test(
+    name = "font_subset_test",
+    build_directory = {
+        ":font-subset": "",
+        ":font_subset": "zip_archives/linux-x64",
+    },
+    script = "test.py",
+    script_args = [
+        "--variant",
+        "{variant}",
+    ],
+)

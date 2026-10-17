@@ -163,7 +163,7 @@ alias(
 )
 
 cc_binary(
-    name = "example_gl",
+    name = "impeller_interop_example_gl",
     srcs = ["example_gl.c"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
@@ -187,8 +187,13 @@ cc_binary(
     ],
 )
 
+alias(
+    name = "example_gl",
+    actual = ":impeller_interop_example_gl",
+)
+
 cc_binary(
-    name = "example_vk",
+    name = "impeller_interop_example_vk",
     srcs = ["example_vk.c"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
@@ -210,6 +215,11 @@ cc_binary(
         "//engine/src/flutter/impeller:impeller_public_config",
         "@glfw",
     ],
+)
+
+alias(
+    name = "example_vk",
+    actual = ":impeller_interop_example_vk",
 )
 
 cc_library(

@@ -949,7 +949,10 @@ final class _Emitter {
   /// A `source_set`/`static_library` ([library]), an `executable`, or a
   /// `shared_library` ([shared]: a `cc_binary` with `linkshared`, named
   /// after the file GN produces -- `lib<output_name>.so`, as Bazel requires
-  /// of a shared binary -- with an `alias` under the GN target's name).
+  /// of a shared binary -- with an `alias` under the GN target's name). An
+  /// executable with an `output_name` of its own (`_font-subset`, producing
+  /// `font-subset`) is named and aliased the same way, since a cc_binary's
+  /// file is its name.
   void _convertCcTarget(
     GnTarget target,
     String kind, {
@@ -973,8 +976,11 @@ final class _Emitter {
     } else {
       _use('@rules_cc//cc:defs.bzl', kind);
     }
+    final String? outputName = _singleString(target.variables['output_name']);
     final String name = shared
-        ? 'lib${_singleString(target.variables['output_name']) ?? target.name}.so'
+        ? 'lib${outputName ?? target.name}.so'
+        : kind == 'cc_binary' && outputName != null
+        ? outputName
         : target.name;
     final rule = _Rule(ruleKind, name, target.comments);
     if (kind == 'cc_test') {
@@ -1137,9 +1143,12 @@ final class _Emitter {
           // GN sets one); a shared library's is in the rule's name already;
           // on anything else it would rename the output.
           break;
-        case 'output_name' when _singleString(variable) == target.name:
-          // An executable named after its own target (flutter_tester's
-          // template forwards the name): the file Bazel produces anyway.
+        case 'output_name'
+            when target.rule == 'executable' &&
+                (kind == 'cc_binary' || _singleString(variable) == target.name):
+          // The rule's name, with an alias under the target's (above); a
+          // test named after its own target (flutter_tester's template
+          // forwards the name) is the file Bazel produces anyway.
           break;
         default:
           if (_ignoredVariables.contains(variable.name) || variable.forwarded) {
@@ -1258,8 +1267,9 @@ final class _Emitter {
       rule.list('deps').addUnique(Condition.always, _Item(_localLabel(cxxRuntimeLabel)));
     }
     rules.add(rule);
-    if (shared) {
-      // GN's name for the library, for dependents and the command line.
+    if (name != target.name) {
+      // GN's name for the library or executable, for dependents and the
+      // command line.
       rules.add(_Rule('alias', target.name, const <String>[])..scalars['actual'] = '":$name"');
     }
   }

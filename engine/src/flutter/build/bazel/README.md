@@ -640,6 +640,35 @@ half, `run_benchmark_tests` -- `dart test/parse_and_send_test.dart` in
 two directories up), so like `ci`'s tests it stays with `dart` in the
 checkout.
 
+### font-subset (`--type font-subset`)
+
+`run_tests.py --type font-subset` is `python3 test.py --variant <build
+directory>` in `tools/font_subset`: the script subsets the fixture fonts with
+`out/<variant>/font-subset` (16 invocations compared with goldens), runs 17
+invocations that must fail, writes the subset fonts to `gen/` beside its
+fixtures, and checks that the build packaged the binary in
+`out/<variant>/zip_archives/linux-x64/font-subset.zip`. Under Bazel the
+package's generated file holds three things. The binary, `cc_binary("font-subset")`
+with `alias("_font-subset")`: GN's target `_font-subset` produces
+`font-subset` through `output_name`, and a `cc_binary`'s file is its name, so
+the converter names the rule after the file and aliases the GN name, as it
+does for shared libraries. The archive, `zip_bundle("font_subset")`
+(`zip_bundle.bzl`): GN's `zip_bundle` template -- `build/zip.py` over
+`{ source, destination }` pairs, a generated `LICENSE.<target>.md` first in
+every archive, the result under `zip_archives/` -- under Bazel runs the same
+script under the synced Python (`@cpython3`) with the readme written from
+`@engine_version`'s version; the converter does not read the template yet
+(its `files` are scopes, its sources `$root_build_dir` paths), so the GN
+target is skipped and the rule written in the manifest's appendix for this
+host's `linux-x64`, which is the artifact phase's to replace. The test,
+`checkout_script_test("font_subset_test")` (`checkout_script_test.bzl`):
+`test.py` run under `@cpython3` from its own directory in a writable view of
+the checkout-shaped runfiles tree (`checkout_view.bzl`, shared with
+`dart_package_test`, which it was lifted from), with the binary and the
+archive at their places under `engine/src/out/<variant>` and the variant's
+name -- GN's build directory name for the mode -- substituted for
+`{variant}` in the script's arguments. 33 invocations, as in the checkout.
+
 ## Impeller's shader pipeline
 
 Every Impeller library with shaders invokes `impeller_shaders()`
