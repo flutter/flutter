@@ -8,7 +8,7 @@ const fileTemplate = '''
 @(requiresFoundationImport)
 import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart' as intl;
+@(libraryImport)
 
 @(messageClassImports)
 
@@ -65,8 +65,8 @@ import 'package:intl/intl.dart' as intl;
 /// you wish to add from the pop-up menu in the Value field. This list should
 /// be consistent with the languages listed in the @(class).supportedLocales
 /// property.
-abstract class @(class) {
-  @(class)(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+abstract class @(class)@(baseClassMixins) {
+  @(class)(String locale) : localeName = @(canonicalizedLocale)(locale.toString());
 
   final String localeName;
 
@@ -104,12 +104,12 @@ abstract class @(class) {
 ''';
 
 const numberFormatPositionalTemplate = '''
-    final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(localeName);
+    final @(numberFormat) @(placeholder)NumberFormat = @(numberFormat).@(format)(localeName);
     final String @(placeholder)String = @(placeholder)NumberFormat.format(@(placeholder));
 ''';
 
 const numberFormatNamedTemplate = '''
-    final intl.NumberFormat @(placeholder)NumberFormat = intl.NumberFormat.@(format)(
+    final @(numberFormat) @(placeholder)NumberFormat = @(numberFormat).@(format)(
       locale: localeName,
       @(parameters)
     );
@@ -117,14 +117,14 @@ const numberFormatNamedTemplate = '''
 ''';
 
 const dateFormatTemplate = '''
-    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat.@(format)(localeName)@(addedFormats);
+    final @(dateFormat) @(placeholder)DateFormat = @(dateFormat).@(format)(localeName)@(addedFormats);
     final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
 ''';
 
 const dateFormatAddFormatTemplate = '''.add_@(format)()''';
 
 const dateFormatCustomTemplate = '''
-    final intl.DateFormat @(placeholder)DateFormat = intl.DateFormat(@(format), localeName);
+    final @(dateFormat) @(placeholder)DateFormat = @(dateFormat)(@(format), localeName);
     final String @(placeholder)String = @(placeholder)DateFormat.format(@(placeholder));
 ''';
 
@@ -149,14 +149,14 @@ const methodWithNamedParameterTemplate = '''
   }''';
 
 const pluralVariableTemplate = '''
-    String @(varName) = intl.Intl.pluralLogic(
+    String @(varName) = @(pluralLogic)(
       @(count),
       locale: localeName,
 @(pluralLogicArgs)
     );''';
 
 const selectVariableTemplate = '''
-    String @(varName) = intl.Intl.selectLogic(
+    String @(varName) = @(selectLogic)(
       @(choice),
       {
 @(selectCases)
@@ -164,17 +164,15 @@ const selectVariableTemplate = '''
     );''';
 
 const dateVariableTemplate = '''
-    String @(varName) = intl.DateFormat.@(formatType)(localeName).format(@(argument));''';
+    String @(varName) = @(dateFormat).@(formatType)(localeName).format(@(argument));''';
 
 const classFileTemplate = '''
-@(header)// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
-import '@(fileName)';
+@(header)@(libraryImport)import '@(fileName)';
 
 // ignore_for_file: type=lint
 
 /// The translations for @(language) (`@(localeName)`).
-class @(class) extends @(baseClass) {
+class @(class) extends @(baseClass)@(classMixins) {
   @(class)([String locale = '@(localeName)']) : super(locale);
 
 @(methods)
@@ -184,7 +182,7 @@ class @(class) extends @(baseClass) {
 const subclassTemplate = '''
 
 /// The translations for @(language) (`@(localeName)`).
-class @(class) extends @(baseLanguageClassName) {
+class @(class) extends @(baseLanguageClassName)@(classMixins) {
   @(class)(): super('@(localeName)');
 
 @(methods)
@@ -242,24 +240,14 @@ const lookupFunctionTemplate = r'''
 @(class) @(lookupName)(Locale locale) {
   @(lookupBody)
 
-  throw FlutterError(
-    '@(class).delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+@(unsupportedLocaleHandling)
 }''';
 
 const lookupFunctionDeferredLoadingTemplate = r'''
 Future<@(class)> @(lookupName)(Locale locale) {
   @(lookupBody)
 
-  throw FlutterError(
-    '@(class).delegate failed to load unsupported locale "$locale". This is likely '
-    'an issue with the localizations generation tool. Please file an issue '
-    'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
-  );
+@(unsupportedLocaleHandling)
 }''';
 
 const lookupBodyTemplate = '''
