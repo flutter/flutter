@@ -442,10 +442,15 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Apply a layout-time correction to the scroll offset.
   ///
   /// This method should change the [pixels] value by `correction`, but without
-  /// calling [notifyListeners]. It is called during layout by the
-  /// [RenderViewport], before [applyContentDimensions]. After this method is
-  /// called, the layout will be recomputed and that may result in this method
-  /// being called again, though this should be very rare.
+  /// calling [notifyListeners]. It is called during layout, before
+  /// [applyContentDimensions]. When a [RenderViewport] or a
+  /// [RenderShrinkWrappingViewport] calls this method, it then recomputes its
+  /// layout, which may result in this method being called again, though this
+  /// should be very rare.
+  ///
+  /// This method also passes the correction to the current [activity] through
+  /// [ScrollActivity.correctBy], so that an activity that holds absolute scroll
+  /// offsets, such as the target offset of an animation, can shift them too.
   ///
   /// See also:
   ///
@@ -462,6 +467,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     );
     _pixels = _pixels! + correction;
     _didChangeViewportDimensionOrReceiveCorrection = true;
+    activity?.correctBy(correction);
   }
 
   /// Change the value of [pixels] to the new value, and notify any customers,
@@ -913,8 +919,15 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// beyond the extents, then going beyond the extents will not interrupt the
   /// animation.)
   ///
-  /// The animation is indifferent to changes to the viewport or content
-  /// dimensions.
+  /// The animation keeps its target unless the scroll offset is corrected while
+  /// it runs. For example, a viewport corrects the scroll offset when one of
+  /// its slivers reports that content before the viewport has changed size, and
+  /// a [SingleChildScrollView] does so when the scroll offset is out of range
+  /// for its new scroll extents. The animation and its target then move by the
+  /// same amount as the scroll offset, otherwise the content would visibly
+  /// jump. The animation can therefore end at a different offset from the given
+  /// value. For example, an animation to the start of a list can stop short of
+  /// it when items above the viewport have changed size.
   ///
   /// Once the animation has completed, the scroll position will attempt to
   /// begin a ballistic activity in case its value is not stable (for example,
