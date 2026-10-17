@@ -78,13 +78,16 @@ class BundleBuilder {
     final BuildResult result = await buildSystem.build(target, environment);
 
     if (!result.success) {
+      final Logger logger = environment.logger;
       for (final ExceptionMeasurement measurement in result.exceptions.values) {
-        globals.printError(
-          'Target ${measurement.target} failed: ${measurement.exception}',
-          stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
-              ? measurement.stackTrace
-              : null,
-        );
+        if (measurement.fatal || logger.isVerbose) {
+          logger.printError(
+            'Target ${measurement.target} failed: ${measurement.exception}',
+            stackTrace: (measurement.fatal && measurement.exception is! ToolExit)
+                ? measurement.stackTrace
+                : null,
+          );
+        }
       }
       throwToolExit('Failed to build bundle.');
     }

@@ -201,6 +201,70 @@ void main() {
   );
 
   testUsingContext(
+    'BundleBuilder suppresses error message on non-fatal build failure',
+    () async {
+      final fileSystem = MemoryFileSystem.test();
+      await expectLater(
+        () => BundleBuilder().build(
+          platform: TargetPlatform.ios,
+          buildInfo: BuildInfo.debug,
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          mainPath: 'lib/main.dart',
+          assetDirPath: 'example',
+          depfilePath: 'example.d',
+          buildSystem: TestBuildSystem.all(
+            BuildResult(
+              success: false,
+              exceptions: <String, ExceptionMeasurement>{
+                'hello': ExceptionMeasurement('hello', 'bar', StackTrace.current),
+              },
+            ),
+          ),
+        ),
+        throwsToolExit(),
+      );
+      expect(testLogger.errorText, isEmpty);
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  final bufferLogger = BufferLogger.test();
+  testUsingContext(
+    'BundleBuilder logs error message on non-fatal build failure when verbose',
+    () async {
+      final fileSystem = MemoryFileSystem.test();
+      await expectLater(
+        () => BundleBuilder().build(
+          platform: TargetPlatform.ios,
+          buildInfo: BuildInfo.debug,
+          project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+          mainPath: 'lib/main.dart',
+          assetDirPath: 'example',
+          depfilePath: 'example.d',
+          buildSystem: TestBuildSystem.all(
+            BuildResult(
+              success: false,
+              exceptions: <String, ExceptionMeasurement>{
+                'hello': ExceptionMeasurement('hello', 'bar', StackTrace.current),
+              },
+            ),
+          ),
+        ),
+        throwsToolExit(),
+      );
+      expect(bufferLogger.errorText, contains('Target hello failed: bar'));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem.test(),
+      Logger: () => VerboseLogger(bufferLogger),
+      ProcessManager: () => FakeProcessManager.any(),
+    },
+  );
+
+  testUsingContext(
     'Passes correct defines to build system',
     () async {
       final FlutterProject project = FlutterProject.fromDirectoryTest(globals.fs.currentDirectory);

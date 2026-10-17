@@ -94,3 +94,19 @@ class MissingDefineException implements Exception {
         'but it was not provided';
   }
 }
+
+/// An exception thrown when a compiler (such as the frontend server) fails
+/// to compile code, and has already emitted the compilation error messages to
+/// the logger.
+class CompilerException implements Exception {
+  const CompilerException([this.message]);
+
+  /// An optional message describing the compilation failure.
+  final String? message;
+
+  @override
+  String toString() => switch (message) {
+    null || '' => 'compilation failed',
+    final String msg => 'compilation failed: $msg',
+  };
+}
