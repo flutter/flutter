@@ -586,7 +586,11 @@ void main() {
     expect(helloPosition3.dy, helloPosition4.dy);
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
-    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 3);
+    // Settling the released back gesture takes two frames rather than three: the
+    // route below now stops ignoring pointers when the settle begins instead of
+    // when it ends, so it no longer needs the extra rebuild frame at the end.
+    // See https://github.com/flutter/flutter/issues/188840.
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
     expect(find.text('PUSH'), findsOneWidget);
     expect(find.text('HELLO'), findsNothing);
 
