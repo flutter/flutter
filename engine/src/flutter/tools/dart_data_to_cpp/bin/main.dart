@@ -29,46 +29,52 @@ Future<void> main(List<String> arguments) async {
   final String dartOutputPath = parsedArguments.option('dart-out')!;
   final String? stampPath = parsedArguments.option('stamp');
 
-  final SomeResolvedUnitResult result = await resolveFile(
-    path: path.normalize(File(inputPath).absolute.path),
-  );
-  if (result is! ResolvedUnitResult) {
-    throw StateError('Failed to resolve $inputPath: $result');
-  }
-
-  final String flutterRoot = Engine.findWithin().flutterDir.path;
-  final String relativeCppPath = path.relative(
-    path.normalize(File(cppOutputPath).absolute.path),
-    from: flutterRoot,
-  );
-  final String underscored = path
-      .withoutExtension(relativeCppPath)
-      .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
-  final headerGuard = 'FLUTTER_${underscored.toUpperCase()}_H_';
-
-  final LibraryElement libElement = result.libraryElement;
-  final Iterable<NativeData> definitions = NativeData.parseLibrary(libElement);
-  final String cppHeader = await generateCppHeader(definitions, headerGuard: headerGuard);
-  final String dartCode = await generateDartEncoders(
-    definitions,
-    partOfFile: libElement.firstFragment.source.shortName,
-    libraryName: libElement.name,
-  );
-
-  final cppFile = File(cppOutputPath);
-  final dartFile = File(dartOutputPath);
-  if (Platform.environment.containsKey('LUCI_CONTEXT')) {
-    if (cppFile.readAsStringSync() != cppHeader || dartFile.readAsStringSync() != dartCode) {
-      stderr.writeln(
-        'Error: Generated files ($cppOutputPath, $dartOutputPath) are out of sync with $inputPath.\n'
-        'Do not manually edit generated files, and regenerate them after modifying $inputPath.',
-      );
-      exitCode = 1;
-      return;
+  final bool isLuci = Platform.environment.containsKey('LUCI_CONTEXT');
+  // On CI, only run the freshness check on Linux builders (the generated files
+  // are platform-independent, and this avoids CRLF issues on Windows and
+  // redundant analyzer work on macOS/Windows bots).
+  if (!isLuci || Platform.isLinux) {
+    final SomeResolvedUnitResult result = await resolveFile(
+      path: path.normalize(File(inputPath).absolute.path),
+    );
+    if (result is! ResolvedUnitResult) {
+      throw StateError('Failed to resolve $inputPath: $result');
     }
-  } else {
-    cppFile.writeAsStringSync(cppHeader);
-    dartFile.writeAsStringSync(dartCode);
+
+    final String flutterRoot = Engine.findWithin().flutterDir.path;
+    final String relativeCppPath = path.relative(
+      path.normalize(File(cppOutputPath).absolute.path),
+      from: flutterRoot,
+    );
+    final String underscored = path
+        .withoutExtension(relativeCppPath)
+        .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+    final headerGuard = 'FLUTTER_${underscored.toUpperCase()}_H_';
+
+    final LibraryElement libElement = result.libraryElement;
+    final Iterable<NativeData> definitions = NativeData.parseLibrary(libElement);
+    final String cppHeader = await generateCppHeader(definitions, headerGuard: headerGuard);
+    final String dartCode = await generateDartEncoders(
+      definitions,
+      partOfFile: libElement.firstFragment.source.shortName,
+      libraryName: libElement.name,
+    );
+
+    final cppFile = File(cppOutputPath);
+    final dartFile = File(dartOutputPath);
+    if (isLuci) {
+      if (cppFile.readAsStringSync() != cppHeader || dartFile.readAsStringSync() != dartCode) {
+        stderr.writeln(
+          'Error: Generated files ($cppOutputPath, $dartOutputPath) are out of sync with $inputPath.\n'
+          'Do not manually edit generated files, and regenerate them after modifying $inputPath.',
+        );
+        exitCode = 1;
+        return;
+      }
+    } else {
+      cppFile.writeAsStringSync(cppHeader);
+      dartFile.writeAsStringSync(dartCode);
+    }
   }
 
   if (stampPath != null) {

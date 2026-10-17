@@ -162,6 +162,21 @@ void DecodeStrut(Dart_Handle strut_handle,
   }
 }
 
+// Copies attributes from the FFI `flutter::TextStyle` (`in`) onto `style`.
+//
+// In `flutter::TextStyle`, omitted primitive fields (`has_<field>() == false`)
+// are pre-populated with the default values declared on `TextStyle._` in
+// `lib/ui/text.dart`:
+// - `kUseDefaults = true` (used in `ParagraphBuilder`'s constructor) copies all
+//   primitive fields unconditionally to seed the paragraph's base style with
+//   those defaults.
+// - `kUseDefaults = false` (used in `ParagraphBuilder::pushStyle`) only copies
+//   fields that were explicitly set (`in.has_<field>()`), so omitted attributes
+//   inherit from the parent style on the style stack.
+//
+// `Dart_Handle` fields (`locale`, `background`, `foreground`, `shadows`, etc.)
+// do not have default values in `TextStyle._` and are always checked with
+// `in.has_<field>()`.
 template <bool kUseDefaults>
 void ApplyTextStyle(const TextStyle& in, txt::TextStyle& style) {
   if (kUseDefaults || in.has_color()) {
