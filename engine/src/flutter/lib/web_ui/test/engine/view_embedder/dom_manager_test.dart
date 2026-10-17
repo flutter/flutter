@@ -32,6 +32,8 @@ void doTests() {
         equalsIgnoringCase(DomManager.textEditingHostTagName),
       );
       expect(domManager.semanticsHost.tagName, equalsIgnoringCase(DomManager.semanticsHostTagName));
+      expect(domManager.rootElement.style.direction, 'ltr');
+      expect(domManager.rootElement.style.textAlign, 'left');
 
       // Check parent-child relationships.
 

@@ -763,6 +763,7 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   set resize(String value) => setProperty('resize', value);
   set alignContent(String value) => setProperty('align-content', value);
   set textAlign(String value) => setProperty('text-align', value);
+  set direction(String value) => setProperty('direction', value);
   set font(String value) => setProperty('font', value);
   set cursor(String value) => setProperty('cursor', value);
   set scrollbarWidth(String value) => setProperty('scrollbar-width', value);
@@ -825,6 +826,7 @@ extension type DomCSSStyleDeclaration._(JSObject _) implements JSObject {
   String get resize => getPropertyValue('resize');
   String get alignContent => getPropertyValue('align-content');
   String get textAlign => getPropertyValue('text-align');
+  String get direction => getPropertyValue('direction');
   String get font => getPropertyValue('font');
   String get cursor => getPropertyValue('cursor');
   String get scrollbarWidth => getPropertyValue('scrollbar-width');
