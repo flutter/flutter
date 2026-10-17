@@ -1684,6 +1684,11 @@ class ListView extends BoxScrollView {
   /// To map the interleaved child index to the semantic item index (for example,
   /// to look up the extent in a data list), divide it by 2 (`index ~/ 2`).
   ///
+  /// The extents returned by this builder are cached for layout performance.
+  ///
+  /// The cache is cleared when the widget is rebuilt with a new
+  /// [itemExtentBuilder].
+  ///
   /// See also:
   ///
   ///  * [SliverVariedExtentList], the sliver used internally when this property

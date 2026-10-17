@@ -642,4 +642,77 @@ void main() {
     expect(rowNeedsPaint('Third'), isFalse);
     expect(rowNeedsPaint('gamma'), isFalse); // Now visible
   });
+
+  testWidgets('TreeSliver treeRowExtentBuilder is not called excessively', (
+    WidgetTester tester,
+  ) async {
+    var calls = 0;
+    final tree = <TreeSliverNode<String>>[
+      TreeSliverNode<String>('First'),
+      TreeSliverNode<String>('Second'),
+    ];
+    await tester.pumpWidget(
+      _buildTestWidget(
+        CustomScrollView(
+          slivers: <Widget>[
+            TreeSliver<String>(
+              tree: tree,
+              treeRowExtentBuilder:
+                  (TreeSliverNode<Object?> node, SliverLayoutDimensions dimensions) {
+                    calls++;
+                    return 40.0;
+                  },
+            ),
+          ],
+        ),
+      ),
+    );
+    final initialCalls = calls;
+    await tester.pump();
+    expect(calls, initialCalls);
+  });
+
+  testWidgets('TreeSliver empty tree', (WidgetTester tester) async {
+    final tree = <TreeSliverNode<String>>[];
+    await tester.pumpWidget(
+      _buildTestWidget(CustomScrollView(slivers: <Widget>[TreeSliver<String>(tree: tree)])),
+    );
+    expect(find.byType(CustomScrollView), findsOneWidget);
+    // Should not throw.
+  });
+
+  testWidgets('TreeSliver expand/collapse with mixed row heights', (WidgetTester tester) async {
+    final tree = <TreeSliverNode<String>>[
+      TreeSliverNode<String>(
+        'First',
+        children: <TreeSliverNode<String>>[TreeSliverNode<String>('alpha')],
+      ),
+      TreeSliverNode<String>(
+        'Second',
+        expanded: true,
+        children: <TreeSliverNode<String>>[TreeSliverNode<String>('beta')],
+      ),
+    ];
+    await tester.pumpWidget(
+      _buildTestWidget(
+        CustomScrollView(
+          slivers: <Widget>[
+            TreeSliver<String>(
+              tree: tree,
+              treeRowExtentBuilder:
+                  (TreeSliverNode<Object?> node, SliverLayoutDimensions dimensions) {
+                    return (node.content! as String).length * 10.0;
+                  },
+            ),
+          ],
+        ),
+      ),
+    );
+    final RenderTreeSliver renderSliver = tester.renderObject<RenderTreeSliver>(
+      find.byType(TreeSliver<String>),
+    );
+    expect(renderSliver.itemExtentBuilder(0, renderSliver.layoutDimensions), 50.0);
+    expect(renderSliver.itemExtentBuilder(1, renderSliver.layoutDimensions), 60.0);
+    expect(renderSliver.itemExtentBuilder(2, renderSliver.layoutDimensions), 40.0);
+  });
 }

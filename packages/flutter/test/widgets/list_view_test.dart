@@ -1019,6 +1019,9 @@ void main() {
       ),
     );
 
+    final RenderSliverVariedExtentList renderSliver = tester
+        .renderObject<RenderSliverVariedExtentList>(find.byType(SliverVariedExtentList));
+
     expect(find.text('Item 0'), findsOneWidget);
     expect(find.text('Item 5'), findsOneWidget);
     expect(find.text('Item 6'), findsNothing);
@@ -1069,8 +1072,11 @@ void main() {
     expect(find.text('Item 50'), findsOneWidget);
     expect(find.text('Item 55'), findsOneWidget);
     expect(find.text('Item 56'), findsNothing);
+    // Since items 47 to 58 were already cached during the jump to 10000.0,
+    // itemExtentBuilder is not re-invoked. We check renderSliver.layoutDimensions
+    // to verify that the sliver's layout dimensions reflect the updated scrollOffset.
     expect(
-      sliverLayoutDimensions,
+      renderSliver.layoutDimensions,
       const SliverLayoutDimensions(
         scrollOffset: 5000.0,
         precedingScrollExtent: 0.0,
@@ -1092,7 +1098,7 @@ void main() {
     expect(find.text('Item 52'), findsOneWidget);
     expect(find.text('Item 53'), findsNothing);
     expect(
-      sliverLayoutDimensions,
+      renderSliver.layoutDimensions,
       const SliverLayoutDimensions(
         scrollOffset: 4700.0,
         precedingScrollExtent: 0.0,
@@ -1114,7 +1120,7 @@ void main() {
     expect(find.text('Item 58'), findsOneWidget);
     expect(find.text('Item 59'), findsNothing);
     expect(
-      sliverLayoutDimensions,
+      renderSliver.layoutDimensions,
       const SliverLayoutDimensions(
         scrollOffset: 5300.0,
         precedingScrollExtent: 0.0,
