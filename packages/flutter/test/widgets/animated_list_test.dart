@@ -1300,6 +1300,214 @@ void main() {
     );
     await tester.pump();
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192533
+  testWidgets('AnimatedList unmounted in the frame that completes removeItem', (
+    WidgetTester tester,
+  ) async {
+    final listKey = GlobalKey<AnimatedListState>();
+    late StateSetter setHostState;
+    var showList = true;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setHostState = setState;
+            return showList
+                ? AnimatedList(
+                    key: listKey,
+                    initialItemCount: 1,
+                    itemBuilder: (_, _, _) => const SizedBox(height: 40),
+                  )
+                : const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    listKey.currentState!.removeItem(
+      0,
+      (_, Animation<double> animation) =>
+          SizeTransition(sizeFactor: animation, child: const SizedBox(height: 40)),
+      duration: const Duration(milliseconds: 100),
+    );
+    await tester.pump();
+
+    // Time passes without frames, then the list is unmounted.
+    await tester.binding.delayed(const Duration(milliseconds: 150));
+    setHostState(() => showList = false);
+    await _pumpWebStyleFrame(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(AnimatedList), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192533
+  testWidgets('AnimatedList unmounted in the frame that completes insertItem', (
+    WidgetTester tester,
+  ) async {
+    final listKey = GlobalKey<AnimatedListState>();
+    late StateSetter setHostState;
+    var showList = true;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setHostState = setState;
+            return showList
+                ? AnimatedList(key: listKey, itemBuilder: (_, _, _) => const SizedBox(height: 40))
+                : const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    listKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 100));
+    await tester.pump();
+
+    // Time passes without frames, then the list is unmounted.
+    await tester.binding.delayed(const Duration(milliseconds: 150));
+    setHostState(() => showList = false);
+    await _pumpWebStyleFrame(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(AnimatedList), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192533
+  testWidgets('SliverAnimatedList unmounted in the frame that completes removeItem', (
+    WidgetTester tester,
+  ) async {
+    final listKey = GlobalKey<SliverAnimatedListState>();
+    late StateSetter setHostState;
+    var showList = true;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            setHostState = setState;
+            return showList
+                ? CustomScrollView(
+                    slivers: <Widget>[
+                      SliverAnimatedList(
+                        key: listKey,
+                        initialItemCount: 1,
+                        itemBuilder: (_, _, _) => const SizedBox(height: 40),
+                      ),
+                    ],
+                  )
+                : const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    listKey.currentState!.removeItem(
+      0,
+      (_, Animation<double> animation) =>
+          SizeTransition(sizeFactor: animation, child: const SizedBox(height: 40)),
+      duration: const Duration(milliseconds: 100),
+    );
+    await tester.pump();
+
+    // Time passes without frames, then the list is unmounted.
+    await tester.binding.delayed(const Duration(milliseconds: 150));
+    setHostState(() => showList = false);
+    await _pumpWebStyleFrame(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SliverAnimatedList), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192533
+  testWidgets('AnimatedList removeItem in the frame that completes insertItem', (
+    WidgetTester tester,
+  ) async {
+    final listKey = GlobalKey<AnimatedListState>();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(key: listKey, itemBuilder: (_, _, _) => const SizedBox(height: 40)),
+      ),
+    );
+
+    listKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 100));
+    await tester.pump();
+
+    // The insert animation completes in the next frame, and the item is
+    // removed in a post-frame callback before the insert's .then runs.
+    await tester.binding.delayed(const Duration(milliseconds: 150));
+    tester.binding.addPostFrameCallback((_) {
+      listKey.currentState!.removeItem(
+        0,
+        (_, Animation<double> animation) =>
+            SizeTransition(sizeFactor: animation, child: const SizedBox(height: 40)),
+      );
+    });
+    await _pumpWebStyleFrame(tester);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(SizedBox), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/192533
+  testWidgets('AnimatedList insertItem at the index of an item removed in the same frame', (
+    WidgetTester tester,
+  ) async {
+    final listKey = GlobalKey<AnimatedListState>();
+    final animations = <int, Animation<double>>{};
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: AnimatedList(
+          key: listKey,
+          initialItemCount: 1,
+          itemBuilder: (_, int index, Animation<double> animation) {
+            animations[index] = animation;
+            return const SizedBox(height: 40);
+          },
+        ),
+      ),
+    );
+
+    listKey.currentState!.insertItem(1, duration: const Duration(milliseconds: 100));
+    await tester.pump();
+
+    // The insert animation completes in the next frame. Before its .then runs,
+    // the item is removed and another item is inserted at its old index.
+    await tester.binding.delayed(const Duration(milliseconds: 150));
+    tester.binding.addPostFrameCallback((_) {
+      final AnimatedListState state = listKey.currentState!;
+      state.removeItem(1, (_, _) => const SizedBox(height: 40));
+      state.insertItem(0, duration: const Duration(seconds: 1));
+      state.insertItem(1, duration: const Duration(seconds: 1));
+    });
+    await _pumpWebStyleFrame(tester);
+
+    // The new item at index 1 is still animating.
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.takeException(), isNull);
+    expect(animations[1]!.value, moreOrLessEquals(0.5));
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+}
+
+// Pumps one frame the way the web engine does: handleBeginFrame and
+// handleDrawFrame run in the same task and microtasks are flushed only after
+// both. A plain pump() flushes microtasks between the two, like the mobile
+// engines do, which hides the bug in #192533.
+Future<void> _pumpWebStyleFrame(WidgetTester tester) async {
+  final TestWidgetsFlutterBinding binding = tester.binding;
+  binding.handleBeginFrame(Duration(microseconds: binding.clock.now().microsecondsSinceEpoch));
+  binding.handleDrawFrame();
+  await tester.pump();
 }
 
 class _StatefulListItem extends StatefulWidget {
