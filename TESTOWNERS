@@ -371,6 +371,7 @@
 #
 # analyze @justinmc @flutter/framework
 # android_engine_opengles_tests @gmackall @flutter/android
+# android_engine_skia_tests @gmackall @flutter/android
 # android_engine_vulkan_tests @mboetger @flutter/android
 # android_engine_hcpp_tests @gmackall @flutter/android
 # android_hardware_smoke_opengles_tests @andywolff @flutter/engine
