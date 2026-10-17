@@ -5,7 +5,7 @@
 # Generated from //flutter/impeller/playground/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -30,7 +30,7 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    ] + FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from ../renderer/backend
         "-Wno-c++98-compat-extra-semi",  # from ../renderer/backend
         "-Wno-deprecated-copy",  # from ../renderer/backend
@@ -40,6 +40,7 @@ cc_library(
         "-Wno-suggest-override",  # from ../renderer/backend
         "-Wno-unused-private-field",  # from ../renderer/backend
         "-Wno-unused-variable",  # from ../renderer/backend
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
@@ -80,7 +81,9 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :playground
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":playground",

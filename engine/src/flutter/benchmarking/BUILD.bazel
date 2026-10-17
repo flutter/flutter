@@ -5,7 +5,7 @@
 # Generated from //flutter/benchmarking/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,7 +14,7 @@ cc_library(
     testonly = True,
     srcs = ["benchmarking.cc"],
     hdrs = ["benchmarking.h"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -34,7 +34,7 @@ cc_library(
     testonly = True,
     srcs = ["library.cc"],
     hdrs = ["library.h"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":benchmark_library_config",

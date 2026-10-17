@@ -5,7 +5,7 @@
 # Generated from //flutter/runtime/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -161,8 +161,9 @@ flutter_cc_test(
         "runtime_controller_unittests.cc",
         "type_conversions_unittests.cc",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :runtime
+        "-Wno-inconsistent-missing-override",  # from //flutter/shell/common:shell_test_fixture_sources
         "-Wno-c++98-compat-extra-semi",  # from //flutter/shell/common:shell_test_fixture_sources
         "-Wno-deprecated-copy",  # from //flutter/shell/common:shell_test_fixture_sources
         "-Wno-implicit-fallthrough",  # from //flutter/shell/common:shell_test_fixture_sources
@@ -203,7 +204,8 @@ flutter_cc_test(
     name = "no_dart_plugin_registrant_unittests",
     size = "small",
     srcs = ["no_dart_plugin_registrant_unittests.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-Wno-redundant-parens",  # from //flutter/testing:fixture_test
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -228,7 +230,8 @@ flutter_cc_test(
     name = "dart_plugin_registrant_unittests",
     size = "small",
     srcs = ["dart_plugin_registrant_unittests.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-Wno-redundant-parens",  # from //flutter/testing:fixture_test
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,

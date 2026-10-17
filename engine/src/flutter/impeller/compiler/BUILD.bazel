@@ -5,7 +5,7 @@
 # Generated from //flutter/impeller/compiler/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -134,10 +134,11 @@ cc_library(
     hdrs = ["compiler_test.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    ] + FLUTTER_COPTS + [
         "-Wno-unused-variable",  # from :compiler_lib
         "-Wno-newline-eof",  # from :compiler_lib
         "-Wno-conversion",  # from :compiler_lib
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [

@@ -481,102 +481,6 @@ const Map<String, String> includeDirLibraries = <String, String>{
       '//engine/src/flutter/shell/platform/common/client_wrapper:relative_core_wrapper_headers',
 };
 
-/// Compiler flags that GN hands to the dependents of a target through one
-/// of its public configs (`wuffs_public` turns warnings off for whoever
-/// includes wuffs), which Bazel has no way to carry along a dependency.
-/// The converter adds them to the `copts` of every target that lists the
-/// dependency, and when it converts the dependency's own file it requires
-/// the public config to carry exactly these, so that the two sides cannot
-/// drift apart. GN also hands them on along `public_deps` chains (whoever
-/// depends on `flutter_vma` compiles with vulkan_memory_allocator's
-/// suppressions), so a target whose public_deps are listed here is listed
-/// here too, with the same flags; the converter checks that as well. Keys
-/// are GN labels as `//dir:name`.
-const Map<String, List<String>> propagatedCopts = <String, List<String>>{
-  '//flutter/third_party/freetype2:freetype2': <String>[
-    '-Wno-unused-function',
-    '-Wno-unused-variable',
-  ],
-  // The secondary tree's forwarder to the same target (harfbuzz names it).
-  '//third_party/freetype2:freetype2': <String>['-Wno-unused-function', '-Wno-unused-variable'],
-  '//flutter/third_party/wuffs:wuffs': <String>['-Wno-unused-function', '-Wno-c++11-narrowing'],
-  '//third_party/inja:inja': _injaCopts,
-  '//flutter/third_party/vulkan-deps/glslang/src:glslang_lib_sources': _glslangCopts,
-  '//flutter/third_party/vulkan-deps/glslang/src:glslang_sources': _glslangCopts,
-  '//flutter/third_party/vulkan-deps/glslang/src:glslang_default_resource_limits_sources':
-      _glslangCopts,
-  '//flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers': _vulkanHeadersCopts,
-  '//flutter/third_party/vulkan_memory_allocator:vulkan_memory_allocator': _vmaCopts,
-  // Handed on through public_deps.
-  '//third_party/shaderc_flutter:shaderc_util_flutter': _glslangCopts,
-  '//third_party/shaderc_flutter:shaderc_flutter': _glslangCopts,
-  '//flutter/impeller/compiler:compiler_lib': <String>[..._injaCopts, ..._glslangCopts],
-  '//flutter/common/graphics:graphics': _vulkanHeadersCopts,
-  '//flutter/vulkan/procs:procs': _vulkanHeadersCopts,
-  '//flutter/vulkan:vulkan': _vulkanHeadersCopts,
-  '//flutter/flow:flow': _vulkanHeadersCopts,
-  '//flutter/lib/ui:ui': _vulkanHeadersCopts,
-  '//flutter/lib/ui:ui_testing_mocks': _vulkanHeadersCopts,
-  '//flutter/runtime:runtime': _vulkanHeadersCopts,
-  '//flutter/testing:dart': _vulkanHeadersCopts,
-  '//flutter/testing:fixture_test': _vulkanHeadersCopts,
-  '//flutter/shell/gpu:gpu_surface_software': _vulkanHeadersCopts,
-  '//flutter/display_list:display_list_benchmarks_source': _vulkanHeadersCopts,
-  '//flutter/flutter_vma:flutter_vma': _vulkanCopts,
-  '//flutter/flutter_vma:flutter_skia_vma': _vulkanCopts,
-  '//flutter/impeller/renderer/backend/vulkan:vulkan': _vulkanCopts,
-  '//flutter/impeller/renderer/backend:backend': _vulkanCopts,
-  '//flutter/impeller:impeller': _vulkanCopts,
-  '//flutter/shell/gpu:gpu_surface_gl': _vulkanCopts,
-  '//flutter/shell/gpu:gpu_surface_vulkan': _vulkanCopts,
-  '//flutter/shell/common:shell_unittests_gpu_configuration': _vulkanCopts,
-  '//flutter/shell/common:shell_test_fixture_sources': _vulkanCopts,
-  // The embedder's GPU configuration group, and the embedder libraries that
-  // publish it (embedder_source_set's public_configs).
-  '//flutter/shell/platform/embedder:embedder_gpu_configuration': _vulkanCopts,
-  '//flutter/shell/platform/embedder:embedder_unittests_library': _vulkanCopts,
-  // flutter_tester's GPU configuration groups (software and Vulkan; OpenGL
-  // ES for the variant), both reaching the same backends.
-  '//flutter/shell/testing:tester_gpu_configuration': _vulkanCopts,
-  '//flutter/shell/testing:tester_opengles_gpu_configuration': _vulkanCopts,
-  // The interop toolkit publishes the renderer backends down its chain.
-  '//flutter/impeller/toolkit/interop:interop_base': _vulkanCopts,
-  '//flutter/impeller/toolkit/interop:interop': _vulkanCopts,
-  '//flutter/impeller/toolkit/interop/backend:backend': _vulkanCopts,
-  '//flutter/impeller/toolkit/interop/backend/gles:gles': _vulkanCopts,
-  '//flutter/impeller/toolkit/interop/backend/vulkan:vulkan': _vulkanCopts,
-  // The GTK shell's sources publish disable_warnings (-Wno-deprecated-volatile
-  // for GTK's headers under C++20) to whoever includes them: flutter_linux
-  // hands it on through public_deps, and the suite and the shared library
-  // get it as dependents.
-  '//flutter/shell/platform/linux:flutter_linux_sources': <String>['-Wno-deprecated-volatile'],
-  '//flutter/shell/platform/linux:flutter_linux': <String>['-Wno-deprecated-volatile'],
-};
-
-/// inja_public_config's flags.
-const List<String> _injaCopts = <String>['-Wno-unused-variable', '-Wno-newline-eof'];
-
-/// glslang_public's one flag.
-const List<String> _glslangCopts = <String>['-Wno-conversion'];
-
-/// vulkan_headers_config's one flag, under is_clang.
-const List<String> _vulkanHeadersCopts = <String>['-Wno-redundant-parens'];
-
-/// vulkan_memory_allocator_config's cflags_cc, under is_clang.
-const List<String> _vmaCopts = <String>[
-  '-Wno-c++98-compat-extra-semi',
-  '-Wno-deprecated-copy',
-  '-Wno-implicit-fallthrough',
-  '-Wno-nullability-completeness',
-  '-Wno-suggest-destructor-override',
-  '-Wno-suggest-override',
-  '-Wno-unused-private-field',
-  '-Wno-unused-variable',
-];
-
-/// What flutter_vma hands on: the headers' flag and the allocator's.
-const List<String> _vulkanCopts = <String>[..._vulkanHeadersCopts, ..._vmaCopts];
-
 /// A Bazel label taken apart: `@repo//package:name`.
 @immutable
 final class BazelLabel {
@@ -821,8 +725,9 @@ final class ConfigWarningSet extends ConfigEffect {
 /// from a file the converter does not convert: they are inlined into the
 /// listing target's `copts`, each group under the GN condition the config
 /// sets it in, as no dependency could carry them. Only private listings are
-/// supported: a public one would hand the flags on along dependency edges
-/// ([propagatedCopts]), which conditional flags do not fit.
+/// supported: a public one would hand the flags on along dependency edges,
+/// which the dependents derive from the owner's GN file
+/// (forwarded_flags.dart), not from this table.
 final class ConfigCopts extends ConfigEffect {
   const ConfigCopts(this.copts);
 
