@@ -182,6 +182,56 @@ public class PlatformViewsController2Test {
   }
 
   @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void attachToViewDoesNotCreateABackdropBlurCarrier() {
+    final PlatformViewsController2 controller = new PlatformViewsController2();
+    final FlutterView flutterView = attach(new FlutterJNI(), controller);
+    final int childCount = flutterView.getChildCount();
+
+    // Engines that never composite a platform view with HCPP never pay for the carrier.
+    assertNull(controller.getBackdropBlurCarrierForTest().getCarrierViewForTest());
+
+    controller.detachFromView();
+    assertEquals(childCount, flutterView.getChildCount());
+  }
+
+  @Test
+  @Config(shadows = {ShadowFlutterJNI.class, ShadowPlatformTaskQueue.class})
+  public void createOverlaySurfaceCreatesTheBackdropBlurCarrier() {
+    Assume.assumeTrue(BackdropBlurCarrier.isSupported());
+    final PlatformViewsController2 controller = new PlatformViewsController2();
+    controller.setRegistry(new PlatformViewRegistryImpl());
+    final Context context = ApplicationProvider.getApplicationContext();
+    final AttachedSurfaceControl rootSurfaceControl = mock(AttachedSurfaceControl.class);
+    when(rootSurfaceControl.buildReparentTransaction(any()))
+        .thenReturn(new SurfaceControl.Transaction());
+    final FlutterView flutterView =
+        new FlutterView(context, new FlutterSurfaceView(context)) {
+          @Override
+          public AttachedSurfaceControl getRootSurfaceControl() {
+            return rootSurfaceControl;
+          }
+        };
+    controller.attachToView(flutterView);
+    assertNull(controller.getBackdropBlurCarrierForTest().getCarrierViewForTest());
+
+    // The first HCPP overlay is what tells us this engine composites with HCPP.
+    controller.createOverlaySurface();
+
+    final SurfaceView carrier = controller.getBackdropBlurCarrierForTest().getCarrierViewForTest();
+    assertNotNull(carrier);
+    assertEquals(flutterView, carrier.getParent());
+
+    // Creating the overlay again (same view) does not add a second carrier.
+    controller.createOverlaySurface();
+    assertEquals(carrier, controller.getBackdropBlurCarrierForTest().getCarrierViewForTest());
+
+    controller.detachFromView();
+    assertNull(controller.getBackdropBlurCarrierForTest().getCarrierViewForTest());
+    assertNull(carrier.getParent());
+  }
+
+  @Test
   public void itUsesActionEventTypeFromFrameworkEventAsActionChanged() {
     MotionEventTracker motionEventTracker = MotionEventTracker.getInstance();
     PlatformViewRegistryImpl registryImpl = new PlatformViewRegistryImpl();

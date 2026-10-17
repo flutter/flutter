@@ -1481,6 +1481,22 @@ public class FlutterJNI {
     platformViewsController2.hidePlatformView(viewId);
   }
 
+  /**
+   * Forwards this frame's backdrop blurs that cover HCPP platform views, as [left, top, right,
+   * bottom, sigma, cornerRadius] per blur in physical pixels. Returns whether native backdrop blur
+   * is available, so the engine can leave filters to Flutter when it is not. See {@link
+   * PlatformViewsController2#onBackdropBlurs}.
+   */
+  @UiThread
+  @SuppressWarnings("unused")
+  public boolean onBackdropBlurs2(@NonNull float[] blurs) {
+    ensureRunningOnMainThread();
+    if (platformViewsController2 == null || Build.VERSION.SDK_INT < API_LEVELS.API_34) {
+      return false;
+    }
+    return platformViewsController2.onBackdropBlurs(blurs);
+  }
+
   // ----- Start Localization Support ----
 
   /** Sets the localization plugin that is used in various localization methods. */

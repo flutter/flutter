@@ -356,6 +356,7 @@ android_java_sources = [
   "io/flutter/plugin/localization/LocalizationPlugin.java",
   "io/flutter/plugin/mouse/MouseCursorPlugin.java",
   "io/flutter/plugin/platform/AccessibilityEventsDelegate.java",
+  "io/flutter/plugin/platform/BackdropBlurCarrier.java",
   "io/flutter/plugin/platform/ImageReaderPlatformViewRenderTarget.java",
   "io/flutter/plugin/platform/PlatformOverlayView.java",
   "io/flutter/plugin/platform/PlatformPlugin.java",
