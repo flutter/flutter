@@ -24,6 +24,7 @@ import '../ios/code_signing.dart';
 import '../ios/plist_parser.dart';
 import '../runner/flutter_command.dart';
 import '../runner/flutter_command_runner.dart';
+import '../version.dart';
 
 class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
   ConfigCommand({
@@ -61,17 +62,20 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
       'clear-ios-signing-settings',
       negatable: false,
       aliases: <String>['clear-ios-signing-cert'],
-      help: 'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
+      help:
+          'Clear the saved development certificate or provisioning profile choice used to sign apps for iOS device deployment.',
     );
     parser.addFlag(
       'select-ios-signing-settings',
       negatable: false,
-      help: 'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
+      help:
+          'Complete prompt to select and save code signing settings used to sign apps for iOS device deployment.',
     );
     parser.addOption('android-sdk', help: 'The Android SDK directory.');
     parser.addOption(
       'android-studio-dir',
-      help: 'The Android Studio installation directory. If unset, flutter will search for valid installations at well-known locations.',
+      help:
+          'The Android Studio installation directory. If unset, flutter will search for valid installations at well-known locations.',
     );
     parser.addOption(
       'jdk-dir',
@@ -412,6 +416,9 @@ class ConfigCommand extends FlutterCommand with ExtensionArgParserMixin {
 
   /// List the status of the analytics reporting.
   String get analyticsUsage {
+    if (_toolContext.flutterVersion.channel == kUserBranch) {
+      return 'Analytics reporting is currently disabled when running from a feature branch.';
+    }
     return 'Analytics reporting is currently ${analytics.telemetryEnabled ? 'enabled' : 'disabled'}.';
   }
 
