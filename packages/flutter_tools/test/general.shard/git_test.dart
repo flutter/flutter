@@ -20,6 +20,55 @@ void main() {
     processManager = FakeProcessManager.empty();
   });
 
+  group('repository environment isolation', () {
+    setUp(() {
+      git = Git(
+        currentPlatform: FakePlatform(
+          environment: {
+            'PATH': '/usr/bin',
+            'GIT_DIR': '/outer/repository',
+            'git_work_tree': '/outer/worktree',
+            'GIT_INDEX_FILE': '/outer/index',
+            'GIT_OBJECT_DIRECTORY': '/outer/objects',
+            'GIT_ALTERNATE_OBJECT_DIRECTORIES': '/outer/alternates',
+            'GIT_QUARANTINE_PATH': '/outer/quarantine',
+            'GIT_COMMON_DIR': '/outer/common',
+          },
+        ),
+        runProcessWith: ProcessUtils(processManager: processManager, logger: logger),
+      );
+      processManager.addCommand(
+        const FakeCommand(
+          command: ['git', 'rev-parse', 'HEAD'],
+          environment: {'PATH': '/usr/bin', 'CUSTOM': 'value'},
+          includeParentEnvironment: false,
+        ),
+      );
+    });
+
+    const environment = {'CUSTOM': 'value', 'GIT_DIR': '/another/repository'};
+
+    test('runSync does not re-inherit removed variables', () {
+      git.runSync(['rev-parse', 'HEAD'], environment: environment);
+    });
+
+    test('run does not re-inherit removed variables', () async {
+      await git.run(['rev-parse', 'HEAD'], environment: environment);
+    });
+
+    test('run with a timeout does not re-inherit removed variables', () async {
+      await git.run(
+        ['rev-parse', 'HEAD'],
+        environment: environment,
+        timeout: const Duration(minutes: 1),
+      );
+    });
+
+    test('stream does not re-inherit removed variables', () async {
+      await git.stream(['rev-parse', 'HEAD'], environment: environment);
+    });
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/74165.
   group('on Windows', () {
     const expectedCygwinEnvVars = {'MSYS': 'noglob', 'CYGWIN': 'noglob'};
