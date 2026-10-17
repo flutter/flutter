@@ -125,8 +125,9 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(
 /// {@tool dartpad}
 /// This simple example shows a [NestedScrollView] whose header contains a
 /// floating [SliverAppBar]. By using the [floatHeaderSlivers] property, the
-/// floating behavior is coordinated between the outer and inner [Scrollable]s,
-/// so it behaves as it would in a single scrollable.
+/// floating behavior during a drag is coordinated between the outer and inner
+/// [Scrollable]s. This does not change the order of ballistic scrolling: a
+/// reverse fling scrolls the body to its start before expanding the header.
 ///
 /// ** See code in examples/api/lib/widgets/nested_scroll_view/nested_scroll_view.1.dart **
 /// {@end-tool}
@@ -249,7 +250,12 @@ class NestedScrollView extends StatefulWidget {
   ///
   /// If null, uses the physics from an explicitly provided [scrollBehavior],
   /// or the inherited [ScrollConfiguration] when no such behavior is provided.
-  /// By default, this follows the platform's scrolling conventions.
+  /// If there is no ancestor [ScrollConfiguration], [ScrollConfiguration.of]
+  /// supplies a default [ScrollBehavior]. The default behavior uses
+  /// [BouncingScrollPhysics] on iOS and macOS and [ClampingScrollPhysics] on
+  /// other platforms. An inherited custom behavior can override this choice.
+  /// To use clamping ballistic motion on every platform, explicitly provide
+  /// [ClampingScrollPhysics].
   ///
   /// The outer scroll position is always clamped to its scroll extents,
   /// regardless of the provided [ScrollPhysics.applyBoundaryConditions]. The
@@ -259,9 +265,11 @@ class NestedScrollView extends StatefulWidget {
   /// This property only applies to the outer scroll view, composed of the
   /// slivers returned from [headerSliverBuilder]. The inner scroll view is
   /// configured separately by the [body]. To use the same physics for both,
-  /// configure this property and the body's scroll view accordingly. An
-  /// inherited [ScrollConfiguration] configures the default physics of both
-  /// scroll views, while explicit settings on either scroll view take precedence.
+  /// configure this property and the body's scroll view accordingly. A
+  /// shared ancestor [ScrollConfiguration] can configure the default physics
+  /// of both scroll views. Explicit settings on either scroll view, or a closer
+  /// [ScrollConfiguration] inside the body, can make their physics differ.
+  /// During a fling, each phase uses the physics of the position it moves.
   ///
   /// The [ScrollPhysics] also determine whether or not the [NestedScrollView]
   /// can accept input from the user to change the scroll offset. For example,
@@ -293,10 +301,13 @@ class NestedScrollView extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   /// Whether or not the [NestedScrollView]'s coordinator should prioritize the
-  /// outer scrollable over the inner when scrolling back.
+  /// outer scrollable over the inner when scrolling back during a drag or
+  /// pointer-signal scroll.
   ///
   /// This is useful for an outer scrollable containing a [SliverAppBar] that
-  /// is expected to float.
+  /// is expected to float. It does not change the ballistic phase order:
+  /// a reverse fling scrolls the participating bodies to their starts before
+  /// expanding the header.
   final bool floatHeaderSlivers;
 
   /// {@macro flutter.material.Material.clipBehavior}
@@ -313,6 +324,16 @@ class NestedScrollView extends StatefulWidget {
   final String? restorationId;
 
   /// {@macro flutter.widgets.scrollable.scrollBehavior}
+  ///
+  /// This property applies only to the outer scroll view. Its
+  /// [ScrollBehavior.getScrollPhysics] supplies the outer physics when
+  /// [physics] is null. If both properties are null, the outer physics comes
+  /// from [ScrollConfiguration.of]. The outer position remains clamped to its
+  /// scroll extents regardless of which behavior supplies its physics.
+  ///
+  /// This behavior is not installed as a [ScrollConfiguration] for the [body].
+  /// To configure both scroll views, provide a shared ancestor
+  /// [ScrollConfiguration], or configure each scroll view separately.
   ///
   /// The [ScrollBehavior] of the inherited [ScrollConfiguration] will be
   /// modified by default to not apply a [Scrollbar]. This is because the
@@ -518,7 +539,13 @@ class NestedScrollViewState extends State<NestedScrollView> {
   }
 }
 
-/// Clamps the header while delegating its motion and permissions to its physics.
+/// Clamps the header while delegating its motion and permissions to its parent.
+///
+/// [NestedScrollViewState.build] resolves the parent from explicit physics,
+/// explicit scroll behavior, or the inherited scroll configuration, in that
+/// order. Clamping the boundary does not require clamping ballistic motion.
+/// The null-parent fallbacks below are defensive; they do not select the
+/// default physics of a normally built [NestedScrollView].
 class _NestedScrollViewPhysics extends ScrollPhysics {
   const _NestedScrollViewPhysics({super.parent});
 
@@ -1642,8 +1669,8 @@ class _NestedBallisticGroup {
     if (_movingHeader) {
       return _leader!._velocity;
     }
-    // As in the existing nested activities, a parked body still reports the
-    // fling velocity for deferred loading until the coordinated motion ends.
+    // A parked body still reports the fling velocity for deferred loading
+    // until the coordinated motion ends.
     return simulation._done ? 0.0 : simulation._velocity;
   }
 
@@ -1770,7 +1797,9 @@ class _NestedPhase {
 /// Physics sees a combined coordinate: outer + inner - inner.minScrollExtent.
 /// The component offsets are retained separately, since their sum cannot reveal
 /// an overscrolled body behind a partially collapsed header. Only the component
-/// owned by the current phase receives its displacement.
+/// owned by the current phase receives its displacement. Each phase uses its
+/// owner's configured physics; inheriting the same default does not merge the
+/// header and body into a single physics policy.
 ///
 /// An initially out-of-range body first recovers using its own bounds translated
 /// into combined coordinates. At the recovery boundary, phases are selected
