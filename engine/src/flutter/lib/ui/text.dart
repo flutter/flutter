@@ -979,16 +979,6 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/featurelist>
   final int value;
 
-  static const int _kEncodedSize = 8;
-
-  void _encode(ByteData byteData) {
-    assert(feature.codeUnits.every((int c) => c >= 0x20 && c <= 0x7F));
-    for (var i = 0; i < 4; i++) {
-      byteData.setUint8(i, feature.codeUnitAt(i));
-    }
-    byteData.setInt32(4, value, _kFakeHostEndian);
-  }
-
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
@@ -1173,16 +1163,6 @@ class FontVariation {
   /// technically supported by OpenType. At the extreme edge of the range, the
   /// smallest increment is only approximately ±0.002.
   final double value;
-
-  static const int _kEncodedSize = 8;
-
-  void _encode(ByteData byteData) {
-    assert(axis.codeUnits.every((int c) => c >= 0x20 && c <= 0x7F));
-    for (var i = 0; i < 4; i++) {
-      byteData.setUint8(i, axis.codeUnitAt(i));
-    }
-    byteData.setFloat32(4, value, _kFakeHostEndian);
-  }
 
   @override
   bool operator ==(Object other) {
@@ -1503,13 +1483,6 @@ class TextHeightBehavior {
     this.leadingDistribution = TextLeadingDistribution.proportional,
   });
 
-  /// Creates a new TextHeightBehavior object from an encoded form.
-  ///
-  /// See [_encode] for the creation of the encoded form.
-  const TextHeightBehavior._fromEncoded(int encoded, this.leadingDistribution)
-    : applyHeightToFirstAscent = (encoded & 0x1) == 0,
-      applyHeightToLastDescent = (encoded & 0x2) == 0;
-
   /// Whether to apply the [TextStyle.height] modifier to the ascent of the first
   /// line in the paragraph.
   ///
@@ -1545,12 +1518,6 @@ class TextHeightBehavior {
   ///
   /// Defaults to [TextLeadingDistribution.proportional],
   final TextLeadingDistribution leadingDistribution;
-
-  /// Returns an encoded int representation of this object (excluding
-  /// [leadingDistribution]).
-  int _encode() {
-    return (applyHeightToFirstAscent ? 0 : 1 << 0) | (applyHeightToLastDescent ? 0 : 1 << 1);
-  }
 
   @override
   bool operator ==(Object other) {
@@ -1602,134 +1569,138 @@ bool _listEquals<T>(List<T>? a, List<T>? b) {
   return true;
 }
 
-// This encoding must match the C++ version of ParagraphBuilder::pushStyle.
-//
-// The encoded array buffer has 8 elements.
-//
-//  - Element 0: A bit field where the ith bit indicates whether the ith element
-//    has a non-null value. Bits 8 to 12 indicate whether |fontFamily|,
-//    |fontSize|, |letterSpacing|, |wordSpacing|, and |height| are non-null,
-//    respectively. Bit 0 indicates the [TextLeadingDistribution] of the text
-//    style.
-//
-//  - Element 1: The |color| in ARGB with 8 bits per channel.
-//
-//  - Element 2: A bit field indicating which text decorations are present in
-//    the |textDecoration| list. The ith bit is set if there's a TextDecoration
-//    with enum index i in the list.
-//
-//  - Element 3: The |decorationColor| in ARGB with 8 bits per channel.
-//
-//  - Element 4: The bit field of the |decorationStyle|.
-//
-//  - Element 5: The index of the |fontWeight|.
-//
-//  - Element 6: The enum index of the |fontStyle|.
-//
-//  - Element 7: The enum index of the |textBaseline|.
-//
-Int32List _encodeTextStyle(
-  Color? color,
-  TextDecoration? decoration,
-  Color? decorationColor,
-  TextDecorationStyle? decorationStyle,
-  double? decorationThickness,
-  FontWeight? fontWeight,
-  FontStyle? fontStyle,
-  TextBaseline? textBaseline,
-  String? fontFamily,
-  List<String>? fontFamilyFallback,
-  double? fontSize,
-  double? letterSpacing,
-  double? wordSpacing,
-  double? height,
-  Locale? locale,
-  Paint? background,
-  Paint? foreground,
-  List<Shadow>? shadows,
-  List<FontFeature>? fontFeatures,
-  List<FontVariation>? fontVariations,
-) {
-  final result = Int32List(9);
-  // The 0th bit of result[0] is reserved for leadingDistribution.
+/// An annotation that marks a Dart constructor to be code-generated into a C++ struct
+/// and FFI encoder/decoder.
+///
+/// The marked Dart constructor's formal parameters must be subtypes of [_NativeType],
+/// to provide the code generator with required information. See [TextStyle._] for more details.
+extension type const _NativeData._(String symbol) {
+  const _NativeData({required this.symbol});
+}
 
-  if (color != null) {
-    result[0] |= 1 << 1;
-    result[1] = color.value;
-  }
-  if (decoration != null) {
-    result[0] |= 1 << 2;
-    result[2] = decoration._mask;
-  }
-  if (decorationColor != null) {
-    result[0] |= 1 << 3;
-    result[3] = decorationColor.value;
-  }
-  if (decorationStyle != null) {
-    result[0] |= 1 << 4;
-    result[4] = decorationStyle.index;
-  }
-  if (fontWeight != null) {
-    result[0] |= 1 << 5;
-    result[5] = fontWeight.value;
-  }
-  if (fontStyle != null) {
-    result[0] |= 1 << 6;
-    result[6] = fontStyle.index;
-  }
-  if (textBaseline != null) {
-    result[0] |= 1 << 7;
-    result[7] = textBaseline.index;
-  }
-  if (decorationThickness != null) {
-    result[0] |= 1 << 8;
-  }
-  if (fontFamily != null || (fontFamilyFallback != null && fontFamilyFallback.isNotEmpty)) {
-    result[0] |= 1 << 9;
-    // Passed separately to native.
-  }
-  if (fontSize != null) {
-    result[0] |= 1 << 10;
-    // Passed separately to native.
-  }
-  if (letterSpacing != null) {
-    result[0] |= 1 << 11;
-    // Passed separately to native.
-  }
-  if (wordSpacing != null) {
-    result[0] |= 1 << 12;
-    // Passed separately to native.
-  }
-  if (height != null) {
-    result[0] |= 1 << 13;
-    // Passed separately to native.
-  }
-  if (locale != null) {
-    result[0] |= 1 << 14;
-    // Passed separately to native.
-  }
-  if (background != null) {
-    result[0] |= 1 << 15;
-    // Passed separately to native.
-  }
-  if (foreground != null) {
-    result[0] |= 1 << 16;
-    // Passed separately to native.
-  }
-  if (shadows != null) {
-    result[0] |= 1 << 17;
-    // Passed separately to native.
-  }
-  if (fontFeatures != null) {
-    result[0] |= 1 << 18;
-    // Passed separately to native.
-  }
-  if (fontVariations != null) {
-    result[0] |= 1 << 19;
-    // Passed separately to native.
-  }
+/// Maps a constructor parameter to a native FFI representation [NativeT] and
+/// Dart value type [DartT].
+///
+/// - `SizedNativeType` [NativeT] (`Bool`, `Uint8`, `Uint16`, `Int32`, `Uint32`,
+///   `Float`, `Double`, etc.) is packed inline into a `dart:ffi` `Struct`.
+/// - `Handle` [NativeT] is stored on the Dart instance and passed in the encoded
+///   object list to C++.
+///
+/// Do not construct a [_NativeType] directly. Use one of its subtypes.
+extension type const _NativeType<DartT, NativeT extends NativeType>._unconstructable(DartT value) {
+  // The `encode` method defines how to convert the `DartT` value into its FFI
+  // representation. This can be omitted when `DartT` is already the FFI
+  // representation type (e.g., `int`, `double`, `bool`, or a `Handle` passed as-is).
+  // Object? encode() => ...;
 
-  return result;
+  // The `decode` method reverses `encode` to reconstruct `DartT` from the packed
+  // FFI value. Required for primitive (`SizedNativeType`) types that define
+  // `encode`; not needed for `Handle` types because their Dart representations
+  // are stored directly as fields on the class.
+  // static DartT decode(NativeFieldT raw) => ...;
+}
+
+extension type const _NativeBool(bool value) implements _NativeType<bool, Bool> {}
+
+extension type const _NativeInt32(int value) implements _NativeType<int, Int32> {}
+
+extension type const _NativeDouble(double value) implements _NativeType<double, Double> {}
+
+extension type const _NativeHandle<T extends Object>(T value) implements _NativeType<T, Handle> {}
+
+/// Wraps a Dart [Enum] for `@_NativeData` constructors.
+//
+// Not defining `encode` and `decode` allows the code generator to choose the
+// smallest unsigned integer `NativeType` based on how many values the enum
+// declares. Typically you can use this wrapper for all enums without
+// introducing a dedicated subtype.
+extension type const _NativeEnum<T extends Enum>(T value) implements _NativeType<T, NativeType> {}
+
+extension type const _NativeColor(Color value) implements _NativeType<Color, Uint32> {
+  int encode() => value.value;
+  static Color decode(int raw) => Color(raw);
+}
+
+extension type const _NativeFontWeight(FontWeight value)
+    implements _NativeType<FontWeight, Uint16> {
+  int encode() => value.value;
+  static FontWeight decode(int raw) => FontWeight(raw);
+}
+
+extension type const _NativeTextDecoration(TextDecoration value)
+    implements _NativeType<TextDecoration, Uint8> {
+  int encode() => value._mask;
+  static TextDecoration decode(int raw) => TextDecoration._(raw);
+}
+
+extension type const _NativeTextHeightBehavior(TextHeightBehavior value)
+    implements _NativeType<TextHeightBehavior, Uint8> {
+  int encode() =>
+      (value.applyHeightToFirstAscent ? 0 : 1 << 0) |
+      (value.applyHeightToLastDescent ? 0 : 1 << 1) |
+      (value.leadingDistribution.index << 2);
+  static TextHeightBehavior decode(int raw) => TextHeightBehavior(
+    applyHeightToFirstAscent: (raw & 0x1) == 0,
+    applyHeightToLastDescent: (raw & 0x2) == 0,
+    leadingDistribution: TextLeadingDistribution.values[(raw >> 2) & 0x1],
+  );
+}
+
+extension type const _NativeLocale(Locale value) implements _NativeType<Locale, Handle> {
+  String encode() => value.toString();
+}
+
+extension type const _NativeShadows(List<Shadow> value)
+    implements _NativeType<List<Shadow>, Handle> {
+  List<Object?> encode() {
+    final result = List<Object?>.filled(value.length * 4, null);
+    for (var i = 0; i < value.length; i++) {
+      final Shadow item = value[i];
+      final int base = i * 4;
+      result[base] = _NativeColor(item.color).encode();
+      result[base + 1] = item.offset.dx;
+      result[base + 2] = item.offset.dy;
+      result[base + 3] = item.blurSigma;
+    }
+    return result;
+  }
+}
+
+extension type const _NativeFontFeatures(List<FontFeature> value)
+    implements _NativeType<List<FontFeature>, Handle> {
+  List<Object?> encode() {
+    final result = List<Object?>.filled(value.length * 2, null);
+    for (var i = 0; i < value.length; i++) {
+      final FontFeature item = value[i];
+      final int base = i * 2;
+      result[base] = item.feature;
+      result[base + 1] = item.value;
+    }
+    return result;
+  }
+}
+
+extension type const _NativeFontVariations(List<FontVariation> value)
+    implements _NativeType<List<FontVariation>, Handle> {
+  List<Object?> encode() {
+    final result = List<Object?>.filled(value.length * 2, null);
+    for (var i = 0; i < value.length; i++) {
+      final FontVariation item = value[i];
+      final int base = i * 2;
+      result[base] = item.axis;
+      result[base + 1] = item.value;
+    }
+    return result;
+  }
+}
+
+extension type const _NativePaint(Paint value) implements _NativeType<Paint, Handle> {
+  List<Object?> encode() => <Object?>[value._objects, value._data];
+}
+
+extension type const _NativeStrutStyle(StrutStyle value)
+    implements _NativeType<StrutStyle, Handle> {
+  _EncodedStrutStyle encode() => value._encoded;
 }
 
 /// An opaque object that determines the size, position, and rendering of text.
@@ -1792,63 +1763,131 @@ class TextStyle {
     List<Shadow>? shadows,
     List<FontFeature>? fontFeatures,
     List<FontVariation>? fontVariations,
+  }) : this._(
+         color: color == null ? null : .new(color),
+         decoration: decoration == null ? null : .new(decoration),
+         decorationColor: decorationColor == null ? null : .new(decorationColor),
+         decorationStyle: decorationStyle == null ? null : .new(decorationStyle),
+         decorationThickness: decorationThickness == null ? null : .new(decorationThickness),
+         fontWeight: fontWeight == null ? null : .new(fontWeight),
+         fontStyle: fontStyle == null ? null : .new(fontStyle),
+         textBaseline: textBaseline == null ? null : .new(textBaseline),
+         fontFamily: fontFamily == null ? null : .new(fontFamily),
+         fontFamilyFallback: fontFamilyFallback == null || fontFamilyFallback.isEmpty
+             ? null
+             : .new(fontFamilyFallback),
+         fontSize: fontSize == null ? null : .new(fontSize),
+         letterSpacing: letterSpacing == null ? null : .new(letterSpacing),
+         wordSpacing: wordSpacing == null ? null : .new(wordSpacing),
+         height: height == null ? null : .new(height),
+         leadingDistribution: leadingDistribution == null ? null : .new(leadingDistribution),
+         locale: locale == null ? null : .new(locale),
+         background: background == null ? null : .new(background),
+         foreground: foreground == null ? null : .new(foreground),
+         shadows: shadows == null ? null : .new(shadows),
+         fontFeatures: fontFeatures == null ? null : .new(fontFeatures),
+         fontVariations: fontVariations == null ? null : .new(fontVariations),
+       );
+
+  /// This constructor describes the C++ interface of this Dart type. It is used by
+  /// `tools/dart_data_to_cpp` to generate the C++ struct (`flutter::TextStyle`),
+  /// and the FFI glue code.
+  ///
+  /// ### Adding a new primitive field (fixed-size data, passed to C++ by value)
+  ///
+  ///  - Add the new parameter and its default value to `TextStyle._` following existing
+  ///    examples, and forward it from `TextStyle` to `TextStyle._` and `_encodeTextStyleFfi`.
+  ///  - No need to update `TextStyle.operator ==` and `TextStyle.hashCode`.
+  ///  - Run `tools/dart_data_to_cpp` (or rebuild the engine) to regenerate
+  ///    `text_styles.g.h` and `text_styles.g.dart`.
+  ///  - Use the primitive value in `flutter::TextStyle` from C++ code.
+  ///
+  /// ### Adding a new "Handle" field (passed to C++ by reference as a `Dart_Handle`)
+  ///
+  ///  - Declare a `final` field on `TextStyle` and add `this._yourField` to `TextStyle._`
+  ///    following existing examples, and forward it from `TextStyle` to `TextStyle._`
+  ///    and `_encodeTextStyleFfi`.
+  ///  - Update `TextStyle.operator ==` and `TextStyle.hashCode` to include `_yourField`.
+  ///  - Run `tools/dart_data_to_cpp` (or rebuild the engine) to regenerate
+  ///    `text_styles.g.h` and `text_styles.g.dart`.
+  ///  - In C++, convert the Dart_Handle in `flutter::TextStyle` to the desired native
+  ///    representation. See the existing examples in `ParagraphBuilder::pushStyle`.
+  ///
+  /// ### Why are there defaults on this private constructor?
+  ///
+  ///  The default values here are not directly used by Dart. They are only used by the code
+  ///  generator to populate the generated C++ struct when an attribute is `null` (unspecified).
+  ///  C++ callers can either read the field directly to use this default value, or check
+  ///  `has_<field>()` when they need to distinguish unspecified attributes (for example, to
+  ///  inherit from a parent [TextStyle] in `ParagraphBuilder.pushStyle`).
+  //
+  // TODO(LongCatIsLooong): Use augment class when available, so we don't have to expose
+  // _encodeTextStyleFfi and update it by hand.
+  @_NativeData(symbol: 'flutter::TextStyle')
+  TextStyle._({
+    /* Fixed size data, passed to C++ by value. */
+    _NativeColor? color = const .new(Color(0xFFFFFFFF)),
+    _NativeTextDecoration? decoration = const .new(.none),
+    // Transparent (0) indicates no decoration color was set; SkParagraph falls
+    // back to the text color.
+    _NativeColor? decorationColor = const .new(Color(0x00000000)),
+    _NativeEnum<TextDecorationStyle>? decorationStyle = const .new(.solid),
+    _NativeDouble? decorationThickness = const .new(1.0),
+    _NativeFontWeight? fontWeight = const .new(.normal),
+    _NativeEnum<FontStyle>? fontStyle = const .new(.normal),
+    _NativeEnum<TextBaseline>? textBaseline = const .new(.alphabetic),
+    _NativeDouble? fontSize = const .new(14.0),
+    _NativeDouble? letterSpacing = const .new(0.0),
+    _NativeDouble? wordSpacing = const .new(0.0),
+    _NativeDouble? height = const .new(kTextHeightNone),
+    _NativeEnum<TextLeadingDistribution>? leadingDistribution = const .new(.proportional),
+    /* Handle data, passed to C++ by reference as `Dart_Handle`s.  */
+    this._fontFamily,
+    this._fontFamilyFallback,
+    this._locale,
+    this._background,
+    this._foreground,
+    this._shadows,
+    this._fontFeatures,
+    this._fontVariations,
   }) : assert(
-         color == null || foreground == null,
+         color == null || _foreground == null,
          'Cannot provide both a color and a foreground\n'
          'The color argument is just a shorthand for "foreground: Paint()..color = color".',
        ),
-       _encoded = _encodeTextStyle(
-         color,
-         decoration,
-         decorationColor,
-         decorationStyle,
-         decorationThickness,
-         fontWeight,
-         fontStyle,
-         textBaseline,
-         fontFamily,
-         fontFamilyFallback,
-         fontSize,
-         letterSpacing,
-         wordSpacing,
-         height,
-         locale,
-         background,
-         foreground,
-         shadows,
-         fontFeatures,
-         fontVariations,
-       ),
-       _leadingDistribution = leadingDistribution,
-       _fontFamily = fontFamily ?? '',
-       _fontFamilyFallback = fontFamilyFallback,
-       _fontSize = fontSize,
-       _letterSpacing = letterSpacing,
-       _wordSpacing = wordSpacing,
-       _height = height,
-       _decorationThickness = decorationThickness,
-       _locale = locale,
-       _background = background,
-       _foreground = foreground,
-       _shadows = shadows,
-       _fontFeatures = fontFeatures,
-       _fontVariations = fontVariations;
+       _encoded = _encodeTextStyleFfi(
+         color: color,
+         decoration: decoration,
+         decorationColor: decorationColor,
+         decorationStyle: decorationStyle,
+         decorationThickness: decorationThickness,
+         fontWeight: fontWeight,
+         fontStyle: fontStyle,
+         textBaseline: textBaseline,
+         fontFamily: _fontFamily,
+         fontFamilyFallback: _fontFamilyFallback,
+         fontSize: fontSize,
+         letterSpacing: letterSpacing,
+         wordSpacing: wordSpacing,
+         height: height,
+         leadingDistribution: leadingDistribution,
+         locale: _locale,
+         background: _background,
+         foreground: _foreground,
+         shadows: _shadows,
+         fontFeatures: _fontFeatures,
+         fontVariations: _fontVariations,
+       );
 
-  final Int32List _encoded;
-  final String _fontFamily;
-  final List<String>? _fontFamilyFallback;
-  final double? _fontSize;
-  final double? _letterSpacing;
-  final double? _wordSpacing;
-  final double? _height;
-  final double? _decorationThickness;
-  final Locale? _locale;
-  final Paint? _background;
-  final Paint? _foreground;
-  final List<Shadow>? _shadows;
-  final List<FontFeature>? _fontFeatures;
-  final List<FontVariation>? _fontVariations;
-  final TextLeadingDistribution? _leadingDistribution;
+  final _EncodedTextStyle _encoded;
+  final _NativeHandle<String>? _fontFamily;
+  final _NativeHandle<List<String>>? _fontFamilyFallback;
+  final _NativeLocale? _locale;
+  final _NativePaint? _background;
+  final _NativePaint? _foreground;
+  final _NativeShadows? _shadows;
+  final _NativeFontFeatures? _fontFeatures;
+  final _NativeFontVariations? _fontVariations;
 
   @override
   bool operator ==(Object other) {
@@ -1856,174 +1895,66 @@ class TextStyle {
       return true;
     }
     return other is TextStyle &&
-        other._leadingDistribution == _leadingDistribution &&
-        other._fontFamily == _fontFamily &&
-        other._fontSize == _fontSize &&
-        other._letterSpacing == _letterSpacing &&
-        other._wordSpacing == _wordSpacing &&
-        other._height == _height &&
-        other._decorationThickness == _decorationThickness &&
-        other._locale == _locale &&
-        other._background == _background &&
-        other._foreground == _foreground &&
-        _listEquals<int>(other._encoded, _encoded) &&
-        _listEquals<Shadow>(other._shadows, _shadows) &&
-        _listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback) &&
-        _listEquals<FontFeature>(other._fontFeatures, _fontFeatures) &&
-        _listEquals<FontVariation>(other._fontVariations, _fontVariations);
+        other.runtimeType == runtimeType &&
+        _encoded.packed == other._encoded.packed &&
+        _fontFamily == other._fontFamily &&
+        _listEquals<String>(_fontFamilyFallback?.value, other._fontFamilyFallback?.value) &&
+        _locale == other._locale &&
+        _background == other._background &&
+        _foreground == other._foreground &&
+        _listEquals<Shadow>(_shadows?.value, other._shadows?.value) &&
+        _listEquals<FontFeature>(_fontFeatures?.value, other._fontFeatures?.value) &&
+        _listEquals<FontVariation>(_fontVariations?.value, other._fontVariations?.value);
   }
 
   @override
-  int get hashCode {
-    final List<Shadow>? shadows = _shadows;
-    final List<FontFeature>? fontFeatures = _fontFeatures;
-    final List<FontVariation>? fontVariations = _fontVariations;
-    return Object.hash(
-      Object.hashAll(_encoded),
-      _leadingDistribution,
-      _fontFamily,
-      _fontFamilyFallback,
-      _fontSize,
-      _letterSpacing,
-      _wordSpacing,
-      _height,
-      _locale,
-      _background,
-      _foreground,
-      shadows == null ? null : Object.hashAll(shadows),
-      _decorationThickness,
-      fontFeatures == null ? null : Object.hashAll(fontFeatures),
-      fontVariations == null ? null : Object.hashAll(fontVariations),
-    );
-  }
+  int get hashCode => Object.hash(
+    _encoded.packed,
+    _fontFamily,
+    _fontFamilyFallback == null ? null : Object.hashAll(_fontFamilyFallback.value),
+    _locale,
+    _background,
+    _foreground,
+    _shadows == null ? null : Object.hashAll(_shadows.value),
+    _fontFeatures == null ? null : Object.hashAll(_fontFeatures.value),
+    _fontVariations == null ? null : Object.hashAll(_fontVariations.value),
+  );
 
   @override
   String toString() {
-    final List<String>? fontFamilyFallback = _fontFamilyFallback;
-    final heightText = _encoded[0] & 0x02000 == 0x02000
-        ? (_height == kTextHeightNone ? 'kTextHeightNone' : '${_height}x')
-        : 'unspecified';
+    final _PackedTextStyle packed = _encoded.packed;
+    final String? fontFamily = _fontFamily?.value;
+    final double? letterSpacing = packed.letterSpacing;
+    final double? wordSpacing = packed.wordSpacing;
+    final String heightText = switch (packed.height) {
+      null => 'unspecified',
+      kTextHeightNone => 'kTextHeightNone',
+      final double height => '${height}x',
+    };
     return 'TextStyle('
-        'color: ${_encoded[0] & 0x00002 == 0x00002 ? Color(_encoded[1]) : "unspecified"}, '
-        'decoration: ${_encoded[0] & 0x00004 == 0x00004 ? TextDecoration._(_encoded[2]) : "unspecified"}, '
-        'decorationColor: ${_encoded[0] & 0x00008 == 0x00008 ? Color(_encoded[3]) : "unspecified"}, '
-        'decorationStyle: ${_encoded[0] & 0x00010 == 0x00010 ? TextDecorationStyle.values[_encoded[4]] : "unspecified"}, '
-        // The decorationThickness is not in encoded order in order to keep it near the other decoration properties.
-        'decorationThickness: ${_encoded[0] & 0x00100 == 0x00100 ? _decorationThickness : "unspecified"}, '
-        'fontWeight: ${_encoded[0] & 0x00020 == 0x00020 ? FontWeight(_encoded[5]) : "unspecified"}, '
-        'fontStyle: ${_encoded[0] & 0x00040 == 0x00040 ? FontStyle.values[_encoded[6]] : "unspecified"}, '
-        'textBaseline: ${_encoded[0] & 0x00080 == 0x00080 ? TextBaseline.values[_encoded[7]] : "unspecified"}, '
-        'fontFamily: ${_encoded[0] & 0x00200 == 0x00200 && _fontFamily != '' ? _fontFamily : "unspecified"}, '
-        'fontFamilyFallback: ${_encoded[0] & 0x00200 == 0x00200 && fontFamilyFallback != null && fontFamilyFallback.isNotEmpty ? fontFamilyFallback : "unspecified"}, '
-        'fontSize: ${_encoded[0] & 0x00400 == 0x00400 ? _fontSize : "unspecified"}, '
-        'letterSpacing: ${_encoded[0] & 0x00800 == 0x00800 ? "${_letterSpacing}x" : "unspecified"}, '
-        'wordSpacing: ${_encoded[0] & 0x01000 == 0x01000 ? "${_wordSpacing}x" : "unspecified"}, '
+        'color: ${packed.color ?? "unspecified"}, '
+        'decoration: ${packed.decoration ?? "unspecified"}, '
+        'decorationColor: ${packed.decorationColor ?? "unspecified"}, '
+        'decorationStyle: ${packed.decorationStyle ?? "unspecified"}, '
+        'decorationThickness: ${packed.decorationThickness ?? "unspecified"}, '
+        'fontWeight: ${packed.fontWeight ?? "unspecified"}, '
+        'fontStyle: ${packed.fontStyle ?? "unspecified"}, '
+        'textBaseline: ${packed.textBaseline ?? "unspecified"}, '
+        'fontFamily: ${fontFamily != null && fontFamily.isNotEmpty ? fontFamily : "unspecified"}, '
+        'fontFamilyFallback: ${_fontFamilyFallback ?? "unspecified"}, '
+        'fontSize: ${packed.fontSize ?? "unspecified"}, '
+        'letterSpacing: ${letterSpacing != null ? "${letterSpacing}x" : "unspecified"}, '
+        'wordSpacing: ${wordSpacing != null ? "${wordSpacing}x" : "unspecified"}, '
         'height: $heightText, '
-        'leadingDistribution: ${_leadingDistribution ?? "unspecified"}, '
-        'locale: ${_encoded[0] & 0x04000 == 0x04000 ? _locale : "unspecified"}, '
-        'background: ${_encoded[0] & 0x08000 == 0x08000 ? _background : "unspecified"}, '
-        'foreground: ${_encoded[0] & 0x10000 == 0x10000 ? _foreground : "unspecified"}, '
-        'shadows: ${_encoded[0] & 0x20000 == 0x20000 ? _shadows : "unspecified"}, '
-        'fontFeatures: ${_encoded[0] & 0x40000 == 0x40000 ? _fontFeatures : "unspecified"}, '
-        'fontVariations: ${_encoded[0] & 0x80000 == 0x80000 ? _fontVariations : "unspecified"}'
+        'leadingDistribution: ${packed.leadingDistribution ?? "unspecified"}, '
+        'locale: ${_locale ?? "unspecified"}, '
+        'background: ${_background ?? "unspecified"}, '
+        'foreground: ${_foreground ?? "unspecified"}, '
+        'shadows: ${_shadows ?? "unspecified"}, '
+        'fontFeatures: ${_fontFeatures ?? "unspecified"}, '
+        'fontVariations: ${_fontVariations ?? "unspecified"}'
         ')';
   }
-}
-
-// This encoding must match the C++ version ParagraphBuilder::build.
-//
-// The encoded array buffer has 6 elements.
-//
-//  - Element 0: A bit mask indicating which fields are non-null.
-//    Bit 0 is unused. Bits 1-n are set if the corresponding index in the
-//    encoded array is non-null.  The remaining bits represent fields that
-//    are passed separately from the array.
-//
-//  - Element 1: The enum index of the |textAlign|.
-//
-//  - Element 2: The enum index of the |textDirection|.
-//
-//  - Element 3: The index of the |fontWeight|.
-//
-//  - Element 4: The enum index of the |fontStyle|.
-//
-//  - Element 5: The value of |maxLines|.
-//
-//  - Element 6: The encoded value of |textHeightBehavior|, except its leading
-//    distribution.
-//
-//  - Element 7: The enum index of the |hyphens|.
-Int32List _encodeParagraphStyle(
-  TextAlign? textAlign,
-  TextDirection? textDirection,
-  int? maxLines,
-  String? fontFamily,
-  double? fontSize,
-  double? height,
-  TextHeightBehavior? textHeightBehavior,
-  FontWeight? fontWeight,
-  FontStyle? fontStyle,
-  StrutStyle? strutStyle,
-  String? ellipsis,
-  Locale? locale,
-  Hyphens? hyphens,
-) {
-  final result = Int32List(8); // also update paragraph_builder.cc
-  if (textAlign != null) {
-    result[0] |= 1 << 1;
-    result[1] = textAlign.index;
-  }
-  if (textDirection != null) {
-    result[0] |= 1 << 2;
-    result[2] = textDirection.index;
-  }
-  if (fontWeight != null) {
-    result[0] |= 1 << 3;
-    result[3] = fontWeight.value;
-  }
-  if (fontStyle != null) {
-    result[0] |= 1 << 4;
-    result[4] = fontStyle.index;
-  }
-  if (maxLines != null) {
-    result[0] |= 1 << 5;
-    result[5] = maxLines;
-  }
-  if (textHeightBehavior != null) {
-    result[0] |= 1 << 6;
-    result[6] = textHeightBehavior._encode();
-  }
-  if (fontFamily != null) {
-    result[0] |= 1 << 7;
-    // Passed separately to native.
-  }
-  if (fontSize != null) {
-    result[0] |= 1 << 8;
-    // Passed separately to native.
-  }
-  // Paragraph styles are unique in a paragraph, there is no inheriting so
-  // height == null and height == kTextHeightNone are semantically equivalent.
-  if (height != null && height != kTextHeightNone) {
-    result[0] |= 1 << 9;
-    // Passed separately to native.
-  }
-  if (strutStyle != null) {
-    result[0] |= 1 << 10;
-    // Passed separately to native.
-  }
-  if (ellipsis != null) {
-    result[0] |= 1 << 11;
-    // Passed separately to native.
-  }
-  if (locale != null) {
-    result[0] |= 1 << 12;
-    // Passed separately to native.
-  }
-  if (hyphens != null) {
-    result[0] |= 1 << 13;
-    result[7] = hyphens.index;
-  }
-  return result;
 }
 
 /// An opaque object that determines the configuration used by
@@ -2092,7 +2023,7 @@ class ParagraphStyle {
   ///
   /// * `hyphens`: Whether to render a hyphen glyph for soft hyphens (U+00AD)
   ///   that fall at a line break. Defaults to [Hyphens.manual].
-  ParagraphStyle({
+  factory ParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
     int? maxLines,
@@ -2106,167 +2037,93 @@ class ParagraphStyle {
     String? ellipsis,
     Locale? locale,
     Hyphens? hyphens,
-  }) : _encoded = _encodeParagraphStyle(
-         textAlign,
-         textDirection,
-         maxLines,
-         fontFamily,
-         fontSize,
-         height,
-         textHeightBehavior,
-         fontWeight,
-         fontStyle,
-         strutStyle,
-         ellipsis,
-         locale,
-         hyphens,
-       ),
-       _fontFamily = fontFamily,
-       _fontSize = fontSize,
-       _height = height,
-       _strutStyle = strutStyle,
-       _ellipsis = ellipsis,
-       _locale = locale,
-       _leadingDistribution =
-           textHeightBehavior?.leadingDistribution ?? TextLeadingDistribution.proportional;
+  }) =>
+      ParagraphStyle._(
+          textAlign: textAlign == null ? null : .new(textAlign),
+          textDirection: textDirection == null ? null : .new(textDirection),
+          maxLines: maxLines == null ? null : .new(maxLines),
+          textHeightBehavior: textHeightBehavior == null ? null : .new(textHeightBehavior),
+          strutStyle: strutStyle == null ? null : .new(strutStyle),
+          ellipsis: ellipsis == null ? null : .new(ellipsis),
+          hyphens: hyphens == null ? null : .new(hyphens),
+        )
+        .._defaultTextStyle = TextStyle(
+          fontFamily: fontFamily,
+          fontSize: fontSize,
+          height: height,
+          leadingDistribution: textHeightBehavior?.leadingDistribution,
+          fontWeight: fontWeight,
+          fontStyle: fontStyle,
+          locale: locale,
+        );
 
-  final Int32List _encoded;
-  final String? _fontFamily;
-  final double? _fontSize;
-  final double? _height;
-  final StrutStyle? _strutStyle;
-  final String? _ellipsis;
-  final Locale? _locale;
-  final TextLeadingDistribution _leadingDistribution;
+  // See the instructions above the TextStyle._ constructor declaration.
+  @_NativeData(symbol: 'flutter::ParagraphStyle')
+  ParagraphStyle._({
+    _NativeEnum<TextAlign>? textAlign = const .new(.start),
+    _NativeEnum<TextDirection>? textDirection = const .new(.ltr),
+    // Ignored when omitted; ParagraphBuilder checks has_max_lines().
+    _NativeInt32? maxLines = const .new(0),
+    _NativeTextHeightBehavior? textHeightBehavior = const .new(.new()),
+    _NativeEnum<Hyphens>? hyphens = const .new(.manual),
+    this._strutStyle,
+    this._ellipsis,
+  }) : _encoded = _encodeParagraphStyleFfi(
+         textAlign: textAlign,
+         textDirection: textDirection,
+         maxLines: maxLines,
+         textHeightBehavior: textHeightBehavior,
+         strutStyle: _strutStyle,
+         ellipsis: _ellipsis,
+         hyphens: hyphens,
+       );
+
+  final _EncodedParagraphStyle _encoded;
+  final _NativeStrutStyle? _strutStyle;
+  final _NativeHandle<String>? _ellipsis;
+  // Holds the base TextStyle attributes specified on ParagraphStyle (fontFamily,
+  // fontSize, height, leadingDistribution, fontWeight, fontStyle, locale).
+  // Initialized outside `ParagraphStyle._` so `dart_data_to_cpp` does not treat
+  // it as a field of `flutter::ParagraphStyle`.
+  late final TextStyle _defaultTextStyle;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is ParagraphStyle &&
-        other._fontFamily == _fontFamily &&
-        other._fontSize == _fontSize &&
-        other._height == _height &&
-        other._strutStyle == _strutStyle &&
-        other._ellipsis == _ellipsis &&
-        other._locale == _locale &&
-        other._leadingDistribution == _leadingDistribution &&
-        _listEquals<int>(other._encoded, _encoded);
+        other.runtimeType == runtimeType &&
+        _encoded.packed == other._encoded.packed &&
+        _strutStyle == other._strutStyle &&
+        _ellipsis == other._ellipsis &&
+        _defaultTextStyle == other._defaultTextStyle;
   }
 
   @override
-  int get hashCode => Object.hash(
-    Object.hashAll(_encoded),
-    _fontFamily,
-    _fontSize,
-    _height,
-    _ellipsis,
-    _locale,
-    _leadingDistribution,
-  );
+  int get hashCode => Object.hash(_encoded.packed, _strutStyle, _ellipsis, _defaultTextStyle);
 
   @override
   String toString() {
+    final _PackedParagraphStyle packed = _encoded.packed;
+    final _PackedTextStyle packedTextStyle = _defaultTextStyle._encoded.packed;
+    final double? height = packedTextStyle.height;
     return 'ParagraphStyle('
-        'textAlign: ${_encoded[0] & 0x002 == 0x002 ? TextAlign.values[_encoded[1]] : "unspecified"}, '
-        'textDirection: ${_encoded[0] & 0x004 == 0x004 ? TextDirection.values[_encoded[2]] : "unspecified"}, '
-        'fontWeight: ${_encoded[0] & 0x008 == 0x008 ? FontWeight(_encoded[3]) : "unspecified"}, '
-        'fontStyle: ${_encoded[0] & 0x010 == 0x010 ? FontStyle.values[_encoded[4]] : "unspecified"}, '
-        'maxLines: ${_encoded[0] & 0x020 == 0x020 ? _encoded[5] : "unspecified"}, '
-        'textHeightBehavior: ${_encoded[0] & 0x040 == 0x040 ? TextHeightBehavior._fromEncoded(_encoded[6], _leadingDistribution).toString() : "unspecified"}, '
-        'fontFamily: ${_encoded[0] & 0x080 == 0x080 ? _fontFamily : "unspecified"}, '
-        'fontSize: ${_encoded[0] & 0x100 == 0x100 ? _fontSize : "unspecified"}, '
-        'height: ${_encoded[0] & 0x200 == 0x200 ? "${_height}x" : "unspecified"}, '
-        'strutStyle: ${_encoded[0] & 0x400 == 0x400 ? _strutStyle : "unspecified"}, '
-        'ellipsis: ${_encoded[0] & 0x800 == 0x800 ? '"$_ellipsis"' : "unspecified"}, '
-        'locale: ${_encoded[0] & 0x1000 == 0x1000 ? _locale : "unspecified"}, '
-        'hyphens: ${_encoded[0] & 0x2000 == 0x2000 ? Hyphens.values[_encoded[7]] : "unspecified"}'
+        'textAlign: ${packed.textAlign ?? "unspecified"}, '
+        'textDirection: ${packed.textDirection ?? "unspecified"}, '
+        'fontWeight: ${packedTextStyle.fontWeight ?? "unspecified"}, '
+        'fontStyle: ${packedTextStyle.fontStyle ?? "unspecified"}, '
+        'maxLines: ${packed.maxLines ?? "unspecified"}, '
+        'textHeightBehavior: ${packed.textHeightBehavior ?? "unspecified"}, '
+        'fontFamily: ${_defaultTextStyle._fontFamily ?? "unspecified"}, '
+        'fontSize: ${packedTextStyle.fontSize ?? "unspecified"}, '
+        'height: ${height != null && height != kTextHeightNone ? "${height}x" : "unspecified"}, '
+        'strutStyle: ${_strutStyle ?? "unspecified"}, '
+        'ellipsis: ${_ellipsis != null ? '"$_ellipsis"' : "unspecified"}, '
+        'locale: ${_defaultTextStyle._locale ?? "unspecified"}, '
+        'hyphens: ${packed.hyphens ?? "unspecified"}'
         ')';
   }
-}
-
-// Serialize strut properties into ByteData. This encoding errs towards
-// compactness. The first 8 bits is a bitmask that records which properties are
-// null. The rest of the values are encoded in the same order encountered in the
-// bitmask. The final returned value truncates any unused bytes at the end. For
-// ease of decoding, all 8 bit integers are stored before any 32 bit integers.
-//
-// We serialize this more thoroughly than ParagraphStyle because it is
-// much more likely that the strut is empty/null and we wish to add
-// minimal overhead for non-strut cases.
-ByteData _encodeStrut(
-  String? fontFamily,
-  List<String>? fontFamilyFallback,
-  double? fontSize,
-  double? height,
-  TextLeadingDistribution? leadingDistribution,
-  double? leading,
-  FontWeight? fontWeight,
-  FontStyle? fontStyle,
-  bool? forceStrutHeight,
-) {
-  // Strut styles are unique in a paragraph, there is no inheriting so
-  // height == null and height == kTextHeightNone are semantically equivalent.
-  final bool hasHeightOverride = height != null && height != kTextHeightNone;
-  if (fontFamily == null &&
-      fontSize == null &&
-      !hasHeightOverride &&
-      leadingDistribution == null &&
-      leading == null &&
-      fontWeight == null &&
-      fontStyle == null &&
-      forceStrutHeight == null) {
-    return ByteData(0);
-  }
-
-  final data = ByteData(24); // Max size is 24 bytes
-  var bitmask = 0;
-  var byteCount = 4;
-  if (fontWeight != null) {
-    bitmask |= 1 << 0;
-    data.setInt32(byteCount, fontWeight.value, _kFakeHostEndian);
-    byteCount += 4;
-  }
-  if (fontStyle != null) {
-    bitmask |= 1 << 1;
-    data.setInt32(byteCount, fontStyle.index, _kFakeHostEndian);
-    byteCount += 4;
-  }
-  if (fontFamily != null || (fontFamilyFallback != null && fontFamilyFallback.isNotEmpty)) {
-    bitmask |= 1 << 2;
-    // passed separately to native
-  }
-
-  // The 3rd bit (0-indexed) is reserved for leadingDistribution.
-
-  if (fontSize != null) {
-    bitmask |= 1 << 4;
-    data.setFloat32(byteCount, fontSize, _kFakeHostEndian);
-    byteCount += 4;
-  }
-  if (hasHeightOverride) {
-    bitmask |= 1 << 5;
-    data.setFloat32(byteCount, height, _kFakeHostEndian);
-    byteCount += 4;
-  }
-  if (leading != null) {
-    bitmask |= 1 << 6;
-    data.setFloat32(byteCount, leading, _kFakeHostEndian);
-    byteCount += 4;
-  }
-  if (forceStrutHeight ?? false) {
-    bitmask |= 1 << 7;
-  }
-
-  data.setInt32(0, bitmask, _kFakeHostEndian);
-
-  assert(byteCount <= 24);
-  assert(bitmask >> 32 == 0, 'strut bitmask overflow: $bitmask');
-  return ByteData.view(data.buffer, 0, byteCount);
 }
 
 /// See also:
@@ -2330,46 +2187,67 @@ class StrutStyle {
     FontWeight? fontWeight,
     FontStyle? fontStyle,
     bool? forceStrutHeight,
-  }) : _encoded = _encodeStrut(
-         fontFamily,
-         fontFamilyFallback,
-         fontSize,
-         height,
-         leadingDistribution,
-         leading,
-         fontWeight,
-         fontStyle,
-         forceStrutHeight,
-       ),
-       _leadingDistribution = leadingDistribution,
-       _fontFamily = fontFamily,
-       _fontFamilyFallback = fontFamilyFallback;
+  }) : this._(
+         fontFamily: fontFamily == null ? null : .new(fontFamily),
+         fontFamilyFallback: fontFamilyFallback == null || fontFamilyFallback.isEmpty
+             ? null
+             : .new(fontFamilyFallback),
+         fontSize: fontSize == null ? null : .new(fontSize),
+         height: height == null ? null : .new(height),
+         leadingDistribution: leadingDistribution == null ? null : .new(leadingDistribution),
+         leading: leading == null ? null : .new(leading),
+         fontWeight: fontWeight == null ? null : .new(fontWeight),
+         fontStyle: fontStyle == null ? null : .new(fontStyle),
+         forceStrutHeight: forceStrutHeight == null ? null : .new(forceStrutHeight),
+       );
 
-  final ByteData _encoded; // Most of the data for strut is encoded.
-  final String? _fontFamily;
-  final List<String>? _fontFamilyFallback;
-  final TextLeadingDistribution? _leadingDistribution;
+  // See the instructions above the TextStyle._ constructor declaration.
+  @_NativeData(symbol: 'flutter::StrutStyle')
+  StrutStyle._({
+    this._fontFamily,
+    this._fontFamilyFallback,
+    _NativeDouble? fontSize = const .new(14.0),
+    _NativeDouble? height = const .new(kTextHeightNone),
+    _NativeEnum<TextLeadingDistribution>? leadingDistribution = const .new(.proportional),
+    // Negative value indicates using the font's default leading.
+    _NativeDouble? leading = const .new(-1.0),
+    _NativeFontWeight? fontWeight = const .new(.normal),
+    _NativeEnum<FontStyle>? fontStyle = const .new(.normal),
+    _NativeBool? forceStrutHeight = const .new(false),
+  }) : _encoded = _encodeStrutStyleFfi(
+         fontFamily: _fontFamily,
+         fontFamilyFallback: _fontFamilyFallback,
+         fontSize: fontSize,
+         height: height,
+         leadingDistribution: leadingDistribution,
+         leading: leading,
+         fontWeight: fontWeight,
+         fontStyle: fontStyle,
+         forceStrutHeight: forceStrutHeight,
+       );
 
-  bool get _enabled => _encoded.lengthInBytes > 0;
+  final _EncodedStrutStyle _encoded;
+  final _NativeHandle<String>? _fontFamily;
+  final _NativeHandle<List<String>>? _fontFamilyFallback;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    if (other.runtimeType != runtimeType) {
-      return false;
-    }
     return other is StrutStyle &&
-        other._fontFamily == _fontFamily &&
-        other._leadingDistribution == _leadingDistribution &&
-        _listEquals<String>(other._fontFamilyFallback, _fontFamilyFallback) &&
-        _listEquals<int>(other._encoded.buffer.asInt8List(), _encoded.buffer.asInt8List());
+        other.runtimeType == runtimeType &&
+        _encoded.packed == other._encoded.packed &&
+        _fontFamily == other._fontFamily &&
+        _listEquals<String>(_fontFamilyFallback?.value, other._fontFamilyFallback?.value);
   }
 
   @override
-  int get hashCode =>
-      Object.hash(Object.hashAll(_encoded.buffer.asInt8List()), _fontFamily, _leadingDistribution);
+  int get hashCode => Object.hash(
+    _encoded.packed,
+    _fontFamily,
+    _fontFamilyFallback == null ? null : Object.hashAll(_fontFamilyFallback.value),
+  );
 }
 
 /// A direction in which text flows.
@@ -3581,50 +3459,12 @@ abstract class ParagraphBuilder {
 }
 
 base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements ParagraphBuilder {
-  _NativeParagraphBuilder(ParagraphStyle style)
-    : _defaultLeadingDistribution = style._leadingDistribution {
-    List<String>? strutFontFamilies;
-    final StrutStyle? strutStyle = style._strutStyle;
-    final ByteData? encodedStrutStyle;
-    if (strutStyle != null && strutStyle._enabled) {
-      final String? fontFamily = strutStyle._fontFamily;
-      strutFontFamilies = <String>[?fontFamily, ...?strutStyle._fontFamilyFallback];
-
-      assert(TextLeadingDistribution.values.length <= 2);
-      final TextLeadingDistribution leadingDistribution =
-          strutStyle._leadingDistribution ?? style._leadingDistribution;
-      encodedStrutStyle = strutStyle._encoded;
-      int bitmask = encodedStrutStyle.getInt32(0, _kFakeHostEndian);
-      bitmask |= (leadingDistribution.index) << 3;
-      encodedStrutStyle.setInt32(0, bitmask, _kFakeHostEndian);
-    } else {
-      encodedStrutStyle = null;
-    }
-    _constructor(
-      style._encoded,
-      encodedStrutStyle,
-      style._fontFamily ?? '',
-      strutFontFamilies,
-      style._fontSize ?? 0,
-      style._height ?? 0,
-      style._ellipsis ?? '',
-      _encodeLocale(style._locale),
-    );
+  _NativeParagraphBuilder(ParagraphStyle style) {
+    _constructor(style._encoded, style._defaultTextStyle._encoded);
   }
 
-  @Native<Void Function(Handle, Handle, Handle, Handle, Handle, Double, Double, Handle, Handle)>(
-    symbol: 'ParagraphBuilder::Create',
-  )
-  external void _constructor(
-    Int32List encoded,
-    ByteData? strutData,
-    String fontFamily,
-    List<Object?>? strutFontFamily,
-    double fontSize,
-    double height,
-    String ellipsis,
-    String locale,
-  );
+  @Native<Void Function(Handle, Handle, Handle)>(symbol: 'ParagraphBuilder::Create')
+  external void _constructor(_EncodedParagraphStyle style, _EncodedTextStyle defaultTextStyle);
 
   @override
   int get placeholderCount => _placeholderCount;
@@ -3634,111 +3474,13 @@ base class _NativeParagraphBuilder extends NativeFieldWrapperClass1 implements P
   List<double> get placeholderScales => _placeholderScales;
   final List<double> _placeholderScales = <double>[];
 
-  final TextLeadingDistribution _defaultLeadingDistribution;
-
   @override
   void pushStyle(TextStyle style) {
-    final fullFontFamilies = <String>[];
-    fullFontFamilies.add(style._fontFamily);
-    final List<String>? fontFamilyFallback = style._fontFamilyFallback;
-    if (fontFamilyFallback != null) {
-      fullFontFamilies.addAll(fontFamilyFallback);
-    }
-
-    final Int32List encoded = style._encoded;
-    final TextLeadingDistribution finalLeadingDistribution =
-        style._leadingDistribution ?? _defaultLeadingDistribution;
-    // ensure the enum can be represented using 1 bit.
-    assert(TextLeadingDistribution.values.length <= 2);
-
-    // Use the leading distribution from the paragraph's style if it's not
-    // explicitly set in `style`.
-    encoded[0] |= finalLeadingDistribution.index << 0;
-
-    ByteData? encodedFontFeatures;
-    final List<FontFeature>? fontFeatures = style._fontFeatures;
-    if (fontFeatures != null) {
-      encodedFontFeatures = ByteData(fontFeatures.length * FontFeature._kEncodedSize);
-      var byteOffset = 0;
-      for (final FontFeature feature in fontFeatures) {
-        feature._encode(
-          ByteData.view(encodedFontFeatures.buffer, byteOffset, FontFeature._kEncodedSize),
-        );
-        byteOffset += FontFeature._kEncodedSize;
-      }
-    }
-
-    ByteData? encodedFontVariations;
-    final List<FontVariation>? fontVariations = style._fontVariations;
-    if (fontVariations != null) {
-      encodedFontVariations = ByteData(fontVariations.length * FontVariation._kEncodedSize);
-      var byteOffset = 0;
-      for (final FontVariation variation in fontVariations) {
-        variation._encode(
-          ByteData.view(encodedFontVariations.buffer, byteOffset, FontVariation._kEncodedSize),
-        );
-        byteOffset += FontVariation._kEncodedSize;
-      }
-    }
-
-    _pushStyle(
-      encoded,
-      fullFontFamilies,
-      style._fontSize ?? 0,
-      style._letterSpacing ?? 0,
-      style._wordSpacing ?? 0,
-      style._height ?? 0,
-      style._decorationThickness ?? 0,
-      _encodeLocale(style._locale),
-      style._background?._objects,
-      style._background?._data,
-      style._foreground?._objects,
-      style._foreground?._data,
-      Shadow._encodeShadows(style._shadows),
-      encodedFontFeatures,
-      encodedFontVariations,
-    );
+    _pushStyle(style._encoded);
   }
 
-  @Native<
-    Void Function(
-      Pointer<Void>,
-      Handle,
-      Handle,
-      Double,
-      Double,
-      Double,
-      Double,
-      Double,
-      Handle,
-      Handle,
-      Handle,
-      Handle,
-      Handle,
-      Handle,
-      Handle,
-      Handle,
-    )
-  >(symbol: 'ParagraphBuilder::pushStyle')
-  external void _pushStyle(
-    Int32List encoded,
-    List<Object?> fontFamilies,
-    double fontSize,
-    double letterSpacing,
-    double wordSpacing,
-    double height,
-    double decorationThickness,
-    String locale,
-    List<Object?>? backgroundObjects,
-    ByteData? backgroundData,
-    List<Object?>? foregroundObjects,
-    ByteData? foregroundData,
-    ByteData shadowsData,
-    ByteData? fontFeaturesData,
-    ByteData? fontVariationsData,
-  );
-
-  static String _encodeLocale(Locale? locale) => locale?.toString() ?? '';
+  @Native<Void Function(Pointer<Void>, Handle)>(symbol: 'ParagraphBuilder::pushStyle')
+  external void _pushStyle(_EncodedTextStyle style);
 
   @override
   @Native<Void Function(Pointer<Void>)>(symbol: 'ParagraphBuilder::pop', isLeaf: true)

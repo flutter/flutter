@@ -59,8 +59,11 @@ enum TextHeightBehavior {
 // NOLINTNEXTLINE(clang-analyzer-optin.performance.Padding)
 class ParagraphStyle {
  public:
-  // Default TextStyle. Used in GetTextStyle() to obtain the base TextStyle to
-  // inherit off of.
+  // Base TextStyle and paragraph-level font defaults. `GetTextStyle()` starts
+  // from `default_text_style` and overlays `font_weight`, `font_style`,
+  // `font_family`, `font_size`, `locale`, `height`, and `has_height_override`
+  // to produce the root `TextStyle` for the paragraph.
+  TextStyle default_text_style;
   int font_weight = FontWeight::normal;
   FontStyle font_style = FontStyle::normal;
   std::string font_family = "";

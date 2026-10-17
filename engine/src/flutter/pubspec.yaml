@@ -96,6 +96,7 @@ workspace:
   - tools/clang_tidy
   - tools/clangd_check
   - tools/compare_goldens
+  - tools/dart_data_to_cpp
   - tools/engine_tool
   - tools/header_guard_check
   - tools/gen_web_locale_keymap

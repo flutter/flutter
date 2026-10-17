@@ -25,278 +25,289 @@
 #include "third_party/tonic/dart_args.h"
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_library_natives.h"
-#include "third_party/tonic/typed_data/dart_byte_data.h"
 
 namespace flutter {
 namespace {
 
 const double kTextHeightNone = 0.0;
 
-// TextStyle
-
-const int kTSLeadingDistributionIndex = 0;
-const int kTSColorIndex = 1;
-const int kTSTextDecorationIndex = 2;
-const int kTSTextDecorationColorIndex = 3;
-const int kTSTextDecorationStyleIndex = 4;
-const int kTSFontWeightIndex = 5;
-const int kTSFontStyleIndex = 6;
-const int kTSTextBaselineIndex = 7;
-const int kTSTextDecorationThicknessIndex = 8;
-const int kTSFontFamilyIndex = 9;
-const int kTSFontSizeIndex = 10;
-const int kTSLetterSpacingIndex = 11;
-const int kTSWordSpacingIndex = 12;
-const int kTSHeightIndex = 13;
-const int kTSLocaleIndex = 14;
-const int kTSBackgroundIndex = 15;
-const int kTSForegroundIndex = 16;
-const int kTSTextShadowsIndex = 17;
-const int kTSFontFeaturesIndex = 18;
-const int kTSFontVariationsIndex = 19;
-
-const int kTSLeadingDistributionMask = 1 << kTSLeadingDistributionIndex;
-const int kTSColorMask = 1 << kTSColorIndex;
-const int kTSTextDecorationMask = 1 << kTSTextDecorationIndex;
-const int kTSTextDecorationColorMask = 1 << kTSTextDecorationColorIndex;
-const int kTSTextDecorationStyleMask = 1 << kTSTextDecorationStyleIndex;
-const int kTSTextDecorationThicknessMask = 1 << kTSTextDecorationThicknessIndex;
-const int kTSFontWeightMask = 1 << kTSFontWeightIndex;
-const int kTSFontStyleMask = 1 << kTSFontStyleIndex;
-const int kTSTextBaselineMask = 1 << kTSTextBaselineIndex;
-const int kTSFontFamilyMask = 1 << kTSFontFamilyIndex;
-const int kTSFontSizeMask = 1 << kTSFontSizeIndex;
-const int kTSLetterSpacingMask = 1 << kTSLetterSpacingIndex;
-const int kTSWordSpacingMask = 1 << kTSWordSpacingIndex;
-const int kTSHeightMask = 1 << kTSHeightIndex;
-const int kTSLocaleMask = 1 << kTSLocaleIndex;
-const int kTSBackgroundMask = 1 << kTSBackgroundIndex;
-const int kTSForegroundMask = 1 << kTSForegroundIndex;
-const int kTSTextShadowsMask = 1 << kTSTextShadowsIndex;
-const int kTSFontFeaturesMask = 1 << kTSFontFeaturesIndex;
-const int kTSFontVariationsMask = 1 << kTSFontVariationsIndex;
-
-// ParagraphStyle
-
-const int kPSTextAlignIndex = 1;
-const int kPSTextDirectionIndex = 2;
-const int kPSFontWeightIndex = 3;
-const int kPSFontStyleIndex = 4;
-const int kPSMaxLinesIndex = 5;
-const int kPSTextHeightBehaviorIndex = 6;
-const int kPSFontFamilyIndex = 7;
-const int kPSFontSizeIndex = 8;
-const int kPSHeightIndex = 9;
-const int kPSStrutStyleIndex = 10;
-const int kPSEllipsisIndex = 11;
-const int kPSLocaleIndex = 12;
-// render_soft_hyphens is the first field whose mask bit and encode slot differ:
-// it claims the next free mask bit (13), but stores its value in the next free
-// encode slot (7), since slots 7-12 are reused only as mask-bit positions.
-const int kPSRenderSoftHyphensIndex = 13;
-const int kPSRenderSoftHyphensEncodeIndex = 7;
-
-const int kPSTextAlignMask = 1 << kPSTextAlignIndex;
-const int kPSTextDirectionMask = 1 << kPSTextDirectionIndex;
-const int kPSFontWeightMask = 1 << kPSFontWeightIndex;
-const int kPSFontStyleMask = 1 << kPSFontStyleIndex;
-const int kPSMaxLinesMask = 1 << kPSMaxLinesIndex;
-const int kPSFontFamilyMask = 1 << kPSFontFamilyIndex;
-const int kPSFontSizeMask = 1 << kPSFontSizeIndex;
-const int kPSHeightMask = 1 << kPSHeightIndex;
-const int kPSTextHeightBehaviorMask = 1 << kPSTextHeightBehaviorIndex;
-const int kPSStrutStyleMask = 1 << kPSStrutStyleIndex;
-const int kPSEllipsisMask = 1 << kPSEllipsisIndex;
-const int kPSLocaleMask = 1 << kPSLocaleIndex;
-const int kPSRenderSoftHyphensMask = 1 << kPSRenderSoftHyphensIndex;
-
-// TextShadows decoding
-
-constexpr uint32_t kColorDefault = 0xFF000000;
-constexpr uint32_t kBytesPerShadow = 16;
-constexpr uint32_t kShadowPropertiesCount = 4;
-constexpr uint32_t kColorOffset = 0;
-constexpr uint32_t kXOffset = 1;
-constexpr uint32_t kYOffset = 2;
-constexpr uint32_t kBlurOffset = 3;
-
-// FontFeature decoding
-constexpr uint32_t kBytesPerFontFeature = 8;
-constexpr uint32_t kFontFeatureTagLength = 4;
-
-// FontVariation decoding
-constexpr uint32_t kBytesPerFontVariation = 8;
-constexpr uint32_t kFontVariationTagLength = 4;
-
-// Strut decoding
-const int kSFontWeightIndex = 0;
-const int kSFontStyleIndex = 1;
-const int kSFontFamilyIndex = 2;
-const int kSLeadingDistributionIndex = 3;
-const int kSFontSizeIndex = 4;
-const int kSHeightIndex = 5;
-const int kSLeadingIndex = 6;
-const int kSForceStrutHeightIndex = 7;
-
-const int kSFontWeightMask = 1 << kSFontWeightIndex;
-const int kSFontStyleMask = 1 << kSFontStyleIndex;
-const int kSFontFamilyMask = 1 << kSFontFamilyIndex;
-const int kSLeadingDistributionMask = 1 << kSLeadingDistributionIndex;
-const int kSFontSizeMask = 1 << kSFontSizeIndex;
-const int kSHeightMask = 1 << kSHeightIndex;
-const int kSLeadingMask = 1 << kSLeadingIndex;
-const int kSForceStrutHeightMask = 1 << kSForceStrutHeightIndex;
-
-}  // namespace
-
-IMPLEMENT_WRAPPERTYPEINFO(ui, ParagraphBuilder);
-
-void ParagraphBuilder::Create(Dart_Handle wrapper,
-                              Dart_Handle encoded_handle,
-                              Dart_Handle strutData,
-                              const std::string& fontFamily,
-                              const std::vector<std::string>& strutFontFamilies,
-                              double fontSize,
-                              double height,
-                              const std::u16string& ellipsis,
-                              const std::string& locale) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  auto res = fml::MakeRefCounted<ParagraphBuilder>(
-      encoded_handle, strutData, fontFamily, strutFontFamilies, fontSize,
-      height, ellipsis, locale);
-  res->AssociateWithDartWrapper(wrapper);
+void DecodePaint(Dart_Handle list, std::optional<DlPaint>& out_paint) {
+  Dart_Handle handles[2];
+  Dart_ListGetRange(list, 0, 2, handles);
+  Paint paint(handles[0], handles[1]);
+  if (paint.isNotNull()) {
+    paint.paint(out_paint.emplace(), DisplayListOpFlags::kDrawParagraphFlags,
+                DlTileMode::kDecal);
+  }
 }
 
-// returns true if there is a font family defined. Font family is the only
-// parameter passed directly.
-void decodeStrut(Dart_Handle strut_data,
-                 const std::vector<std::string>& strut_font_families,
-                 txt::ParagraphStyle& paragraph_style) {  // NOLINT
-  if (strut_data == Dart_Null()) {
-    return;
+struct DartListElements {
+  explicit DartListElements(Dart_Handle list) {
+    Dart_ListLength(list, &length);
+    if (length > 0) {
+      if (length > kInlineCapacity) {
+        heap_storage.resize(length);
+        data = heap_storage.data();
+      }
+      Dart_ListGetRange(list, 0, length, data);
+    }
   }
 
-  tonic::DartByteData byte_data(strut_data);
-  if (byte_data.length_in_bytes() == 0) {
+  static constexpr intptr_t kInlineCapacity = 16;
+  intptr_t length = 0;
+  Dart_Handle inline_storage[kInlineCapacity];
+  std::vector<Dart_Handle> heap_storage;
+  Dart_Handle* data = inline_storage;
+
+  Dart_Handle operator[](intptr_t index) const { return data[index]; }
+};
+
+void DecodeTextShadows(Dart_Handle shadows_handle,
+                       std::vector<txt::TextShadow>& decoded_shadows) {
+  decoded_shadows.clear();
+  DartListElements handles(shadows_handle);
+  if (handles.length <= 0) {
+    return;
+  }
+  decoded_shadows.reserve(handles.length / 4);
+  for (intptr_t i = 0; i < handles.length; i += 4) {
+    decoded_shadows.emplace_back(
+        static_cast<SkColor>(
+            tonic::DartConverter<uint32_t>::FromDart(handles[i])),
+        SkPoint::Make(static_cast<float>(tonic::DartConverter<double>::FromDart(
+                          handles[i + 1])),
+                      static_cast<float>(tonic::DartConverter<double>::FromDart(
+                          handles[i + 2]))),
+        tonic::DartConverter<double>::FromDart(handles[i + 3]));
+  }
+}
+
+void DecodeFontFeatures(Dart_Handle font_features_handle,
+                        txt::FontFeatures& font_features) {
+  DartListElements handles(font_features_handle);
+  for (intptr_t i = 0; i < handles.length; i += 2) {
+    font_features.SetFeature(
+        tonic::DartConverter<std::string>::FromDart(handles[i]),
+        tonic::DartConverter<int32_t>::FromDart(handles[i + 1]));
+  }
+}
+
+void DecodeFontVariations(Dart_Handle font_variations_handle,
+                          txt::FontVariations& font_variations) {
+  DartListElements handles(font_variations_handle);
+  for (intptr_t i = 0; i < handles.length; i += 2) {
+    font_variations.SetAxisValue(
+        tonic::DartConverter<std::string>::FromDart(handles[i]),
+        static_cast<float>(
+            tonic::DartConverter<double>::FromDart(handles[i + 1])));
+  }
+}
+
+void DecodeFontFamilyFallback(Dart_Handle fallback_handle,
+                              std::vector<std::string>& font_families) {
+  DartListElements handles(fallback_handle);
+  if (handles.length <= 0) {
+    return;
+  }
+  font_families.reserve(font_families.size() + handles.length);
+  for (intptr_t i = 0; i < handles.length; ++i) {
+    font_families.push_back(
+        tonic::DartConverter<std::string>::FromDart(handles[i]));
+  }
+}
+
+void DecodeStrut(Dart_Handle strut_handle,
+                 bool default_half_leading,
+                 txt::ParagraphStyle& paragraph_style) {
+  StrutStyle in = tonic::DartConverter<StrutStyle>::FromDart(strut_handle);
+  // Primitive fields on `flutter::StrutStyle` are pre-populated with their
+  // default values from `StrutStyle._` in `lib/ui/text.dart` when omitted by
+  // the caller, so `in.has_<field>()` checks are not needed to read them
+  // (except `leading_distribution`, which falls back to `ParagraphStyle`'s
+  // `default_half_leading` when omitted).
+  const bool has_height_override = in.height != kTextHeightNone;
+  if (!in.has_font_family() && !in.has_font_family_fallback() &&
+      !in.has_font_size() && !has_height_override &&
+      !in.has_leading_distribution() && !in.has_leading() &&
+      !in.has_font_weight() && !in.has_font_style() &&
+      !in.has_force_strut_height()) {
     return;
   }
   paragraph_style.strut_enabled = true;
-
-  const int32_t* int32_data = static_cast<const int32_t*>(byte_data.data());
-  int32_t mask = int32_data[0];
-
-  size_t int32_count = 1;
-  if (mask & kSFontWeightMask) {
-    paragraph_style.strut_font_weight = int32_data[int32_count++];
-  }
-  if (mask & kSFontStyleMask) {
-    paragraph_style.strut_font_style =
-        static_cast<txt::FontStyle>(int32_data[int32_count++]);
-  }
-
-  paragraph_style.strut_half_leading = mask & kSLeadingDistributionMask;
-
-  std::vector<float> float_data;
-  float_data.resize((byte_data.length_in_bytes() / 4) - int32_count);
-  memcpy(float_data.data(), int32_data + int32_count, float_data.size() * 4);
-  size_t float_count = 0;
-  if (mask & kSFontSizeMask) {
-    paragraph_style.strut_font_size = float_data[float_count++];
-  }
-  if (mask & kSHeightMask) {
-    paragraph_style.strut_height = float_data[float_count++];
+  paragraph_style.strut_font_weight = in.font_weight;
+  paragraph_style.strut_font_style = static_cast<txt::FontStyle>(in.font_style);
+  paragraph_style.strut_half_leading = in.has_leading_distribution()
+                                           ? (in.leading_distribution == 1)
+                                           : default_half_leading;
+  paragraph_style.strut_font_size = in.font_size;
+  if (has_height_override) {
+    paragraph_style.strut_height = in.height;
     paragraph_style.strut_has_height_override = true;
   }
-  if (mask & kSLeadingMask) {
-    paragraph_style.strut_leading = float_data[float_count++];
+  paragraph_style.strut_leading = in.leading;
+  paragraph_style.force_strut_height = in.force_strut_height;
+
+  if (in.has_font_family()) {
+    paragraph_style.strut_font_families.push_back(
+        tonic::DartConverter<std::string>::FromDart(in.font_family));
   }
-
-  // The boolean is stored as the last bit in the bitmask, as null
-  // and false have the same behavior.
-  paragraph_style.force_strut_height = mask & kSForceStrutHeightMask;
-
-  if (mask & kSFontFamilyMask) {
-    paragraph_style.strut_font_families = strut_font_families;
-  } else {
+  if (in.has_font_family_fallback()) {
+    DecodeFontFamilyFallback(in.font_family_fallback,
+                             paragraph_style.strut_font_families);
+  }
+  if (paragraph_style.strut_font_families.empty()) {
     // Provide an empty font name so that the platform default font will be
     // used.
     paragraph_style.strut_font_families.push_back("");
   }
 }
 
-ParagraphBuilder::ParagraphBuilder(
-    Dart_Handle encoded_data,
-    Dart_Handle strutData,
-    const std::string& fontFamily,
-    const std::vector<std::string>& strutFontFamilies,
-    double fontSize,
-    double height,
-    const std::u16string& ellipsis,
-    const std::string& locale) {
-  int32_t mask = 0;
+// Copies attributes from the FFI `flutter::TextStyle` (`in`) onto `style`.
+//
+// In `flutter::TextStyle`, omitted primitive fields (`has_<field>() == false`)
+// are pre-populated with the default values declared on `TextStyle._` in
+// `lib/ui/text.dart`:
+// - `kUseDefaults = true` (used in `ParagraphBuilder`'s constructor) copies all
+//   primitive fields unconditionally to seed the paragraph's base style with
+//   those defaults.
+// - `kUseDefaults = false` (used in `ParagraphBuilder::pushStyle`) only copies
+//   fields that were explicitly set (`in.has_<field>()`), so omitted attributes
+//   inherit from the parent style on the style stack.
+//
+// `Dart_Handle` fields (`locale`, `background`, `foreground`, `shadows`, etc.)
+// do not have default values in `TextStyle._` and are always checked with
+// `in.has_<field>()`.
+template <bool kUseDefaults>
+void ApplyTextStyle(const TextStyle& in, txt::TextStyle& style) {
+  if (kUseDefaults || in.has_color()) {
+    style.color = in.color;
+  }
+  if (kUseDefaults || in.has_decoration()) {
+    style.decoration = static_cast<txt::TextDecoration>(in.decoration);
+  }
+  if (kUseDefaults || in.has_decoration_color()) {
+    style.decoration_color = in.decoration_color;
+  }
+  if (kUseDefaults || in.has_decoration_style()) {
+    style.decoration_style =
+        static_cast<txt::TextDecorationStyle>(in.decoration_style);
+  }
+  if (kUseDefaults || in.has_decoration_thickness()) {
+    style.decoration_thickness_multiplier = in.decoration_thickness;
+  }
+  if (kUseDefaults || in.has_text_baseline()) {
+    // TODO(abarth): Implement TextBaseline. The CSS version of this
+    // property wasn't wired up either.
+    style.text_baseline = static_cast<txt::TextBaseline>(in.text_baseline);
+  }
+  if (kUseDefaults || in.has_font_weight()) {
+    style.font_weight = in.font_weight;
+  }
+  if (kUseDefaults || in.has_font_style()) {
+    style.font_style = static_cast<txt::FontStyle>(in.font_style);
+  }
+  if (kUseDefaults || in.has_font_size()) {
+    style.font_size = in.font_size;
+  }
+  if (kUseDefaults || in.has_letter_spacing()) {
+    style.letter_spacing = in.letter_spacing;
+  }
+  if (kUseDefaults || in.has_word_spacing()) {
+    style.word_spacing = in.word_spacing;
+  }
+  if (kUseDefaults || in.has_height()) {
+    style.height = in.height;
+    style.has_height_override = style.height != kTextHeightNone;
+  }
+  if (kUseDefaults || in.has_leading_distribution()) {
+    style.half_leading = in.leading_distribution == 1;
+  }
+  if (in.has_locale()) {
+    style.locale = tonic::DartConverter<std::string>::FromDart(in.locale);
+  }
+  if (in.has_background()) {
+    DecodePaint(in.background, style.background);
+  }
+  if (in.has_foreground()) {
+    DecodePaint(in.foreground, style.foreground);
+  }
+  if (in.has_shadows()) {
+    DecodeTextShadows(in.shadows, style.text_shadows);
+  }
+  if (in.has_font_family() || in.has_font_family_fallback()) {
+    // The child style's font families override the parent's font families.
+    // If the child's fonts are not available, then the font collection will
+    // use the system fallback fonts (not the parent's fonts).
+    style.font_families.clear();
+    style.font_families.push_back(
+        in.has_font_family()
+            ? tonic::DartConverter<std::string>::FromDart(in.font_family)
+            : "");
+    if (in.has_font_family_fallback()) {
+      DecodeFontFamilyFallback(in.font_family_fallback, style.font_families);
+    }
+  }
+  if (in.has_font_features()) {
+    DecodeFontFeatures(in.font_features, style.font_features);
+  }
+  if (in.has_font_variations()) {
+    DecodeFontVariations(in.font_variations, style.font_variations);
+  }
+}
+
+}  // namespace
+
+IMPLEMENT_WRAPPERTYPEINFO(ui, ParagraphBuilder);
+
+void ParagraphBuilder::Create(Dart_Handle wrapper,
+                              const ParagraphStyle& in,
+                              const TextStyle& default_text_style) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  auto res = fml::MakeRefCounted<ParagraphBuilder>(in, default_text_style);
+  res->AssociateWithDartWrapper(wrapper);
+}
+
+ParagraphBuilder::ParagraphBuilder(const ParagraphStyle& in,
+                                   const TextStyle& default_text_style) {
+  // Primitive fields on `flutter::ParagraphStyle` and `flutter::TextStyle` are
+  // pre-populated with their default values from `ParagraphStyle._` and
+  // `TextStyle._` in `lib/ui/text.dart` when omitted by the caller, so they can
+  // be assigned directly without `has_<field>()` checks.
   txt::ParagraphStyle style;
-  {
-    tonic::Int32List encoded(encoded_data);
+  style.text_align = static_cast<txt::TextAlign>(in.text_align);
+  style.text_direction = static_cast<txt::TextDirection>(in.text_direction);
+  style.text_height_behavior = in.text_height_behavior & 0x3;
 
-    mask = encoded[0];
-
-    if (mask & kPSTextAlignMask) {
-      style.text_align =
-          static_cast<txt::TextAlign>(encoded[kPSTextAlignIndex]);
-    }
-
-    if (mask & kPSTextDirectionMask) {
-      style.text_direction =
-          static_cast<txt::TextDirection>(encoded[kPSTextDirectionIndex]);
-    }
-
-    if (mask & kPSFontWeightMask) {
-      style.font_weight = encoded[kPSFontWeightIndex];
-    }
-
-    if (mask & kPSFontStyleMask) {
-      style.font_style =
-          static_cast<txt::FontStyle>(encoded[kPSFontStyleIndex]);
-    }
-
-    if (mask & kPSFontFamilyMask) {
-      style.font_family = fontFamily;
-    }
-
-    if (mask & kPSFontSizeMask) {
-      style.font_size = fontSize;
-    }
-
-    if (mask & kPSHeightMask) {
-      style.height = height;
-      style.has_height_override = true;
-    }
-
-    if (mask & kPSTextHeightBehaviorMask) {
-      style.text_height_behavior = encoded[kPSTextHeightBehaviorIndex];
-    }
-
-    if (mask & kPSMaxLinesMask) {
-      style.max_lines = encoded[kPSMaxLinesIndex];
-    }
-
-    if (mask & kPSRenderSoftHyphensMask) {
-      // Hyphens.manual (0) renders the soft hyphen glyph; Hyphens.hidden (1)
-      // suppresses it.
-      style.render_soft_hyphens = encoded[kPSRenderSoftHyphensEncodeIndex] == 0;
-    }
+  // Still check `in.has_max_lines()` because an omitted `maxLines`
+  // means unlimited lines (`std::numeric_limits<size_t>::max()`).
+  if (in.has_max_lines()) {
+    style.max_lines = in.max_lines;
   }
-
-  if (mask & kPSStrutStyleMask) {
-    decodeStrut(strutData, strutFontFamilies, style);
+  if (in.has_ellipsis()) {
+    style.ellipsis =
+        tonic::DartConverter<std::u16string>::FromDart(in.ellipsis);
   }
+  // Hyphens.manual (0) renders the soft hyphen glyph; Hyphens.hidden (1)
+  // suppresses it.
+  style.render_soft_hyphens = in.hyphens == 0;
 
-  if (mask & kPSEllipsisMask) {
-    style.ellipsis = ellipsis;
+  // Seed `style.default_text_style` with all fields (including defaults) from
+  // `default_text_style`, then mirror the paragraph-level font properties onto
+  // `style` for SkParagraph and `ParagraphStyle::GetTextStyle()`.
+  ApplyTextStyle</*kUseDefaults=*/true>(default_text_style,
+                                        style.default_text_style);
+  style.font_weight = style.default_text_style.font_weight;
+  style.font_style = style.default_text_style.font_style;
+  if (default_text_style.has_font_family()) {
+    style.font_family = style.default_text_style.font_families[0];
   }
+  style.font_size = style.default_text_style.font_size;
+  style.height = style.default_text_style.height;
+  style.has_height_override = style.default_text_style.has_height_override;
+  style.locale = style.default_text_style.locale;
 
-  if (mask & kPSLocaleMask) {
-    style.locale = locale;
+  if (in.has_strut_style()) {
+    DecodeStrut(in.strut_style, style.default_text_style.half_leading, style);
   }
 
   FontCollection& font_collection = UIDartState::Current()
@@ -311,192 +322,13 @@ ParagraphBuilder::ParagraphBuilder(
 
 ParagraphBuilder::~ParagraphBuilder() = default;
 
-void decodeTextShadows(
-    Dart_Handle shadows_data,
-    std::vector<txt::TextShadow>& decoded_shadows) {  // NOLINT
-  decoded_shadows.clear();
-
-  tonic::DartByteData byte_data(shadows_data);
-  FML_CHECK(byte_data.length_in_bytes() % kBytesPerShadow == 0);
-
-  const uint32_t* uint_data = static_cast<const uint32_t*>(byte_data.data());
-  const float* float_data = static_cast<const float*>(byte_data.data());
-
-  size_t shadow_count = byte_data.length_in_bytes() / kBytesPerShadow;
-  size_t shadow_count_offset = 0;
-  for (size_t shadow_index = 0; shadow_index < shadow_count; ++shadow_index) {
-    shadow_count_offset = shadow_index * kShadowPropertiesCount;
-    SkColor color =
-        uint_data[shadow_count_offset + kColorOffset] ^ kColorDefault;
-    decoded_shadows.emplace_back(
-        color,
-        SkPoint::Make(float_data[shadow_count_offset + kXOffset],
-                      float_data[shadow_count_offset + kYOffset]),
-        float_data[shadow_count_offset + kBlurOffset]);
-  }
-}
-
-void decodeFontFeatures(Dart_Handle font_features_data,
-                        txt::FontFeatures& font_features) {  // NOLINT
-  tonic::DartByteData byte_data(font_features_data);
-  FML_CHECK(byte_data.length_in_bytes() % kBytesPerFontFeature == 0);
-
-  size_t feature_count = byte_data.length_in_bytes() / kBytesPerFontFeature;
-  for (size_t feature_index = 0; feature_index < feature_count;
-       ++feature_index) {
-    size_t feature_offset = feature_index * kBytesPerFontFeature;
-    const char* feature_bytes =
-        static_cast<const char*>(byte_data.data()) + feature_offset;
-    std::string tag(feature_bytes, kFontFeatureTagLength);
-    int32_t value = *(reinterpret_cast<const int32_t*>(feature_bytes +
-                                                       kFontFeatureTagLength));
-    font_features.SetFeature(tag, value);
-  }
-}
-
-void decodeFontVariations(Dart_Handle font_variations_data,
-                          txt::FontVariations& font_variations) {  // NOLINT
-  tonic::DartByteData byte_data(font_variations_data);
-  FML_CHECK(byte_data.length_in_bytes() % kBytesPerFontVariation == 0);
-
-  size_t variation_count = byte_data.length_in_bytes() / kBytesPerFontVariation;
-  for (size_t variation_index = 0; variation_index < variation_count;
-       ++variation_index) {
-    size_t variation_offset = variation_index * kBytesPerFontVariation;
-    const char* variation_bytes =
-        static_cast<const char*>(byte_data.data()) + variation_offset;
-    std::string tag(variation_bytes, kFontVariationTagLength);
-    float value = *(reinterpret_cast<const float*>(variation_bytes +
-                                                   kFontVariationTagLength));
-    font_variations.SetAxisValue(tag, value);
-  }
-}
-
-void ParagraphBuilder::pushStyle(const tonic::Int32List& encoded,
-                                 const std::vector<std::string>& fontFamilies,
-                                 double fontSize,
-                                 double letterSpacing,
-                                 double wordSpacing,
-                                 double height,
-                                 double decorationThickness,
-                                 const std::string& locale,
-                                 Dart_Handle background_objects,
-                                 Dart_Handle background_data,
-                                 Dart_Handle foreground_objects,
-                                 Dart_Handle foreground_data,
-                                 Dart_Handle shadows_data,
-                                 Dart_Handle font_features_data,
-                                 Dart_Handle font_variations_data) {
-  FML_DCHECK(encoded.num_elements() == 9);
-
-  int32_t mask = encoded[0];
-
-  // Set to use the properties of the previous style if the property is not
-  // explicitly given.
+void ParagraphBuilder::pushStyle(const TextStyle& in) {
+  // `PeekStyle()` returns `base_style_` (seeded from `default_text_style` in
+  // the constructor) when the style stack is empty, or the parent
+  // `txt::TextStyle` when styles are nested. Only fields explicitly provided on
+  // `in` (`in.has_<field>()`) overwrite the inherited style.
   txt::TextStyle style = m_paragraph_builder_->PeekStyle();
-
-  style.half_leading = mask & kTSLeadingDistributionMask;
-  // Only change the style property from the previous value if a new explicitly
-  // set value is available
-  if (mask & kTSColorMask) {
-    style.color = encoded[kTSColorIndex];
-  }
-
-  if (mask & kTSTextDecorationMask) {
-    style.decoration =
-        static_cast<txt::TextDecoration>(encoded[kTSTextDecorationIndex]);
-  }
-
-  if (mask & kTSTextDecorationColorMask) {
-    style.decoration_color = encoded[kTSTextDecorationColorIndex];
-  }
-
-  if (mask & kTSTextDecorationStyleMask) {
-    style.decoration_style = static_cast<txt::TextDecorationStyle>(
-        encoded[kTSTextDecorationStyleIndex]);
-  }
-
-  if (mask & kTSTextDecorationThicknessMask) {
-    style.decoration_thickness_multiplier = decorationThickness;
-  }
-
-  if (mask & kTSTextBaselineMask) {
-    // TODO(abarth): Implement TextBaseline. The CSS version of this
-    // property wasn't wired up either.
-  }
-
-  if (mask & (kTSFontWeightMask | kTSFontStyleMask | kTSFontSizeMask |
-              kTSLetterSpacingMask | kTSWordSpacingMask)) {
-    if (mask & kTSFontWeightMask) {
-      style.font_weight = encoded[kTSFontWeightIndex];
-    }
-
-    if (mask & kTSFontStyleMask) {
-      style.font_style =
-          static_cast<txt::FontStyle>(encoded[kTSFontStyleIndex]);
-    }
-
-    if (mask & kTSFontSizeMask) {
-      style.font_size = fontSize;
-    }
-
-    if (mask & kTSLetterSpacingMask) {
-      style.letter_spacing = letterSpacing;
-    }
-
-    if (mask & kTSWordSpacingMask) {
-      style.word_spacing = wordSpacing;
-    }
-  }
-
-  if (mask & kTSHeightMask) {
-    style.height = height;
-    style.has_height_override = style.height != kTextHeightNone;
-  }
-
-  if (mask & kTSLocaleMask) {
-    style.locale = locale;
-  }
-
-  if (mask & kTSBackgroundMask) {
-    Paint background(background_objects, background_data);
-    if (background.isNotNull()) {
-      DlPaint dl_paint;
-      background.paint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
-                       DlTileMode::kDecal);
-      style.background = dl_paint;
-    }
-  }
-
-  if (mask & kTSForegroundMask) {
-    Paint foreground(foreground_objects, foreground_data);
-    if (foreground.isNotNull()) {
-      DlPaint dl_paint;
-      foreground.paint(dl_paint, DisplayListOpFlags::kDrawParagraphFlags,
-                       DlTileMode::kDecal);
-      style.foreground = dl_paint;
-    }
-  }
-
-  if (mask & kTSTextShadowsMask) {
-    decodeTextShadows(shadows_data, style.text_shadows);
-  }
-
-  if (mask & kTSFontFamilyMask) {
-    // The child style's font families override the parent's font families.
-    // If the child's fonts are not available, then the font collection will
-    // use the system fallback fonts (not the parent's fonts).
-    style.font_families = fontFamilies;
-  }
-
-  if (mask & kTSFontFeaturesMask) {
-    decodeFontFeatures(font_features_data, style.font_features);
-  }
-
-  if (mask & kTSFontVariationsMask) {
-    decodeFontVariations(font_variations_data, style.font_variations);
-  }
-
+  ApplyTextStyle</*kUseDefaults=*/false>(in, style);
   m_paragraph_builder_->PushStyle(style);
 }
 
