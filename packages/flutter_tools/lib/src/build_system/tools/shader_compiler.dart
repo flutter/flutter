@@ -340,6 +340,13 @@ class ShaderCompiler {
       }
       return hint;
     }
+
+    final stderr = result.stderr as String?;
+    if (stderr != null && stderr.contains('Could not write file to')) {
+      return 'The shader compiler (impellerc) failed to write the output file.\n'
+          'Ensure the build/ directory is writable and concurrent flutter test runs are not racing on it.';
+    }
+
     return null;
   }
 
