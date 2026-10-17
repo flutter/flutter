@@ -564,7 +564,7 @@ abstract class _ShapeToCircleBorder<T extends _RRectLikeBorder> extends Outlined
     return buildPath(
       _adjustRect(rect),
       _adjustBorderRadius(rect, textDirection),
-      -ui.lerpDouble(side.width, 0, side.strokeAlign)!,
+      -side.strokeInset,
     );
   }
 
