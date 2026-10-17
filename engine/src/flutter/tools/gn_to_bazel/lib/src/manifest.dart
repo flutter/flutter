@@ -109,6 +109,49 @@ exports_files([
   // engine's wrapper of it, for the benchmark executables run_tests.py
   // --type benchmarks runs (benchmarkRuns).
   ConvertedFile('//flutter/benchmarking'),
+  // font-subset, the SDK's font subsetting tool (run_tests.py --type
+  // font-subset runs its test.py against the built binary and its
+  // archive). GN's zip_bundle is artifact packaging the converter does not
+  // read yet; the archive the test checks is written by hand below with
+  // the same template's Bazel side, and the entitlements list is the macOS
+  // bundle's.
+  ConvertedFile(
+    '//flutter/tools/font_subset',
+    skip: <String, String>{
+      'font_entitlement_config':
+          'generated_file over metadata: the entitlements list of the macOS bundle',
+      'font_subset': 'zip_bundle: artifact packaging (written by hand below)',
+    },
+    appendix: '''
+load("//engine/src/flutter/build/bazel:checkout_script_test.bzl", "checkout_script_test")
+load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle")
+
+# GN's zip_bundle("font_subset") -- the binary in
+# `<full_target_platform_name>/font-subset.zip` -- for this host, until the
+# converter reads the template: the archive test.py checks.
+zip_bundle(
+    name = "font_subset",
+    files = {"font-subset": ":font-subset"},
+    output = "linux-x64/font-subset.zip",
+)
+
+# run_tests.py --type font-subset: `python3 test.py --variant <build
+# directory>` from this directory, against the binary and the archive at
+# their places in the build directory.
+checkout_script_test(
+    name = "font_subset_test",
+    build_directory = {
+        ":font-subset": "",
+        ":font_subset": "zip_archives/linux-x64",
+    },
+    script = "test.py",
+    script_args = [
+        "--variant",
+        "{variant}",
+    ],
+)
+''',
+  ),
   ConvertedFile(
     '//flutter/testing',
     // The fixtures macro in testing.bzl compiles this file into every

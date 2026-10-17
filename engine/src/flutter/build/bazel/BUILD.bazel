@@ -10,7 +10,11 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files(["deps.lock.bzl"])
+exports_files([
+    "deps.lock.bzl",
+    # zip_bundle.bzl's wrapper of build/zip.py.
+    "zip_bundle.py",
+])
 
 # GN's `is_debug` is "unoptimized", which Bazel spells -c dbg or -c fastbuild;
 # `optimized` is the complement (tools/gn without --unoptimized) and

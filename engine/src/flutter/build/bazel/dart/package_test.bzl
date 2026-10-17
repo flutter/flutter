@@ -39,15 +39,23 @@ place for a build directory, named as GN names one for the mode
 reads the mode off the name -- holding `build_directory`'s files; empty for
 every other package, as the variable is set for every run.
 
-A test runs in a writable view of the runfiles tree under TEST_TMPDIR: the
-directories down to the package are real, everything beside that path a
-symlink into the runfiles, and the package itself a copy. Bazel mounts a
-runfiles tree read-only once it exists, and flutter_frontend_server's test
-writes its kernels beside its fixtures, as it does in the checkout (where
-they are ignored by git).
+A test runs in a writable view of the runfiles tree under TEST_TMPDIR
+(checkout_view.bzl): the directories down to the package are real,
+everything beside that path a symlink into the runfiles, and the package
+itself a copy. Bazel mounts a runfiles tree read-only once it exists, and
+flutter_frontend_server's test writes its kernels beside its fixtures, as it
+does in the checkout (where they are ignored by git).
 """
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load(
+    "//engine/src/flutter/build/bazel:checkout_view.bzl",
+    "BUILD_DIRECTORY_ATTRS",
+    "ENGINE_SRC",
+    "build_directory_attrs",
+    "build_directory_symlinks",
+    "checkout_view_prologue",
+)
 
 # The packages of the engine's pub workspace that live in other repositories
 # (the trees gclient syncs), each at the path the package configuration names
@@ -62,15 +70,6 @@ WORKSPACE_PACKAGE_TREES = {
     "@process_runner//:dart_sources": "engine/src/flutter/third_party/pkg/process_runner",
 }
 
-# GN's build directory names by runtime mode (tools/gn: host_<mode>, with
-# _unopt when not optimized), for FLUTTER_BUILD_DIRECTORY.
-_BUILD_DIRECTORY_NAMES = {
-    "//engine/src/flutter/common:runtime_mode_jit_release": "host_jit_release",
-    "//engine/src/flutter/common:runtime_mode_profile": "host_profile",
-    "//engine/src/flutter/common:runtime_mode_release": "host_release",
-    "//conditions:default": "host_debug",
-}
-
 def _external_path(ctx, f):
     """The path of a file of another repository, relative to that repository's root."""
     if not f.short_path.startswith("../"):
@@ -80,6 +79,8 @@ def _external_path(ctx, f):
 def _dart_package_test_impl(ctx):
     package_config = ctx.file.package_config
     workspace = paths.dirname(paths.dirname(package_config.short_path))
+    if paths.dirname(workspace) != ENGINE_SRC:
+        fail("%s: the package configuration %s should be the engine's" % (ctx.label, package_config.short_path))
     package = ctx.label.package
     if not package.startswith(workspace + "/"):
         fail("%s: a dart_package_test belongs in a package under %s" % (ctx.label, workspace))
@@ -100,14 +101,7 @@ def _dart_package_test_impl(ctx):
 
     # The build directory: GN's place and name for the mode, this target's
     # files under it.
-    build_directory = paths.join(
-        paths.dirname(workspace),
-        "out",
-        ctx.attr.build_directory_name + ("" if ctx.attr.optimized else "_unopt"),
-    )
-    for target, path in ctx.attr.build_directory.items():
-        for f in target[DefaultInfo].files.to_list():
-            symlinks[paths.join(build_directory, path.strip("/"), f.basename)] = f
+    build_directory = build_directory_symlinks(ctx, symlinks)
 
     dart = [f for f in ctx.files._sdk if f.short_path.endswith("/bin/dart")]
     if len(dart) != 1:
@@ -116,34 +110,9 @@ def _dart_package_test_impl(ctx):
     launcher = ctx.actions.declare_file(ctx.label.name + ".sh")
     ctx.actions.write(
         output = launcher,
-        content = """#!/bin/bash
-set -euo pipefail
-shopt -s dotglob nullglob
-# The runfiles directory of this repository: bazel test's working directory.
-root="$PWD"
-# A writable view of it: real directories down to the package, symlinks to
-# everything beside that path, the package itself a copy.
-tree="$TEST_TMPDIR/tree"
-package="{package}"
-IFS=/ read -r -a parts <<< "$package"
-dir=""
-for part in "${{parts[@]}}"; do
-  mkdir -p "$tree/$dir"
-  for entry in "$root/$dir"*; do
-    name="${{entry##*/}}"
-    [ "$name" = "$part" ] || ln -s "$entry" "$tree/$dir$name"
-  done
-  dir="$dir$part/"
-done
-cp -RL "$root/$package" "$tree/$package"
-export HOME="$TEST_TMPDIR/home"
-export FLUTTER_BUILD_DIRECTORY="$tree/{build_directory}"
-mkdir -p "$HOME" "$FLUTTER_BUILD_DIRECTORY"
-cd "$tree/$package"
+        content = checkout_view_prologue(package, build_directory) + """
 exec "$root/{dart}" "--packages=$tree/{package_config}" "$tree/{runner}" --reporter=expanded "$@"
 """.format(
-            build_directory = build_directory,
-            package = package,
             dart = dart[0].short_path,
             package_config = package_config.short_path,
             runner = runner,
@@ -185,18 +154,6 @@ _dart_package_test = rule(
             doc = "Sources of workspace packages in other repositories, each mapped to the path under the " +
                   "source root where the package configuration names the package (WORKSPACE_PACKAGE_TREES).",
         ),
-        "build_directory": attr.label_keyed_string_dict(
-            allow_files = True,
-            doc = "Files of FLUTTER_BUILD_DIRECTORY, each target mapped to the directory under it that " +
-                  "holds its files by base name (`gen`, `flutter_patched_sdk`).",
-        ),
-        "build_directory_name": attr.string(
-            mandatory = True,
-            doc = "GN's name for the build directory in this mode (host_debug, host_release, ...).",
-        ),
-        "optimized": attr.bool(
-            doc = "Whether this is an optimized build; GN's name carries _unopt otherwise.",
-        ),
         "env": attr.string_dict(
             doc = "Further environment variables for the run.",
         ),
@@ -219,7 +176,7 @@ _dart_package_test = rule(
             doc = "The prebuilt SDK: dart with its libraries and snapshots, and the AOT runtime beside it " +
                   "(flutter_frontend_server's test runs the frontend server on it).",
         ),
-    },
+    } | BUILD_DIRECTORY_ATTRS,
 )
 
 def dart_package_test(name, srcs = None, package_trees = WORKSPACE_PACKAGE_TREES, size = "medium", **kwargs):
@@ -243,11 +200,6 @@ def dart_package_test(name, srcs = None, package_trees = WORKSPACE_PACKAGE_TREES
         name = name,
         srcs = srcs,
         package_trees = package_trees,
-        build_directory_name = select(_BUILD_DIRECTORY_NAMES),
-        optimized = select({
-            "//engine/src/flutter/build/bazel:optimized": True,
-            "//conditions:default": False,
-        }),
         size = size,
-        **kwargs
+        **(build_directory_attrs() | kwargs)
     )
