@@ -5,7 +5,7 @@
 # Generated from //flutter/impeller/display_list/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -113,7 +113,9 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + ["_USE_MATH_DEFINES"],
     deps = [
         ":aiks_unittests",
@@ -165,7 +167,9 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + [
         "IMPELLER_GOLDEN_TESTS",
         "IMPELLER_ENABLE_VALIDATION=1",
@@ -193,7 +197,9 @@ cc_library(
     srcs = ["skia_conversions_unittests.cc"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":skia_conversions",
@@ -211,7 +217,9 @@ cc_library(
     hdrs = ["aiks_playground.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":display_list",
@@ -235,7 +243,9 @@ cc_library(
     hdrs = ["aiks_unittests.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/renderer/backend/gles:mock_gles
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + ["_USE_MATH_DEFINES"],
     deps = [
         ":aiks_playground",
@@ -260,7 +270,9 @@ cc_library(
     hdrs = ["aiks_unittests.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/impeller/playground:playground_test
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + [
         "IMPELLER_GOLDEN_TESTS",
         "IMPELLER_ENABLE_VALIDATION=1",

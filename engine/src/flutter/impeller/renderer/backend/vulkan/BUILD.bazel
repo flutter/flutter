@@ -5,7 +5,7 @@
 # Generated from //flutter/impeller/renderer/backend/vulkan/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,7 +14,7 @@ cc_library(
     testonly = True,
     srcs = ["test/mock_vulkan.cc"],
     hdrs = ["test/mock_vulkan.h"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :vulkan
         "-Wno-c++98-compat-extra-semi",  # from :vulkan
         "-Wno-deprecated-copy",  # from :vulkan
@@ -63,7 +63,7 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    ] + FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :vulkan
         "-Wno-c++98-compat-extra-semi",  # from :vulkan
         "-Wno-deprecated-copy",  # from :vulkan
@@ -73,6 +73,7 @@ cc_library(
         "-Wno-suggest-override",  # from :vulkan
         "-Wno-unused-private-field",  # from :vulkan
         "-Wno-unused-variable",  # from :vulkan
+        "-Wno-inconsistent-missing-override",  # from ../../../playground:playground_test
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [

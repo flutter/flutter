@@ -222,8 +222,20 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    dependencies' `all_dependent_configs` become public `deps` of the
    target, so that Skia's `SK_VULKAN` and friends reach the engine as they
    do under GN. A public config's compiler flags cannot ride a dependency:
-   they are inlined into the owner, and dependents get them from the
-   `propagatedCopts` table, against which the owner's file is checked. A
+   they are inlined into the owner, and a dependent gets them on its own
+   `copts` from the dependency's GN file (`forwarded_flags.dart` evaluates
+   it under the run's assumptions, once, and reads the target's public
+   configs and, recursively, what its `public_deps` hand on, as GN forwards
+   public configs along `public_deps` chains -- wuffs's suppressions reach
+   whoever includes it, the Vulkan allocator's everything on
+   `//flutter/impeller`'s public side, gmock's
+   `-Wno-inconsistent-missing-override` every test through
+   `//flutter/testing:testing_core`); a flag handed on under a condition (a
+   `public_deps` entry inside an `if`) lands in a `select()`, and the
+   owner's conversion checks that its own reading of its public configs is
+   what its dependents will derive. A dependency whose file the converter
+   cannot evaluate (the Dart runtime's, abseil's) hands nothing it can see;
+   the compile-command parity check is the backstop. A
    private config of another file (`configs += [ "../../:skia_private" ]`)
    is an `implementation_deps` entry: Bazel applies it to the target's own
    compiles alone, which is GN's private semantics. A file of another

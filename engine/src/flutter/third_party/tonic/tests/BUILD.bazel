@@ -4,7 +4,7 @@
 
 # Generated from //flutter/third_party/tonic/tests/BUILD.gn by gn_to_bazel; do not edit.
 
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -24,8 +24,9 @@ flutter_cc_test(
         "ffi_native_unittest.cc",
         "//engine/src/flutter/third_party/tonic:file_loader/file_loader_unittests.cc",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/runtime:runtime
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [

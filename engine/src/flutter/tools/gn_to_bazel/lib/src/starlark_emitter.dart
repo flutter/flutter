@@ -10,6 +10,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import 'bazel_mapping.dart';
+import 'forwarded_flags.dart';
 import 'gn_ast.dart';
 import 'gn_eval.dart';
 
@@ -146,7 +147,10 @@ final class _Rule {
 /// what the GN file has no way to say (an `exports_files`, say). [layout]
 /// says where the file lives, which decides how file paths are written.
 /// [implicitDeps] are labels every target that compiles depends on (see
-/// the manifest).
+/// the manifest). [forwardedFlags] resolves the compiler flags a dependency
+/// hands this file's targets (forwarded_flags.dart); one resolver serves a
+/// whole run, and without one a resolver over [tree] is made -- or, with
+/// no tree, one that finds none.
 String emitBuildFile(
   GnFileEvaluation evaluation, {
   required String gnPackage,
@@ -155,8 +159,14 @@ String emitBuildFile(
   OutputLayout layout = const OutputLayout.main(),
   List<String> implicitDeps = const <String>[],
   GnSourceTree? tree,
+  ForwardedFlags? forwardedFlags,
 }) {
-  final emitter = _Emitter(gnPackage, layout, implicitDeps, tree, evaluation.assumptions)
+  final ForwardedFlags forwarded =
+      forwardedFlags ??
+      (tree == null
+          ? ForwardedFlags.none()
+          : ForwardedFlags(tree: tree, assumptions: evaluation.assumptions));
+  final emitter = _Emitter(gnPackage, layout, implicitDeps, tree, evaluation.assumptions, forwarded)
     ..inheritedConfigs.addAll(evaluation.allDependentConfigs)
     ..conditionalInheritance.addAll(evaluation.conditionalAllDependentConfigs);
   final Set<GnTarget> placeholders = _placeholders(evaluation.targets);
@@ -237,8 +247,14 @@ Set<GnTarget> _placeholders(List<GnTarget> targets) {
 const Set<String> _ignoredVariables = <String>{'check_includes', 'metadata', 'visibility'};
 
 final class _Emitter {
-  _Emitter(this.gnPackage, this.layout, this.implicitDeps, this.tree, this.assumptions)
-    : package = BazelLabel.parse(bazelLabel(gnPackage, package: gnPackage));
+  _Emitter(
+    this.gnPackage,
+    this.layout,
+    this.implicitDeps,
+    this.tree,
+    this.assumptions,
+    this.forwarded,
+  ) : package = BazelLabel.parse(bazelLabel(gnPackage, package: gnPackage));
 
   final String gnPackage;
   final OutputLayout layout;
@@ -250,6 +266,10 @@ final class _Emitter {
   /// The assumptions the file was evaluated under, for the conditions the
   /// mapping tables state (ConfigCopts).
   final Assumptions assumptions;
+
+  /// The compiler flags a dependency hands its dependents, which Bazel
+  /// cannot carry along the dependency (forwarded_flags.dart).
+  final ForwardedFlags forwarded;
 
   /// Labels every compiled target depends on (the manifest's implicitDeps).
   final List<String> implicitDeps;
@@ -411,7 +431,7 @@ final class _Emitter {
   void _convertGroup(GnTarget target) {
     _use('@rules_cc//cc:defs.bzl', 'cc_library');
     final rule = _Rule('cc_library', target.name, target.comments);
-    final propagated = <String>[];
+    final propagated = <ForwardedFlag>[];
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'deps':
@@ -1063,8 +1083,8 @@ final class _Emitter {
     // config's flags follow the target's own as they do in GN.
     final configVariables = <GnVariable>[];
     // The compiler flags this target hands its dependents, for the check
-    // against propagatedCopts.
-    final propagated = <String>[];
+    // against what they will derive from this file.
+    final propagated = <ForwardedFlag>[];
     for (final GnVariable variable in target.variables.values) {
       switch (variable.name) {
         case 'sources':
@@ -1187,13 +1207,6 @@ final class _Emitter {
           ? 'FLUTTER_COPTS'
           : 'CHROMIUM_CODE_COPTS';
       _use('//engine/src/flutter/build/bazel:copts.bzl', constant);
-      // gmock's public config (-Wno-inconsistent-missing-override) reaches
-      // every test target through testing_core's public_deps; see copts.bzl.
-      final bool testonly = kind == 'cc_test' || rule.scalars['testonly'] == 'True';
-      if (testonly) {
-        _use('//engine/src/flutter/build/bazel:copts.bzl', 'FLUTTER_TESTONLY_COPTS');
-        rule.list('copts').always.insert(0, const _Item('FLUTTER_TESTONLY_COPTS', quoted: false));
-      }
       rule.list('copts').always.insert(0, _Item(constant, quoted: false));
       if (chromiumCode) {
         _use('//engine/src/flutter/build/bazel:copts.bzl', 'FLUTTER_LOCAL_DEFINES');
@@ -1403,62 +1416,61 @@ final class _Emitter {
   }
 
   /// The flags a dependency hands its dependents through a public config
-  /// ([propagatedCopts]), added to the rule that lists the dependency.
+  /// ([forwarded]), added to the rule that lists the dependency, under the
+  /// dependency's condition and the flag's own.
   void _propagatedFlagsInto(_Rule rule, GnVariable variable) {
     _forEachItem(variable, into: _ListAttribute(), (_Element e) {
-      final List<String>? flags = propagatedCopts[_gnLabel(_string(e))];
-      if (flags == null) {
-        return;
-      }
-      for (final String flag in flags) {
-        rule.list('copts').addUnique(e.condition, _Item(flag, comment: 'from ${_string(e)}'));
+      for (final ForwardedFlag flag in forwarded.of(_gnLabel(_string(e)))) {
+        rule
+            .list('copts')
+            .addUnique(
+              e.condition.and(flag.condition),
+              _Item(_tokenizerEscaped(flag.flag), comment: 'from ${_string(e)}'),
+            );
       }
     });
   }
 
   /// The flags the public dependencies of [variable] hand this target
-  /// ([propagatedCopts]), which GN hands on to its dependents in turn --
-  /// public configs travel along public_deps chains -- collected into
-  /// [propagated] for [_checkPropagatedFlags]. The table knows no
-  /// conditions, so a conditional public dependency with flags to hand on
-  /// is refused.
-  void _forwardedFlagsInto(List<String> propagated, GnVariable variable) {
+  /// ([forwarded]), which GN hands on to its dependents in turn -- public
+  /// configs travel along public_deps chains -- collected into
+  /// [propagated] for [_checkPropagatedFlags].
+  void _forwardedFlagsInto(List<ForwardedFlag> propagated, GnVariable variable) {
     _forEachItem(variable, into: _ListAttribute(), (_Element e) {
-      final List<String>? flags = propagatedCopts[_gnLabel(_string(e))];
-      if (flags == null) {
-        return;
+      for (final ForwardedFlag flag in forwarded.of(_gnLabel(_string(e)))) {
+        propagated.add((condition: e.condition.and(flag.condition), flag: flag.flag));
       }
-      if (e.condition != Condition.always) {
-        throw GnError(
-          e.assignment.location,
-          'public dependency ${_string(e)} hands on compiler flags under `${e.condition}`, '
-          'which propagatedCopts cannot say',
-        );
-      }
-      propagated.addAll(flags);
     });
   }
 
   /// A target that hands compiler flags to its dependents -- through its
   /// own public configs, or those of its public_deps, which GN forwards --
-  /// must be listed in [propagatedCopts] with exactly those flags, since
-  /// that table is how its dependents get them.
-  void _checkPropagatedFlags(GnTarget target, List<String> propagated) {
-    final label = '$gnPackage:${target.name}';
-    final Set<String> expected = propagatedCopts[label]?.toSet() ?? const <String>{};
-    final Set<String> actual = propagated.toSet();
-    if (expected.length != actual.length || !expected.containsAll(actual)) {
+  /// is read twice: by its own conversion, into [propagated], and by its
+  /// dependents' through forwarded_flags.dart. The two readings must agree,
+  /// or the dependents compile with other flags than the owner's file says.
+  void _checkPropagatedFlags(GnTarget target, List<ForwardedFlag> propagated) {
+    final Set<ForwardedFlag> actual = propagated.toSet();
+    final Set<ForwardedFlag> derived = publicFlagsOf(
+      target,
+      gnPackage: gnPackage,
+      localConfigs: localConfigs,
+      forwarded: forwarded.of,
+    ).toSet();
+    if (derived.length != actual.length || !derived.containsAll(actual)) {
       throw GnError(
         target.location,
-        actual.isEmpty
-            ? '$label is in propagatedCopts but its public configs and public_deps carry no '
-                  'compiler flags'
-            : 'the public configs and public_deps of $label hand compiler flags '
-                  '${actual.toList()} to its dependents, which Bazel cannot carry; list them '
-                  'under $label in propagatedCopts (bazel_mapping.dart)'
-                  '${expected.isEmpty ? '' : ', which has ${expected.toList()}'}',
+        'converting $gnPackage:${target.name} finds it handing ${_describe(actual)} to its '
+        'dependents, and forwarded_flags.dart derives ${_describe(derived)}: the two '
+        'readings of its public configs and public_deps disagree',
       );
     }
+  }
+
+  static String _describe(Set<ForwardedFlag> flags) {
+    return <String>[
+      for (final ForwardedFlag f in flags)
+        if (f.condition == Condition.always) f.flag else '${f.flag} under `${f.condition}`',
+    ].toString();
   }
 
   /// A GN label as written in this file, as `//dir:name`.
@@ -1468,9 +1480,9 @@ final class _Emitter {
   /// directories and link flags, which dependents list in deps; Bazel
   /// propagates those the way GN propagates a config. Compiler flags cannot
   /// travel that way: a target of this file that lists the config gets them
-  /// inlined (and, for a public config, must be in [propagatedCopts] for
-  /// its dependents); a config with flags that no target here lists is
-  /// refused.
+  /// inlined (and its dependents, for a public config, derive them from
+  /// this file: forwarded_flags.dart); a config with flags that no target
+  /// here lists is refused.
   void _convertConfig(GnTarget target) {
     _use('@rules_cc//cc:defs.bzl', 'cc_library');
     final rule = _Rule('cc_library', target.name, target.comments);
@@ -1516,18 +1528,10 @@ final class _Emitter {
     rules.add(rule);
   }
 
-  static const Set<String> _flagVariables = <String>{
-    'cflags',
-    'cflags_c',
-    'cflags_cc',
-    'cflags_objc',
-    'cflags_objcc',
-  };
-
   /// The variables GN's config() reads (`gn help config`); anything else in
   /// a config block is a local.
   static const Set<String> _configVariables = <String>{
-    ..._flagVariables,
+    ...flagVariables,
     'asmflags',
     'configs',
     'defines',
@@ -1554,7 +1558,7 @@ final class _Emitter {
   /// (what a public config cannot carry as a dependency).
   void _inlineConfig(_Rule rule, GnTarget config, GnAssignment use, {bool flagsOnly = false}) {
     for (final GnVariable variable in config.variables.values) {
-      if (_flagVariables.contains(variable.name)) {
+      if (flagVariables.contains(variable.name)) {
         _compilerFlagsInto(rule, variable, use.condition);
         continue;
       }
@@ -1690,7 +1694,8 @@ final class _Emitter {
   // -------------------------------------------------------------------------
 
   /// Calls [visit] for every item of a list variable with the condition it
-  /// is appended under. Removals (`-=`) are only supported unconditionally.
+  /// is appended under ([GnVariable.liveItems]: removals only
+  /// unconditionally).
   ///
   /// The comments on the `=` that defined the variable describe the whole
   /// list and go above [into], the attribute the items end up in; comments on
@@ -1700,31 +1705,14 @@ final class _Emitter {
     void Function(_Element) visit, {
     required _ListAttribute into,
   }) {
-    final elements = <_Element>[];
     for (final GnAssignment assignment in variable.assignments) {
-      switch (assignment.op) {
-        case '=':
-          if (assignment.isUnconditional) {
-            elements.clear();
-          }
-          into.comments.addAll(assignment.comments);
-          elements.addAll(_elements(assignment, withComments: false));
-        case '+=':
-          elements.addAll(_elements(assignment, withComments: true));
-        case '-=':
-          if (!assignment.isUnconditional) {
-            throw GnError(assignment.location, 'conditional -= is not supported');
-          }
-          for (final GnValue value in assignment.items) {
-            final int before = elements.length;
-            elements.removeWhere((_Element e) => e.value == value);
-            if (elements.length == before) {
-              throw GnError(assignment.location, '-= of $value, which is not in ${variable.name}');
-            }
-          }
+      if (assignment.op == '=') {
+        into.comments.addAll(assignment.comments);
       }
     }
-    elements.forEach(visit);
+    for (final GnListItem item in variable.liveItems) {
+      visit(_element(item, withComments: item.assignment.op == '+='));
+    }
   }
 
   /// The elements of one assignment; with [withComments], the comment lines
@@ -1732,18 +1720,23 @@ final class _Emitter {
   static List<_Element> _elements(GnAssignment assignment, {required bool withComments}) {
     return <_Element>[
       for (var i = 0; i < assignment.items.length; i++)
-        _Element(
-          assignment.condition,
-          assignment.items[i],
-          assignment,
-          i == 0 && withComments && assignment.comments.isNotEmpty
-              ? GnItemComments(
-                  before: <String>[...assignment.comments, ...assignment.commentsOf(i).before],
-                  suffix: assignment.commentsOf(i).suffix,
-                )
-              : assignment.commentsOf(i),
-        ),
+        _element(GnListItem(assignment, i), withComments: withComments),
     ];
+  }
+
+  static _Element _element(GnListItem item, {required bool withComments}) {
+    final GnAssignment assignment = item.assignment;
+    return _Element(
+      item.condition,
+      item.value,
+      assignment,
+      item.index == 0 && withComments && assignment.comments.isNotEmpty
+          ? GnItemComments(
+              before: <String>[...assignment.comments, ...item.comments.before],
+              suffix: item.comments.suffix,
+            )
+          : item.comments,
+    );
   }
 
   static String _string(_Element element) {
@@ -2149,7 +2142,7 @@ final class _Emitter {
     GnTarget target, {
     required bool chromiumCode,
     required Set<String> publicConfigs,
-    required List<String> propagatedFlags,
+    required List<ForwardedFlag> propagatedFlags,
   }) {
     var result = chromiumCode;
     final private = variable.name == 'configs';
@@ -2170,14 +2163,11 @@ final class _Emitter {
         }
         if (local != null) {
           _inlineConfig(rule, local, assignment, flagsOnly: true);
-          for (final GnVariable v in local.variables.values) {
-            if (_flagVariables.contains(v.name)) {
-              for (final GnValue flag in v.unconditionalItems ?? const <GnValue>[]) {
-                if (flag is GnStringValue && !flag.value.startsWith('-std=')) {
-                  propagatedFlags.add(flag.value);
-                }
-              }
-            }
+          for (final ForwardedFlag flag in flagsOfConfig(local)) {
+            propagatedFlags.add((
+              condition: assignment.condition.and(flag.condition),
+              flag: flag.flag,
+            ));
           }
         }
         final ConfigEffect? effect = config.startsWith(':')
@@ -2212,7 +2202,9 @@ final class _Emitter {
             }
             if (!private) {
               // Listed publicly, the config's flags reach dependents too.
-              propagatedFlags.addAll(copts);
+              for (final flag in copts) {
+                propagatedFlags.add((condition: assignment.condition, flag: flag));
+              }
             }
           case ConfigImplied():
             break;
@@ -2530,8 +2522,8 @@ final class _Emitter {
   void _renderList(StringBuffer out, _ListAttribute list, _Rule rule, String attribute) {
     final bool sorted = _sortedAttributes.contains(attribute);
     final parts = <String>[];
-    // Bare list constants (FLUTTER_COPTS, FLUTTER_TESTONLY_COPTS,
-    // FLUTTER_LOCAL_DEFINES) stand as themselves wherever they sit; the
+    // Bare list constants (FLUTTER_COPTS, FLUTTER_LOCAL_DEFINES) stand as
+    // themselves wherever they sit; the
     // elements between them form list literals (a target's own flags lead
     // its copts, ahead of the constants, as in GN).
     bool constant(_Item item) => !item.quoted && !item.expression && item.comment == null;

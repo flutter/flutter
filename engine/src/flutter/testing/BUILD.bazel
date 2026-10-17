@@ -6,7 +6,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_dart_snapshot_aot", "flutter_dart_snapshot_kernel", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -46,7 +46,9 @@ cc_library(
         "testing.h",
         "thread_test.h",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/third_party/googletest:gmock
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         "//engine/src:include_root",
@@ -69,7 +71,9 @@ cc_library(
         "display_list_testing.h",
         "sk_data_fixtures.h",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :testing_core
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":testing_core",
@@ -86,7 +90,9 @@ cc_library(
     name = "run_all_unittests",
     testonly = True,
     srcs = ["run_all_unittests.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :testing_core
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":dynamic_symbols",
@@ -119,7 +125,8 @@ cc_library(
         "elf_loader.h",
         "test_dart_native_resolver.h",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :testing_lib
         "-Wno-redundant-parens",  # from //flutter/runtime
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -144,7 +151,9 @@ cc_library(
         "assertions_skia.h",
         "canvas_test.h",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :testing_lib
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":testing_lib",
@@ -178,7 +187,8 @@ cc_library(
         "dart_fixture.h",
         "fixture_test.h",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :dart
         "-Wno-redundant-parens",  # from :dart
     ],
     data = select({
@@ -210,7 +220,8 @@ cc_library(
         "test_vulkan_image.h",
         "test_vulkan_surface.h",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :skia
         "-Wno-redundant-parens",  # from //flutter/flutter_vma:flutter_skia_vma
         "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
         "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
@@ -294,7 +305,8 @@ cc_library(
         "test_gl_surface.h",
         "test_gl_utils.h",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :skia
         "-Wno-string-conversion",  # configs -= //build/config/clang:extra_warnings
         "-Wno-newline-eof",  # configs -= //build/config/clang:extra_warnings
     ],

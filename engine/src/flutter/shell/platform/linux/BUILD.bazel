@@ -6,7 +6,7 @@
 # Not converted: flutter_gtk.
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_display_test", "flutter_test_fixtures")
 
@@ -365,8 +365,9 @@ flutter_display_test(
         "testing/wayland_test.cc",
         "testing/wayland_test.h",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-deprecated-volatile",  # from :flutter_linux_sources
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ],
     data = [":flutter_linux_gschemas"],
     env = {"G_DEBUG": "fatal-criticals"},

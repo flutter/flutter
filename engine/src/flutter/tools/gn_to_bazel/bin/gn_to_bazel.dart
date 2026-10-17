@@ -135,6 +135,11 @@ Future<int> run(List<String> arguments) async {
     return 64;
   }
 
+  // The compiler flags dependencies hand this run's targets, read from
+  // their GN files (forwarded_flags.dart); shared, so each file is
+  // evaluated once.
+  final forwardedFlags = ForwardedFlags(tree: tree, assumptions: assumptions);
+
   for (final file in files) {
     final String gnPackage = tree.gnDirectory(file);
     final ConvertedFile? manifest = manifestEntry(gnPackage);
@@ -157,6 +162,7 @@ Future<int> run(List<String> arguments) async {
         layout: layout,
         implicitDeps: manifest?.implicitDeps ?? const <String>[],
         tree: tree,
+        forwardedFlags: forwardedFlags,
       );
       if (buildifier != null) {
         output = await _format(buildifier, output);

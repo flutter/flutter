@@ -5,7 +5,7 @@
 # Generated from //flutter/impeller/entity/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impeller_shaders")
 
 package(default_visibility = ["//visibility:public"])
@@ -271,7 +271,7 @@ cc_library(
     hdrs = ["contents/test/recording_render_pass.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + CHROMIUM_CODE_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + CHROMIUM_CODE_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":entity",
@@ -308,7 +308,9 @@ cc_library(
     hdrs = ["entity_playground.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":entity",

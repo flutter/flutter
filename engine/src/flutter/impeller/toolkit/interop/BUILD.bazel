@@ -6,7 +6,7 @@
 # Not converted: static_library, example_mtl, sdk.
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "embed_blob_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -231,7 +231,7 @@ cc_library(
     hdrs = ["playground_test.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    ] + FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :interop
         "-Wno-c++98-compat-extra-semi",  # from :interop
         "-Wno-deprecated-copy",  # from :interop
@@ -241,6 +241,7 @@ cc_library(
         "-Wno-suggest-override",  # from :interop
         "-Wno-unused-private-field",  # from :interop
         "-Wno-unused-variable",  # from :interop
+        "-Wno-inconsistent-missing-override",  # from ../../playground:playground_test
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [

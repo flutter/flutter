@@ -6,7 +6,7 @@
 # Not converted: common_cpp_accessibility.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_test_fixtures")
 
@@ -170,7 +170,9 @@ flutter_cc_test(
     name = "common_cpp_core_unittests",
     size = "small",
     srcs = ["path_utils_unittests.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":common_cpp_core",
@@ -198,7 +200,9 @@ flutter_cc_test(
         "text_input_model_unittests.cc",
         "text_range_unittests.cc",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":common_cpp",
