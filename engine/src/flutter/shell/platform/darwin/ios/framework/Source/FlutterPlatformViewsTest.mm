@@ -5039,6 +5039,94 @@ static UIGestureRecognizer* FindForwardingGestureRecognizer(UIView* view) {
     XCTAssertNotNil([flutterPlatformViewsController platformViewForId:1]);
   }
 }
+
+// Disposing a platform view removes its UIView on the platform thread, but its composition
+// parameters are raster-thread state and must only be erased there, which happens at the start of
+// the raster thread's next frame (see `pruneStateForDisposedViews`).
+- (void)testDisposedViewCompositionParamsArePrunedOnNextFrame {
+  flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
+
+  FlutterFMLTaskRunners* runners = CreateTestTaskRunners(self.name);
+  FlutterPlatformViewsController* flutterPlatformViewsController =
+      [[FlutterPlatformViewsController alloc] init];
+  flutterPlatformViewsController.taskRunner = GetDefaultTaskRunner();
+  auto platform_view = std::make_unique<flutter::PlatformViewIOS>(
+      /*delegate=*/mock_delegate,
+      /*platform_views_controller=*/flutterPlatformViewsController,
+      /*task_runners=*/runners.taskRunners,
+      /*is_gpu_disabled_jsync_switch=*/std::make_shared<fml::SyncSwitch>());
+
+  UIView* flutterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
+  flutterPlatformViewsController.flutterView = flutterView;
+
+  FlutterPlatformViewsTestMockFlutterPlatformFactory* factory =
+      [[FlutterPlatformViewsTestMockFlutterPlatformFactory alloc] init];
+  [flutterPlatformViewsController
+                   registerViewFactory:factory
+                                withId:@"MockFlutterPlatformView"
+      gestureRecognizersBlockingPolicy:FlutterPlatformViewGestureRecognizersBlockingPolicyEager];
+  FlutterResult result = ^(id result) {
+  };
+  for (NSNumber* viewId in @[ @0, @1 ]) {
+    [flutterPlatformViewsController
+        onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"create"
+                                                       arguments:@{
+                                                         @"id" : viewId,
+                                                         @"viewType" : @"MockFlutterPlatformView",
+                                                         @"gestureBlockingPolicy" : @"eager"
+                                                       }]
+              result:result];
+  }
+
+  // Begins a frame, prerolls the given views and submits the frame. The test task runner runs the
+  // platform thread work synchronously, so disposed views are removed before this returns.
+  auto submitFrameWithViews = [&](const std::vector<int64_t>& viewIds) -> BOOL {
+    [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+    for (int64_t viewId : viewIds) {
+      flutter::MutatorsStack stack;
+      flutter::DlMatrix finalMatrix;
+      auto embeddedViewParams = std::make_unique<flutter::EmbeddedViewParams>(
+          finalMatrix, flutter::DlSize(300, 300), stack);
+      [flutterPlatformViewsController prerollCompositeEmbeddedView:viewId
+                                                        withParams:std::move(embeddedViewParams)];
+    }
+    flutter::SurfaceFrame::FramebufferInfo framebuffer_info;
+    auto mock_surface = std::make_unique<flutter::SurfaceFrame>(
+        nullptr, framebuffer_info,
+        [](const flutter::SurfaceFrame& surface_frame, flutter::DlCanvas* canvas) { return true; },
+        [](const flutter::SurfaceFrame& surface_frame) { return true; },
+        /*frame_size=*/flutter::DlISize(800, 600), nullptr, /*display_list_fallback=*/true);
+    return [flutterPlatformViewsController submitFrame:std::move(mock_surface)
+                                        withIosContext:std::make_shared<FakeIOSContext>()];
+  };
+
+  // First frame: both views are composited.
+  XCTAssertTrue(submitFrameWithViews({0, 1}));
+  XCTAssertTrue([flutterPlatformViewsController hasCompositionParamsForView:0]);
+  XCTAssertTrue([flutterPlatformViewsController hasCompositionParamsForView:1]);
+
+  XCTestExpectation* expectation = [self expectationWithDescription:@"dispose call ended."];
+  [flutterPlatformViewsController
+      onMethodCall:[FlutterMethodCall methodCallWithMethodName:@"dispose" arguments:@0]
+            result:^(id result) {
+              [expectation fulfill];
+            }];
+  [self waitForExpectationsWithTimeout:30 handler:nil];
+
+  // Second frame without view 0: its UIView is disposed on the platform thread, but its
+  // composition parameters are left for the raster thread to prune at the start of the next frame.
+  XCTAssertTrue(submitFrameWithViews({1}));
+  XCTAssertNil([flutterPlatformViewsController platformViewForId:0]);
+  XCTAssertNotNil([flutterPlatformViewsController platformViewForId:1]);
+  XCTAssertTrue([flutterPlatformViewsController hasCompositionParamsForView:0]);
+  XCTAssertTrue([flutterPlatformViewsController hasCompositionParamsForView:1]);
+
+  // Third frame: the disposed view's parameters are gone and the live view's are kept.
+  [flutterPlatformViewsController beginFrameWithSize:flutter::DlISize(300, 300)];
+  XCTAssertFalse([flutterPlatformViewsController hasCompositionParamsForView:0]);
+  XCTAssertTrue([flutterPlatformViewsController hasCompositionParamsForView:1]);
+}
+
 - (void)testOnlyPlatformViewsAreRemovedWhenReset {
   flutter::FlutterPlatformViewsTestMockPlatformViewDelegate mock_delegate;
 
