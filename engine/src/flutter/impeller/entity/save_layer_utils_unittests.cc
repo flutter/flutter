@@ -337,6 +337,59 @@ TEST(SaveLayerUtilsTest,
   EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 50, 50));
 }
 
+TEST(SaveLayerUtilsTest,
+     RuntimeEffectFilterPreservesContentCoverageWhenClippedByCoverageLimit) {
+  auto image_filter = FilterContents::MakeRuntimeEffect(
+      FilterInput::Make(Rect()), nullptr, nullptr, {});
+
+  // Even when the parent coverage_limit (e.g., an HCPP/HC overlay slice clip)
+  // is smaller than the SaveLayer's content_coverage, a runtime effect filter
+  // must preserve the full SaveLayer coverage so u_size and FlutterFragCoord
+  // remain in the SaveLayer's coordinate space.
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 400, 800),   //
+      /*effect_transform=*/{},                               //
+      /*coverage_limit=*/Rect::MakeLTRB(50, 100, 350, 300),  //
+      /*image_filter=*/image_filter                          //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 400, 800));
+}
+
+TEST(SaveLayerUtilsTest,
+     RuntimeEffectFilterDisjointFromCoverageLimitProducesNoCoverage) {
+  auto image_filter = FilterContents::MakeRuntimeEffect(
+      FilterInput::Make(Rect()), nullptr, nullptr, {});
+
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 100, 100),    //
+      /*effect_transform=*/{},                                //
+      /*coverage_limit=*/Rect::MakeLTRB(200, 200, 300, 300),  //
+      /*image_filter=*/image_filter                           //
+  );
+
+  EXPECT_FALSE(coverage.has_value());
+}
+
+TEST(SaveLayerUtilsTest,
+     RuntimeEffectFilterWithFloodCoverageUsesCoverageLimit) {
+  auto image_filter = FilterContents::MakeRuntimeEffect(
+      FilterInput::Make(Rect()), nullptr, nullptr, {});
+
+  auto coverage = ComputeSaveLayerCoverage(
+      /*content_coverage=*/Rect::MakeLTRB(0, 0, 100, 100),  //
+      /*effect_transform=*/{},                              //
+      /*coverage_limit=*/Rect::MakeLTRB(0, 0, 400, 800),    //
+      /*image_filter=*/image_filter,                        //
+      /*flood_output_coverage=*/false,                      //
+      /*flood_input_coverage=*/true                         //
+  );
+
+  ASSERT_TRUE(coverage.has_value());
+  EXPECT_EQ(coverage.value(), Rect::MakeLTRB(0, 0, 400, 800));
+}
+
 }  // namespace testing
 }  // namespace impeller
 

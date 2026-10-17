@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "flutter/display_list/effects/dl_image_filter.h"
+#include "flutter/display_list/utils/dl_receiver_utils.h"
 #include "flutter/flow/layers/clip_rect_layer.h"
+#include "flutter/flow/layers/image_filter_layer.h"
 #include "flutter/flow/layers/platform_view_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
 
@@ -138,6 +141,90 @@ TEST_F(PlatformViewLayerTest, StateTransfer) {
   PaintContext& paint_ctx = paint_context();
   paint_ctx.view_embedder = &embedder;
   transform_layer1->Paint(paint_ctx);
+}
+
+namespace {
+
+class SaveLayerBoundsReceiver final : public IgnoreAttributeDispatchHelper,
+                                      public IgnoreClipDispatchHelper,
+                                      public IgnoreTransformDispatchHelper,
+                                      public IgnoreDrawDispatchHelper {
+ public:
+  void saveLayer(const DlRect& bounds,
+                 const SaveLayerOptions options,
+                 const DlImageFilter* backdrop,
+                 std::optional<int64_t> backdrop_id) override {
+    save_layer_bounds.push_back(bounds);
+  }
+
+  std::vector<DlRect> save_layer_bounds;
+};
+
+}  // namespace
+
+TEST_F(PlatformViewLayerTest,
+       RuntimeEffectImageFilterLayerPreservesBoundsAcrossPlatformViewSlices) {
+  // Regression test for post-PlatformView overscroll stretch reset:
+  // image_filter_layer (RuntimeEffect, e.g. StretchEffect)
+  //   |- pre_pv_child  (top of screen:    [0,   0, 400, 200])
+  //   |- platform_view (middle of screen: [0, 200, 400, 500])
+  //   |- post_pv_child (bottom of screen: [0, 500, 400, 800])
+  //
+  // When PlatformViewLayer splits painting across the root canvas and the
+  // overlay slice canvas, LayerStateStack replays ImageFilterLayer's SaveLayer
+  // onto the overlay slice canvas with the full ImageFilterLayer bounds
+  // ([0, 0, 400, 800]). Even though only post_pv_child ([0, 500, 400, 800]) is
+  // drawn into the overlay slice, the SaveLayer on the overlay slice must
+  // preserve the full caller bounds ([0, 0, 400, 800]) so UV-normalized
+  // runtime effect shaders do not shift their origin to post_pv_child's top.
+  const DlRect pre_pv_bounds = DlRect::MakeLTRB(0.0f, 0.0f, 400.0f, 200.0f);
+  const DlPoint pv_offset = DlPoint(0.0f, 200.0f);
+  const DlSize pv_size = DlSize(400.0f, 300.0f);
+  const DlRect post_pv_bounds = DlRect::MakeLTRB(0.0f, 500.0f, 400.0f, 800.0f);
+  const DlRect full_layer_bounds = DlRect::MakeLTRB(0.0f, 0.0f, 400.0f, 800.0f);
+  const int64_t view_id = 0;
+
+  auto runtime_effect_filter = DlImageFilter::MakeRuntimeEffect(
+      nullptr, {nullptr}, std::make_shared<std::vector<uint8_t>>());
+  auto image_filter_layer =
+      std::make_shared<ImageFilterLayer>(runtime_effect_filter);
+  auto pre_pv_child =
+      std::make_shared<MockLayer>(DlPath::MakeRect(pre_pv_bounds));
+  auto platform_layer =
+      std::make_shared<PlatformViewLayer>(pv_offset, pv_size, view_id);
+  auto post_pv_child =
+      std::make_shared<MockLayer>(DlPath::MakeRect(post_pv_bounds));
+
+  image_filter_layer->Add(pre_pv_child);
+  image_filter_layer->Add(platform_layer);
+  image_filter_layer->Add(post_pv_child);
+
+  auto embedder = MockViewEmbedder();
+  DisplayListBuilder overlay_builder(full_layer_bounds);
+  embedder.AddCanvas(&overlay_builder);
+
+  PrerollContext* preroll_ctx = preroll_context();
+  preroll_ctx->view_embedder = &embedder;
+  image_filter_layer->Preroll(preroll_ctx);
+  ASSERT_EQ(image_filter_layer->child_paint_bounds(), full_layer_bounds);
+
+  PaintContext& paint_ctx = paint_context();
+  paint_ctx.view_embedder = &embedder;
+  image_filter_layer->Paint(paint_ctx);
+
+  sk_sp<DisplayList> background_dl = display_list();
+  sk_sp<DisplayList> overlay_dl = overlay_builder.Build();
+
+  SaveLayerBoundsReceiver background_receiver;
+  background_dl->Dispatch(background_receiver);
+  ASSERT_EQ(background_receiver.save_layer_bounds.size(), 1u);
+  EXPECT_EQ(background_receiver.save_layer_bounds[0], full_layer_bounds);
+
+  SaveLayerBoundsReceiver overlay_receiver;
+  overlay_dl->Dispatch(overlay_receiver);
+  ASSERT_EQ(overlay_receiver.save_layer_bounds.size(), 1u);
+  EXPECT_EQ(overlay_receiver.save_layer_bounds[0], full_layer_bounds);
+  EXPECT_EQ(overlay_dl->GetBounds(), full_layer_bounds);
 }
 
 }  // namespace testing

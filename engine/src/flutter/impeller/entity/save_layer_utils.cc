@@ -68,6 +68,9 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     //
     // See note below on flood_output_coverage.
     if (flood_output_coverage || coverage.IsMaximum()) {
+      if (source_coverage_limit->IsMaximum()) {
+        return coverage_limit;
+      }
       return source_coverage_limit;
     }
 
@@ -82,6 +85,10 @@ std::optional<Rect> ComputeSaveLayerCoverage(
     // intersected coverage, then just use the transformed coverage. In other
     // cases, use the intersection.
     auto transformed_coverage = coverage.TransformBounds(effect_transform);
+    if (source_coverage_limit->IsMaximum() &&
+        !transformed_coverage.IntersectsWithRect(coverage_limit)) {
+      return std::nullopt;
+    }
     auto intersected_coverage =
         transformed_coverage.Intersection(source_coverage_limit.value());
     if (intersected_coverage.has_value() &&
