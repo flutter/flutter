@@ -27,9 +27,20 @@ TEST_F(ShellIOManagerTest,
   auto gif_mapping = flutter::testing::OpenFixtureAsSkData("hello_loop_2.gif");
   ASSERT_TRUE(gif_mapping);
 
-  ImageGeneratorRegistry registry;
-  std::shared_ptr<ImageGenerator> gif_generator =
-      registry.CreateCompatibleGenerator(gif_mapping);
+  auto generator_task_runner = CreateNewThread("image_generator");
+  auto concurrent_loop = fml::ConcurrentMessageLoop::Create(1u);
+  fml::AutoResetWaitableEvent generator_latch;
+  std::shared_ptr<ImageGenerator> gif_generator;
+  generator_task_runner->PostTask([&]() {
+    ImageGeneratorRegistry registry;
+    registry.CreateCompatibleGenerator(
+        gif_mapping, concurrent_loop->GetTaskRunner(), generator_task_runner,
+        [&](std::shared_ptr<ImageGenerator> generator) {
+          gif_generator = std::move(generator);
+          generator_latch.Signal();
+        });
+  });
+  generator_latch.Wait();
   ASSERT_TRUE(gif_generator);
 
   TaskRunners runners(GetCurrentTestName(),         // label
