@@ -119,6 +119,11 @@
   if (!_node) {
     return;
   }
+  // Becoming the field editor resigns and re-acquires first responder, which ends the input
+  // method's composition. The value change that follows the composition calls this again.
+  if (_plugin.hasMarkedText) {
+    return;
+  }
   // Selecting text seems to be the only way to make the field editor
   // current editor.
   [self selectText:self];
