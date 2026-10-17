@@ -48,32 +48,108 @@ void main() {
     });
   });
 
+  group('ExtensionSource', () {
+    test('pattern, artifact, and hostArtifact serialize and deserialize', () {
+      const patternSource = ExtensionSource.pattern('{PROJECT_DIR}/pubspec.yaml', optional: true);
+      expect(ExtensionSource.fromJson(patternSource.toMap()), equals(patternSource));
+      expect(patternSource.toString(), contains('{PROJECT_DIR}/pubspec.yaml'));
+
+      const artifactSource = ExtensionSource.artifact(
+        BuiltInArtifacts.genSnapshot,
+        mode: .release,
+        platform: 'linux-x64',
+      );
+      expect(ExtensionSource.fromJson(artifactSource.toMap()), equals(artifactSource));
+      expect(artifactSource.toString(), contains('genSnapshot'));
+
+      const hostArtifactSource = ExtensionSource.hostArtifact(BuiltInHostArtifacts.impellerc);
+      expect(ExtensionSource.fromJson(hostArtifactSource.toMap()), equals(hostArtifactSource));
+      expect(hostArtifactSource.toString(), contains('impellerc'));
+    });
+
+    test('fromJson throws ArgumentError on invalid type or missing fields', () {
+      expect(
+        () => ExtensionSource.fromJson(const <String, Object?>{'type': 'unknown'}),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionSource.fromJson(const <String, Object?>{'type': 'pattern'}),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionSource.fromJson(const <String, Object?>{'type': 'artifact'}),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionSource.fromJson(const <String, Object?>{'type': 'host_artifact'}),
+        throwsArgumentError,
+      );
+    });
+  });
+
   group('ExtensionBuildTarget', () {
     test('serializes and deserializes correctly with all fields', () {
       const target = ExtensionBuildTarget(
         description: 'A custom Linux build target.',
         name: 'custom-linux-build',
+        targetPlatform: 'linux-x64',
+        artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData, BuiltInArtifacts.genSnapshot},
+        hostArtifacts: <ExtensionHostArtifact>{BuiltInHostArtifacts.impellerc},
+        outputDir: '{PROJECT_DIR}/build/linux',
       );
 
       final Map<String, Object?> map = target.toMap();
       expect(map[ExtensionBuildTarget.nameKey], 'custom-linux-build');
+      expect(map[ExtensionBuildTarget.targetPlatformKey], 'linux-x64');
       expect(map[ExtensionBuildTarget.descriptionKey], 'A custom Linux build target.');
+      expect(map[ExtensionBuildTarget.artifactsKey], equals(<String>['icuData', 'genSnapshot']));
+      expect(map[ExtensionBuildTarget.hostArtifactsKey], equals(<String>['impellerc']));
+      expect(map[ExtensionBuildTarget.outputDirKey], '{PROJECT_DIR}/build/linux');
 
       final parsed = ExtensionBuildTarget.fromJson(map);
       expect(parsed, equals(target));
       expect(parsed.hashCode, equals(target.hashCode));
       expect(parsed.toString(), contains('custom-linux-build'));
+      expect(parsed.toString(), contains('outputDir: {PROJECT_DIR}/build/linux'));
     });
 
-    test('deserializes with default empty strings when fields are missing', () {
+    test('deserializes with defaults when fields are missing', () {
       final parsed = ExtensionBuildTarget.fromJson(const <String, Object?>{});
       expect(parsed.name, isEmpty);
+      expect(parsed.targetPlatform, isEmpty);
       expect(parsed.description, isEmpty);
+      expect(parsed.artifacts, isEmpty);
+      expect(parsed.hostArtifacts, isEmpty);
+      expect(parsed.outputDir, BuiltInPlaceholders.buildDir);
+    });
+
+    test('fromJson throws ArgumentError on malformed artifacts or hostArtifacts', () {
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'artifacts': <Object?>[123],
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{'artifacts': 'invalid'}),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{
+          'hostArtifacts': <Object?>[123],
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionBuildTarget.fromJson(const <String, Object?>{'hostArtifacts': 'invalid'}),
+        throwsArgumentError,
+      );
     });
 
     test('listFromJson handles valid and invalid lists', () {
       final validJson = <String, Object?>{
         'name': 'custom-linux-build',
+        'targetPlatform': 'linux-x64',
         'description': 'A custom Linux build target.',
       };
 
@@ -82,15 +158,141 @@ void main() {
       ]);
       expect(targets, hasLength(1));
       expect(targets.first.name, 'custom-linux-build');
+      expect(targets.first.targetPlatform, 'linux-x64');
       expect(targets.first.description, 'A custom Linux build target.');
 
       expect(ExtensionBuildTarget.listFromJson(null), isEmpty);
       expect(ExtensionBuildTarget.listFromJson('invalid'), isEmpty);
     });
 
+    test('equality and hashCode distinguish different targets and ignore artifact set order', () {
+      const target1 = ExtensionBuildTarget(
+        description: 'Target 1',
+        name: 'target-1',
+        targetPlatform: 'linux-x64',
+        artifacts: <ExtensionArtifact>{BuiltInArtifacts.icuData, BuiltInArtifacts.genSnapshot},
+      );
+      const target1Reordered = ExtensionBuildTarget(
+        description: 'Target 1',
+        name: 'target-1',
+        targetPlatform: 'linux-x64',
+        artifacts: <ExtensionArtifact>{BuiltInArtifacts.genSnapshot, BuiltInArtifacts.icuData},
+      );
+      const target2 = ExtensionBuildTarget(
+        description: 'Target 2',
+        name: 'target-2',
+        targetPlatform: 'linux-x64',
+      );
+
+      expect(target1, equals(target1Reordered));
+      expect(target1.hashCode, equals(target1Reordered.hashCode));
+      expect(target1, isNot(equals(target2)));
+      expect(target1.hashCode, isNot(equals(target2.hashCode)));
+    });
+  });
+
+  group('ExtensionAssembleTarget', () {
+    test('serializes and deserializes correctly with all fields', () {
+      const target = ExtensionAssembleTarget(
+        description: 'A custom Linux assemble target.',
+        name: 'custom-linux-assemble-only-debug',
+        targetPlatform: 'linux-x64',
+        dependencies: <String>[BuiltInTargets.copyAssets],
+        inputs: <ExtensionSource>[
+          ExtensionSource.pattern('{PROJECT_DIR}/pubspec.yaml'),
+          ExtensionSource.artifact(BuiltInArtifacts.icuData),
+        ],
+        outputs: <ExtensionSource>[ExtensionSource.pattern('{OUTPUT_DIR}/bundle/*')],
+      );
+
+      final Map<String, Object?> map = target.toMap();
+      expect(map[ExtensionAssembleTarget.nameKey], 'custom-linux-assemble-only-debug');
+      expect(map[ExtensionAssembleTarget.targetPlatformKey], 'linux-x64');
+      expect(map[ExtensionAssembleTarget.descriptionKey], 'A custom Linux assemble target.');
+      expect(
+        map[ExtensionAssembleTarget.dependenciesKey],
+        equals(<String>[BuiltInTargets.copyAssets]),
+      );
+
+      final parsed = ExtensionAssembleTarget.fromJson(map);
+      expect(parsed, equals(target));
+      expect(parsed.hashCode, equals(target.hashCode));
+      expect(parsed.toString(), contains('custom-linux-assemble-only-debug'));
+    });
+
+    test('deserializes with defaults when fields are missing', () {
+      final parsed = ExtensionAssembleTarget.fromJson(const <String, Object?>{});
+      expect(parsed.name, isEmpty);
+      expect(parsed.targetPlatform, isEmpty);
+      expect(parsed.description, isEmpty);
+      expect(parsed.dependencies, isEmpty);
+      expect(parsed.inputs, isEmpty);
+      expect(parsed.outputs, isEmpty);
+    });
+
+    test('fromJson throws ArgumentError on malformed dependencies, inputs, or outputs', () {
+      expect(
+        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{
+          'dependencies': <Object?>[123],
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{'dependencies': 'invalid'}),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{
+          'inputs': <Object?>['not-a-map'],
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{'inputs': 'invalid'}),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{
+          'outputs': <Object?>['not-a-map'],
+        }),
+        throwsArgumentError,
+      );
+      expect(
+        () => ExtensionAssembleTarget.fromJson(const <String, Object?>{'outputs': 'invalid'}),
+        throwsArgumentError,
+      );
+    });
+
+    test('listFromJson handles valid and invalid lists', () {
+      final validJson = <String, Object?>{
+        'name': 'custom-linux-assemble-only-debug',
+        'targetPlatform': 'linux-x64',
+        'description': 'A custom Linux assemble target.',
+      };
+
+      final List<ExtensionAssembleTarget> targets = ExtensionAssembleTarget.listFromJson(<Object?>[
+        validJson,
+      ]);
+      expect(targets, hasLength(1));
+      expect(targets.first.name, 'custom-linux-assemble-only-debug');
+      expect(targets.first.targetPlatform, 'linux-x64');
+      expect(targets.first.description, 'A custom Linux assemble target.');
+
+      expect(ExtensionAssembleTarget.listFromJson(null), isEmpty);
+      expect(ExtensionAssembleTarget.listFromJson('invalid'), isEmpty);
+    });
+
     test('equality and hashCode distinguish different targets', () {
-      const target1 = ExtensionBuildTarget(description: 'Target 1', name: 'target-1');
-      const target2 = ExtensionBuildTarget(description: 'Target 2', name: 'target-2');
+      const target1 = ExtensionAssembleTarget(
+        description: 'Target 1',
+        name: 'target-1',
+        targetPlatform: 'linux-x64',
+      );
+      const target2 = ExtensionAssembleTarget(
+        description: 'Target 2',
+        name: 'target-2',
+        targetPlatform: 'linux-x64',
+      );
 
       expect(target1, isNot(equals(target2)));
       expect(target1.hashCode, isNot(equals(target2.hashCode)));

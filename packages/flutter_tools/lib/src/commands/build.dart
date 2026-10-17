@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools_core/flutter_tools_core.dart';
+import 'package:flutter_tools_core/flutter_tools_core.dart' hide BuildMode;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -16,6 +16,7 @@ import '../base/platform.dart';
 import '../base/template.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/targets/extension.dart';
 import '../cache.dart';
 import '../context/android_context.dart';
 import '../context/apple_context.dart';
@@ -305,12 +306,32 @@ class ExtensionBuildSubCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final ToolContext(:Artifacts artifacts, :FileSystem fs) = toolContext;
+    final Directory projectDir = fs.currentDirectory;
     final BuildInfo buildInfo = await getBuildInfo();
+    final Directory buildDir = projectDir
+        .childDirectory('.dart_tool')
+        .childDirectory('flutter_build');
+    final Directory outputDir = resolveExtensionOutputDir(
+      buildDir: buildDir,
+      buildMode: buildInfo.mode,
+      fileSystem: fs,
+      projectDir: projectDir,
+      target: target,
+    );
+    final Map<String, String> resolvedArtifacts = resolveExtensionBuildTargetArtifacts(
+      artifacts: artifacts,
+      buildMode: buildInfo.mode,
+      target: target,
+    );
 
     final ExtensionBuildResult result = await _buildManager.build(
+      buildDir: buildDir.uri,
       buildMode: buildInfo.mode,
       mainPath: targetFile,
-      projectRoot: toolContext.fs.currentDirectory.uri,
+      outputDir: outputDir.uri,
+      projectRoot: projectDir.uri,
+      resolvedArtifacts: resolvedArtifacts,
       targetName: target.name,
     );
 

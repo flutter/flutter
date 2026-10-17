@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_tools_core/flutter_tools_core.dart';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 import 'package:flutter_tools_extension_linux_prototype/src/build.dart';
@@ -9,150 +11,278 @@ import 'package:test/test.dart';
 
 void main() {
   group('LinuxBuildService', () {
-    test('getBuildTargets returns prototype custom-linux-build target', () async {
+    test('buildTargets and assembleTargets return prototype Linux targets', () {
       final service = LinuxBuildService();
-      final List<ExtensionBuildTarget> targets = await service.getBuildTargets();
+      final LinuxBuildService(
+        :List<BuildTarget> buildTargets,
+        :List<AssembleTarget> assembleTargets,
+      ) = service;
 
-      expect(targets, hasLength(1));
-      final ExtensionBuildTarget target = targets.first;
-      expect(target.name, LinuxBuildService.customLinuxBuildTargetName);
-      expect(target.description, 'A custom Linux build target from prototype extension.');
+      expect(
+        buildTargets.map((BuildTarget t) => t.name),
+        equals(<String>[LinuxBuildService.customLinuxBuildTargetName]),
+      );
+      expect(
+        assembleTargets.map((AssembleTarget t) => t.name),
+        equals(<String>['custom-linux-assemble-only-debug']),
+      );
     });
 
-    test('build succeeds for custom-linux-build and fails for unknown target', () async {
-      final service = LinuxBuildService();
+    test(
+      'initialize registers getBuildTargets, getAssembleTargets, build, and assemble RPC handlers',
+      () async {
+        final service = LinuxBuildService();
+        expect(service.namespace, BuildService.serviceNamespace);
 
-      final ExtensionBuildResult successResult = await service.build(
-        buildMode: .debug,
-        mainPath: 'lib/main.dart',
-        projectRoot: Uri.parse('/project'),
-        targetName: LinuxBuildService.customLinuxBuildTargetName,
-      );
-      expect(successResult.success, isTrue);
-      expect(successResult.errorMessage, isNull);
+        final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
+        expect(
+          handlers.keys,
+          containsAll(<String>['getBuildTargets', 'getAssembleTargets', 'build', 'assemble']),
+        );
 
-      final ExtensionBuildResult failureResult = await service.build(
-        buildMode: .debug,
-        mainPath: 'lib/main.dart',
-        projectRoot: Uri.parse('/project'),
-        targetName: 'unknown-target',
-      );
-      expect(failureResult.success, isFalse);
-      expect(failureResult.errorMessage, contains('Unknown build target: unknown-target'));
-    });
+        final Object? buildTargetsResult = await handlers['getBuildTargets']!(
+          const <String, Object?>{},
+        );
+        final List<ExtensionBuildTarget> buildTargets = ExtensionBuildTarget.listFromJson(
+          buildTargetsResult,
+        );
+        expect(buildTargets, hasLength(1));
+        expect(buildTargets.single.name, LinuxBuildService.customLinuxBuildTargetName);
+        expect(
+          buildTargets.single.artifacts,
+          equals(const <ExtensionArtifact>{
+            LinuxArtifacts.linuxHeaders,
+            LinuxArtifacts.linuxDesktopPath,
+            BuiltInArtifacts.icuData,
+          }),
+        );
 
-    test('initialize registers getBuildTargets and build RPC handlers', () async {
-      final service = LinuxBuildService();
-      expect(service.namespace, BuildService.serviceNamespace);
+        final Object? assembleTargetsResult = await handlers['getAssembleTargets']!(
+          const <String, Object?>{},
+        );
+        final List<ExtensionAssembleTarget> assembleTargets = ExtensionAssembleTarget.listFromJson(
+          assembleTargetsResult,
+        );
+        expect(assembleTargets, hasLength(1));
+        expect(assembleTargets.single.name, 'custom-linux-assemble-only-debug');
 
-      final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
-      expect(handlers.keys, containsAll(<String>['getBuildTargets', 'build']));
-
-      final Object? targetsResult = await handlers['getBuildTargets']!(const <String, Object?>{});
-      final List<ExtensionBuildTarget> targets = ExtensionBuildTarget.listFromJson(targetsResult);
-      expect(targets, hasLength(1));
-      expect(targets.first.name, LinuxBuildService.customLinuxBuildTargetName);
-
-      final Object? buildResultObj = await handlers['build']!(<String, Object?>{
-        BuildService.buildModeParam: 'debug',
-        BuildService.mainPathParam: 'lib/main.dart',
-        BuildService.projectRootParam: '/project',
-        BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
-      });
-      expect(buildResultObj, isA<Map<String, Object?>>());
-      final buildResult = ExtensionBuildResult.fromJson(buildResultObj! as Map<String, Object?>);
-      expect(buildResult.success, isTrue);
-
-      await service.shutdown();
-    });
-
-    test('build RPC handler throws on missing or invalid parameters', () async {
-      final service = LinuxBuildService();
-      final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
-      final ExtensionRpcHandler buildHandler = handlers['build']!;
-
-      await expectLater(
-        () => buildHandler(const <String, Object?>{}),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.targetNameParam}" parameter.'),
-          ),
-        ),
-      );
-
-      await expectLater(
-        () => buildHandler(<String, Object?>{BuildService.targetNameParam: 'custom-linux-build'}),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.projectRootParam}" parameter.'),
-          ),
-        ),
-      );
-
-      await expectLater(
-        () => buildHandler(<String, Object?>{
-          BuildService.targetNameParam: 'custom-linux-build',
-          BuildService.projectRootParam: '/project',
-        }),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.mainPathParam}" parameter.'),
-          ),
-        ),
-      );
-
-      await expectLater(
-        () => buildHandler(<String, Object?>{
-          BuildService.targetNameParam: 'custom-linux-build',
-          BuildService.projectRootParam: '/project',
-          BuildService.mainPathParam: 'lib/main.dart',
-        }),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.buildModeParam}" parameter.'),
-          ),
-        ),
-      );
-
-      await expectLater(
-        () => buildHandler(<String, Object?>{
-          BuildService.targetNameParam: 'custom-linux-build',
-          BuildService.projectRootParam: 'relative/path',
-          BuildService.mainPathParam: 'lib/main.dart',
+        final Object? missingCmakeResultObj = await handlers['build']!(<String, Object?>{
+          BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
           BuildService.buildModeParam: 'debug',
-        }),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.projectRootParam}" parameter.'),
-          ),
+          BuildService.mainPathParam: 'lib/main.dart',
+          BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+          BuildService.projectRootParam: '/project',
+          BuildService.resolvedArtifactsParam: const <String, String>{},
+          BuildService.targetNameParam: LinuxBuildService.customLinuxBuildTargetName,
+        });
+        final missingCmakeResult = ExtensionBuildResult.fromJson(
+          missingCmakeResultObj! as Map<String, Object?>,
+        );
+        expect(missingCmakeResult.success, isFalse);
+        expect(missingCmakeResult.errorMessage, contains('Missing linux/CMakeLists.txt'));
+
+        final Object? unknownBuildTargetResultObj = await handlers['build']!(<String, Object?>{
+          BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
+          BuildService.buildModeParam: 'debug',
+          BuildService.mainPathParam: 'lib/main.dart',
+          BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+          BuildService.projectRootParam: '/project',
+          BuildService.resolvedArtifactsParam: const <String, String>{},
+          BuildService.targetNameParam: 'unknown-target',
+        });
+        final unknownBuildResult = ExtensionBuildResult.fromJson(
+          unknownBuildTargetResultObj! as Map<String, Object?>,
+        );
+        expect(unknownBuildResult.success, isFalse);
+        expect(unknownBuildResult.errorMessage, contains('Unknown build target: unknown-target'));
+
+        final Object? unknownAssembleTargetResultObj = await handlers['assemble']!(
+          <String, Object?>{
+            BuildService.buildDirParam: '/project/.dart_tool/flutter_build',
+            BuildService.buildModeParam: 'debug',
+            BuildService.mainPathParam: 'lib/main.dart',
+            BuildService.outputDirParam: '/project/build/linux_extension/x64/debug',
+            BuildService.projectRootParam: '/project',
+            BuildService.resolvedArtifactsParam: const <String, String>{},
+            BuildService.targetNameParam: 'unknown-assemble-target',
+          },
+        );
+        final unknownAssembleResult = ExtensionBuildResult.fromJson(
+          unknownAssembleTargetResultObj! as Map<String, Object?>,
+        );
+        expect(unknownAssembleResult.success, isFalse);
+        expect(
+          unknownAssembleResult.errorMessage,
+          contains('Unknown assemble target: unknown-assemble-target'),
+        );
+
+        await service.shutdown();
+      },
+    );
+
+    test('CustomLinuxAssembleOnlyDebug copies artifacts and application binary', () async {
+      final Directory tempDir = Directory.systemTemp.createTempSync('linux_build_test.');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      final buildDir = Directory('${tempDir.path}/build_dir')..createSync(recursive: true);
+      final outputDir = Directory('${tempDir.path}/output_dir')..createSync(recursive: true);
+      final desktopDir = Directory('${tempDir.path}/desktop')..createSync(recursive: true);
+      File('${desktopDir.path}/libflutter_linux_gtk.so').writeAsStringSync('gtk');
+      final icuFile = File('${tempDir.path}/icudtl.dat')..writeAsStringSync('icu');
+      File('${buildDir.path}/app.dill').writeAsStringSync('dill');
+      final assetsDir = Directory('${buildDir.path}/flutter_assets')..createSync(recursive: true);
+      File('${assetsDir.path}/AssetManifest.bin').writeAsStringSync('manifest');
+
+      const target = CustomLinuxAssembleOnlyDebug();
+      final ExtensionBuildResult result = await target.build(
+        ExtensionBuildContext(
+          buildDir: buildDir.uri,
+          buildMode: .debug,
+          mainPath: 'lib/main.dart',
+          outputDir: outputDir.uri,
+          projectRoot: tempDir.uri,
+          resolvedArtifacts: <String, String>{
+            LinuxArtifacts.linuxDesktopPath.name: desktopDir.path,
+            BuiltInArtifacts.icuData.name: icuFile.path,
+          },
         ),
       );
 
-      await expectLater(
-        () => buildHandler(<String, Object?>{
-          BuildService.targetNameParam: 'custom-linux-build',
-          BuildService.projectRootParam: '/project',
-          BuildService.mainPathParam: 'lib/main.dart',
-          BuildService.buildModeParam: 'invalid_mode',
-        }),
-        throwsA(
-          isA<Object>().having(
-            (Object e) => e.toString(),
-            'toString',
-            contains('Missing or invalid "${BuildService.buildModeParam}" parameter.'),
-          ),
+      expect(result.success, isTrue);
+      expect(File('${outputDir.path}/bundle/lib/libflutter_linux_gtk.so').existsSync(), isTrue);
+      expect(File('${outputDir.path}/bundle/data/icudtl.dat').existsSync(), isTrue);
+      expect(
+        File('${outputDir.path}/bundle/data/flutter_assets/kernel_blob.bin').existsSync(),
+        isTrue,
+      );
+      expect(
+        File('${outputDir.path}/bundle/data/flutter_assets/AssetManifest.bin').existsSync(),
+        isTrue,
+      );
+    });
+
+    test('CustomLinuxAssembleOnlyDebug fails when required artifacts are missing', () async {
+      final Directory tempDir = Directory.systemTemp.createTempSync('linux_build_test_missing.');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      const target = CustomLinuxAssembleOnlyDebug();
+      final ExtensionBuildResult result = await target.build(
+        ExtensionBuildContext(
+          buildDir: tempDir.uri,
+          buildMode: .debug,
+          mainPath: 'lib/main.dart',
+          outputDir: tempDir.uri,
+          projectRoot: tempDir.uri,
+          resolvedArtifacts: const <String, String>{},
         ),
       );
+
+      expect(result.success, isFalse);
+      expect(result.errorMessage, contains('Missing linuxDesktopPath artifact.'));
+    });
+
+    group('build RPC parameter validation', () {
+      const validParams = <String, Object?>{
+        BuildService.targetNameParam: 'custom-linux-build',
+        BuildService.projectRootParam: '/project',
+        BuildService.mainPathParam: 'lib/main.dart',
+        BuildService.buildModeParam: 'debug',
+        BuildService.outputDirParam: '/out',
+        BuildService.buildDirParam: '/build',
+        BuildService.resolvedArtifactsParam: <String, String>{},
+      };
+
+      final invalidCases =
+          <(String description, Map<String, Object?> overrides, String expectedParam)>[
+            (
+              'missing targetName',
+              <String, Object?>{BuildService.targetNameParam: null},
+              BuildService.targetNameParam,
+            ),
+            (
+              'missing projectRoot',
+              <String, Object?>{BuildService.projectRootParam: null},
+              BuildService.projectRootParam,
+            ),
+            (
+              'relative projectRoot',
+              <String, Object?>{BuildService.projectRootParam: 'relative/path'},
+              BuildService.projectRootParam,
+            ),
+            (
+              'missing mainPath',
+              <String, Object?>{BuildService.mainPathParam: null},
+              BuildService.mainPathParam,
+            ),
+            (
+              'missing buildMode',
+              <String, Object?>{BuildService.buildModeParam: null},
+              BuildService.buildModeParam,
+            ),
+            (
+              'invalid buildMode',
+              <String, Object?>{BuildService.buildModeParam: 'invalid_mode'},
+              BuildService.buildModeParam,
+            ),
+            (
+              'missing outputDir',
+              <String, Object?>{BuildService.outputDirParam: null},
+              BuildService.outputDirParam,
+            ),
+            (
+              'relative outputDir',
+              <String, Object?>{BuildService.outputDirParam: 'relative/output'},
+              BuildService.outputDirParam,
+            ),
+            (
+              'missing buildDir',
+              <String, Object?>{BuildService.buildDirParam: null},
+              BuildService.buildDirParam,
+            ),
+            (
+              'relative buildDir',
+              <String, Object?>{BuildService.buildDirParam: 'relative/build'},
+              BuildService.buildDirParam,
+            ),
+            (
+              'missing resolvedArtifacts',
+              <String, Object?>{BuildService.resolvedArtifactsParam: null},
+              BuildService.resolvedArtifactsParam,
+            ),
+            (
+              'non-string resolvedArtifacts value',
+              <String, Object?>{
+                BuildService.resolvedArtifactsParam: <String, Object?>{'genSnapshot': 123},
+              },
+              BuildService.resolvedArtifactsParam,
+            ),
+          ];
+
+      for (final (String description, Map<String, Object?> overrides, String expectedParam)
+          in invalidCases) {
+        test('throws RpcException on $description for build and assemble', () async {
+          final service = LinuxBuildService();
+          final Map<String, ExtensionRpcHandler> handlers = await service.initialize();
+          final ExtensionRpcHandler buildHandler = handlers['build']!;
+          final ExtensionRpcHandler assembleHandler = handlers['assemble']!;
+
+          for (final handler in <ExtensionRpcHandler>[buildHandler, assembleHandler]) {
+            await expectLater(
+              () => handler(<String, Object?>{...validParams, ...overrides}),
+              throwsA(
+                isA<Exception>().having(
+                  (Exception e) => e.toString(),
+                  'toString',
+                  allOf(
+                    contains('-32602'),
+                    contains('Missing or invalid "$expectedParam" parameter.'),
+                  ),
+                ),
+              ),
+            );
+          }
+        });
+      }
     });
   });
 }
