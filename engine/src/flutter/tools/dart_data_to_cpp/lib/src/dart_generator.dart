@@ -128,6 +128,10 @@ String _generateEncoder(NativeData definition) {
   final String encodeBlocks = <String>[
     for (final NativeDataField field in definition.fields) ?field._dartEncodeBlock,
   ].join('\n');
+  // The encoded list stores:
+  // - [0] `packed`: the `dart:ffi` `Struct` view for Dart-side `==`, `hashCode`, and getters
+  // - [1] `bytes`: the backing `Uint8List` read by C++ via `Dart_TypedDataAcquireData`
+  // - [2..] encoded `Handle` fields read by C++ as `Dart_Handle`s
   final returnElements = <String>[
     'packed',
     'bytes',

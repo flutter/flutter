@@ -1581,19 +1581,23 @@ extension type const _NativeData._(String symbol) {
 /// Maps a constructor parameter to a native FFI representation [NativeT] and
 /// Dart value type [DartT].
 ///
-/// - Primitive [NativeT] (`Bool`, `Uint8`, `Int32`, `Uint32`, `Float`, `Double`)
-///   is packed inline into a `dart:ffi` `Struct`.
+/// - `SizedNativeType` [NativeT] (`Bool`, `Uint8`, `Uint16`, `Int32`, `Uint32`,
+///   `Float`, `Double`, etc.) is packed inline into a `dart:ffi` `Struct`.
 /// - `Handle` [NativeT] is stored on the Dart instance and passed in the encoded
-///   list to C++.
-///   Do not construct a _NativeType directly. Use one of its subtypes.
+///   object list to C++.
+///
+/// Do not construct a [_NativeType] directly. Use one of its subtypes.
 extension type const _NativeType<DartT, NativeT extends NativeType>._unconstructable(DartT value) {
-  // The encode method defines how to turn the DartT value into a NativeT. This is not needed if NativeT
-  // is a `SizedNativeType`, or a `Handle`.
-  //NativeType encode() => ...;
+  // The `encode` method defines how to convert the `DartT` value into its FFI
+  // representation. This can be omitted when `DartT` is already the FFI
+  // representation type (e.g., `int`, `double`, `bool`, or a `Handle` passed as-is).
+  // Object? encode() => ...;
 
-  // The decode method defines how to reverse the process defined by `encode. This is typically not
-  // needed for `Handle`s because their Dart representation are stored as fields by convention.
-  //static DartT decode(NativeType raw) => ...;
+  // The `decode` method reverses `encode` to reconstruct `DartT` from the packed
+  // FFI value. Required for primitive (`SizedNativeType`) types that define
+  // `encode`; not needed for `Handle` types because their Dart representations
+  // are stored directly as fields on the class.
+  // static DartT decode(NativeFieldT raw) => ...;
 }
 
 extension type const _NativeBool(bool value) implements _NativeType<bool, Bool> {}
@@ -1604,9 +1608,12 @@ extension type const _NativeDouble(double value) implements _NativeType<double, 
 
 extension type const _NativeHandle<T extends Object>(T value) implements _NativeType<T, Handle> {}
 
-// Not defining how to decode and encode allows the code generator to determine the NativeType
-// based on the how many cases are in the Enum. Typically you can use this wrapper for all Enums,
-// without having to introduce a subtype.
+/// Wraps a Dart [Enum] for `@_NativeData` constructors.
+//
+// Not defining `encode` and `decode` allows the code generator to choose the
+// smallest unsigned integer `NativeType` based on how many values the enum
+// declares. Typically you can use this wrapper for all enums without
+// introducing a dedicated subtype.
 extension type const _NativeEnum<T extends Enum>(T value) implements _NativeType<T, NativeType> {}
 
 extension type const _NativeColor(Color value) implements _NativeType<Color, Uint32> {
@@ -1808,10 +1815,11 @@ class TextStyle {
   ///
   /// ### Why are there defaults on this private constructor?
   ///
-  ///   The default values here are not directly used by dart. The default values are only
-  ///   read by the code generator to create fallback values when an attribute is not specified
-  ///   by this [TextStyle] and all the ancestor [TextStyle]s. For instance if `fontSize` is
-  ///   never specified in an `InlineSpan` tree, then the default font size `14` will be selected.
+  ///  The default values here are not directly used by Dart. They are only used by the code
+  ///  generator to populate the generated C++ struct when an attribute is `null` (unspecified).
+  ///  C++ callers can either read the field directly to use this default value, or check
+  ///  `has_<field>()` when they need to distinguish unspecified attributes (for example, to
+  ///  inherit from a parent [TextStyle] in `ParagraphBuilder.pushStyle`).
   //
   // TODO(LongCatIsLooong): Use augment class when available, so we don't have to expose
   // _encodeTextStyleFfi and update it by hand.
@@ -1820,6 +1828,8 @@ class TextStyle {
     /* Fixed size data, passed to C++ by value. */
     _NativeColor? color = const .new(Color(0xFFFFFFFF)),
     _NativeTextDecoration? decoration = const .new(.none),
+    // Transparent (0) indicates no decoration color was set; SkParagraph falls
+    // back to the text color.
     _NativeColor? decorationColor = const .new(Color(0x00000000)),
     _NativeEnum<TextDecorationStyle>? decorationStyle = const .new(.solid),
     _NativeDouble? decorationThickness = const .new(1.0),
@@ -2052,6 +2062,7 @@ class ParagraphStyle {
   ParagraphStyle._({
     _NativeEnum<TextAlign>? textAlign = const .new(.start),
     _NativeEnum<TextDirection>? textDirection = const .new(.ltr),
+    // Ignored when omitted; ParagraphBuilder checks has_max_lines().
     _NativeInt32? maxLines = const .new(0),
     _NativeTextHeightBehavior? textHeightBehavior = const .new(.new()),
     _NativeEnum<Hyphens>? hyphens = const .new(.manual),
@@ -2070,6 +2081,10 @@ class ParagraphStyle {
   final _EncodedParagraphStyle _encoded;
   final _NativeStrutStyle? _strutStyle;
   final _NativeHandle<String>? _ellipsis;
+  // Holds the base TextStyle attributes specified on ParagraphStyle (fontFamily,
+  // fontSize, height, leadingDistribution, fontWeight, fontStyle, locale).
+  // Initialized outside `ParagraphStyle._` so `dart_data_to_cpp` does not treat
+  // it as a field of `flutter::ParagraphStyle`.
   late final TextStyle _defaultTextStyle;
 
   @override
@@ -2186,6 +2201,7 @@ class StrutStyle {
          forceStrutHeight: forceStrutHeight == null ? null : .new(forceStrutHeight),
        );
 
+  // See the instructions above the TextStyle._ constructor declaration.
   @_NativeData(symbol: 'flutter::StrutStyle')
   StrutStyle._({
     this._fontFamily,
@@ -2193,6 +2209,7 @@ class StrutStyle {
     _NativeDouble? fontSize = const .new(14.0),
     _NativeDouble? height = const .new(kTextHeightNone),
     _NativeEnum<TextLeadingDistribution>? leadingDistribution = const .new(.proportional),
+    // Negative value indicates using the font's default leading.
     _NativeDouble? leading = const .new(-1.0),
     _NativeFontWeight? fontWeight = const .new(.normal),
     _NativeEnum<FontStyle>? fontStyle = const .new(.normal),

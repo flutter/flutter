@@ -202,6 +202,9 @@ ParagraphBuilder::ParagraphBuilder(const ParagraphStyle& in,
   // suppresses it.
   style.render_soft_hyphens = in.hyphens == 0;
 
+  // Populate the paragraph's base font properties (used by SkParagraph for
+  // unstyled text and ellipsis, and copied into `base_style_` by
+  // `ParagraphStyle::GetTextStyle()`).
   style.font_weight = default_text_style.font_weight;
   style.font_style = static_cast<txt::FontStyle>(default_text_style.font_style);
   if (default_text_style.has_font_family()) {
@@ -218,6 +221,9 @@ ParagraphBuilder::ParagraphBuilder(const ParagraphStyle& in,
         tonic::DartConverter<std::string>::FromDart(default_text_style.locale);
   }
 
+  // Populate the remaining `TextStyle` defaults so `style.GetTextStyle()`
+  // produces a complete base `txt::TextStyle` for `ParagraphBuilder::pushStyle`
+  // to inherit from.
   style.default_text_style.color = default_text_style.color;
   style.default_text_style.decoration =
       static_cast<txt::TextDecoration>(default_text_style.decoration);

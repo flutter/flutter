@@ -21,12 +21,15 @@
 
 namespace txt {
 
+// Primitive fields are value-initialized (`= {}`); default values for
+// `dart:ui` are defined on `TextStyle._` in `lib/ui/text.dart` and seeded onto
+// `ParagraphStyle::default_text_style` by `flutter::ParagraphBuilder`.
 class TextStyle {
  public:
   SkColor color = {};
   int decoration = {};
-  // Does not make sense to draw a transparent object, so we use it as a default
-  // value to indicate no decoration color was set.
+  // Does not make sense to draw a transparent object, so SK_ColorTRANSPARENT
+  // (0) is used as a sentinel to indicate no decoration color was set.
   SkColor decoration_color = {};
   TextDecorationStyle decoration_style = {};
   // Thickness is applied as a multiplier to the default thickness of the font.

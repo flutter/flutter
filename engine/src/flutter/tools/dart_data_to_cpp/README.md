@@ -129,12 +129,11 @@ void ParagraphBuilder::SetStrutStyle(const flutter::StrutStyle& strut) {
 
 ### Default Values and Nullability (`presentMask`)
 
-Nullable primitive parameters are required to specify a default value in the `@_NativeData` constructor, while non-nullable and `Handle` parameters must not:
-- **Presence tracking**: Every nullable parameter is assigned a bit in a synthesized `presentMask` field. When the caller passes a non-null value, its bit is set, which C++ can query via `has_<field>()`.
-- **Deterministic struct slots**: Because a `Struct` occupies fixed memory, every primitive field must hold some value even when the Dart argument is `null`. Filling omitted primitive slots with their constructor default value serves two purposes:
-  1. **Fast Dart equality and hashing**: Because `null` fields always contain a canonical default value in memory (with their `presentMask` bit cleared), two packed structs can be compared and hashed directly without branching on presence bits for every field.
-  2. **Ergonomic C++ consumption**: C++ code that simply wants a fallback value when a property is omitted can read the struct field directly, while code that distinguishes "unspecified" from "explicitly set to the default" can check `has_<field>()`.
-- **Why non-nullable and `Handle` parameters omit defaults**: Non-nullable parameters are always provided by the caller, and `Handle` parameters are passed as `null` (`Dart_Null()`) rather than occupying a primitive `Struct` slot, so default values on them would have no effect.
+Nullable primitive parameters must specify a default value in the `@_NativeData` constructor (making Dart the single source of truth for defaults), while non-nullable and `Handle` parameters must not. When a nullable primitive argument is `null`, the generated encoder populates the struct field with the default value and leaves its bit cleared in `presentMask` (exposed to C++ as `has_<field>()`). In AOT mode, the private constructor and generated encoder are inlined, so this incurs almost no performance cost.
+
+Tracking both a default value and `has_<field>()` is primarily needed for `TextStyle`:
+- As the paragraph's base style, C++ reads the struct fields directly so `null` attributes fall back to their default values.
+- When pushed onto `ParagraphBuilder`'s style stack via `pushStyle`, `null` attributes should inherit from the parent style rather than resetting to the default, so C++ checks `has_<field>()` to only apply explicitly provided attributes.
 
 ## Usage
 

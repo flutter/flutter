@@ -129,6 +129,11 @@ static_assert(std::is_trivially_copyable_v<$structName>);
 ''';
 }
 
+// Generates a `tonic::DartConverter` specialization that unpacks the
+// `_Encoded<Type>` `List<Object?>` created in Dart:
+// - `handle[0]`: `_Packed<Type>` `Struct` instance (kept alive on the Dart side)
+// - `handle[1]`: `Uint8List` backing buffer copied into the C++ struct via `std::memcpy`
+// - `handle[2..]`: `Dart_Handle` fields in declaration order
 String _generateTonicConverter(NativeData definition) {
   final String cppType = definition.symbol.qualifiedName;
   final String lastPackedMember = definition.packedFields.last._cppName;
