@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -32,6 +30,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
   String? lastError;
   int? id;
   int windowClickCount = 0;
+  bool isWindowAdded = false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +41,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
           SizedBox(
             height: 300,
             child: AndroidView(
+              key: const ValueKey<String>('PlatformView'),
               viewType: 'simple_view',
               onPlatformViewCreated: onPlatformViewCreated,
             ),
@@ -60,11 +60,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
                   onPressed: onAddWindowPressed,
                   child: const Text('ADD WINDOW'),
                 ),
-                ElevatedButton(
-                  key: const ValueKey<String>('TapWindow'),
-                  onPressed: onTapWindowPressed,
-                  child: const Text('TAP WINDOW'),
-                ),
+                if (isWindowAdded) const SizedBox.shrink(key: ValueKey<String>('WindowAdded')),
                 if (windowClickCount > 0)
                   Text(
                     'Click count: $windowClickCount',
@@ -112,8 +108,12 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
 
   Future<void> onAddWindowPressed() async {
     try {
+      setState(() {
+        isWindowAdded = false;
+      });
       await viewChannel?.invokeMethod<void>('addWindowAndWaitForClick');
       setState(() {
+        isWindowAdded = false;
         windowClickCount++;
       });
     } catch (e) {
@@ -124,23 +124,19 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
     }
   }
 
-  Future<void> onTapWindowPressed() async {
-    await Future<void>.delayed(const Duration(seconds: 1));
-
-    // Dispatch a tap event on the child view inside the platform view.
-    //
-    // Android mutates `MotionEvent` instances, so in this case *do not* dispatch
-    // new instances as it won't cover the `MotionEventTracker` class in the embedding
-    // which tracks events.
-    //
-    // See the issue this prevents: https://github.com/flutter/flutter/issues/61169
-    await Process.run('input', const <String>['tap', '250', '550']);
+  Future<Object?> onViewMethodChannelCall(MethodCall call) async {
+    if (call.method == 'onWindowAdded') {
+      setState(() {
+        isWindowAdded = true;
+      });
+    }
+    return null;
   }
 
   void onPlatformViewCreated(int id) {
     this.id = id;
     setState(() {
-      viewChannel = MethodChannel('simple_view/$id');
+      viewChannel = MethodChannel('simple_view/$id')..setMethodCallHandler(onViewMethodChannelCall);
     });
   }
 }
