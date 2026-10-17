@@ -27,28 +27,56 @@ import '../../src/fakes.dart';
 import '../../src/test_build_system.dart';
 import '../../src/test_flutter_command_runner.dart';
 
-final class _FailingAndConflictingBuildService extends BuildService {
-  @override
-  Future<List<ExtensionBuildTarget>> getBuildTargets() async {
-    return const <ExtensionBuildTarget>[
-      ExtensionBuildTarget(description: 'Failing custom build target.', name: 'failing-build'),
-      ExtensionBuildTarget(description: 'Conflicting bundle target.', name: 'bundle'),
-      ExtensionBuildTarget(description: 'Empty target name that should be skipped.', name: ''),
-    ];
-  }
+final class _TestBuildTarget extends BuildTarget {
+  const _TestBuildTarget({
+    required super.description,
+    required this.name,
+    this.errorMessage,
+    this.shouldSucceed = true,
+    super.targetPlatform = 'linux-x64',
+  });
 
   @override
-  Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
-    required String mainPath,
-    required Uri projectRoot,
-    required String targetName,
-  }) async {
-    return const ExtensionBuildResult(
-      success: false,
-      errorMessage: 'Custom build compilation error.',
-    );
+  final String name;
+
+  final String? errorMessage;
+  final bool shouldSucceed;
+
+  @override
+  Future<ExtensionBuildResult> build(ExtensionBuildContext context) async {
+    return shouldSucceed
+        ? const ExtensionBuildResult(success: true)
+        : ExtensionBuildResult(success: false, errorMessage: errorMessage ?? 'Build failed.');
   }
+}
+
+final class _SucceedingBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
+    _TestBuildTarget(description: 'Hermetic custom build target.', name: 'custom-hermetic-build'),
+  ];
+}
+
+void _succeedingBuildExtensionEntryPoint(SendPort sendPort) {
+  ToolExtensionEntryPoint.run(
+    sendPort,
+    <ToolExtensionService>[_SucceedingBuildService()],
+    supportedPlatforms: const <String>{'linux'},
+  );
+}
+
+final class _FailingAndConflictingBuildService extends BuildService {
+  @override
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
+    _TestBuildTarget(
+      description: 'Failing custom build target.',
+      name: 'failing-build',
+      shouldSucceed: false,
+      errorMessage: 'Custom build compilation error.',
+    ),
+    _TestBuildTarget(description: 'Conflicting bundle target.', name: 'bundle'),
+    _TestBuildTarget(description: 'Empty target name that should be skipped.', name: ''),
+  ];
 }
 
 void _failingBuildExtensionEntryPoint(SendPort sendPort) {
@@ -61,21 +89,9 @@ void _failingBuildExtensionEntryPoint(SendPort sendPort) {
 
 final class _FirstDuplicateBuildService extends BuildService {
   @override
-  Future<List<ExtensionBuildTarget>> getBuildTargets() async {
-    return const <ExtensionBuildTarget>[
-      ExtensionBuildTarget(description: 'First extension shared target.', name: 'shared-target'),
-    ];
-  }
-
-  @override
-  Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
-    required String mainPath,
-    required Uri projectRoot,
-    required String targetName,
-  }) async {
-    return const ExtensionBuildResult(success: true);
-  }
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
+    _TestBuildTarget(description: 'First extension shared target.', name: 'shared-target'),
+  ];
 }
 
 void _firstDuplicateExtensionEntryPoint(SendPort sendPort) {
@@ -88,24 +104,14 @@ void _firstDuplicateExtensionEntryPoint(SendPort sendPort) {
 
 final class _SecondDuplicateBuildService extends BuildService {
   @override
-  Future<List<ExtensionBuildTarget>> getBuildTargets() async {
-    return const <ExtensionBuildTarget>[
-      ExtensionBuildTarget(description: 'Second extension shared target.', name: 'shared-target'),
-    ];
-  }
-
-  @override
-  Future<ExtensionBuildResult> build({
-    required BuildMode buildMode,
-    required String mainPath,
-    required Uri projectRoot,
-    required String targetName,
-  }) async {
-    return const ExtensionBuildResult(
-      success: false,
+  List<BuildTarget> get buildTargets => const <BuildTarget>[
+    _TestBuildTarget(
+      description: 'Second extension shared target.',
+      name: 'shared-target',
+      shouldSucceed: false,
       errorMessage: 'Second connection should have been skipped.',
-    );
-  }
+    ),
+  ];
 }
 
 void _secondDuplicateExtensionEntryPoint(SendPort sendPort) {
@@ -372,7 +378,7 @@ void main() {
         final manager = ExtensionManager(
           hostPlatform: HostPlatform.linux_x64,
           logger: testLogger,
-          entryPoints: <ExtensionEntryPoint>[linuxExtensionEntryPoint],
+          entryPoints: <ExtensionEntryPoint>[_succeedingBuildExtensionEntryPoint],
           featureFlags: featureFlags,
         );
         final buildManager = ExtensionBuildManager(
@@ -393,9 +399,9 @@ void main() {
 
         final CommandRunner<void> commandRunner = createTestCommandRunner(command);
 
-        await commandRunner.run(<String>['build', 'custom-linux-build', '--no-pub']);
+        await commandRunner.run(<String>['build', 'custom-hermetic-build', '--no-pub']);
 
-        expect(command.subcommands.containsKey('custom-linux-build'), isTrue);
+        expect(command.subcommands.containsKey('custom-hermetic-build'), isTrue);
 
         await manager.dispose();
       },
