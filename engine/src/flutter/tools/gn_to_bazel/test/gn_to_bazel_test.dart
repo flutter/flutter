@@ -1992,8 +1992,9 @@ shared_library("tessellator_shared") {
       );
     });
 
-    test("an executable's output_name is accepted when it is the target's name", () async {
-      // flutter_tester's template forwards output_name = target_name.
+    test("an executable's output_name names the rule, with an alias under the target's", () async {
+      // flutter_tester's template forwards output_name = target_name: the
+      // file Bazel produces anyway.
       final String output = await convert('''
 executable("tester") {
   output_name = "tester"
@@ -2002,14 +2003,32 @@ executable("tester") {
 ''');
       expect(output, contains('cc_binary(\n    name = "tester",\n'));
       expect(output, isNot(contains('output_name')));
+      expect(output, isNot(contains('alias(')));
+      // font-subset: the target `_font-subset` produces `font-subset`, and a
+      // cc_binary's file is its name.
+      final String renamed = await convert('''
+executable("_font-subset") {
+  output_name = "font-subset"
+  sources = [ "a.cc" ]
+}
+''');
+      expect(renamed, contains('cc_binary(\n    name = "font-subset",\n'));
+      expect(
+        renamed,
+        contains('alias(\n    name = "_font-subset",\n    actual = ":font-subset",\n)'),
+      );
+      expect(renamed, isNot(contains('output_name')));
+      // A test binary keeps its target's name, so a name of its own would
+      // go unhonoured.
       await expectLater(
         convert('''
-executable("tester") {
-  output_name = "flutter_tester"
+executable("a_unittests") {
+  testonly = true
+  output_name = "a_tests"
   sources = [ "a.cc" ]
 }
 '''),
-        throwsGnError(line: 2, message: 'variable output_name is not converted yet'),
+        throwsGnError(line: 3, message: 'variable output_name is not converted yet'),
       );
     });
 
