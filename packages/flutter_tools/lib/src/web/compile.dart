@@ -19,6 +19,7 @@ import '../build_system/build_targets.dart';
 import '../cache.dart';
 import '../compile.dart' show kDdcCanaryFeatures;
 import '../flutter_plugins.dart';
+import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -118,6 +119,7 @@ class WebBuilder {
     final migration = ProjectMigration(migrators);
     await migration.run();
 
+    final String buildSettingsString = _buildEventAnalyticsSettings(configs: compilerConfigs);
     final Status status = _logger.startProgress('Compiling $target for the Web...');
     final sw = Stopwatch()..start();
     try {
@@ -163,6 +165,28 @@ class WebBuilder {
                 : null,
           );
         }
+        final bool hasDeprecatedJsInteropFlag = compilerConfigs.any(
+          (WebCompilerConfig config) =>
+              config is JsCompilerConfig && config.deprecatedJsInterop != null,
+        );
+        if (hasDeprecatedJsInteropFlag) {
+          final List<String> failedTargets = <String>{
+            for (final ExceptionMeasurement measurement in result.exceptions.values)
+              measurement.target,
+          }.toList()..sort();
+          final rawError = failedTargets.isEmpty
+              ? 'web-compile-failure'
+              : '${failedTargets.join(',')}-failure';
+          final error = rawError.length > 100 ? '${rawError.substring(0, 92)}...-fail' : rawError;
+          _analytics.send(
+            Event.flutterBuildInfo(
+              label: 'web-compile',
+              buildType: 'web',
+              settings: buildSettingsString,
+              error: error,
+            ),
+          );
+        }
         throwToolExit('Failed to compile application for the Web.');
       }
     } on Exception catch (err) {
@@ -178,8 +202,6 @@ class WebBuilder {
       'Built ${_fileSystem.path.relative(outputDirectory.path)}',
       color: TerminalColor.green,
     );
-
-    final String buildSettingsString = _buildEventAnalyticsSettings(configs: compilerConfigs);
 
     _analytics.send(
       Event.flutterBuildInfo(label: 'web-compile', buildType: 'web', settings: buildSettingsString),
@@ -290,8 +312,42 @@ String _buildEventAnalyticsSettings({required List<WebCompilerConfig> configs}) 
   values['web-renderer'] = renderers.join(',');
   values['web-target'] = targets.join(',');
 
-  final List<String> sortedList =
-      values.entries.map((MapEntry<String, Object> e) => '${e.key}: ${e.value};').toList()..sort();
+  String formatValues(Map<String, Object> entries) {
+    final List<String> sortedList =
+        entries.entries.map((MapEntry<String, Object> e) => '${e.key}: ${e.value};').toList()
+          ..sort();
+    return sortedList.join(' ');
+  }
 
-  return sortedList.join(' ');
+  final String result = formatValues(values);
+  // GA4 / package:unified_analytics enforces a 100-character limit on event
+  // parameter values. When dual-compile (Wasm + JS) combines `dryRun`,
+  // `deprecatedJsInterop`, and `optimizationLevel`, the joined string reaches
+  // 116–117 chars; drop `optimizationLevel` to stay within 95 chars.
+  if (result.length > 100 && values.remove('optimizationLevel') != null) {
+    return formatValues(values);
+  }
+  return result;
+}
+
+/// Sends an [Event.flutterBuildInfo] event for a DDC web compilation when
+/// `--[no-]deprecated-js-interop` (`[deprecatedJsInterop]`) was explicitly set.
+void sendDdcCompileAnalytics({
+  required bool? deprecatedJsInterop,
+  required String command,
+  required bool succeeded,
+  Analytics? analytics,
+}) {
+  if (deprecatedJsInterop == null) {
+    return;
+  }
+  (analytics ?? globals.analytics).send(
+    Event.flutterBuildInfo(
+      label: 'web-compile',
+      buildType: 'web',
+      command: command,
+      settings: 'deprecatedJsInterop: $deprecatedJsInterop; web-compiler: ddc;',
+      error: succeeded ? null : 'ddc-compile-failure',
+    ),
+  );
 }
