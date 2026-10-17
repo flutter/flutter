@@ -1875,6 +1875,99 @@ void main() {
     expect(outer.physics.allowImplicitScrolling, isFalse);
   });
 
+  testWidgets('NestedScrollView uses platform physics while clamping the header', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<NestedScrollViewState>();
+    await tester.pumpWidget(_buildBallisticTestWidget(key));
+    final ScrollPosition outer = key.currentState!.outerController.position;
+    final ScrollPosition inner = key.currentState!.innerController.position;
+    final ScrollPhysics expected = switch (debugDefaultTargetPlatformOverride!) {
+      TargetPlatform.iOS => const BouncingScrollPhysics(),
+      TargetPlatform.macOS => const BouncingScrollPhysics(
+        decelerationRate: ScrollDecelerationRate.fast,
+      ),
+      _ => const ClampingScrollPhysics(),
+    };
+    for (final position in <ScrollPosition>[outer, inner]) {
+      final ScrollMetrics metrics = position.copyWith(
+        pixels: 5000,
+        minScrollExtent: 0,
+        maxScrollExtent: 10000,
+      );
+      for (final velocity in <double>[-1000, 1000]) {
+        final Simulation actual = position.physics.createBallisticSimulation(metrics, velocity)!;
+        final Simulation reference = expected.createBallisticSimulation(metrics, velocity)!;
+        for (final time in <double>[.016, .1, .3]) {
+          expect(actual.x(time), closeTo(reference.x(time), .001));
+          expect(actual.dx(time), closeTo(reference.dx(time), .001));
+        }
+      }
+    }
+    expect(
+      outer.physics.applyBoundaryConditions(
+        outer.copyWith(pixels: outer.minScrollExtent),
+        outer.minScrollExtent - 10,
+      ),
+      -10,
+    );
+    expect(
+      outer.physics.applyBoundaryConditions(
+        outer.copyWith(pixels: outer.maxScrollExtent),
+        outer.maxScrollExtent + 10,
+      ),
+      10,
+    );
+  }, variant: TargetPlatformVariant.all());
+
+  testWidgets('NestedScrollView updates inherited physics during a fling', (
+    WidgetTester tester,
+  ) async {
+    final key = GlobalKey<NestedScrollViewState>();
+    late StateSetter rebuild;
+    var bouncing = false;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          rebuild = setState;
+          return _buildBallisticTestWidget(
+            key,
+            inheritedBehavior: _PhysicsScrollBehavior(
+              bouncing ? const BouncingScrollPhysics() : const ClampingScrollPhysics(),
+            ),
+          );
+        },
+      ),
+    );
+    ScrollPosition outer = key.currentState!.outerController.position;
+    outer.jumpTo(100);
+    await tester.pumpAndSettle();
+    outer
+        .drag(DragStartDetails(), () {})
+        .end(
+          DragEndDetails(
+            primaryVelocity: -1000,
+            velocity: const Velocity(pixelsPerSecond: Offset(0, -1000)),
+          ),
+        );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 16));
+    final double before = outer.pixels;
+    rebuild(() {
+      bouncing = true;
+    });
+    await tester.pump();
+    outer = key.currentState!.outerController.position;
+    expect(outer.pixels, before);
+    expect(outer.physics.createBallisticSimulation(outer, 1000), isA<BouncingScrollSimulation>());
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(outer.pixels, greaterThan(before));
+    await tester.pumpAndSettle();
+    expect(outer.outOfRange, isFalse);
+    expect(tester.binding.transientCallbackCount, 0);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final configuration in <String>[
     'inherited',
     'nested behavior',
@@ -1909,10 +2002,7 @@ void main() {
         );
         final ScrollPosition outer = key.currentState!.outerController.position;
         final ScrollPosition inner = key.currentState!.innerController.position;
-        final ScrollPhysics expectedOuter =
-            configuration == 'nested behavior' || configuration == 'outer parent'
-            ? bouncing
-            : clamping;
+        final ScrollPhysics expectedOuter = configuration != 'explicit outer' ? bouncing : clamping;
         final ScrollPhysics expectedInner = configuration == 'inherited' ? bouncing : clamping;
         for (final pair in [(outer, expectedOuter), (inner, expectedInner)]) {
           final metrics = FixedScrollMetrics(
@@ -1988,12 +2078,14 @@ void main() {
   }
 
   for (final velocity in <double>[1000.0, -1000.0]) {
-    testWidgets('NestedScrollView preserves the default outer Clamping simulation ($velocity)', (
+    testWidgets('NestedScrollView preserves an explicit outer Clamping simulation ($velocity)', (
       WidgetTester tester,
     ) async {
-      // Preserve the pre-PR default; coordination must not change configured physics.
+      // An explicit override can retain the previous clamping default on every platform.
       final key = GlobalKey<NestedScrollViewState>();
-      await tester.pumpWidget(_buildBallisticTestWidget(key));
+      await tester.pumpWidget(
+        _buildBallisticTestWidget(key, physics: const ClampingScrollPhysics()),
+      );
 
       final ScrollPosition outer = key.currentState!.outerController.position;
       final metrics = FixedScrollMetrics(

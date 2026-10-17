@@ -248,7 +248,8 @@ class NestedScrollView extends StatefulWidget {
   /// the physics to be overridden).
   ///
   /// If null, uses the physics from an explicitly provided [scrollBehavior],
-  /// or [ClampingScrollPhysics] when no such behavior is provided.
+  /// or the inherited [ScrollConfiguration] when no such behavior is provided.
+  /// By default, this follows the platform's scrolling conventions.
   ///
   /// The outer scroll position is always clamped to its scroll extents,
   /// regardless of the provided [ScrollPhysics.applyBoundaryConditions]. The
@@ -259,8 +260,8 @@ class NestedScrollView extends StatefulWidget {
   /// slivers returned from [headerSliverBuilder]. The inner scroll view is
   /// configured separately by the [body]. To use the same physics for both,
   /// configure this property and the body's scroll view accordingly. An
-  /// inherited [ScrollConfiguration] can configure the body's physics, but
-  /// does not replace the outer scroll view's clamping fallback.
+  /// inherited [ScrollConfiguration] configures the default physics of both
+  /// scroll views, while explicit settings on either scroll view take precedence.
   ///
   /// The [ScrollPhysics] also determine whether or not the [NestedScrollView]
   /// can accept input from the user to change the scroll offset. For example,
@@ -484,7 +485,7 @@ class NestedScrollViewState extends State<NestedScrollView> {
     final ScrollPhysics scrollPhysics = const _NestedScrollViewPhysics().applyTo(
       widget.physics ??
           widget.scrollBehavior?.getScrollPhysics(context) ??
-          const ClampingScrollPhysics(),
+          ScrollConfiguration.of(context).getScrollPhysics(context),
     );
 
     return _InheritedNestedScrollView(
