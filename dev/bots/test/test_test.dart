@@ -178,6 +178,24 @@ void main() {
       expectExitCode(result, 0);
       expect(result.stdout, contains('|> bin/flutter'));
     }, testOn: 'posix');
+
+    test('--dry-run on fuchsia_precache shard runs precache with --all-platforms', () async {
+      final ProcessResult result = await runScript(
+        <String, String>{'SHARD': 'fuchsia_precache'},
+        <String>['--dry-run'],
+      );
+      expectExitCode(result, 0);
+      expect(
+        result.stdout,
+        contains(
+          '  precache\n'
+          '  --all-platforms\n'
+          '  --flutter_runner\n'
+          '  --fuchsia\n'
+          '  --force\n',
+        ),
+      );
+    }, testOn: 'posix');
   });
 
   test('selectTestsForSubShard distributes tests amongst subshards correctly', () async {
