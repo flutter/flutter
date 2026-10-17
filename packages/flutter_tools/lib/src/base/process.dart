@@ -675,7 +675,9 @@ class _DefaultProcessUtils implements ProcessUtils {
 }
 
 Future<int> exitWithHooks(int code, {required ShutdownHooks shutdownHooks}) async {
-  if (globals.analytics.shouldShowMessage) {
+  // Suppress the consent notice in machine mode to avoid corrupting machine-readable
+  // output streams (e.g. JSON/daemon), and defer marking it as shown until an interactive run.
+  if (globals.analytics.shouldShowMessage && !globals.logger.isMachine) {
     globals.logger.printStatus(globals.analytics.getConsentMessage);
     globals.analytics.clientShowedMessage();
 

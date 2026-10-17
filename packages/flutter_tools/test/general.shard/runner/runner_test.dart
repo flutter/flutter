@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
@@ -711,6 +712,57 @@ void main() {
         FileSystem: () => MemoryFileSystem.test(),
         ProcessManager: () => FakeProcessManager.any(),
         BotDetector: () => const FakeBotDetector(true),
+      },
+    );
+
+    testUsingContext(
+      'do not print welcome when --machine is provided',
+      () async {
+        final fs = MemoryFileSystem.test();
+        final fakeFlutterVersion = FakeFlutterVersion();
+        final Analytics analytics = Analytics.fake(
+          tool: DashTool.flutterTool,
+          homeDirectory: fs.currentDirectory,
+          dartVersion: fakeFlutterVersion.dartSdkVersion,
+          fs: fs,
+          flutterChannel: fakeFlutterVersion.channel,
+          flutterVersion: fakeFlutterVersion.getVersionString(),
+        );
+
+        final stdio = FakeStdio();
+        await runner.run(
+          <String>['--version', '--machine'],
+          (ToolDependencies toolDependencies) => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+          overrides: <Type, Generator>{
+            Analytics: () => analytics,
+            FileSystem: () => fs,
+            Logger: () {
+              final loggerFactory = LoggerFactory(
+                outputPreferences: OutputPreferences.test(),
+                terminal: Terminal.test(),
+                stdio: stdio,
+              );
+              return loggerFactory.createLogger(
+                daemon: false,
+                machine: true,
+                verbose: false,
+                prefixedErrors: false,
+                widgetPreviews: false,
+                windows: false,
+              );
+            },
+          },
+        );
+
+        expect(stdio.writtenToStdout.join(), isNot(contains(analytics.getConsentMessage)));
+        expect(analytics.shouldShowMessage, isTrue);
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => FakeProcessManager.any(),
+        BotDetector: () => const FakeBotDetector(false),
       },
     );
 
