@@ -123,7 +123,7 @@ TEST_P(AiksTest, SrgbToLinearFilterSubpassCollapseOptimization) {
   DisplayListBuilder builder(DlRect::MakeSize(GetWindowSize()));
 
   DlPaint paint;
-  paint.setColorFilter(DlColorFilter::MakeLinearToSrgbGamma());
+  paint.setColorFilter(DlColorFilter::MakeSrgbToLinearGamma());
   builder.SaveLayer(std::nullopt, &paint);
 
   builder.Translate(500, 300);

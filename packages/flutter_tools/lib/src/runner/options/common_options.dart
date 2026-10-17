@@ -237,7 +237,6 @@ abstract final class BuildInfoOptions {
   static const trackWidgetCreation = FlagOptionDescriptor(
     name: 'track-widget-creation',
     defaultsTo: true,
-    verboseOnly: true,
     help:
         'Track widget creation locations. This enables features such as the widget inspector. '
         'This parameter is only functional in debug mode (i.e. when compiling JIT, not AOT).',
@@ -875,6 +874,7 @@ abstract final class DebuggingOptionDescriptors {
   static const adbLogFiltering = FlagOptionDescriptor(
     name: 'adb-log-filtering',
     defaultsTo: true,
+    verboseOnly: true,
     help:
         'Filter adb logs so that logs not emitted by the current flutter application are not '
         'displayed.',
@@ -1282,17 +1282,4 @@ abstract final class DebuggingOptionDescriptors {
         '(deprecated) If necessary, build the app before running. To use an existing app, '
         'pass the "--${FlutterOptions.kUseApplicationBinary}" flag with an existing application artifact.',
   );
-
-  static FlagOptionDescriptor buildOption({bool verboseOnly = true}) {
-    if (verboseOnly) {
-      return build;
-    }
-    return const FlagOptionDescriptor(
-      name: 'build',
-      defaultsTo: true,
-      help:
-          '(deprecated) If necessary, build the app before running. To use an existing app, '
-          'pass the "--${FlutterOptions.kUseApplicationBinary}" flag with an existing application artifact.',
-    );
-  }
 }
