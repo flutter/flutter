@@ -10,6 +10,7 @@ import 'dart:isolate';
 import 'package:flutter_tools_extension/flutter_tools_extension.dart';
 
 import 'src/build.dart';
+import 'src/clean.dart';
 import 'src/config.dart';
 import 'src/device.dart';
 import 'src/diagnostics.dart';
@@ -25,6 +26,7 @@ void linuxExtensionEntryPoint(SendPort sendPort) {
       LinuxTemplateService(),
       LinuxDeviceService(),
       LinuxBuildService(),
+      LinuxCleanService(),
     ],
     supportedPlatforms: const <String>{'linux'},
     logger: (String message) {
