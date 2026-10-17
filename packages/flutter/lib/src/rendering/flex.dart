@@ -14,6 +14,7 @@ import 'debug_overflow_indicator.dart';
 import 'layer.dart';
 import 'layout_helper.dart';
 import 'object.dart';
+import 'proxy_box.dart';
 
 // A 2D vector that uses a [RenderFlex]'s main axis and cross axis as its first and second coordinate axes.
 // It represents the same vector as (double mainAxisExtent, double crossAxisExtent).
@@ -83,6 +84,7 @@ class _LayoutSizes {
     required this.baselineOffset,
     required this.mainAxisFreeSpace,
     required this.spacePerFlex,
+    required this.spacedChildCount,
   }) : assert(spacePerFlex?.isFinite ?? true);
 
   // The final constrained _AxisSize of the RenderFlex.
@@ -99,6 +101,10 @@ class _LayoutSizes {
 
   // The allocated space for flex children.
   final double? spacePerFlex;
+
+  // The number of children that are not excluded from spacing, see
+  // [RenderExcludeFromSpacing].
+  final int spacedChildCount;
 }
 
 /// How the child is inscribed into the available space.
@@ -359,6 +365,52 @@ enum CrossAxisAlignment {
         !flipped,
       ),
     };
+  }
+}
+
+/// A render object that its [RenderFlex] parent ignores when placing
+/// [RenderFlex.spacing] between children, if [excluding] is true.
+///
+/// When [excluding] is true, the child is still laid out, painted and hit
+/// tested as usual, but the parent [RenderFlex] places no spacing before or
+/// after it, and does not count it when distributing free space according to
+/// [MainAxisAlignment.spaceBetween], [MainAxisAlignment.spaceAround] or
+/// [MainAxisAlignment.spaceEvenly]. The spacing between the remaining children
+/// is the same as if this child were not in the list of children.
+///
+/// Whether a child is excluded is known before layout, so it does not depend
+/// on the child's size: a child that happens to be laid out with a zero
+/// main-axis extent still receives spacing unless it is excluded.
+///
+/// This render object has no effect when its parent is not a [RenderFlex].
+///
+/// See also:
+///
+///  * [ExcludeFromSpacing], the widget equivalent.
+///  * [Visibility.excludeFromSpacing], which uses this to hide a child as if
+///    it were not in the list of children.
+class RenderExcludeFromSpacing extends RenderProxyBox {
+  /// Creates a render object that may be excluded from its parent's spacing.
+  RenderExcludeFromSpacing({RenderBox? child, this._excluding = true}) : super(child);
+
+  /// Whether the parent [RenderFlex] places no spacing around this render
+  /// object.
+  bool get excluding => _excluding;
+  bool _excluding;
+  set excluding(bool value) {
+    if (value == _excluding) {
+      return;
+    }
+    _excluding = value;
+    // The parent's layout depends on this value, even if this render object is
+    // a relayout boundary.
+    markParentNeedsLayout();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('excluding', excluding));
   }
 }
 
@@ -635,6 +687,11 @@ class RenderFlex extends RenderBox
   ///
   /// The spacing is only applied between children in the main axis.
   ///
+  /// Children that are excluded from spacing, such as an [ExcludeFromSpacing]
+  /// with [ExcludeFromSpacing.excluding] set to true, or a hidden [Visibility]
+  /// with [Visibility.excludeFromSpacing] set to true, receive no spacing and
+  /// are not counted when placing it. See [RenderExcludeFromSpacing].
+  ///
   /// If the [spacing] is 10.0 and the [mainAxisAlignment] is
   /// [MainAxisAlignment.start], then the first child will be placed at the start
   /// of the main axis, and the second child will be placed 10.0 pixels after
@@ -710,7 +767,7 @@ class RenderFlex extends RenderBox
       // Intrinsic main size is the smallest size the flex container can take
       // while maintaining the min/max-content contributions of its flex items.
       var totalFlex = 0.0;
-      double inflexibleSpace = spacing * (childCount - 1);
+      double inflexibleSpace = _totalSpacing(_countSpacedChildren());
       var maxFlexFractionSoFar = 0.0;
       for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
         final int flex = _getFlex(child);
@@ -811,6 +868,31 @@ class RenderFlex extends RenderBox
   static FlexFit _getFit(RenderBox child) {
     final childParentData = child.parentData! as FlexParentData;
     return childParentData.fit ?? FlexFit.tight;
+  }
+
+  static bool _isExcludedFromSpacing(RenderBox child) {
+    return child is RenderExcludeFromSpacing && child.excluding;
+  }
+
+  // The number of children that are not excluded from spacing.
+  int _countSpacedChildren() {
+    var count = 0;
+    for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
+      if (!_isExcludedFromSpacing(child)) {
+        count += 1;
+      }
+    }
+    return count;
+  }
+
+  // The total main-axis spacing between the `spacedChildCount` children that
+  // are not excluded from spacing.
+  double _totalSpacing(int spacedChildCount) {
+    if (spacedChildCount == childCount) {
+      // No child is excluded.
+      return spacing * (childCount - 1);
+    }
+    return spacing * math.max(0, spacedChildCount - 1);
   }
 
   bool get _isBaselineAligned {
@@ -1038,7 +1120,7 @@ class RenderFlex extends RenderBox
     final bool flipMainAxis = _flipMainAxis;
     final (double leadingSpace, double betweenSpace) = mainAxisAlignment._distributeSpace(
       remainingSpace,
-      childCount,
+      sizes.spacedChildCount,
       flipMainAxis,
       spacing,
     );
@@ -1048,11 +1130,17 @@ class RenderFlex extends RenderBox
         ? (childBefore, lastChild)
         : (childAfter, firstChild);
     var pos = leadingSpace;
+    int spacedChildrenLeft = sizes.spacedChildCount;
     for (var child = startChild; child != null; child = nextChildPaintOrder(child)) {
       mainPositions[child] = pos;
       final BoxConstraints cc = constraintsForChild(child);
       final Size cs = child.getDryLayout(cc);
-      pos += _getMainSize(cs) + betweenSpace;
+      final bool isSpaced = !_isExcludedFromSpacing(child);
+      if (isSpaced) {
+        spacedChildrenLeft -= 1;
+      }
+      final spaceAfterChild = isSpaced && spacedChildrenLeft > 0 ? betweenSpace : 0.0;
+      pos += _getMainSize(cs) + spaceAfterChild;
     }
 
     // Then, find the first child with a baseline in child-list order and return its baseline + position.
@@ -1217,8 +1305,9 @@ class RenderFlex extends RenderBox
     var totalFlex = 0;
     RenderBox? firstFlexChild;
     _AscentDescent accumulatedAscentDescent = _AscentDescent.none;
+    final int spacedChildCount = _countSpacedChildren();
     // Initially, accumulatedSize is the sum of the spaces between children in the main axis.
-    var accumulatedSize = _AxisSize._(Size(spacing * (childCount - 1), 0.0));
+    var accumulatedSize = _AxisSize._(Size(_totalSpacing(spacedChildCount), 0.0));
     for (RenderBox? child = firstChild; child != null; child = childAfter(child)) {
       final int flex;
       if (canFlex && (flex = _getFlex(child)) > 0) {
@@ -1301,6 +1390,7 @@ class RenderFlex extends RenderBox
       mainAxisFreeSpace: constrainedSize.mainAxisExtent - accumulatedSize.mainAxisExtent,
       baselineOffset: accumulatedAscentDescent.baselineOffset,
       spacePerFlex: firstFlexChild == null ? null : spacePerFlex,
+      spacedChildCount: spacedChildCount,
     );
   }
 
@@ -1333,7 +1423,7 @@ class RenderFlex extends RenderBox
     final bool flipCrossAxis = _flipCrossAxis;
     final (double leadingSpace, double betweenSpace) = mainAxisAlignment._distributeSpace(
       remainingSpace,
-      childCount,
+      sizes.spacedChildCount,
       flipMainAxis,
       spacing,
     );
@@ -1349,6 +1439,7 @@ class RenderFlex extends RenderBox
     // Position all children in visual order: starting from the top-left child and
     // work towards the child that's farthest away from the origin.
     var childMainPosition = leadingSpace;
+    int spacedChildrenLeft = sizes.spacedChildCount;
     for (var child = topLeftChild; child != null; child = nextChild(child)) {
       final double? childBaselineOffset;
       final bool baselineAlign =
@@ -1379,7 +1470,13 @@ class RenderFlex extends RenderBox
         Axis.horizontal => Offset(childMainPosition, childCrossPosition),
         Axis.vertical => Offset(childCrossPosition, childMainPosition),
       };
-      childMainPosition += _getMainSize(child.size) + betweenSpace;
+      final bool isSpaced = !_isExcludedFromSpacing(child);
+      if (isSpaced) {
+        spacedChildrenLeft -= 1;
+      }
+      // No space follows an excluded child, nor the last spaced child.
+      final spaceAfterChild = isSpaced && spacedChildrenLeft > 0 ? betweenSpace : 0.0;
+      childMainPosition += _getMainSize(child.size) + spaceAfterChild;
     }
   }
 
