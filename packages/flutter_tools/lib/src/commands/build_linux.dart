@@ -96,8 +96,8 @@ class BuildLinuxCommand extends BuildSubCommand {
       :Platform platform,
     ) = toolContext;
 
-    final BuildInfo buildInfo = await getBuildInfo();
     final TargetPlatform targetPlatform = getValue(_targetPlatformOption);
+    final BuildInfo buildInfo = await getBuildInfo(forcedTargetPlatform: targetPlatform);
     final needCrossBuild = os.hostPlatform.platformName != targetPlatform.simpleName;
 
     if (!_featureFlags.isLinuxEnabled) {

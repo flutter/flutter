@@ -152,7 +152,7 @@ class BuildApkCommand extends BuildSubCommand {
     if (androidSdk == null) {
       exitWithNoSdkMessage(analytics: analytics, logger: logger);
     }
-    final BuildInfo buildInfo = await getBuildInfo();
+    final BuildInfo buildInfo = await getBuildInfo(forcedTargetPlatform: TargetPlatform.android);
 
     final androidBuildInfo = AndroidBuildInfo(
       buildInfo,

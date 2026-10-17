@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/deferred_component.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/yaml.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 
@@ -1556,7 +1557,62 @@ flutter:
 
     expect(flutterManifest, isNotNull);
     expect(flutterManifest!.defaultFlavor, 'prod');
+    expect(flutterManifest.defaultFlavorForPlatform(TargetPlatform.android), 'prod');
   });
+
+  testWithoutContext('FlutterManifest can parse platform-specific default flavors', () async {
+    const manifest = '''
+name: test
+flutter:
+    default-flavor:
+      android: android_flavor
+      ios: ios_flavor
+      macos: macos_flavor
+      windows: windows_flavor
+      linux: linux_flavor
+      web: web_flavor
+      default: default_flavor
+''';
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: BufferLogger.test(),
+    );
+
+    expect(flutterManifest, isNotNull);
+    expect(flutterManifest!.defaultFlavorForPlatform(TargetPlatform.android), 'android_flavor');
+    expect(flutterManifest.defaultFlavorForPlatform(TargetPlatform.ios), 'ios_flavor');
+    expect(flutterManifest.defaultFlavorForPlatform(TargetPlatform.darwin), 'macos_flavor');
+    expect(flutterManifest.defaultFlavorForPlatform(TargetPlatform.windows_x64), 'windows_flavor');
+    expect(flutterManifest.defaultFlavorForPlatform(TargetPlatform.linux_x64), 'linux_flavor');
+    expect(flutterManifest.defaultFlavorForPlatform(TargetPlatform.web_javascript), 'web_flavor');
+    expect(flutterManifest.defaultFlavorForPlatform(TargetPlatform.tester), 'default_flavor');
+    expect(flutterManifest.defaultFlavorForPlatform(), 'default_flavor');
+    expect(flutterManifest.defaultFlavor, 'default_flavor');
+  });
+
+  testWithoutContext(
+    'FlutterManifest can parse platform-specific default flavors without default entry',
+    () async {
+      const manifest = '''
+name: test
+flutter:
+    default-flavor:
+      android: android_flavor
+      ios: ios_flavor
+''';
+      final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+        manifest,
+        logger: BufferLogger.test(),
+      );
+
+      expect(flutterManifest, isNotNull);
+      expect(flutterManifest!.defaultFlavorForPlatform(TargetPlatform.android), 'android_flavor');
+      expect(flutterManifest.defaultFlavorForPlatform(TargetPlatform.ios), 'ios_flavor');
+      expect(flutterManifest.defaultFlavorForPlatform(TargetPlatform.darwin), isNull);
+      expect(flutterManifest.defaultFlavorForPlatform(), isNull);
+      expect(flutterManifest.defaultFlavor, isNull);
+    },
+  );
 
   testWithoutContext('FlutterManifest fails on invalid default flavor', () async {
     const manifest = '''
@@ -1571,7 +1627,47 @@ flutter:
     );
 
     expect(flutterManifest, null);
-    expect(logger.errorText, 'Expected "default-flavor" to be a string, but got 3 (int).\n');
+    expect(logger.errorText, 'Expected "default-flavor" to be a string or map, but got 3 (int).\n');
+  });
+
+  testWithoutContext('FlutterManifest fails on invalid platform in default-flavor map', () async {
+    const manifest = '''
+name: test
+flutter:
+    default-flavor:
+      unknown_platform: flavor
+''';
+
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(
+      logger.errorText,
+      'Invalid platform "unknown_platform" under "default-flavor". Supported platforms are: "android", "ios", "web", "windows", "linux", "macos", "default".\n',
+    );
+  });
+
+  testWithoutContext('FlutterManifest fails on non-string value in default-flavor map', () async {
+    const manifest = '''
+name: test
+flutter:
+    default-flavor:
+      android: 123
+''';
+
+    final FlutterManifest? flutterManifest = FlutterManifest.createFromString(
+      manifest,
+      logger: logger,
+    );
+
+    expect(flutterManifest, null);
+    expect(
+      logger.errorText,
+      'Expected value for "android" under "default-flavor" to be a string, but got 123 (int).\n',
+    );
   });
 
   testWithoutContext('FlutterManifest parses asset with platforms', () async {

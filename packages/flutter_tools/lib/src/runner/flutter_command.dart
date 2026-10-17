@@ -881,6 +881,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<BuildInfo> getBuildInfo({
     BuildMode? forcedBuildMode,
     File? forcedTargetFile,
+    TargetPlatform? forcedTargetPlatform,
     bool? forcedUseLocalCanvasKit,
   }) async {
     final bool trackWidgetCreation =
@@ -971,7 +972,7 @@ abstract class FlutterCommand extends Command<void> {
         wasParsed(CommonOptions.localWebSdk) && getValue(CommonOptions.localWebSdk) != null;
     final bool useLocalCanvasKit = forcedUseLocalCanvasKit ?? (!useCdn || useLocalWebSdk);
 
-    final String? defaultFlavor = project.manifest.defaultFlavor;
+    final String? defaultFlavor = project.manifest.defaultFlavorForPlatform(forcedTargetPlatform);
     final String? cliFlavor = getValue(BuildInfoOptions.flavor);
     final String? flavor = cliFlavor ?? defaultFlavor;
 
