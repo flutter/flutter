@@ -7,10 +7,10 @@
 #include <memory>
 #include <vector>
 
-#include "fml/status.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "impeller/renderer/testing/mocks.h"
+#include "third_party/abseil-cpp/absl/status/status.h"
 
 namespace flutter::gpu {
 namespace {
@@ -51,7 +51,7 @@ TEST(FlutterGpuCommandBufferTest,
             EXPECT_EQ(buffers.size(), 1u);
             callback(impeller::CommandBuffer::Status::kCompleted);
           },
-          Return(fml::Status())));
+          Return(absl::OkStatus())));
 
   EXPECT_TRUE(command_buffer.Submit(
       [&statuses](impeller::CommandBuffer::Status status) {
@@ -72,7 +72,7 @@ TEST(FlutterGpuCommandBufferTest, RejectsCompletionCallbacksAfterSubmit) {
   EXPECT_CALL(*context, GetBackendType)
       .WillOnce(Return(impeller::Context::BackendType::kMetal));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
-  EXPECT_CALL(*command_queue, Submit(_, _)).WillOnce(Return(fml::Status()));
+  EXPECT_CALL(*command_queue, Submit(_, _)).WillOnce(Return(absl::OkStatus()));
 
   EXPECT_TRUE(command_buffer.Submit());
   EXPECT_FALSE(command_buffer.AddCompletionCallback(
@@ -98,8 +98,8 @@ TEST(FlutterGpuCommandBufferTest,
       .WillOnce(Return(impeller::Context::BackendType::kMetal));
   EXPECT_CALL(*context, GetCommandQueue).WillOnce(Return(command_queue));
   EXPECT_CALL(*command_queue, Submit(_, _))
-      .WillOnce(Return(fml::Status(fml::StatusCode::kInternal,
-                                   "Command queue submit failed.")));
+      .WillOnce(Return(absl::Status(absl::StatusCode::kInternal,
+                                    "Command queue submit failed.")));
 
   EXPECT_FALSE(command_buffer.Submit());
   EXPECT_EQ(statuses.size(), 1u);
