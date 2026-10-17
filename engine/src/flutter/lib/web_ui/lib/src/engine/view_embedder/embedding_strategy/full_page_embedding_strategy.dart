@@ -15,21 +15,26 @@ import 'embedding_strategy.dart';
 /// This strategy takes over the <body> element, modifies the viewport meta-tag,
 /// and ensures that the root Flutter view covers the whole screen.
 class FullPageEmbeddingStrategy implements EmbeddingStrategy {
-  FullPageEmbeddingStrategy() {
+  FullPageEmbeddingStrategy({DomWindow? viewDomWindow, DomDocument? viewDomDocument})
+    : _domWindow = viewDomWindow ?? domWindow,
+      _domDocument = (viewDomDocument ?? domDocument) as DomHTMLDocument {
     hostElement.setAttribute('flt-embedding', 'full-page');
     _applyViewportMeta();
     _setHostStyles();
   }
 
-  @override
-  final DomElement hostElement = domDocument.body!;
+  final DomWindow _domWindow;
+  final DomHTMLDocument _domDocument;
 
   @override
-  DomEventTarget get globalEventTarget => domWindow;
+  DomElement get hostElement => _domDocument.body!;
+
+  @override
+  DomEventTarget get globalEventTarget => _domWindow;
 
   @override
   void setLocale(ui.Locale locale) {
-    domDocument.documentElement!.setAttribute('lang', locale.toLanguageTag());
+    _domDocument.documentElement!.setAttribute('lang', locale.toLanguageTag());
   }
 
   @override
@@ -45,6 +50,13 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
     hostElement.append(rootElement);
 
     registerElementForCleanup(rootElement);
+  }
+
+  @override
+  void updateHostElement(DomElement newHostElement, DomElement newRootElement) {
+    // Full-page embedding does not support moving the view to a different host
+    // element. The full-page strategy always renders into the document body.
+    throw UnsupportedError('FullPageEmbeddingStrategy does not support updateHostElement.');
   }
 
   // Sets the global styles for a flutter app.
@@ -69,7 +81,7 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
 
   // Sets a meta viewport tag appropriate for Flutter Web in full screen.
   void _applyViewportMeta() {
-    final List<DomElement> existingMetas = domDocument.head!
+    final List<DomElement> existingMetas = _domDocument.head!
         .querySelectorAll('meta[name="viewport"]')
         .toList();
 
@@ -120,7 +132,7 @@ class FullPageEmbeddingStrategy implements EmbeddingStrategy {
       ..name = 'viewport'
       ..content = content;
 
-    domDocument.head!.append(viewportMeta);
+    _domDocument.head!.append(viewportMeta);
 
     // This must remain the first `registerElementForCleanup` call of the boot
     // sequence. The first call is what sweeps the elements registered by the
