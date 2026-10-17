@@ -551,6 +551,25 @@ final class GnAssignment {
   String toString() => '[$condition] $op $items';
 }
 
+/// One item of a list variable and the assignment that put it there
+/// ([GnVariable.liveItems]).
+@immutable
+final class GnListItem {
+  const GnListItem(this.assignment, this.index);
+
+  final GnAssignment assignment;
+
+  /// The item's position in [assignment]'s items.
+  final int index;
+
+  GnValue get value => assignment.items[index];
+
+  /// The condition the item is in the list under.
+  Condition get condition => assignment.condition;
+
+  GnItemComments get comments => assignment.commentsOf(index);
+}
+
 /// Everything that was assigned to one variable, in program order.
 final class GnVariable {
   GnVariable(this.name, {required this.isList, this.forwarded = false});
@@ -584,6 +603,39 @@ final class GnVariable {
           items.addAll(a.items);
         case '-=':
           items.removeWhere(a.items.contains);
+      }
+    }
+    return items;
+  }
+
+  /// The items of a list variable with the assignment each came in, in
+  /// order, each in the list under its assignment's condition: an
+  /// unconditional `=` starts the list over, a conditional one appends like
+  /// `+=` (both branches of an `if`/`else` stay, each under its own
+  /// condition), and `-=` -- unconditional only -- removes every item equal
+  /// to one of its own, which must be there.
+  List<GnListItem> get liveItems {
+    final items = <GnListItem>[];
+    for (final GnAssignment a in assignments) {
+      switch (a.op) {
+        case '=' || '+=':
+          if (a.op == '=' && a.isUnconditional) {
+            items.clear();
+          }
+          for (var i = 0; i < a.items.length; i++) {
+            items.add(GnListItem(a, i));
+          }
+        case '-=':
+          if (!a.isUnconditional) {
+            throw GnError(a.location, 'conditional -= is not supported');
+          }
+          for (final GnValue value in a.items) {
+            final int before = items.length;
+            items.removeWhere((GnListItem item) => item.value == value);
+            if (items.length == before) {
+              throw GnError(a.location, '-= of $value, which is not in $name');
+            }
+          }
       }
     }
     return items;

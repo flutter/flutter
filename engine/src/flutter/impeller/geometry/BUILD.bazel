@@ -5,7 +5,7 @@
 # Generated from //flutter/impeller/geometry/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -115,7 +115,9 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":geometry",
@@ -133,7 +135,7 @@ cc_test(
     size = "medium",
     srcs = ["geometry_benchmarks.cc"],
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS,
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     tags = [

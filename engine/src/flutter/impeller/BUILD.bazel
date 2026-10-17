@@ -5,7 +5,7 @@
 # Generated from //flutter/impeller/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_display_test", "flutter_gpu_test_backends")
 
 package(default_visibility = ["//visibility:public"])
@@ -46,7 +46,9 @@ cc_library(
     name = "impeller_unittesting",
     testonly = True,
     srcs = ["//engine/src/flutter/testing:run_all_unittests.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ],
     # Informs run_all_unittests to perform impeller specific initialization
     local_defines = FLUTTER_LOCAL_DEFINES + ["IMPELLER_UNITTEST_SUITE=1"],
     deps = [

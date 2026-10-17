@@ -5,7 +5,7 @@
 # Generated from //flutter/shell/common/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -186,8 +186,9 @@ cc_test(
         "shell_benchmarks.cc",
     ],
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/flow
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:dart
     ],
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -237,8 +238,9 @@ cc_library(
         "shell_test_platform_view_vulkan.h",  # test_enable_vulkan
         "vsync_waiters_test.h",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from //flutter/common/graphics
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
         "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma:flutter_skia_vma
         "-Wno-deprecated-copy",  # from //flutter/flutter_vma:flutter_skia_vma
         "-Wno-implicit-fallthrough",  # from //flutter/flutter_vma:flutter_skia_vma
@@ -304,8 +306,9 @@ flutter_cc_test(
         "variable_refresh_rate_display_unittests.cc",
         "vsync_waiter_unittests.cc",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :shell_test_fixture_sources
+        "-Wno-inconsistent-missing-override",  # from :shell_test_fixture_sources
         "-Wno-c++98-compat-extra-semi",  # from :shell_test_fixture_sources
         "-Wno-deprecated-copy",  # from :shell_test_fixture_sources
         "-Wno-implicit-fallthrough",  # from :shell_test_fixture_sources

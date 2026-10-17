@@ -5,7 +5,7 @@
 # Generated from //flutter/impeller/renderer/backend/gles/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -21,7 +21,9 @@ cc_library(
     hdrs = ["test/mock_gles.h"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:testing_lib
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":gles",
@@ -56,7 +58,9 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from :mock_gles
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":gles",

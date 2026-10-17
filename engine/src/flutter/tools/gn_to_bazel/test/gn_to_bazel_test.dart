@@ -1083,7 +1083,7 @@ cc_library(
     name = "x_unittests",
     testonly = True,
     srcs = ["x_unittests.cc"],
-    copts = CHROMIUM_CODE_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = CHROMIUM_CODE_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     target_compatible_with = select({
         "//engine/src/flutter/testing:unittests_enabled": [],
@@ -1535,7 +1535,7 @@ executable("example_unittests") {
 # Generated from //flutter/example/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -1579,7 +1579,7 @@ cc_test(
     name = "example_unittests",
     size = "small",
     srcs = ["example_unittests.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS,
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":dynamic_symbols",
@@ -2533,7 +2533,7 @@ flutter_cc_test(
     name = "ui_unittests",
     size = "medium",
     srcs = ["ui_unittests.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS,
     data = [":gpu_test_backends"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     runner_args = ["--timeout=90"],
@@ -2578,7 +2578,7 @@ cc_test(
     size = "medium",
     srcs = ["message_loop_task_queues_benchmark.cc"],
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    copts = FLUTTER_COPTS,
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     tags = [
@@ -2688,8 +2688,7 @@ cc_library(
         '@wuffs',
         repositoryGnRoot: '//flutter/third_party/wuffs',
       );
-      final String wuffs = await convert(
-        '''
+      const wuffsGn = '''
 config("wuffs_public") {
   include_dirs = [ "release/c" ]
   cflags = []
@@ -2711,7 +2710,9 @@ source_set("wuffs") {
   configs += [ ":quiet" ]
   sources = [ "release/c/wuffs-v0.3.c" ]
 }
-''',
+''';
+      final String wuffs = await convert(
+        wuffsGn,
         gnPackage: '//flutter/third_party/wuffs',
         layout: layout,
       );
@@ -2740,13 +2741,22 @@ cc_library(
       );
       expect(wuffs, contains('cc_library(\n    name = "quiet",\n)'));
 
-      // A dependent gets them from the table.
-      final String user = await convert('''
+      // A dependent gets them from wuffs's own GN file, read from the tree
+      // (forwarded_flags.dart).
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/third_party/wuffs/BUILD.gn': wuffsGn,
+        'flutter/example/BUILD.gn': '''
 source_set("gif_codec") {
   sources = [ "gif.cc" ]
   deps = [ "//flutter/third_party/wuffs" ]
 }
-''');
+''',
+      });
+      final String user = emitBuildFile(
+        evaluateIn(tree, '//flutter/example/BUILD.gn'),
+        gnPackage: '//flutter/example',
+        tree: tree,
+      );
       expect(
         user,
         contains('''
@@ -2756,21 +2766,20 @@ source_set("gif_codec") {
     ],
 '''),
       );
-
-      // A public config with flags that the table does not know is an error,
-      // as is a config with flags that nothing in the file lists.
-      await expectLater(
-        convert('''
-config("loud_public") {
-  cflags = [ "-Wall" ]
-}
-source_set("x") {
-  sources = [ "x.cc" ]
-  public_configs = [ ":loud_public" ]
+      expect(user, contains('        "@wuffs",\n    ],'));
+      // Without a tree to read wuffs's file from, nothing says what it
+      // hands on.
+      expect(
+        await convert('''
+source_set("gif_codec") {
+  sources = [ "gif.cc" ]
+  deps = [ "//flutter/third_party/wuffs" ]
 }
 '''),
-        throwsGnError(line: 4, message: 'list them under //flutter/example:x in propagatedCopts'),
+        contains('copts = CHROMIUM_CODE_COPTS,'),
       );
+
+      // A config with flags that nothing in the file lists is an error.
       await expectLater(
         convert('''
 config("unused") {
@@ -2781,11 +2790,35 @@ config("unused") {
       );
     });
 
-    test('hands the flags on along public_deps chains', () async {
-      // flutter_vma: GN applies vulkan_memory_allocator's suppressions to
-      // whoever depends on flutter_vma, since it lists the allocator in
-      // public_deps; flutter_vma is in the table for that.
-      final String vma = await convert('''
+    test('hands the flags on along public_deps chains, under their conditions', () async {
+      // flutter_vma: GN applies the Vulkan headers' and the allocator's
+      // suppressions to whoever depends on flutter_vma, since it lists both
+      // in public_deps, and so on down the chain; each hop is read from the
+      // dependency's file.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/third_party/vulkan-deps/vulkan-headers/src/BUILD.gn': '''
+config("vulkan_headers_config") {
+  include_dirs = [ "include" ]
+  if (is_clang) {
+    cflags = [ "-Wno-redundant-parens" ]
+  }
+}
+
+source_set("vulkan_headers") {
+  public_configs = [ ":vulkan_headers_config" ]
+}
+''',
+        'flutter/third_party/vulkan_memory_allocator/BUILD.gn': '''
+config("vulkan_memory_allocator_config") {
+  include_dirs = [ "include" ]
+  cflags_cc = [ "-Wno-unused-private-field" ]
+}
+
+source_set("vulkan_memory_allocator") {
+  public_configs = [ ":vulkan_memory_allocator_config" ]
+}
+''',
+        'flutter/flutter_vma/BUILD.gn': '''
 source_set("flutter_vma") {
   sources = [ "flutter_vma.cc" ]
   public_deps = [
@@ -2794,82 +2827,179 @@ source_set("flutter_vma") {
   ]
   public_configs = [ "//flutter:config" ]
 }
-''', gnPackage: '//flutter/flutter_vma');
-      expect(
-        vma,
-        contains('''
-    copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/third_party/vulkan_memory_allocator
-'''),
-      );
-      // A dependent, directly or through another public dependency.
-      final String user = await convert('''
+''',
+        'flutter/vulkan/BUILD.gn': '''
 source_set("vulkan") {
   sources = [ "vulkan.cc" ]
   deps = [ "//flutter/flutter_vma" ]
 }
-''');
-      expect(
-        user,
-        contains('''
-    copts = FLUTTER_COPTS + [
-        "-Wno-redundant-parens",  # from //flutter/flutter_vma
-        "-Wno-c++98-compat-extra-semi",  # from //flutter/flutter_vma
-'''),
-      );
 
-      // A target or group whose public_deps hand flags on must be in the
-      // table itself, like one whose own public config carries them.
-      await expectLater(
-        convert('''
-source_set("x") {
-  sources = [ "x.cc" ]
-  public_deps = [ "//flutter/third_party/wuffs" ]
+group("forwarding") {
+  public_deps = [ "//flutter/flutter_vma" ]
 }
-'''),
-        throwsGnError(
-          line: 1,
-          message:
-              'the public configs and public_deps of //flutter/example:x hand compiler flags '
-              '[-Wno-unused-function, -Wno-c++11-narrowing] to its dependents',
-        ),
-      );
-      await expectLater(
-        convert('''
-group("g") {
-  public_deps = [ "//flutter/third_party/wuffs" ]
+
+group("private") {
+  deps = [ "//flutter/flutter_vma" ]
 }
-'''),
-        throwsGnError(line: 1, message: 'list them under //flutter/example:g in propagatedCopts'),
-      );
-      // A private dependency hands nothing on.
-      expect(
-        await convert('''
-group("g") {
-  deps = [ "//flutter/third_party/wuffs" ]
-}
-'''),
-        contains('deps = ["@wuffs"]'),
-      );
-      // The table knows no conditions.
-      await expectLater(
-        convert('''
-source_set("y") {
-  sources = [ "y.cc" ]
+
+source_set("in_release") {
+  sources = [ "r.cc" ]
   public_deps = []
   if (flutter_runtime_mode == "release") {
-    public_deps += [ "//flutter/third_party/wuffs" ]
+    public_deps += [ "//flutter/flutter_vma" ]
   }
 }
+''',
+        'flutter/shell/BUILD.gn': '''
+source_set("through_group") {
+  sources = [ "g.cc" ]
+  deps = [ "//flutter/vulkan:forwarding" ]
+}
+
+source_set("stopped") {
+  sources = [ "s.cc" ]
+  deps = [ "//flutter/vulkan:private" ]
+}
+
+source_set("maybe") {
+  sources = [ "m.cc" ]
+  deps = [ "//flutter/vulkan:in_release" ]
+}
+''',
+      });
+      String convertIn(String package) {
+        return emitBuildFile(evaluateIn(tree, '$package/BUILD.gn'), gnPackage: package, tree: tree);
+      }
+
+      // The owner compiles with what its public_deps hand it (the headers'
+      // flag, under is_clang, which the host assumptions settle).
+      expect(
+        convertIn('//flutter/flutter_vma'),
+        contains('''
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/third_party/vulkan-deps/vulkan-headers/src:vulkan_headers
+        "-Wno-unused-private-field",  # from //flutter/third_party/vulkan_memory_allocator
+    ],
 '''),
-        throwsGnError(
-          line: 5,
-          message:
-              'public dependency //flutter/third_party/wuffs hands on compiler flags under '
-              '`flutter_runtime_mode == "release"`, which propagatedCopts cannot say',
-        ),
       );
+      // A dependent, two hops down.
+      final String vulkan = convertIn('//flutter/vulkan');
+      expect(
+        vulkan,
+        contains('''
+    name = "vulkan",
+    srcs = ["vulkan.cc"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/flutter_vma
+        "-Wno-unused-private-field",  # from //flutter/flutter_vma
+    ],
+'''),
+      );
+      // A group hands on what its public_deps hand it, and keeps what its
+      // private deps hand it to itself; a conditional public dependency
+      // hands on under its condition, which the dependent's copts take as
+      // a select().
+      final String shell = convertIn('//flutter/shell');
+      expect(
+        shell,
+        contains('''
+    name = "through_group",
+    srcs = ["g.cc"],
+    copts = FLUTTER_COPTS + [
+        "-Wno-redundant-parens",  # from //flutter/vulkan:forwarding
+        "-Wno-unused-private-field",  # from //flutter/vulkan:forwarding
+    ],
+'''),
+      );
+      expect(
+        shell,
+        contains('    name = "stopped",\n    srcs = ["s.cc"],\n    copts = FLUTTER_COPTS,\n'),
+      );
+      expect(
+        shell,
+        contains('''
+    name = "maybe",
+    srcs = ["m.cc"],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "-Wno-redundant-parens",  # from //flutter/vulkan:in_release
+            "-Wno-unused-private-field",  # from //flutter/vulkan:in_release
+        ],
+        "//conditions:default": [],
+    }),
+'''),
+      );
+      // The owner of a conditional public dependency takes it under the
+      // condition too.
+      expect(
+        vulkan,
+        contains('''
+    name = "in_release",
+    srcs = ["r.cc"],
+    copts = FLUTTER_COPTS + select({
+        "//engine/src/flutter/common:runtime_mode_release": [
+            "-Wno-redundant-parens",  # from //flutter/flutter_vma
+            "-Wno-unused-private-field",  # from //flutter/flutter_vma
+        ],
+        "//conditions:default": [],
+    }),
+'''),
+      );
+    });
+
+    test('derives the flags once per dependency file and reads the placeholder idiom', () async {
+      // One resolver serves a run; a dependency whose file is absent, or
+      // which GN defines twice (the real target under a condition, an empty
+      // group otherwise), hands what the real target does.
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/third_party/quiet/BUILD.gn': '''
+config("quiet_public") {
+  cflags = [ "-Wno-shadow" ]
+}
+
+if (is_linux) {
+  source_set("quiet") {
+    sources = [ "q.cc" ]
+    public_configs = [ ":quiet_public" ]
+  }
+} else {
+  group("quiet") {
+  }
+}
+''',
+        'flutter/a/BUILD.gn': '''
+source_set("a") {
+  sources = [ "a.cc" ]
+  deps = [
+    "//flutter/third_party/quiet",
+    "//flutter/nowhere:nothing",
+  ]
+}
+''',
+        'flutter/b/BUILD.gn': '''
+source_set("b") {
+  sources = [ "b.cc" ]
+  deps = [ "//flutter/third_party/quiet" ]
+}
+''',
+      });
+      final resolver = ForwardedFlags(tree: tree, assumptions: linuxHostAssumptions());
+      for (final package in <String>['//flutter/a', '//flutter/b']) {
+        expect(
+          emitBuildFile(
+            evaluateIn(tree, '$package/BUILD.gn'),
+            gnPackage: package,
+            tree: tree,
+            forwardedFlags: resolver,
+          ),
+          contains('"-Wno-shadow",  # from //flutter/third_party/quiet'),
+        );
+      }
+      expect(resolver.of('//flutter/third_party/quiet:quiet'), <ForwardedFlag>[
+        (condition: Condition.always, flag: '-Wno-shadow'),
+      ]);
+      expect(resolver.of('//flutter/nowhere:nothing'), isEmpty);
+      expect(ForwardedFlags.none().of('//flutter/third_party/quiet:quiet'), isEmpty);
     });
 
     test('secondary source root: a BUILD.gn stands in for another directory', () {
