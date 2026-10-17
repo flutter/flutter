@@ -1,9 +1,11 @@
 package io.flutter.plugin.editing;
 
 import static io.flutter.Build.API_LEVELS;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalMatchers.aryEq;
@@ -1496,6 +1498,273 @@ public class TextInputPluginTest {
 
     assertEquals(-1, testImm.getLastCursorAnchorInfo().getComposingTextStart());
     assertEquals(0, testImm.getLastCursorAnchorInfo().getComposingText().length());
+  }
+
+  private static TextInputChannel.Configuration textConfiguration() {
+    return new TextInputChannel.Configuration(
+        false,
+        false,
+        true,
+        true,
+        false,
+        TextInputChannel.TextCapitalization.NONE,
+        new TextInputChannel.InputType(TextInputChannel.TextInputType.TEXT, false, false, false),
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
+  }
+
+  // Returns a column-major 4x4 matrix that translates by (x, y).
+  private static double[] translation(double x, double y) {
+    return new double[] {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, 0, 1};
+  }
+
+  private static void sendEditableSizeAndTransform(
+      BinaryMessenger.BinaryMessageHandler binaryMessageHandler,
+      double width,
+      double height,
+      double[] transform)
+      throws JSONException {
+    JSONObject arguments = new JSONObject();
+    arguments.put("width", width);
+    arguments.put("height", height);
+    arguments.put("transform", new JSONArray(transform));
+    sendToBinaryMessageHandler(
+        binaryMessageHandler, "TextInput.setEditableSizeAndTransform", arguments);
+  }
+
+  private static void sendCaretRect(
+      BinaryMessenger.BinaryMessageHandler binaryMessageHandler,
+      double x,
+      double y,
+      double width,
+      double height)
+      throws JSONException {
+    JSONObject arguments = new JSONObject();
+    arguments.put("x", x);
+    arguments.put("y", y);
+    arguments.put("width", width);
+    arguments.put("height", height);
+    sendToBinaryMessageHandler(binaryMessageHandler, "TextInput.setCaretRect", arguments);
+  }
+
+  @SuppressWarnings("deprecation")
+  // setMessageHandler is deprecated.
+  @Test
+  @Config(qualifiers = "xhdpi")
+  public void inputConnection_reportsCaretRectInCursorAnchorInfo() throws JSONException {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = new View(ctx);
+    // Place the view at (100, 200) on the screen.
+    testView.layout(100, 200, 900, 1000);
+    ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
+        ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
+    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            new TextInputChannel(mockBinaryMessenger),
+            new ScribeChannel(mock(DartExecutor.class)),
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    verify(mockBinaryMessenger, times(1))
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
+    BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
+        binaryMessageHandlerCaptor.getValue();
+
+    // The framework sends the geometry of the client before its editing state.
+    textInputPlugin.setTextInputClient(0, textConfiguration());
+    sendEditableSizeAndTransform(binaryMessageHandler, 200, 40, translation(10, 30));
+    sendCaretRect(binaryMessageHandler, 5, 2, 2, 16);
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("text", 4, 4, -1, -1));
+    InputConnection connection =
+        textInputPlugin.createInputConnection(
+            testView, mock(KeyboardManager.class), new EditorInfo());
+    connection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE);
+
+    CursorAnchorInfo cursorAnchorInfo = testImm.getLastCursorAnchorInfo();
+    assertEquals(5, cursorAnchorInfo.getInsertionMarkerHorizontal(), 0);
+    assertEquals(2, cursorAnchorInfo.getInsertionMarkerTop(), 0);
+    assertEquals(18, cursorAnchorInfo.getInsertionMarkerBottom(), 0);
+    // The top of the caret is at ((10 + 5) * 2 + 100, (30 + 2) * 2 + 200) on the screen, since the
+    // density is 2.
+    float[] caretTopOnScreen = {5, 2};
+    cursorAnchorInfo.getMatrix().mapPoints(caretTopOnScreen);
+    assertEquals(130, caretTopOnScreen[0], 0);
+    assertEquals(264, caretTopOnScreen[1], 0);
+  }
+
+  @SuppressWarnings("deprecation")
+  // setMessageHandler is deprecated.
+  @Test
+  public void inputConnection_notifiesMonitoringInputMethodOfCaretRectChanges()
+      throws JSONException {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = new View(ctx);
+    ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
+        ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
+    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            new TextInputChannel(mockBinaryMessenger),
+            new ScribeChannel(mock(DartExecutor.class)),
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    verify(mockBinaryMessenger, times(1))
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
+    BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
+        binaryMessageHandlerCaptor.getValue();
+    textInputPlugin.setTextInputClient(0, textConfiguration());
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("text", 4, 4, -1, -1));
+    InputConnection connection =
+        textInputPlugin.createInputConnection(
+            testView, mock(KeyboardManager.class), new EditorInfo());
+
+    // The input method isn't monitoring cursor updates.
+    sendEditableSizeAndTransform(binaryMessageHandler, 200, 40, translation(0, 0));
+    sendCaretRect(binaryMessageHandler, 5, 2, 2, 16);
+    assertNull(testImm.getLastCursorAnchorInfo());
+
+    connection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+    sendCaretRect(binaryMessageHandler, 25, 2, 2, 16);
+    assertEquals(25, testImm.getLastCursorAnchorInfo().getInsertionMarkerHorizontal(), 0);
+
+    // Scrolling moves the client without changing the caret rect in its local coordinate system,
+    // so the framework only sends the new transform.
+    sendEditableSizeAndTransform(binaryMessageHandler, 200, 40, translation(0, 50));
+    float[] caretTop = {25, 2};
+    testImm.getLastCursorAnchorInfo().getMatrix().mapPoints(caretTop);
+    assertEquals(25, caretTop[0], 0);
+    assertEquals(52, caretTop[1], 0);
+
+    // The framework sends a rect with a negative size when the caret rect is unknown.
+    sendCaretRect(binaryMessageHandler, 0, 0, -1, -1);
+    assertTrue(Float.isNaN(testImm.getLastCursorAnchorInfo().getInsertionMarkerHorizontal()));
+  }
+
+  @SuppressWarnings("deprecation")
+  // setMessageHandler is deprecated.
+  @Test
+  public void setTextInputClient_clearsCaretRect() throws JSONException {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = new View(ctx);
+    ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
+        ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
+    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            new TextInputChannel(mockBinaryMessenger),
+            new ScribeChannel(mock(DartExecutor.class)),
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    verify(mockBinaryMessenger, times(1))
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
+    BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
+        binaryMessageHandlerCaptor.getValue();
+    textInputPlugin.setTextInputClient(0, textConfiguration());
+    sendEditableSizeAndTransform(binaryMessageHandler, 200, 40, translation(0, 0));
+    sendCaretRect(binaryMessageHandler, 5, 2, 2, 16);
+
+    // The caret rect of the previous client must not be reported for the new client.
+    textInputPlugin.setTextInputClient(1, textConfiguration());
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("text", 4, 4, -1, -1));
+    InputConnection connection =
+        textInputPlugin.createInputConnection(
+            testView, mock(KeyboardManager.class), new EditorInfo());
+    connection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE);
+
+    assertTrue(Float.isNaN(testImm.getLastCursorAnchorInfo().getInsertionMarkerHorizontal()));
+  }
+
+  @SuppressWarnings("deprecation")
+  // setMessageHandler is deprecated.
+  @Test
+  public void setTextInputClient_doesNotSendCaretRectToPreviousInputConnection()
+      throws JSONException {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = new View(ctx);
+    ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
+        ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
+    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            new TextInputChannel(mockBinaryMessenger),
+            new ScribeChannel(mock(DartExecutor.class)),
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    verify(mockBinaryMessenger, times(1))
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
+    BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
+        binaryMessageHandlerCaptor.getValue();
+    textInputPlugin.setTextInputClient(0, textConfiguration());
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("text", 4, 4, -1, -1));
+    InputConnection connection =
+        textInputPlugin.createInputConnection(
+            testView, mock(KeyboardManager.class), new EditorInfo());
+    connection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_MONITOR);
+
+    // The framework sends the geometry of the new client before its editing state, which restarts
+    // the input method.
+    textInputPlugin.setTextInputClient(1, textConfiguration());
+    sendEditableSizeAndTransform(binaryMessageHandler, 200, 40, translation(0, 0));
+    sendCaretRect(binaryMessageHandler, 5, 2, 2, 16);
+
+    assertNull(testImm.getLastCursorAnchorInfo());
+  }
+
+  @SuppressWarnings("deprecation")
+  // setMessageHandler is deprecated.
+  @Test
+  @Config(qualifiers = "xhdpi")
+  public void inputConnection_convertsEditableTransformForCursorAnchorInfo() throws JSONException {
+    TestImm testImm = Shadow.extract(ctx.getSystemService(Context.INPUT_METHOD_SERVICE));
+    View testView = new View(ctx);
+    ArgumentCaptor<BinaryMessenger.BinaryMessageHandler> binaryMessageHandlerCaptor =
+        ArgumentCaptor.forClass(BinaryMessenger.BinaryMessageHandler.class);
+    DartExecutor mockBinaryMessenger = mock(DartExecutor.class);
+    TextInputPlugin textInputPlugin =
+        new TextInputPlugin(
+            testView,
+            new TextInputChannel(mockBinaryMessenger),
+            new ScribeChannel(mock(DartExecutor.class)),
+            mock(PlatformViewsController.class),
+            mock(PlatformViewsController2.class));
+    verify(mockBinaryMessenger, times(1))
+        .setMessageHandler(any(String.class), binaryMessageHandlerCaptor.capture());
+    BinaryMessenger.BinaryMessageHandler binaryMessageHandler =
+        binaryMessageHandlerCaptor.getValue();
+    textInputPlugin.setTextInputClient(0, textConfiguration());
+    textInputPlugin.setTextInputEditingState(
+        testView, new TextInputChannel.TextEditState("text", 4, 4, -1, -1));
+    InputConnection connection =
+        textInputPlugin.createInputConnection(
+            testView, mock(KeyboardManager.class), new EditorInfo());
+
+    // A column-major 4x4 matrix that rotates by 90 degrees, scales by 2, translates by (10, 30),
+    // and has a perspective component.
+    sendEditableSizeAndTransform(
+        binaryMessageHandler,
+        200,
+        40,
+        new double[] {0, 2, 0, 0.001, -2, 0, 0, 0.002, 0, 0, 1, 0, 10, 30, 0, 1});
+    sendCaretRect(binaryMessageHandler, 5, 2, 2, 16);
+    connection.requestCursorUpdates(InputConnection.CURSOR_UPDATE_IMMEDIATE);
+
+    // The z axis is dropped, and the result is scaled by the density, which is 2.
+    float[] expectedValues = {0, -4, 20, 4, 0, 60, 0.001f, 0.002f, 1};
+    float[] values = new float[9];
+    testImm.getLastCursorAnchorInfo().getMatrix().getValues(values);
+    assertArrayEquals(expectedValues, values, 1e-6f);
   }
 
   @Test
