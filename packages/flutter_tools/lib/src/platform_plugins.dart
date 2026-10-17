@@ -107,6 +107,21 @@ typedef _CommonPlatformFields = ({
   String? defaultPackage,
 });
 
+sealed class ParseResult<T> {
+  factory ParseResult.pass(T value) => ParseResultPass<T>(value: value);
+  factory ParseResult.fail(List<String> errors) => ParseResultFail<T>(errors: errors);
+}
+
+final class ParseResultPass<T>({required final T value}) implements ParseResult<T>;
+
+final class ParseResultFail<T>({required final List<String> errors}) implements ParseResult<T> {
+  this {
+    if (errors.isEmpty) {
+      throw StateError('The error list must not be empty');
+    }
+  }
+}
+
 /// Helper for extracting and validating fields from a platform plugin [YamlMap].
 final class _PluginPlatformYaml {
   _PluginPlatformYaml(this._yaml, {required this.configKey});
@@ -216,23 +231,15 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     YamlMap yaml,
     String pluginPath,
     FileSystem fileSystem,
-  ) {
-    final (:AndroidPlugin? plugin, :List<String> errors) = parseFromYaml(
+  ) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(
       name,
       yaml,
       pluginPath: pluginPath,
       fileSystem: fileSystem,
-    );
-    if (errors.isNotEmpty) {
-      throwToolExit(
-        'Invalid "$kConfigKey" plugin specification for plugin "$name".\n${errors.join('\n')}',
-      );
-    }
-    return plugin!;
-  }
+    ));
 
   /// Parses the Android plugin configuration from the given [yaml].
-  static ({AndroidPlugin? plugin, List<String> errors}) parseFromYaml(
+  static ParseResult<AndroidPlugin> parseFromYaml(
     String name,
     YamlMap yaml, {
     required String pluginPath,
@@ -254,11 +261,11 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     }
 
     if (parser.errors.isNotEmpty) {
-      return (plugin: null, errors: parser.errors);
+      return .fail(parser.errors);
     }
 
-    return (
-      plugin: AndroidPlugin(
+    return .pass(
+      AndroidPlugin(
         name: name,
         package: package,
         pluginClass: fields.pluginClass,
@@ -269,7 +276,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
         pluginPath: pluginPath,
         fileSystem: fileSystem,
       ),
-      errors: const <String>[],
     );
   }
 
@@ -413,18 +419,10 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
   }) : ffiPlugin = ffiPlugin ?? false,
        sharedDarwinSource = sharedDarwinSource ?? false;
 
-  factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
-    final (:IOSPlugin? plugin, :List<String> errors) = parseFromYaml(name, yaml);
-    if (errors.isNotEmpty) {
-      throwToolExit(
-        'Invalid "$kConfigKey" plugin specification for plugin "$name".\n${errors.join('\n')}',
-      );
-    }
-    return plugin!;
-  }
+  factory IOSPlugin.fromYaml(String name, YamlMap yaml) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(name, yaml));
 
   /// Parses the iOS plugin configuration from the given [yaml].
-  static ({IOSPlugin? plugin, List<String> errors}) parseFromYaml(String name, YamlMap yaml) {
+  static ParseResult<IOSPlugin> parseFromYaml(String name, YamlMap yaml) {
     final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
     final _CommonPlatformFields fields = parser.parseCommonFields(name, displayName: 'iOS');
     final bool sharedDarwinSource = parser.flag(kSharedDarwinSource);
@@ -442,11 +440,11 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
     }
 
     if (parser.errors.isNotEmpty) {
-      return (plugin: null, errors: parser.errors);
+      return .fail(parser.errors);
     }
 
-    return (
-      plugin: IOSPlugin(
+    return .pass(
+      IOSPlugin(
         name: name,
         classPrefix: '',
         pluginClass: fields.pluginClass,
@@ -456,7 +454,6 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
         defaultPackage: fields.defaultPackage,
         sharedDarwinSource: sharedDarwinSource,
       ),
-      errors: const <String>[],
     );
   }
 
@@ -525,18 +522,10 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   }) : ffiPlugin = ffiPlugin ?? false,
        sharedDarwinSource = sharedDarwinSource ?? false;
 
-  factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
-    final (:MacOSPlugin? plugin, :List<String> errors) = parseFromYaml(name, yaml);
-    if (errors.isNotEmpty) {
-      throwToolExit(
-        'Invalid "$kConfigKey" plugin specification for plugin "$name".\n${errors.join('\n')}',
-      );
-    }
-    return plugin!;
-  }
+  factory MacOSPlugin.fromYaml(String name, YamlMap yaml) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(name, yaml));
 
   /// Parses the macOS plugin configuration from the given [yaml].
-  static ({MacOSPlugin? plugin, List<String> errors}) parseFromYaml(String name, YamlMap yaml) {
+  static ParseResult<MacOSPlugin> parseFromYaml(String name, YamlMap yaml) {
     final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
     final _CommonPlatformFields fields = parser.parseCommonFields(name, displayName: 'macOS');
     final bool sharedDarwinSource = parser.flag(kSharedDarwinSource);
@@ -554,11 +543,11 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
     }
 
     if (parser.errors.isNotEmpty) {
-      return (plugin: null, errors: parser.errors);
+      return .fail(parser.errors);
     }
 
-    return (
-      plugin: MacOSPlugin(
+    return .pass(
+      MacOSPlugin(
         name: name,
         pluginClass: fields.pluginClass,
         dartPluginClass: fields.dartPluginClass,
@@ -567,7 +556,6 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
         defaultPackage: fields.defaultPackage,
         sharedDarwinSource: sharedDarwinSource,
       ),
-      errors: const <String>[],
     );
   }
 
@@ -634,18 +622,10 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
              (ffiPlugin ?? false),
        );
 
-  factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
-    final (:WindowsPlugin? plugin, :List<String> errors) = parseFromYaml(name, yaml);
-    if (errors.isNotEmpty) {
-      throwToolExit(
-        'Invalid "$kConfigKey" plugin specification for plugin "$name".\n${errors.join('\n')}',
-      );
-    }
-    return plugin!;
-  }
+  factory WindowsPlugin.fromYaml(String name, YamlMap yaml) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(name, yaml));
 
   /// Parses the Windows plugin configuration from the given [yaml].
-  static ({WindowsPlugin? plugin, List<String> errors}) parseFromYaml(String name, YamlMap yaml) {
+  static ParseResult<WindowsPlugin> parseFromYaml(String name, YamlMap yaml) {
     final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
     final _CommonPlatformFields fields = parser.parseCommonFields(name, displayName: 'Windows');
 
@@ -680,11 +660,11 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
     }
 
     if (parser.errors.isNotEmpty) {
-      return (plugin: null, errors: parser.errors);
+      return .fail(parser.errors);
     }
 
-    return (
-      plugin: WindowsPlugin(
+    return .pass(
+      WindowsPlugin(
         name: name,
         pluginClass: fields.pluginClass,
         dartPluginClass: fields.dartPluginClass,
@@ -693,7 +673,6 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
         defaultPackage: fields.defaultPackage,
         variants: variants,
       ),
-      errors: const <String>[],
     );
   }
 
@@ -758,18 +737,10 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
              defaultPackage != null,
        );
 
-  factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
-    final (:LinuxPlugin? plugin, :List<String> errors) = parseFromYaml(name, yaml);
-    if (errors.isNotEmpty) {
-      throwToolExit(
-        'Invalid "$kConfigKey" plugin specification for plugin "$name".\n${errors.join('\n')}',
-      );
-    }
-    return plugin!;
-  }
+  factory LinuxPlugin.fromYaml(String name, YamlMap yaml) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(name, yaml));
 
   /// Parses the Linux plugin configuration from the given [yaml].
-  static ({LinuxPlugin? plugin, List<String> errors}) parseFromYaml(String name, YamlMap yaml) {
+  static ParseResult<LinuxPlugin> parseFromYaml(String name, YamlMap yaml) {
     final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
     final _CommonPlatformFields fields = parser.parseCommonFields(name, displayName: 'Linux');
 
@@ -785,11 +756,11 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     }
 
     if (parser.errors.isNotEmpty) {
-      return (plugin: null, errors: parser.errors);
+      return .fail(parser.errors);
     }
 
-    return (
-      plugin: LinuxPlugin(
+    return .pass(
+      LinuxPlugin(
         name: name,
         pluginClass: fields.pluginClass,
         dartPluginClass: fields.dartPluginClass,
@@ -797,7 +768,6 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
         ffiPlugin: fields.ffiPlugin,
         defaultPackage: fields.defaultPackage,
       ),
-      errors: const <String>[],
     );
   }
 
@@ -844,16 +814,10 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
 class WebPlugin extends PluginPlatform {
   const WebPlugin({required this.name, required this.pluginClass, required this.fileName});
 
-  factory WebPlugin.fromYaml(String name, YamlMap yaml) {
-    final (:WebPlugin? plugin, :List<String> errors) = parseFromYaml(name, yaml);
-    if (errors.isNotEmpty) {
-      throwToolExit(errors.join('\n'));
-    }
-    return plugin!;
-  }
+  factory WebPlugin.fromYaml(String name, YamlMap yaml) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(name, yaml));
 
   /// Parses the Web plugin configuration from the given [yaml].
-  static ({WebPlugin? plugin, List<String> errors}) parseFromYaml(String name, YamlMap yaml) {
+  static ParseResult<WebPlugin> parseFromYaml(String name, YamlMap yaml) {
     final errors = <String>[];
     final Object? rawPluginClass = yaml[kPluginClass];
     String? pluginClass;
@@ -876,12 +840,9 @@ class WebPlugin extends PluginPlatform {
     }
 
     if (errors.isNotEmpty) {
-      return (plugin: null, errors: errors);
+      return .fail(errors);
     }
-    return (
-      plugin: WebPlugin(name: name, pluginClass: pluginClass!, fileName: fileName!),
-      errors: const <String>[],
-    );
+    return .pass(WebPlugin(name: name, pluginClass: pluginClass!, fileName: fileName!));
   }
 
   static const kConfigKey = 'web';

@@ -73,7 +73,7 @@ class Plugin {
     required bool isDevDependency,
     Set<String>? appDependencies,
   }) {
-    final (:Plugin? plugin, :List<String> errors) = _parseFromYaml(
+    final ParseResult<Plugin> result = _parseFromYaml(
       name,
       path,
       pluginYaml,
@@ -83,13 +83,15 @@ class Plugin {
       isDevDependency: isDevDependency,
       appDependencies: appDependencies,
     );
-    if (errors.isNotEmpty) {
-      throwToolExit('Invalid plugin specification $name.\n${errors.join('\n')}');
+    switch (result) {
+      case ParseResultPass(value: final plugin):
+        return plugin;
+      case ParseResultFail(errors: final errors):
+        throwToolExit('Invalid plugin specification $name.\n${errors.join('\n')}');
     }
-    return plugin!;
   }
 
-  static ({Plugin? plugin, List<String> errors}) _parseFromYaml(
+  static ParseResult<Plugin> _parseFromYaml(
     String name,
     String path,
     YamlMap? pluginYaml,
@@ -100,7 +102,7 @@ class Plugin {
     Set<String>? appDependencies,
   }) {
     if (pluginYaml == null) {
-      return (plugin: null, errors: <String>['Invalid "plugin" specification.']);
+      return .fail(<String>['Invalid "plugin" specification.']);
     }
 
     final bool usesOldPluginFormat = const <String>{
@@ -116,7 +118,7 @@ class Plugin {
           'The flutter.plugin.platforms key cannot be used in combination with the old '
           'flutter.plugin.{androidPackage,iosPrefix,pluginClass} keys. '
           'See: https://flutter.dev/to/pubspec-plugin-platforms';
-      return (plugin: null, errors: <String>[errorMessage]);
+      return .fail(<String>[errorMessage]);
     }
 
     if (!usesOldPluginFormat && !usesNewPluginFormat) {
@@ -124,7 +126,7 @@ class Plugin {
           'Cannot find the `flutter.plugin.platforms` key in the `pubspec.yaml` file. '
           'An instruction to format the `pubspec.yaml` can be found here: '
           'https://flutter.dev/to/pubspec-plugin-platforms';
-      return (plugin: null, errors: <String>[errorMessage]);
+      return .fail(<String>[errorMessage]);
     }
 
     final bool isDirectDependency = appDependencies != null && appDependencies.contains(name);
@@ -153,7 +155,7 @@ class Plugin {
     );
   }
 
-  static ({Plugin? plugin, List<String> errors}) _parseMultiPlatformYaml(
+  static ParseResult<Plugin> _parseMultiPlatformYaml(
     String name,
     String path,
     YamlMap pluginYaml,
@@ -167,10 +169,10 @@ class Plugin {
     if (platformsValue is! YamlMap?) {
       const errorMessage =
           'flutter.plugin.platforms should be a map with the platform name as the key';
-      return (plugin: null, errors: <String>[errorMessage]);
+      return .fail(<String>[errorMessage]);
     }
     if (platformsValue == null) {
-      return (plugin: null, errors: <String>['Invalid "platforms" specification.']);
+      return .fail(<String>['Invalid "platforms" specification.']);
     }
     final YamlMap platformsYaml = platformsValue;
 
@@ -184,8 +186,9 @@ class Plugin {
 
     void parseNativeOrDartPlatform<T extends PluginPlatform>(
       String platformKey,
-      ({T? plugin, List<String> errors}) Function(YamlMap) parse, {
+      ParseResult<T> Function(YamlMap) parse, {
       bool ignoreEmptyConfig = false,
+      bool Function(YamlMap)? skipIf,
     }) {
       if (!platformsYaml.containsKey(platformKey)) {
         return;
@@ -197,28 +200,29 @@ class Plugin {
         }
         return;
       }
-      final (plugin: T? parsed, errors: List<String> platformErrors) = parse(yamlValue);
-      if (platformErrors.isNotEmpty) {
-        errors.addAll(platformErrors);
+      if (skipIf != null && skipIf(yamlValue)) {
         return;
       }
-      if (parsed == null) {
-        return;
-      }
-      if (parsed case final NativeOrDartPlugin nativeOrDart) {
-        if (nativeOrDart.defaultPackage != null) {
-          defaultPackages[platformKey] = nativeOrDart.defaultPackage!;
-        } else {
-          platforms[platformKey] = parsed;
-        }
-        if (nativeOrDart.dartPluginClass != null) {
-          dartPluginClasses[platformKey] = (
-            dartClass: nativeOrDart.dartPluginClass!,
-            dartFileName: nativeOrDart.dartFileName ?? '$name.dart',
-          );
-        }
-      } else {
-        platforms[platformKey] = parsed;
+      switch (parse(yamlValue)) {
+        case ParseResultFail(errors: final List<String> platformErrors):
+          errors.addAll(platformErrors);
+          return;
+        case ParseResultPass(value: final T parsed):
+          if (parsed case final NativeOrDartPlugin nativeOrDart) {
+            if (nativeOrDart.defaultPackage != null) {
+              defaultPackages[platformKey] = nativeOrDart.defaultPackage!;
+            } else {
+              platforms[platformKey] = parsed;
+            }
+            if (nativeOrDart.dartPluginClass != null) {
+              dartPluginClasses[platformKey] = (
+                dartClass: nativeOrDart.dartPluginClass!,
+                dartFileName: nativeOrDart.dartFileName ?? '$name.dart',
+              );
+            }
+          } else {
+            platforms[platformKey] = parsed;
+          }
       }
     }
 
@@ -241,14 +245,13 @@ class Plugin {
     );
     parseNativeOrDartPlatform(
       WebPlugin.kConfigKey,
-      (YamlMap yaml) => yaml.containsKey(kDefaultPackage)
-          ? (plugin: null, errors: const <String>[])
-          : WebPlugin.parseFromYaml(name, yaml),
+      (YamlMap yaml) => WebPlugin.parseFromYaml(name, yaml),
       // Unlike native/Dart platforms, an empty `web:` entry (where the value is
       // null rather than a YamlMap) or a `web:` entry with `default_package` is
       // ignored rather than rejected, as existing published packages use an empty
       // `web:` key to declare web support without a WebPlugin registrant class.
       ignoreEmptyConfig: true,
+      skipIf: (YamlMap yaml) => yaml.containsKey(kDefaultPackage),
     );
     parseNativeOrDartPlatform(
       WindowsPlugin.kConfigKey,
@@ -266,11 +269,11 @@ class Plugin {
     }
 
     if (errors.isNotEmpty) {
-      return (plugin: null, errors: errors);
+      return .fail(errors);
     }
 
-    return (
-      plugin: Plugin(
+    return .pass(
+      Plugin(
         name: name,
         path: path,
         platforms: platforms,
@@ -282,11 +285,10 @@ class Plugin {
         implementsPackage: implementsPackage,
         isDevDependency: isDevDependency,
       ),
-      errors: const <String>[],
     );
   }
 
-  static ({Plugin? plugin, List<String> errors}) _parseLegacyYaml(
+  static ParseResult<Plugin> _parseLegacyYaml(
     String name,
     String path,
     YamlMap pluginYaml,
@@ -324,7 +326,7 @@ class Plugin {
     ];
 
     if (errors.isNotEmpty) {
-      return (plugin: null, errors: errors);
+      return .fail(errors);
     }
 
     final platforms = <String, PluginPlatform>{};
@@ -345,8 +347,8 @@ class Plugin {
         pluginClass: pluginClass,
       );
     }
-    return (
-      plugin: Plugin(
+    return .pass(
+      Plugin(
         name: name,
         path: path,
         platforms: platforms,
@@ -357,7 +359,6 @@ class Plugin {
         isDirectDependency: isDirectDependency,
         isDevDependency: isDevDependency,
       ),
-      errors: const <String>[],
     );
   }
 
@@ -386,7 +387,7 @@ class Plugin {
   }
 
   static List<String> validatePluginYaml(YamlMap? yaml, {String packageName = 'plugin'}) {
-    final (:List<String> errors, plugin: _) = _parseFromYaml(
+    final ParseResult<Plugin> result = _parseFromYaml(
       packageName,
       '',
       yaml,
@@ -397,10 +398,14 @@ class Plugin {
       // `validatePluginYaml` is called from `FlutterManifest` where no
       // `FileSystem` is available and the parsed `Plugin` is discarded here,
       // an unused `MemoryFileSystem` is passed.
+      // TODO(chingjun): Remove the required fileSystem parameter here.
       fileSystem: MemoryFileSystem(),
       isDevDependency: false,
     );
-    return errors;
+    return switch (result) {
+      ParseResultFail(:final errors) => errors,
+      ParseResultPass() => const <String>[],
+    };
   }
 
   final String name;
