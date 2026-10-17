@@ -372,24 +372,6 @@ ${fieldsSource(33)}
         ),
         File(dartPath).readAsStringSync(),
       );
-
-      if (Platform.environment.containsKey('LUCI_CONTEXT')) {
-        final ProcessResult diffResult = Process.runSync('git', <String>[
-          'diff',
-          '--exit-code',
-          '--',
-          cppPath,
-          dartPath,
-        ], workingDirectory: flutterRoot);
-        expect(
-          diffResult.exitCode,
-          0,
-          reason:
-              'Running the generate_text_styles build step dirtied the git repo. '
-              'Do not manually edit generated files ($cppPath, $dartPath), and '
-              'regenerate them after modifying $inputPath:\n${diffResult.stdout}',
-        );
-      }
     },
   );
 }

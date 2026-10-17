@@ -55,8 +55,22 @@ Future<void> main(List<String> arguments) async {
     libraryName: libElement.name,
   );
 
-  File(cppOutputPath).writeAsStringSync(cppHeader);
-  File(dartOutputPath).writeAsStringSync(dartCode);
+  final cppFile = File(cppOutputPath);
+  final dartFile = File(dartOutputPath);
+  if (Platform.environment.containsKey('LUCI_CONTEXT')) {
+    if (cppFile.readAsStringSync() != cppHeader || dartFile.readAsStringSync() != dartCode) {
+      stderr.writeln(
+        'Error: Generated files ($cppOutputPath, $dartOutputPath) are out of sync with $inputPath.\n'
+        'Do not manually edit generated files, and regenerate them after modifying $inputPath.',
+      );
+      exitCode = 1;
+      return;
+    }
+  } else {
+    cppFile.writeAsStringSync(cppHeader);
+    dartFile.writeAsStringSync(dartCode);
+  }
+
   if (stampPath != null) {
     final stampFile = File(stampPath);
     stampFile.parent.createSync(recursive: true);

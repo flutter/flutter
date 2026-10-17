@@ -162,144 +162,49 @@ void DecodeStrut(Dart_Handle strut_handle,
   }
 }
 
-}  // namespace
-
-IMPLEMENT_WRAPPERTYPEINFO(ui, ParagraphBuilder);
-
-void ParagraphBuilder::Create(Dart_Handle wrapper,
-                              const ParagraphStyle& in,
-                              const TextStyle& default_text_style) {
-  UIDartState::ThrowIfUIOperationsProhibited();
-  auto res = fml::MakeRefCounted<ParagraphBuilder>(in, default_text_style);
-  res->AssociateWithDartWrapper(wrapper);
-}
-
-ParagraphBuilder::ParagraphBuilder(const ParagraphStyle& in,
-                                   const TextStyle& default_text_style) {
-  // Primitive fields on `flutter::ParagraphStyle` and `flutter::TextStyle` are
-  // pre-populated with their default values from `ParagraphStyle._` and
-  // `TextStyle._` in `lib/ui/text.dart` when omitted by the caller, so they can
-  // be assigned directly without `has_<field>()` checks.
-  txt::ParagraphStyle style;
-  style.text_align = static_cast<txt::TextAlign>(in.text_align);
-  style.text_direction = static_cast<txt::TextDirection>(in.text_direction);
-  style.text_height_behavior = in.text_height_behavior & 0x3;
-
-  // Still check `in.has_max_lines()` because an omitted `maxLines`
-  // means unlimited lines (`std::numeric_limits<size_t>::max()`).
-  if (in.has_max_lines()) {
-    style.max_lines = in.max_lines;
-  }
-  const bool default_half_leading = default_text_style.leading_distribution == 1;
-  if (in.has_strut_style()) {
-    DecodeStrut(in.strut_style, default_half_leading, style);
-  }
-  if (in.has_ellipsis()) {
-    style.ellipsis =
-        tonic::DartConverter<std::u16string>::FromDart(in.ellipsis);
-  }
-  // Hyphens.manual (0) renders the soft hyphen glyph; Hyphens.hidden (1)
-  // suppresses it.
-  style.render_soft_hyphens = in.hyphens == 0;
-
-  // Populate the paragraph's base font properties (used by SkParagraph for
-  // unstyled text and ellipsis, and copied into `base_style_` by
-  // `ParagraphStyle::GetTextStyle()`).
-  style.font_weight = default_text_style.font_weight;
-  style.font_style = static_cast<txt::FontStyle>(default_text_style.font_style);
-  if (default_text_style.has_font_family()) {
-    style.font_family = tonic::DartConverter<std::string>::FromDart(
-        default_text_style.font_family);
-  }
-  style.font_size = default_text_style.font_size;
-  if (default_text_style.height != kTextHeightNone) {
-    style.height = default_text_style.height;
-    style.has_height_override = true;
-  }
-  if (default_text_style.has_locale()) {
-    style.locale =
-        tonic::DartConverter<std::string>::FromDart(default_text_style.locale);
-  }
-
-  // Populate the remaining `TextStyle` defaults so `style.GetTextStyle()`
-  // produces a complete base `txt::TextStyle` for `ParagraphBuilder::pushStyle`
-  // to inherit from.
-  style.default_text_style.color = default_text_style.color;
-  style.default_text_style.decoration =
-      static_cast<txt::TextDecoration>(default_text_style.decoration);
-  style.default_text_style.decoration_color =
-      default_text_style.decoration_color;
-  style.default_text_style.decoration_style =
-      static_cast<txt::TextDecorationStyle>(
-          default_text_style.decoration_style);
-  style.default_text_style.decoration_thickness_multiplier =
-      default_text_style.decoration_thickness;
-  style.default_text_style.text_baseline =
-      static_cast<txt::TextBaseline>(default_text_style.text_baseline);
-  style.default_text_style.letter_spacing = default_text_style.letter_spacing;
-  style.default_text_style.word_spacing = default_text_style.word_spacing;
-  style.default_text_style.half_leading = default_half_leading;
-
-  FontCollection& font_collection = UIDartState::Current()
-                                        ->platform_configuration()
-                                        ->client()
-                                        ->GetFontCollection();
-
-  auto impeller_enabled = UIDartState::Current()->IsImpellerEnabled();
-  m_paragraph_builder_ = txt::ParagraphBuilder::CreateSkiaBuilder(
-      style, font_collection.GetFontCollection(), impeller_enabled);
-}
-
-ParagraphBuilder::~ParagraphBuilder() = default;
-
-void ParagraphBuilder::pushStyle(const TextStyle& in) {
-  // `PeekStyle()` returns `base_style_` (seeded from `default_text_style` in
-  // the constructor) when the style stack is empty, or the parent
-  // `txt::TextStyle` when styles are nested. Only fields explicitly provided on
-  // `in` (`in.has_<field>()`) overwrite the inherited style.
-  txt::TextStyle style = m_paragraph_builder_->PeekStyle();
-
-  if (in.has_color()) {
+template <bool kUseDefaults>
+void ApplyTextStyle(const TextStyle& in, txt::TextStyle& style) {
+  if (kUseDefaults || in.has_color()) {
     style.color = in.color;
   }
-  if (in.has_decoration()) {
+  if (kUseDefaults || in.has_decoration()) {
     style.decoration = static_cast<txt::TextDecoration>(in.decoration);
   }
-  if (in.has_decoration_color()) {
+  if (kUseDefaults || in.has_decoration_color()) {
     style.decoration_color = in.decoration_color;
   }
-  if (in.has_decoration_style()) {
+  if (kUseDefaults || in.has_decoration_style()) {
     style.decoration_style =
         static_cast<txt::TextDecorationStyle>(in.decoration_style);
   }
-  if (in.has_decoration_thickness()) {
+  if (kUseDefaults || in.has_decoration_thickness()) {
     style.decoration_thickness_multiplier = in.decoration_thickness;
   }
-  if (in.has_text_baseline()) {
+  if (kUseDefaults || in.has_text_baseline()) {
     // TODO(abarth): Implement TextBaseline. The CSS version of this
     // property wasn't wired up either.
     style.text_baseline = static_cast<txt::TextBaseline>(in.text_baseline);
   }
-  if (in.has_font_weight()) {
+  if (kUseDefaults || in.has_font_weight()) {
     style.font_weight = in.font_weight;
   }
-  if (in.has_font_style()) {
+  if (kUseDefaults || in.has_font_style()) {
     style.font_style = static_cast<txt::FontStyle>(in.font_style);
   }
-  if (in.has_font_size()) {
+  if (kUseDefaults || in.has_font_size()) {
     style.font_size = in.font_size;
   }
-  if (in.has_letter_spacing()) {
+  if (kUseDefaults || in.has_letter_spacing()) {
     style.letter_spacing = in.letter_spacing;
   }
-  if (in.has_word_spacing()) {
+  if (kUseDefaults || in.has_word_spacing()) {
     style.word_spacing = in.word_spacing;
   }
-  if (in.has_height()) {
+  if (kUseDefaults || in.has_height()) {
     style.height = in.height;
     style.has_height_override = style.height != kTextHeightNone;
   }
-  if (in.has_leading_distribution()) {
+  if (kUseDefaults || in.has_leading_distribution()) {
     style.half_leading = in.leading_distribution == 1;
   }
   if (in.has_locale()) {
@@ -333,7 +238,82 @@ void ParagraphBuilder::pushStyle(const TextStyle& in) {
   if (in.has_font_variations()) {
     DecodeFontVariations(in.font_variations, style.font_variations);
   }
+}
 
+}  // namespace
+
+IMPLEMENT_WRAPPERTYPEINFO(ui, ParagraphBuilder);
+
+void ParagraphBuilder::Create(Dart_Handle wrapper,
+                              const ParagraphStyle& in,
+                              const TextStyle& default_text_style) {
+  UIDartState::ThrowIfUIOperationsProhibited();
+  auto res = fml::MakeRefCounted<ParagraphBuilder>(in, default_text_style);
+  res->AssociateWithDartWrapper(wrapper);
+}
+
+ParagraphBuilder::ParagraphBuilder(const ParagraphStyle& in,
+                                   const TextStyle& default_text_style) {
+  // Primitive fields on `flutter::ParagraphStyle` and `flutter::TextStyle` are
+  // pre-populated with their default values from `ParagraphStyle._` and
+  // `TextStyle._` in `lib/ui/text.dart` when omitted by the caller, so they can
+  // be assigned directly without `has_<field>()` checks.
+  txt::ParagraphStyle style;
+  style.text_align = static_cast<txt::TextAlign>(in.text_align);
+  style.text_direction = static_cast<txt::TextDirection>(in.text_direction);
+  style.text_height_behavior = in.text_height_behavior & 0x3;
+
+  // Still check `in.has_max_lines()` because an omitted `maxLines`
+  // means unlimited lines (`std::numeric_limits<size_t>::max()`).
+  if (in.has_max_lines()) {
+    style.max_lines = in.max_lines;
+  }
+  if (in.has_ellipsis()) {
+    style.ellipsis =
+        tonic::DartConverter<std::u16string>::FromDart(in.ellipsis);
+  }
+  // Hyphens.manual (0) renders the soft hyphen glyph; Hyphens.hidden (1)
+  // suppresses it.
+  style.render_soft_hyphens = in.hyphens == 0;
+
+  // Seed `style.default_text_style` with all fields (including defaults) from
+  // `default_text_style`, then mirror the paragraph-level font properties onto
+  // `style` for SkParagraph and `ParagraphStyle::GetTextStyle()`.
+  ApplyTextStyle</*kUseDefaults=*/true>(default_text_style,
+                                        style.default_text_style);
+  style.font_weight = style.default_text_style.font_weight;
+  style.font_style = style.default_text_style.font_style;
+  if (default_text_style.has_font_family()) {
+    style.font_family = style.default_text_style.font_families[0];
+  }
+  style.font_size = style.default_text_style.font_size;
+  style.height = style.default_text_style.height;
+  style.has_height_override = style.default_text_style.has_height_override;
+  style.locale = style.default_text_style.locale;
+
+  if (in.has_strut_style()) {
+    DecodeStrut(in.strut_style, style.default_text_style.half_leading, style);
+  }
+
+  FontCollection& font_collection = UIDartState::Current()
+                                        ->platform_configuration()
+                                        ->client()
+                                        ->GetFontCollection();
+
+  auto impeller_enabled = UIDartState::Current()->IsImpellerEnabled();
+  m_paragraph_builder_ = txt::ParagraphBuilder::CreateSkiaBuilder(
+      style, font_collection.GetFontCollection(), impeller_enabled);
+}
+
+ParagraphBuilder::~ParagraphBuilder() = default;
+
+void ParagraphBuilder::pushStyle(const TextStyle& in) {
+  // `PeekStyle()` returns `base_style_` (seeded from `default_text_style` in
+  // the constructor) when the style stack is empty, or the parent
+  // `txt::TextStyle` when styles are nested. Only fields explicitly provided on
+  // `in` (`in.has_<field>()`) overwrite the inherited style.
+  txt::TextStyle style = m_paragraph_builder_->PeekStyle();
+  ApplyTextStyle</*kUseDefaults=*/false>(in, style);
   m_paragraph_builder_->PushStyle(style);
 }
 
