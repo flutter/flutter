@@ -423,6 +423,16 @@ EGLBoolean _eglDestroyContext(EGLDisplay dpy, EGLContext ctx) {
   return bool_success();
 }
 
+EGLBoolean _eglTerminate(EGLDisplay dpy) {
+  if (!check_display(dpy)) {
+    return EGL_FALSE;
+  }
+
+  display_initialized = false;
+
+  return bool_success();
+}
+
 EGLBoolean _eglSwapInterval(EGLDisplay dpy, EGLint interval) {
   if (!check_display(dpy) || !check_initialized(dpy)) {
     return EGL_FALSE;
@@ -852,6 +862,7 @@ EGLBoolean (*epoxy_eglQuerySurface)(EGLDisplay dpy,
                                     EGLint* value);
 EGLBoolean (*epoxy_eglDestroySurface)(EGLDisplay dpy, EGLSurface surface);
 EGLBoolean (*epoxy_eglDestroyContext)(EGLDisplay dpy, EGLContext ctx);
+EGLBoolean (*epoxy_eglTerminate)(EGLDisplay dpy);
 EGLBoolean (*epoxy_eglSwapInterval)(EGLDisplay dpy, EGLint interval);
 EGLSyncKHR (*epoxy_eglCreateSyncKHR)(EGLDisplay dpy,
                                      EGLenum type,
@@ -966,6 +977,7 @@ static void library_init() {
   epoxy_eglQuerySurface = _eglQuerySurface;
   epoxy_eglDestroySurface = _eglDestroySurface;
   epoxy_eglDestroyContext = _eglDestroyContext;
+  epoxy_eglTerminate = _eglTerminate;
   epoxy_eglSwapInterval = _eglSwapInterval;
   epoxy_eglCreateSyncKHR = _eglCreateSyncKHR;
   epoxy_eglDestroySyncKHR = _eglDestroySyncKHR;
