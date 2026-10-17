@@ -438,6 +438,135 @@ const float kFloatCompareEpsilon = 0.001;
                              kFloatCompareEpsilon);
 }
 
+
+- (void)testHiddenNodeInVerticalScrollableHasNonEmptyFrameAtViewportEdge {
+  fml::WeakPtrFactory<flutter::testing::MockAccessibilityBridge> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::testing::MockAccessibilityBridge> bridge = factory.GetWeakPtr();
+  CGFloat scale = ((bridge->view().window.screen ?: UIScreen.mainScreen)).scale;
+
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* above = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  SemanticsObject* visible = [[SemanticsObject alloc] initWithBridge:bridge uid:2];
+  SemanticsObject* below = [[SemanticsObject alloc] initWithBridge:bridge uid:3];
+  scrollable.children = @[ above, visible, below ];
+
+  flutter::SemanticsNode scrollableNode;
+  scrollableNode.id = 0;
+  scrollableNode.flags.hasImplicitScrolling = true;
+  scrollableNode.actions = flutter::kVerticalScrollSemanticsActions;
+  scrollableNode.rect = SkRect::MakeXYWH(0, 100 * scale, 300 * scale, 400 * scale);
+  [scrollable setSemanticsNode:&scrollableNode];
+
+  flutter::SemanticsNode aboveNode;
+  aboveNode.id = 1;
+  aboveNode.label = "above";
+  aboveNode.flags.isHidden = true;
+  aboveNode.rect = SkRect::MakeXYWH(0, 0, 300 * scale, 50 * scale);
+  [above setSemanticsNode:&aboveNode];
+
+  flutter::SemanticsNode visibleNode;
+  visibleNode.id = 2;
+  visibleNode.label = "visible";
+  visibleNode.rect = SkRect::MakeXYWH(0, 200 * scale, 300 * scale, 50 * scale);
+  [visible setSemanticsNode:&visibleNode];
+
+  flutter::SemanticsNode belowNode;
+  belowNode.id = 3;
+  belowNode.label = "below";
+  belowNode.flags.isHidden = true;
+  belowNode.rect = SkRect::MakeXYWH(0, 550 * scale, 300 * scale, 50 * scale);
+  [below setSemanticsNode:&belowNode];
+
+  CGRect viewport = scrollable.accessibilityFrame;
+  XCTAssertFalse(CGRectIsEmpty(viewport));
+
+  CGRect visibleFrame = visible.accessibilityFrame;
+  XCTAssertEqualWithAccuracy(CGRectGetMinY(visibleFrame), CGRectGetMinY(viewport) + 100,
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(CGRectGetHeight(visibleFrame), 50, kFloatCompareEpsilon);
+
+  CGRect aboveFrame = above.accessibilityFrame;
+  XCTAssertFalse(CGRectIsEmpty(aboveFrame));
+  XCTAssertTrue(CGRectContainsRect(viewport, aboveFrame));
+  XCTAssertEqualWithAccuracy(CGRectGetMinY(aboveFrame), CGRectGetMinY(viewport),
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(CGRectGetWidth(aboveFrame), CGRectGetWidth(viewport),
+                             kFloatCompareEpsilon);
+
+  CGRect belowFrame = below.accessibilityFrame;
+  XCTAssertFalse(CGRectIsEmpty(belowFrame));
+  XCTAssertTrue(CGRectContainsRect(viewport, belowFrame));
+  XCTAssertEqualWithAccuracy(CGRectGetMaxY(belowFrame), CGRectGetMaxY(viewport),
+                             kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(CGRectGetWidth(belowFrame), CGRectGetWidth(viewport),
+                             kFloatCompareEpsilon);
+
+  [below accessibilityScrollToVisible];
+  XCTAssertTrue(bridge->observations.size() == 1);
+  XCTAssertTrue(bridge->observations[0].id == 3);
+  XCTAssertTrue(bridge->observations[0].action == flutter::SemanticsAction::kShowOnScreen);
+}
+
+- (void)testHiddenNodeInHorizontalScrollableHasNonEmptyFrameAtViewportEdge {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+  CGFloat scale = ((bridge->view().window.screen ?: UIScreen.mainScreen)).scale;
+
+  FlutterScrollableSemanticsObject* scrollable =
+      [[FlutterScrollableSemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* trailing = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  scrollable.children = @[ trailing ];
+
+  flutter::SemanticsNode scrollableNode;
+  scrollableNode.id = 0;
+  scrollableNode.flags.hasImplicitScrolling = true;
+  scrollableNode.actions = flutter::kHorizontalScrollSemanticsActions;
+  scrollableNode.rect = SkRect::MakeXYWH(0, 100 * scale, 300 * scale, 100 * scale);
+  [scrollable setSemanticsNode:&scrollableNode];
+
+  flutter::SemanticsNode trailingNode;
+  trailingNode.id = 1;
+  trailingNode.label = "trailing";
+  trailingNode.flags.isHidden = true;
+  trailingNode.rect = SkRect::MakeXYWH(350 * scale, 100 * scale, 100 * scale, 100 * scale);
+  [trailing setSemanticsNode:&trailingNode];
+
+  CGRect viewport = scrollable.accessibilityFrame;
+  CGRect frame = trailing.accessibilityFrame;
+  XCTAssertFalse(CGRectIsEmpty(frame));
+  XCTAssertTrue(CGRectContainsRect(viewport, frame));
+  XCTAssertEqualWithAccuracy(CGRectGetMaxX(frame), CGRectGetMaxX(viewport), kFloatCompareEpsilon);
+  XCTAssertEqualWithAccuracy(CGRectGetHeight(frame), CGRectGetHeight(viewport),
+                             kFloatCompareEpsilon);
+}
+
+- (void)testHiddenNodeOutsideScrollableKeepsEmptyFrame {
+  fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
+      new flutter::testing::MockAccessibilityBridge());
+  fml::WeakPtr<flutter::AccessibilityBridgeIos> bridge = factory.GetWeakPtr();
+
+  SemanticsObject* parent = [[SemanticsObject alloc] initWithBridge:bridge uid:0];
+  SemanticsObject* child = [[SemanticsObject alloc] initWithBridge:bridge uid:1];
+  parent.children = @[ child ];
+
+  flutter::SemanticsNode parentNode;
+  parentNode.id = 0;
+  parentNode.rect = SkRect::MakeXYWH(0, 0, 300, 400);
+  [parent setSemanticsNode:&parentNode];
+
+  flutter::SemanticsNode childNode;
+  childNode.id = 1;
+  childNode.label = "hidden";
+  childNode.flags.isHidden = true;
+  childNode.rect = SkRect::MakeXYWH(0, 500, 300, 50);
+  [child setSemanticsNode:&childNode];
+
+  XCTAssertTrue(CGRectIsEmpty(child.accessibilityFrame));
+}
+
 - (void)testVerticalFlutterScrollableSemanticsObjectNoWindowDoesNotCrash {
   fml::WeakPtrFactory<flutter::AccessibilityBridgeIos> factory(
       new flutter::testing::MockAccessibilityBridgeNoWindow());
