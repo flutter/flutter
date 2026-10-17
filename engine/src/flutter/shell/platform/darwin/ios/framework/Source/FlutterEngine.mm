@@ -1174,6 +1174,15 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
 }
 
 - (void)flutterTextInputView:(FlutterTextInputView*)textInputView
+           didDeleteBackward:(NSString*)deletedText
+                  withClient:(int)client {
+  // One-way: invokeMethod:arguments: sends no binary reply, so nothing here
+  // waits on the framework and -deleteBackward is never re-entered.
+  [self.textInputChannel invokeMethod:@"TextInputClient.didDeleteBackward"
+                            arguments:@[ @(client), deletedText ]];
+}
+
+- (void)flutterTextInputView:(FlutterTextInputView*)textInputView
     showAutocorrectionPromptRectForStart:(NSUInteger)start
                                      end:(NSUInteger)end
                               withClient:(int)client {

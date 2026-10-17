@@ -86,6 +86,12 @@ typedef SelectionChangedCallback = void Function(
   SelectionChangedCause? cause,
 );
 
+/// Signature for the callback that reports a backward deletion.
+///
+/// `deletedText` is the text that was removed. It is empty when the deletion
+/// removed nothing, which is the case this callback exists to report.
+typedef DeleteBackwardCallback = void Function(String deletedText);
+
 /// Signature for the callback that reports the app private command results.
 typedef AppPrivateCommandCallback = void Function(String action, Map<String, dynamic> data);
 
@@ -893,6 +899,7 @@ class EditableText extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onAppPrivateCommand,
+    this.onDeleteBackward,
     this.onSelectionChanged,
     this.onSelectionHandleTapped,
     this.groupId = EditableText,
@@ -1547,6 +1554,37 @@ class EditableText extends StatefulWidget {
   ///     send a command to the input method.
   /// {@endtemplate}
   final AppPrivateCommandCallback? onAppPrivateCommand;
+
+  /// {@template flutter.widgets.editableText.onDeleteBackward}
+  /// Called after a backward deletion, including when it removed nothing.
+  ///
+  /// The argument is the text that was removed, and is empty when the deletion
+  /// removed nothing — a backspace on an empty field, or one with the
+  /// selection collapsed at offset zero. Those presses change no text at all,
+  /// so they cannot be observed through [onChanged], a [TextEditingController]
+  /// listener, or a [TextInputFormatter]; this callback is the only way to see
+  /// them. Detecting them is what makes a backspace move focus to the previous
+  /// box of a PIN or one-time-code field.
+  ///
+  /// Called after the deletion has been applied, so the controller already
+  /// holds the new value when this runs.
+  ///
+  /// This is best effort, and what reaches it depends on the platform's text
+  /// input system and on the active input method:
+  ///
+  ///  * It does not fire while an input method has an active composing region,
+  ///    because the input method edits that region itself rather than
+  ///    reporting a deletion. This covers most CJK input.
+  ///  * More generally on Android it fires only when the input method reports
+  ///    the press, which not every input method or version does.
+  ///  * It may fire without a key press, for example from an assistive
+  ///    technology or an input method that deletes programmatically.
+  ///  * It does not fire on the web.
+  ///
+  /// So a call means a backward deletion happened, but the absence of a call
+  /// does not mean none did.
+  /// {@endtemplate}
+  final DeleteBackwardCallback? onDeleteBackward;
 
   /// {@template flutter.widgets.editableText.onSelectionChanged}
   /// Called when the user changes the selection of text (including the cursor
@@ -3816,6 +3854,14 @@ class EditableTextState extends State<EditableText>
   @override
   void performPrivateCommand(String action, Map<String, dynamic> data) {
     widget.onAppPrivateCommand?.call(action, data);
+  }
+
+  // Reported by embedders that perform the deletion themselves, which today
+  // means iOS. Platforms where the framework deletes instead report it from
+  // _DeleteTextAction, so that exactly one of the two paths fires per press.
+  @override
+  void didDeleteBackward(String deletedText) {
+    widget.onDeleteBackward?.call(deletedText);
   }
 
   @override
@@ -6603,6 +6649,32 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     }
   }
 
+  // The text [range] covers in [value], which is the text a replacement of
+  // that range removes. Empty when the range removes nothing, which is the
+  // backspace-on-an-empty-field case.
+  String _deletedTextIn(TextEditingValue value, TextRange range) {
+    if (!range.isValid || range.isCollapsed) {
+      return '';
+    }
+    final int start = range.start.clamp(0, value.text.length);
+    final int end = range.end.clamp(0, value.text.length);
+    return start < end ? value.text.substring(start, end) : '';
+  }
+
+  // Reports a backward deletion once it has been applied.
+  //
+  // This is the leg for platforms where the framework performs the deletion.
+  // iOS deletes in the engine instead and reports it through
+  // EditableTextState.didDeleteBackward, so only one of the two fires per
+  // press: on iOS a bare backspace never reaches this action, because
+  // _iOSDisablingTextShortcuts maps it to DoNothingAndStopPropagationTextIntent.
+  void _reportDeleteBackward(T intent, TextEditingValue oldValue, TextRange range) {
+    if (intent.forward) {
+      return;
+    }
+    state.widget.onDeleteBackward?.call(_deletedTextIn(oldValue, range));
+  }
+
   @override
   Object? invoke(T intent, [BuildContext? context]) {
     final TextSelection selection = state._value.selection;
@@ -6625,7 +6697,10 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
         SelectionChangedCause.keyboard,
       );
       _hideToolbarIfTextChanged(replaceTextIntent);
-      return Actions.invoke(context!, replaceTextIntent);
+      final TextEditingValue oldValue = state._value;
+      final Object? result = Actions.invoke(context!, replaceTextIntent);
+      _reportDeleteBackward(intent, oldValue, range);
+      return result;
     }
 
     final int target = _applyTextBoundary(selection.base, intent.forward, getTextBoundary()).offset;
@@ -6644,7 +6719,10 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
       SelectionChangedCause.keyboard,
     );
     _hideToolbarIfTextChanged(replaceTextIntent);
-    return Actions.invoke(context!, replaceTextIntent);
+    final TextEditingValue oldValue = state._value;
+    final Object? result = Actions.invoke(context!, replaceTextIntent);
+    _reportDeleteBackward(intent, oldValue, rangeToDelete);
+    return result;
   }
 
   @override
