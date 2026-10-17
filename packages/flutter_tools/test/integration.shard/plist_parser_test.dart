@@ -180,7 +180,7 @@ void main() {
     skip: platform.isMacOS, // [intended] requires absence of macos tool chain.
   );
 
-  testWithoutContext('PlistParser.replaceKey can replace a key', () async {
+  testWithoutContext('PlistParser.replaceKeyWithString can replace a key', () async {
     file.writeAsBytesSync(base64.decode(base64PlistXml));
 
     expect(
@@ -188,7 +188,7 @@ void main() {
       'io.flutter.flutter.app',
     );
     expect(
-      parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
+      parser.replaceKeyWithString(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
       isTrue,
     );
     expect(logger.statusText, isEmpty);
@@ -199,41 +199,52 @@ void main() {
     );
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
-  testWithoutContext('PlistParser.replaceKey can create a new key', () async {
+  testWithoutContext('PlistParser.replaceKeyWithString can create a new key', () async {
     file.writeAsBytesSync(base64.decode(base64PlistXml));
 
     expect(parser.getValueFromFile<String>(file.path, 'CFNewKey'), isNull);
-    expect(parser.replaceKey(file.path, key: 'CFNewKey', value: 'dev.flutter.fake'), isTrue);
+    expect(
+      parser.replaceKeyWithString(file.path, key: 'CFNewKey', value: 'dev.flutter.fake'),
+      isTrue,
+    );
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
     expect(parser.getValueFromFile<String>(file.path, 'CFNewKey'), equals('dev.flutter.fake'));
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
-  testWithoutContext('PlistParser.replaceKey can delete a key', () async {
+  testWithoutContext('PlistParser.replaceKeyWithString can delete a key', () async {
     file.writeAsBytesSync(base64.decode(base64PlistXml));
 
-    expect(parser.replaceKey(file.path, key: 'CFBundleIdentifier'), isTrue);
+    expect(parser.replaceKeyWithString(file.path, key: 'CFBundleIdentifier'), isTrue);
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
     expect(parser.getValueFromFile<String>(file.path, 'CFBundleIdentifier'), isNull);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
-  testWithoutContext('PlistParser.replaceKey throws when /usr/bin/plutil is not found', () async {
-    file.writeAsBytesSync(base64.decode(base64PlistXml));
+  testWithoutContext(
+    'PlistParser.replaceKeyWithString throws when /usr/bin/plutil is not found',
+    () async {
+      file.writeAsBytesSync(base64.decode(base64PlistXml));
 
-    expect(
-      () => parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
-      throwsA(isA<FileNotFoundException>()),
-    );
-    expect(logger.statusText, isEmpty);
-    expect(logger.errorText, isEmpty);
-  }, skip: platform.isMacOS); // [intended] requires absence of macos tool chain.
+      expect(
+        () => parser.replaceKeyWithString(
+          file.path,
+          key: 'CFBundleIdentifier',
+          value: 'dev.flutter.fake',
+        ),
+        throwsA(isA<FileNotFoundException>()),
+      );
+      expect(logger.statusText, isEmpty);
+      expect(logger.errorText, isEmpty);
+    },
+    skip: platform.isMacOS, // [intended] requires absence of macos tool chain.
+  );
 
-  testWithoutContext('PlistParser.replaceKey returns false for a malformed plist file', () {
+  testWithoutContext('PlistParser.replaceKeyWithString returns false for a malformed plist file', () {
     file.writeAsBytesSync(const <int>[1, 2, 3, 4, 5, 6]);
 
     expect(
-      parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
+      parser.replaceKeyWithString(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
       isFalse,
     );
     // See the malformed-plist getValueFromFile test above: the diagnostic
@@ -256,7 +267,7 @@ void main() {
     );
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
 
-  testWithoutContext('PlistParser.replaceKey works with a JSON file', () {
+  testWithoutContext('PlistParser.replaceKeyWithString works with a JSON file', () {
     file.writeAsBytesSync(base64.decode(base64PlistJson));
 
     expect(
@@ -264,7 +275,7 @@ void main() {
       'io.flutter.flutter.app',
     );
     expect(
-      parser.replaceKey(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
+      parser.replaceKeyWithString(file.path, key: 'CFBundleIdentifier', value: 'dev.flutter.fake'),
       isTrue,
     );
     expect(
@@ -274,6 +285,67 @@ void main() {
     expect(logger.statusText, isEmpty);
     expect(logger.errorText, isEmpty);
   }, skip: !platform.isMacOS); // [intended] requires macos tool chain.
+
+  for (final MapEntry<String, String> plist in <String, String>{
+    'XML': base64PlistXml,
+    'binary': base64PlistBinary,
+  }.entries) {
+    for (final value in <bool>[true, false]) {
+      testWithoutContext(
+        'PlistParser.replaceKeyWithBoolean writes $value as a boolean in a ${plist.key} file',
+        () {
+          file.writeAsBytesSync(base64.decode(plist.value));
+
+          expect(
+            parser.replaceKeyWithBoolean(file.path, key: 'CFBundleIdentifier', value: value),
+            isTrue,
+          );
+          expect(parser.getValueFromFile<bool>(file.path, 'CFBundleIdentifier'), value);
+          expect(parser.parseFile(file.path), <String, Object>{
+            'CFBundleExecutable': 'App',
+            'CFBundleIdentifier': value,
+          });
+          expect(logger.statusText, isEmpty);
+          expect(logger.errorText, isEmpty);
+        },
+        skip: !platform.isMacOS, // [intended] requires macos tool chain.
+      );
+    }
+  }
+
+  testWithoutContext(
+    'PlistParser.replaceKeyWithBoolean throws when /usr/bin/plutil is not found',
+    () {
+      file.writeAsBytesSync(base64.decode(base64PlistXml));
+
+      expect(
+        () => parser.replaceKeyWithBoolean(file.path, key: 'CFNewKey', value: true),
+        throwsA(isA<FileNotFoundException>()),
+      );
+      expect(logger.statusText, isEmpty);
+      expect(logger.errorText, isEmpty);
+    },
+    skip: platform.isMacOS, // [intended] requires absence of macos tool chain.
+  );
+
+  testWithoutContext(
+    'PlistParser.replaceKeyWithBoolean returns false for a malformed plist file',
+    () {
+      const contents = <int>[1, 2, 3, 4, 5, 6];
+      file.writeAsBytesSync(contents);
+
+      expect(parser.replaceKeyWithBoolean(file.path, key: 'CFNewKey', value: true), isFalse);
+      expect(file.readAsBytesSync(), contents);
+      expect(
+        logger.errorText,
+        endsWith(
+          'ProcessException: The command failed with exit code 1\n'
+          '  Command: /usr/bin/plutil -replace CFNewKey -bool true foo.plist\n',
+        ),
+      );
+    },
+    skip: !platform.isMacOS, // [intended] requires macos tool chain.
+  );
 
   testWithoutContext('PlistParser.parseFile can handle different datatypes', () async {
     file.writeAsBytesSync(base64.decode(base64PlistXmlWithComplexDatatypes));

@@ -41,7 +41,7 @@ class FlutterApplicationMigration extends ProjectMigrator {
       logger.printStatus(
         'Updating ${_infoPlistFile.basename} to use NSApplication instead of FlutterApplication.',
       );
-      final bool success = globals.plistParser.replaceKey(
+      final bool success = globals.plistParser.replaceKeyWithString(
         _infoPlistFile.path,
         key: PlistParser.kNSPrincipalClassKey,
         value: 'NSApplication',

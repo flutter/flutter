@@ -83,7 +83,7 @@ class PlistParser {
   /// If the value is null, then the key will be removed.
   ///
   /// Returns true if successful.
-  bool replaceKey(String plistFilePath, {required String key, String? value}) {
+  bool replaceKeyWithString(String plistFilePath, {required String key, String? value}) {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
     }
@@ -93,6 +93,30 @@ class PlistParser {
     } else {
       args = <String>[_plutilExecutable, '-replace', key, '-string', value, plistFilePath];
     }
+    try {
+      _processUtils.runSync(args, throwOnError: true);
+    } on ProcessException catch (error) {
+      _logger.printError('$error');
+      return false;
+    }
+    return true;
+  }
+
+  /// Replaces the key in the given plist file with a boolean value.
+  ///
+  /// Returns true if successful.
+  bool replaceKeyWithBoolean(String plistFilePath, {required String key, required bool value}) {
+    if (!_fileSystem.isFileSync(_plutilExecutable)) {
+      throw const FileNotFoundException(_plutilExecutable);
+    }
+    final args = <String>[
+      _plutilExecutable,
+      '-replace',
+      key,
+      '-bool',
+      value.toString(),
+      plistFilePath,
+    ];
     try {
       _processUtils.runSync(args, throwOnError: true);
     } on ProcessException catch (error) {

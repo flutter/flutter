@@ -400,11 +400,17 @@ class FakePlistParser implements PlistParser {
   }
 
   @override
-  bool replaceKey(String plistFilePath, {required String key, String? value}) {
+  bool replaceKeyWithString(String plistFilePath, {required String key, String? value}) {
     if (value == null) {
       _underlyingValues.remove(key);
       return true;
     }
+    setProperty(key, value);
+    return true;
+  }
+
+  @override
+  bool replaceKeyWithBoolean(String plistFilePath, {required String key, required bool value}) {
     setProperty(key, value);
     return true;
   }
