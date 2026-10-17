@@ -226,18 +226,6 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     required this._fileSystem,
   }) : ffiPlugin = ffiPlugin ?? false;
 
-  factory AndroidPlugin.fromYaml(
-    String name,
-    YamlMap yaml,
-    String pluginPath,
-    FileSystem fileSystem,
-  ) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(
-      name,
-      yaml,
-      pluginPath: pluginPath,
-      fileSystem: fileSystem,
-    ));
-
   /// Parses the Android plugin configuration from the given [yaml].
   static ParseResult<AndroidPlugin> parseFromYaml(
     String name,
@@ -419,8 +407,6 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
   }) : ffiPlugin = ffiPlugin ?? false,
        sharedDarwinSource = sharedDarwinSource ?? false;
 
-  factory IOSPlugin.fromYaml(String name, YamlMap yaml) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(name, yaml));
-
   /// Parses the iOS plugin configuration from the given [yaml].
   static ParseResult<IOSPlugin> parseFromYaml(String name, YamlMap yaml) {
     final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
@@ -522,8 +508,6 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
   }) : ffiPlugin = ffiPlugin ?? false,
        sharedDarwinSource = sharedDarwinSource ?? false;
 
-  factory MacOSPlugin.fromYaml(String name, YamlMap yaml) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(name, yaml));
-
   /// Parses the macOS plugin configuration from the given [yaml].
   static ParseResult<MacOSPlugin> parseFromYaml(String name, YamlMap yaml) {
     final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
@@ -621,8 +605,6 @@ class WindowsPlugin extends PluginPlatform implements NativeOrDartPlugin, Varian
              defaultPackage != null ||
              (ffiPlugin ?? false),
        );
-
-  factory WindowsPlugin.fromYaml(String name, YamlMap yaml) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(name, yaml));
 
   /// Parses the Windows plugin configuration from the given [yaml].
   static ParseResult<WindowsPlugin> parseFromYaml(String name, YamlMap yaml) {
@@ -737,8 +719,6 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
              defaultPackage != null,
        );
 
-  factory LinuxPlugin.fromYaml(String name, YamlMap yaml) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(name, yaml));
-
   /// Parses the Linux plugin configuration from the given [yaml].
   static ParseResult<LinuxPlugin> parseFromYaml(String name, YamlMap yaml) {
     final parser = _PluginPlatformYaml(yaml, configKey: kConfigKey);
@@ -813,8 +793,6 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
 /// containing the code.
 class WebPlugin extends PluginPlatform {
   const WebPlugin({required this.name, required this.pluginClass, required this.fileName});
-
-  factory WebPlugin.fromYaml(String name, YamlMap yaml) => _valueOrThrowToolExit(kConfigKey, name, parseFromYaml(name, yaml));
 
   /// Parses the Web plugin configuration from the given [yaml].
   static ParseResult<WebPlugin> parseFromYaml(String name, YamlMap yaml) {

@@ -2544,27 +2544,20 @@ iosPrefix: FLT
         expect(map.isEmpty, true);
       });
 
-      testUsingContext('Platform plugin fromYaml factories perform validation', () async {
+      testUsingContext('Platform plugin parseFromYaml methods perform validation', () async {
+        final emptyYaml = YamlMap.wrap(<String, dynamic>{});
         expect(
-          () => AndroidPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{}), '', globals.fs),
-          throwsToolExit(message: 'Invalid "android" plugin specification for plugin "foo".'),
+          AndroidPlugin.parseFromYaml('foo', emptyYaml, pluginPath: '', fileSystem: globals.fs),
+          isA<ParseResultFail<AndroidPlugin>>(),
         );
+        expect(IOSPlugin.parseFromYaml('foo', emptyYaml), isA<ParseResultFail<IOSPlugin>>());
+        expect(MacOSPlugin.parseFromYaml('foo', emptyYaml), isA<ParseResultFail<MacOSPlugin>>());
         expect(
-          () => IOSPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(message: 'Invalid "ios" plugin specification for plugin "foo".'),
+          WindowsPlugin.parseFromYaml('foo', emptyYaml),
+          isA<ParseResultFail<WindowsPlugin>>(),
         );
-        expect(
-          () => MacOSPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(message: 'Invalid "macos" plugin specification for plugin "foo".'),
-        );
-        expect(
-          () => WindowsPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(message: 'Invalid "windows" plugin specification for plugin "foo".'),
-        );
-        expect(
-          () => LinuxPlugin.fromYaml('foo', YamlMap.wrap(<String, dynamic>{})),
-          throwsToolExit(message: 'Invalid "linux" plugin specification for plugin "foo".'),
-        );
+        expect(LinuxPlugin.parseFromYaml('foo', emptyYaml), isA<ParseResultFail<LinuxPlugin>>());
+        expect(WebPlugin.parseFromYaml('foo', emptyYaml), isA<ParseResultFail<WebPlugin>>());
       });
     });
 
