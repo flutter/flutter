@@ -550,7 +550,7 @@ InferMetalPlatformViewCreationCallback(
     frame_info.struct_size = sizeof(FlutterFrameInfo);
     frame_info.size = {static_cast<uint32_t>(frame_size.width),
                        static_cast<uint32_t>(frame_size.height)};
-    flutter::GPUMTLTextureInfo texture_info;
+    flutter::GPUMTLTextureInfo texture_info{};
 
     FlutterMetalTexture metal_texture = ptr(user_data, &frame_info);
     texture_info.texture_id = metal_texture.texture_id;
@@ -1707,6 +1707,7 @@ using UniqueLoadedElf = std::unique_ptr<Dart_LoadedElf, LoadedElfDeleter>;
 
 struct _FlutterEngineAOTData {
   UniqueLoadedElf loaded_elf = nullptr;
+  fml::RefPtr<fml::NativeLibrary> native_library = nullptr;
   const uint8_t* vm_snapshot_data = nullptr;
   const uint8_t* vm_snapshot_instrs = nullptr;
   const uint8_t* vm_isolate_data = nullptr;
@@ -1761,6 +1762,45 @@ FlutterEngineResult FlutterEngineCreateAOTData(
 
       *data_out = aot_data.release();
       return kSuccess;
+    }
+    case kFlutterEngineAOTDataSourceTypeDllPath: {
+// TODO(team-windows): Support PE/COFF AOT snapshots for Windows Arm64.
+// See: https://github.com/flutter/flutter/issues/190897
+#if FML_OS_WIN && FML_ARCH_CPU_X86_64
+      if (!source->dll_path || !fml::IsFile(source->dll_path)) {
+        return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Invalid DLL path specified.");
+      }
+
+      auto native_library = fml::NativeLibrary::Create(source->dll_path);
+      if (!native_library) {
+        return LOG_EMBEDDER_ERROR(kInvalidArguments,
+                                  "Could not load DLL path specified.");
+      }
+
+      auto aot_data = std::make_unique<_FlutterEngineAOTData>();
+      aot_data->native_library = std::move(native_library);
+      aot_data->vm_snapshot_data =
+          aot_data->native_library->ResolveSymbol("_kDartSnapshotData");
+      aot_data->vm_snapshot_instrs =
+          aot_data->native_library->ResolveSymbol("_kDartSnapshotText");
+      aot_data->vm_isolate_data = aot_data->vm_snapshot_data;
+      aot_data->vm_isolate_instrs = aot_data->vm_snapshot_instrs;
+
+      if (aot_data->vm_snapshot_data == nullptr ||
+          aot_data->vm_snapshot_instrs == nullptr) {
+        return LOG_EMBEDDER_ERROR(
+            kInvalidArguments,
+            "Could not resolve required AOT snapshot symbols from DLL.");
+      }
+
+      *data_out = aot_data.release();
+      return kSuccess;
+#else   // FML_OS_WIN && FML_ARCH_CPU_X86_64
+      return LOG_EMBEDDER_ERROR(
+          kInvalidArguments,
+          "DLL AOT data sources are only supported on Windows x64.");
+#endif  // FML_OS_WIN && FML_ARCH_CPU_X86_64
     }
   }
 
@@ -2319,6 +2359,8 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
 
   impeller::Flags impeller_flags;
   impeller_flags.use_sdfs = settings.impeller_use_sdfs;
+  impeller_flags.top_left_default_framebuffer_origin =
+      settings.impeller_top_left_default_framebuffer_origin;
 
   auto on_create_platform_view = InferPlatformViewCreationCallback(
       config, user_data, platform_dispatch_table,
@@ -2383,6 +2425,29 @@ FlutterEngineResult FlutterEngineInitialize(size_t version,
       };
       external_texture_resolver = std::make_unique<ExternalTextureResolver>(
           external_texture_metal_callback);
+    }
+  }
+#endif
+#ifdef SHELL_ENABLE_VULKAN
+  if (config->type == kVulkan) {
+    const FlutterVulkanRendererConfig* vulkan_config = &config->vulkan;
+    if (auto callback = SAFE_ACCESS(vulkan_config,
+                                    external_texture_frame_callback, nullptr)) {
+      auto external_texture_vulkan_callback =
+          [frame_callback = callback, user_data](
+              int64_t texture_identifier, size_t width,
+              size_t height) -> std::unique_ptr<FlutterVulkanExternalTexture> {
+        std::unique_ptr<FlutterVulkanExternalTexture> texture =
+            std::make_unique<FlutterVulkanExternalTexture>();
+        texture->struct_size = sizeof(FlutterVulkanExternalTexture);
+        if (!frame_callback(user_data, texture_identifier, width, height,
+                            texture.get())) {
+          return nullptr;
+        }
+        return texture;
+      };
+      external_texture_resolver = std::make_unique<ExternalTextureResolver>(
+          external_texture_vulkan_callback);
     }
   }
 #endif
@@ -2825,7 +2890,7 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
   const FlutterPointerEvent* current = pointers;
 
   for (size_t i = 0; i < events_count; ++i) {
-    flutter::PointerData pointer_data;
+    flutter::PointerData pointer_data{};
     pointer_data.Clear();
     // this is currely in use only on android embedding.
     pointer_data.embedder_id = 0;
@@ -2978,7 +3043,7 @@ FlutterEngineResult FlutterEngineSendKeyEvent(FLUTTER_API_SYMBOL(FlutterEngine)
 
   const char* character = SAFE_ACCESS(event, character, nullptr);
 
-  flutter::KeyData key_data;
+  flutter::KeyData key_data{};
   key_data.Clear();
   key_data.timestamp = static_cast<uint64_t>(SAFE_ACCESS(event, timestamp, 0));
   key_data.type = MapKeyEventType(

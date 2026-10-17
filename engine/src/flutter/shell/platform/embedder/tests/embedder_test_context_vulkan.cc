@@ -82,6 +82,7 @@ VkImage EmbedderTestContextVulkan::GetNextImage(const DlISize& size) {
 bool EmbedderTestContextVulkan::PresentImage(VkImage image) {
   FireRootSurfacePresentCallbackIfPresent(
       [&]() { return surface_->GetSurfaceSnapshot(); });
+  present_callback_mock_.Call();
   present_count_++;
   return true;
 }

@@ -349,19 +349,28 @@ class EngineFlutterView implements ui.FlutterView {
   /// presence. This allows the framework to correctly shrink its content using
   /// `resizeToAvoidBottomInset`. When the keyboard is dismissed, `_physicalSize`
   /// is updated to the actual new physical size of the window.
+  ///
+  /// The keyboard can only make the viewport shorter than the full screen size,
+  /// so a viewport that is taller than the preserved `_physicalSize` means the
+  /// preserved size isn't the full screen size. This happens when
+  /// `_physicalSize` was measured while the keyboard was already up, e.g. for
+  /// an input inside an iframe, which Flutter's text editing doesn't know
+  /// about. In that case `_physicalSize` is updated even though the text
+  /// editing is still active.
   void _handleBrowserResize(ui.Size? _) {
     StyleManager.scaleSemanticsHost(dom.semanticsHost, devicePixelRatio);
     final ui.Size newPhysicalSize = _computePhysicalSize();
-    if (_shouldPreservePhysicalSizeOnResize && !_isRotation(newPhysicalSize)) {
-      _computeOnScreenKeyboardInsets(true);
-    } else {
+    final bool isEditingOnMobile =
+        _shouldPreservePhysicalSizeOnResize && !_isRotation(newPhysicalSize);
+    if (!isEditingOnMobile || newPhysicalSize.height > physicalSize.height) {
       _physicalSize = newPhysicalSize;
       // The safe area moves with the size of the view, e.g. when the device is
       // rotated, so it has to be recalculated too.
       _viewPadding = dimensionsProvider.computeSafeAreaInsets();
-      // When physical size changes this value has to be recalculated.
-      _computeOnScreenKeyboardInsets(false);
     }
+    // The insets are relative to the physical size, so they have to be
+    // recalculated on every resize, whether the physical size changed or not.
+    _computeOnScreenKeyboardInsets(isEditingOnMobile);
     platformDispatcher.invokeOnMetricsChanged();
   }
 
@@ -715,14 +724,17 @@ final class EngineFlutterWindow extends EngineFlutterView implements ui.Singleto
           final String path;
           if (uriString != null) {
             final Uri uri = Uri.parse(uriString);
-            // Need to remove scheme and authority.
-            path = Uri.decodeComponent(
-              Uri(
-                path: uri.path.isEmpty ? '/' : uri.path,
-                queryParameters: uri.queryParametersAll.isEmpty ? null : uri.queryParametersAll,
-                fragment: uri.fragment.isEmpty ? null : uri.fragment,
-              ).toString(),
-            );
+            // Need to remove scheme and authority while preserving the
+            // percent-encoding of the path, query, and fragment exactly as
+            // reported by the framework. Decoding the URL here would make the
+            // browser's address bar diverge from the route the app is on
+            // (e.g. `/a%2Fb` would turn into `/a/b`), so a refresh or a
+            // shared link would no longer round-trip to the same route.
+            // See https://github.com/flutter/flutter/issues/180373.
+            path =
+                '${uri.path.isEmpty ? '/' : uri.path}'
+                '${uri.hasQuery ? '?${uri.query}' : ''}'
+                '${uri.hasFragment ? '#${uri.fragment}' : ''}';
           } else {
             path = arguments.tryString('location')!;
           }
