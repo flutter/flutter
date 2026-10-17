@@ -164,6 +164,16 @@ class Plugin {
       );
     }
 
+    final customPlatformKeys = <String>[
+      for (final Object? key in platformsYaml.keys)
+        if (key is String && !_builtInPlatformKeys.contains(key)) key,
+    ];
+    for (final key in customPlatformKeys) {
+      if (_providesImplementationForPlatform(platformsYaml, key)) {
+        platforms[key] = CustomPlatformPlugin.fromYaml(name, key, platformsYaml[key] as YamlMap);
+      }
+    }
+
     // TODO(stuartmorgan): Consider merging web into this common handling; the
     //  fact that its implementation of Dart-only plugins and default packages
     //  are separate is legacy.
@@ -173,6 +183,7 @@ class Plugin {
       LinuxPlugin.kConfigKey,
       MacOSPlugin.kConfigKey,
       WindowsPlugin.kConfigKey,
+      ...customPlatformKeys,
     ];
     final defaultPackages = <String, String>{};
     final dartPluginClasses = <String, DartPluginClassAndFilePair>{};
@@ -325,6 +336,15 @@ class Plugin {
   static bool _hasNonNullNonStringValue(YamlMap yaml, String key) =>
       yaml[key] != null && yaml[key] is! String;
 
+  static const _builtInPlatformKeys = <String>{
+    AndroidPlugin.kConfigKey,
+    IOSPlugin.kConfigKey,
+    LinuxPlugin.kConfigKey,
+    MacOSPlugin.kConfigKey,
+    WebPlugin.kConfigKey,
+    WindowsPlugin.kConfigKey,
+  };
+
   static List<String> _validateMultiPlatformYaml({required YamlMap parentMap}) {
     final Object? platforms = parentMap['platforms'];
     if (platforms is! YamlMap?) {
@@ -372,6 +392,11 @@ class Plugin {
         'Invalid "macos" plugin specification.',
       if (isInvalid(WindowsPlugin.kConfigKey, WindowsPlugin.validate))
         'Invalid "windows" plugin specification.',
+      for (final Object? key in yaml.keys)
+        if (key is String &&
+            !_builtInPlatformKeys.contains(key) &&
+            isInvalid(key, CustomPlatformPlugin.validate))
+          'Invalid "$key" plugin specification.',
     ];
   }
 

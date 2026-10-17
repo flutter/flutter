@@ -204,7 +204,19 @@ class KernelSnapshot extends Target {
     final String targetFileAbsolute = environment.fileSystem.file(targetFile).absolute.path;
     // everything besides 'false' is considered to be enabled.
     final trackWidgetCreation = environment.defines[kTrackWidgetCreation] != 'false';
-    final targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
+    TargetPlatform targetPlatform;
+    try {
+      targetPlatform = TargetPlatform.fromName(targetPlatformEnvironment);
+    } on Exception {
+      targetPlatform = switch (environment.defines[kExtensionTargetOs]?.toLowerCase()) {
+        'android' => TargetPlatform.android,
+        'fuchsia' => TargetPlatform.fuchsia_arm64,
+        'ios' => TargetPlatform.ios,
+        'macos' || 'darwin' => TargetPlatform.darwin,
+        'windows' => TargetPlatform.windows_x64,
+        _ => TargetPlatform.linux_x64,
+      };
+    }
 
     // This configuration is all optional.
     final String? frontendServerStarterPath = environment.defines[kFrontendServerStarterPath];

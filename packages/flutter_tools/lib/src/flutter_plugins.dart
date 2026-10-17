@@ -1575,9 +1575,10 @@ List<Plugin> resolvePluginImplementationsForPlatform(
   final Map<String, List<Plugin>> pluginsByPlatform = _resolvePluginImplementations(
     plugins,
     pluginResolutionType: _PluginResolutionType.nativeOrDart,
+    extraPlatformKeys: <String>[platformKey],
     quiet: quiet,
   );
-  return pluginsByPlatform[platformKey] ?? [];
+  return pluginsByPlatform[platformKey] ?? const <Plugin>[];
 }
 
 /// Resolves the plugin implementations for all platforms.
@@ -1622,6 +1623,7 @@ List<PluginInterfaceResolution> resolvePlatformImplementation(
 Map<String, List<Plugin>> _resolvePluginImplementations(
   List<Plugin> plugins, {
   required _PluginResolutionType pluginResolutionType,
+  Iterable<String> extraPlatformKeys = const <String>[],
   bool quiet = false,
 }) {
   final pluginsByPlatform = <String, List<Plugin>>{
@@ -1631,6 +1633,7 @@ Map<String, List<Plugin>> _resolvePluginImplementations(
     MacOSPlugin.kConfigKey: <Plugin>[],
     WindowsPlugin.kConfigKey: <Plugin>[],
     WebPlugin.kConfigKey: <Plugin>[],
+    for (final String key in extraPlatformKeys) key: <Plugin>[],
   };
 
   var hasPluginPubspecError = false;
