@@ -18,24 +18,29 @@
 #include "third_party/skia/include/codec/SkCodecAnimation.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPixelRef.h"
+#include "third_party/skia/include/core/SkSamplingOptions.h"
 #include "third_party/skia/include/gpu/ganesh/SkImageGanesh.h"
 #include "third_party/tonic/logging/dart_invoke.h"
 
 namespace flutter {
 
-MultiFrameCodec::MultiFrameCodec(std::shared_ptr<ImageGenerator> generator)
-    : state_(new State(std::move(generator))) {}
+MultiFrameCodec::MultiFrameCodec(std::shared_ptr<ImageGenerator> generator,
+                                 SkISize target_size)
+    : state_(new State(std::move(generator), target_size)) {}
 
 MultiFrameCodec::~MultiFrameCodec() = default;
 
-MultiFrameCodec::State::State(std::shared_ptr<ImageGenerator> generator)
+MultiFrameCodec::State::State(std::shared_ptr<ImageGenerator> generator,
+                              SkISize target_size)
     : generator_(std::move(generator)),
       frameCount_(generator_->GetFrameCount()),
       repetitionCount_(generator_->GetPlayCount() ==
                                ImageGenerator::kInfinitePlayCount
                            ? -1
                            : generator_->GetPlayCount() - 1),
-      is_impeller_enabled_(UIDartState::Current()->IsImpellerEnabled()) {}
+      is_impeller_enabled_(UIDartState::Current()->IsImpellerEnabled()),
+      target_size_(target_size.isEmpty() ? generator_->GetInfo().dimensions()
+                                         : target_size) {}
 
 static void InvokeNextFrameCallback(
     const fml::RefPtr<CanvasImage>& image,
@@ -53,6 +58,25 @@ static void InvokeNextFrameCallback(
   tonic::DartInvoke(callback->value(),
                     {tonic::ToDart(image), tonic::ToDart(duration),
                      tonic::ToDart(decode_error)});
+}
+
+// Resizes a fully composited frame to |target_size|. This uses the same
+// sampling as the resizing of single-frame images (`ResizeRasterImage` in
+// image_decoder_skia.cc and `ResizeOnCpu` in image_decoder_impeller.cc), so
+// `targetWidth` and `targetHeight` behave the same way for every image.
+static std::optional<SkBitmap> ResizeFrame(const SkBitmap& frame,
+                                           const SkISize& target_size) {
+  SkBitmap resized;
+  if (!resized.tryAllocPixels(frame.info().makeDimensions(target_size))) {
+    return std::nullopt;
+  }
+  if (!frame.pixmap().scalePixels(
+          resized.pixmap(),
+          SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone))) {
+    return std::nullopt;
+  }
+  resized.setImmutable();
+  return resized;
 }
 
 std::pair<sk_sp<DlImage>, std::string>
@@ -144,20 +168,43 @@ MultiFrameCodec::State::GetNextFrameImage(
     restoreBGColorRect_.reset();
   }
 
+  // Frames are decoded and composited at the intrinsic size of the image
+  // above, because frame rects, blending and disposal are all defined in the
+  // coordinate space of the full canvas, and `lastRequiredFrame_` must keep
+  // that size to be reused as a backdrop. Only the finished frame is resized
+  // to the size requested through `targetWidth` and `targetHeight` (e.g. by
+  // `cacheWidth`/`cacheHeight` or `ResizeImage` in the framework).
+  //
+  // See https://github.com/flutter/flutter/issues/90804.
+  SkBitmap output = bitmap;
+  if (output.dimensions() != target_size_) {
+    std::optional<SkBitmap> resized = ResizeFrame(bitmap, target_size_);
+    if (!resized.has_value()) {
+      std::ostringstream ostr;
+      ostr << "Could not resize frame " << nextFrameIndex_ << " to "
+           << target_size_.width() << "x" << target_size_.height();
+      std::string decode_error = ostr.str();
+      FML_LOG(ERROR) << decode_error;
+      return std::make_pair(nullptr, decode_error);
+    }
+    output = std::move(resized.value());
+  }
+
 #if IMPELLER_SUPPORTS_RENDERING
   if (is_impeller_enabled_) {
 #ifdef FML_OS_IOS
     // This is safe regardless of whether the GPU is available or not because
     // without mipmap creation there is no command buffer encoding done.
     return ImageDecoderImpeller::UploadTextureToStorage(
-        impeller_context, std::make_shared<SkBitmap>(bitmap));
+        impeller_context, std::make_shared<SkBitmap>(output));
 #else
     sk_sp<DlImage> dl_image;
     std::string error_message;
+    const SkImageInfo& output_info = output.info();
     auto mapping = std::make_unique<fml::NonOwnedMapping>(
-        reinterpret_cast<const uint8_t*>(bitmap.getAddr(0, 0)),  // data
-        bitmap.dimensions().area() * info.bytesPerPixel(),       // size
-        [bitmap](auto, auto) mutable { bitmap.reset(); }         // proc
+        reinterpret_cast<const uint8_t*>(output.getAddr(0, 0)),    // data
+        output.dimensions().area() * output_info.bytesPerPixel(),  // size
+        [output](auto, auto) mutable { output.reset(); }           // proc
     );
     std::shared_ptr<impeller::DeviceBuffer> device_buffer =
         impeller_context->GetResourceAllocator()->CreateBufferWithCopy(
@@ -167,16 +214,16 @@ MultiFrameCodec::State::GetNextFrameImage(
     }
 
     const auto pixel_format =
-        ImageDecoderImpeller::ToPixelFormat(info.colorType());
+        ImageDecoderImpeller::ToPixelFormat(output_info.colorType());
     if (!pixel_format.has_value()) {
       std::string decode_error(
           std::format("Unsupported pixel format (SkColorType={})",
-                      static_cast<int>(info.colorType())));
+                      static_cast<int>(output_info.colorType())));
       FML_DLOG(ERROR) << decode_error;
       return std::make_pair(nullptr, decode_error);
     }
     ImageDecoderImpeller::ImageInfo image_info = {
-        .size = impeller::ISize(info.width(), info.height()),
+        .size = impeller::ISize(output_info.width(), output_info.height()),
         .format = pixel_format.value()};
 
     ImageDecoderImpeller::UploadTextureToPrivate(
@@ -195,23 +242,23 @@ MultiFrameCodec::State::GetNextFrameImage(
   sk_sp<SkImage> skImage;
   gpu_disable_sync_switch->Execute(
       fml::SyncSwitch::Handlers()
-          .SetIfTrue([&skImage, &bitmap] {
+          .SetIfTrue([&skImage, &output] {
             // Defer decoding until time of draw later on the raster thread.
             // Can happen when GL operations are currently forbidden such as
             // in the background on iOS.
-            skImage = SkImages::RasterFromBitmap(bitmap);
+            skImage = SkImages::RasterFromBitmap(output);
           })
-          .SetIfFalse([&skImage, &resourceContext, &bitmap] {
+          .SetIfFalse([&skImage, &resourceContext, &output] {
             if (resourceContext) {
-              SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
-                              bitmap.pixelRef()->rowBytes());
+              SkPixmap pixmap(output.info(), output.pixelRef()->pixels(),
+                              output.pixelRef()->rowBytes());
               skImage = SkImages::CrossContextTextureFromPixmap(
                   resourceContext.get(), pixmap, true);
             } else {
               // Defer decoding until time of draw later on the raster thread.
               // Can happen when GL operations are currently forbidden such as
               // in the background on iOS.
-              skImage = SkImages::RasterFromBitmap(bitmap);
+              skImage = SkImages::RasterFromBitmap(output);
             }
           }));
 
