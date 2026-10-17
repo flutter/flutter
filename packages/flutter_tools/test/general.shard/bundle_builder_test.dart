@@ -27,6 +27,7 @@ import 'package:test/fake.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/fake_process_manager.dart';
 import '../src/test_build_system.dart';
 
 // Tests for BundleBuilder.
@@ -370,6 +371,98 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     },
   );
+
+  testWithoutContext('writeBundle converts ShaderCompilerException into ToolExit when shader compilation fails', () async {
+    final fileSystem = MemoryFileSystem.test();
+    final String shaderRelativePath = fileSystem.path.join('shaders', 'my_shader.frag');
+    final File shaderAsset = fileSystem.file(shaderRelativePath)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() {}');
+    final artifacts = Artifacts.test();
+    final String impellerc = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+    fileSystem.file(impellerc).createSync(recursive: true);
+
+    final String inputShaderPath = shaderAsset.path;
+    final String outputShaderPath = fileSystem.path.join(
+      'build',
+      'unit_test_assets',
+      'shaders',
+      'my_shader.frag',
+    );
+    final outputSpirvPath = '$outputShaderPath.spirv';
+    final String shaderLibPath = fileSystem.path.join(
+      fileSystem.file(impellerc).parent.absolute.path,
+      'shader_lib',
+    );
+
+    final processManager = FakeProcessManager.list(<FakeCommand>[
+      FakeCommand(
+        command: <String>[
+          'HostArtifact.impellerc',
+          '--sksl',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=$outputShaderPath',
+          '--spirv=$outputSpirvPath',
+          '--input=$inputShaderPath',
+          '--input-type=frag',
+          '--include=${shaderAsset.parent.path}',
+          '--include=$shaderLibPath',
+        ],
+        exitCode: 1,
+        stderr: 'Could not write file to "$outputShaderPath"',
+      ),
+      FakeCommand(
+        command: <String>[
+          'HostArtifact.impellerc',
+          '--runtime-stage-vulkan',
+          '--iplr',
+          '--sl=$outputShaderPath',
+          '--spirv=$outputSpirvPath',
+          '--input=$inputShaderPath',
+          '--input-type=frag',
+          '--include=${shaderAsset.parent.path}',
+          '--include=$shaderLibPath',
+        ],
+        exitCode: 1,
+        stderr: 'Could not write file to "$outputShaderPath"',
+      ),
+    ]);
+
+    final bundle = FakeAssetBundle()
+      ..entries[shaderRelativePath] = AssetBundleEntry(
+        DevFSFileContent(shaderAsset),
+        kind: AssetKind.shader,
+        transformers: const <AssetTransformerEntry>[],
+      );
+
+    final Directory bundleDir = fileSystem.directory(
+      fileSystem.path.join('build', 'unit_test_assets'),
+    );
+    final logger = BufferLogger.test();
+
+    await expectLater(
+      () => writeBundle(
+        bundleDir,
+        bundle.entries,
+        targetPlatform: TargetPlatform.tester,
+        impellerStatus: ImpellerStatus.platformDefault,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: artifacts,
+        logger: logger,
+        projectDir: fileSystem.currentDirectory,
+        buildMode: BuildMode.debug,
+        platform: FakePlatform(),
+      ),
+      throwsToolExit(
+        message:
+            'Shader compilation of "$inputShaderPath" to "$outputShaderPath" failed with exit code 1.',
+      ),
+    );
+    expect(logger.errorText, contains('Could not write file to "$outputShaderPath"'));
+    expect(processManager, hasNoRemainingExpectations);
+  });
 }
 
 class FakeAssetBundle extends Fake implements AssetBundle {

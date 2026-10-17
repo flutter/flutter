@@ -228,11 +228,15 @@ Future<void> writeBundle(
                 inputToCompiler = fileSystem.file(transformedShaderSourcePath);
               }
 
-              doCopy = !await shaderCompiler.compileShader(
-                input: inputToCompiler,
-                outputPath: file.path,
-                targetPlatform: targetPlatform,
-              );
+              try {
+                doCopy = !await shaderCompiler.compileShader(
+                  input: inputToCompiler,
+                  outputPath: file.path,
+                  targetPlatform: targetPlatform,
+                );
+              } on ShaderCompilerException catch (e) {
+                throwToolExit(e.message);
+              }
           }
           if (doCopy) {
             input.copySync(file.path);

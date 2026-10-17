@@ -689,6 +689,78 @@ flutter:
   );
 
   testUsingContext(
+    'exits tool if shader compilation fails',
+    () async {
+      Cache.flutterRoot = Cache.defaultFlutterRoot(
+        platform: globals.platform,
+        fileSystem: fileSystem,
+        userMessages: UserMessages(),
+      );
+
+      final artifacts = Artifacts.test();
+      final environment = Environment.test(
+        fileSystem.currentDirectory,
+        processManager: globals.processManager,
+        artifacts: artifacts,
+        fileSystem: fileSystem,
+        logger: logger,
+        platform: globals.platform,
+        defines: <String, String>{kBuildMode: BuildMode.debug.cliName},
+      );
+
+      final String impellercPath = artifacts.getHostArtifact(HostArtifact.impellerc).path;
+      fileSystem.file(impellercPath).createSync(recursive: true);
+
+      fileSystem.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+name: example
+flutter:
+  shaders:
+    - shaders/test.frag
+''');
+
+      writePackageConfigFiles(directory: globals.fs.currentDirectory, mainLibName: 'example');
+
+      final File shaderFile =
+          environment.projectDir.childDirectory('shaders').childFile('test.frag')
+            ..createSync(recursive: true);
+      final String shaderOutputPath = fileSystem.path.join(
+        'build',
+        'flutter_assets',
+        'shaders',
+        'test.frag',
+      );
+
+      await expectToolExitLater(
+        const CopyAssets().build(environment),
+        contains('Shader compilation of "${shaderFile.path}" to'),
+      );
+      expect(logger.errorText, contains('Could not write file to "$shaderOutputPath"'));
+      expect(globals.processManager, hasNoRemainingExpectations);
+    },
+    overrides: <Type, Generator>{
+      Logger: () => logger,
+      FileSystem: () => fileSystem,
+      Platform: () => FakePlatform(),
+      ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+        FakeCommand(
+          command: <Pattern>[RegExp(r'.*impellerc.*'), ...List<Pattern>.filled(11, RegExp(r'.*'))],
+          exitCode: 1,
+          stderr:
+              'Could not write file to "${fileSystem.path.join('build', 'flutter_assets', 'shaders', 'test.frag')}"',
+        ),
+        FakeCommand(
+          command: <Pattern>[RegExp(r'.*impellerc.*'), ...List<Pattern>.filled(10, RegExp(r'.*'))],
+          exitCode: 1,
+          stderr:
+              'Could not write file to "${fileSystem.path.join('build', 'flutter_assets', 'shaders', 'test.frag')}"',
+        ),
+      ]),
+    },
+  );
+
+  testUsingContext(
     'asset transformation, per each asset, uses unique paths for temporary files',
     () async {
       final inputFilePaths = <String>[];
