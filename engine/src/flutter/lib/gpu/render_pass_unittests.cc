@@ -10,6 +10,7 @@
 #include "flutter/lib/gpu/render_pipeline.h"
 #include "flutter/lib/gpu/shader.h"
 #include "fml/memory/ref_ptr.h"
+#include "impeller/renderer/testing/mocks.h"
 
 namespace flutter::gpu {
 namespace {
@@ -137,6 +138,81 @@ TEST(FlutterGpuRenderPassTest, BindSetReplacesTheSlotContents) {
   for (const auto& set : render_pass->binding_sets) {
     EXPECT_EQ(set.get(), nullptr);
   }
+}
+
+std::shared_ptr<impeller::Texture> MakeColorTexture(
+    impeller::PixelFormat format) {
+  impeller::TextureDescriptor desc;
+  desc.storage_mode = impeller::StorageMode::kDevicePrivate;
+  desc.format = format;
+  desc.size = {16, 16};
+  desc.usage = impeller::TextureUsage::kRenderTarget;
+  auto texture =
+      std::make_shared<::testing::NiceMock<impeller::testing::MockTexture>>(
+          desc);
+  ON_CALL(*texture, IsValid).WillByDefault(::testing::Return(true));
+  return texture;
+}
+
+// Each color attachment of the pipeline must use the format of the texture
+// attached at that index, not the format of attachment 0.
+TEST(FlutterGpuRenderPassTest, PipelineUsesEachColorAttachmentFormat) {
+  auto render_pass = fml::MakeRefCounted<RenderPass>();
+
+  impeller::ColorAttachment color0;
+  color0.texture = MakeColorTexture(impeller::PixelFormat::kR8G8B8A8UNormInt);
+  impeller::ColorAttachment color1;
+  color1.texture = MakeColorTexture(impeller::PixelFormat::kR16G16B16A16Float);
+  impeller::ColorAttachment color2;
+  color2.texture = MakeColorTexture(impeller::PixelFormat::kR32Float);
+  render_pass->GetRenderTarget()
+      .SetColorAttachment(color0, 0)
+      .SetColorAttachment(color1, 1)
+      .SetColorAttachment(color2, 2);
+
+  impeller::PipelineDescriptor desc =
+      render_pass->BuildPipelineDescriptorForTesting();
+
+  ASSERT_NE(desc.GetColorAttachmentDescriptor(0), nullptr);
+  ASSERT_NE(desc.GetColorAttachmentDescriptor(1), nullptr);
+  ASSERT_NE(desc.GetColorAttachmentDescriptor(2), nullptr);
+  EXPECT_EQ(desc.GetColorAttachmentDescriptor(0)->format,
+            impeller::PixelFormat::kR8G8B8A8UNormInt);
+  EXPECT_EQ(desc.GetColorAttachmentDescriptor(1)->format,
+            impeller::PixelFormat::kR16G16B16A16Float);
+  EXPECT_EQ(desc.GetColorAttachmentDescriptor(2)->format,
+            impeller::PixelFormat::kR32Float);
+}
+
+// Blend state set for an index the render target has no attachment at must
+// not add a color attachment (with an unknown format) to the pipeline.
+// Building the descriptor must not change the pass either.
+TEST(FlutterGpuRenderPassTest, PipelineOnlyHasAttachedColorAttachments) {
+  auto render_pass = fml::MakeRefCounted<RenderPass>();
+
+  impeller::ColorAttachment color0;
+  color0.texture = MakeColorTexture(impeller::PixelFormat::kR8G8B8A8UNormInt);
+  render_pass->GetRenderTarget().SetColorAttachment(color0, 0);
+
+  InternalFlutterGpu_RenderPass_SetColorBlendEnable(render_pass.get(), 0, true);
+  InternalFlutterGpu_RenderPass_SetColorBlendEnable(render_pass.get(), 1, true);
+  render_pass->ClearPipelineStateDirtyForTesting();
+
+  impeller::PipelineDescriptor desc =
+      render_pass->BuildPipelineDescriptorForTesting();
+
+  EXPECT_EQ(desc.GetColorAttachmentDescriptors().size(), 1u);
+  ASSERT_NE(desc.GetColorAttachmentDescriptor(0), nullptr);
+  EXPECT_TRUE(desc.GetColorAttachmentDescriptor(0)->blending_enabled);
+  EXPECT_EQ(desc.GetColorAttachmentDescriptor(0)->format,
+            impeller::PixelFormat::kR8G8B8A8UNormInt);
+  EXPECT_EQ(desc.GetColorAttachmentDescriptor(1), nullptr);
+
+  EXPECT_FALSE(render_pass->IsPipelineStateDirtyForTesting());
+  // The stored blend state for index 0 is untouched: its format was not
+  // written back.
+  EXPECT_EQ(render_pass->GetColorAttachmentDescriptor(0).format,
+            impeller::ColorAttachmentDescriptor{}.format);
 }
 
 }  // namespace
