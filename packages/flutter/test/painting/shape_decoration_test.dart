@@ -289,6 +289,59 @@ void main() {
     );
     expect(clipPath, isLookLikeExpectedPath);
   });
+
+  test('ShapeDecoration inset shadow is clipped inside the shape', () {
+    const decoration = ShapeDecoration(
+      color: Color(0xFF00FF00),
+      shadows: <BoxShadow>[BoxShadow(blurRadius: 0, spreadRadius: 10, inset: true)],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+    );
+    final TestRecordingCanvas canvas = TestRecordingCanvas();
+    decoration
+        .createBoxPainter(() {})
+        .paint(
+          canvas,
+          Offset.zero,
+          const ImageConfiguration(size: Size(100, 100), textDirection: TextDirection.ltr),
+        );
+    final List<Symbol> calls = canvas.invocations
+        .map((RecordedInvocation call) => call.invocation.memberName)
+        .toList();
+    expect(calls.indexOf(#drawRRect), lessThan(calls.indexOf(#clipPath)));
+    expect(calls.indexOf(#clipPath), lessThan(calls.lastIndexOf(#drawPath)));
+    final Path shadow =
+        canvas.invocations
+                .lastWhere((RecordedInvocation call) => call.invocation.memberName == #drawPath)
+                .invocation
+                .positionalArguments
+                .first
+            as Path;
+    expect(shadow.contains(const Offset(50, 50)), isFalse);
+    expect(shadow.contains(const Offset(2, 50)), isTrue);
+  });
+
+  test('ShapeDecoration clips stacked inset shadows once', () {
+    const decoration = ShapeDecoration(
+      shadows: <BoxShadow>[
+        BoxShadow(blurRadius: 0, inset: true),
+        BoxShadow(color: Color(0xFF00FF00), blurRadius: 0, inset: true),
+      ],
+      shape: RoundedRectangleBorder(),
+    );
+    final TestRecordingCanvas canvas = TestRecordingCanvas();
+    decoration
+        .createBoxPainter(() {})
+        .paint(
+          canvas,
+          Offset.zero,
+          const ImageConfiguration(size: Size(40, 40), textDirection: TextDirection.ltr),
+        );
+    final List<Symbol> calls = canvas.invocations
+        .map((RecordedInvocation call) => call.invocation.memberName)
+        .toList();
+    expect(calls.where((Symbol call) => call == #clipPath).length, 1);
+    expect(calls.where((Symbol call) => call == #drawPath).length, 2);
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
