@@ -10318,6 +10318,65 @@ void main() {
     expect(rectWithText.height, greaterThan(100));
   });
 
+  testWidgets('Multiline placeholder does not overflow CupertinoTextField when maxLines is null', (
+    WidgetTester tester,
+  ) async {
+    // Regression test for https://github.com/flutter/flutter/issues/183529.
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(child: CupertinoTextField(maxLines: null, placeholder: '1111\n222\n333')),
+      ),
+    );
+
+    final Rect textFieldRect = tester.getRect(find.byType(CupertinoTextField));
+    final Rect placeholderRect = tester.getRect(find.text('1111\n222\n333'));
+
+    expect(placeholderRect.top, greaterThanOrEqualTo(textFieldRect.top));
+    expect(placeholderRect.bottom, lessThanOrEqualTo(textFieldRect.bottom));
+
+    // Entering text hides placeholder and fits inside text field.
+    await tester.enterText(find.byType(CupertinoTextField), 'entered text');
+    await tester.pump();
+
+    final Rect updatedFieldRect = tester.getRect(find.byType(CupertinoTextField));
+    final Rect editableTextRect = tester.getRect(find.byType(EditableText));
+    expect(editableTextRect.top, greaterThanOrEqualTo(updatedFieldRect.top));
+    expect(editableTextRect.bottom, lessThanOrEqualTo(updatedFieldRect.bottom));
+  });
+
+  testWidgets(
+    'Multiline placeholder with custom textAlignVertical does not overflow CupertinoTextField when maxLines is null',
+    (WidgetTester tester) async {
+      for (final alignment in const <TextAlignVertical>[
+        TextAlignVertical.top,
+        TextAlignVertical.center,
+        TextAlignVertical.bottom,
+      ]) {
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 200,
+                width: 200,
+                child: CupertinoTextField(
+                  maxLines: null,
+                  placeholder: '1111\n222\n333',
+                  textAlignVertical: alignment,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final Rect textFieldRect = tester.getRect(find.byType(CupertinoTextField));
+        final Rect placeholderRect = tester.getRect(find.text('1111\n222\n333'));
+
+        expect(placeholderRect.top, greaterThanOrEqualTo(textFieldRect.top));
+        expect(placeholderRect.bottom, lessThanOrEqualTo(textFieldRect.bottom));
+      }
+    },
+  );
+
   testWidgets('Placeholder is baseline aligned with text', (WidgetTester tester) async {
     const placeholderTextContent = 'hint text';
     const actualTextContent = 'text';

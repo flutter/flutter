@@ -1403,6 +1403,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField>
                 child: _BaselineAlignedStack(
                   placeholder: placeholder,
                   editableText: editableText,
+                  placeholderVisible: !hasText,
                   textAlignVertical: _textAlignVertical,
                   editableTextBaseline: textStyle.textBaseline ?? TextBaseline.alphabetic,
                   placeholderBaseline: placeholderStyle.textBaseline ?? TextBaseline.alphabetic,
@@ -1713,6 +1714,7 @@ class _BaselineAlignedStack
     required this.textAlignVertical,
     required this.editableText,
     this.placeholder,
+    this.placeholderVisible = true,
   });
 
   final TextBaseline editableTextBaseline;
@@ -1720,7 +1722,7 @@ class _BaselineAlignedStack
   final TextAlignVertical textAlignVertical;
   final Widget editableText;
   final Widget? placeholder;
-
+  final bool placeholderVisible;
   @override
   Iterable<_BaselineAlignedStackSlot> get slots => _BaselineAlignedStackSlot.values;
 
@@ -1738,6 +1740,7 @@ class _BaselineAlignedStack
       textAlignVertical: textAlignVertical,
       editableTextBaseline: editableTextBaseline,
       placeholderBaseline: placeholderBaseline,
+      placeholderVisible: placeholderVisible,
     );
   }
 
@@ -1746,7 +1749,8 @@ class _BaselineAlignedStack
     renderObject
       ..textAlignVertical = textAlignVertical
       ..editableTextBaseline = editableTextBaseline
-      ..placeholderBaseline = placeholderBaseline;
+      ..placeholderBaseline = placeholderBaseline
+      ..placeholderVisible = placeholderVisible;
   }
 }
 
@@ -1758,7 +1762,18 @@ class _RenderBaselineAlignedStack extends RenderBox
     required this._textAlignVertical,
     required this._editableTextBaseline,
     required this._placeholderBaseline,
+    this._placeholderVisible = true,
   });
+
+  bool get placeholderVisible => _placeholderVisible;
+  bool _placeholderVisible;
+  set placeholderVisible(bool value) {
+    if (_placeholderVisible == value) {
+      return;
+    }
+    _placeholderVisible = value;
+    markNeedsLayout();
+  }
 
   TextAlignVertical get textAlignVertical => _textAlignVertical;
   TextAlignVertical _textAlignVertical;
@@ -1872,6 +1887,32 @@ class _RenderBaselineAlignedStack extends RenderBox
     );
     // Baseline-align the placeholder to the editable text.
     placeholderParentData?.offset = editableTextParentData.offset + baselineDiff;
+
+    if (placeholderVisible && placeholder != null && placeholderParentData != null) {
+      final double overflowBottom =
+          (placeholderParentData.offset.dy + placeholder.size.height) - size.height;
+      if (overflowBottom > 0.0) {
+        placeholderParentData.offset = Offset(
+          placeholderParentData.offset.dx,
+          placeholderParentData.offset.dy - overflowBottom,
+        );
+        editableTextParentData.offset = Offset(
+          editableTextParentData.offset.dx,
+          editableTextParentData.offset.dy - overflowBottom,
+        );
+      }
+      if (placeholderParentData.offset.dy < 0.0) {
+        final double overflowTop = -placeholderParentData.offset.dy;
+        placeholderParentData.offset = Offset(
+          placeholderParentData.offset.dx,
+          placeholderParentData.offset.dy + overflowTop,
+        );
+        editableTextParentData.offset = Offset(
+          editableTextParentData.offset.dx,
+          editableTextParentData.offset.dy + overflowTop,
+        );
+      }
+    }
   }
 
   @override
