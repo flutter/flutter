@@ -30,17 +30,17 @@ class FillPathSourceGeometry : public Geometry {
   /// vertices.
   virtual const PathSource& GetSource() const = 0;
 
- private:
   // |Geometry|
   GeometryResult GetPositionBuffer(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const override;
 
   // |Geometry|
-  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
-
-  // |Geometry|
   GeometryResult::Mode GetResultMode() const override;
+
+ private:
+  // |Geometry|
+  std::optional<Rect> GetCoverage(const Matrix& transform) const override;
 
   std::optional<Rect> inner_rect_;
 
@@ -69,6 +69,14 @@ class FillPathGeometry final : public FillPathSourceGeometry {
  public:
   explicit FillPathGeometry(const flutter::DlPath& path,
                             std::optional<Rect> inner_rect = std::nullopt);
+
+  // |Geometry|
+  GeometryResult GetPositionBuffer(const ContentContext& renderer,
+                                   const Entity& entity,
+                                   RenderPass& pass) const override;
+
+  // |Geometry|
+  GeometryResult::Mode GetResultMode() const override;
 
  protected:
   const PathSource& GetSource() const override;
