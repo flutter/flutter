@@ -4,6 +4,7 @@
 
 /// @docImport 'package:flutter/material.dart';
 ///
+/// @docImport 'expansible.dart';
 /// @docImport 'routes.dart';
 /// @docImport 'scroll_controller.dart';
 /// @docImport 'scroll_position.dart';
@@ -68,29 +69,8 @@ class _StorageEntryIdentifier {
 /// Useful for storing per-page state that persists across navigations from one
 /// page to another.
 class PageStorageBucket {
-  static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
-    final Widget widget = context.widget;
-    final Key? key = widget.key;
-    if (key is PageStorageKey) {
-      keys.add(key);
-    }
-    return widget is! PageStorage;
-  }
-
-  // _ExpansibleState._computeStorageIdentifier in expansible.dart collects the
-  // keys the same way and must be kept in sync with this.
-  List<PageStorageKey<dynamic>> _allKeys(BuildContext context) {
-    final keys = <PageStorageKey<dynamic>>[];
-    if (_maybeAddKey(context, keys)) {
-      context.visitAncestorElements((Element element) {
-        return _maybeAddKey(element, keys);
-      });
-    }
-    return keys;
-  }
-
   _StorageEntryIdentifier _computeIdentifier(BuildContext context) {
-    return _StorageEntryIdentifier(_allKeys(context));
+    return _StorageEntryIdentifier(PageStorage.computeStorageKeys(context));
   }
 
   Map<Object, dynamic>? _storage;
@@ -239,6 +219,32 @@ class PageStorage extends StatelessWidget {
       return true;
     }());
     return bucket!;
+  }
+
+  /// The [PageStorageKey]s of the widget at the given context and its
+  /// ancestors, up to and including the closest [PageStorage] widget.
+  ///
+  /// [PageStorageBucket.readState] and [PageStorageBucket.writeState] use these
+  /// keys to find the state for a context when no `identifier` is given. A
+  /// widget that saves its state under an identifier of its own, such as
+  /// [Expansible], can build that identifier from these keys.
+  ///
+  /// This method can be expensive (it walks the element tree).
+  static List<PageStorageKey<dynamic>> computeStorageKeys(BuildContext context) {
+    final keys = <PageStorageKey<dynamic>>[];
+    bool addKey(BuildContext current) {
+      final Widget widget = current.widget;
+      final Key? key = widget.key;
+      if (key is PageStorageKey) {
+        keys.add(key);
+      }
+      return widget is! PageStorage;
+    }
+
+    if (addKey(context)) {
+      context.visitAncestorElements(addKey);
+    }
+    return keys;
   }
 
   @override
