@@ -910,7 +910,16 @@ abstract class FlutterCommand extends Command<void> {
 
     final Iterable<String> defines = getValue(CommonOptions.dartDefines)
         .where((string) => string.isNotEmpty);
-    dartDefines.addAll(defines);
+    for (final define in defines) {
+      if (define.contains('\r') || define.contains('\n')) {
+        throwToolExit(
+          'Multi-line value is not supported for '
+          '--${FlutterOptions.kDartDefinesOption} or '
+          '--${FlutterOptions.kDartDefineFromFileOption}: $define',
+        );
+      }
+      dartDefines.add(define);
+    }
 
     return dartDefines;
   }
@@ -965,7 +974,17 @@ abstract class FlutterCommand extends Command<void> {
       }
 
       try {
-        dartDefineConfigJsonMap.addAll(json.decode(configJsonRaw) as Map<String, Object?>);
+        final decoded = json.decode(configJsonRaw) as Map<String, Object?>;
+        for (final MapEntry(:String key, :Object? value) in decoded.entries) {
+          if (key.contains('\r') ||
+              key.contains('\n') ||
+              (value is String && (value.contains('\r') || value.contains('\n')))) {
+            throwToolExit(
+              'The file at path "$path" contains a multi-line value, which is not supported: $key',
+            );
+          }
+          dartDefineConfigJsonMap[key] = value;
+        }
       } on FormatException catch (err) {
         throwToolExit(
           'Unable to parse the file at path "$path" due to a formatting error. '
