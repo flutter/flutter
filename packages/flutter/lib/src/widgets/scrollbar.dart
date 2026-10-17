@@ -1062,6 +1062,12 @@ class RawScrollbar extends StatefulWidget {
   /// of this widget needs to manage the ScrollController and either pass it to
   /// a scrollable descendant or use a PrimaryScrollController to share it.
   ///
+  /// Passing a ScrollController also identifies the scroll view this scrollbar
+  /// is for: the scrollbar then ignores scroll notifications from any other
+  /// scroll view, such as a sibling of the one it wraps. If [controller] is
+  /// null, notifications from any scroll view in the subtree that satisfy
+  /// [notificationPredicate] are used.
+  ///
   /// <callout-box>
   ///
   /// Here is an example of using the [controller] attribute to enable
@@ -1978,8 +1984,37 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
         scrollController.position.axis == notificationAxis;
   }
 
+  // Whether the notification was definitely sent by a ScrollView other than
+  // the one this scrollbar is attached to.
+  //
+  // Sibling ScrollViews share a scrollbar's notification scope, so without this
+  // check the metrics of an unrelated ScrollView can be applied to this
+  // scrollbar.
+  //
+  // This only applies when a controller was explicitly provided, since that
+  // identifies the scrollable this scrollbar is for. An inherited
+  // PrimaryScrollController carries no such meaning: it may well be attached to
+  // some other scroll view, and painting is documented to follow the child's
+  // notifications. Returns false whenever there is not enough information to
+  // tell the scroll views apart, preserving the existing behavior.
+  bool _isFromUnrelatedScrollable(BuildContext? notificationContext) {
+    final ScrollController? scrollController = widget.controller;
+    if (scrollController == null ||
+        !scrollController.hasClients ||
+        scrollController.positions.length > 1) {
+      return false;
+    }
+    final BuildContext? positionContext = scrollController.position.context.notificationContext;
+    return notificationContext != null &&
+        positionContext != null &&
+        notificationContext != positionContext;
+  }
+
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
     if (!widget.notificationPredicate(notification.asScrollUpdate())) {
+      return false;
+    }
+    if (_isFromUnrelatedScrollable(notification.context)) {
       return false;
     }
 
@@ -2008,6 +2043,9 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (!widget.notificationPredicate(notification)) {
+      return false;
+    }
+    if (_isFromUnrelatedScrollable(notification.context)) {
       return false;
     }
 
