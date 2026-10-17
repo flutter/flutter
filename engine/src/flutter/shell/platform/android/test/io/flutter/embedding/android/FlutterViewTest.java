@@ -60,6 +60,7 @@ import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.loader.FlutterLoader;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
+import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.plugin.platform.PlatformViewsController2;
 import java.lang.reflect.Field;
@@ -1495,5 +1496,32 @@ public class FlutterViewTest {
     SparseArray<AutofillValue> values = mock(SparseArray.class);
     flutterView.autofill(values);
     // No exception should be thrown
+  }
+
+  @Test
+  public void onWindowFocusChanged_forwardsToTextInputPlugin() throws Exception {
+    FlutterView flutterView = new FlutterView(ctx);
+    TextInputPlugin textInputPlugin = mock(TextInputPlugin.class);
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    textInputPluginField.set(flutterView, textInputPlugin);
+
+    flutterView.onWindowFocusChanged(true);
+    verify(textInputPlugin, times(1)).onWindowFocusChanged(true);
+
+    flutterView.onWindowFocusChanged(false);
+    verify(textInputPlugin, times(1)).onWindowFocusChanged(false);
+  }
+
+  @Test
+  public void onWindowFocusChanged_doesNothingWhenTextInputPluginIsNull() throws Exception {
+    FlutterView flutterView = new FlutterView(ctx);
+    Field textInputPluginField = FlutterView.class.getDeclaredField("textInputPlugin");
+    textInputPluginField.setAccessible(true);
+    assertNull(textInputPluginField.get(flutterView));
+
+    // Should not throw.
+    flutterView.onWindowFocusChanged(true);
+    flutterView.onWindowFocusChanged(false);
   }
 }
