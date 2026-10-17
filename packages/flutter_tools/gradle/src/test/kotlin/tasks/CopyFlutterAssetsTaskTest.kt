@@ -63,10 +63,14 @@ class CopyFlutterAssetsTaskTest {
     }
 
     @Test
-    fun `clears the destination directory when there is no flutter build for the variant`(
+    fun `removes staged assets that the flutter build does not produce`(
         @TempDir tempDir: Path
     ) {
         val project = ProjectBuilder.builder().withProjectDir(tempDir.resolve("project").toFile()).build()
+        val intermediateDir = tempDir.resolve("intermediate").toFile()
+        val assetFile = intermediateDir.resolve("flutter_assets/asset.txt")
+        assetFile.parentFile.mkdirs()
+        assetFile.writeText("asset-bytes")
         val destinationDir = tempDir.resolve("staged").toFile()
         val staleFile = destinationDir.resolve("flutter_assets/stale.txt")
         staleFile.parentFile.mkdirs()
@@ -77,11 +81,13 @@ class CopyFlutterAssetsTaskTest {
                 .register("testCopyFlutterAssets", CopyFlutterAssetsTask::class.java)
                 .get()
                 .also { task ->
+                    task.intermediateDir.set(intermediateDir)
                     task.destinationDir.set(destinationDir)
                 }
 
         task.copy()
 
         assertFalse(staleFile.exists(), "stale staged assets should be removed")
+        assertTrue(destinationDir.resolve("flutter_assets/asset.txt").isFile, "expected the asset to be staged")
     }
 }
