@@ -4,6 +4,7 @@
 
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -221,6 +222,130 @@ void main() {
       expect(renderBox.size.width, equals(800.0));
       expect(renderBox.size.height, equals(300.0));
       expect(renderBox.localToGlobal(Offset.zero), equals(const Offset(0, 300)));
+    });
+    testWidgets('moves to the new sub-screen over the duration', (WidgetTester tester) async {
+      const childKey = Key('childKey');
+      final flat = MediaQueryData.fromView(tester.view);
+      final MediaQueryData folded = flat.copyWith(
+        displayFeatures: <DisplayFeature>[
+          const DisplayFeature(
+            bounds: Rect.fromLTRB(390, 0, 410, 600),
+            type: DisplayFeatureType.fold,
+            state: DisplayFeatureState.postureHalfOpened,
+          ),
+        ],
+      );
+
+      Widget build(MediaQueryData data) => MediaQuery(
+        data: data,
+        child: const DisplayFeatureSubScreen(
+          anchorPoint: Offset.zero,
+          child: SizedBox.expand(key: childKey),
+        ),
+      );
+
+      await tester.pumpWidget(build(flat));
+      expect(tester.renderObject<RenderBox>(find.byKey(childKey)).size.width, 800.0);
+
+      // The fold opens. The child belongs to the left sub-screen now, and gets
+      // there over the duration rather than in the next frame.
+      await tester.pumpWidget(build(folded));
+      await tester.pump(const Duration(milliseconds: 100));
+      final double midway = tester.renderObject<RenderBox>(find.byKey(childKey)).size.width;
+      expect(midway, greaterThan(390.0));
+      expect(midway, lessThan(800.0));
+
+      await tester.pumpAndSettle();
+      expect(tester.renderObject<RenderBox>(find.byKey(childKey)).size.width, 390.0);
+    });
+
+    testWidgets('Duration.zero moves the child in a single frame', (WidgetTester tester) async {
+      const childKey = Key('childKey');
+      final flat = MediaQueryData.fromView(tester.view);
+      final MediaQueryData folded = flat.copyWith(
+        displayFeatures: <DisplayFeature>[
+          const DisplayFeature(
+            bounds: Rect.fromLTRB(390, 0, 410, 600),
+            type: DisplayFeatureType.fold,
+            state: DisplayFeatureState.postureHalfOpened,
+          ),
+        ],
+      );
+
+      Widget build(MediaQueryData data) => MediaQuery(
+        data: data,
+        child: const DisplayFeatureSubScreen(
+          anchorPoint: Offset.zero,
+          duration: Duration.zero,
+          child: SizedBox.expand(key: childKey),
+        ),
+      );
+
+      await tester.pumpWidget(build(flat));
+      await tester.pumpWidget(build(folded));
+      await tester.pump();
+
+      expect(tester.renderObject<RenderBox>(find.byKey(childKey)).size.width, 390.0);
+    });
+
+    testWidgets('the first position is not animated', (WidgetTester tester) async {
+      const childKey = Key('childKey');
+      final MediaQueryData folded = MediaQueryData.fromView(tester.view).copyWith(
+        displayFeatures: <DisplayFeature>[
+          const DisplayFeature(
+            bounds: Rect.fromLTRB(390, 0, 410, 600),
+            type: DisplayFeatureType.fold,
+            state: DisplayFeatureState.postureHalfOpened,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: folded,
+          child: const DisplayFeatureSubScreen(
+            anchorPoint: Offset.zero,
+            child: SizedBox.expand(key: childKey),
+          ),
+        ),
+      );
+
+      // A widget built into an already folded device starts where it belongs,
+      // so a test that sets up a fold and pumps once sees what it saw before.
+      expect(tester.renderObject<RenderBox>(find.byKey(childKey)).size.width, 390.0);
+    });
+    testWidgets('debugFillProperties lists what differs from the defaults', (
+      WidgetTester tester,
+    ) async {
+      final properties = DiagnosticPropertiesBuilder();
+      const DisplayFeatureSubScreen(
+        anchorPoint: Offset(10, 20),
+        duration: Duration(milliseconds: 500),
+        curve: Curves.linear,
+        child: SizedBox(),
+      ).debugFillProperties(properties);
+
+      final List<String> description = properties.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+
+      expect(description, hasLength(3));
+      expect(description[0], 'anchorPoint: Offset(10.0, 20.0)');
+      expect(description[1], startsWith('duration:'));
+      expect(description[2], startsWith('curve:'));
+    });
+
+    testWidgets('debugFillProperties hides the defaults', (WidgetTester tester) async {
+      final properties = DiagnosticPropertiesBuilder();
+      const DisplayFeatureSubScreen(child: SizedBox()).debugFillProperties(properties);
+
+      final List<String> description = properties.properties
+          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+
+      expect(description, isEmpty);
     });
   });
 
