@@ -2576,7 +2576,7 @@ TEST_F(ShellTest, RasterizerMakeImpellerSnapshotDoesNotGenerateMipmaps) {
         sk_sp<DisplayList> display_list = MakeSizedDisplayList(50, 50);
         std::shared_ptr<impeller::Texture> texture =
             delegate->MakeImpellerSnapshotSync(
-                SnapshotDelegate::MakeDisplayListProvider(display_list),
+                [display_list](impeller::AiksContext*) { return display_list; },
                 DlISize(50, 50), SnapshotPixelFormat::kDontCare);
         EXPECT_NE(texture, nullptr);
         if (texture != nullptr) {

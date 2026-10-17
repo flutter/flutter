@@ -8,7 +8,6 @@
 #include <variant>
 
 #include "flutter/fml/make_copyable.h"
-#include "flutter/lib/ui/snapshot_layer_tree_helper.h"
 #include "impeller/display_list/aiks_context.h"
 
 // Disable a warning on Windows about use of deprecated atomic operations
@@ -171,13 +170,25 @@ void DlDeferredImageGPUImpeller::ImageWrapper::SnapshotDisplayList(
 
         SnapshotDelegate::SnapshotDisplayListProvider provider;
         if (std::holds_alternative<sk_sp<DisplayList>>(content)) {
-          provider = SnapshotDelegate::MakeDisplayListProvider(
-              std::get<sk_sp<DisplayList>>(std::move(content)));
+          provider = [display_list =
+                          std::get<sk_sp<DisplayList>>(std::move(content))](
+                         impeller::AiksContext*) { return display_list; };
         } else if (std::holds_alternative<std::unique_ptr<LayerTree>>(
                        content)) {
-          provider = MakeLayerTreeSnapshotProvider(
-              std::get<std::unique_ptr<LayerTree>>(std::move(content)),
-              snapshot_delegate->GetTextureRegistry());
+          // Flatten only once the snapshot controller has made a rendering
+          // context current, and with the AiksContext that renders the
+          // snapshot. https://github.com/flutter/flutter/issues/192365
+          provider = fml::MakeCopyable(
+              [layer_tree =
+                   std::get<std::unique_ptr<LayerTree>>(std::move(content)),
+               texture_registry = snapshot_delegate->GetTextureRegistry(),
+               bounds =
+                   DlRect::MakeWH(wrapper->size_.width, wrapper->size_.height)](
+                  impeller::AiksContext* aiks_context) mutable {
+                return layer_tree->Flatten(bounds, texture_registry,
+                                           /*gr_context=*/nullptr,
+                                           aiks_context);
+              });
         }
 
         auto texture = snapshot_delegate->MakeImpellerSnapshotSync(

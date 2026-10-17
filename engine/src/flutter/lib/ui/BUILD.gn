@@ -125,8 +125,6 @@ source_set("ui") {
     "semantics/string_attribute.cc",
     "semantics/string_attribute.h",
     "snapshot_delegate.h",
-    "snapshot_layer_tree_helper.cc",
-    "snapshot_layer_tree_helper.h",
     "text/asset_manager_font_provider.cc",
     "text/asset_manager_font_provider.h",
     "text/font_collection.cc",
