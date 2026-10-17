@@ -85,6 +85,8 @@ source_set("flutter_linux_sources") {
   public = _public_headers + [
              "fl_binary_messenger_private.h",
              "fl_engine_private.h",
+             "fl_gtk.h",
+             "fl_gtk_gtk3.h",
              "fl_key_channel_responder.h",
              "fl_key_embedder_responder.h",
              "fl_key_event.h",
@@ -251,6 +253,7 @@ executable("flutter_linux_unittests") {
     "fl_framebuffer_test.cc",
     "fl_gl_fence_test.cc",
     "fl_gnome_settings_test.cc",
+    "fl_gtk_test.cc",
     "fl_json_message_codec_test.cc",
     "fl_json_method_codec_test.cc",
     "fl_key_channel_responder_test.cc",
