@@ -551,7 +551,8 @@ Command: /home/android/gradlew assembleRelease
     testWithoutContext('handler', () async {
       await licenseNotAcceptedHandler.handler(
         gradleUtils: FakeGradleUtils(),
-        line: 'You have not accepted the license agreements of the following SDK components: [foo, bar]',
+        line:
+            'You have not accepted the license agreements of the following SDK components: [foo, bar]',
         project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
         toolContext: toolContext,
         usesAndroidX: true,
@@ -633,6 +634,70 @@ assembleFooTest
           '│                                                                                                 │\n'
           '│ The /android/app/build.gradle file defines product flavors: flavor1, flavor_2. You must specify │\n'
           '│ a --flavor option to select one of them.                                                        │\n'
+          '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n',
+        ),
+      );
+      expect(processManager, hasNoRemainingExpectations);
+    });
+
+    testWithoutContext('handler - with multiple flavor dimensions', () async {
+      processManager.addCommand(
+        const FakeCommand(
+          command: <String>['gradlew', 'app:tasks', '--all', '--console=auto'],
+          stdout: '''
+assembleRelease
+assembleDebug
+assembleProfile
+assembleDevelopment
+assembleProduction
+assembleExternal
+assembleInternal
+assembleDevelopmentExternal
+assembleDevelopmentExternalDebug
+assembleDevelopmentExternalRelease
+assembleDevelopmentExternalProfile
+assembleDevelopmentInternal
+assembleDevelopmentInternalDebug
+assembleDevelopmentInternalRelease
+assembleDevelopmentInternalProfile
+assembleProductionExternal
+assembleProductionExternalDebug
+assembleProductionExternalRelease
+assembleProductionExternalProfile
+assembleProductionInternal
+assembleProductionInternalDebug
+assembleProductionInternalRelease
+assembleProductionInternalProfile
+''',
+        ),
+      );
+
+      await flavorUndefinedHandler.handler(
+        gradleUtils: FakeGradleUtils(),
+        java: FakeJava(),
+        line: '',
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+        toolContext: toolContext,
+        usesAndroidX: true,
+      );
+
+      expect(
+        testLogger.statusText,
+        contains(
+          'Gradle project does not define a task suitable '
+          'for the requested build.',
+        ),
+      );
+      expect(
+        testLogger.statusText,
+        contains(
+          '\n'
+          '┌─ Flutter Fix ───────────────────────────────────────────────────────────────────────────────────┐\n'
+          '│ [!]  Gradle project does not define a task suitable for the requested build.                    │\n'
+          '│                                                                                                 │\n'
+          '│ The /android/app/build.gradle file defines product flavors: developmentexternal,                │\n'
+          '│ developmentinternal, productionexternal, productioninternal. You must specify a --flavor option │\n'
+          '│ to select one of them.                                                                          │\n'
           '└─────────────────────────────────────────────────────────────────────────────────────────────────┘\n',
         ),
       );
