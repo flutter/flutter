@@ -655,6 +655,136 @@ void main() {
     });
   });
 
+  group('waitForUIIsolatePaused', () {
+    vm_service.Isolate isolateWithPauseEvent(String eventKind) {
+      return vm_service.Isolate.parse(
+        isolate.toJson()..['pauseEvent'] = vm_service.Event(kind: eventKind, timestamp: 0).toJson(),
+      )!;
+    }
+
+    testWithoutContext(
+      'returns immediately when the UI isolate is already in PauseStart',
+      () async {
+        final vm_service.Isolate pausedIsolate = isolateWithPauseEvent(
+          vm_service.EventKind.kPauseStart,
+        );
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            listViewsRequest,
+            FakeVmServiceRequest(
+              method: 'getIsolate',
+              jsonResponse: pausedIsolate.toJson(),
+              args: <String, Object>{'isolateId': '1'},
+            ),
+          ],
+        );
+
+        await fakeVmServiceHost.vmService.waitForUIIsolatePaused();
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+      },
+    );
+
+    testWithoutContext(
+      'waits for a PauseStart event on the Debug stream when the UI isolate is not yet paused',
+      () async {
+        final vm_service.Isolate unpausedIsolate = isolateWithPauseEvent(
+          vm_service.EventKind.kNone,
+        );
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            listViewsRequest,
+            FakeVmServiceRequest(
+              method: 'getIsolate',
+              jsonResponse: unpausedIsolate.toJson(),
+              args: <String, Object>{'isolateId': '1'},
+            ),
+            FakeVmServiceStreamResponse(
+              streamId: 'Debug',
+              event: vm_service.Event(
+                kind: vm_service.EventKind.kPauseStart,
+                isolate: isolate,
+                timestamp: 1,
+              ),
+            ),
+          ],
+        );
+
+        await fakeVmServiceHost.vmService.waitForUIIsolatePaused();
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+      },
+    );
+
+    testWithoutContext('polls until a FlutterView is registered', () async {
+      final vm_service.Isolate pausedIsolate = isolateWithPauseEvent(
+        vm_service.EventKind.kPauseStart,
+      );
+      final fakeVmServiceHost = FakeVmServiceHost(
+        requests: <VmServiceExpectation>[
+          const FakeVmServiceRequest(
+            method: 'streamListen',
+            args: <String, Object>{'streamId': 'Debug'},
+          ),
+          const FakeVmServiceRequest(
+            method: kListViewsMethod,
+            jsonResponse: <String, Object>{'views': <Object>[]},
+          ),
+          listViewsRequest,
+          FakeVmServiceRequest(
+            method: 'getIsolate',
+            jsonResponse: pausedIsolate.toJson(),
+            args: <String, Object>{'isolateId': '1'},
+          ),
+        ],
+      );
+
+      await fakeVmServiceHost.vmService.waitForUIIsolatePaused();
+      expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+    });
+
+    testWithoutContext(
+      'returns when the VM service is disposed while waiting for PauseStart',
+      () async {
+        final vm_service.Isolate unpausedIsolate = isolateWithPauseEvent(
+          vm_service.EventKind.kNone,
+        );
+        final fakeVmServiceHost = FakeVmServiceHost(
+          requests: <VmServiceExpectation>[
+            const FakeVmServiceRequest(
+              method: 'streamListen',
+              args: <String, Object>{'streamId': 'Debug'},
+            ),
+            listViewsRequest,
+            FakeVmServiceRequest(
+              method: 'getIsolate',
+              jsonResponse: unpausedIsolate.toJson(),
+              args: <String, Object>{'isolateId': '1'},
+            ),
+          ],
+        );
+
+        var completed = false;
+        unawaited(
+          fakeVmServiceHost.vmService.waitForUIIsolatePaused().then((_) => completed = true),
+        );
+        await pumpEventQueue();
+        expect(fakeVmServiceHost.hasRemainingExpectations, isFalse);
+        expect(completed, isFalse);
+
+        await fakeVmServiceHost.vmService.dispose();
+        await pumpEventQueue();
+        expect(completed, isTrue);
+      },
+    );
+  });
+
   testWithoutContext('Can process log events from the vm service', () {
     final event = vm_service.Event(
       bytes: base64.encode(utf8.encode('Hello There\n')),
