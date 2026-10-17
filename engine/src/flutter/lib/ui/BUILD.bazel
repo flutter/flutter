@@ -5,7 +5,7 @@
 # Generated from //flutter/lib/ui/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -235,8 +235,9 @@ cc_test(
     size = "enormous",
     srcs = ["ui_benchmarks.cc"],
     args = ["--icu-data-file-path=../+synced_deps+icu/common/icudtl.dat"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :ui
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing:fixture_test
     ],
     data = ["@icu//:icudata"],
     local_defines = FLUTTER_LOCAL_DEFINES,
@@ -286,8 +287,9 @@ flutter_cc_test(
         "window/pointer_data_packet_converter_unittests.cc",
         "window/pointer_data_packet_unittests.cc",
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :ui
+        "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
         "-Wno-c++98-compat-extra-semi",  # from //flutter/impeller
         "-Wno-deprecated-copy",  # from //flutter/impeller
         "-Wno-implicit-fallthrough",  # from //flutter/impeller
@@ -328,8 +330,9 @@ cc_library(
     srcs = [
         "painting/display_list_deferred_image_gpu_impeller_unittests.cc",  # impeller_supports_rendering
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :ui
+        "-Wno-inconsistent-missing-override",  # from :ui_testing_mocks
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [

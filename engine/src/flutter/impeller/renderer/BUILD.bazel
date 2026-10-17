@@ -5,7 +5,7 @@
 # Generated from //flutter/impeller/renderer/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "impeller_shaders")
 
 package(default_visibility = ["//visibility:public"])
@@ -123,7 +123,9 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
         ":renderer",
@@ -160,7 +162,9 @@ cc_library(
     ],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
+    ],
     local_defines = FLUTTER_LOCAL_DEFINES + [
         "IMPELLER_GOLDEN_TESTS",
         "IMPELLER_ENABLE_VALIDATION=1",
@@ -187,7 +191,8 @@ cc_library(
     srcs = ["renderer_dart_unittests.cc"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from ../playground:playground_test
         "-Wno-redundant-parens",  # from //flutter/runtime
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,

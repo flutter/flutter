@@ -6,7 +6,7 @@
 # Not converted: copy_headers, flutter_engine, embedder-archive.
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -354,7 +354,7 @@ cc_library(
         "tests/embedder_unittests_util.h",
         "//engine/src/flutter/impeller/renderer/backend/gles:test/mock_gles.h",  # test_enable_gl
     ],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :embedder_gpu_configuration
         "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
         "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
@@ -364,6 +364,7 @@ cc_library(
         "-Wno-suggest-override",  # from :embedder_gpu_configuration
         "-Wno-unused-private-field",  # from :embedder_gpu_configuration
         "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ],
     implementation_deps = ["//engine/src/flutter:export_dynamic_symbols"],
     includes = ["."],
@@ -418,7 +419,7 @@ flutter_cc_test(
         "tests/embedder_unittests.cc",
         "tests/embedder_vk_unittests.cc",  # test_enable_vulkan
     ],
-    copts = CHROMIUM_CODE_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = CHROMIUM_CODE_COPTS + [
         "-Wno-redundant-parens",  # from :embedder_unittests_library
         "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
         "-Wno-deprecated-copy",  # from :embedder_unittests_library
@@ -428,6 +429,7 @@ flutter_cc_test(
         "-Wno-suggest-override",  # from :embedder_unittests_library
         "-Wno-unused-private-field",  # from :embedder_unittests_library
         "-Wno-unused-variable",  # from :embedder_unittests_library
+        "-Wno-inconsistent-missing-override",  # from :embedder_unittests_library
     ],
     data = [
         ":gpu_test_backends",
@@ -463,7 +465,7 @@ flutter_cc_test(
     name = "embedder_a11y_unittests",
     size = "small",
     srcs = ["tests/embedder_a11y_unittests.cc"],
-    copts = CHROMIUM_CODE_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = CHROMIUM_CODE_COPTS + [
         "-Wno-redundant-parens",  # from :embedder_unittests_library
         "-Wno-c++98-compat-extra-semi",  # from :embedder_unittests_library
         "-Wno-deprecated-copy",  # from :embedder_unittests_library
@@ -473,6 +475,7 @@ flutter_cc_test(
         "-Wno-suggest-override",  # from :embedder_unittests_library
         "-Wno-unused-private-field",  # from :embedder_unittests_library
         "-Wno-unused-variable",  # from :embedder_unittests_library
+        "-Wno-inconsistent-missing-override",  # from :embedder_unittests_library
     ],
     data = [":gpu_test_backends"],
     local_defines = FLUTTER_LOCAL_DEFINES + [
@@ -493,7 +496,7 @@ flutter_cc_test(
     name = "embedder_proctable_unittests",
     size = "small",
     srcs = ["tests/embedder_unittests_proctable.cc"],
-    copts = FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    copts = FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :embedder_gpu_configuration
         "-Wno-c++98-compat-extra-semi",  # from :embedder_gpu_configuration
         "-Wno-deprecated-copy",  # from :embedder_gpu_configuration
@@ -503,6 +506,7 @@ flutter_cc_test(
         "-Wno-suggest-override",  # from :embedder_gpu_configuration
         "-Wno-unused-private-field",  # from :embedder_gpu_configuration
         "-Wno-unused-variable",  # from :embedder_gpu_configuration
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES + [
         "FLUTTER_ENGINE_NO_PROTOTYPES",

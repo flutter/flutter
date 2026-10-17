@@ -5,7 +5,7 @@
 # Generated from //flutter/shell/gpu/BUILD.gn by gn_to_bazel; do not edit.
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES", "FLUTTER_TESTONLY_COPTS")
+load("//engine/src/flutter/build/bazel:copts.bzl", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends")
 
 package(default_visibility = ["//visibility:public"])
@@ -127,7 +127,7 @@ cc_library(
     srcs = ["gpu_surface_vulkan_impeller_unittests.cc"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS + [
+    ] + FLUTTER_COPTS + [
         "-Wno-redundant-parens",  # from :gpu_surface_vulkan
         "-Wno-c++98-compat-extra-semi",  # from :gpu_surface_vulkan
         "-Wno-deprecated-copy",  # from :gpu_surface_vulkan
@@ -137,6 +137,7 @@ cc_library(
         "-Wno-suggest-override",  # from :gpu_surface_vulkan
         "-Wno-unused-private-field",  # from :gpu_surface_vulkan
         "-Wno-unused-variable",  # from :gpu_surface_vulkan
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
     ],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
@@ -172,7 +173,9 @@ flutter_cc_test(
     srcs = ["gpu_surface_unittests.cc"],
     copts = [
         "-Wthread-safety-analysis",  # is_clang
-    ] + FLUTTER_COPTS + FLUTTER_TESTONLY_COPTS,
+    ] + FLUTTER_COPTS + [
+        "-Wno-inconsistent-missing-override",  # from //flutter/testing
+    ],
     data = [":gpu_test_backends"],
     local_defines = FLUTTER_LOCAL_DEFINES,
     deps = [
