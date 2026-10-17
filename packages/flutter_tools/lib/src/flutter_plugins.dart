@@ -33,6 +33,12 @@ import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'project.dart';
 
+/// The default class name for the generated plugin registrant.
+const String defaultPluginRegistrantClassName = 'GeneratedPluginRegistrant';
+
+/// The default CocoaPods pod name for the generated iOS plugin registrant.
+const String defaultPluginRegistrantPodName = 'FlutterPluginRegistrant';
+
 /// Cache of parsed pubspec YAML content keyed by package root URI string.
 ///
 /// Pre-built once per workspace via [buildPubspecCache] and passed to
@@ -536,8 +542,8 @@ import io.flutter.embedding.engine.FlutterEngine;
  * plugins that support the Android platform.
  */
 @Keep
-public final class GeneratedPluginRegistrant {
-  private static final String TAG = "GeneratedPluginRegistrant";
+public final class {{pluginRegistrantClassName}} {
+  private static final String TAG = "{{pluginRegistrantClassName}}";
   public static void registerWith(@NonNull FlutterEngine flutterEngine) {
 {{#methodChannelPlugins}}
   {{#supportsEmbeddingV2}}
@@ -569,29 +575,22 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     AndroidPlugin.kConfigKey,
   );
 
+  final String registrantClassName =
+      project.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantClassName;
+
   final templateContext = <String, Object>{
     'methodChannelPlugins': androidPlugins,
     'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
+    'pluginRegistrantClassName': registrantClassName,
   };
-  final String javaSourcePath = globals.fs.path.join(
-    project.android.pluginRegistrantHost.path,
-    'src',
-    'main',
-    'java',
-  );
-  final String registryPath = globals.fs.path.join(
-    javaSourcePath,
-    'io',
-    'flutter',
-    'plugins',
-    'GeneratedPluginRegistrant.java',
-  );
+  final File registryFile = project.android.generatedPluginRegistrantFile;
+  final String registryPath = registryFile.path;
   const String templateContent = _androidPluginRegistryTemplateNewEmbedding;
   globals.printTrace('Generating $registryPath');
   await _renderTemplateToFile(
     templateContent,
     templateContext,
-    globals.fs.file(registryPath),
+    registryFile,
     globals.templateRenderer,
   );
 }
@@ -607,7 +606,7 @@ import UIKit
 import {{name}}
 {{/methodChannelPlugins}}
 
-@objc public class GeneratedPluginRegistrant: NSObject {
+@objc public class {{pluginRegistrantClassName}}: NSObject {
     @objc public static func register(with registry: FlutterPluginRegistry) {
         {{#methodChannelPlugins}}
         if let {{classVar}} = registry.registrar(forPlugin: "{{prefix}}{{class}}") {
@@ -625,19 +624,19 @@ const _objcPluginRegistryHeaderTemplate = '''
 
 // clang-format off
 
-#ifndef GeneratedPluginRegistrant_h
-#define GeneratedPluginRegistrant_h
+#ifndef {{pluginRegistrantClassName}}_h
+#define {{pluginRegistrantClassName}}_h
 
 #import <{{framework}}/{{framework}}.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface GeneratedPluginRegistrant : NSObject
+@interface {{pluginRegistrantClassName}} : NSObject
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
 @end
 
 NS_ASSUME_NONNULL_END
-#endif /* GeneratedPluginRegistrant_h */
+#endif /* {{pluginRegistrantClassName}}_h */
 ''';
 
 const _objcPluginRegistryImplementationTemplate = '''
@@ -647,7 +646,7 @@ const _objcPluginRegistryImplementationTemplate = '''
 
 // clang-format off
 
-#import "GeneratedPluginRegistrant.h"
+#import "{{pluginRegistrantClassName}}.h"
 
 {{#methodChannelPlugins}}
 #if __has_include(<{{name}}/{{class}}.h>)
@@ -657,7 +656,7 @@ const _objcPluginRegistryImplementationTemplate = '''
 #endif
 
 {{/methodChannelPlugins}}
-@implementation GeneratedPluginRegistrant
+@implementation {{pluginRegistrantClassName}}
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
 {{#methodChannelPlugins}}
@@ -698,7 +697,7 @@ const _pluginRegistrantPodspecTemplate = '''
 #
 
 Pod::Spec.new do |s|
-  s.name             = 'FlutterPluginRegistrant'
+  s.name             = '{{iosPodName}}'
   s.version          = '0.0.1'
   s.summary          = 'Registers plugins with your Flutter app'
   s.description      = <<-DESC
@@ -948,18 +947,26 @@ Future<void> writeIOSPluginRegistrant(
     methodChannelPlugins,
     IOSPlugin.kConfigKey,
   );
+
+  final String registrantClassName =
+      project.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantClassName;
+  final String iosPodName =
+      project.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantPodName;
+
   final context = <String, Object>{
     'os': FlutterDarwinPlatform.ios.name,
     'deploymentTarget': FlutterDarwinPlatform.ios.deploymentTarget().toString(),
     'framework': FlutterDarwinPlatform.ios.binaryName,
     'methodChannelPlugins': iosPlugins,
+    'pluginRegistrantClassName': registrantClassName,
+    'iosPodName': iosPodName,
   };
   if (project.isModule) {
     final Directory registryDirectory = project.ios.pluginRegistrantHost;
     await _renderTemplateToFile(
       _pluginRegistrantPodspecTemplate,
       context,
-      registryDirectory.childFile('FlutterPluginRegistrant.podspec'),
+      registryDirectory.childFile('$iosPodName.podspec'),
       templateRenderer ?? globals.templateRenderer,
     );
   }

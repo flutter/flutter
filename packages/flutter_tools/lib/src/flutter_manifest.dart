@@ -347,6 +347,17 @@ class FlutterManifest {
     return null;
   }
 
+  /// Returns the custom plugin registrant class name declared by this manifest
+  /// in its module descriptor. Returns null if there is no such declaration.
+  String? get pluginRegistrantClassName {
+    if (isModule) {
+      if (_flutterDescriptor case {'module': {'pluginRegistrantClassName': final String name}}) {
+        return name;
+      }
+    }
+    return null;
+  }
+
   /// Gets the supported platforms. This only supports the new `platforms` format.
   ///
   /// If the plugin uses the legacy pubspec format, this method returns null.
@@ -530,6 +541,8 @@ bool _validate(Object? manifest, Logger logger) {
   return true;
 }
 
+final RegExp _validClassNamePattern = RegExp(r'^[a-zA-Z_][a-zA-Z0-9_]*$');
+
 void _validateFlutter(YamlMap? yaml, List<String> errors) {
   if (yaml == null) {
     return;
@@ -586,6 +599,14 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
         if (yamlValue['iosBundleIdentifier'] != null &&
             yamlValue['iosBundleIdentifier'] is! String) {
           errors.add('The "iosBundleIdentifier" section must be a string if set.');
+        }
+        if (yamlValue['pluginRegistrantClassName'] != null) {
+          final Object? name = yamlValue['pluginRegistrantClassName'];
+          if (name is! String || !_validClassNamePattern.hasMatch(name)) {
+            errors.add(
+              'The "pluginRegistrantClassName" value must be a valid class identifier if set (e.g. "MyPluginRegistrant").',
+            );
+          }
         }
       case 'plugin':
         if (yamlValue is! YamlMap) {

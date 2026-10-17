@@ -1142,25 +1142,28 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
   /// Used only for "flutter clean" to remove old references.
   File get flutterPodspec => _flutterLibRoot.childDirectory('Flutter').childFile('Flutter.podspec');
 
+  /// The directory containing the plugin registrant files for iOS.
   Directory get pluginRegistrantHost {
+    final String folderName =
+        parent.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantPodName;
     return isModule
-        ? _flutterLibRoot.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
+        ? _flutterLibRoot.childDirectory('Flutter').childDirectory(folderName)
         : hostAppRoot.childDirectory(XcodeBasedProject._defaultHostAppName);
   }
 
-  File get pluginRegistrantHeader {
-    final Directory registryDirectory = isModule
-        ? pluginRegistrantHost.childDirectory('Classes')
-        : pluginRegistrantHost;
-    return registryDirectory.childFile('GeneratedPluginRegistrant.h');
-  }
+  Directory get _pluginRegistrantDirectory =>
+      isModule ? pluginRegistrantHost.childDirectory('Classes') : pluginRegistrantHost;
 
-  File get pluginRegistrantImplementation {
-    final Directory registryDirectory = isModule
-        ? pluginRegistrantHost.childDirectory('Classes')
-        : pluginRegistrantHost;
-    return registryDirectory.childFile('GeneratedPluginRegistrant.m');
-  }
+  String get _pluginRegistrantFileName =>
+      parent.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantClassName;
+
+  /// The Objective-C header file containing the plugin registrant declarations.
+  File get pluginRegistrantHeader =>
+      _pluginRegistrantDirectory.childFile('$_pluginRegistrantFileName.h');
+
+  /// The Objective-C implementation file containing the plugin registrant definitions.
+  File get pluginRegistrantImplementation =>
+      _pluginRegistrantDirectory.childFile('$_pluginRegistrantFileName.m');
 
   File get lldbInitFile {
     return ephemeralDirectory.childFile('flutter_lldbinit');
@@ -1204,6 +1207,9 @@ def __lldb_init_module(debugger: lldb.SBDebugger, _):
       'iosIdentifier': iosBundleIdentifier,
       'hasIosDevelopmentTeam': iosDevelopmentTeam != null && iosDevelopmentTeam.isNotEmpty,
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
+      'iosPodName': parent.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantPodName,
+      'pluginRegistrantClassName':
+          parent.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantClassName,
     }, printStatusWhenWriting: false);
   }
 }

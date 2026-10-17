@@ -945,16 +945,18 @@ class AndroidProject extends FlutterProjectPlatform {
         .childFile('gradle-wrapper.properties');
   }
 
+  /// The Java source file containing the plugin registrant class for Android.
   File get generatedPluginRegistrantFile {
-    return hostAppGradleRoot
-        .childDirectory('app')
+    final String filename =
+        parent.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantClassName;
+    return pluginRegistrantHost
         .childDirectory('src')
         .childDirectory('main')
         .childDirectory('java')
         .childDirectory('io')
         .childDirectory('flutter')
         .childDirectory('plugins')
-        .childFile('GeneratedPluginRegistrant.java');
+        .childFile('$filename.java');
   }
 
   /// Whether the current flutter project has an Android sub-project.
@@ -1165,10 +1167,13 @@ See the link below for more information:
     );
     final String androidIdentifier =
         parent.manifest.androidPackage ?? 'com.example.${parent.manifest.appName}';
+    final String pluginRegistrantClassName =
+        parent.manifest.pluginRegistrantClassName ?? defaultPluginRegistrantClassName;
     template.render(target, <String, Object>{
       'android': true,
       'projectName': parent.manifest.appName,
       'androidIdentifier': androidIdentifier,
+      'pluginRegistrantClassName': pluginRegistrantClassName,
       'androidX': usesAndroidX,
       'agpVersion': gradle.templateAndroidGradlePluginVersion,
       'agpVersionForModule': gradle.templateAndroidGradlePluginVersionForModule,
