@@ -87,14 +87,16 @@ GnFileEvaluation evaluateIn(
   GnSourceTree tree,
   String file, {
   Assumptions? assumptions,
+  Set<String> templates = const <String>{},
   ImportPolicy importPolicy = const ImportPolicy(
     evaluatedPrefixes: <String>{'//lib/'},
-    known: <String>{'//known/config.gni'},
+    known: <String>{'//known/config.gni', '//flutter/build/zip_bundle.gni'},
   ),
 }) {
   return evaluateGnFile(
     tree.load(tree.resolve(file)),
     assumptions: assumptions ?? linuxHostAssumptions(),
+    templates: templates,
     externalVariables: knownExternalVariables,
     tree: tree,
     importPolicy: importPolicy,
@@ -2761,7 +2763,7 @@ cc_library(
       expect(wuffs, contains('cc_library(\n    name = "quiet",\n)'));
 
       // A dependent gets them from wuffs's own GN file, read from the tree
-      // (forwarded_flags.dart).
+      // (dependency_resolver.dart).
       final GnSourceTree tree = sourceTree(<String, String>{
         'flutter/third_party/wuffs/BUILD.gn': wuffsGn,
         'flutter/example/BUILD.gn': '''
@@ -3002,7 +3004,7 @@ source_set("b") {
 }
 ''',
       });
-      final resolver = ForwardedFlags(tree: tree, assumptions: linuxHostAssumptions());
+      final resolver = DependencyResolver(tree: tree, assumptions: linuxHostAssumptions());
       for (final package in <String>['//flutter/a', '//flutter/b']) {
         expect(
           emitBuildFile(
@@ -3014,11 +3016,200 @@ source_set("b") {
           contains('"-Wno-shadow",  # from //flutter/third_party/quiet'),
         );
       }
-      expect(resolver.of('//flutter/third_party/quiet:quiet'), <ForwardedFlag>[
+      expect(resolver.flagsOf('//flutter/third_party/quiet:quiet'), <ForwardedFlag>[
         (condition: Condition.always, flag: '-Wno-shadow'),
       ]);
-      expect(resolver.of('//flutter/nowhere:nothing'), isEmpty);
-      expect(ForwardedFlags.none().of('//flutter/third_party/quiet:quiet'), isEmpty);
+      expect(resolver.flagsOf('//flutter/nowhere:nothing'), isEmpty);
+      expect(DependencyResolver.none().flagsOf('//flutter/third_party/quiet:quiet'), isEmpty);
+    });
+
+    test('zip_bundle: entries by destination, sources resolved to their producers', () async {
+      // font_subset's shape: the executable's output_name, a copy into the
+      // build root, a shared library, a source file, an entry under the
+      // runtime mode, and the block's helpers.
+      final String output = await convert(
+        r'''
+import("//flutter/build/zip_bundle.gni")
+
+executable("_tool") {
+  output_name = "tool"
+  sources = [ "a.cc" ]
+}
+
+shared_library("engine_library") {
+  output_name = "engine"
+  sources = [ "b.cc" ]
+}
+
+copy("copy_headers") {
+  sources = [ "embedder.h" ]
+  outputs = [ "$root_out_dir/flutter_embedder.h" ]
+}
+
+zip_bundle("bundle") {
+  if (is_mac) {
+    output = "darwin-${target_cpu}/tool.zip"
+  } else {
+    output = "${full_target_platform_name}/tool.zip"
+  }
+  tool_bin = "tool"
+  if (is_win) {
+    tool_bin = "${tool_bin}.exe"
+  }
+  deps = [ ":_tool", ":engine_library", ":copy_headers" ]
+  files = [
+    {
+      source = "$root_build_dir/$tool_bin"
+      destination = tool_bin
+    },
+    {
+      source = "README.md"
+      destination = "docs/README.md"
+    },
+    {
+      source = "$root_out_dir/flutter_embedder.h"
+      destination = "flutter_embedder.h"
+    },
+  ]
+  if (host_os == "linux") {
+    files += [
+      {
+        source = "$root_out_dir/libengine.so"
+        destination = "libengine.so"
+      },
+    ]
+  }
+  if (flutter_runtime_mode == "release") {
+    files += [
+      {
+        source = "$root_build_dir/tool"
+        destination = "extra/tool"
+      },
+    ]
+  }
+}
+''',
+        templates: <String>{'zip_bundle'},
+      );
+      expect(
+        output,
+        contains('''
+zip_bundle(
+    name = "bundle",
+    files = {
+        "tool": ":_tool",
+        "docs/README.md": "README.md",
+        "flutter_embedder.h": ":copy_headers",
+        "libengine.so": ":engine_library",
+    } | select({
+        "//engine/src/flutter/common:runtime_mode_release": {"extra/tool": ":_tool"},
+        "//conditions:default": {},
+    }),
+    output = "linux-x64/tool.zip",
+)
+'''),
+      );
+      // The copy into the build root converts (the file travels as it is).
+      expect(
+        output,
+        contains('gn_copy(\n    name = "copy_headers",\n    srcs = ["embedder.h"],\n'),
+      );
+      expect(output, isNot(contains('tool_bin')));
+      // An entry nothing produces.
+      await expectLater(
+        convert(
+          r'''
+import("//flutter/build/zip_bundle.gni")
+
+zip_bundle("bundle") {
+  output = "x.zip"
+  files = [
+    {
+      source = "$root_build_dir/gen_snapshot"
+      destination = "gen_snapshot"
+    },
+  ]
+}
+''',
+          templates: <String>{'zip_bundle'},
+        ),
+        throwsGnError(
+          line: 5,
+          message: r'no target of this file or of the deps of bundle produces $root_out_dir/gen_snapshot',
+        ),
+      );
+      // An argument the mapping lacks, as opposed to a helper the block reads.
+      await expectLater(
+        convert(
+          '''
+import("//flutter/build/zip_bundle.gni")
+
+zip_bundle("bundle") {
+  output = "x.zip"
+  files = []
+  strip = true
+}
+''',
+          templates: <String>{'zip_bundle'},
+        ),
+        throwsGnError(
+          line: 6,
+          message: 'argument strip is not handled by the zip_bundle macro mapping',
+        ),
+      );
+    });
+
+    test("zip_bundle: an entry produced by another file's target, through the resolver", () {
+      final GnSourceTree tree = sourceTree(<String, String>{
+        'flutter/build/zip_bundle.gni': '',
+        'flutter/compiler/BUILD.gn': '''
+executable("impellerc") {
+  sources = [ "c.cc" ]
+}
+''',
+        'flutter/sdk/BUILD.gn': r'''
+import("//flutter/build/zip_bundle.gni")
+
+zip_bundle("sdk") {
+  output = "sdk.zip"
+  deps = [ "//flutter/compiler:impellerc" ]
+  files = [
+    {
+      source = "$root_build_dir/impellerc"
+      destination = "bin/impellerc"
+    },
+  ]
+}
+''',
+      });
+      final resolver = DependencyResolver(tree: tree, assumptions: linuxHostAssumptions());
+      expect(
+        emitBuildFile(
+          evaluateIn(tree, '//flutter/sdk/BUILD.gn', templates: <String>{'zip_bundle'}),
+          gnPackage: '//flutter/sdk',
+          tree: tree,
+          forwardedFlags: resolver,
+        ),
+        contains('files = {"bin/impellerc": "//engine/src/flutter/compiler:impellerc"}'),
+      );
+      expect(resolver.targetOf('//flutter/compiler:impellerc')?.rule, 'executable');
+      expect(resolver.targetOf('//flutter/compiler:nothing'), isNull);
+      expect(resolver.targetOf('//flutter/nowhere:nothing'), isNull);
+    });
+
+    test('a helper variable of a target block is ignored', () async {
+      // The embedder's flutter_engine group.
+      final String output = await convert('''
+group("flutter_engine") {
+  deps = []
+  build_embedder_api = current_toolchain == host_toolchain || is_win
+  if (build_embedder_api) {
+    deps += [ ":a" ]
+  }
+}
+''');
+      expect(output, contains('deps = [\n        ":a",  # build_embedder_api\n    ],'));
+      expect(output, isNot(contains('build_embedder_api =')));
     });
 
     test('secondary source root: a BUILD.gn stands in for another directory', () {

@@ -36,6 +36,11 @@ build --dynamic_mode=off
 # this flag; cc_shared_library targets list it explicitly.
 build --@bazel_tools//tools/cpp:link_extra_libs=//engine/src/flutter/build/bazel/toolchains:cxx_runtime
 
+# GN's `complete_static_lib` (the Impeller SDK's libimpeller.a: an archive of
+# every object in the dependency closure) is cc_static_library, which Bazel 8
+# ships behind this flag.
+build --experimental_cc_static_library
+
 # A content-addressed cache of action outputs shared by every checkout and
 # output base of this user, garbage-collected to the cap by the idle server.
 # Half of a cold build is the exec configuration (impellerc's closure, built

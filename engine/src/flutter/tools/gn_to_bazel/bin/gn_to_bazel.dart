@@ -136,9 +136,9 @@ Future<int> run(List<String> arguments) async {
   }
 
   // The compiler flags dependencies hand this run's targets, read from
-  // their GN files (forwarded_flags.dart); shared, so each file is
+  // their GN files (dependency_resolver.dart); shared, so each file is
   // evaluated once.
-  final forwardedFlags = ForwardedFlags(tree: tree, assumptions: assumptions);
+  final forwardedFlags = DependencyResolver(tree: tree, assumptions: assumptions);
 
   for (final file in files) {
     final String gnPackage = tree.gnDirectory(file);

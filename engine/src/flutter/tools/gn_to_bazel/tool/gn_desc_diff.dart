@@ -372,13 +372,19 @@ int _compare(
     differences++;
   }
   // gn desc's deps are deps and public_deps together, plus what
-  // BUILDCONFIG.gn's executable template adds (the C++ runtime, which the
-  // Bazel toolchain provides).
-  check(
-    'deps',
-    items('deps', labelOf).union(items('public_deps', labelOf)),
-    _strings(gnTarget['deps']).map(_stripToolchain).map(labelOf).toSet()..removeAll(_toolchainDeps),
-  );
+  // BUILDCONFIG.gn's executable and shared_library templates add (the C++
+  // runtime, which the Bazel toolchain provides); a static library that
+  // names the runtime itself (a complete one archiving it) is compared as
+  // written.
+  final Set<String> gnDeps = _strings(gnTarget['deps']).map(_stripToolchain).map(labelOf).toSet();
+  if (const <String>{
+    'executable',
+    'shared_library',
+    'loadable_module',
+  }.contains(gnTarget['type'])) {
+    gnDeps.removeAll(_toolchainDeps);
+  }
+  check('deps', items('deps', labelOf).union(items('public_deps', labelOf)), gnDeps);
   // gn desc lists public_configs after propagation from public_deps, so the
   // target's own are a subset; all_dependent_configs are compared after
   // propagation on both sides. The converter follows deps within the file;
@@ -463,8 +469,8 @@ int _compare(
 
 void _report(String label, String message) => stdout.writeln('$label $message');
 
-/// Dependencies BUILDCONFIG.gn adds to every executable and shared library:
-/// the C++ runtime, which is the Bazel toolchain's.
+/// Dependencies BUILDCONFIG.gn adds to every executable, shared library and
+/// loadable module: the C++ runtime, which is the Bazel toolchain's.
 const Set<String> _toolchainDeps = <String>{
   '//flutter/third_party/libcxx:libcxx',
   '//flutter/third_party/libcxxabi:libcxxabi',
