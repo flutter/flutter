@@ -207,7 +207,7 @@ class StackFrame {
     }
 
     final parser = RegExp(r'^#(\d+) +(.+) \((.+?):?(\d+){0,1}:?(\d+){0,1}\)$');
-    final Match? match = parser.firstMatch(line);
+    final match = parser.firstMatch(line);
     if (match == null) {
       return null;
     }
