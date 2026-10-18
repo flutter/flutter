@@ -217,6 +217,125 @@ void main() {
         expect(resizedImageSize, const Size(1, 1));
       });
 
+      group('with policy=cover', () {
+        test('covers a landscape rect with a square image', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+          await _expectImageSize(rawImage, const Size(50, 50));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 20,
+            height: 10,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(20, 20));
+        });
+
+        test('covers a square with a portrait image', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBluePortraitPng));
+          await _expectImageSize(rawImage, const Size(50, 100));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 30,
+            height: 30,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(30, 60));
+        });
+
+        test('covers a tall rect with a portrait image', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBluePortraitPng));
+          await _expectImageSize(rawImage, const Size(50, 100));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 10,
+            height: 40,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(20, 40));
+        });
+
+        test('covers a square with a landscape image', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueLandscapePng));
+          await _expectImageSize(rawImage, const Size(100, 50));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 30,
+            height: 30,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(60, 30));
+        });
+
+        test('covers a wide rect with a landscape image', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueLandscapePng));
+          await _expectImageSize(rawImage, const Size(100, 50));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 40,
+            height: 5,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(40, 20));
+        });
+
+        test('leaves image as-is if the box needs upscaling', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBluePortraitPng));
+          await _expectImageSize(rawImage, const Size(50, 100));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 60,
+            height: 60,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(50, 100));
+        });
+
+        test('scales up when allowUpscaling is true', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBluePortraitPng));
+          await _expectImageSize(rawImage, const Size(50, 100));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 60,
+            height: 60,
+            policy: ResizeImagePolicy.cover,
+            allowUpscaling: true,
+          );
+          await _expectImageSize(resizedImage, const Size(60, 120));
+        });
+
+        test('rounds the other side up', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueLandscapePng));
+          await _expectImageSize(rawImage, const Size(100, 50));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 15,
+            height: 1,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(15, 8));
+        });
+
+        test('does not add a pixel when the scale is exact', () async {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+          await _expectImageSize(rawImage, const Size(50, 50));
+          final resizedImage = ResizeImage(
+            rawImage,
+            width: 7,
+            height: 1,
+            policy: ResizeImagePolicy.cover,
+          );
+          await _expectImageSize(resizedImage, const Size(7, 7));
+        });
+
+        test('asserts when width or height is null', () {
+          final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
+          expect(
+            () => ResizeImage(rawImage, width: 10, policy: ResizeImagePolicy.cover),
+            throwsAssertionError,
+          );
+        });
+      });
+
       group('with policy=fit and allowResize=false', () {
         test('constrains square image to bounded portrait rect', () async {
           final rawImage = MemoryImage(Uint8List.fromList(kBlueSquarePng));
