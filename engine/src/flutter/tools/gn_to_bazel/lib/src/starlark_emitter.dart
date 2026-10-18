@@ -10,7 +10,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import 'bazel_mapping.dart';
-import 'forwarded_flags.dart';
+import 'dependency_resolver.dart';
 import 'gn_ast.dart';
 import 'gn_eval.dart';
 
@@ -148,7 +148,7 @@ final class _Rule {
 /// says where the file lives, which decides how file paths are written.
 /// [implicitDeps] are labels every target that compiles depends on (see
 /// the manifest). [forwardedFlags] resolves the compiler flags a dependency
-/// hands this file's targets (forwarded_flags.dart); one resolver serves a
+/// hands this file's targets (dependency_resolver.dart); one resolver serves a
 /// whole run, and without one a resolver over [tree] is made -- or, with
 /// no tree, one that finds none.
 String emitBuildFile(
@@ -159,13 +159,13 @@ String emitBuildFile(
   OutputLayout layout = const OutputLayout.main(),
   List<String> implicitDeps = const <String>[],
   GnSourceTree? tree,
-  ForwardedFlags? forwardedFlags,
+  DependencyResolver? forwardedFlags,
 }) {
-  final ForwardedFlags forwarded =
+  final DependencyResolver forwarded =
       forwardedFlags ??
       (tree == null
-          ? ForwardedFlags.none()
-          : ForwardedFlags(tree: tree, assumptions: evaluation.assumptions));
+          ? DependencyResolver.none()
+          : DependencyResolver(tree: tree, assumptions: evaluation.assumptions));
   final emitter = _Emitter(gnPackage, layout, implicitDeps, tree, evaluation.assumptions, forwarded)
     ..inheritedConfigs.addAll(evaluation.allDependentConfigs)
     ..conditionalInheritance.addAll(evaluation.conditionalAllDependentConfigs);
@@ -246,6 +246,73 @@ Set<GnTarget> _placeholders(List<GnTarget> targets) {
 /// Target variables that say nothing Bazel needs.
 const Set<String> _ignoredVariables = <String>{'check_includes', 'metadata', 'visibility'};
 
+/// The variables GN's own target types read (`gn help` lists them); any
+/// other variable assigned in a target's block is the block's helper, read
+/// by its own strings or conditions (`build_embedder_api`), since GN rejects
+/// an assignment nothing reads. The converter ignores such a variable: its
+/// effect is already in the values it fed.
+const Set<String> _gnTargetVariables = <String>{
+  'all_dependent_configs',
+  'allow_circular_includes_from',
+  'arflags',
+  'args',
+  'asmflags',
+  'assert_no_deps',
+  'cflags',
+  'cflags_c',
+  'cflags_cc',
+  'cflags_objc',
+  'cflags_objcc',
+  'check_includes',
+  'complete_static_lib',
+  'configs',
+  'contents',
+  'data',
+  'data_deps',
+  'data_keys',
+  'defines',
+  'depfile',
+  'deps',
+  'framework_dirs',
+  'frameworks',
+  'friend',
+  'gen_deps',
+  'include_dirs',
+  'inputs',
+  'ldflags',
+  'lib_dirs',
+  'libs',
+  'metadata',
+  'mnemonic',
+  'output_conversion',
+  'output_dir',
+  'output_extension',
+  'output_name',
+  'output_prefix_override',
+  'outputs',
+  'pool',
+  'precompiled_header',
+  'precompiled_header_type',
+  'precompiled_source',
+  'public',
+  'public_configs',
+  'public_deps',
+  'rebase',
+  'response_file_contents',
+  'script',
+  'sources',
+  'swiftflags',
+  'testonly',
+  'visibility',
+  'walk_keys',
+  'weak_frameworks',
+  'write_runtime_deps',
+};
+
+/// Whether [variable] is a helper of its target's block rather than one of
+/// GN's target variables (see [_gnTargetVariables]).
+bool _isHelperVariable(GnVariable variable) => !_gnTargetVariables.contains(variable.name);
+
 final class _Emitter {
   _Emitter(
     this.gnPackage,
@@ -268,8 +335,8 @@ final class _Emitter {
   final Assumptions assumptions;
 
   /// The compiler flags a dependency hands its dependents, which Bazel
-  /// cannot carry along the dependency (forwarded_flags.dart).
-  final ForwardedFlags forwarded;
+  /// cannot carry along the dependency (dependency_resolver.dart).
+  final DependencyResolver forwarded;
 
   /// Labels every compiled target depends on (the manifest's implicitDeps).
   final List<String> implicitDeps;
@@ -398,6 +465,8 @@ final class _Emitter {
       return;
     }
     switch (target.rule) {
+      case 'static_library' when _isCompleteStaticLibrary(target):
+        _convertCompleteStaticLibrary(target);
       case 'source_set':
       case 'static_library':
         _convertCcTarget(target, 'cc_library', library: true);
@@ -421,6 +490,73 @@ final class _Emitter {
         _convertCopy(target);
       default:
         throw GnError(target.location, '${target.rule}() is not converted yet');
+    }
+  }
+
+  static bool _isCompleteStaticLibrary(GnTarget target) {
+    final List<GnValue>? complete = target.variables['complete_static_lib']?.unconditionalItems;
+    return complete != null && complete.length == 1 && complete.single == const GnBoolValue(true);
+  }
+
+  /// A `static_library` with `complete_static_lib`: an archive of every
+  /// object in its dependency closure, which GN writes as an artifact
+  /// (`$target_out_dir/lib<output_name>.a`; the Impeller SDK's
+  /// `libimpeller.a`). Bazel's `cc_static_library` is the same archive
+  /// (`lib<name>.a` in the package, so the rule is named after GN's
+  /// `output_name` with an alias under the GN name, like a shared
+  /// library's), behind `--experimental_cc_static_library` in Bazel 8
+  /// (.bazelrc). Nothing compiles in it, so GN's configs and flags on it
+  /// have nothing to apply to and are not written.
+  void _convertCompleteStaticLibrary(GnTarget target) {
+    _use('@rules_cc//cc:cc_static_library.bzl', 'cc_static_library');
+    final List<GnValue>? outputName = target.variables['output_name']?.unconditionalItems;
+    final String name =
+        outputName != null && outputName.length == 1 && outputName.single is GnStringValue
+        ? (outputName.single as GnStringValue).value
+        : target.name;
+    final rule = _Rule('cc_static_library', name, target.comments);
+    for (final GnVariable variable in target.variables.values) {
+      switch (variable.name) {
+        case 'deps':
+        case 'public_deps':
+          _depsInto(rule, variable, target);
+        case 'testonly':
+          _scalar(rule, 'testonly', variable);
+        case 'complete_static_lib':
+        case 'output_name':
+        // Compile and link settings, with nothing here to compile or link.
+        case 'all_dependent_configs':
+        case 'asmflags':
+        case 'cflags':
+        case 'cflags_c':
+        case 'cflags_cc':
+        case 'cflags_objc':
+        case 'cflags_objcc':
+        case 'configs':
+        case 'defines':
+        case 'framework_dirs':
+        case 'frameworks':
+        case 'include_dirs':
+        case 'ldflags':
+        case 'lib_dirs':
+        case 'libs':
+        case 'public_configs':
+          break;
+        default:
+          if (_ignoredVariables.contains(variable.name) ||
+              variable.forwarded ||
+              _isHelperVariable(variable)) {
+            break;
+          }
+          throw GnError(
+            variable.assignments.first.location,
+            'variable ${variable.name} of complete static library ${target.name} is not converted yet',
+          );
+      }
+    }
+    rules.add(rule);
+    if (name != target.name) {
+      rules.add(_Rule('alias', target.name, const <String>[])..scalars['actual'] = '":$name"');
     }
   }
 
@@ -452,7 +588,9 @@ final class _Emitter {
             propagatedFlags: propagated,
           );
         default:
-          if (_ignoredVariables.contains(variable.name) || variable.forwarded) {
+          if (_ignoredVariables.contains(variable.name) ||
+              variable.forwarded ||
+              _isHelperVariable(variable)) {
             break;
           }
           throw GnError(
@@ -628,7 +766,11 @@ final class _Emitter {
     for (final GnVariable variable in target.variables.values) {
       final TemplateArgument? argument = template.arguments[variable.name];
       if (argument == null) {
-        if (_ignoredVariables.contains(variable.name)) {
+        // A variable the block itself read, and the mapping does not name,
+        // is the block's helper (`exe = ""`, then `"gen_snapshot$exe"`); one
+        // nothing read must be an argument the mapping lacks.
+        if (_ignoredVariables.contains(variable.name) ||
+            target.readVariables.contains(variable.name)) {
           continue;
         }
         throw GnError(
@@ -687,6 +829,8 @@ final class _Emitter {
           );
         case TemplateArgumentKind.ignored:
           break;
+        case TemplateArgumentKind.archiveEntries:
+          rule.scalars[argument.attribute] = _archiveEntriesText(variable, target, rule);
         case TemplateArgumentKind.package:
           final String? directory = _singleString(variable);
           if (directory == null) {
@@ -704,6 +848,179 @@ final class _Emitter {
       rule.scalars[attribute] = text;
     });
     rules.add(rule);
+  }
+
+  /// A zip_bundle's `files` -- `{ source, destination }` scopes -- as the
+  /// macro's dictionary of destination to the label of the file placed
+  /// there: the unconditional entries as a literal, those under a condition
+  /// in a `select()` joined to it with `|` (Bazel merges the dictionaries;
+  /// a condition that does not hold adds nothing). A source under the build
+  /// directory is the output of a target ([_buildOutputLabel]); any other
+  /// is a source file.
+  String _archiveEntriesText(GnVariable variable, GnTarget target, _Rule rule) {
+    final always = <String, String>{};
+    final conditional = <Condition, Map<String, String>>{};
+    for (final GnListItem item in variable.liveItems) {
+      final GnLocation location = item.assignment.location;
+      final GnValue value = item.value;
+      if (value is! GnScopeValue) {
+        throw GnError(
+          location,
+          'an entry of ${variable.name} is $value, not a { source, destination } scope',
+        );
+      }
+      final String source = _scopeMember(value, 'source', location);
+      final String destination = _scopeMember(value, 'destination', location);
+      final String label = source.startsWith('$buildDirRoot/') || source.startsWith('$genDirRoot/')
+          ? _buildOutputLabel(source, target, location)
+          : _filePath(source, location);
+      final Map<String, String> entries = item.condition == Condition.always
+          ? always
+          : conditional.putIfAbsent(item.condition, () => <String, String>{});
+      if (entries.containsKey(destination)) {
+        throw GnError(location, 'two entries of ${variable.name} go to $destination');
+      }
+      entries[destination] = label;
+    }
+    final out = StringBuffer(_stringDictText(always));
+    for (final MapEntry<Condition, Map<String, String>> group in conditional.entries) {
+      final _SelectKeys keys = _selectKeys(
+        group.key,
+        rule,
+        variable.assignments.first.location,
+        () => 'of an entry of ${variable.name}',
+      );
+      final String held = _stringDictText(group.value);
+      out.write(' | select({\n');
+      for (final String setting in keys.settings) {
+        out.write('        ${_starlarkString(setting)}: ${keys.negated ? '{}' : held},\n');
+      }
+      out.write('        "//conditions:default": ${keys.negated ? held : '{}'},\n');
+      out.write('    })');
+    }
+    return out.toString();
+  }
+
+  /// The one string [member] of [scope] (`source`, `destination`).
+  static String _scopeMember(GnScopeValue scope, String member, GnLocation location) {
+    final List<GnValue>? items = scope.variables[member]?.unconditionalItems;
+    if (items == null || items.length != 1 || items.single is! GnStringValue) {
+      throw GnError(location, 'the scope has no single $member string');
+    }
+    return (items.single as GnStringValue).value;
+  }
+
+  /// The label of the target that produces the build output [path]
+  /// (`//@out/font-subset`, `//@gen/flutter/lib/snapshot/isolate_snapshot.bin`):
+  /// a target of this file, or of another file that [bundle]'s `deps` name,
+  /// read through the resolver; else the table of outputs the converter
+  /// cannot see produced ([buildOutputLabels]: the wrapped and hand-written
+  /// trees).
+  String _buildOutputLabel(String path, GnTarget bundle, GnLocation location) {
+    String? label = _buildOutputs(localTargets.values.toList(), gnPackage)[path];
+    if (label == null) {
+      for (final GnListItem dep in bundle.variables['deps']?.liveItems ?? const <GnListItem>[]) {
+        if (dep.value is! GnStringValue) {
+          continue;
+        }
+        final String gnLabel = _gnLabel((dep.value as GnStringValue).value);
+        final int colon = gnLabel.indexOf(':');
+        if (colon < 0 || gnLabel.substring(0, colon) == gnPackage) {
+          continue;
+        }
+        final GnTarget? target = forwarded.targetOf(gnLabel);
+        if (target == null) {
+          continue;
+        }
+        label = _buildOutputs(<GnTarget>[target], gnLabel.substring(0, colon))[path];
+        if (label != null) {
+          break;
+        }
+      }
+    }
+    if (label != null) {
+      return _localLabel(bazelLabel(label, package: gnPackage, location: location));
+    }
+    final String? known = buildOutputLabels[path];
+    if (known != null) {
+      return _localLabel(known);
+    }
+    final String spelled = path
+        .replaceFirst('$genDirRoot/', r'$root_gen_dir/')
+        .replaceFirst('$buildDirRoot/', r'$root_out_dir/');
+    throw GnError(
+      location,
+      'no target of this file or of the deps of ${bundle.name} produces $spelled '
+      '(buildOutputLabels in bazel_mapping.dart names the outputs of the wrapped trees)',
+    );
+  }
+
+  /// The build outputs of [targets] (of the GN directory [directory]), each
+  /// as the GN label of what produces it: an executable's file is its
+  /// `output_name` or name, a shared library's `lib<name>.so`, a complete
+  /// static library's `lib<name>.a` under its `obj/` directory, and a copy's
+  /// or an action's its `outputs` -- the source itself for a copy that
+  /// keeps the file as it is, the output file for one that renames or an
+  /// action that generates. The host's file names: these files are the
+  /// Linux host's.
+  static Map<String, String> _buildOutputs(List<GnTarget> targets, String directory) {
+    final outputs = <String, String>{};
+    for (final target in targets) {
+      final label = '$directory:${target.name}';
+      String name() {
+        final List<GnValue>? outputName = target.variables['output_name']?.unconditionalItems;
+        return outputName != null && outputName.length == 1 && outputName.single is GnStringValue
+            ? (outputName.single as GnStringValue).value
+            : target.name;
+      }
+
+      switch (target.rule) {
+        case 'executable':
+          outputs['$buildDirRoot/${name()}'] = label;
+        case 'shared_library':
+          outputs['$buildDirRoot/lib${name()}.so'] = label;
+        case 'static_library':
+          final List<GnValue>? complete =
+              target.variables['complete_static_lib']?.unconditionalItems;
+          if (complete != null &&
+              complete.length == 1 &&
+              complete.single == const GnBoolValue(true)) {
+            outputs['$buildDirRoot/obj${directory.substring(1)}/lib${name()}.a'] = label;
+          }
+        case 'copy' || 'action':
+          final List<GnValue>? files = target.variables['outputs']?.unconditionalItems;
+          final List<GnValue>? sources = target.variables['sources']?.unconditionalItems;
+          if (files == null) {
+            break;
+          }
+          final genDir = '$genDirRoot${directory.substring(1)}/';
+          for (var i = 0; i < files.length; i++) {
+            final GnValue file = files[i];
+            if (file is! GnStringValue || file.value.contains('{{')) {
+              continue;
+            }
+            // A copy that keeps the file as it is (an output outside its own
+            // gen dir: the artifact layout's) is the file: the copy itself
+            // when it is the one file, else the source of that output. One
+            // that renames under its gen dir, and an action, name the output
+            // file.
+            final String? source =
+                sources != null && sources.length == files.length && sources[i] is GnStringValue
+                ? (sources[i] as GnStringValue).value
+                : null;
+            if (file.value.startsWith(genDir)) {
+              outputs[file.value] = '$directory:${file.value.substring(genDir.length)}';
+            } else if (files.length == 1) {
+              outputs[file.value] = label;
+            } else if (target.rule == 'copy' && source != null) {
+              outputs[file.value] = source.startsWith('//')
+                  ? source.replaceFirst(RegExp(r'/(?=[^/]*$)'), ':')
+                  : '$directory:$source';
+            }
+          }
+      }
+    }
+    return outputs;
   }
 
   /// The label of the package at the GN directory [directory] (a source
@@ -884,6 +1201,13 @@ final class _Emitter {
           if (items == null || !items.every((GnValue v) => v is GnStringValue)) {
             break;
           }
+          if (items.every((GnValue v) => (v as GnStringValue).value.startsWith('$buildDirRoot/'))) {
+            // Outputs under the build root (`$root_out_dir/flutter_embedder.h`)
+            // are the artifact layout's, which packaging assembles from the
+            // sources (a zip_bundle entry naming the output gets the source):
+            // the files travel as they are, the destinations are on record.
+            break;
+          }
           if (items.every((GnValue v) => !(v as GnStringValue).value.contains('{{'))) {
             _outputsInto(rule.list('outs'), variable, target);
           } else {
@@ -895,7 +1219,9 @@ final class _Emitter {
         case 'testonly':
           _scalar(rule, 'testonly', variable);
         default:
-          if (_ignoredVariables.contains(variable.name) || variable.forwarded) {
+          if (_ignoredVariables.contains(variable.name) ||
+              variable.forwarded ||
+              _isHelperVariable(variable)) {
             break;
           }
           throw GnError(
@@ -1151,7 +1477,9 @@ final class _Emitter {
           // forwards the name) is the file Bazel produces anyway.
           break;
         default:
-          if (_ignoredVariables.contains(variable.name) || variable.forwarded) {
+          if (_ignoredVariables.contains(variable.name) ||
+              variable.forwarded ||
+              _isHelperVariable(variable)) {
             // A template forwards its invoker's bookkeeping (`enabled`, ...)
             // along with the real variables; GN ignores it just the same.
             break;
@@ -1430,7 +1758,7 @@ final class _Emitter {
   /// dependency's condition and the flag's own.
   void _propagatedFlagsInto(_Rule rule, GnVariable variable) {
     _forEachItem(variable, into: _ListAttribute(), (_Element e) {
-      for (final ForwardedFlag flag in forwarded.of(_gnLabel(_string(e)))) {
+      for (final ForwardedFlag flag in forwarded.flagsOf(_gnLabel(_string(e)))) {
         rule
             .list('copts')
             .addUnique(
@@ -1447,7 +1775,7 @@ final class _Emitter {
   /// [propagated] for [_checkPropagatedFlags].
   void _forwardedFlagsInto(List<ForwardedFlag> propagated, GnVariable variable) {
     _forEachItem(variable, into: _ListAttribute(), (_Element e) {
-      for (final ForwardedFlag flag in forwarded.of(_gnLabel(_string(e)))) {
+      for (final ForwardedFlag flag in forwarded.flagsOf(_gnLabel(_string(e)))) {
         propagated.add((condition: e.condition.and(flag.condition), flag: flag.flag));
       }
     });
@@ -1456,7 +1784,7 @@ final class _Emitter {
   /// A target that hands compiler flags to its dependents -- through its
   /// own public configs, or those of its public_deps, which GN forwards --
   /// is read twice: by its own conversion, into [propagated], and by its
-  /// dependents' through forwarded_flags.dart. The two readings must agree,
+  /// dependents' through dependency_resolver.dart. The two readings must agree,
   /// or the dependents compile with other flags than the owner's file says.
   void _checkPropagatedFlags(GnTarget target, List<ForwardedFlag> propagated) {
     final Set<ForwardedFlag> actual = propagated.toSet();
@@ -1464,13 +1792,13 @@ final class _Emitter {
       target,
       gnPackage: gnPackage,
       localConfigs: localConfigs,
-      forwarded: forwarded.of,
+      forwarded: forwarded.flagsOf,
     ).toSet();
     if (derived.length != actual.length || !derived.containsAll(actual)) {
       throw GnError(
         target.location,
         'converting $gnPackage:${target.name} finds it handing ${_describe(actual)} to its '
-        'dependents, and forwarded_flags.dart derives ${_describe(derived)}: the two '
+        'dependents, and dependency_resolver.dart derives ${_describe(derived)}: the two '
         'readings of its public configs and public_deps disagree',
       );
     }
@@ -1491,7 +1819,7 @@ final class _Emitter {
   /// propagates those the way GN propagates a config. Compiler flags cannot
   /// travel that way: a target of this file that lists the config gets them
   /// inlined (and its dependents, for a public config, derive them from
-  /// this file: forwarded_flags.dart); a config with flags that no target
+  /// this file: dependency_resolver.dart); a config with flags that no target
   /// here lists is refused.
   void _convertConfig(GnTarget target) {
     _use('@rules_cc//cc:defs.bzl', 'cc_library');

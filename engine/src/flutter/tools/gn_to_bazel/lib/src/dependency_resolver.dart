@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// The compiler flags a GN target hands its dependents, read from the
-/// dependency's own GN file.
+/// What a conversion needs to know about targets of other GN files, read
+/// from those files: the compiler flags a target hands its dependents, and
+/// the target itself (for the files it produces, which an archive packs).
 ///
 /// GN applies a dependency's `public_configs` (and `all_dependent_configs`)
 /// to the dependent's compiles, and forwards them along `public_deps`
@@ -31,6 +32,10 @@
 /// hands nothing, as far as the converter can tell; none of those carries
 /// compiler flags in a public config today, and the compile-command parity
 /// check (tool/compile_command_diff.py) is the backstop.
+///
+/// The same evaluations answer [DependencyResolver.targetOf]: the target a
+/// label names, for a `zip_bundle` whose `files` name a build output
+/// (`$root_build_dir/impellerc`) that a target of another file produces.
 library;
 
 import 'dart:io';
@@ -43,18 +48,20 @@ import 'manifest.dart';
 /// A compiler flag a target hands its dependents, and when.
 typedef ForwardedFlag = ({Condition condition, String flag});
 
-/// Resolves the flags a GN target (`//dir:name`) hands its dependents.
-final class ForwardedFlags {
+/// Resolves what other GN files say about their targets: the flags a target
+/// (`//dir:name`) hands its dependents, and the target itself.
+final class DependencyResolver {
   /// A resolver over [tree], evaluating dependency files under
   /// [assumptions]; one per conversion run, so that every file is
   /// evaluated once.
-  ForwardedFlags({required GnSourceTree tree, required Assumptions assumptions})
+  DependencyResolver({required GnSourceTree tree, required Assumptions assumptions})
     : _tree = tree,
       _assumptions = assumptions;
 
-  /// A resolver with no tree to read: every dependency hands nothing (a
-  /// lone file converted without its tree, as in tests).
-  ForwardedFlags.none() : _tree = null, _assumptions = null;
+  /// A resolver with no tree to read: every dependency hands nothing and
+  /// no target is found (a lone file converted without its tree, as in
+  /// tests).
+  DependencyResolver.none() : _tree = null, _assumptions = null;
 
   final GnSourceTree? _tree;
   final Assumptions? _assumptions;
@@ -66,7 +73,31 @@ final class ForwardedFlags {
 
   /// The flags [label] (`//dir:name`) hands its dependents; empty when it
   /// hands none, or when its file cannot say.
-  List<ForwardedFlag> of(String label) => _flags.putIfAbsent(label, () => _derive(label));
+  List<ForwardedFlag> flagsOf(String label) => _flags.putIfAbsent(label, () => _derive(label));
+
+  /// The evaluation of the `BUILD.gn` of [directory] (`//flutter/fml`), or
+  /// null when the file is absent or does not evaluate.
+  GnFileEvaluation? evaluationOf(String directory) => _evaluate(directory);
+
+  /// The target [label] (`//dir:name`) names, other than a config, or null
+  /// when its file is absent, does not evaluate, or has no such target.
+  /// GN's placeholder idiom defines a name twice (the real target under a
+  /// condition, an empty group otherwise): the one that is not a group.
+  GnTarget? targetOf(String label) {
+    final int colon = label.indexOf(':');
+    if (colon < 0 || !label.startsWith('//')) {
+      return null;
+    }
+    final String name = label.substring(colon + 1);
+    final targets = <GnTarget>[
+      ...?_evaluate(label.substring(0, colon))?.targets
+          .where((GnTarget t) => t.rule != 'config' && t.name == name),
+    ];
+    if (targets.length > 1) {
+      targets.removeWhere((GnTarget t) => t.rule == 'group');
+    }
+    return targets.length == 1 ? targets.single : null;
+  }
 
   List<ForwardedFlag> _derive(String label) {
     final int colon = label.indexOf(':');
@@ -92,7 +123,7 @@ final class ForwardedFlags {
           target,
           gnPackage: directory,
           localConfigs: localConfigs,
-          forwarded: of,
+          forwarded: flagsOf,
         )) {
           if (!flags.contains(flag)) {
             flags.add(flag);

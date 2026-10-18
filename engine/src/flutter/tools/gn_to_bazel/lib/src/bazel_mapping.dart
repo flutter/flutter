@@ -396,6 +396,11 @@ const Map<String, String> labelOverrides = <String, String>{
   // google/benchmark (the secondary tree's GN over the synced tree), for
   // //flutter/benchmarking and the benchmark executables.
   '//flutter/third_party/benchmark': '@benchmark',
+  // The engine's libc++, which the toolchain links into every binary
+  // (toolchains:cxx_runtime) and a complete static library archives
+  // (BUILDCONFIG.gn's use_flutter_cxx).
+  '//flutter/third_party/libcxx': '@libcxx',
+  '//flutter/third_party/libcxx:libcxx': '@libcxx',
   // The Impeller playground's window and UI libraries (secondary tree).
   '//flutter/third_party/glfw': '@glfw',
   '//flutter/third_party/imgui': '@imgui',
@@ -727,7 +732,7 @@ final class ConfigWarningSet extends ConfigEffect {
 /// sets it in, as no dependency could carry them. Only private listings are
 /// supported: a public one would hand the flags on along dependency edges,
 /// which the dependents derive from the owner's GN file
-/// (forwarded_flags.dart), not from this table.
+/// (dependency_resolver.dart), not from this table.
 final class ConfigCopts extends ConfigEffect {
   const ConfigCopts(this.copts);
 
@@ -1004,6 +1009,14 @@ const String _coptsBzl = '//engine/src/flutter/build/bazel:copts.bzl';
 /// when it generates a GN build.
 const String _versionBzl = '@engine_version//:version.bzl';
 
+/// The build outputs a zip_bundle's entries may name that no converted GN
+/// file produces -- the wrapped and hand-written trees' -- each as the
+/// Bazel label of the file: GN's path under the build directory
+/// (`//@out/...` for `$root_out_dir`, `//@gen/...` for `$root_gen_dir`) to
+/// the label. An entry whose producer is a converted file needs no row: the
+/// emitter reads the producer's outputs (`_buildOutputs`).
+const Map<String, String> buildOutputLabels = <String, String>{};
+
 /// Starlark constants for GN references that have a Bazel-side value.
 const Map<String, ReferenceConstant> referenceConstants = <String, ReferenceConstant>{
   'flutter_cflags_objc': ReferenceConstant(_coptsBzl, 'FLUTTER_CFLAGS_OBJC'),
@@ -1048,6 +1061,12 @@ enum TemplateArgumentKind {
   /// A directory that names a package (`dest = "$root_gen_dir/flutter/lib/ui"`),
   /// which becomes the package's label.
   package,
+
+  /// `{ source, destination }` scopes naming an archive's entries (a
+  /// zip_bundle's `files`): the macro's dictionary of destination to the
+  /// label of the file placed there, each source resolved to the target
+  /// that produces it (see `_archiveEntriesText` in starlark_emitter.dart).
+  archiveEntries,
 }
 
 /// One argument of a known template: the macro attribute it becomes and how.
@@ -1257,6 +1276,26 @@ const Map<String, TemplateMapping> templateMappings = <String, TemplateMapping>{
       'analyze_{backend}_{name}',
     ],
   ),
+  // build/zip_bundle.gni: an archive under zip_archives/ made by build/zip.py
+  // from `{ source, destination }` scopes, a generated LICENSE first
+  // (build/bazel/zip_bundle.bzl runs the same script). GN's `deps` name the
+  // targets whose outputs the entries are, which is how a source under the
+  // build directory is resolved; under Bazel the entries' labels carry the
+  // dependency, so the list itself is not written.
+  'zip_bundle': TemplateMapping(
+    '//engine/src/flutter/build/bazel:zip_bundle.bzl',
+    'zip_bundle',
+    <String, TemplateArgument>{
+      'output': TemplateArgument('output', TemplateArgumentKind.scalar),
+      'files': TemplateArgument('files', TemplateArgumentKind.archiveEntries),
+      'deps': TemplateArgument('deps', TemplateArgumentKind.ignored),
+      'testonly': TemplateArgument('testonly', TemplateArgumentKind.scalar),
+      // The invocations' helpers for their names and paths (`exe`, `prefix`,
+      // `zip_out_dir`) are read by the strings of their own blocks, which
+      // is how the converter tells them from arguments (GnTarget.readVariables).
+    },
+    files: true,
+  ),
 };
 
 /// Which imported `.gni` files the converter evaluates (Skia's lists,
@@ -1361,9 +1400,30 @@ Assumptions linuxHostAssumptions() {
     'is_qnx': GnBoolValue(false),
     'is_wasm': GnBoolValue(false),
     'is_win': GnBoolValue(false),
+    // BUILDCONFIG.gn: clang on Linux links the engine's own libc++.
+    'use_flutter_cxx': GnBoolValue(true),
     // //flutter/common/config.gni
     'enable_backtrace': GnBoolValue(true),
     'enable_unittests': GnBoolValue(true),
+    // The artifact names (config.gni computes them from host_os, host_cpu,
+    // target_os and target_cpu), and whether the host builds the SDK's
+    // artifacts at all: on a Linux x64 host, yes.
+    'platform_name': GnStringValue('linux'),
+    'full_platform_name': GnStringValue('linux-x64'),
+    'target_platform_name': GnStringValue('linux'),
+    'full_target_platform_name': GnStringValue('linux-x64'),
+    'build_engine_artifacts': GnBoolValue(true),
+    // tools/gn's --prebuilt-dart-sdk, which every host builder passes and
+    // `et` defaults to: the engine's Dart tooling comes from the prebuilt
+    // SDK under flutter/prebuilts (host_debug_no_prebuilt_dart_sdk is the
+    // one config that builds it, from the Dart tree).
+    'flutter_prebuilt_dart_sdk': GnBoolValue(true),
+    'prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
+    'host_prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
+    'target_prebuilt_dart_sdk': GnStringValue('//flutter/prebuilts/linux-x64/dart-sdk'),
+    // $dart_src/runtime/runtime_args.gni (zip_bundle.gni imports it): the
+    // dynamic-modules build is its own configuration (`_ddm`), not this.
+    'dart_dynamic_modules': GnBoolValue(false),
     // //flutter/shell/config.gni
     'shell_enable_gl': GnBoolValue(true),
     'shell_enable_metal': GnBoolValue(false),

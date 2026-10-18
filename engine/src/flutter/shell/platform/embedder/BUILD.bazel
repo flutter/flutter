@@ -3,10 +3,11 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/shell/platform/embedder/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: copy_headers, flutter_engine, embedder-archive.
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle")
+load("//engine/src/flutter/build/bazel/gn_action:gn_action.bzl", "gn_copy")
 load("//engine/src/flutter/testing:testing.bzl", "flutter_cc_test", "flutter_gpu_test_backends", "flutter_test_fixtures")
 
 package(default_visibility = ["//visibility:public"])
@@ -542,4 +543,31 @@ cc_binary(
 alias(
     name = "flutter_engine_library",
     actual = ":libflutter_engine.so",
+)
+
+gn_copy(
+    name = "copy_headers",
+    srcs = ["embedder.h"],
+    outputs = ["$root_out_dir/flutter_embedder.h"],
+)
+
+cc_library(
+    name = "flutter_engine",
+    data = [
+        # All platforms require the embedder dylib and headers.
+        ":copy_headers",  # build_embedder_api
+    ],
+    linkstatic = True,
+    deps = [
+        ":flutter_engine_library",  # build_embedder_api
+    ],
+)
+
+zip_bundle(
+    name = "embedder-archive",
+    files = {
+        "flutter_embedder.h": ":copy_headers",
+        "libflutter_engine.so": ":flutter_engine_library",
+    },
+    output = "linux-x64/linux-x64-embedder.zip",
 )
