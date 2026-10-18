@@ -226,7 +226,7 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    target, so that Skia's `SK_VULKAN` and friends reach the engine as they
    do under GN. A public config's compiler flags cannot ride a dependency:
    they are inlined into the owner, and a dependent gets them on its own
-   `copts` from the dependency's GN file (`forwarded_flags.dart` evaluates
+   `copts` from the dependency's GN file (`dependency_resolver.dart` evaluates
    it under the run's assumptions, once, and reads the target's public
    configs and, recursively, what its `public_deps` hand on, as GN forwards
    public configs along `public_deps` chains -- wuffs's suppressions reach
@@ -299,12 +299,28 @@ GN build files are programs; Bazel wants data. The converter has three layers:
    through `{{source_file_part}}`/`{{source_name_part}}` with more than the
    bare name around them (`assets/{{source_name_part}}/gschemas.compiled`),
    when the copies are produced under those names (`outs`), expanded per
-   source as GN expands them. A known template's invocation becomes the macro call its
+   source as GN expands them; a copy into the build root
+   (`$root_out_dir/flutter_embedder.h`, the artifact layout's) lets its file
+   travel as it is. A `static_library` with `complete_static_lib` -- an
+   archive of every object in its closure, the Impeller SDK's
+   `libimpeller.a` -- becomes `cc_static_library`, named after its
+   `output_name` with an alias under the GN name. A known template's
+   invocation becomes the macro call its
    `TemplateMapping` describes, argument by argument: files of the package,
-   labels, configs (which become the labels of their config libraries) or a
-   scalar; the template's body is the macro's (`flatbuffers()` in
+   labels, configs (which become the labels of their config libraries), a
+   scalar, or a `zip_bundle`'s `{ source, destination }` scopes (a
+   dictionary of destination to the label of the file: a source under the
+   build directory is resolved to the target that produces it -- of the
+   same file, or of a file the bundle's `deps` name, read through
+   `dependency_resolver.dart`, or of a wrapped tree, `buildOutputLabels`);
+   the template's body is the macro's (`flatbuffers()` in
    `build/bazel/flatbuffers`), and the targets it expands to in GN are the
-   mapping's `innerTargets`, which the oracle expects.
+   mapping's `innerTargets`, which the oracle expects. A variable of a
+   target's block that is neither one of GN's target variables nor a
+   template's argument, and that the block itself read (`exe = ""`, then
+   `"gen_snapshot$exe"`; `GnTarget.readVariables`), is the block's helper
+   and is not written: GN rejects an assignment nothing reads, so its
+   effect is already in the values it fed.
 
 `bazel_mapping.dart` holds the converter's knowledge of the engine: label
 translations for synced dependencies (`//flutter/third_party/icu` is `@icu`,

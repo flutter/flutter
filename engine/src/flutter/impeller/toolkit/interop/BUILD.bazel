@@ -3,10 +3,12 @@
 # found in the LICENSE file.
 
 # Generated from //flutter/impeller/toolkit/interop/BUILD.gn by gn_to_bazel; do not edit.
-# Not converted: static_library, example_mtl, sdk.
+# Not converted: example_mtl.
 
+load("@rules_cc//cc:cc_static_library.bzl", "cc_static_library")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("//engine/src/flutter/build/bazel:copts.bzl", "CHROMIUM_CODE_COPTS", "FLUTTER_COPTS", "FLUTTER_LOCAL_DEFINES")
+load("//engine/src/flutter/build/bazel:zip_bundle.bzl", "zip_bundle")
 load("//engine/src/flutter/build/bazel/impeller:shaders.bzl", "embed_blob_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -162,6 +164,19 @@ alias(
     actual = ":libimpeller.so",
 )
 
+cc_static_library(
+    name = "impeller",
+    deps = [
+        ":interop",
+        "@libcxx",  # use_flutter_cxx
+    ],
+)
+
+alias(
+    name = "static_library",
+    actual = ":impeller",
+)
+
 cc_binary(
     name = "impeller_interop_example_gl",
     srcs = ["example_gl.c"],
@@ -263,4 +278,20 @@ cc_library(
         "//engine/src/flutter/testing:testing_lib",
     ],
     alwayslink = True,
+)
+
+zip_bundle(
+    name = "sdk",
+    files = {
+        "README.md": "README.md",
+        "include/impeller.h": "impeller.h",
+        "include/impeller.hpp": "impeller.hpp",
+        "examples/example_gl.c": "example_gl.c",
+        "examples/example_vk.c": "example_vk.c",
+        "examples/example_mtl.m": "example_mtl.m",
+        "lib/libimpeller.so": ":shared_library",
+        "lib/libimpeller.a": ":static_library",
+        "bin/impellerc": "//engine/src/flutter/impeller/compiler:impellerc",
+    },
+    output = "linux-x64/impeller_sdk.zip",
 )

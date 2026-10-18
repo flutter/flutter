@@ -705,6 +705,15 @@ final class GnTarget {
   /// order.
   final Map<String, GnVariable> variables = <String, GnVariable>{};
 
+  /// The names of [variables] the block itself read -- in a condition, a
+  /// string expansion, another variable's value. A variable that is not one
+  /// of GN's target variables or a template's arguments, and that the block
+  /// read, is a helper of the block (`font_subset_bin = "font-subset"`,
+  /// then `"$root_build_dir/$font_subset_bin"`): GN rejects an assignment
+  /// nothing reads, so such a variable's effect is already in the values
+  /// it fed, and the conversion ignores it.
+  final Set<String> readVariables = <String>{};
+
   /// Comments that preceded the target in the GN file.
   List<String> comments = const <String>[];
 }
@@ -960,7 +969,23 @@ final class _Scope {
   final Map<String, GnVariable> variables = <String, GnVariable>{};
   final Map<String, _Template> templates = <String, _Template>{};
 
-  GnVariable? lookup(String name) => variables[name] ?? parent?.lookup(name);
+  /// The names of [variables] something read (see [GnTarget.readVariables]).
+  final Set<String> readNames = <String>{};
+
+  /// The variable [name] names in this scope or an enclosing one, noting
+  /// the read in the scope that holds it.
+  GnVariable? lookup(String name) {
+    final GnVariable? own = variables[name];
+    if (own != null) {
+      readNames.add(name);
+      return own;
+    }
+    return parent?.lookup(name);
+  }
+
+  /// [lookup] without noting a read: for an assignment, which finds the
+  /// variable to append to.
+  GnVariable? find(String name) => variables[name] ?? parent?.find(name);
 
   _Template? lookupTemplate(String name) => templates[name] ?? parent?.lookupTemplate(name);
 }
@@ -1252,6 +1277,7 @@ final class _Evaluator {
     final targetScope = _Scope(scope, isTarget: true);
     _evaluateBlock(block, targetScope, Condition.always, const <String>[], target: newTarget);
     newTarget.variables.addAll(targetScope.variables);
+    newTarget.readVariables.addAll(targetScope.readNames);
     result.targets.add(newTarget);
   }
 
@@ -1519,7 +1545,7 @@ final class _Evaluator {
       throw GnError(left.location, 'assignment to something other than a variable');
     }
     final String name = left.name;
-    final GnVariable? existing = scope.lookup(name);
+    final GnVariable? existing = scope.find(name);
     final GnValue? assumed = !_declaringArgs || node.op != '='
         ? null
         : assumptions[name] ??
