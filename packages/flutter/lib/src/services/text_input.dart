@@ -2229,12 +2229,13 @@ class TextInput {
         return false;
     }
     // The updateEditingStateWithTag request (autofill) can come up even to a
-    // text field that doesn't have an active connection.
+    // text field that doesn't have a connection.
     if (method == 'TextInputClient.updateEditingStateWithTag') {
       final args = methodCall.arguments as List<dynamic>;
-      // The last-connection fallback is a web-only workaround: a browser password
-      // manager can autofill in the brief window after the connection is torn down.
-      // Native platforms keep the upstream behavior of using the current connection.
+      // On the web a browser password manager can autofill in the brief window
+      // after the connection is torn down, so fall back to the last connection.
+      // Other platforms only route to the current connection.
+      // https://github.com/flutter/flutter/issues/174773
       final TextInputConnection? connection = kIsWeb
           ? (_currentConnection ?? _lastConnection)
           : _currentConnection;

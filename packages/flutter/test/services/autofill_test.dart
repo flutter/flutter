@@ -89,12 +89,12 @@ void main() {
       expect(client2.currentTextEditingValue, text2);
     });
 
-    test('updateEditingStateWithTag routes autofill to the last connection on web', () async {
+    test('updateEditingStateWithTag routes autofill to the last connection only on web', () async {
       // A browser password manager can autofill a field in the brief window after
       // the text input connection is torn down (so TextInput's _currentConnection is
       // null) but before it is re-established. On the web the value must still reach
-      // the client, routed through the last connection; on native platforms the
-      // fallback is not used, matching upstream behavior.
+      // the client, routed through the last connection; on other platforms the
+      // fallback is not used.
       final client1 = FakeAutofillClient(const TextEditingValue(text: 'test1'));
       final client2 = FakeAutofillClient(const TextEditingValue(text: 'test2'));
 
@@ -123,7 +123,7 @@ void main() {
       connection.close();
 
       const filled = TextEditingValue(text: 'filled');
-      fakeTextChannel.incoming?.call(
+      await fakeTextChannel.incoming?.call(
         MethodCall('TextInputClient.updateEditingStateWithTag', <dynamic>[
           0,
           <String, dynamic>{client2.autofillId: filled.toJSON()},

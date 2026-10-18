@@ -21,6 +21,7 @@ import '../semantics.dart';
 import '../services.dart';
 import '../text/paragraph.dart';
 import '../util.dart';
+import '../view_embedder/dom_manager.dart';
 import '../view_embedder/flutter_view_manager.dart';
 import '../window.dart';
 import 'autofill_hint.dart';
@@ -55,15 +56,20 @@ const String transparentTextEditingClass = 'transparentTextEditing';
 /// real focus loss.
 ///
 /// Several browser behaviors blur transiently and restore focus a moment later:
-/// backgrounding a tab fires blur before `visibilitychange`, on iOS a native
-/// caret or selection drag blurs the input mid-gesture before WebKit refocuses
-/// it, and a password manager filling an autofill form blurs each field as it
-/// finishes with it before focusing the next. Waiting this long lets those
-/// settle before the engine acts.
+/// backgrounding a tab fires blur before `visibilitychange`, and on iOS a
+/// native caret or selection drag blurs the input mid-gesture before WebKit
+/// refocuses it. Waiting this long lets those settle before the engine acts.
 ///
 /// Shared by [DefaultTextEditingStrategy.handleBlur] and [ViewFocusBinding],
 /// which defer the same gesture and must not disagree about the window.
+/// [ViewFocusBinding] also waits this long while a password manager steps
+/// between the fields of an autofill form.
 const Duration kTransientBlurSettleDelay = Duration(milliseconds: 100);
+
+/// Marks the `<form>` the engine builds for an autofill group with more than one
+/// field. A password manager steps between the fields of such a form while it
+/// fills it, which is what [ViewFocusBinding] defers its unfocused report for.
+const String autofillFormClass = 'flt-autofill-form';
 
 void _emptyCallback(dynamic _) {}
 
@@ -109,10 +115,10 @@ void _setStaticStyleAttributes(DomHTMLElement domElement) {
   }
 }
 
-// Password managers and browser autofill skip inputs that are effectively
-// zero-sized, so the invisible autofill proxies are floored to this small but
-// non-trivial size to keep them detectable. This only raises a floor and never
-// shrinks a normally sized field.
+/// Password managers and browser autofill skip inputs that are effectively
+/// zero-sized, so the invisible autofill proxies are floored to this small but
+/// non-trivial size to keep them detectable. This only raises a floor and never
+/// shrinks a normally sized field.
 const String _kAutofillFieldMinWidth = '40px';
 const String _kAutofillFieldMinHeight = '20px';
 
@@ -127,13 +133,22 @@ void _ensureAutofillStyleInjected() {
     return;
   }
   _autofillAnimationStyleInjected = true;
-  final DomHTMLStyleElement style = createDomHTMLStyleElement(null);
-  style.text = '''
+  final DomHTMLStyleElement style = createDomHTMLStyleElement(configuration.nonce);
+  // One rule per pseudo-class: a selector list is dropped as a whole by a
+  // browser that does not know one of them. Scoped to Flutter's own views so
+  // the inputs of a host page are left alone.
+  const String view = DomManager.flutterViewTagName;
+  style.text =
+      '''
 @keyframes flutterAutofillStart {
   from { opacity: 0.99; }
   to { opacity: 1; }
 }
-input:-webkit-autofill, input:autofill {
+$view input:-webkit-autofill {
+  animation-name: flutterAutofillStart !important;
+  animation-duration: 1ms !important;
+}
+$view input:autofill {
   animation-name: flutterAutofillStart !important;
   animation-duration: 1ms !important;
 }
@@ -141,12 +156,6 @@ input:-webkit-autofill, input:autofill {
   domDocument.head?.append(style);
 }
 
-/// Sets attributes to hide autofill elements.
-///
-/// These style attributes are constant throughout the life time of an input
-/// element.
-///
-/// They are assigned once during the creation of the DOM element.
 /// Hides a non-focused autofill proxy from assistive technology, but only when
 /// semantics is on.
 ///
@@ -164,6 +173,12 @@ void _hideFromAssistiveTechnology(DomHTMLElement element) {
   }
 }
 
+/// Sets attributes to hide autofill elements.
+///
+/// These style attributes are constant throughout the life time of an input
+/// element.
+///
+/// They are assigned once during the creation of the DOM element.
 void _styleAutofillElements(
   DomHTMLElement domElement, {
   bool isOffScreen = false,
@@ -192,12 +207,10 @@ void _styleAutofillElements(
   }
 
   if (shouldHideElement) {
-    // 1px rather than 0: Safari and some password managers ignore zero-sized
-    // inputs (see https://github.com/flutter/flutter/issues/71275), so even a
-    // hidden proxy keeps a minimal layout box. Clear any min-width/min-height
-    // floor (set by the discoverable branch below, or on the focused element)
-    // first, otherwise it would override the 1px and the element would not
-    // actually shrink when it is hidden.
+    // The form, its submit button and, in semantics mode off WebKit, the
+    // non-focused fields take this branch. 1px rather than 0 keeps a minimal
+    // layout box (see https://github.com/flutter/flutter/issues/71275). Clear
+    // any min floor first so it cannot override the 1px.
     elementStyle
       ..setProperty('min-width', '0px')
       ..setProperty('min-height', '0px')
@@ -321,6 +334,13 @@ class EngineAutofillForm {
   /// [SemanticsTextEditingStrategy], not the Safari/iOS strategy, so the
   /// strategy type alone would miss WebKit there.
   bool get _isWebKit => ui_web.browser.browserEngine == ui_web.BrowserEngine.webkit;
+
+  /// Whether the non-focused fields are hidden instead of keeping a real size.
+  ///
+  /// Outside semantics mode every field keeps a real size, because password
+  /// managers skip a field too small to see. In semantics mode they are hidden
+  /// off WebKit.
+  bool get _hideNonFocusedFields => associateFocusedElementByAttribute && !_isWebKit;
 
   /// Stable DOM id for the form, used so a focused element that lives outside
   /// the form, in semantics mode, can be associated with it via the HTML `form`
@@ -446,6 +466,7 @@ class EngineAutofillForm {
     EngineAutofillForm? existingForm = dormantForms[formIdentifier];
     if (existingForm != null &&
         existingForm.associateFocusedElementByAttribute != associateFocusedElementByAttribute) {
+      existingForm._cancelPendingPark();
       existingForm.formElement?.remove();
       dormantForms.remove(formIdentifier);
       existingForm = null;
@@ -461,12 +482,13 @@ class EngineAutofillForm {
         formElement = existingForm.formElement;
         elements.addAll(existingForm.elements);
         // Carry over the per-field tracking so the reused form remembers the
-        // last value forwarded for each field. Each text input connection
-        // builds a new form instance, so without this the tracking would reset
-        // on every focus change and the form could not tell a programmatic
-        // framework update apart from a browser autofill.
-        _lastSentAutofillText.addAll(existingForm._lastSentAutofillText);
+        // last framework value and the last value forwarded for each field.
+        // Each text input connection builds a new form instance, so without
+        // this the tracking would reset on every focus change and the form
+        // could not tell a programmatic framework update apart from a browser
+        // autofill.
         _lastFrameworkText.addAll(existingForm._lastFrameworkText);
+        _lastSentAutofillText.addAll(existingForm._lastSentAutofillText);
         // The adopted DOM elements still carry the dormant instance's
         // listeners (goDormant deliberately keeps them so a late fill on the
         // dormant form is not lost). This instance rebinds its own below in
@@ -478,6 +500,7 @@ class EngineAutofillForm {
         // unconditionally, and _sendAutofillEditingState collapses the
         // selection to the end of the text on every keystroke.
         existingForm._cancelFormSubscriptions();
+        existingForm._cancelPendingPark();
       } else {
         formElement = _createFormElementAndFields(focusedElement, focusedAutofill);
         _insertEditingElementInView(formElement!, viewId);
@@ -506,9 +529,8 @@ class EngineAutofillForm {
       final DomHTMLElement oldFocusedElement = elements[focusedAutofill.uniqueIdentifier]!;
       // Before discarding the old focused element, salvage any value the browser
       // autofilled into it while it was blurred (e.g. a mobile password manager
-      // filling the field the user tapped). _updateFieldValues skips the focused
-      // field and the element is about to be replaced, so this is the only
-      // chance to forward that value to the framework.
+      // filling the field the user tapped). The element is about to be
+      // replaced, so this is the only chance to forward that value.
       final oldDomState = EditingState.fromDomElement(oldFocusedElement);
       final String frameworkText = focusedAutofill.editingState.text;
       if (oldDomState.text.isNotEmpty &&
@@ -520,13 +542,15 @@ class EngineAutofillForm {
       oldFocusedElement.replaceWith(focusedElement);
     }
 
-    // Pointer events belong only on the focused element. A reused element (see
-    // _reuseDormantAutofillElementOrCreate) can carry over the enabled state
-    // from when it was focused, so reset the non-focused fields here to keep
-    // them from intercepting taps meant for the app UI.
+    // On WebKit only the focused field takes pointer events. Elsewhere every
+    // field stays hit-testable, because password managers confirm a field by
+    // hit-testing it, and swallows pointer input instead (see
+    // _createFormElementAndFields). A reused element (see
+    // _reuseDormantAutofillElementOrCreate) can carry over the state it had
+    // when it was focused, so set it for every field here.
     for (final MapEntry<String, DomHTMLElement> entry in elements.entries) {
-      final bool isFocused = entry.key == focusedAutofill.uniqueIdentifier;
-      entry.value.style.pointerEvents = isFocused || !_isSafariStrategy ? 'all' : 'none';
+      final isFocused = entry.key == focusedAutofill.uniqueIdentifier;
+      entry.value.style.pointerEvents = isFocused || !_isWebKit ? 'all' : 'none';
       // The focused field stays interactive (its tabIndex is set in
       // _reuseDormantAutofillElementOrCreate); the others are kept discoverable
       // for password managers but out of the tab order. See
@@ -545,13 +569,14 @@ class EngineAutofillForm {
     scanForAutofilledValues();
   }
 
-  /// True while a password manager holds focus to fill the form. During that
-  /// window the focused field and the non-focused proxies are held at their
-  /// current positions instead of tracking the browser's scroll/relayout, so
-  /// repositioning them does not churn the DOM under the manager's own overlay
-  /// UI. Some extension overlays race their own DOM insertion when the page
-  /// mutates the tree mid-fill, so holding still avoids interfering with them.
-  /// The filled values still arrive through the input/animationstart listeners.
+  /// Whether focus left the form to something that is not a DOM element, as a
+  /// password manager's menu does while it fills the form.
+  ///
+  /// While this is set the fields are held at their current positions instead
+  /// of tracking the browser's scroll and relayout. Some extension overlays race
+  /// their own DOM insertion when the page mutates the tree mid-fill, so holding
+  /// still avoids interfering with them. The filled values still arrive through
+  /// the input and animationstart listeners.
   bool _fillWindowActive = false;
 
   /// Whether this form instance has been deactivated ([goDormant]) and its
@@ -561,22 +586,19 @@ class EngineAutofillForm {
   /// [DefaultTextEditingStrategy.handleChange] instead.
   bool _isDormant = false;
 
-  /// Whether a password manager currently holds focus to fill the form, during
-  /// which the proxy geometry is held still. See [beginFillWindow].
+  /// Whether the fields are held still for a fill. See [beginFillWindow].
   bool get fillWindowActive => _fillWindowActive;
 
-  /// Opens the fill window when a password manager takes focus to fill the form.
-  /// While it is open the proxy geometry is held still (see [fillWindowActive]).
-  /// It is closed by [endFillWindow] the moment focus returns to the field or
-  /// the page, which is when the manager has finished and placement can resume
-  /// -- an event boundary rather than a fixed timeout.
+  /// Holds the fields still while focus is away from the form, as when a
+  /// password manager's menu takes it to fill the form.
+  ///
+  /// Ended by [endFillWindow] when focus returns to the field or the page, or
+  /// when the form goes dormant: an event boundary, not a timeout.
   void beginFillWindow() {
     _fillWindowActive = true;
   }
 
-  /// Closes the fill window opened by [beginFillWindow], so proxy placement
-  /// resumes. Called when the password manager hands focus back (the field or
-  /// window regains focus) or when the form is deactivated.
+  /// Ends the window opened by [beginFillWindow], so placement resumes.
   void endFillWindow() {
     _fillWindowActive = false;
   }
@@ -586,30 +608,22 @@ class EngineAutofillForm {
   /// Only the focused field receives an on-screen geometry (transform) from the
   /// framework; without help the other proxies sit at the form origin, far away.
   /// Some password managers then fail to associate the far-away field and fill
-  /// only the focused one (observed with Bitwarden). Stacking the siblings just
-  /// under the focused field presents a coherent, adjacent username-above-
-  /// password login form so they fill every field. (Proton Pass filled the whole
-  /// form either way.)
+  /// only the focused one. Stacking the siblings just under the focused field,
+  /// at the same width and in viewport coordinates (`position: fixed`), presents
+  /// an adjacent login form they fill completely.
   ///
   /// Called after the geometry transform has been applied to [focusedElement].
   void clusterNonFocusedFieldsAt(DomHTMLElement focusedElement) {
-    // Held still during an active password-manager fill; see beginFillWindow.
+    // Held still during a fill; see beginFillWindow.
     if (_fillWindowActive) {
       return;
     }
     final DomRect rect = focusedElement.getBoundingClientRect();
-    final double w = rect.width;
-    final double h = rect.height;
-    // Not laid out / positioned yet -- nothing reliable to anchor to.
-    if (w == 0 || h == 0) {
+    // Not laid out yet, so there is nothing reliable to anchor to.
+    if (rect.width == 0 || rect.height == 0) {
       return;
     }
-    // Stack each non-focused proxy directly below the focused field, at the same
-    // width, so the manager sees an adjacent, coherent username-above-password
-    // login form (viewport coordinates, so position:fixed). Without this the
-    // non-focused proxies sit at the form origin, far from the focused field,
-    // and some managers fill only the focused one.
-    var top = rect.top + h;
+    double top = rect.top + rect.height;
     for (final DomHTMLElement element in elements.values) {
       if (identical(element, focusedElement)) {
         continue;
@@ -618,10 +632,10 @@ class EngineAutofillForm {
         ..position = 'fixed'
         ..left = '${rect.left}px'
         ..top = '${top}px'
-        ..width = '${w}px'
-        ..height = '${h}px'
+        ..width = '${rect.width}px'
+        ..height = '${rect.height}px'
         ..transform = 'none';
-      top += h;
+      top += rect.height;
     }
   }
 
@@ -669,11 +683,76 @@ class EngineAutofillForm {
   void goDormant() {
     assert(formElement != null);
 
+    // Read before the window is ended below.
+    final bool fillInProgress = _fillWindowActive;
     // The form is deactivated; end any open fill window so it never stays frozen.
     endFillWindow();
     _isDormant = true;
     dormantForms[formIdentifier] = this;
     _styleAutofillElements(formElement!, isOffScreen: true);
+    if (fillInProgress) {
+      // Focus left to a password manager, which fills a field only if the field
+      // hit-tests back to itself, so the fields stay where they are until the
+      // fill is over: the next real tap on the page, or the window getting the
+      // focus back from a manager popup.
+      _parkWhenFillEnds();
+    } else {
+      _parkFields();
+    }
+  }
+
+  /// Parks the fields of a form that went dormant during a fill, on the window
+  /// getting the focus back or on a capturing `pointerdown`. See [goDormant].
+  DomEventListener? _pendingPark;
+
+  void _parkWhenFillEnds() {
+    _cancelPendingPark();
+    final DomEventListener park = createDomEventListener((DomEvent _) => _parkFields());
+    _pendingPark = park;
+    domWindow.addEventListener('focus', park);
+    // Capturing, so the tap is seen before anything below handles it.
+    domWindow.addEventListener('pointerdown', park, true.toJS);
+  }
+
+  void _cancelPendingPark() {
+    final DomEventListener? park = _pendingPark;
+    if (park == null) {
+      return;
+    }
+    domWindow.removeEventListener('focus', park);
+    domWindow.removeEventListener('pointerdown', park, true.toJS);
+    _pendingPark = null;
+  }
+
+  /// Moves every field off screen and out of the tab order, so nothing of a
+  /// dismissed form stays hit-testable or reachable with Tab.
+  ///
+  /// The fields [clusterNonFocusedFieldsAt] pinned with `position: fixed` are
+  /// laid out against the viewport, so moving the form off screen does not move
+  /// them. Each field keeps a size above the min floor: password managers judge
+  /// whether a field is fillable by its size, not its position. The next
+  /// [wakeUp] clusters them again.
+  void _parkFields() {
+    _cancelPendingPark();
+    for (final DomHTMLElement element in elements.values) {
+      element.tabIndex = -1;
+      if (element.style.position == 'fixed') {
+        element.style
+          ..position = 'absolute'
+          ..top = '${offScreenOffset}px'
+          ..left = '${offScreenOffset}px'
+          ..removeProperty('width')
+          ..removeProperty('height')
+          ..removeProperty('transform');
+      } else {
+        _styleAutofillElements(
+          element,
+          isOffScreen: true,
+          shouldHideElement: _hideNonFocusedFields,
+          shouldDisablePointerEvents: _isWebKit,
+        );
+      }
+    }
   }
 
   DomHTMLFormElement _createFormElementAndFields(
@@ -684,6 +763,11 @@ class EngineAutofillForm {
     assert(elements.isEmpty);
 
     final DomHTMLFormElement formElement = createDomHTMLFormElement();
+    // A password manager steps between the fields of a form only when there is
+    // more than one; [ViewFocusBinding] scopes its unfocus deferral to these.
+    if (items.length > 1) {
+      formElement.classList.add(autofillFormClass);
+    }
     // Validation is in the framework side.
     formElement.noValidate = true;
     formElement.method = 'post';
@@ -713,17 +797,15 @@ class EngineAutofillForm {
         htmlElement = field.inputType.createDomElement();
         field.autofillInfo.applyToDomElement(htmlElement);
 
-        // Keep the non-focused autofill fields sized and placed on the DOM (not
-        // hidden), only visually transparent, and disable pointer events on
-        // them. Safari and password-manager extensions ignore zero-size or
-        // hidden inputs, which breaks a paired username+password autofill.
-        // Making the elements discoverable but invisible lets those tools fill
-        // the whole form.
+        // Keep the non-focused autofill fields sized and placed in the DOM (see
+        // [_hideNonFocusedFields]), only visually transparent. Safari and
+        // password managers ignore zero-sized or hidden inputs, which breaks a
+        // paired username and password fill.
         // (ref: https://github.com/flutter/flutter/issues/71275)
         _styleAutofillElements(
           htmlElement,
-          shouldHideElement: false,
-          shouldDisablePointerEvents: _isSafariStrategy,
+          shouldHideElement: _hideNonFocusedFields,
+          shouldDisablePointerEvents: _isWebKit,
         );
         // Keep the proxy discoverable to password managers (which scan the DOM)
         // but out of the tab order, so keyboard Tab does not land on this
@@ -731,18 +813,13 @@ class EngineAutofillForm {
         htmlElement.tabIndex = -1;
         _hideFromAssistiveTechnology(htmlElement);
         // The proxy has to hit-test back to itself for a manager to consider it
-        // fillable, which also makes it a target for real clicks. Swallow those:
-        // a manager focuses a field with .focus(), which fires no pointer event,
-        // so it loses nothing, while a click on the invisible field becomes a
-        // no-op instead of moving the browser's focus somewhere the framework
-        // does not know about.
-        for (final String type in <String>['pointerdown', 'mousedown']) {
-          htmlElement.addEventListener(
-            type,
-            createDomEventListener((DomEvent event) {
-              event.preventDefault();
-            }),
-          );
+        // fillable, which also makes it a target for real taps. Suppress their
+        // default action: a manager focuses a field with .focus(), which fires no
+        // pointer event, so it loses nothing, while a tap on the invisible field
+        // does not move the browser's focus to it. The tap still reaches the app
+        // (see computeEventOffsetToTarget).
+        for (final type in <String>['pointerdown', 'mousedown']) {
+          htmlElement.addEventListener(type, preventDefaultListener);
         }
       }
 
@@ -753,7 +830,16 @@ class EngineAutofillForm {
     // In order to submit the form when Framework sends a `TextInput.commit`
     // message, we add a submit button to the form.
     // The -1 tab index value makes this element not reachable by keyboard.
-    final DomHTMLInputElement submitButton = createDomHTMLInputElement()..tabIndex = -1;
+    //
+    // aria-hidden is unconditional, unlike the fields' semantics-gated
+    // [_hideFromAssistiveTechnology]: the button is engine plumbing that only
+    // [saveForms] ever clicks, programmatically, and it is not a fill
+    // candidate, so the manager objection to aria-hidden inputs does not apply.
+    // Without it, a screen reader's form-controls listing announces a Submit
+    // button that makes the invisible proxies read as a real login form.
+    final DomHTMLInputElement submitButton = createDomHTMLInputElement()
+      ..tabIndex = -1
+      ..setAttribute('aria-hidden', 'true');
     _styleAutofillElements(submitButton, isOffScreen: true);
     submitButton.className = 'submitBtn';
     submitButton.type = 'submit';
@@ -785,7 +871,7 @@ class EngineAutofillForm {
       final String lastFrameworkText =
           _lastFrameworkText[autofill.uniqueIdentifier] ?? frameworkText;
       _lastFrameworkText[autofill.uniqueIdentifier] = frameworkText;
-      final bool frameworkUnchanged = frameworkText == lastFrameworkText;
+      final frameworkUnchanged = frameworkText == lastFrameworkText;
       if (frameworkUnchanged &&
           domEditingState.text.isNotEmpty &&
           domEditingState.text != frameworkText) {
@@ -827,9 +913,9 @@ class EngineAutofillForm {
     if (elements.isEmpty) {
       return;
     }
-    // Keep the non-focused proxies clustered under the focused field. Done here
-    // (not in updateElementPlacement, which does not fire for this flow) because
-    // the scan runs after the field has been laid out and positioned.
+    // Keep the non-focused proxies clustered under the focused field. Also done
+    // here because [wakeUp] reaches the scan after placement without going
+    // through updateElementPlacement.
     final DomHTMLElement? focused = elements[focusedElementId];
     if (focused != null) {
       clusterNonFocusedFieldsAt(focused);
@@ -884,15 +970,15 @@ class EngineAutofillForm {
     }
   }
 
-  /// Binds autofill listeners to the non-focused fields for the lifetime of the
-  /// (re)woken form, replacing any previous set.
+  /// Binds autofill listeners to every field for the lifetime of the (re)woken
+  /// form, replacing any previous set.
   ///
   /// Unlike [addInputEventListeners] (used by the semantics strategy, whose
   /// subscriptions are owned by [DefaultTextEditingStrategy.subscriptions]),
   /// this owns its subscriptions in [_formSubscriptions] so they can be rebound
   /// each time the form wakes. The focused field is observed only after its
   /// connection has closed (see the guard in the listener); while it is live its
-  /// edits and autofills are delivered by [handleChange].
+  /// edits and autofills are delivered by [DefaultTextEditingStrategy.handleChange].
   void attachPersistentFormListeners() {
     _ensureAutofillStyleInjected();
     _cancelFormSubscriptions();
@@ -903,7 +989,7 @@ class EngineAutofillForm {
       if (fieldItem == null) {
         continue;
       }
-      final bool isFocusedField = key == focusedElementId;
+      final isFocusedField = key == focusedElementId;
       final AutofillInfo autofillInfo = fieldItem.autofillInfo;
       for (final String type in _autofillEventTypes) {
         _formSubscriptions.add(
@@ -936,9 +1022,7 @@ class EngineAutofillForm {
   /// subscriptions so the caller can cancel them.
   ///
   /// Used by the semantics text-editing strategy, whose fields already exist
-  /// when its handlers are attached. [DefaultTextEditingStrategy] instead builds
-  /// its form lazily and (re)binds these listeners from [wakeUp] through
-  /// [attachPersistentFormListeners].
+  /// when its handlers are attached.
   List<DomSubscription> addInputEventListeners() {
     _ensureAutofillStyleInjected();
     final Iterable<String> keys = elements.keys;
@@ -972,23 +1056,22 @@ class EngineAutofillForm {
   void _sendAutofillEditingState(String tag, EditingState editingState) {
     // Collapse selection to end of text for autofilled values so Chrome's
     // DOM selection highlight doesn't leave the field text selected in Flutter.
-    final cleanEditingState = EditingState(
+    final collapsedEditingState = EditingState(
       text: editingState.text,
       baseOffset: editingState.text.length,
       extentOffset: editingState.text.length,
     );
-    _lastSentAutofillText[tag] = cleanEditingState.text;
+    _lastSentAutofillText[tag] = collapsedEditingState.text;
     EnginePlatformDispatcher.instance.invokeOnPlatformMessage(
       'flutter/textinput',
       const JSONMethodCodec().encodeMethodCall(
         MethodCall('TextInputClient.updateEditingStateWithTag', <dynamic>[
           0,
-          <String, dynamic>{tag: cleanEditingState.toFlutter()},
+          <String, dynamic>{tag: collapsedEditingState.toFlutter()},
         ]),
       ),
       _emptyCallback,
     );
-    EnginePlatformDispatcher.instance.scheduleFrame();
   }
 }
 
@@ -1892,15 +1975,15 @@ abstract class DefaultTextEditingStrategy
   final List<DomSubscription> subscriptions = <DomSubscription>[];
   Timer? _pendingBlurConnectionCloseTimer;
 
-  /// Rescans the autofill form for filled values when an autofill session is
-  /// blurred (a password-manager dialog is open) and the dialog hands control
-  /// back: the window regains focus, or the page becomes visible again. Both
-  /// fire when the dialog closes after filling, so the filled values reach the
-  /// framework without the user having to refocus the field. The per-field
-  /// input/change/animationstart listeners cover fills that do fire an event;
-  /// these two events cover fills that arrive while the field is blurred.
-  DomSubscription? _autofillScanFocusSub;
-  DomSubscription? _autofillScanVisibilitySub;
+  /// Rescan the autofill form when the window regains focus or the page becomes
+  /// visible again, for as long as an autofill connection is open.
+  ///
+  /// A password-manager dialog that took the focus hands it back this way after
+  /// filling, so values that arrived while the field was blurred still reach the
+  /// framework without the user refocusing the field. The per-field input,
+  /// change and animationstart listeners cover fills that do fire an event.
+  DomSubscription? _autofillScanFocusSubscription;
+  DomSubscription? _autofillScanVisibilitySubscription;
 
   void _startAutofillScan() {
     if (!hasAutofillGroup) {
@@ -1909,8 +1992,8 @@ abstract class DefaultTextEditingStrategy
     // Scan immediately, then again whenever the dialog hands control back.
     inputConfiguration.autofillGroup?.scanForAutofilledValues();
 
-    _autofillScanFocusSub?.cancel();
-    _autofillScanFocusSub = DomSubscription(
+    _autofillScanFocusSubscription?.cancel();
+    _autofillScanFocusSubscription = DomSubscription(
       domWindow,
       'focus',
       createDomEventListener((DomEvent _) {
@@ -1920,8 +2003,8 @@ abstract class DefaultTextEditingStrategy
         inputConfiguration.autofillGroup?.scanForAutofilledValues();
       }),
     );
-    _autofillScanVisibilitySub?.cancel();
-    _autofillScanVisibilitySub = DomSubscription(
+    _autofillScanVisibilitySubscription?.cancel();
+    _autofillScanVisibilitySubscription = DomSubscription(
       domDocument,
       'visibilitychange',
       createDomEventListener((DomEvent _) {
@@ -1934,10 +2017,10 @@ abstract class DefaultTextEditingStrategy
   }
 
   void _stopAutofillScan() {
-    _autofillScanFocusSub?.cancel();
-    _autofillScanFocusSub = null;
-    _autofillScanVisibilitySub?.cancel();
-    _autofillScanVisibilitySub = null;
+    _autofillScanFocusSubscription?.cancel();
+    _autofillScanFocusSubscription = null;
+    _autofillScanVisibilitySubscription?.cancel();
+    _autofillScanVisibilitySubscription = null;
   }
 
   /// Overrides the result of [domDocument.hasFocus] for testing.
@@ -1984,15 +2067,14 @@ abstract class DefaultTextEditingStrategy
   /// detected and rely on it keeping a stable identity and position; creating a
   /// fresh element on every focus (and replacing the dormant one in
   /// [EngineAutofillForm.wakeUp]) makes the login form churn, which breaks
-  /// detection in extensions like Bitwarden. Reusing keeps the element -- and
-  /// its geometry -- stable across focus changes.
+  /// detection in some password managers. Reusing keeps the element, and its
+  /// geometry, stable across focus changes.
   DomHTMLElement _reuseDormantAutofillElementOrCreate(InputConfiguration inputConfig) {
     final EngineAutofillForm? autofillGroup = inputConfig.autofillGroup;
     final AutofillInfo? autofill = inputConfig.autofill;
-    // The focused field is the element tagged tabindex="-1", and in testing it
-    // was the one field password managers would not fill. Keeping autofill
-    // fields in the tab order (tabindex=0) makes them fillable; non-autofill
-    // fields keep -1 so the invisible proxy does not steal keyboard focus.
+    // The focused autofill field stays in the tab order: password managers do
+    // not fill a focused field with tabindex -1. Other fields keep -1 so the
+    // invisible proxy does not take keyboard focus.
     final double tabIndex = autofillGroup != null ? 0 : -1;
     final DomHTMLElement freshElement = inputConfig.inputType.createDomElement()
       ..tabIndex = tabIndex;
@@ -2002,14 +2084,16 @@ abstract class DefaultTextEditingStrategy
       // Only reuse the dormant element when it is the same kind of element (for
       // example not an <input> when the field now needs a <textarea>); reusing a
       // mismatched element would give the field the wrong DOM type.
-      if (reused != null && reused.tagName == freshElement.tagName) {
+      if (reused != null &&
+          reused.tagName == freshElement.tagName &&
+          (reused.isConnected ?? false)) {
         reused.tabIndex = tabIndex;
         // Start from the same state a freshly created element would have. The
         // dormant element still holds the value from the previous connection,
         // and the framework's own value only arrives later over the platform
         // channel. Until it does, the stale value is what password managers
         // read: managers that skip a field which already contains the value
-        // they are about to write (Bitwarden does) then fill nothing at all.
+        // they are about to write then fill nothing at all.
         if (reused.isA<DomHTMLInputElement>()) {
           (reused as DomHTMLInputElement).value = '';
         } else if (reused.isA<DomHTMLTextAreaElement>()) {
@@ -2034,7 +2118,6 @@ abstract class DefaultTextEditingStrategy
     _pendingBlurConnectionCloseTimer = null;
     _stopAutofillScan();
 
-    // The -1 tab index value makes this element not reachable by keyboard.
     domElement = _reuseDormantAutofillElementOrCreate(inputConfig);
     applyConfiguration(inputConfig);
 
@@ -2043,11 +2126,9 @@ abstract class DefaultTextEditingStrategy
 
     if (hasAutofillGroup) {
       // Floor the focused element's size so password managers can detect it too.
-      // The editable geometry can be as small as 1px, which is below the size at
-      // which Proton Pass/Bitwarden consider an input a real field. min-* only
-      // acts as a floor and never shrinks a normally-sized field. Because the
-      // focused element is reused as a non-focused field on the next focus
-      // change, this also keeps the sibling fields discoverable.
+      // The editable geometry can be as small as 1px, below the size managers
+      // accept as a real field. min-* only acts as a floor and never shrinks a
+      // normally sized field.
       activeDomElement.style
         ..setProperty('min-width', _kAutofillFieldMinWidth)
         ..setProperty('min-height', _kAutofillFieldMinHeight);
@@ -2174,12 +2255,11 @@ abstract class DefaultTextEditingStrategy
   void updateElementPlacement(EditableTextGeometry textGeometry) {
     geometry = textGeometry;
     if (isEnabled) {
-      // A password manager is filling the form: hold the field where it is (see
+      // Hold the field where it is during a fill (see
       // EngineAutofillForm.beginFillWindow). Re-applying the transform as the
       // browser scrolls the field under the opening menu churns the DOM under
-      // the manager's overlay UI, which can break its fill. The stored geometry
-      // is applied by the next placement once the window thaws.
-      // (inputConfiguration is a late field, so it is only read once enabled.)
+      // the manager's overlay, which can break its fill. The stored geometry is
+      // applied by the next placement once the window ends.
       if (inputConfiguration.autofillGroup?.fillWindowActive ?? false) {
         return;
       }
@@ -2213,10 +2293,9 @@ abstract class DefaultTextEditingStrategy
     assert(isEnabled);
     _pendingBlurConnectionCloseTimer?.cancel();
     _pendingBlurConnectionCloseTimer = null;
-    // Editing has genuinely stopped (a transient password-manager blur keeps the
-    // connection open instead of disabling, see handleBlur), so stop polling for
-    // autofill. Leaving the periodic scan running here would poll forever and,
-    // in tests, leak platform messages into later cases.
+    // Editing stopped, so drop the listeners that rescan the form when the
+    // window regains focus. Left attached they would rescan a form whose
+    // connection is gone and, in tests, leak messages into later cases.
     _stopAutofillScan();
 
     // Preserve the internal scroll position.
@@ -2242,35 +2321,18 @@ abstract class DefaultTextEditingStrategy
     // More details on `TextInput.finishAutofillContext` call.
     if (_appendedToForm && inputConfiguration.autofillGroup?.formElement != null) {
       final EngineAutofillForm group = inputConfiguration.autofillGroup!;
-      if (group.fillWindowActive) {
-        // A password manager took the focus to fill the form, and that is what
-        // closed this connection. Parking this field off screen at 1x1 now
-        // would hide the one field the manager was invoked from, which is the
-        // field the user was in: managers do not fill a field they cannot see,
-        // so filling from the password field would deliver only the username
-        // and filling from the username field only the password. Leave it
-        // discoverable, like the fields it now sits beside. Read before
-        // goDormant, which closes the window.
-        _styleAutofillElements(
-          activeDomElement,
-          shouldHideElement: false,
-          shouldDisablePointerEvents: group._isSafariStrategy,
-        );
-      } else {
-        // Off screen, but at its real size. A manager measures a field's box to
-        // decide whether it is one it can ever fill, and at least one of them
-        // memoises that verdict against the element: a field measured while it
-        // was a pixel tall is written off for as long as that element lives,
-        // and these elements are reused for the life of the form. Position is
-        // not part of that judgement, so moving it away is enough to get it out
-        // of the way, and shrinking it only makes it unfillable later.
-        _styleAutofillElements(
-          activeDomElement,
-          isOffScreen: true,
-          shouldHideElement: false,
-          shouldDisablePointerEvents: group._isSafariStrategy,
-        );
-      }
+      // Off screen but at its real size: password managers judge whether a
+      // field is fillable by its size, some memoise that per element, and these
+      // elements are reused for the life of the form. While a fill window is
+      // open the field stays where it is instead, because a manager's menu
+      // taking the focus is what closed this connection and a manager does not
+      // fill a field it cannot hit-test. Read before goDormant ends the window.
+      _styleAutofillElements(
+        activeDomElement,
+        isOffScreen: !group.fillWindowActive,
+        shouldHideElement: false,
+        shouldDisablePointerEvents: group._isWebKit,
+      );
       group.goDormant();
       EnginePlatformDispatcher.instance.viewManager.safeBlur(activeDomElement);
     } else {
@@ -2424,17 +2486,17 @@ abstract class DefaultTextEditingStrategy
 
     final willGainFocusElement = event.relatedTarget as DomElement?;
     if (willGainFocusElement == null) {
-      // Focus left to something that is not a DOM element: either the window or
-      // iframe that Flutter runs in is losing focus (tab or app switch), or a
-      // piece of browser/OS chrome such as an autofill / password-manager
-      // dialog took focus while it is open.
+      // If the element to gain focus is reported as `null`, it means that the
+      // window/iframe that Flutter runs in is losing focus. In this case, the
+      // engine signals to the framework to close the text input connection,
+      // allowing the focus to move elsewhere.
       //
-      // When an autofill group is active, begin scanning for the values the
-      // dialog is about to fill and hold the proxy geometry still for a short
-      // window so the DOM does not churn under the dialog's overlay mid-fill;
-      // see EngineAutofillForm.beginFillWindow. isEnabled is checked first so
-      // `inputConfiguration` (a late field) is only read once the strategy is
-      // enabled.
+      // This is fixing https://github.com/flutter/flutter/issues/155265.
+      //
+      // A password manager's menu taking the focus to fill an autofill form
+      // also blurs to nothing. Hold the fields still while it fills (see
+      // EngineAutofillForm.beginFillWindow) and rescan when the focus comes
+      // back. isEnabled is checked first because inputConfiguration is late.
       final bool autofillSession = isEnabled && hasAutofillGroup && textEditing.isEditing;
       if (autofillSession) {
         _startAutofillScan();
@@ -2442,24 +2504,19 @@ abstract class DefaultTextEditingStrategy
       }
 
       if (!_documentHasFocus) {
-        // The window/iframe that Flutter runs in is losing focus. Defer the
-        // close: when a browser tab is backgrounded the input blur arrives
-        // before visibilitychange, and focus may also return immediately. Keep
-        // the connection alive on a tab background or a quick refocus, and
-        // otherwise close it. This is fixing
-        // https://github.com/flutter/flutter/issues/155265.
         _pendingBlurConnectionCloseTimer?.cancel();
+        // When a browser tab is backgrounded, the input blur arrives before
+        // visibilitychange. Wait briefly so tab switches can keep the text
+        // connection alive, while ordinary window/iframe blurs still close it.
         _pendingBlurConnectionCloseTimer = Timer(kTransientBlurSettleDelay, () {
           _pendingBlurConnectionCloseTimer = null;
           if (_documentVisibilityState == 'hidden' || _documentHasFocus) {
             return;
           }
-          // A field participating in autofill lost focus while the page moved
-          // to the background, for example a mobile OS autofill sheet that
-          // takes system focus away from the page while it fills the form and
-          // then returns. Keep the connection alive so the value it is about to
-          // fill still reaches the framework.
-          // https://github.com/flutter/flutter/issues/174773
+          // An autofill field also keeps its connection while the page is
+          // visible but unfocused, as when a mobile autofill sheet takes the
+          // focus to fill the form. The framework closes it when it unfocuses
+          // the field. https://github.com/flutter/flutter/issues/174773
           if (isEnabled && hasAutofillGroup && textEditing.isEditing) {
             return;
           }
@@ -2468,18 +2525,11 @@ abstract class DefaultTextEditingStrategy
         return;
       }
 
-      // The document still has focus, yet the editing element blurred to
-      // nowhere. For an autofill session this is a password-manager / browser
-      // autofill dialog that steals the element's focus while the page keeps
-      // focus -- on mobile that can be several seconds -- and then fills the
-      // fields and hands focus back. Closing the connection now would tear down
-      // the field listeners and drop the value the dialog is about to fill,
-      // which is exactly the "autofill never reaches the Flutter field" bug
-      // (https://github.com/flutter/flutter/issues/174773). Keep the connection
-      // open: the fill dispatches 'input' events that the still-attached
-      // listeners forward to the framework, and the connection is closed
-      // normally when the framework unfocuses the field (widget disposed, or
-      // focus moved elsewhere in the widget tree).
+      // The page kept the focus, so for an autofill field this is a password
+      // manager's menu taking it to fill the form, and closing now would drop
+      // the fill (https://github.com/flutter/flutter/issues/174773). Keep the
+      // connection: the framework closes it when it unfocuses the field, which
+      // is also how an autofill field closes on iOS.
       if (autofillSession) {
         return;
       }
@@ -2510,10 +2560,6 @@ abstract class DefaultTextEditingStrategy
         });
         return;
       }
-
-      // Ordinary field: focus genuinely left the input while the page kept
-      // focus (the user clicked an empty area of the page), so close the
-      // connection.
       textEditing.sendTextConnectionClosedToFrameworkIfAny();
     } else if (_viewForElement(willGainFocusElement) == activeDomElementView) {
       // If the focus stays within the same FlutterView, ensure the focus stays
@@ -2540,16 +2586,11 @@ abstract class DefaultTextEditingStrategy
   void handleFocus(DomEvent event) {
     _pendingBlurConnectionCloseTimer?.cancel();
     _pendingBlurConnectionCloseTimer = null;
-    // A re-focus cancels the pending close above. For an autofill field, also
-    // sync the current value and scan: a password manager may fill the field
-    // while it is blurred and then hand focus back. Non-autofill fields need
-    // nothing here (their edits arrive through input events), and running
-    // handleChange for them would push a redundant editing state on every focus.
-    // isEnabled is checked first so the late `inputConfiguration` is only read
-    // once the strategy is enabled.
+    // For an autofill field, the focus coming back means a password manager
+    // handed it back, possibly after filling the field while it was blurred:
+    // end the fill window, then sync the value and rescan. Other fields need
+    // nothing here; their edits arrive through input events.
     if (isEnabled && hasAutofillGroup) {
-      // Focus returned to the field: the manager finished, so end the fill
-      // window and let placement resume.
       inputConfiguration.autofillGroup?.endFillWindow();
       handleChange(event);
       inputConfiguration.autofillGroup?.scanForAutofilledValues();
@@ -3209,6 +3250,7 @@ void saveForms() {
 /// Called when the form is finalized.
 void cleanForms() {
   for (final EngineAutofillForm form in dormantForms.values) {
+    form._cancelPendingPark();
     form.formElement?.remove();
   }
   dormantForms.clear();
