@@ -1072,10 +1072,6 @@ mixin _RenderTheaterMixin on RenderBox {
   Iterable<RenderBox> _childrenInPaintOrder();
   Iterable<RenderBox> _childrenInHitTestOrder();
 
-  static bool _hasValidGeometry(RenderObject child) {
-    return child is! _RenderDeferredLayoutBox || child._hasValidGeometry;
-  }
-
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! StackParentData) {
@@ -1088,7 +1084,7 @@ mixin _RenderTheaterMixin on RenderBox {
     assert(!debugNeedsLayout);
     BaselineOffset baselineOffset = BaselineOffset.noBaseline;
     for (final RenderBox child in _childrenInPaintOrder()) {
-      if (!_hasValidGeometry(child)) {
+      if (child is _RenderDeferredLayoutBox && child._isPendingLayout) {
         continue;
       }
       assert(!child.debugNeedsLayout);
@@ -1147,7 +1143,7 @@ mixin _RenderTheaterMixin on RenderBox {
     var isHit = false;
     while (!isHit && iterator.moveNext()) {
       final RenderBox child = iterator.current;
-      if (!_hasValidGeometry(child)) {
+      if (child is _RenderDeferredLayoutBox && child._isPendingLayout) {
         continue;
       }
       final childParentData = child.parentData! as StackParentData;
@@ -1166,9 +1162,6 @@ mixin _RenderTheaterMixin on RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     for (final RenderBox child in _childrenInPaintOrder()) {
-      if (!_hasValidGeometry(child)) {
-        continue;
-      }
       final childParentData = child.parentData! as StackParentData;
       context.paintChild(child, childParentData.offset + offset);
     }
@@ -1590,9 +1583,10 @@ class _RenderTheater extends RenderBox
       final childParentData = child.parentData! as _TheaterParentData;
 
       childParentData.visitOverlayPortalChildrenOnOverlayEntry((RenderObject child) {
-        if (_RenderTheaterMixin._hasValidGeometry(child)) {
-          visitor(child);
+        if (child is _RenderDeferredLayoutBox && child._isPendingLayout) {
+          return;
         }
+        visitor(child);
       });
       child = childParentData.nextSibling;
     }
@@ -2623,7 +2617,11 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
     return _needsLayout;
   }
 
-  bool get _hasValidGeometry => !needsLayout && hasSize;
+  // A deferred child can remain attached when its layout surrogate is moved to
+  // a sliver keep-alive bucket before the surrogate is laid out.
+  // Geometry-dependent operations must ignore the child until the surrogate can
+  // schedule its layout.
+  bool get _isPendingLayout => needsLayout;
 
   bool _needsLayout = true;
   @override

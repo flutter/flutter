@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/foundation/constants.dart';
 import 'package:flutter/widgets.dart';
@@ -3056,6 +3059,90 @@ void main() {
     });
   });
 
+  for (final semanticsEnabled in <bool>[false, true]) {
+    testWidgets('pending-layout overlay child is ignored and recovers '
+        'with semantics ${semanticsEnabled ? 'enabled' : 'disabled'}', (WidgetTester tester) async {
+      final SemanticsTester? semantics = semanticsEnabled ? SemanticsTester(tester) : null;
+      final scrollController = ScrollController();
+      addTearDown(scrollController.dispose);
+      late final OverlayEntry entry;
+      addTearDown(() {
+        entry.remove();
+        entry.dispose();
+      });
+      var overlayHitCount = 0;
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              entry = OverlayEntry(
+                builder: (BuildContext context) => Center(
+                  child: SizedBox(
+                    height: 400.0,
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: 20,
+                      itemBuilder: (BuildContext context, int index) => index == 3
+                          ? _KeepAliveOverlayPortalItem(
+                              onOverlayHit: () {
+                                overlayHitCount += 1;
+                              },
+                            )
+                          : SizedBox(height: 250.0, child: Text('Item $index')),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      scrollController.jumpTo(700.0);
+      await tester.pump();
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer(location: Offset.zero);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      // Showing the overlay child also requests keep-alive. Moving the item
+      // beyond the trailing cache extent in the same frame parks its layout
+      // surrogate before it can schedule the deferred child's layout.
+      await gesture.moveTo(tester.getCenter(find.byKey(_KeepAliveOverlayPortalItem.targetKey)));
+      scrollController.jumpTo(0.0);
+      _PaintOrder.paintOrder.clear();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(_PaintOrder.paintOrder, isEmpty);
+      if (semantics != null) {
+        expect(semantics.nodesWith(label: _KeepAliveOverlayPortalItem.overlayLabel), isEmpty);
+      }
+
+      // Pointer movement still hit-tests the theater, but the pending overlay
+      // child must not participate.
+      await gesture.moveTo(const Offset(25.0, 25.0));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(overlayHitCount, 0);
+
+      // Laying out the surrogate again lets the deferred child catch up and
+      // rejoin paint, hit testing, and semantics.
+      _PaintOrder.paintOrder.clear();
+      scrollController.jumpTo(700.0);
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(_PaintOrder.paintOrder, isNotEmpty);
+      if (semantics != null) {
+        expect(semantics.nodesWith(label: _KeepAliveOverlayPortalItem.overlayLabel), isNotEmpty);
+      }
+      await tester.tapAt(const Offset(25.0, 25.0));
+      expect(overlayHitCount, 1);
+      semantics?.dispose();
+    }, semanticsEnabled: semanticsEnabled);
+  }
+
   group('Semantics', () {
     testWidgets('ordering and transform', (WidgetTester tester) async {
       final semantics = SemanticsTester(tester);
@@ -3567,6 +3654,74 @@ class _RenderLayoutCounter extends RenderProxyBox {
     if (!_parentDoingLayout) {
       layoutCount += 1;
     }
+  }
+}
+
+class _KeepAliveOverlayPortalItem extends StatefulWidget {
+  const _KeepAliveOverlayPortalItem({required this.onOverlayHit});
+
+  static const Key targetKey = ValueKey<String>('keep-alive-overlay-portal-target');
+  static const String overlayLabel = 'overlay child';
+
+  final VoidCallback onOverlayHit;
+
+  @override
+  State<_KeepAliveOverlayPortalItem> createState() => _KeepAliveOverlayPortalItemState();
+}
+
+class _KeepAliveOverlayPortalItemState extends State<_KeepAliveOverlayPortalItem>
+    with AutomaticKeepAliveClientMixin<_KeepAliveOverlayPortalItem> {
+  final OverlayPortalController _controller = OverlayPortalController();
+  bool _keepAlive = false;
+
+  @override
+  bool get wantKeepAlive => _keepAlive;
+
+  void _handleEnter(PointerEnterEvent event) {
+    _keepAlive = true;
+    updateKeepAlive();
+    _controller.show();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            const Expanded(child: Text('Item 3')),
+            OverlayPortal(
+              controller: _controller,
+              overlayChildBuilder: (BuildContext context) => Positioned(
+                left: 0.0,
+                top: 0.0,
+                width: 50.0,
+                height: 50.0,
+                child: Semantics(
+                  label: _KeepAliveOverlayPortalItem.overlayLabel,
+                  child: Listener(
+                    behavior: HitTestBehavior.opaque,
+                    onPointerDown: (PointerDownEvent event) => widget.onOverlayHit(),
+                    child: const _PaintOrder(),
+                  ),
+                ),
+              ),
+              child: MouseRegion(
+                onEnter: _handleEnter,
+                child: const SizedBox(
+                  key: _KeepAliveOverlayPortalItem.targetKey,
+                  width: 48.0,
+                  height: 48.0,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 202.0),
+      ],
+    );
   }
 }
 
