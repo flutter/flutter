@@ -240,7 +240,8 @@ static void fl_view_renderer_subsurface_realize(GtkWidget* widget) {
   self->compositor =
       fl_compositor_opengl_new(fl_engine_get_opengl_manager(self->engine));
 
-  // Create a subsurface on the toplevel's surface.
+  // Create a subsurface on the toplevel's surface. This asks for a frame, as
+  // any rendered before this point were dropped.
   update_parent_surface(self);
 }
 

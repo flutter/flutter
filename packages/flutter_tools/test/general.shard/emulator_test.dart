@@ -80,14 +80,17 @@ void main() {
     testUsingContext('getEmulators', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw.
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
         ]),
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
@@ -98,7 +101,7 @@ void main() {
       'getEmulators ignores info and warning messages in android emulator output',
       () async {
         final emulatorManager = EmulatorManager(
-          java: FakeJava(),
+          javaBuilder: FakeJava.new,
           fileSystem: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
@@ -111,8 +114,11 @@ void main() {
                   'pixel-4.api-30',
             ),
           ]),
-          androidSdk: sdk,
-          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(
+            androidSdkBuilder: () => sdk,
+            featureFlags: TestFeatureFlags(),
+          ),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         );
 
@@ -140,13 +146,16 @@ iOS Simulator       • iOS Simulator • Apple        • android
     testUsingContext('getEmulators with no Android SDK', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw when there's no Android SDK.
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
         ]),
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
 
@@ -156,10 +165,13 @@ iOS Simulator       • iOS Simulator • Apple        • android
     testWithoutContext('getEmulatorsById', () async {
       final testEmulatorManager = TestEmulatorManager(
         emulators,
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         logger: BufferLogger.test(),
         processManager: fakeProcessManager,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
         operatingSystemUtils: FakeOperatingSystemUtils(),
         fileSystem: fileSystem,
       );
@@ -182,14 +194,17 @@ iOS Simulator       • iOS Simulator • Apple        • android
     testUsingContext('create emulator with a missing avdmanager does not crash.', () async {
       sdk.avdManagerPath = null;
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
           const FakeCommand(command: <String>['emulator', '-list-avds'], stdout: 'existing-avd-1'),
         ]),
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -201,7 +216,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
     // iOS discovery uses context.
     testUsingContext('create emulator with an empty name does not fail', () async {
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -225,8 +240,11 @@ iOS Simulator       • iOS Simulator • Apple        • android
             ],
           ),
         ]),
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -236,7 +254,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     testWithoutContext('create emulator with a unique name does not throw', () async {
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -260,8 +278,11 @@ iOS Simulator       • iOS Simulator • Apple        • android
             ],
           ),
         ]),
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -273,7 +294,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
       'create emulator prefers a 64-bit system image over an unsupported x86 one',
       () async {
         final emulatorManager = EmulatorManager(
-          java: FakeJava(),
+          javaBuilder: FakeJava.new,
           fileSystem: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
@@ -304,8 +325,8 @@ iOS Simulator       • iOS Simulator • Apple        • android
               ],
             ),
           ]),
-          androidSdk: sdk,
-          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => sdk, featureFlags: TestFeatureFlags()),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         );
         final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -318,7 +339,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
       'create emulator still prefers a 64-bit system image when avdmanager output uses CRLF',
       () async {
         final emulatorManager = EmulatorManager(
-          java: FakeJava(),
+          javaBuilder: FakeJava.new,
           fileSystem: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
@@ -349,8 +370,8 @@ iOS Simulator       • iOS Simulator • Apple        • android
               ],
             ),
           ]),
-          androidSdk: sdk,
-          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => sdk, featureFlags: TestFeatureFlags()),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         );
         final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -361,7 +382,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     Future<void> testAbiPreferenceForHost(HostPlatform hostPlatform, String preferredAbi) async {
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -393,8 +414,8 @@ iOS Simulator       • iOS Simulator • Apple        • android
             ],
           ),
         ]),
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => sdk, featureFlags: TestFeatureFlags()),
         operatingSystemUtils: FakeOperatingSystemUtils(hostPlatform: hostPlatform),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -416,7 +437,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
       'create emulator falls back to the first available image when no ABI is preferred',
       () async {
         final emulatorManager = EmulatorManager(
-          java: FakeJava(),
+          javaBuilder: FakeJava.new,
           fileSystem: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
@@ -446,8 +467,8 @@ iOS Simulator       • iOS Simulator • Apple        • android
               ],
             ),
           ]),
-          androidSdk: sdk,
-          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => sdk, featureFlags: TestFeatureFlags()),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         );
         final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -460,7 +481,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
       'create emulator fails with a clear error when only unsupported x86 images are available',
       () async {
         final emulatorManager = EmulatorManager(
-          java: FakeJava(),
+          javaBuilder: FakeJava.new,
           fileSystem: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
@@ -470,8 +491,8 @@ iOS Simulator       • iOS Simulator • Apple        • android
             ),
             kListEmulatorsCommand,
           ]),
-          androidSdk: sdk,
-          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(androidSdkBuilder: () => sdk, featureFlags: TestFeatureFlags()),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         );
         final CreateEmulatorResult result = await emulatorManager.createEmulator(name: 'test');
@@ -483,7 +504,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 
     testWithoutContext('create emulator with an existing name errors', () async {
       final emulatorManager = EmulatorManager(
-        java: FakeJava(),
+        javaBuilder: FakeJava.new,
         fileSystem: MemoryFileSystem.test(),
         logger: BufferLogger.test(),
         processManager: FakeProcessManager.list(<FakeCommand>[
@@ -510,8 +531,11 @@ iOS Simulator       • iOS Simulator • Apple        • android
                 'Use --force if you want to replace it.',
           ),
         ]),
-        androidSdk: sdk,
-        androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+        androidSdkBuilder: () => sdk,
+        androidWorkflow: AndroidWorkflow(
+          androidSdkBuilder: () => sdk,
+          featureFlags: TestFeatureFlags(),
+        ),
         operatingSystemUtils: FakeOperatingSystemUtils(),
       );
       final CreateEmulatorResult result = await emulatorManager.createEmulator(
@@ -526,7 +550,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
       'create emulator without a name but when default exists adds a suffix',
       () async {
         final emulatorManager = EmulatorManager(
-          java: FakeJava(),
+          javaBuilder: FakeJava.new,
           fileSystem: MemoryFileSystem.test(),
           logger: BufferLogger.test(),
           processManager: FakeProcessManager.list(<FakeCommand>[
@@ -554,8 +578,11 @@ iOS Simulator       • iOS Simulator • Apple        • android
               ],
             ),
           ]),
-          androidSdk: sdk,
-          androidWorkflow: AndroidWorkflow(androidSdk: sdk, featureFlags: TestFeatureFlags()),
+          androidSdkBuilder: () => sdk,
+          androidWorkflow: AndroidWorkflow(
+            androidSdkBuilder: () => sdk,
+            featureFlags: TestFeatureFlags(),
+          ),
           operatingSystemUtils: FakeOperatingSystemUtils(),
         );
         final CreateEmulatorResult result = await emulatorManager.createEmulator();
@@ -611,7 +638,7 @@ iOS Simulator       • iOS Simulator • Apple        • android
 class TestEmulatorManager extends EmulatorManager {
   TestEmulatorManager(
     this.allEmulators, {
-    required super.java,
+    required super.javaBuilder,
     required super.logger,
     required super.processManager,
     required super.androidWorkflow,

@@ -92,8 +92,6 @@ class IntegrationTestTestDevice implements TestDevice {
       vmServiceUri = _ddsLauncher.uri;
     }
 
-    _gotProcessVmServiceUri.complete(vmServiceUri);
-
     globals.printTrace('test $id: Connecting to vm service');
     final FlutterVmService vmService =
         await connectToVmService(
@@ -104,6 +102,11 @@ class IntegrationTestTestDevice implements TestDevice {
           const Duration(seconds: 5),
           onTimeout: () => throw TimeoutException('Connecting to the VM Service timed out.'),
         );
+    if (debuggingOptions.startPaused) {
+      await vmService.waitForUIIsolatePaused();
+    }
+
+    _gotProcessVmServiceUri.complete(vmServiceUri);
 
     globals.printTrace(
       'test $id: Finding the correct isolate with the integration test service extension',

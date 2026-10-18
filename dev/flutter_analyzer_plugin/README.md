@@ -467,19 +467,18 @@ class FlutterAnalyzerPlugin extends Plugin {
 
 ### 3. Writing Unit Tests
 
-Rules must be covered by reflective tests using `package:analyzer_testing`:
+Rules must be covered by unit tests using `package:analyzer_testing` and `package:test`:
 
 1. Create a test file in `dev/flutter_analyzer_plugin/test/<rule_name>_test.dart`.
-2. Extend `AnalysisRuleTest` and annotate the class with `@reflectiveTest`.
+2. Extend `AnalysisRuleTest`.
 3. Register the rule in `setUp()` using `Registry.ruleRegistry.registerWarningRule(...)` and define test cases using `assertDiagnostics()`.
 
 ```dart
 import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:flutter_analyzer_plugin/src/rules/my_custom_rule.dart';
-import 'package:test_reflective_loader/test_reflective_loader.dart';
+import 'package:test/test.dart';
 
-@reflectiveTest
 class MyCustomRuleTest extends AnalysisRuleTest {
   @override
   void setUp() {
@@ -490,34 +489,39 @@ class MyCustomRuleTest extends AnalysisRuleTest {
 
   @override
   String get analysisRule => MyCustomRule.code.name;
+}
 
-  Future<void> test_disallowedPattern() async {
-    await assertDiagnostics(
+void main() {
+  late MyCustomRuleTest testSuite;
+
+  setUp(() {
+    testSuite = MyCustomRuleTest();
+    testSuite.setUp();
+  });
+
+  tearDown(() => testSuite.tearDown());
+
+  test('disallowed pattern', () async {
+    await testSuite.assertDiagnostics(
       '''
 void test() {
   badFunction();
 }
 ''',
       <ExpectedDiagnostic>[
-        lint(16, 13),
+        testSuite.lint(16, 13),
       ],
     );
-  }
+  });
 
-  Future<void> test_allowedPattern() async {
-    await assertNoDiagnostics(
+  test('allowed pattern', () async {
+    await testSuite.assertNoDiagnostics(
       '''
 void test() {
   goodFunction();
 }
 ''',
     );
-  }
-}
-
-void main() {
-  defineReflectiveSuite(() {
-    defineReflectiveTests(MyCustomRuleTest);
   });
 }
 ```
@@ -526,16 +530,17 @@ void main() {
 
 ### 4. Running Unit Tests
 
-Because tests use `test_reflective_loader` (which depends on `dart:mirrors`), tests must be executed with the standalone Dart VM SDK rather than `flutter test`:
+Run unit tests using `flutter test` (or `dart test`):
 
 ```bash
 # 1. Resolve plugin dependencies
 cd dev/flutter_analyzer_plugin
 ../../bin/flutter pub get
 
-# 2. Run unit tests using the Dart SDK
-../../bin/cache/dart-sdk/bin/dart test test/my_custom_rule_test.dart
+# 2. Run unit tests
+../../bin/flutter test test/my_custom_rule_test.dart
 ```
+
 
 ---
 

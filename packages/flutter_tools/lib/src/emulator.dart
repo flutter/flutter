@@ -24,28 +24,30 @@ EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 /// A class to get all available emulators.
 class EmulatorManager {
   EmulatorManager({
-    required this._java,
-    AndroidSdk? androidSdk,
-    required Logger logger,
-    required ProcessManager processManager,
     required AndroidWorkflow androidWorkflow,
     required FileSystem fileSystem,
+    required this._javaBuilder,
     required OperatingSystemUtils operatingSystemUtils,
-  }) : _androidSdk = androidSdk,
+    required Logger logger,
+    required ProcessManager processManager,
+    AndroidSdk? Function()? androidSdkBuilder,
+  }) : _androidSdkBuilder = androidSdkBuilder,
        _operatingSystemUtils = operatingSystemUtils,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _androidEmulators = AndroidEmulators(
-         androidSdk: androidSdk,
+         androidSdkBuilder: androidSdkBuilder,
+         androidWorkflow: androidWorkflow,
+         fileSystem: fileSystem,
          logger: logger,
          processManager: processManager,
-         fileSystem: fileSystem,
-         androidWorkflow: androidWorkflow,
        ) {
     _emulatorDiscoverers.add(_androidEmulators);
   }
 
-  final Java? _java;
-  final AndroidSdk? _androidSdk;
+  final AndroidSdk? Function()? _androidSdkBuilder;
+  late final AndroidSdk? _androidSdk = _androidSdkBuilder?.call();
+  final Java? Function() _javaBuilder;
+  late final Java? _java = _javaBuilder();
   final OperatingSystemUtils _operatingSystemUtils;
   final AndroidEmulators _androidEmulators;
   final ProcessUtils _processUtils;

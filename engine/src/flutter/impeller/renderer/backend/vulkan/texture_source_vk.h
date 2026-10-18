@@ -68,6 +68,18 @@ class TextureSourceVK {
   virtual vk::ImageView GetImageView() const = 0;
 
   //----------------------------------------------------------------------------
+  /// @brief      Retrieve a view of this texture source covering only the base
+  ///             mip level.
+  ///
+  ///             Only created on drivers that generate corrupt mip levels, and
+  ///             only for textures that can be sampled. A null handle means
+  ///             the view from `GetImageView` is the only one.
+  ///
+  /// @return     The base mip level view, or a null handle.
+  ///
+  virtual vk::ImageView GetBaseMipImageView() const;
+
+  //----------------------------------------------------------------------------
   /// @brief      Retrieve the image view used to attach a specific
   ///             subresource of this texture as a render target.
   ///
@@ -167,9 +179,9 @@ class TextureSourceVK {
 
  private:
   struct CachedFrameDataEntry {
-    SampleCount sample_count;
-    uint32_t mip_level;
-    uint32_t slice;
+    SampleCount sample_count = SampleCount::kCount1;
+    uint32_t mip_level = 0;
+    uint32_t slice = 0;
     FramebufferAndRenderPass data;
   };
   // Linear-scanned because N is typically 1 and bounded by

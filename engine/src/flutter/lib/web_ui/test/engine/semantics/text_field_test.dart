@@ -753,6 +753,43 @@ void testMain() {
       expect(dormantForms[form.formIdentifier], form);
     });
 
+    // See https://github.com/flutter/flutter/issues/192102
+    test('TextInput.updateConfig preserves active autofill form', () {
+      final (form: EngineAutofillForm form, textField: SemanticTextField textField) =
+          activateGroup();
+      final DomHTMLFormElement formElement = form.formElement!;
+
+      // A `TextInput.updateConfig` message (e.g. toggling obscureText) only
+      // describes the focused field, so the decoded group has no 'fields' and
+      // no DOM form.
+      final focusedMap =
+          _autofillFields(<String>['username'], <String>['field1']).single['autofill']!
+              as Map<String, Object?>;
+      testTextEditing.configuration = InputConfiguration(
+        viewId: kImplicitViewId,
+        obscureText: true,
+        autofill: AutofillInfo.fromFrameworkMessage(focusedMap),
+        autofillGroup: EngineAutofillForm.fromFrameworkMessage(kImplicitViewId, focusedMap, null),
+      );
+      const TextInputUpdateConfig().run(testTextEditing);
+
+      // The live form is kept and the focused field stays linked to it.
+      expect(strategy.inputConfiguration.obscureText, isTrue);
+      expect(strategy.inputConfiguration.autofillGroup, same(form));
+      expect(form.formElement, same(formElement));
+      expect(textField.editableElement.getAttribute('form'), form.formDomId);
+
+      strategy.disable();
+
+      // On blur the form goes dormant instead of being dropped, so the next
+      // connection can reuse it.
+      expect(dormantForms[form.formIdentifier], same(form));
+      expect(form.formElement, same(formElement));
+      expect(formElement.isConnected, isTrue);
+      expect(textField.editableElement.getAttribute('form'), isNull);
+      expect(formElement.contains(form.elements['field1']), isTrue);
+    });
+
     // Focus A, autofill A, focus B, autofill a different credential, focus A
     // again, then assert each field is represented in the form exactly once
     // with its latest value and the focused field is linked by attribute (not
